@@ -120,11 +120,7 @@ namespace TUNING
 
 			public static readonly EdiblesManager.FoodInfo COOKED_FISH = new EdiblesManager.FoodInfo("CookedFish", "", 1600000f, 3, 255.15f, 277.15f, 2400f, true).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.AVAILABLE_EXPANSION1_ONLY);
 
-			public static readonly EdiblesManager.FoodInfo POPCORN = new EdiblesManager.FoodInfo("Popcorn", "EXPANSION1_ID", 1000000f, 1, 255.15f, 277.15f, 4800f, true);
-
-			public static readonly EdiblesManager.FoodInfo COOKED_MEAT = new EdiblesManager.FoodInfo("CookedMeat", "EXPANSION1_ID", 4000000f, 3, 255.15f, 277.15f, 2400f, true);
-
-			public static readonly EdiblesManager.FoodInfo MICROWAVED_LETTUCE = new EdiblesManager.FoodInfo("MicrowavedLettuce", "EXPANSION1_ID", 800000f, 1, 255.15f, 277.15f, 2400f, true).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.AVAILABLE_EXPANSION1_ONLY);
+			public static readonly EdiblesManager.FoodInfo COOKED_MEAT = new EdiblesManager.FoodInfo("CookedMeat", "", 4000000f, 3, 255.15f, 277.15f, 2400f, true);
 
 			public static readonly EdiblesManager.FoodInfo WORMBASICFOOD = new EdiblesManager.FoodInfo("WormBasicFood", "EXPANSION1_ID", 1200000f, 1, 255.15f, 277.15f, 4800f, true);
 

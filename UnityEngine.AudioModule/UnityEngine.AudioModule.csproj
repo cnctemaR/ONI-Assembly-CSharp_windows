@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{75C9B936-DA25-44D1-A89D-D0F24172F57C}</ProjectGuid>
+    <ProjectGuid>{684B2992-617A-4300-BDA5-367C3840F626}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.AudioModule</RootNamespace>
     <AssemblyName>UnityEngine.AudioModule</AssemblyName>
@@ -61,11 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{75C9B936-DA25-44D1-A89D-D0F24172F580}</Project>
+      <Project>{684B2992-617A-4300-BDA5-367C3840F62A}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{75C9B936-DA25-44D1-A89D-D0F24172F596}</Project>
+      <Project>{684B2992-617A-4300-BDA5-367C3840F640}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -801,7 +801,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					471883U,
+					472345U,
 					25
 				});
 			}
@@ -987,7 +987,15 @@ public class LoadScreen : KModalScreen
 		Image component = freeElement.GetReference<RectTransform>("Preview").GetComponent<Image>();
 		this.SetPreview(firstSave.FileName, colonyName, component, true);
 		KImage reference = freeElement.GetReference<KImage>("DlcIcon");
-		reference.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_FROM_SPACED_OUT_TOOLTIP);
+		if (firstSave.FileInfo.dlcId == "EXPANSION1_ID")
+		{
+			reference.enabled = true;
+			reference.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_FROM_SPACED_OUT_TOOLTIP);
+		}
+		else
+		{
+			reference.enabled = false;
+		}
 		Component reference2 = freeElement.GetReference<RectTransform>("LocationIcons");
 		bool flag2 = this.CloudSavesVisible();
 		reference2.gameObject.SetActive(flag2);
@@ -1054,7 +1062,6 @@ public class LoadScreen : KModalScreen
 		KButton component2 = freeElement.GetReference<RectTransform>("Button").GetComponent<KButton>();
 		component2.ClearOnClick();
 		component2.isInteractable = flag;
-		reference.gameObject.SetActive(DlcManager.IsExpansion1Id(firstSave.FileInfo.dlcId));
 		component2.onClick += delegate
 		{
 			this.ShowColony(saves, -1);
@@ -1110,7 +1117,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 25) || header.buildVersion > 471883U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 25) || header.buildVersion > 472345U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1189,10 +1196,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 471883U)
+		if (header.buildVersion > 472345U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 471883U.ToString();
+			text2 = 472345U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{

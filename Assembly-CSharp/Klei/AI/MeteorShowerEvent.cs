@@ -67,13 +67,21 @@ namespace Klei.AI
 				{
 					this.runTimeRemaining.Delta(-dt, smi);
 				}, UpdateRate.SIM_200ms, false).ParamTransition<float>(this.runTimeRemaining, this.finished, GameStateMachine<MeteorShowerEvent.States, MeteorShowerEvent.StatesInstance, GameplayEventManager, object>.IsLTEZero);
-				this.running.bombarding.Exit(delegate(MeteorShowerEvent.StatesInstance smi)
+				this.running.bombarding.Enter(delegate(MeteorShowerEvent.StatesInstance smi)
+				{
+					smi.StartBackgroundEffects();
+				}).Exit(delegate(MeteorShowerEvent.StatesInstance smi)
+				{
+					smi.StopBackgroundEffects();
+				}).Exit(delegate(MeteorShowerEvent.StatesInstance smi)
 				{
 					this.bombardTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOn.Get(), smi);
-				}).Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
-				{
-					this.bombardTimeRemaining.Delta(-dt, smi);
-				}, UpdateRate.SIM_200ms, false).ParamTransition<float>(this.bombardTimeRemaining, this.running.snoozing, GameStateMachine<MeteorShowerEvent.States, MeteorShowerEvent.StatesInstance, GameplayEventManager, object>.IsLTEZero)
+				})
+					.Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
+					{
+						this.bombardTimeRemaining.Delta(-dt, smi);
+					}, UpdateRate.SIM_200ms, false)
+					.ParamTransition<float>(this.bombardTimeRemaining, this.running.snoozing, GameStateMachine<MeteorShowerEvent.States, MeteorShowerEvent.StatesInstance, GameplayEventManager, object>.IsLTEZero)
 					.Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
 					{
 						smi.Bombarding(dt);
@@ -116,6 +124,16 @@ namespace Klei.AI
 				this.timeRemaining = this.gameplayEvent.duration;
 				this.timeBetweenMeteors = this.gameplayEvent.secondsPerMeteor;
 				this.m_worldId = eventInstance.worldId;
+			}
+
+			public override void StopSM(string reason)
+			{
+				this.StopBackgroundEffects();
+				base.StopSM(reason);
+			}
+
+			public void StartBackgroundEffects()
+			{
 				if (this.activeMeteorBackground == null)
 				{
 					this.activeMeteorBackground = Util.KInstantiate(EffectPrefabs.Instance.MeteorBackground, null, null);
@@ -128,7 +146,7 @@ namespace Klei.AI
 				}
 			}
 
-			public override void StopSM(string reason)
+			public void StopBackgroundEffects()
 			{
 				if (this.activeMeteorBackground != null)
 				{
@@ -141,7 +159,6 @@ namespace Klei.AI
 					}
 					this.activeMeteorBackground = null;
 				}
-				base.StopSM(reason);
 			}
 
 			public float TimeUntilNextShower()

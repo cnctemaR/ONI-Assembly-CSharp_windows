@@ -21,14 +21,27 @@ namespace Database
 		public override bool Success()
 		{
 			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().tamedCritterTypes;
+			bool flag = true;
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
-				if (!tamedCritterTypes.Contains(keyValuePair.Key))
-				{
-					return false;
-				}
+				flag = flag && tamedCritterTypes.Contains(keyValuePair.Key);
 			}
-			return true;
+			this.UpdateSavedState();
+			return flag;
+		}
+
+		public void UpdateSavedState()
+		{
+			this.revisedCritterTypesToCheckState.Clear();
+			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().tamedCritterTypes;
+			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
+			{
+				this.revisedCritterTypesToCheckState.Add(keyValuePair.Key, tamedCritterTypes.Contains(keyValuePair.Key));
+			}
+			foreach (KeyValuePair<Tag, bool> keyValuePair2 in this.revisedCritterTypesToCheckState)
+			{
+				this.critterTypesToCheck[keyValuePair2.Key] = keyValuePair2.Value;
+			}
 		}
 
 		public void Deserialize(IReader reader)
@@ -50,5 +63,7 @@ namespace Database
 		private Tag trait;
 
 		private bool hasTrait;
+
+		private Dictionary<Tag, bool> revisedCritterTypesToCheckState = new Dictionary<Tag, bool>();
 	}
 }

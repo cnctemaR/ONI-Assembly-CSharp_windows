@@ -427,7 +427,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
 		min.x -= 4;
 		min.y -= 4;
-		if (CameraController.Instance != null)
+		if (CameraController.Instance != null && DlcManager.IsExpansion1Active())
 		{
 			Vector2I vector2I;
 			Vector2I vector2I2;

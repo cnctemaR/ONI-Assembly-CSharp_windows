@@ -100,11 +100,11 @@ public class SuitFabricatorConfig : IBuildingConfig
 			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 			sortOrder = 1
 		};
-		if (ElementLoader.FindElementByHash(SimHashes.Cobaltite) != null)
+		if (ElementLoader.FindElementByHash(SimHashes.Cobalt) != null)
 		{
 			ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
 			{
-				new ComplexRecipe.RecipeElement(SimHashes.Cobaltite.CreateTag(), 300f, true),
+				new ComplexRecipe.RecipeElement(SimHashes.Cobalt.CreateTag(), 300f, true),
 				new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), 2f)
 			};
 			ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]

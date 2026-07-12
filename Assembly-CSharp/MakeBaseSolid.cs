@@ -21,8 +21,15 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 		{
 			CellOffset rotatedOffset = component2.GetRotatedOffset(cellOffset);
 			int num2 = Grid.OffsetCell(num, rotatedOffset);
-			SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, component.Mass, component.Temperature, byte.MaxValue, 0, -1);
-			Grid.Objects[num2, 9] = smi.gameObject;
+			if (smi.def.occupyFoundationLayer)
+			{
+				SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, component.Mass, component.Temperature, byte.MaxValue, 0, -1);
+				Grid.Objects[num2, 9] = smi.gameObject;
+			}
+			else
+			{
+				SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierOnSpawn, 0f, 0f, byte.MaxValue, 0, -1);
+			}
 			Grid.Foundation[num2] = true;
 			Grid.SetSolid(num2, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			SimMessages.SetCellProperties(num2, 103);
@@ -60,6 +67,8 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 	public class Def : StateMachine.BaseDef
 	{
 		public CellOffset[] solidOffsets;
+
+		public bool occupyFoundationLayer = true;
 	}
 
 	public new class Instance : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Instance, IStateMachineTarget, MakeBaseSolid.Def>.GameInstance

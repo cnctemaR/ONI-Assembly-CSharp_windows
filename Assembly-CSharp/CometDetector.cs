@@ -119,7 +119,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 					}
 				}
 				this.meteorShowers.Clear();
-				if (num < detectTime)
+				if (num <= detectTime)
 				{
 					component.AddTag(GameTags.Detecting, false);
 					return;

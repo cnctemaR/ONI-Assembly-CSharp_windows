@@ -73,6 +73,7 @@ public class OverlayLegend : KScreen
 					}
 				}
 			}
+			base.GetComponent<LayoutElement>().minWidth = (float)(DlcManager.FeatureClusterSpaceEnabled() ? 322 : 288);
 			this.ClearLegend();
 			return;
 		}

@@ -22,7 +22,8 @@ public class RefrigeratorConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0.125f;
+		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_INACTIVE, false, false) };
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
@@ -46,7 +47,10 @@ public class RefrigeratorConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<Refrigerator>();
-		go.AddOrGetDef<RefrigeratorController.Def>().powerSaverEnergyUsage = 20f;
+		RefrigeratorController.Def def = go.AddOrGetDef<RefrigeratorController.Def>();
+		def.powerSaverEnergyUsage = 20f;
+		def.coolingHeatKW = 0.375f;
+		def.steadyHeatKW = 0f;
 		go.AddOrGet<UserNameable>();
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGetDef<StorageController.Def>();

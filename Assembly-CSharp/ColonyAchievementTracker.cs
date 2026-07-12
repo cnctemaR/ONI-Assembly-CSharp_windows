@@ -36,6 +36,27 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		}
 		this.forceCheckAchievementHandle = Game.Instance.Subscribe(395452326, new Action<object>(this.CheckAchievements));
 		base.Subscribe<ColonyAchievementTracker>(631075836, ColonyAchievementTracker.OnNewDayDelegate);
+		this.UpgradeTamedCritterAchievements();
+	}
+
+	private void UpgradeTamedCritterAchievements()
+	{
+		foreach (ColonyAchievementRequirement colonyAchievementRequirement in Db.Get().ColonyAchievements.TameAllBasicCritters.requirementChecklist)
+		{
+			CritterTypesWithTraits critterTypesWithTraits = colonyAchievementRequirement as CritterTypesWithTraits;
+			if (critterTypesWithTraits != null)
+			{
+				critterTypesWithTraits.UpdateSavedState();
+			}
+		}
+		foreach (ColonyAchievementRequirement colonyAchievementRequirement2 in Db.Get().ColonyAchievements.TameAGassyMoo.requirementChecklist)
+		{
+			CritterTypesWithTraits critterTypesWithTraits2 = colonyAchievementRequirement2 as CritterTypesWithTraits;
+			if (critterTypesWithTraits2 != null)
+			{
+				critterTypesWithTraits2.UpdateSavedState();
+			}
+		}
 	}
 
 	public void RenderEveryTick(float dt)

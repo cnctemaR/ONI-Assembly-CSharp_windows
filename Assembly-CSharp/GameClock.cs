@@ -56,6 +56,10 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 			this.cycle++;
 			this.timeSinceStartOfCycle -= 600f;
 			base.Trigger(631075836, null);
+			foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+			{
+				worldContainer.Trigger(631075836, null);
+			}
 			flag = true;
 		}
 		if (!this.isNight && this.IsNighttime())

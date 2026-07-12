@@ -50,13 +50,20 @@ public class WorldDamage : KMonoBehaviour
 					BuildingHP component = gameObject.GetComponent<BuildingHP>();
 					if (component != null)
 					{
-						int num3 = Mathf.RoundToInt(Mathf.Max((float)component.HitPoints - (1f - num2) * (float)component.MaxHitPoints, 0f));
-						gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						if (!component.invincible)
 						{
-							damage = num3,
-							source = source_name,
-							popString = pop_text
-						});
+							int num3 = Mathf.RoundToInt(Mathf.Max((float)component.HitPoints - (1f - num2) * (float)component.MaxHitPoints, 0f));
+							gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+							{
+								damage = num3,
+								source = source_name,
+								popString = pop_text
+							});
+						}
+						else
+						{
+							num2 = 0f;
+						}
 					}
 				}
 			}

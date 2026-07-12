@@ -940,23 +940,29 @@ namespace Database
 			this.InOrbitRequired = this.CreateStatusItem("InOrbitRequired", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.ReactorRefuelDisabled = this.CreateStatusItem("ReactorRefuelDisabled", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.FridgeCooling = this.CreateStatusItem("FridgeCooling", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.FridgeCooling.resolveStringCallback = delegate(string str, object data)
+			{
+				RefrigeratorController.StatesInstance statesInstance5 = (RefrigeratorController.StatesInstance)data;
+				str = str.Replace("{UsedPower}", GameUtil.GetFormattedWattage(statesInstance5.GetNormalPower(), GameUtil.WattageFormatterUnit.Automatic, true)).Replace("{MaxPower}", GameUtil.GetFormattedWattage(statesInstance5.GetNormalPower(), GameUtil.WattageFormatterUnit.Automatic, true));
+				return str;
+			};
 			this.FridgeSteady = this.CreateStatusItem("FridgeSteady", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.FridgeSteady.resolveStringCallback = delegate(string str, object data)
 			{
-				RefrigeratorController.StatesInstance statesInstance5 = (RefrigeratorController.StatesInstance)data;
-				str = str.Replace("{UsedPower}", GameUtil.GetFormattedWattage(statesInstance5.GetSaverPower(), GameUtil.WattageFormatterUnit.Automatic, true)).Replace("{MaxPower}", GameUtil.GetFormattedWattage(statesInstance5.GetNormalPower(), GameUtil.WattageFormatterUnit.Automatic, true));
+				RefrigeratorController.StatesInstance statesInstance6 = (RefrigeratorController.StatesInstance)data;
+				str = str.Replace("{UsedPower}", GameUtil.GetFormattedWattage(statesInstance6.GetSaverPower(), GameUtil.WattageFormatterUnit.Automatic, true)).Replace("{MaxPower}", GameUtil.GetFormattedWattage(statesInstance6.GetNormalPower(), GameUtil.WattageFormatterUnit.Automatic, true));
 				return str;
 			};
 			this.RailGunCooldown = this.CreateStatusItem("RailGunCooldown", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.RailGunCooldown.resolveStringCallback = delegate(string str, object data)
 			{
-				RailGun.StatesInstance statesInstance6 = (RailGun.StatesInstance)data;
-				str = str.Replace("{timeleft}", GameUtil.GetFormattedTime(statesInstance6.sm.cooldownTimer.Get(statesInstance6), "F0"));
+				RailGun.StatesInstance statesInstance7 = (RailGun.StatesInstance)data;
+				str = str.Replace("{timeleft}", GameUtil.GetFormattedTime(statesInstance7.sm.cooldownTimer.Get(statesInstance7), "F0"));
 				return str;
 			};
 			this.RailGunCooldown.resolveTooltipCallback = delegate(string str, object data)
 			{
-				RailGun.StatesInstance statesInstance7 = (RailGun.StatesInstance)data;
+				RailGun.StatesInstance statesInstance8 = (RailGun.StatesInstance)data;
 				str = str.Replace("{x}", 6.ToString());
 				return str;
 			};

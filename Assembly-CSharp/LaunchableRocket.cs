@@ -158,13 +158,13 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				{
 					gameObject6.Trigger(-1358394196, null);
 				}
-				Game.Instance.Trigger(705820818, this);
+				Game.Instance.Trigger(-1277991738, this);
 				foreach (GameObject gameObject7 in smi.master.parts)
 				{
 					if (!(gameObject7 == null))
 					{
 						smi.master.takeOffLocation = Grid.PosToCell(smi.master.gameObject);
-						gameObject7.Trigger(705820818, null);
+						gameObject7.Trigger(-1277991738, null);
 					}
 				}
 				smi.SetMissionState(Spacecraft.MissionState.Launching);

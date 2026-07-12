@@ -9,13 +9,21 @@ internal class DehydratedFoodPackage : Workable
 {
 	public override BuildingFacade GetBuildingFacade()
 	{
-		DebugUtil.DevAssert(this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
+		DebugUtil.DevAssert(this.rehydrator == null || this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
+		if (!(this.rehydrator != null))
+		{
+			return null;
+		}
 		return this.rehydrator.GetComponent<BuildingFacade>();
 	}
 
 	public override KAnimControllerBase GetAnimController()
 	{
-		DebugUtil.DevAssert(this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
+		DebugUtil.DevAssert(this.rehydrator == null || this.rehydrator == base.gameObject.GetComponent<Pickupable>().storage.gameObject, "invalid rehydrator reference", null);
+		if (!(this.rehydrator != null))
+		{
+			return null;
+		}
 		return this.rehydrator.GetComponent<KAnimControllerBase>();
 	}
 

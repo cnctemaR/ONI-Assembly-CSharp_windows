@@ -70,6 +70,7 @@ public class PajamaDispenser : Workable, IDispenser
 		}
 		this.hasDispenseChore = true;
 		this.Chore = new WorkChore<PajamaDispenser>(Db.Get().ChoreTypes.EquipmentFetch, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, false);
+		this.Chore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 	}
 
 	public void CancelFetch()

@@ -30,7 +30,7 @@ internal class BeckonFromSpaceStates : GameStateMachine<BeckonFromSpaceStates, B
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KPrefabID kprefabID = (scenePartitionerEntry.obj as Pickupable).KPrefabID;
-			if (!(kprefabID.gameObject == smi.gameObject) && kprefabID.HasTag("Moo"))
+			if (!(kprefabID.gameObject == smi.gameObject) && kprefabID.HasTag("Moo") && kprefabID.GetSMI<AnimInterruptMonitor.Instance>() != null)
 			{
 				kprefabID.GetSMI<AnimInterruptMonitor.Instance>().PlayAnimSequence(smi.def.choirAnims);
 			}

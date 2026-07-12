@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ public class MorbRoverMakerConfig : IBuildingConfig
 		component.SetElement(SimHashes.Steel, true);
 		component.Temperature = 294.15f;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.storageFilters = ((this.GERM_INTAKE_CONDUIT_TYPE == ConduitType.Gas) ? STORAGEFILTERS.GASES : STORAGEFILTERS.LIQUIDS);
+		storage.storageFilters = ((this.GERM_INTAKE_CONDUIT_TYPE == ConduitType.Gas) ? new List<Tag>(STORAGEFILTERS.GASES) : new List<Tag>(STORAGEFILTERS.LIQUIDS));
 		storage.storageFilters.Add(MorbRoverMakerConfig.ROVER_MATERIAL_TAG.CreateTag());
 		storage.allowItemRemoval = false;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();

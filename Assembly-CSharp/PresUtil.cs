@@ -11,11 +11,11 @@ public static class PresUtil
 			Updater.Ease(delegate(float f)
 			{
 				canvasGroup.alpha = f;
-			}, canvasGroup.alpha, targetAlpha, duration, easing),
+			}, canvasGroup.alpha, targetAlpha, duration, easing, -1f),
 			Updater.Ease(delegate(Vector2 v2)
 			{
 				rect.anchoredPosition = v2;
-			}, rect.anchoredPosition, targetAnchoredPosition, duration, easing)
+			}, rect.anchoredPosition, targetAnchoredPosition, duration, easing, -1f)
 		}));
 	}
 

@@ -42,7 +42,7 @@ public class BuildTool : DragTool
 		}
 		if (!this.facadeID.IsNullOrWhiteSpace() && this.facadeID != "DEFAULT_FACADE")
 		{
-			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID));
+			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID), false);
 		}
 		Rotatable component2 = this.visualizer.GetComponent<Rotatable>();
 		if (component2 != null)
@@ -400,11 +400,6 @@ public class BuildTool : DragTool
 		else
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, pos, 1.5f, false, false);
-		}
-		Rotatable component2 = builtItem.GetComponent<Rotatable>();
-		if (component2 != null)
-		{
-			component2.SetOrientation(this.buildingOrientation);
 		}
 		if (this.def.OnePerWorld)
 		{

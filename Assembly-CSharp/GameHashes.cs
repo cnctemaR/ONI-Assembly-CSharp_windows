@@ -248,6 +248,7 @@ public enum GameHashes
 	DebugGoTo = 775300118,
 	Threatened = -96307134,
 	SafeFromThreats = -21431934,
+	FactionChanged = -971105736,
 	BeginWalk = 1773898642,
 	EndWalk = 1597112836,
 	IsMovableChanged = -962627472,
@@ -443,5 +444,6 @@ public enum GameHashes
 	DreamsOn = -1768884913,
 	DreamsOff = 49503455,
 	MarkForMove = 1122777325,
-	RailGunLaunchMassChanged = 161772031
+	RailGunLaunchMassChanged = 161772031,
+	CancelReconstruct = 954267658
 }

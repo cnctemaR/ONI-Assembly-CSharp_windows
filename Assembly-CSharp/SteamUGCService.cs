@@ -22,6 +22,7 @@ public class SteamUGCService : MonoBehaviour
 		this.on_unsubscribed = Callback<RemoteStoragePublishedFileUnsubscribed_t>.Create(new Callback<RemoteStoragePublishedFileUnsubscribed_t>.DispatchDelegate(this.OnItemUnsubscribed));
 		this.on_updated = Callback<RemoteStoragePublishedFileUpdated_t>.Create(new Callback<RemoteStoragePublishedFileUpdated_t>.DispatchDelegate(this.OnItemUpdated));
 		this.on_query_completed = CallResult<SteamUGCQueryCompleted_t>.Create(new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate(this.OnSteamUGCQueryDetailsCompleted));
+		this.on_download_completed = Callback<DownloadItemResult_t>.Create(new Callback<DownloadItemResult_t>.DispatchDelegate(this.OnDownloadItemComplete));
 		this.mods = new List<SteamUGCService.Mod>();
 	}
 
@@ -220,14 +221,6 @@ public class SteamUGCService : MonoBehaviour
 			}
 		}
 		pooledList2.Recycle();
-		foreach (PublishedFileId_t publishedFileId_t2 in pooledList3)
-		{
-			if ((SteamUGC.GetItemState(publishedFileId_t2) & 4U) != 0U)
-			{
-				string text = string.Format("Mod Steam PublishedFileId_t {0}", publishedFileId_t2.m_PublishedFileId);
-				KCrashReporter.ReportDevNotification("SteamUGCService updated Mod has not finished updating!", Environment.StackTrace, text, false);
-			}
-		}
 		pooledList3.Recycle();
 		loaded_previews.Recycle();
 		if (flag)
@@ -242,17 +235,18 @@ public class SteamUGCService : MonoBehaviour
 			}
 			this.removals.Clear();
 		}
-		foreach (PublishedFileId_t publishedFileId_t3 in this.downloads)
+		foreach (PublishedFileId_t publishedFileId_t2 in this.downloads)
 		{
-			EItemState itemState = (EItemState)SteamUGC.GetItemState(publishedFileId_t3);
-			if (((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateNone || (itemState & EItemState.k_EItemStateNeedsUpdate) != EItemState.k_EItemStateNone) && (itemState & (EItemState.k_EItemStateDownloading | EItemState.k_EItemStateDownloadPending)) == EItemState.k_EItemStateNone)
+			EItemState itemState = (EItemState)SteamUGC.GetItemState(publishedFileId_t2);
+			if (((itemState & EItemState.k_EItemStateInstalled) == EItemState.k_EItemStateNone || (itemState & EItemState.k_EItemStateNeedsUpdate) != EItemState.k_EItemStateNone) && (itemState & (EItemState.k_EItemStateDownloading | EItemState.k_EItemStateDownloadPending)) == EItemState.k_EItemStateNone && SteamUGC.DownloadItem(publishedFileId_t2, false))
 			{
-				SteamUGC.DownloadItem(publishedFileId_t3, false);
+				this.awaiting_download.Add(publishedFileId_t2);
 			}
 		}
 		if (this.details_query == UGCQueryHandle_t.Invalid)
 		{
 			this.queries.UnionWith(this.downloads);
+			this.queries.ExceptWith(this.awaiting_download);
 			this.downloads.Clear();
 			if (this.queries.Count != 0)
 			{
@@ -340,6 +334,20 @@ public class SteamUGCService : MonoBehaviour
 		this.removals.Add(pCallback.m_nPublishedFileId);
 	}
 
+	private void OnDownloadItemComplete(DownloadItemResult_t callback)
+	{
+		if (callback.m_unAppID == new AppId_t(457140U) || callback.m_unAppID == new AppId_t(1452490U))
+		{
+			string text = string.Format("Mod Steam PublishedFileId_t {0} DownloadItemResult_t result {1}", callback.m_nPublishedFileId, callback.m_eResult);
+			KCrashReporter.ReportDevNotification("SteamUGCService Mod DownloadItemResult_t Callback - remove me!", Environment.StackTrace, text, false);
+			if (callback.m_eResult == EResult.k_EResultOK)
+			{
+				this.queries.Add(callback.m_nPublishedFileId);
+				this.awaiting_download.Remove(callback.m_nPublishedFileId);
+			}
+		}
+	}
+
 	public static byte[] GetBytesFromZip(PublishedFileId_t item, string[] filesToExtract, out global::System.DateTime lastModified, bool getFirstMatch = false)
 	{
 		byte[] array = null;
@@ -406,6 +414,8 @@ public class SteamUGCService : MonoBehaviour
 
 	private CallResult<SteamUGCQueryCompleted_t> on_query_completed;
 
+	private Callback<DownloadItemResult_t> on_download_completed;
+
 	private HashSet<PublishedFileId_t> downloads = new HashSet<PublishedFileId_t>();
 
 	private HashSet<PublishedFileId_t> queries = new HashSet<PublishedFileId_t>();
@@ -417,6 +427,8 @@ public class SteamUGCService : MonoBehaviour
 	private HashSet<PublishedFileId_t> removals = new HashSet<PublishedFileId_t>();
 
 	private HashSet<SteamUGCDetails_t> previews = new HashSet<SteamUGCDetails_t>();
+
+	private HashSet<PublishedFileId_t> awaiting_download = new HashSet<PublishedFileId_t>();
 
 	private List<SteamUGCService.Mod> mods = new List<SteamUGCService.Mod>();
 

@@ -146,7 +146,7 @@ namespace STRINGS
 		{
 			public class MORB
 			{
-				public static LocString NAME = "Biobot";
+				public static LocString NAME = UI.FormatAsLink("Biobot", "STORYTRAITMORBROVER");
 
 				public static LocString DESC = "A Pathogen-Fueled Extravehicular Geo-Exploratory Guidebot (model Y), aka \"P.E.G.G.Y.\"\n\nIt can be assigned basic building tasks and digging duties in hazardous environments.";
 

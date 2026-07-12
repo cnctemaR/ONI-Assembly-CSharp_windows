@@ -154,6 +154,7 @@ public class Repairable : Workable
 			this.storageProxy = gameObject.GetComponent<Storage>();
 			this.storageProxy.prioritizable = base.transform.GetComponent<Prioritizable>();
 			this.storageProxy.prioritizable.AddRef();
+			gameObject.GetComponent<KSelectable>().entityName = base.transform.gameObject.GetProperName();
 			gameObject.SetActive(true);
 		}
 	}

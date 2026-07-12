@@ -6,6 +6,22 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class LogicLightSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
+	private void OnCopySettings(object data)
+	{
+		LogicLightSensor component = ((GameObject)data).GetComponent<LogicLightSensor>();
+		if (component != null)
+		{
+			this.Threshold = component.Threshold;
+			this.ActivateAboveThreshold = component.ActivateAboveThreshold;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicLightSensor>(-905833192, LogicLightSensor.OnCopySettingsDelegate);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -229,4 +245,12 @@ public class LogicLightSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200
 	private float averageBrightness;
 
 	private bool wasOn;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicLightSensor> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicLightSensor>(delegate(LogicLightSensor component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

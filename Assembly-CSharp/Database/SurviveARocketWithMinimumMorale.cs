@@ -23,7 +23,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			foreach (KeyValuePair<int, int> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().cyclesRocketDupeMoraleAboveRequirement)
+			foreach (KeyValuePair<int, int> keyValuePair in SaveGame.Instance.ColonyAchievementTracker.cyclesRocketDupeMoraleAboveRequirement)
 			{
 				if (keyValuePair.Value >= this.numberOfCycles)
 				{

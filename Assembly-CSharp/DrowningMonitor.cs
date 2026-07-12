@@ -140,27 +140,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 
 	private static bool CellSafeTest(int testCell, object data)
 	{
-		int num = Grid.CellAbove(testCell);
-		if (!Grid.IsValidCell(testCell) || !Grid.IsValidCell(num))
-		{
-			return false;
-		}
-		if (Grid.IsSubstantialLiquid(testCell, 0.95f))
-		{
-			return false;
-		}
-		if (Grid.IsLiquid(testCell))
-		{
-			if (Grid.Element[num].IsLiquid)
-			{
-				return false;
-			}
-			if (Grid.Element[num].IsSolid)
-			{
-				return false;
-			}
-		}
-		return true;
+		return !Grid.IsNavigatableLiquid(testCell);
 	}
 
 	public bool IsCellSafe(int cell)

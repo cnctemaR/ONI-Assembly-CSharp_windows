@@ -943,7 +943,7 @@ namespace STRINGS
 
 			public class BASIC_FABRIC
 			{
-				public static LocString NAME = "Reed Fiber";
+				public static LocString NAME = UI.FormatAsLink("Reed Fiber", "BASIC_FABRIC");
 
 				public static LocString DESC = "A ball of raw cellulose used in the production of " + UI.FormatAsLink("Clothing", "EQUIPMENT") + " and textiles.";
 			}
@@ -1122,7 +1122,7 @@ namespace STRINGS
 
 			public class WOOD
 			{
-				public static LocString NAME = "Lumber";
+				public static LocString NAME = UI.FormatAsLink("Lumber", "WOOD");
 
 				public static LocString DESC = string.Concat(new string[]
 				{

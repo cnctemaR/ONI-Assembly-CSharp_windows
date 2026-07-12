@@ -22,6 +22,10 @@ public class Faction
 		this.ConfigureAlignments(faction);
 	}
 
+	public bool CanAttack { get; private set; }
+
+	public bool CanAssist { get; private set; }
+
 	private void ConfigureAlignments(FactionManager.FactionID faction)
 	{
 		switch (faction)
@@ -33,7 +37,7 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Neutral);
-			return;
+			break;
 		case FactionManager.FactionID.Friendly:
 			this.Dispositions.Add(FactionManager.FactionID.Duplicant, FactionManager.Disposition.Assist);
 			this.Dispositions.Add(FactionManager.FactionID.Friendly, FactionManager.Disposition.Assist);
@@ -41,7 +45,7 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Neutral);
-			return;
+			break;
 		case FactionManager.FactionID.Hostile:
 			this.Dispositions.Add(FactionManager.FactionID.Duplicant, FactionManager.Disposition.Attack);
 			this.Dispositions.Add(FactionManager.FactionID.Friendly, FactionManager.Disposition.Attack);
@@ -49,7 +53,7 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Attack);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Attack);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Attack);
-			return;
+			break;
 		case FactionManager.FactionID.Prey:
 			this.Dispositions.Add(FactionManager.FactionID.Duplicant, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Friendly, FactionManager.Disposition.Neutral);
@@ -57,7 +61,7 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Neutral);
-			return;
+			break;
 		case FactionManager.FactionID.Predator:
 			this.Dispositions.Add(FactionManager.FactionID.Duplicant, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Friendly, FactionManager.Disposition.Attack);
@@ -65,7 +69,7 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Attack);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Attack);
-			return;
+			break;
 		case FactionManager.FactionID.Pest:
 			this.Dispositions.Add(FactionManager.FactionID.Duplicant, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Friendly, FactionManager.Disposition.Neutral);
@@ -73,9 +77,18 @@ public class Faction
 			this.Dispositions.Add(FactionManager.FactionID.Predator, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Prey, FactionManager.Disposition.Neutral);
 			this.Dispositions.Add(FactionManager.FactionID.Pest, FactionManager.Disposition.Neutral);
-			return;
-		default:
-			return;
+			break;
+		}
+		foreach (KeyValuePair<FactionManager.FactionID, FactionManager.Disposition> keyValuePair in this.Dispositions)
+		{
+			if (keyValuePair.Value == FactionManager.Disposition.Attack)
+			{
+				this.CanAttack = true;
+			}
+			if (keyValuePair.Value == FactionManager.Disposition.Assist)
+			{
+				this.CanAssist = true;
+			}
 		}
 	}
 

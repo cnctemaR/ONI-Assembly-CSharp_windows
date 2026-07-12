@@ -26,7 +26,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			return false;
 		}
 		int num = Grid.PosToCell(pickupable);
-		return Grid.IsValidCell(num) && Grid.Solid[num] && !(Grid.Objects[num, 9] != null) && (pickupable.GetComponent<PrimaryElement>().Element.IsSolid && pickupable.GetComponent<ElementChunk>() != null);
+		return Grid.IsValidCell(num) && Grid.Solid[num] && !(Grid.Objects[num, 9] != null) && (pickupable.PrimaryElement.Element.IsSolid && pickupable.GetComponent<ElementChunk>() != null);
 	}
 
 	public void Add(Pickupable pickupable)
@@ -49,12 +49,12 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		foreach (Pickupable pickupable2 in pooledHashSet)
 		{
 			int num = Grid.PosToCell(pickupable2);
-			PrimaryElement component2 = pickupable2.GetComponent<PrimaryElement>();
-			SimHashes elementID = component2.ElementID;
-			float mass = component2.Mass;
-			float temperature = component2.Temperature;
-			byte diseaseIdx = component2.DiseaseIdx;
-			int diseaseCount = component2.DiseaseCount;
+			PrimaryElement primaryElement = pickupable2.PrimaryElement;
+			SimHashes elementID = primaryElement.ElementID;
+			float mass = primaryElement.Mass;
+			float temperature = primaryElement.Temperature;
+			byte diseaseIdx = primaryElement.DiseaseIdx;
+			int diseaseCount = primaryElement.DiseaseCount;
 			Element element = Grid.Element[num];
 			if (elementID == element.id && mass > 0.010000001f && Grid.Mass[num] + mass < element.maxMass)
 			{

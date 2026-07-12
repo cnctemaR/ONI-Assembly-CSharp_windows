@@ -9,14 +9,14 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 	{
 		default_state = this.cooldown;
 		this.cooldown.ScheduleGoTo((LureableMonitor.Instance smi) => smi.def.cooldown, this.nolure);
-		this.nolure.Update("FindLure", delegate(LureableMonitor.Instance smi, float dt)
+		this.nolure.PreBrainUpdate(delegate(LureableMonitor.Instance smi)
 		{
 			smi.FindLure();
-		}, UpdateRate.SIM_1000ms, false).ParamTransition<GameObject>(this.targetLure, this.haslure, (LureableMonitor.Instance smi, GameObject p) => p != null);
-		this.haslure.ParamTransition<GameObject>(this.targetLure, this.nolure, (LureableMonitor.Instance smi, GameObject p) => p == null).Update("FindLure", delegate(LureableMonitor.Instance smi, float dt)
+		}).ParamTransition<GameObject>(this.targetLure, this.haslure, (LureableMonitor.Instance smi, GameObject p) => p != null);
+		this.haslure.ParamTransition<GameObject>(this.targetLure, this.nolure, (LureableMonitor.Instance smi, GameObject p) => p == null).PreBrainUpdate(delegate(LureableMonitor.Instance smi)
 		{
 			smi.FindLure();
-		}, UpdateRate.SIM_1000ms, false).ToggleBehaviour(GameTags.Creatures.MoveToLure, (LureableMonitor.Instance smi) => smi.HasLure(), delegate(LureableMonitor.Instance smi)
+		}).ToggleBehaviour(GameTags.Creatures.MoveToLure, (LureableMonitor.Instance smi) => smi.HasLure(), delegate(LureableMonitor.Instance smi)
 		{
 			smi.GoTo(this.cooldown);
 		});
@@ -54,7 +54,7 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		public void FindLure()
 		{
-			LureableMonitor.Instance.LureIterator lureIterator = new LureableMonitor.Instance.LureIterator(base.GetComponent<Navigator>(), base.def.lures);
+			LureableMonitor.Instance.LureIterator lureIterator = new LureableMonitor.Instance.LureIterator(this.navigator, base.def.lures);
 			GameScenePartitioner.Instance.Iterate<LureableMonitor.Instance.LureIterator>(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure, ref lureIterator);
 			lureIterator.Cleanup();
 			base.sm.targetLure.Set(lureIterator.result, this, false);
@@ -69,6 +69,9 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 		{
 			return base.sm.targetLure.Get(this);
 		}
+
+		[MyCmpReq]
+		private Navigator navigator;
 
 		private struct LureIterator : GameScenePartitioner.Iterator
 		{

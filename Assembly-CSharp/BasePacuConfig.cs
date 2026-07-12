@@ -56,7 +56,9 @@ public static class BasePacuConfig
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
-		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().useunderWaterCondos = true;
+		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def2.requireCavity = false;
+		def2.condoPrefabTag = "UnderwaterCritterCondo";
 		Tag tag = SimHashes.ToxicSand.CreateTag();
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Algae.CreateTag());
@@ -64,9 +66,9 @@ public static class BasePacuConfig
 		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false));
 		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
 		Diet diet = new Diet(list.ToArray());
-		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def2.diet = diet;
-		def2.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
+		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def3.diet = diet;
+		def3.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
 		{
@@ -86,13 +88,13 @@ public static class BasePacuConfig
 	public static List<Diet.Info> SeedDiet(Tag poopTag, float caloriesPerSeed, float producedConversionRate)
 	{
 		List<Diet.Info> list = new List<Diet.Info>();
-		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Seed))
+		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<PlantableSeed>())
 		{
 			GameObject prefab = Assets.GetPrefab(gameObject.GetComponent<PlantableSeed>().PlantID);
 			if (!prefab.HasTag(GameTags.DeprecatedContent))
 			{
 				SeedProducer component = prefab.GetComponent<SeedProducer>();
-				if (component == null || component.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
+				if (component == null || component.seedInfo.productionType == SeedProducer.ProductionType.Harvest || component.seedInfo.productionType == SeedProducer.ProductionType.Crop)
 				{
 					list.Add(new Diet.Info(new HashSet<Tag>
 					{

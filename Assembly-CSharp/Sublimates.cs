@@ -52,18 +52,18 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	private void OnSplitFromChunk(object data)
 	{
 		Pickupable pickupable = data as Pickupable;
-		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
-		Sublimates component2 = pickupable.GetComponent<Sublimates>();
-		if (component2 == null)
+		PrimaryElement primaryElement = pickupable.PrimaryElement;
+		Sublimates component = pickupable.GetComponent<Sublimates>();
+		if (component == null)
 		{
 			return;
 		}
 		float mass = this.primaryElement.Mass;
-		float mass2 = component.Mass;
+		float mass2 = primaryElement.Mass;
 		float num = mass / (mass2 + mass);
-		this.sublimatedMass = component2.sublimatedMass * num;
+		this.sublimatedMass = component.sublimatedMass * num;
 		float num2 = 1f - num;
-		component2.sublimatedMass *= num2;
+		component.sublimatedMass *= num2;
 	}
 
 	public void Sim200ms(float dt)

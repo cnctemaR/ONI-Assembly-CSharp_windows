@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 
 namespace STRINGS
 {
@@ -303,7 +304,7 @@ namespace STRINGS
 
 			public static class DECORATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor Item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
 			}
 
 			public class CEILING_HEIGHT
@@ -334,7 +335,7 @@ namespace STRINGS
 
 			public class HAS_BED
 			{
-				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "BUILDINGCATEGORYREQUIREMENTCLASSBEDTYPE");
+				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires at least one Cot or Comfy Bed";
 			}
@@ -355,7 +356,7 @@ namespace STRINGS
 
 			public class BED_SINGLE
 			{
-				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "BUILDINGCATEGORYREQUIREMENTCLASSBEDTYPE");
+				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Must have no more than one Cot or Comfy Bed";
 			}
@@ -404,9 +405,17 @@ namespace STRINGS
 
 			public class DECOR20
 			{
-				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION") + ": +{0} Decor";
+				// Note: this type is marked as 'beforefieldinit'.
+				static DECOR20()
+				{
+					string text = "Requires a decorative item with a minimum Decor value of ";
+					int amount = BUILDINGS.DECOR.BONUS.TIER3.amount;
+					ROOMS.CRITERIA.DECOR20.DESCRIPTION = text + amount.ToString();
+				}
 
-				public static LocString DESCRIPTION = "Requires a decorative item with a minimum Decor value of {0}";
+				public static LocString NAME = UI.FormatAsLink("Fancy decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+
+				public static LocString DESCRIPTION;
 			}
 
 			public class CLINIC
@@ -544,21 +553,21 @@ namespace STRINGS
 
 			public class RESEARCH_STATION
 			{
-				public static LocString NAME = "Research station";
+				public static LocString NAME = UI.FormatAsLink("Research station", "BUILDCATEGORYREQUIREMENTCLASSRESEARCH_STATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Research Stations or Super Computers";
 			}
 
 			public class TOILETTYPE
 			{
-				public static LocString NAME = "Toilet";
+				public static LocString NAME = UI.FormatAsLink("Toilet", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Outhouses or Lavatories";
 			}
 
 			public class FLUSHTOILETTYPE
 			{
-				public static LocString NAME = "Flush Toilet";
+				public static LocString NAME = UI.FormatAsLink("Flush Toilet", "BUILDCATEGORYREQUIREMENTCLASSFLUSHTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Lavatories";
 			}
@@ -572,14 +581,14 @@ namespace STRINGS
 
 			public class WASHSTATION
 			{
-				public static LocString NAME = "Wash station";
+				public static LocString NAME = UI.FormatAsLink("Wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Wash Basins, Sinks, Hand Sanitizers, or Showers";
 			}
 
 			public class ADVANCEDWASHSTATION
 			{
-				public static LocString NAME = "Plumbed wash station";
+				public static LocString NAME = UI.FormatAsLink("Plumbed wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Sinks, Hand Sanitizers, or Showers";
 			}

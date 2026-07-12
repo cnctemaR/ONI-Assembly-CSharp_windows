@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/MinionVitalsPanel")]
-public class MinionVitalsPanel : KMonoBehaviour
+public class MinionVitalsPanel : CollapsibleDetailContentPanel
 {
 	public void Init()
 	{
@@ -96,6 +96,12 @@ public class MinionVitalsPanel : KMonoBehaviour
 		}, (GameObject go) => this.check_radiation(go), (GameObject go) => this.GetRadiationTooltip(go));
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Init();
+	}
+
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
@@ -110,7 +116,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	private void AddAmountLine(Amount amount, Func<AmountInstance, string> tooltip_func = null)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
+		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, this.Content.gameObject, false);
 		gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(amount.uiSprite);
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
@@ -126,7 +132,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	private void AddAttributeLine(Klei.AI.Attribute attribute, Func<AttributeInstance, string> tooltip_func = null)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
+		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, this.Content.gameObject, false);
 		gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(attribute.uiSprite);
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
@@ -142,7 +148,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	private void AddCheckboxLine(Amount amount, Transform parentContainer, Func<GameObject, string> label_text_func, Func<GameObject, MinionVitalsPanel.CheckboxLineDisplayType> display_condition, Func<GameObject, bool> checkbox_value_func, Func<GameObject, string> tooltip_func = null)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.CheckboxLinePrefab, base.gameObject, false);
+		GameObject gameObject = Util.KInstantiateUI(this.CheckboxLinePrefab, this.Content.gameObject, false);
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
@@ -173,81 +179,106 @@ public class MinionVitalsPanel : KMonoBehaviour
 			tt.OnToolTip = delegate
 			{
 				tt.ClearMultiStringTooltip();
-				tt.AddMultiStringTooltip(tooltip_func(this.selectedEntity), null);
+				tt.AddMultiStringTooltip(tooltip_func(this.lastSelectedEntity), null);
 				return "";
 			};
 		}
 		this.checkboxLines.Add(checkboxLine);
 	}
 
-	public void Refresh()
+	private void ShouldShowVitalsPanel(GameObject selectedEntity)
 	{
-		if (this.selectedEntity == null)
+	}
+
+	public void Refresh(GameObject selectedEntity)
+	{
+		if (selectedEntity == null)
 		{
 			return;
 		}
-		if (this.selectedEntity.gameObject == null)
+		if (selectedEntity.gameObject == null)
 		{
 			return;
 		}
-		Amounts amounts = this.selectedEntity.GetAmounts();
-		Attributes attributes = this.selectedEntity.GetAttributes();
+		this.lastSelectedEntity = selectedEntity;
+		WiltCondition component = selectedEntity.GetComponent<WiltCondition>();
+		MinionIdentity component2 = selectedEntity.GetComponent<MinionIdentity>();
+		CreatureBrain component3 = selectedEntity.GetComponent<CreatureBrain>();
+		IncubationMonitor.Instance smi = selectedEntity.GetSMI<IncubationMonitor.Instance>();
+		object[] array = new object[] { component, component2, component3, smi };
+		bool flag = false;
+		for (int i = 0; i < array.Length; i++)
+		{
+			if (array[i] != null)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (!flag)
+		{
+			base.SetActive(false);
+			return;
+		}
+		base.SetActive(true);
+		base.SetTitle((component == null) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
+		Amounts amounts = selectedEntity.GetAmounts();
+		Attributes attributes = selectedEntity.GetAttributes();
 		if (amounts == null || attributes == null)
 		{
 			return;
 		}
-		WiltCondition component = this.selectedEntity.GetComponent<WiltCondition>();
 		if (component == null)
 		{
 			this.conditionsContainerNormal.gameObject.SetActive(false);
 			this.conditionsContainerAdditional.gameObject.SetActive(false);
 			foreach (MinionVitalsPanel.AmountLine amountLine in this.amountsLines)
 			{
-				bool flag = amountLine.TryUpdate(amounts);
-				if (amountLine.go.activeSelf != flag)
+				bool flag2 = amountLine.TryUpdate(amounts);
+				if (amountLine.go.activeSelf != flag2)
 				{
-					amountLine.go.SetActive(flag);
+					amountLine.go.SetActive(flag2);
 				}
 			}
 			foreach (MinionVitalsPanel.AttributeLine attributeLine in this.attributesLines)
 			{
-				bool flag2 = attributeLine.TryUpdate(attributes);
-				if (attributeLine.go.activeSelf != flag2)
+				bool flag3 = attributeLine.TryUpdate(attributes);
+				if (attributeLine.go.activeSelf != flag3)
 				{
-					attributeLine.go.SetActive(flag2);
+					attributeLine.go.SetActive(flag3);
 				}
 			}
 		}
-		bool flag3 = false;
-		for (int i = 0; i < this.checkboxLines.Count; i++)
+		bool flag4 = false;
+		for (int j = 0; j < this.checkboxLines.Count; j++)
 		{
-			MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[i];
+			MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[j];
 			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-			if (this.checkboxLines[i].amount != null)
+			if (this.checkboxLines[j].amount != null)
 			{
-				for (int j = 0; j < amounts.Count; j++)
+				for (int k = 0; k < amounts.Count; k++)
 				{
-					AmountInstance amountInstance = amounts[j];
+					AmountInstance amountInstance = amounts[k];
 					if (checkboxLine.amount == amountInstance.amount)
 					{
-						checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
+						checkboxLineDisplayType = checkboxLine.display_condition(selectedEntity.gameObject);
 						break;
 					}
 				}
 			}
 			else
 			{
-				checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
+				checkboxLineDisplayType = checkboxLine.display_condition(selectedEntity.gameObject);
 			}
 			if (checkboxLineDisplayType != MinionVitalsPanel.CheckboxLineDisplayType.Hidden)
 			{
-				checkboxLine.locText.SetText(checkboxLine.label_text_func(this.selectedEntity.gameObject));
+				checkboxLine.locText.SetText(checkboxLine.label_text_func(selectedEntity.gameObject));
 				if (!checkboxLine.go.activeSelf)
 				{
 					checkboxLine.go.SetActive(true);
 				}
 				GameObject gameObject = checkboxLine.go.GetComponent<HierarchyReferences>().GetReference("Check").gameObject;
-				gameObject.SetActive(checkboxLine.get_value(this.selectedEntity.gameObject));
+				gameObject.SetActive(checkboxLine.get_value(selectedEntity.gameObject));
 				if (checkboxLine.go.transform.parent != checkboxLine.parentContainer)
 				{
 					checkboxLine.go.transform.SetParent(checkboxLine.parentContainer);
@@ -255,11 +286,11 @@ public class MinionVitalsPanel : KMonoBehaviour
 				}
 				if (checkboxLine.parentContainer == this.conditionsContainerAdditional)
 				{
-					flag3 = true;
+					flag4 = true;
 				}
 				if (checkboxLineDisplayType == MinionVitalsPanel.CheckboxLineDisplayType.Normal)
 				{
-					if (checkboxLine.get_value(this.selectedEntity.gameObject))
+					if (checkboxLine.get_value(selectedEntity.gameObject))
 					{
 						checkboxLine.locText.color = Color.black;
 						gameObject.transform.parent.GetComponent<Image>().color = Color.black;
@@ -284,20 +315,20 @@ public class MinionVitalsPanel : KMonoBehaviour
 		}
 		if (component != null)
 		{
-			global::UnityEngine.Object component2 = component.GetComponent<Growing>();
-			bool flag4 = component.HasTag(GameTags.Decoration);
+			global::UnityEngine.Object component4 = component.GetComponent<Growing>();
+			bool flag5 = component.HasTag(GameTags.Decoration);
 			this.conditionsContainerNormal.gameObject.SetActive(true);
-			this.conditionsContainerAdditional.gameObject.SetActive(!flag4);
-			if (component2 == null)
+			this.conditionsContainerAdditional.gameObject.SetActive(!flag5);
+			if (component4 == null)
 			{
 				float num = 1f;
 				LocText reference = this.conditionsContainerNormal.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
 				reference.text = "";
-				reference.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, Array.Empty<object>()) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)));
+				reference.text = (flag5 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, Array.Empty<object>()) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)));
 				reference.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.TOOLTIP, Array.Empty<object>()));
 				LocText reference2 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				ReceptacleMonitor component3 = this.selectedEntity.GetComponent<ReceptacleMonitor>();
-				reference2.color = ((component3 == null || component3.Replanted) ? Color.black : Color.grey);
+				ReceptacleMonitor component5 = selectedEntity.GetComponent<ReceptacleMonitor>();
+				reference2.color = ((component5 == null || component5.Replanted) ? Color.black : Color.grey);
 				reference2.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 100f));
 				reference2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.TOOLTIP, Array.Empty<object>()));
 			}
@@ -308,9 +339,9 @@ public class MinionVitalsPanel : KMonoBehaviour
 				reference3.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1", false));
 				reference3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().WildGrowthTime(), "F1", false)));
 				LocText reference4 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				reference4.color = (this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
+				reference4.color = (selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
 				reference4.text = "";
-				reference4.text = (flag3 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)));
+				reference4.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)));
 				reference4.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1", false)));
 			}
 			foreach (MinionVitalsPanel.AmountLine amountLine2 in this.amountsLines)
@@ -575,7 +606,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	public GameObject CheckboxLinePrefab;
 
-	public GameObject selectedEntity;
+	private GameObject lastSelectedEntity;
 
 	public List<MinionVitalsPanel.AmountLine> amountsLines = new List<MinionVitalsPanel.AmountLine>();
 

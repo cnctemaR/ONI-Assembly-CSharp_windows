@@ -83,12 +83,12 @@ public static class InventoryOrganization
 
 	private static void GenerateTopLevelCategories()
 	{
-		InventoryOrganization.AddTopLevelCategory("CLOTHING_TOPS", Assets.GetSprite("icon_inventory_tops"), new string[] { "CLOTHING_TOPS_BASIC", "CLOTHING_TOPS_TSHIRT", "CLOTHING_TOPS_JACKET", "CLOTHING_TOPS_UNDERSHIRT", "CLOTHING_TOPS_DRESS" });
+		InventoryOrganization.AddTopLevelCategory("CLOTHING_TOPS", Assets.GetSprite("icon_inventory_tops"), new string[] { "CLOTHING_TOPS_BASIC", "CLOTHING_TOPS_TSHIRT", "CLOTHING_TOPS_FANCY", "CLOTHING_TOPS_JACKET", "CLOTHING_TOPS_UNDERSHIRT", "CLOTHING_TOPS_DRESS" });
 		InventoryOrganization.AddTopLevelCategory("CLOTHING_BOTTOMS", Assets.GetSprite("icon_inventory_bottoms"), new string[] { "CLOTHING_BOTTOMS_BASIC", "CLOTHING_BOTTOMS_FANCY", "CLOTHING_BOTTOMS_SHORTS", "CLOTHING_BOTTOMS_SKIRTS", "CLOTHING_BOTTOMS_UNDERWEAR" });
-		InventoryOrganization.AddTopLevelCategory("CLOTHING_GLOVES", Assets.GetSprite("icon_inventory_gloves"), new string[] { "CLOTHING_GLOVES_BASIC", "CLOTHING_GLOVES_PRINTS", "CLOTHING_GLOVES_SHORT" });
+		InventoryOrganization.AddTopLevelCategory("CLOTHING_GLOVES", Assets.GetSprite("icon_inventory_gloves"), new string[] { "CLOTHING_GLOVES_BASIC", "CLOTHING_GLOVES_PRINTS", "CLOTHING_GLOVES_SHORT", "CLOTHING_GLOVES_FORMAL" });
 		InventoryOrganization.AddTopLevelCategory("CLOTHING_SHOES", Assets.GetSprite("icon_inventory_shoes"), new string[] { "CLOTHING_SHOES_BASIC", "CLOTHING_SHOES_FANCY", "CLOTHING_SHOE_SOCKS" });
 		InventoryOrganization.AddTopLevelCategory("ATMOSUITS", Assets.GetSprite("icon_inventory_atmosuit_helmet"), new string[] { "ATMOSUIT_BODIES_BASIC", "ATMOSUIT_BODIES_FANCY", "ATMOSUIT_HELMETS_BASIC", "ATMOSUIT_HELMETS_FANCY", "ATMOSUIT_BELTS_BASIC", "ATMOSUIT_BELTS_FANCY", "ATMOSUIT_GLOVES_BASIC", "ATMOSUIT_GLOVES_FANCY", "ATMOSUIT_SHOES_BASIC", "ATMOSUIT_SHOES_FANCY" });
-		InventoryOrganization.AddTopLevelCategory("BUILDINGS", Assets.GetSprite("icon_inventory_buildings"), new string[] { "BUILDINGS_BED_COT", "BUILDINGS_BED_LUXURY", "BUILDINGS_FLOWER_VASE", "BUILDING_CEILING_LIGHT", "BUILDINGS_STORAGE", "BUILDINGS_INDUSTRIAL", "BUILDINGS_FOOD", "BUILDINGS_RECREATION" });
+		InventoryOrganization.AddTopLevelCategory("BUILDINGS", Assets.GetSprite("icon_inventory_buildings"), new string[] { "BUILDINGS_BED_COT", "BUILDINGS_BED_LUXURY", "BUILDINGS_FLOWER_VASE", "BUILDING_CEILING_LIGHT", "BUILDINGS_STORAGE", "BUILDINGS_INDUSTRIAL", "BUILDINGS_FOOD", "BUILDINGS_WASHROOM", "BUILDINGS_RECREATION" });
 		InventoryOrganization.AddTopLevelCategory("WALLPAPERS", Def.GetFacadeUISprite("ExteriorWall_tropical"), new string[] { "BUILDING_WALLPAPER_BASIC", "BUILDING_WALLPAPER_FANCY", "BUILDING_WALLPAPER_PRINTS" });
 		InventoryOrganization.AddTopLevelCategory("ARTWORK", Assets.GetSprite("icon_inventory_artworks"), new string[] { "BUILDING_CANVAS_STANDARD", "BUILDING_CANVAS_PORTRAIT", "BUILDING_CANVAS_LANDSCAPE", "BUILDING_SCULPTURE" });
 		InventoryOrganization.AddTopLevelCategory("JOY_RESPONSES", Assets.GetSprite("icon_inventory_joyresponses"), new string[] { "JOY_BALLOON" });
@@ -98,7 +98,11 @@ public static class InventoryOrganization
 	{
 		InventoryOrganization.AddSubcategory("BUILDING_CEILING_LIGHT", Def.GetUISprite("CeilingLight", "ui", false).first, 100, new string[] { "CeilingLight_mining", "CeilingLight_flower", "CeilingLight_polka_lamp_shade", "CeilingLight_burt_shower", "CeilingLight_ada_flask_round", "CeilingLight_rubiks", "FloorLamp_leg", "FloorLamp_bristle_blossom" });
 		InventoryOrganization.AddSubcategory("BUILDINGS_BED_COT", Def.GetUISprite("Bed", "ui", false).first, 200, new string[] { "Bed_star_curtain", "Bed_canopy", "Bed_rowan_tropical", "Bed_ada_science_lab", "Bed_stringlights" });
-		InventoryOrganization.AddSubcategory("BUILDINGS_BED_LUXURY", Def.GetUISprite("LuxuryBed", "ui", false).first, 300, new string[] { "LuxuryBed_boat", "LuxuryBed_bouncy", "LuxuryBed_grandprix", "LuxuryBed_rocket", "LuxuryBed_puft", "LuxuryBed_hand", "LuxuryBed_rubiks" });
+		InventoryOrganization.AddSubcategory("BUILDINGS_BED_LUXURY", Def.GetUISprite("LuxuryBed", "ui", false).first, 300, new string[]
+		{
+			"LuxuryBed_boat", "LuxuryBed_bouncy", "LuxuryBed_grandprix", "LuxuryBed_rocket", "LuxuryBed_puft", "LuxuryBed_hand", "LuxuryBed_rubiks", "LuxuryBed_red_rose", "LuxuryBed_green_mush", "LuxuryBed_yellow_tartar",
+			"LuxuryBed_purple_brainfat"
+		});
 		InventoryOrganization.AddSubcategory("BUILDINGS_FLOWER_VASE", Def.GetUISprite("FlowerVase", "ui", false).first, 400, new string[]
 		{
 			"FlowerVase_retro", "FlowerVase_retro_red", "FlowerVase_retro_white", "FlowerVase_retro_green", "FlowerVase_retro_blue", "FlowerVaseWall_retro_green", "FlowerVaseWall_retro_yellow", "FlowerVaseWall_retro_red", "FlowerVaseWall_retro_blue", "FlowerVaseWall_retro_white",
@@ -115,22 +119,34 @@ public static class InventoryOrganization
 			"ExteriorWall_diagonal_red_deep_white", "ExteriorWall_diagonal_orange_satsuma_white", "ExteriorWall_diagonal_yellow_lemon_white", "ExteriorWall_diagonal_green_kelly_white", "ExteriorWall_diagonal_blue_cobalt_white", "ExteriorWall_diagonal_pink_flamingo_white", "ExteriorWall_diagonal_grey_charcoal_white", "ExteriorWall_circle_red_deep_white", "ExteriorWall_circle_orange_satsuma_white", "ExteriorWall_circle_yellow_lemon_white",
 			"ExteriorWall_circle_green_kelly_white", "ExteriorWall_circle_blue_cobalt_white", "ExteriorWall_circle_pink_flamingo_white", "ExteriorWall_circle_grey_charcoal_white", "ExteriorWall_stripes_blue", "ExteriorWall_stripes_diagonal_blue", "ExteriorWall_stripes_circle_blue", "ExteriorWall_squares_red_deep_white", "ExteriorWall_squares_orange_satsuma_white", "ExteriorWall_squares_yellow_lemon_white",
 			"ExteriorWall_squares_green_kelly_white", "ExteriorWall_squares_blue_cobalt_white", "ExteriorWall_squares_pink_flamingo_white", "ExteriorWall_squares_grey_charcoal_white", "ExteriorWall_plus_red_deep_white", "ExteriorWall_plus_orange_satsuma_white", "ExteriorWall_plus_yellow_lemon_white", "ExteriorWall_plus_green_kelly_white", "ExteriorWall_plus_blue_cobalt_white", "ExteriorWall_plus_pink_flamingo_white",
-			"ExteriorWall_plus_grey_charcoal_white", "ExteriorWall_stripes_rose", "ExteriorWall_stripes_diagonal_rose", "ExteriorWall_stripes_circle_rose", "ExteriorWall_stripes_mush", "ExteriorWall_stripes_diagonal_mush", "ExteriorWall_stripes_circle_mush"
+			"ExteriorWall_plus_grey_charcoal_white", "ExteriorWall_stripes_rose", "ExteriorWall_stripes_diagonal_rose", "ExteriorWall_stripes_circle_rose", "ExteriorWall_stripes_mush", "ExteriorWall_stripes_diagonal_mush", "ExteriorWall_stripes_circle_mush", "ExteriorWall_stripes_yellow_tartar", "ExteriorWall_stripes_diagonal_yellow_tartar", "ExteriorWall_stripes_circle_yellow_tartar",
+			"ExteriorWall_stripes_purple_brainfat", "ExteriorWall_stripes_diagonal_purple_brainfat", "ExteriorWall_stripes_circle_purple_brainfat"
 		});
 		InventoryOrganization.AddSubcategory("BUILDING_WALLPAPER_PRINTS", Assets.GetSprite("icon_inventory_patterned_wallpapers"), 700, new string[]
 		{
 			"ExteriorWall_balm_lily", "ExteriorWall_clouds", "ExteriorWall_coffee", "ExteriorWall_mosaic", "ExteriorWall_mushbar", "ExteriorWall_plaid", "ExteriorWall_rain", "ExteriorWall_rainbow", "ExteriorWall_snow", "ExteriorWall_sun",
 			"ExteriorWall_polka", "ExteriorWall_blueberries", "ExteriorWall_grapes", "ExteriorWall_lemon", "ExteriorWall_lime", "ExteriorWall_satsuma", "ExteriorWall_strawberry", "ExteriorWall_watermelon", "ExteriorWall_toiletpaper", "ExteriorWall_plunger",
-			"ExteriorWall_tropical", "ExteriorWall_kitchen_retro1"
+			"ExteriorWall_tropical", "ExteriorWall_kitchen_retro1", "ExteriorWall_floppy_azulene_vitro", "ExteriorWall_floppy_black_white", "ExteriorWall_floppy_peagreen_balmy", "ExteriorWall_floppy_satsuma_yellowcake", "ExteriorWall_floppy_magma_amino", "ExteriorWall_orange_juice", "ExteriorWall_paint_blots", "ExteriorWall_telescope",
+			"ExteriorWall_tictactoe_o", "ExteriorWall_tictactoe_x", "ExteriorWall_dice_1", "ExteriorWall_dice_2", "ExteriorWall_dice_3", "ExteriorWall_dice_4", "ExteriorWall_dice_5", "ExteriorWall_dice_6"
 		});
-		InventoryOrganization.AddSubcategory("BUILDINGS_RECREATION", Def.GetUISprite("WaterCooler", "ui", false).first, 700, new string[] { "WaterCooler_round_body", "ItemPedestal_hand", "MassageTable_shiatsu", "MassageTable_balloon", "WaterCooler_balloon", "CornerMoulding_shineornaments", "CrownMoulding_shineornaments" });
-		InventoryOrganization.AddSubcategory("BUILDINGS_STORAGE", Def.GetUISprite("RockCrusher", "ui", false).first, 800, new string[]
+		InventoryOrganization.AddSubcategory("BUILDINGS_RECREATION", Def.GetUISprite("WaterCooler", "ui", false).first, 700, new string[]
 		{
-			"StorageLocker_green_mush", "StorageLocker_red_rose", "StorageLocker_blue_babytears", "StorageLocker_purple_brainfat", "StorageLocker_yellow_tartar", "StorageLocker_polka_darknavynookgreen", "StorageLocker_polka_darkpurpleresin", "StorageLocker_stripes_red_white", "Refrigerator_stripes_red_white", "GasReservoir_lightgold",
-			"GasReservoir_peagreen", "GasReservoir_lightcobalt", "GasReservoir_polka_darkpurpleresin", "GasReservoir_polka_darknavynookgreen", "GasReservoir_blue_babytears", "GasReservoir_yellow_tartar", "GasReservoir_green_mush", "GasReservoir_red_rose", "GasReservoir_purple_brainfat"
+			"ItemPedestal_hand", "MassageTable_shiatsu", "MassageTable_balloon", "WaterCooler_round_body", "WaterCooler_balloon", "WaterCooler_yellow_tartar", "WaterCooler_red_rose", "WaterCooler_green_mush", "WaterCooler_purple_brainfat", "WaterCooler_blue_babytears",
+			"CornerMoulding_shineornaments", "CrownMoulding_shineornaments"
+		});
+		InventoryOrganization.AddSubcategory("BUILDINGS_STORAGE", Def.GetUISprite("StorageLocker", "ui", false).first, 800, new string[]
+		{
+			"StorageLocker_green_mush", "StorageLocker_red_rose", "StorageLocker_blue_babytears", "StorageLocker_purple_brainfat", "StorageLocker_yellow_tartar", "StorageLocker_polka_darknavynookgreen", "StorageLocker_polka_darkpurpleresin", "StorageLocker_stripes_red_white", "Refrigerator_stripes_red_white", "Refrigerator_blue_babytears",
+			"Refrigerator_green_mush", "Refrigerator_red_rose", "Refrigerator_yellow_tartar", "Refrigerator_purple_brainfat", "GasReservoir_lightgold", "GasReservoir_peagreen", "GasReservoir_lightcobalt", "GasReservoir_polka_darkpurpleresin", "GasReservoir_polka_darknavynookgreen", "GasReservoir_blue_babytears",
+			"GasReservoir_yellow_tartar", "GasReservoir_green_mush", "GasReservoir_red_rose", "GasReservoir_purple_brainfat"
 		});
 		InventoryOrganization.AddSubcategory("BUILDINGS_INDUSTRIAL", Def.GetUISprite("RockCrusher", "ui", false).first, 800, new string[] { "RockCrusher_hands", "RockCrusher_teeth", "RockCrusher_roundstamp", "RockCrusher_spikebeds", "RockCrusher_chomp", "RockCrusher_gears", "RockCrusher_balloon" });
-		InventoryOrganization.AddSubcategory("BUILDINGS_FOOD", Def.GetUISprite("EggCracker", "ui", false).first, 800, new string[] { "EggCracker_beaker", "EggCracker_flower", "EggCracker_hands" });
+		InventoryOrganization.AddSubcategory("BUILDINGS_FOOD", Def.GetUISprite("EggCracker", "ui", false).first, 800, new string[] { "EggCracker_beaker", "EggCracker_flower", "EggCracker_hands", "MicrobeMusher_purple_brainfat", "MicrobeMusher_yellow_tartar", "MicrobeMusher_red_rose", "MicrobeMusher_green_mush", "MicrobeMusher_blue_babytears" });
+		InventoryOrganization.AddSubcategory("BUILDINGS_WASHROOM", Def.GetUISprite("FlushToilet", "ui", false).first, 800, new string[]
+		{
+			"FlushToilet_polka_darkpurpleresin", "FlushToilet_polka_darknavynookgreen", "FlushToilet_purple_brainfat", "FlushToilet_yellow_tartar", "FlushToilet_red_rose", "FlushToilet_green_mush", "FlushToilet_blue_babytears", "WashSink_purple_brainfat", "WashSink_blue_babytears", "WashSink_green_mush",
+			"WashSink_yellow_tartar", "WashSink_red_rose"
+		});
 		InventoryOrganization.AddSubcategory("JOY_BALLOON", Db.Get().Permits.BalloonArtistFacades[0].GetPermitPresentationInfo().sprite, 100, new string[]
 		{
 			"BalloonRedFireEngineLongSparkles", "BalloonYellowLongSparkles", "BalloonBlueLongSparkles", "BalloonGreenLongSparkles", "BalloonPinkLongSparkles", "BalloonPurpleLongSparkles", "BalloonBabyPacuEgg", "BalloonBabyGlossyDreckoEgg", "BalloonBabyHatchEgg", "BalloonBabyPokeshellEgg",
@@ -150,7 +166,7 @@ public static class InventoryOrganization
 		InventoryOrganization.AddSubcategory("BUILDING_CANVAS_STANDARD", Def.GetUISprite("Canvas", "ui", false).first, 100, new string[]
 		{
 			"Canvas_Bad", "Canvas_Average", "Canvas_Good", "Canvas_Good2", "Canvas_Good3", "Canvas_Good4", "Canvas_Good5", "Canvas_Good6", "Canvas_Good7", "Canvas_Good8",
-			"Canvas_Good9", "Canvas_Good10", "Canvas_Good11", "Canvas_Good13", "Canvas_Good12", "Canvas_Good14", "Canvas_Good15"
+			"Canvas_Good9", "Canvas_Good10", "Canvas_Good11", "Canvas_Good13", "Canvas_Good12", "Canvas_Good14", "Canvas_Good15", "Canvas_Good16"
 		});
 		InventoryOrganization.AddSubcategory("BUILDING_CANVAS_PORTRAIT", Def.GetUISprite("CanvasTall", "ui", false).first, 200, new string[]
 		{
@@ -160,7 +176,7 @@ public static class InventoryOrganization
 		InventoryOrganization.AddSubcategory("BUILDING_CANVAS_LANDSCAPE", Def.GetUISprite("CanvasWide", "ui", false).first, 300, new string[]
 		{
 			"CanvasWide_Bad", "CanvasWide_Average", "CanvasWide_Good", "CanvasWide_Good2", "CanvasWide_Good3", "CanvasWide_Good4", "CanvasWide_Good5", "CanvasWide_Good6", "CanvasWide_Good7", "CanvasWide_Good8",
-			"CanvasWide_Good9", "CanvasWide_Good10", "CanvasWide_Good11"
+			"CanvasWide_Good9", "CanvasWide_Good10", "CanvasWide_Good11", "CanvasWide_Good13"
 		});
 		InventoryOrganization.AddSubcategory("BUILDING_SCULPTURE", Def.GetUISprite("Sculpture", "ui", false).first, 400, new string[]
 		{
@@ -171,68 +187,86 @@ public static class InventoryOrganization
 		});
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_BASIC", Assets.GetSprite("icon_inventory_basic_shirts"), 100, new string[] { "TopBasicBlack", "TopBasicWhite", "TopBasicRed", "TopBasicOrange", "TopBasicYellow", "TopBasicGreen", "TopBasicAqua", "TopBasicPurple", "TopBasicPinkOrchid" });
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_TSHIRT", Assets.GetSprite("icon_inventory_tees"), 300, new string[] { "TopRaglanDeepRed", "TopRaglanCobalt", "TopRaglanFlamingo", "TopRaglanKellyGreen", "TopRaglanCharcoal", "TopRaglanLemon", "TopRaglanSatsuma", "TopTShirtWhite", "TopTShirtMagenta" });
-		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_UNDERSHIRT", Assets.GetSprite("icon_inventory_undershirts"), 400, new string[] { "TopUndershirtExecutive", "TopUndershirtUnderling", "TopUndershirtGroupthink", "TopUndershirtStakeholder", "TopUndershirtAdmin", "TopUndershirtBuzzword", "TopUndershirtSynergy" });
+		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_UNDERSHIRT", Assets.GetSprite("icon_inventory_undershirts"), 400, new string[]
+		{
+			"TopUndershirtExecutive", "TopUndershirtUnderling", "TopUndershirtGroupthink", "TopUndershirtStakeholder", "TopUndershirtAdmin", "TopUndershirtBuzzword", "TopUndershirtSynergy", "TopGinchPinkSaltrock", "TopGinchPurpleDusky", "TopGinchBlueBasin",
+			"TopGinchTealBalmy", "TopGinchGreenLime", "TopGinchYellowYellowcake", "TopGinchOrangeAtomic", "TopGinchRedMagma", "TopGinchGreyGrey", "TopGinchGreyCharcoal"
+		});
+		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_FANCY", Assets.GetSprite("icon_inventory_specialty_tops"), 500, new string[] { "TopResearcher", "TopX1Pinchapeppernutbells", "TopXSporchid", "TopPompomShinebugsPinkPeppernut", "TopSnowflakeBlue", "TopWaistcoatPinstripeSlate", "TopWater", "TopFloralPink" });
 		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_JACKET", Assets.GetSprite("icon_inventory_jackets"), 500, new string[]
 		{
-			"TopJellypuffJacketBlueberry", "TopJellypuffJacketGrape", "TopJellypuffJacketLemon", "TopJellypuffJacketLime", "TopJellypuffJacketSatsuma", "TopJellypuffJacketStrawberry", "TopJellypuffJacketWatermelon", "TopAthlete", "TopCircuitGreen", "TopResearcher",
-			"TopDenimBlue", "TopRebelGi", "TopJacketSmokingBurgundy", "TopMechanic", "TopVelourBlack", "TopVelourBlue", "TopVelourPink", "TopWaistcoatPinstripeSlate", "TopWater", "TopTweedPinkOrchid",
-			"TopX1Pinchapeppernutbells", "TopXSporchid", "TopPompomShinebugsPinkPeppernut", "TopSnowflakeBlue"
+			"TopJellypuffJacketBlueberry", "TopJellypuffJacketGrape", "TopJellypuffJacketLemon", "TopJellypuffJacketLime", "TopJellypuffJacketSatsuma", "TopJellypuffJacketStrawberry", "TopJellypuffJacketWatermelon", "TopAthlete", "TopCircuitGreen", "TopDenimBlue",
+			"TopRebelGi", "TopJacketSmokingBurgundy", "TopMechanic", "TopVelourBlack", "TopVelourBlue", "TopVelourPink", "TopTweedPinkOrchid", "TopBuilder", "TopKnitPolkadotTurq", "TopFlashy"
 		});
-		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_DRESS", Assets.GetSprite("icon_inventory_dress_fancy"), 500, new string[] { "DressSleevelessBowBw", "BodysuitBallerinaPink" });
+		InventoryOrganization.AddSubcategory("CLOTHING_TOPS_DRESS", Assets.GetSprite("icon_inventory_dress_fancy"), 500, new string[] { "DressSleevelessBowBw", "BodysuitBallerinaPink", "PjCloversGlitchKelly", "PjHeartsChilliStrawberry" });
 		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_BASIC", Assets.GetSprite("icon_inventory_basic_pants"), 100, new string[]
 		{
 			"BottomBasicBlack", "BottomBasicWhite", "BottomBasicRed", "BottomBasicOrange", "BottomBasicYellow", "BottomBasicGreen", "BottomBasicAqua", "BottomBasicPurple", "BottomBasicPinkOrchid", "PantsBasicRedOrange",
 			"PantsBasicLightBrown", "PantsBasicOrangeSatsuma"
 		});
-		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_FANCY", Assets.GetSprite("icon_inventory_fancy_pants"), 200, new string[] { "PantsAthlete", "PantsCircuitGreen", "PantsJeans", "PantsRebelGi", "PantsResearch", "PantsPinstripeSlate", "PantsVelourBlack", "PantsVelourBlue", "PantsVelourPink" });
+		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_FANCY", Assets.GetSprite("icon_inventory_fancy_pants"), 200, new string[]
+		{
+			"PantsAthlete", "PantsCircuitGreen", "PantsJeans", "PantsRebelGi", "PantsResearch", "PantsPinstripeSlate", "PantsVelourBlack", "PantsVelourBlue", "PantsVelourPink", "PantsKnitPolkadotTurq",
+			"PantsGiBeltWhiteBlack", "PantsBeltKhakiTan"
+		});
 		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_SHORTS", Assets.GetSprite("icon_inventory_shorts"), 300, new string[] { "ShortsBasicDeepRed", "ShortsBasicSatsuma", "ShortsBasicYellowcake", "ShortsBasicKellyGreen", "ShortsBasicBlueCobalt", "ShortsBasicPinkFlamingo", "ShortsBasicCharcoal" });
 		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_SKIRTS", Assets.GetSprite("icon_inventory_skirts"), 300, new string[]
 		{
 			"SkirtBasicBlueMiddle", "SkirtBasicPurple", "SkirtBasicGreen", "SkirtBasicOrange", "SkirtBasicPinkOrchid", "SkirtBasicRed", "SkirtBasicYellow", "SkirtBasicPolkadot", "SkirtBasicWatermelon", "SkirtDenimBlue",
 			"SkirtLeopardPrintBluePink", "SkirtSparkleBlue", "SkirtBallerinaPink", "SkirtTweedPinkOrchid"
 		});
-		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_UNDERWEAR", Assets.GetSprite("icon_inventory_underwear"), 300, new string[] { "BottomBriefsExecutive", "BottomBriefsUnderling", "BottomBriefsGroupthink", "BottomBriefsStakeholder", "BottomBriefsAdmin", "BottomBriefsBuzzword", "BottomBriefsSynergy" });
+		InventoryOrganization.AddSubcategory("CLOTHING_BOTTOMS_UNDERWEAR", Assets.GetSprite("icon_inventory_underwear"), 300, new string[]
+		{
+			"BottomBriefsExecutive", "BottomBriefsUnderling", "BottomBriefsGroupthink", "BottomBriefsStakeholder", "BottomBriefsAdmin", "BottomBriefsBuzzword", "BottomBriefsSynergy", "BottomGinchPinkGluon", "BottomGinchPurpleCortex", "BottomGinchBlueFrosty",
+			"BottomGinchTealLocus", "BottomGinchGreenGoop", "BottomGinchYellowBile", "BottomGinchOrangeNybble", "BottomGinchRedIronbow", "BottomGinchGreyPhlegm", "BottomGinchGreyObelus"
+		});
 		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_BASIC", Assets.GetSprite("icon_inventory_basic_gloves"), 100, new string[]
 		{
-			"GlovesBasicBlack", "GlovesBasicWhite", "GlovesBasicRed", "GlovesBasicOrange", "GlovesBasicYellow", "GlovesBasicGreen", "GlovesBasicAqua", "GlovesBasicPurple", "GlovesBasicPinkOrchid", "GlovesBasicBlueGrey",
-			"GlovesBasicBrownKhaki", "GlovesBasicGrey", "GlovesBasicPinksalmon", "GlovesBasicTan"
+			"GlovesBasicBlack", "GlovesBasicWhite", "GlovesBasicRed", "GlovesBasicOrange", "GlovesBasicYellow", "GlovesBasicGreen", "GlovesBasicAqua", "GlovesBasicPurple", "GlovesBasicPinkOrchid", "GlovesBasicSlate",
+			"GlovesBasicBlueGrey", "GlovesBasicBrownKhaki", "GlovesBasicGrey", "GlovesBasicPinksalmon", "GlovesBasicTan"
 		});
-		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_SHORT", Assets.GetSprite("icon_inventory_short_gloves"), 200, new string[] { "GlovesCufflessBlueberry", "GlovesCufflessGrape", "GlovesCufflessLemon", "GlovesCufflessLime", "GlovesCufflessSatsuma", "GlovesCufflessStrawberry", "GlovesCufflessWatermelon", "GlovesCufflessBlack" });
-		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_PRINTS", Assets.GetSprite("icon_inventory_specialty_gloves"), 300, new string[]
+		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_FORMAL", Assets.GetSprite("icon_inventory_fancy_gloves"), 200, new string[]
+		{
+			"GlovesFormalWhite", "GlovesLongWhite", "Gloves2ToneCreamCharcoal", "GlovesSparkleWhite", "GlovesGinchPinkSaltrock", "GlovesGinchPurpleDusky", "GlovesGinchBlueBasin", "GlovesGinchTealBalmy", "GlovesGinchGreenLime", "GlovesGinchYellowYellowcake",
+			"GlovesGinchOrangeAtomic", "GlovesGinchRedMagma", "GlovesGinchGreyGrey", "GlovesGinchGreyCharcoal"
+		});
+		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_SHORT", Assets.GetSprite("icon_inventory_short_gloves"), 300, new string[] { "GlovesCufflessBlueberry", "GlovesCufflessGrape", "GlovesCufflessLemon", "GlovesCufflessLime", "GlovesCufflessSatsuma", "GlovesCufflessStrawberry", "GlovesCufflessWatermelon", "GlovesCufflessBlack" });
+		InventoryOrganization.AddSubcategory("CLOTHING_GLOVES_PRINTS", Assets.GetSprite("icon_inventory_specialty_gloves"), 400, new string[]
 		{
 			"GlovesAthlete", "GlovesCircuitGreen", "GlovesAthleticRedDeep", "GlovesAthleticOrangeSatsuma", "GlovesAthleticYellowLemon", "GlovesAthleticGreenKelly", "GlovesAthleticBlueCobalt", "GlovesAthleticPinkFlamingo", "GlovesAthleticGreyCharcoal", "GlovesDenimBlue",
-			"GlovesBallerinaPink", "GlovesFormalWhite", "GlovesLongWhite", "Gloves2ToneCreamCharcoal"
+			"GlovesBallerinaPink", "GlovesKnitGold", "GlovesKnitMagenta"
 		});
 		InventoryOrganization.AddSubcategory("CLOTHING_SHOES_BASIC", Assets.GetSprite("icon_inventory_basic_shoes"), 100, new string[]
 		{
 			"ShoesBasicBlack", "ShoesBasicWhite", "ShoesBasicRed", "ShoesBasicOrange", "ShoesBasicYellow", "ShoesBasicGreen", "ShoesBasicAqua", "ShoesBasicPurple", "ShoesBasicPinkOrchid", "ShoesBasicBlueGrey",
 			"ShoesBasicTan", "ShoesBasicGray", "ShoesDenimBlue"
 		});
-		InventoryOrganization.AddSubcategory("CLOTHING_SHOES_FANCY", Assets.GetSprite("icon_inventory_fancy_shoes"), 100, new string[] { "ShoesBallerinaPink", "ShoesMaryjaneSocksBw", "ShoesClassicFlatsCreamCharcoal", "ShoesVelourBlue", "ShoesVelourPink", "ShoesVelourBlack" });
+		InventoryOrganization.AddSubcategory("CLOTHING_SHOES_FANCY", Assets.GetSprite("icon_inventory_fancy_shoes"), 200, new string[] { "ShoesBallerinaPink", "ShoesMaryjaneSocksBw", "ShoesClassicFlatsCreamCharcoal", "ShoesVelourBlue", "ShoesVelourPink", "ShoesVelourBlack", "ShoesFlashy" });
 		InventoryOrganization.AddSubcategory("CLOTHING_SHOE_SOCKS", Assets.GetSprite("icon_inventory_socks"), 500, new string[]
 		{
 			"SocksAthleticDeepRed", "SocksAthleticOrangeSatsuma", "SocksAthleticYellowLemon", "SocksAthleticGreenKelly", "SocksAthleticBlueCobalt", "SocksAthleticPinkFlamingo", "SocksAthleticGreyCharcoal", "SocksLegwarmersBlueberry", "SocksLegwarmersGrape", "SocksLegwarmersLemon",
-			"SocksLegwarmersLime", "SocksLegwarmersSatsuma", "SocksLegwarmersStrawberry", "SocksLegwarmersWatermelon"
+			"SocksLegwarmersLime", "SocksLegwarmersSatsuma", "SocksLegwarmersStrawberry", "SocksLegwarmersWatermelon", "SocksGinchPinkSaltrock", "SocksGinchPurpleDusky", "SocksGinchBlueBasin", "SocksGinchTealBalmy", "SocksGinchGreenLime", "SocksGinchYellowYellowcake",
+			"SocksGinchOrangeAtomic", "SocksGinchRedMagma", "SocksGinchGreyGrey", "SocksGinchGreyCharcoal"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_BODIES_BASIC", Assets.GetSprite("icon_inventory_atmosuit_body"), 100, new string[]
 		{
 			"AtmoSuitBasicYellow", "AtmoSuitSparkleRed", "AtmoSuitSparkleGreen", "AtmoSuitSparkleBlue", "AtmoSuitSparkleLavender", "AtmoSuitPuft", "AtmoSuitConfetti", "AtmoSuitCrispEggplant", "AtmoSuitBasicNeonPink", "AtmoSuitMultiRedBlack",
-			"AtmoSuitRocketmelon"
+			"AtmoSuitRocketmelon", "AtmoSuitMultiBlueGreyBlack", "AtmoSuitMultiBlueYellowRed"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_HELMETS_BASIC", Assets.GetSprite("icon_inventory_atmosuit_helmet"), 300, new string[]
 		{
 			"AtmoHelmetLimone", "AtmoHelmetSparkleRed", "AtmoHelmetSparkleGreen", "AtmoHelmetSparkleBlue", "AtmoHelmetSparklePurple", "AtmoHelmetPuft", "AtmoHelmetConfetti", "AtmoHelmetEggplant", "AtmoHelmetCummerbundRed", "AtmoHelmetWorkoutLavender",
-			"AtmoHelmetRocketmelon"
+			"AtmoHelmetRocketmelon", "AtmoHelmetMondrianBlueRedYellow", "AtmoHelmetOverallsRed"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_GLOVES_BASIC", Assets.GetSprite("icon_inventory_atmosuit_gloves"), 500, new string[]
 		{
 			"AtmoGlovesLime", "AtmoGlovesSparkleRed", "AtmoGlovesSparkleGreen", "AtmoGlovesSparkleBlue", "AtmoGlovesSparkleLavender", "AtmoGlovesPuft", "AtmoGlovesGold", "AtmoGlovesEggplant", "AtmoGlovesWhite", "AtmoGlovesStripesLavender",
-			"AtmoGlovesRocketmelon"
+			"AtmoGlovesRocketmelon", "AtmoGlovesBrown"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_BELTS_BASIC", Assets.GetSprite("icon_inventory_atmosuit_belt"), 700, new string[]
 		{
 			"AtmoBeltBasicLime", "AtmoBeltSparkleRed", "AtmoBeltSparkleGreen", "AtmoBeltSparkleBlue", "AtmoBeltSparkleLavender", "AtmoBeltPuft", "AtmoBeltBasicGold", "AtmoBeltEggplant", "AtmoBeltBasicGrey", "AtmoBeltBasicNeonPink",
-			"AtmoBeltRocketmelon"
+			"AtmoBeltRocketmelon", "AtmoBeltTwoToneBrown"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_SHOES_BASIC", Assets.GetSprite("icon_inventory_atmosuit_boots"), 900, new string[] { "AtmoShoesBasicYellow", "AtmoShoesSparkleBlack", "AtmoShoesPuft", "AtmoShoesStealth", "AtmoShoesEggplant", "AtmoShoesBasicLavender", "AtmoBootsRocketmelon" });
 	}
@@ -332,6 +366,8 @@ public static class InventoryOrganization
 
 		public const string CLOTHING_TOPS_TSHIRT = "CLOTHING_TOPS_TSHIRT";
 
+		public const string CLOTHING_TOPS_FANCY = "CLOTHING_TOPS_FANCY";
+
 		public const string CLOTHING_TOPS_JACKET = "CLOTHING_TOPS_JACKET";
 
 		public const string CLOTHING_TOPS_UNDERSHIRT = "CLOTHING_TOPS_UNDERSHIRT";
@@ -353,6 +389,8 @@ public static class InventoryOrganization
 		public const string CLOTHING_GLOVES_PRINTS = "CLOTHING_GLOVES_PRINTS";
 
 		public const string CLOTHING_GLOVES_SHORT = "CLOTHING_GLOVES_SHORT";
+
+		public const string CLOTHING_GLOVES_FORMAL = "CLOTHING_GLOVES_FORMAL";
 
 		public const string CLOTHING_SHOES_BASIC = "CLOTHING_SHOES_BASIC";
 
@@ -391,6 +429,8 @@ public static class InventoryOrganization
 		public const string BUILDINGS_INDUSTRIAL = "BUILDINGS_INDUSTRIAL";
 
 		public const string BUILDINGS_FOOD = "BUILDINGS_FOOD";
+
+		public const string BUILDINGS_WASHROOM = "BUILDINGS_WASHROOM";
 
 		public const string BUILDINGS_RECREATION = "BUILDINGS_RECREATION";
 

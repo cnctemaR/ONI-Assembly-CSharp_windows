@@ -435,8 +435,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 		public void SetupFoodSymbol()
 		{
-			GameObject gameObject = new GameObject();
-			gameObject.name = "foodSymbol";
+			GameObject gameObject = Util.NewGameObject(base.gameObject, "foodSymbol");
 			gameObject.SetActive(false);
 			bool flag;
 			Vector3 vector = this.kbac.GetSymbolTransform(SpiceGrinder.StatesInstance.HASH_FOOD, out flag).GetColumn(3);

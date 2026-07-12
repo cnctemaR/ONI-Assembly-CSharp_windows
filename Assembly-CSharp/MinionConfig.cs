@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class MinionConfig : IEntityConfig
@@ -249,6 +250,13 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<Accessorizer>();
 		gameObject.AddOrGet<WearableAccessorizer>();
 		gameObject.AddOrGet<Schedulable>();
+		EntityLuminescence.Def def = gameObject.AddOrGetDef<EntityLuminescence.Def>();
+		def.lightColor = Color.green;
+		def.lightRange = 2f;
+		def.lightAngle = 0f;
+		def.lightDirection = LIGHT2D.DEFAULT_DIRECTION;
+		def.lightOffset = new Vector2(0.05f, 0.5f);
+		def.lightShape = global::LightShape.Circle;
 		gameObject.AddOrGet<LoopingSounds>().updatePosition = true;
 		gameObject.AddOrGet<AnimEventHandler>();
 		gameObject.AddOrGet<FactionAlignment>().Alignment = FactionManager.FactionID.Duplicant;
@@ -522,6 +530,7 @@ public class MinionConfig : IEntityConfig
 		modifiers.initialAttributes.Add(Db.Get().Attributes.RadiationResistance.Id);
 		modifiers.initialAttributes.Add(Db.Get().Attributes.RadiationRecovery.Id);
 		modifiers.initialAttributes.Add(Db.Get().Attributes.TransitTubeTravelSpeed.Id);
+		modifiers.initialAttributes.Add(Db.Get().Attributes.Luminescence.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Stamina.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Calories.Id);

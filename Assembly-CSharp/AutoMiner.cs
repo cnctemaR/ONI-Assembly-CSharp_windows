@@ -240,7 +240,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		if (flag)
 		{
 			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
-			flag = component != null && component.IsOpen();
+			flag = component != null && component.IsOpen() && !component.IsPendingClose();
 		}
 		return Grid.Solid[cell] && (!Grid.Foundation[cell] || flag) && Grid.Element[cell].hardness < 150;
 	}
@@ -251,7 +251,7 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		if (flag)
 		{
 			Door component = Grid.ObjectLayers[9][cell].GetComponent<Door>();
-			flag = component != null && component.IsOpen();
+			flag = component != null && component.IsOpen() && !component.IsPendingClose();
 		}
 		return (Grid.Foundation[cell] && Grid.Solid[cell] && !flag) || Grid.Element[cell].hardness >= 150;
 	}

@@ -12,12 +12,12 @@ namespace Database
 
 		public override string GetProgress(bool complete)
 		{
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.RADBOLT_TRAVEL, SaveGame.Instance.GetComponent<ColonyAchievementTracker>().radBoltTravelDistance, this.travelDistance);
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.RADBOLT_TRAVEL, SaveGame.Instance.ColonyAchievementTracker.radBoltTravelDistance, this.travelDistance);
 		}
 
 		public override bool Success()
 		{
-			return SaveGame.Instance.GetComponent<ColonyAchievementTracker>().radBoltTravelDistance > (float)this.travelDistance;
+			return SaveGame.Instance.ColonyAchievementTracker.radBoltTravelDistance > (float)this.travelDistance;
 		}
 
 		private int travelDistance;

@@ -18,7 +18,7 @@ public class GraveConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
@@ -47,6 +47,8 @@ public class GraveConfig : IBuildingConfig
 	}
 
 	public const string ID = "Grave";
+
+	public const string AnimFile = "gravestone_kanim";
 
 	private static KAnimFile[] STORAGE_OVERRIDE_ANIM_FILES;
 

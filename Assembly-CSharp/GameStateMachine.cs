@@ -1502,6 +1502,30 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State PreBrainUpdate(Action<StateMachineInstanceType> callback)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			int data_idx = this.CreateDataTableEntry();
+			this.Enter("EnablePreBrainUpdate", delegate(StateMachineInstanceType smi)
+			{
+				global::System.Action action = delegate
+				{
+					callback(smi);
+				};
+				smi.dataTable[data_idx] = action;
+				Brain brain = state_target.Get<Brain>(smi);
+				DebugUtil.AssertArgs(brain != null, new object[] { "PreBrainUpdate cannot find a brain" });
+				brain.onPreUpdate += action;
+			});
+			this.Exit("DisablePreBrainUpdate", delegate(StateMachineInstanceType smi)
+			{
+				global::System.Action action2 = (global::System.Action)smi.dataTable[data_idx];
+				state_target.Get<Brain>(smi).onPreUpdate -= action2;
+				smi.dataTable[data_idx] = null;
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State TriggerOnEnter(GameHashes evt, Func<StateMachineInstanceType, object> callback = null)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();

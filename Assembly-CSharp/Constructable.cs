@@ -464,7 +464,7 @@ public class Constructable : Workable, ISaveLoadable
 			this.building.RunOnArea(delegate(int offset_cell)
 			{
 				Diggable diggable = Diggable.GetDiggable(offset_cell);
-				if (diggable != null)
+				if (diggable != null && diggable.isActiveAndEnabled)
 				{
 					int num = diggable_count + 1;
 					diggable_count = num;
@@ -514,19 +514,18 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					digs_complete = false;
 					Diggable diggable = Diggable.GetDiggable(offset_cell);
-					if (diggable == null)
+					if (diggable != null && !diggable.isActiveAndEnabled)
+					{
+						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
+					}
+					if (diggable == null || !diggable.isActiveAndEnabled)
 					{
 						diggable = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), Grid.SceneLayer.Move, null, 0).GetComponent<Diggable>();
 						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
-						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 						Grid.Objects[offset_cell, 7] = diggable.gameObject;
 					}
-					else
-					{
-						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
-						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
-					}
+					diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
 					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
 					RenderUtil.EnableRenderer(diggable.transform, false);

@@ -40,7 +40,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			{
 				foreach (Breakable breakable2 in Components.Breakables.Items)
 				{
-					if (!(breakable2 == null) && !breakable2.isBroken())
+					if (!(breakable2 == null) && !breakable2.IsInvincible && !breakable2.isBroken())
 					{
 						int navigationCost = navigator.GetNavigationCost(breakable2);
 						if (navigationCost != -1 && navigationCost < num)

@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
@@ -10,7 +11,10 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.no_operational;
 		this.root.Update(new Action<MorbRoverMaker.Instance, float>(MorbRoverMaker.GermsRequiredFeedbackUpdate), UpdateRate.SIM_1000ms, false);
-		this.no_operational.TagTransition(GameTags.Operational, this.operational, false);
+		this.no_operational.Enter(delegate(MorbRoverMaker.Instance smi)
+		{
+			MorbRoverMaker.DisableManualDelivery(smi, "Disable manual delivery while no operational. in case players disabled the machine on purpose for this reason");
+		}).TagTransition(GameTags.Operational, this.operational, false);
 		this.operational.TagTransition(GameTags.Operational, this.no_operational, true).DefaultState(this.operational.covered);
 		this.operational.covered.ToggleStatusItem(Db.Get().BuildingStatusItems.MorbRoverMakerDusty, null).ParamTransition<bool>(this.WasUncoverByDuplicant, this.operational.idle, GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.IsTrue).Enter(delegate(MorbRoverMaker.Instance smi)
 		{
@@ -30,9 +34,11 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 			.PlayAnim("idle")
 			.ToggleStatusItem(Db.Get().BuildingStatusItems.MorbRoverMakerGermCollectionProgress, null);
 		this.operational.crafting.DefaultState(this.operational.crafting.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.MorbRoverMakerGermCollectionProgress, null).ToggleStatusItem(Db.Get().BuildingStatusItems.MorbRoverMakerCraftingBody, null);
-		this.operational.crafting.pre.PlayAnim("crafting_pre").OnAnimQueueComplete(this.operational.crafting.loop);
-		this.operational.crafting.loop.Update(new Action<MorbRoverMaker.Instance, float>(MorbRoverMaker.CraftingUpdate), UpdateRate.SIM_200ms, false).PlayAnim("crafting_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.CraftProgress, this.operational.crafting.pst, GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.IsOne);
-		this.operational.crafting.pst.PlayAnim("crafting_pst").OnAnimQueueComplete(this.operational.waitingForMorb);
+		this.operational.crafting.conflict.Enter(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State.Callback(MorbRoverMaker.ResetRoverBodyCraftingProgress)).GoTo(this.operational.idle);
+		this.operational.crafting.pre.EventTransition(GameHashes.OnStorageChange, this.operational.crafting.conflict, GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.Not(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.Transition.ConditionCallback(MorbRoverMaker.ShouldBeCrafting))).PlayAnim("crafting_pre").OnAnimQueueComplete(this.operational.crafting.loop);
+		this.operational.crafting.loop.EventTransition(GameHashes.OnStorageChange, this.operational.crafting.conflict, GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.Not(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.Transition.ConditionCallback(MorbRoverMaker.ShouldBeCrafting))).Update(new Action<MorbRoverMaker.Instance, float>(MorbRoverMaker.CraftingUpdate), UpdateRate.SIM_200ms, false).PlayAnim("crafting_loop", KAnim.PlayMode.Loop)
+			.ParamTransition<float>(this.CraftProgress, this.operational.crafting.pst, GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.IsOne);
+		this.operational.crafting.pst.Enter(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State.Callback(MorbRoverMaker.ConsumeRoverBodyCraftingMaterials)).PlayAnim("crafting_pst").OnAnimQueueComplete(this.operational.waitingForMorb);
 		this.operational.waitingForMorb.PlayAnim("crafting_complete").ParamTransition<long>(this.Germs, this.operational.doctor, new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.Parameter<long>.Callback(MorbRoverMaker.HasEnoughGerms)).ToggleStatusItem(Db.Get().BuildingStatusItems.MorbRoverMakerGermCollectionProgress, null);
 		this.operational.doctor.Enter(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State.Callback(MorbRoverMaker.StartWorkChore_ReleaseRover)).Exit(new StateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State.Callback(MorbRoverMaker.CancelWorkChore_ReleaseRover)).WorkableCompleteTransition((MorbRoverMaker.Instance smi) => smi.GetWorkable_ReleaseRover(), this.operational.finish)
 			.DefaultState(this.operational.doctor.needed);
@@ -94,6 +100,16 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 	public static void DisableManualDelivery(MorbRoverMaker.Instance smi, string reason)
 	{
 		smi.DisableManualDelivery(reason);
+	}
+
+	public static void ConsumeRoverBodyCraftingMaterials(MorbRoverMaker.Instance smi)
+	{
+		smi.ConsumeRoverBodyCraftingMaterials();
+	}
+
+	public static void ResetRoverBodyCraftingProgress(MorbRoverMaker.Instance smi)
+	{
+		smi.SetRoverDevelopmentProgress(0f);
 	}
 
 	public static void CraftingUpdate(MorbRoverMaker.Instance smi, float dt)
@@ -212,6 +228,8 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 
 	public class CraftingStates : GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State
 	{
+		public GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State conflict;
+
 		public GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State pre;
 
 		public GameStateMachine<MorbRoverMaker, MorbRoverMaker.Instance, IStateMachineTarget, MorbRoverMaker.Def>.State loop;
@@ -422,19 +440,27 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 			}
 		}
 
+		public void ConsumeRoverBodyCraftingMaterials()
+		{
+			float num = 0f;
+			this.storage.ConsumeAndGetDisease(base.def.ROVER_MATERIAL.CreateTag(), base.def.METAL_PER_ROVER, out num, out this.lastastMaterialsConsumedDiseases, out this.lastastMaterialsConsumedTemp);
+		}
+
 		public void SpawnRover()
 		{
-			if (this.HasMaterialsForRover)
+			if (this.RoverDevelopment_Progress == 1f)
 			{
-				float num = 0f;
-				float num2 = 0f;
-				SimUtil.DiseaseInfo diseaseInfo;
-				this.storage.ConsumeAndGetDisease(base.def.ROVER_MATERIAL.CreateTag(), base.def.METAL_PER_ROVER, out num2, out diseaseInfo, out num);
 				this.RemoveGerms(base.def.GERMS_PER_ROVER);
 				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(base.def.ROVER_PREFAB_ID), base.gameObject.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0);
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				component.AddDisease(diseaseInfo.idx, diseaseInfo.count, "From the materials provided for its creation");
-				component.SetMassTemperature(component.Mass, num);
+				if (this.lastastMaterialsConsumedDiseases.idx != 255)
+				{
+					component.AddDisease(this.lastastMaterialsConsumedDiseases.idx, this.lastastMaterialsConsumedDiseases.count, "From the materials provided for its creation");
+				}
+				if (this.lastastMaterialsConsumedTemp > 0f)
+				{
+					component.SetMassTemperature(component.Mass, this.lastastMaterialsConsumedTemp);
+				}
 				gameObject.SetActive(true);
 				this.SetRoverDevelopmentProgress(0f);
 				Action<GameObject> onRoverSpawned = this.OnRoverSpawned;
@@ -495,7 +521,7 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 		{
 			get
 			{
-				return base.sm.UncoverOrderRequested.Get(base.smi) ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.CANCEL_REVEAL_BTN : CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.REVEAL_BTN;
+				return this.HasBeenRevealed ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.DROP_INVENTORY : (base.sm.UncoverOrderRequested.Get(base.smi) ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.CANCEL_REVEAL_BTN : CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.REVEAL_BTN);
 			}
 		}
 
@@ -503,18 +529,18 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 		{
 			get
 			{
-				return base.sm.UncoverOrderRequested.Get(base.smi) ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.CANCEL_REVEAL_BTN_TOOLTIP : CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.REVEAL_BTN_TOOLTIP;
+				return this.HasBeenRevealed ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.DROP_INVENTORY_TOOLTIP : (base.sm.UncoverOrderRequested.Get(base.smi) ? CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.CANCEL_REVEAL_BTN_TOOLTIP : CODEX.STORY_TRAITS.MORB_ROVER_MAKER.UI_SIDESCREENS.REVEAL_BTN_TOOLTIP);
 			}
 		}
 
 		public bool SidescreenEnabled()
 		{
-			return !base.smi.sm.WasUncoverByDuplicant.Get(base.smi);
+			return true;
 		}
 
 		public bool SidescreenButtonInteractable()
 		{
-			return !base.smi.sm.WasUncoverByDuplicant.Get(base.smi);
+			return true;
 		}
 
 		public int HorizontalGroupID()
@@ -534,6 +560,11 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 
 		public void OnSidescreenButtonPressed()
 		{
+			if (this.HasBeenRevealed)
+			{
+				this.storage.DropAll(false, false, default(Vector3), true, null);
+				return;
+			}
 			bool flag = base.smi.sm.UncoverOrderRequested.Get(base.smi);
 			base.smi.sm.UncoverOrderRequested.Set(!flag, base.smi, false);
 		}
@@ -577,6 +608,12 @@ public class MorbRoverMaker : GameStateMachine<MorbRoverMaker, MorbRoverMaker.In
 		private Chore workChore_revealMachine;
 
 		private Chore workChore_releaseRover;
+
+		[Serialize]
+		private float lastastMaterialsConsumedTemp = -1f;
+
+		[Serialize]
+		private SimUtil.DiseaseInfo lastastMaterialsConsumedDiseases = SimUtil.DiseaseInfo.Invalid;
 
 		public float lastTimeGermsAdded = -1f;
 

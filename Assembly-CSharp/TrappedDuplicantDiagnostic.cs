@@ -70,6 +70,7 @@ public class TrappedDuplicantDiagnostic : ColonyDiagnostic
 
 	private bool CheckMinionBasicallyIdle(MinionIdentity minion)
 	{
-		return minion.HasTag(GameTags.Idle) || minion.HasTag(GameTags.RecoveringBreath) || minion.HasTag(GameTags.MakingMess);
+		KPrefabID component = minion.GetComponent<KPrefabID>();
+		return component.HasTag(GameTags.Idle) || component.HasTag(GameTags.RecoveringBreath) || component.HasTag(GameTags.MakingMess);
 	}
 }

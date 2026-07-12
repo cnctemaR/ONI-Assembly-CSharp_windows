@@ -76,6 +76,16 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		base.Begin(context);
 	}
 
+	public override bool IsValid()
+	{
+		WorkableType workableType = base.target as WorkableType;
+		if (workableType != null)
+		{
+			return base.provider != null && Grid.WorldIdx[workableType.GetCell()] != byte.MaxValue;
+		}
+		return base.IsValid();
+	}
+
 	public bool IsOperationalValid()
 	{
 		if (this.onlyWhenOperational)

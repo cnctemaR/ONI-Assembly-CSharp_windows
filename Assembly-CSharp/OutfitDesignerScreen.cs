@@ -176,9 +176,8 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				OutfitDesignerScreenConfig outfitDesignerScreenConfig3 = this.Config;
 				if (outfitDesignerScreenConfig3.minionPersonality.HasValue)
 				{
-					ClothingOutfits clothingOutfits = Db.Get().Permits.ClothingOutfits;
 					outfitDesignerScreenConfig3 = this.Config;
-					clothingOutfits.SetDuplicantPersonalityOutfit(outfitDesignerScreenConfig3.minionPersonality.Value.Id, this.outfitState.destinationTarget.OutfitId, this.outfitState.destinationTarget.OutfitType);
+					outfitDesignerScreenConfig3.minionPersonality.Value.SetSelectedTemplateOutfitId(this.outfitState.destinationTarget.OutfitType, this.outfitState.destinationTarget.OutfitId);
 				}
 				if (this.Config.onWriteToOutfitTargetFn != null)
 				{
@@ -508,7 +507,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 					clothingOutfitTarget.WriteItems(outfitState.outfitType, outfitState.GetItems());
 					if (minionPersonality.HasValue)
 					{
-						Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(minionPersonality.Value.Id, clothingOutfitTarget.OutfitId, clothingOutfitTarget.OutfitType);
+						minionPersonality.Value.SetSelectedTemplateOutfitId(clothingOutfitTarget.OutfitType, clothingOutfitTarget.OutfitId);
 					}
 					if (onWriteToOutfitTargetFn != null)
 					{

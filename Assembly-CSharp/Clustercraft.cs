@@ -751,6 +751,10 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		{
 			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.DestinationOutOfRange, this.m_clusterTraveler);
 		}
+		else if (orbitAsteroid != null && this.Destination == orbitAsteroid.Location)
+		{
+			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.WaitingToLand, orbitAsteroid);
+		}
 		else if (this.IsFlightInProgress() || this.Status == Clustercraft.CraftStatus.Launching)
 		{
 			this.mainStatusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
@@ -887,6 +891,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 	public float GetRange()
 	{
 		return this.ModuleInterface.Range;
+	}
+
+	public int GetRangeInTiles()
+	{
+		return this.ModuleInterface.RangeInTiles;
 	}
 
 	[Serialize]

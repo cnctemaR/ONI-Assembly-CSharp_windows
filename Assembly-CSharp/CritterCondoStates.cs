@@ -25,7 +25,7 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 		}).OnAnimQueueComplete(this.interact.loop);
 		this.interact.loop.PlayAnim("cc_working").Enter(delegate(CritterCondoStates.Instance smi)
 		{
-			CritterCondoStates.PlayCondoBuildingAnim(smi, "cc_working");
+			CritterCondoStates.PlayCondoBuildingAnim(smi, smi.def.working_anim);
 		}).OnAnimQueueComplete(this.interact.pst);
 		this.interact.pst.PlayAnim("cc_working_pst").Enter(delegate(CritterCondoStates.Instance smi)
 		{
@@ -86,7 +86,7 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 
 	private static void ApplyEffects(CritterCondoStates.Instance smi)
 	{
-		smi.Get<Effects>().Add("InteractedWithCondo", true);
+		smi.Get<Effects>().Add(CritterCondoStates.GetTargetCondo(smi).def.effectId, true);
 	}
 
 	private static void PlayCondoBuildingAnim(CritterCondoStates.Instance smi, string anim_name)
@@ -108,6 +108,8 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 	public class Def : StateMachine.BaseDef
 	{
 		public bool entersBuilding = true;
+
+		public string working_anim = "cc_working";
 	}
 
 	public new class Instance : GameStateMachine<CritterCondoStates, CritterCondoStates.Instance, IStateMachineTarget, CritterCondoStates.Def>.GameInstance

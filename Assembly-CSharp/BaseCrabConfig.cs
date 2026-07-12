@@ -31,6 +31,7 @@ public static class BaseCrabConfig
 		ThreatMonitor.Def def = gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		def.fleethresholdState = Health.HealthState.Dead;
 		def.friendlyCreatureTags = new Tag[] { GameTags.Creatures.CrabFriend };
+		def.maxSearchDistance = 12;
 		gameObject.AddWeapon(2f, 3f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("FloorSoundEvent", "Hatch_footstep", NOISE_POLLUTION.CREATURES.TIER1);
@@ -74,7 +75,9 @@ public static class BaseCrabConfig
 			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.CrabSpecies, symbolOverridePrefix);
-		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().useunderWaterCondos = true;
+		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def2.requireCavity = false;
+		def2.condoPrefabTag = "UnderwaterCritterCondo";
 		gameObject.AddTag(GameTags.Amphibious);
 		return gameObject;
 	}

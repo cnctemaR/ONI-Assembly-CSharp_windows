@@ -377,7 +377,7 @@ namespace STRINGS
 
 			public static LocString SANDBOXSTRESSTOOL = "Sandbox Happy Tool";
 
-			public static LocString SANDBOXSTORYTRAITTOOL = "Sandbox Story Trait Tool";
+			public static LocString SANDBOXSTORYTRAITTOOL = "Sandbox Spawn Story Trait";
 		}
 
 		public class SWITCHACTIVEWORLD

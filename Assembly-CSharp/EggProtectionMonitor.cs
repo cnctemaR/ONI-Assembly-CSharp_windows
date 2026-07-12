@@ -8,10 +8,6 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.find_egg;
-		this.root.EventHandler(GameHashes.ObjectDestroyed, delegate(EggProtectionMonitor.Instance smi, object d)
-		{
-			smi.Cleanup(d);
-		});
 		this.find_egg.BatchUpdate(new UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.BatchUpdateDelegate(EggProtectionMonitor.Instance.FindEggToGuard), UpdateRate.SIM_200ms).ParamTransition<bool>(this.hasEggToGuard, this.guard.safe, GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.IsTrue);
 		this.guard.Enter(delegate(EggProtectionMonitor.Instance smi)
 		{
@@ -28,7 +24,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 				smi.gameObject.AddOrGet<SymbolOverrideController>().RemoveBuildOverride(Assets.GetAnim("pincher_kanim").GetData(), 0);
 			}
 			smi.gameObject.AddOrGet<FactionAlignment>().SwitchAlignment(FactionManager.FactionID.Pest);
-		}).Update("evaulate_egg", delegate(EggProtectionMonitor.Instance smi, float dt)
+		}).Update("CanProtectEgg", delegate(EggProtectionMonitor.Instance smi, float dt)
 		{
 			smi.CanProtectEgg();
 		}, UpdateRate.SIM_1000ms, true)
@@ -36,11 +32,11 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		this.guard.safe.Enter(delegate(EggProtectionMonitor.Instance smi)
 		{
 			smi.RefreshThreat(null);
-		}).Update("safe", delegate(EggProtectionMonitor.Instance smi, float dt)
+		}).Update("EggProtectionMonitor.safe", delegate(EggProtectionMonitor.Instance smi, float dt)
 		{
 			smi.RefreshThreat(null);
 		}, UpdateRate.SIM_200ms, true).ToggleStatusItem(CREATURES.STATUSITEMS.PROTECTINGENTITY.NAME, CREATURES.STATUSITEMS.PROTECTINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, null);
-		this.guard.threatened.ToggleBehaviour(GameTags.Creatures.Defend, (EggProtectionMonitor.Instance smi) => smi.MainThreat != null, delegate(EggProtectionMonitor.Instance smi)
+		this.guard.threatened.ToggleBehaviour(GameTags.Creatures.Defend, (EggProtectionMonitor.Instance smi) => smi.threatMonitor.HasThreat(), delegate(EggProtectionMonitor.Instance smi)
 		{
 			smi.GoTo(this.guard.safe);
 		}).Update("Threatened", new Action<EggProtectionMonitor.Instance, float>(EggProtectionMonitor.CritterUpdateThreats), UpdateRate.SIM_200ms, false);
@@ -52,7 +48,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		{
 			return;
 		}
-		if (!smi.CheckForThreats())
+		if (!smi.threatMonitor.HasThreat())
 		{
 			smi.GoTo(smi.sm.guard.safe);
 		}
@@ -80,18 +76,9 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 
 	public new class Instance : GameStateMachine<EggProtectionMonitor, EggProtectionMonitor.Instance, IStateMachineTarget, EggProtectionMonitor.Def>.GameInstance
 	{
-		public GameObject MainThreat
-		{
-			get
-			{
-				return this.mainThreat;
-			}
-		}
-
 		public Instance(IStateMachineTarget master, EggProtectionMonitor.Def def)
 			: base(master, def)
 		{
-			this.alignment = master.GetComponent<FactionAlignment>();
 			this.navigator = master.GetComponent<Navigator>();
 			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
 		}
@@ -164,43 +151,6 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			base.sm.hasEggToGuard.Set(egg != null, base.smi, false);
 		}
 
-		public void SetMainThreat(GameObject threat)
-		{
-			if (threat == this.mainThreat)
-			{
-				return;
-			}
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
-				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
-				if (threat == null)
-				{
-					base.Trigger(2144432245, null);
-				}
-			}
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
-				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
-			}
-			this.mainThreat = threat;
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Subscribe(1623392196, this.refreshThreatDelegate);
-				this.mainThreat.Subscribe(1969584890, this.refreshThreatDelegate);
-			}
-		}
-
-		public void Cleanup(object data)
-		{
-			if (this.mainThreat)
-			{
-				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
-				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
-			}
-		}
-
 		public void GoToThreatened()
 		{
 			base.smi.GoTo(base.sm.guard.threatened);
@@ -212,7 +162,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			{
 				return;
 			}
-			if (base.smi.CheckForThreats())
+			if (base.smi.threatMonitor.HasThreat())
 			{
 				this.GoToThreatened();
 				return;
@@ -224,76 +174,12 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			}
 		}
 
-		public bool CheckForThreats()
-		{
-			if (this.eggToProtect == null)
-			{
-				return false;
-			}
-			GameObject gameObject = this.FindThreat();
-			this.SetMainThreat(gameObject);
-			return gameObject != null;
-		}
-
-		public GameObject FindThreat()
-		{
-			this.threats.Clear();
-			ListPool<ScenePartitionerEntry, ThreatMonitor>.PooledList pooledList = ListPool<ScenePartitionerEntry, ThreatMonitor>.Allocate();
-			Extents extents = new Extents(Grid.PosToCell(this.eggToProtect), this.maxThreatDistance);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.attackableEntitiesLayer, pooledList);
-			for (int i = 0; i < pooledList.Count; i++)
-			{
-				FactionAlignment factionAlignment = pooledList[i].obj as FactionAlignment;
-				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && factionAlignment.IsAlignmentActive() && this.navigator.CanReach(factionAlignment.attackable))
-				{
-					bool flag = false;
-					foreach (Tag tag in base.def.allyTags)
-					{
-						if (factionAlignment.HasTag(tag))
-						{
-							flag = true;
-						}
-					}
-					if (!flag)
-					{
-						this.threats.Add(factionAlignment);
-					}
-				}
-			}
-			pooledList.Recycle();
-			return this.PickBestTarget(this.threats);
-		}
-
-		public GameObject PickBestTarget(List<FactionAlignment> threats)
-		{
-			float num = 1f;
-			Vector2 vector = base.gameObject.transform.GetPosition();
-			GameObject gameObject = null;
-			float num2 = float.PositiveInfinity;
-			for (int i = threats.Count - 1; i >= 0; i--)
-			{
-				FactionAlignment factionAlignment = threats[i];
-				float num3 = Vector2.Distance(vector, factionAlignment.transform.GetPosition()) / num;
-				if (num3 < num2)
-				{
-					num2 = num3;
-					gameObject = factionAlignment.gameObject;
-				}
-			}
-			return gameObject;
-		}
+		[MySmiReq]
+		public ThreatMonitor.Instance threatMonitor;
 
 		public GameObject eggToProtect;
 
-		public FactionAlignment alignment;
-
 		private Navigator navigator;
-
-		private GameObject mainThreat;
-
-		private List<FactionAlignment> threats = new List<FactionAlignment>();
-
-		private int maxThreatDistance = 12;
 
 		private Action<object> refreshThreatDelegate;
 

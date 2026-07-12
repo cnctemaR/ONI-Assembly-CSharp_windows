@@ -37,9 +37,9 @@ public class KleiPermitDioramaVis_BuildingOnBackground : KMonoBehaviour, IKleiPe
 	public void ConfigureWith(PermitResource permit)
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
-		BuildingDef value = KleiPermitVisUtil.GetBuildingDef(permit).Value;
-		DebugUtil.DevAssert(value.WidthInCells == 1, "assert failed", null);
-		DebugUtil.DevAssert(value.HeightInCells == 1, "assert failed", null);
+		BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
+		DebugUtil.DevAssert(buildingDef.WidthInCells == 1, "assert failed", null);
+		DebugUtil.DevAssert(buildingDef.HeightInCells == 1, "assert failed", null);
 		KBatchedAnimController[] array = this.buildingKAnimArray;
 		for (int i = 0; i < array.Length; i++)
 		{

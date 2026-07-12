@@ -540,11 +540,7 @@ public class CustomGameSettings : KMonoBehaviour
 		Dictionary<SettingConfig, string> dictionary = new Dictionary<SettingConfig, string>();
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
 		{
-			if (!this.QualitySettings.ContainsKey(keyValuePair.Key))
-			{
-				KCrashReporter.ReportDevNotification("QualitySettings missing key " + keyValuePair.Key, Environment.StackTrace, "", false);
-			}
-			else
+			if (this.QualitySettings.ContainsKey(keyValuePair.Key))
 			{
 				SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
 				if (settingConfig.coordinate_dimension >= 0L && settingConfig.coordinate_dimension_width >= 0L)

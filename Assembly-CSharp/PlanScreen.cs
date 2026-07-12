@@ -879,10 +879,6 @@ public class PlanScreen : KIconToggleMenu
 			this.categoryPanelSizeNeedsRefresh = false;
 			this.ConfigurePanelSize(null);
 		}
-		if (this.ProductInfoScreen.gameObject.activeSelf)
-		{
-			this.ProductInfoScreen.materialSelectionPanel.UpdateResourceToggleValues();
-		}
 	}
 
 	public override void ScreenUpdate(bool topLevel)

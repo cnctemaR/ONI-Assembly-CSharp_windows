@@ -116,9 +116,9 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		Assets.GetPrefab(new Tag(this.seedInfo.seedId)) != null;
 		switch (this.seedInfo.productionType)
 		{
-		default:
-			return null;
+		case SeedProducer.ProductionType.Hidden:
 		case SeedProducer.ProductionType.DigOnly:
+		case SeedProducer.ProductionType.Crop:
 			return null;
 		case SeedProducer.ProductionType.Harvest:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_HARVEST, Descriptor.DescriptorType.Lifecycle, true));
@@ -130,6 +130,9 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		case SeedProducer.ProductionType.Sterile:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.MUTANT_STERILE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.MUTANT_STERILE, Descriptor.DescriptorType.Effect, false));
 			break;
+		default:
+			DebugUtil.Assert(false, "Seed producer type descriptor not specified");
+			return null;
 		}
 		return list;
 	}
@@ -164,6 +167,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		DigOnly,
 		Harvest,
 		Fruit,
-		Sterile
+		Sterile,
+		Crop
 	}
 }

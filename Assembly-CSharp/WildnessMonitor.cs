@@ -15,7 +15,7 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 			.ToggleEffect((WildnessMonitor.Instance smi) => smi.def.tameEffect)
 			.Enter(delegate(WildnessMonitor.Instance smi)
 			{
-				SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogCritterTamed(smi.PrefabID());
+				SaveGame.Instance.ColonyAchievementTracker.LogCritterTamed(smi.PrefabID());
 			});
 	}
 

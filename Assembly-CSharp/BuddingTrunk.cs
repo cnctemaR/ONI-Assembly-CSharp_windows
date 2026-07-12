@@ -114,6 +114,11 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 			Growing component = mostMatureBranch.GetComponent<Growing>();
 			if (component)
 			{
+				Harvestable component2 = mostMatureBranch.GetComponent<Harvestable>();
+				if (component2 != null)
+				{
+					component2.Trigger(2127324410, null);
+				}
 				component.ConsumeMass(mass_to_consume);
 			}
 		}

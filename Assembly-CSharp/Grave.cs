@@ -54,6 +54,16 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		if (gameObject != null)
 		{
 			this.graveName = gameObject.name;
+			MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
+			if (component != null)
+			{
+				Personality personality = Db.Get().Personalities.TryGet(component.personalityResourceId);
+				KAnimFile anim = Assets.GetAnim("gravestone_kanim");
+				if (personality != null && anim.GetData().GetAnim(personality.graveStone) != null)
+				{
+					this.graveAnim = personality.graveStone;
+				}
+			}
 			Util.KDestroyGameObject(gameObject);
 		}
 	}
@@ -64,6 +74,9 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	[Serialize]
 	public string graveName;
+
+	[Serialize]
+	public string graveAnim = "closed";
 
 	[Serialize]
 	public int epitaphIdx;
@@ -115,7 +128,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			})
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.GraveEmpty, null)
 				.EventTransition(GameHashes.OnStorageChange, this.full, null);
-			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave, null).Enter(delegate(Grave.StatesInstance smi)
+			this.full.PlayAnim((Grave.StatesInstance smi) => smi.master.graveAnim, KAnim.PlayMode.Once).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave, null).Enter(delegate(Grave.StatesInstance smi)
 			{
 				if (smi.master.burialTime < 0f)
 				{

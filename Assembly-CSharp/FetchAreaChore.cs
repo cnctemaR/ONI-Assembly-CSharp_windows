@@ -63,18 +63,18 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 	private static bool IsPickupableStillValidForChore(Pickupable pickupable, FetchChore chore)
 	{
-		KPrefabID component = pickupable.GetComponent<KPrefabID>();
-		if ((chore.criteria == FetchChore.MatchCriteria.MatchID && !chore.tags.Contains(component.PrefabTag)) || (chore.criteria == FetchChore.MatchCriteria.MatchTags && !component.HasTag(chore.tagsFirst)))
+		KPrefabID kprefabID = pickupable.KPrefabID;
+		if ((chore.criteria == FetchChore.MatchCriteria.MatchID && !chore.tags.Contains(kprefabID.PrefabTag)) || (chore.criteria == FetchChore.MatchCriteria.MatchTags && !kprefabID.HasTag(chore.tagsFirst)))
 		{
 			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it is not or does not contain one of these tags: {1}", pickupable, string.Join<Tag>(",", chore.tags)));
 			return false;
 		}
-		if (chore.requiredTag.IsValid && !component.HasTag(chore.requiredTag))
+		if (chore.requiredTag.IsValid && !kprefabID.HasTag(chore.requiredTag))
 		{
 			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it does not have the required tag: {1}", pickupable, chore.requiredTag));
 			return false;
 		}
-		if (component.HasAnyTags(chore.forbiddenTags))
+		if (kprefabID.HasAnyTags(chore.forbiddenTags))
 		{
 			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", chore.forbiddenTags)));
 			return false;
@@ -164,8 +164,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					break;
 				}
 				Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
-				KPrefabID component = pickupable2.GetComponent<KPrefabID>();
-				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(component.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || component.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || component.HasTag(this.rootChore.requiredTag)) && !component.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !pickupable2.HasTag(GameTags.MarkedForMove))
+				KPrefabID kprefabID = pickupable2.KPrefabID;
+				if (!(kprefabID.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(kprefabID.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || kprefabID.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || kprefabID.HasTag(this.rootChore.requiredTag)) && !kprefabID.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !kprefabID.HasTag(GameTags.MarkedForMove))
 				{
 					float unreservedAmount = pickupable2.UnreservedAmount;
 					list.Add(pickupable2);
@@ -256,7 +256,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					return true;
 				}
-				if (x.HasTag(GameTags.MarkedForMove))
+				if (x.KPrefabID.HasTag(GameTags.MarkedForMove))
 				{
 					return true;
 				}
@@ -421,7 +421,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					break;
 				}
-				if (!pickupable.HasTag(GameTags.MarkedForMove))
+				if (!pickupable.KPrefabID.HasTag(GameTags.MarkedForMove))
 				{
 					float num2 = Math.Min(num, pickupable.UnreservedAmount);
 					num -= num2;

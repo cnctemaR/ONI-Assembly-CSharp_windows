@@ -6,6 +6,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/Breakable")]
 public class Breakable : Workable
 {
+	public bool IsInvincible
+	{
+		get
+		{
+			return this.hp == null || this.hp.invincible;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

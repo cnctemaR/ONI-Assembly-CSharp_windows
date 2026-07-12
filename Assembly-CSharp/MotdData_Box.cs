@@ -26,4 +26,6 @@ public class MotdData_Box
 	public string href;
 
 	public Texture2D resolvedImage;
+
+	public bool resolvedImageIsFromDisk;
 }

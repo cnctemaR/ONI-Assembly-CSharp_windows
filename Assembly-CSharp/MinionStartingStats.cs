@@ -490,21 +490,10 @@ public class MinionStartingStats : ITelepadDeliverable
 	public void ApplyOutfit(Personality personality, GameObject go)
 	{
 		WearableAccessorizer component = go.GetComponent<WearableAccessorizer>();
-		foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair in personality.outfitIds)
+		Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromTemplateId(personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
+		if (option.IsSome())
 		{
-			Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromTemplateId(keyValuePair.Value);
-			if (option.HasValue)
-			{
-				component.AddCustomOutfit(option);
-			}
-		}
-		if (personality.outfitIds.ContainsKey(ClothingOutfitUtility.OutfitType.Clothing))
-		{
-			Option<ClothingOutfitTarget> option2 = ClothingOutfitTarget.TryFromTemplateId(personality.outfitIds[ClothingOutfitUtility.OutfitType.Clothing]);
-			if (option2.HasValue)
-			{
-				component.ApplyClothingItems(option2.Value.OutfitType, option2.Value.ReadItemValues());
-			}
+			component.ApplyClothingItems(ClothingOutfitUtility.OutfitType.Clothing, option.Unwrap().ReadItemValues());
 		}
 	}
 

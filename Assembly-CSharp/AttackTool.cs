@@ -14,24 +14,27 @@ public class AttackTool : DragTool
 	{
 		foreach (FactionAlignment factionAlignment in Components.FactionAlignments.Items)
 		{
-			Vector2 vector = Grid.PosToXY(factionAlignment.transform.GetPosition());
-			if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)
+			if (!factionAlignment.IsNullOrDestroyed())
 			{
-				if (mark)
+				Vector2 vector = Grid.PosToXY(factionAlignment.transform.GetPosition());
+				if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)
 				{
-					if (FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
+					if (mark)
 					{
-						factionAlignment.SetPlayerTargeted(true);
-						Prioritizable component = factionAlignment.GetComponent<Prioritizable>();
-						if (component != null)
+						if (FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
 						{
-							component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+							factionAlignment.SetPlayerTargeted(true);
+							Prioritizable component = factionAlignment.GetComponent<Prioritizable>();
+							if (component != null)
+							{
+								component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+							}
 						}
 					}
-				}
-				else
-				{
-					factionAlignment.gameObject.Trigger(2127324410, null);
+					else
+					{
+						factionAlignment.gameObject.Trigger(2127324410, null);
+					}
 				}
 			}
 		}

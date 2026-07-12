@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7695FF58-A068-4851-A805-CCF852E985E8}</ProjectGuid>
+    <ProjectGuid>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EAE6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ArabicSupport</RootNamespace>
     <AssemblyName>ArabicSupport</AssemblyName>

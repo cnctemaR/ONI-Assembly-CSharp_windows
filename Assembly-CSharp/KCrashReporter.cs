@@ -347,7 +347,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 		else
 		{
-			userMessage = "[" + BuildWatermark.GetBuildText() + "]" + userMessage;
+			userMessage = "[" + BuildWatermark.GetBuildText() + "] " + userMessage;
 		}
 		userMessage = userMessage.Replace(stack_trace, "");
 		KCrashReporter.Error error = new KCrashReporter.Error();
@@ -683,7 +683,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 587362;
+		public int build = 596100;
 
 		public string callstack = "";
 

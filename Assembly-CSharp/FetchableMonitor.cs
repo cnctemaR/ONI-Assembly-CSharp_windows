@@ -37,12 +37,12 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 
 	private void UpdateStorage(FetchableMonitor.Instance smi, object data)
 	{
-		Game.Instance.fetchManager.UpdateStorage(smi.pickupable.PrefabID(), smi.fetchable, data as Storage);
+		Game.Instance.fetchManager.UpdateStorage(smi.pickupable.KPrefabID.PrefabID(), smi.fetchable, data as Storage);
 	}
 
 	private void UpdateTags(FetchableMonitor.Instance smi, object data)
 	{
-		Game.Instance.fetchManager.UpdateTags(smi.pickupable.PrefabID(), smi.fetchable);
+		Game.Instance.fetchManager.UpdateTags(smi.pickupable.KPrefabID.PrefabID(), smi.fetchable);
 	}
 
 	public GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.State fetchable;

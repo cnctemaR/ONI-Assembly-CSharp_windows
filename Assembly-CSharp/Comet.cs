@@ -451,7 +451,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			Health component3 = pickupable.GetComponent<Health>();
 			if (component3 != null && !this.damagedEntities.Contains(pickupable.gameObject))
 			{
-				float num2 = (pickupable.GetComponent<KPrefabID>().HasTag(GameTags.Bunker) ? ((float)damage * this.bunkerDamageMultiplier) : ((float)damage));
+				float num2 = (pickupable.KPrefabID.HasTag(GameTags.Bunker) ? ((float)damage * this.bunkerDamageMultiplier) : ((float)damage));
 				component3.Damage(num2);
 				this.damagedEntities.Add(pickupable.gameObject);
 			}

@@ -12,6 +12,8 @@ namespace Klei.AI
 
 		public bool IsMultiplier { get; private set; }
 
+		public GameUtil.TimeSlice? OverrideTimeSlice { get; set; }
+
 		public bool UIOnly { get; private set; }
 
 		public bool IsReadonly { get; private set; }
@@ -25,6 +27,7 @@ namespace Klei.AI
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
 			this.IsReadonly = is_readonly;
+			this.OverrideTimeSlice = null;
 		}
 
 		public AttributeModifier(string attribute_id, float value, Func<string> description_cb, bool is_multiplier = false, bool uiOnly = false)
@@ -35,6 +38,7 @@ namespace Klei.AI
 			this.Description = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
+			this.OverrideTimeSlice = null;
 			if (description_cb == null)
 			{
 				global::Debug.LogWarning("AttributeModifier being constructed without a description callback: " + attribute_id);
@@ -107,7 +111,12 @@ namespace Klei.AI
 			}
 			if (text != null && text.Length > 0 && text[0] != '-')
 			{
-				text = GameUtil.AddPositiveSign(text, this.Value > 0f);
+				GameUtil.TimeSlice? overrideTimeSlice = this.OverrideTimeSlice;
+				GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None;
+				if (!((overrideTimeSlice.GetValueOrDefault() == timeSlice) & (overrideTimeSlice != null)))
+				{
+					text = GameUtil.AddPositiveSign(text, this.Value > 0f);
+				}
 			}
 			return text;
 		}

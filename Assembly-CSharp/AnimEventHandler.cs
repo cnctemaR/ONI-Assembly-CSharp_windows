@@ -6,14 +6,16 @@ public class AnimEventHandler : KMonoBehaviour
 {
 	private event AnimEventHandler.SetPos onWorkTargetSet;
 
-	public void SetDirty()
+	public int GetCachedCell()
 	{
-		this.isDirty = 2;
+		return this.pickupable.cachedCell;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.cachedTransform = base.transform;
+		this.pickupable = base.GetComponent<Pickupable>();
 		foreach (KBatchedAnimTracker kbatchedAnimTracker in base.GetComponentsInChildren<KBatchedAnimTracker>(true))
 		{
 			if (kbatchedAnimTracker.useTargetPoint)
@@ -22,8 +24,12 @@ public class AnimEventHandler : KMonoBehaviour
 			}
 		}
 		this.baseOffset = this.animCollider.offset;
-		this.instanceIndex = AnimEventHandler.InstanceSequence++;
-		this.SetDirty();
+		AnimEventHandlerManager.Instance.Add(this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		AnimEventHandlerManager.Instance.Remove(this);
 	}
 
 	protected override void OnForcedCleanUp()
@@ -65,26 +71,17 @@ public class AnimEventHandler : KMonoBehaviour
 		this.context = default(HashedString);
 	}
 
-	public void LateUpdate()
-	{
-		int num = Time.frameCount % 3;
-		int num2 = this.instanceIndex % 3;
-		if (num != num2 && this.isDirty <= 0)
-		{
-			return;
-		}
-		this.UpdateOffset();
-	}
-
 	public void UpdateOffset()
 	{
 		Vector3 pivotSymbolPosition = this.controller.GetPivotSymbolPosition();
 		Vector3 vector = this.navigator.NavGrid.GetNavTypeData(this.navigator.CurrentNavType).animControllerOffset;
-		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - base.transform.GetPosition().x - vector.x, this.baseOffset.y + pivotSymbolPosition.y - base.transform.GetPosition().y + vector.y);
-		this.isDirty = Mathf.Max(0, this.isDirty - 1);
+		Vector3 position = this.cachedTransform.position;
+		Vector2 vector2 = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - position.x - vector.x, this.baseOffset.y + pivotSymbolPosition.y - position.y + vector.y);
+		if (this.animCollider.offset != vector2)
+		{
+			this.animCollider.offset = vector2;
+		}
 	}
-
-	private const int UPDATE_FRAME_RATE = 3;
 
 	[MyCmpGet]
 	private KBatchedAnimController controller;
@@ -95,17 +92,15 @@ public class AnimEventHandler : KMonoBehaviour
 	[MyCmpGet]
 	private Navigator navigator;
 
+	private Pickupable pickupable;
+
 	private Vector3 targetPos;
+
+	public Transform cachedTransform;
 
 	public Vector2 baseOffset;
 
-	public int isDirty;
-
 	private HashedString context;
-
-	private int instanceIndex;
-
-	private static int InstanceSequence;
 
 	private delegate void SetPos(Vector3 pos);
 }

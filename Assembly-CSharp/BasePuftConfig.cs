@@ -69,12 +69,17 @@ public static class BasePuftConfig
 			}, true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
+			.Add(new CritterCondoStates.Def
+			{
+				working_anim = "cc_working_puft"
+			}, !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BasePuftConfig.CustomIdleAnim)
 			}, true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PuftSpecies, symbol_override_prefix);
+		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().condoPrefabTag = "AirBorneCritterCondo";
 		return gameObject;
 	}
 

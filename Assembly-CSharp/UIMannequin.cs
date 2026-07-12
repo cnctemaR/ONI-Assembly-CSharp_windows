@@ -53,48 +53,52 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 		{
 			outfit = UIMinionOrMannequinITargetExtensions.GetOutfitWithDefaultItems(outfitType, outfit);
 		}
+		this.SpawnedAvatar.GetComponent<SymbolOverrideController>().RemoveAllSymbolOverrides(0);
 		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
-		SymbolOverrideController component = this.SpawnedAvatar.GetComponent<SymbolOverrideController>();
-		Accessorizer component2 = this.SpawnedAvatar.GetComponent<Accessorizer>();
-		WearableAccessorizer component3 = this.SpawnedAvatar.GetComponent<WearableAccessorizer>();
-		component.RemoveAllSymbolOverrides(0);
+		Accessorizer component = this.SpawnedAvatar.GetComponent<Accessorizer>();
+		WearableAccessorizer component2 = this.SpawnedAvatar.GetComponent<WearableAccessorizer>();
+		component.ApplyMinionPersonality(this.personalityToUseForDefaultClothing.UnwrapOr(Db.Get().Personalities.Get("ABE"), null));
+		component2.ClearClothingItems(null);
+		component2.ApplyClothingItems(outfitType, outfit);
+		List<KAnimHashedString> list = new List<KAnimHashedString>(32);
 		if (this.shouldShowOutfitWithDefaultItems && outfitType == ClothingOutfitUtility.OutfitType.Clothing)
 		{
-			component2.ApplyMinionPersonality(this.personalityToUseForDefaultClothing.UnwrapOr(Db.Get().Personalities.Get("ABE"), null));
-			component3.UpdateVisibleSymbols(outfitType);
-			foreach (string text in UIMannequin.DEFAULT_CLOTHING_SYMBOLS_TO_SHOW_AND_HIDE)
+			list.Add("foot");
+			list.Add("hand_paint");
+			if (flag)
 			{
-				this.animController.SetSymbolVisiblity(text, true);
+				list.Add("belt");
 			}
-			if (!flag)
+			if (!outfit.Select<ClothingItemResource, PermitCategory>((ClothingItemResource item) => item.Category).Contains(PermitCategory.DupeTops))
 			{
-				this.animController.SetSymbolVisiblity("belt", false);
+				list.Add("torso");
+				list.Add("neck");
+				list.Add("arm_lower");
+				list.Add("arm_lower_sleeve");
+				list.Add("arm_sleeve");
+				list.Add("cuff");
 			}
-			ClothingItemResource itemForCategory = UIMannequin.GetItemForCategory(PermitCategory.DupeGloves, outfit);
-			ClothingItemResource itemForCategory2 = UIMannequin.GetItemForCategory(PermitCategory.DupeTops, outfit);
-			if (itemForCategory != null && itemForCategory2 != null && itemForCategory.AnimFile.GetData().build.GetSymbol("arm_lower_sleeve") == null && itemForCategory2.AnimFile.GetData().build.GetSymbol("arm_lower_sleeve") == null)
+			if (!outfit.Select<ClothingItemResource, PermitCategory>((ClothingItemResource item) => item.Category).Contains(PermitCategory.DupeGloves))
 			{
-				this.animController.SetSymbolVisiblity("arm_lower_sleeve", false);
+				list.Add("arm_lower_sleeve");
+				list.Add("cuff");
+			}
+			if (!outfit.Select<ClothingItemResource, PermitCategory>((ClothingItemResource item) => item.Category).Contains(PermitCategory.DupeBottoms))
+			{
+				list.Add("leg");
+				list.Add("pelvis");
 			}
 		}
-		else
+		KAnimHashedString[] array = outfit.SelectMany<ClothingItemResource, KAnimHashedString>((ClothingItemResource item) => item.AnimFile.GetData().build.symbols.Select<KAnim.Build.Symbol, KAnimHashedString>((KAnim.Build.Symbol s) => s.hash)).Concat<KAnimHashedString>(list).ToArray<KAnimHashedString>();
+		foreach (KAnim.Build.Symbol symbol in this.animController.AnimFiles[0].GetData().build.symbols)
 		{
-			foreach (string text2 in UIMannequin.DEFAULT_CLOTHING_SYMBOLS_TO_SHOW_AND_HIDE)
+			if (symbol.hash == "mannequin_arm" || symbol.hash == "mannequin_body" || symbol.hash == "mannequin_headshape" || symbol.hash == "mannequin_leg")
 			{
-				this.animController.SetSymbolVisiblity(text2, false);
+				this.animController.SetSymbolVisiblity(symbol.hash, true);
 			}
-		}
-		foreach (ClothingItemResource clothingItemResource in outfit)
-		{
-			KAnim.Build build = clothingItemResource.AnimFile.GetData().build;
-			if (build != null)
+			else
 			{
-				for (int j = 0; j < build.symbols.Length; j++)
-				{
-					string text3 = HashCache.Get().Get(build.symbols[j].hash);
-					component.AddSymbolOverride(text3, build.symbols[j], 0);
-					this.animController.SetSymbolVisiblity(text3, true);
-				}
+				this.animController.SetSymbolVisiblity(symbol.hash, array.Contains(symbol.hash));
 			}
 		}
 	}
@@ -125,10 +129,4 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 	public bool shouldShowOutfitWithDefaultItems = true;
 
 	public Option<Personality> personalityToUseForDefaultClothing;
-
-	private static readonly string[] DEFAULT_CLOTHING_SYMBOLS_TO_SHOW_AND_HIDE = new string[]
-	{
-		"arm_lower", "arm_lower_sleeve", "arm_sleeve", "belt", "cuff", "foot", "hand_paint", "leg", "neck", "pelvis",
-		"torso"
-	};
 }

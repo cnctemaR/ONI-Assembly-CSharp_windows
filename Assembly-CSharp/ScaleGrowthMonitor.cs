@@ -22,7 +22,7 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 	private static bool IsInCorrectAtmosphere(ScaleGrowthMonitor.Instance smi)
 	{
 		int num = Grid.PosToCell(smi);
-		return Grid.Element[num].id == smi.def.targetAtmosphere;
+		return Grid.IsValidCell(num) && Grid.Element[num].id == smi.def.targetAtmosphere;
 	}
 
 	private static bool AreScalesFullyGrown(ScaleGrowthMonitor.Instance smi)

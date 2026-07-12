@@ -56,7 +56,10 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 	private void UpdateRetractedPre(SegmentedCreature.Instance smi, float dt)
 	{
-		this.UpdateHeadPosition(smi);
+		if (this.UpdateHeadPosition(smi) == 0f)
+		{
+			return;
+		}
 		bool flag = true;
 		for (LinkedListNode<SegmentedCreature.CreatureSegment> linkedListNode = smi.GetFirstBodySegmentNode(); linkedListNode != null; linkedListNode = linkedListNode.Next)
 		{
@@ -88,9 +91,11 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 	private void UpdateRetractedLoop(SegmentedCreature.Instance smi, float dt)
 	{
-		this.UpdateHeadPosition(smi);
-		this.SetRetractedPath(smi);
-		this.UpdateBodyPosition(smi);
+		if (this.UpdateHeadPosition(smi) != 0f)
+		{
+			this.SetRetractedPath(smi);
+			this.UpdateBodyPosition(smi);
+		}
 	}
 
 	private void SetRetractedPath(SegmentedCreature.Instance smi)
@@ -113,8 +118,11 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 	private void UpdateFreeMovement(SegmentedCreature.Instance smi, float dt)
 	{
 		float num = this.UpdateHeadPosition(smi);
-		this.AdjustBodySegmentsSpacing(smi, num);
-		this.UpdateBodyPosition(smi);
+		if (num != 0f)
+		{
+			this.AdjustBodySegmentsSpacing(smi, num);
+			this.UpdateBodyPosition(smi);
+		}
 	}
 
 	private float UpdateHeadPosition(SegmentedCreature.Instance smi)
@@ -152,10 +160,6 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 
 	private void AdjustBodySegmentsSpacing(SegmentedCreature.Instance smi, float spacing)
 	{
-		if (spacing == 0f)
-		{
-			return;
-		}
 		for (LinkedListNode<SegmentedCreature.CreatureSegment> linkedListNode = smi.GetFirstBodySegmentNode(); linkedListNode != null; linkedListNode = linkedListNode.Next)
 		{
 			linkedListNode.Value.distanceToPreviousSegment += spacing;

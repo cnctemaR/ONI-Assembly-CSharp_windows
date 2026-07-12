@@ -78,6 +78,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		base.OnPrefabInit();
 		base.Subscribe<ManualGenerator>(-592767678, ManualGenerator.OnOperationalChangedDelegate);
 		base.Subscribe<ManualGenerator>(824508782, ManualGenerator.OnActiveChangedDelegate);
+		base.Subscribe<ManualGenerator>(-905833192, ManualGenerator.OnCopySettingsDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
@@ -116,6 +117,19 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		if (this.operational.IsActive)
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.ManualGeneratorChargingUp, null);
+		}
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = data as GameObject;
+		if (gameObject != null)
+		{
+			ManualGenerator component = gameObject.GetComponent<ManualGenerator>();
+			if (component != null)
+			{
+				this.batteryRefillPercent = component.batteryRefillPercent;
+			}
 		}
 	}
 
@@ -239,6 +253,9 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	[MyCmpGet]
 	private BuildingEnabledButton buildingEnabledButton;
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	private Chore chore;
 
 	private int powerCell;
@@ -255,6 +272,11 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	private static readonly EventSystem.IntraObjectHandler<ManualGenerator> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<ManualGenerator>(delegate(ManualGenerator component, object data)
 	{
 		component.OnActiveChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ManualGenerator> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<ManualGenerator>(delegate(ManualGenerator component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	public class GeneratePowerSM : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance>

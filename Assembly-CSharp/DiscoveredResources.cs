@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -76,6 +77,21 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 				if (keyValuePair.Value.Contains(tag3))
 				{
 					keyValuePair.Value.Remove(tag3);
+				}
+			}
+		}
+		foreach (string text in new List<string> { "Pacu", "PacuCleaner", "PacuTropical", "PacuBaby", "PacuCleanerBaby", "PacuTropicalBaby" })
+		{
+			if (this.DiscoveredCategories.ContainsKey(text))
+			{
+				List<Tag> list = this.DiscoveredCategories[text].ToList<Tag>();
+				SolidConsumerMonitor.Def def = Assets.GetPrefab(text).GetDef<SolidConsumerMonitor.Def>();
+				foreach (Tag tag4 in list)
+				{
+					if (def.diet.GetDietInfo(tag4) == null)
+					{
+						this.DiscoveredCategories[text].Remove(tag4);
+					}
 				}
 			}
 		}

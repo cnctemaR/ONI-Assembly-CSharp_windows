@@ -27,7 +27,7 @@ public class GasReservoirConfig : IBuildingConfig
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.GASES;
-		storage.capacityKg = 150f;
+		storage.capacityKg = 1000f;
 		storage.SetDefaultStoredItemModifiers(GasReservoirConfig.ReservoirStoredItemModifiers);
 		storage.showCapacityStatusItem = true;
 		storage.showCapacityAsMainStatus = true;

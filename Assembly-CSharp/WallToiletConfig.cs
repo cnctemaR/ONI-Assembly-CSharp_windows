@@ -63,7 +63,7 @@ public class WallToiletConfig : IBuildingConfig
 		AutoStorageDropper.Def def = go.AddOrGetDef<AutoStorageDropper.Def>();
 		def.dropOffset = new CellOffset(-2, 0);
 		def.elementFilter = new SimHashes[] { SimHashes.Water };
-		def.invertElementFilter = true;
+		def.invertElementFilterInitialValue = true;
 		def.blockedBySubstantialLiquid = true;
 		def.fxOffset = new Vector3(0.5f, 0f, 0f);
 		def.leftFx = new AutoStorageDropper.DropperFxConfig

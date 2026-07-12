@@ -12,7 +12,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			return SaveGame.Instance.GetComponent<ColonyAchievementTracker>().defrostedDuplicant;
+			return SaveGame.Instance.ColonyAchievementTracker.defrostedDuplicant;
 		}
 	}
 }

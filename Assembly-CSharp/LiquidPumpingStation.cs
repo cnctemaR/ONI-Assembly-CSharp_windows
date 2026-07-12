@@ -139,7 +139,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				{
 					liquidInfo.source = base.GetComponent<Storage>().AddLiquid(liquidInfo.element.id, liquidInfo.amount, liquidInfo.element.defaultValues.temperature, byte.MaxValue, 0, false, true).GetComponent<SubstanceChunk>();
 					Pickupable component = liquidInfo.source.GetComponent<Pickupable>();
-					component.GetComponent<KPrefabID>().AddTag(GameTags.LiquidSource, false);
+					component.KPrefabID.AddTag(GameTags.LiquidSource, false);
 					component.SetOffsets(new CellOffset[]
 					{
 						new CellOffset(0, 1)
@@ -208,7 +208,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		base.OnStartWork(worker);
 		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
 		float amount = pickupableStartWorkInfo.amount;
-		Element element = pickupableStartWorkInfo.originalPickupable.GetComponent<PrimaryElement>().Element;
+		Element element = pickupableStartWorkInfo.originalPickupable.PrimaryElement.Element;
 		this.session = new LiquidPumpingStation.WorkSession(Grid.PosToCell(this), element.id, pickupableStartWorkInfo.originalPickupable.GetComponent<SubstanceChunk>(), amount, base.gameObject);
 		this.meter.SetPositionPercent(0f);
 		this.meter.SetSymbolTint(new KAnimHashedString("meter_target"), element.substance.colour);

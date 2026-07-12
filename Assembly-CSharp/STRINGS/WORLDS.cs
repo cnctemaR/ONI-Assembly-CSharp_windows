@@ -404,7 +404,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Big Empty FOR DEVS";
 
-			public static LocString DESCRIPTION = "A base game sized asteroid without biomes, perfect for Game Devs.";
+			public static LocString DESCRIPTION = "A big ol' biome-free spacerock for claustrophobic devs.";
 		}
 
 		public class TINYSURFACE

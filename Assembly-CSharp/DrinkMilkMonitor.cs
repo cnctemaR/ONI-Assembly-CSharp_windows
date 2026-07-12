@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Klei.AI;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 		{
 			this.remainingSecondsForEffect.Set(Mathf.Clamp(this.remainingSecondsForEffect.Get(smi), 0f, 600f), smi, false);
 		}).ParamTransition<float>(this.remainingSecondsForEffect, this.satisfied, (DrinkMilkMonitor.Instance smi, float val) => val > 0f);
-		this.lookingToDrinkMilk.Update(new Action<DrinkMilkMonitor.Instance, float>(DrinkMilkMonitor.FindMilkFeederTarget), UpdateRate.SIM_4000ms, true).ToggleBehaviour(GameTags.Creatures.Behaviour_TryToDrinkMilkFromFeeder, (DrinkMilkMonitor.Instance smi) => !smi.targetMilkFeeder.IsNullOrStopped() && !smi.targetMilkFeeder.IsReserved(), null).Exit(delegate(DrinkMilkMonitor.Instance smi)
+		this.lookingToDrinkMilk.PreBrainUpdate(new Action<DrinkMilkMonitor.Instance>(DrinkMilkMonitor.FindMilkFeederTarget)).ToggleBehaviour(GameTags.Creatures.Behaviour_TryToDrinkMilkFromFeeder, (DrinkMilkMonitor.Instance smi) => !smi.targetMilkFeeder.IsNullOrStopped() && !smi.targetMilkFeeder.IsReserved(), null).Exit(delegate(DrinkMilkMonitor.Instance smi)
 		{
 			smi.targetMilkFeeder = null;
 		});
@@ -45,39 +46,46 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 			}, UpdateRate.SIM_1000ms, false);
 	}
 
-	private static void FindMilkFeederTarget(DrinkMilkMonitor.Instance smi, float dt)
+	private static void FindMilkFeederTarget(DrinkMilkMonitor.Instance smi)
 	{
 		DrinkMilkMonitor.<>c__DisplayClass8_0 CS$<>8__locals1;
 		CS$<>8__locals1.smi = smi;
+		int num = Grid.PosToCell(CS$<>8__locals1.smi.gameObject);
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		List<MilkFeeder.Instance> items = Components.MilkFeeders.GetItems((int)Grid.WorldIdx[num]);
+		if (items == null || items.Count == 0)
+		{
+			return;
+		}
 		using (ListPool<MilkFeeder.Instance, DrinkMilkMonitor>.PooledList pooledList = PoolsFor<DrinkMilkMonitor>.AllocateList<MilkFeeder.Instance>())
 		{
-			int num = Grid.PosToCell(CS$<>8__locals1.smi.gameObject);
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
 			if (cavityForCell != null && cavityForCell.room != null && cavityForCell.room.roomType == Db.Get().RoomTypes.CreaturePen)
 			{
-				foreach (KPrefabID kprefabID in cavityForCell.buildings)
+				foreach (MilkFeeder.Instance instance in items)
 				{
-					if (!kprefabID.IsNullOrDestroyed())
+					if (!instance.IsNullOrDestroyed())
 					{
-						MilkFeeder.Instance smi2 = kprefabID.GetSMI<MilkFeeder.Instance>();
-						if (smi2 != null && smi2.IsReadyToStartFeeding())
+						int num2 = Grid.PosToCell(instance);
+						if (Game.Instance.roomProber.GetCavityForCell(num2) == cavityForCell && instance.IsReadyToStartFeeding())
 						{
-							pooledList.Add(smi2);
+							pooledList.Add(instance);
 						}
 					}
 				}
 			}
 			DrinkMilkMonitor.<>c__DisplayClass8_1 CS$<>8__locals2;
-			CS$<>8__locals2.navigator = CS$<>8__locals1.smi.GetComponent<Navigator>();
-			CS$<>8__locals2.drowningMonitor = CS$<>8__locals1.smi.GetComponent<DrowningMonitor>();
-			CS$<>8__locals2.canDrown = CS$<>8__locals2.drowningMonitor != null && CS$<>8__locals2.drowningMonitor.canDrownToDeath && !CS$<>8__locals2.drowningMonitor.livesUnderWater;
+			CS$<>8__locals2.canDrown = CS$<>8__locals1.smi.drowningMonitor != null && CS$<>8__locals1.smi.drowningMonitor.canDrownToDeath && !CS$<>8__locals1.smi.drowningMonitor.livesUnderWater;
 			CS$<>8__locals1.smi.targetMilkFeeder = null;
 			CS$<>8__locals1.smi.doesTargetMilkFeederHaveSpaceForGassyMoo = false;
 			CS$<>8__locals2.resultCost = -1;
-			foreach (MilkFeeder.Instance instance in pooledList)
+			foreach (MilkFeeder.Instance instance2 in pooledList)
 			{
 				DrinkMilkMonitor.<>c__DisplayClass8_2 CS$<>8__locals3;
-				CS$<>8__locals3.milkFeeder = instance;
+				CS$<>8__locals3.milkFeeder = instance2;
 				if (CS$<>8__locals1.smi.def.isGassyMoo)
 				{
 					if (DrinkMilkMonitor.<FindMilkFeederTarget>g__ConsiderCell|8_0(CS$<>8__locals1.smi.GetDrinkCellOf(CS$<>8__locals3.milkFeeder, false), ref CS$<>8__locals1, ref CS$<>8__locals2, ref CS$<>8__locals3))
@@ -100,11 +108,11 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 	[CompilerGenerated]
 	internal static bool <FindMilkFeederTarget>g__ConsiderCell|8_0(int cell, ref DrinkMilkMonitor.<>c__DisplayClass8_0 A_1, ref DrinkMilkMonitor.<>c__DisplayClass8_1 A_2, ref DrinkMilkMonitor.<>c__DisplayClass8_2 A_3)
 	{
-		if (A_2.canDrown && !A_2.drowningMonitor.IsCellSafe(cell))
+		if (A_2.canDrown && !A_1.smi.drowningMonitor.IsCellSafe(cell))
 		{
 			return false;
 		}
-		int navigationCost = A_2.navigator.GetNavigationCost(cell);
+		int navigationCost = A_1.smi.navigator.GetNavigationCost(cell);
 		if (navigationCost == -1)
 		{
 			return false;
@@ -159,5 +167,11 @@ public class DrinkMilkMonitor : GameStateMachine<DrinkMilkMonitor, DrinkMilkMoni
 		public MilkFeeder.Instance targetMilkFeeder;
 
 		public bool doesTargetMilkFeederHaveSpaceForGassyMoo;
+
+		[MyCmpReq]
+		public Navigator navigator;
+
+		[MyCmpGet]
+		public DrowningMonitor drowningMonitor;
 	}
 }

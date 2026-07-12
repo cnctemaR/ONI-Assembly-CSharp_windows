@@ -216,10 +216,6 @@ public class TransitionDriver
 			{
 				this.brain.Resume("move_handler");
 			}
-			if (this.navigator.animEventHandler != null)
-			{
-				this.navigator.animEventHandler.SetDirty();
-			}
 			TransitionDriver.TransitionPool.ReleaseInstance(this.transition);
 			this.transition = null;
 			this.navigator = null;

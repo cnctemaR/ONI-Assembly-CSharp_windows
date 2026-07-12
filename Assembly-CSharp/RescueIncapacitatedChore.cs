@@ -83,7 +83,8 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				{
 					smi.GoTo(this.holding.ditch);
 				});
-				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				GameObject gameObject = this.rescuer.Get(smi).gameObject;
+				if (!gameObject.IsNullOrDestroyed() && gameObject.HasTag(GameTags.Minion))
 				{
 					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
@@ -91,7 +92,8 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				}
 			}).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
-				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				GameObject gameObject2 = this.rescuer.Get(smi).gameObject;
+				if (!gameObject2.IsNullOrDestroyed() && gameObject2.HasTag(GameTags.Minion))
 				{
 					KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);

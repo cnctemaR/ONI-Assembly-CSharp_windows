@@ -556,11 +556,7 @@ public class GameTags
 
 	public static TagSet GasElements = new TagSet();
 
-	public static TagSet CalorieCategories = new TagSet
-	{
-		GameTags.Edible,
-		GameTags.Dehydrated
-	};
+	public static TagSet CalorieCategories = new TagSet { GameTags.Edible };
 
 	public static TagSet UnitCategories = new TagSet
 	{
@@ -573,7 +569,8 @@ public class GameTags
 		GameTags.IndustrialProduct,
 		GameTags.Compostable,
 		GameTags.HighEnergyParticle,
-		GameTags.StoryTraitResource
+		GameTags.StoryTraitResource,
+		GameTags.Dehydrated
 	};
 
 	public static TagSet IgnoredMaterialCategories = new TagSet

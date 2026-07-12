@@ -120,8 +120,15 @@ public static class CodexEntryGenerator
 		if (Strings.TryGet(new StringKey(text + ".ROOMSREQUIRING"), out stringEntry))
 		{
 			List<ICodexWidget> list6 = new List<ICodexWidget>();
-			ICodexWidget codexWidget4 = new CodexText(stringEntry.String, CodexTextStyle.Body, null);
-			ContentContainer contentContainer2 = new ContentContainer(new List<ICodexWidget> { codexWidget4 }, ContentContainer.ContentLayout.Vertical);
+			List<ICodexWidget> list7 = new List<ICodexWidget>();
+			string[] array = stringEntry.String.Split(new char[] { '\n' });
+			for (int i = 0; i < array.Length; i++)
+			{
+				ICodexWidget codexWidget4 = new CodexText(array[i], CodexTextStyle.Body, null);
+				list7.Add(codexWidget4);
+			}
+			new CodexText(stringEntry.String, CodexTextStyle.Body, null);
+			ContentContainer contentContainer2 = new ContentContainer(list7, ContentContainer.ContentLayout.Vertical);
 			CodexCollapsibleHeader codexCollapsibleHeader2 = new CodexCollapsibleHeader(CODEX.ROOM_REQUIREMENT_CLASS.SHARED.ROOMS_REQUIRED_LIST_TITLE, contentContainer2);
 			list6.Add(codexCollapsibleHeader2);
 			list6.Add(new CodexSpacer());
@@ -133,21 +140,27 @@ public static class CodexEntryGenerator
 		StringEntry stringEntry2;
 		if (Strings.TryGet(new StringKey(text + ".CONFLICTINGROOMS"), out stringEntry2))
 		{
-			List<ICodexWidget> list7 = new List<ICodexWidget>();
-			ICodexWidget codexWidget5 = new CodexText(stringEntry2.String, CodexTextStyle.Body, null);
-			ContentContainer contentContainer3 = new ContentContainer(new List<ICodexWidget> { codexWidget5 }, ContentContainer.ContentLayout.Vertical);
+			List<ICodexWidget> list8 = new List<ICodexWidget>();
+			List<ICodexWidget> list9 = new List<ICodexWidget>();
+			string[] array2 = stringEntry2.String.Split(new char[] { '\n' });
+			for (int j = 0; j < array2.Length; j++)
+			{
+				ICodexWidget codexWidget5 = new CodexText(array2[j], CodexTextStyle.Body, null);
+				list9.Add(codexWidget5);
+			}
+			ContentContainer contentContainer3 = new ContentContainer(list9, ContentContainer.ContentLayout.Vertical);
 			CodexCollapsibleHeader codexCollapsibleHeader3 = new CodexCollapsibleHeader(CODEX.ROOM_REQUIREMENT_CLASS.SHARED.ROOMS_CONFLICT_LIST_TITLE, contentContainer3);
-			list7.Add(codexCollapsibleHeader3);
-			list7.Add(new CodexSpacer());
-			list7.Add(new CodexSpacer());
-			list7.Reverse();
-			list.Add(new ContentContainer(list7, ContentContainer.ContentLayout.Vertical));
+			list8.Add(codexCollapsibleHeader3);
+			list8.Add(new CodexSpacer());
+			list8.Add(new CodexSpacer());
+			list8.Reverse();
+			list.Add(new ContentContainer(list8, ContentContainer.ContentLayout.Vertical));
 			list.Add(contentContainer3);
 		}
-		List<ICodexWidget> list8 = new List<ICodexWidget>();
+		List<ICodexWidget> list10 = new List<ICodexWidget>();
 		ICodexWidget codexWidget6 = new CodexText(Strings.Get(text + ".FLAVOUR"), CodexTextStyle.Body, null);
-		list8.Add(codexWidget6);
-		list.Add(new ContentContainer(list8, ContentContainer.ContentLayout.Vertical));
+		list10.Add(codexWidget6);
+		list.Add(new ContentContainer(list10, ContentContainer.ContentLayout.Vertical));
 		CodexEntry codexEntry = new CodexEntry(categoryEntryID, list, RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(requirementClassTag));
 		Tag tag;
 		codexEntry.icon = (CodexEntryGenerator.RoomConstrainTagIcons.TryGetValue(requirementClassTag, out tag) ? Def.GetUISprite(tag, "ui", false).first : null);
@@ -846,7 +859,7 @@ public static class CodexEntryGenerator
 		Dictionary<Tag, List<BuildingDef>> dictionary2 = new Dictionary<Tag, List<BuildingDef>>();
 		foreach (BuildingDef buildingDef in Assets.BuildingDefs)
 		{
-			if (!buildingDef.Deprecated)
+			if (!buildingDef.Deprecated && !buildingDef.DebugOnly && (buildingDef.ShowInBuildMenu || buildingDef.BuildingComplete.HasTag(GameTags.RocketModule)))
 			{
 				foreach (string text in buildingDef.MaterialCategory)
 				{

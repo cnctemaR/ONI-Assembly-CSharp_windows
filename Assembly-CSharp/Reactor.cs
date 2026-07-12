@@ -252,9 +252,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 			float num = this.spentFuel * 100f;
 			if (num > 0f)
 			{
-				GameObject gameObject = ElementLoader.FindElementByHash(SimHashes.NuclearWaste).substance.SpawnResource(base.transform.position, num, activeFuel.Temperature, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.id), Mathf.RoundToInt(num * 50f), false, false, false);
-				gameObject.AddTag(GameTags.Stored);
-				this.wasteStorage.Store(gameObject, true, false, true, false);
+				this.wasteStorage.AddLiquid(SimHashes.NuclearWaste, num, activeFuel.Temperature, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.id), Mathf.RoundToInt(num * 50f), false, true);
 			}
 			if (this.wasteStorage.MassStored() >= 100f)
 			{

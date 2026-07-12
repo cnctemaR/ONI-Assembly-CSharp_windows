@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildingChoresPanel : TargetScreen
+public class BuildingChoresPanel : TargetPanel
 {
 	public override bool IsValidForTarget(GameObject target)
 	{
@@ -24,7 +24,7 @@ public class BuildingChoresPanel : TargetScreen
 		this.Refresh();
 	}
 
-	public override void OnSelectTarget(GameObject target)
+	protected override void OnSelectTarget(GameObject target)
 	{
 		base.OnSelectTarget(target);
 		this.Refresh();

@@ -94,7 +94,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		UtilityConnections connections = grid[cell].connections;
 		grid[cell].connections = (UtilityConnections)0;
 		Vector2I vector2I = Grid.CellToXY(cell);
-		if (vector2I.x > 1 && (connections & UtilityConnections.Left) != (UtilityConnections)0)
+		if (vector2I.x > 0 && (connections & UtilityConnections.Left) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array = grid;
 			int num = Grid.CellLeft(cell);
@@ -106,7 +106,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			int num2 = Grid.CellRight(cell);
 			array2[num2].connections = array2[num2].connections & ~UtilityConnections.Left;
 		}
-		if (vector2I.y > 1 && (connections & UtilityConnections.Down) != (UtilityConnections)0)
+		if (vector2I.y > 0 && (connections & UtilityConnections.Down) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array3 = grid;
 			int num3 = Grid.CellBelow(cell);
@@ -224,14 +224,14 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			ptr3[num] = 8;
 			num++;
 		}
-		if (vector2I.y > 1)
+		if (vector2I.y > 0)
 		{
 			ptr[num] = Grid.CellBelow(cell);
 			ptr2[num] = 8;
 			ptr3[num] = 4;
 			num++;
 		}
-		if (vector2I.x > 1)
+		if (vector2I.x > 0)
 		{
 			ptr[num] = Grid.CellLeft(cell);
 			ptr2[num] = 1;
@@ -356,13 +356,13 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			ptr2[num] = -9;
 			num++;
 		}
-		if (vector2I.y > 1)
+		if (vector2I.y > 0)
 		{
 			ptr[num] = Grid.CellBelow(cell);
 			ptr2[num] = -5;
 			num++;
 		}
-		if (vector2I.x > 1)
+		if (vector2I.x > 0)
 		{
 			ptr[num] = Grid.CellLeft(cell);
 			ptr2[num] = -3;
@@ -434,25 +434,25 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 					}
 					Vector2I vector2I = Grid.CellToXY(num2);
 					int num3 = 0;
-					if (vector2I.x >= 0)
+					if (vector2I.x > 0)
 					{
 						ptr[num3] = Grid.CellLeft(num2);
 						ptr2[num3] = 1;
 						num3++;
 					}
-					if (vector2I.x < Grid.WidthInCells)
+					if (vector2I.x < Grid.WidthInCells - 1)
 					{
 						ptr[num3] = Grid.CellRight(num2);
 						ptr2[num3] = 2;
 						num3++;
 					}
-					if (vector2I.y >= 0)
+					if (vector2I.y > 0)
 					{
 						ptr[num3] = Grid.CellBelow(num2);
 						ptr2[num3] = 8;
 						num3++;
 					}
-					if (vector2I.y < Grid.HeightInCells)
+					if (vector2I.y < Grid.HeightInCells - 1)
 					{
 						ptr[num3] = Grid.CellAbove(num2);
 						ptr2[num3] = 4;
@@ -593,7 +593,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 	{
 		UtilityConnections utilityConnections = (UtilityConnections)0;
 		Vector2I vector2I = Grid.CellToXY(cell);
-		if (vector2I.x > 1 && nodes.Contains(Grid.CellLeft(cell)))
+		if (vector2I.x > 0 && nodes.Contains(Grid.CellLeft(cell)))
 		{
 			utilityConnections |= UtilityConnections.Left;
 		}
@@ -601,7 +601,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		{
 			utilityConnections |= UtilityConnections.Right;
 		}
-		if (vector2I.y > 1 && nodes.Contains(Grid.CellBelow(cell)))
+		if (vector2I.y > 0 && nodes.Contains(Grid.CellBelow(cell)))
 		{
 			utilityConnections |= UtilityConnections.Down;
 		}

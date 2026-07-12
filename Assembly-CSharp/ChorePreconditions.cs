@@ -83,44 +83,12 @@ public class ChorePreconditions
 		};
 		this.IsAssignedtoMe = precondition;
 		precondition = default(Chore.Precondition);
-		precondition.id = "IsInMyWorld";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_IN_MY_WORLD;
-		precondition.sortOrder = -1;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return !context.chore.isNull && context.chore.gameObject.IsMyWorld(context.consumerState.gameObject);
-		};
-		this.IsInMyWorld = precondition;
-		precondition = default(Chore.Precondition);
-		precondition.id = "IsInMyParentWorld";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_IN_MY_WORLD;
-		precondition.sortOrder = -1;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return !context.chore.isNull && context.chore.gameObject.IsMyParentWorld(context.consumerState.gameObject);
-		};
-		this.IsInMyParentWorld = precondition;
-		precondition = default(Chore.Precondition);
-		precondition.id = "IsCellNotInMyWorld";
-		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CELL_NOT_IN_MY_WORLD;
-		precondition.sortOrder = -1;
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			if (!context.chore.isNull)
-			{
-				int num = (int)data;
-				return !Grid.IsValidCell(num) || (int)Grid.WorldIdx[num] != context.consumerState.gameObject.GetMyWorldId();
-			}
-			return false;
-		};
-		this.IsCellNotInMyWorld = precondition;
-		precondition = default(Chore.Precondition);
 		precondition.id = "IsInMyRoom";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_IN_MY_ROOM;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			int num2 = (int)data;
-			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num2);
+			int num = (int)data;
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
 			Room room = null;
 			if (cavityForCell != null)
 			{
@@ -314,7 +282,7 @@ public class ChorePreconditions
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && !(kmonoBehaviour == null) && context.consumerState.navigator.CanReach(kmonoBehaviour.GetComponent<Chattable>());
+			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && !(kmonoBehaviour == null) && context.consumerState.navigator.CanReach(Grid.PosToCell(kmonoBehaviour));
 		};
 		this.IsChattable = precondition;
 		precondition = default(Chore.Precondition);
@@ -354,10 +322,10 @@ public class ChorePreconditions
 				return false;
 			}
 			IApproachable approachable = (IApproachable)kmonoBehaviour2;
-			int num3;
-			if (context.consumerState.consumer.GetNavigationCost(approachable, out num3))
+			int num2;
+			if (context.consumerState.consumer.GetNavigationCost(approachable, out num2))
 			{
-				context.cost += num3;
+				context.cost += num2;
 				return true;
 			}
 			return false;
@@ -372,15 +340,15 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			int num4 = (int)data;
-			if (!Grid.IsValidCell(num4))
+			int num3 = (int)data;
+			if (!Grid.IsValidCell(num3))
 			{
 				return false;
 			}
-			int num5;
-			if (context.consumerState.consumer.GetNavigationCost(num4, out num5))
+			int num4;
+			if (context.consumerState.consumer.GetNavigationCost(num3, out num4))
 			{
-				context.cost += num5;
+				context.cost += num4;
 				return true;
 			}
 			return false;
@@ -392,7 +360,7 @@ public class ChorePreconditions
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Pickupable pickupable = (Pickupable)data;
-			return !(pickupable == null) && !(context.consumerState.consumer == null) && !pickupable.HasTag(GameTags.StoredPrivate) && pickupable.CouldBePickedUpByMinion(context.consumerState.gameObject) && context.consumerState.consumer.CanReach(pickupable);
+			return !(pickupable == null) && !(context.consumerState.consumer == null) && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate) && pickupable.CouldBePickedUpByMinion(context.consumerState.gameObject) && context.consumerState.consumer.CanReach(pickupable);
 		};
 		this.CanPickup = precondition;
 		precondition = default(Chore.Precondition);
@@ -547,10 +515,10 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			int num6 = 0;
-			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num6))
+			int num5 = 0;
+			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num5))
 			{
-				context.consumerPriority += num6;
+				context.consumerPriority += num5;
 				return true;
 			}
 			return false;
@@ -602,7 +570,7 @@ public class ChorePreconditions
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.NOT_A_ROBOT;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.consumerState.gameObject.GetComponent<MinionResume>() != null;
+			return context.consumerState.resume != null;
 		};
 		this.IsNotARobot = precondition;
 		precondition = default(Chore.Precondition);
@@ -643,12 +611,6 @@ public class ChorePreconditions
 	public Chore.Precondition IsPermitted;
 
 	public Chore.Precondition IsAssignedtoMe;
-
-	public Chore.Precondition IsInMyWorld;
-
-	public Chore.Precondition IsInMyParentWorld;
-
-	public Chore.Precondition IsCellNotInMyWorld;
 
 	public Chore.Precondition IsInMyRoom;
 

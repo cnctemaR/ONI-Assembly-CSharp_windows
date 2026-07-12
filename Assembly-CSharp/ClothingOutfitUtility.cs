@@ -89,62 +89,46 @@ public static class ClothingOutfitUtility
 			Dictionary<string, string> dictionary;
 			keyValuePair2.Deconstruct<string, Dictionary<string, string>>(out text3, out dictionary);
 			string text5 = text3;
-			Dictionary<string, string> dictionary2 = dictionary;
 			Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(text5);
 			if (personalityFromNameStringKey.IsNullOrDestroyed())
 			{
 				DebugUtil.DevAssert(false, "<Loadings Outfit Error> Couldn't find personality \"" + text5 + "\" to apply outfit preferences", null);
 			}
-			else
+			else if (text5 != personalityFromNameStringKey.Id)
 			{
-				foreach (KeyValuePair<string, string> keyValuePair3 in dictionary2)
-				{
-					string text6;
-					keyValuePair3.Deconstruct<string, string>(out text3, out text6);
-					string text7 = text3;
-					string text8 = text6;
-					ClothingOutfitUtility.OutfitType outfitType;
-					if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(text7, true, out outfitType))
-					{
-						personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType, text8);
-					}
-				}
-				if (text5 != personalityFromNameStringKey.Id)
-				{
-					list.Add(text5);
-				}
+				list.Add(text5);
 			}
 		}
-		foreach (string text9 in list)
+		foreach (string text6 in list)
 		{
-			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(text9);
-			if (!personalityFromNameStringKey2.IsNullOrDestroyed() && version.PersonalityIdToAssignedOutfits.ContainsKey(text9))
+			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(text6);
+			if (!personalityFromNameStringKey2.IsNullOrDestroyed() && version.PersonalityIdToAssignedOutfits.ContainsKey(text6))
 			{
 				string id = personalityFromNameStringKey2.Id;
-				Dictionary<string, string> dictionary3 = version.PersonalityIdToAssignedOutfits[text9];
-				version.PersonalityIdToAssignedOutfits.Remove(text9);
-				Dictionary<string, string> dictionary4;
-				if (version.PersonalityIdToAssignedOutfits.TryGetValue(id, out dictionary4))
+				Dictionary<string, string> dictionary2 = version.PersonalityIdToAssignedOutfits[text6];
+				version.PersonalityIdToAssignedOutfits.Remove(text6);
+				Dictionary<string, string> dictionary3;
+				if (version.PersonalityIdToAssignedOutfits.TryGetValue(id, out dictionary3))
 				{
-					using (Dictionary<string, string>.Enumerator enumerator3 = dictionary3.GetEnumerator())
+					using (Dictionary<string, string>.Enumerator enumerator4 = dictionary2.GetEnumerator())
 					{
-						while (enumerator3.MoveNext())
+						while (enumerator4.MoveNext())
 						{
-							KeyValuePair<string, string> keyValuePair4 = enumerator3.Current;
+							KeyValuePair<string, string> keyValuePair3 = enumerator4.Current;
 							string text3;
-							string text6;
-							keyValuePair4.Deconstruct<string, string>(out text6, out text3);
-							string text10 = text6;
-							string text11 = text3;
-							if (!dictionary4.ContainsKey(text10))
+							string text7;
+							keyValuePair3.Deconstruct<string, string>(out text3, out text7);
+							string text8 = text3;
+							string text9 = text7;
+							if (!dictionary3.ContainsKey(text8))
 							{
-								dictionary4[text10] = text11;
+								dictionary3[text8] = text9;
 							}
 						}
 						continue;
 					}
 				}
-				version.PersonalityIdToAssignedOutfits.Add(id, dictionary3);
+				version.PersonalityIdToAssignedOutfits.Add(id, dictionary2);
 			}
 		}
 		CustomClothingOutfits.Instance.Internal_SetOutfitData(version);

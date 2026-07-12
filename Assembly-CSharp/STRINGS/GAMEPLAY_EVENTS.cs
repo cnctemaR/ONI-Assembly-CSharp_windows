@@ -103,7 +103,7 @@ namespace STRINGS
 
 				public static LocString UNDERWAY_TOOLTIP = "There is a food fight happening now";
 
-				public static LocString ACCEPT_OPTION_NAME = "Dupes start preparing to fight.";
+				public static LocString ACCEPT_OPTION_NAME = "Duplicants start preparing to fight.";
 
 				public static LocString ACCEPT_OPTION_DETAILS = "(Plus morale)";
 

@@ -13,11 +13,15 @@ namespace Database
 
 		public override bool Success()
 		{
-			Dictionary<int, List<int>> dupesCompleteChoresInSuits = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().dupesCompleteChoresInSuits;
+			Dictionary<int, List<int>> dupesCompleteChoresInSuits = SaveGame.Instance.ColonyAchievementTracker.dupesCompleteChoresInSuits;
 			Dictionary<int, float> dictionary = new Dictionary<int, float>();
 			foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
 			{
-				dictionary.Add(minionIdentity.GetComponent<KPrefabID>().InstanceID, minionIdentity.arrivalTime);
+				KPrefabID component = minionIdentity.GetComponent<KPrefabID>();
+				if (!component.HasTag(GameTags.Dead))
+				{
+					dictionary.Add(component.InstanceID, minionIdentity.arrivalTime);
+				}
 			}
 			int num = 0;
 			int num2 = Math.Min(dupesCompleteChoresInSuits.Count, this.numCycles);
@@ -67,7 +71,7 @@ namespace Database
 		public int GetNumberOfDupesForCycle(int cycle)
 		{
 			int num = 0;
-			Dictionary<int, List<int>> dupesCompleteChoresInSuits = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().dupesCompleteChoresInSuits;
+			Dictionary<int, List<int>> dupesCompleteChoresInSuits = SaveGame.Instance.ColonyAchievementTracker.dupesCompleteChoresInSuits;
 			if (dupesCompleteChoresInSuits.ContainsKey(GameClock.Instance.GetCycle()))
 			{
 				num = dupesCompleteChoresInSuits[GameClock.Instance.GetCycle()].Count;

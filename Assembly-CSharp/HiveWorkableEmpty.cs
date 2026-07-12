@@ -23,7 +23,7 @@ public class HiveWorkableEmpty : Workable
 		base.OnCompleteWork(worker);
 		if (!this.wasStung)
 		{
-			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().harvestAHiveWithoutGettingStung = true;
+			SaveGame.Instance.ColonyAchievementTracker.harvestAHiveWithoutGettingStung = true;
 		}
 	}
 

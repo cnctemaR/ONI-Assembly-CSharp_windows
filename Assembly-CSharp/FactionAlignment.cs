@@ -19,6 +19,7 @@ public class FactionAlignment : KMonoBehaviour
 		Components.FactionAlignments.Add(this);
 		base.Subscribe<FactionAlignment>(493375141, FactionAlignment.OnRefreshUserMenuDelegate);
 		base.Subscribe<FactionAlignment>(2127324410, FactionAlignment.SetPlayerTargetedFalseDelegate);
+		base.Subscribe<FactionAlignment>(1502190696, FactionAlignment.OnQueueDestroyObjectDelegate);
 		if (this.alignmentActive)
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
@@ -70,6 +71,14 @@ public class FactionAlignment : KMonoBehaviour
 	public void SetPlayerTargeted(bool state)
 	{
 		this.targeted = this.canBePlayerTargeted && state && this.targetable;
+		if (state && !Components.PlayerTargeted.Items.Contains(this))
+		{
+			Components.PlayerTargeted.Add(this);
+		}
+		else
+		{
+			Components.PlayerTargeted.Remove(this);
+		}
 		this.UpdateStatusItem();
 	}
 
@@ -109,13 +118,13 @@ public class FactionAlignment : KMonoBehaviour
 		this.SetAlignmentActive(false);
 		this.Alignment = newAlignment;
 		this.SetAlignmentActive(true);
+		base.Trigger(-971105736, newAlignment);
 	}
 
-	protected override void OnCleanUp()
+	private void OnQueueDestroyObject()
 	{
-		Components.FactionAlignments.Remove(this);
 		FactionManager.Instance.GetFaction(this.Alignment).Members.Remove(this);
-		base.OnCleanUp();
+		Components.FactionAlignments.Remove(this);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -141,6 +150,9 @@ public class FactionAlignment : KMonoBehaviour
 		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELATTACK.TOOLTIP, true));
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
+
+	[MyCmpReq]
+	public KPrefabID kprefabID;
 
 	[SerializeField]
 	public bool canBePlayerTargeted = true;
@@ -174,5 +186,10 @@ public class FactionAlignment : KMonoBehaviour
 	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> SetPlayerTargetedFalseDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
 	{
 		component.SetPlayerTargeted(false);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnQueueDestroyObjectDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
+	{
+		component.OnQueueDestroyObject();
 	});
 }

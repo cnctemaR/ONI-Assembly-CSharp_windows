@@ -14,8 +14,10 @@ public class RoomProber : ISim1000ms
 		}
 		this.ProcessSolidChanges();
 		this.RefreshRooms();
-		World instance = World.Instance;
-		instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.SolidChangedEvent));
+		Game instance = Game.Instance;
+		instance.OnSpawnComplete = (global::System.Action)Delegate.Combine(instance.OnSpawnComplete, new global::System.Action(this.Refresh));
+		World instance2 = World.Instance;
+		instance2.OnSolidChanged = (Action<int>)Delegate.Combine(instance2.OnSolidChanged, new Action<int>(this.SolidChangedEvent));
 		GameScenePartitioner.Instance.AddGlobalLayerListener(GameScenePartitioner.Instance.objectLayers[1], new Action<int, object>(this.OnBuildingsChanged));
 		GameScenePartitioner.Instance.AddGlobalLayerListener(GameScenePartitioner.Instance.objectLayers[2], new Action<int, object>(this.OnBuildingsChanged));
 	}

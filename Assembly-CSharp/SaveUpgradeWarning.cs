@@ -75,14 +75,14 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			return;
 		}
-		ColonyAchievementTracker component = SaveGame.Instance.GetComponent<ColonyAchievementTracker>();
-		if (component == null)
+		ColonyAchievementTracker colonyAchievementTracker = SaveGame.Instance.ColonyAchievementTracker;
+		if (colonyAchievementTracker == null)
 		{
 			return;
 		}
 		ColonyAchievement basicComforts = Db.Get().ColonyAchievements.BasicComforts;
 		ColonyAchievementStatus colonyAchievementStatus = null;
-		if (component.achievements.TryGetValue(basicComforts.Id, out colonyAchievementStatus))
+		if (colonyAchievementTracker.achievements.TryGetValue(basicComforts.Id, out colonyAchievementStatus))
 		{
 			colonyAchievementStatus.failed = false;
 		}

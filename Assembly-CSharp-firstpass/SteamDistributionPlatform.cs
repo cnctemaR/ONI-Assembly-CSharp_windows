@@ -136,7 +136,7 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		uint num = this.DLCtoSteamIDMap[dlcID];
 		if (SteamManager.Initialized)
 		{
-			return SteamApps.BIsSubscribedApp(new AppId_t(num));
+			return SteamApps.BIsDlcInstalled(new AppId_t(num));
 		}
 		return Application.isEditor;
 	}

@@ -220,6 +220,12 @@ public class HarvestDesignatable : KMonoBehaviour
 
 	protected virtual void OnClickCancelHarvestWhenReady()
 	{
+		Harvestable component = base.GetComponent<Harvestable>();
+		if (component != null)
+		{
+			component.Trigger(2127324410, null);
+			return;
+		}
 		this.SetHarvestWhenReady(false);
 	}
 

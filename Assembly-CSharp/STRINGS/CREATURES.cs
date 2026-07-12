@@ -3394,6 +3394,23 @@ namespace STRINGS
 					public static LocString TOOLTIP = "This critter is relaxing in a water fort\n\nIt's like a mini vacation!";
 				}
 			}
+
+			public class AIRBORNECRITTERCONDO
+			{
+				public class MOVINGTO
+				{
+					public static LocString NAME = "Heading for Airborne Critter Condo";
+
+					public static LocString TOOLTIP = "This critter is making its way to an unoccupied airborne critter condo";
+				}
+
+				public class INTERACTING
+				{
+					public static LocString NAME = "Getting Cozy";
+
+					public static LocString TOOLTIP = "This critter is nesting in an airborne critter condo\n\nIt's like a mini vacation!";
+				}
+			}
 		}
 
 		public class STATS
@@ -4086,9 +4103,12 @@ namespace STRINGS
 
 			public class UNDERWATERCRITTERCONDOINTERACTEFFECT
 			{
-				public static LocString NAME = "Cozy";
-
 				public static LocString TOOLTIP = "This critter recently enjoyed a visit to a water fort";
+			}
+
+			public class AIRBORNECRITTERCONDOINTERACTEFFECT
+			{
+				public static LocString TOOLTIP = "This critter recently nested in an airborne critter condo";
 			}
 		}
 

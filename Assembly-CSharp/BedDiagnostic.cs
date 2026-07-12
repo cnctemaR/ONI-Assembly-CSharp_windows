@@ -54,6 +54,6 @@ public class BedDiagnostic : ColonyDiagnostic
 
 	public override string GetAverageValueString()
 	{
-		return Components.Sleepables.GetWorldItems(base.worldID, false).FindAll((Sleepable match) => match.GetComponent<Assignable>() != null).Count.ToString() + "/" + Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Count.ToString();
+		return Components.Sleepables.GetWorldItems(base.worldID, false).FindAll((Sleepable match) => match.GetComponent<Assignable>() != null && match.GetComponent<Clinic>() == null).Count.ToString() + "/" + Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Count.ToString();
 	}
 }

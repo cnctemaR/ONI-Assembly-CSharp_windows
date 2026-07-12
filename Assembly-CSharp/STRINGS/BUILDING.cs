@@ -1392,6 +1392,17 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This container is storing <b>{Stored}{Units}</b> of a maximum <b>{Capacity}{Units}</b>";
 			}
 
+			public class CRITTERCAPACITY
+			{
+				public static LocString NAME = "Storing: {Stored} / {Capacity} Critters";
+
+				public static LocString TOOLTIP = "This container is storing <b>{Stored} {StoredUnits}</b> of a maximum <b>{Capacity} {CapacityUnits}</b>";
+
+				public static LocString UNITS = "Critters";
+
+				public static LocString UNIT = "Critter";
+			}
+
 			public class SKILL_POINTS_AVAILABLE
 			{
 				public static LocString NAME = "Skill Points Available";
@@ -3259,6 +3270,13 @@ namespace STRINGS
 				public static LocString NAME = "In Orbit: {Destination}";
 
 				public static LocString TOOLTIP = "This rocket is currently in orbit around {Destination}";
+			}
+
+			public class WAITINGTOLAND
+			{
+				public static LocString NAME = "Waiting to land on {Destination}";
+
+				public static LocString TOOLTIP = "This rocket is waiting for an available Rcoket Platform on {Destination}";
 			}
 
 			public class INFLIGHT

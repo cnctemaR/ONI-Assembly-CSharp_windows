@@ -1094,7 +1094,7 @@ public class GameNavGrids
 		this.SwimmerGrid = new NavGrid("SwimmerNavGrid", array3, array4, array, new NavTableValidator[]
 		{
 			new GameNavGrids.SwimValidator()
-		}, 1, 1, array3.Length);
+		}, 1, 2, array3.Length);
 		pathfinding.AddNavGrid(this.SwimmerGrid);
 	}
 

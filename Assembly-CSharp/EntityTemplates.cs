@@ -252,6 +252,11 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToWildCreature(GameObject prefab, int space_required_per_creature)
 	{
+		return EntityTemplates.ExtendEntityToWildCreature(prefab, space_required_per_creature, true);
+	}
+
+	public static GameObject ExtendEntityToWildCreature(GameObject prefab, int space_required_per_creature, bool add_fixed_capturable_monitor)
+	{
 		prefab.AddOrGetDef<AgeMonitor.Def>();
 		prefab.AddOrGetDef<HappinessMonitor.Def>();
 		Tag prefabTag = prefab.GetComponent<KPrefabID>().PrefabTag;
@@ -263,6 +268,10 @@ public class EntityTemplates
 		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -1f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		prefab.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = space_required_per_creature;
+		if (add_fixed_capturable_monitor)
+		{
+			prefab.AddOrGetDef<FixedCapturableMonitor.Def>();
+		}
 		return prefab;
 	}
 
@@ -297,10 +306,6 @@ public class EntityTemplates
 		if (is_ranchable)
 		{
 			prefab.AddOrGetDef<RanchableMonitor.Def>();
-		}
-		if (add_fixed_capturable_monitor)
-		{
-			prefab.AddOrGetDef<FixedCapturableMonitor.Def>();
 		}
 		if (add_fish_overcrowding_monitor)
 		{

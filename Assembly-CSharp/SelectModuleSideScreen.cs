@@ -159,7 +159,7 @@ public class SelectModuleSideScreen : KScreen
 			this.facadeSelectionPanel = Util.KInstantiateUI<FacadeSelectionPanel>(this.facadeSelectionPanelPrefab, base.gameObject, true);
 			this.facadeSelectionPanel.transform.SetSiblingIndex(this.materialSelectionPanel.transform.GetSiblingIndex());
 		}
-		this.facadeSelectionPanel.SetBuildingDef(this.selectedModuleDef.PrefabID);
+		this.facadeSelectionPanel.SetBuildingDef(this.selectedModuleDef.PrefabID, null);
 	}
 
 	private bool IsDefBuildable(BuildingDef def)
@@ -480,7 +480,7 @@ public class SelectModuleSideScreen : KScreen
 			Vector2 anchoredPosition = this.mainContents.GetComponent<KScrollRect>().content.anchoredPosition;
 			if (this.facadeSelectionPanel.SelectedFacade != null && this.facadeSelectionPanel.SelectedFacade != "DEFAULT_FACADE")
 			{
-				gameObject2.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeSelectionPanel.SelectedFacade));
+				gameObject2.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeSelectionPanel.SelectedFacade), false);
 			}
 			SelectTool.Instance.StartCoroutine(this.SelectNextFrame(gameObject2.GetComponent<KSelectable>(), buildingDef, anchoredPosition.y));
 		}

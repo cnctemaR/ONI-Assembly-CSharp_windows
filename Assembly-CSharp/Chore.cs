@@ -36,7 +36,7 @@ public abstract class Chore
 
 	public abstract bool isNull { get; }
 
-	public bool IsValid()
+	public virtual bool IsValid()
 	{
 		return this.provider != null && this.gameObject.GetMyWorldId() != -1;
 	}
@@ -261,7 +261,7 @@ public abstract class Chore
 		if (this.addToDailyReport)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
-			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
+			SaveGame.Instance.ColonyAchievementTracker.LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
 		}
 		this.End(reason);
 		this.Cleanup();
@@ -299,7 +299,7 @@ public abstract class Chore
 		if (this.addToDailyReport)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
-			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
+			SaveGame.Instance.ColonyAchievementTracker.LogSuitChore((this.driver != null) ? this.driver : this.lastDriver);
 		}
 		this.End(reason);
 		this.Cleanup();

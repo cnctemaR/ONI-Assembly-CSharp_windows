@@ -54,7 +54,7 @@ public class AutoStorageDropper : GameStateMachine<AutoStorageDropper, AutoStora
 
 		public SimHashes[] elementFilter;
 
-		public bool invertElementFilter;
+		public bool invertElementFilterInitialValue;
 
 		public bool blockedBySubstantialLiquid;
 
@@ -77,14 +77,17 @@ public class AutoStorageDropper : GameStateMachine<AutoStorageDropper, AutoStora
 
 	public new class Instance : GameStateMachine<AutoStorageDropper, AutoStorageDropper.Instance, IStateMachineTarget, AutoStorageDropper.Def>.GameInstance
 	{
+		public bool isInvertElementFilter { get; private set; }
+
 		public Instance(IStateMachineTarget master, AutoStorageDropper.Def def)
 			: base(master, def)
 		{
+			this.isInvertElementFilter = def.invertElementFilterInitialValue;
 		}
 
 		public void SetInvertElementFilter(bool value)
 		{
-			base.def.invertElementFilter = value;
+			base.smi.isInvertElementFilter = value;
 			base.smi.sm.checkCanDrop.Trigger(base.smi);
 		}
 
@@ -109,7 +112,7 @@ public class AutoStorageDropper : GameStateMachine<AutoStorageDropper, AutoStora
 
 		private bool AllowedToDrop(SimHashes element)
 		{
-			return base.def.elementFilter == null || base.def.elementFilter.Length == 0 || (!base.def.invertElementFilter && this.IsFilteredElement(element)) || (base.def.invertElementFilter && !this.IsFilteredElement(element));
+			return base.def.elementFilter == null || base.def.elementFilter.Length == 0 || (!this.isInvertElementFilter && this.IsFilteredElement(element)) || (this.isInvertElementFilter && !this.IsFilteredElement(element));
 		}
 
 		public void Drop()

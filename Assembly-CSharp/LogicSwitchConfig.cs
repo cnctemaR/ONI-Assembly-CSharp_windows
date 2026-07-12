@@ -42,7 +42,6 @@ public class LogicSwitchConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<LogicSwitch>().manuallyControlled = false;
-		Prioritizable.AddRef(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 

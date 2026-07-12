@@ -948,7 +948,7 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 		{
 			return;
 		}
-		this.SetElapsedTime((float)this.curAnim.numFrames / this.curAnim.frameRate * percent);
+		this.SetElapsedTime((float)(this.curAnim.numFrames - 1) / this.curAnim.frameRate * percent);
 		int frameIdx = this.curAnim.GetFrameIdx(this.mode, this.elapsedTime);
 		if (this.currentFrame != frameIdx)
 		{

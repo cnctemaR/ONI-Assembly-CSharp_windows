@@ -44,7 +44,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 			this.selectionIdx++;
 			int num = this.selectionIdx % this.cachedPickupables.Count;
 			pickupable = this.cachedPickupables[num];
-			if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
+			if (pickupable != null && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate))
 			{
 				break;
 			}

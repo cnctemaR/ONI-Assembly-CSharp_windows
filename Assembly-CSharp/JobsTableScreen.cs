@@ -647,7 +647,6 @@ public class JobsTableScreen : TableScreen
 						keyValuePair.Value.on_load_action(id, keyValuePair2.Value);
 					}
 				}
-				keyValuePair.Value.on_load_action(null, this.rows[0].GetWidget(keyValuePair.Value));
 			}
 		}
 	}

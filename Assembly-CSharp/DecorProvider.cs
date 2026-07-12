@@ -16,7 +16,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			this.currDecor = this.decor.GetTotalValue();
 		}
-		if (base.gameObject.HasTag(GameTags.Stored))
+		if (this.prefabId.HasTag(GameTags.Stored))
 		{
 			this.currDecor = 0f;
 		}
@@ -113,18 +113,17 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		this.Clear();
 		this.AddDecor();
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		bool flag = component.HasTag(RoomConstraints.ConstraintTags.Decor20);
+		bool flag = this.prefabId.HasTag(RoomConstraints.ConstraintTags.Decor20);
 		bool flag2 = this.decor.GetTotalValue() >= 20f;
 		if (flag != flag2)
 		{
 			if (flag2)
 			{
-				component.AddTag(RoomConstraints.ConstraintTags.Decor20, false);
+				this.prefabId.AddTag(RoomConstraints.ConstraintTags.Decor20, false);
 			}
 			else
 			{
-				component.RemoveTag(RoomConstraints.ConstraintTags.Decor20);
+				this.prefabId.RemoveTag(RoomConstraints.ConstraintTags.Decor20);
 			}
 			int num = Grid.PosToCell(this);
 			if (Grid.IsValidCell(num))
@@ -293,6 +292,9 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 	private AttributeModifier baseDecorModifier;
 
 	private AttributeModifier baseDecorRadiusModifier;
+
+	[MyCmpReq]
+	private KPrefabID prefabId;
 
 	[MyCmpReq]
 	public OccupyArea occupyArea;

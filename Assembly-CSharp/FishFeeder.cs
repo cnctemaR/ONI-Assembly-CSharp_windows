@@ -35,7 +35,6 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 	private static void CleanupFishFeederTopAndBot(FishFeeder.Instance smi)
 	{
 		smi.fishFeederTop.Cleanup();
-		smi.fishFeederBot.Cleanup();
 	}
 
 	private static void MoveStoredContentsToConsumeOffset(FishFeeder.Instance smi)
@@ -153,21 +152,10 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		private void FillFeeder(float mass)
 		{
 			KBatchedAnimController component = this.smi.GetComponent<KBatchedAnimController>();
-			SymbolOverrideController component2 = this.smi.GetComponent<SymbolOverrideController>();
-			KAnim.Build.Symbol symbol = null;
-			Storage component3 = this.smi.GetComponent<Storage>();
-			if (component3.items.Count > 0 && component3.items[0] != null)
-			{
-				symbol = this.smi.GetComponent<Storage>().items[0].GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("algae");
-			}
 			for (int i = 0; i < this.ballSymbols.Length; i++)
 			{
 				bool flag = mass > (float)(i + 1) * this.massPerBall;
 				component.SetSymbolVisiblity(this.ballSymbols[i], flag);
-				if (symbol != null)
-				{
-					component2.AddSymbolOverride(this.ballSymbols[i], symbol, 0);
-				}
 			}
 		}
 
@@ -242,6 +230,11 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			Storage[] components = smi.gameObject.GetComponents<Storage>();
 			this.topStorage = components[0];
 			this.botStorage = components[1];
+			if (!this.botStorage.IsEmpty())
+			{
+				this.SetBallSymbol(this.botStorage.items[0].gameObject);
+				this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
+			}
 		}
 
 		public void RefreshStorage()
@@ -271,17 +264,10 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				}
 				if (num2 > 0f)
 				{
-					this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, true);
-					this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
 					Pickupable pickupable = this.topStorage.items[0].GetComponent<Pickupable>().Take(this.massPerBall);
-					KAnim.Build.Symbol symbol = pickupable.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("algae");
-					if (symbol != null)
-					{
-						this.anim.GetComponent<SymbolOverrideController>().AddSymbolOverride(FishFeeder.FishFeederBot.HASH_FEEDBALL, symbol, 0);
-					}
+					this.SetBallSymbol(pickupable.gameObject);
+					this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
 					this.botStorage.Store(pickupable.gameObject, false, false, true, false);
-					int num3 = Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this.smi.transform.GetPosition())));
-					pickupable.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.BuildingUse));
 				}
 				else
 				{
@@ -291,8 +277,23 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 			this.refreshingStorage = false;
 		}
 
-		public void Cleanup()
+		private void SetBallSymbol(GameObject stored_go)
 		{
+			if (stored_go == null)
+			{
+				return;
+			}
+			this.anim.SetSymbolVisiblity(FishFeeder.FishFeederBot.HASH_FEEDBALL, true);
+			KAnim.Build build = stored_go.GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build;
+			KAnim.Build.Symbol symbol = (stored_go.HasTag(GameTags.Seed) ? build.GetSymbol("object") : build.GetSymbol("algae"));
+			if (symbol != null)
+			{
+				this.anim.GetComponent<SymbolOverrideController>().AddSymbolOverride(FishFeeder.FishFeederBot.HASH_FEEDBALL, symbol, 0);
+			}
+			HashedString hashedString = new HashedString("FishFeeder" + stored_go.GetComponent<KPrefabID>().PrefabTag.Name);
+			this.anim.SetBatchGroupOverride(hashedString);
+			int num = Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this.smi.transform.GetPosition())));
+			stored_go.transform.SetPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.BuildingUse));
 		}
 
 		private KBatchedAnimController anim;

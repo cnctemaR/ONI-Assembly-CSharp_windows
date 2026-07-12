@@ -1,9 +1,20 @@
 ﻿using System;
+using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
 
 public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, OvercrowdingMonitor.Instance, IStateMachineTarget, OvercrowdingMonitor.Def>
 {
+	[Conditional("DETAILED_OVERCROWDING_MONITOR_PROFILE")]
+	private static void BeginDetailedSample(string regionName)
+	{
+	}
+
+	[Conditional("DETAILED_OVERCROWDING_MONITOR_PROFILE")]
+	private static void EndDetailedSample(string regionName)
+	{
+	}
+
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
@@ -12,15 +23,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static bool IsConfined(OvercrowdingMonitor.Instance smi)
 	{
-		if (smi.def.spaceRequiredPerCreature == 0)
-		{
-			return false;
-		}
-		if (smi.HasTag(GameTags.Creatures.Burrowed))
-		{
-			return false;
-		}
-		if (smi.HasTag(GameTags.Creatures.Digger))
+		if (smi.kpid.HasAnyTags(OvercrowdingMonitor.confinementImmunity))
 		{
 			return false;
 		}
@@ -31,8 +34,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			{
 				return true;
 			}
-			FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
-			if (smi2 != null && smi2.cellCount < smi.def.spaceRequiredPerCreature)
+			if (smi.fishOvercrowdingMonitor.cellCount < smi.def.spaceRequiredPerCreature)
 			{
 				return true;
 			}
@@ -53,10 +55,6 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static bool IsFutureOvercrowded(OvercrowdingMonitor.Instance smi)
 	{
-		if (smi.def.spaceRequiredPerCreature == 0)
-		{
-			return false;
-		}
 		if (smi.cavity != null)
 		{
 			int num = smi.cavity.creatures.Count + smi.cavity.eggs.Count;
@@ -67,20 +65,15 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static int CalculateOvercrowdedModifer(OvercrowdingMonitor.Instance smi)
 	{
-		if (smi.def.spaceRequiredPerCreature == 0)
+		if (smi.fishOvercrowdingMonitor != null)
 		{
-			return 0;
-		}
-		FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
-		if (smi2 != null)
-		{
-			int fishCount = smi2.fishCount;
+			int fishCount = smi.fishOvercrowdingMonitor.fishCount;
 			if (fishCount <= 0)
 			{
 				return 0;
 			}
-			int num = smi2.cellCount / smi.def.spaceRequiredPerCreature;
-			if (num < smi2.fishCount)
+			int num = smi.fishOvercrowdingMonitor.cellCount / smi.def.spaceRequiredPerCreature;
+			if (num < smi.fishOvercrowdingMonitor.fishCount)
 			{
 				return -(fishCount - num);
 			}
@@ -111,15 +104,14 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		{
 			return false;
 		}
-		FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
-		if (smi2 == null)
+		if (smi.fishOvercrowdingMonitor == null)
 		{
 			return smi.cavity != null && smi.cavity.creatures.Count > 1 && smi.cavity.numCells / smi.cavity.creatures.Count < smi.def.spaceRequiredPerCreature;
 		}
-		int fishCount = smi2.fishCount;
+		int fishCount = smi.fishOvercrowdingMonitor.fishCount;
 		if (fishCount > 0)
 		{
-			return smi2.cellCount / fishCount < smi.def.spaceRequiredPerCreature;
+			return smi.fishOvercrowdingMonitor.cellCount / fishCount < smi.def.spaceRequiredPerCreature;
 		}
 		int num = Grid.PosToCell(smi);
 		return Grid.IsValidCell(num) && !Grid.IsLiquid(num);
@@ -127,37 +119,49 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static void UpdateState(OvercrowdingMonitor.Instance smi, float dt)
 	{
+		bool flag = smi.kpid.HasTag(GameTags.Creatures.Confined);
+		bool flag2 = smi.kpid.HasTag(GameTags.Creatures.Expecting);
+		bool flag3 = smi.kpid.HasTag(GameTags.Creatures.Overcrowded);
 		OvercrowdingMonitor.UpdateCavity(smi, dt);
-		bool flag = OvercrowdingMonitor.IsConfined(smi);
-		bool flag2 = OvercrowdingMonitor.IsOvercrowded(smi);
-		bool flag3 = !smi.isBaby && OvercrowdingMonitor.IsFutureOvercrowded(smi);
-		KPrefabID component = smi.gameObject.GetComponent<KPrefabID>();
-		Effect effect = (smi.isFish ? smi.fishOvercrowdedEffect : smi.overcrowdedEffect);
-		component.SetTag(GameTags.Creatures.Confined, flag);
-		component.SetTag(GameTags.Creatures.Overcrowded, flag2);
-		component.SetTag(GameTags.Creatures.Expecting, flag3);
-		if (!smi.isFish)
+		if (smi.def.spaceRequiredPerCreature == 0)
 		{
-			smi.overcrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+			return;
 		}
-		else
+		bool flag4 = OvercrowdingMonitor.IsConfined(smi);
+		bool flag5 = OvercrowdingMonitor.IsOvercrowded(smi);
+		if (flag5)
 		{
-			smi.fishOvercrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+			if (!smi.isFish)
+			{
+				smi.overcrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+			}
+			else
+			{
+				smi.fishOvercrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+			}
 		}
-		OvercrowdingMonitor.SetEffect(smi, smi.stuckEffect, flag);
-		OvercrowdingMonitor.SetEffect(smi, effect, !flag && flag2);
-		OvercrowdingMonitor.SetEffect(smi, smi.futureOvercrowdedEffect, !flag && flag3);
+		bool flag6 = !smi.isBaby && OvercrowdingMonitor.IsFutureOvercrowded(smi);
+		if (flag != flag4 || flag2 != flag6 || flag3 != flag5)
+		{
+			KPrefabID kpid = smi.kpid;
+			Effect effect = (smi.isFish ? smi.fishOvercrowdedEffect : smi.overcrowdedEffect);
+			kpid.SetTag(GameTags.Creatures.Confined, flag4);
+			kpid.SetTag(GameTags.Creatures.Overcrowded, flag5);
+			kpid.SetTag(GameTags.Creatures.Expecting, flag6);
+			OvercrowdingMonitor.SetEffect(smi, smi.stuckEffect, flag4);
+			OvercrowdingMonitor.SetEffect(smi, effect, !flag4 && flag5);
+			OvercrowdingMonitor.SetEffect(smi, smi.futureOvercrowdedEffect, !flag4 && flag6);
+		}
 	}
 
 	private static void SetEffect(OvercrowdingMonitor.Instance smi, Effect effect, bool set)
 	{
-		Effects component = smi.GetComponent<Effects>();
 		if (set)
 		{
-			component.Add(effect, false);
+			smi.effects.Add(effect, false);
 			return;
 		}
-		component.Remove(effect);
+		smi.effects.Remove(effect);
 	}
 
 	private static void UpdateCavity(OvercrowdingMonitor.Instance smi, float dt)
@@ -165,29 +169,28 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(smi));
 		if (cavityForCell != smi.cavity)
 		{
-			KPrefabID component = smi.GetComponent<KPrefabID>();
 			if (smi.cavity != null)
 			{
-				if (smi.HasTag(GameTags.Egg))
+				if (smi.kpid.HasTag(GameTags.Egg))
 				{
-					smi.cavity.RemoveFromCavity(component, smi.cavity.eggs);
+					smi.cavity.RemoveFromCavity(smi.kpid, smi.cavity.eggs);
 				}
 				else
 				{
-					smi.cavity.RemoveFromCavity(component, smi.cavity.creatures);
+					smi.cavity.RemoveFromCavity(smi.kpid, smi.cavity.creatures);
 				}
 				Game.Instance.roomProber.UpdateRoom(cavityForCell);
 			}
 			smi.cavity = cavityForCell;
 			if (smi.cavity != null)
 			{
-				if (smi.HasTag(GameTags.Egg))
+				if (smi.kpid.HasTag(GameTags.Egg))
 				{
-					smi.cavity.eggs.Add(component);
+					smi.cavity.eggs.Add(smi.kpid);
 				}
 				else
 				{
-					smi.cavity.creatures.Add(component);
+					smi.cavity.creatures.Add(smi.kpid);
 				}
 				Game.Instance.roomProber.UpdateRoom(smi.cavity);
 			}
@@ -195,6 +198,12 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 	}
 
 	public const float OVERCROWDED_FERTILITY_DEBUFF = -1f;
+
+	public static Tag[] confinementImmunity = new Tag[]
+	{
+		GameTags.Creatures.Burrowed,
+		GameTags.Creatures.Digger
+	};
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -230,13 +239,12 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			{
 				return;
 			}
-			KPrefabID component = base.master.GetComponent<KPrefabID>();
-			if (base.HasTag(GameTags.Egg))
+			if (this.kpid.HasTag(GameTags.Egg))
 			{
-				this.cavity.RemoveFromCavity(component, this.cavity.eggs);
+				this.cavity.RemoveFromCavity(this.kpid, this.cavity.eggs);
 				return;
 			}
-			this.cavity.RemoveFromCavity(component, this.cavity.creatures);
+			this.cavity.RemoveFromCavity(this.kpid, this.cavity.creatures);
 		}
 
 		public void RoomRefreshUpdateCavity()
@@ -261,5 +269,14 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		public AttributeModifier fishOvercrowdedModifier;
 
 		public Effect stuckEffect;
+
+		[MyCmpReq]
+		public KPrefabID kpid;
+
+		[MyCmpReq]
+		public Effects effects;
+
+		[MySmiGet]
+		public FishOvercrowdingMonitor.Instance fishOvercrowdingMonitor;
 	}
 }

@@ -80,6 +80,11 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 					amountInstance2.value = num * amountInstance2.GetMax();
 				}
 			}
+			EffectInstance effectInstance = base.gameObject.GetComponent<Effects>().Get("AteFromFeeder");
+			if (effectInstance != null)
+			{
+				gameObject.GetComponent<Effects>().Add(effectInstance.effect, effectInstance.shouldSave).timeRemaining = effectInstance.timeRemaining;
+			}
 			if (!base.smi.def.forceAdultNavType)
 			{
 				Navigator component = base.smi.GetComponent<Navigator>();

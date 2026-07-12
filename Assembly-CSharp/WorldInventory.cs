@@ -238,7 +238,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		{
 			foreach (Pickupable pickupable in collection2)
 			{
-				if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate) && !pickupable.HasAnyTags(forbiddenTags))
+				if (pickupable != null && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate) && !pickupable.KPrefabID.HasAnyTags(forbiddenTags))
 				{
 					num += pickupable.TotalAmount;
 				}
@@ -262,7 +262,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 				float num2 = 0f;
 				foreach (Pickupable pickupable in value)
 				{
-					if (pickupable != null && pickupable.GetMyWorldId() == worldId && !pickupable.HasTag(GameTags.StoredPrivate))
+					if (pickupable != null && pickupable.GetMyWorldId() == worldId && !pickupable.KPrefabID.HasTag(GameTags.StoredPrivate))
 					{
 						num2 += pickupable.TotalAmount;
 					}

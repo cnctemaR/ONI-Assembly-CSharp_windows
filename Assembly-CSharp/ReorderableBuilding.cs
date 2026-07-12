@@ -134,9 +134,13 @@ public class ReorderableBuilding : KMonoBehaviour
 		}
 		Building component2 = base.GetComponent<Building>();
 		component2.Def.UnmarkArea(Grid.PosToCell(this), component2.Orientation, component2.Def.ObjectLayer, base.gameObject);
-		if (attachableBuilding != null && attachableBuilding.GetComponent<ReorderableBuilding>() != null)
+		if (attachableBuilding != null)
 		{
-			attachableBuilding.GetComponent<ReorderableBuilding>().MoveVertical(-heightInCells);
+			ReorderableBuilding component3 = attachableBuilding.GetComponent<ReorderableBuilding>();
+			if (component3 != null)
+			{
+				component3.MoveVertical(-heightInCells);
+			}
 		}
 	}
 

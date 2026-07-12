@@ -41,13 +41,13 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 						int num4 = Grid.PosToCell(pickupable);
 						if (Vector3.Distance(smi.gameObject.transform.position, pickupable.gameObject.transform.position) < Grid.CellSizeInMeters)
 						{
-							if (pickupable.PrefabID() == "SweepBot" && num4 == num)
+							if (pickupable.KPrefabID.IsPrefabID("SweepBot") && num4 == num)
 							{
 								smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("bump");
 								smi2.sm.headingRight.Set(!smi2.sm.headingRight.Get(smi2), smi2, false);
 								flag = true;
 							}
-							else if (pickupable.HasTag(GameTags.Creature))
+							else if (pickupable.KPrefabID.HasTag(GameTags.Creature))
 							{
 								flag2 = true;
 							}

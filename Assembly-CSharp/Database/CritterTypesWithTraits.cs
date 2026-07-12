@@ -20,7 +20,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().tamedCritterTypes;
+			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.ColonyAchievementTracker.tamedCritterTypes;
 			bool flag = true;
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
@@ -33,7 +33,7 @@ namespace Database
 		public void UpdateSavedState()
 		{
 			this.revisedCritterTypesToCheckState.Clear();
-			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().tamedCritterTypes;
+			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.ColonyAchievementTracker.tamedCritterTypes;
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
 				this.revisedCritterTypesToCheckState.Add(keyValuePair.Key, tamedCritterTypes.Contains(keyValuePair.Key));

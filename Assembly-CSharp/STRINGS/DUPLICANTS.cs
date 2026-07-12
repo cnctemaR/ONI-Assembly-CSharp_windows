@@ -6245,7 +6245,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Alone";
 
-				public static LocString TOOLTIP = "This Duplicant is more feeling focused now that they're alone";
+				public static LocString TOOLTIP = "This Duplicant is feeling more focused now that they're alone";
 			}
 
 			public class STARRYEYED
@@ -7957,6 +7957,13 @@ namespace STRINGS
 				public static LocString DESC = "Determines a Duplicant's default runspeed.";
 
 				public static LocString SPEEDMODIFIER = "{0} Runspeed";
+			}
+
+			public class LUMINESCENCE
+			{
+				public static LocString NAME = "Luminescence";
+
+				public static LocString DESC = "Determines how much light a Duplicant emits.";
 			}
 
 			public class TRANSITTUBETRAVELSPEED

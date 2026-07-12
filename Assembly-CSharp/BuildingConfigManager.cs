@@ -18,6 +18,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<BuildingComplete>();
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
+		this.baseTemplate.AddComponent<Reconstructable>();
 		this.baseTemplate.AddComponent<SaveLoadRoot>();
 		this.baseTemplate.AddComponent<OccupyArea>();
 		this.baseTemplate.AddComponent<DecorProvider>();

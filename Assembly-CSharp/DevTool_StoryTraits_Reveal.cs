@@ -7,11 +7,11 @@ public class DevTool_StoryTraits_Reveal : DevTool
 {
 	protected override void RenderTo(DevPanel panel)
 	{
-		Option<int> cellIndexForUniqueBuilding = DevToolUtil.GetCellIndexForUniqueBuilding("Headquarters");
-		bool flag = cellIndexForUniqueBuilding.IsSome();
+		int num;
+		bool flag = DevToolUtil.TryGetCellIndexForUniqueBuilding("Headquarters", out num);
 		if (ImGuiEx.Button("Focus on headquaters", flag))
 		{
-			DevToolUtil.FocusCameraOnCell(cellIndexForUniqueBuilding.Unwrap());
+			DevToolUtil.FocusCameraOnCell(num);
 		}
 		if (!flag)
 		{
@@ -19,22 +19,23 @@ public class DevTool_StoryTraits_Reveal : DevTool
 		}
 		if (ImGui.CollapsingHeader("Search world for entity", ImGuiTreeNodeFlags.DefaultOpen))
 		{
-			Option<IReadOnlyList<WorldGenSpawner.Spawnable>> allSpawnables = this.GetAllSpawnables();
-			if (!allSpawnables.HasValue)
+			IReadOnlyList<WorldGenSpawner.Spawnable> allSpawnables = this.GetAllSpawnables();
+			if (allSpawnables == null)
 			{
 				ImGui.Text("Couldn't find a list of spawnables");
 				return;
 			}
 			foreach (string text in this.GetPrefabIDsToSearchFor())
 			{
-				Option<int> cellIndexForSpawnable = this.GetCellIndexForSpawnable(text, allSpawnables.Value);
+				int num2;
+				bool cellIndexForSpawnable = this.GetCellIndexForSpawnable(text, allSpawnables, out num2);
 				string text2 = "\"" + text + "\"";
-				bool hasValue = cellIndexForSpawnable.HasValue;
-				if (ImGuiEx.Button("Reveal and focus on " + text2, hasValue))
+				bool flag2 = cellIndexForSpawnable;
+				if (ImGuiEx.Button("Reveal and focus on " + text2, flag2))
 				{
-					DevToolUtil.RevealAndFocusAt(cellIndexForSpawnable.Value);
+					DevToolUtil.RevealAndFocusAt(num2);
 				}
-				if (!hasValue)
+				if (!flag2)
 				{
 					ImGuiEx.TooltipForPrevious("Couldn't find a cell that contained a spawnable with component " + text2);
 				}
@@ -51,39 +52,32 @@ public class DevTool_StoryTraits_Reveal : DevTool
 		yield break;
 	}
 
-	private Option<ClusterManager> GetClusterManager()
-	{
-		if (ClusterManager.Instance == null)
-		{
-			return Option.None;
-		}
-		return ClusterManager.Instance;
-	}
-
-	private Option<int> GetCellIndexForSpawnable(string prefabId, IReadOnlyList<WorldGenSpawner.Spawnable> spawnablesToSearch)
+	private bool GetCellIndexForSpawnable(string prefabId, IReadOnlyList<WorldGenSpawner.Spawnable> spawnablesToSearch, out int cellIndex)
 	{
 		foreach (WorldGenSpawner.Spawnable spawnable in spawnablesToSearch)
 		{
 			if (prefabId == spawnable.spawnInfo.id)
 			{
-				return spawnable.cell;
+				cellIndex = spawnable.cell;
+				return true;
 			}
 		}
-		return Option.None;
+		cellIndex = -1;
+		return false;
 	}
 
-	private Option<IReadOnlyList<WorldGenSpawner.Spawnable>> GetAllSpawnables()
+	private IReadOnlyList<WorldGenSpawner.Spawnable> GetAllSpawnables()
 	{
 		WorldGenSpawner worldGenSpawner = global::UnityEngine.Object.FindObjectOfType<WorldGenSpawner>(true);
 		if (worldGenSpawner == null)
 		{
-			return Option.None;
+			return null;
 		}
 		IReadOnlyList<WorldGenSpawner.Spawnable> spawnables = worldGenSpawner.GetSpawnables();
 		if (spawnables == null)
 		{
-			return Option.None;
+			return null;
 		}
-		return Option.Some<IReadOnlyList<WorldGenSpawner.Spawnable>>(spawnables);
+		return spawnables;
 	}
 }

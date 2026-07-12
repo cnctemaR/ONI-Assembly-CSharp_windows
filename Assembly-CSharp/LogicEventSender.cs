@@ -73,7 +73,7 @@ internal class LogicEventSender : ILogicEventSender, ILogicNetworkConnection, IL
 
 	private int cell;
 
-	private int logicValue = -1;
+	private int logicValue = -16;
 
 	private Action<int, int> onValueChanged;
 

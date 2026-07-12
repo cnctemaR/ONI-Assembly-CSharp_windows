@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Database;
 using Klei.AI;
 using ProcGen;
 using UnityEngine;
@@ -929,6 +931,48 @@ public class EconomyDetails
 						streamWriter.Write(",");
 					}
 					streamWriter.Write("\n");
+				}
+			}
+			using (List<PermitResource>.Enumerator enumerator2 = Db.Get().Permits.resources.GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					PermitResource permit = enumerator2.Current;
+					if (BuildingFacades.Infos_Skins.Any<BuildingFacades.Info>((BuildingFacades.Info info) => info.Id == permit.Id) || ClothingItems.Infos_Skins.Any<ClothingItems.Info>((ClothingItems.Info info) => info.id == permit.Id) || ArtableStages.Infos_Skins.Any<ArtableStages.Info>((ArtableStages.Info info) => info.id == permit.Id))
+					{
+						string text4 = TagManager.StripLinkFormatting(permit.Name);
+						streamWriter.Write(text4);
+						string id = permit.Id;
+						streamWriter.Write("," + id);
+						BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
+						string text5;
+						if (buildingFacadeResource != null)
+						{
+							text5 = buildingFacadeResource.AnimFile;
+						}
+						else
+						{
+							ClothingItemResource clothingItemResource = permit as ClothingItemResource;
+							if (clothingItemResource != null)
+							{
+								text5 = clothingItemResource.AnimFile.name;
+							}
+							else
+							{
+								ArtableStage artableStage = permit as ArtableStage;
+								if (artableStage != null)
+								{
+									text5 = artableStage.animFile;
+								}
+								else
+								{
+									text5 = "";
+								}
+							}
+						}
+						streamWriter.Write("," + text5);
+						streamWriter.Write("\n");
+					}
 				}
 			}
 		}

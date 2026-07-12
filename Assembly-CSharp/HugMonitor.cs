@@ -59,6 +59,8 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 
 	private static string soundPath = GlobalAssets.GetSound("Squirrel_hug_frenzyFX", false);
 
+	private static Effect hugEffect;
+
 	private StateMachine<HugMonitor, HugMonitor.Instance, IStateMachineTarget, HugMonitor.Def>.FloatParameter hugFrenzyTimer;
 
 	private StateMachine<HugMonitor, HugMonitor.Instance, IStateMachineTarget, HugMonitor.Def>.FloatParameter wantsHugCooldownTimer;
@@ -95,6 +97,8 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 		public float hugFrenzyCooldownFailed = 120f;
 
 		public float scanningIntervalFrenzy = 15f;
+
+		public int maxSearchCost = 30;
 	}
 
 	public class HugReadyStates : GameStateMachine<HugMonitor, HugMonitor.Instance, IStateMachineTarget, HugMonitor.Def>.State
@@ -118,6 +122,10 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 		{
 			this.frenzyEffect = Db.Get().effects.Get("HuggingFrenzy");
 			this.RefreshSearchTime();
+			if (HugMonitor.hugEffect == null)
+			{
+				HugMonitor.hugEffect = Db.Get().effects.Get("EggHug");
+			}
 			base.smi.sm.wantsHugCooldownTimer.Set(global::UnityEngine.Random.Range(base.smi.def.hugFrenzyCooldownFailed, base.smi.def.hugFrenzyCooldown), base.smi, false);
 		}
 
@@ -181,62 +189,48 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 
 		private void FindEgg()
 		{
+			int num = Grid.PosToCell(base.gameObject);
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			int num2 = base.def.maxSearchCost;
 			this.hugTarget = null;
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			ListPool<KMonoBehaviour, SquirrelHugConfig>.PooledList pooledList2 = ListPool<KMonoBehaviour, SquirrelHugConfig>.Allocate();
-			Vector3 position = base.master.transform.GetPosition();
-			Extents extents = new Extents(Grid.PosToCell(position), 10);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.completeBuildings, pooledList);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
-			Navigator component = base.GetComponent<Navigator>();
-			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+			if (cavityForCell != null)
 			{
-				KMonoBehaviour kmonoBehaviour = scenePartitionerEntry.obj as KMonoBehaviour;
-				KPrefabID component2 = kmonoBehaviour.GetComponent<KPrefabID>();
-				if (!component2.HasTag(GameTags.Creatures.ReservedByCreature))
+				foreach (KPrefabID kprefabID in cavityForCell.eggs)
 				{
-					int num = Grid.PosToCell(kmonoBehaviour);
-					if (component.CanReach(num))
+					if (!kprefabID.HasTag(GameTags.Creatures.ReservedByCreature) && !kprefabID.GetComponent<Effects>().HasEffect(HugMonitor.hugEffect))
 					{
-						EggIncubator component3 = kmonoBehaviour.GetComponent<EggIncubator>();
-						if (component3 != null)
+						int num3 = Grid.PosToCell(kprefabID);
+						if (kprefabID.HasTag(GameTags.Stored))
 						{
-							if (component3.Occupant == null || component3.Occupant.HasTag(GameTags.Creatures.ReservedByCreature) || !component3.Occupant.HasTag(GameTags.Egg))
+							GameObject gameObject;
+							KPrefabID kprefabID2;
+							if (!Grid.ObjectLayers[1].TryGetValue(num3, out gameObject) || !gameObject.TryGetComponent<KPrefabID>(out kprefabID2) || !kprefabID2.IsPrefabID("EggIncubator"))
 							{
 								continue;
 							}
-							if (component3.Occupant.GetComponent<Effects>().HasEffect("EggHug"))
-							{
-								continue;
-							}
+							num3 = Grid.PosToCell(gameObject);
+							kprefabID = kprefabID2;
 						}
-						else if (!component2.HasTag(GameTags.Egg) || kmonoBehaviour.GetComponent<Effects>().HasEffect("EggHug"))
+						int navigationCost = this.navigator.GetNavigationCost(num3);
+						if (navigationCost != -1 && navigationCost < num2)
 						{
-							continue;
+							this.hugTarget = kprefabID;
+							num2 = navigationCost;
 						}
-						pooledList2.Add(kmonoBehaviour);
 					}
 				}
 			}
-			if (pooledList2.Count > 0)
-			{
-				int num2 = global::UnityEngine.Random.Range(0, pooledList2.Count);
-				KMonoBehaviour kmonoBehaviour2 = pooledList2[num2];
-				this.hugTarget = kmonoBehaviour2.gameObject;
-			}
-			pooledList.Recycle();
-			pooledList2.Recycle();
 		}
 
 		public GameObject hugParticleFx;
 
 		public Vector3 hugParticleOffset;
 
-		public GameObject hugTarget;
+		public Effect frenzyEffect;
+
+		public KPrefabID hugTarget;
 
 		[MyCmpGet]
-		private Effects effects;
-
-		public Effect frenzyEffect;
+		private Navigator navigator;
 	}
 }

@@ -188,7 +188,7 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "Immovable_Object", null));
 			this.IdleDuplicants = base.Add(new ColonyAchievement("IdleDuplicants", "IDLE_DUPLICANTS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
-				new DupesVsSolidTransferArmFetch(0.51f, 5)
+				new DupesVsSolidTransferArmFetch(1f, 5)
 			}, "", "", "", "", null, default(EventReference), "easy_livin", null));
 			this.ExosuitCycles = base.Add(new ColonyAchievement("ExosuitCycles", "EXOSUIT_CYCLES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXOSUIT_CYCLES, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXOSUIT_CYCLES_DESCRIPTION, 10), false, new List<ColonyAchievementRequirement>
 			{

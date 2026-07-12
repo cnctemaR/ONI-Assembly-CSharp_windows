@@ -44,15 +44,15 @@ public class Diggable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = Grid.PosToCell(this);
-		this.originalDigElement = Grid.Element[num];
+		this.cached_cell = Grid.PosToCell(this);
+		this.originalDigElement = Grid.Element[this.cached_cell];
 		if (this.originalDigElement.hardness == 255)
 		{
 			this.OnCancel();
 		}
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForDig, null);
 		this.UpdateColor(this.isReachable);
-		Grid.Objects[num, 7] = base.gameObject;
+		Grid.Objects[this.cached_cell, 7] = base.gameObject;
 		ChoreType choreType = Db.Get().ChoreTypes.Dig;
 		if (this.choreTypeIdHash.IsValid)
 		{
@@ -66,6 +66,11 @@ public class Diggable : Workable
 		base.Subscribe<Diggable>(493375141, Diggable.OnRefreshUserMenuDelegate);
 		this.handle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		Components.Diggables.Add(this);
+	}
+
+	public override int GetCell()
+	{
+		return this.cached_cell;
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -107,16 +112,15 @@ public class Diggable : Workable
 			return;
 		}
 		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
-		int num = Grid.PosToCell(this);
-		int num2 = -1;
+		int num = -1;
 		this.UpdateColor(this.isReachable);
-		if (Grid.Element[num].hardness == 255)
+		if (Grid.Element[this.cached_cell].hardness == 255)
 		{
 			this.UpdateColor(false);
 			this.requiredSkillPerk = null;
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDigUnobtanium);
 		}
-		else if (Grid.Element[num].hardness >= 251)
+		else if (Grid.Element[this.cached_cell].hardness >= 251)
 		{
 			bool flag = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -137,7 +141,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigRadioactiveMaterials.Id;
 			this.materialDisplay.sharedMaterial = this.materials[3];
 		}
-		else if (Grid.Element[num].hardness >= 200)
+		else if (Grid.Element[this.cached_cell].hardness >= 200)
 		{
 			bool flag2 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -158,7 +162,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigSuperDuperHard.Id;
 			this.materialDisplay.sharedMaterial = this.materials[3];
 		}
-		else if (Grid.Element[num].hardness >= 150)
+		else if (Grid.Element[this.cached_cell].hardness >= 150)
 		{
 			bool flag3 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -179,7 +183,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigNearlyImpenetrable.Id;
 			this.materialDisplay.sharedMaterial = this.materials[2];
 		}
-		else if (Grid.Element[num].hardness >= 50)
+		else if (Grid.Element[this.cached_cell].hardness >= 50)
 		{
 			bool flag4 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -207,10 +211,10 @@ public class Diggable : Workable
 		}
 		this.UpdateStatusItem(null);
 		bool flag5 = false;
-		if (!Grid.Solid[num])
+		if (!Grid.Solid[this.cached_cell])
 		{
-			num2 = Diggable.GetUnstableCellAbove(num);
-			if (num2 == -1)
+			num = Diggable.GetUnstableCellAbove(this.cached_cell);
+			if (num == -1)
 			{
 				flag5 = true;
 			}
@@ -219,18 +223,18 @@ public class Diggable : Workable
 				base.StartCoroutine("PeriodicUnstableFallingRecheck");
 			}
 		}
-		else if (Grid.Foundation[num])
+		else if (Grid.Foundation[this.cached_cell])
 		{
 			flag5 = true;
 		}
 		if (!flag5)
 		{
-			if (num2 != -1)
+			if (num != -1)
 			{
 				Extents extents = default(Extents);
-				Grid.CellToXY(num, out extents.x, out extents.y);
+				Grid.CellToXY(this.cached_cell, out extents.x, out extents.y);
 				extents.width = 1;
-				extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
+				extents.height = (num - this.cached_cell + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
 				this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 			}
 			return;
@@ -246,8 +250,7 @@ public class Diggable : Workable
 
 	public Element GetTargetElement()
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition());
-		return Grid.Element[num];
+		return Grid.Element[this.cached_cell];
 	}
 
 	public override string GetConversationTopic()
@@ -257,7 +260,7 @@ public class Diggable : Workable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		Diggable.DoDigTick(Grid.PosToCell(this), dt);
+		Diggable.DoDigTick(this.cached_cell, dt);
 		return this.isDigComplete;
 	}
 
@@ -271,12 +274,11 @@ public class Diggable : Workable
 
 	public override bool InstantlyFinish(Worker worker)
 	{
-		int num = Grid.PosToCell(this);
-		if (Grid.Element[num].hardness == 255)
+		if (Grid.Element[this.cached_cell].hardness == 255)
 		{
 			return false;
 		}
-		float approximateDigTime = Diggable.GetApproximateDigTime(num);
+		float approximateDigTime = Diggable.GetApproximateDigTime(this.cached_cell);
 		worker.Work(approximateDigTime);
 		return true;
 	}
@@ -472,6 +474,8 @@ public class Diggable : Workable
 	private MeshRenderer childRenderer;
 
 	private bool isReachable;
+
+	private int cached_cell = -1;
 
 	private Element originalDigElement;
 

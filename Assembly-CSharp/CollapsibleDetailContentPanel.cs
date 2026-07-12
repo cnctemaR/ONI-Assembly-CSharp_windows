@@ -87,7 +87,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		label.used = true;
 	}
 
-	public void SetLabelWithButton(string id, string text, string tooltip, string buttonText, string buttonTooltip, global::System.Action buttonCb)
+	public void SetLabelWithButton(string id, string text, string tooltip, global::System.Action buttonCb)
 	{
 		CollapsibleDetailContentPanel.Label<DetailLabelWithButton> label;
 		if (!this.buttonLabels.TryGetValue(id, out label))
@@ -100,11 +100,10 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 			label.obj.gameObject.name = id;
 			this.buttonLabels[id] = label;
 		}
-		label.obj.label.AllowLinks = true;
+		label.obj.label.AllowLinks = false;
+		label.obj.label.raycastTarget = false;
 		label.obj.label.text = text;
 		label.obj.toolTip.toolTip = tooltip;
-		label.obj.buttonLabel.text = buttonText;
-		label.obj.buttonToolTip.toolTip = buttonTooltip;
 		label.obj.button.ClearOnClick();
 		label.obj.button.onClick += buttonCb;
 		label.used = true;
@@ -130,6 +129,14 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
 			componentsInChildren[i].ForceMeshUpdate();
+		}
+	}
+
+	public void SetActive(bool active)
+	{
+		if (base.gameObject.activeSelf != active)
+		{
+			base.gameObject.SetActive(active);
 		}
 	}
 

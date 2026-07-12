@@ -64,7 +64,7 @@ public class StorageTileConfig : IBuildingConfig
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		Prioritizable.AddRef(go);
-		go.AddOrGetDef<RocketUsageRestriction.Def>();
+		go.AddOrGetDef<RocketUsageRestriction.Def>().restrictOperational = false;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

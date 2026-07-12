@@ -98,21 +98,34 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.GrantedSkillIDs.RemoveAll((string x) => Db.Get().Skills.TryGet(x) == null);
+		List<string> list = new List<string>();
+		foreach (string text in this.MasteryBySkillID.Keys)
+		{
+			if (Db.Get().Skills.TryGet(text) == null)
+			{
+				list.Add(text);
+			}
+		}
+		foreach (string text2 in list)
+		{
+			this.MasteryBySkillID.Remove(text2);
+		}
 		if (this.GrantedSkillIDs == null)
 		{
 			this.GrantedSkillIDs = new List<string>();
 		}
-		List<string> list = new List<string>();
+		List<string> list2 = new List<string>();
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
 			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).deprecated)
 			{
-				list.Add(keyValuePair.Key);
+				list2.Add(keyValuePair.Key);
 			}
 		}
-		foreach (string text in list)
+		foreach (string text3 in list2)
 		{
-			this.UnmasterSkill(text);
+			this.UnmasterSkill(text3);
 		}
 		foreach (KeyValuePair<string, bool> keyValuePair2 in this.MasteryBySkillID)
 		{

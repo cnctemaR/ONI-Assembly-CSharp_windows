@@ -132,7 +132,14 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 
 	private static void StoreOre(BeeForageStates.Instance smi)
 	{
-		smi.master.GetComponent<Storage>().Transfer(smi.targetHive.GetComponent<Storage>(), false, false);
+		if (smi.targetHive.IsNullOrDestroyed())
+		{
+			smi.GoTo(smi.sm.storage.dropMaterial);
+		}
+		else
+		{
+			smi.master.GetComponent<Storage>().Transfer(smi.targetHive.GetComponent<Storage>(), false, false);
+		}
 		smi.forageTarget = null;
 		smi.forageTarget_cell = Grid.InvalidCell;
 		smi.targetHive = null;
@@ -178,12 +185,12 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
-			if (pickupable2 && pickupable2.GetComponent<ElementChunk>() && pickupable2.GetComponent<PrimaryElement>() && pickupable2.GetComponent<PrimaryElement>().Element == element && !pickupable2.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature))
+			if (!(pickupable2 == null) && !(pickupable2.PrimaryElement == null) && pickupable2.PrimaryElement.Element == element && !pickupable2.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature))
 			{
 				int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable2));
 				if (navigationCost != -1 && navigationCost < num)
 				{
-					pickupable = pickupable2.GetComponent<Pickupable>();
+					pickupable = pickupable2;
 					num = navigationCost;
 				}
 			}

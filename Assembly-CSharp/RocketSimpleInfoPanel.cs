@@ -49,7 +49,7 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 				UI.CLUSTERMAP.ROCKETS.OXIDIZER_REMAINING.NAME,
 				GameUtil.GetFormattedMass(craftModuleInterface.OxidizerPowerRemaining, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 			});
-			rocketStatusContainer.SetLabel("RangeRemaining", UI.CLUSTERMAP.ROCKETS.RANGE.NAME + GameUtil.GetFormattedRocketRange(craftModuleInterface.Range, GameUtil.TimeSlice.None, true), text3);
+			rocketStatusContainer.SetLabel("RangeRemaining", UI.CLUSTERMAP.ROCKETS.RANGE.NAME + GameUtil.GetFormattedRocketRange(craftModuleInterface.RangeInTiles, true), text3);
 			string text4 = string.Concat(new string[]
 			{
 				UI.CLUSTERMAP.ROCKETS.SPEED.TOOLTIP,
@@ -60,7 +60,7 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 				UI.CLUSTERMAP.ROCKETS.BURDEN_TOTAL.NAME,
 				craftModuleInterface.TotalBurden.ToString()
 			});
-			rocketStatusContainer.SetLabel("Speed", UI.CLUSTERMAP.ROCKETS.SPEED.NAME + GameUtil.GetFormattedRocketRange(craftModuleInterface.Speed, GameUtil.TimeSlice.PerCycle, true), text4);
+			rocketStatusContainer.SetLabel("Speed", UI.CLUSTERMAP.ROCKETS.SPEED.NAME + GameUtil.GetFormattedRocketRangePerCycle(craftModuleInterface.Speed, true), text4);
 			if (craftModuleInterface.GetEngine() != null)
 			{
 				string text5 = string.Format(UI.CLUSTERMAP.ROCKETS.MAX_HEIGHT.TOOLTIP, craftModuleInterface.GetEngine().GetProperName(), craftModuleInterface.MaxHeight.ToString());
@@ -79,8 +79,6 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 					ArtifactModule component = @ref.Get().GetComponent<ArtifactModule>();
 					if (component != null)
 					{
-						GameObject gameObject = this.simpleInfoRoot.AddOrGetStorageLabel(this.artifactModuleLabels, rocketStatusContainer, "artifactModule_" + num.ToString());
-						num++;
 						string text6;
 						if (component.Occupant != null)
 						{
@@ -90,8 +88,8 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 						{
 							text6 = string.Format("{0}: {1}", component.GetProperName(), UI.CLUSTERMAP.ROCKETS.ARTIFACT_MODULE.EMPTY);
 						}
-						gameObject.GetComponentInChildren<LocText>().text = text6;
-						gameObject.SetActive(true);
+						rocketStatusContainer.SetLabel("artifactModule_" + num.ToString(), text6, "");
+						num++;
 					}
 				}
 				List<CargoBayCluster> allCargoBays = clustercraft.GetAllCargoBays();
@@ -107,18 +105,15 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 					foreach (CargoBayCluster cargoBayCluster in allCargoBays)
 					{
 						pooledList.Clear();
-						GameObject gameObject2 = this.simpleInfoRoot.AddOrGetStorageLabel(this.cargoBayLabels, rocketStatusContainer, "cargoBay_" + num2.ToString());
 						Storage storage = cargoBayCluster.storage;
 						string text7 = string.Format("{0}: {1}/{2}", cargoBayCluster.GetComponent<KPrefabID>().GetProperName(), GameUtil.GetFormattedMass(storage.MassStored(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), GameUtil.GetFormattedMass(storage.capacityKg, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-						foreach (GameObject gameObject3 in storage.GetItems())
+						foreach (GameObject gameObject in storage.GetItems())
 						{
-							KPrefabID component2 = gameObject3.GetComponent<KPrefabID>();
-							PrimaryElement component3 = gameObject3.GetComponent<PrimaryElement>();
+							KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+							PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
 							string text8 = string.Format("{0} : {1}", component2.GetProperName(), GameUtil.GetFormattedMass(component3.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 							pooledList.Add(new global::Tuple<string, TextStyleSetting>(text8, PluginAssets.Instance.defaultTextStyleSetting));
 						}
-						num2++;
-						gameObject2.GetComponentInChildren<LocText>().text = text7;
 						string text9 = "";
 						for (int i = 0; i < pooledList.Count; i++)
 						{
@@ -128,7 +123,8 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 								text9 += "\n";
 							}
 						}
-						gameObject2.GetComponentInChildren<ToolTip>().SetSimpleTooltip(text9);
+						rocketStatusContainer.SetLabel("cargoBay_" + num2.ToString(), text7, text9);
+						num2++;
 					}
 					pooledList.Recycle();
 				}

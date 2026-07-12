@@ -49,7 +49,7 @@ public class GameplayEventPreconditions
 	{
 		return new GameplayEventPrecondition
 		{
-			condition = () => SaveGame.Instance.GetComponent<ColonyAchievementTracker>().IsAchievementUnlocked(achievement),
+			condition = () => SaveGame.Instance.ColonyAchievementTracker.IsAchievementUnlocked(achievement),
 			description = "Unlocked the " + achievement.Id + " achievement"
 		};
 	}

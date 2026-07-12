@@ -125,14 +125,14 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 					return false;
 				}
 			}
-			this.submerged = this.submerged || Grid.IsSubstantialLiquid(cell, 0.35f);
-			bool flag = this.navType != NavType.Swim;
-			bool flag2 = this.navType == NavType.Swim || this.allowLiquid;
-			if (this.submerged && !flag2)
+			bool flag = this.submerged || Grid.IsNavigatableLiquid(cell);
+			bool flag2 = this.navType != NavType.Swim;
+			bool flag3 = this.navType == NavType.Swim || this.allowLiquid;
+			if (flag && !flag3)
 			{
 				return false;
 			}
-			if (!this.submerged && !flag)
+			if (!flag && !flag2)
 			{
 				return false;
 			}

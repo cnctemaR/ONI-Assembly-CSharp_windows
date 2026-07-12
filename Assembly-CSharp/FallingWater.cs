@@ -72,7 +72,6 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		int num = Grid.PosToCell(root_pos);
 		if (!Grid.IsValidCell(num))
 		{
-			KCrashReporter.Assert(false, "Trying to add falling water outside of the scene");
 			return;
 		}
 		if (temperature <= 0f || base_mass <= 0f)

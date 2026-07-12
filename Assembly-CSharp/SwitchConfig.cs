@@ -35,7 +35,6 @@ public class SwitchConfig : IBuildingConfig
 		CircuitSwitch circuitSwitch = go.AddOrGet<CircuitSwitch>();
 		circuitSwitch.objectLayer = ObjectLayer.Wire;
 		circuitSwitch.manuallyControlled = false;
-		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

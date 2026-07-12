@@ -40,8 +40,6 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public KButtonMenu OwnerScreen;
 
-	public EnergyInfoScreen EnergyInfoScreen;
-
 	public KButtonMenu ButtonGrid;
 
 	public NameDisplayScreen NameDisplayScreen;

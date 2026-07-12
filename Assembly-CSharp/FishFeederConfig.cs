@@ -57,7 +57,9 @@ public class FishFeederConfig : IBuildingConfig
 		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
 		Db.Get().effects.Add(effect);
 		go.AddOrGet<TreeFilterable>().filterAllStoragesOnBuilding = true;
-		go.AddOrGet<CreatureFeeder>().effectId = effect.Id;
+		CreatureFeeder creatureFeeder = go.AddOrGet<CreatureFeeder>();
+		creatureFeeder.effectId = effect.Id;
+		creatureFeeder.feederOffset = new CellOffset(0, -2);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

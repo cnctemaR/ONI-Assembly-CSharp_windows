@@ -48,15 +48,22 @@ namespace STRINGS
 				"). Each ice element has a different freezing and melting point based upon its composition and state."
 			});
 
-			public static LocString PHOSPHORUS = "Phosphorus";
+			public static LocString PHOSPHORUS = UI.FormatAsLink("Phosphorus", "PHOSPHORUS");
 
-			public static LocString BUILDABLERAW = "Raw Mineral";
+			public static LocString BUILDABLERAW = UI.FormatAsLink("Raw Mineral", "BUILDABLERAW");
 
-			public static LocString BUILDABLERAW_DESC = "";
+			public static LocString BUILDABLERAW_DESC = string.Concat(new string[]
+			{
+				"Raw minerals are the unrefined forms of organic solids. Almost all raw minerals can be processed in the ",
+				UI.FormatAsLink("Rock Crusher", "ROCKCRUSHER"),
+				", although a handful require the use of the ",
+				UI.FormatAsLink("Molecular Forge", "SUPERMATERIALREFINERY"),
+				"."
+			});
 
-			public static LocString BUILDABLEPROCESSED = "Refined Mineral";
+			public static LocString BUILDABLEPROCESSED = UI.FormatAsLink("Refined Mineral", "BUILDABLEPROCESSED");
 
-			public static LocString BUILDABLEANY = "General Buildable";
+			public static LocString BUILDABLEANY = UI.FormatAsLink("General Buildable", "BUILDABLEANY");
 
 			public static LocString BUILDABLEANY_DESC = "";
 
@@ -73,49 +80,67 @@ namespace STRINGS
 				"."
 			});
 
-			public static LocString METAL = "Metal Ore";
+			public static LocString METAL = UI.FormatAsLink("Metal Ore", "METAL");
 
-			public static LocString METAL_DESC = "";
+			public static LocString METAL_DESC = string.Concat(new string[]
+			{
+				"Metal ore is the raw form of metal, and has a wide variety of practical applications in electronics and general construction.\n\nMetal ore is typically processed into ",
+				UI.FormatAsLink("Refined Metal", "REFINEDMETAL"),
+				" using the ",
+				UI.FormatAsLink("Rock Crusher", "ROCKCRUSHER"),
+				" or the ",
+				UI.FormatAsLink("Metal Refinery", "METALREFINERY"),
+				".\n\nSome rare metal ores can also be refined in the ",
+				UI.FormatAsLink("Molecular Forge", "SUPERMATERIALREFINERY"),
+				"."
+			});
 
-			public static LocString PRECIOUSMETAL = "Precious Metal";
+			public static LocString PRECIOUSMETAL = UI.FormatAsLink("Precious Metal", "PRECIOUSMETAL");
 
 			public static LocString RAWPRECIOUSMETAL = "Precious Metal Ore";
 
-			public static LocString PRECIOUSROCK = "Precious Rock";
+			public static LocString PRECIOUSROCK = UI.FormatAsLink("Precious Rock", "PRECIOUSROCK");
 
-			public static LocString PRECIOUSROCK_DESC = "";
+			public static LocString PRECIOUSROCK_DESC = "Precious rocks are raw minerals. Their extreme hardness produces durable " + UI.FormatAsLink("Decor", "DECOR") + ".\n\nSome precious rocks are inherently attractive even in their natural, unfinished form.";
 
-			public static LocString ALLOY = "Alloy";
+			public static LocString ALLOY = UI.FormatAsLink("Alloy", "ALLOY");
 
-			public static LocString BUILDINGFIBER = "Fiber";
+			public static LocString BUILDINGFIBER = UI.FormatAsLink("Fiber", "BUILDINGFIBER");
 
-			public static LocString BUILDINGFIBER_DESC = "";
+			public static LocString BUILDINGFIBER_DESC = "Fibers are organically sourced polymers which are both sturdy and sensorially pleasant, making them suitable in the construction of " + UI.FormatAsLink("Morale", "MORALE") + "-boosting buildings.";
 
-			public static LocString BUILDINGWOOD = "Wood";
+			public static LocString BUILDINGWOOD = UI.FormatAsLink("Wood", "BUILDINGWOOD");
 
-			public static LocString BUILDINGWOOD_DESC = "";
+			public static LocString BUILDINGWOOD_DESC = string.Concat(new string[]
+			{
+				"Wood is a renewable building material which can also be used as valuable fuel and electricity when refined at the ",
+				UI.FormatAsLink("Wood Burner", "WOODGASGENERATOR"),
+				" or the ",
+				UI.FormatAsLink("Ethanol Distiller", "ETHANOLDISTILLERY"),
+				"."
+			});
 
 			public static LocString CRUSHABLE = "Crushable";
 
 			public static LocString CROPSEEDS = "Crop Seeds";
 
-			public static LocString BAGABLECREATURE = "Critter";
+			public static LocString BAGABLECREATURE = UI.FormatAsLink("Critter", "CREATURES");
 
 			public static LocString SWIMMINGCREATURE = "Aquatic Critter";
 
 			public static LocString LIFE = "Life";
 
-			public static LocString LIQUIFIABLE = "Liquefiable";
+			public static LocString LIQUIFIABLE = UI.FormatAsLink("Liquefiable", "LIQUIFIABLE");
 
-			public static LocString LIQUID = "Liquid";
+			public static LocString LIQUID = UI.FormatAsLink("Liquid", "LIQUID");
 
 			public static LocString SPECIAL = "Special";
 
-			public static LocString FARMABLE = "Cultivable Soil";
+			public static LocString FARMABLE = UI.FormatAsLink("Cultivable Soil", "FARMABLE");
 
-			public static LocString FARMABLE_DESC = "";
+			public static LocString FARMABLE_DESC = "Cultivable soil is a fundamental building block of basic agricultural systems and can also be useful in the production of clean " + UI.FormatAsLink("Oxygen", "OXYGEN") + ".";
 
-			public static LocString AGRICULTURE = "Agriculture";
+			public static LocString AGRICULTURE = UI.FormatAsLink("Agriculture", "AGRICULTURE");
 
 			public static LocString COAL = "Coal";
 
@@ -141,19 +166,19 @@ namespace STRINGS
 
 			public static LocString MIXTURE = "Mixture";
 
-			public static LocString SOLID = "Solid";
+			public static LocString SOLID = UI.FormatAsLink("Solid", "ELEMENTS_SOLID");
 
 			public static LocString FLYINGCRITTEREDIBLE = "Bait";
 
 			public static LocString INDUSTRIALPRODUCT = "Industrial Product";
 
-			public static LocString INDUSTRIALINGREDIENT = "Industrial Ingredient";
+			public static LocString INDUSTRIALINGREDIENT = UI.FormatAsLink("Industrial Ingredient", "INDUSTRIALINGREDIENT");
 
 			public static LocString MEDICALSUPPLIES = "Medical Supplies";
 
-			public static LocString CLOTHES = "Clothing";
+			public static LocString CLOTHES = UI.FormatAsLink("Clothing", "EQUIPMENT");
 
-			public static LocString EMITSLIGHT = "Light Emitter";
+			public static LocString EMITSLIGHT = UI.FormatAsLink("Light Emitter", "LIGHT");
 
 			public static LocString BED = "Bed";
 
@@ -173,7 +198,7 @@ namespace STRINGS
 
 			public static LocString EXTRUDABLE = "Extrudable";
 
-			public static LocString PLUMBABLE = "Plumbable";
+			public static LocString PLUMBABLE = UI.FormatAsLink("Plumbable", "PLUMBABLE");
 
 			public static LocString PLUMBABLE_DESC = "";
 
@@ -214,9 +239,16 @@ namespace STRINGS
 
 			public static LocString PICKLED = "Pickled";
 
-			public static LocString PLASTIC = "Plastics";
+			public static LocString PLASTIC = UI.FormatAsLink("Plastics", "PLASTIC");
 
-			public static LocString PLASTIC_DESC = "";
+			public static LocString PLASTIC_DESC = string.Concat(new string[]
+			{
+				"Plastics are synthetic ",
+				UI.FormatAsLink("Solids", "ELEMENTSSOLID"),
+				" that are pliable and minimize the transfer of ",
+				UI.FormatAsLink("Heat", "Heat"),
+				". They typically have a low melting point, although more advanced plastics have been developed to circumvent this issue."
+			});
 
 			public static LocString TOILET = "Toilet";
 
@@ -248,7 +280,14 @@ namespace STRINGS
 
 			public static LocString TRANSPARENT = "Transparent";
 
-			public static LocString TRANSPARENT_DESC = "";
+			public static LocString TRANSPARENT_DESC = string.Concat(new string[]
+			{
+				"Transparent materials allow ",
+				UI.FormatAsLink("Light", "LIGHT"),
+				" to pass through. Illumination boosts Duplicant productivity during working hours, but undermines sleep quality.\n\nTransparency is also important for buildings that require a clear line of sight in order to function correctly, such as the ",
+				UI.FormatAsLink("Space Scanner", "COMETDETECTOR"),
+				"."
+			});
 
 			public static LocString RAREMATERIALS = "Rare Resource";
 
@@ -256,7 +295,7 @@ namespace STRINGS
 
 			public static LocString INSULATOR = "Insulator";
 
-			public static LocString INSULATOR_DESC = "";
+			public static LocString INSULATOR_DESC = "Insulators have low thermal conductivity, and effectively reduce the speed at which " + UI.FormatAsLink("Heat", "Heat") + " is transferred through them.";
 
 			public static LocString RAILGUNPAYLOADEMPTYABLE = "Payload";
 
@@ -388,9 +427,16 @@ namespace STRINGS
 
 			public class REHYDRATEDFOOD
 			{
-				public static LocString NAME = "Rehydrated food";
+				public static LocString NAME = "Rehydrated Food";
 
-				public static LocString TOOLTIP = string.Format("Not quite as good as fresh, causes a {0} to {1}", -1f, UI.FormatAsLink(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME, DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME));
+				public static LocString TOOLTIP = string.Format(string.Concat(new string[]
+				{
+					"This food has been carefully re-moistened for consumption\n\n",
+					UI.PRE_KEYWORD,
+					"{1}",
+					UI.PST_KEYWORD,
+					": {0}"
+				}), -1f, UI.FormatAsLink(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME, DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.NAME));
 			}
 
 			public class MARKEDFORDISINFECTION

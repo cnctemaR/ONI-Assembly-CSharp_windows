@@ -165,7 +165,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(587362U);
+		this.changelistsPlayedOn.Add(596100U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -816,6 +816,11 @@ public class Game : KMonoBehaviour
 
 	private void LateUpdate()
 	{
+		if (this.OnSpawnComplete != null)
+		{
+			this.OnSpawnComplete();
+			this.OnSpawnComplete = null;
+		}
 		if (Time.timeScale == 0f && !this.IsPaused)
 		{
 			this.IsPaused = true;
@@ -915,7 +920,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 587362U;
+		uint num = 596100U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1139,9 +1144,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(587362U))
+		if (!this.changelistsPlayedOn.Contains(596100U))
 		{
-			this.changelistsPlayedOn.Add(587362U);
+			this.changelistsPlayedOn.Add(596100U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1586,6 +1591,7 @@ public class Game : KMonoBehaviour
 		DiscoveredResources.DestroyInstance();
 		ClusterMapSelectTool.DestroyInstance();
 		StoryManager.DestroyInstance();
+		AnimEventHandlerManager.DestroyInstance();
 		Game.Instance = null;
 		Game.BrainScheduler = null;
 		Grid.OnReveal = null;
@@ -1607,6 +1613,8 @@ public class Game : KMonoBehaviour
 	public Action<Game.GameSaveData> OnSave;
 
 	public Action<Game.GameSaveData> OnLoad;
+
+	public global::System.Action OnSpawnComplete;
 
 	[NonSerialized]
 	public bool baseAlreadyCreated;

@@ -249,20 +249,20 @@ public class Grid
 
 	public static bool ReserveEmptyLocker(int cell, int minionInstanceID, bool reserve)
 	{
-		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
+		DebugUtil.Assert(Grid.HasSuitMarker[cell], "No suit marker");
 		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
 		HashSet<int> minionIDsWithEmptyLockerReservations = suitMarker.minionIDsWithEmptyLockerReservations;
 		if (!reserve)
 		{
 			bool flag = minionIDsWithEmptyLockerReservations.Remove(minionInstanceID);
-			DebugUtil.Assert(flag);
+			DebugUtil.Assert(flag, "Reservation not removed");
 			return flag;
 		}
 		if (minionIDsWithEmptyLockerReservations.Count >= suitMarker.emptyLockerCount)
 		{
 			return false;
 		}
-		DebugUtil.Assert(minionIDsWithEmptyLockerReservations.Add(minionInstanceID));
+		DebugUtil.Assert(minionIDsWithEmptyLockerReservations.Add(minionInstanceID), "Reservation not made");
 		return true;
 	}
 
@@ -491,14 +491,24 @@ public class Grid
 
 	public static int GetCellDistance(int cell_a, int cell_b)
 	{
-		CellOffset offset = Grid.GetOffset(cell_a, cell_b);
-		return Math.Abs(offset.x) + Math.Abs(offset.y);
+		int num;
+		int num2;
+		Grid.CellToXY(cell_a, out num, out num2);
+		int num3;
+		int num4;
+		Grid.CellToXY(cell_b, out num3, out num4);
+		return Math.Abs(num - num3) + Math.Abs(num2 - num4);
 	}
 
 	public static int GetCellRange(int cell_a, int cell_b)
 	{
-		CellOffset offset = Grid.GetOffset(cell_a, cell_b);
-		return Math.Max(Math.Abs(offset.x), Math.Abs(offset.y));
+		int num;
+		int num2;
+		Grid.CellToXY(cell_a, out num, out num2);
+		int num3;
+		int num4;
+		Grid.CellToXY(cell_b, out num3, out num4);
+		return Math.Max(Math.Abs(num - num3), Math.Abs(num2 - num4));
 	}
 
 	public static CellOffset GetOffset(int base_cell, int offset_cell)
@@ -830,6 +840,31 @@ public class Grid
 		return false;
 	}
 
+	public static bool IsNavigatableLiquid(int cell)
+	{
+		int num = Grid.CellAbove(cell);
+		if (!Grid.IsValidCell(cell) || !Grid.IsValidCell(num))
+		{
+			return false;
+		}
+		if (Grid.IsSubstantialLiquid(cell, 0.35f))
+		{
+			return true;
+		}
+		if (Grid.IsLiquid(cell))
+		{
+			if (Grid.Element[num].IsLiquid)
+			{
+				return true;
+			}
+			if (Grid.Element[num].IsSolid)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static bool IsLiquid(int cell)
 	{
 		return ElementLoader.elements[(int)Grid.ElementIdx[cell]].IsLiquid;
@@ -853,6 +888,40 @@ public class Grid
 	public static void GetVisibleExtents(out Vector2I min, out Vector2I max)
 	{
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
+	}
+
+	public static void GetVisibleCellRangeInActiveWorld(out Vector2I min, out Vector2I max, int padding = 4, float rangeScale = 1.5f)
+	{
+		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
+		min.x -= padding;
+		min.y -= padding;
+		if (CameraController.Instance != null && DlcManager.IsExpansion1Active())
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			CameraController.Instance.GetWorldCamera(out vector2I, out vector2I2);
+			min.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, min.x));
+			min.y = Math.Min(vector2I.y + vector2I2.y - 1, Math.Max(vector2I.y, min.y));
+			max.x += padding;
+			max.y += padding;
+			max.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, max.x));
+			max.y = Math.Min(vector2I.y + vector2I2.y - 1 + 20, Math.Max(vector2I.y, max.y));
+			return;
+		}
+		min.x = Math.Min((int)((float)Grid.WidthInCells * rangeScale) - 1, Math.Max(0, min.x));
+		min.y = Math.Min((int)((float)Grid.HeightInCells * rangeScale) - 1, Math.Max(0, min.y));
+		max.x += padding;
+		max.y += padding;
+		max.x = Math.Min((int)((float)Grid.WidthInCells * rangeScale) - 1, Math.Max(0, max.x));
+		max.y = Math.Min((int)((float)Grid.HeightInCells * rangeScale) - 1, Math.Max(0, max.y));
+	}
+
+	public static Extents GetVisibleExtentsInActiveWorld(int padding = 4, float rangeScale = 1.5f)
+	{
+		Vector2I vector2I;
+		Vector2I vector2I2;
+		Grid.GetVisibleCellRangeInActiveWorld(out vector2I, out vector2I2, 4, 1.5f);
+		return new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
 	}
 
 	public static bool IsVisible(int cell)
@@ -888,7 +957,7 @@ public class Grid
 
 	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, Grid.PhysicalBlockingDelegate, blocking_tile_visible, false);
+		return Grid.FastTestLineOfSightSolid(x, y, x2, y2);
 	}
 
 	public static void CollectCellsInLine(int startCell, int endCell, HashSet<int> outputCells)
@@ -931,6 +1000,133 @@ public class Grid
 			num++;
 		}
 		return cellsClear > 0;
+	}
+
+	public static bool FastTestLineOfSightSolid(int x, int y, int x2, int y2)
+	{
+		int num = x2 - x;
+		int num2 = y2 - y;
+		int num3 = 0;
+		int num5;
+		int num4 = (num5 = Math.Sign(num));
+		int num6 = Math.Sign(num2);
+		int num7 = Math.Abs(num);
+		int num8 = Math.Abs(num2);
+		if (num7 <= num8)
+		{
+			num7 = Math.Abs(num2);
+			num8 = Math.Abs(num);
+			if (num2 < 0)
+			{
+				num3 = -1;
+			}
+			else if (num2 > 0)
+			{
+				num3 = 1;
+			}
+			num4 = 0;
+		}
+		int num9 = num7 >> 1;
+		int num10 = num5 + num6 * Grid.WidthInCells;
+		int num11 = num4 + num3 * Grid.WidthInCells;
+		int num12 = Grid.XYToCell(x, y);
+		for (int i = 1; i < num7; i++)
+		{
+			num9 += num8;
+			if (num9 < num7)
+			{
+				num12 += num11;
+			}
+			else
+			{
+				num9 -= num7;
+				num12 += num10;
+			}
+			if (Grid.Solid[num12])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static bool TestLineOfSightFixedBlockingVisible(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible, bool allow_invalid_cells = false)
+	{
+		int num = x;
+		int num2 = y;
+		int num3 = x2 - x;
+		int num4 = y2 - y;
+		int num5 = 0;
+		int num6 = 0;
+		int num7 = 0;
+		int num8 = 0;
+		if (num3 < 0)
+		{
+			num5 = -1;
+		}
+		else if (num3 > 0)
+		{
+			num5 = 1;
+		}
+		if (num4 < 0)
+		{
+			num6 = -1;
+		}
+		else if (num4 > 0)
+		{
+			num6 = 1;
+		}
+		if (num3 < 0)
+		{
+			num7 = -1;
+		}
+		else if (num3 > 0)
+		{
+			num7 = 1;
+		}
+		int num9 = Math.Abs(num3);
+		int num10 = Math.Abs(num4);
+		if (num9 <= num10)
+		{
+			num9 = Math.Abs(num4);
+			num10 = Math.Abs(num3);
+			if (num4 < 0)
+			{
+				num8 = -1;
+			}
+			else if (num4 > 0)
+			{
+				num8 = 1;
+			}
+			num7 = 0;
+		}
+		int num11 = num9 >> 1;
+		for (int i = 0; i <= num9; i++)
+		{
+			int num12 = Grid.XYToCell(x, y);
+			if (!allow_invalid_cells && !Grid.IsValidCell(num12))
+			{
+				return false;
+			}
+			bool flag = blocking_cb(num12);
+			if ((x != num || y != num2) && flag)
+			{
+				return blocking_tile_visible && x == x2 && y == y2;
+			}
+			num11 += num10;
+			if (num11 >= num9)
+			{
+				num11 -= num9;
+				x += num5;
+				y += num6;
+			}
+			else
+			{
+				x += num7;
+				y += num8;
+			}
+		}
+		return true;
 	}
 
 	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, Func<int, bool> blocking_tile_visible_cb, bool allow_invalid_cells = false)
@@ -1014,7 +1210,7 @@ public class Grid
 
 	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false, bool allow_invalid_cells = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, blocking_cb, (int c) => blocking_tile_visible, allow_invalid_cells);
+		return Grid.TestLineOfSightFixedBlockingVisible(x, y, x2, y2, blocking_cb, blocking_tile_visible, allow_invalid_cells);
 	}
 
 	public static bool GetFreeGridSpace(Vector2I size, out Vector2I offset)

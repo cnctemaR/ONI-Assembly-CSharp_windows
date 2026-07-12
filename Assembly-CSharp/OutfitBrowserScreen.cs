@@ -227,18 +227,18 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			WearableAccessorizer component = outfitBrowserScreenConfig.targetMinionInstance.Unwrap().GetComponent<WearableAccessorizer>();
 			ClothingOutfitUtility.OutfitType currentOutfitType = this.state.CurrentOutfitType;
 			Option<ClothingOutfitTarget> option = this.state.SelectedOutfitOpt;
-			component.AddCustomClothingOutfit(currentOutfitType, option.AndThen<IEnumerable<ClothingItemResource>>((ClothingOutfitTarget outfit) => outfit.ReadItemValues()).UnwrapOr(ClothingOutfitTarget.NO_ITEM_VALUES, null));
+			component.ApplyClothingItems(currentOutfitType, option.AndThen<IEnumerable<ClothingItemResource>>((ClothingOutfitTarget outfit) => outfit.ReadItemValues()).UnwrapOr(ClothingOutfitTarget.NO_ITEM_VALUES, null));
 		}
 		else
 		{
 			outfitBrowserScreenConfig = this.Config;
 			if (outfitBrowserScreenConfig.minionPersonality.IsSome())
 			{
-				ClothingOutfits clothingOutfits = Db.Get().Permits.ClothingOutfits;
 				outfitBrowserScreenConfig = this.Config;
-				string id = outfitBrowserScreenConfig.minionPersonality.Value.Id;
+				Personality value = outfitBrowserScreenConfig.minionPersonality.Value;
+				ClothingOutfitUtility.OutfitType currentOutfitType2 = this.state.CurrentOutfitType;
 				Option<ClothingOutfitTarget> option = this.state.SelectedOutfitOpt;
-				clothingOutfits.SetDuplicantPersonalityOutfit(id, option.AndThen<string>((ClothingOutfitTarget o) => o.OutfitId), this.state.CurrentOutfitType);
+				value.SetSelectedTemplateOutfitId(currentOutfitType2, option.AndThen<string>((ClothingOutfitTarget o) => o.OutfitId));
 			}
 		}
 		LockerNavigator.Instance.PopScreen();

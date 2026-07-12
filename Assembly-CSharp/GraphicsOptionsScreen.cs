@@ -441,7 +441,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 		Coroutine timer = base.StartCoroutine(this.Timer(15f, action));
 		this.confirmDialog.onDeactivateCB = delegate
 		{
-			this.StopCoroutine(timer);
+			if (timer != null)
+			{
+				this.StopCoroutine(timer);
+			}
 		};
 		this.confirmDialog.PopupConfirmDialog(this.colorModeChanged ? UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES_STRING_COLOR.text : UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null);
 		this.confirmDialog.gameObject.SetActive(true);
@@ -467,7 +470,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private IEnumerator Timer(float time, global::System.Action revert)
 	{
-		yield return SequenceUtil.WaitForSeconds(time);
+		yield return new WaitForSecondsRealtime(time);
 		if (this.confirmDialog != null)
 		{
 			this.confirmDialog.Deactivate();

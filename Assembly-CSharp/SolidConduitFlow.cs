@@ -1224,7 +1224,9 @@ public class SolidConduitFlow : IConduitFlow
 					pickupable.transform.parent = null;
 					Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
 					pickupable.transform.SetPosition(vector);
-					pickupable.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.SolidConduitContents);
+					KBatchedAnimController component = pickupable.GetComponent<KBatchedAnimController>();
+					component.GetBatchInstanceData().ClearOverrideTransformMatrix();
+					component.SetSceneLayer(Grid.SceneLayer.SolidConduitContents);
 				}
 			}
 		}

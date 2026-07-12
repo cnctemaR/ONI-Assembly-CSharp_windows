@@ -27,7 +27,6 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 		public Instance(IStateMachineTarget master, CreatureFallMonitor.Def def)
 			: base(master, def)
 		{
-			this.navigator = master.GetComponent<Navigator>();
 		}
 
 		public void SnapToGround()
@@ -49,7 +48,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		public bool ShouldFall()
 		{
-			if (base.gameObject.HasTag(GameTags.Stored))
+			if (this.kprefabId.HasTag(GameTags.Stored))
 			{
 				return false;
 			}
@@ -102,7 +101,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 				{
 					num = 0.5f;
 				}
-				position.y += base.transform.GetComponent<KBoxCollider2D>().size.y * num;
+				position.y += this.collider.size.y * num;
 				if (Grid.IsSubstantialLiquid(Grid.PosToCell(position), 0.35f))
 				{
 					if (!GameComps.Gravities.Has(base.gameObject))
@@ -120,6 +119,13 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		public string anim = "fall";
 
+		[MyCmpReq]
+		private KPrefabID kprefabId;
+
+		[MyCmpReq]
 		private Navigator navigator;
+
+		[MyCmpReq]
+		private KBoxCollider2D collider;
 	}
 }

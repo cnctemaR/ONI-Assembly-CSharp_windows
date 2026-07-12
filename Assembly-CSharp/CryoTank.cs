@@ -94,7 +94,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 			gameObject.transform.SetPosition(position);
 			gameObject.GetMyWorld().SetDupeVisited();
 		}
-		SaveGame.Instance.GetComponent<ColonyAchievementTracker>().defrostedDuplicant = true;
+		SaveGame.Instance.ColonyAchievementTracker.defrostedDuplicant = true;
 	}
 
 	public void ShowEventPopup()

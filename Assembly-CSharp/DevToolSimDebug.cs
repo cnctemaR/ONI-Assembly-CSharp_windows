@@ -107,6 +107,25 @@ public class DevToolSimDebug : DevTool
 		int num2;
 		Grid.PosToXY(this.worldPos, out num, out num2);
 		int num3 = num2 * Grid.WidthInCells + num;
+		ImGui.Checkbox("Draw Bounding Box", ref this.shouldDrawBoundingBox);
+		if (ImGui.CollapsingHeader("Overlay Box") && this.shouldDrawBoundingBox)
+		{
+			if (ImGui.Button("Pick cell"))
+			{
+				panel.PushDevTool(new DevToolEntity_EyeDrop(delegate(DevToolEntityTarget target)
+				{
+					this.boundBoxSimCellTarget = (DevToolEntityTarget.ForSimCell)target;
+				}, delegate(DevToolEntityTarget uncastTarget)
+				{
+					if (!(uncastTarget is DevToolEntityTarget.ForSimCell))
+					{
+						return "Target is not a sim cell";
+					}
+					return Option.None;
+				}));
+			}
+			this.DrawBoundingBoxOverlay();
+		}
 		this.showMouseData = ImGui.CollapsingHeader("Mouse Data");
 		if (this.showMouseData)
 		{
@@ -298,7 +317,7 @@ public class DevToolSimDebug : DevTool
 						this.showCreatures = ImGui.CollapsingHeader("Creatures (" + room.cavity.creatures.Count.ToString() + ")");
 						if (!this.showCreatures)
 						{
-							goto IL_0C53;
+							goto IL_0CC0;
 						}
 						using (List<KPrefabID>.Enumerator enumerator4 = room.cavity.creatures.GetEnumerator())
 						{
@@ -307,7 +326,7 @@ public class DevToolSimDebug : DevTool
 								KPrefabID kprefabID2 = enumerator4.Current;
 								ImGui.Text(kprefabID2.ToString());
 							}
-							goto IL_0C53;
+							goto IL_0CC0;
 						}
 					}
 					ImGui.Text("Is Room: False");
@@ -316,7 +335,7 @@ public class DevToolSimDebug : DevTool
 				{
 					ImGui.Text("No Cavity Detected");
 				}
-				IL_0C53:
+				IL_0CC0:
 				ImGui.Unindent();
 			}
 			this.showPropertyInfo = ImGui.CollapsingHeader("Property Info");
@@ -347,12 +366,14 @@ public class DevToolSimDebug : DevTool
 			this.showElementData = ImGui.CollapsingHeader("Element");
 			ImGui.SameLine();
 			ImGui.Text("[" + element.name + "]");
+			ImGui.Indent();
 			ImGui.Text("Mass:" + Grid.Mass[num3].ToString());
 			if (this.showElementData)
 			{
 				this.DrawElem(element);
 			}
 			ImGui.Text("Average Flow Rate (kg/s):" + (Grid.AccumulatedFlow[num3] / 3f).ToString());
+			ImGui.Unindent();
 		}
 		this.showPhysicsData = ImGui.CollapsingHeader("Physics Data");
 		if (this.showPhysicsData)
@@ -478,6 +499,31 @@ public class DevToolSimDebug : DevTool
 		ImGui.Unindent();
 	}
 
+	private void DrawBoundingBoxOverlay()
+	{
+		ImGui.InputInt("Width:", ref this.xBound, 2);
+		ImGui.InputInt("Height:", ref this.yBound, 2);
+		Vector2I vector2I = (this.boundBoxSimCellTarget.HasValue ? Grid.CellToXY(this.boundBoxSimCellTarget.Unwrap().cellIndex) : Grid.PosToXY(this.worldPos));
+		Vector2I vector2I2 = new Vector2I(Math.Max(0, vector2I.x - this.xBound / 2), Math.Max(0, vector2I.y - this.yBound / 2));
+		Vector2I vector2I3 = new Vector2I(Math.Min(vector2I.x + this.xBound / 2, Grid.WidthInCells), Math.Min(vector2I.y + this.yBound / 2, Grid.HeightInCells));
+		Option<ValueTuple<Vector2, Vector2>> screenRect = new DevToolEntityTarget.ForSimCell(Grid.XYToCell(vector2I2.X, vector2I2.Y)).GetScreenRect();
+		Option<ValueTuple<Vector2, Vector2>> screenRect2 = new DevToolEntityTarget.ForSimCell(Grid.XYToCell(vector2I3.X, vector2I3.Y)).GetScreenRect();
+		if (screenRect.IsSome() && screenRect2.IsSome())
+		{
+			for (int i = vector2I2.Y; i <= vector2I3.Y; i++)
+			{
+				for (int j = vector2I2.X; j <= vector2I3.X; j++)
+				{
+					Option<ValueTuple<Vector2, Vector2>> screenRect3 = new DevToolEntityTarget.ForSimCell(Grid.XYToCell(j, i)).GetScreenRect();
+					Option<ValueTuple<Vector2, Vector2>> screenRect4 = new DevToolEntityTarget.ForSimCell(Grid.XYToCell(j, i)).GetScreenRect();
+					ValueTuple<Vector2, Vector2> valueTuple = new ValueTuple<Vector2, Vector2>(screenRect3.Unwrap().Item1, screenRect4.Unwrap().Item2);
+					string text = Grid.XYToCell(j, i).ToString();
+					DevToolEntity.DrawScreenRect(valueTuple, text, new Color(1f, 1f, 1f, 0.7f), new Color(1f, 1f, 1f, 0.2f), new Option<DevToolUtil.TextAlignment>(DevToolUtil.TextAlignment.Center));
+				}
+			}
+		}
+	}
+
 	public void SetCell(int cell)
 	{
 		this.worldPos = Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
@@ -492,6 +538,14 @@ public class DevToolSimDebug : DevTool
 	public static DevToolSimDebug Instance;
 
 	private const string INVALID_OVERLAY_MODE_STR = "None";
+
+	private bool shouldDrawBoundingBox = true;
+
+	private Option<DevToolEntityTarget.ForSimCell> boundBoxSimCellTarget;
+
+	private int xBound = 8;
+
+	private int yBound = 8;
 
 	private bool showElementData;
 

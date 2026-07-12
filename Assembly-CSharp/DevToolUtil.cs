@@ -13,6 +13,16 @@ public static class DevToolUtil
 		return DevToolManager.Instance.panels.AddPanelFor<T>();
 	}
 
+	public static DevPanel DebugObject<T>(T obj)
+	{
+		return DevToolUtil.Open(new DevToolObjectViewer<T>(() => obj));
+	}
+
+	public static DevPanel DebugObject<T>(Func<T> get_obj_fn)
+	{
+		return DevToolUtil.Open(new DevToolObjectViewer<T>(get_obj_fn));
+	}
+
 	public static void Close(DevTool devTool)
 	{
 		devTool.ClosePanel();
@@ -49,17 +59,18 @@ public static class DevToolUtil
 
 	public static bool CanRevealAndFocus(GameObject gameObject)
 	{
-		return DevToolUtil.GetCellIndexFor(gameObject).HasValue;
+		int num;
+		return DevToolUtil.TryGetCellIndexFor(gameObject, out num);
 	}
 
 	public static void RevealAndFocus(GameObject gameObject)
 	{
-		Option<int> cellIndexFor = DevToolUtil.GetCellIndexFor(gameObject);
-		if (!cellIndexFor.HasValue)
+		int num;
+		if (DevToolUtil.TryGetCellIndexFor(gameObject, out num))
 		{
 			return;
 		}
-		DevToolUtil.RevealAndFocusAt(cellIndexFor.Value);
+		DevToolUtil.RevealAndFocusAt(num);
 		if (!gameObject.GetComponent<KSelectable>().IsNullOrDestroyed())
 		{
 			SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
@@ -74,34 +85,38 @@ public static class DevToolUtil
 		CameraController.Instance.SetPosition(vector);
 	}
 
-	public static Option<int> GetCellIndexFor(GameObject gameObject)
+	public static bool TryGetCellIndexFor(GameObject gameObject, out int cellIndex)
 	{
+		cellIndex = -1;
 		if (gameObject.IsNullOrDestroyed())
 		{
-			return Option.None;
+			return false;
 		}
 		if (!gameObject.GetComponent<RectTransform>().IsNullOrDestroyed())
 		{
-			return Option.None;
+			return false;
 		}
-		return Grid.PosToCell(gameObject);
+		cellIndex = Grid.PosToCell(gameObject);
+		return true;
 	}
 
-	public static Option<int> GetCellIndexForUniqueBuilding(string prefabId)
+	public static bool TryGetCellIndexForUniqueBuilding(string prefabId, out int index)
 	{
+		index = -1;
 		BuildingComplete[] array = global::UnityEngine.Object.FindObjectsOfType<BuildingComplete>(true);
 		if (array == null)
 		{
-			return Option.None;
+			return false;
 		}
 		foreach (BuildingComplete buildingComplete in array)
 		{
 			if (prefabId == buildingComplete.Def.PrefabID)
 			{
-				return buildingComplete.GetCell();
+				index = buildingComplete.GetCell();
+				return true;
 			}
 		}
-		return Option.None;
+		return false;
 	}
 
 	public static void RevealAndFocusAt(int cellIndex)
@@ -111,19 +126,26 @@ public static class DevToolUtil
 		Grid.CellToXY(cellIndex, out num, out num2);
 		GridVisibility.Reveal(num + 2, num2 + 2, 10, 10f);
 		DevToolUtil.FocusCameraOnCell(cellIndex);
-		Option<int> cellIndexForUniqueBuilding = DevToolUtil.GetCellIndexForUniqueBuilding("Headquarters");
-		if (cellIndexForUniqueBuilding.IsSome())
+		int num3;
+		if (DevToolUtil.TryGetCellIndexForUniqueBuilding("Headquarters", out num3))
 		{
 			Vector3 vector = Grid.CellToPos2D(cellIndex);
-			Vector3 vector2 = Grid.CellToPos2D(cellIndexForUniqueBuilding.Unwrap());
-			float num3 = 2f / Vector3.Distance(vector, vector2);
-			for (float num4 = 0f; num4 < 1f; num4 += num3)
+			Vector3 vector2 = Grid.CellToPos2D(num3);
+			float num4 = 2f / Vector3.Distance(vector, vector2);
+			for (float num5 = 0f; num5 < 1f; num5 += num4)
 			{
-				int num5;
 				int num6;
-				Grid.PosToXY(Vector3.Lerp(vector, vector2, num4), out num5, out num6);
-				GridVisibility.Reveal(num5 + 2, num6 + 2, 4, 4f);
+				int num7;
+				Grid.PosToXY(Vector3.Lerp(vector, vector2, num5), out num6, out num7);
+				GridVisibility.Reveal(num6 + 2, num7 + 2, 4, 4f);
 			}
 		}
+	}
+
+	public enum TextAlignment
+	{
+		Center,
+		Left,
+		Right
 	}
 }

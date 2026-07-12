@@ -142,32 +142,6 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		return SubWorld.ZoneType.Sandstone;
 	}
 
-	private SubWorld.ZoneType GetSubWorldZoneType(Vector2I pos)
-	{
-		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
-		if (clusterDetailSave != null)
-		{
-			for (int i = 0; i < clusterDetailSave.overworldCells.Count; i++)
-			{
-				if (clusterDetailSave.overworldCells[i].poly.Contains(pos))
-				{
-					return clusterDetailSave.overworldCells[i].zoneType;
-				}
-			}
-		}
-		return SubWorld.ZoneType.Sandstone;
-	}
-
-	private Color32 GetZoneColor(SubWorld.ZoneType zone_type)
-	{
-		Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 3);
-		bool flag = zone_type < (SubWorld.ZoneType)this.zoneColours.Length;
-		string text = "Need to add more colours to handle this zone";
-		int num = (int)zone_type;
-		global::Debug.Assert(flag, text + num.ToString() + "<" + this.zoneColours.Length.ToString());
-		return color;
-	}
-
 	private unsafe void InitSimZones(byte[] bytes)
 	{
 		fixed (byte[] array = bytes)

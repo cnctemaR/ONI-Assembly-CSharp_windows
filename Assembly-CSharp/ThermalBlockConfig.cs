@@ -57,7 +57,7 @@ public class ThermalBlockConfig : IBuildingConfig
 			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(game_object);
 			StructureTemperaturePayload payload = GameComps.StructureTemperatures.GetPayload(handle);
 			int num = Grid.PosToCell(game_object);
-			payload.OverrideExtents(new Extents(num, ThermalBlockConfig.overrideOffsets));
+			payload.OverrideExtents(new Extents(num, ThermalBlockConfig.overrideOffsets, Extents.BoundsCheckCoords));
 			GameComps.StructureTemperatures.SetPayload(handle, ref payload);
 		};
 	}

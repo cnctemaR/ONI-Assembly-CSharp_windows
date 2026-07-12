@@ -70,15 +70,20 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		get
 		{
-			foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+			RocketEngineCluster engine = this.GetEngine();
+			if (engine != null)
 			{
-				RocketEngineCluster component = @ref.Get().GetComponent<RocketEngineCluster>();
-				if (component != null)
-				{
-					return this.BurnableMassRemaining / component.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance;
-				}
+				return this.BurnableMassRemaining / engine.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance;
 			}
 			return 0f;
+		}
+	}
+
+	public int RangeInTiles
+	{
+		get
+		{
+			return (int)Mathf.Floor((this.Range + 0.001f) / 600f);
 		}
 	}
 
@@ -86,13 +91,10 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		get
 		{
-			foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+			RocketEngineCluster engine = this.GetEngine();
+			if (engine != null)
 			{
-				RocketEngineCluster component = @ref.Get().GetComponent<RocketEngineCluster>();
-				if (component != null)
-				{
-					return component.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance * 600f;
-				}
+				return engine.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance * 600f;
 			}
 			return float.PositiveInfinity;
 		}
@@ -102,20 +104,12 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		get
 		{
-			RocketEngineCluster rocketEngineCluster = null;
-			foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
-			{
-				rocketEngineCluster = @ref.Get().GetComponent<RocketEngineCluster>();
-				if (rocketEngineCluster != null)
-				{
-					break;
-				}
-			}
-			if (rocketEngineCluster == null)
+			RocketEngineCluster engine = this.GetEngine();
+			if (!(engine != null))
 			{
 				return 0f;
 			}
-			if (!rocketEngineCluster.requireOxidizer)
+			if (!engine.requireOxidizer)
 			{
 				return this.FuelRemaining;
 			}

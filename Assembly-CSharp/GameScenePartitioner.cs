@@ -18,7 +18,7 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		global::Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
-		this.partitioner = new ScenePartitioner(16, 65, Grid.WidthInCells, Grid.HeightInCells);
+		this.partitioner = new ScenePartitioner(16, 66, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
 		this.liquidChangedLayer = this.partitioner.CreateMask("LiquidChanged");
 		this.digDestroyedLayer = this.partitioner.CreateMask("DigDestroyed");
@@ -27,6 +27,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.attackableEntitiesLayer = this.partitioner.CreateMask("FactionedEntities");
 		this.fetchChoreLayer = this.partitioner.CreateMask("FetchChores");
 		this.pickupablesLayer = this.partitioner.CreateMask("Pickupables");
+		this.storedPickupablesLayer = this.partitioner.CreateMask("StoredPickupables");
 		this.pickupablesChangedLayer = this.partitioner.CreateMask("PickupablesChanged");
 		this.gasConduitsLayer = this.partitioner.CreateMask("GasConduit");
 		this.liquidConduitsLayer = this.partitioner.CreateMask("LiquidConduit");
@@ -65,6 +66,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.attackableEntitiesLayer = null;
 		this.fetchChoreLayer = null;
 		this.pickupablesLayer = null;
+		this.storedPickupablesLayer = null;
 		this.pickupablesChangedLayer = null;
 		this.gasConduitsLayer = null;
 		this.liquidConduitsLayer = null;
@@ -154,6 +156,16 @@ public class GameScenePartitioner : KMonoBehaviour
 	public void GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
 	{
 		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
+	}
+
+	public void UnsafeReadonlyGatherEntries(Extents extents, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
+	{
+		this.UnsafeReadonlyGatherEntries(extents.x, extents.y, extents.width, extents.height, layer, gathered_entries);
+	}
+
+	public void UnsafeReadonlyGatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
+	{
+		this.partitioner.UnsafeReadonlyGatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, gathered_entries);
 	}
 
 	public void Iterate<IteratorType>(int x, int y, int width, int height, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
@@ -265,6 +277,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer fetchChoreLayer;
 
 	public ScenePartitionerLayer pickupablesLayer;
+
+	public ScenePartitionerLayer storedPickupablesLayer;
 
 	public ScenePartitionerLayer pickupablesChangedLayer;
 

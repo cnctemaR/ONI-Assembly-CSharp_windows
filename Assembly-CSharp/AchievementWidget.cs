@@ -332,8 +332,8 @@ public class AchievementWidget : KMonoBehaviour
 		this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.ARM_PERFORMANCE, succeed ? dupesVsSolidTransferArmFetch.numCycles : dupesVsSolidTransferArmFetch.currentCycleCount, dupesVsSolidTransferArmFetch.numCycles), hierarchyReferences);
 		if (!succeed)
 		{
-			Dictionary<int, int> fetchDupeChoreDeliveries = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().fetchDupeChoreDeliveries;
-			Dictionary<int, int> fetchAutomatedChoreDeliveries = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().fetchAutomatedChoreDeliveries;
+			Dictionary<int, int> fetchDupeChoreDeliveries = SaveGame.Instance.ColonyAchievementTracker.fetchDupeChoreDeliveries;
+			Dictionary<int, int> fetchAutomatedChoreDeliveries = SaveGame.Instance.ColonyAchievementTracker.fetchAutomatedChoreDeliveries;
 			int num = 0;
 			fetchDupeChoreDeliveries.TryGetValue(GameClock.Instance.GetCycle(), out num);
 			int num2 = 0;
@@ -462,7 +462,7 @@ public class AchievementWidget : KMonoBehaviour
 			this.ShowRequirement(success, req);
 			return;
 		}
-		foreach (KeyValuePair<int, int> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().cyclesRocketDupeMoraleAboveRequirement)
+		foreach (KeyValuePair<int, int> keyValuePair in SaveGame.Instance.ColonyAchievementTracker.cyclesRocketDupeMoraleAboveRequirement)
 		{
 			WorldContainer world = ClusterManager.Instance.GetWorld(keyValuePair.Key);
 			if (world != null)

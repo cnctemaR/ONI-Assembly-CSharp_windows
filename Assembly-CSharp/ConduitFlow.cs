@@ -41,35 +41,21 @@ public class ConduitFlow : IConduitFlow
 		return (ConduitFlow.FlowDirections)(1 << index);
 	}
 
-	private static int ComputeIndex(ConduitFlow.FlowDirections flow)
-	{
-		switch (flow)
-		{
-		case ConduitFlow.FlowDirections.Down:
-			return 0;
-		case ConduitFlow.FlowDirections.Left:
-			return 1;
-		case ConduitFlow.FlowDirections.Down | ConduitFlow.FlowDirections.Left:
-			break;
-		case ConduitFlow.FlowDirections.Right:
-			return 2;
-		default:
-			if (flow == ConduitFlow.FlowDirections.Up)
-			{
-				return 3;
-			}
-			break;
-		}
-		global::Debug.Assert(false, "multiple bits are set in 'flow'...can't compute refuted index");
-		return -1;
-	}
-
 	private static ConduitFlow.FlowDirections ComputeNextFlowDirection(ConduitFlow.FlowDirections current)
 	{
-		if (current != ConduitFlow.FlowDirections.None)
+		switch (current)
 		{
-			return ConduitFlow.ComputeFlowDirection((ConduitFlow.ComputeIndex(current) + 1) % 4);
+		case ConduitFlow.FlowDirections.None:
+		case ConduitFlow.FlowDirections.Up:
+			return ConduitFlow.FlowDirections.Down;
+		case ConduitFlow.FlowDirections.Down:
+			return ConduitFlow.FlowDirections.Left;
+		case ConduitFlow.FlowDirections.Left:
+			return ConduitFlow.FlowDirections.Right;
+		case ConduitFlow.FlowDirections.Right:
+			return ConduitFlow.FlowDirections.Up;
 		}
+		global::Debug.Assert(false, "multiple bits are set in 'FlowDirections'...can't compute next direction");
 		return ConduitFlow.FlowDirections.Down;
 	}
 
@@ -339,27 +325,22 @@ public class ConduitFlow : IConduitFlow
 		}
 	}
 
-	private float ComputeMovableMass(ConduitFlow.GridNode grid_node, Dictionary<int, ConduitFlow.Sink> sinks)
+	private float ComputeMovableMass(ConduitFlow.GridNode grid_node)
 	{
 		ConduitFlow.ConduitContents contents = grid_node.contents;
 		if (contents.element == SimHashes.Vacuum)
 		{
 			return 0f;
 		}
-		ConduitFlow.Sink sink;
-		if (!sinks.TryGetValue(grid_node.conduitIdx, out sink) || !(sink.consumer != null))
-		{
-			return contents.movable_mass;
-		}
-		return Mathf.Max(0f, contents.movable_mass - sink.space_remaining);
+		return contents.movable_mass;
 	}
 
-	private bool UpdateConduit(ConduitFlow.Conduit conduit, Dictionary<int, ConduitFlow.Sink> sinks)
+	private bool UpdateConduit(ConduitFlow.Conduit conduit)
 	{
 		bool flag = false;
 		int cell = this.soaInfo.GetCell(conduit.idx);
 		ConduitFlow.GridNode gridNode = this.grid[cell];
-		float num = this.ComputeMovableMass(gridNode, sinks);
+		float num = this.ComputeMovableMass(gridNode);
 		ConduitFlow.FlowDirections permittedFlowDirections = this.soaInfo.GetPermittedFlowDirections(conduit.idx);
 		ConduitFlow.FlowDirections flowDirections = this.soaInfo.GetTargetFlowDirection(conduit.idx);
 		if (num <= 0f)
@@ -446,7 +427,7 @@ public class ConduitFlow : IConduitFlow
 								this.soaInfo.SetLastFlowInfo(conduit.idx, flowDirections, ref contents2);
 							}
 							this.grid[cell].contents = gridNode.contents;
-							flag = 0f < this.ComputeMovableMass(gridNode, sinks);
+							flag = 0f < this.ComputeMovableMass(gridNode);
 							break;
 						}
 					}
@@ -2470,19 +2451,6 @@ public class ConduitFlow : IConduitFlow
 		private int end;
 	}
 
-	private struct Sink
-	{
-		public Sink(FlowUtilityNetwork.IItem sink)
-		{
-			this.consumer = ((sink.GameObject != null) ? sink.GameObject.GetComponent<ConduitConsumer>() : null);
-			this.space_remaining = ((this.consumer != null && this.consumer.operational.IsOperational) ? this.consumer.space_remaining_kg : 0f);
-		}
-
-		public ConduitConsumer consumer;
-
-		public float space_remaining;
-	}
-
 	private class UpdateNetworkTask : IWorkItem<ConduitFlow>
 	{
 		public bool continue_updating { get; private set; }
@@ -2491,11 +2459,6 @@ public class ConduitFlow : IConduitFlow
 		{
 			this.continue_updating = true;
 			this.network = network;
-			this.sinks = DictionaryPool<int, ConduitFlow.Sink, ConduitFlow>.Allocate();
-			foreach (FlowUtilityNetwork.IItem item in network.network.sinks)
-			{
-				this.sinks.Add(item.Cell, new ConduitFlow.Sink(item));
-			}
 		}
 
 		public void Run(ConduitFlow conduit_flow)
@@ -2505,7 +2468,7 @@ public class ConduitFlow : IConduitFlow
 			foreach (int num in this.network.cells)
 			{
 				int conduitIdx = conduit_flow.grid[num].conduitIdx;
-				if (conduit_flow.UpdateConduit(conduit_flow.soaInfo.GetConduit(conduitIdx), this.sinks))
+				if (conduit_flow.UpdateConduit(conduit_flow.soaInfo.GetConduit(conduitIdx)))
 				{
 					this.continue_updating = true;
 				}
@@ -2520,11 +2483,8 @@ public class ConduitFlow : IConduitFlow
 				contents.ConsolidateMass();
 				conduit_flow.grid[num].contents = contents;
 			}
-			this.sinks.Recycle();
 		}
 
 		private ConduitFlow.Network network;
-
-		private DictionaryPool<int, ConduitFlow.Sink, ConduitFlow>.PooledDictionary sinks;
 	}
 }

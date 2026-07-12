@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShowOptimizedKScreen : KScreen
 {
@@ -22,5 +23,12 @@ public class ShowOptimizedKScreen : KScreen
 		}
 		this.isHiddenButActive = !show;
 		this.OnShow(show);
+		if (this.enableLayoutOnShow != null)
+		{
+			this.enableLayoutOnShow.enabled = show;
+		}
 	}
+
+	[SerializeField]
+	private LayoutGroup enableLayoutOnShow;
 }

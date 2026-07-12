@@ -33,7 +33,9 @@ public class CritterCondo : GameStateMachine<CritterCondo, CritterCondo.Instance
 
 		public StatusItem interactStatusItem;
 
-		public bool underWaterCondo;
+		public Tag condoTag = "CritterCondo";
+
+		public string effectId;
 	}
 
 	public new class Instance : GameStateMachine<CritterCondo, CritterCondo.Instance, IStateMachineTarget, CritterCondo.Def>.GameInstance

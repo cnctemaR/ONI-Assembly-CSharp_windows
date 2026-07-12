@@ -142,6 +142,8 @@ namespace TUNING
 			{ "RationBox", "storage" },
 			{ "Refrigerator", "storage" },
 			{ "CreatureDeliveryPoint", "ranching" },
+			{ "CritterDropOff", "ranching" },
+			{ "CritterPickUp", "ranching" },
 			{ "FishDeliveryPoint", "ranching" },
 			{ "CreatureFeeder", "ranching" },
 			{ "FishFeeder", "ranching" },
@@ -153,6 +155,7 @@ namespace TUNING
 			{ "WaterTrap", "ranching" },
 			{ "CritterCondo", "ranching" },
 			{ "UnderwaterCritterCondo", "ranching" },
+			{ "AirBorneCritterCondo", "ranching" },
 			{ "Outhouse", "washroom" },
 			{ "FlushToilet", "washroom" },
 			{ "WallToilet", "washroom" },
@@ -561,8 +564,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox",
-				"Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap",
-				"CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo"
+				"Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker",
+				"CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{

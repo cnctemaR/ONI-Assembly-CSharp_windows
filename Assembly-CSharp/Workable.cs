@@ -211,7 +211,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		base.OnLoadLevel();
 	}
 
-	public int GetCell()
+	public virtual int GetCell()
 	{
 		return Grid.PosToCell(this);
 	}

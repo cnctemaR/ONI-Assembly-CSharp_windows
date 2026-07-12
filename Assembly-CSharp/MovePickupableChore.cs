@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 {
 	public MovePickupableChore(IStateMachineTarget target, GameObject pickupable, Action<Chore> onEnd)
-		: base(Db.Get().ChoreTypes.Fetch, target, target.GetComponent<ChoreProvider>(), false, null, null, onEnd, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
+		: base((pickupable.GetComponent<CreatureBrain>() == null) ? Db.Get().ChoreTypes.Fetch : Db.Get().ChoreTypes.Ranch, target, target.GetComponent<ChoreProvider>(), false, null, null, onEnd, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new MovePickupableChore.StatesInstance(this);
 		Pickupable component = pickupable.GetComponent<Pickupable>();
@@ -14,7 +15,7 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		base.AddPrecondition(ChorePreconditions.instance.IsNotTransferArm, this);
 		if (pickupable.GetComponent<CreatureBrain>())
 		{
-			base.AddPrecondition(ChorePreconditions.instance.HasTag, GameTags.Reachable);
+			base.AddPrecondition(MovePickupableChore.CanReachCritter, pickupable);
 			base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures);
 			base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, pickupable.GetComponent<Capturable>());
 		}
@@ -22,8 +23,8 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		{
 			base.AddPrecondition(ChorePreconditions.instance.CanPickup, component);
 		}
-		PrimaryElement component2 = pickupable.GetComponent<PrimaryElement>();
-		base.smi.sm.requestedamount.Set(component2.Mass, base.smi, false);
+		PrimaryElement primaryElement = component.PrimaryElement;
+		base.smi.sm.requestedamount.Set(primaryElement.Mass, base.smi, false);
 		base.smi.sm.pickupablesource.Set(pickupable.gameObject, base.smi, false);
 		base.smi.sm.deliverypoint.Set(target.gameObject, base.smi, false);
 		this.movePlacer = target.gameObject;
@@ -31,10 +32,10 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 		this.OnReachableChanged(flag);
 		pickupable.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		target.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		Prioritizable component3 = target.GetComponent<Prioritizable>();
-		if (!component3.IsPrioritizable())
+		Prioritizable component2 = target.GetComponent<Prioritizable>();
+		if (!component2.IsPrioritizable())
 		{
-			component3.AddRef();
+			component2.AddRef();
 		}
 		base.SetPrioritizable(target.GetComponent<Prioritizable>());
 	}
@@ -80,6 +81,17 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 	}
 
 	public GameObject movePlacer;
+
+	public static Chore.Precondition CanReachCritter = new Chore.Precondition
+	{
+		id = "CanReachCritter",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			return !(gameObject == null) && gameObject.HasTag(GameTags.Reachable);
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<MovePickupableChore.States, MovePickupableChore.StatesInstance, MovePickupableChore, object>.GameInstance
 	{

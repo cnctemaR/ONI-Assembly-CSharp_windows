@@ -384,8 +384,8 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 
 		public void WriteItems(ClothingOutfitUtility.OutfitType outfitType, string[] items)
 		{
-			this.accessorizer.ClearAllOutfitItems(new ClothingOutfitUtility.OutfitType?(outfitType));
-			this.accessorizer.AddCustomClothingOutfit(outfitType, items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
+			this.accessorizer.ClearClothingItems(new ClothingOutfitUtility.OutfitType?(outfitType));
+			this.accessorizer.ApplyClothingItems(outfitType, items.Select<string, ClothingItemResource>((string i) => Db.Get().Permits.ClothingItems.Get(i)));
 		}
 
 		public string ReadName()

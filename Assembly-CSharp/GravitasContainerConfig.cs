@@ -38,6 +38,8 @@ public class GravitasContainerConfig : IBuildingConfig
 		PajamaDispenser pajamaDispenser = go.AddComponent<PajamaDispenser>();
 		pajamaDispenser.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_gravitas_container_kanim") };
 		pajamaDispenser.SetWorkTime(30f);
+		go.AddOrGet<Demolishable>();
+		go.GetComponent<Deconstructable>().allowDeconstruction = false;
 	}
 
 	public const string ID = "GravitasContainer";

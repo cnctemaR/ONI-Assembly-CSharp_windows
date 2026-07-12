@@ -149,22 +149,15 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			this.alive.wilting.PlayAnim(new Func<StandardCropPlant.StatesInstance, string>(StandardCropPlant.States.GetWiltAnim), KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.harvest, null);
 			this.alive.sleeping.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.grow, KAnim.PlayMode.Once).EventTransition(GameHashes.CropWakeUp, this.alive.idle, GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Not(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Transition.ConditionCallback(this.IsSleeping))).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.EventTransition(GameHashes.Wilt, this.alive.wilting, null);
-			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
+			this.alive.fruiting.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.idle_full, KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			{
+				if (smi.master.harvestable != null)
+				{
+					smi.master.harvestable.SetCanBeHarvested(true);
+				}
+			}).EventTransition(GameHashes.Wilt, this.alive.wilting, null)
+				.EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.EventTransition(GameHashes.Grow, this.alive.fruiting_lost, (StandardCropPlant.StatesInstance smi) => !smi.master.growing.ReachedNextHarvest());
-			this.alive.fruiting.fruiting_idle.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.idle_full, KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
-			{
-				if (smi.master.harvestable != null)
-				{
-					smi.master.harvestable.SetCanBeHarvested(true);
-				}
-			}).Transition(this.alive.fruiting.fruiting_old, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Transition.ConditionCallback(this.IsOld), UpdateRate.SIM_4000ms);
-			this.alive.fruiting.fruiting_old.PlayAnim(new Func<StandardCropPlant.StatesInstance, string>(StandardCropPlant.States.GetWiltAnim), KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
-			{
-				if (smi.master.harvestable != null)
-				{
-					smi.master.harvestable.SetCanBeHarvested(true);
-				}
-			}).Transition(this.alive.fruiting.fruiting_idle, GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Not(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Transition.ConditionCallback(this.IsOld)), UpdateRate.SIM_4000ms);
 			this.alive.harvest.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.harvest, KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (smi.master != null)
@@ -211,11 +204,6 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			smi.master.RefreshPositionPercent();
 		}
 
-		public bool IsOld(StandardCropPlant.StatesInstance smi)
-		{
-			return smi.master.growing.PercentOldAge() > 0.5f;
-		}
-
 		public bool IsSleeping(StandardCropPlant.StatesInstance smi)
 		{
 			CropSleepingMonitor.Instance smi2 = smi.master.GetSMI<CropSleepingMonitor.Instance>();
@@ -238,7 +226,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State barren;
 
-			public StandardCropPlant.States.FruitingState fruiting;
+			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State wilting;
 
@@ -247,13 +235,6 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State harvest;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State sleeping;
-		}
-
-		public class FruitingState : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State
-		{
-			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_idle;
-
-			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_old;
 		}
 	}
 

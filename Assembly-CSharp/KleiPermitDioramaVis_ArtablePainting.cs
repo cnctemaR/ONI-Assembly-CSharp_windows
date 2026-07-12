@@ -18,10 +18,11 @@ public class KleiPermitDioramaVis_ArtablePainting : KMonoBehaviour, IKleiPermitD
 	{
 		ArtableStage artableStage = (ArtableStage)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, artableStage);
-		BuildingDef value = KleiPermitVisUtil.GetBuildingDef(permit).Value;
+		BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
 		this.buildingKAnimPosition.SetOn(this.buildingKAnim);
-		this.buildingKAnim.rectTransform().anchoredPosition += new Vector2(0f, -176f * (float)value.HeightInCells / 2f + 176f);
+		this.buildingKAnim.rectTransform().anchoredPosition += new Vector2(0f, -176f * (float)buildingDef.HeightInCells / 2f + 176f);
 		this.buildingKAnim.rectTransform().localScale = Vector3.one * 0.9f;
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
 	}
 
 	[SerializeField]

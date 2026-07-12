@@ -38,7 +38,7 @@ public class Def : ScriptableObject
 			{
 				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.uiColour);
 			}
-			return new global::Tuple<Sprite, Color>(null, Color.clear);
+			return new global::Tuple<Sprite, Color>(Assets.GetSprite("unknown_far"), Color.black);
 		}
 		else
 		{

@@ -78,8 +78,8 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 			Pickupable pickupable = pooledList[i].obj as Pickupable;
 			if (!(pickupable == null) && !pickupable.wasAbsorbed)
 			{
-				KPrefabID component = pickupable.GetComponent<KPrefabID>();
-				if (!component.HasTag(GameTags.Creature) || (component.HasTag(GameTags.Creatures.Walker) || component.HasTag(GameTags.Creatures.Hoverer) || component.HasTag(GameTags.Creatures.Flopping)))
+				KPrefabID kprefabID = pickupable.KPrefabID;
+				if (!kprefabID.HasTag(GameTags.Creature) || (kprefabID.HasTag(GameTags.Creatures.Walker) || kprefabID.HasTag(GameTags.Creatures.Hoverer) || kprefabID.HasTag(GameTags.Creatures.Flopping)))
 				{
 					num += pickupable.PrimaryElement.Mass;
 				}

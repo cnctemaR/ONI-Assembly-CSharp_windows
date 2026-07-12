@@ -66,7 +66,7 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 			{
 				pathLength *= 2;
 			}
-			text = string.Format(text, pathLength, GameUtil.GetFormattedRocketRange((float)rocketRange, GameUtil.TimeSlice.None, true));
+			text = string.Format(text, pathLength, GameUtil.GetFormattedRocketRange(rocketRange, true));
 			this.m_tooltip.AddMultiStringTooltip(text, this.informationTooltipStyle);
 		}
 		this.UpdateHoverColors(string.IsNullOrEmpty(fail_reason));

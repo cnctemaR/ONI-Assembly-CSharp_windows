@@ -121,7 +121,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				Pickupable component = base.GetComponent<Pickupable>();
 				if (component != null)
 				{
-					component.RegisterListeners();
+					component.UpdateListeners(true);
 				}
 			}
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Corpse, false);

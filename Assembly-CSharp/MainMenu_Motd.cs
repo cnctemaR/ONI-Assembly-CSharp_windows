@@ -68,10 +68,9 @@ public class MainMenu_Motd
 
 	private MotdBox.PageData ConvertToPageData(MotdData_Box box)
 	{
-		Sprite sprite = Sprite.Create(box.resolvedImage, new Rect(0f, 0f, (float)box.resolvedImage.width, (float)box.resolvedImage.height), new Vector2(0.5f, 0.5f));
 		return new MotdBox.PageData
 		{
-			Sprite = sprite,
+			Texture = box.resolvedImage,
 			HeaderText = box.title,
 			ImageText = box.text,
 			URL = box.href

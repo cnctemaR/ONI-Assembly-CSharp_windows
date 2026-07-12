@@ -164,7 +164,7 @@ public class BuildingDef : Def
 		GameObject gameObject = this.Build(cell, orientation, resource_storage, selected_elements, temperature, playsound, timeBuilt);
 		if (facadeID != null && facadeID != "DEFAULT_FACADE")
 		{
-			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
+			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID), false);
 		}
 		return gameObject;
 	}
@@ -223,6 +223,14 @@ public class BuildingDef : Def
 		if (this.IsValidPlaceLocation(src_go, pos, orientation, false, out text))
 		{
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
+			if (orientation != Orientation.Neutral)
+			{
+				Rotatable component = gameObject.GetComponent<Rotatable>();
+				if (component != null)
+				{
+					component.SetOrientation(orientation);
+				}
+			}
 		}
 		return gameObject;
 	}
@@ -232,7 +240,7 @@ public class BuildingDef : Def
 		GameObject gameObject = this.TryPlace(src_go, pos, orientation, selected_elements, layer);
 		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
 		{
-			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
+			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID), false);
 			gameObject.GetComponent<KBatchedAnimController>().Play("place", KAnim.PlayMode.Once, 1f, 0f);
 		}
 		return gameObject;
@@ -248,6 +256,14 @@ public class BuildingDef : Def
 			component.IsReplacementTile = true;
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
 			component.IsReplacementTile = false;
+			if (orientation != Orientation.Neutral)
+			{
+				Rotatable component2 = gameObject.GetComponent<Rotatable>();
+				if (component2 != null)
+				{
+					component2.SetOrientation(orientation);
+				}
+			}
 		}
 		return gameObject;
 	}
@@ -255,9 +271,20 @@ public class BuildingDef : Def
 	public GameObject TryReplaceTile(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, int layer = 0)
 	{
 		GameObject gameObject = this.TryReplaceTile(src_go, pos, orientation, selected_elements, layer);
-		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
+		if (gameObject != null)
 		{
-			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
+			if (facadeID != null && facadeID != "DEFAULT_FACADE")
+			{
+				gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID), false);
+			}
+			if (orientation != Orientation.Neutral)
+			{
+				Rotatable component = gameObject.GetComponent<Rotatable>();
+				if (component != null)
+				{
+					component.SetOrientation(orientation);
+				}
+			}
 		}
 		return gameObject;
 	}
@@ -1261,7 +1288,7 @@ public class BuildingDef : Def
 		else
 		{
 			LogicGateBase component2 = source_go.GetComponent<LogicGateBase>();
-			if (component2 != null && (this.IsLogicPortObstructed(component2.InputCellOne, visElements) || this.IsLogicPortObstructed(component2.OutputCellOne, visElements) || ((component2.RequiresTwoInputs || component2.RequiresFourInputs) && this.IsLogicPortObstructed(component2.InputCellTwo, visElements)) || (component2.RequiresFourInputs && (this.IsLogicPortObstructed(component2.InputCellThree, visElements) || this.IsLogicPortObstructed(component2.InputCellFour, visElements))) || (component2.RequiresFourOutputs && (this.IsLogicPortObstructed(component2.OutputCellTwo, visElements) || this.IsLogicPortObstructed(component2.OutputCellThree, visElements) || this.IsLogicPortObstructed(component2.OutputCellFour, visElements)))))
+			if (component2 != null && (this.IsLogicPortObstructed(component2.InputCellOne, visElements) || this.IsLogicPortObstructed(component2.OutputCellOne, visElements) || ((component2.RequiresTwoInputs || component2.RequiresFourInputs) && this.IsLogicPortObstructed(component2.InputCellTwo, visElements)) || (component2.RequiresFourInputs && (this.IsLogicPortObstructed(component2.InputCellThree, visElements) || this.IsLogicPortObstructed(component2.InputCellFour, visElements))) || (component2.RequiresFourOutputs && (this.IsLogicPortObstructed(component2.OutputCellTwo, visElements) || this.IsLogicPortObstructed(component2.OutputCellThree, visElements) || this.IsLogicPortObstructed(component2.OutputCellFour, visElements))) || (component2.RequiresControlInputs && (this.IsLogicPortObstructed(component2.ControlCellOne, visElements) || this.IsLogicPortObstructed(component2.ControlCellTwo, visElements)))))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LOGIC_PORTS_OBSTRUCTED;
 				return false;

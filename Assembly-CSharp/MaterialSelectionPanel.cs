@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class MaterialSelectionPanel : KScreen
+public class MaterialSelectionPanel : KScreen, IRender200ms
 {
 	public static void ClearStatics()
 	{
@@ -14,7 +14,7 @@ public class MaterialSelectionPanel : KScreen
 	{
 		get
 		{
-			return this.MaterialSelectors[0].CurrentSelectedElement;
+			return this.materialSelectors[0].CurrentSelectedElement;
 		}
 	}
 
@@ -23,7 +23,7 @@ public class MaterialSelectionPanel : KScreen
 		get
 		{
 			this.currentSelectedElements.Clear();
-			foreach (MaterialSelector materialSelector in this.MaterialSelectors)
+			foreach (MaterialSelector materialSelector in this.materialSelectors)
 			{
 				if (materialSelector.gameObject.activeSelf)
 				{
@@ -52,14 +52,17 @@ public class MaterialSelectionPanel : KScreen
 		{
 			MaterialSelector materialSelector = Util.KInstantiateUI<MaterialSelector>(this.MaterialSelectorTemplate, base.gameObject, false);
 			materialSelector.selectorIndex = i;
-			this.MaterialSelectors.Add(materialSelector);
+			this.materialSelectors.Add(materialSelector);
 		}
-		this.MaterialSelectors[0].gameObject.SetActive(true);
+		this.materialSelectors[0].gameObject.SetActive(true);
 		this.MaterialSelectorTemplate.SetActive(false);
-		this.ResearchRequired.SetActive(false);
-		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.priorityScreenPrefab.gameObject, this.priorityScreenParent, false);
-		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), true);
-		this.priorityScreenParent.transform.SetAsLastSibling();
+		this.ToggleResearchRequired(false);
+		if (this.priorityScreenParent != null)
+		{
+			this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.priorityScreenPrefab.gameObject, this.priorityScreenParent, false);
+			this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), true);
+			this.priorityScreenParent.transform.SetAsLastSibling();
+		}
 		this.gameSubscriptionHandles.Add(Game.Instance.Subscribe(-107300940, delegate(object d)
 		{
 			this.RefreshSelectors();
@@ -84,7 +87,7 @@ public class MaterialSelectionPanel : KScreen
 
 	public void AddSelectAction(MaterialSelector.SelectMaterialActions action)
 	{
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		this.materialSelectors.ForEach(delegate(MaterialSelector selector)
 		{
 			selector.selectMaterialActions = (MaterialSelector.SelectMaterialActions)Delegate.Combine(selector.selectMaterialActions, action);
 		});
@@ -92,7 +95,7 @@ public class MaterialSelectionPanel : KScreen
 
 	public void ClearSelectActions()
 	{
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		this.materialSelectors.ForEach(delegate(MaterialSelector selector)
 		{
 			selector.selectMaterialActions = null;
 		});
@@ -100,7 +103,7 @@ public class MaterialSelectionPanel : KScreen
 
 	public void ClearMaterialToggles()
 	{
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		this.materialSelectors.ForEach(delegate(MaterialSelector selector)
 		{
 			selector.ClearMaterialToggles();
 		});
@@ -117,7 +120,7 @@ public class MaterialSelectionPanel : KScreen
 	public bool AllSelectorsSelected()
 	{
 		bool flag = false;
-		foreach (MaterialSelector materialSelector in this.MaterialSelectors)
+		foreach (MaterialSelector materialSelector in this.materialSelectors)
 		{
 			flag = flag || materialSelector.gameObject.activeInHierarchy;
 			if (materialSelector.gameObject.activeInHierarchy && materialSelector.CurrentSelectedElement == null)
@@ -138,7 +141,7 @@ public class MaterialSelectionPanel : KScreen
 		{
 			return;
 		}
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		this.materialSelectors.ForEach(delegate(MaterialSelector selector)
 		{
 			selector.gameObject.SetActive(false);
 		});
@@ -147,30 +150,49 @@ public class MaterialSelectionPanel : KScreen
 		string text = this.GetBuildableTooltip(buildingDef);
 		if (!flag)
 		{
-			this.ResearchRequired.SetActive(true);
+			this.ToggleResearchRequired(true);
 			LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
 			componentsInChildren[0].text = "";
 			componentsInChildren[1].text = text;
 			componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
-			this.priorityScreen.gameObject.SetActive(false);
-			this.buildToolRotateButton.gameObject.SetActive(false);
-			return;
+			if (this.priorityScreen != null)
+			{
+				this.priorityScreen.gameObject.SetActive(false);
+			}
+			if (this.buildToolRotateButton != null)
+			{
+				this.buildToolRotateButton.gameObject.SetActive(false);
+				return;
+			}
 		}
-		this.ResearchRequired.SetActive(false);
-		for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
+		else
 		{
-			this.MaterialSelectors[i].gameObject.SetActive(true);
-			this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
+			this.ToggleResearchRequired(false);
+			for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
+			{
+				this.materialSelectors[i].gameObject.SetActive(true);
+				this.materialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
+			}
+			if (this.priorityScreen != null)
+			{
+				this.priorityScreen.gameObject.SetActive(true);
+				this.priorityScreen.transform.SetAsLastSibling();
+			}
+			if (this.buildToolRotateButton != null)
+			{
+				this.buildToolRotateButton.gameObject.SetActive(true);
+				this.buildToolRotateButton.transform.SetAsLastSibling();
+			}
 		}
-		this.priorityScreen.gameObject.SetActive(true);
-		this.priorityScreen.transform.SetAsLastSibling();
-		this.buildToolRotateButton.gameObject.SetActive(true);
-		this.buildToolRotateButton.transform.SetAsLastSibling();
 	}
 
-	public void UpdateResourceToggleValues()
+	private void UpdateResourceToggleValues()
 	{
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
+		if (!base.gameObject.activeInHierarchy)
+		{
+			return;
+		}
+		this.materialSelectors.ForEach(delegate(MaterialSelector selector)
 		{
 			if (selector.gameObject.activeSelf)
 			{
@@ -179,12 +201,21 @@ public class MaterialSelectionPanel : KScreen
 		});
 	}
 
+	private void ToggleResearchRequired(bool state)
+	{
+		if (this.ResearchRequired == null)
+		{
+			return;
+		}
+		this.ResearchRequired.SetActive(state);
+	}
+
 	public bool AutoSelectAvailableMaterial()
 	{
 		bool flag = true;
-		for (int i = 0; i < this.MaterialSelectors.Count; i++)
+		for (int i = 0; i < this.materialSelectors.Count; i++)
 		{
-			if (!this.MaterialSelectors[i].AutoSelectAvailableMaterial())
+			if (!this.materialSelectors[i].AutoSelectAvailableMaterial())
 			{
 				flag = false;
 			}
@@ -207,14 +238,19 @@ public class MaterialSelectionPanel : KScreen
 		}
 		if (array != null)
 		{
-			for (int i = 0; i < Mathf.Min(array.Length, this.MaterialSelectors.Count); i++)
+			for (int i = 0; i < Mathf.Min(array.Length, this.materialSelectors.Count); i++)
 			{
-				if (this.MaterialSelectors[i].ElementToggles.ContainsKey(array[i]))
+				if (this.materialSelectors[i].ElementToggles.ContainsKey(array[i]))
 				{
-					this.MaterialSelectors[i].OnSelectMaterial(array[i], this.activeRecipe, false);
+					this.materialSelectors[i].OnSelectMaterial(array[i], this.activeRecipe, false);
 				}
 			}
 		}
+	}
+
+	public void ForceSelectPrimaryTag(Tag tag)
+	{
+		this.materialSelectors[0].OnSelectMaterial(tag, this.activeRecipe, false);
 	}
 
 	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag)
@@ -267,11 +303,11 @@ public class MaterialSelectionPanel : KScreen
 
 	public void ToggleShowDescriptorPanels(bool show)
 	{
-		for (int i = 0; i < this.MaterialSelectors.Count; i++)
+		for (int i = 0; i < this.materialSelectors.Count; i++)
 		{
-			if (this.MaterialSelectors[i] != null)
+			if (this.materialSelectors[i] != null)
 			{
-				this.MaterialSelectors[i].ToggleShowDescriptorsPanel(show);
+				this.materialSelectors[i].ToggleShowDescriptorsPanel(show);
 			}
 		}
 	}
@@ -281,9 +317,14 @@ public class MaterialSelectionPanel : KScreen
 		this.priorityScreen.SetScreenPriority(priority, false);
 	}
 
+	public void Render200ms(float dt)
+	{
+		this.UpdateResourceToggleValues();
+	}
+
 	public Dictionary<KToggle, Tag> ElementToggles = new Dictionary<KToggle, Tag>();
 
-	private List<MaterialSelector> MaterialSelectors = new List<MaterialSelector>();
+	private List<MaterialSelector> materialSelectors = new List<MaterialSelector>();
 
 	private List<Tag> currentSelectedElements = new List<Tag>();
 

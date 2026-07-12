@@ -247,7 +247,8 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 	[Serialize]
 	public bool activateOnGreaterThan = true;
 
-	private int currentCount;
+	[Serialize]
+	public int currentCount;
 
 	private KSelectable selectable;
 

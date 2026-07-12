@@ -33,19 +33,23 @@ public class Schedule : ISaveLoadable, IListableOption
 
 	public void SetBlocksToGroupDefaults(List<ScheduleGroup> defaultGroups)
 	{
-		this.blocks.Clear();
-		int num = 0;
+		this.blocks = Schedule.GetScheduleBlocksFromGroupDefaults(defaultGroups);
+		global::Debug.Assert(this.blocks.Count == 24);
+		this.Changed();
+	}
+
+	public static List<ScheduleBlock> GetScheduleBlocksFromGroupDefaults(List<ScheduleGroup> defaultGroups)
+	{
+		List<ScheduleBlock> list = new List<ScheduleBlock>();
 		for (int i = 0; i < defaultGroups.Count; i++)
 		{
 			ScheduleGroup scheduleGroup = defaultGroups[i];
 			for (int j = 0; j < scheduleGroup.defaultSegments; j++)
 			{
-				this.blocks.Add(new ScheduleBlock(scheduleGroup.Name, scheduleGroup.allowedTypes, scheduleGroup.Id));
-				num++;
+				list.Add(new ScheduleBlock(scheduleGroup.Name, scheduleGroup.allowedTypes, scheduleGroup.Id));
 			}
 		}
-		global::Debug.Assert(num == 24);
-		this.Changed();
+		return list;
 	}
 
 	public void Tick()

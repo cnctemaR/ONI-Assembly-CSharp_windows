@@ -151,7 +151,7 @@ namespace Database
 			new Tech("FoodRepurposing", new List<string> { "Juicer", "SpiceGrinder", "MilkPress" }, this, null);
 			new Tech("FinerDining", new List<string> { "GourmetCookingStation", "FoodDehydrator", "FoodRehydrator" }, this, null);
 			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign", "RadiationLight" }, this, null);
-			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FishDeliveryPoint", "FishFeeder" }, this, null);
+			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FishDeliveryPoint", "FishFeeder", "CritterPickUp", "CritterDropOff" }, this, null);
 			new Tech("AnimalControl", new List<string>
 			{
 				"CreatureAirTrap",
@@ -160,7 +160,7 @@ namespace Database
 				"EggIncubator",
 				LogicCritterCountSensorConfig.ID
 			}, this, null);
-			new Tech("AnimalComfort", new List<string> { "CritterCondo", "UnderwaterCritterCondo" }, this, null);
+			new Tech("AnimalComfort", new List<string> { "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo" }, this, null);
 			new Tech("DairyOperation", new List<string> { "MilkFeeder", "MilkFatSeparator", "MilkingStation" }, this, null);
 			new Tech("ImprovedOxygen", new List<string> { "Electrolyzer", "RustDeoxidizer" }, this, null);
 			new Tech("GasPiping", new List<string> { "GasConduit", "GasConduitBridge", "GasPump", "GasVent" }, this, null);

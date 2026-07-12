@@ -51,8 +51,9 @@ public class KAnim
 			}
 			if (elapsedSeconds > 0f)
 			{
-				float num2 = elapsedSeconds * this.frameRate + 0.49999997f;
-				num = Math.Min(this.numFrames - 1, (int)num2);
+				float num2 = 0.01f / this.frameRate;
+				float num3 = elapsedSeconds * this.frameRate + num2;
+				num = Math.Min(this.numFrames - 1, (int)num3);
 			}
 			return num;
 		}

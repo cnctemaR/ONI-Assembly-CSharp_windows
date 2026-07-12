@@ -37,6 +37,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		{
 			kleiPermitDioramaVisTarget.GetGameObject().SetActive(false);
 		}
+		KleiPermitVisUtil.ClearAnimation();
 		IKleiPermitDioramaVisTarget permitVisTarget = this.GetPermitVisTarget(permit);
 		permitVisTarget.GetGameObject().SetActive(true);
 		permitVisTarget.ConfigureWith(permit);
@@ -55,58 +56,83 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 		}
 		if (permit.Category == PermitCategory.Building)
 		{
-			bool flag;
-			BuildLocationRule buildLocationRule;
-			KleiPermitVisUtil.GetBuildLocationRule(permit).Deconstruct(out flag, out buildLocationRule);
-			bool flag2 = flag;
-			BuildLocationRule buildLocationRule2 = buildLocationRule;
-			if (flag2)
+			BuildLocationRule? buildLocationRule = KleiPermitVisUtil.GetBuildLocationRule(permit);
+			if (buildLocationRule == null)
 			{
-				switch (buildLocationRule2)
+				if (permit.DlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
 				{
-				case BuildLocationRule.OnFloor:
 					return this.buildingOnFloorVis;
-				case BuildLocationRule.OnCeiling:
-				{
-					string prefabID = KleiPermitVisUtil.GetBuildingDef(permit).Value.PrefabID;
-					if (prefabID == "FlowerVaseHanging" || prefabID == "FlowerVaseHangingFancy")
-					{
-						return this.buildingHangingHookVis;
-					}
-					return this.buildingPresentationStandVis.WithAlignment(Alignment.Top());
 				}
-				case BuildLocationRule.OnWall:
-					return this.buildingPresentationStandVis.WithAlignment(Alignment.Left());
-				case BuildLocationRule.InCorner:
-					return this.buildingPresentationStandVis.WithAlignment(Alignment.TopLeft());
-				case BuildLocationRule.NotInTiles:
-					return this.pedestalAndItemVis;
-				}
-				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule2));
+				return this.fallbackVis.WithError("Couldn't get BuildLocationRule on permit with id \"" + permit.Id + "\"");
 			}
-			if (permit.DlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
+			else
 			{
-				return this.buildingOnFloorVis;
+				BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
+				if (!buildingDef.BuildingComplete.GetComponent<Bed>().IsNullOrDestroyed())
+				{
+					return this.buildingOnFloorVis;
+				}
+				if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink")
+				{
+					return this.buildingOnFloorBigVis;
+				}
+				if (!buildingDef.BuildingComplete.GetComponent<RocketModule>().IsNullOrDestroyed() || !buildingDef.BuildingComplete.GetComponent<RocketEngine>().IsNullOrDestroyed())
+				{
+					return this.buildingRocketVis;
+				}
+				if (buildingDef.PrefabID == "PlanterBox" || buildingDef.PrefabID == "FlowerVase")
+				{
+					return this.buildingOnFloorBotanicalVis;
+				}
+				if (buildingDef.PrefabID == "ExteriorWall")
+				{
+					return this.wallpaperVis;
+				}
+				if (buildingDef.PrefabID == "FlowerVaseHanging" || buildingDef.PrefabID == "FlowerVaseHangingFancy")
+				{
+					return this.buildingHangingHookBotanicalVis;
+				}
+				if (buildLocationRule != null)
+				{
+					BuildLocationRule valueOrDefault = buildLocationRule.GetValueOrDefault();
+					switch (valueOrDefault)
+					{
+					case BuildLocationRule.OnFloor:
+						break;
+					case BuildLocationRule.OnFloorOverSpace:
+						goto IL_028A;
+					case BuildLocationRule.OnCeiling:
+						return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
+					case BuildLocationRule.OnWall:
+						return this.buildingOnWallVis.WithAlignment(Alignment.Left());
+					case BuildLocationRule.InCorner:
+						return this.buildingInCeilingCornerVis.WithAlignment(Alignment.TopLeft());
+					default:
+						if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
+						{
+							goto IL_028A;
+						}
+						break;
+					}
+					return this.buildingOnFloorVis;
+				}
+				IL_028A:
+				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 			}
-			return this.fallbackVis.WithError("Couldn't get BuildLocationRule on permit with id \"" + permit.Id + "\"");
 		}
 		else if (permit.Category == PermitCategory.Artwork)
 		{
-			bool flag;
-			BuildingDef buildingDef;
-			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
-			bool flag3 = flag;
-			BuildingDef buildingDef2 = buildingDef;
-			if (!flag3)
+			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);
+			if (buildingDef2.IsNullOrDestroyed())
 			{
 				return this.fallbackVis.WithError("Couldn't find building def for Artable " + permit.Id);
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|16_0<Sculpture>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|20_0<Sculpture>(buildingDef2))
 			{
 				return this.artableSculptureVis;
 			}
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|16_0<Painting>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|20_0<Painting>(buildingDef2))
 			{
 				return this.artablePaintingVis;
 			}
@@ -169,7 +195,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetPermitVisTarget>g__Has|16_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetPermitVisTarget>g__Has|20_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -184,16 +210,28 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	private KleiPermitDioramaVis_BuildingOnFloor buildingOnFloorVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_BuildingPresentationStand buildingPresentationStandVis;
+	private KleiPermitDioramaVis_BuildingOnFloorBig buildingOnFloorBigVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_BuildingPresentationStandHanging buildingPresentationStandHangingVis;
+	private KleiPermitDioramaVis_BuildingPresentationStand buildingOnWallVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_BuildingHangingHook buildingHangingHookVis;
+	private KleiPermitDioramaVis_BuildingPresentationStand buildingOnCeilingVis;
 
 	[SerializeField]
-	private KleiPermitDioramaVis_PedestalAndItem pedestalAndItemVis;
+	private KleiPermitDioramaVis_BuildingPresentationStand buildingInCeilingCornerVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_BuildingRocket buildingRocketVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_BuildingOnFloor buildingOnFloorBotanicalVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_BuildingHangingHook buildingHangingHookBotanicalVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_Wallpaper wallpaperVis;
 
 	[SerializeField]
 	private KleiPermitDioramaVis_ArtablePainting artablePaintingVis;

@@ -355,10 +355,6 @@ public class BuildMenu : KScreen
 		}
 		this.elapsedTime = 0f;
 		this.updating = true;
-		if (this.productInfoScreen.gameObject.activeSelf)
-		{
-			this.productInfoScreen.materialSelectionPanel.UpdateResourceToggleValues();
-		}
 		foreach (KIconToggleMenu kiconToggleMenu in this.submenuStack)
 		{
 			if (kiconToggleMenu is BuildMenuCategoriesScreen)

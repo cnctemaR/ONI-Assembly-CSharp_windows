@@ -80,7 +80,7 @@ public class Movable : Workable
 				if (num != num2)
 				{
 					bool flag = MinionGroupProber.Get().IsReachable(num, OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(num2, OffsetGroups.Standard);
-					if (this.pickupable.HasTag(GameTags.Creatures.Confined))
+					if (this.pickupable.KPrefabID.HasTag(GameTags.Creatures.Confined))
 					{
 						flag = false;
 					}
@@ -178,7 +178,7 @@ public class Movable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.HasTag(GameTags.Stored))
+		if (this.pickupable.KPrefabID.HasTag(GameTags.Stored))
 		{
 			return;
 		}

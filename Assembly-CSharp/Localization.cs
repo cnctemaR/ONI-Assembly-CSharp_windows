@@ -666,19 +666,22 @@ public static class Localization
 	public static string GetFontName(string[] lines)
 	{
 		string text = null;
-		foreach (string text2 in lines)
+		if (lines != null)
 		{
-			if (text2 != null && text2.Length != 0)
+			foreach (string text2 in lines)
 			{
-				string fontParam = Localization.GetFontParam(text2);
-				if (fontParam != null)
+				if (!string.IsNullOrEmpty(text2))
 				{
-					text = Localization.ValidateFontName(fontParam);
+					string fontParam = Localization.GetFontParam(text2);
+					if (fontParam != null)
+					{
+						text = Localization.ValidateFontName(fontParam);
+					}
 				}
-			}
-			if (text != null)
-			{
-				break;
+				if (text != null)
+				{
+					break;
+				}
 			}
 		}
 		if (text == null)

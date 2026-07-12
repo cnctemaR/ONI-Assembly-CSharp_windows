@@ -72,7 +72,7 @@ namespace Database
 			return flag;
 		}
 
-		private Tech GetTechFromItemID(string itemId)
+		public Tech GetTechFromItemID(string itemId)
 		{
 			if (Db.Get().Techs == null)
 			{

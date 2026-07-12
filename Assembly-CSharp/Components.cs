@@ -42,6 +42,8 @@ public class Components
 
 	public static Components.CmpsByWorld<CreatureFeeder> CreatureFeeders = new Components.CmpsByWorld<CreatureFeeder>();
 
+	public static Components.CmpsByWorld<MilkFeeder.Instance> MilkFeeders = new Components.CmpsByWorld<MilkFeeder.Instance>();
+
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
 
 	public static Components.Cmps<Radiator> Radiators = new Components.Cmps<Radiator>();
@@ -63,6 +65,8 @@ public class Components
 	public static Components.Cmps<Equipment> Equipment = new Components.Cmps<Equipment>();
 
 	public static Components.Cmps<FactionAlignment> FactionAlignments = new Components.Cmps<FactionAlignment>();
+
+	public static Components.Cmps<FactionAlignment> PlayerTargeted = new Components.Cmps<FactionAlignment>();
 
 	public static Components.Cmps<Telepad> Telepads = new Components.Cmps<Telepad>();
 

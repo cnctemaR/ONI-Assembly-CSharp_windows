@@ -171,11 +171,11 @@ public class KleiItemDropScreen : KModalScreen
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, num), 0.5f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, num), 0.5f, Easing.CircInOut, -1f);
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(OPEN_WIDTH, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(OPEN_WIDTH, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut, -1f);
 		this.userMessageLabel.gameObject.SetActive(true);
 		yield break;
 	}
@@ -187,11 +187,11 @@ public class KleiItemDropScreen : KModalScreen
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(8f, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(8f, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut, -1f);
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, 0f), 0.25f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, 0f), 0.25f, Easing.CircInOut, -1f);
 		yield break;
 	}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -83,7 +84,9 @@ public class ConfigureConsumerSideScreen : SideScreenContent
 			this.descriptor.text = selectedOption.GetDetailedDescription();
 			this.selectedOptionNameLabel.text = "<b>" + selectedOption.GetName() + "</b>";
 			this.descriptor.gameObject.SetActive(true);
+			return;
 		}
+		this.selectedOptionNameLabel.text = UI.UISIDESCREENS.FABRICATORSIDESCREEN.NORECIPESELECTED;
 	}
 
 	public override int GetSideScreenSortOrder()

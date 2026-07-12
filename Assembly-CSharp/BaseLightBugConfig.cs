@@ -98,9 +98,14 @@ public static class BaseLightBugConfig
 			}, true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
+			.Add(new CritterCondoStates.Def
+			{
+				working_anim = "cc_working_shinebug"
+			}, !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);
+		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().condoPrefabTag = "AirBorneCritterCondo";
 		return gameObject;
 	}
 

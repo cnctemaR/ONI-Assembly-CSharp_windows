@@ -849,7 +849,7 @@ namespace STRINGS
 			public static LocString DESC = string.Concat(new string[]
 			{
 				"(Co) Cobalt Ore is a blue-hued ",
-				UI.FormatAsLink("Metal", "RAWMETAL"),
+				UI.FormatAsLink("Metal", "BUILDINGMATERIALCLASSES"),
 				".\n\nIt is suitable for building ",
 				UI.FormatAsLink("Power", "POWER"),
 				" systems."
@@ -1154,14 +1154,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Molten Niobium", "MOLTENNIOBIUM");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"(Nb) Molten Niobium is a ",
-				UI.FormatAsLink("Rare Metal", "RAREMATERIALS"),
-				" heated into a ",
-				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
-				" state."
-			});
+			public static LocString DESC = "(Nb) Molten Niobium is a rare metal heated into a " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " state.";
 		}
 
 		public class MOLTENTUNGSTEN
@@ -1226,28 +1219,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Niobium", "NIOBIUM");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"(Nb) Niobium is a ",
-				UI.FormatAsLink("Rare Metal", "RAREMATERIALS"),
-				" with many practical applications in metallurgy and superconductor ",
-				UI.FormatAsLink("Research", "RESEARCH"),
-				"."
-			});
+			public static LocString DESC = "(Nb) Niobium is a rare metal with many practical applications in metallurgy and superconductor " + UI.FormatAsLink("Research", "RESEARCH") + ".";
 		}
 
 		public class NIOBIUMGAS
 		{
 			public static LocString NAME = UI.FormatAsLink("Niobium Gas", "NIOBIUMGAS");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"(Nb) Niobium Gas is a ",
-				UI.FormatAsLink("Rare Metal", "RAREMATERIALS"),
-				".\n\nThis selection is in a ",
-				UI.FormatAsLink("Gaseous", "ELEMENTS_GAS"),
-				" state."
-			});
+			public static LocString DESC = "(Nb) Niobium Gas is a rare metal.\n\nThis selection is in a " + UI.FormatAsLink("Gaseous", "ELEMENTS_GAS") + " state.";
 		}
 
 		public class NUCLEARWASTE
@@ -1723,11 +1702,11 @@ namespace STRINGS
 
 		public class SUPERINSULATOR
 		{
-			public static LocString NAME = UI.FormatAsLink("Insulation", "SUPERINSULATOR");
+			public static LocString NAME = UI.FormatAsLink("Insulite", "SUPERINSULATOR");
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"Insulation reduces ",
+				"Insulite reduces ",
 				UI.FormatAsLink("Heat Transfer", "HEAT"),
 				" and is composed of recrystallized ",
 				UI.FormatAsLink("Abyssalite", "KATAIRITE"),

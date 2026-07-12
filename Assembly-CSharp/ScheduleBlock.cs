@@ -11,7 +11,11 @@ public class ScheduleBlock
 		{
 			if (this._groupId == null)
 			{
-				this._groupId = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(this.allowed_types).Id;
+				ScheduleGroup scheduleGroup = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(this.allowed_types);
+				if (scheduleGroup != null)
+				{
+					this._groupId = scheduleGroup.Id;
+				}
 			}
 			return this._groupId;
 		}

@@ -9,7 +9,12 @@ public class ImageAspectRatioFitter : AspectRatioFitter
 {
 	private void UpdateAspectRatio()
 	{
-		base.aspectRatio = this.targetImage.sprite.rect.width / this.targetImage.sprite.rect.height;
+		if (this.targetImage != null && this.targetImage.sprite != null)
+		{
+			base.aspectRatio = this.targetImage.sprite.rect.width / this.targetImage.sprite.rect.height;
+			return;
+		}
+		base.aspectRatio = 1f;
 	}
 
 	protected override void OnTransformParentChanged()

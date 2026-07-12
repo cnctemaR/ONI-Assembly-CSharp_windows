@@ -212,7 +212,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		}
 		Vector2I vector2I;
 		Vector2I vector2I2;
-		KBatchedAnimUpdater.GetVisibleCellRange(out vector2I, out vector2I2);
+		Grid.GetVisibleCellRangeInActiveWorld(out vector2I, out vector2I2, 4, 1.5f);
 		this.vis_chunk_min = new Vector2I(vector2I.x / 32, vector2I.y / 32);
 		this.vis_chunk_max = new Vector2I(vector2I2.x / 32, vector2I2.y / 32);
 		this.vis_chunk_max.x = Math.Min(this.vis_chunk_max.x, this.controllerGrid.GetLength(0) - 1);
@@ -435,32 +435,6 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			pooledList.Recycle();
 		}
 		this.cleanUpChunkIndex = (this.cleanUpChunkIndex + 16) % this.controllerGrid.Length;
-	}
-
-	public static void GetVisibleCellRange(out Vector2I min, out Vector2I max)
-	{
-		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
-		min.x -= 4;
-		min.y -= 4;
-		if (CameraController.Instance != null && DlcManager.IsExpansion1Active())
-		{
-			Vector2I vector2I;
-			Vector2I vector2I2;
-			CameraController.Instance.GetWorldCamera(out vector2I, out vector2I2);
-			min.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, min.x));
-			min.y = Math.Min(vector2I.y + vector2I2.y - 1, Math.Max(vector2I.y, min.y));
-			max.x += 4;
-			max.y += 4;
-			max.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, max.x));
-			max.y = Math.Min(vector2I.y + vector2I2.y - 1 + 20, Math.Max(vector2I.y, max.y));
-			return;
-		}
-		min.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, min.x));
-		min.y = Math.Min((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) - 1, Math.Max(0, min.y));
-		max.x += 4;
-		max.y += 4;
-		max.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, max.x));
-		max.y = Math.Min((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) - 1, Math.Max(0, max.y));
 	}
 
 	private bool DoGridProcessing()

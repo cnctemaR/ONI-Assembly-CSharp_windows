@@ -53,6 +53,10 @@ namespace Database
 
 		public float GetProductionAmount(bool complete)
 		{
+			if (complete)
+			{
+				return this.amountToProduce * 1000f;
+			}
 			float num = 0f;
 			foreach (KeyValuePair<Tag, float> keyValuePair in Game.Instance.savedInfo.powerCreatedbyGeneratorType)
 			{
@@ -61,11 +65,7 @@ namespace Database
 					num += keyValuePair.Value;
 				}
 			}
-			if (!complete)
-			{
-				return num;
-			}
-			return this.amountToProduce;
+			return num;
 		}
 
 		public List<Tag> disallowedBuildings = new List<Tag>();

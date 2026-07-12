@@ -108,7 +108,7 @@ public class ProductInfoScreen : KScreen
 		this.SetTitle(def);
 		this.SetDescription(def);
 		this.SetEffects(def);
-		this.facadeSelectionPanel.SetBuildingDef(def.PrefabID);
+		this.facadeSelectionPanel.SetBuildingDef(def.PrefabID, null);
 		BuildingFacadeResource buildingFacadeResource = null;
 		if ("DEFAULT_FACADE" != facadeID)
 		{
@@ -312,7 +312,7 @@ public class ProductInfoScreen : KScreen
 		this.ProductEffectsPane.SetDescriptors(effectDescriptors);
 		foreach (Tag tag in def.BuildingComplete.GetComponent<KPrefabID>().Tags)
 		{
-			if (RoomConstraints.ConstraintTags.AllTags.Contains(tag))
+			if (RoomConstraints.ConstraintTags.AllTags.Contains(tag) && !this.HiddenRoomConstrainTags.Contains(tag))
 			{
 				Descriptor descriptor3 = default(Descriptor);
 				descriptor3.SetupDescriptor(RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(tag), null, Descriptor.DescriptorType.Effect);
@@ -460,6 +460,22 @@ public class ProductInfoScreen : KScreen
 	private Dictionary<string, GameObject> descLabels = new Dictionary<string, GameObject>();
 
 	public MultiToggle sandboxInstantBuildToggle;
+
+	private List<Tag> HiddenRoomConstrainTags = new List<Tag>
+	{
+		RoomConstraints.ConstraintTags.Refrigerator,
+		RoomConstraints.ConstraintTags.FarmStationType,
+		RoomConstraints.ConstraintTags.LuxuryBedType,
+		RoomConstraints.ConstraintTags.MassageTable,
+		RoomConstraints.ConstraintTags.MessTable,
+		RoomConstraints.ConstraintTags.NatureReserve,
+		RoomConstraints.ConstraintTags.Park,
+		RoomConstraints.ConstraintTags.PowerStation,
+		RoomConstraints.ConstraintTags.SpiceStation,
+		RoomConstraints.ConstraintTags.DeStressingBuilding,
+		RoomConstraints.ConstraintTags.Decor20,
+		RoomConstraints.ConstraintTags.MachineShopType
+	};
 
 	[NonSerialized]
 	public MaterialSelectionPanel materialSelectionPanel;

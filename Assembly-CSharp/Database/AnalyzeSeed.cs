@@ -17,7 +17,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			return SaveGame.Instance.GetComponent<ColonyAchievementTracker>().analyzedSeeds.Contains(this.seedName);
+			return SaveGame.Instance.ColonyAchievementTracker.analyzedSeeds.Contains(this.seedName);
 		}
 
 		private string seedName;

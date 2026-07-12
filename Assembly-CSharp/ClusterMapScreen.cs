@@ -111,7 +111,7 @@ public class ClusterMapScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && (e.IsAction(global::Action.ZoomIn) || e.IsAction(global::Action.ZoomOut)))
+		if (!e.Consumed && (e.IsAction(global::Action.ZoomIn) || e.IsAction(global::Action.ZoomOut)) && CameraController.IsMouseOverGameWindow)
 		{
 			List<RaycastResult> list = new List<RaycastResult>();
 			PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
@@ -687,13 +687,13 @@ public class ClusterMapScreen : KScreen
 		int num = ((path != null) ? path.Count : (-1));
 		if (this.m_selectedEntity != null)
 		{
-			float range = this.m_selectedEntity.GetComponent<IClusterRange>().GetRange();
-			if ((float)num > range / 600f && string.IsNullOrEmpty(text))
+			int rangeInTiles = this.m_selectedEntity.GetComponent<IClusterRange>().GetRangeInTiles();
+			if (num > rangeInTiles && string.IsNullOrEmpty(text))
 			{
-				text = string.Format(UI.CLUSTERMAP.TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE, range / 600f);
+				text = string.Format(UI.CLUSTERMAP.TOOLTIP_INVALID_DESTINATION_OUT_OF_RANGE, rangeInTiles);
 			}
 			bool repeat = clusterDestinationSelector.GetComponent<RocketClusterDestinationSelector>().Repeat;
-			this.m_hoveredHex.SetDestinationStatus(text, num, (int)range, repeat);
+			this.m_hoveredHex.SetDestinationStatus(text, num, rangeInTiles, repeat);
 			return;
 		}
 		this.m_hoveredHex.SetDestinationStatus(text);

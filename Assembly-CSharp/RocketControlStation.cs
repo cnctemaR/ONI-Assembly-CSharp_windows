@@ -45,7 +45,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			{
 				return this.m_logicUsageRestrictionState;
 			}
-			base.smi.sm.AquireClustercraft(base.smi);
+			base.smi.sm.AquireClustercraft(base.smi, false);
 			GameObject gameObject = base.smi.sm.clusterCraft.Get(base.smi);
 			return this.RestrictWhenGrounded && gameObject != null && gameObject.gameObject.HasTag(GameTags.RocketOnGround);
 		}
@@ -126,7 +126,10 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 		{
 			base.serializable = StateMachine.SerializeType.ParamsOnly;
 			default_state = this.unoperational;
-			this.root.Enter("SetTarget", new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.State.Callback(this.AquireClustercraft)).Target(this.masterTarget).Exit(delegate(RocketControlStation.StatesInstance smi)
+			this.root.Enter("SetTarget", delegate(RocketControlStation.StatesInstance smi)
+			{
+				this.AquireClustercraft(smi, true);
+			}).Target(this.masterTarget).Exit(delegate(RocketControlStation.StatesInstance smi)
 			{
 				this.SetRocketSpeedModifiers(smi, 0.5f, 1f);
 			});
@@ -193,9 +196,9 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			});
 		}
 
-		public void AquireClustercraft(RocketControlStation.StatesInstance smi)
+		public void AquireClustercraft(RocketControlStation.StatesInstance smi, bool force = false)
 		{
-			if (this.clusterCraft.IsNull(smi))
+			if (force || this.clusterCraft.IsNull(smi))
 			{
 				GameObject rocket = this.GetRocket(smi);
 				this.clusterCraft.Set(rocket, smi, false);

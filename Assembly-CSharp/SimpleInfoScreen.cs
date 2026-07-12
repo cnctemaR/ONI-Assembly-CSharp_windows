@@ -8,7 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
+public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 {
 	public CollapsibleDetailContentPanel StoragePanel { get; private set; }
 
@@ -19,57 +19,42 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	protected override void OnPrefabInit()
 	{
-		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
 		base.OnPrefabInit();
-		this.processConditionContainer = this.CreateCollapsableSection(UI.DETAILTABS.PROCESS_CONDITIONS.NAME);
-		this.statusItemPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS);
+		this.processConditionContainer = base.CreateCollapsableSection(UI.DETAILTABS.PROCESS_CONDITIONS.NAME);
+		this.statusItemPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS);
 		this.statusItemPanel.Content.GetComponent<VerticalLayoutGroup>().padding.bottom = 10;
 		this.statusItemPanel.scalerMask.hoverLock = true;
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
 		this.spaceSimpleInfoPOIPanel = new SpacePOISimpleInfoPanel(this);
-		this.spacePOIPanel = this.CreateCollapsableSection(null);
+		this.spacePOIPanel = base.CreateCollapsableSection(null);
 		this.rocketSimpleInfoPanel = new RocketSimpleInfoPanel(this);
-		this.rocketStatusContainer = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
-		this.vitalsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
-		this.vitalsContainer = global::Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
-		this.fertilityPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
-		this.infoPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION);
-		this.requirementsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
+		this.rocketStatusContainer = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
+		this.vitalsPanel = global::Util.KInstantiateUI(this.VitalsPanelTemplate, base.gameObject, false).GetComponent<MinionVitalsPanel>();
+		this.fertilityPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
+		this.infoPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION);
+		this.requirementsPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
 		this.requirementContent = global::Util.KInstantiateUI<DescriptorPanel>(this.DescriptorContentPrefab.gameObject, this.requirementsPanel.Content.gameObject, false);
-		this.effectsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_EFFECTS);
+		this.effectsPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_EFFECTS);
 		this.effectsContent = global::Util.KInstantiateUI<DescriptorPanel>(this.DescriptorContentPrefab.gameObject, this.effectsPanel.Content.gameObject, false);
-		this.worldMeteorShowersPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_METEORSHOWERS);
-		this.worldElementsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
-		this.worldGeysersPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
-		this.worldTraitsPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_WORLDTRAITS);
-		this.worldBiomesPanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
-		this.worldLifePanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
-		this.StoragePanel = this.CreateCollapsableSection(null);
-		this.stressPanel = this.CreateCollapsableSection(null);
+		this.worldMeteorShowersPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_METEORSHOWERS);
+		this.worldElementsPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
+		this.worldGeysersPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
+		this.worldTraitsPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_WORLDTRAITS);
+		this.worldBiomesPanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
+		this.worldLifePanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
+		this.StoragePanel = base.CreateCollapsableSection(null);
+		this.stressPanel = base.CreateCollapsableSection(null);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.Content.gameObject);
-		this.movePanel = this.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOVABLE);
+		this.movePanel = base.CreateCollapsableSection(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_MOVABLE);
 		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
 	}
 
-	private CollapsibleDetailContentPanel CreateCollapsableSection(string title = null)
-	{
-		CollapsibleDetailContentPanel collapsibleDetailContentPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		if (!string.IsNullOrEmpty(title))
-		{
-			collapsibleDetailContentPanel.SetTitle(title);
-		}
-		return collapsibleDetailContentPanel;
-	}
-
-	public override void OnSelectTarget(GameObject target)
+	protected override void OnSelectTarget(GameObject target)
 	{
 		base.OnSelectTarget(target);
-		base.Subscribe(target, -1697596308, this.onStorageChangeDelegate);
-		base.Subscribe(target, -1197125120, this.onStorageChangeDelegate);
-		this.RefreshStorage();
+		base.Subscribe(target, -1697596308, new Action<object>(this.TriggerRefreshStorage));
+		base.Subscribe(target, -1197125120, new Action<object>(this.TriggerRefreshStorage));
 		base.Subscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
-		this.RefreshBreedingChance();
-		this.vitalsPanel.SetTitle((target.GetComponent<WiltCondition>() == null) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS);
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -99,7 +84,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.statusItemPanel.gameObject.SetActive(true);
 		this.statusItemPanel.scalerMask.UpdateSize();
 		this.Refresh(true);
-		this.RefreshWorld();
+		this.RefreshWorldPanel();
+		this.RefreshProcessConditionsPanel();
 		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
 	}
 
@@ -108,8 +94,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		base.OnDeselectTarget(target);
 		if (target != null)
 		{
-			base.Unsubscribe(target, -1697596308, this.onStorageChangeDelegate);
-			base.Unsubscribe(target, -1197125120, this.onStorageChangeDelegate);
+			base.Unsubscribe(target, -1697596308, new Action<object>(this.TriggerRefreshStorage));
+			base.Unsubscribe(target, -1197125120, new Action<object>(this.TriggerRefreshStorage));
 			base.Unsubscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
 		}
 		KSelectable component = target.GetComponent<KSelectable>();
@@ -139,12 +125,12 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private void OnStorageChange(object data)
 	{
-		this.RefreshStorage();
+		SimpleInfoScreen.RefreshStoragePanel(this.StoragePanel, this.selectedTarget);
 	}
 
 	private void OnBreedingChanceChanged(object data)
 	{
-		this.RefreshBreedingChance();
+		SimpleInfoScreen.RefreshFertilityPanel(this.fertilityPanel, this.selectedTarget);
 	}
 
 	private void OnAddStatusItem(StatusItemGroup.Entry status_item, StatusItemCategory category)
@@ -217,25 +203,16 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.oldStatusItems.Remove(item);
 	}
 
-	private void Update()
-	{
-		this.Refresh(false);
-	}
-
 	private void OnRefreshData(object obj)
 	{
 		this.Refresh(false);
 	}
 
-	public void Refresh(bool force = false)
+	protected override void Refresh(bool force = false)
 	{
 		if (this.selectedTarget != this.lastTarget || force)
 		{
 			this.lastTarget = this.selectedTarget;
-			if (this.selectedTarget != null)
-			{
-				this.SetPanels(this.selectedTarget);
-			}
 		}
 		int count = this.statusItems.Count;
 		this.statusItemPanel.gameObject.SetActive(count > 0);
@@ -243,378 +220,253 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		{
 			this.statusItems[i].Refresh();
 		}
-		if (this.vitalsContainer.isActiveAndEnabled)
-		{
-			this.vitalsContainer.Refresh();
-		}
-		this.RefreshStress();
-		this.RefreshStorage();
-		this.RefreshMovePanel();
+		SimpleInfoScreen.RefreshStressPanel(this.stressPanel, this.selectedTarget);
+		SimpleInfoScreen.RefreshStoragePanel(this.StoragePanel, this.selectedTarget);
+		SimpleInfoScreen.RefreshMovePanel(this.movePanel, this.selectedTarget);
+		SimpleInfoScreen.RefreshFertilityPanel(this.fertilityPanel, this.selectedTarget);
+		SimpleInfoScreen.RefreshEffectsPanel(this.effectsPanel, this.selectedTarget, this.effectsContent);
+		SimpleInfoScreen.RefreshRequirementsPanel(this.requirementsPanel, this.selectedTarget, this.requirementContent);
+		SimpleInfoScreen.RefreshInfoPanel(this.infoPanel, this.selectedTarget);
+		this.vitalsPanel.Refresh(this.selectedTarget);
 		this.rocketSimpleInfoPanel.Refresh(this.rocketStatusContainer, this.selectedTarget);
 	}
 
-	private void SetPanels(GameObject target)
+	public void Sim1000ms(float dt)
 	{
-		MinionIdentity component = target.GetComponent<MinionIdentity>();
-		Amounts amounts = target.GetAmounts();
-		PrimaryElement component2 = target.GetComponent<PrimaryElement>();
-		BuildingComplete component3 = target.GetComponent<BuildingComplete>();
-		BuildingUnderConstruction component4 = target.GetComponent<BuildingUnderConstruction>();
-		CellSelectionObject component5 = target.GetComponent<CellSelectionObject>();
-		InfoDescription component6 = target.GetComponent<InfoDescription>();
-		Edible component7 = target.GetComponent<Edible>();
-		bool component8 = target.GetComponent<IProcessConditionSet>() != null;
-		this.attributeLabels.ForEach(delegate(LocText x)
+		if (this.selectedTarget != null && this.selectedTarget.GetComponent<IProcessConditionSet>() != null)
 		{
-			global::UnityEngine.Object.Destroy(x.gameObject);
-		});
-		this.attributeLabels.Clear();
-		this.vitalsPanel.gameObject.SetActive(amounts != null);
+			this.RefreshProcessConditionsPanel();
+		}
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		this.RefreshWorldPanel();
+		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
+	}
+
+	private static void RefreshInfoPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
+	{
 		string text = "";
 		string text2 = "";
-		if (amounts != null)
+		global::UnityEngine.Object component = targetEntity.GetComponent<MinionIdentity>();
+		InfoDescription component2 = targetEntity.GetComponent<InfoDescription>();
+		BuildingComplete component3 = targetEntity.GetComponent<BuildingComplete>();
+		BuildingUnderConstruction component4 = targetEntity.GetComponent<BuildingUnderConstruction>();
+		Edible component5 = targetEntity.GetComponent<Edible>();
+		PrimaryElement component6 = targetEntity.GetComponent<PrimaryElement>();
+		CellSelectionObject component7 = targetEntity.GetComponent<CellSelectionObject>();
+		if (!component)
 		{
-			this.vitalsContainer.selectedEntity = this.selectedTarget;
-			Uprootable component9 = this.selectedTarget.gameObject.GetComponent<Uprootable>();
-			if (component9 != null)
+			if (component2)
 			{
-				this.vitalsPanel.gameObject.SetActive(component9.GetPlanterStorage != null);
+				text = component2.description;
+				text2 = component2.effect;
 			}
-			if (this.selectedTarget.gameObject.GetComponent<WiltCondition>() != null)
+			else if (component3 != null)
 			{
-				this.vitalsPanel.gameObject.SetActive(true);
+				text = component3.DescFlavour;
+				text2 = component3.Desc;
+			}
+			else if (component4 != null)
+			{
+				text = component4.Def.Effect;
+				text2 = component4.Desc;
+			}
+			else if (component5 != null)
+			{
+				EdiblesManager.FoodInfo foodInfo = component5.FoodInfo;
+				text += string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true));
+			}
+			else if (component7 != null)
+			{
+				text = component7.element.FullDescription(false);
+			}
+			else if (component6 != null)
+			{
+				Element element = ElementLoader.FindElementByHash(component6.ElementID);
+				text = ((element != null) ? element.FullDescription(false) : "");
+			}
+			if (!string.IsNullOrEmpty(text))
+			{
+				targetPanel.SetLabel("Description", text, "");
+			}
+			bool flag = !string.IsNullOrEmpty(text2) && text2 != "\n";
+			string text3 = "\n" + text2;
+			if (flag)
+			{
+				targetPanel.SetLabel("Flavour", text3, "");
+			}
+			string[] roomClassForObject = CodexEntryGenerator.GetRoomClassForObject(targetEntity);
+			if (roomClassForObject != null)
+			{
+				string text4 = "\n" + CODEX.HEADERS.BUILDINGTYPE + ":";
+				foreach (string text5 in roomClassForObject)
+				{
+					text4 = text4 + "\n    • " + text5;
+				}
+				targetPanel.SetLabel("RoomClass", text4, "");
 			}
 		}
-		if (component8)
+		targetPanel.Commit();
+	}
+
+	private static void RefreshEffectsPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity, DescriptorPanel effectsContent)
+	{
+		if (targetEntity.GetComponent<MinionIdentity>() != null)
 		{
-			this.processConditionContainer.gameObject.SetActive(true);
-			this.RefreshProcessConditions();
+			targetPanel.SetActive(false);
+			return;
 		}
-		else
-		{
-			this.processConditionContainer.gameObject.SetActive(false);
-		}
-		if (component)
-		{
-			text = "";
-		}
-		else if (component6)
-		{
-			text = component6.description;
-			text2 = component6.effect;
-		}
-		else if (component3 != null)
-		{
-			text = component3.DescFlavour;
-			text2 = component3.Desc;
-		}
-		else if (component4 != null)
-		{
-			text = component4.Def.Effect;
-			text2 = component4.Desc;
-		}
-		else if (component7 != null)
-		{
-			EdiblesManager.FoodInfo foodInfo = component7.FoodInfo;
-			text += string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true));
-		}
-		else if (component5 != null)
-		{
-			text = component5.element.FullDescription(false);
-		}
-		else if (component2 != null)
-		{
-			Element element = ElementLoader.FindElementByHash(component2.ElementID);
-			text = ((element != null) ? element.FullDescription(false) : "");
-		}
-		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
-		{
-			this.vitalsPanel.gameObject.SetActive(false);
-		}
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(component4 ? component4.Def.BuildingComplete : target, true);
-		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(component4 ? component4.Def.BuildingComplete : target, true);
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors, false);
+		targetEntity.GetComponent<BuildingComplete>();
+		BuildingUnderConstruction component = targetEntity.GetComponent<BuildingUnderConstruction>();
+		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(component ? component.Def.BuildingComplete : targetEntity, true);
 		bool flag = gameObjectEffects.Count > 0;
-		this.effectsContent.gameObject.SetActive(flag);
+		effectsContent.gameObject.SetActive(flag);
 		if (flag)
 		{
-			this.effectsContent.SetDescriptors(gameObjectEffects);
+			effectsContent.SetDescriptors(gameObjectEffects);
 		}
-		this.effectsPanel.gameObject.SetActive(component == null && flag);
-		this.effectsContent.gameObject.SetActive(this.effectsPanel.gameObject.activeSelf);
-		bool flag2 = requirementDescriptors.Count > 0 && !this.vitalsPanel.gameObject.activeSelf;
-		this.requirementContent.gameObject.SetActive(flag2);
-		if (flag2)
-		{
-			this.requirementContent.SetDescriptors(requirementDescriptors);
-		}
-		this.requirementsPanel.gameObject.SetActive(component == null && flag2);
-		this.requirementContent.gameObject.SetActive(this.requirementsPanel.gameObject.activeSelf);
-		this.infoPanel.SetLabel("Description", text, "");
-		bool flag3 = !string.IsNullOrEmpty(text2) && text2 != "\n";
-		string text3 = "\n" + text2;
-		if (flag3)
-		{
-			this.infoPanel.SetLabel("Flavour", text3, "");
-		}
-		string[] roomClassForObject = CodexEntryGenerator.GetRoomClassForObject(target);
-		bool flag4 = roomClassForObject != null;
-		if (flag4)
-		{
-			string text4 = "\n" + CODEX.HEADERS.BUILDINGTYPE + ":";
-			foreach (string text5 in roomClassForObject)
-			{
-				text4 = text4 + "\n    • " + text5;
-			}
-			this.infoPanel.SetLabel("RoomClass", text4, "");
-		}
-		bool flag5 = text.IsNullOrWhiteSpace() && text2.IsNullOrWhiteSpace() && !flag4;
-		this.infoPanel.Commit();
-		this.infoPanel.gameObject.SetActive(component == null && !flag5);
+		targetPanel.SetActive(targetEntity != null && flag);
 	}
 
-	private void RefreshBreedingChance()
+	private static void RefreshRequirementsPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity, DescriptorPanel requirementContent)
 	{
-		if (this.selectedTarget == null)
+		MinionIdentity component = targetEntity.GetComponent<MinionIdentity>();
+		global::UnityEngine.Object component2 = targetEntity.GetComponent<WiltCondition>();
+		CreatureBrain component3 = targetEntity.GetComponent<CreatureBrain>();
+		if (component2 != null || component != null || component3 != null)
 		{
-			this.fertilityPanel.gameObject.SetActive(false);
+			targetPanel.SetActive(false);
 			return;
 		}
-		FertilityMonitor.Instance smi = this.selectedTarget.GetSMI<FertilityMonitor.Instance>();
-		if (smi == null)
+		targetPanel.SetActive(true);
+		BuildingUnderConstruction component4 = targetEntity.GetComponent<BuildingUnderConstruction>();
+		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(GameUtil.GetAllDescriptors(component4 ? component4.Def.BuildingComplete : targetEntity, true), false);
+		bool flag = requirementDescriptors.Count > 0;
+		requirementContent.gameObject.SetActive(flag);
+		if (flag)
 		{
-			this.fertilityPanel.gameObject.SetActive(false);
-			return;
+			requirementContent.SetDescriptors(requirementDescriptors);
 		}
-		int num = 0;
-		foreach (FertilityMonitor.BreedingChance breedingChance in smi.breedingChances)
+		targetPanel.SetActive(flag);
+	}
+
+	private static void RefreshFertilityPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
+	{
+		FertilityMonitor.Instance smi = targetEntity.GetSMI<FertilityMonitor.Instance>();
+		if (smi != null)
 		{
-			List<FertilityModifier> forTag = Db.Get().FertilityModifiers.GetForTag(breedingChance.egg);
-			if (forTag.Count > 0)
+			int num = 0;
+			foreach (FertilityMonitor.BreedingChance breedingChance in smi.breedingChances)
 			{
-				string text = "";
-				foreach (FertilityModifier fertilityModifier in forTag)
+				List<FertilityModifier> forTag = Db.Get().FertilityModifiers.GetForTag(breedingChance.egg);
+				if (forTag.Count > 0)
 				{
-					text += string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_MOD_FORMAT, fertilityModifier.GetTooltip());
+					string text = "";
+					foreach (FertilityModifier fertilityModifier in forTag)
+					{
+						text += string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_MOD_FORMAT, fertilityModifier.GetTooltip());
+					}
+					targetPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None), text));
 				}
-				this.fertilityPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None), text));
-			}
-			else
-			{
-				this.fertilityPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)));
+				else
+				{
+					targetPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)));
+				}
 			}
 		}
-		this.fertilityPanel.Commit();
+		targetPanel.Commit();
 	}
 
-	private void RefreshStorage()
+	private void TriggerRefreshStorage(object data = null)
 	{
-		if (this.selectedTarget == null)
+		SimpleInfoScreen.RefreshStoragePanel(this.StoragePanel, this.selectedTarget);
+	}
+
+	private static void RefreshStoragePanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
+	{
+		if (targetEntity == null)
 		{
-			this.StoragePanel.gameObject.SetActive(false);
+			targetPanel.gameObject.SetActive(false);
+			targetPanel.Commit();
 			return;
 		}
-		IStorage[] array = this.selectedTarget.GetComponentsInChildren<IStorage>();
+		IStorage[] array = targetEntity.GetComponentsInChildren<IStorage>();
 		if (array == null)
 		{
-			this.StoragePanel.gameObject.SetActive(false);
+			targetPanel.gameObject.SetActive(false);
+			targetPanel.Commit();
 			return;
 		}
 		array = Array.FindAll<IStorage>(array, (IStorage n) => n.ShouldShowInUI());
 		if (array.Length == 0)
 		{
-			this.StoragePanel.gameObject.SetActive(false);
+			targetPanel.gameObject.SetActive(false);
+			targetPanel.Commit();
 			return;
 		}
-		string text = ((this.selectedTarget.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
-		this.StoragePanel.gameObject.SetActive(true);
-		this.StoragePanel.SetTitle(text);
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
-		{
-			keyValuePair.Value.SetActive(false);
-		}
+		string text = ((targetEntity.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
+		targetPanel.gameObject.SetActive(true);
+		targetPanel.SetTitle(text);
 		int num = 0;
-		foreach (IStorage storage in array)
+		IStorage[] array2 = array;
+		for (int i = 0; i < array2.Length; i++)
 		{
-			ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
-			foreach (GameObject gameObject in storage.GetItems())
+			using (List<GameObject>.Enumerator enumerator = array2[i].GetItems().GetEnumerator())
 			{
-				if (!(gameObject == null))
+				while (enumerator.MoveNext())
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					if (!(component != null) || component.Mass != 0f)
+					GameObject go = enumerator.Current;
+					if (!(go == null))
 					{
-						Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
-						HighEnergyParticleStorage component2 = gameObject.GetComponent<HighEnergyParticleStorage>();
-						string text2 = "";
-						pooledList.Clear();
-						if (component != null && component2 == null)
+						PrimaryElement component = go.GetComponent<PrimaryElement>();
+						if (!(component != null) || component.Mass != 0f)
 						{
-							text2 = GameUtil.GetUnitFormattedName(gameObject, false);
-							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-						}
-						if (component2 != null)
-						{
-							text2 = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
-							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None, true));
-						}
-						if (smi != null)
-						{
-							string text3 = smi.StateString();
-							if (!string.IsNullOrEmpty(text3))
+							Rottable.Instance smi = go.GetSMI<Rottable.Instance>();
+							HighEnergyParticleStorage component2 = go.GetComponent<HighEnergyParticleStorage>();
+							string text2 = "";
+							string text3 = "";
+							if (component != null && component2 == null)
 							{
-								text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text3);
+								text2 = GameUtil.GetUnitFormattedName(go, false);
+								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 							}
-							pooledList.Add(new global::Tuple<string, TextStyleSetting>(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting));
-						}
-						if (component.DiseaseIdx != 255)
-						{
-							text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
-							string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
-							pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
-						}
-						GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.StoragePanel, "storage_" + num.ToString());
-						num++;
-						gameObject2.GetComponentInChildren<LocText>().text = text2;
-						gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-						foreach (global::Tuple<string, TextStyleSetting> tuple in pooledList)
-						{
-							gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(tuple.first, tuple.second);
-						}
-						KButton component3 = gameObject2.GetComponent<KButton>();
-						GameObject select_target = gameObject;
-						component3.onClick += delegate
-						{
-							SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
-						};
-						if (storage.allowUIItemRemoval)
-						{
-							Transform transform = gameObject2.transform.Find("removeAttributeButton");
-							if (transform != null)
+							if (component2 != null)
 							{
-								KButton component4 = transform.GetComponent<KButton>();
-								component4.enabled = true;
-								component4.gameObject.SetActive(true);
-								GameObject select_item = gameObject;
-								IStorage selected_storage = storage;
-								component4.onClick += delegate
-								{
-									selected_storage.Drop(select_item, true);
-								};
-							}
-						}
-					}
-				}
-			}
-			pooledList.Recycle();
-		}
-		if (num == 0)
-		{
-			this.AddOrGetStorageLabel(this.storageLabels, this.StoragePanel, "empty").GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
-		}
-	}
-
-	private void RefreshMovePanel()
-	{
-		if (this.selectedTarget == null)
-		{
-			this.movePanel.gameObject.SetActive(false);
-			return;
-		}
-		CancellableMove component = this.selectedTarget.GetComponent<CancellableMove>();
-		Movable component2 = this.selectedTarget.GetComponent<Movable>();
-		if (component == null && (component2 == null || !component2.IsMarkedForMove))
-		{
-			this.movePanel.gameObject.SetActive(false);
-			return;
-		}
-		this.movePanel.gameObject.SetActive(true);
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.moveToLabels)
-		{
-			keyValuePair.Value.SetActive(false);
-		}
-		if (component != null)
-		{
-			List<Ref<Movable>> movingObjects = component.movingObjects;
-			int num = 0;
-			using (List<Ref<Movable>>.Enumerator enumerator2 = movingObjects.GetEnumerator())
-			{
-				while (enumerator2.MoveNext())
-				{
-					Ref<Movable> @ref = enumerator2.Current;
-					ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
-					Movable movable = @ref.Get();
-					GameObject gameObject = ((movable != null) ? movable.gameObject : null);
-					if (!(gameObject == null))
-					{
-						PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
-						if (!(component3 != null) || component3.Mass != 0f)
-						{
-							Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
-							HighEnergyParticleStorage component4 = gameObject.GetComponent<HighEnergyParticleStorage>();
-							string text = "";
-							pooledList.Clear();
-							if (component3 != null && component4 == null)
-							{
-								text = GameUtil.GetUnitFormattedName(gameObject, false);
-								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedMass(component3.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text, GameUtil.GetFormattedTemperature(component3.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-							}
-							if (component4 != null)
-							{
-								text = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
-								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedHighEnergyParticles(component4.Particles, GameUtil.TimeSlice.None, true));
+								text2 = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
+								text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None, true));
 							}
 							if (smi != null)
 							{
-								string text2 = smi.StateString();
-								if (!string.IsNullOrEmpty(text2))
+								string text4 = smi.StateString();
+								if (!string.IsNullOrEmpty(text4))
 								{
-									text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text2);
+									text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text4);
 								}
-								pooledList.Add(new global::Tuple<string, TextStyleSetting>(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting));
+								text3 += smi.GetToolTip();
 							}
-							if (component3.DiseaseIdx != 255)
+							if (component.DiseaseIdx != 255)
 							{
-								text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, false));
-								string formattedDisease = GameUtil.GetFormattedDisease(component3.DiseaseIdx, component3.DiseaseCount, true);
-								pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
+								text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
+								text3 += GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
 							}
-							GameObject gameObject2 = this.AddOrGetStorageLabel(this.moveToLabels, this.movePanel, "move_" + num.ToString());
+							targetPanel.SetLabelWithButton("storage_" + num.ToString(), text2, text3, delegate
+							{
+								SelectTool.Instance.Select(go.GetComponent<KSelectable>(), false);
+							});
 							num++;
-							gameObject2.GetComponentInChildren<LocText>().text = text;
-							gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-							foreach (global::Tuple<string, TextStyleSetting> tuple in pooledList)
-							{
-								gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(tuple.first, tuple.second);
-							}
-							KButton component5 = gameObject2.GetComponent<KButton>();
-							GameObject select_target2 = gameObject;
-							component5.onClick += delegate
-							{
-								SelectTool.Instance.SelectAndFocus(select_target2.transform.GetPosition(), select_target2.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
-							};
-							pooledList.Recycle();
 						}
 					}
 				}
-				return;
 			}
 		}
-		if (component2 != null && component2.IsMarkedForMove)
+		if (num == 0)
 		{
-			GameObject gameObject3 = this.AddOrGetStorageLabel(this.moveToLabels, this.movePanel, "moveplacer");
-			gameObject3.GetComponentInChildren<LocText>().text = MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS;
-			gameObject3.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-			gameObject3.GetComponentInChildren<ToolTip>().SetSimpleTooltip(MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS_TOOLTIP);
-			KButton component6 = gameObject3.GetComponent<KButton>();
-			Storage select_target = component2.StorageProxy;
-			component6.onClick += delegate
-			{
-				SelectTool.Instance.SelectAndFocus(select_target.transform.GetPosition(), select_target.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
-			};
+			targetPanel.SetLabel("storage_empty", UI.DETAILTABS.DETAILS.STORAGE_EMPTY, "");
 		}
+		targetPanel.Commit();
 	}
 
 	private void CreateWorldTraitRow()
@@ -626,7 +478,79 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		component.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 	}
 
-	private void RefreshWorld()
+	private static void RefreshMovePanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
+	{
+		CancellableMove component = targetEntity.GetComponent<CancellableMove>();
+		Movable moving = targetEntity.GetComponent<Movable>();
+		if (component != null)
+		{
+			List<Ref<Movable>> movingObjects = component.movingObjects;
+			int num = 0;
+			using (List<Ref<Movable>>.Enumerator enumerator = movingObjects.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Ref<Movable> @ref = enumerator.Current;
+					Movable movable = @ref.Get();
+					GameObject go = ((movable != null) ? movable.gameObject : null);
+					if (!(go == null))
+					{
+						PrimaryElement component2 = go.GetComponent<PrimaryElement>();
+						if (!(component2 != null) || component2.Mass != 0f)
+						{
+							Rottable.Instance smi = go.GetSMI<Rottable.Instance>();
+							HighEnergyParticleStorage component3 = go.GetComponent<HighEnergyParticleStorage>();
+							string text = "";
+							string text2 = "";
+							if (component2 != null && component3 == null)
+							{
+								text = GameUtil.GetUnitFormattedName(go, false);
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedMass(component2.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+							}
+							if (component3 != null)
+							{
+								text = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
+								text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedHighEnergyParticles(component3.Particles, GameUtil.TimeSlice.None, true));
+							}
+							if (smi != null)
+							{
+								string text3 = smi.StateString();
+								if (!string.IsNullOrEmpty(text3))
+								{
+									text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text3);
+								}
+								text2 += smi.GetToolTip();
+							}
+							if (component2.DiseaseIdx != 255)
+							{
+								text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, false));
+								string formattedDisease = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
+								text2 += formattedDisease;
+							}
+							targetPanel.SetLabelWithButton("move_" + num.ToString(), text, text2, delegate
+							{
+								SelectTool.Instance.SelectAndFocus(go.transform.GetPosition(), go.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+							});
+							num++;
+						}
+					}
+				}
+				goto IL_029A;
+			}
+		}
+		if (moving != null && moving.IsMarkedForMove)
+		{
+			targetPanel.SetLabelWithButton("moveplacer", MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS, MISC.PLACERS.MOVEPICKUPABLEPLACER.PLACER_STATUS_TOOLTIP, delegate
+			{
+				SelectTool.Instance.SelectAndFocus(moving.StorageProxy.transform.GetPosition(), moving.StorageProxy.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
+			});
+		}
+		IL_029A:
+		targetPanel.Commit();
+	}
+
+	private void RefreshWorldPanel()
 	{
 		WorldContainer worldContainer = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<WorldContainer>());
 		AsteroidGridEntity asteroidGridEntity = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<AsteroidGridEntity>());
@@ -830,43 +754,90 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.surfaceConditionRows.Add(gameObject2);
 	}
 
-	private void RefreshProcessConditions()
+	private void RefreshProcessConditionsPanel()
 	{
 		foreach (GameObject gameObject in this.processConditionRows)
 		{
 			global::Util.KDestroyGameObject(gameObject);
 		}
 		this.processConditionRows.Clear();
+		this.processConditionContainer.SetActive(this.selectedTarget.GetComponent<IProcessConditionSet>() != null);
 		if (!DlcManager.FeatureClusterSpaceEnabled())
 		{
 			if (this.selectedTarget.GetComponent<LaunchableRocket>() != null)
 			{
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketPrep);
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketStorage);
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketBoard);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketPrep);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketStorage);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketBoard);
 				return;
 			}
-			this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.All);
+			this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.All);
 			return;
 		}
 		else
 		{
 			if (this.selectedTarget.GetComponent<LaunchPad>() != null || this.selectedTarget.GetComponent<RocketProcessConditionDisplayTarget>() != null)
 			{
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketFlight);
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketPrep);
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketStorage);
-				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketBoard);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketFlight);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketPrep);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketStorage);
+				this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.RocketBoard);
 				return;
 			}
-			this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.All);
+			this.RefreshProcessConditionsForType(this.selectedTarget, ProcessCondition.ProcessConditionType.All);
 			return;
 		}
 	}
 
-	private void RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType conditionType)
+	private static void RefreshStressPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
 	{
-		List<ProcessCondition> conditionSet = this.selectedTarget.GetComponent<IProcessConditionSet>().GetConditionSet(conditionType);
+		MinionIdentity identity = ((targetEntity != null) ? targetEntity.GetComponent<MinionIdentity>() : null);
+		if (identity != null)
+		{
+			List<ReportManager.ReportEntry.Note> stressNotes = new List<ReportManager.ReportEntry.Note>();
+			targetPanel.gameObject.SetActive(true);
+			targetPanel.SetTitle(UI.DETAILTABS.STATS.GROUPNAME_STRESS);
+			ReportManager.ReportEntry reportEntry = ReportManager.Instance.TodaysReport.reportEntries.Find((ReportManager.ReportEntry entry) => entry.reportType == ReportManager.ReportType.StressDelta);
+			float num = 0f;
+			stressNotes.Clear();
+			int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
+			ReportManager.ReportEntry reportEntry2 = ((num2 != -1) ? reportEntry.contextEntries[num2] : null);
+			if (reportEntry2 != null)
+			{
+				reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)
+				{
+					stressNotes.Add(note);
+				});
+				stressNotes.Sort((ReportManager.ReportEntry.Note a, ReportManager.ReportEntry.Note b) => a.value.CompareTo(b.value));
+				for (int i = 0; i < stressNotes.Count; i++)
+				{
+					string text = (float.IsNegativeInfinity(stressNotes[i].value) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(stressNotes[i].value));
+					targetPanel.SetLabel("stressNotes_" + i.ToString(), string.Concat(new string[]
+					{
+						(stressNotes[i].value > 0f) ? UIConstants.ColorPrefixRed : "",
+						stressNotes[i].note,
+						": ",
+						text,
+						"%",
+						(stressNotes[i].value > 0f) ? UIConstants.ColorSuffix : ""
+					}), "");
+					num += stressNotes[i].value;
+				}
+			}
+			string text2 = (float.IsNegativeInfinity(num) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(num));
+			targetPanel.SetLabel("net_stress", ((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, text2) + ((num > 0f) ? UIConstants.ColorSuffix : ""), "");
+		}
+		targetPanel.Commit();
+	}
+
+	private void RefreshProcessConditionsForType(GameObject target, ProcessCondition.ProcessConditionType conditionType)
+	{
+		IProcessConditionSet component = target.GetComponent<IProcessConditionSet>();
+		if (component == null)
+		{
+			return;
+		}
+		List<ProcessCondition> conditionSet = component.GetConditionSet(conditionType);
 		if (conditionSet.Count == 0)
 		{
 			return;
@@ -890,90 +861,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				}
 			}
 		}
-	}
-
-	public GameObject AddOrGetStorageLabel(Dictionary<string, GameObject> labels, CollapsibleDetailContentPanel panel, string id)
-	{
-		GameObject gameObject;
-		if (labels.ContainsKey(id))
-		{
-			gameObject = labels[id];
-			gameObject.GetComponent<KButton>().ClearOnClick();
-			Transform transform = gameObject.transform.Find("removeAttributeButton");
-			if (transform != null)
-			{
-				KButton kbutton = transform.FindComponent<KButton>();
-				kbutton.enabled = false;
-				kbutton.gameObject.SetActive(false);
-				kbutton.ClearOnClick();
-			}
-		}
-		else
-		{
-			gameObject = global::Util.KInstantiate(this.attributesLabelButtonTemplate, panel.Content.gameObject, null);
-			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
-			labels[id] = gameObject;
-		}
-		gameObject.SetActive(true);
-		return gameObject;
-	}
-
-	private void RefreshStress()
-	{
-		MinionIdentity identity = ((this.selectedTarget != null) ? this.selectedTarget.GetComponent<MinionIdentity>() : null);
-		if (identity == null)
-		{
-			this.stressPanel.gameObject.SetActive(false);
-			return;
-		}
-		List<ReportManager.ReportEntry.Note> stressNotes = new List<ReportManager.ReportEntry.Note>();
-		this.stressPanel.gameObject.SetActive(true);
-		this.stressPanel.SetTitle(UI.DETAILTABS.STATS.GROUPNAME_STRESS);
-		ReportManager.ReportEntry reportEntry = ReportManager.Instance.TodaysReport.reportEntries.Find((ReportManager.ReportEntry entry) => entry.reportType == ReportManager.ReportType.StressDelta);
-		this.stressDrawer.BeginDrawing();
-		float num = 0f;
-		stressNotes.Clear();
-		int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
-		ReportManager.ReportEntry reportEntry2 = ((num2 != -1) ? reportEntry.contextEntries[num2] : null);
-		if (reportEntry2 != null)
-		{
-			reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)
-			{
-				stressNotes.Add(note);
-			});
-			stressNotes.Sort((ReportManager.ReportEntry.Note a, ReportManager.ReportEntry.Note b) => a.value.CompareTo(b.value));
-			for (int i = 0; i < stressNotes.Count; i++)
-			{
-				string text = (float.IsNegativeInfinity(stressNotes[i].value) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(stressNotes[i].value));
-				this.stressDrawer.NewLabel(string.Concat(new string[]
-				{
-					(stressNotes[i].value > 0f) ? UIConstants.ColorPrefixRed : "",
-					stressNotes[i].note,
-					": ",
-					text,
-					"%",
-					(stressNotes[i].value > 0f) ? UIConstants.ColorSuffix : ""
-				}));
-				num += stressNotes[i].value;
-			}
-		}
-		string text2 = (float.IsNegativeInfinity(num) ? UI.NEG_INFINITY.ToString() : global::Util.FormatTwoDecimalPlace(num));
-		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, text2) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
-		this.stressDrawer.EndDrawing();
-	}
-
-	public void Sim1000ms(float dt)
-	{
-		if (this.selectedTarget != null && this.selectedTarget.GetComponent<IProcessConditionSet>() != null)
-		{
-			this.RefreshProcessConditions();
-		}
-	}
-
-	public void Sim4000ms(float dt)
-	{
-		this.RefreshWorld();
-		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
 	}
 
 	public GameObject iconLabelRow;
@@ -1027,7 +914,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private CollapsibleDetailContentPanel statusItemPanel;
 
-	private CollapsibleDetailContentPanel vitalsPanel;
+	private MinionVitalsPanel vitalsPanel;
 
 	private CollapsibleDetailContentPanel fertilityPanel;
 
@@ -1067,8 +954,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private SpacePOISimpleInfoPanel spaceSimpleInfoPOIPanel;
 
-	private MinionVitalsPanel vitalsContainer;
-
 	private DetailsPanelDrawer stressDrawer;
 
 	private bool TargetIsMinion;
@@ -1076,10 +961,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private GameObject lastTarget;
 
 	private GameObject statusItemsFolder;
-
-	private Dictionary<string, GameObject> storageLabels = new Dictionary<string, GameObject>();
-
-	private Dictionary<string, GameObject> moveToLabels = new Dictionary<string, GameObject>();
 
 	private Dictionary<Tag, GameObject> lifeformRows = new Dictionary<Tag, GameObject>();
 
@@ -1097,11 +978,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private List<SimpleInfoScreen.StatusItemEntry> oldStatusItems = new List<SimpleInfoScreen.StatusItemEntry>();
 
-	private List<LocText> attributeLabels = new List<LocText>();
-
 	private List<GameObject> processConditionRows = new List<GameObject>();
-
-	private Action<object> onStorageChangeDelegate;
 
 	private static readonly EventSystem.IntraObjectHandler<SimpleInfoScreen> OnRefreshDataDelegate = new EventSystem.IntraObjectHandler<SimpleInfoScreen>(delegate(SimpleInfoScreen component, object data)
 	{

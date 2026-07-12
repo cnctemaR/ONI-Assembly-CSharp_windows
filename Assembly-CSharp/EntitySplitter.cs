@@ -44,17 +44,17 @@ public class EntitySplitter : KMonoBehaviour
 		{
 			return false;
 		}
-		KPrefabID component = pickupable.GetComponent<KPrefabID>();
-		KPrefabID component2 = other.GetComponent<KPrefabID>();
-		if (component == null)
+		KPrefabID kprefabID = pickupable.KPrefabID;
+		KPrefabID kprefabID2 = other.KPrefabID;
+		if (kprefabID == null)
 		{
 			return false;
 		}
-		if (component2 == null)
+		if (kprefabID2 == null)
 		{
 			return false;
 		}
-		if (component.PrefabTag != component2.PrefabTag)
+		if (kprefabID.PrefabTag != kprefabID2.PrefabTag)
 		{
 			return false;
 		}
@@ -62,7 +62,7 @@ public class EntitySplitter : KMonoBehaviour
 		{
 			return false;
 		}
-		if (component.HasTag(GameTags.MarkedForMove) || component2.HasTag(GameTags.MarkedForMove))
+		if (kprefabID.HasTag(GameTags.MarkedForMove) || kprefabID2.HasTag(GameTags.MarkedForMove))
 		{
 			return false;
 		}
@@ -82,32 +82,32 @@ public class EntitySplitter : KMonoBehaviour
 				return false;
 			}
 		}
-		bool flag = component.HasTag(GameTags.SpicedFood);
-		if (flag != component2.HasTag(GameTags.SpicedFood))
+		bool flag = kprefabID.HasTag(GameTags.SpicedFood);
+		if (flag != kprefabID2.HasTag(GameTags.SpicedFood))
 		{
 			return false;
 		}
-		Edible component3 = component.GetComponent<Edible>();
-		Edible component4 = component2.GetComponent<Edible>();
-		if (flag && !component3.CanAbsorb(component4))
+		Edible component = kprefabID.GetComponent<Edible>();
+		Edible component2 = kprefabID2.GetComponent<Edible>();
+		if (flag && !component.CanAbsorb(component2))
 		{
 			return false;
 		}
-		if (component.HasTag(GameTags.Seed) || component.HasTag(GameTags.CropSeed) || component.HasTag(GameTags.Compostable))
+		if (kprefabID.HasTag(GameTags.Seed) || kprefabID.HasTag(GameTags.CropSeed) || kprefabID.HasTag(GameTags.Compostable))
 		{
-			MutantPlant component5 = pickupable.GetComponent<MutantPlant>();
-			MutantPlant component6 = other.GetComponent<MutantPlant>();
-			if (component5 != null || component6 != null)
+			MutantPlant component3 = pickupable.GetComponent<MutantPlant>();
+			MutantPlant component4 = other.GetComponent<MutantPlant>();
+			if (component3 != null || component4 != null)
 			{
-				if (component5 == null != (component6 == null))
+				if (component3 == null != (component4 == null))
 				{
 					return false;
 				}
-				if (component.HasTag(GameTags.UnidentifiedSeed) != component2.HasTag(GameTags.UnidentifiedSeed))
+				if (kprefabID.HasTag(GameTags.UnidentifiedSeed) != kprefabID2.HasTag(GameTags.UnidentifiedSeed))
 				{
 					return false;
 				}
-				if (component5.SubSpeciesID != component6.SubSpeciesID)
+				if (component3.SubSpeciesID != component4.SubSpeciesID)
 				{
 					return false;
 				}
@@ -125,7 +125,7 @@ public class EntitySplitter : KMonoBehaviour
 		Storage storage = pickupable.storage;
 		if (prefab == null)
 		{
-			prefab = Assets.GetPrefab(pickupable.GetComponent<KPrefabID>().PrefabTag);
+			prefab = Assets.GetPrefab(pickupable.KPrefabID.PrefabID());
 		}
 		GameObject gameObject = null;
 		if (pickupable.transform.parent != null)

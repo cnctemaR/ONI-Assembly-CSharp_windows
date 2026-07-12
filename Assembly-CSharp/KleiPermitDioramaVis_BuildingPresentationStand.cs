@@ -17,7 +17,8 @@ public class KleiPermitDioramaVis_BuildingPresentationStand : KMonoBehaviour, IK
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, buildingFacadeResource);
-		KleiPermitVisUtil.ConfigureBuildingPosition(this.buildingKAnim.rectTransform(), this.anchorPos, KleiPermitVisUtil.GetBuildingDef(permit).Unwrap(), this.lastAlignment);
+		KleiPermitVisUtil.ConfigureBuildingPosition(this.buildingKAnim.rectTransform(), this.anchorPos, KleiPermitVisUtil.GetBuildingDef(permit), this.lastAlignment);
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
 	}
 
 	public KleiPermitDioramaVis_BuildingPresentationStand WithAlignment(Alignment alignment)

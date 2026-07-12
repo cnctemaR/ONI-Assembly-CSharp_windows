@@ -79,10 +79,10 @@ public class DevToolCommandPalette : DevTool
 		{
 			this.m_selected_index = 0;
 		}
-		if ((Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter)) && this.commands.filteredValues.Count > 0)
+		DevToolCommandPalette.Command command = null;
+		if ((Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter)) && this.commands.filteredValues.Count > 0 && command == null)
 		{
-			this.SelectCommand(this.commands.filteredValues[this.m_selected_index], panel);
-			return;
+			command = this.commands.filteredValues[this.m_selected_index];
 		}
 		if (this.m_should_focus_search)
 		{
@@ -111,17 +111,17 @@ public class DevToolCommandPalette : DevTool
 			{
 				for (int i = 0; i < this.commands.filteredValues.Count; i++)
 				{
-					DevToolCommandPalette.Command command = this.commands.filteredValues[i];
+					DevToolCommandPalette.Command command2 = this.commands.filteredValues[i];
 					bool flag = i == this.m_selected_index;
 					ImGui.PushID(i);
 					bool flag2;
 					if (flag)
 					{
-						flag2 = ImGui.Selectable("> " + command.display_name, flag);
+						flag2 = ImGui.Selectable("> " + command2.display_name, flag);
 					}
 					else
 					{
-						flag2 = ImGui.Selectable("  " + command.display_name, flag);
+						flag2 = ImGui.Selectable("  " + command2.display_name, flag);
 					}
 					ImGui.PopID();
 					if (this.shouldScrollToSelectedCommandFlag && flag)
@@ -129,22 +129,19 @@ public class DevToolCommandPalette : DevTool
 						this.shouldScrollToSelectedCommandFlag = false;
 						ImGui.SetScrollHereY(0.5f);
 					}
-					if (flag2)
+					if (flag2 && command == null)
 					{
-						this.SelectCommand(command, panel);
-						ImGui.EndChild();
-						return;
+						command = command2;
 					}
 				}
 			}
 		}
 		ImGui.EndChild();
-	}
-
-	private void SelectCommand(DevToolCommandPalette.Command command, DevPanel panel)
-	{
-		command.Internal_Select();
-		panel.Close();
+		if (command != null)
+		{
+			command.Internal_Select();
+			panel.Close();
+		}
 	}
 
 	private static void Resize(DevPanel devToolPanel)

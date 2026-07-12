@@ -99,6 +99,18 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 			this.storageMeter = new MeterController(base.smi.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		}
 
+		public override void StartSM()
+		{
+			base.StartSM();
+			Components.MilkFeeders.Add(base.smi.GetMyWorldId(), this);
+		}
+
+		protected override void OnCleanUp()
+		{
+			base.OnCleanUp();
+			Components.MilkFeeders.Remove(base.smi.GetMyWorldId(), this);
+		}
+
 		public void UpdateStorageMeter()
 		{
 			this.storageMeter.SetPositionPercent(1f - Mathf.Clamp01(this.milkStorage.RemainingCapacity() / this.milkStorage.capacityKg));

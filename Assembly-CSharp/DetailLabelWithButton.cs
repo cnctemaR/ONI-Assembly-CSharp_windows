@@ -8,9 +8,5 @@ public class DetailLabelWithButton : KMonoBehaviour
 
 	public ToolTip toolTip;
 
-	public LocText buttonLabel;
-
-	public ToolTip buttonToolTip;
-
 	public KButton button;
 }

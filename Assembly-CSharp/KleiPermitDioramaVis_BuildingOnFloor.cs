@@ -17,6 +17,7 @@ public class KleiPermitDioramaVis_BuildingOnFloor : KMonoBehaviour, IKleiPermitD
 	{
 		BuildingFacadeResource buildingFacadeResource = (BuildingFacadeResource)permit;
 		KleiPermitVisUtil.ConfigureToRenderBuilding(this.buildingKAnim, buildingFacadeResource);
+		KleiPermitVisUtil.AnimateIn(this.buildingKAnim, default(Updater));
 	}
 
 	[SerializeField]

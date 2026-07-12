@@ -35,7 +35,7 @@ public class KleiItemDropScreen_PermitVis : KMonoBehaviour
 		yield return Updater.Ease(delegate(Vector3 v3)
 		{
 			this.root.transform.localScale = v3;
-		}, this.root.transform.localScale, Vector3.one, 0.5f, Easing.EaseOutBack);
+		}, this.root.transform.localScale, Vector3.one, 0.5f, Easing.EaseOutBack, -1f);
 		yield break;
 	}
 
@@ -44,7 +44,7 @@ public class KleiItemDropScreen_PermitVis : KMonoBehaviour
 		yield return Updater.Ease(delegate(Vector3 v3)
 		{
 			this.root.transform.localScale = v3;
-		}, this.root.transform.localScale, Vector3.zero, 0.25f, null);
+		}, this.root.transform.localScale, Vector3.zero, 0.25f, null, -1f);
 		this.root.gameObject.SetActive(true);
 		yield break;
 	}

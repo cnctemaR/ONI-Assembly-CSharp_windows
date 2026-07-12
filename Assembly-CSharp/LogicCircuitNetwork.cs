@@ -411,7 +411,9 @@ public class LogicCircuitNetwork : UtilityNetwork
 
 	private const float MIN_OVERLOAD_NOTIFICATION_DISPLAY_TIME = 5f;
 
-	public const int UNINITIALIZED_LOGIC_STATE = -1;
+	public const int VALID_LOGIC_SIGNAL_MASK = 15;
+
+	public const int UNINITIALIZED_LOGIC_STATE = -16;
 
 	private GameObject targetOverloadedWire;
 

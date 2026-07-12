@@ -99,6 +99,7 @@ public class Deconstructable : Workable
 		{
 			this.QueueDeconstruction(false);
 		}
+		this.reconstructable = base.GetComponent<Reconstructable>();
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -110,6 +111,10 @@ public class Deconstructable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		if (this.reconstructable != null)
+		{
+			this.reconstructable.TryCommenceReconstruct();
+		}
 		Building component = base.GetComponent<Building>();
 		SimCellOccupier component2 = base.GetComponent<SimCellOccupier>();
 		if (DetailsScreen.Instance != null && DetailsScreen.Instance.CompareTargetWith(base.gameObject))
@@ -355,6 +360,11 @@ public class Deconstructable : Workable
 			base.ShowProgressBar(false);
 			this.isMarkedForDeconstruction = false;
 			Prioritizable.RemoveRef(base.gameObject);
+			Reconstructable component = base.GetComponent<Reconstructable>();
+			if (component != null)
+			{
+				component.CancelReconstructOrder();
+			}
 		}
 	}
 
@@ -378,6 +388,8 @@ public class Deconstructable : Workable
 	public string audioSize;
 
 	public float customWorkTime = -1f;
+
+	private Reconstructable reconstructable;
 
 	[Serialize]
 	private bool isMarkedForDeconstruction;

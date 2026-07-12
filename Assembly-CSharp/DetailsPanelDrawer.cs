@@ -34,52 +34,13 @@ public class DetailsPanelDrawer
 		return this;
 	}
 
-	public DetailsPanelDrawer Tooltip(string tooltip_text)
-	{
-		this.labels[this.activeLabelCount - 1].tooltip.toolTip = tooltip_text;
-		return this;
-	}
-
-	public DetailsPanelDrawer Tooltip(Func<string> tooltip_cb)
-	{
-		this.labels[this.activeLabelCount - 1].tooltip.OnToolTip = tooltip_cb;
-		return this;
-	}
-
-	public string Format(string format, float value)
-	{
-		return this.floatFormatter.Format(format, value);
-	}
-
-	public string Format(string format, string s0)
-	{
-		return this.stringformatter.Format(format, s0);
-	}
-
-	public string Format(string format, string s0, string s1)
-	{
-		return this.stringformatter.Format(format, s0, s1);
-	}
-
 	public DetailsPanelDrawer BeginDrawing()
 	{
-		this.activeLabelCount = 0;
-		this.stringformatter.BeginDrawing();
-		this.floatFormatter.BeginDrawing();
 		return this;
 	}
 
 	public DetailsPanelDrawer EndDrawing()
 	{
-		this.floatFormatter.EndDrawing();
-		this.stringformatter.EndDrawing();
-		for (int i = this.activeLabelCount; i < this.labels.Count; i++)
-		{
-			if (this.labels[i].text.gameObject.activeSelf)
-			{
-				this.labels[i].text.gameObject.SetActive(false);
-			}
-		}
 		return this;
 	}
 

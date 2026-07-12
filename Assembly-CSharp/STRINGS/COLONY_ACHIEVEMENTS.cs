@@ -95,7 +95,7 @@ namespace STRINGS
 
 			public static LocString EXOSUIT_CYCLES = "Job Suitability";
 
-			public static LocString EXOSUIT_CYCLES_DESCRIPTION = "For {0} cycles in a row, have every Duplicant in the colony complete at least one chore while wearing an Exosuit.";
+			public static LocString EXOSUIT_CYCLES_DESCRIPTION = "For {0} cycles in a row, have every Duplicant in the colony complete at least one errand while wearing an Exosuit.";
 
 			public static LocString HATCH_REFINEMENT = "Down the Hatch";
 
@@ -293,13 +293,13 @@ namespace STRINGS
 
 				public static LocString TAME_A_CRITTER = "Tamed a {0}";
 
-				public static LocString ARM_PERFORMANCE = "Auto-Sweepers outperformed dupes for cycles: {0} / {1}";
+				public static LocString ARM_PERFORMANCE = "Auto-Sweepers outperformed Duplicants: {0} / {1} cycles";
 
 				public static LocString ARM_VS_DUPE_FETCHES = "Deliveries this cycle: Auto-Sweepers: {1} Duplicants: {2}";
 
-				public static LocString EXOSUIT_CYCLES = "All Dupes completed an Exosuit errand for cycles: {0} / {1}";
+				public static LocString EXOSUIT_CYCLES = "All Duplicants completed an Exosuit errand for cycles: {0} / {1}";
 
-				public static LocString EXOSUIT_THIS_CYCLE = "Dupes who completed Exosuit errands this cycle: {0} / {1}";
+				public static LocString EXOSUIT_THIS_CYCLE = "Duplicants who completed Exosuit errands this cycle: {0} / {1}";
 
 				public static LocString GENERATE_POWER = "Energy generated: {0} / {1}";
 

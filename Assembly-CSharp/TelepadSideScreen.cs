@@ -142,7 +142,7 @@ public class TelepadSideScreen : SideScreenContent
 
 	private void UpdateAchievementsUnlocked()
 	{
-		if (SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievementsToDisplay.Count > 0)
+		if (SaveGame.Instance.ColonyAchievementTracker.achievementsToDisplay.Count > 0)
 		{
 			this.newAchievementsEarned.gameObject.SetActive(true);
 		}

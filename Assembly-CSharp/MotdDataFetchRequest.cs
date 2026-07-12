@@ -16,6 +16,7 @@ public class MotdDataFetchRequest : IDisposable
 	{
 		MotdDataFetchRequest.FetchWebMotdJson(url, delegate(MotdData webMotd)
 		{
+			this.data = webMotd;
 			if (webMotd == null)
 			{
 				global::Debug.LogWarning("MOTD Error: failed to get web motd json");
@@ -89,41 +90,42 @@ public class MotdDataFetchRequest : IDisposable
 				}
 			}
 		}
-		int runningTasks = 0;
-		int successfullyFetchedImages = 0;
+		int imagesToFetchCount = motdData.boxesLive.Count;
+		if (imagesToFetchCount == 0)
+		{
+			onCompleteFn(false);
+			return;
+		}
+		int imagesValidCount = 0;
 		using (List<MotdData_Box>.Enumerator enumerator = motdData.boxesLive.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
 				MotdData_Box box = enumerator.Current;
-				runningTasks++;
-				MotdDataFetchRequest.FetchWebMotdImage(box.image, delegate(Texture2D resolvedImage)
+				MotdDataFetchRequest.FetchWebMotdImage(box.image, delegate(Texture2D resolvedImage, bool isFromDisk)
 				{
-					runningTasks--;
+					imagesToFetchCount--;
 					box.resolvedImage = resolvedImage;
+					box.resolvedImageIsFromDisk = isFromDisk;
 					if (box.resolvedImage != null)
 					{
-						successfullyFetchedImages++;
+						imagesValidCount++;
 					}
-					if (runningTasks == 0)
+					if (imagesToFetchCount == 0)
 					{
-						onCompleteFn(successfullyFetchedImages == motdData.boxesLive.Count);
+						onCompleteFn(imagesValidCount == motdData.boxesLive.Count);
 					}
 				});
 			}
 		}
-		if (runningTasks == 0)
-		{
-			onCompleteFn(true);
-		}
 	}
 
-	public static void FetchWebMotdImage(string url, Action<Texture2D> onCompleteFn)
+	public static void FetchWebMotdImage(string url, Action<Texture2D, bool> onCompleteFn)
 	{
 		Texture2D texture2D = MotdDataFetchRequest.ReadCachedMotdImage(url);
 		if (texture2D != null)
 		{
-			onCompleteFn(texture2D);
+			onCompleteFn(texture2D, true);
 			return;
 		}
 		UnityWebRequest webRequest = UnityWebRequest.Get(url);
@@ -132,12 +134,12 @@ public class MotdDataFetchRequest : IDisposable
 		{
 			if (string.IsNullOrEmpty(webRequest.error))
 			{
-				onCompleteFn(MotdDataFetchRequest.ParseImage(webRequest.downloadHandler.data));
+				onCompleteFn(MotdDataFetchRequest.ParseImage(webRequest.downloadHandler.data), false);
 			}
 			else
 			{
 				global::Debug.LogWarning("MOTD Error: failed to fetch web image at " + url + ". " + webRequest.error);
-				onCompleteFn(null);
+				onCompleteFn(null, false);
 			}
 			webRequest.Dispose();
 		};
@@ -161,15 +163,14 @@ public class MotdDataFetchRequest : IDisposable
 		}
 		try
 		{
-			if (Directory.Exists(MotdDataFetchRequest.GetCachePath()))
+			if (!Directory.Exists(MotdDataFetchRequest.GetCachePath()))
 			{
-				Directory.Delete(MotdDataFetchRequest.GetCachePath(), true);
+				Directory.CreateDirectory(MotdDataFetchRequest.GetCachePath());
 			}
-			Directory.CreateDirectory(MotdDataFetchRequest.GetCachePath());
 		}
 		catch (Exception ex)
 		{
-			global::Debug.LogWarning(string.Format("MOTD Error: Failed to clear old image cache --- {0}", ex));
+			global::Debug.LogWarning(string.Format("MOTD Error: Failed to create image cache directory --- {0}", ex));
 		}
 		try
 		{
@@ -180,20 +181,49 @@ public class MotdDataFetchRequest : IDisposable
 					while (enumerator.MoveNext())
 					{
 						MotdData_Box motdData_Box = enumerator.Current;
-						if (motdData_Box.image != null && motdData_Box.resolvedImage != null)
+						if (motdData_Box.image != null && motdData_Box.resolvedImage != null && !motdData_Box.resolvedImageIsFromDisk)
 						{
 							File.WriteAllBytes(MotdDataFetchRequest.GetCachedFilePath(motdData_Box.image), motdData_Box.resolvedImage.EncodeToPNG());
 						}
 					}
-					goto IL_00B3;
+					goto IL_00B0;
 				}
 			}
 			global::Debug.LogWarning("MOTD Error: Failed to write cached motd images, couldn't find a valid cache directory");
-			IL_00B3:;
+			IL_00B0:;
 		}
 		catch (Exception ex2)
 		{
 			global::Debug.LogWarning(string.Format("MOTD Error: Failed to write cached motd images --- {0}", ex2));
+		}
+		try
+		{
+			if (Directory.Exists(MotdDataFetchRequest.GetCachePath()))
+			{
+				List<string> list = new List<string>(16);
+				foreach (MotdData_Box motdData_Box2 in data.boxesLive)
+				{
+					if (motdData_Box2.image != null)
+					{
+						list.Add(MotdDataFetchRequest.GetCachedFilePath(motdData_Box2.image));
+					}
+				}
+				foreach (string text in Directory.GetFiles(MotdDataFetchRequest.GetCachePath()))
+				{
+					if (!list.Contains(MotdDataFetchRequest.GetCachedFilePath(text)))
+					{
+						File.Delete(text);
+					}
+				}
+			}
+			else
+			{
+				global::Debug.LogWarning("MOTD Error: Failed to clean cached motd images, couldn't find a valid cache directory");
+			}
+		}
+		catch (Exception ex3)
+		{
+			global::Debug.LogWarning(string.Format("MOTD Error: Failed to clean cached motd images --- {0}", ex3));
 		}
 	}
 
@@ -271,8 +301,12 @@ public class MotdDataFetchRequest : IDisposable
 	[CompilerGenerated]
 	private void <Fetch>g__CompleteWith|4_1(MotdData data)
 	{
-		this.data = data;
+		if (this.isComplete)
+		{
+			return;
+		}
 		this.isComplete = true;
+		this.data = data;
 		if (this.onCompleteFn != null)
 		{
 			this.onCompleteFn(data);

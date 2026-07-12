@@ -33,14 +33,10 @@ public static class KleiPermitVisUtil
 	{
 		buildingKAnim.Stop();
 		buildingKAnim.SwapAnims(new KAnimFile[] { artablePermit.animFile });
-		bool flag;
-		HashedString hashedString;
-		KleiPermitVisUtil.GetDefaultStickerAnimHash(artablePermit.animFile).Deconstruct(out flag, out hashedString);
-		bool flag2 = flag;
-		HashedString hashedString2 = hashedString;
-		if (flag2)
+		HashedString defaultStickerAnimHash = KleiPermitVisUtil.GetDefaultStickerAnimHash(artablePermit.animFile);
+		if (defaultStickerAnimHash != null)
 		{
-			buildingKAnim.Play(hashedString2, KAnim.PlayMode.Once, 1f, 0f);
+			buildingKAnim.Play(defaultStickerAnimHash, KAnim.PlayMode.Once, 1f, 0f);
 		}
 		else
 		{
@@ -61,12 +57,26 @@ public static class KleiPermitVisUtil
 		transform.anchoredPosition = anchorPosition + new Vector2(176f * (float)buildingDef.WidthInCells * -(alignment.x - 0.5f), 176f * (float)buildingDef.HeightInCells * -alignment.y);
 	}
 
+	public static void ClearAnimation()
+	{
+		if (!KleiPermitVisUtil.buildingAnimateIn.IsNullOrDestroyed())
+		{
+			global::UnityEngine.Object.Destroy(KleiPermitVisUtil.buildingAnimateIn.gameObject);
+		}
+	}
+
+	public static void AnimateIn(KBatchedAnimController buildingKAnim, Updater extraUpdater = default(Updater))
+	{
+		KleiPermitVisUtil.ClearAnimation();
+		KleiPermitVisUtil.buildingAnimateIn = KleiPermitBuildingAnimateIn.MakeFor(buildingKAnim, extraUpdater);
+	}
+
 	public static HashedString GetFirstAnimHash(KAnimFile animFile)
 	{
 		return animFile.GetData().GetAnim(0).hash;
 	}
 
-	public static Option<HashedString> GetDefaultStickerAnimHash(KAnimFile stickerAnimFile)
+	public static HashedString GetDefaultStickerAnimHash(KAnimFile stickerAnimFile)
 	{
 		KAnimFileData data = stickerAnimFile.GetData();
 		for (int i = 0; i < data.animCount; i++)
@@ -77,20 +87,20 @@ public static class KleiPermitVisUtil
 				return anim.hash;
 			}
 		}
-		return Option.None;
+		return null;
 	}
 
-	public static Option<BuildLocationRule> GetBuildLocationRule(PermitResource permit)
+	public static BuildLocationRule? GetBuildLocationRule(PermitResource permit)
 	{
-		Option<BuildingDef> buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
-		if (!buildingDef.HasValue)
+		BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
+		if (buildingDef == null)
 		{
-			return Option.None;
+			return null;
 		}
-		return buildingDef.Value.BuildLocationRule;
+		return new BuildLocationRule?(buildingDef.BuildLocationRule);
 	}
 
-	public static Option<BuildingDef> GetBuildingDef(PermitResource permit)
+	public static BuildingDef GetBuildingDef(PermitResource permit)
 	{
 		BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
 		if (buildingFacadeResource != null)
@@ -98,12 +108,12 @@ public static class KleiPermitVisUtil
 			GameObject gameObject = Assets.TryGetPrefab(buildingFacadeResource.PrefabID);
 			if (gameObject == null)
 			{
-				return Option.None;
+				return null;
 			}
 			BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
 			if (component == null || !component)
 			{
-				return Option.None;
+				return null;
 			}
 			return component.Def;
 		}
@@ -112,16 +122,18 @@ public static class KleiPermitVisUtil
 			ArtableStage artableStage = permit as ArtableStage;
 			if (artableStage == null)
 			{
-				return Option.None;
+				return null;
 			}
 			BuildingComplete component2 = Assets.GetPrefab(artableStage.prefabId).GetComponent<BuildingComplete>();
 			if (component2 == null || !component2)
 			{
-				return Option.None;
+				return null;
 			}
 			return component2.Def;
 		}
 	}
 
 	public const float TILE_SIZE_UI = 176f;
+
+	public static KleiPermitBuildingAnimateIn buildingAnimateIn;
 }

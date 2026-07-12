@@ -90,7 +90,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public bool CouldBePickedUpByTransferArm(GameObject carrier)
 	{
-		return this.CouldBePickedUpCommon(carrier);
+		return this.CouldBePickedUpCommon(carrier) && (this.fetchable_monitor == null || this.fetchable_monitor.IsFetchable());
 	}
 
 	public float FindReservedAmount(GameObject reserver)
@@ -247,7 +247,8 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 		this.UpdateCachedCell(num);
 		new ReachabilityMonitor.Instance(this).StartSM();
-		new FetchableMonitor.Instance(this).StartSM();
+		this.fetchable_monitor = new FetchableMonitor.Instance(this);
+		this.fetchable_monitor.StartSM();
 		base.SetWorkTime(1.5f);
 		this.faceTargetWhenWorking = true;
 		KSelectable component = base.GetComponent<KSelectable>();
@@ -277,23 +278,50 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
-	public void RegisterListeners()
+	public void UpdateListeners(bool worldSpace)
 	{
 		if (this.cleaningUp)
 		{
 			return;
 		}
-		if (this.solidPartitionerEntry.IsValid())
+		int num = Grid.PosToCell(this);
+		if (worldSpace)
 		{
+			if (this.solidPartitionerEntry.IsValid())
+			{
+				return;
+			}
+			GameScenePartitioner.Instance.Free(ref this.storedPartitionerEntry);
+			this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+			this.worldPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
+			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.OnCellChange");
+			Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
+			Singleton<CellChangeMonitor>.Instance.ClearLastKnownCell(base.transform);
 			return;
 		}
-		int num = Grid.PosToCell(this);
-		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
-		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.OnCellChange");
-		Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
-		Singleton<CellChangeMonitor>.Instance.ClearLastKnownCell(base.transform);
+		else
+		{
+			if (this.storedPartitionerEntry.IsValid())
+			{
+				return;
+			}
+			this.storedPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterStoredPickupable", this, num, GameScenePartitioner.Instance.storedPickupablesLayer, null);
+			if (this.objectLayerListItem != null)
+			{
+				this.objectLayerListItem.Clear();
+				this.objectLayerListItem = null;
+			}
+			GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
+			GameScenePartitioner.Instance.Free(ref this.worldPartitionerEntry);
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			return;
+		}
+	}
+
+	public void RegisterListeners()
+	{
+		this.UpdateListeners(true);
 	}
 
 	public void UnregisterListeners()
@@ -304,7 +332,8 @@ public class Pickupable : Workable, IHasSortOrder
 			this.objectLayerListItem = null;
 		}
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
-		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.worldPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.storedPartitionerEntry);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
@@ -490,7 +519,7 @@ public class Pickupable : Workable, IHasSortOrder
 				}
 			}
 			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, num);
-			GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, num);
+			GameScenePartitioner.Instance.UpdatePosition(this.worldPartitionerEntry, num);
 			int cachedCell = this.cachedCell;
 			this.UpdateCachedCell(num);
 			if (!flag)
@@ -508,11 +537,11 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		if (!this.KPrefabID.HasTag(GameTags.Stored) && !this.KPrefabID.HasTag(GameTags.Equipped))
 		{
-			this.RegisterListeners();
+			this.UpdateListeners(true);
 			this.AddFaller(Vector2.zero);
 			return;
 		}
-		this.UnregisterListeners();
+		this.UpdateListeners(false);
 		this.RemoveFaller();
 	}
 
@@ -567,6 +596,7 @@ public class Pickupable : Workable, IHasSortOrder
 			this.storage.Remove(base.gameObject, true);
 		}
 		this.UnregisterListeners();
+		this.fetchable_monitor = null;
 		Components.Pickupables.Remove(this);
 		if (this.reservations.Count > 0)
 		{
@@ -708,7 +738,7 @@ public class Pickupable : Workable, IHasSortOrder
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.enabled = true;
 		base.gameObject.transform.rotation = Quaternion.identity;
-		this.RegisterListeners();
+		this.UpdateListeners(true);
 		component.GetBatchInstanceData().ClearOverrideTransformMatrix();
 	}
 
@@ -720,12 +750,21 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void UpdateCachedCell(int cell)
 	{
+		if (this.cachedCell != cell)
+		{
+			GameScenePartitioner.Instance.UpdatePosition(this.storedPartitionerEntry, cell);
+		}
 		this.cachedCell = cell;
 		this.GetOffsets(this.cachedCell);
 		if (this.KPrefabID.HasTag(GameTags.PickupableStorage))
 		{
 			base.GetComponent<Storage>().UpdateStoredItemCachedCells();
 		}
+	}
+
+	public override int GetCell()
+	{
+		return this.cachedCell;
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -1004,7 +1043,11 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private HandleVector<int>.Handle solidPartitionerEntry;
 
-	private HandleVector<int>.Handle partitionerEntry;
+	private HandleVector<int>.Handle worldPartitionerEntry;
+
+	private HandleVector<int>.Handle storedPartitionerEntry;
+
+	private FetchableMonitor.Instance fetchable_monitor;
 
 	private LoggerFSSF log;
 

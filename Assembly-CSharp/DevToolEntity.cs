@@ -182,21 +182,34 @@ public class DevToolEntity : DevTool
 	{
 		if (isFocused)
 		{
-			DevToolEntity.DrawScreenRect(screenRect, name, new Color(1f, 0f, 0f, 1f), new Color(1f, 0f, 0f, 0.3f));
+			DevToolEntity.DrawScreenRect(screenRect, name, new Color(1f, 0f, 0f, 1f), new Color(1f, 0f, 0f, 0.3f), default(Option<DevToolUtil.TextAlignment>));
 			return;
 		}
-		DevToolEntity.DrawScreenRect(screenRect, Option.None, new Color(0.9f, 0f, 0f, 0.6f), default(Option<Color>));
+		DevToolEntity.DrawScreenRect(screenRect, Option.None, new Color(0.9f, 0f, 0f, 0.6f), default(Option<Color>), default(Option<DevToolUtil.TextAlignment>));
 	}
 
-	public static void DrawScreenRect([TupleElementNames(new string[] { "cornerA", "cornerB" })] ValueTuple<Vector2, Vector2> screenRect, Option<string> text = default(Option<string>), Option<Color> outlineColor = default(Option<Color>), Option<Color> fillColor = default(Option<Color>))
+	public unsafe static void DrawScreenRect([TupleElementNames(new string[] { "cornerA", "cornerB" })] ValueTuple<Vector2, Vector2> screenRect, Option<string> text = default(Option<string>), Option<Color> outlineColor = default(Option<Color>), Option<Color> fillColor = default(Option<Color>), Option<DevToolUtil.TextAlignment> alignment = default(Option<DevToolUtil.TextAlignment>))
 	{
 		Vector2 vector = Vector2.Min(screenRect.Item1, screenRect.Item2);
 		Vector2 vector2 = Vector2.Max(screenRect.Item1, screenRect.Item2);
 		ImGui.GetBackgroundDrawList().AddRect(vector, vector2, ImGui.GetColorU32(outlineColor.UnwrapOr(Color.red, null)), 0f, ImDrawFlags.None, 4f);
 		ImGui.GetBackgroundDrawList().AddRectFilled(vector, vector2, ImGui.GetColorU32(fillColor.UnwrapOr(Color.clear, null)));
+		float num = 30f;
 		if (text.IsSome())
 		{
-			ImGui.GetBackgroundDrawList().AddText(ImGui.GetFont(), 30f, new Vector2(vector2.x, vector.y) + new Vector2(15f, 0f), ImGui.GetColorU32(Color.white), text.Unwrap());
+			Vector2 vector3 = new Vector2(vector2.x, vector.y) + new Vector2(15f, 0f);
+			if (alignment.HasValue)
+			{
+				num = *ImGui.GetFont().FontSize;
+				Vector2 vector4 = ImGui.CalcTextSize(text.Unwrap());
+				if (alignment == DevToolUtil.TextAlignment.Center)
+				{
+					Vector2 vector5 = vector2 - vector;
+					vector3.x = vector.x + (vector5.x - vector4.x) * 0.5f;
+					vector3.y = vector.y + (vector5.y - vector4.y) * 0.5f;
+				}
+			}
+			ImGui.GetBackgroundDrawList().AddText(ImGui.GetFont(), num, vector3, ImGui.GetColorU32(Color.white), text.Unwrap());
 		}
 	}
 

@@ -1333,7 +1333,7 @@ namespace STRINGS
 
 			public class FLUSHTOILETTYPE
 			{
-				public static LocString TITLE = "Flush Toilets";
+				public static LocString TITLE = UI.FormatAsLink("Flush Toilets", "FLUSHTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Buildings that give Duplicants a sanitary and dignified place to conduct essential \"business\"...and then flush away the evidence.";
 
@@ -1357,7 +1357,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Decor Items";
 
-				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.";
+				public static LocString DESCRIPTION = "Buildings that give the colony a valuable aesthetic boost, and allow Duplicants to express themselves creatively.\n\nSome rooms require Fancy Decor items, which contribute extra-high levels of aesthetic enhancement.";
 
 				public static LocString FLAVOUR = "";
 
@@ -1442,13 +1442,11 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that must be built inside a rocket.";
 
 				public static LocString FLAVOUR = "";
-
-				public static LocString CONFLICTINGROOMS = "    •  Any room that is not inside a rocket.";
 			}
 
 			public class CREATURERELOCATOR
 			{
-				public static LocString TITLE = "Critter Relocator";
+				public static LocString TITLE = "Critter Relocators";
 
 				public static LocString DESCRIPTION = "Buildings that facilitate the movement of " + UI.FormatAsLink("Critters", "CREATURES") + " from one location to another.";
 

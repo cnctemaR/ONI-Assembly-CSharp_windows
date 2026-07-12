@@ -43,6 +43,20 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		{
 			schedule.ClearNullReferences();
 		}
+		List<ScheduleBlock> scheduleBlocksFromGroupDefaults = Schedule.GetScheduleBlocksFromGroupDefaults(Db.Get().ScheduleGroups.allGroups);
+		foreach (Schedule schedule2 in this.schedules)
+		{
+			List<ScheduleBlock> blocks = schedule2.GetBlocks();
+			for (int i = 0; i < blocks.Count; i++)
+			{
+				ScheduleBlock scheduleBlock = blocks[i];
+				if (Db.Get().ScheduleGroups.FindGroupForScheduleTypes(scheduleBlock.allowed_types) == null)
+				{
+					ScheduleGroup scheduleGroup = Db.Get().ScheduleGroups.FindGroupForScheduleTypes(scheduleBlocksFromGroupDefaults[i].allowed_types);
+					schedule2.SetGroup(i, scheduleGroup);
+				}
+			}
+		}
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			Schedulable component = minionIdentity.GetComponent<Schedulable>();

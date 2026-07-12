@@ -61,17 +61,17 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 	{
 		ElementSplitter data = GameComps.ElementSplitters.GetData(handle);
 		Storage storage = pickupable.storage;
-		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
-		Pickupable component2 = component.Element.substance.SpawnResource(pickupable.transform.GetPosition(), amount, component.Temperature, byte.MaxValue, 0, true, false, false).GetComponent<Pickupable>();
+		PrimaryElement primaryElement = pickupable.PrimaryElement;
+		Pickupable component = primaryElement.Element.substance.SpawnResource(pickupable.transform.GetPosition(), amount, primaryElement.Temperature, byte.MaxValue, 0, true, false, false).GetComponent<Pickupable>();
 		pickupable.TotalAmount -= amount;
-		component2.Trigger(1335436905, pickupable);
-		ElementSplitterComponents.CopyRenderSettings(pickupable.GetComponent<KBatchedAnimController>(), component2.GetComponent<KBatchedAnimController>());
+		component.Trigger(1335436905, pickupable);
+		ElementSplitterComponents.CopyRenderSettings(pickupable.GetComponent<KBatchedAnimController>(), component.GetComponent<KBatchedAnimController>());
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, data.primaryElement.gameObject);
 			storage.Trigger(-778359855, storage);
 		}
-		return component2;
+		return component;
 	}
 
 	private static void CopyRenderSettings(KBatchedAnimController src, KBatchedAnimController dest)

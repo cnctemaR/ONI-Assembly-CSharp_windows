@@ -24,7 +24,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		base.OnSpawn();
 		if (this.isMarkedForClear)
 		{
-			if (this.HasTag(GameTags.Stored))
+			if (this.pickupable.KPrefabID.HasTag(GameTags.Stored))
 			{
 				if (!base.transform.parent.GetComponent<Storage>().allowClearable)
 				{
@@ -85,7 +85,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 		if ((!this.isMarkedForClear || restoringFromSave) && !this.pickupable.IsEntombed && !this.clearHandle.IsValid() && (!this.HasTag(GameTags.Stored) || allowWhenStored))
 		{
 			Prioritizable.AddRef(base.gameObject);
-			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage, false);
+			this.pickupable.KPrefabID.AddTag(GameTags.Garbage, false);
 			this.isMarkedForClear = true;
 			this.clearHandle = GlobalChoreProvider.Instance.RegisterClearable(this);
 			this.RefreshClearableStatus(true);
@@ -120,7 +120,7 @@ public class Clearable : Workable, ISaveLoadable, IRender1000ms
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isClearable || base.GetComponent<Health>() != null || this.HasTag(GameTags.Stored) || this.HasTag(GameTags.MarkedForMove))
+		if (!this.isClearable || base.GetComponent<Health>() != null || this.pickupable.KPrefabID.HasTag(GameTags.Stored) || this.pickupable.KPrefabID.HasTag(GameTags.MarkedForMove))
 		{
 			return;
 		}

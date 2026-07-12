@@ -79,7 +79,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Updater None()
 	{
-		return Updater.WaitFrames(0);
+		return new Updater((float dt) => UpdaterResult.Complete);
 	}
 
 	public static Updater WaitOneFrame()
@@ -116,22 +116,22 @@ public readonly struct Updater : IEnumerator
 		});
 	}
 
-	public static Updater Ease(Action<float> fn, float from, float to, float duration, Easing.EasingFn easing = null)
+	public static Updater Ease(Action<float> fn, float from, float to, float duration, Easing.EasingFn easing = null, float delay = -1f)
 	{
-		return Updater.GenericEase<float>(fn, new Func<float, float, float, float>(Mathf.LerpUnclamped), easing, from, to, duration);
+		return Updater.GenericEase<float>(fn, new Func<float, float, float, float>(Mathf.LerpUnclamped), easing, from, to, duration, delay);
 	}
 
-	public static Updater Ease(Action<Vector2> fn, Vector2 from, Vector2 to, float duration, Easing.EasingFn easing = null)
+	public static Updater Ease(Action<Vector2> fn, Vector2 from, Vector2 to, float duration, Easing.EasingFn easing = null, float delay = -1f)
 	{
-		return Updater.GenericEase<Vector2>(fn, new Func<Vector2, Vector2, float, Vector2>(Vector2.LerpUnclamped), easing, from, to, duration);
+		return Updater.GenericEase<Vector2>(fn, new Func<Vector2, Vector2, float, Vector2>(Vector2.LerpUnclamped), easing, from, to, duration, delay);
 	}
 
-	public static Updater Ease(Action<Vector3> fn, Vector3 from, Vector3 to, float duration, Easing.EasingFn easing = null)
+	public static Updater Ease(Action<Vector3> fn, Vector3 from, Vector3 to, float duration, Easing.EasingFn easing = null, float delay = -1f)
 	{
-		return Updater.GenericEase<Vector3>(fn, new Func<Vector3, Vector3, float, Vector3>(Vector3.LerpUnclamped), easing, from, to, duration);
+		return Updater.GenericEase<Vector3>(fn, new Func<Vector3, Vector3, float, Vector3>(Vector3.LerpUnclamped), easing, from, to, duration, delay);
 	}
 
-	public static Updater GenericEase<T>(Action<T> useFn, Func<T, T, float, T> interpolateFn, Easing.EasingFn easingFn, T from, T to, float duration)
+	public static Updater GenericEase<T>(Action<T> useFn, Func<T, T, float, T> interpolateFn, Easing.EasingFn easingFn, T from, T to, float duration, float delay)
 	{
 		Updater.<>c__DisplayClass18_0<T> CS$<>8__locals1 = new Updater.<>c__DisplayClass18_0<T>();
 		CS$<>8__locals1.useFn = useFn;
@@ -146,7 +146,7 @@ public readonly struct Updater : IEnumerator
 		}
 		CS$<>8__locals1.currentSeconds = 0f;
 		CS$<>8__locals1.<GenericEase>g__UseKeyframeAt|0(0f);
-		return new Updater(delegate(float dt)
+		Updater updater = new Updater(delegate(float dt)
 		{
 			CS$<>8__locals1.currentSeconds += dt;
 			if (CS$<>8__locals1.currentSeconds < CS$<>8__locals1.duration)
@@ -157,6 +157,15 @@ public readonly struct Updater : IEnumerator
 			base.<GenericEase>g__UseKeyframeAt|0(1f);
 			return UpdaterResult.Complete;
 		});
+		if (delay > 0f)
+		{
+			return Updater.Series(new Updater[]
+			{
+				Updater.WaitForSeconds(delay),
+				updater
+			});
+		}
+		return updater;
 	}
 
 	public static Updater Do(global::System.Action fn)
@@ -257,6 +266,10 @@ public readonly struct Updater : IEnumerator
 		int i = 0;
 		return new Updater(delegate(float dt)
 		{
+			if (i == updaters.Length)
+			{
+				return UpdaterResult.Complete;
+			}
 			if (updaters[i].Internal_Update(dt) == UpdaterResult.Complete)
 			{
 				int j = i;

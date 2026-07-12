@@ -7,7 +7,7 @@ public class PacuConfig : IEntityConfig
 {
 	public static GameObject CreatePacu(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		return EntityTemplates.ExtendEntityToWildCreature(BasePacuConfig.CreatePrefab(id, "PacuBaseTrait", name, desc, anim_file, is_baby, null, 273.15f, 333.15f), PacuTuning.PEN_SIZE_PER_CREATURE);
+		return EntityTemplates.ExtendEntityToWildCreature(BasePacuConfig.CreatePrefab(id, "PacuBaseTrait", name, desc, anim_file, is_baby, null, 273.15f, 333.15f), PacuTuning.PEN_SIZE_PER_CREATURE, false);
 	}
 
 	public string[] GetDlcIds()

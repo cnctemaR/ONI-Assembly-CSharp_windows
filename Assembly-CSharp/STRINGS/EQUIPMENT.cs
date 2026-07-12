@@ -159,6 +159,20 @@ namespace STRINGS
 
 						public static LocString DESC = "A melon for your melon.";
 					}
+
+					public class MONDRIAN_BLUE_RED_YELLOW
+					{
+						public static LocString NAME = "Cubist Atmo Helmet";
+
+						public static LocString DESC = "Abstract geometrics are both hip <i>and</i> square.";
+					}
+
+					public class OVERALLS_RED
+					{
+						public static LocString NAME = "Spiffy Atmo Helmet";
+
+						public static LocString DESC = "The twin antennae serve as an early warning system for low ceilings.";
+					}
 				}
 			}
 
@@ -245,6 +259,20 @@ namespace STRINGS
 						public static LocString NAME = "Rocketmelon Atmo Suit";
 
 						public static LocString DESC = "It starts to smell ripe pretty quickly.";
+					}
+
+					public class MULTI_BLUE_GREY_BLACK
+					{
+						public static LocString NAME = "Swagger Atmo Suit";
+
+						public static LocString DESC = "Engineered to resemble stonewashed denim and black leather.";
+					}
+
+					public class MULTI_BLUE_YELLOW_RED
+					{
+						public static LocString NAME = "Fundamental Stripe Atmo Suit";
+
+						public static LocString DESC = "Designed by the Primary Colors Appreciation Society.";
 					}
 				}
 			}
@@ -333,6 +361,13 @@ namespace STRINGS
 
 						public static LocString DESC = "It takes eighteen melon rinds to make a single glove.";
 					}
+
+					public class BROWN
+					{
+						public static LocString NAME = "Leather Atmo Gloves";
+
+						public static LocString DESC = "They creak rather loudly during the break-in period.";
+					}
 				}
 			}
 
@@ -419,6 +454,13 @@ namespace STRINGS
 						public static LocString NAME = "Rocketmelon Atmo Belt";
 
 						public static LocString DESC = "A tribute to the <i>cucumis melo cantalupensis</i>.";
+					}
+
+					public class TWOTONE_BROWN
+					{
+						public static LocString NAME = "Leather Atmo Belt";
+
+						public static LocString DESC = "Crafted from the tanned hide of a thick-skinned critter.";
 					}
 				}
 			}
@@ -968,6 +1010,104 @@ namespace STRINGS
 
 						public static LocString DESC = "Designed by someone with cold hands and an excess of old socks.";
 					}
+
+					public class BASIC_SLATE
+					{
+						public static LocString NAME = "Basic Slate Gloves";
+
+						public static LocString DESC = "A good, solid pair of slate gloves that go with everything.";
+					}
+
+					public class KNIT_GOLD
+					{
+						public static LocString NAME = "Gold Knit Gloves";
+
+						public static LocString DESC = "Produces a pleasantly muffled \"whump\" when high-fiving.";
+					}
+
+					public class KNIT_MAGENTA
+					{
+						public static LocString NAME = "Magenta Knit Gloves";
+
+						public static LocString DESC = "Produces a pleasantly muffled \"whump\" when high-fiving.";
+					}
+
+					public class SPARKLE_WHITE
+					{
+						public static LocString NAME = "White Glitter Gloves";
+
+						public static LocString DESC = "Each sequin was attached using sealant borrowed from the rocketry department.";
+					}
+
+					public class GINCH_PINK_SALTROCK
+					{
+						public static LocString NAME = "Frilly Saltrock Gloves";
+
+						public static LocString DESC = "Thick, soft pink gloves with added flounce.";
+					}
+
+					public class GINCH_PURPLE_DUSKY
+					{
+						public static LocString NAME = "Frilly Dusk Gloves";
+
+						public static LocString DESC = "Thick, soft purple gloves with added flounce.";
+					}
+
+					public class GINCH_BLUE_BASIN
+					{
+						public static LocString NAME = "Frilly Basin Gloves";
+
+						public static LocString DESC = "Thick, soft blue gloves with added flounce.";
+					}
+
+					public class GINCH_TEAL_BALMY
+					{
+						public static LocString NAME = "Frilly Balm Gloves";
+
+						public static LocString DESC = "The soft teal fabric soothes hard-working hands.";
+					}
+
+					public class GINCH_GREEN_LIME
+					{
+						public static LocString NAME = "Frilly Leach Gloves";
+
+						public static LocString DESC = "Thick, soft green gloves with added flounce.";
+					}
+
+					public class GINCH_YELLOW_YELLOWCAKE
+					{
+						public static LocString NAME = "Frilly Yellowcake Gloves";
+
+						public static LocString DESC = "Thick, soft yellow gloves with added flounce.";
+					}
+
+					public class GINCH_ORANGE_ATOMIC
+					{
+						public static LocString NAME = "Frilly Atomic Gloves";
+
+						public static LocString DESC = "Thick, bright orange gloves with added flounce.";
+					}
+
+					public class GINCH_RED_MAGMA
+					{
+						public static LocString NAME = "Frilly Magma Gloves";
+
+						public static LocString DESC = "Thick, soft red gloves with added flounce.";
+					}
+
+					public class GINCH_GREY_GREY
+					{
+						public static LocString NAME = "Frilly Slate Gloves";
+
+						public static LocString DESC = "Thick, soft grey gloves with added flounce.";
+					}
+
+					public class GINCH_GREY_CHARCOAL
+					{
+						public static LocString NAME = "Frilly Charcoal Gloves";
+
+						public static LocString DESC = "Thick, soft dark grey gloves with added flounce.";
+					}
 				}
 			}
 
@@ -1342,6 +1482,118 @@ namespace STRINGS
 
 						public static LocString DESC = "Tiny imperfections in the front pattern ensure that no two are truly identical.";
 					}
+
+					public class PJ_CLOVERS_GLITCH_KELLY
+					{
+						public static LocString NAME = "Lucky Jammies";
+
+						public static LocString DESC = "Even the most brilliant minds need a little extra luck sometimes.";
+					}
+
+					public class PJ_HEARTS_CHILLI_STRAWBERRY
+					{
+						public static LocString NAME = "Sweetheart Jammies";
+
+						public static LocString DESC = "Plush chenille fabric and a drool-absorbent collar? This sleepsuit really <i>is</i> \"The One.\"";
+					}
+
+					public class BUILDER
+					{
+						public static LocString NAME = "Hi-Vis Jacket";
+
+						public static LocString DESC = "Unmissable style for the safety-minded.";
+					}
+
+					public class FLORAL_PINK
+					{
+						public static LocString NAME = "Downtime Shirt";
+
+						public static LocString DESC = "For maxing and relaxing when errands are too taxing.";
+					}
+
+					public class GINCH_PINK_SALTROCK
+					{
+						public static LocString NAME = "Frilly Saltrock Undershirt";
+
+						public static LocString DESC = "A seamless pink undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_PURPLE_DUSKY
+					{
+						public static LocString NAME = "Frilly Dusk Undershirt";
+
+						public static LocString DESC = "A seamless purple undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_BLUE_BASIN
+					{
+						public static LocString NAME = "Frilly Basin Undershirt";
+
+						public static LocString DESC = "A seamless blue undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_TEAL_BALMY
+					{
+						public static LocString NAME = "Frilly Balm Undershirt";
+
+						public static LocString DESC = "A seamless teal undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_GREEN_LIME
+					{
+						public static LocString NAME = "Frilly Leach Undershirt";
+
+						public static LocString DESC = "A seamless green undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_YELLOW_YELLOWCAKE
+					{
+						public static LocString NAME = "Frilly Yellowcake Undershirt";
+
+						public static LocString DESC = "A seamless yellow undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_ORANGE_ATOMIC
+					{
+						public static LocString NAME = "Frilly Atomic Undershirt";
+
+						public static LocString DESC = "A seamless orange undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_RED_MAGMA
+					{
+						public static LocString NAME = "Frilly Magma Undershirt";
+
+						public static LocString DESC = "A seamless red undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_GREY_GREY
+					{
+						public static LocString NAME = "Frilly Slate Undershirt";
+
+						public static LocString DESC = "A seamless grey undershirt with laser-cut ruffles.";
+					}
+
+					public class GINCH_GREY_CHARCOAL
+					{
+						public static LocString NAME = "Frilly Charcoal Undershirt";
+
+						public static LocString DESC = "A seamless dark grey undershirt with laser-cut ruffles.";
+					}
+
+					public class KNIT_POLKADOT_TURQ
+					{
+						public static LocString NAME = "Polka Dot Track Jacket";
+
+						public static LocString DESC = "The dots are infused with odor-neutralizing enzymes!";
+					}
+
+					public class FLASHY
+					{
+						public static LocString NAME = "Superstar Jacket";
+
+						public static LocString DESC = "Some of us were not made to be subtle.";
+					}
 				}
 			}
 
@@ -1695,6 +1947,97 @@ namespace STRINGS
 
 						public static LocString DESC = "It has pockets!";
 					}
+
+					public class GINCH_PINK_GLUON
+					{
+						public static LocString NAME = "Gluon Shorties";
+
+						public static LocString DESC = "Comfy pink short-shorts with a ruffled hem.";
+					}
+
+					public class GINCH_PURPLE_CORTEX
+					{
+						public static LocString NAME = "Cortex Shorties";
+
+						public static LocString DESC = "Comfy purple short-shorts with a ruffled hem.";
+					}
+
+					public class GINCH_BLUE_FROSTY
+					{
+						public static LocString NAME = "Frosty Shorties";
+
+						public static LocString DESC = "Icy blue short-shorts with a ruffled hem.";
+					}
+
+					public class GINCH_TEAL_LOCUS
+					{
+						public static LocString NAME = "Locus Shorties";
+
+						public static LocString DESC = "Comfy teal short-shorts with a ruffled hem.";
+					}
+
+					public class GINCH_GREEN_GOOP
+					{
+						public static LocString NAME = "Goop Shorties";
+
+						public static LocString DESC = "Short-shorts with a ruffled hem and one pocket full of melted snacks.";
+					}
+
+					public class GINCH_YELLOW_BILE
+					{
+						public static LocString NAME = "Bile Shorties";
+
+						public static LocString DESC = "Ruffled short-shorts in a stomach-turning shade of yellow.";
+					}
+
+					public class GINCH_ORANGE_NYBBLE
+					{
+						public static LocString NAME = "Nybble Shorties";
+
+						public static LocString DESC = "Comfy orange ruffled short-shorts for computer scientists.";
+					}
+
+					public class GINCH_RED_IRONBOW
+					{
+						public static LocString NAME = "Ironbow Shorties";
+
+						public static LocString DESC = "Comfy red short-shorts with a ruffled hem.";
+					}
+
+					public class GINCH_GREY_PHLEGM
+					{
+						public static LocString NAME = "Phlegmy Shorties";
+
+						public static LocString DESC = "Ruffled short-shorts in a rather sticky shade of light grey.";
+					}
+
+					public class GINCH_GREY_OBELUS
+					{
+						public static LocString NAME = "Obelus Shorties";
+
+						public static LocString DESC = "Comfy grey short-shorts with a ruffled hem.";
+					}
+
+					public class KNIT_POLKADOT_TURQ
+					{
+						public static LocString NAME = "Polka Dot Track Pants";
+
+						public static LocString DESC = "For clowning around during mandatory physical fitness week.";
+					}
+
+					public class GI_BELT_WHITE_BLACK
+					{
+						public static LocString NAME = "Rebel Gi Pants";
+
+						public static LocString DESC = "Relaxed-fit pants designed for roundhouse kicks.";
+					}
+
+					public class BELT_KHAKI_TAN
+					{
+						public static LocString NAME = "HVAC Khaki Pants";
+
+						public static LocString DESC = "Rip-resistant fabric makes crawling through ducts a breeze.";
+					}
 				}
 			}
 
@@ -1935,6 +2278,83 @@ namespace STRINGS
 						public static LocString NAME = "Black Velour Shoes";
 
 						public static LocString DESC = "Matching velour lining gently tickles feet with every step.";
+					}
+
+					public class FLASHY
+					{
+						public static LocString NAME = "Superstar Shoes";
+
+						public static LocString DESC = "Why walk when you can <i>moon</i>walk?";
+					}
+
+					public class GINCH_PINK_SALTROCK
+					{
+						public static LocString NAME = "Frilly Saltrock Socks";
+
+						public static LocString DESC = "Thick, soft pink socks with extra flounce.";
+					}
+
+					public class GINCH_PURPLE_DUSKY
+					{
+						public static LocString NAME = "Frilly Dusk Socks";
+
+						public static LocString DESC = "Thick, soft purple socks with extra flounce.";
+					}
+
+					public class GINCH_BLUE_BASIN
+					{
+						public static LocString NAME = "Frilly Basin Socks";
+
+						public static LocString DESC = "Thick, soft blue socks with extra flounce.";
+					}
+
+					public class GINCH_TEAL_BALMY
+					{
+						public static LocString NAME = "Frilly Balm Socks";
+
+						public static LocString DESC = "Thick, soothing teal socks with extra flounce.";
+					}
+
+					public class GINCH_GREEN_LIME
+					{
+						public static LocString NAME = "Frilly Leach Socks";
+
+						public static LocString DESC = "Thick, soft green socks with extra flounce.";
+					}
+
+					public class GINCH_YELLOW_YELLOWCAKE
+					{
+						public static LocString NAME = "Frilly Yellowcake Socks";
+
+						public static LocString DESC = "Dangerously soft yellow socks with extra flounce.";
+					}
+
+					public class GINCH_ORANGE_ATOMIC
+					{
+						public static LocString NAME = "Frilly Atomic Socks";
+
+						public static LocString DESC = "Thick, soft orange socks with extra flounce.";
+					}
+
+					public class GINCH_RED_MAGMA
+					{
+						public static LocString NAME = "Frilly Magma Socks";
+
+						public static LocString DESC = "Thick, toasty red socks with extra flounce.";
+					}
+
+					public class GINCH_GREY_GREY
+					{
+						public static LocString NAME = "Frilly Slate Socks";
+
+						public static LocString DESC = "Thick, soft grey socks with extra flounce.";
+					}
+
+					public class GINCH_GREY_CHARCOAL
+					{
+						public static LocString NAME = "Frilly Charcoal Socks";
+
+						public static LocString DESC = "Thick, soft dark grey socks with extra flounce.";
 					}
 				}
 			}

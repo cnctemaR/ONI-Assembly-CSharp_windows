@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class CritterCondoInteractMontior : GameStateMachine<CritterCondoInteractMontior, CritterCondoInteractMontior.Instance, IStateMachineTarget, CritterCondoInteractMontior.Def>
 {
@@ -8,7 +9,7 @@ public class CritterCondoInteractMontior : GameStateMachine<CritterCondoInteract
 		default_state = this.lookingForCondo;
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		this.root.ParamTransition<float>(this.remainingSecondsForEffect, this.satisfied, (CritterCondoInteractMontior.Instance smi, float val) => val > 0f);
-		this.lookingForCondo.Update(new Action<CritterCondoInteractMontior.Instance, float>(CritterCondoInteractMontior.FindCondoTarget), UpdateRate.SIM_4000ms, true).ToggleBehaviour(GameTags.Creatures.Behaviour_InteractWithCritterCondo, (CritterCondoInteractMontior.Instance smi) => !smi.targetCondo.IsNullOrStopped() && !smi.targetCondo.IsReserved(), delegate(CritterCondoInteractMontior.Instance smi)
+		this.lookingForCondo.PreBrainUpdate(new Action<CritterCondoInteractMontior.Instance>(CritterCondoInteractMontior.FindCondoTarget)).ToggleBehaviour(GameTags.Creatures.Behaviour_InteractWithCritterCondo, (CritterCondoInteractMontior.Instance smi) => !smi.targetCondo.IsNullOrStopped() && !smi.targetCondo.IsReserved(), delegate(CritterCondoInteractMontior.Instance smi)
 		{
 			smi.GoTo(this.satisfied);
 		});
@@ -18,23 +19,24 @@ public class CritterCondoInteractMontior : GameStateMachine<CritterCondoInteract
 		}).ScheduleGoTo((CritterCondoInteractMontior.Instance smi) => this.remainingSecondsForEffect.Get(smi), this.lookingForCondo);
 	}
 
-	private static void FindCondoTarget(CritterCondoInteractMontior.Instance smi, float dt)
+	private static void FindCondoTarget(CritterCondoInteractMontior.Instance smi)
 	{
 		using (ListPool<CritterCondo.Instance, CritterCondoInteractMontior>.PooledList pooledList = PoolsFor<CritterCondoInteractMontior>.AllocateList<CritterCondo.Instance>())
 		{
-			if (smi.def.useunderWaterCondos)
+			if (!smi.def.requireCavity)
 			{
+				Vector3 position = smi.gameObject.transform.GetPosition();
 				using (List<CritterCondo.Instance>.Enumerator enumerator = Components.CritterCondos.GetItems(smi.GetMyWorldId()).GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
 						CritterCondo.Instance instance = enumerator.Current;
-						if (!instance.IsNullOrDestroyed() && instance != null && instance.def.underWaterCondo && instance.CanBeReserved())
+						if (!instance.IsNullOrDestroyed() && !(instance.def.condoTag != smi.def.condoPrefabTag) && (instance.transform.GetPosition() - position).sqrMagnitude <= 256f && instance.CanBeReserved())
 						{
 							pooledList.Add(instance);
 						}
 					}
-					goto IL_0108;
+					goto IL_0152;
 				}
 			}
 			int num = Grid.PosToCell(smi.gameObject);
@@ -46,14 +48,14 @@ public class CritterCondoInteractMontior : GameStateMachine<CritterCondoInteract
 					if (!kprefabID.IsNullOrDestroyed())
 					{
 						CritterCondo.Instance smi2 = kprefabID.GetSMI<CritterCondo.Instance>();
-						if (smi2 != null && !smi2.def.underWaterCondo && smi2.CanBeReserved())
+						if (smi2 != null && kprefabID.HasTag(smi.def.condoPrefabTag) && smi2.CanBeReserved())
 						{
 							pooledList.Add(smi2);
 						}
 					}
 				}
 			}
-			IL_0108:
+			IL_0152:
 			Navigator component = smi.GetComponent<Navigator>();
 			int num2 = -1;
 			foreach (CritterCondo.Instance instance2 in pooledList)
@@ -77,7 +79,9 @@ public class CritterCondoInteractMontior : GameStateMachine<CritterCondoInteract
 
 	public class Def : StateMachine.BaseDef
 	{
-		public bool useunderWaterCondos;
+		public bool requireCavity = true;
+
+		public Tag condoPrefabTag = "CritterCondo";
 	}
 
 	public new class Instance : GameStateMachine<CritterCondoInteractMontior, CritterCondoInteractMontior.Instance, IStateMachineTarget, CritterCondoInteractMontior.Def>.GameInstance

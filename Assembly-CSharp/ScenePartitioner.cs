@@ -417,6 +417,29 @@ public class ScenePartitioner : ISim1000ms
 		}
 	}
 
+	public void UnsafeReadonlyGatherEntries(int x, int y, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
+	{
+		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
+		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num2 = Math.Max(nodeExtents.y, 0);
+		int num3 = Math.Max(nodeExtents.x, 0);
+		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer2 = layer.layer;
+		for (int i = num2; i < num; i++)
+		{
+			for (int j = num3; j < num4; j++)
+			{
+				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
+				{
+					if (scenePartitionerEntry != null && scenePartitionerEntry.obj != null && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
+					{
+						gathered_entries.Add(scenePartitionerEntry);
+					}
+				}
+			}
+		}
+	}
+
 	public void Cleanup()
 	{
 		SimAndRenderScheduler.instance.Remove(this);

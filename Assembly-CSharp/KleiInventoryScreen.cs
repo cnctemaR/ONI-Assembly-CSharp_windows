@@ -619,16 +619,12 @@ public class KleiInventoryScreen : KModalScreen
 		}
 		if (permit.Category == PermitCategory.Building)
 		{
-			bool flag;
-			BuildingDef buildingDef;
-			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
-			bool flag2 = flag;
-			BuildingDef buildingDef2 = buildingDef;
-			if (!flag2)
+			BuildingDef buildingDef = KleiPermitVisUtil.GetBuildingDef(permit);
+			if (buildingDef == null)
 			{
 				return "HUD";
 			}
-			string prefabID = buildingDef2.PrefabID;
+			string prefabID = buildingDef.PrefabID;
 			if (prefabID != null)
 			{
 				uint num = <PrivateImplementationDetails>.ComputeStringHash(prefabID);
@@ -642,24 +638,24 @@ public class KleiInventoryScreen : KModalScreen
 							{
 								if (num != 1633134164U)
 								{
-									goto IL_038E;
+									goto IL_035E;
 								}
 								if (!(prefabID == "CeilingLight"))
 								{
-									goto IL_038E;
+									goto IL_035E;
 								}
 								return "ceilingLight";
 							}
 							else if (!(prefabID == "FlowerVase"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 						}
 						else
 						{
 							if (!(prefabID == "LuxuryBed"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							string id = permit.Id;
 							if (id != null)
@@ -682,11 +678,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 1943253450U)
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							if (!(prefabID == "WaterCooler"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							return "watercooler";
 						}
@@ -694,7 +690,7 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(prefabID == "RockCrusher"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							return "rockrefinery";
 						}
@@ -703,17 +699,17 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 2076384603U)
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						if (!(prefabID == "GasReservoir"))
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						return "gasstorage";
 					}
 					else if (!(prefabID == "FlowerVaseHanging"))
 					{
-						goto IL_038E;
+						goto IL_035E;
 					}
 				}
 				else if (num <= 3048425356U)
@@ -724,11 +720,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 2722382738U)
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							if (!(prefabID == "PlanterBox"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							return "planterbox";
 						}
@@ -736,7 +732,7 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(prefabID == "StorageLocker"))
 							{
-								goto IL_038E;
+								goto IL_035E;
 							}
 							return "storagelocker";
 						}
@@ -745,11 +741,11 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3048425356U)
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						if (!(prefabID == "Bed"))
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						return "bed";
 					}
@@ -757,7 +753,7 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (!(prefabID == "ExteriorWall"))
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						return "wall";
 					}
@@ -768,63 +764,59 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3534553076U)
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						if (!(prefabID == "MassageTable"))
 						{
-							goto IL_038E;
+							goto IL_035E;
 						}
 						return "massagetable";
 					}
 					else if (!(prefabID == "FlowerVaseWall"))
 					{
-						goto IL_038E;
+						goto IL_035E;
 					}
 				}
 				else if (num != 3903452895U)
 				{
 					if (num != 3958671086U)
 					{
-						goto IL_038E;
+						goto IL_035E;
 					}
 					if (!(prefabID == "FlowerVaseHangingFancy"))
 					{
-						goto IL_038E;
+						goto IL_035E;
 					}
 				}
 				else
 				{
 					if (!(prefabID == "EggCracker"))
 					{
-						goto IL_038E;
+						goto IL_035E;
 					}
 					return "eggcracker";
 				}
 				return "flowervase";
 			}
 		}
-		IL_038E:
+		IL_035E:
 		if (permit.Category == PermitCategory.Artwork)
 		{
-			bool flag;
-			BuildingDef buildingDef;
-			KleiPermitVisUtil.GetBuildingDef(permit).Deconstruct(out flag, out buildingDef);
-			bool flag3 = flag;
-			BuildingDef buildingDef3 = buildingDef;
-			if (!flag3)
+			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);
+			if (buildingDef2 == null)
 			{
 				return "HUD";
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Sculpture>(buildingDef3))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Sculpture>(buildingDef2))
 			{
-				if (buildingDef3.PrefabID == "IceSculpture")
+				if (buildingDef2.PrefabID == "IceSculpture")
 				{
 					return "icesculpture";
 				}
 				return "sculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Painting>(buildingDef3))
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|72_0<Painting>(buildingDef2))
 			{
 				return "painting";
 			}

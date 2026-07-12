@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Klei;
 using Klei.AI;
 using STRINGS;
@@ -425,18 +426,14 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
-	public static string GetFormattedRocketRange(float range, GameUtil.TimeSlice timeSlice, bool displaySuffix = true)
+	public static string GetFormattedRocketRangePerCycle(float range, bool displaySuffix = true)
 	{
-		if (timeSlice == GameUtil.TimeSlice.PerCycle)
-		{
-			return range.ToString("N1") + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES_PER_CYCLE) : "");
-		}
-		float num = range / 600f;
-		if (Mathf.Approximately(num, Mathf.Round(num)))
-		{
-			num = Mathf.Round(num);
-		}
-		return Mathf.Floor(num).ToString() + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES) : "");
+		return range.ToString("N1") + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES_PER_CYCLE) : "");
+	}
+
+	public static string GetFormattedRocketRange(int rangeInTiles, bool displaySuffix = true)
+	{
+		return rangeInTiles.ToString() + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES) : "");
 	}
 
 	public static string ApplyBoldString(string source)
@@ -1172,42 +1169,42 @@ public static class GameUtil
 
 	public static int FloodFillFind<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
-		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+		GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 		{
 			cell = start_cell,
 			depth = 0
 		});
 		int num = -1;
-		while (GameUtil.FloodFillNext.Count > 0)
+		while (GameUtil.FloodFillNext.Value.Count > 0)
 		{
-			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Dequeue();
+			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Value.Dequeue();
 			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell))
 			{
 				Element element = Grid.Element[floodFillInfo.cell];
-				if ((!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Contains(floodFillInfo.cell))
+				if ((!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Value.Contains(floodFillInfo.cell))
 				{
-					GameUtil.FloodFillVisited.Add(floodFillInfo.cell);
+					GameUtil.FloodFillVisited.Value.Add(floodFillInfo.cell);
 					if (fn(floodFillInfo.cell, arg))
 					{
 						num = floodFillInfo.cell;
 						break;
 					}
-					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellLeft(floodFillInfo.cell),
 						depth = floodFillInfo.depth + 1
 					});
-					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellRight(floodFillInfo.cell),
 						depth = floodFillInfo.depth + 1
 					});
-					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellAbove(floodFillInfo.cell),
 						depth = floodFillInfo.depth + 1
 					});
-					GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellBelow(floodFillInfo.cell),
 						depth = floodFillInfo.depth + 1
@@ -1215,19 +1212,19 @@ public static class GameUtil
 				}
 			}
 		}
-		GameUtil.FloodFillVisited.Clear();
-		GameUtil.FloodFillNext.Clear();
+		GameUtil.FloodFillVisited.Value.Clear();
+		GameUtil.FloodFillNext.Value.Clear();
 		return num;
 	}
 
 	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
 	{
-		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+		GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
 		{
 			cell = start_cell,
 			depth = 0
 		});
-		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells, valid_cells, 10000);
+		GameUtil.FloodFillConditional(GameUtil.FloodFillNext.Value, condition, visited_cells, valid_cells, 10000);
 	}
 
 	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null, int max_depth = 10000)
@@ -2916,11 +2913,9 @@ public static class GameUtil
 
 	private static string[] adjectives;
 
-	[ThreadStatic]
-	public static Queue<GameUtil.FloodFillInfo> FloodFillNext = new Queue<GameUtil.FloodFillInfo>();
+	public static ThreadLocal<Queue<GameUtil.FloodFillInfo>> FloodFillNext = new ThreadLocal<Queue<GameUtil.FloodFillInfo>>(() => new Queue<GameUtil.FloodFillInfo>());
 
-	[ThreadStatic]
-	public static HashSet<int> FloodFillVisited = new HashSet<int>();
+	public static ThreadLocal<HashSet<int>> FloodFillVisited = new ThreadLocal<HashSet<int>>(() => new HashSet<int>());
 
 	public static TagSet foodTags = new TagSet(new string[]
 	{

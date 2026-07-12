@@ -196,6 +196,8 @@ namespace STRINGS
 
 		public static string PST_RATE = "</style>";
 
+		public static string CODEXLINK = "BUILDCATEGORYREQUIREMENTCLASS";
+
 		public static string PRE_AUTOMATION_ACTIVE = "<b><style=\"logic_on\">";
 
 		public static string PRE_AUTOMATION_STANDBY = "<b><style=\"logic_off\">";
@@ -516,7 +518,7 @@ namespace STRINGS
 
 			public static LocString SEE_ALL = "+ See All ({0})";
 
-			public static LocString CRITERIA_TOOLTIP = "Toggle the <b>{0}</b> diagnostics evaluation of the <b>{1}</b> criteria.";
+			public static LocString CRITERIA_TOOLTIP = "Toggle the <b>{0}</b> diagnostics evaluation of the <b>{1}</b> criteria";
 
 			public static LocString CRITERIA_ENABLED_COUNT = "{0}/{1} criteria enabled";
 
@@ -579,6 +581,8 @@ namespace STRINGS
 				public static class CRITERIA
 				{
 					public static LocString CHECKIDLE = "Check idle";
+
+					public static LocString CHECKIDLESEVERE = "Use high severity idle warning";
 				}
 			}
 
@@ -2756,7 +2760,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Fast Workers Mode";
 
-						public static LocString TOOLTIP = "Dupes will finish most work immediately and require little sleep";
+						public static LocString TOOLTIP = "Duplicants will finish most work immediately and require little sleep";
 
 						public static class LEVELS
 						{
@@ -4781,11 +4785,13 @@ namespace STRINGS
 
 				public static LocString CLOTHING_TOPS_TSHIRT = "Tees";
 
+				public static LocString CLOTHING_TOPS_FANCY = "Specialty Tops";
+
 				public static LocString CLOTHING_TOPS_JACKET = "Jackets";
 
 				public static LocString CLOTHING_TOPS_UNDERSHIRT = "Undershirts";
 
-				public static LocString CLOTHING_TOPS_DRESS = "Dresses and Bodysuits";
+				public static LocString CLOTHING_TOPS_DRESS = "Dresses and Onesies";
 
 				public static LocString CLOTHING_BOTTOMS_BASIC = "Standard Pants";
 
@@ -4798,6 +4804,8 @@ namespace STRINGS
 				public static LocString CLOTHING_BOTTOMS_UNDERWEAR = "Underwear";
 
 				public static LocString CLOTHING_GLOVES_BASIC = "Standard Gloves";
+
+				public static LocString CLOTHING_GLOVES_FORMAL = "Fancy Gloves";
 
 				public static LocString CLOTHING_GLOVES_SHORT = "Short Gloves";
 
@@ -4858,6 +4866,8 @@ namespace STRINGS
 				public static LocString BUILDINGS_INDUSTRIAL = "Industrial";
 
 				public static LocString BUILDINGS_FOOD = "Cooking";
+
+				public static LocString BUILDINGS_WASHROOM = "Sanitation";
 
 				public static LocString BUILDINGS_RECREATION = "Recreation and Decor";
 			}
@@ -5432,6 +5442,96 @@ namespace STRINGS
 			public class SNOWFLAKE_BLUE
 			{
 				public static LocString NAME = "Crystal-Iced Outfit";
+			}
+
+			public class POLKADOT_TRACKSUIT
+			{
+				public static LocString NAME = "Polka Dot Tracksuit";
+			}
+
+			public class SUPERSTAR
+			{
+				public static LocString NAME = "Superstar Outfit";
+			}
+
+			public class ATMOSUIT_SPIFFY
+			{
+				public static LocString NAME = "Spiffy Atmo Outfit";
+			}
+
+			public class ATMOSUIT_CUBIST
+			{
+				public static LocString NAME = "Cubist Atmo Outfit";
+			}
+
+			public class LUCKY
+			{
+				public static LocString NAME = "Lucky Jammies Outfit";
+			}
+
+			public class SWEETHEART
+			{
+				public static LocString NAME = "Sweetheart Jammies Outfit";
+			}
+
+			public class GINCH_GLUON
+			{
+				public static LocString NAME = "Frilly Saltrock Outfit";
+			}
+
+			public class GINCH_CORTEX
+			{
+				public static LocString NAME = "Dusk Undies Outfit";
+			}
+
+			public class GINCH_FROSTY
+			{
+				public static LocString NAME = "Frostbasin Undies Outfit";
+			}
+
+			public class GINCH_LOCUS
+			{
+				public static LocString NAME = "Balmy Undies Outfit";
+			}
+
+			public class GINCH_GOOP
+			{
+				public static LocString NAME = "Leachy Undies Outfit";
+			}
+
+			public class GINCH_BILE
+			{
+				public static LocString NAME = "Yellowcake Undies Outfit";
+			}
+
+			public class GINCH_NYBBLE
+			{
+				public static LocString NAME = "Atomic Undies Outfit";
+			}
+
+			public class GINCH_IRONBOW
+			{
+				public static LocString NAME = "Magma Undies Outfit";
+			}
+
+			public class GINCH_PHLEGM
+			{
+				public static LocString NAME = "Slate Undies Outfit";
+			}
+
+			public class GINCH_OBELUS
+			{
+				public static LocString NAME = "Charcoal Undies Outfit";
+			}
+
+			public class HIVIS
+			{
+				public static LocString NAME = "Hi-Vis Outfit";
+			}
+
+			public class DOWNTIME
+			{
+				public static LocString NAME = "Downtime Outfit";
 			}
 		}
 
@@ -6392,6 +6492,8 @@ namespace STRINGS
 			public static LocString NO_CODEX_ENTRY = "No database entry available";
 
 			public static LocString CHANGE_OUTFIT = "Change this Duplicant's outfit";
+
+			public static LocString CHANGE_MATERIAL = "Change this building's construction material";
 
 			public static LocString METERSCREEN_AVGSTRESS = "Highest Stress: {0}";
 
@@ -9384,7 +9486,7 @@ namespace STRINGS
 		{
 			public static LocString HEADER = "Select Blueprint";
 
-			public static LocString STORE_BUTTON_TOOLTIP = "More Blueprints";
+			public static LocString STORE_BUTTON_TOOLTIP = "See more Blueprints in the Supply Closet";
 		}
 
 		public class FILE_NAME_DIALOG
@@ -9405,6 +9507,35 @@ namespace STRINGS
 
 		public class UISIDESCREENS
 		{
+			public class TABS
+			{
+				public static LocString HEADER = "Options";
+
+				public static LocString CONFIGURATION = "Config";
+
+				public static LocString MATERIAL = "Material";
+
+				public static LocString SKIN = "Blueprint";
+			}
+
+			public class BLUEPRINT_TAB
+			{
+				public static LocString EDIT_OUTFIT_BUTTON = "Restyle";
+
+				public static LocString SUBCATEGORY_OUTFIT = "Clothing";
+
+				public static LocString SUBCATEGORY_ATMOSUIT = "Atmo Suit";
+
+				public static LocString SUBCATEGORY_JOYRESPONSE = "Overjoyed";
+			}
+
+			public class NOCONFIG
+			{
+				public static LocString TITLE = "No configuration";
+
+				public static LocString LABEL = "There is no configuration available for this object.";
+			}
+
 			public class ARTABLESELECTIONSIDESCREEN
 			{
 				public static LocString TITLE = "Style Selection";
@@ -10092,6 +10223,10 @@ namespace STRINGS
 
 			public class MINIONTODOSIDESCREEN
 			{
+				public static LocString NAME = "Errands";
+
+				public static LocString TOOLTIP = "<b>Errands</b>\nView current and upcoming errands";
+
 				public static LocString CURRENT_TITLE = "Current Errand";
 
 				public static LocString LIST_TITLE = "\"To Do\" List";
@@ -11793,6 +11928,17 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Choose a technology from the " + UI.FormatAsManagementMenu("Research Tree", global::Action.ManageResearch);
 			}
 
+			public class RECONSTRUCT
+			{
+				public static LocString REQUEST_RECONSTRUCT = "Order Rebuild";
+
+				public static LocString REQUEST_RECONSTRUCT_TOOLTIP = "Deconstruct this building and rebuild it using the selected material";
+
+				public static LocString CANCEL_RECONSTRUCT = "Cancel Rebuild Order";
+
+				public static LocString CANCEL_RECONSTRUCT_TOOLTIP = "Cancel deconstruction and rebuilding of this building";
+			}
+
 			public class RELOCATE
 			{
 				public static LocString NAME = "Relocate";
@@ -13323,7 +13469,7 @@ namespace STRINGS
 
 				public static LocString AGRICULTURE = "Agriculture";
 
-				public static LocString MISC = "Other";
+				public static LocString MISC = "Miscellaneous";
 
 				public static LocString ABSOLUTETEMPERATURE = "Temperature";
 
@@ -13349,7 +13495,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Skills";
 
-				public static LocString TOOLTIP = "View this Duplicant's attributes, traits, and daily stress";
+				public static LocString TOOLTIP = "<b>Skills</b>\nView this Duplicant's resume and attributes";
 
 				public static LocString GROUPNAME_ATTRIBUTES = "ATTRIBUTES";
 
@@ -13364,7 +13510,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Status";
 
-				public static LocString TOOLTIP = "View the current status of the selected object";
+				public static LocString TOOLTIP = "<b>Status</b>\nView current status";
 
 				public static LocString GROUPNAME_STATUS = "STATUS";
 
@@ -13415,7 +13561,7 @@ namespace STRINGS
 
 				public static LocString MINION_NAME = "About";
 
-				public static LocString TOOLTIP = "More information";
+				public static LocString TOOLTIP = "<b>Properties</b>\nView elements, temperature, germs and more";
 
 				public static LocString MINION_TOOLTIP = "More information";
 
@@ -13449,7 +13595,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bio";
 
-				public static LocString TOOLTIP = "View this Duplicant's personality, resume, and amenities";
+				public static LocString TOOLTIP = "<b>Bio</b>\nView this Duplicant's personality, skills, traits and amenities";
 
 				public static LocString GROUPNAME_BIO = "ABOUT";
 
@@ -13574,7 +13720,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Energy";
 
-				public static LocString TOOLTIP = "Monitor the power this building is generating";
+				public static LocString TOOLTIP = "<b>Energy</b>\nMonitor the power this building is generating";
 
 				public static LocString CIRCUITOVERVIEW = "CIRCUIT OVERVIEW";
 
@@ -13617,7 +13763,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Germs";
 
-				public static LocString TOOLTIP = "View the disease risk presented by the selected object";
+				public static LocString TOOLTIP = "<b>Germs</b>\nView germ resistance and risk of contagion";
 
 				public static LocString DISEASE_SOURCE = "DISEASE SOURCE";
 
@@ -13783,7 +13929,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Errands";
 
-				public static LocString TOOLTIP = "See what errands this building can perform and view its current queue";
+				public static LocString TOOLTIP = "<b>Errands</b>\nView available errands and current queue";
 
 				public static LocString CHORE_TYPE_TOOLTIP = "Errand Type: {0}";
 
@@ -13821,6 +13967,31 @@ namespace STRINGS
 				public static LocString ALL = "Requirements";
 
 				public static LocString ALL_TOOLTIP = "These conditions must be fulfilled in order to launch a rocket mission";
+			}
+
+			public class COSMETICS
+			{
+				public static LocString NAME = "Blueprint";
+
+				public static LocString TOOLTIP = "<b>Blueprint</b>\nView and change assigned blueprints";
+			}
+
+			public class MATERIAL
+			{
+				public static LocString NAME = "Material";
+
+				public static LocString TOOLTIP = "<b>Material</b>\nView and change this building's construction material";
+
+				public static LocString SUB_HEADER_CURRENT_MATERIAL = "CURRENT MATERIAL";
+
+				public static LocString BUTTON_CHANGE_MATERIAL = "Change Material";
+			}
+
+			public class CONFIGURATION
+			{
+				public static LocString NAME = "Config";
+
+				public static LocString TOOLTIP = "<b>Config</b>\nView and change filters, recipes, production orders and more";
 			}
 		}
 

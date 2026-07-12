@@ -976,21 +976,21 @@ namespace STRINGS
 
 			public class NUCLEARRESEARCH
 			{
-				public static LocString NAME = UI.FormatAsLink("Materials Science Research", "ATOMIC");
+				public static LocString NAME = UI.FormatAsLink("Materials Science Research", "NUCLEARRESEARCH");
 
 				public static LocString DESC = "Harness sub-atomic particles to study the properties of matter.";
 			}
 
 			public class ADVANCEDNUCLEARRESEARCH
 			{
-				public static LocString NAME = UI.FormatAsLink("More Materials Science Research", "ATOMIC");
+				public static LocString NAME = UI.FormatAsLink("More Materials Science Research", "ADVANCEDNUCLEARRESEARCH");
 
 				public static LocString DESC = "Harness sub-atomic particles to study the properties of matter even more.";
 			}
 
 			public class NUCLEARSTORAGE
 			{
-				public static LocString NAME = UI.FormatAsLink("Radbolt Containment", "ATOMIC");
+				public static LocString NAME = UI.FormatAsLink("Radbolt Containment", "NUCLEARSTORAGE");
 
 				public static LocString DESC = "Build a quality cache of radbolts.";
 			}

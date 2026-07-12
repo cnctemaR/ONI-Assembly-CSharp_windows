@@ -85,8 +85,6 @@ public class MorbRoverMakerConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<Disinfectable>());
 	}
 
-	public static HashedString hashID = new HashedString("FossilDig");
-
 	public const string ID = "MorbRoverMaker";
 
 	public const float TUNING_MAX_DESIRED_ROVERS_ALIVE_AT_ONCE = 6f;

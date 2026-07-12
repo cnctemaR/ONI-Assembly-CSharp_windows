@@ -57,7 +57,9 @@ namespace STRINGS
 				UI.FormatAsLink("Water", "WATER"),
 				"; and the ",
 				UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
-				" which provides lumber as a fuel source.\n\nA symbiotic relationship exists with the ",
+				" which provides ",
+				UI.FormatAsLink("Lumber", "WOOD"),
+				" as a fuel source.\n\nA symbiotic relationship exists with the ",
 				UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
 				" and the native ",
 				UI.FormatAsLink("Pips", "SQUIRRELSPECIES"),
@@ -121,15 +123,15 @@ namespace STRINGS
 				UI.FormatAsLink("Drecko", "DRECKOSPECIES"),
 				" is a relatively benign critter which can be domesticated to aid in textile and food production.\n\nThe ",
 				UI.FormatAsLink("Morb", "GLOMSPECIES"),
-				" only function is to produce ",
+				"'s only function is to produce ",
 				UI.FormatAsLink("Polluted Oxygen", "POLLUTEDOXYGEN"),
 				" which may be useful when establishing sustainable production loops with other critters.\n\n",
 				UI.FormatAsLink("Balm Lilies", "SWAMPLILY"),
 				" would be useful to cultivate for the production of critical medical materials.\n\n",
 				UI.FormatAsLink("Pincha Pepperplants", "SPICE_VINE"),
-				" greatly improve the nutritional and gratification of a colony's food supply. Because of their unique relationship with gravity, the plants must be orientated upside-down for proper growing. This can be accomplished by using a ",
+				" greatly improve the nutritional value and quality of a colony's food supply. Because of their unique relationship with gravity, the plants must be orientated upside-down for proper growing. This can be accomplished by using a ",
 				UI.FormatAsLink("Farm Tile", "FARMTILE"),
-				".\n\nGiven the toxic gases I will have to build proper ",
+				".\n\nGiven the toxic gases I will have to build a proper ",
 				UI.FormatAsLink("Ventilation", "BUILDCATEGORYHVAC"),
 				" system to both protect my Duplicants and provide the optimum environments for the native plants and critters."
 			});
@@ -197,7 +199,7 @@ namespace STRINGS
 			public static LocString UTILITY = string.Concat(new string[]
 			{
 				UI.FormatAsLink("Gold Amalgam", "GOLDAMALGAM"),
-				" ",
+				", ",
 				UI.FormatAsLink("Aluminum Ore", "ALUMINUMORE"),
 				" and ",
 				UI.FormatAsLink("Cobalt Ore", "COBALTITE"),
@@ -248,19 +250,21 @@ namespace STRINGS
 				UI.FormatAsLink("Lettuce", "LETTUCE"),
 				" for many higher-tier ",
 				UI.FormatAsLink("foods", "FOOD"),
-				".\n\nAny water will need to be filtered through a ",
+				".\n\nAny ",
+				UI.FormatAsLink("Water", "WATER"),
+				" will need to be filtered through a ",
 				UI.FormatAsLink("Desalinator", "DESALINATOR"),
 				" to remove the ",
 				UI.FormatAsLink("Salt", "SALT"),
-				" from ",
-				UI.FormatAsLink("Water", "WATER"),
-				" in order to be useful for my Duplicants. Luckily ",
+				" in order to make it useful for my Duplicants. Luckily ",
 				UI.FormatAsLink("Table Salt", "SALT"),
 				" can be produced using a ",
 				UI.FormatAsLink("Rock Crusher", "ROCKCRUSHER"),
 				" which, when combined with a ",
 				UI.FormatAsLink("Mess Table", "DININGTABLE"),
-				", gives my Duplicants a Morale boost."
+				", gives my Duplicants a ",
+				UI.FormatAsLink("Morale", "MORALE"),
+				" boost."
 			});
 		}
 
@@ -281,9 +285,11 @@ namespace STRINGS
 			{
 				"Though ",
 				UI.FormatAsLink("Oxygen", "OXYGEN"),
-				" is more scarce in this biome, it's the perfect place to cultivate flora and fauna that thrive in CO2, such as domesticating ",
+				" is more scarce in this biome, it's the perfect place to cultivate flora and fauna that thrive in CO2, such as ",
 				UI.FormatAsLink("Slicksters", "OILFLOATERSPECIES"),
-				" to create a renewable source of oil.\n\n",
+				". These critters can be domesticated as a renewable source of ",
+				UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
+				".\n\n",
 				UI.FormatAsLink("Diamond", "DIAMOND"),
 				" deposits can occasionally be found in the Oily biome, which will require a Duplicant with the ",
 				UI.FormatAsLink("Super-Duperhard Digging", "MINING3"),
@@ -303,22 +309,22 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Radioactive";
 
-			public static LocString DESC = "A highly volatile environment containing a highly useful resource, this biome is invaluable when venturing into Nuclear technologies.";
+			public static LocString DESC = "A highly volatile environment containing a highly useful resource, this biome is invaluable when venturing into nuclear technologies.";
 
 			public static LocString UTILITY = string.Concat(new string[]
 			{
 				UI.FormatAsLink("Lead Suits", "LEAD_SUIT"),
 				" are imperative if my Duplicants are going to start exploring this biome as ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATIONSICKNESS"),
-				" is a constant danger here.\n\n",
+				" are a constant danger here.\n\n",
 				UI.FormatAsLink("Beetas", "BEE"),
-				" pose a double threat as they are both highly radioactive and very aggressive. If they can be domesticated, however, ",
+				" pose a double threat as they are both highly radioactive and very aggressive. If they can be subdued, ",
 				UI.FormatAsLink("Beeta Hives", "BEEHIVE"),
-				", provide a great service turning ",
+				" provide a great service turning ",
 				UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 				" into ",
 				UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
-				".\n\nWhile the Radioactive Biome, and the Beetas contained within it, should be avoided at all costs if my Duplicants do not have the correct protection, my colony will need to trek into this dangerous biome if we are going to build any higher tier nuclear technologies."
+				".\n\nWhile the Radioactive Biome, and the Beetas contained within it, should be avoided at all costs if my Duplicants do not have the correct protection, my colony will need to trek into this dangerous biome if we are going to build any higher-tier nuclear technologies."
 			});
 		}
 
@@ -336,7 +342,7 @@ namespace STRINGS
 				UI.FormatAsLink("Rust", "RUST"),
 				" can produce many of a colony's basic needs.\n\nThe ",
 				UI.FormatAsLink("Squeaky Puft", "PUFTBLEACHSTONE"),
-				", a frequent resident of the Rust biome, are a renewable source of ",
+				", a frequent resident of the Rust biome, is a renewable source of ",
 				UI.FormatAsLink("Bleachstone", "BLEACHSTONE"),
 				" and can be domesticated for such purposes.\n\n",
 				UI.FormatAsLink("Dreckos", "DRECKOS"),
@@ -344,11 +350,13 @@ namespace STRINGS
 				UI.FormatAsLink("Phosphorite", "PHOSPHORITE"),
 				" and fibre for making ",
 				UI.FormatAsLink("Textile Production", "CLOTHING"),
-				"\n\nTwo plants found in this biome: the ",
+				".\n\nTwo plants found in this biome, the ",
 				UI.FormatAsLink("Nosh Bean", "BEANPLANTSEED"),
 				" and the ",
 				UI.FormatAsLink("Dasha Saltvine", "SALTPLANT"),
-				" can both produce food that will add significant Morale value for my Duplicants."
+				", can both produce food that will add significant ",
+				UI.FormatAsLink("Morale", "MORALE"),
+				" value for my Duplicants."
 			});
 		}
 
@@ -373,13 +381,15 @@ namespace STRINGS
 				UI.FormatAsLink("Sandstone", "SANDSTONE"),
 				" provide all the materials to get basic colony essentials built.\n\nRandom ",
 				UI.FormatAsLink("Shine Bugs", "LIGHTBUGSPECIES"),
-				" provide Morale boosts for my Duplicants but are not a reliable light source.\n\n",
-				UI.FormatAsLink("Hatch", "HATCHSPECIES"),
+				" provide ",
+				UI.FormatAsLink("Morale", "MORALE"),
+				" boosts for my Duplicants but are not a reliable light source.\n\n",
+				UI.FormatAsLink("Hatches", "HATCHSPECIES"),
 				" can be domesticated for food or ",
 				UI.FormatAsLink("Coal", "CARBON"),
 				", which will be useful if using a ",
 				UI.FormatAsLink("Coal Generator", "GENERATOR"),
-				" for power.\n\nAll-in-all this biome is the perfect starting spot for my colony to establish a base full of essentials, from which they can then venture out and explore."
+				" for power.\n\nAll in all, this biome is the perfect starting spot for my colony to establish a base full of essentials, from which they can then venture out and explore."
 			});
 		}
 
@@ -428,7 +438,7 @@ namespace STRINGS
 			public static LocString UTILITY = string.Concat(new string[]
 			{
 				"Setting up ",
-				UI.FormatAsLink("Solar Panels", "SOLARPANELS"),
+				UI.FormatAsLink("Solar Panels", "SOLARPANEL"),
 				" on the surface will provide a source of renewable energy. However, much care must be taken to ensure ",
 				UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID"),
 				" or ",
@@ -489,13 +499,13 @@ namespace STRINGS
 
 			public static LocString UTILITY = string.Concat(new string[]
 			{
-				"By itself ",
+				"By itself, ",
 				UI.FormatAsLink("Niobium", "NIOBIUM"),
-				" is not a particularly useful resource, but if processed through a ",
-				UI.FormatAsLink("Metal Refinery", "METALREFINERY"),
-				" it produces the extremely thermal conductive ",
+				" is not a particularly useful resource. But if processed through a ",
+				UI.FormatAsLink("Molecular Forge", "SUPERMETALREFINERY"),
+				", it produces the extremely thermal conductive ",
 				UI.FormatAsLink("Thermium", "TEMPCONDUCTORSOLID"),
-				" which goes a long way in solving many extreme temperature issues in a colony.\n\nThe edges of this biome are filled with ",
+				", which goes a long way in solving many extreme temperature issues in a colony.\n\nThe edges of this biome are filled with ",
 				UI.FormatAsLink("Obsidian", "OBSIDIAN"),
 				" so a Duplicant with the ",
 				UI.FormatAsLink("Super-Duperhard Digging", "MINING3"),

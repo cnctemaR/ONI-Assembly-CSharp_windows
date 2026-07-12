@@ -299,6 +299,11 @@ public class NameDisplayScreen : KScreen
 		}
 	}
 
+	public bool IsVisibleToZoom()
+	{
+		return !(Game.MainCamera == null) && Game.MainCamera.orthographicSize < this.HideDistance;
+	}
+
 	private void LateUpdate()
 	{
 		if (App.isLoading || App.IsExiting)
@@ -306,8 +311,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		this.BindOnOverlayChange();
-		Camera mainCamera = Game.MainCamera;
-		if (mainCamera == null)
+		if (Game.MainCamera == null)
 		{
 			return;
 		}
@@ -316,7 +320,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		int count = this.entries.Count;
-		bool flag = mainCamera.orthographicSize < this.HideDistance;
+		bool flag = this.IsVisibleToZoom();
 		bool flag2 = flag && this.lastKnownOverlayID == OverlayModes.None.ID;
 		if (this.nameDisplayCanvas.enabled != flag2)
 		{
@@ -339,7 +343,7 @@ public class NameDisplayScreen : KScreen
 		}
 		Vector2I vector2I;
 		Vector2I vector2I2;
-		KBatchedAnimUpdater.GetVisibleCellRange(out vector2I, out vector2I2);
+		Grid.GetVisibleCellRangeInActiveWorld(out vector2I, out vector2I2, 4, 1.5f);
 		int num = Mathf.Min(500, this.entries.Count);
 		for (int i = 0; i < num; i++)
 		{
@@ -370,19 +374,14 @@ public class NameDisplayScreen : KScreen
 				if (!(world_go == null))
 				{
 					Vector3 vector = world_go.transform.GetPosition();
-					if (instance != null && followTarget == world_go.transform)
+					if (followTarget == world_go.transform)
 					{
 						vector = instance.followTargetPos;
 					}
-					else if (entry.world_go_anim_controller != null)
+					else if (entry.world_go_anim_controller != null && entry.collider != null)
 					{
-						Vector3 position = entry.world_go.transform.GetPosition();
-						if (entry.collider != null)
-						{
-							position.x += entry.collider.offset.x;
-							position.y += entry.collider.offset.y - entry.collider.size.y / 2f;
-						}
-						vector = position;
+						vector.x += entry.collider.offset.x;
+						vector.y += entry.collider.offset.y - entry.collider.size.y / 2f;
 					}
 					entry.display_go_rect.anchoredPosition = (this.worldSpace ? vector : base.WorldToScreen(vector));
 				}
@@ -623,8 +622,6 @@ public class NameDisplayScreen : KScreen
 	private bool isOverlayChangeBound;
 
 	private HashedString lastKnownOverlayID = OverlayModes.None.ID;
-
-	private List<KCollider2D> workingList = new List<KCollider2D>();
 
 	private int currentUpdateIndex;
 

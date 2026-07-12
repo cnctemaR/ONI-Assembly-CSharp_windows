@@ -1,4 +1,6 @@
 ﻿using System;
+using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,7 +19,7 @@ public class UnderwaterCritterCondoConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, plastics, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER3, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER3, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.Floodable = false;
@@ -35,6 +37,9 @@ public class UnderwaterCritterCondoConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<Submergable>();
+		Effect effect = new Effect("InteractedWithUnderwaterCondo", global::STRINGS.CREATURES.MODIFIERS.CRITTERCONDOINTERACTEFFECT.NAME, global::STRINGS.CREATURES.MODIFIERS.UNDERWATERCRITTERCONDOINTERACTEFFECT.TOOLTIP, 600f, true, true, false, null, -1f, 0f, null, "");
+		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 1f, global::STRINGS.CREATURES.MODIFIERS.CRITTERCONDOINTERACTEFFECT.NAME, false, false, true));
+		Db.Get().effects.Add(effect);
 		CritterCondo.Def def = go.AddOrGetDef<CritterCondo.Def>();
 		def.IsCritterCondoOperationalCb = delegate(CritterCondo.Instance condo_smi)
 		{
@@ -50,7 +55,8 @@ public class UnderwaterCritterCondoConfig : IBuildingConfig
 		};
 		def.moveToStatusItem = new StatusItem("UNDERWATERCRITTERCONDO.MOVINGTO", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		def.interactStatusItem = new StatusItem("UNDERWATERCRITTERCONDO.INTERACTING", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
-		def.underWaterCondo = true;
+		def.condoTag = "UnderwaterCritterCondo";
+		def.effectId = effect.Id;
 	}
 
 	public override void ConfigurePost(BuildingDef def)

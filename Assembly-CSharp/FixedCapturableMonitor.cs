@@ -23,13 +23,26 @@ public class FixedCapturableMonitor : GameStateMachine<FixedCapturableMonitor, F
 		public Instance(IStateMachineTarget master, FixedCapturableMonitor.Def def)
 			: base(master, def)
 		{
+			this.ChoreConsumer = base.GetComponent<ChoreConsumer>();
+			this.Navigator = base.GetComponent<Navigator>();
+			this.PrefabTag = base.GetComponent<KPrefabID>().PrefabTag;
+			BabyMonitor.Def def2 = master.gameObject.GetDef<BabyMonitor.Def>();
+			this.isBaby = def2 != null;
 		}
 
 		public bool ShouldGoGetCaptured()
 		{
-			return this.targetCapturePoint != null && this.targetCapturePoint.IsRunning() && this.targetCapturePoint.shouldCreatureGoGetCaptured;
+			return this.targetCapturePoint != null && this.targetCapturePoint.IsRunning() && this.targetCapturePoint.shouldCreatureGoGetCaptured && (!this.isBaby || this.targetCapturePoint.def.allowBabies);
 		}
 
 		public FixedCapturePoint.Instance targetCapturePoint;
+
+		public ChoreConsumer ChoreConsumer;
+
+		public Navigator Navigator;
+
+		public Tag PrefabTag;
+
+		public bool isBaby;
 	}
 }

@@ -38,7 +38,7 @@ public class MotdBox : KMonoBehaviour
 		{
 			this.pageButtons[i].GetComponent<MultiToggle>().ChangeState((i == this.selectedPage) ? 1 : 0);
 		}
-		this.image.sprite = this.pageDatas[newPage].Sprite;
+		this.image.texture = this.pageDatas[newPage].Texture;
 		this.headerLabel.SetText(this.pageDatas[newPage].HeaderText);
 		this.urlOpener.SetURL(this.pageDatas[newPage].URL);
 		if (string.IsNullOrEmpty(this.pageDatas[newPage].ImageText))
@@ -58,7 +58,7 @@ public class MotdBox : KMonoBehaviour
 	private GameObject pageCarouselButtonPrefab;
 
 	[SerializeField]
-	private Image image;
+	private RawImage image;
 
 	[SerializeField]
 	private LocText headerLabel;
@@ -77,7 +77,7 @@ public class MotdBox : KMonoBehaviour
 
 	public class PageData
 	{
-		public Sprite Sprite { get; set; }
+		public Texture2D Texture { get; set; }
 
 		public string HeaderText { get; set; }
 

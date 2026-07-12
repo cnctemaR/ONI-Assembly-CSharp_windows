@@ -80,20 +80,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			batchUpdateContext.Finish();
 			return;
 		}
-		SolidTransferArm.cached_pickupables.Clear();
-		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in Game.Instance.fetchManager.prefabIdToFetchables)
-		{
-			List<FetchManager.Fetchable> dataList = keyValuePair.Value.fetchables.GetDataList();
-			SolidTransferArm.cached_pickupables.Capacity = Math.Max(SolidTransferArm.cached_pickupables.Capacity, SolidTransferArm.cached_pickupables.Count + dataList.Count);
-			foreach (FetchManager.Fetchable fetchable in dataList)
-			{
-				SolidTransferArm.cached_pickupables.Add(new SolidTransferArm.CachedPickupable
-				{
-					pickupable = fetchable.pickupable,
-					storage_cell = fetchable.pickupable.cachedCell
-				});
-			}
-		}
 		SolidTransferArm.batch_update_job.Reset(batchUpdateContext);
 		int num = Math.Max(1, batchUpdateContext.solid_transfer_arms.Count / CPUBudget.coreCount);
 		int num2 = Math.Min(batchUpdateContext.solid_transfer_arms.Count, CPUBudget.coreCount);
@@ -110,7 +96,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 		batchUpdateContext.Finish();
 		SolidTransferArm.batch_update_job.Reset(null);
-		SolidTransferArm.cached_pickupables.Clear();
 	}
 
 	private void Sim()
@@ -153,7 +138,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.SetArmAnim(SolidTransferArm.ArmAnim.Idle);
 	}
 
-	private bool AsyncUpdate(int cell, HashSet<int> workspace, GameObject game_object)
+	private bool AsyncUpdate(int cell, HashSet<int> workspace, List<ScenePartitionerEntry> entries, GameObject game_object)
 	{
 		workspace.Clear();
 		int num;
@@ -177,11 +162,15 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.reachableCells.UnionWith(workspace);
 		}
 		this.pickupables.Clear();
-		foreach (SolidTransferArm.CachedPickupable cachedPickupable in SolidTransferArm.cached_pickupables)
+		entries.Clear();
+		GameScenePartitioner.Instance.UnsafeReadonlyGatherEntries(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.pickupablesLayer, entries);
+		GameScenePartitioner.Instance.UnsafeReadonlyGatherEntries(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.storedPickupablesLayer, entries);
+		foreach (ScenePartitionerEntry scenePartitionerEntry in entries)
 		{
-			if (Grid.GetCellRange(cell, cachedPickupable.storage_cell) <= this.pickupRange && this.IsPickupableRelevantToMyInterests(cachedPickupable.pickupable.KPrefabID, cachedPickupable.storage_cell) && cachedPickupable.pickupable.CouldBePickedUpByTransferArm(game_object))
+			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
+			if (Grid.GetCellRange(cell, pickupable.cachedCell) <= this.pickupRange && this.IsPickupableRelevantToMyInterests(pickupable.KPrefabID, pickupable.cachedCell) && pickupable.CouldBePickedUpByTransferArm(game_object))
 			{
-				this.pickupables.Add(cachedPickupable.pickupable);
+				this.pickupables.Add(pickupable);
 			}
 		}
 		return flag;
@@ -413,8 +402,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private static WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext> batch_update_job = new WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext>();
 
-	private static List<SolidTransferArm.CachedPickupable> cached_pickupables = new List<SolidTransferArm.CachedPickupable>();
-
 	private short serial_no;
 
 	private static HashedString HASH_ROTATION = "rotation";
@@ -523,19 +510,21 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.start = start;
 			this.end = end;
 			this.reachable_cells_workspace = HashSetPool<int, SolidTransferArm>.Allocate();
+			this.pickupable_entries = ListPool<ScenePartitionerEntry, SolidTransferArm>.Allocate();
 		}
 
 		public void Run(SolidTransferArm.BatchUpdateContext context)
 		{
 			for (int num = this.start; num != this.end; num++)
 			{
-				context.refreshed_reachable_cells[num] = context.solid_transfer_arms[num].AsyncUpdate(context.cells[num], this.reachable_cells_workspace, context.game_objects[num]);
+				context.refreshed_reachable_cells[num] = context.solid_transfer_arms[num].AsyncUpdate(context.cells[num], this.reachable_cells_workspace, this.pickupable_entries, context.game_objects[num]);
 			}
 		}
 
 		public void Finish()
 		{
 			this.reachable_cells_workspace.Recycle();
+			this.pickupable_entries.Recycle();
 		}
 
 		private int start;
@@ -543,6 +532,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		private int end;
 
 		private HashSetPool<int, SolidTransferArm>.PooledHashSet reachable_cells_workspace;
+
+		private ListPool<ScenePartitionerEntry, SolidTransferArm>.PooledList pickupable_entries;
 	}
 
 	public struct CachedPickupable

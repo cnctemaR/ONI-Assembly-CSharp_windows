@@ -109,7 +109,7 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 		{
 			return 0f;
 		}
-		if (this.conduitType == ConduitType.Solid && pickupable != null && GameTags.DisplayAsUnits.Contains(pickupable.PrefabID()))
+		if (this.conduitType == ConduitType.Solid && pickupable != null && GameTags.DisplayAsUnits.Contains(pickupable.KPrefabID.PrefabID()))
 		{
 			float num = pickupable.PrimaryElement.Units;
 			if (this.RemainingCapacity < num)

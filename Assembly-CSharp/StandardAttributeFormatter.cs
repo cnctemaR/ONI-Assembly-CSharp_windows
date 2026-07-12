@@ -21,7 +21,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 
 	public virtual string GetFormattedModifier(AttributeModifier modifier)
 	{
-		return this.GetFormattedValue(modifier.Value, this.DeltaTimeSlice);
+		return this.GetFormattedValue(modifier.Value, (modifier.OverrideTimeSlice != null) ? modifier.OverrideTimeSlice.Value : this.DeltaTimeSlice);
 	}
 
 	public virtual string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)

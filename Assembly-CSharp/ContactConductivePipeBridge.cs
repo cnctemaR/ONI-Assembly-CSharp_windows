@@ -153,12 +153,13 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 				float num3 = this.building.Def.MassForTemperatureModification * component.Element.specificHeatCapacity;
 				float temperature = component.Temperature;
 				float temperature2 = content.temperature;
-				float killoJoulesTransfered = ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, num, temperature2, element.thermalConductivity), dt, temperature, num3, temperature2, num2);
-				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(killoJoulesTransfered, temperature, num3, temperature2, num2);
+				float num4 = ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, num, temperature2, element.thermalConductivity);
+				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(ContactConductivePipeBridge.GetKilloJoulesTransfered(num4, dt, temperature, num3, temperature2, num2), temperature, num3, temperature2, num2);
 				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num2, temperature, num3);
+				float num5 = Mathf.Sign(num4) * Mathf.Abs(finalBuildingTemperature - temperature) * num3;
 				if ((finalBuildingTemperature >= 0f && finalBuildingTemperature <= 10000f) & (finalContentTemperature >= 0f && finalContentTemperature <= 10000f))
 				{
-					GameComps.StructureTemperatures.ProduceEnergy(base.smi.structureHandle, killoJoulesTransfered, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, Time.time);
+					GameComps.StructureTemperatures.ProduceEnergy(base.smi.structureHandle, num5, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, Time.time);
 					return finalContentTemperature;
 				}
 			}

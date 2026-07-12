@@ -15,17 +15,23 @@ public class Personality : Resource
 
 	[Obsolete("Modders: Use constructor with isStartingMinion parameter")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
-		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true)
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "")
 	{
 	}
 
 	[Obsolete("Modders: Added additional body part customization to duplicant personalities")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description, bool isStartingMinion)
-		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true)
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "")
 	{
 	}
 
+	[Obsolete("Modders: Added a custom gravestone image to duplicant personalities")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, int belt, int cuff, int foot, int hand, int pelvis, int leg, string description, bool isStartingMinion)
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, isStartingMinion, "")
+	{
+	}
+
+	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, int belt, int cuff, int foot, int hand, int pelvis, int leg, string description, bool isStartingMinion, string graveStone)
 		: base(name_string_key, name)
 	{
 		this.nameStringKey = name_string_key;
@@ -49,7 +55,7 @@ public class Personality : Resource
 		this.pelvis = pelvis;
 		this.leg = leg;
 		this.startingMinion = isStartingMinion;
-		this.outfitIds = new Dictionary<ClothingOutfitUtility.OutfitType, string>();
+		this.graveStone = graveStone;
 	}
 
 	public string GetDescription()
@@ -71,24 +77,15 @@ public class Personality : Resource
 
 	public void SetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
 	{
-		Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(this.Id, outfit, outfitType);
-	}
-
-	public void Internal_SetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
-	{
-		if (outfit.HasValue)
-		{
-			this.outfitIds[outfitType] = outfit.Unwrap();
-			return;
-		}
-		this.outfitIds.Remove(outfitType);
+		CustomClothingOutfits.Instance.Internal_SetDuplicantPersonalityOutfit(outfitType, this.Id, outfit);
 	}
 
 	public string GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType)
 	{
-		if (this.outfitIds.ContainsKey(outfitType))
+		string text;
+		if (CustomClothingOutfits.Instance.Internal_TryGetDuplicantPersonalityOutfit(outfitType, this.Id, out text))
 		{
-			return this.outfitIds[outfitType];
+			return text;
 		}
 		return null;
 	}
@@ -139,8 +136,6 @@ public class Personality : Resource
 
 	public int leg;
 
-	public Dictionary<ClothingOutfitUtility.OutfitType, string> outfitIds;
-
 	public string nameStringKey;
 
 	public string genderStringKey;
@@ -156,6 +151,8 @@ public class Personality : Resource
 	public string congenitaltrait;
 
 	public string unformattedDescription;
+
+	public string graveStone;
 
 	public bool startingMinion;
 

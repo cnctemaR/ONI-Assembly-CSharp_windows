@@ -43,8 +43,8 @@ public class DebugTool : DragTool
 				return;
 			case DebugTool.Type.FillReplaceSubstance:
 			{
-				GameUtil.FloodFillNext.Clear();
-				GameUtil.FloodFillVisited.Clear();
+				GameUtil.FloodFillNext.Value.Clear();
+				GameUtil.FloodFillVisited.Value.Clear();
 				SimHashes elem_hash = Grid.Element[cell].id;
 				GameUtil.FloodFillConditional(cell, delegate(int check_cell)
 				{
@@ -55,7 +55,7 @@ public class DebugTool : DragTool
 						this.DoReplaceSubstance(check_cell);
 					}
 					return flag;
-				}, GameUtil.FloodFillVisited, null);
+				}, GameUtil.FloodFillVisited.Value, null);
 				return;
 			}
 			case DebugTool.Type.Clear:
@@ -185,13 +185,16 @@ public class DebugTool : DragTool
 			Grid.Objects[cell, 1],
 			Grid.Objects[cell, 12],
 			Grid.Objects[cell, 16],
+			Grid.Objects[cell, 20],
 			Grid.Objects[cell, 0],
-			Grid.Objects[cell, 26]
+			Grid.Objects[cell, 26],
+			Grid.Objects[cell, 31],
+			Grid.Objects[cell, 30]
 		})
 		{
 			if (gameObject != null)
 			{
-				global::UnityEngine.Object.Destroy(gameObject);
+				Util.KDestroyGameObject(gameObject);
 			}
 		}
 		this.ClearCell(cell);

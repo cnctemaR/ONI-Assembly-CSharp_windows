@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7695FF58-A068-4851-A805-CCF852E985FB}</ProjectGuid>
+    <ProjectGuid>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EAF9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System</AssemblyName>
@@ -1591,19 +1591,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{7695FF58-A068-4851-A805-CCF852E985F5}</Project>
+      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EAF3}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7695FF58-A068-4851-A805-CCF852E985F6}</Project>
+      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EAF4}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{7695FF58-A068-4851-A805-CCF852E985F8}</Project>
+      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EAF6}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{7695FF58-A068-4851-A805-CCF852E98604}</Project>
+      <Project>{7FC8B6E5-0E2C-426A-ADAB-1E95A8B3EB02}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
   </ItemGroup>

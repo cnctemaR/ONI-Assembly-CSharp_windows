@@ -997,6 +997,41 @@ namespace STRINGS
 
 						public static LocString DESC = "There's a funny aftertaste.";
 					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "Did someone boil eggs in this water?";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "Rose-colored paper cups: the shatter-proof alternative to rose-colored glasses.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "Ideal for post-Mush Bar palate cleansing.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "Most Duplicants agree that it really should dispense juice.";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Water Cooler", "WATERCOOLER");
+
+						public static LocString DESC = "Lightly salted with Duplicants' tears.";
+					}
 				}
 			}
 
@@ -1189,7 +1224,7 @@ namespace STRINGS
 
 			public class TELEPORTALPAD
 			{
-				public static LocString NAME = UI.FormatAsLink("Teleporter Pad", "TELEPORTALPAD");
+				public static LocString NAME = "Teleporter Pad";
 
 				public static LocString DESC = "Duplicants are just atoms as far as the pad's concerned.";
 
@@ -1560,6 +1595,34 @@ namespace STRINGS
 
 						public static LocString DESC = "A little pattern recognition at bedtime soothes the mind.";
 					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Comfy Puce Bed", "LUXURYBED");
+
+						public static LocString DESC = "A pink-hued bed for rosy dreams.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Comfy Mush Bed", "LUXURYBED");
+
+						public static LocString DESC = "The mattress is so soft, it's almost impossible to climb out of.";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Comfy Ick Bed", "LUXURYBED");
+
+						public static LocString DESC = "When life is icky, bed rest is the only answer.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Comfy Fainting Bed", "LUXURYBED");
+
+						public static LocString DESC = "A soft landing spot for swooners.";
+					}
 				}
 			}
 
@@ -1879,9 +1942,16 @@ namespace STRINGS
 
 					public class ART_Q
 					{
-						public static LocString NAME = "Ore Else";
+						public static LocString NAME = UI.FormatAsLink("Ore Else", "ART_Q");
 
 						public static LocString DESC = "The only kind of gift that poorly behaved Duplicants can expect to receive.";
+					}
+
+					public class ART_R
+					{
+						public static LocString NAME = UI.FormatAsLink("Lazer Pipz", "ART_R");
+
+						public static LocString DESC = "It combines two things that everyone loves: pips and lasers.";
 					}
 				}
 			}
@@ -1998,6 +2068,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Hot Afternoon", "ART_WIDE_M");
 
 						public static LocString DESC = "Things get a bit melty if they're forgotten in the sun.";
+					}
+
+					public class ART_WIDE_O
+					{
+						public static LocString NAME = UI.FormatAsLink("Super Old Mural", "ART_WIDE_O");
+
+						public static LocString DESC = "Even just exhaling nearby could damage this historical work.";
 					}
 				}
 			}
@@ -2620,6 +2697,65 @@ namespace STRINGS
 				public static LocString DESC = "Lavatories transmit fewer germs to Duplicants' skin and require no emptying.";
 
 				public static LocString EFFECT = "Gives Duplicants a place to relieve themselves.\n\nSpreads very few " + UI.FormatAsLink("Germs", "DISEASE") + ".";
+
+				public class FACADES
+				{
+					public class DEFAULT_FLUSHTOILET
+					{
+						public static LocString NAME = UI.FormatAsLink("Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "Lavatories transmit fewer germs to Duplicants' skin and require no emptying.";
+					}
+
+					public class POLKA_DARKPURPLERESIN
+					{
+						public static LocString NAME = UI.FormatAsLink("Mod Dot Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "For those who've really got to a-go-go.";
+					}
+
+					public class POLKA_DARKNAVYNOOKGREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Party Dot Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "Smooth moves happen here.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "It's like pooping inside Hexalent fruit!";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "Someone thought it'd be a good idea to have the outside match the inside.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "The scented pink toilet paper smells like a rosebush in a sewage plant.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "Mush in, mush out.";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Lavatory", "FLUSHTOILET");
+
+						public static LocString DESC = "A private place to feel big feelings.";
+					}
+				}
 			}
 
 			public class SHOWER
@@ -2650,7 +2786,7 @@ namespace STRINGS
 
 			public class MORBROVERMAKER
 			{
-				public static LocString NAME = "Biobot Builder";
+				public static LocString NAME = UI.FormatAsLink("Biobot Builder", "STORYTRAITMORBROVER");
 
 				public static LocString DESC = "Allows a skilled Duplicant to manufacture a steady supply of icky yet effective bots.";
 
@@ -2660,7 +2796,9 @@ namespace STRINGS
 					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
 					" and ",
 					UI.FormatAsLink("Steel", "STEEL"),
-					" to craft biofueled machines that can be sent into hostile environments.\n\nDefunct Biobots drop harvestable ",
+					" to craft biofueled machines that can be sent into hostile environments.\n\nDefunct ",
+					UI.FormatAsLink("Biobots", "STORYTRAITMORBROVER"),
+					" drop harvestable ",
 					UI.FormatAsLink("Steel", "STEEL"),
 					"."
 				});
@@ -2882,7 +3020,7 @@ namespace STRINGS
 
 			public class DEVPUMPGAS
 			{
-				public static LocString NAME = UI.FormatAsLink("Dev Pump Gas", "DEVPUMPGAS");
+				public static LocString NAME = "Dev Pump Gas";
 
 				public static LocString DESC = "Piping a pump's output to a building's intake will send gas to that building.";
 
@@ -3349,7 +3487,7 @@ namespace STRINGS
 
 			public class CONTACTCONDUCTIVEPIPEBRIDGE
 			{
-				public static LocString NAME = "Conduction Panel";
+				public static LocString NAME = UI.FormatAsLink("Conduction Panel", "CONTACTCONDUCTIVEPIPEBRIDGE");
 
 				public static LocString DESC = "It can transfer heat effectively even if no liquid is passing through.";
 
@@ -3915,6 +4053,160 @@ namespace STRINGS
 
 						public static LocString DESC = "This wallpaper, like this colony's journey, is full of twists and turns.";
 					}
+
+					public class STRIPES_YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Stripe", "EXTERIORWALL");
+
+						public static LocString DESC = "Vertical stripes make it quite obvious when nearby objects are askew.";
+					}
+
+					public class STRIPES_DIAGONAL_YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Diagonal", "EXTERIORWALL");
+
+						public static LocString DESC = "Diagonal stripes in alternating shades of yellow.";
+					}
+
+					public class STRIPES_CIRCLE_YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Curves", "EXTERIORWALL");
+
+						public static LocString DESC = "This wallpaper, like this colony's journey, is full of twists and turns.";
+					}
+
+					public class STRIPES_PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Fainting Stripe", "EXTERIORWALL");
+
+						public static LocString DESC = "Vertical stripes make it quite obvious when nearby objects are askew.";
+					}
+
+					public class STRIPES_DIAGONAL_PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Fainting Diagonal", "EXTERIORWALL");
+
+						public static LocString DESC = "Diagonal stripes in alternating shades of purple.";
+					}
+
+					public class STRIPES_CIRCLE_PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Fainting Curves", "EXTERIORWALL");
+
+						public static LocString DESC = "This wallpaper, like this colony's journey, is full of twists and turns.";
+					}
+
+					public class FLOPPY_AZULENE_VITRO
+					{
+						public static LocString NAME = UI.FormatAsLink("Waterlogged Databank", "EXTERIORWALL");
+
+						public static LocString DESC = "A fun blue print in honor of information storage.";
+					}
+
+					public class FLOPPY_BLACK_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Monochrome Databank", "EXTERIORWALL");
+
+						public static LocString DESC = "A chic black-and-white print in honor of information storage.";
+					}
+
+					public class FLOPPY_PEAGREEN_BALMY
+					{
+						public static LocString NAME = UI.FormatAsLink("Lush Databank", "EXTERIORWALL");
+
+						public static LocString DESC = "A fun green print in honor of information storage.";
+					}
+
+					public class FLOPPY_SATSUMA_YELLOWCAKE
+					{
+						public static LocString NAME = UI.FormatAsLink("Hi-Vis Databank", "EXTERIORWALL");
+
+						public static LocString DESC = "A fun orange print in honor of information storage.";
+					}
+
+					public class FLOPPY_MAGMA_AMINO
+					{
+						public static LocString NAME = UI.FormatAsLink("Flashy Databank", "EXTERIORWALL");
+
+						public static LocString DESC = "A fun red print in honor of information storage.";
+					}
+
+					public class ORANGE_JUICE
+					{
+						public static LocString NAME = UI.FormatAsLink("Infinite Spill", "EXTERIORWALL");
+
+						public static LocString DESC = "If the liquids never hit the floor, is it really a spill?";
+					}
+
+					public class PAINT_BLOTS
+					{
+						public static LocString NAME = UI.FormatAsLink("Happy Accidents", "EXTERIORWALL");
+
+						public static LocString DESC = "There are no mistakes, only cheerful little splotches.";
+					}
+
+					public class TELESCOPE
+					{
+						public static LocString NAME = UI.FormatAsLink("Telescope Print", "EXTERIORWALL");
+
+						public static LocString DESC = "The perfect wallpaper for skygazers.";
+					}
+
+					public class TICTACTOE_O
+					{
+						public static LocString NAME = UI.FormatAsLink("TicTacToe O", "EXTERIORWALL");
+
+						public static LocString DESC = "A crisp black 'O' on a clean white background. Ideal for monochromatic games rooms.";
+					}
+
+					public class TICTACTOE_X
+					{
+						public static LocString NAME = UI.FormatAsLink("TicTacToe X", "EXTERIORWALL");
+
+						public static LocString DESC = "A crisp black 'X' on a clean white background. Ideal for monochromatic games rooms.";
+					}
+
+					public class DICE_1
+					{
+						public static LocString NAME = UI.FormatAsLink("Roll One", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
+
+					public class DICE_2
+					{
+						public static LocString NAME = UI.FormatAsLink("Roll Two", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
+
+					public class DICE_3
+					{
+						public static LocString NAME = UI.FormatAsLink("Roll Three", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
+
+					public class DICE_4
+					{
+						public static LocString NAME = UI.FormatAsLink("Roll Four", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
+
+					public class DICE_5
+					{
+						public static LocString NAME = UI.FormatAsLink("Roll Five", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
+
+					public class DICE_6
+					{
+						public static LocString NAME = UI.FormatAsLink("High Roller", "EXTERIORWALL");
+
+						public static LocString DESC = "Inspired by classic dice.";
+					}
 				}
 			}
 
@@ -4054,6 +4346,42 @@ namespace STRINGS
 				public static LocString EFFECT = "Releases trapped " + UI.FormatAsLink("Critters", "CREATURES") + " back into the world.\n\nCan be used multiple times.";
 			}
 
+			public class CRITTERPICKUP
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter Pick-Up", "CRITTERPICKUP");
+
+				public static LocString DESC = "Duplicants will automatically wrangle excess critters.";
+
+				public static LocString EFFECT = "Ensures the prompt relocation of " + UI.FormatAsLink("Critters", "CREATURES") + " that exceed the maximum amount set.\n\nMonitoring and pick-up are limited to the specified species.";
+
+				public class LOGIC_INPUT
+				{
+					public static LocString DESC = "Enable/Disable";
+
+					public static LocString LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Wrangle excess critters";
+
+					public static LocString LOGIC_PORT_INACTIVE = (BUILDINGS.PREFABS.CRITTERPICKUP.LOGIC_INPUT.LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Ignore excess critters");
+				}
+			}
+
+			public class CRITTERDROPOFF
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter Drop-Off", "CRITTERDROPOFF");
+
+				public static LocString DESC = "Duplicants automatically bring captured critters to these relocation points for release.";
+
+				public static LocString EFFECT = "Releases trapped " + UI.FormatAsLink("Critters", "CREATURES") + " back into the world.\n\nMonitoring and drop-off are limited to the specified species.";
+
+				public class LOGIC_INPUT
+				{
+					public static LocString DESC = "Enable/Disable";
+
+					public static LocString LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Enable critter drop-off";
+
+					public static LocString LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Disable critter drop-off";
+				}
+			}
+
 			public class LIQUIDFILTER
 			{
 				public static LocString NAME = UI.FormatAsLink("Liquid Filter", "LIQUIDFILTER");
@@ -4072,7 +4400,7 @@ namespace STRINGS
 
 			public class DEVPUMPLIQUID
 			{
-				public static LocString NAME = UI.FormatAsLink("Dev Pump Liquid", "DEVPUMPLIQUID");
+				public static LocString NAME = "Dev Pump Liquid";
 
 				public static LocString DESC = "Piping a pump's output to a building's intake will send liquid to that building.";
 
@@ -4376,6 +4704,51 @@ namespace STRINGS
 				public static LocString DESC = "Musher recipes will keep Duplicants fed, but may impact health and morale over time.";
 
 				public static LocString EFFECT = "Produces low quality " + UI.FormatAsLink("Food", "FOOD") + " using common ingredients.\n\nDuplicants will not fabricate items unless recipes are queued.";
+
+				public class FACADES
+				{
+					public class DEFAULT_MICROBEMUSHER
+					{
+						public static LocString NAME = UI.FormatAsLink("Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "Musher recipes will keep Duplicants fed, but may impact health and morale over time.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "A colorful distraction from the actual quality of the food.";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "Makes meals that are memorable for all the wrong reasons.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "Hunger strikes are not an option, but color-coordination is.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "Edible colloids for dinner <i>again</i>?";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Microbe Musher", "MICROBEMUSHER");
+
+						public static LocString DESC = "Prioritizes nutritional value over flavor.";
+					}
+				}
 			}
 
 			public class MINERALDEOXIDIZER
@@ -4645,9 +5018,44 @@ namespace STRINGS
 
 					public class STRIPES_RED_WHITE
 					{
-						public static LocString NAME = "Bold Stripe Refrigerator";
+						public static LocString NAME = UI.FormatAsLink("Bold Stripe Refrigerator", "REFRIGERATOR");
 
 						public static LocString DESC = "Bold on the outside, cold on the inside!";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "For food so cold, it brings a tear to the eye.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "Honestly, this hue is particularly chilling.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "Inspired by the Duplicant poem, \"Pretty in Puce.\"";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "Some Duplicants call it \"sunny\" yellow, but only because they've never seen the sun.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "This fridge makes color-coordination a (cold) snap.";
 					}
 				}
 			}
@@ -6065,6 +6473,51 @@ namespace STRINGS
 				public static LocString DESC = "Sinks are plumbed and do not need to be manually emptied or refilled.";
 
 				public static LocString EFFECT = "Removes " + UI.FormatAsLink("Germs", "DISEASE") + " from Duplicants.\n\nGerm-covered Duplicants use Sinks when passing by in the selected direction.";
+
+				public class FACADES
+				{
+					public class DEFAULT_WASHSINK
+					{
+						public static LocString NAME = UI.FormatAsLink("Sink", "WASHSINK");
+
+						public static LocString DESC = "Sinks are plumbed and do not need to be manually emptied or refilled.";
+					}
+
+					public class PURPLE_BRAINFAT
+					{
+						public static LocString NAME = UI.FormatAsLink("Faint Purple Sink", "WASHSINK");
+
+						public static LocString DESC = "A refreshing splash of color for the light-headed.";
+					}
+
+					public class BLUE_BABYTEARS
+					{
+						public static LocString NAME = UI.FormatAsLink("Weepy Blue Sink", "WASHSINK");
+
+						public static LocString DESC = "A calm, colorful sink for heavy-hearted Duplicants.";
+					}
+
+					public class GREEN_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Green Sink", "WASHSINK");
+
+						public static LocString DESC = "Even the soap is mush-colored.";
+					}
+
+					public class YELLOW_TARTAR
+					{
+						public static LocString NAME = UI.FormatAsLink("Ick Yellow Sink", "WASHSINK");
+
+						public static LocString DESC = "The juxtaposition of 'ick' and 'clean' can be very satisfying.";
+					}
+
+					public class RED_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Pink Sink", "WASHSINK");
+
+						public static LocString DESC = "Some Duplicants say it looks like a germ-devouring mouth.";
+					}
+				}
 			}
 
 			public class DECONTAMINATIONSHOWER
@@ -6410,7 +6863,7 @@ namespace STRINGS
 
 				public static LocString SUPERINSULATOR_RECIPE_DESCRIPTION = string.Concat(new string[]
 				{
-					"Insulation reduces ",
+					"Insulite reduces ",
 					UI.FormatAsLink("Heat Transfer", "HEAT"),
 					" and is composed of recrystallized ",
 					UI.FormatAsLink("Abyssalite", "KATAIRITE"),
@@ -7870,7 +8323,7 @@ namespace STRINGS
 
 			public class DEVPUMPSOLID
 			{
-				public static LocString NAME = UI.FormatAsLink("Dev Pump Solid", "DEVPUMPSOLID");
+				public static LocString NAME = "Dev Pump Solid";
 
 				public static LocString DESC = "Piping a pump's output to a building's intake will send solids to that building.";
 
@@ -8664,6 +9117,24 @@ namespace STRINGS
 				});
 			}
 
+			public class AIRBORNECRITTERCONDO
+			{
+				public static LocString NAME = UI.FormatAsLink("Airborne Critter Condo", "AIRBORNECRITTERCONDO");
+
+				public static LocString DESC = "Triggers natural nesting instincts and improves critters' moods.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"A hanging respite area for adult ",
+					UI.FormatAsLink("Pufts", "PUFT"),
+					", ",
+					UI.FormatAsLink("Gassy Moos", "MOOSPECIES"),
+					" and ",
+					UI.FormatAsLink("Shine Bugs", "LIGHTBUG"),
+					"."
+				});
+			}
+
 			public class MASSIVEHEATSINK
 			{
 				public static LocString NAME = UI.FormatAsLink("Anti Entropy Thermo-Nullifier", "MASSIVEHEATSINK");
@@ -8711,7 +9182,7 @@ namespace STRINGS
 
 			public class FACILITYBACKWALLWINDOW
 			{
-				public static LocString NAME = UI.FormatAsLink("Window", "FACILITYBACKWALLWINDOW");
+				public static LocString NAME = "Window";
 
 				public static LocString DESC = "";
 
@@ -8720,7 +9191,7 @@ namespace STRINGS
 
 			public class POIBUNKEREXTERIORDOOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Security Door", "POIBUNKEREXTERIORDOOR");
+				public static LocString NAME = "Security Door";
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
@@ -8729,7 +9200,7 @@ namespace STRINGS
 
 			public class POIDOORINTERNAL
 			{
-				public static LocString NAME = UI.FormatAsLink("Security Door", "POIDOORINTERNAL");
+				public static LocString NAME = "Security Door";
 
 				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 
@@ -8738,7 +9209,7 @@ namespace STRINGS
 
 			public class POIFACILITYDOOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Lobby Doors", "FACILITYDOOR");
+				public static LocString NAME = "Lobby Doors";
 
 				public static LocString EFFECT = "Large double doors that were once the main entrance to a large facility.";
 
@@ -9199,7 +9670,7 @@ namespace STRINGS
 
 			public class LONELYMAILBOX
 			{
-				public static LocString NAME = UI.FormatAsLink("Mailbox", "LONELYMAILBOX");
+				public static LocString NAME = "Mailbox";
 
 				public static LocString DESC = "There's nothing quite like receiving homemade gifts in the mail.";
 
@@ -9272,7 +9743,7 @@ namespace STRINGS
 
 			public class FOODREHYDRATOR
 			{
-				public static LocString NAME = "Rehydrator";
+				public static LocString NAME = UI.FormatAsLink("Rehydrator", "FOODREHYDRATOR");
 
 				public static LocString DESC = "Rehydrated food is nutritious and only slightly less delicious.";
 

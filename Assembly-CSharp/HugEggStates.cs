@@ -25,7 +25,15 @@ public class HugEggStates : GameStateMachine<HugEggStates, HugEggStates.Instance
 		{
 			smi.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 		});
-		this.hug.pre.Face(this.target, 0.5f).PlayAnim((HugEggStates.Instance smi) => HugEggStates.GetAnims(smi).pre, KAnim.PlayMode.Once).OnAnimQueueComplete(this.hug.loop);
+		this.hug.pre.Face(this.target, 0.5f).Enter(delegate(HugEggStates.Instance smi)
+		{
+			Navigator component = smi.GetComponent<Navigator>();
+			if (component.IsValidNavType(NavType.Floor))
+			{
+				component.SetCurrentNavType(NavType.Floor);
+			}
+		}).PlayAnim((HugEggStates.Instance smi) => HugEggStates.GetAnims(smi).pre, KAnim.PlayMode.Once)
+			.OnAnimQueueComplete(this.hug.loop);
 		this.hug.loop.QueueAnim((HugEggStates.Instance smi) => HugEggStates.GetAnims(smi).loop, true, null).ScheduleGoTo((HugEggStates.Instance smi) => smi.def.hugTime, this.hug.pst);
 		this.hug.pst.QueueAnim((HugEggStates.Instance smi) => HugEggStates.GetAnims(smi).pst, false, null).Enter(new StateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State.Callback(HugEggStates.ApplyEffect)).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete((HugEggStates.Instance smi) => smi.def.behaviourTag, false);
@@ -33,7 +41,7 @@ public class HugEggStates : GameStateMachine<HugEggStates, HugEggStates.Instance
 
 	private static void SetTarget(HugEggStates.Instance smi)
 	{
-		smi.sm.target.Set(smi.GetSMI<HugMonitor.Instance>().hugTarget, smi, false);
+		smi.sm.target.Set(smi.GetSMI<HugMonitor.Instance>().hugTarget.gameObject, smi, false);
 	}
 
 	private static HugEggStates.AnimSet GetAnims(HugEggStates.Instance smi)

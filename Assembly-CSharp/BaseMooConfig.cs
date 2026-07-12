@@ -66,6 +66,10 @@ public static class BaseMooConfig
 			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
+			.Add(new CritterCondoStates.Def
+			{
+				working_anim = "cc_working_moo"
+			}, !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
@@ -73,6 +77,7 @@ public static class BaseMooConfig
 			}, true, -1);
 		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>().isGassyMoo = true;
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MooSpecies, symbol_override_prefix);
+		gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>().condoPrefabTag = "AirBorneCritterCondo";
 		return gameObject;
 	}
 

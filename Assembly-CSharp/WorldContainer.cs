@@ -910,7 +910,7 @@ public class WorldContainer : KMonoBehaviour
 				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 				if (pickupable != null)
 				{
-					if (pickupable.IsPrefabID(GameTags.Minion))
+					if (pickupable.KPrefabID.IsPrefabID(GameTags.Minion))
 					{
 						global::Util.KDestroyGameObject(pickupable.gameObject);
 					}

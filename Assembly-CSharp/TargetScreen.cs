@@ -5,8 +5,9 @@ public abstract class TargetScreen : KScreen
 {
 	public abstract bool IsValidForTarget(GameObject target);
 
-	public void SetTarget(GameObject target)
+	public virtual void SetTarget(GameObject target)
 	{
+		Console.WriteLine(target);
 		if (this.selectedTarget != target)
 		{
 			if (this.selectedTarget != null)

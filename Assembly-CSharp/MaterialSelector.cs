@@ -64,21 +64,35 @@ public class MaterialSelector : KScreen
 
 	public void ConfigureScreen(Recipe.Ingredient ingredient, Recipe recipe)
 	{
-		this.ClearMaterialToggles();
 		this.activeIngredient = ingredient;
 		this.activeRecipe = recipe;
 		this.activeMass = ingredient.amount;
-		foreach (Tag tag in MaterialSelector.GetValidMaterials(ingredient.tag, false))
+		List<Tag> validMaterials = MaterialSelector.GetValidMaterials(ingredient.tag, false);
+		List<Tag> list = new List<Tag>();
+		foreach (KeyValuePair<Tag, KToggle> keyValuePair in this.ElementToggles)
 		{
-			if (!this.ElementToggles.ContainsKey(tag))
+			if (!validMaterials.Contains(keyValuePair.Key))
 			{
-				GameObject gameObject = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + tag.ProperName());
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (Tag tag in list)
+		{
+			this.ElementToggles[tag].gameObject.SetActive(false);
+			Util.KDestroyGameObject(this.ElementToggles[tag].gameObject);
+			this.ElementToggles.Remove(tag);
+		}
+		foreach (Tag tag2 in validMaterials)
+		{
+			if (!this.ElementToggles.ContainsKey(tag2))
+			{
+				GameObject gameObject = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + tag2.ProperName());
 				gameObject.transform.localScale = Vector3.one;
 				gameObject.SetActive(true);
 				KToggle component = gameObject.GetComponent<KToggle>();
-				this.ElementToggles.Add(tag, component);
+				this.ElementToggles.Add(tag2, component);
 				component.group = this.toggleGroup;
-				gameObject.gameObject.GetComponent<ToolTip>().toolTip = tag.ProperName();
+				gameObject.gameObject.GetComponent<ToolTip>().toolTip = tag2.ProperName();
 			}
 		}
 		this.ConfigureMaterialTooltips();
@@ -126,13 +140,16 @@ public class MaterialSelector : KScreen
 			this.UpdateHeader();
 			this.SetDescription(elem);
 			this.SetEffects(elem);
-			if (!this.MaterialDescriptionPane.gameObject.activeSelf && !this.MaterialEffectsPane.gameObject.activeSelf)
+			if (this.MaterialDescriptionPane != null)
 			{
-				this.DescriptorsPanel.SetActive(false);
-			}
-			else
-			{
-				this.DescriptorsPanel.SetActive(true);
+				if (!this.MaterialDescriptionPane.gameObject.activeSelf && !this.MaterialEffectsPane.gameObject.activeSelf)
+				{
+					this.DescriptorsPanel.SetActive(false);
+				}
+				else
+				{
+					this.DescriptorsPanel.SetActive(true);
+				}
 			}
 		}
 		if (focusScrollRect && this.ElementToggles.Count > 1)
@@ -292,6 +309,10 @@ public class MaterialSelector : KScreen
 
 	private void UpdateScrollBar()
 	{
+		if (this.Scrollbar == null)
+		{
+			return;
+		}
 		int num = 0;
 		foreach (KeyValuePair<Tag, KToggle> keyValuePair in this.ElementToggles)
 		{
@@ -330,7 +351,10 @@ public class MaterialSelector : KScreen
 			this.NoMaterialDiscovered.gameObject.SetActive(true);
 			this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
 			this.BadBG.SetActive(true);
-			this.Scrollbar.SetActive(false);
+			if (this.Scrollbar != null)
+			{
+				this.Scrollbar.SetActive(false);
+			}
 			this.LayoutContainer.SetActive(false);
 			return;
 		}
@@ -343,11 +367,19 @@ public class MaterialSelector : KScreen
 
 	public void ToggleShowDescriptorsPanel(bool show)
 	{
+		if (this.DescriptorsPanel == null)
+		{
+			return;
+		}
 		this.DescriptorsPanel.gameObject.SetActive(show);
 	}
 
 	private void SetDescription(Tag element)
 	{
+		if (this.DescriptorsPanel == null)
+		{
+			return;
+		}
 		StringEntry stringEntry = null;
 		if (Strings.TryGet(new StringKey("STRINGS.ELEMENTS." + element.ToString().ToUpper() + ".BUILD_DESC"), out stringEntry))
 		{
@@ -360,6 +392,10 @@ public class MaterialSelector : KScreen
 
 	private void SetEffects(Tag element)
 	{
+		if (this.MaterialDescriptionPane == null)
+		{
+			return;
+		}
 		List<Descriptor> materialDescriptors = GameUtil.GetMaterialDescriptors(element);
 		if (materialDescriptors.Count > 0)
 		{

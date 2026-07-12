@@ -79,6 +79,7 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 			: base(master, def)
 		{
 			base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 			this.meterController = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 			this.UpdateMeter(null);
 		}
@@ -165,6 +166,19 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 			}
 		}
 
+		private void OnCopySettings(object data)
+		{
+			GameObject gameObject = data as GameObject;
+			if (gameObject != null)
+			{
+				HEPBattery.Instance smi = gameObject.GetSMI<HEPBattery.Instance>();
+				if (smi != null)
+				{
+					this.particleThreshold = smi.particleThreshold;
+				}
+			}
+		}
+
 		public string SliderTitleKey
 		{
 			get
@@ -221,6 +235,9 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 
 		[MyCmpGet]
 		public Operational operational;
+
+		[MyCmpAdd]
+		public CopyBuildingSettings copyBuildingSettings;
 
 		[Serialize]
 		public float launcherTimer;

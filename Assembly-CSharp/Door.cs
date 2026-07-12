@@ -49,7 +49,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 	{
 		get
 		{
-			return this.controller.sm.isSealed.Get(this.controller);
+			return this.controller != null && this.controller.sm.isSealed.Get(this.controller);
 		}
 	}
 
@@ -492,6 +492,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		}
 	}
 
+	public bool IsPendingClose()
+	{
+		return this.controller.IsInsideState(this.controller.sm.closedelay);
+	}
+
 	public bool IsOpen()
 	{
 		return this.controller.IsInsideState(this.controller.sm.open) || this.controller.IsInsideState(this.controller.sm.closedelay) || this.controller.IsInsideState(this.controller.sm.closeblocked);
@@ -865,7 +870,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			public void RefreshIsBlocked()
 			{
 				bool flag = false;
-				foreach (int num in base.master.GetComponent<Building>().PlacementCells)
+				foreach (int num in this.building.PlacementCells)
 				{
 					if (Grid.Objects[num, 40] != null)
 					{
@@ -875,6 +880,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				}
 				base.sm.isBlocked.Set(flag, base.smi, false);
 			}
+
+			[MyCmpReq]
+			public Building building;
 		}
 	}
 }

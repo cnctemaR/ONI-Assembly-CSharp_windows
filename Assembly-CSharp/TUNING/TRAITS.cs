@@ -175,6 +175,8 @@ namespace TUNING
 
 		public static int HORRIBLE_ATTRIBUTE_PENALTY = -5;
 
+		public static float GLOWSTICK_LUX_VALUE = 500f;
+
 		public static float GLOWSTICK_RADIATION_RESISTANCE = 0.33f;
 
 		public static float RADIATION_EATER_RECOVERY = -0.25f;

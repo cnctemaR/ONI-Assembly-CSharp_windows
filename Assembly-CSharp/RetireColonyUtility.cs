@@ -103,7 +103,7 @@ public static class RetireColonyUtility
 			}
 		}
 		List<string> list2 = new List<string>();
-		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievements)
+		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in SaveGame.Instance.ColonyAchievementTracker.achievements)
 		{
 			if (keyValuePair.Value.success)
 			{

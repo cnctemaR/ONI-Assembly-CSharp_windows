@@ -22,7 +22,7 @@ public class NuclearWaste : GameStateMachine<NuclearWaste, NuclearWaste.Instance
 		{
 			Pickupable pickupable = (Pickupable)otherObject;
 			float timeAlive = pickupable.GetSMI<NuclearWaste.Instance>().timeAlive;
-			float mass = pickupable.GetComponent<PrimaryElement>().Mass;
+			float mass = pickupable.PrimaryElement.Mass;
 			float mass2 = smi.master.GetComponent<PrimaryElement>().Mass;
 			float num = ((mass2 - mass) * smi.timeAlive + mass * timeAlive) / mass2;
 			smi.timeAlive = num;

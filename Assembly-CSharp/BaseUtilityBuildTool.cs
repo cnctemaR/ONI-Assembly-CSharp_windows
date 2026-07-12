@@ -38,7 +38,7 @@ public class BaseUtilityBuildTool : DragTool
 		this.conduitMgr = component2.GetNetworkManager();
 		if (!this.facadeID.IsNullOrWhiteSpace() && this.facadeID != "DEFAULT_FACADE")
 		{
-			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID));
+			this.visualizer.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(this.facadeID), false);
 		}
 	}
 

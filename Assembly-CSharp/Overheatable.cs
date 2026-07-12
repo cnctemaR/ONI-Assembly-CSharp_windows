@@ -26,7 +26,10 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			return;
 		}
 		this.modifiersInitialized = true;
-		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true)
+		{
+			OverrideTimeSlice = new GameUtil.TimeSlice?(GameUtil.TimeSlice.None)
+		};
 		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 		this.GetAttributes().Add(attributeModifier);
 		this.GetAttributes().Add(attributeModifier2);

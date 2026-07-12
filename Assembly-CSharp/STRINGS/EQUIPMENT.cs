@@ -68,6 +68,13 @@ namespace STRINGS
 				}
 			}
 
+			public class HOLIDAY_2023_CRATE
+			{
+				public static LocString NAME = "Holiday Gift Crate";
+
+				public static LocString DESC = "An unaddressed package has been discovered near the Printing Pod. It exudes seasonal cheer, and trace amounts of Neutronium have been detected.";
+			}
+
 			public class ATMO_SUIT_HELMET
 			{
 				public static LocString NAME = "Default Atmo Helmet";
@@ -954,6 +961,13 @@ namespace STRINGS
 
 						public static LocString DESC = "For elegance so understated, it may go completely unnoticed.";
 					}
+
+					public class SOCKSUIT_BEIGE
+					{
+						public static LocString NAME = "Vintage Handsock";
+
+						public static LocString DESC = "Designed by someone with cold hands and an excess of old socks.";
+					}
 				}
 			}
 
@@ -1292,6 +1306,41 @@ namespace STRINGS
 						public static LocString NAME = "Ballet Leotard";
 
 						public static LocString DESC = "Lab-crafted fabric with a level of stretchiness that defies the laws of physics.";
+					}
+
+					public class SOCKSUIT_BEIGE
+					{
+						public static LocString NAME = "Vintage Sockshirt";
+
+						public static LocString DESC = "Like a sock for the torso. With sleeves.";
+					}
+
+					public class X_SPORCHID
+					{
+						public static LocString NAME = "Sporefest Sweater";
+
+						public static LocString DESC = "This soft knit can be worn anytime, not just during Zombie Spore season.";
+					}
+
+					public class X1_PINCHAPEPPERNUTBELLS
+					{
+						public static LocString NAME = "Pinchabell Jacket";
+
+						public static LocString DESC = "The peppernuts jingle just loudly enough to be distracting.";
+					}
+
+					public class POMPOM_SHINEBUGS_PINK_PEPPERNUT
+					{
+						public static LocString NAME = "Pom Bug Sweater";
+
+						public static LocString DESC = "No Shine Bugs were harmed in the making of this sweater.";
+					}
+
+					public class SNOWFLAKE_BLUE
+					{
+						public static LocString NAME = "Crystal-Iced Sweater";
+
+						public static LocString DESC = "Tiny imperfections in the front pattern ensure that no two are truly identical.";
 					}
 				}
 			}

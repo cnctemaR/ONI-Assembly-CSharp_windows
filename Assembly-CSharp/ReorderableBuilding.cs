@@ -119,7 +119,7 @@ public class ReorderableBuilding : KMonoBehaviour
 	{
 		BuildingAttachPoint component = base.GetComponent<BuildingAttachPoint>();
 		AttachableBuilding attachableBuilding = null;
-		if (component != null && component.points[0].attachedBuilding != null && component.points[0].attachedBuilding.HasTag(GameTags.RocketModule))
+		if (component != null && component.points[0].attachedBuilding != null)
 		{
 			attachableBuilding = component.points[0].attachedBuilding;
 		}
@@ -134,7 +134,7 @@ public class ReorderableBuilding : KMonoBehaviour
 		}
 		Building component2 = base.GetComponent<Building>();
 		component2.Def.UnmarkArea(Grid.PosToCell(this), component2.Orientation, component2.Def.ObjectLayer, base.gameObject);
-		if (attachableBuilding != null)
+		if (attachableBuilding != null && attachableBuilding.GetComponent<ReorderableBuilding>() != null)
 		{
 			attachableBuilding.GetComponent<ReorderableBuilding>().MoveVertical(-heightInCells);
 		}

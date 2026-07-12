@@ -490,7 +490,26 @@ public class PermitItems
 		new PermitItems.ItemInfo("gasstorage_red_rose", 410U, "GasReservoir_red_rose"),
 		new PermitItems.ItemInfo("gasstorage_purple_brainfat", 411U, "GasReservoir_purple_brainfat"),
 		new PermitItems.ItemInfo("masseur_balloon", 412U, "MassageTable_balloon"),
-		new PermitItems.ItemInfo("watercooler_balloon", 413U, "WaterCooler_balloon")
+		new PermitItems.ItemInfo("watercooler_balloon", 413U, "WaterCooler_balloon"),
+		new PermitItems.ItemInfo("top_x_sporchid", 415U, "TopXSporchid"),
+		new PermitItems.ItemInfo("top_x1_pinchapeppernutbells", 416U, "TopX1Pinchapeppernutbells"),
+		new PermitItems.ItemInfo("top_pompom_shinebugs_pink_peppernut", 417U, "TopPompomShinebugsPinkPeppernut"),
+		new PermitItems.ItemInfo("top_snowflake_blue", 418U, "TopSnowflakeBlue"),
+		new PermitItems.ItemInfo("bed_stringlights", 419U, "Bed_stringlights"),
+		new PermitItems.ItemInfo("corner_tile_shineornaments", 420U, "CornerMoulding_shineornaments"),
+		new PermitItems.ItemInfo("crown_moulding_shineornaments", 421U, "CrownMoulding_shineornaments"),
+		new PermitItems.ItemInfo("floorlamp_leg", 422U, "FloorLamp_leg"),
+		new PermitItems.ItemInfo("floorlamp_bristle_blossom", 423U, "FloorLamp_bristle_blossom"),
+		new PermitItems.ItemInfo("storagelocker_stripes_red_white", 424U, "StorageLocker_stripes_red_white"),
+		new PermitItems.ItemInfo("fridge_stripes_red_white", 425U, "Refrigerator_stripes_red_white"),
+		new PermitItems.ItemInfo("walls_stripes_rose", 426U, "ExteriorWall_stripes_rose"),
+		new PermitItems.ItemInfo("walls_stripes_diagonal_rose", 427U, "ExteriorWall_stripes_diagonal_rose"),
+		new PermitItems.ItemInfo("walls_stripes_circle_rose", 428U, "ExteriorWall_stripes_circle_rose"),
+		new PermitItems.ItemInfo("walls_stripes_mush", 429U, "ExteriorWall_stripes_mush"),
+		new PermitItems.ItemInfo("walls_stripes_diagonal_mush", 430U, "ExteriorWall_stripes_diagonal_mush"),
+		new PermitItems.ItemInfo("walls_stripes_circle_mush", 431U, "ExteriorWall_stripes_circle_mush"),
+		new PermitItems.ItemInfo("painting_art_q", 432U, "Canvas_Good15"),
+		new PermitItems.ItemInfo("painting_tall_art_p", 433U, "CanvasTall_Good14")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);
@@ -505,7 +524,8 @@ public class PermitItems
 		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_a", "Team Players Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 148U, "ONI_giftbox_u44_box_b", true),
 		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_b", "Pizzazz Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 149U, "ONI_giftbox_u44_box_c", true),
 		new PermitItems.BoxInfo("MYSTERYBOX_u46_box_a", "Superfruits Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 190U, "ONI_giftbox_u44_box_a", true),
-		new PermitItems.BoxInfo("MYSTERYBOX_u47_klei_fest", EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.DESC, 196U, "ONI_box_puft_atmo_set", false)
+		new PermitItems.BoxInfo("MYSTERYBOX_u47_klei_fest", EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.DESC, 196U, "ONI_box_puft_atmo_set", false),
+		new PermitItems.BoxInfo("MYSTERYBOX_u50_winter_holiday", EQUIPMENT.PREFABS.HOLIDAY_2023_CRATE.NAME, EQUIPMENT.PREFABS.HOLIDAY_2023_CRATE.DESC, 414U, "Holiday_2023_gift_box", true)
 	};
 
 	private const string MYSTERYBOX_U44_DESC = "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.";

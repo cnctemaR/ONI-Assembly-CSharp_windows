@@ -4857,7 +4857,7 @@ namespace STRINGS
 
 				public static LocString BUILDINGS_INDUSTRIAL = "Industrial";
 
-				public static LocString BUILDINGS_FOOD = "Culinary";
+				public static LocString BUILDINGS_FOOD = "Cooking";
 
 				public static LocString BUILDINGS_RECREATION = "Recreation and Decor";
 			}
@@ -5407,6 +5407,31 @@ namespace STRINGS
 			public class ATMOSUIT_CANTALOUPE
 			{
 				public static LocString NAME = "Rocketmelon Atmo Outfit";
+			}
+
+			public class PAJAMAS_SNOW
+			{
+				public static LocString NAME = "Crystal-Iced Jammies";
+			}
+
+			public class X_SPORCHID
+			{
+				public static LocString NAME = "Sporefest Outfit";
+			}
+
+			public class X1_PINCHAPEPPERNUTBELLS
+			{
+				public static LocString NAME = "Pinchabell Outfit";
+			}
+
+			public class POMPOM_SHINEBUGS_PINK_PEPPERNUT
+			{
+				public static LocString NAME = "Pom Bug Outfit";
+			}
+
+			public class SNOWFLAKE_BLUE
+			{
+				public static LocString NAME = "Crystal-Iced Outfit";
 			}
 		}
 

@@ -347,6 +347,13 @@ namespace STRINGS
 
 						public static LocString DESC = "It's sturdier than it looks.";
 					}
+
+					public class STRINGLIGHTS
+					{
+						public static LocString NAME = "Good Job Cot";
+
+						public static LocString DESC = "Wrapped in shiny gold stars, to help sleepy Duplicants feel accomplished.";
+					}
 				}
 			}
 
@@ -1869,6 +1876,13 @@ namespace STRINGS
 
 						public static LocString DESC = "It is a cruel guest who does not RSVP.";
 					}
+
+					public class ART_Q
+					{
+						public static LocString NAME = "Ore Else";
+
+						public static LocString DESC = "The only kind of gift that poorly behaved Duplicants can expect to receive.";
+					}
 				}
 			}
 
@@ -2100,6 +2114,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Mirror Ball", "ART_TALL_L");
 
 						public static LocString DESC = "Nearby, a companion animal waited for the object to be thrown.";
+					}
+
+					public class ART_TALL_P
+					{
+						public static LocString NAME = "The Feast";
+
+						public static LocString DESC = "There were greasy fingerprints on the canvas even before the paint had dried.";
 					}
 				}
 			}
@@ -2343,6 +2364,26 @@ namespace STRINGS
 
 				public class FACADES
 				{
+					public class DEFAULT_FLOORLAMP
+					{
+						public static LocString NAME = UI.FormatAsLink("Lamp", "FLOORLAMP");
+
+						public static LocString DESC = "Any building's light emitting radius can be viewed in the light overlay.";
+					}
+
+					public class LEG
+					{
+						public static LocString NAME = UI.FormatAsLink("Fragile Leg Lamp", "FLOORLAMP");
+
+						public static LocString DESC = "This lamp blazes forth in unparalleled glory.";
+					}
+
+					public class BRISTLEBLOSSOM
+					{
+						public static LocString NAME = UI.FormatAsLink("Holiday Lamp", "FLOORLAMP");
+
+						public static LocString DESC = "It's a bit prickly, but it casts a festive glow.";
+					}
 				}
 			}
 
@@ -3832,6 +3873,48 @@ namespace STRINGS
 
 						public static LocString DESC = "It's futuristic, so it must be good.";
 					}
+
+					public class STRIPES_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Stripe", "EXTERIORWALL");
+
+						public static LocString DESC = "Vertical stripes make it quite obvious when nearby objects are askew.";
+					}
+
+					public class STRIPES_DIAGONAL_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Diagonal", "EXTERIORWALL");
+
+						public static LocString DESC = "Some describe this color as \"squashed bug.\"";
+					}
+
+					public class STRIPES_CIRCLE_ROSE
+					{
+						public static LocString NAME = UI.FormatAsLink("Puce Curves", "EXTERIORWALL");
+
+						public static LocString DESC = "It's pronounced \"peeyoo-ss,\" a sound that Duplicants just can't seem to reproduce.";
+					}
+
+					public class STRIPES_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Stripe", "EXTERIORWALL");
+
+						public static LocString DESC = "The kind of green that makes one feel slightly nauseated.";
+					}
+
+					public class STRIPES_DIAGONAL_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Diagonal", "EXTERIORWALL");
+
+						public static LocString DESC = "Diagonal stripes in alternating shades of mush bar.";
+					}
+
+					public class STRIPES_CIRCLE_MUSH
+					{
+						public static LocString NAME = UI.FormatAsLink("Mush Curves", "EXTERIORWALL");
+
+						public static LocString DESC = "This wallpaper, like this colony's journey, is full of twists and turns.";
+					}
 				}
 			}
 
@@ -4550,6 +4633,23 @@ namespace STRINGS
 				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when full";
 
 				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+
+				public class FACADES
+				{
+					public class DEFAULT_REFRIGERATOR
+					{
+						public static LocString NAME = UI.FormatAsLink("Refrigerator", "REFRIGERATOR");
+
+						public static LocString DESC = "Food spoilage can be slowed by ambient conditions as well as by refrigerators.";
+					}
+
+					public class STRIPES_RED_WHITE
+					{
+						public static LocString NAME = "Bold Stripe Refrigerator";
+
+						public static LocString DESC = "Bold on the outside, cold on the inside!";
+					}
+				}
 			}
 
 			public class ROLESTATION
@@ -5444,6 +5544,13 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Mod Dot Storage Bin", "STORAGELOCKER");
 
 						public static LocString DESC = "Groovy storage, because messy colonies are such a drag.";
+					}
+
+					public class STRIPES_RED_WHITE
+					{
+						public static LocString NAME = "Bold Stripe Storage Bin";
+
+						public static LocString DESC = "It's the merriest storage bin of all.";
 					}
 				}
 			}
@@ -7829,9 +7936,9 @@ namespace STRINGS
 
 			public class CROWNMOULDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Crown Moulding", "CROWNMOULDING");
+				public static LocString NAME = UI.FormatAsLink("Ceiling Trim", "CROWNMOULDING");
 
-				public static LocString DESC = "Crown moulding is used as purely decorative trim for ceilings.";
+				public static LocString DESC = "Ceiling trim is a purely decorative addition to one's overhead area.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -7844,14 +7951,27 @@ namespace STRINGS
 
 				public class FACADES
 				{
+					public class DEFAULT_CROWNMOULDING
+					{
+						public static LocString NAME = UI.FormatAsLink("Ceiling Trim", "CROWNMOULDING");
+
+						public static LocString DESC = "Ceiling trim is a purely decorative addition to one's overhead area.";
+					}
+
+					public class SHINEORNAMENTS
+					{
+						public static LocString NAME = UI.FormatAsLink("Fancy Bug Ceiling Garland", "CROWNMOULDING");
+
+						public static LocString DESC = "Someone spent their entire weekend gluing ribbons to paper Shine Bug cut-outs, and it shows.";
+					}
 				}
 			}
 
 			public class CORNERMOULDING
 			{
-				public static LocString NAME = UI.FormatAsLink("Corner Moulding", "CORNERMOULDING");
+				public static LocString NAME = UI.FormatAsLink("Corner Trim", "CORNERMOULDING");
 
-				public static LocString DESC = "Corner moulding is used as purely decorative trim for ceiling corners.";
+				public static LocString DESC = "Corner trim is a purely decorative addition for ceiling corners.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -7864,6 +7984,19 @@ namespace STRINGS
 
 				public class FACADES
 				{
+					public class DEFAULT_CORNERMOULDING
+					{
+						public static LocString NAME = UI.FormatAsLink("Corner Trim", "CORNERMOULDING");
+
+						public static LocString DESC = "It really dresses up a ceiling corner.";
+					}
+
+					public class SHINEORNAMENTS
+					{
+						public static LocString NAME = UI.FormatAsLink("Fancy Bug Corner Garland", "CORNERMOULDING");
+
+						public static LocString DESC = "Why deck the halls, when you could <i>festoon</i> them?";
+					}
 				}
 			}
 

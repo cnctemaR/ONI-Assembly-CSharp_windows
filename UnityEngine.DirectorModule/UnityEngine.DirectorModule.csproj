@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F25D3FA5-9046-4B1E-ABC2-B1862F736A45}</ProjectGuid>
+    <ProjectGuid>{68EAA862-A9A4-4454-8C54-98D83F6E4A67}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Playables</RootNamespace>
     <AssemblyName>UnityEngine.DirectorModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F25D3FA5-9046-4B1E-ABC2-B1862F736A43}</Project>
+      <Project>{68EAA862-A9A4-4454-8C54-98D83F6E4A65}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F25D3FA5-9046-4B1E-ABC2-B1862F736A59}</Project>
+      <Project>{68EAA862-A9A4-4454-8C54-98D83F6E4A7B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

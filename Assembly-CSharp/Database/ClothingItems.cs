@@ -257,7 +257,11 @@ namespace Database
 			new ClothingItems.Info("AtmoSuitRocketmelon", EQUIPMENT.PREFABS.ATMO_SUIT_BODY.FACADES.CANTALOUPE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BODY.FACADES.CANTALOUPE.DESC, PermitCategory.AtmoSuitBody, PermitRarity.Splendid, "atmosuit_cantaloupe_kanim"),
 			new ClothingItems.Info("AtmoBeltRocketmelon", EQUIPMENT.PREFABS.ATMO_SUIT_BELT.FACADES.CANTALOUPE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_BELT.FACADES.CANTALOUPE.DESC, PermitCategory.AtmoSuitBelt, PermitRarity.Nifty, "atmo_belt_cantaloupe_kanim"),
 			new ClothingItems.Info("AtmoGlovesRocketmelon", EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.FACADES.CANTALOUPE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_GLOVES.FACADES.CANTALOUPE.DESC, PermitCategory.AtmoSuitGloves, PermitRarity.Common, "atmo_gloves_cantaloupe_kanim"),
-			new ClothingItems.Info("AtmoBootsRocketmelon", EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.FACADES.CANTALOUPE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.FACADES.CANTALOUPE.DESC, PermitCategory.AtmoSuitShoes, PermitRarity.Common, "atmo_shoes_cantaloupe_kanim")
+			new ClothingItems.Info("AtmoBootsRocketmelon", EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.FACADES.CANTALOUPE.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SHOES.FACADES.CANTALOUPE.DESC, PermitCategory.AtmoSuitShoes, PermitRarity.Common, "atmo_shoes_cantaloupe_kanim"),
+			new ClothingItems.Info("TopXSporchid", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.X_SPORCHID.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.X_SPORCHID.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_x_sporchid_kanim"),
+			new ClothingItems.Info("TopX1Pinchapeppernutbells", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.X1_PINCHAPEPPERNUTBELLS.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.X1_PINCHAPEPPERNUTBELLS.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_x1_pinchapeppernutbells_kanim"),
+			new ClothingItems.Info("TopPompomShinebugsPinkPeppernut", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.POMPOM_SHINEBUGS_PINK_PEPPERNUT.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.POMPOM_SHINEBUGS_PINK_PEPPERNUT.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_pompom_shinebugs_pink_peppernut_kanim"),
+			new ClothingItems.Info("TopSnowflakeBlue", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.SNOWFLAKE_BLUE.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.SNOWFLAKE_BLUE.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_snowflake_blue_kanim")
 		};
 
 		public static ClothingItems.Info[] Infos_All = ClothingItems.Infos_Skins;

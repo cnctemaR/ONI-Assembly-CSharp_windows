@@ -66,6 +66,10 @@ namespace Database
 			this.Add("PowerBrunch", new string[] { "TopTweedPinkOrchid", "SkirtTweedPinkOrchid", "Gloves2ToneCreamCharcoal", "ShoesClassicFlatsCreamCharcoal" }, UI.OUTFITS.TWEED_PINK_ORCHID.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("Ballet", new string[] { "BodysuitBallerinaPink", "SkirtBallerinaPink", "GlovesBallerinaPink", "ShoesBallerinaPink" }, UI.OUTFITS.BALLET.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			this.Add("AtmoRocketmelon", new string[] { "AtmoHelmetRocketmelon", "AtmoSuitRocketmelon", "AtmoGlovesRocketmelon", "AtmoBeltRocketmelon", "AtmoBootsRocketmelon" }, UI.OUTFITS.ATMOSUIT_CANTALOUPE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("TopXSporchid", new string[] { "TopXSporchid" }, UI.OUTFITS.X_SPORCHID.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("TopX1Pinchapeppernutbells", new string[] { "TopX1Pinchapeppernutbells" }, UI.OUTFITS.X1_PINCHAPEPPERNUTBELLS.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("TopPompomShinebugsPinkPeppernut", new string[] { "TopPompomShinebugsPinkPeppernut" }, UI.OUTFITS.POMPOM_SHINEBUGS_PINK_PEPPERNUT.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("TopSnowflakeBlue", new string[] { "TopSnowflakeBlue" }, UI.OUTFITS.SNOWFLAKE_BLUE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 

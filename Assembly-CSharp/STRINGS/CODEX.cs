@@ -782,6 +782,17 @@ namespace STRINGS
 
 				public class UI_SIDESCREENS
 				{
+					public static LocString DROP_INVENTORY = "Empty Building";
+
+					public static LocString DROP_INVENTORY_TOOLTIP = string.Concat(new string[]
+					{
+						"Empties stored ",
+						UI.FormatAsLink("Steel", "STEEL"),
+						"\n\nDisabling the building will also prevent ",
+						UI.FormatAsLink("Steel", "STEEL"),
+						" from being delivered"
+					});
+
 					public static LocString REVEAL_BTN = "Restore Building";
 
 					public static LocString REVEAL_BTN_TOOLTIP = "Assign a Duplicant to restore this building's functionality";

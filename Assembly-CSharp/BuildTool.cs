@@ -331,7 +331,7 @@ public class BuildTool : DragTool
 					string text2;
 					if (!flag)
 					{
-						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
+						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, this.facadeID, 0);
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
 					else if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation, true) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, true, out text2))

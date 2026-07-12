@@ -50,6 +50,10 @@ public class ArtableSelectionSideScreen : SideScreenContent
 
 	private void OnRefreshTarget(object data = null)
 	{
+		if (this.target == null)
+		{
+			return;
+		}
 		this.GenerateStateButtons();
 		this.selectedStage = this.target.CurrentStage;
 		this.RefreshButtons();

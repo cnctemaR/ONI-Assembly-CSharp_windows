@@ -254,7 +254,10 @@ public static class RoomConstraints
 				if (component2 != null)
 				{
 					RequireInputs component3 = kprefabID4.GetComponent<RequireInputs>();
-					return component2.enabled || (component3 != null && component3.RequirementsMet);
+					if (component2.enabled || (component3 != null && component3.RequirementsMet))
+					{
+						return true;
+					}
 				}
 			}
 		}

@@ -235,6 +235,7 @@ public class BuildingDef : Def
 		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
 		{
 			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
+			gameObject.GetComponent<KBatchedAnimController>().Play("place", KAnim.PlayMode.Once, 1f, 0f);
 		}
 		return gameObject;
 	}
@@ -249,6 +250,16 @@ public class BuildingDef : Def
 			component.IsReplacementTile = true;
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
 			component.IsReplacementTile = false;
+		}
+		return gameObject;
+	}
+
+	public GameObject TryReplaceTile(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, int layer = 0)
+	{
+		GameObject gameObject = this.TryReplaceTile(src_go, pos, orientation, selected_elements, layer);
+		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
+		{
+			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID));
 		}
 		return gameObject;
 	}

@@ -66,10 +66,10 @@ public class SymbolOverrideController : KMonoBehaviour
 			if (symbolEntry.targetSymbol == target_symbol && symbolEntry.priority == priority)
 			{
 				this.symbolOverrides.RemoveAt(i);
+				this.MarkDirty();
 				return true;
 			}
 		}
-		this.MarkDirty();
 		return false;
 	}
 

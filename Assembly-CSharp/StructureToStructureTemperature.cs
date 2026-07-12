@@ -168,7 +168,7 @@ public class StructureToStructureTemperature : KMonoBehaviour
 				for (int i = 0; i < buildingsInCell.Count; i++)
 				{
 					Building building = ((buildingsInCell[i] == null) ? null : buildingsInCell[i].GetComponent<Building>());
-					if (building != null && building.Def.UseStructureTemperature)
+					if (building != null && building.Def.UseStructureTemperature && building.PlacementCellsContainCell(cell))
 					{
 						if (!dictionary.ContainsKey(building))
 						{

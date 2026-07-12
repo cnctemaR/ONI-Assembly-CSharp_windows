@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -108,7 +109,12 @@ public class ProductInfoScreen : KScreen
 		this.SetDescription(def);
 		this.SetEffects(def);
 		this.facadeSelectionPanel.SetBuildingDef(def.PrefabID);
-		if (facadeID != null && facadeID != "DEFAULT_FACADE" && Db.GetBuildingFacades().Get(facadeID).PrefabID == def.PrefabID)
+		BuildingFacadeResource buildingFacadeResource = null;
+		if ("DEFAULT_FACADE" != facadeID)
+		{
+			buildingFacadeResource = Db.GetBuildingFacades().TryGet(facadeID);
+		}
+		if (buildingFacadeResource != null && buildingFacadeResource.PrefabID == def.PrefabID && Db.Get().Permits.Get(buildingFacadeResource.PermitId).IsUnlocked())
 		{
 			this.facadeSelectionPanel.SelectedFacade = facadeID;
 		}

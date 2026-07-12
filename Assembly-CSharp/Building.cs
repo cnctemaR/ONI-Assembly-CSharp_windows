@@ -52,6 +52,16 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		return extents;
 	}
 
+	public bool PlacementCellsContainCell(int cell)
+	{
+		bool flag = false;
+		for (int i = 0; i < this.PlacementCells.Length; i++)
+		{
+			flag |= this.PlacementCells[i] == cell;
+		}
+		return flag;
+	}
+
 	public void RefreshCells()
 	{
 		this.placementCells = new int[this.Def.PlacementOffsets.Length];

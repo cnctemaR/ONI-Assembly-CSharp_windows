@@ -166,7 +166,8 @@ public class GeoTunerSideScreen : SideScreenContent
 				{
 					func3 = (<>9__8 = (GeoTuner.Instance x) => x.GetFutureGeyser() == geyser || x.GetAssignedGeyser() == geyser);
 				}
-				if (items.Count<GeoTuner.Instance>(func3) + 1 > 5)
+				int num5 = items.Count<GeoTuner.Instance>(func3);
+				if (geyser != null && num5 + 1 > 5)
 				{
 					return;
 				}

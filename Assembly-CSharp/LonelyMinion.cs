@@ -182,7 +182,8 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		this.Inactive.Enter(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(this.OnBecomeInactive)).Exit(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(this.OnBecomeActive));
 		this.Idle.ParamTransition<GameObject>(this.Mail, this.CheckMail, (LonelyMinion.Instance smi, GameObject p) => smi.AnimController.currentAnim == smi.AnimController.defaultAnim && this.Mail.Get(smi) != null).Update(new Action<LonelyMinion.Instance, float>(this.DelayIdle), UpdateRate.SIM_EVERY_TICK, false).EventHandler(GameHashes.AnimQueueComplete, new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(this.OnIdleAnimComplete))
 			.Exit(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(this.OnIdleAnimComplete));
-		this.CheckMail.Enter(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(LonelyMinion.MailStates.OnEnter)).EventTransition(GameHashes.AnimQueueComplete, this.Idle, new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.Transition.ConditionCallback(this.HahCheckedMail)).Exit(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(LonelyMinion.MailStates.OnExit));
+		this.CheckMail.Enter(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(LonelyMinion.MailStates.OnEnter)).ParamTransition<GameObject>(this.Mail, this.Idle, (LonelyMinion.Instance smi, GameObject p) => this.Mail.Get(smi) == null).EventTransition(GameHashes.AnimQueueComplete, this.Idle, new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.Transition.ConditionCallback(this.HahCheckedMail))
+			.Exit(new StateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State.Callback(LonelyMinion.MailStates.OnExit));
 		this.CheckMail.Success.Enter(delegate(LonelyMinion.Instance smi)
 		{
 			LonelyMinion.MailStates.PlayAnims(smi, LonelyMinionConfig.FOOD_SUCCESS);
@@ -273,6 +274,8 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 			instance.QuestProgressChanged = (Action<QuestInstance, Quest.State, float>)Delegate.Remove(instance.QuestProgressChanged, new Action<QuestInstance, Quest.State, float>(this.ShowQuestCompleteNotification));
 			this.StoryCleanUp();
 			base.StopSM(reason);
+			this.ResetHandle.ClearScheduler();
+			this.ResetHandle.FreeResources();
 		}
 
 		public HashedString ChooseIdle()
@@ -418,6 +421,10 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 			}
 		}
 
+		public SchedulerHandle ResetHandle;
+
+		public float StartingAverageDecor = float.NegativeInfinity;
+
 		public float IdleDelayTimer;
 
 		private KBatchedAnimController[] animControllers;
@@ -427,8 +434,6 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		private const int maxIdles = 8;
 
 		private List<HashedString> availableIdles = new List<HashedString>(8);
-
-		public float StartingAverageDecor = float.NegativeInfinity;
 	}
 
 	public class MailStates : GameStateMachine<LonelyMinion, LonelyMinion.Instance, StateMachineController, LonelyMinion.Def>.State
@@ -446,7 +451,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 
 		public static void OnExit(LonelyMinion.Instance smi)
 		{
-			smi.ScheduleNextFrame(new Action<object>(LonelyMinion.MailStates.ResetState), smi);
+			smi.ResetHandle = smi.ScheduleNextFrame(new Action<object>(LonelyMinion.MailStates.ResetState), smi);
 		}
 
 		private static void ResetState(object data)

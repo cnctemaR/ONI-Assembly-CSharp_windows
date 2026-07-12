@@ -120,6 +120,7 @@ public class Artable : Workable
 		BuildingDef def = base.GetComponent<Building>().Def;
 		component.SetName(def.Name);
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().ArtableStatuses.AwaitingArting, this);
+		this.GetAttributes().Remove(this.artQualityDecorModifier);
 		this.shouldShowSkillPerkStatusItem = false;
 		this.UpdateStatusItem(null);
 		if (this.currentStage == this.defaultArtworkId)
@@ -142,10 +143,11 @@ public class Artable : Workable
 		this.currentStage = artableStage.id;
 		base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Assets.GetAnim(artableStage.animFile) });
 		base.GetComponent<KAnimControllerBase>().Play(artableStage.anim, KAnim.PlayMode.Once, 1f, 0f);
+		this.GetAttributes().Remove(this.artQualityDecorModifier);
 		if (artableStage.decor != 0)
 		{
-			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)artableStage.decor, "Art Quality", false, false, true);
-			this.GetAttributes().Add(attributeModifier);
+			this.artQualityDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)artableStage.decor, "Art Quality", false, false, true);
+			this.GetAttributes().Add(this.artQualityDecorModifier);
 		}
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.SetName(artableStage.Name);
@@ -165,6 +167,8 @@ public class Artable : Workable
 
 	[Serialize]
 	private string userChosenTargetStage;
+
+	private AttributeModifier artQualityDecorModifier;
 
 	private string defaultArtworkId = "Default";
 

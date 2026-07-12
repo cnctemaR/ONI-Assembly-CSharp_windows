@@ -328,6 +328,7 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				startingLevels[text] += 7;
 			}
 			global::UnityEngine.Object.Destroy(this.lonelyMinion.gameObject);
+			this.lonelyMinion = null;
 			MinionIdentity minionIdentity = Util.KInstantiate<MinionIdentity>(Assets.GetPrefab(MinionConfig.ID), null, null);
 			Immigration.Instance.ApplyDefaultPersonalPriorities(minionIdentity.gameObject);
 			minionIdentity.gameObject.SetActive(true);
@@ -454,10 +455,6 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 				}
 				if (state == Workable.WorkableEvent.WorkStopped)
 				{
-					Activatable activatable2 = activatable;
-					activatable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(activatable2.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkStateChanged));
-					Activatable activatable3 = activatable;
-					activatable3.onActivate = (global::System.Action)Delegate.Remove(activatable3.onActivate, new global::System.Action(this.StartStoryTrait));
 					if (this.currentWorkState == Workable.WorkableEvent.WorkStarted)
 					{
 						if (this.knockNotification != null)
@@ -469,6 +466,13 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 						FocusTargetSequence.Cancel(base.master);
 						this.knocker.gameObject.Unsubscribe(-1503271301, new Action<object>(this.OnObjectSelect));
 						this.knocker = null;
+					}
+					if (this.currentWorkState == Workable.WorkableEvent.WorkCompleted)
+					{
+						Activatable activatable2 = activatable;
+						activatable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(activatable2.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkStateChanged));
+						Activatable activatable3 = activatable;
+						activatable3.onActivate = (global::System.Action)Delegate.Remove(activatable3.onActivate, new global::System.Action(this.StartStoryTrait));
 					}
 				}
 				this.currentWorkState = state;

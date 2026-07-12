@@ -28,7 +28,11 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			smi.animController.randomiseLoopedOffset = false;
 		}).PlayAnim("landed", KAnim.PlayMode.Loop)
 			.EventTransition(GameHashes.OnStore, this.grounded.idle, null);
-		this.takeoff.DefaultState(this.takeoff.launch).PlayAnim("launching").OnSignal(this.beginTravelling, this.travel)
+		this.takeoff.DefaultState(this.takeoff.launch).Enter(delegate(RailGunPayload.StatesInstance smi)
+		{
+			this.onSurface.Set(false, smi);
+		}).PlayAnim("launching")
+			.OnSignal(this.beginTravelling, this.travel)
 			.Enter(delegate(RailGunPayload.StatesInstance smi)
 			{
 				smi.GetComponent<Pickupable>().deleteOffGrid = false;
@@ -41,7 +45,11 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 		{
 			smi.UpdateLaunch(dt);
 		}, UpdateRate.SIM_EVERY_TICK, false);
-		this.travel.DefaultState(this.travel.travelling).PlayAnim("idle").ToggleTag(GameTags.EntityInSpace)
+		this.travel.DefaultState(this.travel.travelling).Enter(delegate(RailGunPayload.StatesInstance smi)
+		{
+			this.onSurface.Set(false, smi);
+		}).PlayAnim("idle")
+			.ToggleTag(GameTags.EntityInSpace)
 			.ToggleMainStatusItem(Db.Get().BuildingStatusItems.InFlight, (RailGunPayload.StatesInstance smi) => smi.GetComponent<ClusterTraveler>());
 		this.travel.travelling.EventTransition(GameHashes.ClusterDestinationReached, this.travel.transferWorlds, null).Enter(delegate(RailGunPayload.StatesInstance smi)
 		{
@@ -52,7 +60,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			smi.StartLand();
 		}).GoTo(this.landing.landing);
 		this.landing.DefaultState(this.landing.landing).ParamTransition<bool>(this.onSurface, this.grounded.crater, GameStateMachine<RailGunPayload, RailGunPayload.StatesInstance, IStateMachineTarget, RailGunPayload.Def>.IsTrue).ParamTransition<int>(this.destinationWorld, this.takeoff, (RailGunPayload.StatesInstance smi, int p) => p != -1);
-		this.landing.landing.PlayAnim("falling").Update("Landing", delegate(RailGunPayload.StatesInstance smi, float dt)
+		this.landing.landing.PlayAnim("falling", KAnim.PlayMode.Loop).Update("Landing", delegate(RailGunPayload.StatesInstance smi, float dt)
 		{
 			smi.UpdateLanding(dt);
 		}, UpdateRate.SIM_200ms, false).ToggleGravity(this.landing.impact);
@@ -185,7 +193,8 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			{
 				Vector3 position = base.transform.GetPosition();
 				position.y -= 0.5f;
-				if (Grid.IsSolidCell(Grid.PosToCell(position)))
+				int num = Grid.PosToCell(position);
+				if (Grid.IsWorldValidCell(num) && Grid.IsSolidCell(num))
 				{
 					base.sm.onSurface.Set(true, this);
 				}

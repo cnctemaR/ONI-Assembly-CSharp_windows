@@ -42,6 +42,7 @@ public class RationBoxConfig : IBuildingConfig
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<RationBox>();
 		go.AddOrGet<UserNameable>();
+		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

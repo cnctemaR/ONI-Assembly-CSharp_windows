@@ -79,6 +79,8 @@ public class DistributionPlatform : MonoBehaviour
 
 		bool IsArchiveBranch { get; }
 
+		bool IsDLCStatusReady();
+
 		string ApplyWordFilter(string text);
 
 		void GetAuthTicket(DistributionPlatform.AuthTicketHandler callback);

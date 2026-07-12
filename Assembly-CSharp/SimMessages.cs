@@ -942,7 +942,7 @@ public static class SimMessages
 		}
 	}
 
-	public unsafe static void NewGameFrame(float elapsed_seconds, List<Pair<Vector2I, Vector2I>> activeRegions)
+	public unsafe static void NewGameFrame(float elapsed_seconds, List<Game.SimActiveRegion> activeRegions)
 	{
 		Debug.Assert(activeRegions.Count > 0, "NewGameFrame cannot be called with zero activeRegions");
 		Sim.NewGameFrame* ptr;
@@ -952,16 +952,18 @@ public static class SimMessages
 			ptr = stackalloc Sim.NewGameFrame[unchecked((UIntPtr)activeRegions.Count) * (UIntPtr)sizeof(Sim.NewGameFrame)];
 			ptr2 = ptr;
 		}
-		foreach (Pair<Vector2I, Vector2I> pair in activeRegions)
+		foreach (Game.SimActiveRegion simActiveRegion in activeRegions)
 		{
-			Pair<Vector2I, Vector2I> pair2 = pair;
-			pair2.first = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, pair.first.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, pair.first.y));
-			pair2.second = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, pair.second.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, pair.second.y));
+			Pair<Vector2I, Vector2I> region = simActiveRegion.region;
+			region.first = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, simActiveRegion.region.first.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, simActiveRegion.region.first.y));
+			region.second = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, simActiveRegion.region.second.x), MathUtil.Clamp(0, Grid.HeightInCells - 1, simActiveRegion.region.second.y));
 			ptr2->elapsedSeconds = elapsed_seconds;
-			ptr2->minX = pair2.first.x;
-			ptr2->minY = pair2.first.y;
-			ptr2->maxX = pair2.second.x;
-			ptr2->maxY = pair2.second.y;
+			ptr2->minX = region.first.x;
+			ptr2->minY = region.first.y;
+			ptr2->maxX = region.second.x;
+			ptr2->maxY = region.second.y;
+			ptr2->currentSunlightIntensity = simActiveRegion.currentSunlightIntensity;
+			ptr2->currentCosmicRadiationIntensity = simActiveRegion.currentCosmicRadiationIntensity;
 			ptr2++;
 		}
 		Sim.SIM_HandleMessage(-775326397, sizeof(Sim.NewGameFrame) * activeRegions.Count, (byte*)ptr);

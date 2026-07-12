@@ -64,6 +64,7 @@ public class ShowerConfig : IBuildingConfig
 		storage.capacityKg = 10f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
+		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

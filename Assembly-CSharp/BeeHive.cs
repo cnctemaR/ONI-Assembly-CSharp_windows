@@ -36,7 +36,10 @@ public class BeeHive : GameStateMachine<BeeHive, BeeHive.StatesInstance, IStateM
 		this.enabled.grownStates.dayTime.EventTransition(GameHashes.Nighttime, (BeeHive.StatesInstance smi) => GameClock.Instance, this.enabled.grownStates.nightTime, (BeeHive.StatesInstance smi) => GameClock.Instance.IsNighttime());
 		this.enabled.grownStates.nightTime.EventTransition(GameHashes.NewDay, (BeeHive.StatesInstance smi) => GameClock.Instance, this.enabled.grownStates.dayTime, (BeeHive.StatesInstance smi) => GameClock.Instance.GetTimeSinceStartOfCycle() <= 1f).Exit(delegate(BeeHive.StatesInstance smi)
 		{
-			smi.SpawnNewLarvaFromHive();
+			if (!GameClock.Instance.IsNighttime())
+			{
+				smi.SpawnNewLarvaFromHive();
+			}
 		});
 	}
 
@@ -139,7 +142,5 @@ public class BeeHive : GameStateMachine<BeeHive, BeeHive.StatesInstance, IStateM
 			KPrefabID component = base.GetComponent<KPrefabID>();
 			return component.HasTag(GameTags.Creatures.HasNoFoundation) || component.HasTag(GameTags.Entombed) || component.HasTag(GameTags.Creatures.Drowning);
 		}
-
-		private Coroutine newGameSpawnRoutine;
 	}
 }

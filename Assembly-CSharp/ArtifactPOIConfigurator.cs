@@ -83,6 +83,8 @@ public class ArtifactPOIConfigurator : KMonoBehaviour
 		public float poiRechargeTimeMax;
 
 		public string dlcID;
+
+		public List<string> orbitalObject = new List<string> { Db.Get().OrbitalTypeCategories.gravitas.Id };
 	}
 
 	[Serializable]

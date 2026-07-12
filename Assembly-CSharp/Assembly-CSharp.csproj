@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{684B2992-617A-4300-BDA5-367C3840F607}</ProjectGuid>
+    <ProjectGuid>{D77EAD7E-EB3D-4944-AC4A-1C87B872F27D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -418,6 +418,7 @@
     <Compile Include="ClusterGridEntity.cs" />
     <Compile Include="ClusterGridWorldSideScreen.cs" />
     <Compile Include="ClusterLocationChangedEvent.cs" />
+    <Compile Include="ClusterLocationFilterSideScreen.cs" />
     <Compile Include="ClusterManager.cs" />
     <Compile Include="ClusterMapHex.cs" />
     <Compile Include="ClusterMapPath.cs" />
@@ -673,6 +674,7 @@
     <Compile Include="Database\NoFarmables.cs" />
     <Compile Include="Database\NumberOfDupes.cs" />
     <Compile Include="Database\OpenTemporalTear.cs" />
+    <Compile Include="Database\OrbitalTypeCategories.cs" />
     <Compile Include="Database\Personalities.cs" />
     <Compile Include="Database\PlantAttributes.cs" />
     <Compile Include="Database\PlantMutations.cs" />
@@ -1672,6 +1674,8 @@
     <Compile Include="LogicBitSelectorSideScreen.cs" />
     <Compile Include="LogicCircuitManager.cs" />
     <Compile Include="LogicCircuitNetwork.cs" />
+    <Compile Include="LogicClusterLocationSensor.cs" />
+    <Compile Include="LogicClusterLocationSensorConfig.cs" />
     <Compile Include="LogicControlInputUI.cs" />
     <Compile Include="LogicCounter.cs" />
     <Compile Include="LogicCounterConfig.cs" />
@@ -2000,9 +2004,12 @@
     <Compile Include="OperationalValve.cs" />
     <Compile Include="OptionSelector.cs" />
     <Compile Include="OptionsMenuScreen.cs" />
+    <Compile Include="OrbitalBGConfig.cs" />
     <Compile Include="OrbitalCargoModuleConfig.cs" />
+    <Compile Include="OrbitalData.cs" />
     <Compile Include="OrbitalDeployCargoModule.cs" />
     <Compile Include="OrbitalMechanics.cs" />
+    <Compile Include="OrbitalObject.cs" />
     <Compile Include="OrbitalResearchCenterConfig.cs" />
     <Compile Include="OreScrubber.cs" />
     <Compile Include="OreScrubberConfig.cs" />
@@ -2389,9 +2396,11 @@
     <Compile Include="RocketOxidizerTracker.cs" />
     <Compile Include="RocketPassengerMonitor.cs" />
     <Compile Include="RocketProcessConditionDisplayTarget.cs" />
+    <Compile Include="RocketRestrictionSideScreen.cs" />
     <Compile Include="RocketSimpleInfoPanel.cs" />
     <Compile Include="RocketStats.cs" />
     <Compile Include="RocketThrustWidget.cs" />
+    <Compile Include="RocketUsageRestriction.cs" />
     <Compile Include="RocketWallTileConfig.cs" />
     <Compile Include="RoleSlotUnlock.cs" />
     <Compile Include="RoleStation.cs" />
@@ -2941,6 +2950,7 @@
     <Compile Include="TUNING\DISEASE.cs" />
     <Compile Include="TUNING\DUPLICANTSTATS.cs" />
     <Compile Include="TUNING\EQUIPMENT.cs" />
+    <Compile Include="TUNING\FIXEDTRAITS.cs" />
     <Compile Include="TUNING\FOOD.cs" />
     <Compile Include="TUNING\GAMEPLAYEVENT.cs" />
     <Compile Include="TUNING\GERM_EXPOSURE.cs" />
@@ -2969,6 +2979,7 @@
     <Compile Include="TutorialMessageDialog.cs" />
     <Compile Include="Tween.cs" />
     <Compile Include="UglyCryChore.cs" />
+    <Compile Include="UIAnimationSoundEvent.cs" />
     <Compile Include="UIConstants.cs" />
     <Compile Include="UICurvePath.cs" />
     <Compile Include="UIDupeRandomizer.cs" />
@@ -3127,111 +3138,111 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\0Harmony\0Harmony.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F604}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F27A}</Project>
       <Name>0Harmony</Name>
     </ProjectReference>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F605}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F27B}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F606}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F27C}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F608}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F27E}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F60C}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F282}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F60D}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F283}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F610}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F286}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F611}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F287}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F613}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F289}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F615}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F28B}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F61E}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F294}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F623}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F299}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F625}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F29B}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F62A}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2A0}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F633}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2A9}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F634}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2AA}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F635}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2AB}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F639}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2AF}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F63B}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2B1}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F63C}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2B2}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ScreenCaptureModule\UnityEngine.ScreenCaptureModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F63F}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2B5}</Project>
       <Name>UnityEngine.ScreenCaptureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F649}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2BF}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F64F}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2C5}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F64C}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2C2}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F658}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2CE}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestTextureModule\UnityEngine.UnityWebRequestTextureModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F659}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2CF}</Project>
       <Name>UnityEngine.UnityWebRequestTextureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VideoModule\UnityEngine.VideoModule.csproj">
-      <Project>{684B2992-617A-4300-BDA5-367C3840F65D}</Project>
+      <Project>{D77EAD7E-EB3D-4944-AC4A-1C87B872F2D3}</Project>
       <Name>UnityEngine.VideoModule</Name>
     </ProjectReference>
   </ItemGroup>

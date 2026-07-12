@@ -70,7 +70,7 @@ public class BeeMakeHiveStates : GameStateMachine<BeeMakeHiveStates, BeeMakeHive
 
 		public void BuildHome()
 		{
-			Vector3 vector = Grid.CellToPos(this.targetBuildCell);
+			Vector3 vector = Grid.CellToPos(this.targetBuildCell, CellAlignment.Bottom, Grid.SceneLayer.Creatures);
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("BeeHive".ToTag()), vector, Quaternion.identity, null, null, true, 0);
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.ElementID = SimHashes.Creature;

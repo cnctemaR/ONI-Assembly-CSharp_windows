@@ -7,6 +7,7 @@ using KSerialization;
 using ProcGen;
 using ProcGenGame;
 using TemplateClasses;
+using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -129,12 +130,120 @@ public class WorldContainer : KMonoBehaviour
 		base.OnSpawn();
 		base.gameObject.AddOrGet<InfoDescription>().DescriptionLocString = this.worldDescription;
 		this.RefreshHasTopPriorityChore();
+		this.UpgradeFixedTraits();
+		this.RefreshFixedTraits();
 	}
 
 	protected override void OnCleanUp()
 	{
 		ClusterManager.Instance.UnregisterWorldContainer(this);
 		base.OnCleanUp();
+	}
+
+	private void UpgradeFixedTraits()
+	{
+		if (this.sunlightFixedTrait == null || this.sunlightFixedTrait == "")
+		{
+			new Dictionary<int, string>
+			{
+				{
+					160000,
+					FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_HIGH
+				},
+				{
+					0,
+					FIXEDTRAITS.SUNLIGHT.NAME.NONE
+				},
+				{
+					10000,
+					FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_LOW
+				},
+				{
+					20000,
+					FIXEDTRAITS.SUNLIGHT.NAME.VERY_LOW
+				},
+				{
+					30000,
+					FIXEDTRAITS.SUNLIGHT.NAME.LOW
+				},
+				{
+					35000,
+					FIXEDTRAITS.SUNLIGHT.NAME.MED_LOW
+				},
+				{
+					40000,
+					FIXEDTRAITS.SUNLIGHT.NAME.MED
+				},
+				{
+					50000,
+					FIXEDTRAITS.SUNLIGHT.NAME.MED_HIGH
+				},
+				{
+					60000,
+					FIXEDTRAITS.SUNLIGHT.NAME.HIGH
+				},
+				{
+					80000,
+					FIXEDTRAITS.SUNLIGHT.NAME.VERY_HIGH
+				},
+				{
+					120000,
+					FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_HIGH
+				}
+			}.TryGetValue(this.sunlight, out this.sunlightFixedTrait);
+		}
+		if (this.cosmicRadiationFixedTrait == null || this.cosmicRadiationFixedTrait == "")
+		{
+			new Dictionary<int, string>
+			{
+				{
+					0,
+					FIXEDTRAITS.COSMICRADIATION.NAME.NONE
+				},
+				{
+					6,
+					FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW
+				},
+				{
+					12,
+					FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW
+				},
+				{
+					18,
+					FIXEDTRAITS.COSMICRADIATION.NAME.LOW
+				},
+				{
+					21,
+					FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW
+				},
+				{
+					25,
+					FIXEDTRAITS.COSMICRADIATION.NAME.MED
+				},
+				{
+					31,
+					FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH
+				},
+				{
+					37,
+					FIXEDTRAITS.COSMICRADIATION.NAME.HIGH
+				},
+				{
+					50,
+					FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH
+				},
+				{
+					75,
+					FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH
+				}
+			}.TryGetValue(this.cosmicRadiation, out this.cosmicRadiationFixedTrait);
+		}
+	}
+
+	private void RefreshFixedTraits()
+	{
+		this.sunlight = this.GetSunlightValueFromFixedTrait();
+		this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
 	}
 
 	private void RefreshHasTopPriorityChore()
@@ -340,6 +449,56 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	private string GetSunlightFromFixedTraits(WorldGen world)
+	{
+		foreach (string text in world.Settings.world.fixedTraits)
+		{
+			if (this.sunlightFixedTraits.ContainsKey(text))
+			{
+				return text;
+			}
+		}
+		return FIXEDTRAITS.SUNLIGHT.NAME.DEFAULT;
+	}
+
+	private string GetCosmicRadiationFromFixedTraits(WorldGen world)
+	{
+		foreach (string text in world.Settings.world.fixedTraits)
+		{
+			if (this.cosmicRadiationFixedTraits.ContainsKey(text))
+			{
+				return text;
+			}
+		}
+		return FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
+	}
+
+	private int GetSunlightValueFromFixedTrait()
+	{
+		if (this.sunlightFixedTrait == null)
+		{
+			this.sunlightFixedTrait = FIXEDTRAITS.SUNLIGHT.NAME.DEFAULT;
+		}
+		if (this.sunlightFixedTraits.ContainsKey(this.sunlightFixedTrait))
+		{
+			return this.sunlightFixedTraits[this.sunlightFixedTrait];
+		}
+		return FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
+	}
+
+	private int GetCosmicRadiationValueFromFixedTrait()
+	{
+		if (this.cosmicRadiationFixedTrait == null)
+		{
+			this.sunlightFixedTrait = FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
+		}
+		if (this.cosmicRadiationFixedTraits.ContainsKey(this.cosmicRadiationFixedTrait))
+		{
+			return this.cosmicRadiationFixedTraits[this.cosmicRadiationFixedTrait];
+		}
+		return FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+	}
+
 	public void SetWorldDetails(WorldGen world)
 	{
 		if (world != null)
@@ -355,6 +514,11 @@ public class WorldContainer : KMonoBehaviour
 			this.worldType = world.Settings.world.name;
 			this.isModuleInterior = world.Settings.world.moduleInterior;
 			this.m_seasonIds = new List<string>(world.Settings.world.seasons);
+			this.sunlightFixedTrait = this.GetSunlightFromFixedTraits(world);
+			this.cosmicRadiationFixedTrait = this.GetCosmicRadiationFromFixedTraits(world);
+			this.sunlight = this.GetSunlightValueFromFixedTrait();
+			this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
+			this.currentCosmicIntensity = (float)this.cosmicRadiation;
 			this.m_subworldNames = new List<string>();
 			using (List<WeightedSubworldName>.Enumerator enumerator = world.Settings.world.subworldFiles.GetEnumerator())
 			{
@@ -724,6 +888,119 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	public string worldDescription;
+
+	[Serialize]
+	public int sunlight = FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
+
+	[Serialize]
+	public int cosmicRadiation = FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+
+	[Serialize]
+	public float currentSunlightIntensity;
+
+	[Serialize]
+	public float currentCosmicIntensity = (float)FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+
+	[Serialize]
+	public string sunlightFixedTrait;
+
+	[Serialize]
+	public string cosmicRadiationFixedTrait;
+
+	[Serialize]
+	public int fixedTraitsUpdateVersion = 1;
+
+	private Dictionary<string, int> sunlightFixedTraits = new Dictionary<string, int>
+	{
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.NONE,
+			FIXEDTRAITS.SUNLIGHT.NONE
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_LOW,
+			FIXEDTRAITS.SUNLIGHT.VERY_VERY_LOW
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.VERY_LOW,
+			FIXEDTRAITS.SUNLIGHT.VERY_LOW
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.LOW,
+			FIXEDTRAITS.SUNLIGHT.LOW
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.MED_LOW,
+			FIXEDTRAITS.SUNLIGHT.MED_LOW
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.MED,
+			FIXEDTRAITS.SUNLIGHT.MED
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.MED_HIGH,
+			FIXEDTRAITS.SUNLIGHT.MED_HIGH
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.HIGH,
+			FIXEDTRAITS.SUNLIGHT.HIGH
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.VERY_HIGH,
+			FIXEDTRAITS.SUNLIGHT.VERY_HIGH
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_HIGH,
+			FIXEDTRAITS.SUNLIGHT.VERY_VERY_HIGH
+		},
+		{
+			FIXEDTRAITS.SUNLIGHT.NAME.VERY_VERY_VERY_HIGH,
+			FIXEDTRAITS.SUNLIGHT.VERY_VERY_VERY_HIGH
+		}
+	};
+
+	private Dictionary<string, int> cosmicRadiationFixedTraits = new Dictionary<string, int>
+	{
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.NONE,
+			FIXEDTRAITS.COSMICRADIATION.NONE
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_LOW,
+			FIXEDTRAITS.COSMICRADIATION.VERY_VERY_LOW
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.VERY_LOW,
+			FIXEDTRAITS.COSMICRADIATION.VERY_LOW
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.LOW,
+			FIXEDTRAITS.COSMICRADIATION.LOW
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.MED_LOW,
+			FIXEDTRAITS.COSMICRADIATION.MED_LOW
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.MED,
+			FIXEDTRAITS.COSMICRADIATION.MED
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.MED_HIGH,
+			FIXEDTRAITS.COSMICRADIATION.MED_HIGH
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.HIGH,
+			FIXEDTRAITS.COSMICRADIATION.HIGH
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.VERY_HIGH,
+			FIXEDTRAITS.COSMICRADIATION.VERY_HIGH
+		},
+		{
+			FIXEDTRAITS.COSMICRADIATION.NAME.VERY_VERY_HIGH,
+			FIXEDTRAITS.COSMICRADIATION.VERY_VERY_HIGH
+		}
+	};
 
 	[Serialize]
 	private List<string> m_seasonIds;

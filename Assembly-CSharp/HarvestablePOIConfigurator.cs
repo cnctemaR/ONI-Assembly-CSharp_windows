@@ -53,7 +53,7 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 
 	public class HarvestablePOIType
 	{
-		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, string dlcID = "EXPANSION1_ID")
+		public HarvestablePOIType(string id, Dictionary<SimHashes, float> harvestableElements, float poiCapacityMin = 54000f, float poiCapacityMax = 81000f, float poiRechargeMin = 30000f, float poiRechargeMax = 60000f, bool canProvideArtifacts = true, List<string> orbitalObject = null, int maxNumOrbitingObjects = 10, string dlcID = "EXPANSION1_ID")
 		{
 			this.id = id;
 			this.idHash = id;
@@ -63,6 +63,8 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 			this.poiRechargeMin = poiRechargeMin;
 			this.poiRechargeMax = poiRechargeMax;
 			this.canProvideArtifacts = canProvideArtifacts;
+			this.orbitalObject = orbitalObject;
+			this.maxNumOrbitingObjects = maxNumOrbitingObjects;
 			this.dlcID = dlcID;
 			if (HarvestablePOIConfigurator._poiTypes == null)
 			{
@@ -88,6 +90,10 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 		public bool canProvideArtifacts;
 
 		public string dlcID;
+
+		public List<string> orbitalObject;
+
+		public int maxNumOrbitingObjects;
 	}
 
 	[Serializable]

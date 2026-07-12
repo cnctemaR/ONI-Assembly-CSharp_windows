@@ -54,6 +54,18 @@ namespace ProcGen
 				string key = keyValuePair.Key;
 				globalFeatures[key] += keyValuePair.Value;
 			}
+			using (List<string>.Enumerator enumerator4 = trait.removeWorldTemplateRulesById.GetEnumerator())
+			{
+				while (enumerator4.MoveNext())
+				{
+					string rule = enumerator4.Current;
+					this.world.worldTemplateRules.RemoveAll((World.TemplateSpawnRules x) => x.ruleId == rule);
+				}
+			}
+			foreach (World.TemplateSpawnRules templateSpawnRules in trait.additionalWorldTemplateRules)
+			{
+				this.world.worldTemplateRules.Add(templateSpawnRules);
+			}
 			foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair2 in this.biomes.BiomeBackgroundElementBandConfigurations)
 			{
 				foreach (ElementGradient elementGradient in keyValuePair2.Value)

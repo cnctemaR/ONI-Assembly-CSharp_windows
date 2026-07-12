@@ -42,7 +42,7 @@ public class GameAudioSheets : AudioSheets
 		}
 	}
 
-	protected override AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval)
+	protected override AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval, string dlcId)
 	{
 		SoundEvent soundEvent = null;
 		bool flag = true;
@@ -120,6 +120,14 @@ public class GameAudioSheets : AudioSheets
 		else if (type == "ClusterMapLoopingSoundEvent")
 		{
 			soundEvent = new ClusterMapSoundEvent(file_name, sound_name, frame, true);
+		}
+		else if (type == "UIAnimationSoundEvent")
+		{
+			soundEvent = new UIAnimationSoundEvent(file_name, sound_name, frame, false);
+		}
+		else if (type == "UIAnimationLoopingSoundEvent")
+		{
+			soundEvent = new UIAnimationSoundEvent(file_name, sound_name, frame, true);
 		}
 		else if (type == "CreatureVariationSoundEvent")
 		{

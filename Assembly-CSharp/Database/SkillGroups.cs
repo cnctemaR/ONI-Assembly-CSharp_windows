@@ -33,7 +33,7 @@ namespace Database
 			this.Research.requiredChoreGroups = new List<string> { Db.Get().ChoreGroups.Research.Id };
 			if (DlcManager.FeatureClusterSpaceEnabled())
 			{
-				this.Rocketry = base.Add(new SkillGroup("Rocketry", Db.Get().ChoreGroups.Rocketry.Id, DUPLICANTS.CHOREGROUPS.ROCKETRY.NAME, "icon_errand_tidy", "icon_archetype_tidy"));
+				this.Rocketry = base.Add(new SkillGroup("Rocketry", Db.Get().ChoreGroups.Rocketry.Id, DUPLICANTS.CHOREGROUPS.ROCKETRY.NAME, "icon_errand_rocketry", "icon_archetype_rocketry"));
 				this.Rocketry.relevantAttributes = new List<Klei.AI.Attribute> { Db.Get().ChoreGroups.Rocketry.attribute };
 				this.Rocketry.requiredChoreGroups = new List<string> { Db.Get().ChoreGroups.Rocketry.Id };
 			}

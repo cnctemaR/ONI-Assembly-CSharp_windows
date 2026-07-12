@@ -996,6 +996,9 @@ namespace Database
 				float num10 = (float)data;
 				return string.Format(BUILDING.STATUSITEMS.SPACEPOIWASTING.NAME, GameUtil.GetFormattedMass(num10, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 			};
+			this.RocketRestrictionActive = new StatusItem("ROCKETRESTRICTIONACTIVE", "BUILDING", "status_item_rocket_restricted", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.RocketRestrictionInactive = new StatusItem("ROCKETRESTRICTIONINACTIVE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.NoRocketRestriction = new StatusItem("NOROCKETRESTRICTION", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1488,5 +1491,11 @@ namespace Database
 		public StatusItem SpacePOIHarvesting;
 
 		public StatusItem SpacePOIWasting;
+
+		public StatusItem RocketRestrictionActive;
+
+		public StatusItem RocketRestrictionInactive;
+
+		public StatusItem NoRocketRestriction;
 	}
 }

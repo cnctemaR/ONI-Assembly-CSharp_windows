@@ -48,6 +48,8 @@ namespace ProcGen
 
 		public List<string> seasons { get; private set; }
 
+		public List<string> fixedTraits { get; private set; }
+
 		public bool adjacentTemporalTear { get; private set; }
 
 		public World()
@@ -58,6 +60,7 @@ namespace ProcGen
 			this.startingBasePositionVertical = new MinMax(0.5f, 0.5f);
 			this.globalFeatures = new Dictionary<string, int>();
 			this.seasons = new List<string>();
+			this.fixedTraits = new List<string>();
 			this.category = World.WorldCategory.Asteroid;
 		}
 
@@ -133,6 +136,8 @@ namespace ProcGen
 				this.allowDuplicates = false;
 				this.useRelaxedFiltering = false;
 			}
+
+			public string ruleId { get; private set; }
 
 			public List<string> names { get; private set; }
 

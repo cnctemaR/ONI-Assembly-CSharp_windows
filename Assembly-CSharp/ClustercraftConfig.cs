@@ -14,6 +14,7 @@ public class ClustercraftConfig : IEntityConfig
 		SaveLoadRoot saveLoadRoot = gameObject.AddOrGet<SaveLoadRoot>();
 		saveLoadRoot.DeclareOptionalComponent<WorldInventory>();
 		saveLoadRoot.DeclareOptionalComponent<WorldContainer>();
+		saveLoadRoot.DeclareOptionalComponent<OrbitalMechanics>();
 		gameObject.AddOrGet<Clustercraft>();
 		gameObject.AddOrGet<CraftModuleInterface>();
 		RocketClusterDestinationSelector rocketClusterDestinationSelector = gameObject.AddOrGet<RocketClusterDestinationSelector>();

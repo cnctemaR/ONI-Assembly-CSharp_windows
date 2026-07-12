@@ -19,6 +19,8 @@ public class TimeRangeSideScreen : SideScreenContent, IRender200ms
 
 	public override void SetTarget(GameObject target)
 	{
+		this.imageActiveZone.color = GlobalAssets.Instance.colorSet.logicOnSidescreen;
+		this.imageInactiveZone.color = GlobalAssets.Instance.colorSet.logicOffSidescreen;
 		base.SetTarget(target);
 		this.targetTimedSwitch = target.GetComponent<LogicTimeOfDaySensor>();
 		this.duration.onValueChanged.RemoveAllListeners();
@@ -71,6 +73,8 @@ public class TimeRangeSideScreen : SideScreenContent, IRender200ms
 	{
 		return degrees / 360f;
 	}
+
+	public Image imageInactiveZone;
 
 	public Image imageActiveZone;
 

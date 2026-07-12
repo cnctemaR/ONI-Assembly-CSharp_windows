@@ -22,9 +22,13 @@ namespace ProcGen
 
 		public List<World.AllowedCellsFilter> additionalUnknownCellFilters { get; private set; }
 
+		public List<World.TemplateSpawnRules> additionalWorldTemplateRules { get; private set; }
+
 		public Dictionary<string, int> globalFeatureTemplateMods { get; private set; }
 
 		public Dictionary<string, int> globalFeatureMods { get; private set; }
+
+		public List<string> removeWorldTemplateRulesById { get; private set; }
 
 		public List<WorldTrait.ElementBandModifier> elementBandModifiers { get; private set; }
 
@@ -32,6 +36,8 @@ namespace ProcGen
 		{
 			this.additionalSubworldFiles = new List<WeightedSubworldName>();
 			this.additionalUnknownCellFilters = new List<World.AllowedCellsFilter>();
+			this.additionalWorldTemplateRules = new List<World.TemplateSpawnRules>();
+			this.removeWorldTemplateRulesById = new List<string>();
 			this.globalFeatureTemplateMods = new Dictionary<string, int>();
 			this.globalFeatureMods = new Dictionary<string, int>();
 			this.elementBandModifiers = new List<WorldTrait.ElementBandModifier>();

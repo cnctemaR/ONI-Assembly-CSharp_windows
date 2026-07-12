@@ -57,6 +57,10 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 
 	public bool IsCellSafe(int cell)
 	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return false;
+		}
 		if (this.prefersDarkness)
 		{
 			return Grid.LightIntensity[cell] == 0;
@@ -137,12 +141,16 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 			default_state = this.comfortable;
 			this.root.Update("Illumination", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{
-				smi.master.GetAmounts().Get(Db.Get().Amounts.Illumination).SetValue((float)Grid.LightCount[Grid.PosToCell(smi.master.gameObject)]);
+				int num = Grid.PosToCell(smi.master.gameObject);
+				if (Grid.IsValidCell(num))
+				{
+					smi.master.GetAmounts().Get(Db.Get().Amounts.Illumination).SetValue((float)Grid.LightCount[num]);
+				}
 			}, UpdateRate.SIM_1000ms, false);
 			this.comfortable.Update("Illumination.Comfortable", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{
-				int num = Grid.PosToCell(smi.master.gameObject);
-				if (!smi.master.IsCellSafe(num))
+				int num2 = Grid.PosToCell(smi.master.gameObject);
+				if (!smi.master.IsCellSafe(num2))
 				{
 					GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.State state = (smi.master.prefersDarkness ? this.too_bright : this.too_dark);
 					smi.GoTo(state);
@@ -153,16 +161,16 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 			});
 			this.too_dark.TriggerOnEnter(GameHashes.IlluminationDiscomfort, null).Update("Illumination.too_dark", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{
-				int num2 = Grid.PosToCell(smi.master.gameObject);
-				if (smi.master.IsCellSafe(num2))
+				int num3 = Grid.PosToCell(smi.master.gameObject);
+				if (smi.master.IsCellSafe(num3))
 				{
 					smi.GoTo(this.comfortable);
 				}
 			}, UpdateRate.SIM_1000ms, false);
 			this.too_bright.TriggerOnEnter(GameHashes.IlluminationDiscomfort, null).Update("Illumination.too_bright", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{
-				int num3 = Grid.PosToCell(smi.master.gameObject);
-				if (smi.master.IsCellSafe(num3))
+				int num4 = Grid.PosToCell(smi.master.gameObject);
+				if (smi.master.IsCellSafe(num4))
 				{
 					smi.GoTo(this.comfortable);
 				}

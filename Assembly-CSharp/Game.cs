@@ -10,6 +10,7 @@ using Klei.CustomSettings;
 using KSerialization;
 using ProcGenGame;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -692,7 +693,11 @@ public class Game : KMonoBehaviour
 		{
 			if (worldContainer.IsDiscovered)
 			{
-				this.simActiveRegions.Add(new Pair<Vector2I, Vector2I>(worldContainer.WorldOffset, worldContainer.WorldOffset + worldContainer.WorldSize));
+				Game.SimActiveRegion simActiveRegion = new Game.SimActiveRegion();
+				simActiveRegion.region = new Pair<Vector2I, Vector2I>(worldContainer.WorldOffset, worldContainer.WorldOffset + worldContainer.WorldSize);
+				simActiveRegion.currentSunlightIntensity = worldContainer.currentSunlightIntensity;
+				simActiveRegion.currentCosmicRadiationIntensity = worldContainer.currentCosmicIntensity;
+				this.simActiveRegions.Add(simActiveRegion);
 			}
 		}
 		global::Debug.Assert(this.simActiveRegions.Count > 0, "Cannot send a frame to the sim with zero active regions");
@@ -875,7 +880,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 472345U;
+		uint num = 473720U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1538,7 +1543,7 @@ public class Game : KMonoBehaviour
 
 	public Element VisualTunerElement;
 
-	public float currentSunlightIntensity;
+	public float currentFallbackSunlightIntensity;
 
 	public RoomProber roomProber;
 
@@ -1708,7 +1713,7 @@ public class Game : KMonoBehaviour
 
 	private bool isLoading;
 
-	private List<Pair<Vector2I, Vector2I>> simActiveRegions = new List<Pair<Vector2I, Vector2I>>();
+	private List<Game.SimActiveRegion> simActiveRegions = new List<Game.SimActiveRegion>();
 
 	private HashedString previousOverlayMode = OverlayModes.None.ID;
 
@@ -1951,6 +1956,22 @@ public class Game : KMonoBehaviour
 		private Vector2I max;
 
 		public bool isActive;
+	}
+
+	public class SimActiveRegion
+	{
+		public SimActiveRegion()
+		{
+			this.region = default(Pair<Vector2I, Vector2I>);
+			this.currentSunlightIntensity = (float)FIXEDTRAITS.SUNLIGHT.DEFAULT_VALUE;
+			this.currentCosmicRadiationIntensity = (float)FIXEDTRAITS.COSMICRADIATION.DEFAULT_VALUE;
+		}
+
+		public Pair<Vector2I, Vector2I> region;
+
+		public float currentSunlightIntensity;
+
+		public float currentCosmicRadiationIntensity;
 	}
 
 	private enum SpawnRotationConfig

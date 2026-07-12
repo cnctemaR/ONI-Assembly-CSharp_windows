@@ -1768,6 +1768,49 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ScheduleAction(string name, Func<StateMachineInstanceType, float> time_cb, Action<StateMachineInstanceType> action)
+		{
+			this.Enter("ScheduleAction(" + name + ")", delegate(StateMachineInstanceType smi)
+			{
+				smi.Schedule(time_cb(smi), delegate(object obj)
+				{
+					action(smi);
+				}, null);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ScheduleAction(string name, float time, Action<StateMachineInstanceType> action)
+		{
+			this.Enter(string.Concat(new string[]
+			{
+				"ScheduleAction(",
+				time.ToString(),
+				", ",
+				name,
+				")"
+			}), delegate(StateMachineInstanceType smi)
+			{
+				smi.Schedule(time, delegate(object obj)
+				{
+					action(smi);
+				}, null);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ScheduleActionNextFrame(string name, Action<StateMachineInstanceType> action)
+		{
+			this.Enter("ScheduleActionNextFrame(" + name + ")", delegate(StateMachineInstanceType smi)
+			{
+				smi.ScheduleNextFrame(delegate(object obj)
+				{
+					action(smi);
+				}, null);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EventHandler(GameHashes evt, Func<StateMachineInstanceType, KMonoBehaviour> global_event_system_callback, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback)
 		{
 			return this.EventHandler(evt, global_event_system_callback, delegate(StateMachineInstanceType smi, object d)

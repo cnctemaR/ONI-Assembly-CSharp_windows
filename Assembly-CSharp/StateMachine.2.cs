@@ -422,6 +422,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			return Singleton<StateMachineManager>.Instance.Schedule(text, time, callback, callback_data, this.currentSchedulerGroup);
 		}
 
+		public override SchedulerHandle ScheduleNextFrame(Action<object> callback, object callback_data = null)
+		{
+			string text = null;
+			return Singleton<StateMachineManager>.Instance.ScheduleNextFrame(text, callback, callback_data, this.currentSchedulerGroup);
+		}
+
 		public override void StartSM()
 		{
 			if (this.controller != null && !this.controller.HasStateMachineInstance(this))

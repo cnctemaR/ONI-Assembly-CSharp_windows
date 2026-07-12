@@ -39,6 +39,8 @@ public class TimerSideScreen : SideScreenContent, IRenderEveryTick
 
 	public override void SetTarget(GameObject target)
 	{
+		this.greenActiveZone.color = GlobalAssets.Instance.colorSet.logicOnSidescreen;
+		this.redActiveZone.color = GlobalAssets.Instance.colorSet.logicOffSidescreen;
 		base.SetTarget(target);
 		this.targetTimedSwitch = target.GetComponent<LogicTimerSensor>();
 		this.onDurationSlider.onValueChanged.RemoveAllListeners();

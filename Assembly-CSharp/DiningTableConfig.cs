@@ -30,6 +30,7 @@ public class DiningTableConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.MessTable, false);
 		go.AddOrGet<MessStation>();
 		go.AddOrGet<AnimTileable>();
+		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

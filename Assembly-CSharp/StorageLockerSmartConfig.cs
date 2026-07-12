@@ -48,6 +48,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		go.AddOrGet<StorageLockerSmart>();
 		go.AddOrGet<UserNameable>();
 		go.AddOrGetDef<StorageController.Def>();
+		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
 	public const string ID = "StorageLockerSmart";

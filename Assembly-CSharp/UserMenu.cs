@@ -79,6 +79,8 @@ public class UserMenu
 
 	public const float AUTODISINFECT_PRIORITY = 10f;
 
+	public const float ROCKETUSAGERESTRICTION_PRIORITY = 11f;
+
 	private List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>> buttons = new List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>>();
 
 	private List<UserMenu.SliderInfo> sliders = new List<UserMenu.SliderInfo>();

@@ -59,7 +59,11 @@ public class Db : EntityModifierSet
 		this.ChoreTypes = new ChoreTypes(this.Root);
 		this.GameplayEvents = new GameplayEvents(this.Root);
 		this.GameplaySeasons = new GameplaySeasons(this.Root);
-		this.PlantMutations = new PlantMutations(this.Root);
+		if (DlcManager.FeaturePlantMutationsEnabled())
+		{
+			this.PlantMutations = new PlantMutations(this.Root);
+		}
+		this.OrbitalTypeCategories = new OrbitalTypeCategories(this.Root);
 		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
@@ -184,6 +188,8 @@ public class Db : EntityModifierSet
 	public Techs Techs;
 
 	public TechTreeTitles TechTreeTitles;
+
+	public OrbitalTypeCategories OrbitalTypeCategories;
 
 	[Serializable]
 	public class SlotInfo : Resource

@@ -328,7 +328,7 @@ namespace TUNING
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "ConstructionUp", "CantBuild" }
+				mutuallyExclusiveTraits = new List<string> { "RanchingUp" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{

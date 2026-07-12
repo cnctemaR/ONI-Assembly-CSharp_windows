@@ -43,6 +43,12 @@ public static class RailAPI
 	[DllImport("RailAPI")]
 	public static extern void QueryIsOwnedDlcsOnServer();
 
+	[DllImport("RailAPI")]
+	public static extern bool IsOwnedDlc(ulong dlcId);
+
+	[DllImport("RailAPI")]
+	public static extern void CheckAllDlcsStateReady(string user_data);
+
 	public enum Platform
 	{
 		TGP = 1,
@@ -53,7 +59,8 @@ public static class RailAPI
 	{
 		AuthTicketAcquired = 13001,
 		EventSystemChanged = 2,
-		QueryIsOwnedDlcsResult = 17007
+		QueryIsOwnedDlcsResult = 17007,
+		CheckAllDlcsStateReadyResult = 17006
 	}
 
 	[Serializable]
@@ -75,6 +82,12 @@ public static class RailAPI
 		public int dlcGameId;
 
 		public bool isOwned;
+	}
+
+	[Serializable]
+	public struct CheckAllDlcsStateReadyResult
+	{
+		public bool ready;
 	}
 
 	public delegate void EventHandler(RailAPI.Event eventId, IntPtr data);

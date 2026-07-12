@@ -175,6 +175,8 @@ public abstract class StateMachine
 
 		public abstract SchedulerHandle Schedule(float time, Action<object> callback, object callback_data = null);
 
+		public abstract SchedulerHandle ScheduleNextFrame(Action<object> callback, object callback_data = null);
+
 		public virtual void FreeResources()
 		{
 			this.stateMachine = null;

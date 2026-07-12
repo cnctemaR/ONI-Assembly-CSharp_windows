@@ -682,11 +682,12 @@ namespace ProcGenGame
 			bool flag5 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToEdge);
 			bool flag6 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToEdgeInv);
 			bool flag7 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToBorder);
-			bool flag8 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToBorderInv);
-			bool flag9 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToWorldTop);
-			bool flag10 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToWorldTopOrSide);
-			bool flag11 = leafForTerrainCell.tags.Contains(WorldGenTags.DistFunctionPointCentroid);
-			bool flag12 = leafForTerrainCell.tags.Contains(WorldGenTags.DistFunctionPointEdge);
+			bool flag8 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToBorderWeak);
+			bool flag9 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToBorderInv);
+			bool flag10 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToWorldTop);
+			bool flag11 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToWorldTopOrSide);
+			bool flag12 = leafForTerrainCell.tags.Contains(WorldGenTags.DistFunctionPointCentroid);
+			bool flag13 = leafForTerrainCell.tags.Contains(WorldGenTags.DistFunctionPointEdge);
 			this.LogInfo("Getting Element Bands", this.node.type, 0f);
 			ElementBandConfiguration elementBandConfiguration = worldGen.Settings.GetElementBandForBiome(this.node.type);
 			if (elementBandConfiguration == null && this.node.biomeSpecificTags != null)
@@ -738,7 +739,7 @@ namespace ProcGenGame
 						if (flag3 || flag4)
 						{
 							float num5 = 15f;
-							if (flag12)
+							if (flag13)
 							{
 								float num6 = 0f;
 								MathUtil.Pair<Vector2, Vector2> closestEdge = this.poly.GetClosestEdge(vector, ref num6);
@@ -757,7 +758,7 @@ namespace ProcGenGame
 							MathUtil.Pair<Vector2, Vector2> closestEdge2 = this.poly.GetClosestEdge(vector, ref num7);
 							Vector2 vector2 = closestEdge2.First + (closestEdge2.Second - closestEdge2.First) * num7;
 							float num8 = 15f;
-							if (flag11)
+							if (flag12)
 							{
 								num8 = Vector2.Distance(this.poly.Centroid(), vector);
 							}
@@ -768,7 +769,7 @@ namespace ProcGenGame
 								num4 = 1f - num4;
 							}
 						}
-						if (flag8 || flag7)
+						if (flag9 || flag7)
 						{
 							List<Edge> edgesWithTag = worldGen.WorldLayout.overworldGraph.GetEdgesWithTag(WorldGenTags.EdgeClosed);
 							float num9 = float.MaxValue;
@@ -778,19 +779,19 @@ namespace ProcGenGame
 								float num10 = 0f;
 								num9 = Mathf.Min(Mathf.Abs(MathUtil.GetClosestPointBetweenPointAndLineSegment(pair, vector, ref num10)), num9);
 							}
-							float num11 = 20f;
-							if (flag11)
+							float num11 = (flag8 ? 7f : 20f);
+							if (flag12)
 							{
 								num11 = Vector2.Distance(this.poly.Centroid(), vector);
 							}
 							num4 = num9 / num11;
 							num4 = Mathf.Max(0f, Mathf.Min(1f, num4));
-							if (flag8)
+							if (flag9)
 							{
 								num4 = 1f - num4;
 							}
 						}
-						if (flag9)
+						if (flag10)
 						{
 							float y = (float)worldGen.WorldSize.y;
 							float num12 = 38f;
@@ -809,7 +810,7 @@ namespace ProcGenGame
 								num4 = 1f;
 							}
 						}
-						if (flag10)
+						if (flag11)
 						{
 							float y2 = (float)worldGen.WorldSize.y;
 							int x = worldGen.WorldSize.x;

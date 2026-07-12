@@ -9,9 +9,9 @@ public class LaunchInitializer : MonoBehaviour
 	{
 		if (!DlcManager.IsExpansion1Active())
 		{
-			return "FA";
+			return "U33";
 		}
-		return "EX1 S14";
+		return "U33";
 	}
 
 	private void Update()
@@ -20,17 +20,24 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			return;
 		}
-		if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
+		if (!DistributionPlatform.Initialized)
 		{
-			global::Debug.LogError("Machine does not support RGBAFloat32");
+			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
+			{
+				global::Debug.LogError("Machine does not support RGBAFloat32");
+			}
+			GraphicsOptionsScreen.SetSettingsFromPrefs();
+			Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
+			global::Debug.Log("Current date: " + global::System.DateTime.Now.ToString());
+			global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
+			global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
+			KPlayerPrefs.instance.Load();
+			DistributionPlatform.Initialize();
 		}
-		GraphicsOptionsScreen.SetSettingsFromPrefs();
-		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Current date: " + global::System.DateTime.Now.ToString());
-		global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
-		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
-		KPlayerPrefs.instance.Load();
-		DistributionPlatform.Initialize();
+		if (!DistributionPlatform.Inst.IsDLCStatusReady())
+		{
+			return;
+		}
 		global::Debug.Log("DistributionPlatform initialized.");
 		global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
 		global::Debug.Log(string.Format("EXPANSION1 installed: {0}  active: {1}", DlcManager.IsExpansion1Installed(), DlcManager.IsExpansion1Active()));
@@ -68,9 +75,9 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	private const string BASE_BUILD_PREFIX = "FA";
+	private const string BASE_BUILD_PREFIX = "U33";
 
-	private const string EXPANSION1_BUILD_PREFIX = "EX1 S14";
+	private const string EXPANSION1_BUILD_PREFIX = "U33";
 
 	public GameObject[] SpawnPrefabs;
 

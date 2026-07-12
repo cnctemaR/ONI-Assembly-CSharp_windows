@@ -228,19 +228,22 @@ namespace ProcGenGame
 						}
 						if (num3 > 0)
 						{
-							string text4 = string.Concat(new string[]
+							string text4 = string.Join(", ", settings.GetTraitIDs());
+							string text5 = string.Concat(new string[]
 							{
 								"TemplateSpawning: Guaranteed placement failiure on ",
 								settings.world.filePath,
 								"\n",
 								string.Format("    listRule={0} someCount={1} moreCount={2} count={3}\n", new object[] { templateSpawnRules.listRule, templateSpawnRules.someCount, templateSpawnRules.moreCount, pooledList.Count }),
 								"    Could not place templates:",
-								text2
+								text2,
+								"\n    world traits=",
+								text4
 							});
-							DebugUtil.LogErrorArgs(new object[] { text4 });
+							DebugUtil.LogErrorArgs(new object[] { text5 });
 							if (!isRunningDebugGen)
 							{
-								throw new Exception(text4);
+								throw new Exception(text5);
 							}
 						}
 						pooledList.Recycle();

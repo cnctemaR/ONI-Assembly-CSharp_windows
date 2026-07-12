@@ -63,12 +63,8 @@ public class LogicCounter : Switch, ISaveLoadable
 
 	public void UpdateMeter()
 	{
-		float num = (float)(this.advancedMode ? (this.currentCount % this.maxCount) : this.currentCount);
-		if (num == 10f)
-		{
-			num = 0f;
-		}
-		this.meter.SetPositionPercent(num / 10f);
+		float num = (float)(this.currentCount % (this.advancedMode ? this.maxCount : 10));
+		this.meter.SetPositionPercent(num / 9f);
 	}
 
 	public void UpdateVisualState(bool force = false)

@@ -10,14 +10,7 @@ public class DefendStates : GameStateMachine<DefendStates, DefendStates.Instance
 		{
 			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().MainThreat, smi, false);
 		}).ToggleStatusItem(CREATURES.STATUSITEMS.ATTACKINGENTITY.NAME, CREATURES.STATUSITEMS.ATTACKINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, new CellOffset[]
-		{
-			new CellOffset(0, 0),
-			new CellOffset(1, 0),
-			new CellOffset(-1, 0),
-			new CellOffset(1, 1),
-			new CellOffset(-1, 1)
-		}, null);
+		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, CrabTuning.DEFEND_OFFSETS, null);
 		this.protectEntity.attackThreat.Enter(delegate(DefendStates.Instance smi)
 		{
 			smi.Play("slap_pre", KAnim.PlayMode.Once);

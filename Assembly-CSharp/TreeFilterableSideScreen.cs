@@ -242,6 +242,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 		return component != null && target.GetComponent<FlatTagFilterable>() == null && component.showUserMenu && (component2 == null || component2.showInUI) && target.GetSMI<StorageTile.Instance>() == null;
 	}
 
+	private void ReconfigureForPreviousTarget()
+	{
+		global::Debug.Assert(this.target != null, "TreeFilterableSideScreen trying to restore null target.");
+		this.SetTarget(this.target);
+	}
+
 	public override void SetTarget(GameObject target)
 	{
 		this.Initialize();
@@ -383,6 +389,15 @@ public class TreeFilterableSideScreen : SideScreenContent
 			return;
 		}
 		global::Debug.LogError("If you're filtering, your storage filter should have the filters set on it");
+	}
+
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		if (this.target != null && (this.tagRowMap == null || this.tagRowMap.Count == 0))
+		{
+			this.ReconfigureForPreviousTarget();
+		}
 	}
 
 	protected override void OnCmpDisable()

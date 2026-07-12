@@ -25,6 +25,7 @@ public class FactionAlignment : KMonoBehaviour
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
 		GameUtil.SubscribeToTags<FactionAlignment>(this, FactionAlignment.OnDeadTagAddedDelegate, true);
+		this.SetPlayerTargeted(this.targeted);
 		this.UpdateStatusItem();
 	}
 

@@ -32,6 +32,7 @@ public static class BaseCrabConfig
 		def.fleethresholdState = Health.HealthState.Dead;
 		def.friendlyCreatureTags = new Tag[] { GameTags.Creatures.CrabFriend };
 		def.maxSearchDistance = 12;
+		def.offsets = CrabTuning.DEFEND_OFFSETS;
 		gameObject.AddWeapon(2f, 3f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("FloorSoundEvent", "Hatch_footstep", NOISE_POLLUTION.CREATURES.TIER1);

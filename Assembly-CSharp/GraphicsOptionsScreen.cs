@@ -347,7 +347,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 				this.applyButton.isInteractable = false;
 				if (this.colorModeChanged)
 				{
-					this.feedbackDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+					this.feedbackDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.parent.gameObject, false).GetComponent<ConfirmDialogScreen>();
 					this.feedbackDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK.text, null, null, UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK_BUTTON.text, delegate
 					{
 						App.OpenWebURL("https://forums.kleientertainment.com/forums/topic/117325-color-blindness-feedback/");
@@ -433,7 +433,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		GraphicsOptionsScreen.Settings current_settings = this.CaptureSettings();
 		this.ApplySettings(new_settings);
-		this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+		this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.parent.gameObject, false).GetComponent<ConfirmDialogScreen>();
 		global::System.Action action = delegate
 		{
 			this.ApplySettings(current_settings);

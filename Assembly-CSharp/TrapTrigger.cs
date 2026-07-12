@@ -45,6 +45,7 @@ public class TrapTrigger : KMonoBehaviour
 			vector.y += this.trappedOffset.y;
 		}
 		go.transform.SetPosition(vector);
+		go.GetComponent<Pickupable>().UpdateCachedCell(Grid.PosToCell(vector));
 		component.SetSceneLayer(Grid.SceneLayer.BuildingFront);
 	}
 

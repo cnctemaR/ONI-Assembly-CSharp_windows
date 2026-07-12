@@ -40,7 +40,11 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new HygieneMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new FallMonitor.Instance(smi.master, true, "anim_emotes_default_kanim"))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def
+			{
+				fleethresholdState = Health.HealthState.Critical,
+				offsets = MinionConfig.ATTACK_OFFSETS
+			}))
 			.ToggleStateMachine((RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))

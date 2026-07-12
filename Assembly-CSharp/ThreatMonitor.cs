@@ -53,7 +53,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 	private static bool DupeHasValidTarget(ThreatMonitor.Instance smi)
 	{
-		return smi.MainThreat != null && smi.MainThreat.GetComponent<FactionAlignment>().IsPlayerTargeted() && smi.navigator.CanReach(Grid.PosToCell(smi.MainThreat));
+		return smi.MainThreat != null && smi.MainThreat.GetComponent<FactionAlignment>().IsPlayerTargeted() && smi.navigator.CanReach(Grid.PosToCell(smi.MainThreat), smi.def.offsets);
 	}
 
 	private static void DupeUpdateTarget(ThreatMonitor.Instance smi, float dt)
@@ -116,6 +116,8 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public int maxSearchEntities = 50;
 
 		public int maxSearchDistance = 20;
+
+		public CellOffset[] offsets = OffsetGroups.Use;
 	}
 
 	public class SafeStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
@@ -384,7 +386,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 				foreach (object obj in Components.PlayerTargeted)
 				{
 					FactionAlignment factionAlignment = (FactionAlignment)obj;
-					if (!factionAlignment.IsNullOrDestroyed() && factionAlignment.IsPlayerTargeted() && !factionAlignment.health.IsDefeated() && this.navigator.CanReach(factionAlignment.attackable))
+					if (!factionAlignment.IsNullOrDestroyed() && factionAlignment.IsPlayerTargeted() && !factionAlignment.health.IsDefeated() && this.navigator.CanReach(factionAlignment.attackable.GetCell(), base.smi.def.offsets))
 					{
 						this.threats.Add(factionAlignment);
 					}
@@ -416,7 +418,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 				ScenePartitionerEntry scenePartitionerEntry = pooledList[this.currentUpdateIndex];
 				this.currentUpdateIndex++;
 				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && (base.def.friendlyCreatureTags == null || !factionAlignment.kprefabID.HasAnyTags(base.def.friendlyCreatureTags)) && factionAlignment.IsAlignmentActive() && FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack && this.navigator.CanReach(factionAlignment.attackable))
+				if (!(factionAlignment.transform == null) && !(factionAlignment == this.alignment) && (base.def.friendlyCreatureTags == null || !factionAlignment.kprefabID.HasAnyTags(base.def.friendlyCreatureTags)) && factionAlignment.IsAlignmentActive() && FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack && this.navigator.CanReach(factionAlignment.attackable.GetCell(), base.smi.def.offsets))
 				{
 					this.threats.Add(factionAlignment);
 				}

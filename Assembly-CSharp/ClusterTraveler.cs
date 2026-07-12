@@ -103,6 +103,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 
 	public int RemainingTravelNodes()
 	{
+		if (this.CurrentPath == null)
+		{
+			return 0;
+		}
 		int count = this.CurrentPath.Count;
 		return Mathf.Max(0, count);
 	}

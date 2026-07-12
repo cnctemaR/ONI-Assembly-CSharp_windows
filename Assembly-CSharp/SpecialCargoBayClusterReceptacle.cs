@@ -28,6 +28,12 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.choreType = Db.Get().ChoreTypes.CreatureFetch;
+	}
+
 	protected override void OnSpawn()
 	{
 		this.capsule = base.gameObject.GetSMI<SpecialCargoBayCluster.Instance>();
@@ -62,6 +68,15 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 					this.CreateOrder(tag, component.requestedEntityAdditionalFilterTag);
 				}
 			}
+		}
+	}
+
+	public override void CreateOrder(Tag entityTag, Tag additionalFilterTag)
+	{
+		base.CreateOrder(entityTag, additionalFilterTag);
+		if (this.fetchChore != null)
+		{
+			this.fetchChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, this);
 		}
 	}
 

@@ -74,7 +74,7 @@ public class Reconstructable : KMonoBehaviour
 		Orientation orientation = this.building.Orientation;
 		GameScheduler.Instance.ScheduleNextFrame("Reconstruct", delegate(object data)
 		{
-			this.building.Def.TryPlace(null, position, orientation, this.selectedElementsTags, facadeID, 0);
+			this.building.Def.TryPlace(null, position, orientation, this.selectedElementsTags, facadeID, false, 0);
 		}, null, null);
 	}
 

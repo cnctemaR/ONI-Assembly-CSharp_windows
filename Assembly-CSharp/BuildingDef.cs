@@ -218,9 +218,19 @@ public class BuildingDef : Def
 
 	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, int layer = 0)
 	{
+		return this.TryPlace(src_go, pos, orientation, selected_elements, null, 0);
+	}
+
+	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, int layer = 0)
+	{
+		return this.TryPlace(src_go, pos, orientation, selected_elements, facadeID, true, layer);
+	}
+
+	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, bool restrictToActiveWorld, int layer = 0)
+	{
 		GameObject gameObject = null;
 		string text;
-		if (this.IsValidPlaceLocation(src_go, pos, orientation, false, out text))
+		if (this.IsValidPlaceLocation(src_go, Grid.PosToCell(pos), orientation, false, out text, restrictToActiveWorld))
 		{
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
 			if (orientation != Orientation.Neutral)
@@ -232,12 +242,6 @@ public class BuildingDef : Def
 				}
 			}
 		}
-		return gameObject;
-	}
-
-	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Tag> selected_elements, string facadeID, int layer = 0)
-	{
-		GameObject gameObject = this.TryPlace(src_go, pos, orientation, selected_elements, layer);
 		if (gameObject != null && facadeID != null && facadeID != "DEFAULT_FACADE")
 		{
 			gameObject.GetComponent<BuildingFacade>().ApplyBuildingFacade(Db.GetBuildingFacades().Get(facadeID), false);
@@ -304,6 +308,11 @@ public class BuildingDef : Def
 
 	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, bool replace_tile, out string fail_reason)
 	{
+		return this.IsAreaClear(source_go, cell, orientation, layer, tile_layer, replace_tile, true, out fail_reason);
+	}
+
+	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, bool replace_tile, bool restrictToActiveWorld, out string fail_reason)
+	{
 		bool flag = true;
 		fail_reason = null;
 		int i = 0;
@@ -317,7 +326,7 @@ public class BuildingDef : Def
 				break;
 			}
 			int num = Grid.OffsetCell(cell, rotatedCellOffset);
-			if ((int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
+			if (restrictToActiveWorld && (int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
 				return false;
@@ -847,12 +856,17 @@ public class BuildingDef : Def
 
 	public bool IsValidPlaceLocation(GameObject source_go, int cell, Orientation orientation, bool replace_tile, out string fail_reason)
 	{
+		return this.IsValidPlaceLocation(source_go, cell, orientation, replace_tile, out fail_reason, false);
+	}
+
+	public bool IsValidPlaceLocation(GameObject source_go, int cell, Orientation orientation, bool replace_tile, out string fail_reason, bool restrictToActiveWorld)
+	{
 		if (!Grid.IsValidBuildingCell(cell))
 		{
 			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
 			return false;
 		}
-		if ((int)Grid.WorldIdx[cell] != ClusterManager.Instance.activeWorldId)
+		if (restrictToActiveWorld && (int)Grid.WorldIdx[cell] != ClusterManager.Instance.activeWorldId)
 		{
 			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
 			return false;
@@ -898,7 +912,7 @@ public class BuildingDef : Def
 				return false;
 			}
 		}
-		return this.IsAreaClear(source_go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, out fail_reason);
+		return this.IsAreaClear(source_go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, restrictToActiveWorld, out fail_reason);
 	}
 
 	public bool IsValidReplaceLocation(Vector3 pos, Orientation orientation, ObjectLayer replace_layer, ObjectLayer obj_layer)

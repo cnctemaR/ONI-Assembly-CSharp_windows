@@ -748,7 +748,7 @@ public class Pickupable : Workable, IHasSortOrder
 		this.UpdateCachedCell(Grid.PosToCell(this.storage));
 	}
 
-	private void UpdateCachedCell(int cell)
+	public void UpdateCachedCell(int cell)
 	{
 		if (this.cachedCell != cell)
 		{

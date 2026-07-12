@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -7,6 +8,21 @@ using UnityEngine;
 
 public class MinionConfig : IEntityConfig
 {
+	private static CellOffset[] CreateAttackCellOffsets(CellOffset[][] table)
+	{
+		CellOffset[] array = new CellOffset[table.Sum<CellOffset[]>((CellOffset[] row) => row.Length)];
+		int num = 0;
+		foreach (CellOffset[] array2 in table)
+		{
+			foreach (CellOffset cellOffset in array2)
+			{
+				array[num] = cellOffset;
+				num++;
+			}
+		}
+		return array;
+	}
+
 	public string[] GetDlcIds()
 	{
 		return DlcManager.AVAILABLE_ALL_VERSIONS;
@@ -508,11 +524,6 @@ public class MinionConfig : IEntityConfig
 		component2.transitionDriver.overrideLayers.Add(new ReactableTransitionLayer(component2));
 		component2.transitionDriver.overrideLayers.Add(new NavTeleportTransitionLayer(component2));
 		component2.transitionDriver.overrideLayers.Add(new SplashTransitionLayer(component2));
-		ThreatMonitor.Instance smi = go.GetSMI<ThreatMonitor.Instance>();
-		if (smi != null)
-		{
-			smi.def.fleethresholdState = Health.HealthState.Critical;
-		}
 	}
 
 	public static void AddMinionAmounts(Modifiers modifiers)
@@ -644,6 +655,8 @@ public class MinionConfig : IEntityConfig
 	public const int MINION_PICKUP_SYMBOL_LAYER = 5;
 
 	public const int MINION_SUIT_SYMBOL_LAYER = 6;
+
+	public static CellOffset[] ATTACK_OFFSETS = MinionConfig.CreateAttackCellOffsets(OffsetGroups.InvertedStandardTable);
 
 	public struct LaserEffect
 	{

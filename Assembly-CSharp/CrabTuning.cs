@@ -70,4 +70,13 @@ public static class CrabTuning
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3;
 
 	public static float EGG_MASS = 2f;
+
+	public static CellOffset[] DEFEND_OFFSETS = new CellOffset[]
+	{
+		new CellOffset(0, 0),
+		new CellOffset(1, 0),
+		new CellOffset(-1, 0),
+		new CellOffset(1, 1),
+		new CellOffset(-1, 1)
+	};
 }

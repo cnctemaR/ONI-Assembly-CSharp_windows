@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C2C0E585-4366-4599-9ECC-30CB58524132}</ProjectGuid>
+    <ProjectGuid>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C5C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.ParticleSystemModule</RootNamespace>
     <AssemblyName>UnityEngine.ParticleSystemModule</AssemblyName>
@@ -78,11 +78,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C2C0E585-4366-4599-9ECC-30CB58524123}</Project>
+      <Project>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C4D}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C2C0E585-4366-4599-9ECC-30CB58524139}</Project>
+      <Project>{86D2A58F-3730-40DB-8DD4-BCFA4B4B3C63}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

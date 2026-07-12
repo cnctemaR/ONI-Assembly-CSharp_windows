@@ -133,6 +133,11 @@ namespace ProcGen
 			return new List<string>(SettingsCache.traits.Keys);
 		}
 
+		public static List<WorldTrait> GetCachedTraits()
+		{
+			return new List<WorldTrait>(SettingsCache.traits.Values);
+		}
+
 		public static WorldTrait GetCachedTrait(string name, bool assertMissingTrait)
 		{
 			if (SettingsCache.traits.ContainsKey(name))
@@ -280,16 +285,31 @@ namespace ProcGen
 			{
 				errors.Add(error);
 			}, null);
+			if (worldTrait.forbiddenDLCIds != null)
+			{
+				using (List<string>.Enumerator enumerator = worldTrait.forbiddenDLCIds.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						if (DlcManager.IsContentActive(enumerator.Current))
+						{
+							return;
+						}
+					}
+				}
+			}
 			int num = SettingsCache.FirstUncommonCharacter(path, file.full_path);
 			string text = ((num > -1) ? file.full_path.Substring(num) : file.full_path);
 			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
 			text = text.Replace('\\', '/');
+			text = prefix + text;
 			if (worldTrait == null)
 			{
 				DebugUtil.LogWarningArgs(new object[] { "Failed to load trait: ", text });
 				return;
 			}
-			worldTrait.filePath = prefix + text;
+			worldTrait.filePath = text;
+			DebugUtil.DevAssert(!SettingsCache.traits.ContainsKey(text), "Overwriting trait " + text + " already exists", null);
 			SettingsCache.traits[text] = worldTrait;
 		}
 
@@ -441,33 +461,88 @@ namespace ProcGen
 			return true;
 		}
 
-		public static List<string> GetRandomTraits(int seed)
+		public static List<string> GetRandomTraits(int seed, World world)
 		{
-			global::System.Random random = new global::System.Random(seed);
-			int num = random.Next(2, 5);
-			List<string> list = new List<string>(SettingsCache.traits.Keys);
-			list.Sort();
-			List<string> list2 = new List<string>();
-			while (list2.Count < num && list.Count > 0)
+			if (world.disableWorldTraits || world.worldTraitRules == null || seed == 0)
 			{
-				int num2 = random.Next(list.Count);
-				string text = list[num2];
-				bool flag = false;
-				foreach (string text2 in SettingsCache.GetCachedTrait(text, true).exclusiveWith)
+				return new List<string>();
+			}
+			global::System.Random random = new global::System.Random(seed);
+			List<WorldTrait> list = new List<WorldTrait>(SettingsCache.traits.Values);
+			List<WorldTrait> list2 = new List<WorldTrait>();
+			TagSet tagSet = new TagSet();
+			using (List<World.TraitRule>.Enumerator enumerator = world.worldTraitRules.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
 				{
-					if (list2.Contains(text2))
+					World.TraitRule rule = enumerator.Current;
+					if (rule.specificTraits != null)
 					{
-						flag = true;
-						break;
+						foreach (string text in rule.specificTraits)
+						{
+							list2.Add(SettingsCache.traits[text]);
+						}
+					}
+					List<WorldTrait> list3 = new List<WorldTrait>(list);
+					TagSet requiredTags = ((rule.requiredTags != null) ? new TagSet(rule.requiredTags) : null);
+					TagSet forbiddenTags = ((rule.forbiddenTags != null) ? new TagSet(rule.forbiddenTags) : null);
+					list3.RemoveAll((WorldTrait trait) => (requiredTags != null && !trait.traitTagsSet.ContainsAll(requiredTags)) || (forbiddenTags != null && trait.traitTagsSet.ContainsOne(forbiddenTags)) || (rule.forbiddenTraits != null && rule.forbiddenTraits.Contains(trait.filePath)) || !trait.IsValid(world, true));
+					int num = random.Next(rule.min, Mathf.Max(rule.min, rule.max + 1));
+					int count = list2.Count;
+					while (list2.Count < count + num && list3.Count > 0)
+					{
+						int num2 = random.Next(list3.Count);
+						WorldTrait worldTrait = list3[num2];
+						bool flag = false;
+						using (List<string>.Enumerator enumerator2 = worldTrait.exclusiveWith.GetEnumerator())
+						{
+							while (enumerator2.MoveNext())
+							{
+								string exclusiveId = enumerator2.Current;
+								if (list2.Find((WorldTrait t) => t.filePath == exclusiveId) != null)
+								{
+									flag = true;
+									break;
+								}
+							}
+						}
+						foreach (string text2 in worldTrait.exclusiveWithTags)
+						{
+							if (tagSet.Contains(text2))
+							{
+								flag = true;
+								break;
+							}
+						}
+						if (!flag)
+						{
+							list2.Add(worldTrait);
+							list.Remove(worldTrait);
+							foreach (string text3 in worldTrait.exclusiveWithTags)
+							{
+								tagSet.Add(text3);
+							}
+						}
+						list3.RemoveAt(num2);
+					}
+					if (list2.Count != count + num)
+					{
+						global::Debug.LogWarning(string.Format("TraitRule on {0} tried to generate {1} but only generated {2}", world.name, num, list2.Count - count));
 					}
 				}
-				if (!flag)
-				{
-					list2.Add(text);
-				}
-				list.RemoveAt(num2);
 			}
-			return list2;
+			List<string> list4 = new List<string>();
+			foreach (WorldTrait worldTrait2 in list2)
+			{
+				list4.Add(worldTrait2.filePath);
+			}
+			DebugUtil.LogArgs(new object[]
+			{
+				"Getting traits for seed",
+				seed,
+				string.Join(", ", list4.ToArray())
+			});
+			return list4;
 		}
 
 		public static ClusterLayouts clusterLayouts = new ClusterLayouts();

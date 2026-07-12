@@ -11,6 +11,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 	{
 		this.activeSetups = new List<Conversation>();
 		this.lastConvoTimeByMinion = new Dictionary<MinionIdentity, float>();
+		this.simRenderLoadBalance = true;
 	}
 
 	public void Sim200ms(float dt)

@@ -6,6 +6,40 @@ namespace TUNING
 {
 	public class DUPLICANTSTATS
 	{
+		public static DUPLICANTSTATS.TraitVal GetTraitVal(string id)
+		{
+			foreach (DUPLICANTSTATS.TraitVal traitVal in DUPLICANTSTATS.SPECIALTRAITS)
+			{
+				if (id == traitVal.id)
+				{
+					return traitVal;
+				}
+			}
+			foreach (DUPLICANTSTATS.TraitVal traitVal2 in DUPLICANTSTATS.GOODTRAITS)
+			{
+				if (id == traitVal2.id)
+				{
+					return traitVal2;
+				}
+			}
+			foreach (DUPLICANTSTATS.TraitVal traitVal3 in DUPLICANTSTATS.BADTRAITS)
+			{
+				if (id == traitVal3.id)
+				{
+					return traitVal3;
+				}
+			}
+			foreach (DUPLICANTSTATS.TraitVal traitVal4 in DUPLICANTSTATS.CONGENITALTRAITS)
+			{
+				if (id == traitVal4.id)
+				{
+					return traitVal4;
+				}
+			}
+			DebugUtil.Assert(true, "Could not find TraitVal with ID: " + id);
+			return DUPLICANTSTATS.INVALID_TRAIT_VAL;
+		}
+
 		public const float DEFAULT_MASS = 30f;
 
 		public const float PEE_FUSE_TIME = 120f;
@@ -261,6 +295,11 @@ namespace TUNING
 				id = "Liam",
 				mutuallyExclusiveTraits = new List<string> { "Flatulence", "InteriorDecorator" }
 			}
+		};
+
+		public static readonly DUPLICANTSTATS.TraitVal INVALID_TRAIT_VAL = new DUPLICANTSTATS.TraitVal
+		{
+			id = "INVALID"
 		};
 
 		public static readonly List<DUPLICANTSTATS.TraitVal> BADTRAITS = new List<DUPLICANTSTATS.TraitVal>
@@ -548,6 +587,22 @@ namespace TUNING
 			}
 		};
 
+		public static readonly List<DUPLICANTSTATS.TraitVal> SPECIALTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "AncientKnowledge",
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "EXPANSION1_ID",
+				doNotGenerateTrait = true,
+				mutuallyExclusiveTraits = new List<string>
+				{
+					"CantResearch", "CantBuild", "CantCook", "CantDig", "Hemophobia", "ScaredyCat", "Anemic", "SlowLearner", "NoodleArms", "ConstructionDown",
+					"RanchingDown", "DiggingDown", "MachineryDown", "CookingDown", "ArtDown", "CaringDown", "BotanistDown"
+				}
+			}
+		};
+
 		public static readonly List<DUPLICANTSTATS.TraitVal> GOODTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
@@ -689,6 +744,30 @@ namespace TUNING
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
 				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "RanchingDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Loner",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "EXPANSION1_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "StarryEyed",
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "EXPANSION1_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GlowStick",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "EXPANSION1_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "RadiationEater",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "EXPANSION1_ID"
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -1168,6 +1247,8 @@ namespace TUNING
 			public List<string> mutuallyExclusiveTraits;
 
 			public List<HashedString> mutuallyExclusiveAptitudes;
+
+			public bool doNotGenerateTrait;
 		}
 
 		public class ATTRIBUTE_LEVELING

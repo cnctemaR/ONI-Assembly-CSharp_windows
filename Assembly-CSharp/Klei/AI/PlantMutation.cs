@@ -24,7 +24,7 @@ namespace Klei.AI
 		public void ApplyTo(MutantPlant target)
 		{
 			this.ApplyFunctionalTo(target);
-			if (!target.HasTag(GameTags.Seed) && !target.HasTag(GameTags.CropSeed))
+			if (!target.HasTag(GameTags.Seed) && !target.HasTag(GameTags.CropSeed) && !target.HasTag(GameTags.Compostable))
 			{
 				this.ApplyVisualTo(target);
 			}
@@ -85,10 +85,13 @@ namespace Klei.AI
 			if (this.symbolOverrideInfo != null && this.symbolOverrideInfo.Count > 0)
 			{
 				SymbolOverrideController component2 = target.GetComponent<SymbolOverrideController>();
-				foreach (PlantMutation.SymbolOverrideInfo symbolOverrideInfo in this.symbolOverrideInfo)
+				if (component2 != null)
 				{
-					KAnim.Build.Symbol symbol = Assets.GetAnim(symbolOverrideInfo.sourceAnim).GetData().build.GetSymbol(symbolOverrideInfo.sourceSymbol);
-					component2.AddSymbolOverride(symbolOverrideInfo.targetSymbolName, symbol, 0);
+					foreach (PlantMutation.SymbolOverrideInfo symbolOverrideInfo in this.symbolOverrideInfo)
+					{
+						KAnim.Build.Symbol symbol = Assets.GetAnim(symbolOverrideInfo.sourceAnim).GetData().build.GetSymbol(symbolOverrideInfo.sourceSymbol);
+						component2.AddSymbolOverride(symbolOverrideInfo.targetSymbolName, symbol, 0);
+					}
 				}
 			}
 			if (this.bGFXAnim != null)

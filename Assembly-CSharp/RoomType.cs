@@ -107,7 +107,7 @@ public class RoomType : Resource
 			foreach (string text2 in this.effects)
 			{
 				Effect effect = Db.Get().effects.Get(text2);
-				text += Effect.CreateTooltip(effect, false, "\n    • ", true);
+				text += Effect.CreateTooltip(effect, false, "\n    • ", false);
 			}
 			return text;
 		}

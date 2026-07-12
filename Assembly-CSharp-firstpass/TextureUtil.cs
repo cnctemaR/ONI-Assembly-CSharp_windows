@@ -46,12 +46,13 @@ public static class TextureUtil
 		case TextureFormat.ARGB32:
 			return 4;
 		default:
-			if (format == TextureFormat.RGFloat)
+			switch (format)
 			{
+			case TextureFormat.RFloat:
+				return 4;
+			case TextureFormat.RGFloat:
 				return 8;
-			}
-			if (format == TextureFormat.RGBAFloat)
-			{
+			case TextureFormat.RGBAFloat:
 				return 16;
 			}
 			break;
@@ -74,12 +75,13 @@ public static class TextureUtil
 		case TextureFormat.ARGB32:
 			return RenderTextureFormat.ARGB32;
 		default:
-			if (format == TextureFormat.RGFloat)
+			switch (format)
 			{
+			case TextureFormat.RFloat:
+				return RenderTextureFormat.RFloat;
+			case TextureFormat.RGFloat:
 				return RenderTextureFormat.RGFloat;
-			}
-			if (format == TextureFormat.RGBAFloat)
-			{
+			case TextureFormat.RGBAFloat:
 				return RenderTextureFormat.ARGBHalf;
 			}
 			break;

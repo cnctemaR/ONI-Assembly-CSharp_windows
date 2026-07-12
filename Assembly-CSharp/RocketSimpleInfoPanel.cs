@@ -29,8 +29,8 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 			string text2;
 			if (engine != null && engine.GetComponent<HEPFuelTank>() != null)
 			{
-				text = GameUtil.GetFormattedHighEnergyParticles(craftModuleInterface.FuelPerHex, GameUtil.TimeSlice.None);
-				text2 = GameUtil.GetFormattedHighEnergyParticles(craftModuleInterface.FuelRemaining, GameUtil.TimeSlice.None);
+				text = GameUtil.GetFormattedHighEnergyParticles(craftModuleInterface.FuelPerHex, GameUtil.TimeSlice.None, true);
+				text2 = GameUtil.GetFormattedHighEnergyParticles(craftModuleInterface.FuelRemaining, GameUtil.TimeSlice.None, true);
 			}
 			else
 			{

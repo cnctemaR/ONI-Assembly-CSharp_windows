@@ -310,7 +310,7 @@ public class KCrashReporter : MonoBehaviour
 		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
 		{
 			KCrashReporter.previouslyReportedDevNotifications.Add(hashValue);
-			KCrashReporter.ReportError(notification_name, stack_trace, null, null, null, details);
+			KCrashReporter.ReportError("DevNotification: " + notification_name, stack_trace, null, null, null, details);
 		}
 		KCrashReporter.hasReportedError = hasReportedError;
 	}
@@ -410,7 +410,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 479045;
+			error.build = 481350;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;

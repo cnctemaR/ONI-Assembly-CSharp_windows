@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,17 +19,18 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 		string text2 = "temporal_tear_opener_kanim";
 		int num3 = 100;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 2400f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER6;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER2, tier2, 0.2f);
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.Entombable = false;
 		buildingDef.Invincible = true;
 		buildingDef.UseHighEnergyParticleInputPort = true;
 		buildingDef.HighEnergyParticleInputOffset = new CellOffset(0, 2);
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
 		return buildingDef;
 	}
 
@@ -40,6 +43,7 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 		HighEnergyParticleStorage highEnergyParticleStorage = go.AddOrGet<HighEnergyParticleStorage>();
 		highEnergyParticleStorage.autoStore = true;
 		highEnergyParticleStorage.capacity = 1000f;
+		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
 		TemporalTearOpener.Def def = go.AddOrGetDef<TemporalTearOpener.Def>();
 		def.numParticlesToOpen = 10000f;
 		def.consumeRate = 5f;
@@ -51,6 +55,8 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 	}
 
 	public const string ID = "TemporalTearOpener";
+
+	public const string PORT_ID = "HEP_STORAGE";
 
 	public const float PARTICLES_CAPACITY = 1000f;
 

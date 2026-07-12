@@ -14,17 +14,14 @@ public class EdiblesManager : KMonoBehaviour
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)
 	{
 		string text = foodID.Replace("Compost", "");
-		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.s_allFoodTypes)
-		{
-			if (foodInfo.Id == text)
-			{
-				return foodInfo;
-			}
-		}
-		return null;
+		EdiblesManager.FoodInfo foodInfo = null;
+		EdiblesManager.s_allFoodMap.TryGetValue(text, out foodInfo);
+		return foodInfo;
 	}
 
 	private static List<EdiblesManager.FoodInfo> s_allFoodTypes = new List<EdiblesManager.FoodInfo>();
+
+	private static Dictionary<string, EdiblesManager.FoodInfo> s_allFoodMap = new Dictionary<string, EdiblesManager.FoodInfo>();
 
 	public class FoodInfo : IConsumableUIItem
 	{
@@ -43,6 +40,7 @@ public class EdiblesManager : KMonoBehaviour
 			this.Description = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".DESC");
 			this.Effects = new List<string>();
 			EdiblesManager.s_allFoodTypes.Add(this);
+			EdiblesManager.s_allFoodMap[this.Id] = this;
 		}
 
 		public EdiblesManager.FoodInfo AddEffects(List<string> effects, string[] dlcIds)

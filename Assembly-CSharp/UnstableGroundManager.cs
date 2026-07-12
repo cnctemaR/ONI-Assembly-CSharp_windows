@@ -131,7 +131,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		{
 			Vector2I vector2I;
 			Grid.PosToXY(this.fallingObjects[i].transform.GetPosition(), out vector2I);
-			if (vector2I.x == cellXY.x || vector2I.y >= cellXY.y)
+			if (vector2I.x == cellXY.x && vector2I.y >= cellXY.y)
 			{
 				int num = Grid.PosToCell(vector2I);
 				list.Add(num);
@@ -140,7 +140,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		for (int j = 0; j < this.pendingCells.Count; j++)
 		{
 			Vector2I vector2I2 = Grid.CellToXY(this.pendingCells[j]);
-			if (vector2I2.x == cellXY.x || vector2I2.y >= cellXY.y)
+			if (vector2I2.x == cellXY.x && vector2I2.y >= cellXY.y)
 			{
 				list.Add(this.pendingCells[j]);
 			}

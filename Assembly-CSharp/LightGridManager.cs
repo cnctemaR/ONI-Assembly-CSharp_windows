@@ -69,9 +69,12 @@ public static class LightGridManager
 			}
 			foreach (int num in this.litCells)
 			{
-				int num2 = Mathf.Max(0, Grid.LightCount[num] + this.ComputeLux(num));
-				Grid.LightCount[num] = num2;
-				LightGridManager.previewLux[num] = num2;
+				if (Grid.IsValidCell(num))
+				{
+					int num2 = Mathf.Max(0, Grid.LightCount[num] + this.ComputeLux(num));
+					Grid.LightCount[num] = num2;
+					LightGridManager.previewLux[num] = num2;
+				}
 			}
 		}
 
@@ -79,8 +82,11 @@ public static class LightGridManager
 		{
 			foreach (int num in this.litCells)
 			{
-				Grid.LightCount[num] = Mathf.Max(0, Grid.LightCount[num] - this.ComputeLux(num));
-				LightGridManager.previewLux[num] = 0;
+				if (Grid.IsValidCell(num))
+				{
+					Grid.LightCount[num] = Mathf.Max(0, Grid.LightCount[num] - this.ComputeLux(num));
+					LightGridManager.previewLux[num] = 0;
+				}
 			}
 			this.litCells.Clear();
 		}

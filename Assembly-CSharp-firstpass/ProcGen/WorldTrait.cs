@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ProcGen
 {
@@ -12,7 +13,13 @@ namespace ProcGen
 
 		public string colorHex { get; private set; }
 
+		public List<string> forbiddenDLCIds { get; private set; }
+
 		public List<string> exclusiveWith { get; private set; }
+
+		public List<string> exclusiveWithTags { get; private set; }
+
+		public List<string> traitTags { get; private set; }
 
 		public MinMax startingBasePositionHorizontalMod { get; private set; }
 
@@ -32,6 +39,18 @@ namespace ProcGen
 
 		public List<WorldTrait.ElementBandModifier> elementBandModifiers { get; private set; }
 
+		public TagSet traitTagsSet
+		{
+			get
+			{
+				if (this.m_traitTagSet == null)
+				{
+					this.m_traitTagSet = new TagSet(this.traitTags);
+				}
+				return this.m_traitTagSet;
+			}
+		}
+
 		public WorldTrait()
 		{
 			this.additionalSubworldFiles = new List<WeightedSubworldName>();
@@ -42,9 +61,33 @@ namespace ProcGen
 			this.globalFeatureMods = new Dictionary<string, int>();
 			this.elementBandModifiers = new List<WorldTrait.ElementBandModifier>();
 			this.exclusiveWith = new List<string>();
+			this.exclusiveWithTags = new List<string>();
+			this.forbiddenDLCIds = new List<string>();
+		}
+
+		public bool IsValid(World world, bool logErrors)
+		{
+			int num = 0;
+			int num2 = 0;
+			foreach (KeyValuePair<string, int> keyValuePair in this.globalFeatureMods)
+			{
+				num += keyValuePair.Value;
+				num2 += Mathf.FloorToInt(world.worldTraitScale * (float)keyValuePair.Value);
+			}
+			if (this.globalFeatureMods.Count > 0 && num2 == 0)
+			{
+				if (logErrors)
+				{
+					DebugUtil.LogWarningArgs(new object[] { string.Concat(new string[] { "Trait '", this.filePath, "' cannot be applied to world '", world.name, "' due to globalFeatureMods and worldTraitScale resulting in no features being generated." }) });
+				}
+				return false;
+			}
+			return true;
 		}
 
 		public string filePath;
+
+		private TagSet m_traitTagSet;
 
 		[Serializable]
 		public class ElementBandModifier

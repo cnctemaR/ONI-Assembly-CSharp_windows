@@ -66,11 +66,27 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public bool IsRoverVisted
+	{
+		get
+		{
+			return this.isRoverVisited;
+		}
+	}
+
 	public List<string> Biomes
 	{
 		get
 		{
 			return this.m_subworldNames;
+		}
+	}
+
+	public List<string> WorldTraitIds
+	{
+		get
+		{
+			return this.m_worldTraitIds;
 		}
 	}
 
@@ -366,6 +382,11 @@ public class WorldContainer : KMonoBehaviour
 		Game.Instance.Trigger(-434755240, this);
 	}
 
+	public void SetRoverLanded()
+	{
+		this.isRoverVisited = true;
+	}
+
 	public void SetRocketInteriorWorldDetails(int world_id, Vector2I size, Vector2I offset)
 	{
 		this.SetID(world_id);
@@ -520,18 +541,16 @@ public class WorldContainer : KMonoBehaviour
 			this.cosmicRadiation = this.GetCosmicRadiationValueFromFixedTrait();
 			this.currentCosmicIntensity = (float)this.cosmicRadiation;
 			this.m_subworldNames = new List<string>();
-			using (List<WeightedSubworldName>.Enumerator enumerator = world.Settings.world.subworldFiles.GetEnumerator())
+			foreach (WeightedSubworldName weightedSubworldName in world.Settings.world.subworldFiles)
 			{
-				while (enumerator.MoveNext())
-				{
-					WeightedSubworldName weightedSubworldName = enumerator.Current;
-					string text = weightedSubworldName.name;
-					text = text.Substring(0, text.LastIndexOf('/'));
-					text = text.Substring(text.LastIndexOf('/') + 1, text.Length - (text.LastIndexOf('/') + 1));
-					this.m_subworldNames.Add(text);
-				}
-				return;
+				string text = weightedSubworldName.name;
+				text = text.Substring(0, text.LastIndexOf('/'));
+				text = text.Substring(text.LastIndexOf('/') + 1, text.Length - (text.LastIndexOf('/') + 1));
+				this.m_subworldNames.Add(text);
 			}
+			this.m_worldTraitIds = new List<string>();
+			this.m_worldTraitIds.AddRange(world.Settings.GetTraitIDs());
+			return;
 		}
 		this.fullyEnclosedBorder = false;
 		this.worldOffset = Vector2I.zero;
@@ -612,14 +631,17 @@ public class WorldContainer : KMonoBehaviour
 	{
 		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.GetWorldItems(this.id, false))
 		{
-			Vector3 vector = new Vector3(-1f, -1f, 0f);
-			GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab("EscapePod"), vector);
-			gameObject.GetComponent<PrimaryElement>().SetElement(podElement, true);
-			gameObject.SetActive(true);
-			gameObject.GetComponent<MinionStorage>().SerializeMinion(minionIdentity.gameObject);
-			TravellingCargoLander.StatesInstance smi = gameObject.GetSMI<TravellingCargoLander.StatesInstance>();
-			smi.StartSM();
-			smi.Travel(sourceLocation, ClusterUtil.ClosestVisibleAsteroidToLocation(sourceLocation).Location);
+			if (!minionIdentity.HasTag(GameTags.Dead))
+			{
+				Vector3 vector = new Vector3(-1f, -1f, 0f);
+				GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab("EscapePod"), vector);
+				gameObject.GetComponent<PrimaryElement>().SetElement(podElement, true);
+				gameObject.SetActive(true);
+				gameObject.GetComponent<MinionStorage>().SerializeMinion(minionIdentity.gameObject);
+				TravellingCargoLander.StatesInstance smi = gameObject.GetSMI<TravellingCargoLander.StatesInstance>();
+				smi.StartSM();
+				smi.Travel(sourceLocation, ClusterUtil.ClosestVisibleAsteroidToLocation(sourceLocation).Location);
+			}
 		}
 	}
 
@@ -779,22 +801,29 @@ public class WorldContainer : KMonoBehaviour
 				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 				if (pickupable != null)
 				{
-					pickupable.PrimaryElement.Units = (float)Mathf.Max(1, Mathf.RoundToInt(pickupable.PrimaryElement.Units * 0.5f));
-					if ((debrisObjects.Count == 0 || debrisObjects[debrisObjects.Count - 1].RemainingCapacity() == 0f) && pickupable.PrimaryElement.Mass > 0f)
+					if (pickupable.HasTag(GameTags.Minion))
 					{
-						debrisObjects.Add(CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement));
+						global::Util.KDestroyGameObject(pickupable.gameObject);
 					}
-					Storage storage = debrisObjects[debrisObjects.Count - 1];
-					while (pickupable.PrimaryElement.Mass > storage.RemainingCapacity())
+					else
 					{
-						Pickupable pickupable2 = pickupable.Take(storage.RemainingCapacity());
-						storage.Store(pickupable2.gameObject, false, false, true, false);
-						storage = CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement);
-						debrisObjects.Add(storage);
-					}
-					if (pickupable.PrimaryElement.Mass > 0f)
-					{
-						storage.Store(pickupable.gameObject, false, false, true, false);
+						pickupable.PrimaryElement.Units = (float)Mathf.Max(1, Mathf.RoundToInt(pickupable.PrimaryElement.Units * 0.5f));
+						if ((debrisObjects.Count == 0 || debrisObjects[debrisObjects.Count - 1].RemainingCapacity() == 0f) && pickupable.PrimaryElement.Mass > 0f)
+						{
+							debrisObjects.Add(CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement));
+						}
+						Storage storage = debrisObjects[debrisObjects.Count - 1];
+						while (pickupable.PrimaryElement.Mass > storage.RemainingCapacity())
+						{
+							Pickupable pickupable2 = pickupable.Take(storage.RemainingCapacity());
+							storage.Store(pickupable2.gameObject, false, false, true, false);
+							storage = CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement);
+							debrisObjects.Add(storage);
+						}
+						if (pickupable.PrimaryElement.Mass > 0f)
+						{
+							storage.Store(pickupable.gameObject, false, false, true, false);
+						}
 					}
 				}
 			}
@@ -980,6 +1009,9 @@ public class WorldContainer : KMonoBehaviour
 	private float discoveryTimestamp;
 
 	[Serialize]
+	private bool isRoverVisited;
+
+	[Serialize]
 	public string worldName;
 
 	[Serialize]
@@ -1109,6 +1141,9 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	private List<string> m_subworldNames;
+
+	[Serialize]
+	private List<string> m_worldTraitIds;
 
 	[MySmiReq]
 	private AlertStateManager.Instance m_alertManager;

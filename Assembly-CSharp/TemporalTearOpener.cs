@@ -39,7 +39,7 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 			smi.UpdateMeter();
 			if (ClusterManager.Instance.GetClusterPOIManager().IsTemporalTearOpen())
 			{
-				smi.GoTo(this.inert);
+				smi.GoTo(this.opening_tear_finish);
 				return;
 			}
 			smi.GoTo(this.check_requirements);
@@ -59,17 +59,17 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 			{
 				smi.GetComponent<HighEnergyParticleStorage>().receiverOpen = true;
 				smi.GetComponent<KBatchedAnimController>().Play("port_open", KAnim.PlayMode.Once, 1f, 0f);
-				smi.GetComponent<KBatchedAnimController>().Queue("on", KAnim.PlayMode.Loop, 1f, 0f);
+				smi.GetComponent<KBatchedAnimController>().Queue("inert", KAnim.PlayMode.Loop, 1f, 0f);
 			});
 		this.charging.idle.EventTransition(GameHashes.OnParticleStorageChanged, this.charging.consuming, (TemporalTearOpener.Instance smi) => !smi.GetComponent<HighEnergyParticleStorage>().IsEmpty());
 		this.charging.consuming.EventTransition(GameHashes.OnParticleStorageChanged, this.charging.idle, (TemporalTearOpener.Instance smi) => smi.GetComponent<HighEnergyParticleStorage>().IsEmpty()).UpdateTransition(this.ready, (TemporalTearOpener.Instance smi, float dt) => smi.ConsumeParticlesAndCheckComplete(dt), UpdateRate.SIM_200ms, false);
-		this.ready.ToggleNotification((TemporalTearOpener.Instance smi) => new Notification(BUILDING.STATUSITEMS.TEMPORAL_TEAR_OPENER_READY.NOTIFICATION, NotificationType.Good, (List<Notification> a, object b) => BUILDING.STATUSITEMS.TEMPORAL_TEAR_OPENER_READY.NOTIFICATION_TOOLTIP, null, false, 0f, null, null, null, true)).PlayAnim("working_pre").QueueAnim("working_loop", true, null);
+		this.ready.ToggleNotification((TemporalTearOpener.Instance smi) => new Notification(BUILDING.STATUSITEMS.TEMPORAL_TEAR_OPENER_READY.NOTIFICATION, NotificationType.Good, (List<Notification> a, object b) => BUILDING.STATUSITEMS.TEMPORAL_TEAR_OPENER_READY.NOTIFICATION_TOOLTIP, null, false, 0f, null, null, null, true));
+		this.opening_tear_beam_pre.PlayAnim("working_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.opening_tear_beam);
 		this.opening_tear_beam.Enter(delegate(TemporalTearOpener.Instance smi)
 		{
 			smi.CreateBeamFX();
-		}).ScheduleGoTo(5f, this.opening_tear_finish);
-		this.opening_tear_finish.PlayAnim("working_pst").OnAnimQueueComplete(this.inert);
-		this.inert.PlayAnim("inert").Enter(delegate(TemporalTearOpener.Instance smi)
+		}).PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleGoTo(5f, this.opening_tear_finish);
+		this.opening_tear_finish.PlayAnim("working_pst").Enter(delegate(TemporalTearOpener.Instance smi)
 		{
 			smi.OpenTemporalTear();
 		});
@@ -89,13 +89,13 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 
 	private TemporalTearOpener.ChargingState charging;
 
+	private GameStateMachine<TemporalTearOpener, TemporalTearOpener.Instance, IStateMachineTarget, TemporalTearOpener.Def>.State opening_tear_beam_pre;
+
 	private GameStateMachine<TemporalTearOpener, TemporalTearOpener.Instance, IStateMachineTarget, TemporalTearOpener.Def>.State opening_tear_beam;
 
 	private GameStateMachine<TemporalTearOpener, TemporalTearOpener.Instance, IStateMachineTarget, TemporalTearOpener.Def>.State opening_tear_finish;
 
 	private GameStateMachine<TemporalTearOpener, TemporalTearOpener.Instance, IStateMachineTarget, TemporalTearOpener.Def>.State ready;
-
-	private GameStateMachine<TemporalTearOpener, TemporalTearOpener.Instance, IStateMachineTarget, TemporalTearOpener.Def>.State inert;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -239,7 +239,7 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 
 		public void OnSidescreenButtonPressed()
 		{
-			base.smi.GoTo(base.sm.opening_tear_beam);
+			base.smi.GoTo(base.sm.opening_tear_beam_pre);
 		}
 
 		public int ButtonSideScreenSortOrder()

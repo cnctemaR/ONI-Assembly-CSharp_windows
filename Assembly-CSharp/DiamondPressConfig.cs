@@ -33,6 +33,7 @@ public class DiamondPressConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(0, 4), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
 		return buildingDef;
 	}
 
@@ -48,6 +49,7 @@ public class DiamondPressConfig : IBuildingConfig
 		HighEnergyParticleStorage highEnergyParticleStorage = go.AddOrGet<HighEnergyParticleStorage>();
 		highEnergyParticleStorage.capacity = 2000f;
 		highEnergyParticleStorage.autoStore = true;
+		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
 		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
 		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_diamond_press_kanim") };
@@ -89,6 +91,8 @@ public class DiamondPressConfig : IBuildingConfig
 	}
 
 	public const string ID = "DiamondPress";
+
+	public const string PORT_ID = "HEP_STORAGE";
 
 	private const int HEP_PER_DIAMOND_KG = 10;
 

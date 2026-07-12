@@ -30,7 +30,7 @@ namespace ProcGen
 			DebugUtil.Assert(SettingsCache.worlds.HasWorld(worldName), "Failed to load world " + worldName);
 			World worldData = SettingsCache.worlds.GetWorldData(worldName);
 			List<WorldTrait> list = new List<WorldTrait>();
-			if (!worldData.disableWorldTraits && traits != null)
+			if (traits != null)
 			{
 				DebugUtil.LogArgs(new object[]
 				{
@@ -48,11 +48,11 @@ namespace ProcGen
 							list.Add(cachedTrait);
 						}
 					}
-					goto IL_00A8;
+					goto IL_00A0;
 				}
 			}
 			Debug.Log("Generating a world without traits. Either this world has traits disabled or none were specified.");
-			IL_00A8:
+			IL_00A0:
 			this.mutatedWorldData = new MutatedWorldData(worldData, list);
 			Debug.Log("Set world to [" + worldName + "]");
 		}

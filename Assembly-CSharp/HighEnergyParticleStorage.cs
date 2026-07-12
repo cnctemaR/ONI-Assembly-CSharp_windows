@@ -29,6 +29,16 @@ public class HighEnergyParticleStorage : KMonoBehaviour, IStorage
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.UpdateLogicPorts();
+	}
+
+	private void UpdateLogicPorts()
+	{
+		if (this._logicPorts != null)
+		{
+			bool flag = this.IsFull();
+			this._logicPorts.SendSignal(this.PORT_ID, Convert.ToInt32(flag));
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -57,26 +67,27 @@ public class HighEnergyParticleStorage : KMonoBehaviour, IStorage
 		return this.particles < this.capacity && this.receiverOpen;
 	}
 
+	public void DeltaParticles(float delta)
+	{
+		this.particles += delta;
+		if (this.particles <= 0f)
+		{
+			base.Trigger(155636535, base.transform.gameObject);
+		}
+		base.Trigger(-1837862626, base.transform.gameObject);
+		this.UpdateLogicPorts();
+	}
+
 	public void Store(float amount)
 	{
 		DebugUtil.Assert(amount >= 0f, string.Format("Storing negative amount ({0}) of particles", amount));
-		this.particles += amount;
-		base.Trigger(-1837862626, base.transform.gameObject);
+		this.DeltaParticles(amount);
 	}
 
 	public float ConsumeAndGet(float amount)
 	{
-		if (amount > this.Particles)
-		{
-			amount = this.Particles;
-			this.particles = 0f;
-			base.Trigger(155636535, base.transform.gameObject);
-		}
-		else
-		{
-			this.particles -= amount;
-		}
-		base.Trigger(-1837862626, base.transform.gameObject);
+		amount = Mathf.Min(this.Particles, amount);
+		this.DeltaParticles(-amount);
 		return amount;
 	}
 
@@ -164,4 +175,9 @@ public class HighEnergyParticleStorage : KMonoBehaviour, IStorage
 
 	[Serialize]
 	public bool receiverOpen = true;
+
+	[MyCmpGet]
+	private LogicPorts _logicPorts;
+
+	public string PORT_ID = "";
 }

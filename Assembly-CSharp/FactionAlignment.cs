@@ -69,7 +69,7 @@ public class FactionAlignment : KMonoBehaviour
 
 	public void SetPlayerTargeted(bool state)
 	{
-		this.targeted = state && this.targetable;
+		this.targeted = this.canBePlayerTargeted && state && this.targetable;
 		this.UpdateStatusItem();
 	}
 

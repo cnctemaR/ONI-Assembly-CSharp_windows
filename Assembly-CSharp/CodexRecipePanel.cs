@@ -101,7 +101,7 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 			component.GetReference<ToolTip>("Tooltip").toolTip = text;
 			component.GetReference<KButton>("Button").onClick += delegate
 			{
-				ManagementMenu.Instance.codexScreen.ChangeArticle(CodexCache.FormatLinkID(ing.material.ToString()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
+				ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(Assets.GetPrefab(ing.material).GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			};
 		}
 		array = this.complexRecipe.results;
@@ -123,21 +123,21 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 			component2.GetReference<ToolTip>("Tooltip").toolTip = text2;
 			component2.GetReference<KButton>("Button").onClick += delegate
 			{
-				ManagementMenu.Instance.codexScreen.ChangeArticle(CodexCache.FormatLinkID(res.material.ToString()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
+				ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(Assets.GetPrefab(res.material).GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			};
 		}
-		string fabricatorId = this.complexRecipe.id.Substring(0, this.complexRecipe.id.IndexOf('_'));
+		string text3 = this.complexRecipe.id.Substring(0, this.complexRecipe.id.IndexOf('_'));
 		HierarchyReferences component3 = Util.KInstantiateUI(this.fabricatorPrefab, this.fabricatorContainer, true).GetComponent<HierarchyReferences>();
-		global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(fabricatorId, "ui", false);
+		global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(text3, "ui", false);
 		component3.GetReference<Image>("Icon").sprite = uisprite3.first;
 		component3.GetReference<Image>("Icon").color = uisprite3.second;
 		component3.GetReference<LocText>("Time").text = GameUtil.GetFormattedTime(this.complexRecipe.time, "F0");
 		component3.GetReference<LocText>("Time").color = Color.black;
-		GameObject prefab3 = Assets.GetPrefab(fabricatorId.ToTag());
-		component3.GetReference<ToolTip>("Tooltip").toolTip = prefab3.GetProperName();
+		GameObject fabricator = Assets.GetPrefab(text3.ToTag());
+		component3.GetReference<ToolTip>("Tooltip").toolTip = fabricator.GetProperName();
 		component3.GetReference<KButton>("Button").onClick += delegate
 		{
-			ManagementMenu.Instance.codexScreen.ChangeArticle(CodexCache.FormatLinkID(fabricatorId), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
+			ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(fabricator.GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		};
 	}
 

@@ -63,11 +63,11 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	public void OnReset(object data = null)
 	{
-		this.lerpers = new TextureLerper[13];
+		this.lerpers = new TextureLerper[14];
 		this.texturePagePool = new TexturePagePool();
-		this.textureBuffers = new TextureBuffer[13];
-		this.externallyUpdatedTextures = new Texture2D[13];
-		for (int i = 0; i < 13; i++)
+		this.textureBuffers = new TextureBuffer[14];
+		this.externallyUpdatedTextures = new Texture2D[14];
+		for (int i = 0; i < 14; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties = new PropertyTextures.TextureProperties
 			{
@@ -123,7 +123,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void OnShadersReloaded()
 	{
-		for (int i = 0; i < 13; i++)
+		for (int i = 0; i < 14; i++)
 		{
 			TextureLerper textureLerper = this.lerpers[i];
 			if (textureLerper != null)
@@ -203,6 +203,9 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			case PropertyTextures.Property.FallingSolid:
 				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateFallingSolidChange));
 				break;
+			case PropertyTextures.Property.Radiation:
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateRadiation));
+				break;
 			}
 			textureRegion.Unlock();
 			return;
@@ -275,7 +278,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
 		}
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < 14; j++)
 		{
 			TextureLerper textureLerper = this.lerpers[j];
 			if (textureLerper != null)
@@ -679,6 +682,28 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	private static void UpdateRadiation(TextureRegion region, int x0, int y0, int x1, int y1)
+	{
+		Vector2 vector = PropertyTextures.instance.coldRange;
+		Vector2 vector2 = PropertyTextures.instance.hotRange;
+		for (int i = y0; i <= y1; i++)
+		{
+			for (int j = x0; j <= x1; j++)
+			{
+				int num = Grid.XYToCell(j, i);
+				if (!Grid.IsActiveWorld(num))
+				{
+					region.SetBytes(j, i, 0, 0, 0);
+				}
+				else
+				{
+					float num2 = Grid.Radiation[num];
+					region.SetBytes(j, i, num2);
+				}
+			}
+		}
+	}
+
 	[NonSerialized]
 	public bool ForceLightEverywhere;
 
@@ -864,6 +889,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			updatedExternally = false,
 			blend = false,
 			blendSpeed = 0f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.Radiation,
+			textureFormat = TextureFormat.RFloat,
+			filterMode = FilterMode.Bilinear,
+			updateEveryFrame = false,
+			updatedExternally = false,
+			blend = false,
+			blendSpeed = 0f
 		}
 	};
 
@@ -886,6 +921,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		Temperature,
 		ExposedToSunlight,
 		FallingSolid,
+		Radiation,
 		Num
 	}
 

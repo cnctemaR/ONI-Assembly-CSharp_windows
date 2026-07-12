@@ -385,7 +385,12 @@ public static class GameUtil
 		{
 			return range.ToString("N1") + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES_PER_CYCLE) : "");
 		}
-		return Mathf.Floor(range / 600f).ToString() + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES) : "");
+		float num = range / 600f;
+		if (Mathf.Approximately(num, Mathf.Round(num)))
+		{
+			num = Mathf.Round(num);
+		}
+		return Mathf.Floor(num).ToString() + (displaySuffix ? (" " + UI.CLUSTERMAP.TILES) : "");
 	}
 
 	public static string ApplyBoldString(string source)
@@ -509,11 +514,11 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(rads) + UI.UNITSUFFIXES.RADIATION.RADS, timeSlice);
 	}
 
-	public static string GetFormattedHighEnergyParticles(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	public static string GetFormattedHighEnergyParticles(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displayUnits = true)
 	{
 		string text = ((units == 1f) ? UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLE : UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLES);
 		units = GameUtil.ApplyTimeSlice(units, timeSlice);
-		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(units) + text, timeSlice);
+		return GameUtil.AddTimeSliceText(displayUnits ? (GameUtil.GetStandardFloat(units) + text) : GameUtil.GetStandardFloat(units), timeSlice);
 	}
 
 	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)

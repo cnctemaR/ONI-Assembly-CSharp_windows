@@ -460,14 +460,18 @@ namespace ProcGenGame
 
 		private void ReportWorldGenError(Exception e)
 		{
+			bool flag = FileSystem.IsModdedFile(SettingsCache.RewriteWorldgenPathYaml(this.Settings.world.filePath));
 			string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
-			global::Debug.LogWarning("Worldgen Failure on seed " + settingsCoordinate);
+			global::Debug.LogWarning(string.Format("Worldgen Failure on seed {0}, modded={1}", settingsCoordinate, flag));
 			this.errorCallback(new OfflineWorldGen.ErrorInfo
 			{
 				errorDesc = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE, settingsCoordinate),
 				exception = e
 			});
-			KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, settingsCoordinate + " - " + e.Message);
+			if (!flag)
+			{
+				KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, settingsCoordinate + " - " + e.Message);
+			}
 		}
 
 		public void SetWorldSize(int width, int height)
@@ -1062,9 +1066,20 @@ namespace ProcGenGame
 						string text;
 						if (!string.IsNullOrEmpty(borderOverride2) && !string.IsNullOrEmpty(borderOverride))
 						{
-							text = ((seededRandom.RandomValue() > 0.5f) ? borderOverride2 : borderOverride);
-							terrainCell3.LogInfo("BORDER WITH " + terrainCell4.site.id.ToString(), "Picked Random:" + text, 0f);
-							terrainCell4.LogInfo("BORDER WITH " + terrainCell3.site.id.ToString(), "Picked Random:" + text, 0f);
+							int borderOverridePriority = this.Settings.GetSubWorld(terrainCell3.node.type).borderOverridePriority;
+							int borderOverridePriority2 = this.Settings.GetSubWorld(terrainCell4.node.type).borderOverridePriority;
+							if (borderOverridePriority == borderOverridePriority2)
+							{
+								text = ((seededRandom.RandomValue() > 0.5f) ? borderOverride2 : borderOverride);
+								terrainCell3.LogInfo("BORDER WITH " + terrainCell4.site.id.ToString(), "Picked Random:" + text, 0f);
+								terrainCell4.LogInfo("BORDER WITH " + terrainCell3.site.id.ToString(), "Picked Random:" + text, 0f);
+							}
+							else
+							{
+								text = ((borderOverridePriority > borderOverridePriority2) ? borderOverride : borderOverride2);
+								terrainCell3.LogInfo("BORDER WITH " + terrainCell4.site.id.ToString(), "Picked priority:" + text, 0f);
+								terrainCell4.LogInfo("BORDER WITH " + terrainCell3.site.id.ToString(), "Picked priority:" + text, 0f);
+							}
 						}
 						else if (string.IsNullOrEmpty(borderOverride2) && string.IsNullOrEmpty(borderOverride))
 						{
@@ -1203,7 +1218,9 @@ namespace ProcGenGame
 
 		private void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd, ref HashSet<int> borderCells, ref List<RectInt> poiBounds, WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
-			bool boolSetting = this.Settings.GetBoolSetting("DrawWorldBorderOverVacuum");
+			WorldGen.<>c__DisplayClass138_0 CS$<>8__locals1 = new WorldGen.<>c__DisplayClass138_0();
+			CS$<>8__locals1.world = world;
+			bool boolSetting = this.Settings.GetBoolSetting("DrawWorldBorderForce");
 			int intSetting = this.Settings.GetIntSetting("WorldBorderThickness");
 			int intSetting2 = this.Settings.GetIntSetting("WorldBorderRange");
 			byte b = (byte)ElementLoader.elements.IndexOf(WorldGen.vacuumElement);
@@ -1214,71 +1231,81 @@ namespace ProcGenGame
 			int num = 0;
 			int num2 = 0;
 			updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 0f, WorldGenProgressStages.Stages.DrawWorldBorder);
-			int num3 = world.size.y - 1;
+			int num3 = CS$<>8__locals1.world.size.y - 1;
 			int num4 = 0;
-			int num5 = world.size.x - 1;
-			for (int i = num3; i >= 0; i--)
+			int num5 = CS$<>8__locals1.world.size.x - 1;
+			List<TerrainCell> terrainCellsForTag = this.GetTerrainCellsForTag(WorldGenTags.RemoveWorldBorderOverVacuum);
+			int y;
+			int num9;
+			for (y = num3; y >= 0; y = num9 - 1)
 			{
-				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, (float)i / (float)num3 * 0.33f, WorldGenProgressStages.Stages.DrawWorldBorder);
+				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, (float)y / (float)num3 * 0.33f, WorldGenProgressStages.Stages.DrawWorldBorder);
 				num = Mathf.Max(-intSetting2, Mathf.Min(num + rnd.RandomRange(-2, 2), intSetting2));
-				for (int j = 0; j < intSetting + num; j++)
+				bool flag = terrainCellsForTag.Find((TerrainCell n) => n.poly.Contains(new Vector2(0f, (float)y))) != null;
+				for (int i = 0; i < intSetting + num; i++)
 				{
-					int num6 = Grid.XYToCell(j, i);
-					if (boolSetting || (cells[num6].elementIdx != b && cells[num6].elementIdx != b2))
+					int num6 = Grid.XYToCell(i, y);
+					if (boolSetting || (cells[num6].elementIdx != b && cells[num6].elementIdx != b2 && flag) || !flag)
 					{
 						borderCells.Add(num6);
 						cells[num6].SetValues(b3, temperature, mass);
-						num4 = Mathf.Max(num4, j);
+						num4 = Mathf.Max(num4, i);
 					}
 				}
 				num2 = Mathf.Max(-intSetting2, Mathf.Min(num2 + rnd.RandomRange(-2, 2), intSetting2));
-				for (int k = 0; k < intSetting + num2; k++)
+				bool flag2 = terrainCellsForTag.Find((TerrainCell n) => n.poly.Contains(new Vector2((float)(CS$<>8__locals1.world.size.x - 1), (float)y))) != null;
+				for (int j = 0; j < intSetting + num2; j++)
 				{
-					int num7 = world.size.x - 1 - k;
-					int num8 = Grid.XYToCell(num7, i);
-					if (boolSetting || (cells[num8].elementIdx != b && cells[num8].elementIdx != b2))
+					int num7 = CS$<>8__locals1.world.size.x - 1 - j;
+					int num8 = Grid.XYToCell(num7, y);
+					if (boolSetting || (cells[num8].elementIdx != b && cells[num8].elementIdx != b2 && flag2) || !flag2)
 					{
 						borderCells.Add(num8);
 						cells[num8].SetValues(b3, temperature, mass);
 						num5 = Mathf.Min(num5, num7);
 					}
 				}
+				num9 = y;
 			}
 			this.POIBounds.Add(new RectInt(0, 0, num4 + 1, this.World.size.y));
-			this.POIBounds.Add(new RectInt(num5, 0, world.size.x - num5, this.World.size.y));
-			int num9 = 0;
+			this.POIBounds.Add(new RectInt(num5, 0, CS$<>8__locals1.world.size.x - num5, this.World.size.y));
 			int num10 = 0;
 			int num11 = 0;
-			int num12 = this.World.size.y - 1;
-			for (int l = 0; l < world.size.x; l++)
+			int num12 = 0;
+			int num13 = this.World.size.y - 1;
+			int x;
+			for (x = 0; x < CS$<>8__locals1.world.size.x; x = num9 + 1)
 			{
-				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, (float)l / (float)world.size.x * 0.66f + 0.33f, WorldGenProgressStages.Stages.DrawWorldBorder);
-				num9 = Mathf.Max(-intSetting2, Mathf.Min(num9 + rnd.RandomRange(-2, 2), intSetting2));
-				for (int m = 0; m < intSetting + num9; m++)
-				{
-					int num13 = Grid.XYToCell(l, m);
-					if (boolSetting || (cells[num13].elementIdx != b && cells[num13].elementIdx != b2))
-					{
-						borderCells.Add(num13);
-						cells[num13].SetValues(b3, temperature, mass);
-						num11 = Mathf.Max(num11, m);
-					}
-				}
+				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, (float)x / (float)CS$<>8__locals1.world.size.x * 0.66f + 0.33f, WorldGenProgressStages.Stages.DrawWorldBorder);
 				num10 = Mathf.Max(-intSetting2, Mathf.Min(num10 + rnd.RandomRange(-2, 2), intSetting2));
-				for (int n = 0; n < intSetting + num10; n++)
+				bool flag3 = terrainCellsForTag.Find((TerrainCell n) => n.poly.Contains(new Vector2((float)x, 0f))) != null;
+				for (int k = 0; k < intSetting + num10; k++)
 				{
-					int num14 = world.size.y - 1 - n;
-					int num15 = Grid.XYToCell(l, num14);
-					if (boolSetting || (cells[num15].elementIdx != b && cells[num15].elementIdx != b2))
+					int num14 = Grid.XYToCell(x, k);
+					if (boolSetting || (cells[num14].elementIdx != b && cells[num14].elementIdx != b2 && flag3) || !flag3)
 					{
-						borderCells.Add(num15);
-						cells[num15].SetValues(b3, temperature, mass);
-						num12 = Mathf.Min(num12, num14);
+						borderCells.Add(num14);
+						cells[num14].SetValues(b3, temperature, mass);
+						num12 = Mathf.Max(num12, k);
 					}
 				}
+				num11 = Mathf.Max(-intSetting2, Mathf.Min(num11 + rnd.RandomRange(-2, 2), intSetting2));
+				bool flag4 = terrainCellsForTag.Find((TerrainCell n) => n.poly.Contains(new Vector2((float)x, (float)(CS$<>8__locals1.world.size.y - 1)))) != null;
+				for (int l = 0; l < intSetting + num11; l++)
+				{
+					int num15 = CS$<>8__locals1.world.size.y - 1 - l;
+					int num16 = Grid.XYToCell(x, num15);
+					if (boolSetting || (cells[num16].elementIdx != b && cells[num16].elementIdx != b2 && flag4) || !flag4)
+					{
+						borderCells.Add(num16);
+						cells[num16].SetValues(b3, temperature, mass);
+						num13 = Mathf.Min(num13, num15);
+					}
+				}
+				num9 = x;
 			}
-			this.POIBounds.Add(new RectInt(0, 0, this.World.size.x, num11 + 1));
-			this.POIBounds.Add(new RectInt(0, num12, this.World.size.x, this.World.size.y - num12));
+			this.POIBounds.Add(new RectInt(0, 0, this.World.size.x, num12 + 1));
+			this.POIBounds.Add(new RectInt(0, num13, this.World.size.x, this.World.size.y - num13));
 		}
 
 		private void SetupNoise(WorldGen.OfflineCallbackFunction updateProgressFn)

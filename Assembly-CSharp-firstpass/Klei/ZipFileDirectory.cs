@@ -13,15 +13,16 @@ namespace Klei
 			return this.id;
 		}
 
-		public ZipFileDirectory(string id, ZipFile zipfile, string mount_point = "")
+		public ZipFileDirectory(string id, ZipFile zipfile, string mount_point = "", bool isModded = false)
 		{
 			this.id = id;
+			this.isModded = isModded;
 			this.mountPoint = FileSystem.Normalize(mount_point);
 			this.zipfile = zipfile;
 		}
 
-		public ZipFileDirectory(string id, Stream zip_data_stream, string mount_point = "")
-			: this(id, ZipFile.Read(zip_data_stream), mount_point)
+		public ZipFileDirectory(string id, Stream zip_data_stream, string mount_point = "", bool isModded = false)
+			: this(id, ZipFile.Read(zip_data_stream), mount_point, isModded)
 		{
 		}
 
@@ -107,10 +108,17 @@ namespace Klei
 			return default(FileHandle);
 		}
 
+		public bool IsModded()
+		{
+			return this.isModded;
+		}
+
 		private string id;
 
 		private string mountPoint;
 
 		private ZipFile zipfile;
+
+		private bool isModded;
 	}
 }

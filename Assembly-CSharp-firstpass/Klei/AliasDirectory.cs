@@ -12,11 +12,12 @@ namespace Klei
 			return this.id;
 		}
 
-		public AliasDirectory(string id, string actual_location, string path_prefix)
+		public AliasDirectory(string id, string actual_location, string path_prefix, bool isModded = false)
 		{
 			this.id = id;
 			actual_location = FileSystem.Normalize(actual_location);
 			path_prefix = FileSystem.Normalize(path_prefix);
+			this.isModded = isModded;
 			this.root = actual_location;
 			this.prefix = path_prefix;
 		}
@@ -94,10 +95,17 @@ namespace Klei
 			return default(FileHandle);
 		}
 
+		public bool IsModded()
+		{
+			return this.isModded;
+		}
+
 		private string id;
 
 		private string root;
 
 		private string prefix;
+
+		private bool isModded;
 	}
 }

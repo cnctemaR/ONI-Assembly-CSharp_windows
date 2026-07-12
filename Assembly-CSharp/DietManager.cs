@@ -63,9 +63,19 @@ public class DietManager : KMonoBehaviour
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
 			CreatureCalorieMonitor.Def def = kprefabID.GetDef<CreatureCalorieMonitor.Def>();
-			if (def != null && (target_species == null || Array.IndexOf<Tag>(target_species, kprefabID.GetComponent<CreatureBrain>().species) >= 0))
+			BeehiveCalorieMonitor.Def def2 = kprefabID.GetDef<BeehiveCalorieMonitor.Def>();
+			Diet diet = null;
+			if (def != null)
 			{
-				dictionary[kprefabID.PrefabTag] = def.diet;
+				diet = def.diet;
+			}
+			else if (def2 != null)
+			{
+				diet = def2.diet;
+			}
+			if (diet != null && (target_species == null || Array.IndexOf<Tag>(target_species, kprefabID.GetComponent<CreatureBrain>().species) >= 0))
+			{
+				dictionary[kprefabID.PrefabTag] = diet;
 			}
 		}
 		return dictionary;

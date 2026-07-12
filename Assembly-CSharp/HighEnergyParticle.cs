@@ -222,6 +222,7 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		int num = Grid.PosToCell(position);
 		Vector3 vector = position + EightDirectionUtil.GetNormal(this.direction) * this.speed * dt;
 		int num2 = Grid.PosToCell(vector);
+		SaveGame.Instance.GetComponent<ColonyAchievementTracker>().radBoltTravelDistance += this.speed * dt;
 		this.loopingSounds.UpdateVelocity(this.flyingSound, vector - position);
 		if (!Grid.IsValidCell(num2))
 		{

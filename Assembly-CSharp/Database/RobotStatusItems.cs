@@ -17,49 +17,49 @@ namespace Database
 			this.CantReachStation.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject = (GameObject)data;
-				return str.Replace("{0}", gameObject.name);
+				return str.Replace("{0}", gameObject.GetProperName());
 			};
 			this.LowBattery = new StatusItem("LowBattery", "ROBOTS", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.LowBattery.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject2 = (GameObject)data;
-				return str.Replace("{0}", gameObject2.name);
+				return str.Replace("{0}", gameObject2.GetProperName());
 			};
 			this.LowBatteryNoCharge = new StatusItem("LowBatteryNoCharge", "ROBOTS", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.LowBatteryNoCharge.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject3 = (GameObject)data;
-				return str.Replace("{0}", gameObject3.name);
+				return str.Replace("{0}", gameObject3.GetProperName());
 			};
 			this.DeadBattery = new StatusItem("DeadBattery", "ROBOTS", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.DeadBattery.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject4 = (GameObject)data;
-				return str.Replace("{0}", gameObject4.name);
+				return str.Replace("{0}", gameObject4.GetProperName());
 			};
 			this.DustBinFull = new StatusItem("DustBinFull", "ROBOTS", "status_item_pending_clear", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.DustBinFull.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject5 = (GameObject)data;
-				return str.Replace("{0}", gameObject5.name);
+				return str.Replace("{0}", gameObject5.GetProperName());
 			};
 			this.Working = new StatusItem("Working", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.Working.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject6 = (GameObject)data;
-				return str.Replace("{0}", gameObject6.name);
+				return str.Replace("{0}", gameObject6.GetProperName());
 			};
 			this.MovingToChargeStation = new StatusItem("MovingToChargeStation", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.MovingToChargeStation.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject7 = (GameObject)data;
-				return str.Replace("{0}", gameObject7.name);
+				return str.Replace("{0}", gameObject7.GetProperName());
 			};
 			this.UnloadingStorage = new StatusItem("UnloadingStorage", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.UnloadingStorage.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject8 = (GameObject)data;
-				return str.Replace("{0}", gameObject8.name);
+				return str.Replace("{0}", gameObject8.GetProperName());
 			};
 			this.ReactPositive = new StatusItem("ReactPositive", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.ReactPositive.resolveStringCallback = (string str, object data) => str;

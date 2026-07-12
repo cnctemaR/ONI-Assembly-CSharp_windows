@@ -57,7 +57,7 @@ public class DebugHandler : IInputHandler
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null).Apply(gameObject);
+		new MinionStartingStats(false, null, null).Apply(gameObject);
 		if (addAtmoSuit)
 		{
 			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("Atmo_Suit"), vector, Grid.SceneLayer.Creatures, null, 0);

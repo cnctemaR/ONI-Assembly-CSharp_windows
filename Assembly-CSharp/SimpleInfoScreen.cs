@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
+using ProcGen;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,39 +24,41 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.processConditionContainer = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.processConditionContainer = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PROCESS_CONDITIONS.NAME;
-		this.statusItemPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.statusItemPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.statusItemPanel.Content.GetComponent<VerticalLayoutGroup>().padding.bottom = 10;
 		this.statusItemPanel.HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS;
 		this.statusItemPanel.scalerMask.hoverLock = true;
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
 		this.spaceSimpleInfoPOIPanel = new SpacePOISimpleInfoPanel(this);
-		this.spacePOIPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.spacePOIPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.rocketSimpleInfoPanel = new RocketSimpleInfoPanel(this);
-		this.rocketStatusContainer = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.rocketStatusContainer = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.rocketStatusContainer.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
-		this.vitalsPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.vitalsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.vitalsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
-		this.vitalsContainer = Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
-		this.fertilityPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.vitalsContainer = global::Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
+		this.fertilityPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.fertilityPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_FERTILITY);
-		this.infoPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.infoPanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
-		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
-		this.worldLifePanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.descriptionContainer = global::Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
+		this.worldLifePanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldLifePanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
-		this.worldElementsPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldTraitsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldTraitsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_WORLDTRAITS;
+		this.worldElementsPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldElementsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
-		this.worldGeysersPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldGeysersPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldGeysersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
-		this.worldBiomesPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldBiomesPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldBiomesPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
-		this.StoragePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.stressPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.StoragePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.stressPanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
-		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
+		this.stampContainer = global::Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
 		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
 	}
 
@@ -428,7 +431,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 						if (component2 != null)
 						{
 							text2 = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
-							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None));
+							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None, true));
 						}
 						if (smi != null)
 						{
@@ -486,6 +489,15 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 	}
 
+	private void CreateWorldTraitRow()
+	{
+		GameObject gameObject = global::Util.KInstantiateUI(this.iconLabelRow, this.worldTraitsPanel.Content.gameObject, true);
+		this.worldTraitRows.Add(gameObject);
+		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+		component.GetReference<Image>("Icon").gameObject.SetActive(false);
+		component.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+	}
+
 	private void RefreshWorld()
 	{
 		WorldContainer worldContainer = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<WorldContainer>());
@@ -493,6 +505,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		bool flag = worldContainer != null && asteroidGridEntity != null;
 		this.worldBiomesPanel.gameObject.SetActive(flag);
 		this.worldGeysersPanel.gameObject.SetActive(flag);
+		this.worldTraitsPanel.gameObject.SetActive(flag);
 		if (!flag)
 		{
 			return;
@@ -511,7 +524,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					Sprite biomeSprite = GameUtil.GetBiomeSprite(text);
 					if (!this.biomeRows.ContainsKey(text))
 					{
-						this.biomeRows.Add(text, Util.KInstantiateUI(this.bigIconLabelRow, this.worldBiomesPanel.Content.gameObject, true));
+						this.biomeRows.Add(text, global::Util.KInstantiateUI(this.bigIconLabelRow, this.worldBiomesPanel.Content.gameObject, true));
 						HierarchyReferences component = this.biomeRows[text].GetComponent<HierarchyReferences>();
 						component.GetReference<Image>("Icon").sprite = biomeSprite;
 						component.GetReference<LocText>("NameLabel").SetText(UI.FormatAsLink(Strings.Get("STRINGS.SUBWORLDS." + text.ToUpper() + ".NAME"), "BIOME" + text.ToUpper()));
@@ -519,11 +532,11 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					}
 					this.biomeRows[text].SetActive(true);
 				}
-				goto IL_0209;
+				goto IL_021A;
 			}
 		}
 		this.worldBiomesPanel.gameObject.SetActive(false);
-		IL_0209:
+		IL_021A:
 		List<Tag> list = new List<Tag>();
 		foreach (Geyser geyser in global::UnityEngine.Object.FindObjectsOfType<Geyser>())
 		{
@@ -543,7 +556,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(tag, "ui", false);
 			if (!this.geyserRows.ContainsKey(tag))
 			{
-				this.geyserRows.Add(tag, Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+				this.geyserRows.Add(tag, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
 				HierarchyReferences component2 = this.geyserRows[tag].GetComponent<HierarchyReferences>();
 				component2.GetReference<Image>("Icon").sprite = uisprite.first;
 				component2.GetReference<Image>("Icon").color = uisprite.second;
@@ -555,20 +568,56 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		Tag tag2 = "NoGeysers";
 		if (!this.geyserRows.ContainsKey(tag2))
 		{
-			this.geyserRows.Add(tag2, Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+			this.geyserRows.Add(tag2, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
 			HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
 			component3.GetReference<Image>("Icon").sprite = Assets.GetSprite("icon_action_cancel");
 			component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_GEYSERS);
 			component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 		}
 		this.geyserRows[tag2].gameObject.SetActive(list.Count == 0);
+		List<string> worldTraitIds = worldContainer.WorldTraitIds;
+		if (worldTraitIds != null)
+		{
+			for (int j = 0; j < worldTraitIds.Count; j++)
+			{
+				if (j > this.worldTraitRows.Count - 1)
+				{
+					this.CreateWorldTraitRow();
+				}
+				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraitIds[j], false);
+				if (cachedTrait != null)
+				{
+					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedTrait.name));
+					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedTrait.description));
+				}
+				else
+				{
+					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.MISSING_TRAIT);
+					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip("");
+				}
+			}
+			for (int k = 0; k < this.worldTraitRows.Count; k++)
+			{
+				this.worldTraitRows[k].SetActive(k < worldTraitIds.Count);
+			}
+			if (worldTraitIds.Count == 0)
+			{
+				if (this.worldTraitRows.Count < 1)
+				{
+					this.CreateWorldTraitRow();
+				}
+				this.worldTraitRows[0].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.NO_TRAITS.NAME_SHORTHAND);
+				this.worldTraitRows[0].AddOrGet<ToolTip>().SetSimpleTooltip(WORLD_TRAITS.NO_TRAITS.DESCRIPTION);
+				this.worldTraitRows[0].SetActive(true);
+			}
+		}
 	}
 
 	private void RefreshProcessConditions()
 	{
 		foreach (GameObject gameObject in this.processConditionRows)
 		{
-			Util.KDestroyGameObject(gameObject);
+			global::Util.KDestroyGameObject(gameObject);
 		}
 		this.processConditionRows.Clear();
 		if (!DlcManager.FeatureClusterSpaceEnabled())
@@ -605,7 +654,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
-		HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+		HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
 		hierarchyReferences.GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper());
 		hierarchyReferences.GetComponent<ToolTip>().toolTip = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper() + "_TOOLTIP");
 		this.processConditionRows.Add(hierarchyReferences.gameObject);
@@ -618,7 +667,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				if (condition.ShowInUI() && (condition.GetType() == typeof(RequireAttachedComponent) || list.Find((ProcessCondition match) => match.GetType() == condition.GetType()) == null))
 				{
 					list.Add(condition);
-					GameObject gameObject = Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+					GameObject gameObject = global::Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
 					this.processConditionRows.Add(gameObject);
 					ConditionListSideScreen.SetRowState(gameObject, condition);
 				}
@@ -644,7 +693,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		else
 		{
-			gameObject = Util.KInstantiate(this.attributesLabelButtonTemplate, panel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, null);
+			gameObject = global::Util.KInstantiate(this.attributesLabelButtonTemplate, panel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, null);
 			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
 			labels[id] = gameObject;
 		}
@@ -683,14 +732,14 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					(stressNotes[i].value > 0f) ? UIConstants.ColorPrefixRed : "",
 					stressNotes[i].note,
 					": ",
-					Util.FormatTwoDecimalPlace(stressNotes[i].value),
+					global::Util.FormatTwoDecimalPlace(stressNotes[i].value),
 					"%",
 					(stressNotes[i].value > 0f) ? UIConstants.ColorSuffix : ""
 				}));
 				num += stressNotes[i].value;
 			}
 		}
-		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, Util.FormatTwoDecimalPlace(num)) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
+		this.stressDrawer.NewLabel(((num > 0f) ? UIConstants.ColorPrefixRed : "") + string.Format(UI.DETAILTABS.DETAILS.NET_STRESS, global::Util.FormatTwoDecimalPlace(num)) + ((num > 0f) ? UIConstants.ColorSuffix : ""));
 		this.stressDrawer.EndDrawing();
 	}
 
@@ -789,6 +838,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private CollapsibleDetailContentPanel spacePOIPanel;
 
+	private CollapsibleDetailContentPanel worldTraitsPanel;
+
 	[SerializeField]
 	public GameObject iconLabelRow;
 
@@ -800,6 +851,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private Dictionary<Tag, GameObject> biomeRows = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, GameObject> geyserRows = new Dictionary<Tag, GameObject>();
+
+	private List<GameObject> worldTraitRows = new List<GameObject>();
 
 	[SerializeField]
 	public GameObject spacerRow;
@@ -872,7 +925,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			this.onDestroy = onDestroy;
 			this.color = color;
 			this.style = style;
-			this.widget = Util.KInstantiateUI(status_item_prefab, parent.gameObject, false);
+			this.widget = global::Util.KInstantiateUI(status_item_prefab, parent.gameObject, false);
 			this.text = this.widget.GetComponentInChildren<LocText>(true);
 			SetTextStyleSetting.ApplyStyle(this.text, style);
 			this.toolTip = this.widget.GetComponentInChildren<ToolTip>(true);

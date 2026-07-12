@@ -222,6 +222,29 @@ public class LightingSettings : ScriptableObject
 
 	public SolidConduitFlowVisualizer.Tuning SolidConduit;
 
+	[Header("Radiation Overlay")]
+	public bool ShowRadiation;
+
+	public Texture2D Radiation1Tex;
+
+	public Texture2D Radiation2Tex;
+
+	public Texture2D Radiation3Tex;
+
+	public Texture2D Radiation4Tex;
+
+	public Color RadColor;
+
+	public Vector2 Rad1UVOffset;
+
+	public Vector2 Rad2UVOffset;
+
+	public Vector2 Rad3UVOffset;
+
+	public Vector2 Rad4UVOffset;
+
+	public Vector4 RadUVScales;
+
 	[Serializable]
 	public struct EdgeLighting
 	{

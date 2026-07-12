@@ -115,7 +115,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		int num = 0;
 		do
 		{
-			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID);
+			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID, null);
 			num++;
 		}
 		while (this.IsCharacterRedundant() && num < 20);

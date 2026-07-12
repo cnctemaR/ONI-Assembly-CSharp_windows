@@ -212,6 +212,10 @@ public class AchievementWidget : KMonoBehaviour
 			{
 				this.ShowMinimumMoraleRequirement(achievement.success, colonyAchievementRequirement);
 			}
+			else if (colonyAchievementRequirement is SurviveARocketWithMinimumMorale)
+			{
+				this.ShowRocketMoraleRequirement(achievement.success, colonyAchievementRequirement);
+			}
 			else
 			{
 				this.ShowRequirement(achievement.success, colonyAchievementRequirement);
@@ -424,6 +428,35 @@ public class AchievementWidget : KMonoBehaviour
 					}
 					this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.MORALE, targetGameObject.GetProperName(), attributeInstance.GetTotalDisplayValue()), nextRequirementWidget);
 				}
+			}
+		}
+	}
+
+	private void ShowRocketMoraleRequirement(bool success, ColonyAchievementRequirement req)
+	{
+		SurviveARocketWithMinimumMorale surviveARocketWithMinimumMorale = req as SurviveARocketWithMinimumMorale;
+		if (surviveARocketWithMinimumMorale == null)
+		{
+			return;
+		}
+		if (success)
+		{
+			this.ShowRequirement(success, req);
+			return;
+		}
+		foreach (KeyValuePair<int, int> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().cyclesRocketDupeMoraleAboveRequirement)
+		{
+			WorldContainer world = ClusterManager.Instance.GetWorld(keyValuePair.Key);
+			if (world != null)
+			{
+				HierarchyReferences nextRequirementWidget = this.GetNextRequirementWidget();
+				this.SetDescription(string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.SURVIVE_SPACE, new object[]
+				{
+					surviveARocketWithMinimumMorale.minimumMorale,
+					keyValuePair.Value,
+					surviveARocketWithMinimumMorale.numberOfCycles,
+					world.GetProperName()
+				}), nextRequirementWidget);
 			}
 		}
 	}

@@ -86,7 +86,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 						return;
 					}
 				}
-				else if (!flag && !this.IsLoudSleeper())
+				else if (!flag && !this.IsLoudSleeper() && !this.IsGlowStick())
 				{
 					gameObject.Trigger(-1063113160, null);
 				}
@@ -96,6 +96,11 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		public bool IsLoudSleeper()
 		{
 			return base.sm.sleeper.Get(base.smi).GetComponent<Snorer>() != null;
+		}
+
+		public bool IsGlowStick()
+		{
+			return base.sm.sleeper.Get(base.smi).GetComponent<GlowStick>() != null;
 		}
 
 		public void EvaluateSleepQuality()
@@ -188,6 +193,10 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 				.EventHandler(GameHashes.SleepDisturbedByNoise, delegate(SleepChore.StatesInstance smi)
 				{
 					this.isDisturbedByNoise.Set(true, smi);
+				})
+				.EventHandler(GameHashes.SleepDisturbedByFearOfDark, delegate(SleepChore.StatesInstance smi)
+				{
+					this.isScaredOfDark.Set(true, smi);
 				})
 				.EventHandler(GameHashes.SleepDisturbedByMovement, delegate(SleepChore.StatesInstance smi)
 				{

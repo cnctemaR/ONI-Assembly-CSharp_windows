@@ -197,6 +197,58 @@ namespace Database
 			{
 				new DupesCompleteChoreInExoSuitForCycles(10)
 			}, "", "", "", "", null, "", "job_suitability"));
+			if (DlcManager.IsExpansion1Active())
+			{
+				this.FirstTeleport = base.Add(new ColonyAchievement("FirstTeleport", "FIRST_TELEPORT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new TeleportDuplicant(),
+					new DefrostDuplicant()
+				}, "", "", "", "", null, "", "first_teleport_of_call"));
+				this.SoftLaunch = base.Add(new ColonyAchievement("SoftLaunch", "SOFT_LAUNCH", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new BuildALaunchPad()
+				}, "", "", "", "", null, "", "soft_launch"));
+				this.GMOOK = base.Add(new ColonyAchievement("GMOOK", "GMO_OK", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new AnalyzeSeed(BasicFabricMaterialPlantConfig.ID),
+					new AnalyzeSeed("BasicSingleHarvestPlant"),
+					new AnalyzeSeed("GasGrass"),
+					new AnalyzeSeed("MushroomPlant"),
+					new AnalyzeSeed("PrickleFlower"),
+					new AnalyzeSeed("SaltPlant"),
+					new AnalyzeSeed(SeaLettuceConfig.ID),
+					new AnalyzeSeed("SpiceVine"),
+					new AnalyzeSeed("SwampHarvestPlant"),
+					new AnalyzeSeed(SwampLilyConfig.ID),
+					new AnalyzeSeed("WormPlant"),
+					new AnalyzeSeed("ColdWheat"),
+					new AnalyzeSeed("BeanPlant")
+				}, "", "", "", "", null, "", "gmo_ok"));
+				this.MineTheGap = base.Add(new ColonyAchievement("MineTheGap", "MINE_THE_GAP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new HarvestAmountFromSpacePOI(1000000f)
+				}, "", "", "", "", null, "", "mine_the_gap"));
+				this.LandedOnAllWorlds = base.Add(new ColonyAchievement("LandedOnAllWorlds", "LANDED_ON_ALL_WORLDS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new LandOnAllWorlds()
+				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				this.RadicalTrip = base.Add(new ColonyAchievement("RadicalTrip", "RADICAL_TRIP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new RadBoltTravelDistance(10000)
+				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				this.SweeterThanHoney = base.Add(new ColonyAchievement("SweeterThanHoney", "SWEETER_THAN_HONEY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				{
+					new HarvestAHiveWithoutBeingStung()
+				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				this.SurviveInARocket = base.Add(new ColonyAchievement("SurviveInARocket", "SURVIVE_IN_A_ROCKET", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET_DESCRIPTION, 10, 25), false, new List<ColonyAchievementRequirement>
+				{
+					new SurviveARocketWithMinimumMorale(25f, 10)
+				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				this.RunAReactor = base.Add(new ColonyAchievement("RunAReactor", "REACTOR_USAGE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE_DESCRIPTION, 5), false, new List<ColonyAchievementRequirement>
+				{
+					new RunReactorForXDays(5)
+				}, "", "", "", "", null, "", "land_on_all_worlds"));
+			}
 		}
 
 		public ColonyAchievement Thriving;
@@ -270,5 +322,23 @@ namespace Database
 		public ColonyAchievement IdleDuplicants;
 
 		public ColonyAchievement ExosuitCycles;
+
+		public ColonyAchievement FirstTeleport;
+
+		public ColonyAchievement SoftLaunch;
+
+		public ColonyAchievement GMOOK;
+
+		public ColonyAchievement MineTheGap;
+
+		public ColonyAchievement LandedOnAllWorlds;
+
+		public ColonyAchievement RadicalTrip;
+
+		public ColonyAchievement SweeterThanHoney;
+
+		public ColonyAchievement SurviveInARocket;
+
+		public ColonyAchievement RunAReactor;
 	}
 }

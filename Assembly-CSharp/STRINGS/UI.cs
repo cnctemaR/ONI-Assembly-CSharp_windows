@@ -93,9 +93,15 @@ namespace STRINGS
 
 		public static string ExtractLinkID(string text)
 		{
-			int num = text.IndexOf("<link=") + 7;
-			int num2 = text.IndexOf(">") - 1;
-			return text.Substring(num, num2 - num);
+			string text2 = text;
+			int num = text2.IndexOf("<link=");
+			if (num != -1)
+			{
+				int num2 = num + 7;
+				int num3 = text2.IndexOf(">") - 1;
+				text2 = text.Substring(num2, num3 - num2);
+			}
+			return text2;
 		}
 
 		public static string StripLinkFormatting(string text)
@@ -1246,10 +1252,8 @@ namespace STRINGS
 					{
 						"A cloud of resources containing ",
 						UI.FormatAsLink("Water", "WATER"),
-						", ",
+						" and ",
 						UI.FormatAsLink("Hydrogen", "HYDROGEN"),
-						", and ",
-						UI.FormatAsLink("Niobium", "NIOBIUM"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
@@ -2921,13 +2925,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "COSMIC CALLING";
+				public static LocString IMAGE_HEADER = "UNEXPLAINED TRAITS";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>COSMIC CALLING UPDATE</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>New buildings allow automation signals to be broadcast between asteroids.</indent>\n•<indent=20px>Duplicants can boost their morale by having a chat on the new Party Line Phone.</indent>\n•<indent=20px>Radbolts can pass through a new special type of wall tile.</indent>\n•<indent=20px>Rocket engine speeds and ranges have been rebalanced.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>UNEXPLAINED TRAITS UPDATE</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>New world traits added to world generation system and old traits made compatible with Spaced Out!</indent>\n•<indent=20px>New traits related to space travel and radiation added for Duplicants.</indent>\n•<indent=20px>Added Spaced Out! specific Achievements.</indent>\n•<indent=20px>Changes and improvements to codex categories.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -6255,6 +6259,8 @@ namespace STRINGS
 
 				public static LocString ELEMENTSOTHER = UI.FormatAsLink("Other", "ELEMENTS_OTHER");
 
+				public static LocString ELEMENTSCLASSES = UI.FormatAsLink("Classes", "ELEMENTS_CLASSES");
+
 				public static LocString GEYSERS = UI.FormatAsLink("Geysers", "GEYSERS");
 
 				public static LocString SYSTEMS = UI.FormatAsLink("Systems", "SYSTEMS");
@@ -9347,6 +9353,11 @@ namespace STRINGS
 				public static LocString WARMER_BUTTON = "Above";
 			}
 
+			public class HEPSWITCHSIDESCREEN
+			{
+				public static LocString TITLE = "Radbolt Threshold";
+			}
+
 			public class THRESHOLD_SWITCH_SIDESCREEN
 			{
 				public static LocString TITLE = "Pressure";
@@ -9485,6 +9496,30 @@ namespace STRINGS
 					" if the ambient ",
 					UI.PRE_KEYWORD,
 					"Radiation",
+					UI.PST_KEYWORD,
+					" is below <b>{0}</b>"
+				});
+
+				public static LocString HEPS = "Radbolt Reading";
+
+				public static LocString HEPS_TOOLTIP_ABOVE = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Radbolts",
+					UI.PST_KEYWORD,
+					" is above <b>{0}</b>"
+				});
+
+				public static LocString HEPS_TOOLTIP_BELOW = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Radbolts",
 					UI.PST_KEYWORD,
 					" is below <b>{0}</b>"
 				});
@@ -11123,6 +11158,8 @@ namespace STRINGS
 
 				public static LocString GROUPNAME_GEYSERS = "GEYSERS";
 
+				public static LocString GROUPNAME_WORLDTRAITS = "WORLD TRAITS";
+
 				public static LocString GROUPNAME_CLUSTER_POI = "POINT OF INTEREST";
 
 				public static LocString NO_GEYSERS = "No geysers detected";
@@ -12178,7 +12215,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Gases",
 					UI.PST_KEYWORD,
-					"by <b>{0}</b>"
+					" by <b>{0}</b>"
 				});
 
 				public static LocString LIQUIDCOOLING = string.Concat(new string[]
@@ -12289,7 +12326,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Gas",
 					UI.PST_KEYWORD,
-					"\n\nCooling 1 ",
+					"\n\nCooling 1",
 					UI.UNITSUFFIXES.MASS.KILOGRAM,
 					" of ",
 					ELEMENTS.OXYGEN.NAME,
@@ -12314,7 +12351,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Liquid",
 					UI.PST_KEYWORD,
-					"\n\nCooling 10 ",
+					"\n\nCooling 10",
 					UI.UNITSUFFIXES.MASS.KILOGRAM,
 					" of ",
 					ELEMENTS.WATER.NAME,

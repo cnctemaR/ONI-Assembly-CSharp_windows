@@ -39,6 +39,7 @@ public class RailGunConfig : IBuildingConfig
 		buildingDef.UseHighEnergyParticleInputPort = true;
 		buildingDef.HighEnergyParticleInputOffset = new CellOffset(-2, 1);
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(RailGun.PORT_ID, new CellOffset(-2, 2), global::STRINGS.BUILDINGS.PREFABS.RAILGUN.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.RAILGUN.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.RAILGUN.LOGIC_PORT_INACTIVE, false, false) };
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(2, 0), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
 		return buildingDef;
 	}
 
@@ -65,6 +66,7 @@ public class RailGunConfig : IBuildingConfig
 		highEnergyParticleStorage.capacity = 210f;
 		highEnergyParticleStorage.autoStore = true;
 		highEnergyParticleStorage.showInUI = false;
+		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -95,6 +97,8 @@ public class RailGunConfig : IBuildingConfig
 	}
 
 	public const string ID = "RailGun";
+
+	public const string PORT_ID = "HEP_STORAGE";
 
 	public const int RANGE = 20;
 

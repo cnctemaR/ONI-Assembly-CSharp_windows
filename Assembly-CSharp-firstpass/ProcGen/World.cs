@@ -14,9 +14,13 @@ namespace ProcGen
 
 		public string nameTable { get; private set; }
 
+		public string asteroidIcon { get; private set; }
+
 		public bool disableWorldTraits { get; private set; }
 
-		public string asteroidIcon { get; private set; }
+		public List<World.TraitRule> worldTraitRules { get; private set; }
+
+		public float worldTraitScale { get; private set; }
 
 		public World.Skip skip { get; private set; }
 
@@ -62,6 +66,9 @@ namespace ProcGen
 			this.seasons = new List<string>();
 			this.fixedTraits = new List<string>();
 			this.category = World.WorldCategory.Asteroid;
+			this.worldTraitScale = 1f;
+			this.worldTraitRules = new List<World.TraitRule>();
+			this.worldTraitRules.Add(new World.TraitRule(2, 4));
 		}
 
 		public void ModStartLocation(MinMax hMod, MinMax vMod)
@@ -100,6 +107,27 @@ namespace ProcGen
 					DebugUtil.LogWarningArgs(new object[] { "World " + this.name + ": defines subworldNames that are not used in unknownCellsAllowedSubworlds: \n" + string.Join(", ", usedSubworldFiles) });
 				}
 			}
+			if (this.worldTraitRules != null)
+			{
+				foreach (World.TraitRule traitRule in this.worldTraitRules)
+				{
+					traitRule.Validate();
+				}
+			}
+		}
+
+		public bool IsValidTrait(WorldTrait trait)
+		{
+			foreach (World.TraitRule traitRule in this.worldTraitRules)
+			{
+				TagSet tagSet = ((traitRule.requiredTags != null) ? new TagSet(traitRule.requiredTags) : null);
+				TagSet tagSet2 = ((traitRule.forbiddenTags != null) ? new TagSet(traitRule.forbiddenTags) : null);
+				if ((tagSet == null || trait.traitTagsSet.ContainsAll(tagSet)) && (tagSet2 == null || !trait.traitTagsSet.ContainsOne(tagSet2)) && (traitRule.forbiddenTraits == null || !traitRule.forbiddenTraits.Contains(trait.filePath)) && trait.IsValid(this, false))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public string filePath;
@@ -124,6 +152,42 @@ namespace ProcGen
 			Default,
 			VoronoiTree = 0,
 			PowerTree
+		}
+
+		[Serializable]
+		public class TraitRule
+		{
+			public int min { get; private set; }
+
+			public int max { get; private set; }
+
+			public List<string> requiredTags { get; private set; }
+
+			public List<string> specificTraits { get; private set; }
+
+			public List<string> forbiddenTags { get; private set; }
+
+			public List<string> forbiddenTraits { get; private set; }
+
+			public TraitRule()
+			{
+			}
+
+			public TraitRule(int min, int max)
+			{
+				this.min = min;
+				this.max = max;
+			}
+
+			public void Validate()
+			{
+				if (this.specificTraits != null)
+				{
+					DebugUtil.DevAssert(this.requiredTags == null, "TraitRule using specificTraits does not support requiredTags", null);
+					DebugUtil.DevAssert(this.forbiddenTags == null, "TraitRule using specificTraits does not support forbiddenTags", null);
+					DebugUtil.DevAssert(this.forbiddenTraits == null, "TraitRule using specificTraits does not support forbiddenTraits", null);
+				}
+			}
 		}
 
 		[Serializable]

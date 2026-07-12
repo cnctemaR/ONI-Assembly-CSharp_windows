@@ -67,7 +67,7 @@ public class SandboxSpawnerTool : InterfaceTool
 		Vector3 vector = Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null).Apply(gameObject);
+		new MinionStartingStats(false, null, null).Apply(gameObject);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

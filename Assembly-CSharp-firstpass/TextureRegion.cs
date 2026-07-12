@@ -55,6 +55,12 @@ public struct TextureRegion
 		this.bytes[byteIdx + 3] = b3;
 	}
 
+	public void SetBytes(int x, int y, float v0)
+	{
+		int num = this.GetByteIdx(x, y) / 4;
+		this.floatConverter.floats[num] = v0;
+	}
+
 	public void SetBytes(int x, int y, float v0, float v1)
 	{
 		int num = this.GetByteIdx(x, y) / 4;

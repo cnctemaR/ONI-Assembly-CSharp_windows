@@ -15,7 +15,7 @@ namespace KMod
 		{
 			this.filename = filename;
 			this.zipfile = ZipFile.Read(filename);
-			this.file_system = new ZipFileDirectory(this.zipfile.Name, this.zipfile, Application.streamingAssetsPath);
+			this.file_system = new ZipFileDirectory(this.zipfile.Name, this.zipfile, Application.streamingAssetsPath, true);
 		}
 
 		public string GetRoot()

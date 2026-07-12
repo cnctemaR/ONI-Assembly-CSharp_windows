@@ -20,6 +20,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		base.OnPrefabInit();
 		base.Subscribe<Sublimates>(-2064133523, Sublimates.OnAbsorbDelegate);
 		base.Subscribe<Sublimates>(1335436905, Sublimates.OnSplitFromChunkDelegate);
+		this.simRenderLoadBalance = true;
 	}
 
 	protected override void OnSpawn()

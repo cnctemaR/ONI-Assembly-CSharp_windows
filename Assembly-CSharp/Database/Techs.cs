@@ -236,7 +236,7 @@ namespace Database
 			new Tech("Clothing", new List<string> { "ClothingFabricator", "CarpetTile" }, this, null);
 			new Tech("Acoustics", new List<string> { "BatterySmart", "Phonobox", "PowerControlStation" }, this, null);
 			new Tech("SpacePower", new List<string> { "BatteryModule", "SolarPanelModule", "RocketInteriorPowerPlug" }, this, null);
-			new Tech("NuclearRefinement", new List<string> { "NuclearReactor", "UraniumCentrifuge" }, this, null);
+			new Tech("NuclearRefinement", new List<string> { "NuclearReactor", "UraniumCentrifuge", "HEPBridgeTile" }, this, null);
 			new Tech("FineArt", new List<string> { "Canvas", "Sculpture" }, this, null);
 			new Tech("EnvironmentalAppreciation", new List<string> { "BeachChair" }, this, null);
 			new Tech("Luxury", new List<string>
@@ -285,7 +285,13 @@ namespace Database
 			new Tech("Smelting", new List<string> { "MetalRefinery", "MetalTile" }, this, null);
 			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor" }, this, null);
 			new Tech("HighPressureForging", new List<string> { "DiamondPress" }, this, null);
-			new Tech("RadiationProtection", new List<string> { "HEPBridgeTile", "LeadSuit", "LeadSuitMarker", "LeadSuitLocker" }, this, null);
+			new Tech("RadiationProtection", new List<string>
+			{
+				"LeadSuit",
+				"LeadSuitMarker",
+				"LeadSuitLocker",
+				LogicHEPSensorConfig.ID
+			}, this, null);
 			new Tech("TemperatureModulation", new List<string> { "LiquidCooledFan", "IceCooledFan", "IceMachine", "InsulationTile", "SpaceHeater" }, this, null);
 			new Tech("HVAC", new List<string>
 			{

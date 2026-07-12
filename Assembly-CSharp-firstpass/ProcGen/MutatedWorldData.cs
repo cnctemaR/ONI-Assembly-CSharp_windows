@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ObjectCloner;
+using UnityEngine;
 
 namespace ProcGen
 {
@@ -50,9 +51,10 @@ namespace ProcGen
 				{
 					this.world.globalFeatures[keyValuePair.Key] = 0;
 				}
+				int num = Mathf.FloorToInt(this.world.worldTraitScale * (float)keyValuePair.Value);
 				Dictionary<string, int> globalFeatures = this.world.globalFeatures;
 				string key = keyValuePair.Key;
-				globalFeatures[key] += keyValuePair.Value;
+				globalFeatures[key] += num;
 			}
 			using (List<string>.Enumerator enumerator4 = trait.removeWorldTemplateRulesById.GetEnumerator())
 			{

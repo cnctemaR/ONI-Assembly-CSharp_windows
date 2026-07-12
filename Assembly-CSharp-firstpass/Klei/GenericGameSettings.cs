@@ -58,6 +58,14 @@ namespace Klei
 
 		public bool disableAutosave { get; private set; }
 
+		public bool devAutoWorldGen { get; set; }
+
+		public int devWorldGenSeed { get; set; }
+
+		public string devWorldGenCluster { get; set; }
+
+		public string[] devWorldGenSkip { get; set; }
+
 		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
 
 		private static string Path
@@ -93,6 +101,8 @@ namespace Klei
 		}
 
 		private static GenericGameSettings _instance;
+
+		public bool devAutoWorldGenActive;
 
 		public class PerformanceCapture
 		{

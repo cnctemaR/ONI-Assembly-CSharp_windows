@@ -12,7 +12,7 @@ namespace KMod
 		public Directory(string root)
 		{
 			this.root = root;
-			this.file_system = new AliasDirectory(root, root, Application.streamingAssetsPath);
+			this.file_system = new AliasDirectory(root, root, Application.streamingAssetsPath, true);
 		}
 
 		public string GetRoot()

@@ -336,6 +336,11 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		}
 	}
 
+	public void LogAnalyzedSeed(Tag seed)
+	{
+		this.analyzedSeeds.Add(seed);
+	}
+
 	public void OnNewDay(object data)
 	{
 		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
@@ -361,6 +366,42 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 				}
 			}
 		}
+		if (DlcManager.IsExpansion1Active())
+		{
+			SurviveARocketWithMinimumMorale surviveARocketWithMinimumMorale = Db.Get().ColonyAchievements.SurviveInARocket.requirementChecklist[0] as SurviveARocketWithMinimumMorale;
+			if (surviveARocketWithMinimumMorale != null)
+			{
+				float minimumMorale = surviveARocketWithMinimumMorale.minimumMorale;
+				int numberOfCycles = surviveARocketWithMinimumMorale.numberOfCycles;
+				foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+				{
+					if (worldContainer.IsModuleInterior)
+					{
+						if (!this.cyclesRocketDupeMoraleAboveRequirement.ContainsKey(worldContainer.id))
+						{
+							this.cyclesRocketDupeMoraleAboveRequirement.Add(worldContainer.id, 0);
+						}
+						if (worldContainer.GetComponent<Clustercraft>().Status != Clustercraft.CraftStatus.Grounded)
+						{
+							bool flag = true;
+							foreach (MinionIdentity minionIdentity in Components.MinionIdentities.GetWorldItems(worldContainer.id, false))
+							{
+								if (Db.Get().Attributes.QualityOfLife.Lookup(minionIdentity).GetTotalValue() < minimumMorale)
+								{
+									flag = false;
+									break;
+								}
+							}
+							this.cyclesRocketDupeMoraleAboveRequirement[worldContainer.id] = (flag ? (this.cyclesRocketDupeMoraleAboveRequirement[worldContainer.id] + 1) : 0);
+						}
+						else if (this.cyclesRocketDupeMoraleAboveRequirement[worldContainer.id] < numberOfCycles)
+						{
+							this.cyclesRocketDupeMoraleAboveRequirement[worldContainer.id] = 0;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public Dictionary<string, ColonyAchievementStatus> achievements = new Dictionary<string, ColonyAchievementStatus>();
@@ -376,6 +417,24 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	[Serialize]
 	public HashSet<Tag> tamedCritterTypes = new HashSet<Tag>();
+
+	[Serialize]
+	public bool defrostedDuplicant;
+
+	[Serialize]
+	public HashSet<Tag> analyzedSeeds = new HashSet<Tag>();
+
+	[Serialize]
+	public float totalMaterialsHarvestFromPOI;
+
+	[Serialize]
+	public float radBoltTravelDistance;
+
+	[Serialize]
+	public bool harvestAHiveWithoutGettingStung;
+
+	[Serialize]
+	public Dictionary<int, int> cyclesRocketDupeMoraleAboveRequirement = new Dictionary<int, int>();
 
 	private SchedulerHandle checkAchievementsHandle;
 

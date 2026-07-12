@@ -44,8 +44,16 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		float time = GameClock.Instance.GetTime();
 		bool flag;
 		Vector3 vector = this.CalculateWorldPos(time, out flag);
+		Vector3 vector2 = vector;
+		if (this.orbitData.periodInCycles > 0f)
+		{
+			vector2.x = vector.x / (float)Grid.WidthInCells;
+			vector2.y = vector.y / (float)Grid.HeightInCells;
+			vector2.x = Camera.main.ViewportToWorldPoint(vector2).x;
+			vector2.y = Camera.main.ViewportToWorldPoint(vector2).y;
+		}
 		bool flag2 = (!this.orbitData.rotatesBehind || !flag) && (this.world == null || ClusterManager.Instance.activeWorldId == this.world.id);
-		base.gameObject.transform.SetPosition(vector);
+		base.gameObject.transform.SetPosition(vector2);
 		if (this.orbitData.periodInCycles > 0f)
 		{
 			base.gameObject.transform.localScale = Vector3.one * (Camera.main.orthographicSize / this.orbitData.distance);

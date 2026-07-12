@@ -402,6 +402,9 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 
 	public Guid refuelStausHandle;
 
+	[Serialize]
+	public int numCyclesRunning;
+
 	private float reactionMassTarget = 60f;
 
 	private int[] ventCells;
@@ -453,56 +456,61 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 				smi.master.operational.SetActive(true, false);
 				smi.master.SetEmitRads(105f);
 				smi.master.radEmitter.SetEmitting(true);
+			}).EventHandler(GameHashes.NewDay, (Reactor.StatesInstance smi) => GameClock.Instance, delegate(Reactor.StatesInstance smi)
+			{
+				smi.master.numCyclesRunning++;
 			}).Exit(delegate(Reactor.StatesInstance smi)
 			{
 				smi.sm.reactionUnderway.Set(false, smi);
-			}).Update(delegate(Reactor.StatesInstance smi, float dt)
-			{
-				smi.master.TransferFuel();
-				smi.master.TransferCoolant();
-				smi.master.React(dt);
-				smi.master.UpdateCoolantStatus();
-				smi.master.UpdateVentStatus();
-				smi.master.DumpSpentFuel();
-				if (!smi.master.fuelDeliveryEnabled)
+				smi.master.numCyclesRunning = 0;
+			})
+				.Update(delegate(Reactor.StatesInstance smi, float dt)
 				{
-					smi.master.refuelStausHandle = smi.master.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ReactorRefuelDisabled, null);
-				}
-				else
-				{
-					smi.master.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ReactorRefuelDisabled, false);
-					smi.master.refuelStausHandle = Guid.Empty;
-				}
-				if (smi.master.GetActiveCoolant() != null)
-				{
-					smi.master.Cool(dt);
-				}
-				PrimaryElement activeFuel = smi.master.GetActiveFuel();
-				if (activeFuel != null)
-				{
-					smi.master.temperatureMeter.SetPositionPercent(Mathf.Clamp01(activeFuel.Temperature / 3000f) / Reactor.meterFrameScaleHack);
-					if (activeFuel.Temperature >= 3000f)
+					smi.master.TransferFuel();
+					smi.master.TransferCoolant();
+					smi.master.React(dt);
+					smi.master.UpdateCoolantStatus();
+					smi.master.UpdateVentStatus();
+					smi.master.DumpSpentFuel();
+					if (!smi.master.fuelDeliveryEnabled)
 					{
-						smi.sm.meltdownMassRemaining.Set(10f + smi.master.supplyStorage.MassStored() + smi.master.reactionStorage.MassStored() + smi.master.wasteStorage.MassStored(), smi);
-						smi.master.supplyStorage.ConsumeAllIgnoringDisease();
-						smi.master.reactionStorage.ConsumeAllIgnoringDisease();
-						smi.master.wasteStorage.ConsumeAllIgnoringDisease();
-						smi.GoTo(this.meltdown.pre);
-						return;
+						smi.master.refuelStausHandle = smi.master.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ReactorRefuelDisabled, null);
 					}
-					if (activeFuel.Mass <= 0.25f)
+					else
+					{
+						smi.master.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ReactorRefuelDisabled, false);
+						smi.master.refuelStausHandle = Guid.Empty;
+					}
+					if (smi.master.GetActiveCoolant() != null)
+					{
+						smi.master.Cool(dt);
+					}
+					PrimaryElement activeFuel = smi.master.GetActiveFuel();
+					if (activeFuel != null)
+					{
+						smi.master.temperatureMeter.SetPositionPercent(Mathf.Clamp01(activeFuel.Temperature / 3000f) / Reactor.meterFrameScaleHack);
+						if (activeFuel.Temperature >= 3000f)
+						{
+							smi.sm.meltdownMassRemaining.Set(10f + smi.master.supplyStorage.MassStored() + smi.master.reactionStorage.MassStored() + smi.master.wasteStorage.MassStored(), smi);
+							smi.master.supplyStorage.ConsumeAllIgnoringDisease();
+							smi.master.reactionStorage.ConsumeAllIgnoringDisease();
+							smi.master.wasteStorage.ConsumeAllIgnoringDisease();
+							smi.GoTo(this.meltdown.pre);
+							return;
+						}
+						if (activeFuel.Mass <= 0.25f)
+						{
+							smi.GoTo(this.off_pre);
+							smi.master.temperatureMeter.SetPositionPercent(0f);
+							return;
+						}
+					}
+					else
 					{
 						smi.GoTo(this.off_pre);
 						smi.master.temperatureMeter.SetPositionPercent(0f);
-						return;
 					}
-				}
-				else
-				{
-					smi.GoTo(this.off_pre);
-					smi.master.temperatureMeter.SetPositionPercent(0f);
-				}
-			}, UpdateRate.SIM_200ms, false)
+				}, UpdateRate.SIM_200ms, false)
 				.DefaultState(this.on.pre);
 			this.on.pre.PlayAnim("working_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.on.reacting).OnSignal(this.doVent, this.on.venting);
 			this.on.reacting.PlayAnim("working_loop", KAnim.PlayMode.Loop).OnSignal(this.doVent, this.on.venting);

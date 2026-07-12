@@ -10,6 +10,7 @@ public class TelephoneCallerWorkable : Workable, IWorkerPrioritizable
 	{
 		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.workingPstComplete = new HashedString[] { "on_pst" };
+		this.workAnims = new HashedString[] { "on_pre", "on", "on_receiving", "on_pre_loop_receiving", "on_loop", "on_loop_pre" };
 	}
 
 	protected override void OnPrefabInit()
@@ -58,6 +59,7 @@ public class TelephoneCallerWorkable : Workable, IWorkerPrioritizable
 
 	protected override void OnStopWork(Worker worker)
 	{
+		this.operational.SetActive(false, false);
 		this.telephone.HangUp();
 	}
 

@@ -11,6 +11,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 		base.Subscribe<Exhaust>(-592767678, Exhaust.OnConduitStateChangedDelegate);
 		base.Subscribe<Exhaust>(-111137758, Exhaust.OnConduitStateChangedDelegate);
 		base.GetComponent<RequireInputs>().visualizeRequirements = false;
+		this.simRenderLoadBalance = true;
 	}
 
 	protected override void OnSpawn()

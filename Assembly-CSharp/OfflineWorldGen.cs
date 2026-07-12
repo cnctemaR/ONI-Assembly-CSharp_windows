@@ -233,10 +233,12 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void DoWorldGenInitialize()
 	{
+		Func<int, WorldGen, bool> func = null;
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
 		this.seed = int.Parse(currentQualitySetting.id);
-		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
-		this.clusterLayout = new Cluster(currentQualitySetting2.id, this.seed, true);
+		string id = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id;
+		this.clusterLayout = new Cluster(id, this.seed, true);
+		this.clusterLayout.ShouldSkipWorldCallback = func;
 		this.clusterLayout.Generate(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed, true, false);
 	}
 

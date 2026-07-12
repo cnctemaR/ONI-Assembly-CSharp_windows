@@ -154,16 +154,31 @@ public class ColonyDestinationAsteroidBeltData
 	private List<AsteroidDescriptor> GenerateTraitDescriptors()
 	{
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
-		if (this.startWorld.disableWorldTraits)
+		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
+		list2.Add(this.startWorld);
+		list2.AddRange(this.worlds);
+		int num = this.seed;
+		for (int i = 0; i < list2.Count; i++)
 		{
-			list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, null));
-		}
-		else
-		{
-			foreach (string text in SettingsCache.GetRandomTraits(this.seed))
+			global::ProcGen.World world = list2[i];
+			List<string> randomTraits = SettingsCache.GetRandomTraits(num, world);
+			if (DlcManager.IsExpansion1Active())
+			{
+				list.Add(new AsteroidDescriptor("", null, null));
+				list.Add(new AsteroidDescriptor(string.Format("<b>{0}</b>", Strings.Get(world.name)), null, null));
+			}
+			foreach (string text in randomTraits)
 			{
 				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
 				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), null));
+			}
+			if (randomTraits.Count == 0)
+			{
+				list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, null));
+			}
+			if (num > 0)
+			{
+				num++;
 			}
 		}
 		return list;

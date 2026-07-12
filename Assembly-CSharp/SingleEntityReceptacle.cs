@@ -131,16 +131,17 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			return;
 		}
 		bool flag = this.fetchChore.fetcher != null;
-		if (!flag)
+		WorldContainer myWorld = this.GetMyWorld();
+		if (!flag && myWorld != null)
 		{
 			Tag[] tags = this.fetchChore.tags;
 			int i = 0;
 			while (i < tags.Length)
 			{
 				Tag tag = tags[i];
-				if (this.GetMyWorld().worldInventory.GetTotalAmount(tag, true) > 0f)
+				if (myWorld.worldInventory.GetTotalAmount(tag, true) > 0f)
 				{
-					if (this.GetMyWorld().worldInventory.GetTotalAmount(this.requestedEntityAdditionalFilterTag, true) > 0f || this.requestedEntityAdditionalFilterTag == Tag.Invalid)
+					if (myWorld.worldInventory.GetTotalAmount(this.requestedEntityAdditionalFilterTag, true) > 0f || this.requestedEntityAdditionalFilterTag == Tag.Invalid)
 					{
 						flag = true;
 						break;

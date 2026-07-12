@@ -25,6 +25,8 @@ namespace ProcGen
 
 		public static LevelLayer levelLayerGradient { get; private set; }
 
+		public WorldGen worldGen { get; private set; }
+
 		public WorldLayout(WorldGen worldGen, int seed)
 		{
 			this.worldGen = worldGen;
@@ -719,7 +721,7 @@ namespace ProcGen
 			Node.maxDepth = this.voronoiTree.MaxDepth(0);
 		}
 
-		private List<Vector2> GetPoints(string name, LoggerSSF log, int minPointCount, Polygon boundingArea, float density, float avoidRadius, List<Vector2> avoidPoints, PointGenerator.SampleBehaviour sampleBehaviour, bool testInsideBounds, SeededRandom rnd, bool doShuffle = true, bool testAvoidPoints = true)
+		private List<Vector2> GetPoints(string name, LoggerSSF log, int minPointCount, int maxPointCount, Polygon boundingArea, float density, float avoidRadius, List<Vector2> avoidPoints, PointGenerator.SampleBehaviour sampleBehaviour, bool testInsideBounds, SeededRandom rnd, bool doShuffle = true, bool testAvoidPoints = true)
 		{
 			int num = 0;
 			List<Vector2> randomPoints;
@@ -734,7 +736,11 @@ namespace ProcGen
 				}
 				num++;
 			}
-			while (randomPoints.Count < minPointCount && num < 10);
+			while (randomPoints.Count < minPointCount && randomPoints.Count <= maxPointCount && num < 10);
+			if (randomPoints.Count > maxPointCount)
+			{
+				randomPoints.RemoveRange(maxPointCount, randomPoints.Count - maxPointCount);
+			}
 			return randomPoints;
 		}
 
@@ -771,7 +777,13 @@ namespace ProcGen
 			}
 			node.dontRelaxChildren = sw.dontRelaxChildren;
 			int num = Mathf.Max(sw.features.Count + sw.extraBiomeChildren, sw.minChildCount);
-			List<Vector2> points = this.GetPoints(sw.name, node.log, num, node.site.poly, randomValueWithinRange, sw.avoidRadius, list, sw.sampleBehaviour, true, seededRandom, true, sw.doAvoidPoints);
+			int num2 = int.MaxValue;
+			if (sw.singleChildCount)
+			{
+				num = 1;
+				num2 = 1;
+			}
+			List<Vector2> points = this.GetPoints(sw.name, node.log, num, num2, node.site.poly, randomValueWithinRange, sw.avoidRadius, list, sw.sampleBehaviour, true, seededRandom, true, sw.doAvoidPoints);
 			global::Debug.Assert(points.Count >= num, string.Format("Overworld node {0} of subworld {1} generated {2} points of an expected minimum {3}\nThis probably means that either:\n* sampler density is too large (lower the number for tighter samples)\n* avoid radius is too large (only applies if there is a central feature, especialy if you get 0 points generated)\n* min point count is just plain too large.", new object[]
 			{
 				node.site.id,
@@ -1130,8 +1142,6 @@ namespace ProcGen
 		private LineSegment rightEdge;
 
 		private SeededRandom myRandom;
-
-		private WorldGen worldGen;
 
 		[Serialize]
 		private WorldLayout.ExtraIO extra;

@@ -115,7 +115,7 @@ public static class AutoRocketUtility
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(position), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null).Apply(gameObject);
+		new MinionStartingStats(false, null, null).Apply(gameObject);
 		MinionResume component = gameObject.GetComponent<MinionResume>();
 		if (DebugHandler.InstantBuildMode && component.AvailableSkillpoints < 1)
 		{

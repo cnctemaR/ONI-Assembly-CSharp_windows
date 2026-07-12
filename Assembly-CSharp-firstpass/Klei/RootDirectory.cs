@@ -64,6 +64,11 @@ namespace Klei
 			return default(FileHandle);
 		}
 
+		public bool IsModded()
+		{
+			return false;
+		}
+
 		private string id = "StandardFS";
 	}
 }

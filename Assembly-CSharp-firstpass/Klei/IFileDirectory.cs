@@ -17,5 +17,7 @@ namespace Klei
 		bool FileExists(string path);
 
 		FileHandle FindFileHandle(string filename);
+
+		bool IsModded();
 	}
 }

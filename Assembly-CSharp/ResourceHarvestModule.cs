@@ -175,9 +175,12 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			if (num5 > 0f)
 			{
 				component.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SpacePOIWasting, num5 / dt);
-				return;
 			}
-			component.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SpacePOIWasting, false);
+			else
+			{
+				component.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.SpacePOIWasting, false);
+			}
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().totalMaterialsHarvestFromPOI += num3;
 		}
 
 		public void ConsumeDiamond(float amount)

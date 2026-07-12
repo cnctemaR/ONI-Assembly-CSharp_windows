@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class MinionStartingStats : ITelepadDeliverable
 {
-	public MinionStartingStats(bool is_starter_minion, string guaranteedAptitudeID = null)
+	public MinionStartingStats(bool is_starter_minion, string guaranteedAptitudeID = null, string guaranteedTraitID = null)
 	{
 		if (is_starter_minion)
 		{
@@ -26,7 +26,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		this.Traits.Add(Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID));
 		List<ChoreGroup> list = new List<ChoreGroup>();
 		this.GenerateAptitudes(guaranteedAptitudeID);
-		int num3 = this.GenerateTraits(is_starter_minion, list, guaranteedAptitudeID);
+		int num3 = this.GenerateTraits(is_starter_minion, list, guaranteedAptitudeID, guaranteedTraitID);
 		this.GenerateAttributes(num3, list);
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
 		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
@@ -91,7 +91,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		}
 	}
 
-	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null)
+	private int GenerateTraits(bool is_starter_minion, List<ChoreGroup> disabled_chore_groups, string guaranteedAptitudeID = null, string guaranteedTraitID = null)
 	{
 		int statDelta = 0;
 		List<string> selectedTraits = new List<string>();
@@ -156,58 +156,62 @@ public class MinionStartingStats : ITelepadDeliverable
 				num7 = Mathf.Min(DUPLICANTSTATS.RARITY_LEGENDARY, num7);
 			}
 			List<DUPLICANTSTATS.TraitVal> list2 = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
-			for (int i = list2.Count - 1; i > -1; i--)
+			for (int j = list2.Count - 1; j > -1; j--)
 			{
-				if (list2[i].rarity != num7)
+				if (list2[j].rarity != num7)
 				{
-					list2.RemoveAt(i);
+					list2.RemoveAt(j);
 					num6--;
 				}
 			}
 			list2.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
-			foreach (DUPLICANTSTATS.TraitVal traitVal in list2)
+			foreach (DUPLICANTSTATS.TraitVal traitVal2 in list2)
 			{
-				if (!DlcManager.IsContentActive(traitVal.dlcId))
+				if (!DlcManager.IsContentActive(traitVal2.dlcId))
 				{
 					num6--;
 				}
-				else if (selectedTraits.Contains(traitVal.id))
+				else if (selectedTraits.Contains(traitVal2.id))
 				{
 					num6--;
 				}
 				else
 				{
-					Trait trait4 = Db.Get().traits.TryGet(traitVal.id);
-					if (trait4 == null)
+					Trait trait5 = Db.Get().traits.TryGet(traitVal2.id);
+					if (trait5 == null)
 					{
-						global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id);
+						global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal2.id);
 						num6--;
 					}
-					else if (is_starter_minion && !trait4.ValidStarterTrait)
-					{
-						num6--;
-					}
-					else if (this.AreTraitAndAptitudesExclusive(traitVal, this.skillAptitudes))
+					else if (is_starter_minion && !trait5.ValidStarterTrait)
 					{
 						num6--;
 					}
-					else if (is_starter_minion && guaranteedAptitudeID != null && this.AreTraitAndArchetypeExclusive(traitVal, guaranteedAptitudeID))
+					else if (traitVal2.doNotGenerateTrait)
+					{
+						num6--;
+					}
+					else if (this.AreTraitAndAptitudesExclusive(traitVal2, this.skillAptitudes))
+					{
+						num6--;
+					}
+					else if (is_starter_minion && guaranteedAptitudeID != null && this.AreTraitAndArchetypeExclusive(traitVal2, guaranteedAptitudeID))
 					{
 						num6--;
 					}
 					else
 					{
-						if (!this.AreTraitsMutuallyExclusive(traitVal, selectedTraits))
+						if (!this.AreTraitsMutuallyExclusive(traitVal2, selectedTraits))
 						{
-							selectedTraits.Add(traitVal.id);
-							statDelta += traitVal.statBonus;
-							this.rarityBalance += (positiveTrait ? (-traitVal.rarity) : traitVal.rarity);
-							this.Traits.Add(trait4);
-							if (trait4.disabledChoreGroups != null)
+							selectedTraits.Add(traitVal2.id);
+							statDelta += traitVal2.statBonus;
+							this.rarityBalance += (positiveTrait ? (-traitVal2.rarity) : traitVal2.rarity);
+							this.Traits.Add(trait5);
+							if (trait5.disabledChoreGroups != null)
 							{
-								for (int j = 0; j < trait4.disabledChoreGroups.Length; j++)
+								for (int k = 0; k < trait5.disabledChoreGroups.Length; k++)
 								{
-									disabled_chore_groups.Add(trait4.disabledChoreGroups[j]);
+									disabled_chore_groups.Add(trait5.disabledChoreGroups[k]);
 								}
 							}
 							return true;
@@ -242,6 +246,34 @@ public class MinionStartingStats : ITelepadDeliverable
 		int num3 = 0;
 		int num4 = 0;
 		int num5 = (num2 + num) * 4;
+		if (!string.IsNullOrEmpty(guaranteedTraitID))
+		{
+			DUPLICANTSTATS.TraitVal traitVal = DUPLICANTSTATS.GetTraitVal(guaranteedTraitID);
+			if (traitVal.id == guaranteedTraitID)
+			{
+				Trait trait4 = Db.Get().traits.TryGet(traitVal.id);
+				bool positiveTrait2 = trait4.PositiveTrait;
+				selectedTraits.Add(traitVal.id);
+				statDelta += traitVal.statBonus;
+				this.rarityBalance += (positiveTrait2 ? (-traitVal.rarity) : traitVal.rarity);
+				this.Traits.Add(trait4);
+				if (trait4.disabledChoreGroups != null)
+				{
+					for (int i = 0; i < trait4.disabledChoreGroups.Length; i++)
+					{
+						disabled_chore_groups.Add(trait4.disabledChoreGroups[i]);
+					}
+				}
+				if (positiveTrait2)
+				{
+					num3++;
+				}
+				else
+				{
+					num4++;
+				}
+			}
+		}
 		while (num5 > 0 && (num4 < num2 || num3 < num))
 		{
 			if (num4 < num2 && func(DUPLICANTSTATS.BADTRAITS, false))
@@ -507,6 +539,13 @@ public class MinionStartingStats : ITelepadDeliverable
 			foreach (DUPLICANTSTATS.TraitVal traitVal4 in DUPLICANTSTATS.CONGENITALTRAITS)
 			{
 				if (text == traitVal4.id && traitVal4.mutuallyExclusiveTraits != null && traitVal4.mutuallyExclusiveTraits.Contains(traitVal.id))
+				{
+					return true;
+				}
+			}
+			foreach (DUPLICANTSTATS.TraitVal traitVal5 in DUPLICANTSTATS.SPECIALTRAITS)
+			{
+				if (text == traitVal5.id && traitVal5.mutuallyExclusiveTraits != null && traitVal5.mutuallyExclusiveTraits.Contains(traitVal.id))
 				{
 					return true;
 				}

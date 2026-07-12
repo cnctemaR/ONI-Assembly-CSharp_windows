@@ -349,7 +349,10 @@ namespace Database
 				List<string> list = new List<string>();
 				foreach (Skill skill in skillsWithPerk)
 				{
-					list.Add(skill.Name);
+					if (!skill.deprecated)
+					{
+						list.Add(skill.Name);
+					}
 				}
 				str = str.Replace("{Skills}", string.Join(", ", list.ToArray()));
 				return str;
@@ -365,7 +368,10 @@ namespace Database
 				List<string> list2 = new List<string>();
 				foreach (Skill skill2 in skillsWithPerk2)
 				{
-					list2.Add(skill2.Name);
+					if (!skill2.deprecated)
+					{
+						list2.Add(skill2.Name);
+					}
 				}
 				str = str.Replace("{Skills}", string.Join(", ", list2.ToArray()));
 				return str;
@@ -378,7 +384,10 @@ namespace Database
 				List<string> list3 = new List<string>();
 				foreach (Skill skill3 in skillsWithPerk3)
 				{
-					list3.Add(skill3.Name);
+					if (!skill3.deprecated)
+					{
+						list3.Add(skill3.Name);
+					}
 				}
 				str = str.Replace("{Skills}", string.Join(", ", list3.ToArray()));
 				return str;

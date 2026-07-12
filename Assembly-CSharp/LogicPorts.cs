@@ -31,7 +31,7 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 		if (this.isPhysical)
 		{
 			this.UpdateMissingWireIcon();
-			this.CreatePhysicalPorts();
+			this.CreatePhysicalPorts(false);
 			return;
 		}
 		this.CreateVisualizers();
@@ -121,10 +121,10 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 		}
 	}
 
-	private void CreatePhysicalPorts()
+	private void CreatePhysicalPorts(bool forceCreate = false)
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
-		if (num == this.cell)
+		if (num == this.cell && !forceCreate)
 		{
 			return;
 		}
@@ -215,7 +215,7 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 	public void OnMove()
 	{
 		this.DestroyPhysicalPorts();
-		this.CreatePhysicalPorts();
+		this.CreatePhysicalPorts(false);
 	}
 
 	private void OnLogicNetworkConnectionChanged(int cell, bool connected)
@@ -300,6 +300,10 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 
 	public void SendSignal(HashedString port_id, int new_value)
 	{
+		if (this.outputPortInfo != null && this.outputPorts == null)
+		{
+			this.CreatePhysicalPorts(true);
+		}
 		foreach (ILogicUIElement logicUIElement in this.outputPorts)
 		{
 			LogicEventSender logicEventSender = (LogicEventSender)logicUIElement;

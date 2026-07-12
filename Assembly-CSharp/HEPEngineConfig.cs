@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -17,12 +19,12 @@ public class HEPEngineConfig : IBuildingConfig
 		string text2 = "rocket_hep_engine_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] engine_MASS_LARGE = BUILDINGS.ROCKETRY_MASS_KG.ENGINE_MASS_LARGE;
+		float[] engine_MASS_LARGE = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.ENGINE_MASS_LARGE;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, engine_MASS_LARGE, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, engine_MASS_LARGE, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -37,6 +39,7 @@ public class HEPEngineConfig : IBuildingConfig
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.UseHighEnergyParticleInputPort = true;
 		buildingDef.HighEnergyParticleInputOffset = new CellOffset(0, 3);
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
 		return buildingDef;
 	}
 
@@ -70,6 +73,7 @@ public class HEPEngineConfig : IBuildingConfig
 		HighEnergyParticleStorage highEnergyParticleStorage = go.AddOrGet<HighEnergyParticleStorage>();
 		highEnergyParticleStorage.capacity = 4000f;
 		highEnergyParticleStorage.autoStore = true;
+		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
 		go.AddOrGet<HEPFuelTank>().physicalFuelCapacity = 4000f;
 		RocketEngineCluster rocketEngineCluster = go.AddOrGet<RocketEngineCluster>();
 		rocketEngineCluster.maxModules = 4;
@@ -100,4 +104,6 @@ public class HEPEngineConfig : IBuildingConfig
 	private const int PORT_OFFSET_Y = 3;
 
 	public const string ID = "HEPEngine";
+
+	public const string PORT_ID = "HEP_STORAGE";
 }

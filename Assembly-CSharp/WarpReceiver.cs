@@ -45,6 +45,7 @@ public class WarpReceiver : Workable
 			}
 		}
 		component.SetWorkTime(num);
+		this.Used = true;
 	}
 
 	private void CompleteChore()
@@ -71,6 +72,9 @@ public class WarpReceiver : Workable
 	public bool IsConsumed;
 
 	private Chore chore;
+
+	[Serialize]
+	public bool Used;
 
 	public class WarpReceiverSM : GameStateMachine<WarpReceiver.WarpReceiverSM, WarpReceiver.WarpReceiverSM.Instance, WarpReceiver>
 	{

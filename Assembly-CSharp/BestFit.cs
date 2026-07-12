@@ -9,9 +9,10 @@ public class BestFit
 	{
 		List<BestFit.Rect> list = new List<BestFit.Rect>();
 		Vector2I vector2I = default(Vector2I);
-		worldsToArrange.Sort((WorldPlacement a, WorldPlacement b) => b.height.CompareTo(a.height));
-		int height = worldsToArrange[0].height;
-		foreach (WorldPlacement worldPlacement in worldsToArrange)
+		List<WorldPlacement> list2 = new List<WorldPlacement>(worldsToArrange);
+		list2.Sort((WorldPlacement a, WorldPlacement b) => b.height.CompareTo(a.height));
+		int height = list2[0].height;
+		foreach (WorldPlacement worldPlacement in list2)
 		{
 			Vector2I vector2I2 = default(Vector2I);
 			while (!BestFit.UnoccupiedSpace(new BestFit.Rect(vector2I2.x, vector2I2.y, worldPlacement.width, worldPlacement.height), list))

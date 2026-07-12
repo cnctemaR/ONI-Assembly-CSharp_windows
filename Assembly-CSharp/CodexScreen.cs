@@ -109,6 +109,8 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexVideo)] = this.prefabVideoWidget;
 		this.ContentPrefabs[typeof(CodexIndentedLabelWithIcon)] = this.prefabIndentedLabelWithIcon;
 		this.ContentPrefabs[typeof(CodexRecipePanel)] = this.prefabRecipePanel;
+		this.ContentPrefabs[typeof(CodexConversionPanel)] = this.prefabConversionPanel;
+		this.ContentPrefabs[typeof(CodexCollapsibleHeader)] = this.prefabCollapsibleHeader;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -766,6 +768,12 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private GameObject prefabRecipePanel;
+
+	[SerializeField]
+	private GameObject prefabConversionPanel;
+
+	[SerializeField]
+	private GameObject prefabCollapsibleHeader;
 
 	[Header("Text Styles")]
 	[SerializeField]

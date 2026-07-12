@@ -880,7 +880,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 479045U;
+		uint num = 481350U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1147,6 +1147,24 @@ public class Game : KMonoBehaviour
 		{
 			yield return null;
 			num = i + 1;
+		}
+		if (GenericGameSettings.instance.devAutoWorldGenActive)
+		{
+			foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+			{
+				worldContainer.SetDiscovered(true);
+			}
+			SaveGame.Instance.worldGenSpawner.SpawnEverything();
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().DEBUG_REVEAL_ENTIRE_MAP();
+			if (CameraController.Instance != null)
+			{
+				CameraController.Instance.EnableFreeCamera(true);
+			}
+			for (int num2 = 0; num2 != Grid.WidthInCells * Grid.HeightInCells; num2++)
+			{
+				Grid.Reveal(num2, byte.MaxValue);
+			}
+			GenericGameSettings.instance.devAutoWorldGenActive = false;
 		}
 		SaveLoader.Instance.InitialSave();
 		yield break;

@@ -8,8 +8,9 @@ public class CargoDropperMinion : GameStateMachine<CargoDropperMinion, CargoDrop
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
-		default_state = this.root;
-		this.root.EventHandlerTransition(GameHashes.JettisonCargo, this.landed, (CargoDropperMinion.StatesInstance smi, object obj) => true).ParamTransition<bool>(this.hasLanded, this.complete, GameStateMachine<CargoDropperMinion, CargoDropperMinion.StatesInstance, IStateMachineTarget, CargoDropperMinion.Def>.IsTrue);
+		default_state = this.notLanded;
+		this.root.ParamTransition<bool>(this.hasLanded, this.complete, GameStateMachine<CargoDropperMinion, CargoDropperMinion.StatesInstance, IStateMachineTarget, CargoDropperMinion.Def>.IsTrue);
+		this.notLanded.EventHandlerTransition(GameHashes.JettisonCargo, this.landed, (CargoDropperMinion.StatesInstance smi, object obj) => true);
 		this.landed.Enter(delegate(CargoDropperMinion.StatesInstance smi)
 		{
 			smi.JettisonCargo(null);
@@ -27,6 +28,8 @@ public class CargoDropperMinion : GameStateMachine<CargoDropperMinion, CargoDrop
 			this.hasLanded.Set(true, smi);
 		});
 	}
+
+	private GameStateMachine<CargoDropperMinion, CargoDropperMinion.StatesInstance, IStateMachineTarget, CargoDropperMinion.Def>.State notLanded;
 
 	private GameStateMachine<CargoDropperMinion, CargoDropperMinion.StatesInstance, IStateMachineTarget, CargoDropperMinion.Def>.State landed;
 

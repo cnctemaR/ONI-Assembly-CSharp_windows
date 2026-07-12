@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{66E46127-F13A-4AF5-8FA8-AC5F8442B58E}</ProjectGuid>
+    <ProjectGuid>{3E951BA0-E777-4821-BB57-03489967A310}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Accessibility</RootNamespace>
     <AssemblyName>UnityEngine.AccessibilityModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{66E46127-F13A-4AF5-8FA8-AC5F8442B598}</Project>
+      <Project>{3E951BA0-E777-4821-BB57-03489967A31A}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{66E46127-F13A-4AF5-8FA8-AC5F8442B5AE}</Project>
+      <Project>{3E951BA0-E777-4821-BB57-03489967A330}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

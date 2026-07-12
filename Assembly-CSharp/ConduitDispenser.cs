@@ -104,6 +104,10 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 	{
 		if (this.operational.IsOperational || this.alwaysDispense)
 		{
+			if (this.building.Def.CanMove)
+			{
+				this.utilityCell = this.GetOutputCell(this.GetConduitManager().conduitType);
+			}
 			PrimaryElement primaryElement = this.FindSuitableElement();
 			if (primaryElement != null)
 			{
@@ -214,6 +218,9 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 
 	[MyCmpReq]
 	public Storage storage;
+
+	[MyCmpReq]
+	private Building building;
 
 	private HandleVector<int>.Handle partitionerEntry;
 

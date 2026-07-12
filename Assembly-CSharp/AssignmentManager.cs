@@ -95,7 +95,7 @@ public class AssignmentManager : KMonoBehaviour
 	{
 		foreach (Assignable assignable in this.assignables)
 		{
-			if (assignable.assignee != null)
+			if (assignable.assignee != null && assignable.assignee.GetOwners().Count == 1)
 			{
 				Ownables soleOwner = assignable.assignee.GetSoleOwner();
 				if (soleOwner != null && soleOwner.GetComponent<MinionAssignablesProxy>() != null && assignable.assignee == minionIdentity && assignable.GetMyWorldId() == world_id)

@@ -107,11 +107,15 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 
 		private void OpenMoveChoreForChosenDuplicant()
 		{
-			ClustercraftInteriorDoor interiorDoor = base.master.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>().ModuleInterface.GetPassengerModule().GetComponent<ClustercraftExteriorDoor>().GetInteriorDoor();
+			RocketModuleCluster component = base.master.GetComponent<RocketModuleCluster>();
+			Clustercraft craft = component.CraftInterface.GetComponent<Clustercraft>();
+			ClustercraftInteriorDoor interiorDoor = craft.ModuleInterface.GetPassengerModule().GetComponent<ClustercraftExteriorDoor>().GetInteriorDoor();
 			int num = Grid.OffsetCell(Grid.PosToCell(interiorDoor), interiorDoor.GetComponent<NavTeleporter>().offset);
 			MinionStorage storage = this.landerContainer.FindFirst(base.def.landerPrefabID).GetComponent<MinionStorage>();
 			this.ChosenDuplicant.GetSMI<RocketPassengerMonitor.Instance>().SetModuleDeployChore(num, delegate(Chore obj)
 			{
+				Game.Instance.assignmentManager.RemoveFromWorld(this.ChosenDuplicant.assignableProxy.Get(), craft.ModuleInterface.GetInteriorWorld().id);
+				craft.ModuleInterface.GetPassengerModule().RemoveRocketPassenger(this.ChosenDuplicant);
 				storage.SerializeMinion(this.ChosenDuplicant.gameObject);
 			});
 		}
@@ -137,42 +141,22 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 					components[i].Transfer(component4, false, true);
 				}
 			}
-			MinionStorage component5 = component.GetComponent<MinionStorage>();
-			if (component5 != null)
-			{
-				CraftModuleInterface craftInterface = base.GetComponent<RocketModuleCluster>().CraftInterface;
-				WorldContainer worldContainer = ((craftInterface != null) ? craftInterface.GetComponent<WorldContainer>() : null);
-				if (worldContainer != null)
-				{
-					int id = worldContainer.id;
-					foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
-					{
-						if (minionIdentity == this.chosenDuplicant && minionIdentity.GetMyWorldId() == id)
-						{
-							Game.Instance.assignmentManager.RemoveFromWorld(minionIdentity.assignableProxy.Get(), id);
-							craftInterface.GetPassengerModule().RemoveRocketPassenger(minionIdentity);
-							component5.SerializeMinion(minionIdentity.gameObject);
-							break;
-						}
-					}
-				}
-			}
 			Vector3 vector = Grid.CellToPosCBC(this.landerPlacementCell, Grid.SceneLayer.Building);
 			component.transform.SetPosition(vector);
 			component.gameObject.SetActive(true);
-			Clustercraft component6 = base.master.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
-			component6.gameObject.Trigger(1792516731, component);
+			Clustercraft component5 = base.master.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
+			component5.gameObject.Trigger(1792516731, component);
 			component.Trigger(1792516731, base.gameObject);
 			GameObject gameObject = Assets.TryGetPrefab(base.smi.def.clusterMapFXPrefabID);
 			if (gameObject != null)
 			{
 				this.clusterMapFX = GameUtil.KInstantiate(gameObject, Grid.SceneLayer.Background, null, 0);
 				this.clusterMapFX.SetActive(true);
-				ClusterFXEntity component7 = this.clusterMapFX.GetComponent<ClusterFXEntity>();
-				AxialI location = component6.Location;
+				ClusterFXEntity component6 = this.clusterMapFX.GetComponent<ClusterFXEntity>();
+				AxialI location = component5.Location;
 				AxialI myWorldLocation = component.GetMyWorldLocation();
 				Vector3 vector2 = Vector3.Normalize(AxialUtil.AxialToWorld((float)myWorldLocation.r, (float)myWorldLocation.q) - AxialUtil.AxialToWorld((float)location.r, (float)location.q)) * 100f;
-				component7.Init(component6.Location, vector2);
+				component6.Init(component5.Location, vector2);
 				component.Subscribe(1969584890, delegate(object data)
 				{
 					if (!this.clusterMapFX.IsNullOrDestroyed())

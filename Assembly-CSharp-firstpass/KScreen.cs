@@ -134,11 +134,15 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		{
 			e.Consumed = true;
 		}
+		if (!e.Consumed)
+		{
+			this.child_scroll_rects = base.GetComponentsInChildren<KScrollRect>();
+		}
 		if (this.mouseOver && this.ConsumeMouseScroll)
 		{
 			if (KInputManager.currentControllerIsGamepad && !e.Consumed)
 			{
-				foreach (KScrollRect kscrollRect in base.GetComponentsInChildren<KScrollRect>())
+				foreach (KScrollRect kscrollRect in this.child_scroll_rects)
 				{
 					Vector2 vector = kscrollRect.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
 					if (kscrollRect.rectTransform().rect.Contains(vector))
@@ -163,10 +167,22 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		}
 		if (!e.Consumed)
 		{
-			KScrollRect[] array = base.GetComponentsInChildren<KScrollRect>();
-			for (int i = 0; i < array.Length; i++)
+			foreach (KScrollRect kscrollRect2 in this.child_scroll_rects)
 			{
-				array[i].OnKeyDown(e);
+				Vector2 vector2 = kscrollRect2.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
+				if (kscrollRect2.rectTransform().rect.Contains(vector2))
+				{
+					kscrollRect2.mouseIsOver = true;
+				}
+				else
+				{
+					kscrollRect2.mouseIsOver = false;
+				}
+				kscrollRect2.OnKeyDown(e);
+				if (e.Consumed)
+				{
+					break;
+				}
 			}
 		}
 	}
@@ -260,6 +276,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 
 	protected virtual void OnShow(bool show)
 	{
+		this.child_scroll_rects = base.GetComponentsInChildren<KScrollRect>();
 		if (show && this.fadeIn)
 		{
 			base.gameObject.FindOrAddUnityComponent<WidgetTransition>().StartTransition();
@@ -312,6 +329,8 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 	public KScreen.PointerEnterActions pointerEnterActions;
 
 	public KScreen.PointerExitActions pointerExitActions;
+
+	private KScrollRect[] child_scroll_rects;
 
 	private bool hasFocus;
 

@@ -273,7 +273,7 @@ public static class Localization
 		return flag;
 	}
 
-	private static bool LoadTranslation(string[] lines, bool isTemplate = false)
+	public static bool LoadTranslation(string[] lines, bool isTemplate = false)
 	{
 		bool flag;
 		try
@@ -416,15 +416,15 @@ public static class Localization
 		}
 		if (!string.IsNullOrEmpty(text))
 		{
-			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + text });
+			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + text });
 		}
 		if (!string.IsNullOrEmpty(text2))
 		{
-			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following have mismatched <link> tags:\n" + text2 });
+			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following have mismatched <link> tags:\n" + text2 });
 		}
 		if (!string.IsNullOrEmpty(text3))
 		{
-			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following do not have the same amount of <link> tags as the english string which can cause nested link errors:\n" + text3 });
+			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following do not have the same amount of <link> tags as the english string which can cause nested link errors:\n" + text3 });
 		}
 	}
 
@@ -802,8 +802,8 @@ public static class Localization
 
 	private static bool AreParametersPreserved(string old_string, string new_string)
 	{
-		MatchCollection matchCollection = Regex.Matches(old_string, "{.*?}");
-		MatchCollection matchCollection2 = Regex.Matches(new_string, "{.*?}");
+		MatchCollection matchCollection = Regex.Matches(old_string, "({.[^}]*?})(?!.*\\1)");
+		MatchCollection matchCollection2 = Regex.Matches(new_string, "({.[^}]*?})(?!.*\\1)");
 		bool flag = false;
 		if (matchCollection == null && matchCollection2 == null)
 		{

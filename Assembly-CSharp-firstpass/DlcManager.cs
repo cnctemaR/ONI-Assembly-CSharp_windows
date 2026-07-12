@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class DlcManager
 {
+	public static void ClearCachedValues()
+	{
+		DlcManager.dlcPurchasedCache = new Dictionary<string, bool>();
+		DlcManager.dlcSubscribedCache = new Dictionary<string, bool>();
+	}
+
 	public static bool IsVanillaId(string dlcId)
 	{
 		return dlcId == null || dlcId == "";

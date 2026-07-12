@@ -408,7 +408,10 @@ public class DetailsScreen : KTabMenu
 
 	public void DeselectAndClose()
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
+		if (base.gameObject.activeInHierarchy)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
+		}
 		if (this.GetActiveTab() != null)
 		{
 			this.GetActiveTab().SetTarget(null);

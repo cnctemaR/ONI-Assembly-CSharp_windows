@@ -300,6 +300,10 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			if (this.onSimRegistered != null)
 			{
 				this.onSimRegistered(this);
+			}
+			if (!base.enabled)
+			{
+				this.OnCmpDisable();
 				return;
 			}
 		}

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CA7B0751-087A-418E-A310-4E99A9439C28}</ProjectGuid>
+    <ProjectGuid>{9ABEC8B3-97C6-41EB-818B-FED891F210EE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Rendering.VirtualTexturing</RootNamespace>
     <AssemblyName>UnityEngine.VirtualTexturingModule</AssemblyName>
@@ -26,11 +26,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{CA7B0751-087A-418E-A310-4E99A9439BF4}</Project>
+      <Project>{9ABEC8B3-97C6-41EB-818B-FED891F210BA}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{CA7B0751-087A-418E-A310-4E99A9439C0A}</Project>
+      <Project>{9ABEC8B3-97C6-41EB-818B-FED891F210D0}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -148,16 +148,16 @@ public class LocText : TextMeshProUGUI
 		return Regex.Replace(text2, text, delegate(Match m)
 		{
 			string value2 = m.Groups[1].Value;
-			Pair<string, string> pair;
+			Pair<LocString, LocString> pair;
 			if (!LocText.ClickLookup.TryGetValue(value2, out pair))
 			{
 				return m.Value;
 			}
 			if (KInputManager.currentControllerIsGamepad)
 			{
-				return pair.first;
+				return pair.first.ToString();
 			}
-			return pair.second;
+			return pair.second.ToString();
 		});
 	}
 
@@ -236,67 +236,67 @@ public class LocText : TextMeshProUGUI
 
 	private static readonly Dictionary<string, global::Action> ActionLookup = Enum.GetNames(typeof(global::Action)).ToDictionary<string, string, global::Action>((string x) => x, (string x) => (global::Action)Enum.Parse(typeof(global::Action), x), StringComparer.OrdinalIgnoreCase);
 
-	private static readonly Dictionary<string, Pair<string, string>> ClickLookup = new Dictionary<string, Pair<string, string>>
+	private static readonly Dictionary<string, Pair<LocString, LocString>> ClickLookup = new Dictionary<string, Pair<LocString, LocString>>
 	{
 		{
 			UI.ClickType.Click.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESS, UI.CONTROLS.CLICK)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESS, UI.CONTROLS.CLICK)
 		},
 		{
 			UI.ClickType.Clickable.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSABLE, UI.CONTROLS.CLICKABLE)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSABLE, UI.CONTROLS.CLICKABLE)
 		},
 		{
 			UI.ClickType.Clicked.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSED, UI.CONTROLS.CLICKED)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSED, UI.CONTROLS.CLICKED)
 		},
 		{
 			UI.ClickType.Clicking.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSING, UI.CONTROLS.CLICKING)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSING, UI.CONTROLS.CLICKING)
 		},
 		{
 			UI.ClickType.Clicks.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSES, UI.CONTROLS.CLICKS)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSES, UI.CONTROLS.CLICKS)
 		},
 		{
 			UI.ClickType.click.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSLOWER, UI.CONTROLS.CLICKLOWER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSLOWER, UI.CONTROLS.CLICKLOWER)
 		},
 		{
 			UI.ClickType.clickable.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSABLELOWER, UI.CONTROLS.CLICKABLELOWER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSABLELOWER, UI.CONTROLS.CLICKABLELOWER)
 		},
 		{
 			UI.ClickType.clicked.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSEDLOWER, UI.CONTROLS.CLICKEDLOWER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSEDLOWER, UI.CONTROLS.CLICKEDLOWER)
 		},
 		{
 			UI.ClickType.clicking.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSINGLOWER, UI.CONTROLS.CLICKINGLOWER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSINGLOWER, UI.CONTROLS.CLICKINGLOWER)
 		},
 		{
 			UI.ClickType.clicks.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSESLOWER, UI.CONTROLS.CLICKSLOWER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSESLOWER, UI.CONTROLS.CLICKSLOWER)
 		},
 		{
 			UI.ClickType.CLICK.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSUPPER, UI.CONTROLS.CLICKUPPER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSUPPER, UI.CONTROLS.CLICKUPPER)
 		},
 		{
 			UI.ClickType.CLICKABLE.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSABLEUPPER, UI.CONTROLS.CLICKABLEUPPER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSABLEUPPER, UI.CONTROLS.CLICKABLEUPPER)
 		},
 		{
 			UI.ClickType.CLICKED.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSEDUPPER, UI.CONTROLS.CLICKEDUPPER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSEDUPPER, UI.CONTROLS.CLICKEDUPPER)
 		},
 		{
 			UI.ClickType.CLICKING.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSINGUPPER, UI.CONTROLS.CLICKINGUPPER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSINGUPPER, UI.CONTROLS.CLICKINGUPPER)
 		},
 		{
 			UI.ClickType.CLICKS.ToString(),
-			new Pair<string, string>(UI.CONTROLS.PRESSESUPPER, UI.CONTROLS.CLICKSUPPER)
+			new Pair<LocString, LocString>(UI.CONTROLS.PRESSESUPPER, UI.CONTROLS.CLICKSUPPER)
 		}
 	};
 

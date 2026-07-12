@@ -503,14 +503,14 @@ public class PlanScreen : KIconToggleMenu
 		{
 			this.notificationPingCount = 0;
 		}
-		int num = 1;
+		int num = 10;
 		if (force_update)
 		{
 			num = Assets.BuildingDefs.Count;
 			this.buildable_state_update_idx = 0;
 		}
 		ListPool<HashedString, PlanScreen>.PooledList pooledList = ListPool<HashedString, PlanScreen>.Allocate();
-		for (int i = 0; i < ((this.activeCategoryInfo == null) ? num : Math.Max(num, 20)); i++)
+		for (int i = 0; i < num; i++)
 		{
 			this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Count;
 			BuildingDef buildingDef = Assets.BuildingDefs[this.buildable_state_update_idx];

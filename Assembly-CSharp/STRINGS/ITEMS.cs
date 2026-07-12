@@ -1014,7 +1014,7 @@ namespace STRINGS
 
 		public class MISSILE_BASIC
 		{
-			public static LocString NAME = "Blastshot";
+			public static LocString NAME = UI.FormatAsLink("Blastshot", "MISSILELAUNCHER");
 
 			public static LocString DESC = "An explosive projectile designed to defend against meteor showers.\n\nMust be launched by a " + UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER") + ".";
 		}

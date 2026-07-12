@@ -100,7 +100,7 @@ public class LockerMenuScreen : KModalScreen
 
 	private void RefreshClaimItemsButton()
 	{
-		bool hasClaimable = PermitItems.HasUnclaimedRewards() || PermitItems.HasUnopenedItem();
+		bool hasClaimable = PermitItems.HasUnopenedItem();
 		this.dropsAvailableNotification.SetActive(hasClaimable);
 		this.buttonClaimItems.ChangeState(hasClaimable ? 0 : 1);
 		this.buttonClaimItems.GetComponent<HierarchyReferences>().GetReference<Image>("FGIcon").material = (hasClaimable ? null : this.desatUIMaterial);

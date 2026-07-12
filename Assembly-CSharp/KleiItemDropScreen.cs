@@ -78,12 +78,6 @@ public class KleiItemDropScreen : KModalScreen
 			this.shouldDoCloseRoutine = true;
 			return;
 		}
-		if (PermitItems.HasUnclaimedRewards())
-		{
-			this.PresentKleiRewardsPrompt(true);
-			this.shouldDoCloseRoutine = true;
-			return;
-		}
 		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.NOTHING_AVAILABLE);
 		this.PresentNoItemAvailablePrompt(true);
 		this.shouldDoCloseRoutine = true;
@@ -98,11 +92,6 @@ public class KleiItemDropScreen : KModalScreen
 				this.PresentItem(itemData, firstItemPresentation);
 				return;
 			}
-		}
-		if (PermitItems.HasUnclaimedRewards())
-		{
-			this.PresentKleiRewardsPrompt(false);
-			return;
 		}
 		this.PresentNoItemAvailablePrompt(false);
 	}
@@ -132,31 +121,6 @@ public class KleiItemDropScreen : KModalScreen
 				this.giftAcknowledged = true;
 			}
 		};
-	}
-
-	public void PresentKleiRewardsPrompt(bool firstItemPresentation)
-	{
-		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.WEB_REWARDS_AVAILABLE);
-		this.kleiRewardsAcknowledged = false;
-		this.acknowledgeButton.ClearOnClick();
-		this.acceptButton.ClearOnClick();
-		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.OPEN_URL_BUTTON);
-		this.acceptButton.onClick += delegate
-		{
-			this.kleiRewardsAcknowledged = true;
-			string text = "https://accounts.klei.com/account/rewards?game=ONI";
-			if (KleiAccount.KleiUserID != null)
-			{
-				text = text + "&expectedKU=" + KleiAccount.KleiUserID;
-			}
-			Application.OpenURL(text);
-			KleiItemsStatusRefresher.Active = true;
-		};
-		if (this.activePresentationRoutine != null)
-		{
-			base.StopCoroutine(this.activePresentationRoutine);
-		}
-		this.activePresentationRoutine = base.StartCoroutine(this.PresentKleiRewardsRoutine(firstItemPresentation));
 	}
 
 	public void PresentNoItemAvailablePrompt(bool firstItemPresentation)
@@ -208,51 +172,6 @@ public class KleiItemDropScreen : KModalScreen
 		{
 			this.shieldMaskRect.sizeDelta = v2;
 		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, 0f), 0.25f, Easing.CircInOut);
-		yield break;
-	}
-
-	private IEnumerator PresentKleiRewardsRoutine(bool firstItem)
-	{
-		yield return null;
-		this.itemNameLabel.SetText("");
-		this.itemDescriptionLabel.SetText("");
-		this.itemRarityLabel.SetText("");
-		this.itemCategoryLabel.SetText("");
-		if (firstItem)
-		{
-			this.animatedPod.Play("idle", KAnim.PlayMode.Loop, 1f, 0f);
-			this.acceptButtonRect.gameObject.SetActive(false);
-			this.shieldMaskRect.sizeDelta = new Vector2(8f, 0f);
-			this.shieldMaskRect.gameObject.SetActive(true);
-		}
-		if (firstItem)
-		{
-			this.closeButton.gameObject.SetActive(false);
-			yield return Updater.WaitForSeconds(0.5f);
-			yield return this.AnimateScreenInRoutine();
-			yield return Updater.WaitForSeconds(0.125f);
-			this.closeButton.gameObject.SetActive(true);
-		}
-		else
-		{
-			yield return Updater.WaitForSeconds(0.25f);
-		}
-		Vector2 animate_offset = new Vector2(0f, -30f);
-		this.acceptButtonRect.FindOrAddComponent<CanvasGroup>().alpha = 0f;
-		this.acceptButtonRect.gameObject.SetActive(true);
-		this.acceptButtonPosition.SetOn(this.acceptButtonRect);
-		this.animatedPod.Play("powerup", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.WaitForSeconds(1.25f);
-		yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
-		yield return Updater.Until(() => this.kleiRewardsAcknowledged);
-		yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
-		this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.WaitForSeconds(1f);
-		this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
-		this.Show(false);
 		yield break;
 	}
 
@@ -393,7 +312,7 @@ public class KleiItemDropScreen : KModalScreen
 
 	public static bool HasItemsToShow()
 	{
-		return PermitItems.HasUnclaimedRewards() || PermitItems.HasUnopenedItem();
+		return PermitItems.HasUnopenedItem();
 	}
 
 	[SerializeField]
@@ -444,13 +363,9 @@ public class KleiItemDropScreen : KModalScreen
 
 	private bool giftAcknowledged;
 
-	private bool kleiRewardsAcknowledged;
-
 	private bool noItemAvailableAcknowledged;
 
 	public static KleiItemDropScreen Instance;
-
-	private const string REDEEM_MYSTERY_BOX_URL = "https://accounts.klei.com/account/rewards?game=ONI";
 
 	private bool shouldDoCloseRoutine;
 

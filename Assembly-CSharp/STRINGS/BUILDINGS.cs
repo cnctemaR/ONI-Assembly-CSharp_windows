@@ -5456,7 +5456,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Produces ",
-					UI.FormatAsLink("Blastshot", "MISSILEBASIC"),
+					UI.FormatAsLink("Blastshot", "MISSILELAUNCHER"),
 					" from ",
 					UI.FormatAsLink("Refined Metals", "REFINEDMETAL"),
 					" combined with ",
@@ -7550,7 +7550,12 @@ namespace STRINGS
 
 				public static LocString DESC = "Meteors that have been blown to smithereens leave behind no harvestable resources.";
 
-				public static LocString EFFECT = "Fires " + UI.FormatAsLink("Blastshot", "MISSILE_BASIC") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
+				public static LocString EFFECT = "Fires " + UI.FormatAsLink("Blastshot", "MISSILELAUNCHER") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Fires " + UI.FormatAsLink("Blastshot", "MISSILELAUNCHER") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.\n\nMeteors that have been blown to smithereens leave behind no harvestable resources.";
+				}
 			}
 
 			public class MASSIVEHEATSINK

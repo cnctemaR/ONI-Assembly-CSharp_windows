@@ -305,7 +305,7 @@ public class MainMenu : KScreen
 
 	private void RefreshInventoryNotification()
 	{
-		bool flag = PermitItems.HasUnclaimedRewards() || PermitItems.HasUnopenedItem();
+		bool flag = PermitItems.HasUnopenedItem();
 		this.lockerButton.GetComponent<HierarchyReferences>().GetReference<RectTransform>("AttentionIcon").gameObject.SetActive(flag);
 	}
 
@@ -494,7 +494,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 551176U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
+				if (header.buildVersion > 552078U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
 				{
 					flag = false;
 				}

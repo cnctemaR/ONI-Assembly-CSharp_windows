@@ -77,6 +77,7 @@ public class DragTool : InterfaceTool
 		cursor_pos = this.ClampPositionToWorld(cursor_pos, ClusterManager.Instance.activeWorld);
 		this.dragging = true;
 		this.downPos = cursor_pos;
+		this.cellChangedSinceDown = false;
 		this.previousCursorPos = cursor_pos;
 		if (this.currentVirtualInputInUse != null)
 		{
@@ -250,7 +251,7 @@ public class DragTool : InterfaceTool
 	protected Vector3 SnapToLine(Vector3 cursorPos)
 	{
 		Vector3 vector = cursorPos - this.downPos;
-		if (this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid)
+		if (this.canChangeDragAxis || (!this.canChangeDragAxis && !this.cellChangedSinceDown) || this.dragAxis == DragTool.DragAxis.Invalid)
 		{
 			this.dragAxis = DragTool.DragAxis.Invalid;
 			if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
@@ -300,6 +301,10 @@ public class DragTool : InterfaceTool
 		if (!this.dragging)
 		{
 			return;
+		}
+		if (Grid.PosToCell(cursorPos) != Grid.PosToCell(this.downPos))
+		{
+			this.cellChangedSinceDown = true;
 		}
 		DragTool.Mode mode = this.GetMode();
 		if (mode != DragTool.Mode.Brush)
@@ -545,6 +550,8 @@ public class DragTool : InterfaceTool
 	protected int lineModeMaxLength = -1;
 
 	protected Vector3 downPos;
+
+	private bool cellChangedSinceDown;
 
 	private VirtualInputModule currentVirtualInputInUse;
 

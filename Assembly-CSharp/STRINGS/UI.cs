@@ -1675,91 +1675,91 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Unidentified Object";
 
-					public static LocString DESCRIPTION = "A cosmic anomaly is traveling through the galaxy.\n\nIts origins and purpose are currently unknown, though a " + BUILDINGS.PREFABS.TELESCOPE.NAME + " could change that.";
+					public static LocString DESCRIPTION = "A cosmic anomaly is traveling through the galaxy.\n\nIts origins and purpose are currently unknown, though a " + BUILDINGS.PREFABS.CLUSTERTELESCOPE.NAME + " could change that.";
 				}
 
 				public class SLIME
 				{
 					public static LocString NAME = "Slimy Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of slimy, biodynamic meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of slimy, biodynamic meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class SNOW
 				{
 					public static LocString NAME = "Blizzard Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of cold, cold meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of cold, cold meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class ICE
 				{
 					public static LocString NAME = "Ice Meteor Shower";
 
-					public static LocString DESCRIPTION = "A hailstorm of icy space rocks on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A hailstorm of icy space rocks on a collision course with the surface of an asteroid.";
 				}
 
 				public class COPPER
 				{
 					public static LocString NAME = "Copper Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of metallic meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of metallic meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class IRON
 				{
 					public static LocString NAME = "Iron Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of metallic space rocks on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of metallic space rocks on a collision course with the surface of an asteroid.";
 				}
 
 				public class GOLD
 				{
 					public static LocString NAME = "Gold Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of shiny metallic space rocks on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of shiny metallic space rocks on a collision course with the surface of an asteroid.";
 				}
 
 				public class URANIUM
 				{
 					public static LocString NAME = "Uranium Meteor Shower";
 
-					public static LocString DESCRIPTION = "A toxic shower of radioactive meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A toxic shower of radioactive meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class LIGHTDUST
 				{
 					public static LocString NAME = "Dust Fluff Meteor Shower";
 
-					public static LocString DESCRIPTION = "A cloud-like shower of dust fluff meteors heading towards the asteroid's surface.";
+					public static LocString DESCRIPTION = "A cloud-like shower of dust fluff meteors heading towards the surface of an asteroid.";
 				}
 
 				public class HEAVYDUST
 				{
 					public static LocString NAME = "Dense Dust Meteor Shower";
 
-					public static LocString DESCRIPTION = "A dark cloud of heavy dust meteors heading towards the asteroid's surface.";
+					public static LocString DESCRIPTION = "A dark cloud of heavy dust meteors heading towards the surface of an asteroid.";
 				}
 
 				public class REGOLITH
 				{
 					public static LocString NAME = "Regolith Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of rocky meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of rocky meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class OXYLITE
 				{
 					public static LocString NAME = "Oxylite Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of rocky, oxygen-rich meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of rocky, oxygen-rich meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class BLEACHSTONE
 				{
 					public static LocString NAME = "Bleach Stone Meteor Shower";
 
-					public static LocString DESCRIPTION = "A shower of bleach stone meteors on a collision course with the asteroid's surface.";
+					public static LocString DESCRIPTION = "A shower of bleach stone meteors on a collision course with the surface of an asteroid.";
 				}
 
 				public class MOO
@@ -12748,7 +12748,7 @@ namespace STRINGS
 
 				public static LocString GROUPNAME_CLUSTER_POI = "POINT OF INTEREST";
 
-				public static LocString NO_METEORSHOWERS = "No meteor showers expected";
+				public static LocString NO_METEORSHOWERS = "No meteor showers forecasted";
 
 				public static LocString NO_GEYSERS = "No geysers detected";
 
@@ -14571,7 +14571,7 @@ namespace STRINGS
 					"\n\nDuplicants can operate buildings more quickly when they're well lit"
 				});
 
-				public static LocString METEOR_SHOWER_SINGLE_METEOR_PERCENTAGE_TOOLTIP = "Percentage of meteors that fall in a shower";
+				public static LocString METEOR_SHOWER_SINGLE_METEOR_PERCENTAGE_TOOLTIP = "Distribution of meteor types in this shower";
 
 				public static LocString SEED_PRODUCTION_DIG_ONLY = "May be replanted, but will produce no further " + UI.PRE_KEYWORD + "Seeds" + UI.PST_KEYWORD;
 

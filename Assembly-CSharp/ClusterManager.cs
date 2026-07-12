@@ -95,7 +95,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		this._discoveredAsteroidIds.Clear();
 		for (int i = 0; i < pooledList.Count; i++)
 		{
-			if (pooledList[i].IsDiscovered && !this.m_worldContainers[i].IsModuleInterior)
+			if (pooledList[i].IsDiscovered && !pooledList[i].IsModuleInterior)
 			{
 				this._discoveredAsteroidIds.Add(pooledList[i].id);
 			}

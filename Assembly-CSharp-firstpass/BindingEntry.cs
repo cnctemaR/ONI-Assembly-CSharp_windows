@@ -42,10 +42,6 @@ public struct BindingEntry : IEquatable<BindingEntry>
 		this.mRebindable = rebindable;
 		this.mIgnoreRootConflics = ignore_root_conflicts;
 		this.dlcIds = dlcIds;
-		if (this.dlcIds == null)
-		{
-			this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
-		}
 	}
 
 	public bool Equals(BindingEntry other)

@@ -187,10 +187,15 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		this.NotifyResearchCenters(GameHashes.ActiveResearchChanged, this.queuedTech);
 		this.CheckBuyResearch();
 		this.CheckResearchBuildings(null);
-		if (this.NoResearcherRole != null)
+		this.UpdateResearcherRoleNotification();
+	}
+
+	private void UpdateResearcherRoleNotification()
+	{
+		if (this.NoResearcherRoleNotification != null)
 		{
-			this.notifier.Remove(this.NoResearcherRole);
-			this.NoResearcherRole = null;
+			this.notifier.Remove(this.NoResearcherRoleNotification);
+			this.NoResearcherRoleNotification = null;
 		}
 		if (this.activeResearch != null)
 		{
@@ -213,8 +218,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			}
 			if (skill != null)
 			{
-				this.NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_SKILL, NotificationType.Bad, new Func<List<Notification>, object, string>(this.NoResearcherRoleTooltip), skill, false, 12f, null, null, null, true, false, false);
-				this.notifier.Add(this.NoResearcherRole, "");
+				this.NoResearcherRoleNotification = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_SKILL, NotificationType.Bad, new Func<List<Notification>, object, string>(this.NoResearcherRoleTooltip), skill, false, 12f, null, null, null, true, false, false);
+				this.notifier.Add(this.NoResearcherRoleNotification, "");
 			}
 		}
 	}
@@ -335,17 +340,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private void OnRolesUpdated(object data)
 	{
-		this.notifier.Remove(this.NoResearcherRole);
-		bool flag = false;
-		if (this.activeResearch != null && ((this.activeResearch.tech.costsByResearchTypeID.ContainsKey("advanced") && this.activeResearch.tech.costsByResearchTypeID["advanced"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("nuclear") && this.activeResearch.tech.costsByResearchTypeID["nuclear"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowNuclearResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("orbital") && this.activeResearch.tech.costsByResearchTypeID["orbital"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowOrbitalResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("space") && this.activeResearch.tech.costsByResearchTypeID["space"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id, -1))))
-		{
-			flag = true;
-		}
-		if (flag)
-		{
-			this.NoResearcherRole.ToolTip = new Func<List<Notification>, object, string>(this.NoResearcherRoleTooltip);
-			this.notifier.Add(this.NoResearcherRole, "");
-		}
+		this.UpdateResearcherRoleNotification();
 	}
 
 	public string GetMissingResearchBuildingName()
@@ -409,7 +404,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private TechInstance activeResearch;
 
-	private Notification NoResearcherRole;
+	private Notification NoResearcherRoleNotification;
 
 	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null, null, true, false, false);
 

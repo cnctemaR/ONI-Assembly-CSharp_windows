@@ -7991,7 +7991,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Meteor Blaster";
 
-				public static LocString DESC = "Meteors that have been blown to smithereens leave behind no harvestable resources.";
+				public static LocString DESC = "Some meteors drop harvestable resources when they're blown to smithereens.";
 
 				public static LocString EFFECT = "Fires " + UI.FormatAsLink("Blastshot", "MISSILELAUNCHER") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
 

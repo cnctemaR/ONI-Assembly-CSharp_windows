@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D701CF3F-4792-4E16-B1D6-3B821C51EB74}</ProjectGuid>
+    <ProjectGuid>{48E248DD-BC28-4A9A-BD04-0BF6145AA934}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.U2D</RootNamespace>
     <AssemblyName>UnityEngine.SpriteShapeModule</AssemblyName>
@@ -26,11 +26,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{D701CF3F-4792-4E16-B1D6-3B821C51EB5C}</Project>
+      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA91C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D701CF3F-4792-4E16-B1D6-3B821C51EB72}</Project>
+      <Project>{48E248DD-BC28-4A9A-BD04-0BF6145AA932}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

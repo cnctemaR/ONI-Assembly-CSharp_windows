@@ -56,7 +56,11 @@ public class DevToolUI : DevTool
 				{
 					position = Input.mousePosition
 				}, pooledList);
-				DevToolManager.Instance.panels.AddOrGetDevTool<DevToolUI>().Internal_Ping(pooledList[0]);
+				DevToolUI devToolUI = DevToolManager.Instance.panels.AddOrGetDevTool<DevToolUI>();
+				if (pooledList.Count > 0)
+				{
+					devToolUI.Internal_Ping(pooledList[0]);
+				}
 			}
 		}
 	}

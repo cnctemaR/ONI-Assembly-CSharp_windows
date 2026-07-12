@@ -51,7 +51,7 @@ public class ChoreProvider : KMonoBehaviour
 	{
 		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
 		List<Chore> list;
-		if (e == null || e.lastParentId == (int)ClusterManager.INVALID_WORLD_IDX || e.lastParentId == e.world.ParentWorldId || !this.choreWorldMap.TryGetValue(e.lastParentId, out list))
+		if (e == null || e.lastParentId == 255 || e.lastParentId == e.world.ParentWorldId || !this.choreWorldMap.TryGetValue(e.lastParentId, out list))
 		{
 			return;
 		}

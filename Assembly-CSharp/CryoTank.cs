@@ -46,6 +46,11 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		throw new NotImplementedException();
 	}
 
+	public int HorizontalGroupID()
+	{
+		return -1;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -97,7 +102,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		GameObject gameObject = base.smi.sm.defrostedDuplicant.Get(base.smi);
 		if (this.opener != null && gameObject != null)
 		{
-			SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.CryoFriend, -1).smi as SimpleEvent.StatesInstance;
+			SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.CryoFriend, -1, null).smi as SimpleEvent.StatesInstance;
 			statesInstance.minions = new GameObject[] { gameObject, this.opener };
 			statesInstance.SetTextParameter("dupe", this.opener.GetProperName());
 			statesInstance.SetTextParameter("friend", gameObject.GetProperName());

@@ -66,6 +66,8 @@ public class EquippableWorkable : Workable, ISaveLoadable
 			if (soleOwner)
 			{
 				soleOwner.GetComponent<Equipment>().Equip(this.equippable);
+				Prioritizable.RemoveRef(this.equippable.gameObject);
+				this.chore = null;
 			}
 		}
 	}

@@ -377,6 +377,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public List<ResourceRef<ClothingItemResource>> clothingItems = new List<ResourceRef<ClothingItemResource>>();
 
+	[Serialize]
+	public Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> wearables = new Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable>();
+
 	[Obsolete("Deprecated, use forbiddenTagSet")]
 	[Serialize]
 	public List<Tag> forbiddenTags;

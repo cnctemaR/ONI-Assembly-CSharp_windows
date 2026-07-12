@@ -485,6 +485,10 @@ namespace Database
 				}
 				return str;
 			};
+			this.FossilMineIdle = this.CreateStatusItem("FossilIdle", "CODEX.STORY_TRAITS.FOSSILHUNT", "status_item_fabricator_select", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.FossilMineEmpty = this.CreateStatusItem("FossilEmpty", "CODEX.STORY_TRAITS.FOSSILHUNT", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.FossilMinePendingWork = this.CreateStatusItem("FossilMinePendingWork", "CODEX.STORY_TRAITS.FOSSILHUNT", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.FossilEntombed = new StatusItem("FossilEntombed", "CODEX.STORY_TRAITS.FOSSILHUNT", "status_item_entombed", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.Toilet = this.CreateStatusItem("Toilet", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Toilet.resolveStringCallback = delegate(string str, object data)
 			{
@@ -1185,6 +1189,8 @@ namespace Database
 				return str.Replace("{TimeToComplete}", statesInstance10.TimeTilDigested.ToString());
 			};
 			this.MegaBrainTankComplete = this.CreateStatusItem("MegaBrainTankComplete", BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
+			this.FossilHuntExcavationOrdered = this.CreateStatusItem("FossilHuntExcavationOrdered", BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.NAME, BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
+			this.FossilHuntExcavationInProgress = this.CreateStatusItem("FossilHuntExcavationInProgress", BUILDING.STATUSITEMS.FOSSILHUNT.EXCAVATING.NAME, BUILDING.STATUSITEMS.FOSSILHUNT.EXCAVATING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1419,6 +1425,14 @@ namespace Database
 		public StatusItem FabricatorIdle;
 
 		public StatusItem FabricatorEmpty;
+
+		public StatusItem FossilMineIdle;
+
+		public StatusItem FossilMineEmpty;
+
+		public StatusItem FossilEntombed;
+
+		public StatusItem FossilMinePendingWork;
 
 		public StatusItem FabricatorLacksHEP;
 
@@ -1735,5 +1749,9 @@ namespace Database
 		public StatusItem MegaBrainTankAllDupesAreDead;
 
 		public StatusItem MegaBrainTankComplete;
+
+		public StatusItem FossilHuntExcavationOrdered;
+
+		public StatusItem FossilHuntExcavationInProgress;
 	}
 }

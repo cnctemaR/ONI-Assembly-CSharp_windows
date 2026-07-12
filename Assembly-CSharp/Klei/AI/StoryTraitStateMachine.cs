@@ -161,7 +161,7 @@ namespace Klei.AI
 				this.ShowEventBeginUI();
 			}
 
-			public void OnPopupClosed()
+			public virtual void OnPopupClosed()
 			{
 				StoryInstance storyInstance = StoryManager.Instance.GetStoryInstance(base.def.Story.HashId);
 				if (storyInstance == null)

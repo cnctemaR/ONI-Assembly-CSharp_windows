@@ -41,6 +41,7 @@ public class ScoutLanderConfig : IEntityConfig
 			Placeable.PlacementRules.VisibleToSpace,
 			Placeable.PlacementRules.RestrictToWorld
 		};
+		placeable.checkRootCellOnly = true;
 		EntityTemplates.CreateAndRegisterPreview("ScoutLander_Preview", Assets.GetAnim("rocket_scout_cargo_lander_kanim"), "place", ObjectLayer.Building, 3, 3);
 		return gameObject;
 	}

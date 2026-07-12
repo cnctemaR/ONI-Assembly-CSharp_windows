@@ -4,7 +4,7 @@ using UnityEngine;
 public class UIAnimationVoiceSoundEvent : SoundEvent
 {
 	public UIAnimationVoiceSoundEvent(string file_name, string sound_name, int frame, bool looping)
-		: base(file_name, sound_name, frame, true, looping, (float)SoundEvent.IGNORE_INTERVAL, false)
+		: base(file_name, sound_name, frame, false, looping, (float)SoundEvent.IGNORE_INTERVAL, false)
 	{
 		this.actualSoundName = sound_name;
 	}

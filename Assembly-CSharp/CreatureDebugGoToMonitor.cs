@@ -34,6 +34,11 @@ public class CreatureDebugGoToMonitor : GameStateMachine<CreatureDebugGoToMonito
 			this.targetCell = DebugHandler.GetMouseCell();
 		}
 
+		public void GoToCell(int cellIndex)
+		{
+			this.targetCell = cellIndex;
+		}
+
 		public int targetCell = Grid.InvalidCell;
 	}
 }

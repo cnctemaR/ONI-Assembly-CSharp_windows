@@ -1,6 +1,5 @@
 ﻿using System;
 using TUNING;
-using UnityEngine;
 
 public class AdvancedApothecary : ComplexFabricator
 {
@@ -21,6 +20,5 @@ public class AdvancedApothecary : ComplexFabricator
 		this.workable.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.workable.requiredSkillPerk = Db.Get().SkillPerks.CanCompound.Id;
 		this.workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medicine_nuclear_kanim") };
-		this.workable.AnimOffset = new Vector3(-1f, 0f, 0f);
 	}
 }

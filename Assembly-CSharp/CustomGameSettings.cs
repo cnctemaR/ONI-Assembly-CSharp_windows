@@ -104,6 +104,7 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddQualitySettingConfig(CustomGameSettingConfigs.CalorieBurn);
 		this.AddQualitySettingConfig(CustomGameSettingConfigs.Morale);
 		this.AddQualitySettingConfig(CustomGameSettingConfigs.Durability);
+		this.AddQualitySettingConfig(CustomGameSettingConfigs.MeteorShowers);
 		if (flag)
 		{
 			this.AddQualitySettingConfig(CustomGameSettingConfigs.Radiation);

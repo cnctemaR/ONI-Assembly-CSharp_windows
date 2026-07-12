@@ -37,7 +37,7 @@ public class GameplayEventManager : KMonoBehaviour
 		this.activeEvents.RemoveAll((GameplayEventInstance x) => Db.Get().GameplayEvents.TryGet(x.eventID) == null);
 		foreach (GameplayEventInstance gameplayEventInstance in this.activeEvents)
 		{
-			this.StartEventInstance(gameplayEventInstance);
+			this.StartEventInstance(gameplayEventInstance, null);
 		}
 	}
 
@@ -87,15 +87,15 @@ public class GameplayEventManager : KMonoBehaviour
 		GameplayEventInstance gameplayEventInstance = this.GetGameplayEventInstance(eventType.Id, worldId);
 		if (gameplayEventInstance == null)
 		{
-			gameplayEventInstance = this.StartNewEvent(eventType, worldId);
+			gameplayEventInstance = this.StartNewEvent(eventType, worldId, null);
 		}
 		return gameplayEventInstance;
 	}
 
-	public GameplayEventInstance StartNewEvent(GameplayEvent eventType, int worldId = -1)
+	public GameplayEventInstance StartNewEvent(GameplayEvent eventType, int worldId = -1, Action<StateMachine.Instance> setupActionsBeforeStart = null)
 	{
 		GameplayEventInstance gameplayEventInstance = this.CreateGameplayEvent(eventType, worldId);
-		this.StartEventInstance(gameplayEventInstance);
+		this.StartEventInstance(gameplayEventInstance, setupActionsBeforeStart);
 		this.activeEvents.Add(gameplayEventInstance);
 		int num;
 		this.pastEvents.TryGetValue(gameplayEventInstance.eventID, out num);
@@ -103,13 +103,18 @@ public class GameplayEventManager : KMonoBehaviour
 		return gameplayEventInstance;
 	}
 
-	private void StartEventInstance(GameplayEventInstance gameplayEventInstance)
+	private void StartEventInstance(GameplayEventInstance gameplayEventInstance, Action<StateMachine.Instance> setupActionsBeforeStart = null)
 	{
 		StateMachine.Instance instance = gameplayEventInstance.PrepareEvent(this);
-		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(instance.OnStop, new Action<string, StateMachine.Status>(delegate(string reason, StateMachine.Status status)
+		StateMachine.Instance instance2 = instance;
+		instance2.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(instance2.OnStop, new Action<string, StateMachine.Status>(delegate(string reason, StateMachine.Status status)
 		{
 			this.activeEvents.Remove(gameplayEventInstance);
 		}));
+		if (setupActionsBeforeStart != null)
+		{
+			setupActionsBeforeStart(instance);
+		}
 		gameplayEventInstance.StartEvent();
 	}
 

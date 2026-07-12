@@ -24,6 +24,13 @@ namespace Database
 			{
 				new QuestCriteria_GreaterOrEqual("Decor", new float[] { 120f }, 1, null, (QuestCriteria.BehaviorFlags)6)
 			}));
+			this.FossilHuntQuest = base.Add(new Quest("FossilHuntQuest", new QuestCriteria[]
+			{
+				new QuestCriteria_Equals("LostSpecimen", new float[] { 1f }, 1, null, QuestCriteria.BehaviorFlags.TrackValues),
+				new QuestCriteria_Equals("LostIceFossil", new float[] { 1f }, 1, null, QuestCriteria.BehaviorFlags.TrackValues),
+				new QuestCriteria_Equals("LostResinFossil", new float[] { 1f }, 1, null, QuestCriteria.BehaviorFlags.TrackValues),
+				new QuestCriteria_Equals("LostRockFossil", new float[] { 1f }, 1, null, QuestCriteria.BehaviorFlags.TrackValues)
+			}));
 		}
 
 		public Quest LonelyMinionGreetingQuest;
@@ -33,5 +40,7 @@ namespace Database
 		public Quest LonelyMinionPowerQuest;
 
 		public Quest LonelyMinionDecorQuest;
+
+		public Quest FossilHuntQuest;
 	}
 }

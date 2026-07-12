@@ -1,108 +1,138 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 using ImGuiNET;
 using UnityEngine;
 
 public class DevToolStatusItems : DevTool
 {
 	public DevToolStatusItems()
+		: this(Option.None)
 	{
-		ValueTuple<string, Action<StatusItemGroup.Entry>>[] array = new ValueTuple<string, Action<StatusItemGroup.Entry>>[4];
-		array[0] = new ValueTuple<string, Action<StatusItemGroup.Entry>>("Text", delegate(StatusItemGroup.Entry entry)
+	}
+
+	public DevToolStatusItems(Option<DevToolEntityTarget.ForWorldGameObject> target)
+	{
+		this.targetOpt = target;
+		this.tableDrawer = ImGuiObjectTableDrawer<StatusItemGroup.Entry>.New().RemoveFlags(ImGuiTableFlags.SizingFixedFit).AddFlags(ImGuiTableFlags.Resizable)
+			.Column("Text", (StatusItemGroup.Entry entry) => entry.GetName())
+			.Column("Id Name", (StatusItemGroup.Entry entry) => entry.item.Id)
+			.Column("Notification Type", (StatusItemGroup.Entry entry) => entry.item.notificationType)
+			.Column("Category", delegate(StatusItemGroup.Entry entry)
+			{
+				StatusItemCategory category = entry.category;
+				return ((category != null) ? category.Name : null) ?? "<no category>";
+			})
+			.Column("OnAdded Callstack", delegate(StatusItemGroup.Entry entry)
+			{
+				StackTrace stackTrace;
+				if (this.statusItemStackTraceWatcher.GetStackTraceForEntry(entry, out stackTrace))
+				{
+					if (ImGui.Selectable("copy callstack"))
+					{
+						ImGui.SetClipboardText(stackTrace.ToString());
+					}
+					ImGuiEx.TooltipForPrevious(stackTrace.ToString());
+					return;
+				}
+				ImGui.Text("<None>");
+			})
+			.Build();
+		base.OnUninit += delegate
 		{
-			ImGui.Text(entry.GetName());
-		});
-		array[1] = new ValueTuple<string, Action<StatusItemGroup.Entry>>("Id Name", delegate(StatusItemGroup.Entry entry)
-		{
-			ImGui.Text(entry.item.Id);
-		});
-		array[2] = new ValueTuple<string, Action<StatusItemGroup.Entry>>("Notification Type", delegate(StatusItemGroup.Entry entry)
-		{
-			ImGui.Text(entry.item.notificationType.ToString());
-		});
-		array[3] = new ValueTuple<string, Action<StatusItemGroup.Entry>>("Category", delegate(StatusItemGroup.Entry entry)
-		{
-			StatusItemCategory category = entry.category;
-			ImGui.Text(((category != null) ? category.Name : null) ?? "<no category>");
-		});
-		this.columns = array;
-		base..ctor();
-		this.RequiresGameRunning = true;
+			this.statusItemStackTraceWatcher.Dispose();
+		};
 	}
 
 	protected override void RenderTo(DevPanel panel)
 	{
-		if (SelectTool.Instance == null)
+		this.statusItemStackTraceWatcher.SetTarget(this.targetOpt.AndThen<GameObject>((DevToolEntityTarget.ForWorldGameObject t) => t.gameObject).AndThen<KSelectable>((GameObject go) => go.GetComponent<KSelectable>()).AndThen<StatusItemGroup>((KSelectable s) => s.GetStatusItemGroup()));
+		if (ImGui.BeginMenuBar())
 		{
-			ImGui.Text("no select tool instance");
+			if (ImGui.MenuItem("Eyedrop New Target"))
+			{
+				panel.PushDevTool(new DevToolEntity_EyeDrop(delegate(DevToolEntityTarget target)
+				{
+					this.targetOpt = (DevToolEntityTarget.ForWorldGameObject)target;
+				}, new Func<DevToolEntityTarget, Option<string>>(DevToolStatusItems.GetErrorForCandidateTarget)));
+			}
+			string text = null;
+			if (this.targetOpt.IsNone())
+			{
+				text = "No target selected.";
+			}
+			else
+			{
+				Option<string> errorForCandidateTarget = DevToolStatusItems.GetErrorForCandidateTarget(this.targetOpt.Unwrap());
+				if (errorForCandidateTarget.IsSome())
+				{
+					text = errorForCandidateTarget.Unwrap();
+				}
+			}
+			if (ImGuiEx.MenuItem("Debug Target", text))
+			{
+				panel.PushValue<DevToolEntityTarget.ForWorldGameObject>(this.targetOpt.Unwrap());
+			}
+			ImGui.EndMenuBar();
+		}
+		this.Name = "Status Items";
+		if (this.targetOpt.IsNone())
+		{
+			ImGui.TextWrapped("No Target selected");
 			return;
 		}
-		KSelectable selected = SelectTool.Instance.selected;
-		if (selected == null || !selected)
+		DevToolEntityTarget.ForWorldGameObject forWorldGameObject = this.targetOpt.Unwrap();
+		Option<string> errorForCandidateTarget2 = DevToolStatusItems.GetErrorForCandidateTarget(forWorldGameObject);
+		if (errorForCandidateTarget2.IsSome())
 		{
-			ImGui.Text("no object is selected");
+			ImGui.TextWrapped(errorForCandidateTarget2.Unwrap());
 			return;
 		}
-		StatusItemGroup statusItemGroup = selected.GetStatusItemGroup();
-		if (statusItemGroup == null)
+		this.Name = "Status Items for: " + DevToolEntity.GetNameFor(forWorldGameObject.gameObject);
+		bool shouldWatch = this.statusItemStackTraceWatcher.GetShouldWatch();
+		if (ImGui.Checkbox("Should Track OnAdded Callstacks", ref shouldWatch))
 		{
-			ImGui.Text("object doesn't have a StatusItemGroup");
-			return;
+			this.statusItemStackTraceWatcher.SetShouldWatch(shouldWatch);
 		}
-		DevToolStatusItems.DrawTable<StatusItemGroup.Entry>("status_items", this.columns, statusItemGroup.GetEnumerator());
+		ImGui.Checkbox("Draw Bounding Box", ref this.shouldDrawBoundingBox);
+		this.tableDrawer.Draw(forWorldGameObject.gameObject.GetComponent<KSelectable>().GetStatusItemGroup().GetEnumerator());
+		if (this.shouldDrawBoundingBox)
+		{
+			Option<ValueTuple<Vector2, Vector2>> screenRect = forWorldGameObject.GetScreenRect();
+			if (screenRect.IsSome())
+			{
+				DevToolEntity.DrawBoundingBox(screenRect.Unwrap(), forWorldGameObject.GetDebugName(), ImGui.IsWindowFocused());
+			}
+		}
 	}
 
-	public static void DrawTable<T>(string string_id, [TupleElementNames(new string[] { "header", "draw" })] ValueTuple<string, Action<T>>[] columns, IEnumerator<T> data)
+	public static Option<string> GetErrorForCandidateTarget(DevToolEntityTarget uncastTarget)
 	{
-		ImGuiTableFlags imGuiTableFlags = ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY;
-		if (ImGui.BeginTable(string_id, columns.Length, imGuiTableFlags))
+		if (!(uncastTarget is DevToolEntityTarget.ForWorldGameObject))
 		{
-			ValueTuple<string, Action<T>>[] array = columns;
-			for (int i = 0; i < array.Length; i++)
-			{
-				ImGui.TableSetupColumn(array[i].Item1);
-			}
-			ImGui.TableHeadersRow();
-			try
-			{
-				while (data.MoveNext())
-				{
-					T t = data.Current;
-					ImGui.TableNextRow();
-					foreach (ValueTuple<string, Action<T>> valueTuple in columns)
-					{
-						ImGui.TableNextColumn();
-						try
-						{
-							valueTuple.Item2(t);
-						}
-						catch (Exception ex)
-						{
-							ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-							ImGui.Text("<ERROR: " + ex.Message + ">");
-							if (ImGui.IsItemHovered())
-							{
-								ImGui.BeginTooltip();
-								ImGui.SetTooltip(ex.ToString());
-								ImGui.EndTooltip();
-							}
-							ImGui.PopStyleColor(1);
-						}
-					}
-				}
-			}
-			finally
-			{
-				if (data != null)
-				{
-					data.Dispose();
-				}
-			}
-			ImGui.EndTable();
+			return "Target must be a world GameObject";
 		}
+		DevToolEntityTarget.ForWorldGameObject forWorldGameObject = (DevToolEntityTarget.ForWorldGameObject)uncastTarget;
+		if (forWorldGameObject.gameObject.IsNullOrDestroyed())
+		{
+			return "Target GameObject is null or destroyed";
+		}
+		KSelectable component = forWorldGameObject.gameObject.GetComponent<KSelectable>();
+		if (component.IsNullOrDestroyed())
+		{
+			return "Target GameObject doesn't have a KSelectable";
+		}
+		if (component.GetStatusItemGroup().IsNullOrDestroyed())
+		{
+			return "Target GameObject doesn't have a StatusItemGroup";
+		}
+		return Option.None;
 	}
 
-	[TupleElementNames(new string[] { "header", "draw" })]
-	private ValueTuple<string, Action<StatusItemGroup.Entry>>[] columns;
+	private Option<DevToolEntityTarget.ForWorldGameObject> targetOpt;
+
+	private ImGuiObjectTableDrawer<StatusItemGroup.Entry> tableDrawer;
+
+	private StatusItemStackTraceWatcher statusItemStackTraceWatcher = new StatusItemStackTraceWatcher();
+
+	private bool shouldDrawBoundingBox = true;
 }

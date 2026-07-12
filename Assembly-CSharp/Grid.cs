@@ -563,7 +563,7 @@ public class Grid
 
 	public static bool IsWorldValidCell(int cell)
 	{
-		return Grid.IsValidCell(cell) && Grid.WorldIdx[cell] != ClusterManager.INVALID_WORLD_IDX;
+		return Grid.IsValidCell(cell) && Grid.WorldIdx[cell] != byte.MaxValue;
 	}
 
 	public static bool IsValidCell(int cell)

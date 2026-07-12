@@ -1155,6 +1155,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	protected ComplexFabricatorWorkable workable;
 
+	public string SideScreenSubtitleLabel = UI.UISIDESCREENS.FABRICATORSIDESCREEN.SUBTITLE;
+
+	public string SideScreenRecipeScreenTitle = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_DETAILS;
+
 	[SerializeField]
 	public HashedString fetchChoreTypeIdHash = Db.Get().ChoreTypes.FabricateFetch.IdHash;
 
@@ -1232,7 +1236,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	protected Operational operational;
 
 	[MyCmpAdd]
-	private ComplexFabricatorSM fabricatorSM;
+	protected ComplexFabricatorSM fabricatorSM;
 
 	private ProgressBar progressBar;
 

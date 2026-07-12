@@ -272,7 +272,7 @@ namespace ProcGen
 				this.zoneTypes = new List<SubWorld.ZoneType>();
 				this.subworldNames = new List<string>();
 				this.command = World.AllowedCellsFilter.Command.Replace;
-				this.optional = false;
+				this.ignoreIfMissingTag = false;
 			}
 
 			public World.AllowedCellsFilter.TagCommand tagcommand { get; private set; }
@@ -291,7 +291,7 @@ namespace ProcGen
 
 			public List<string> subworldNames { get; private set; }
 
-			public bool optional { get; set; }
+			public bool ignoreIfMissingTag { get; set; }
 
 			public void Validate(string parentFile, List<WeightedSubworldName> parentCachedFiles)
 			{

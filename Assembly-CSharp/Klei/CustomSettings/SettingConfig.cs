@@ -19,6 +19,7 @@ namespace Klei.CustomSettings
 			this.required_content = required_content;
 			this.missing_content_default = missing_content_default;
 			this.editor_only = editor_only;
+			DebugUtil.DevAssert(coordinate_dimension <= 1162261467L, "CustomGameSetting's coordinate_dimension is too large, if you're seeing this message it means too many settings have been added", null);
 		}
 
 		public string id { get; private set; }

@@ -24,6 +24,28 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 		}
 	}
 
+	public void SetStatusItem(StatusItem si)
+	{
+		bool flag = this.showStatusItemOnEntombed;
+		this.SetShowStatusItemOnEntombed(false);
+		this.EntombedStatusItem = si;
+		this.SetShowStatusItemOnEntombed(flag);
+	}
+
+	public void SetShowStatusItemOnEntombed(bool val)
+	{
+		this.showStatusItemOnEntombed = val;
+		if (this.isEntombed && this.EntombedStatusItem != null)
+		{
+			if (this.showStatusItemOnEntombed)
+			{
+				this.selectable.AddStatusItem(this.EntombedStatusItem, null);
+				return;
+			}
+			this.selectable.RemoveStatusItem(this.EntombedStatusItem, false);
+		}
+	}
+
 	public string WiltStateString
 	{
 		get
@@ -43,6 +65,10 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.EntombedStatusItem == null)
+		{
+			this.EntombedStatusItem = this.DefaultEntombedStatusItem;
+		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("EntombVulnerable", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.CheckEntombed();
 		if (this.isEntombed)
@@ -75,18 +101,24 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 			if (!this.isEntombed)
 			{
 				this.isEntombed = true;
-				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, base.gameObject);
+				if (this.showStatusItemOnEntombed)
+				{
+					this.selectable.AddStatusItem(this.EntombedStatusItem, base.gameObject);
+				}
 				base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
 				base.Trigger(-1089732772, true);
-				return;
 			}
 		}
 		else if (this.isEntombed)
 		{
 			this.isEntombed = false;
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed, false);
+			this.selectable.RemoveStatusItem(this.EntombedStatusItem, false);
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
 			base.Trigger(-1089732772, false);
+		}
+		if (this.operational != null)
+		{
+			this.operational.SetFlag(EntombVulnerable.notEntombedFlag, !this.isEntombed);
 		}
 	}
 
@@ -103,10 +135,22 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	[MyCmpReq]
 	private KSelectable selectable;
 
+	[MyCmpGet]
+	private Operational operational;
+
 	private OccupyArea _occupyArea;
 
 	[Serialize]
 	private bool isEntombed;
+
+	private StatusItem DefaultEntombedStatusItem = Db.Get().CreatureStatusItems.Entombed;
+
+	[NonSerialized]
+	private StatusItem EntombedStatusItem;
+
+	private bool showStatusItemOnEntombed = true;
+
+	public static readonly Operational.Flag notEntombedFlag = new Operational.Flag("not_entombed", Operational.Flag.Type.Functional);
 
 	private HandleVector<int>.Handle partitionerEntry;
 

@@ -442,6 +442,7 @@ namespace Database
 				ClinicDreamable clinicDreamable = (ClinicDreamable)data;
 				return str.Replace("{time}", GameUtil.GetFormattedTime(clinicDreamable.WorkTimeRemaining, "F0"));
 			};
+			this.FossilHunt_WorkerExcavating = this.CreateStatusItem("FossilHunt_WorkerExcavating", DUPLICANTS.STATUSITEMS.FOSSILHUNT.WORKEREXCAVATING.NAME, DUPLICANTS.STATUSITEMS.FOSSILHUNT.WORKEREXCAVATING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HasBalloon = this.CreateStatusItem("JoyResponse_HasBalloon", DUPLICANTS.MODIFIERS.HASBALLOON.NAME, DUPLICANTS.MODIFIERS.HASBALLOON.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HasBalloon.resolveTooltipCallback = delegate(string str, object data)
 			{
@@ -454,6 +455,7 @@ namespace Database
 				InspirationEffectMonitor.Instance instance3 = (InspirationEffectMonitor.Instance)data;
 				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance3.sm.inspirationTimeRemaining.Get(instance3), "F1", false));
 			};
+			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 		}
 
 		public StatusItem Idle;
@@ -671,6 +673,10 @@ namespace Database
 		public StatusItem JoyResponse_HasBalloon;
 
 		public StatusItem JoyResponse_HeardJoySinger;
+
+		public StatusItem Meteorphile;
+
+		public StatusItem FossilHunt_WorkerExcavating;
 
 		private const int NONE_OVERLAY = 0;
 	}

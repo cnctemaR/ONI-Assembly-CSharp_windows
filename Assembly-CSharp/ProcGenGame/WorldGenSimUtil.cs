@@ -11,7 +11,7 @@ namespace ProcGenGame
 {
 	public static class WorldGenSimUtil
 	{
-		public unsafe static bool DoSettleSim(WorldGenSettings settings, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
+		public unsafe static bool DoSettleSim(WorldGenSettings settings, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
 		{
 			Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
@@ -36,14 +36,14 @@ namespace ProcGenGame
 				if (j == 498)
 				{
 					HashSet<int> hashSet = new HashSet<int>();
-					foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair in templateSpawnTargets)
+					foreach (TemplateSpawning.TemplateSpawner templateSpawner in templateSpawnTargets)
 					{
-						if (keyValuePair.Value.cells != null)
+						if (templateSpawner.container.cells != null)
 						{
-							for (int k = 0; k < keyValuePair.Value.cells.Count; k++)
+							for (int k = 0; k < templateSpawner.container.cells.Count; k++)
 							{
-								Cell cell = keyValuePair.Value.cells[k];
-								int num = Grid.OffsetCell(Grid.XYToCell(keyValuePair.Key.x, keyValuePair.Key.y), cell.location_x, cell.location_y);
+								Cell cell = templateSpawner.container.cells[k];
+								int num = Grid.OffsetCell(Grid.XYToCell(templateSpawner.position.x, templateSpawner.position.y), cell.location_x, cell.location_y);
 								if (Grid.IsValidCell(num) && !hashSet.Contains(num))
 								{
 									hashSet.Add(num);

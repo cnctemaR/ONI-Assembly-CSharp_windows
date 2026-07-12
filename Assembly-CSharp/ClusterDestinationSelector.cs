@@ -56,6 +56,8 @@ public class ClusterDestinationSelector : KMonoBehaviour
 	[Serialize]
 	public bool canNavigateFogOfWar;
 
+	public bool dodgesHiddenAsteroids;
+
 	public bool requireLaunchPadOnAsteroidDestination;
 
 	public bool shouldPointTowardsPath;

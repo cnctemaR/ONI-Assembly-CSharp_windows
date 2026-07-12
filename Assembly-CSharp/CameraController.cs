@@ -70,7 +70,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			if (ClusterManager.Instance == null)
 			{
-				return (int)ClusterManager.INVALID_WORLD_IDX;
+				return 255;
 			}
 			return ClusterManager.Instance.activeWorldId;
 		}
@@ -741,7 +741,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SetTargetPos(Vector3 pos, float orthographic_size, bool playSound)
 	{
 		int num = Grid.PosToCell(pos);
-		if (!Grid.IsValidCell(num) || Grid.WorldIdx[num] == ClusterManager.INVALID_WORLD_IDX || ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]) == null)
+		if (!Grid.IsValidCell(num) || Grid.WorldIdx[num] == 255 || ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]) == null)
 		{
 			return;
 		}
@@ -775,7 +775,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SetTargetPosForWorldChange(Vector3 pos, float orthographic_size, bool playSound)
 	{
 		int num = Grid.PosToCell(pos);
-		if (!Grid.IsValidCell(num) || Grid.WorldIdx[num] == ClusterManager.INVALID_WORLD_IDX || ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]) == null)
+		if (!Grid.IsValidCell(num) || Grid.WorldIdx[num] == 255 || ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]) == null)
 		{
 			return;
 		}
@@ -1135,6 +1135,26 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		return Vector3.zero;
 	}
 
+	public static float GetHighestVisibleCell_Height(byte worldID = 255)
+	{
+		Vector2 zero = Vector2.zero;
+		Vector2 vector = new Vector2(Grid.WidthInMeters, Grid.HeightInMeters);
+		Camera main = Camera.main;
+		float orthographicSize = main.orthographicSize;
+		main.orthographicSize = 20f;
+		Ray ray = main.ViewportPointToRay(Vector3.one - Vector3.one * 0.33f);
+		Vector3 vector2 = CameraController.Instance.transform.GetPosition() - ray.origin;
+		main.orthographicSize = orthographicSize;
+		if (ClusterManager.Instance != null)
+		{
+			WorldContainer worldContainer = ((worldID == byte.MaxValue) ? ClusterManager.Instance.activeWorld : ClusterManager.Instance.GetWorld((int)worldID));
+			worldContainer.minimumBounds * Grid.CellSizeInMeters;
+			vector = worldContainer.maximumBounds * Grid.CellSizeInMeters;
+			new Vector2((float)worldContainer.Width, (float)worldContainer.Height) * Grid.CellSizeInMeters;
+		}
+		return vector.y * 1.1f + 20f + vector2.y;
+	}
+
 	private void ConstrainToWorld()
 	{
 		if (Game.Instance != null && Game.Instance.IsLoading())
@@ -1146,13 +1166,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			return;
 		}
 		Camera main = Camera.main;
-		float num = 0.33f;
-		Ray ray = main.ViewportPointToRay(Vector3.zero + Vector3.one * num);
-		Ray ray2 = main.ViewportPointToRay(Vector3.one - Vector3.one * num);
-		float num2 = Mathf.Abs(ray.origin.z / ray.direction.z);
-		float num3 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
-		Vector3 point = ray.GetPoint(num2);
-		Vector3 point2 = ray2.GetPoint(num3);
+		Ray ray = main.ViewportPointToRay(Vector3.zero + Vector3.one * 0.33f);
+		Ray ray2 = main.ViewportPointToRay(Vector3.one - Vector3.one * 0.33f);
+		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
+		float num2 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
+		Vector3 point = ray.GetPoint(num);
+		Vector3 point2 = ray2.GetPoint(num2);
 		Vector2 vector = Vector2.zero;
 		Vector2 vector2 = new Vector2(Grid.WidthInMeters, Grid.HeightInMeters);
 		Vector2 vector3 = vector2;
@@ -1173,15 +1192,15 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		vector5.y = Mathf.Max(vector.y * Grid.CellSizeInMeters, vector5.y);
 		ray.origin = vector5;
 		ray.direction = -ray.direction;
-		vector5 = ray.GetPoint(num2);
+		vector5 = ray.GetPoint(num);
 		base.transform.SetPosition(vector5 + vector4);
 		vector4 = base.transform.GetPosition() - ray2.origin;
 		vector5 = point2;
 		vector5.x = Mathf.Min(vector2.x, vector5.x);
-		vector5.y = Mathf.Min(vector2.y * this.MAX_Y_SCALE, vector5.y);
+		vector5.y = Mathf.Min(vector2.y * 1.1f, vector5.y);
 		ray2.origin = vector5;
 		ray2.direction = -ray2.direction;
-		vector5 = ray2.GetPoint(num3);
+		vector5 = ray2.GetPoint(num2);
 		Vector3 vector6 = vector5 + vector4;
 		vector6.z = -100f;
 		base.transform.SetPosition(vector6);
@@ -1343,7 +1362,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
 
-	public float MAX_Y_SCALE = 1.1f;
+	public const float MAX_Y_SCALE = 1.1f;
 
 	public LocText infoText;
 
@@ -1382,6 +1401,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private float overrideZoomSpeed;
 
 	private bool panning;
+
+	private const float MaxEdgePaddingPercent = 0.33f;
 
 	private Vector3 keyPanDelta;
 

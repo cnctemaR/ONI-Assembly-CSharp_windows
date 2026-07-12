@@ -668,7 +668,7 @@ public class ClusterMapScreen : KScreen
 		global::Debug.Assert(this.m_destinationSelector != null, "In SelectDestination mode without a destination selector");
 		AxialI myWorldLocation = this.m_destinationSelector.GetMyWorldLocation();
 		string text;
-		List<AxialI> path = ClusterGrid.Instance.GetPath(myWorldLocation, this.m_hoveredHex.location, this.m_destinationSelector, out text);
+		List<AxialI> path = ClusterGrid.Instance.GetPath(myWorldLocation, this.m_hoveredHex.location, this.m_destinationSelector, out text, false);
 		if (path != null)
 		{
 			if (this.m_previewMapPath == null)

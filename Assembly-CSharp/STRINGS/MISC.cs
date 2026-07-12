@@ -437,6 +437,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This tree is working hard to grow new branches right now";
 			}
 
+			public class CLUSTERMETEORREMAININGTRAVELTIME
+			{
+				public static LocString NAME = "Time before collision: {time}";
+
+				public static LocString TOOLTIP = "The remaining time before this meteor reaches its destination";
+			}
+
 			public class ELEMENTALCATEGORY
 			{
 				public static LocString NAME = "{Category}";

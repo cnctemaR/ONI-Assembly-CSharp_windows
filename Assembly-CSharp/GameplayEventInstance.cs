@@ -100,7 +100,7 @@ public class GameplayEventInstance : ISaveLoadable
 					DebugUtil.DevAssert(gameplayEvent != null, string.Format("GameplayEvent {0} is null", hashedString), null);
 					if (gameplayEvent != null && gameplayEvent.IsAllowed())
 					{
-						GameplayEventManager.Instance.StartNewEvent(gameplayEvent, -1);
+						GameplayEventManager.Instance.StartNewEvent(gameplayEvent, -1, null);
 					}
 				}
 				return;
@@ -114,7 +114,7 @@ public class GameplayEventInstance : ISaveLoadable
 				DebugUtil.DevAssert(gameplayEvent2 != null, string.Format("GameplayEvent {0} is null", hashedString2), null);
 				if (gameplayEvent2 != null && gameplayEvent2.IsAllowed())
 				{
-					GameplayEventManager.Instance.StartNewEvent(gameplayEvent2, -1);
+					GameplayEventManager.Instance.StartNewEvent(gameplayEvent2, -1, null);
 				}
 			}
 		}

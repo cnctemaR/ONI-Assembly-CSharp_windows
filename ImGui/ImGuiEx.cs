@@ -99,6 +99,18 @@ public static class ImGuiEx
 		return ImGui.Button(txt);
 	}
 
+	public static bool MenuItem(string txt, string error)
+	{
+		bool flag = error == null;
+		bool flag2 = ImGuiEx.MenuItem(txt, flag);
+		if (!flag)
+		{
+			ImGuiEx.TooltipForPrevious(error);
+			return false;
+		}
+		return flag2;
+	}
+
 	public static bool MenuItem(string txt, bool enabled)
 	{
 		if (!enabled)
@@ -172,7 +184,7 @@ public static class ImGuiEx
 		}
 		else
 		{
-			imGuiTableFlags = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY;
+			imGuiTableFlags = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit;
 		}
 		ImGuiObjectTableDrawer<T>.New().Id(tableId).ColumnsFromType()
 			.Flags(imGuiTableFlags)
@@ -180,7 +192,38 @@ public static class ImGuiEx
 			.Draw(objListIterator);
 	}
 
+	public static void HelpMarker(string desc)
+	{
+		ImGui.TextDisabled("(?)");
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.BeginTooltip();
+			ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+			ImGui.TextUnformatted(desc);
+			ImGui.PopTextWrapPos();
+			ImGui.EndTooltip();
+		}
+	}
+
+	public static bool BeginHelpMarker()
+	{
+		ImGui.TextDisabled("(?)");
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.BeginTooltip();
+			ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+			return true;
+		}
+		return false;
+	}
+
+	public static void EndHelpMarker()
+	{
+		ImGui.PopTextWrapPos();
+		ImGui.EndTooltip();
+	}
+
 	private static Dictionary<Texture2D, IntPtr> ImguiTextureIds = new Dictionary<Texture2D, IntPtr>();
 
-	public const ImGuiTableFlags DEFAULT_TABLE_FLAGS = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY;
+	public const ImGuiTableFlags DEFAULT_TABLE_FLAGS = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit;
 }

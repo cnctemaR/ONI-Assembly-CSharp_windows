@@ -546,6 +546,7 @@ public class GameTags
 		GameTags.Egg,
 		GameTags.Clothes,
 		GameTags.IndustrialIngredient,
+		GameTags.IndustrialProduct,
 		GameTags.Compostable,
 		GameTags.HighEnergyParticle,
 		GameTags.StoryTraitResource

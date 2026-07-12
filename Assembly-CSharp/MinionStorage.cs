@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Database;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
@@ -53,6 +51,7 @@ public class MinionStorage : KMonoBehaviour
 		dest_id.accessories = component2.GetAccessories();
 		WearableAccessorizer component3 = src_id.GetComponent<WearableAccessorizer>();
 		dest_id.clothingItems = component3.GetClothingItems();
+		dest_id.wearables = component3.Wearables;
 		ConsumableConsumer component4 = src_id.GetComponent<ConsumableConsumer>();
 		if (component4.forbiddenTagSet != null)
 		{
@@ -117,10 +116,7 @@ public class MinionStorage : KMonoBehaviour
 		{
 			dest_id.GetComponent<Accessorizer>().SetAccessories(src_id.accessories);
 		}
-		if (src_id.clothingItems != null)
-		{
-			dest_id.GetComponent<WearableAccessorizer>().ApplyClothingItems(src_id.clothingItems.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
-		}
+		dest_id.GetComponent<WearableAccessorizer>().RestoreWearables(src_id.wearables, src_id.clothingItems);
 		ConsumableConsumer component = dest_id.GetComponent<ConsumableConsumer>();
 		if (src_id.forbiddenTagSet != null)
 		{

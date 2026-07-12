@@ -69,12 +69,12 @@ public class Personality : Resource
 		this.traits.Add(trait);
 	}
 
-	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
+	public void SetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
 	{
 		Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(this.Id, outfit, outfitType);
 	}
 
-	public void Internal_SetOutfit(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
+	public void Internal_SetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType, Option<string> outfit)
 	{
 		if (outfit.HasValue)
 		{
@@ -84,7 +84,7 @@ public class Personality : Resource
 		this.outfitIds.Remove(outfitType);
 	}
 
-	public string GetOutfit(ClothingOutfitUtility.OutfitType outfitType)
+	public string GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType outfitType)
 	{
 		if (this.outfitIds.ContainsKey(outfitType))
 		{

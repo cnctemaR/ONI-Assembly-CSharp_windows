@@ -7,17 +7,10 @@ using System.Net;
 using System.Text;
 using Klei;
 using Newtonsoft.Json;
+using UnityEngine;
 
 public class KleiItems : ThreadedHttps<KleiItems>
 {
-	public KleiItems()
-	{
-		this.serviceName = "KleiItems";
-		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
-		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
-		KleiItems.InventoryData.HasUnopenedItem = false;
-	}
-
 	public static IEnumerable<KleiItems.ItemData> IterateInventory(Dictionary<string, string> item_to_permit)
 	{
 		if (KleiItems.InventoryData.AllItems != null)
@@ -30,6 +23,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					KleiItems.ItemData itemData;
 					itemData.PermitId = text;
 					itemData.ItemId = item.ItemId;
+					itemData.IsOpened = item.IsOpened;
 					yield return itemData;
 				}
 			}
@@ -37,6 +31,34 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		}
 		yield break;
 		yield break;
+	}
+
+	public static bool HasUnopenedItem(Dictionary<string, string> item_to_permit)
+	{
+		if (KleiItems.InventoryData.AllItems != null)
+		{
+			foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
+			{
+				if (item_to_permit.ContainsKey(item.ItemType) && !item.IsOpened)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public static bool HasUnclaimedRewards(HashSet<string> claimable)
+	{
+		for (int i = 0; i < KleiItems.InventoryData.UnclaimedRewards.Count; i++)
+		{
+			if (claimable.Contains(KleiItems.InventoryData.UnclaimedRewards[i]))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static bool HasItem(string itemType)
@@ -75,14 +97,29 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		return list.Count<KleiItems.Item>((KleiItems.Item x) => x.IsOpened);
 	}
 
-	public static bool HasUnopenedItem()
+	public static float SecondsToNextTick()
 	{
-		return KleiItems.InventoryData.HasUnopenedItem;
+		return ThreadedHttps<KleiItems>.Instance.TimeToNextTick;
 	}
 
 	public static void AddRequestInventoryRefresh()
 	{
 		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetAllItems, null);
+	}
+
+	public static void AddRequestItemOpened(ulong itemId)
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.SetItemOpened, itemId);
+	}
+
+	public static void AddRequestTick()
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.Tick, null);
+	}
+
+	public static void AddRequestUserRewardsInfo()
+	{
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetUserRewardsInfo, null);
 	}
 
 	public static void AddInventoryRefreshCallback(KleiItems.InventoryRefreshCallback cb)
@@ -95,14 +132,39 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		ThreadedHttps<KleiItems>.Instance.InventoryRefreshCbs.Remove(cb);
 	}
 
+	public static void AddUserRewardInfoReceivedCallback(KleiItems.UserRewardInfoReceivedCallback cb)
+	{
+		ThreadedHttps<KleiItems>.Instance.UserRewardsInfoReceivedCbs.Add(cb);
+	}
+
+	public static void RemoveUserRewardInfoReceivedCallback(KleiItems.UserRewardInfoReceivedCallback cb)
+	{
+		ThreadedHttps<KleiItems>.Instance.UserRewardsInfoReceivedCbs.Remove(cb);
+	}
+
 	public void Update()
 	{
 		if (this.RequestCompleted)
 		{
 			KleiItems.Request activeRequest = this.ActiveRequest;
-			if (!string.IsNullOrEmpty(this.Response) && activeRequest.Type == KleiItems.Request.RequestType.GetAllItems)
+			if (!string.IsNullOrEmpty(this.Response))
 			{
-				this.OnInventoryRecieved(this.Response);
+				if (activeRequest.Type == KleiItems.Request.RequestType.GetAllItems)
+				{
+					this.OnInventoryRecieved(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.SetItemOpened)
+				{
+					this.OnItemOpenedReply(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.Tick)
+				{
+					this.OnTickReply(this.Response);
+				}
+				else if (activeRequest.Type == KleiItems.Request.RequestType.GetUserRewardsInfo)
+				{
+					this.OnRewardsInfoReply(this.Response);
+				}
 			}
 			this.RequestStarted = false;
 			this.RequestCompleted = false;
@@ -122,12 +184,39 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				flag = this.RetrieveInventory();
 			}
+			else if (request.Type == KleiItems.Request.RequestType.SetItemOpened)
+			{
+				flag = this.RequestItemOpened((ulong)request.Data);
+			}
+			else if (request.Type == KleiItems.Request.RequestType.Tick)
+			{
+				flag = this.RequestTick();
+			}
+			else if (request.Type == KleiItems.Request.RequestType.GetUserRewardsInfo)
+			{
+				flag = this.RequestUserRewardsInfo();
+			}
 			if (flag)
 			{
 				this.RequestStarted = true;
 				this.ActiveRequest = request;
 			}
 		}
+		this.TimeToNextTick -= Time.unscaledDeltaTime;
+		if (this.TimeToNextTick <= 0f)
+		{
+			KleiItems.AddRequestTick();
+			this.TimeToNextTick += 360f;
+		}
+	}
+
+	public KleiItems()
+	{
+		this.serviceName = "KleiItems";
+		this.TimeToNextTick = 360f;
+		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
+		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
+		KleiItems.InventoryData.UnclaimedRewards = new List<string>();
 	}
 
 	private void AddRequest(KleiItems.Request.RequestType type, object data)
@@ -204,7 +293,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		{
 			KleiItems.InventoryData.AllItems.Clear();
 			KleiItems.InventoryData.ItemsByType.Clear();
-			KleiItems.InventoryData.HasUnopenedItem = false;
 			if (inventoryReply.Items != null)
 			{
 				for (int i = 0; i < inventoryReply.Items.Length; i++)
@@ -224,7 +312,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					{
 						KleiItems.InventoryData.ItemsByType[item2.ItemType] = new List<KleiItems.Item> { item2 };
 					}
-					KleiItems.InventoryData.HasUnopenedItem = KleiItems.InventoryData.HasUnopenedItem | !item2.IsOpened;
 				}
 			}
 			this.SaveInventoryCache();
@@ -241,7 +328,107 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.HandleError(this.ActiveRequest, inventoryReply.ErrorCode);
 	}
 
-	public static uint hash(string s, uint seed = 0U)
+	private bool RequestItemOpened(ulong itemId)
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "clientitems/ONI/SetItemOpened");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object>
+		{
+			{ "ClientToken", kleiToken },
+			{ "ItemID", itemId }
+		});
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnItemOpenedReply(string response)
+	{
+		KleiItems.SetItemOpenedReply setItemOpenedReply = JsonConvert.DeserializeObject<KleiItems.SetItemOpenedReply>(response);
+		if (!setItemOpenedReply.Error)
+		{
+			KleiItems.AddRequestInventoryRefresh();
+			return;
+		}
+		this.HandleError(this.ActiveRequest, setItemOpenedReply.ErrorCode);
+	}
+
+	private bool RequestTick()
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "clientitems/ONI/Tick");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object> { { "Token", kleiToken } });
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnTickReply(string response)
+	{
+		KleiItems.TickReply tickReply = JsonConvert.DeserializeObject<KleiItems.TickReply>(response);
+		if (!tickReply.Error)
+		{
+			if (tickReply.GiftReceived)
+			{
+				KleiItems.AddRequestInventoryRefresh();
+				return;
+			}
+		}
+		else
+		{
+			this.HandleError(this.ActiveRequest, tickReply.ErrorCode);
+		}
+	}
+
+	private bool RequestUserRewardsInfo()
+	{
+		string kleiToken = KleiAccount.KleiToken;
+		if (string.IsNullOrEmpty(kleiToken))
+		{
+			return false;
+		}
+		this.StartHttpsRequest(KleiItemsConfig.SERVER_URL + "clientitems/ONI/GetUserRewardsInfo");
+		string text = JsonConvert.SerializeObject(new Dictionary<string, object> { { "Token", kleiToken } });
+		byte[] bytes = Encoding.UTF8.GetBytes(text);
+		base.PutPacket(bytes, false);
+		return true;
+	}
+
+	private void OnRewardsInfoReply(string response)
+	{
+		KleiItems.RewardsInfoReply rewardsInfoReply = JsonConvert.DeserializeObject<KleiItems.RewardsInfoReply>(response);
+		if (!rewardsInfoReply.Error)
+		{
+			KleiItems.InventoryData.UnclaimedRewards.Clear();
+			foreach (KeyValuePair<string, KleiItems.RewardsInfoReply.Info> keyValuePair in rewardsInfoReply.ItemRewards)
+			{
+				if (!keyValuePair.Value.Claimed)
+				{
+					KleiItems.InventoryData.UnclaimedRewards.Add(keyValuePair.Key);
+				}
+			}
+			using (List<KleiItems.UserRewardInfoReceivedCallback>.Enumerator enumerator2 = this.UserRewardsInfoReceivedCbs.GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					KleiItems.UserRewardInfoReceivedCallback userRewardInfoReceivedCallback = enumerator2.Current;
+					userRewardInfoReceivedCallback();
+				}
+				return;
+			}
+		}
+		this.HandleError(this.ActiveRequest, rewardsInfoReply.ErrorCode);
+	}
+
+	private static uint hash(string s, uint seed = 0U)
 	{
 		uint num = seed;
 		for (int i = 0; i < s.Length; i++)
@@ -312,7 +499,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			{
 				KleiItems.InventoryData.AllItems.Clear();
 				KleiItems.InventoryData.ItemsByType.Clear();
-				KleiItems.InventoryData.HasUnopenedItem = false;
 				string text = File.ReadAllText(file_path);
 				KleiItems.InventoryCache inventoryCache;
 				try
@@ -348,7 +534,6 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					{
 						KleiItems.InventoryData.ItemsByType[value2.ItemType] = new List<KleiItems.Item> { value2 };
 					}
-					KleiItems.InventoryData.HasUnopenedItem = KleiItems.InventoryData.HasUnopenedItem | !value2.IsOpened;
 				}
 			}, file_path, 0);
 		}
@@ -368,14 +553,26 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 	private bool WaitForReAuthentication;
 
+	private const float SECONDS_PER_TICK = 360f;
+
+	private float TimeToNextTick;
+
 	private List<KleiItems.InventoryRefreshCallback> InventoryRefreshCbs = new List<KleiItems.InventoryRefreshCallback>();
+
+	private List<KleiItems.UserRewardInfoReceivedCallback> UserRewardsInfoReceivedCbs = new List<KleiItems.UserRewardInfoReceivedCallback>();
 
 	public struct ItemData
 	{
 		public string PermitId;
 
 		public ulong ItemId;
+
+		public bool IsOpened;
 	}
+
+	public delegate void InventoryRefreshCallback();
+
+	public delegate void UserRewardInfoReceivedCallback();
 
 	private struct Item
 	{
@@ -392,10 +589,8 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 		public Dictionary<string, List<KleiItems.Item>> ItemsByType;
 
-		public bool HasUnopenedItem;
+		public List<string> UnclaimedRewards;
 	}
-
-	public delegate void InventoryRefreshCallback();
 
 	private struct Request
 	{
@@ -405,7 +600,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 
 		public enum RequestType
 		{
-			GetAllItems
+			GetAllItems,
+			SetItemOpened,
+			Tick,
+			GetUserRewardsInfo
 		}
 	}
 
@@ -424,6 +622,36 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			public string ItemType;
 
 			public int Context;
+		}
+	}
+
+	private struct SetItemOpenedReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+	}
+
+	private struct TickReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public bool GiftReceived;
+	}
+
+	private struct RewardsInfoReply
+	{
+		public bool Error;
+
+		public string ErrorCode;
+
+		public Dictionary<string, KleiItems.RewardsInfoReply.Info> ItemRewards;
+
+		public struct Info
+		{
+			public bool Claimed;
 		}
 	}
 

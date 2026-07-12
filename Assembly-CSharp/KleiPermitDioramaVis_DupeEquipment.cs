@@ -18,7 +18,7 @@ public class KleiPermitDioramaVis_DupeEquipment : KMonoBehaviour, IKleiPermitDio
 		ClothingItemResource clothingItemResource = permit as ClothingItemResource;
 		if (clothingItemResource != null)
 		{
-			this.uiMannequin.SetOutfit(new ClothingItemResource[] { clothingItemResource });
+			this.uiMannequin.SetOutfit(clothingItemResource.outfitType, new ClothingItemResource[] { clothingItemResource });
 			this.uiMannequin.ReactToClothingItemChange(clothingItemResource.Category);
 		}
 	}

@@ -4,14 +4,6 @@ namespace Database
 {
 	public abstract class PermitResource : Resource
 	{
-		public string PermitId
-		{
-			get
-			{
-				return this.Id;
-			}
-		}
-
 		public PermitResource(string id, string Name, string Desc, PermitCategory permitCategory, PermitRarity rarity)
 			: base(id, Name)
 		{

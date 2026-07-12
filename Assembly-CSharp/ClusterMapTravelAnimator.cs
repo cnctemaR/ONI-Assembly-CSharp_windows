@@ -65,7 +65,7 @@ public class ClusterMapTravelAnimator : GameStateMachine<ClusterMapTravelAnimato
 
 	private bool DoOrientToIdle(ClusterMapTravelAnimator.StatesInstance smi)
 	{
-		return smi.RotateTowards(0f, Time.unscaledDeltaTime);
+		return smi.keepRotationOnIdle || smi.RotateTowards(0f, Time.unscaledDeltaTime);
 	}
 
 	private bool ClusterChangedAtMyLocation(ClusterMapTravelAnimator.StatesInstance smi, object data)
@@ -167,5 +167,7 @@ public class ClusterMapTravelAnimator : GameStateMachine<ClusterMapTravelAnimato
 		public ClusterGridEntity entity;
 
 		private float simpleAngle;
+
+		public bool keepRotationOnIdle;
 	}
 }

@@ -24,11 +24,12 @@ public class SymbolInstanceGpuData
 		};
 		for (int i = 0; i < symbol_count; i++)
 		{
-			this.symbolInstances[i].isVisible = 1f;
-			this.symbolInstances[i].symbolIndex = -1f;
-			this.symbolInstances[i].scale = 1f;
-			this.symbolInstances[i].unused = 1f;
-			this.symbolInstances[i].color = Color.white;
+			SymbolInstanceGpuData.SymbolInstance[] symbolInstances = this.symbolInstances;
+			int num = i;
+			symbolInstances[num].isVisible = 1f;
+			symbolInstances[num].scale = 1f;
+			symbolInstances[num].unused = 1f;
+			symbolInstances[num].color = Color.white;
 		}
 		this.MarkDirty();
 	}
@@ -95,16 +96,16 @@ public class SymbolInstanceGpuData
 	public struct SymbolInstance
 	{
 		[FieldOffset(0)]
-		public float symbolIndex;
-
-		[FieldOffset(4)]
 		public float isVisible;
 
-		[FieldOffset(8)]
+		[FieldOffset(4)]
 		public float scale;
 
-		[FieldOffset(12)]
+		[FieldOffset(8)]
 		public float unused;
+
+		[FieldOffset(12)]
+		public float unused2;
 
 		[FieldOffset(16)]
 		public Color color;

@@ -12,6 +12,7 @@ namespace Database
 			this.MegaBrainTank = base.Add(new Story("MegaBrainTank", "storytraits/MegaBrainTank", 0, 1, 43).SetKeepsake("keepsake_megabrain"));
 			this.CreatureManipulator = base.Add(new Story("CreatureManipulator", "storytraits/CritterManipulator", 1, 2, 43).SetKeepsake("keepsake_crittermanipulator"));
 			this.LonelyMinion = base.Add(new Story("LonelyMinion", "storytraits/LonelyMinion", 2, 3, 44).SetKeepsake("keepsake_lonelyminion"));
+			this.FossilHunt = base.Add(new Story("FossilHunt", "storytraits/FossilHunt", 3, 4, 44).SetKeepsake("keepsake_fossilhunt"));
 			this.resources.Sort();
 		}
 
@@ -52,5 +53,7 @@ namespace Database
 		public Story CreatureManipulator;
 
 		public Story LonelyMinion;
+
+		public Story FossilHunt;
 	}
 }

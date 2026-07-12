@@ -97,17 +97,17 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 			this.checkboxContainerPool = new ObjectPool<CheckboxListGroupSideScreen.CheckboxContainer>(new Func<CheckboxListGroupSideScreen.CheckboxContainer>(this.InstantiateCheckboxContainer), 0);
 			this.checkboxPool = new GameObjectPool(new Func<GameObject>(this.InstantiateCheckbox), 0);
 		}
+		this.descriptionLabel.enabled = !this.targets[0].Description.IsNullOrWhiteSpace();
+		if (!this.targets[0].Description.IsNullOrWhiteSpace())
+		{
+			this.descriptionLabel.SetText(this.targets[0].Description);
+		}
 		if (buildTarget == this.currentBuildTarget)
 		{
 			this.Refresh(null);
 			return;
 		}
 		this.currentBuildTarget = buildTarget;
-		this.descriptionLabel.enabled = !this.targets[0].Description.IsNullOrWhiteSpace();
-		if (!this.targets[0].Description.IsNullOrWhiteSpace())
-		{
-			this.descriptionLabel.SetText(this.targets[0].Description);
-		}
 		foreach (ICheckboxListGroupControl checkboxListGroupControl in this.targets)
 		{
 			foreach (ICheckboxListGroupControl.ListGroup listGroup in checkboxListGroupControl.GetData())
@@ -190,12 +190,14 @@ public class CheckboxListGroupSideScreen : SideScreenContent
 			groupUI.checkboxUIItems.Add(component);
 			component.transform.SetParent(groupUI.container.transform);
 			component.gameObject.SetActive(true);
-			component.GetReference<LocText>("Text").SetText(item.text);
+			LocText reference = component.GetReference<LocText>("Text");
+			reference.SetText(item.text);
+			reference.SetLinkOverrideAction(item.overrideLinkActions);
 			component.GetReference<Image>("Check").enabled = item.isOn;
-			ToolTip reference = component.GetReference<ToolTip>("Tooltip");
-			reference.SetSimpleTooltip(item.tooltip);
-			reference.refreshWhileHovering = item.resolveTooltipCallback != null;
-			reference.OnToolTip = delegate
+			ToolTip reference2 = component.GetReference<ToolTip>("Tooltip");
+			reference2.SetSimpleTooltip(item.tooltip);
+			reference2.refreshWhileHovering = item.resolveTooltipCallback != null;
+			reference2.OnToolTip = delegate
 			{
 				if (item.resolveTooltipCallback == null)
 				{

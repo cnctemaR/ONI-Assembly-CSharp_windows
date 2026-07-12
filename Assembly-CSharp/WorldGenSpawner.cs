@@ -129,6 +129,32 @@ public class WorldGenSpawner : KMonoBehaviour
 		return list;
 	}
 
+	public List<WorldGenSpawner.Spawnable> GetSpawnablesWithTag(bool includeSpawned = false, params Tag[] tags)
+	{
+		WorldGenSpawner.<>c__DisplayClass15_0 CS$<>8__locals1 = new WorldGenSpawner.<>c__DisplayClass15_0();
+		CS$<>8__locals1.includeSpawned = includeSpawned;
+		CS$<>8__locals1.allTags = "";
+		foreach (Tag tag in tags)
+		{
+			WorldGenSpawner.<>c__DisplayClass15_0 CS$<>8__locals2 = CS$<>8__locals1;
+			string allTags = CS$<>8__locals1.allTags;
+			Tag tag2 = tag;
+			CS$<>8__locals2.allTags = allTags + tag2.ToString() + ", ";
+		}
+		List<WorldGenSpawner.Spawnable> list = new List<WorldGenSpawner.Spawnable>();
+		List<WorldGenSpawner.Spawnable> list2 = this.spawnables;
+		Predicate<WorldGenSpawner.Spawnable> predicate;
+		if ((predicate = CS$<>8__locals1.<>9__0) == null)
+		{
+			predicate = (CS$<>8__locals1.<>9__0 = (WorldGenSpawner.Spawnable match) => (CS$<>8__locals1.includeSpawned || !match.isSpawned) && CS$<>8__locals1.allTags.Contains(match.spawnInfo.id));
+		}
+		foreach (WorldGenSpawner.Spawnable spawnable in list2.FindAll(predicate))
+		{
+			list.Add(spawnable);
+		}
+		return list;
+	}
+
 	private void PlaceTemplates(Cluster clusterLayout)
 	{
 		this.spawnables = new List<WorldGenSpawner.Spawnable>();

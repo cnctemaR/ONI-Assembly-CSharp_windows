@@ -16,6 +16,27 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 			ranchStation.Abandon(smi.Monitor);
 		});
 		this.ranch.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.SubscribeToRancherStateChanges)).EventHandler(GameHashes.RanchStationNoLongerAvailable, new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.OnRanchStationNotAvailable)).BehaviourComplete(GameTags.Creatures.WantsToGetRanched, true)
+			.Update(delegate(RanchedStates.Instance smi, float deltaSeconds)
+			{
+				RanchStation.Instance ranchStation2 = smi.GetRanchStation();
+				if (ranchStation2.IsNullOrDestroyed())
+				{
+					smi.StopSM("No more target ranch station.");
+					return;
+				}
+				Option<CavityInfo> option = Option.Maybe<CavityInfo>(Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(smi)));
+				Option<CavityInfo> cavityInfo = ranchStation2.GetCavityInfo();
+				if (option.IsNone() || cavityInfo.IsNone())
+				{
+					smi.StopSM("No longer in any cavity.");
+					return;
+				}
+				if (option.Unwrap() != cavityInfo.Unwrap())
+				{
+					smi.StopSM("Critter is in a different cavity");
+					return;
+				}
+			}, UpdateRate.SIM_200ms, false)
 			.Exit(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.UnsubscribeFromRancherStateChanges))
 			.Exit(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.ClearLayerOverride));
 		this.ranch.Cheer.ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter("FaceRancher", delegate(RanchedStates.Instance smi)

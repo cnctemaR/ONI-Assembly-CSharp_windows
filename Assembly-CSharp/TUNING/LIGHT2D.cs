@@ -123,6 +123,12 @@ namespace TUNING
 
 		public static readonly Color LIGHTBUG_COLOR_GREEN = new Color(0.43137255f, 1f, 0.53333336f, 1f);
 
+		public const int MAJORFOSSILDIGSITE_LAMP_LUX = 1000;
+
+		public const float MAJORFOSSILDIGSITE_LAMP_RANGE = 3f;
+
+		public static readonly Vector2 MAJORFOSSILDIGSITE_LAMP_OFFSET = new Vector2(-0.15f, 2.35f);
+
 		public static readonly Vector2 LIGHTBUG_OFFSET = new Vector2(0.05f, 0.25f);
 
 		public static readonly Vector2 LIGHTBUG_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;

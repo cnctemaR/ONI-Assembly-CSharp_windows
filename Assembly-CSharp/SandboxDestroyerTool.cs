@@ -104,6 +104,13 @@ public class SandboxDestroyerTool : BrushTool
 				pooledHashSet.Add(health.gameObject);
 			}
 		}
+		foreach (Comet comet in Components.Meteors.GetItems((int)Grid.WorldIdx[cell]))
+		{
+			if (!comet.IsNullOrDestroyed() && Grid.PosToCell(comet) == cell)
+			{
+				pooledHashSet.Add(comet.gameObject);
+			}
+		}
 		foreach (GameObject gameObject in pooledHashSet)
 		{
 			Util.KDestroyGameObject(gameObject);

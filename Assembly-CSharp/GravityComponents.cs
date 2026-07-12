@@ -120,7 +120,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				}
 				this.data[i] = gravityComponent;
 				int num10 = Grid.PosToCell(vector3);
-				if (gravityComponent.mayLeaveWorld || !Grid.IsValidCell(num2) || Grid.WorldIdx[num2] == ClusterManager.INVALID_WORLD_IDX || Grid.IsValidCellInWorld(num10, (int)Grid.WorldIdx[num2]))
+				if (gravityComponent.mayLeaveWorld || !Grid.IsValidCell(num2) || Grid.WorldIdx[num2] == 255 || Grid.IsValidCellInWorld(num10, (int)Grid.WorldIdx[num2]))
 				{
 					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 					if (flag3)

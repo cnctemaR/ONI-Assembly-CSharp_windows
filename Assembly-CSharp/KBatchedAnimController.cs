@@ -43,6 +43,17 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return this.isVisible;
 	}
 
+	public Vector4 GetPositionData()
+	{
+		if (this.getPositionDataFunctionInUse != null)
+		{
+			return this.getPositionDataFunctionInUse();
+		}
+		Vector3 position = base.transform.GetPosition();
+		Vector3 positionIncludingOffset = base.PositionIncludingOffset;
+		return new Vector4(position.x, position.y, positionIncludingOffset.x, positionIncludingOffset.y);
+	}
+
 	public void SetSymbolScale(KAnimHashedString symbol_name, float scale)
 	{
 		KAnim.Build.Symbol symbol = KAnimBatchManager.Instance().GetBatchGroupData(this.GetBatchGroupID(false)).GetSymbol(symbol_name);
@@ -828,4 +839,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	private Canvas rootCanvas;
 
 	public bool isMovable;
+
+	public Func<Vector4> getPositionDataFunctionInUse;
 }

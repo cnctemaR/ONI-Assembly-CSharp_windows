@@ -45,14 +45,21 @@ public static class Localization
 		{
 			if (!(fieldInfo.FieldType != typeof(LocString)))
 			{
-				LocString locString = (LocString)fieldInfo.GetValue(null);
-				if (locString == null)
+				if (!fieldInfo.IsStatic)
 				{
-					global::Debug.LogError("Tried to generate LocString for " + fieldInfo.Name + " but it is null so skipping");
+					DebugUtil.DevLogError("LocString fields must be static, skipping. " + fieldInfo.Name);
 				}
 				else
 				{
-					dictionary[fieldInfo.Name] = locString.text;
+					LocString locString = (LocString)fieldInfo.GetValue(null);
+					if (locString == null)
+					{
+						global::Debug.LogError("Tried to generate LocString for " + fieldInfo.Name + " but it is null so skipping");
+					}
+					else
+					{
+						dictionary[fieldInfo.Name] = locString.text;
+					}
 				}
 			}
 		}
@@ -85,10 +92,6 @@ public static class Localization
 				text3 = text3.Replace("\\", "\\\\");
 				text3 = text3.Replace("\"", "\\\"");
 				text3 = text3.Replace("\n", "\\n");
-				if (text3.Contains("’") || text3.Contains("“") || text3.Contains("”") || text3.Contains("…"))
-				{
-					global::UnityEngine.Debug.LogError("Smart quotes or ellipses detected in " + text2);
-				}
 				text3 = text3.Replace("’", "'");
 				text3 = text3.Replace("“", "\\\"");
 				text3 = text3.Replace("”", "\\\"");

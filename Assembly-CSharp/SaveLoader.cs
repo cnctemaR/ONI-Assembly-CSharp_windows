@@ -194,6 +194,13 @@ public class SaveLoader : KMonoBehaviour
 		{
 			DebugUtil.LogWarningArgs(new object[] { "Mod footprint of save file doesn't match current mod configuration" });
 		}
+		string text = "Mod Footprint:";
+		foreach (Label label in saveFileRoot.active_mods)
+		{
+			text = text + "\n  - " + label.title;
+		}
+		global::Debug.Log(text);
+		this.LogActiveMods();
 		Global.Instance.modManager.SendMetricsEvent();
 		WorldGen.LoadSettings(false);
 		CustomGameSettings.Instance.LoadClusters();
@@ -272,6 +279,19 @@ public class SaveLoader : KMonoBehaviour
 			worldSizeY = container.WorldSize.y
 		}).ToList<SimMessages.WorldOffsetData>());
 		return true;
+	}
+
+	private void LogActiveMods()
+	{
+		string text = "Active Mods:";
+		foreach (Mod mod in Global.Instance.modManager.mods)
+		{
+			if (mod.IsEnabledForActiveDlc())
+			{
+				text = text + "\n  - " + mod.title;
+			}
+		}
+		global::Debug.Log(text);
 	}
 
 	public static string GetSavePrefix()
@@ -570,6 +590,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			text += ".sav";
 		}
+		this.LogActiveMods();
 		this.Save(text, false, true);
 	}
 

@@ -221,7 +221,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		{
 			if (component != null)
 			{
-				if (component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX && this.registeredBuildingCells != null)
+				if (component.GetMyWorldId() != 255 && this.registeredBuildingCells != null)
 				{
 					int[] array = this.registeredBuildingCells;
 					for (int i = 0; i < array.Length; i++)

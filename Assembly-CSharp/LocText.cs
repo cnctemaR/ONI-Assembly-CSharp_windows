@@ -91,6 +91,15 @@ public class LocText : TextMeshProUGUI
 		base.SetLayoutDirty();
 	}
 
+	public void SetLinkOverrideAction(Func<string, bool> action)
+	{
+		this.RefreshLinkHandler();
+		if (this.textLinkHandler != null)
+		{
+			this.textLinkHandler.overrideLinkAction = action;
+		}
+	}
+
 	public override string text
 	{
 		get

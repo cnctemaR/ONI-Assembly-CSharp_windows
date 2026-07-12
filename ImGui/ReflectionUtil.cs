@@ -63,15 +63,7 @@ public static class ReflectionUtil
 
 	public static bool HasDefaultConstructor(Type type)
 	{
-		ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-		for (int i = 0; i < constructors.Length; i++)
-		{
-			if (constructors[i].GetParameters().Length == 0)
-			{
-				return true;
-			}
-		}
-		return false;
+		return type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null;
 	}
 
 	public static ReflectionUtil.ForObject<T> For<T>(T sourceObject)

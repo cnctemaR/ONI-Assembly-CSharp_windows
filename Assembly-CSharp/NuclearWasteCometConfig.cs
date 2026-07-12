@@ -28,6 +28,7 @@ public class NuclearWasteCometConfig : IEntityConfig
 		comet.addTiles = 1;
 		comet.diseaseIdx = Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id);
 		comet.addDiseaseCount = 1000000;
+		comet.affectedByDifficulty = false;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.SetElement(SimHashes.Corium, true);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;

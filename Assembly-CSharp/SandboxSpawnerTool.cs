@@ -68,6 +68,7 @@ public class SandboxSpawnerTool : InterfaceTool
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
 		new MinionStartingStats(false, null, null, false).Apply(gameObject);
+		gameObject.GetMyWorld().SetDupeVisited();
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

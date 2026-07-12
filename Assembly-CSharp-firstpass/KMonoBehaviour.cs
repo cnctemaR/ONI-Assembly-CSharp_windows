@@ -76,7 +76,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		this.OnCmpEnable();
 	}
 
-	private void OnDisable()
+	protected virtual void OnDisable()
 	{
 		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
 		{

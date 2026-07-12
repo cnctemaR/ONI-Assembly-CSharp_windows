@@ -3,14 +3,6 @@ using System.Collections.Generic;
 
 public class CustomClothingOutfits
 {
-	public OutfitData OutfitData
-	{
-		get
-		{
-			return this.outfitData;
-		}
-	}
-
 	public static CustomClothingOutfits Instance
 	{
 		get
@@ -23,24 +15,49 @@ public class CustomClothingOutfits
 		}
 	}
 
-	public void Internal_EditOutfit(string outfit_name, string[] outfit_items)
+	public SerializableOutfitData.Version2 Internal_GetOutfitData()
 	{
-		this.outfitData.CustomOutfits[outfit_name] = outfit_items;
+		return this.serializableOutfitData;
+	}
+
+	public void Internal_SetOutfitData(SerializableOutfitData.Version2 data)
+	{
+		this.serializableOutfitData = data;
+	}
+
+	public void Internal_EditOutfit(ClothingOutfitUtility.OutfitType outfit_type, string outfit_name, string[] outfit_items)
+	{
+		SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
+		if (!this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.TryGetValue(outfit_name, out customTemplateOutfitEntry))
+		{
+			customTemplateOutfitEntry = new SerializableOutfitData.Version2.CustomTemplateOutfitEntry();
+			customTemplateOutfitEntry.outfitType = outfit_type;
+			customTemplateOutfitEntry.itemIds = outfit_items;
+			this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit[outfit_name] = customTemplateOutfitEntry;
+		}
+		else
+		{
+			if (customTemplateOutfitEntry.outfitType != outfit_type)
+			{
+				throw new NotSupportedException(string.Format("Cannot edit outfit \"{0}\" of outfit type \"{1}\" to be an outfit of type \"{2}\"", outfit_name, customTemplateOutfitEntry.outfitType, outfit_type));
+			}
+			customTemplateOutfitEntry.itemIds = outfit_items;
+		}
 		ClothingOutfitUtility.SaveClothingOutfitData();
 	}
 
-	public void Internal_RenameOutfit(string old_outfit_name, string new_outfit_name)
+	public void Internal_RenameOutfit(ClothingOutfitUtility.OutfitType outfit_type, string old_outfit_name, string new_outfit_name)
 	{
-		if (!this.outfitData.CustomOutfits.ContainsKey(old_outfit_name))
+		if (!this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.ContainsKey(old_outfit_name))
 		{
 			throw new ArgumentException(string.Concat(new string[] { "Can't rename outfit \"", old_outfit_name, "\" to \"", new_outfit_name, "\": missing \"", old_outfit_name, "\" entry" }));
 		}
-		if (this.outfitData.CustomOutfits.ContainsKey(new_outfit_name))
+		if (this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.ContainsKey(new_outfit_name))
 		{
 			throw new ArgumentException(string.Concat(new string[] { "Can't rename outfit \"", old_outfit_name, "\" to \"", new_outfit_name, "\": entry \"", new_outfit_name, "\" already exists" }));
 		}
-		this.outfitData.CustomOutfits.Add(new_outfit_name, this.outfitData.CustomOutfits[old_outfit_name]);
-		foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.outfitData.DuplicantOutfits)
+		this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.Add(new_outfit_name, this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit[old_outfit_name]);
+		foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
 		{
 			string text;
 			Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
@@ -71,21 +88,21 @@ public class CustomClothingOutfits
 						}
 						else
 						{
-							personalityFromNameStringKey.Internal_SetOutfit(outfitType3, new_outfit_name);
+							personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType3, new_outfit_name);
 						}
 					}
 				}
 			}
 		}
-		this.outfitData.CustomOutfits.Remove(old_outfit_name);
+		this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.Remove(old_outfit_name);
 		ClothingOutfitUtility.SaveClothingOutfitData();
 	}
 
-	public void Internal_RemoveOutfit(string outfit_name)
+	public void Internal_RemoveOutfit(ClothingOutfitUtility.OutfitType outfit_type, string outfit_name)
 	{
-		if (this.outfitData.CustomOutfits.Remove(outfit_name))
+		if (this.serializableOutfitData.OutfitIdToUserAuthoredTemplateOutfit.Remove(outfit_name))
 		{
-			foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.outfitData.DuplicantOutfits)
+			foreach (KeyValuePair<string, Dictionary<ClothingOutfitUtility.OutfitType, string>> keyValuePair in this.serializableOutfitData.PersonalityIdToAssignedOutfits)
 			{
 				string text;
 				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
@@ -116,7 +133,7 @@ public class CustomClothingOutfits
 							}
 							else
 							{
-								personalityFromNameStringKey.Internal_SetOutfit(outfitType3, Option.None);
+								personalityFromNameStringKey.Internal_SetSelectedTemplateOutfitId(outfitType3, Option.None);
 							}
 						}
 					}
@@ -131,24 +148,24 @@ public class CustomClothingOutfits
 		Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary;
 		if (outfit_id.HasValue)
 		{
-			if (!this.outfitData.DuplicantOutfits.ContainsKey(personalityId))
+			if (!this.serializableOutfitData.PersonalityIdToAssignedOutfits.ContainsKey(personalityId))
 			{
-				this.outfitData.DuplicantOutfits.Add(personalityId, new Dictionary<ClothingOutfitUtility.OutfitType, string>());
+				this.serializableOutfitData.PersonalityIdToAssignedOutfits.Add(personalityId, new Dictionary<ClothingOutfitUtility.OutfitType, string>());
 			}
-			this.outfitData.DuplicantOutfits[personalityId][outfit_type] = outfit_id.Value;
+			this.serializableOutfitData.PersonalityIdToAssignedOutfits[personalityId][outfit_type] = outfit_id.Value;
 		}
-		else if (this.outfitData.DuplicantOutfits.TryGetValue(personalityId, out dictionary))
+		else if (this.serializableOutfitData.PersonalityIdToAssignedOutfits.TryGetValue(personalityId, out dictionary))
 		{
 			dictionary.Remove(outfit_type);
 			if (dictionary.Count == 0)
 			{
-				this.outfitData.DuplicantOutfits.Remove(personalityId);
+				this.serializableOutfitData.PersonalityIdToAssignedOutfits.Remove(personalityId);
 			}
 		}
 		ClothingOutfitUtility.SaveClothingOutfitData();
 	}
 
-	private OutfitData outfitData = new OutfitData();
-
 	private static CustomClothingOutfits _instance;
+
+	private SerializableOutfitData.Version2 serializableOutfitData = new SerializableOutfitData.Version2();
 }

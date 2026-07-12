@@ -41,6 +41,10 @@ public class ClusterMapVisualizer : KMonoBehaviour
 		base.OnSpawn();
 		if (this.entity != null)
 		{
+			if (this.doesTransitionAnimation)
+			{
+				base.gameObject.GetSMI<ClusterMapTravelAnimator.StatesInstance>().keepRotationOnIdle = this.entity.KeepRotationWhenSpacingOutInHex();
+			}
 			if (this.entity is Clustercraft)
 			{
 				new ClusterMapRocketAnimator.StatesInstance(this, this.entity).StartSM();
@@ -88,12 +92,29 @@ public class ClusterMapVisualizer : KMonoBehaviour
 
 	public void PlayAnim(string animName, KAnim.PlayMode playMode)
 	{
-		this.GetFirstAnimController().Play(animName, playMode, 1f, 0f);
+		if (this.animControllers.Count > 0)
+		{
+			this.GetFirstAnimController().Play(animName, playMode, 1f, 0f);
+		}
 	}
 
 	public KBatchedAnimController GetFirstAnimController()
 	{
-		return this.animControllers[0];
+		return this.GetAnimController(0);
+	}
+
+	public KBatchedAnimController GetAnimController(int index)
+	{
+		if (index < this.animControllers.Count)
+		{
+			return this.animControllers[index];
+		}
+		return null;
+	}
+
+	public void ManualAddAnimController(KBatchedAnimController externalAnimController)
+	{
+		this.animControllers.Add(externalAnimController);
 	}
 
 	public void Show(ClusterRevealLevel level)
@@ -111,7 +132,7 @@ public class ClusterMapVisualizer : KMonoBehaviour
 		{
 		case ClusterRevealLevel.Hidden:
 			base.gameObject.SetActive(false);
-			return;
+			break;
 		case ClusterRevealLevel.Peeked:
 		{
 			this.ClearAnimControllers();
@@ -119,7 +140,7 @@ public class ClusterMapVisualizer : KMonoBehaviour
 			kbatchedAnimController.gameObject.SetActive(true);
 			this.animControllers.Add(kbatchedAnimController);
 			base.gameObject.SetActive(true);
-			return;
+			break;
 		}
 		case ClusterRevealLevel.Visible:
 			this.ClearAnimControllers();
@@ -133,6 +154,10 @@ public class ClusterMapVisualizer : KMonoBehaviour
 					kbatchedAnimController2.initialAnim = animConfig.initialAnim;
 					kbatchedAnimController2.Offset = animConfig.animOffset;
 					kbatchedAnimController2.gameObject.AddComponent<LoopingSounds>();
+					if (animConfig.animPlaySpeedModifier != 0f)
+					{
+						kbatchedAnimController2.PlaySpeedMultiplier = animConfig.animPlaySpeedModifier;
+					}
 					if (!string.IsNullOrEmpty(animConfig.symbolSwapTarget) && !string.IsNullOrEmpty(animConfig.symbolSwapSymbol))
 					{
 						SymbolOverrideController component = kbatchedAnimController2.GetComponent<SymbolOverrideController>();
@@ -144,10 +169,9 @@ public class ClusterMapVisualizer : KMonoBehaviour
 				}
 			}
 			base.gameObject.SetActive(true);
-			return;
-		default:
-			return;
+			break;
 		}
+		this.entity.OnClusterMapIconShown(level);
 	}
 
 	public void RefreshPathDrawing()

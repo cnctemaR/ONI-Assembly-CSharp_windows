@@ -65,7 +65,9 @@ public class Notification
 		if (this.Notifier != null)
 		{
 			this.Notifier.Remove(this);
+			return;
 		}
+		NotificationManager.Instance.RemoveNotification(this);
 	}
 
 	private string ReplaceTags(string text)

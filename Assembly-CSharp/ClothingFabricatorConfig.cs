@@ -36,7 +36,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
 		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_clothingfactory_kanim") };
-		go.AddOrGet<ComplexFabricatorWorkable>().AnimOffset = new Vector3(-1f, 0f, 0f);
+		go.AddOrGet<ComplexFabricatorWorkable>();
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();

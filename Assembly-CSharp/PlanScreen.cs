@@ -337,6 +337,7 @@ public class PlanScreen : KIconToggleMenu
 				}
 			}
 			base.Setup(list);
+			this.toggleBouncers.Clear();
 			this.toggles.ForEach(delegate(KToggle to)
 			{
 				foreach (ImageToggleState imageToggleState in to.GetComponents<ImageToggleState>())
@@ -348,6 +349,7 @@ public class PlanScreen : KIconToggleMenu
 				}
 				to.GetComponent<KToggle>().soundPlayer.Enabled = false;
 				to.GetComponentInChildren<LocText>().fontSize = (float)(ScreenResolutionMonitor.UsingGamepadUIMode() ? PlanScreen.fontSizeBigMode : PlanScreen.fontSizeStandardMode);
+				this.toggleBouncers.Add(to, to.GetComponent<Bouncer>());
 			});
 			for (int j = 0; j < this.toggleEntries.Count; j++)
 			{
@@ -533,11 +535,11 @@ public class PlanScreen : KIconToggleMenu
 					{
 						if ((HashedString)toggleInfo.userData == hashedString)
 						{
-							Bouncer component = toggleInfo.toggle.GetComponent<Bouncer>();
-							if (component != null && !component.IsBouncing() && !pooledList.Contains(hashedString))
+							Bouncer bouncer = this.toggleBouncers[toggleInfo.toggle];
+							if (bouncer != null && !bouncer.IsBouncing() && !pooledList.Contains(hashedString))
 							{
 								pooledList.Add(hashedString);
-								component.Bounce();
+								bouncer.Bounce();
 								if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
 								{
 									if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
@@ -1415,6 +1417,8 @@ public class PlanScreen : KIconToggleMenu
 	private float specialNotificationEmbellishDelay = 8f;
 
 	private int notificationPingCount;
+
+	private Dictionary<KToggle, Bouncer> toggleBouncers = new Dictionary<KToggle, Bouncer>();
 
 	public const string DEFAULT_SUBCATEGORY_KEY = "default";
 

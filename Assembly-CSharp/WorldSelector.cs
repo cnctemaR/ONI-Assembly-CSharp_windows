@@ -232,7 +232,7 @@ public class WorldSelector : KScreen, ISim4000ms
 			keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Indent").anchoredPosition = Vector2.zero;
 			keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Status").anchoredPosition = Vector2.right * 24f;
 			WorldContainer world = ClusterManager.Instance.GetWorld(keyValuePair.Key);
-			if (world.ParentWorldId != world.id && world.ParentWorldId != (int)ClusterManager.INVALID_WORLD_IDX)
+			if (world.ParentWorldId != world.id && world.ParentWorldId != 255)
 			{
 				foreach (KeyValuePair<int, MultiToggle> keyValuePair2 in list)
 				{

@@ -83,6 +83,18 @@ public class KFMOD
 		KFMOD.PlayOneShotWithParameter(sound, Vector3.zero, parameter, parameterValue, 1f);
 	}
 
+	public static void PlayOneShotWithLabeledParameter(string sound, Vector3 position, string parameter, string parameterValue, float volume = 1f)
+	{
+		EventInstance eventInstance = KFMOD.BeginOneShot(sound, position, volume);
+		eventInstance.setParameterByNameWithLabel(parameter, parameterValue, false);
+		KFMOD.EndOneShot(eventInstance);
+	}
+
+	public static void PlayUISoundWithLabeledParameter(string sound, string parameter, string parameterValue)
+	{
+		KFMOD.PlayOneShotWithLabeledParameter(sound, Vector3.zero, parameter, parameterValue, 1f);
+	}
+
 	public static EventInstance BeginOneShot(EventReference event_ref, Vector3 position, float volume = 1f)
 	{
 		if (event_ref.IsNull || App.IsExiting || !RuntimeManager.IsInitialized)

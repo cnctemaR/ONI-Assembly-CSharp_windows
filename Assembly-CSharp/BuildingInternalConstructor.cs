@@ -223,6 +223,11 @@ public class BuildingInternalConstructor : GameStateMachine<BuildingInternalCons
 			return 20;
 		}
 
+		public int HorizontalGroupID()
+		{
+			return -1;
+		}
+
 		private Storage storage;
 
 		[Serialize]

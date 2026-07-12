@@ -11,7 +11,7 @@ public class NotificationHighlightTarget : KMonoBehaviour
 		}
 	}
 
-	protected void OnDisable()
+	protected override void OnDisable()
 	{
 		if (this.controller != null)
 		{

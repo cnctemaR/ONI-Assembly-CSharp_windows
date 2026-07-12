@@ -137,7 +137,7 @@ public class DebugBaseTemplateButton : KScreen
 		base.OnDeactivate();
 	}
 
-	private void OnDisable()
+	protected override void OnDisable()
 	{
 		if (DebugTool.Instance != null)
 		{

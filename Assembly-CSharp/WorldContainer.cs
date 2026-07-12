@@ -392,7 +392,7 @@ public class WorldContainer : KMonoBehaviour
 		this.parentChangeArgs.world = this;
 		this.ParentWorldId = parentIdx;
 		Game.Instance.Trigger(880851192, this.parentChangeArgs);
-		this.parentChangeArgs.lastParentId = (int)ClusterManager.INVALID_WORLD_IDX;
+		this.parentChangeArgs.lastParentId = 255;
 	}
 
 	public Vector2 minimumBounds

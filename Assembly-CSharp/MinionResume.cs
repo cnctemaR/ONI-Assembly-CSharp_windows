@@ -673,7 +673,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static bool AnyMinionHasPerk(string perk, int worldId = -1)
 	{
-		using (List<MinionResume>.Enumerator enumerator = ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items).GetEnumerator())
+		using (List<MinionResume>.Enumerator enumerator = ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items).Where<MinionResume>((MinionResume minion) => !minion.HasTag(GameTags.Dead)).ToList<MinionResume>().GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{

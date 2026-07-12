@@ -54,8 +54,8 @@ public class KAnimFile : ScriptableObject
 
 	public void FinalizeLoading()
 	{
-		this.IsBuildLoaded = this.buildBytes != null;
-		this.IsAnimLoaded = this.animBytes != null;
+		this.IsBuildLoaded = ((this.mod == null) ? (this.buildFile != null) : (this.mod.build != null));
+		this.IsAnimLoaded = ((this.mod == null) ? (this.animFile != null) : (this.mod.anim != null));
 		this.animFile = null;
 		this.buildFile = null;
 	}

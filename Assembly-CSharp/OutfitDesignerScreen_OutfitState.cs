@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class OutfitDesignerScreen_OutfitState
 {
-	private OutfitDesignerScreen_OutfitState(ClothingOutfitTarget sourceTarget, ClothingOutfitTarget destinationTarget)
+	private OutfitDesignerScreen_OutfitState(ClothingOutfitUtility.OutfitType outfitType, ClothingOutfitTarget sourceTarget, ClothingOutfitTarget destinationTarget)
 	{
+		this.outfitType = outfitType;
 		this.destinationTarget = destinationTarget;
 		this.sourceTarget = sourceTarget;
 		this.name = sourceTarget.ReadName();
+		this.slots = OutfitDesignerScreen_OutfitState.Slots.For(outfitType);
 		foreach (ClothingItemResource clothingItemResource in sourceTarget.ReadItemValues())
 		{
 			this.ApplyItem(clothingItemResource);
@@ -19,102 +21,55 @@ public class OutfitDesignerScreen_OutfitState
 	public static OutfitDesignerScreen_OutfitState ForTemplateOutfit(ClothingOutfitTarget outfitTemplate)
 	{
 		global::Debug.Assert(outfitTemplate.IsTemplateOutfit());
-		return new OutfitDesignerScreen_OutfitState(outfitTemplate, outfitTemplate);
+		return new OutfitDesignerScreen_OutfitState(outfitTemplate.OutfitType, outfitTemplate, outfitTemplate);
 	}
 
 	public static OutfitDesignerScreen_OutfitState ForMinionInstance(ClothingOutfitTarget sourceTarget, GameObject minionInstance)
 	{
-		return new OutfitDesignerScreen_OutfitState(sourceTarget, ClothingOutfitTarget.FromMinion(minionInstance));
+		return new OutfitDesignerScreen_OutfitState(sourceTarget.OutfitType, sourceTarget, ClothingOutfitTarget.FromMinion(sourceTarget.OutfitType, minionInstance));
 	}
 
 	public unsafe void ApplyItem(ClothingItemResource item)
 	{
-		*this.GetItemSlotForCategory(item.Category) = item;
+		*this.slots.GetItemSlotForCategory(item.Category) = item;
 	}
 
-	public ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category)
+	public unsafe Option<ClothingItemResource> GetItemForCategory(PermitCategory category)
 	{
-		if (category == PermitCategory.DupeHats)
+		return *this.slots.GetItemSlotForCategory(category);
+	}
+
+	public unsafe void SetItemForCategory(PermitCategory category, Option<ClothingItemResource> item)
+	{
+		if (item.IsSome())
 		{
-			return ref this.hatSlot;
+			DebugUtil.DevAssert(item.Unwrap().outfitType == this.outfitType, string.Format("Tried to set clothing item with outfit type \"{0}\" to outfit of type \"{1}\"", item.Unwrap().outfitType, this.outfitType), null);
+			DebugUtil.DevAssert(item.Unwrap().Category == category, string.Format("Tried to set clothing item with category \"{0}\" to slot with type \"{1}\"", item.Unwrap().Category, category), null);
 		}
-		if (category == PermitCategory.DupeTops)
-		{
-			return ref this.topSlot;
-		}
-		if (category == PermitCategory.DupeGloves)
-		{
-			return ref this.glovesSlot;
-		}
-		if (category == PermitCategory.DupeBottoms)
-		{
-			return ref this.bottomSlot;
-		}
-		if (category == PermitCategory.DupeShoes)
-		{
-			return ref this.shoesSlot;
-		}
-		if (category == PermitCategory.DupeAccessories)
-		{
-			return ref this.accessorySlot;
-		}
-		DebugUtil.DevAssert(false, string.Format("Couldn't get a {0}<{1}> for {2} \"{3}\" on {4} \"{5}\".", new object[] { "Option", "ClothingItemResource", "PermitCategory", category, "OutfitDesignerScreen_OutfitState", this.name }), null);
-		return ref OutfitDesignerScreen_OutfitState.dummySlot;
+		*this.slots.GetItemSlotForCategory(category) = item;
 	}
 
 	public void AddItemValuesTo(ICollection<ClothingItemResource> clothingItems)
 	{
-		if (this.hatSlot.IsSome())
+		for (int i = 0; i < this.slots.array.Length; i++)
 		{
-			clothingItems.Add(this.hatSlot.Unwrap());
-		}
-		if (this.topSlot.IsSome())
-		{
-			clothingItems.Add(this.topSlot.Unwrap());
-		}
-		if (this.glovesSlot.IsSome())
-		{
-			clothingItems.Add(this.glovesSlot.Unwrap());
-		}
-		if (this.bottomSlot.IsSome())
-		{
-			clothingItems.Add(this.bottomSlot.Unwrap());
-		}
-		if (this.shoesSlot.IsSome())
-		{
-			clothingItems.Add(this.shoesSlot.Unwrap());
-		}
-		if (this.accessorySlot.IsSome())
-		{
-			clothingItems.Add(this.accessorySlot.Unwrap());
+			ref Option<ClothingItemResource> ptr = ref this.slots.array[i];
+			if (ptr.IsSome())
+			{
+				clothingItems.Add(ptr.Unwrap());
+			}
 		}
 	}
 
 	public void AddItemsTo(ICollection<string> itemIds)
 	{
-		if (this.hatSlot.IsSome())
+		for (int i = 0; i < this.slots.array.Length; i++)
 		{
-			itemIds.Add(this.hatSlot.Unwrap().Id);
-		}
-		if (this.topSlot.IsSome())
-		{
-			itemIds.Add(this.topSlot.Unwrap().Id);
-		}
-		if (this.glovesSlot.IsSome())
-		{
-			itemIds.Add(this.glovesSlot.Unwrap().Id);
-		}
-		if (this.bottomSlot.IsSome())
-		{
-			itemIds.Add(this.bottomSlot.Unwrap().Id);
-		}
-		if (this.shoesSlot.IsSome())
-		{
-			itemIds.Add(this.shoesSlot.Unwrap().Id);
-		}
-		if (this.accessorySlot.IsSome())
-		{
-			itemIds.Add(this.accessorySlot.Unwrap().Id);
+			ref Option<ClothingItemResource> ptr = ref this.slots.array[i];
+			if (ptr.IsSome())
+			{
+				itemIds.Add(ptr.Unwrap().Id);
+			}
 		}
 	}
 
@@ -159,17 +114,7 @@ public class OutfitDesignerScreen_OutfitState
 
 	public string name;
 
-	public Option<ClothingItemResource> hatSlot;
-
-	public Option<ClothingItemResource> topSlot;
-
-	public Option<ClothingItemResource> glovesSlot;
-
-	public Option<ClothingItemResource> bottomSlot;
-
-	public Option<ClothingItemResource> shoesSlot;
-
-	public Option<ClothingItemResource> accessorySlot;
+	private OutfitDesignerScreen_OutfitState.Slots slots;
 
 	public ClothingOutfitUtility.OutfitType outfitType;
 
@@ -177,5 +122,129 @@ public class OutfitDesignerScreen_OutfitState
 
 	public ClothingOutfitTarget destinationTarget;
 
-	private static Option<ClothingItemResource> dummySlot;
+	public abstract class Slots
+	{
+		private Slots(int slotsCount)
+		{
+			this.array = new Option<ClothingItemResource>[slotsCount];
+		}
+
+		public static OutfitDesignerScreen_OutfitState.Slots For(ClothingOutfitUtility.OutfitType outfitType)
+		{
+			if (outfitType == ClothingOutfitUtility.OutfitType.Clothing)
+			{
+				return new OutfitDesignerScreen_OutfitState.Slots.Clothing();
+			}
+			if (outfitType != ClothingOutfitUtility.OutfitType.JoyResponse)
+			{
+				throw new NotImplementedException();
+			}
+			throw new NotSupportedException("OutfitType.JoyResponse cannot be used with OutfitDesignerScreen_OutfitState. Use JoyResponseOutfitTarget instead.");
+		}
+
+		public abstract ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category);
+
+		private ref Option<ClothingItemResource> FallbackSlot(OutfitDesignerScreen_OutfitState.Slots self, PermitCategory category)
+		{
+			DebugUtil.DevAssert(false, string.Format("Couldn't get a {0}<{1}> for {2} \"{3}\" on {4}.{5}", new object[]
+			{
+				"Option",
+				"ClothingItemResource",
+				"PermitCategory",
+				category,
+				"Slots",
+				self.GetType().Name
+			}), null);
+			return ref OutfitDesignerScreen_OutfitState.Slots.dummySlot;
+		}
+
+		public Option<ClothingItemResource>[] array;
+
+		private static Option<ClothingItemResource> dummySlot;
+
+		public class Clothing : OutfitDesignerScreen_OutfitState.Slots
+		{
+			public Clothing()
+				: base(6)
+			{
+			}
+
+			public ref Option<ClothingItemResource> hatSlot
+			{
+				get
+				{
+					return ref this.array[0];
+				}
+			}
+
+			public ref Option<ClothingItemResource> topSlot
+			{
+				get
+				{
+					return ref this.array[1];
+				}
+			}
+
+			public ref Option<ClothingItemResource> glovesSlot
+			{
+				get
+				{
+					return ref this.array[2];
+				}
+			}
+
+			public ref Option<ClothingItemResource> bottomSlot
+			{
+				get
+				{
+					return ref this.array[3];
+				}
+			}
+
+			public ref Option<ClothingItemResource> shoesSlot
+			{
+				get
+				{
+					return ref this.array[4];
+				}
+			}
+
+			public ref Option<ClothingItemResource> accessorySlot
+			{
+				get
+				{
+					return ref this.array[5];
+				}
+			}
+
+			public override ref Option<ClothingItemResource> GetItemSlotForCategory(PermitCategory category)
+			{
+				if (category == PermitCategory.DupeHats)
+				{
+					return this.hatSlot;
+				}
+				if (category == PermitCategory.DupeTops)
+				{
+					return this.topSlot;
+				}
+				if (category == PermitCategory.DupeGloves)
+				{
+					return this.glovesSlot;
+				}
+				if (category == PermitCategory.DupeBottoms)
+				{
+					return this.bottomSlot;
+				}
+				if (category == PermitCategory.DupeShoes)
+				{
+					return this.shoesSlot;
+				}
+				if (category == PermitCategory.DupeAccessories)
+				{
+					return this.accessorySlot;
+				}
+				return base.FallbackSlot(this, category);
+			}
+		}
+	}
 }

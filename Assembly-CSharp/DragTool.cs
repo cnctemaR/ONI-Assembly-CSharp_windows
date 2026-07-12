@@ -182,7 +182,7 @@ public class DragTool : InterfaceTool
 		cursor_pos = this.ClampPositionToWorld(cursor_pos, ClusterManager.Instance.activeWorld);
 		this.RemoveCurrentAreaText();
 		DragTool.Mode mode = this.GetMode();
-		if (mode == DragTool.Mode.Line)
+		if (mode == DragTool.Mode.Line || Input.GetKey((KeyCode)Global.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
 		{
 			cursor_pos = this.SnapToLine(cursor_pos);
 		}
@@ -253,16 +253,13 @@ public class DragTool : InterfaceTool
 		if (this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid)
 		{
 			this.dragAxis = DragTool.DragAxis.Invalid;
-			if (vector.sqrMagnitude > 0.707f)
+			if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
 			{
-				if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
-				{
-					this.dragAxis = DragTool.DragAxis.Vertical;
-				}
-				else
-				{
-					this.dragAxis = DragTool.DragAxis.Horizontal;
-				}
+				this.dragAxis = DragTool.DragAxis.Vertical;
+			}
+			else
+			{
+				this.dragAxis = DragTool.DragAxis.Horizontal;
 			}
 		}
 		DragTool.DragAxis dragAxis = this.dragAxis;
@@ -271,7 +268,7 @@ public class DragTool : InterfaceTool
 			if (dragAxis == DragTool.DragAxis.Vertical)
 			{
 				cursorPos.x = this.downPos.x;
-				if (this.lineModeMaxLength != -1)
+				if (this.lineModeMaxLength != -1 && Mathf.Abs(vector.y) > (float)(this.lineModeMaxLength - 1))
 				{
 					cursorPos.y = this.downPos.y + Mathf.Sign(vector.y) * (float)(this.lineModeMaxLength - 1);
 				}
@@ -280,7 +277,7 @@ public class DragTool : InterfaceTool
 		else
 		{
 			cursorPos.y = this.downPos.y;
-			if (this.lineModeMaxLength != -1)
+			if (this.lineModeMaxLength != -1 && Mathf.Abs(vector.x) > (float)(this.lineModeMaxLength - 1))
 			{
 				cursorPos.x = this.downPos.x + Mathf.Sign(vector.x) * (float)(this.lineModeMaxLength - 1);
 			}

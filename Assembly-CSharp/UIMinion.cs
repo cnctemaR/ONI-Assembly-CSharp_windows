@@ -44,7 +44,7 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 		base.gameObject.AddOrGet<MinionVoiceProviderMB>().voice = MinionVoice.ByPersonality(personality);
 	}
 
-	public void SetOutfit(IEnumerable<ClothingItemResource> outfit)
+	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, IEnumerable<ClothingItemResource> outfit)
 	{
 		this.SpawnedAvatar.GetComponent<WearableAccessorizer>().ApplyClothingItems(outfit);
 	}
@@ -68,25 +68,28 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 		{
 		case UIMinionOrMannequinReactSource.OnPersonalityChanged:
 			this.animController.Play("react", KAnim.PlayMode.Once, 1f, 0f);
-			goto IL_016C;
+			goto IL_0195;
 		case UIMinionOrMannequinReactSource.OnWholeOutfitChanged:
 		case UIMinionOrMannequinReactSource.OnBottomChanged:
 			this.animController.Play("react_bottoms", KAnim.PlayMode.Once, 1f, 0f);
-			goto IL_016C;
+			goto IL_0195;
+		case UIMinionOrMannequinReactSource.OnHatChanged:
+			this.animController.Play("react_glasses", KAnim.PlayMode.Once, 1f, 0f);
+			goto IL_0195;
 		case UIMinionOrMannequinReactSource.OnTopChanged:
 			this.animController.Play("react_tops", KAnim.PlayMode.Once, 1f, 0f);
-			goto IL_016C;
+			goto IL_0195;
 		case UIMinionOrMannequinReactSource.OnGlovesChanged:
 			this.animController.Play("react_gloves", KAnim.PlayMode.Once, 1f, 0f);
-			goto IL_016C;
+			goto IL_0195;
 		case UIMinionOrMannequinReactSource.OnShoesChanged:
 			this.animController.Play("react_shoes", KAnim.PlayMode.Once, 1f, 0f);
-			goto IL_016C;
+			goto IL_0195;
 		}
 		this.animController.Play("cheer_pre", KAnim.PlayMode.Once, 1f, 0f);
 		this.animController.Queue("cheer_loop", KAnim.PlayMode.Once, 1f, 0f);
 		this.animController.Queue("cheer_pst", KAnim.PlayMode.Once, 1f, 0f);
-		IL_016C:
+		IL_0195:
 		this.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 		this.lastReactSource = source;
 	}

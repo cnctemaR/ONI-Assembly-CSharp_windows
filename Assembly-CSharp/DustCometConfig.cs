@@ -20,7 +20,7 @@ public class DustCometConfig : IEntityConfig
 		comet.entityDamage = 2;
 		comet.totalTileDamage = 0.15f;
 		comet.splashRadius = 0;
-		comet.impactSound = "Meteor_Small_Impact";
+		comet.impactSound = "Meteor_dust_heavy_Impact";
 		comet.flyingSoundID = 0;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();

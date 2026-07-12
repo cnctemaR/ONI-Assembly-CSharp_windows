@@ -14,5 +14,7 @@ public interface ISidescreenButtonControl
 
 	void OnSidescreenButtonPressed();
 
+	int HorizontalGroupID();
+
 	int ButtonSideScreenSortOrder();
 }

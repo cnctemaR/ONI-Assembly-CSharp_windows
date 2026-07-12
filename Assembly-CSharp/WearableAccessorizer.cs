@@ -14,6 +14,14 @@ public class WearableAccessorizer : KMonoBehaviour
 		return this.clothingItems;
 	}
 
+	public Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> Wearables
+	{
+		get
+		{
+			return this.wearables;
+		}
+	}
+
 	public string[] GetClothingItemIds()
 	{
 		string[] array = new string[this.clothingItems.Count];
@@ -48,9 +56,25 @@ public class WearableAccessorizer : KMonoBehaviour
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
+		List<WearableAccessorizer.WearableType> list = new List<WearableAccessorizer.WearableType>();
 		foreach (KeyValuePair<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> keyValuePair in this.wearables)
 		{
 			keyValuePair.Value.Deserialize();
+			if (keyValuePair.Value.BuildAnims == null)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (WearableAccessorizer.WearableType wearableType in list)
+		{
+			this.wearables.Remove(wearableType);
+		}
+		if (!this.wearables.ContainsKey(WearableAccessorizer.WearableType.CustomClothing) && this.clothingItems.Count > 0)
+		{
+			foreach (ResourceRef<ClothingItemResource> resourceRef in this.clothingItems)
+			{
+				this.ApplyClothingItem(resourceRef.Get());
+			}
 		}
 		this.ApplyWearable();
 	}
@@ -72,7 +96,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			if (this.wearables.ContainsKey(wearableType))
 			{
-				this.RemoveAnimBuild(this.wearables[wearableType].buildAnims[0], this.wearables[wearableType].buildOverridePriority);
+				this.RemoveAnimBuild(this.wearables[wearableType].BuildAnims[0], this.wearables[wearableType].buildOverridePriority);
 			}
 			this.wearables[wearableType] = new WearableAccessorizer.Wearable(animFile, equippable.def.BuildOverridePriority);
 			this.ApplyWearable();
@@ -104,7 +128,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		foreach (KeyValuePair<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> keyValuePair in this.wearables)
 		{
 			int buildOverridePriority = keyValuePair.Value.buildOverridePriority;
-			foreach (KAnimFile kanimFile in keyValuePair.Value.buildAnims)
+			foreach (KAnimFile kanimFile in keyValuePair.Value.BuildAnims)
 			{
 				KAnim.Build build = kanimFile.GetData().build;
 				if (build != null)
@@ -137,7 +161,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		bool flag5 = true;
 		if (this.wearables.ContainsKey(wearableType))
 		{
-			List<KAnimHashedString> list = this.wearables[wearableType].buildAnims.SelectMany<KAnimFile, KAnimHashedString>((KAnimFile x) => x.GetData().build.symbols.Select<KAnim.Build.Symbol, KAnimHashedString>((KAnim.Build.Symbol s) => s.hash)).ToList<KAnimHashedString>();
+			List<KAnimHashedString> list = this.wearables[wearableType].BuildAnims.SelectMany<KAnimFile, KAnimHashedString>((KAnimFile x) => x.GetData().build.symbols.Select<KAnim.Build.Symbol, KAnimHashedString>((KAnim.Build.Symbol s) => s.hash)).ToList<KAnimHashedString>();
 			flag = flag || list.Contains(Db.Get().AccessorySlots.Belt.targetSymbolId);
 			flag3 = list.Contains(Db.Get().AccessorySlots.Skirt.targetSymbolId);
 			flag4 = list.Contains(Db.Get().AccessorySlots.Necklace.targetSymbolId);
@@ -190,16 +214,21 @@ public class WearableAccessorizer : KMonoBehaviour
 		if (kprefabID != null)
 		{
 			Equippable component = kprefabID.GetComponent<Equippable>();
-			WearableAccessorizer.WearableType wearableType;
-			if (component != null && Enum.TryParse<WearableAccessorizer.WearableType>(component.def.Slot, out wearableType))
+			this.RemoveEquipment(component);
+		}
+	}
+
+	public void RemoveEquipment(Equippable equippable)
+	{
+		WearableAccessorizer.WearableType wearableType;
+		if (equippable != null && Enum.TryParse<WearableAccessorizer.WearableType>(equippable.def.Slot, out wearableType))
+		{
+			if (this.wearables.ContainsKey(wearableType))
 			{
-				if (this.wearables.ContainsKey(wearableType))
-				{
-					this.RemoveAnimBuild(component.GetBuildOverride(), this.wearables[wearableType].buildOverridePriority);
-					this.wearables.Remove(wearableType);
-				}
-				this.ApplyWearable();
+				this.RemoveAnimBuild(equippable.GetBuildOverride(), this.wearables[wearableType].buildOverridePriority);
+				this.wearables.Remove(wearableType);
 			}
+			this.ApplyWearable();
 		}
 	}
 
@@ -220,7 +249,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			this.wearables[WearableAccessorizer.WearableType.CustomClothing] = new WearableAccessorizer.Wearable(new List<KAnimFile>(), 4);
 		}
-		this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildAnims.Add(clothingItem.AnimFile);
+		this.wearables[WearableAccessorizer.WearableType.CustomClothing].AddAnim(clothingItem.AnimFile);
 	}
 
 	public void RemoveClothingItem(ClothingItemResource clothing_item)
@@ -228,11 +257,11 @@ public class WearableAccessorizer : KMonoBehaviour
 		this.clothingItems.RemoveAll((ResourceRef<ClothingItemResource> x) => x.Get().IdHash == clothing_item.IdHash);
 		if (this.wearables.ContainsKey(WearableAccessorizer.WearableType.CustomClothing))
 		{
-			if (this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildAnims.Remove(clothing_item.AnimFile))
+			if (this.wearables[WearableAccessorizer.WearableType.CustomClothing].RemoveAnim(clothing_item.AnimFile))
 			{
 				this.RemoveAnimBuild(clothing_item.AnimFile, this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildOverridePriority);
 			}
-			if (this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildAnims.Count <= 0)
+			if (this.wearables[WearableAccessorizer.WearableType.CustomClothing].BuildAnims.Count <= 0)
 			{
 				this.wearables.Remove(WearableAccessorizer.WearableType.CustomClothing);
 			}
@@ -250,11 +279,11 @@ public class WearableAccessorizer : KMonoBehaviour
 		this.clothingItems.Clear();
 		if (this.wearables.ContainsKey(WearableAccessorizer.WearableType.CustomClothing))
 		{
-			foreach (KAnimFile kanimFile in this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildAnims)
+			foreach (KAnimFile kanimFile in this.wearables[WearableAccessorizer.WearableType.CustomClothing].BuildAnims)
 			{
 				this.RemoveAnimBuild(kanimFile, this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildOverridePriority);
 			}
-			this.wearables[WearableAccessorizer.WearableType.CustomClothing].buildAnims.Clear();
+			this.wearables[WearableAccessorizer.WearableType.CustomClothing].ClearAnims();
 			if (items.Count<ClothingItemResource>() <= 0)
 			{
 				this.wearables.Remove(WearableAccessorizer.WearableType.CustomClothing);
@@ -263,6 +292,23 @@ public class WearableAccessorizer : KMonoBehaviour
 		foreach (ClothingItemResource clothingItemResource in items)
 		{
 			this.ApplyClothingItem(clothingItemResource);
+		}
+		this.ApplyWearable();
+	}
+
+	public void RestoreWearables(Dictionary<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> stored_wearables, List<ResourceRef<ClothingItemResource>> clothing)
+	{
+		if (stored_wearables != null)
+		{
+			this.wearables = stored_wearables;
+			foreach (KeyValuePair<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> keyValuePair in this.wearables)
+			{
+				keyValuePair.Value.Deserialize();
+			}
+		}
+		if (clothing != null)
+		{
+			this.ApplyClothingItems(clothing.Select<ResourceRef<ClothingItemResource>, ClothingItemResource>((ResourceRef<ClothingItemResource> i) => i.Get()));
 		}
 		this.ApplyWearable();
 	}
@@ -288,30 +334,74 @@ public class WearableAccessorizer : KMonoBehaviour
 		CustomSuit
 	}
 
-	private class Wearable
+	[SerializationConfig(MemberSerialization.OptIn)]
+	public class Wearable
 	{
+		public List<KAnimFile> BuildAnims
+		{
+			get
+			{
+				return this.buildAnims;
+			}
+		}
+
+		public List<string> AnimNames
+		{
+			get
+			{
+				return this.animNames;
+			}
+		}
+
 		public Wearable(List<KAnimFile> buildAnims, int buildOverridePriority)
 		{
 			this.buildAnims = buildAnims;
+			this.animNames = buildAnims.Select<KAnimFile, string>((KAnimFile animFile) => animFile.name).ToList<string>();
 			this.buildOverridePriority = buildOverridePriority;
 		}
 
 		public Wearable(KAnimFile buildAnim, int buildOverridePriority)
 		{
 			this.buildAnims = new List<KAnimFile> { buildAnim };
+			this.animNames = new List<string> { buildAnim.name };
 			this.buildOverridePriority = buildOverridePriority;
 		}
 
 		public void Deserialize()
 		{
-			for (int i = 0; i < this.buildAnims.Count; i++)
+			if (this.animNames != null)
 			{
-				this.buildAnims[i] = Assets.GetAnim(this.buildAnims[i].name);
+				this.buildAnims = new List<KAnimFile>();
+				for (int i = 0; i < this.animNames.Count; i++)
+				{
+					this.buildAnims.Add(Assets.GetAnim(this.animNames[i]));
+				}
 			}
 		}
 
-		public List<KAnimFile> buildAnims;
+		public void AddAnim(KAnimFile animFile)
+		{
+			this.buildAnims.Add(animFile);
+			this.animNames.Add(animFile.name);
+		}
 
+		public bool RemoveAnim(KAnimFile animFile)
+		{
+			return this.buildAnims.Remove(animFile) | this.animNames.Remove(animFile.name);
+		}
+
+		public void ClearAnims()
+		{
+			this.buildAnims.Clear();
+			this.animNames.Clear();
+		}
+
+		private List<KAnimFile> buildAnims;
+
+		[Serialize]
+		private List<string> animNames;
+
+		[Serialize]
 		public int buildOverridePriority;
 	}
 }

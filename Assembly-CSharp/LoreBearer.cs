@@ -68,6 +68,11 @@ public class LoreBearer : KMonoBehaviour, ISidescreenButtonControl
 		}
 	}
 
+	public int HorizontalGroupID()
+	{
+		return -1;
+	}
+
 	public bool SidescreenEnabled()
 	{
 		return true;

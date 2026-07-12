@@ -222,7 +222,7 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Remove(base.gameObject);
 		}
 		base.OnCleanUp();
-		if (!this.WasReplaced() && base.gameObject.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX)
+		if (!this.WasReplaced() && base.gameObject.GetMyWorldId() != 255)
 		{
 			int num = Grid.PosToCell(this);
 			this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);

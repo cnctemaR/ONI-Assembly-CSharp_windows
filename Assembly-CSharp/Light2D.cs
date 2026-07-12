@@ -254,7 +254,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		this.FullRefresh();
 	}
 
-	public List<Descriptor> GetDescriptors(GameObject go)
+	public virtual List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return new List<Descriptor>
 		{

@@ -63,7 +63,7 @@ public class ModuleSolarPanel : Generator
 			return;
 		}
 		float num = 0f;
-		if (Grid.IsValidCell(Grid.PosToCell(this)) && Grid.WorldIdx[Grid.PosToCell(this)] != ClusterManager.INVALID_WORLD_IDX)
+		if (Grid.IsValidCell(Grid.PosToCell(this)) && Grid.WorldIdx[Grid.PosToCell(this)] != 255)
 		{
 			foreach (CellOffset cellOffset in this.solarCellOffsets)
 			{

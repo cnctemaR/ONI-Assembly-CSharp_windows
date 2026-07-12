@@ -11,11 +11,15 @@ namespace Database
 
 		public KAnimFile AnimFile { get; private set; }
 
-		public ClothingItemResource(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile)
+		public ClothingOutfitUtility.OutfitType outfitType { get; private set; }
+
+		public ClothingItemResource(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile)
 			: base(id, name, desc, category, rarity)
 		{
 			this.AnimFile = Assets.GetAnim(animFile);
 			this.animFilename = animFile;
+			this.outfitType = outfitType;
+			DebugUtil.DevAssert(outfitType == PermitCategories.GetOutfitTypeFor(category), "Assert Failed.", null);
 		}
 
 		public global::Tuple<Sprite, Color> GetUISprite()

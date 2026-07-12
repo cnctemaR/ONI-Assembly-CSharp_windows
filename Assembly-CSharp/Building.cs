@@ -132,12 +132,29 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
-			if (this.Def.AvailableFacades.Count > 0 && !this.description.IsNullOrWhiteSpace())
+			if (!this.description.IsNullOrWhiteSpace())
 			{
 				return this.description;
 			}
 			return this.Def.Desc;
 		}
+	}
+
+	public string DescFlavour
+	{
+		get
+		{
+			if (!this.descriptionFlavour.IsNullOrWhiteSpace())
+			{
+				return this.descriptionFlavour;
+			}
+			return this.Def.Effect;
+		}
+	}
+
+	public void SetDescriptionFlavour(string descriptionFlavour)
+	{
+		this.descriptionFlavour = descriptionFlavour;
 	}
 
 	protected override void OnSpawn()
@@ -444,6 +461,8 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	private static StatusItem deprecatedBuildingStatusItem;
 
 	private string description;
+
+	private string descriptionFlavour;
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
 }

@@ -47,7 +47,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		this.UpdateAnimationTags();
 		this.MarkPathDirty();
 		this.RevalidatePath(false);
-		this.ForceRevealLocation(this.m_clusterGridEntity.Location);
+		if (this.revealsFogOfWarAsItTravels)
+		{
+			this.ForceRevealLocation(this.m_clusterGridEntity.Location);
+		}
 	}
 
 	private void MarkPathDirty()
@@ -134,7 +137,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 			{
 				bool requireLaunchPadOnAsteroidDestination = this.m_destinationSelector.requireLaunchPadOnAsteroidDestination;
 			}
-			if (!flag2 || this.CurrentPath.Count > 1)
+			if (!flag2 || this.CurrentPath.Count > 1 || !this.quickTravelToAsteroidIfInOrbit)
 			{
 				float num = dt * this.getSpeedCB();
 				this.m_movePotential += num;
@@ -143,7 +146,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 					this.m_movePotential = 600f;
 					if (this.AdvancePathOneStep())
 					{
-						global::Debug.Assert(ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.m_clusterGridEntity.Location, EntityLayer.Asteroid) == null, string.Format("Somehow this clustercraft pathed through an asteroid at {0}", this.m_clusterGridEntity.Location));
+						global::Debug.Assert(ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.m_clusterGridEntity.Location, EntityLayer.Asteroid) == null || (flag2 && this.CurrentPath.Count == 0), string.Format("Somehow this clustercraft pathed through an asteroid at {0}", this.m_clusterGridEntity.Location));
 						this.m_movePotential -= 600f;
 						if (this.onTravelCB != null)
 						{
@@ -168,7 +171,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		}
 		AxialI axialI = this.CurrentPath[0];
 		this.CurrentPath.RemoveAt(0);
-		this.ForceRevealLocation(axialI);
+		if (this.revealsFogOfWarAsItTravels)
+		{
+			this.ForceRevealLocation(axialI);
+		}
 		this.m_clusterGridEntity.Location = axialI;
 		this.UpdateAnimationTags();
 		return true;
@@ -229,7 +235,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 			return false;
 		}
 		this.m_isPathDirty = false;
-		updatedPath = ClusterGrid.Instance.GetPath(this.m_clusterGridEntity.Location, this.m_cachedPathDestination, this.m_destinationSelector, out reason);
+		updatedPath = ClusterGrid.Instance.GetPath(this.m_clusterGridEntity.Location, this.m_cachedPathDestination, this.m_destinationSelector, out reason, this.m_destinationSelector.dodgesHiddenAsteroids);
 		if (updatedPath == null)
 		{
 			return true;
@@ -276,6 +282,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	private List<AxialI> m_cachedPath;
 
 	private bool m_isPathDirty;
+
+	public bool revealsFogOfWarAsItTravels = true;
+
+	public bool quickTravelToAsteroidIfInOrbit = true;
 
 	public bool stopAndNotifyWhenPathChanges;
 

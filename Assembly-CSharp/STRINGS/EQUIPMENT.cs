@@ -403,6 +403,55 @@ namespace STRINGS
 
 						public static LocString DESC = "The muted stripe minimizes distractions so its wearer can focus on trying very, very hard.";
 					}
+
+					public class CUFFLESS_BLUEBERRY
+					{
+						public static LocString NAME = "Blueberry Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_GRAPE
+					{
+						public static LocString NAME = "Grape Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_LEMON
+					{
+						public static LocString NAME = "Lemon Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_LIME
+					{
+						public static LocString NAME = "Lime Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_SATSUMA
+					{
+						public static LocString NAME = "Satsuma Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_STRAWBERRY
+					{
+						public static LocString NAME = "Strawberry Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
+
+					public class CUFFLESS_WATERMELON
+					{
+						public static LocString NAME = "Watermelon Glovelets";
+
+						public static LocString DESC = "Wrist coverage is <i>so</i> overrated.";
+					}
 				}
 			}
 
@@ -530,6 +579,55 @@ namespace STRINGS
 						public static LocString NAME = "Superfan T-shirt";
 
 						public static LocString DESC = "A slightly sweat-stained tee for the long-time supporter.";
+					}
+
+					public class JELLYPUFFJACKET_BLUEBERRY
+					{
+						public static LocString NAME = "Blueberry Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_GRAPE
+					{
+						public static LocString NAME = "Grape Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_LEMON
+					{
+						public static LocString NAME = "Lemon Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_LIME
+					{
+						public static LocString NAME = "Lime Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_SATSUMA
+					{
+						public static LocString NAME = "Satsuma Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_STRAWBERRY
+					{
+						public static LocString NAME = "Strawberry Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
+					}
+
+					public class JELLYPUFFJACKET_WATERMELON
+					{
+						public static LocString NAME = "Watermelon Jelly Jacket";
+
+						public static LocString DESC = "It's best to keep jelly-filled puffer jackets away from sharp corners.";
 					}
 				}
 			}
@@ -926,6 +1024,55 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Pip Pip Hooray", "EQUIPPABLEBALLOON");
 
 						public static LocString DESC = "A happy little trio of inflatable critters.";
+					}
+
+					public class CANDY_BLUEBERRY
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Blueberry", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy bunch of blueberry-scented balloons.";
+					}
+
+					public class CANDY_GRAPE
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Grape", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy bunch of grape-scented balloons.";
+					}
+
+					public class CANDY_LEMON
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Lemon", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy lemon-scented bunch of balloons.";
+					}
+
+					public class CANDY_LIME
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Lime", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy lime-scented bunch of balloons.";
+					}
+
+					public class CANDY_ORANGE
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Satsuma", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy satsuma-scented bunch of balloons.";
+					}
+
+					public class CANDY_STRAWBERRY
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Strawberry", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy strawberry-scented bunch of balloons.";
+					}
+
+					public class CANDY_WATERMELON
+					{
+						public static LocString NAME = UI.FormatAsLink("Candied Watermelon", "EQUIPPABLEBALLOON");
+
+						public static LocString DESC = "A juicy watermelon-scented bunch of balloons.";
 					}
 				}
 			}

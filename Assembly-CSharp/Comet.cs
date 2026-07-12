@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FMOD.Studio;
+using Klei.CustomSettings;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -9,6 +10,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Comet")]
 public class Comet : KMonoBehaviour, ISim33ms
 {
+	public Vector3 TargetPosition
+	{
+		get
+		{
+			return this.anim.PositionIncludingOffset;
+		}
+	}
+
 	public Vector2 Velocity
 	{
 		get
@@ -24,7 +33,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 	private float GetVolume(GameObject gameObject)
 	{
 		float num = 1f;
-		if (gameObject != null && gameObject.GetComponent<KSelectable>() != null && gameObject.GetComponent<KSelectable>().IsSelected)
+		if (gameObject != null && this.selectable != null && this.selectable.IsSelected)
 		{
 			num = 1f;
 		}
@@ -42,9 +51,47 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	protected override void OnSpawn()
 	{
+		this.anim.Offset = this.offsetPosition;
+		if (this.spawnWithOffset)
+		{
+			this.SetupOffset();
+		}
 		base.OnSpawn();
 		this.RandomizeMassAndTemperature();
 		this.StartLoopingSound();
+		bool flag = this.offsetPosition.x != 0f || this.offsetPosition.y != 0f;
+		this.selectable.enabled = !flag;
+		Components.Meteors.Add(base.gameObject.GetMyWorldId(), this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.Meteors.Remove(base.gameObject.GetMyWorldId(), this);
+	}
+
+	protected void SetupOffset()
+	{
+		Vector3 position = base.transform.GetPosition();
+		Vector3 position2 = base.transform.GetPosition();
+		position2.z = 0f;
+		Vector3 vector = new Vector3(this.velocity.x, this.velocity.y, 0f);
+		WorldContainer myWorld = base.gameObject.GetMyWorld();
+		float num = ((float)(myWorld.WorldOffset.y + myWorld.Height) + 20f) * Grid.CellSizeInMeters - position2.y;
+		float num2 = Vector3.Angle(Vector3.up, -vector);
+		float num3 = Mathf.Abs(num / Mathf.Cos(num2));
+		ref Vector3 ptr = position2 - vector.normalized * num3;
+		float num4 = (float)(myWorld.WorldOffset.x + myWorld.Width) * Grid.CellSizeInMeters;
+		if (ptr.x > num4)
+		{
+			float num5 = ((vector.x < 0f) ? (num4 - position2.x) : (position2.x - (float)myWorld.WorldOffset.x * Grid.CellSizeInMeters));
+			num2 = Vector3.Angle((vector.x < 0f) ? Vector3.right : Vector3.left, -vector);
+			num3 = Mathf.Abs(num5 / Mathf.Cos(num2));
+		}
+		Vector3 vector2 = -vector.normalized * num3;
+		(position2 + vector2).z = position.z;
+		this.offsetPosition = vector2;
+		this.anim.Offset = this.offsetPosition;
+		Grid.PosToCell(this.offsetPosition);
 	}
 
 	public virtual void RandomizeVelocity()
@@ -58,7 +105,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	public void RandomizeMassAndTemperature()
 	{
-		float num = global::UnityEngine.Random.Range(this.massRange.x, this.massRange.y);
+		float num = global::UnityEngine.Random.Range(this.massRange.x, this.massRange.y) * this.GetMassMultiplier();
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.Mass = num;
 		component.Temperature = global::UnityEngine.Random.Range(this.temperatureRange.x, this.temperatureRange.y);
@@ -73,6 +120,38 @@ public class Comet : KMonoBehaviour, ISim33ms
 		this.addTileMass = 0f;
 	}
 
+	public float GetMassMultiplier()
+	{
+		float num = 1f;
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.MeteorShowers);
+		if (this.affectedByDifficulty && currentQualitySetting != null)
+		{
+			string id = currentQualitySetting.id;
+			if (id != null)
+			{
+				if (!(id == "Infrequent"))
+				{
+					if (!(id == "Intense"))
+					{
+						if (id == "Doomed")
+						{
+							num *= 0.5f;
+						}
+					}
+					else
+					{
+						num *= 1f;
+					}
+				}
+				else
+				{
+					num *= 1f;
+				}
+			}
+		}
+		return num;
+	}
+
 	[ContextMenu("Explode")]
 	private void Explode(Vector3 pos, int cell, int prev_cell, Element element)
 	{
@@ -80,7 +159,10 @@ public class Comet : KMonoBehaviour, ISim33ms
 		this.PlayImpactSound(pos);
 		Vector3 vector = pos;
 		vector.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront2);
-		Game.Instance.SpawnFX(this.explosionEffectHash, vector, 0f);
+		if (this.explosionEffectHash != SpawnFXHashes.None)
+		{
+			Game.Instance.SpawnFX(this.explosionEffectHash, vector, 0f);
+		}
 		Substance substance = element.substance;
 		int num = global::UnityEngine.Random.Range(this.explosionOreCount.x, this.explosionOreCount.y + 1);
 		Vector2 vector2 = -this.velocity.normalized;
@@ -125,6 +207,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		float num5 = ((num > 0) ? (this.explosionMass / (float)num) : 1f);
 		float num6 = global::UnityEngine.Random.Range(this.explosionTemperatureRange.x, this.explosionTemperatureRange.y);
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		for (int k = 0; k < num; k++)
 		{
 			Vector2 normalized = (vector2 + vector3 * global::UnityEngine.Random.Range(-1f, 1f)).normalized;
@@ -132,7 +215,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			Vector3 vector6 = normalized.normalized * 0.75f;
 			vector6 += new Vector3(0f, 0.55f, 0f);
 			vector6 += pos;
-			GameObject gameObject2 = substance.SpawnResource(vector6, num5, num6, byte.MaxValue, 0, false, false, false);
+			GameObject gameObject2 = substance.SpawnResource(vector6, num5, num6, component.DiseaseIdx, component.DiseaseCount / (num + this.addTiles), false, false, false);
 			if (GameComps.Fallers.Has(gameObject2))
 			{
 				GameComps.Fallers.Remove(gameObject2);
@@ -180,7 +263,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			int num13 = this.addDiseaseCount / num9;
 			if (element.HasTag(GameTags.Unstable))
 			{
-				UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
+				UnstableGroundManager component2 = World.Instance.GetComponent<UnstableGroundManager>();
 				using (HashSet<int>.Enumerator enumerator2 = pooledHashSet.GetEnumerator())
 				{
 					while (enumerator2.MoveNext())
@@ -190,10 +273,10 @@ public class Comet : KMonoBehaviour, ISim33ms
 						{
 							break;
 						}
-						component.Spawn(num14, element, num12, num6, byte.MaxValue, 0);
+						component2.Spawn(num14, element, num12, num6, byte.MaxValue, 0);
 						num9--;
 					}
-					goto IL_05CD;
+					goto IL_05EE;
 				}
 			}
 			foreach (int num15 in pooledHashSet)
@@ -205,7 +288,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				SimMessages.AddRemoveSubstance(num15, element.id, CellEventLogger.Instance.ElementEmitted, num12, num6, this.diseaseIdx, num13, true, -1);
 				num9--;
 			}
-			IL_05CD:
+			IL_05EE:
 			pooledHashSet.Recycle();
 			pooledHashSet2.Recycle();
 			pooledQueue.Recycle();
@@ -309,7 +392,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	private void DamageThings(Vector3 pos, int cell, int damage, GameObject ignoreObject = null)
 	{
-		if (!Grid.IsValidCell(cell))
+		if (damage == 0 || !Grid.IsValidCell(cell))
 		{
 			return;
 		}
@@ -350,7 +433,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		pooledList.Recycle();
 	}
 
-	private float GetDistanceFromImpact()
+	public float GetDistanceFromImpact()
 	{
 		float num = this.velocity.x / this.velocity.y;
 		Vector3 position = base.transform.GetPosition();
@@ -425,58 +508,72 @@ public class Comet : KMonoBehaviour, ISim33ms
 		{
 			return;
 		}
-		Vector2 vector = new Vector2((float)Grid.WidthInCells, (float)Grid.HeightInCells) * -0.1f;
-		Vector2 vector2 = new Vector2((float)Grid.WidthInCells, (float)Grid.HeightInCells) * 1.1f;
-		Vector3 position = base.transform.GetPosition();
-		Vector3 vector3 = position + new Vector3(this.velocity.x * dt, this.velocity.y * dt, 0f);
-		int num = Grid.PosToCell(vector3);
-		this.loopingSounds.UpdateVelocity(this.flyingSound, vector3 - position);
-		Element element = ElementLoader.FindElementByHash(this.EXHAUST_ELEMENT);
-		if (this.EXHAUST_ELEMENT != SimHashes.Void && Grid.IsValidCell(num) && !Grid.Solid[num])
+		if (this.offsetPosition != Vector3.zero)
 		{
-			SimMessages.EmitMass(num, element.idx, dt * this.EXHAUST_RATE, element.defaultValues.temperature, this.diseaseIdx, Mathf.RoundToInt((float)this.addDiseaseCount * dt), -1);
+			Vector3 vector = new Vector3(this.velocity.x * dt, this.velocity.y * dt, 0f);
+			Vector3 vector2 = ((this.offsetPosition.magnitude < vector.magnitude) ? Vector3.zero : (this.offsetPosition + vector));
+			this.offsetPosition = vector2;
+			this.anim.Offset = this.offsetPosition;
 		}
-		if (vector3.x < vector.x || vector2.x < vector3.x || vector3.y < vector.y)
+		else
 		{
-			global::Util.KDestroyGameObject(base.gameObject);
-		}
-		int num2 = Grid.PosToCell(this);
-		int num3 = Grid.PosToCell(this.previousPosition);
-		if (num2 != num3)
-		{
-			if (Grid.IsValidCell(num2) && Grid.Solid[num2])
+			if (!this.selectable.enabled)
 			{
-				PrimaryElement component = base.GetComponent<PrimaryElement>();
-				this.remainingTileDamage = this.DamageTiles(num2, num3, this.remainingTileDamage);
-				if (this.remainingTileDamage <= 0f)
-				{
-					this.Explode(position, num2, num3, component.Element);
-					this.hasExploded = true;
-					if (this.destroyOnExplode)
-					{
-						global::Util.KDestroyGameObject(base.gameObject);
-					}
-					return;
-				}
+				this.selectable.enabled = true;
 			}
-			else
+			Vector2 vector3 = new Vector2((float)Grid.WidthInCells, (float)Grid.HeightInCells) * -0.1f;
+			Vector2 vector4 = new Vector2((float)Grid.WidthInCells, (float)Grid.HeightInCells) * 1.1f;
+			Vector3 position = base.transform.GetPosition();
+			Vector3 vector5 = position + new Vector3(this.velocity.x * dt, this.velocity.y * dt, 0f);
+			int num = Grid.PosToCell(vector5);
+			this.loopingSounds.UpdateVelocity(this.flyingSound, vector5 - position);
+			Element element = ElementLoader.FindElementByHash(this.EXHAUST_ELEMENT);
+			if (this.EXHAUST_ELEMENT != SimHashes.Void && Grid.IsValidCell(num) && !Grid.Solid[num])
 			{
-				GameObject gameObject = ((this.ignoreObstacleForDamage.Get() == null) ? null : this.ignoreObstacleForDamage.Get().gameObject);
-				this.DamageThings(position, num2, this.entityDamage, gameObject);
+				SimMessages.EmitMass(num, element.idx, dt * this.EXHAUST_RATE, element.defaultValues.temperature, this.diseaseIdx, Mathf.RoundToInt((float)this.addDiseaseCount * dt), -1);
 			}
-		}
-		if (this.canHitDuplicants && this.age > 0.25f && Grid.Objects[Grid.PosToCell(position), 0] != null)
-		{
-			base.transform.position = Grid.CellToPos(Grid.PosToCell(position));
-			this.Explode(position, num2, num3, base.GetComponent<PrimaryElement>().Element);
-			if (this.destroyOnExplode)
+			if (vector5.x < vector3.x || vector4.x < vector5.x || vector5.y < vector3.y)
 			{
 				global::Util.KDestroyGameObject(base.gameObject);
 			}
-			return;
+			int num2 = Grid.PosToCell(this);
+			int num3 = Grid.PosToCell(this.previousPosition);
+			if (num2 != num3)
+			{
+				if (Grid.IsValidCell(num2) && Grid.Solid[num2])
+				{
+					PrimaryElement component = base.GetComponent<PrimaryElement>();
+					this.remainingTileDamage = this.DamageTiles(num2, num3, this.remainingTileDamage);
+					if (this.remainingTileDamage <= 0f)
+					{
+						this.Explode(position, num2, num3, component.Element);
+						this.hasExploded = true;
+						if (this.destroyOnExplode)
+						{
+							global::Util.KDestroyGameObject(base.gameObject);
+						}
+						return;
+					}
+				}
+				else
+				{
+					GameObject gameObject = ((this.ignoreObstacleForDamage.Get() == null) ? null : this.ignoreObstacleForDamage.Get().gameObject);
+					this.DamageThings(position, num2, this.entityDamage, gameObject);
+				}
+			}
+			if (this.canHitDuplicants && this.age > 0.25f && Grid.Objects[Grid.PosToCell(position), 0] != null)
+			{
+				base.transform.position = Grid.CellToPos(Grid.PosToCell(position));
+				this.Explode(position, num2, num3, base.GetComponent<PrimaryElement>().Element);
+				if (this.destroyOnExplode)
+				{
+					global::Util.KDestroyGameObject(base.gameObject);
+				}
+				return;
+			}
+			this.previousPosition = position;
+			base.transform.SetPosition(vector5);
 		}
-		this.previousPosition = position;
-		base.transform.SetPosition(vector3);
 		this.age += dt;
 	}
 
@@ -502,6 +599,19 @@ public class Comet : KMonoBehaviour, ISim33ms
 	{
 		this.loopingSounds.StartSound(this.flyingSound);
 		this.loopingSounds.UpdateFirstParameter(this.flyingSound, this.FLYING_SOUND_ID_PARAMETER, (float)this.flyingSoundID);
+	}
+
+	public void Explode()
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		Vector3 position = base.transform.GetPosition();
+		int num = Grid.PosToCell(position);
+		this.Explode(position, num, num, component.Element);
+		this.hasExploded = true;
+		if (this.destroyOnExplode)
+		{
+			global::Util.KDestroyGameObject(base.gameObject);
+		}
 	}
 
 	public SimHashes EXHAUST_ELEMENT = SimHashes.CarbonDioxide;
@@ -558,6 +668,13 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	private HashedString FLYING_SOUND_ID_PARAMETER = "meteorType";
 
+	public bool affectedByDifficulty = true;
+
+	public bool Targeted;
+
+	[Serialize]
+	protected Vector3 offsetPosition;
+
 	[Serialize]
 	protected Vector2 velocity;
 
@@ -574,11 +691,19 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	public bool destroyOnExplode = true;
 
+	public bool spawnWithOffset;
+
 	private float age;
 
 	public global::System.Action OnImpact;
 
 	public Ref<KPrefabID> ignoreObstacleForDamage = new Ref<KPrefabID>();
+
+	[MyCmpGet]
+	private KBatchedAnimController anim;
+
+	[MyCmpGet]
+	private KSelectable selectable;
 
 	private LoopingSounds loopingSounds;
 

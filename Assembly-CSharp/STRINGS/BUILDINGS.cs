@@ -1394,9 +1394,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Comfy Bed", "LUXURYBED");
 
-				public static LocString DESC = "Duplicants prefer comfy beds to cots and gain more stamina from sleeping in them.";
+				public static LocString DESC = "Duplicants prefer comfy beds to cots and wake up more rested after sleeping in them.";
 
-				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and restores additional " + UI.FormatAsLink("Stamina", "STAMINA") + ".\n\nDuplicants will automatically sleep in their assigned beds at night.";
+				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and restores additional stamina.\n\nDuplicants will automatically sleep in their assigned beds at night.";
 
 				public class FACADES
 				{
@@ -2195,6 +2195,51 @@ namespace STRINGS
 					UI.FormatAsLink("Morale", "MORALE"),
 					".\n\nMust be hung from a wall."
 				});
+
+				public class FACADES
+				{
+					public class DEFAULT_FLOWERVASEWALL
+					{
+						public static LocString NAME = UI.FormatAsLink("Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Facilitates vertical plant displays.";
+					}
+
+					public class RETRO_GREEN
+					{
+						public static LocString NAME = UI.FormatAsLink("Bright Retro Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Vertical gardens are pretty nifty.";
+					}
+
+					public class RETRO_YELLOW
+					{
+						public static LocString NAME = UI.FormatAsLink("Sunny Retro Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Vertical gardens are pretty nifty.";
+					}
+
+					public class RETRO_RED
+					{
+						public static LocString NAME = UI.FormatAsLink("Bold Retro Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Vertical gardens are pretty nifty.";
+					}
+
+					public class RETRO_BLUE
+					{
+						public static LocString NAME = UI.FormatAsLink("Dreamy Retro Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Vertical gardens are pretty nifty.";
+					}
+
+					public class RETRO_WHITE
+					{
+						public static LocString NAME = UI.FormatAsLink("Elegant Retro Wall Pot", "FLOWERVASEWALL");
+
+						public static LocString DESC = "Vertical gardens are pretty nifty.";
+					}
+				}
 			}
 
 			public class FLOWERVASEHANGING
@@ -2276,11 +2321,29 @@ namespace STRINGS
 				}
 			}
 
+			public class FOSSILDIG
+			{
+				public static LocString NAME = "Ancient Specimen";
+
+				public static LocString DESC = "It's not from around here.";
+
+				public static LocString EFFECT = "Contains a partial " + UI.FormatAsLink("Fossil", "FOSSIL") + " left behind by a giant critter.\n\nStudying the full skeleton could yield the information required to access a valuable new resource.";
+			}
+
+			public class FOSSILDIG_COMPLETED
+			{
+				public static LocString NAME = "Fossil Quarry";
+
+				public static LocString DESC = "There sure are a lot of old bones in this area.";
+
+				public static LocString EFFECT = "Contains a deep cache of harvestable " + UI.FormatAsLink("Fossils", "FOSSIL") + ".";
+			}
+
 			public class GAMMARAYOVEN
 			{
 				public static LocString NAME = UI.FormatAsLink("Gamma Ray Oven", "GAMMARAYOVEN");
 
-				public static LocString DESC = "Nuke your food";
+				public static LocString DESC = "Nuke your food.";
 
 				public static LocString EFFECT = "Cooks a variety of " + UI.FormatAsLink("Foods", "FOOD") + ".\n\nDuplicants will not fabricate items unless recipes are queued.";
 			}
@@ -3204,6 +3267,104 @@ namespace STRINGS
 						public static LocString NAME = UI.FormatAsLink("Charcoal Wedge", "EXTERIORWALL");
 
 						public static LocString DESC = "It can be arranged into giant shadowy polka dots.";
+					}
+
+					public class BASIC_BLUE_COBALT
+					{
+						public static LocString NAME = UI.FormatAsLink("Solid Cobalt", "EXTERIORWALL");
+
+						public static LocString DESC = "It doesn't cure the blues, so much as emphasize them.";
+					}
+
+					public class BASIC_GREEN_KELLY
+					{
+						public static LocString NAME = UI.FormatAsLink("Spring Green", "EXTERIORWALL");
+
+						public static LocString DESC = "It's cheaper than having a garden.";
+					}
+
+					public class BASIC_GREY_CHARCOAL
+					{
+						public static LocString NAME = UI.FormatAsLink("Solid Charcoal", "EXTERIORWALL");
+
+						public static LocString DESC = "An elevated take on \"gray\".";
+					}
+
+					public class BASIC_ORANGE_SATSUMA
+					{
+						public static LocString NAME = UI.FormatAsLink("Solid Satsuma", "EXTERIORWALL");
+
+						public static LocString DESC = "Less fruit-forward, but just as fresh.";
+					}
+
+					public class BASIC_PINK_FLAMINGO
+					{
+						public static LocString NAME = UI.FormatAsLink("Solid Pink", "EXTERIORWALL");
+
+						public static LocString DESC = "A bold statement, for bold Duplicants.";
+					}
+
+					public class BASIC_RED_DEEP
+					{
+						public static LocString NAME = UI.FormatAsLink("Chili Red", "EXTERIORWALL");
+
+						public static LocString DESC = "It really spices up dull walls.";
+					}
+
+					public class BASIC_YELLOW_LEMON
+					{
+						public static LocString NAME = UI.FormatAsLink("Canary Yellow", "EXTERIORWALL");
+
+						public static LocString DESC = "The original coal-mine chic.";
+					}
+
+					public class BLUEBERRIES
+					{
+						public static LocString NAME = UI.FormatAsLink("Juicy Blueberry", "EXTERIORWALL");
+
+						public static LocString DESC = "It stains the fingers.";
+					}
+
+					public class GRAPES
+					{
+						public static LocString NAME = UI.FormatAsLink("Grape Escape", "EXTERIORWALL");
+
+						public static LocString DESC = "It's seedless, if that matters.";
+					}
+
+					public class LEMON
+					{
+						public static LocString NAME = UI.FormatAsLink("Sour Lemon", "EXTERIORWALL");
+
+						public static LocString DESC = "A bitter yet refreshing style.";
+					}
+
+					public class LIME
+					{
+						public static LocString NAME = UI.FormatAsLink("Juicy Lime", "EXTERIORWALL");
+
+						public static LocString DESC = "Contains no actual vitamin C.";
+					}
+
+					public class SATSUMA
+					{
+						public static LocString NAME = UI.FormatAsLink("Satsuma Slice", "EXTERIORWALL");
+
+						public static LocString DESC = "Adds some much-needed zest to the room.";
+					}
+
+					public class STRAWBERRY
+					{
+						public static LocString NAME = UI.FormatAsLink("Strawberry Speckle", "EXTERIORWALL");
+
+						public static LocString DESC = "Fruity freckles for naturally sweet spaces.";
+					}
+
+					public class WATERMELON
+					{
+						public static LocString NAME = UI.FormatAsLink("Juicy Watermelon", "EXTERIORWALL");
+
+						public static LocString DESC = "Far more practical than gluing real fruit at a wall.";
 					}
 				}
 			}
@@ -4147,7 +4308,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = UI.FormatAsLink("Frosty Crustacean", "ICESCULPTURE_AMAZING_2");
 
-						public static LocString DESC = "A masterful depiction of the mighty Pokeshell in mid-rampage.";
+						public static LocString DESC = "A charming depiction of the mighty Pokeshell in mid-rampage.";
 					}
 				}
 			}
@@ -5286,6 +5447,26 @@ namespace STRINGS
 				public static LocString RECIPE_DESCRIPTION = "Extracts pure {0} from {1}.";
 			}
 
+			public class MISSILEFABRICATOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Blastshot Maker", "MISSILEFABRICATOR");
+
+				public static LocString DESC = "Blastshot shells are an effective defense against incoming meteor showers.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Produces ",
+					UI.FormatAsLink("Blastshot", "MISSILEBASIC"),
+					" from ",
+					UI.FormatAsLink("Refined Metals", "REFINEDMETAL"),
+					" combined with ",
+					UI.FormatAsLink("Petroleum", "PETROLEUM"),
+					".\n\nDuplicants will not fabricate items unless recipes are queued."
+				});
+
+				public static LocString RECIPE_DESCRIPTION = "Produces {0} from {1} and {2}.";
+			}
+
 			public class GLASSFORGE
 			{
 				public static LocString NAME = UI.FormatAsLink("Glass Forge", "GLASSFORGE");
@@ -6048,14 +6229,14 @@ namespace STRINGS
 				{
 					"Send ",
 					UI.FormatAsAutomationState("Green Signals", UI.AutomationState.Active),
-					" at the chosen starmap locations and ",
+					" at the chosen Starmap locations and ",
 					UI.FormatAsAutomationState("Red Signals", UI.AutomationState.Standby),
 					" everywhere else."
 				});
 
 				public static LocString LOGIC_PORT = "Starmap Location Sensor";
 
-				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " at the chosen starmap locations";
+				public static LocString LOGIC_PORT_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + "when a spacecraft is at the chosen Starmap locations";
 
 				public static LocString LOGIC_PORT_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 			}
@@ -7361,6 +7542,15 @@ namespace STRINGS
 					UI.FormatAsLink("Gasses", "ELEMENTS_GAS"),
 					" to space during flight."
 				});
+			}
+
+			public class MISSILELAUNCHER
+			{
+				public static LocString NAME = "Meteor Blaster";
+
+				public static LocString DESC = "Meteors that have been blown to smithereens leave behind no harvestable resources.";
+
+				public static LocString EFFECT = "Fires " + UI.FormatAsLink("Blastshot", "MISSILE_BASIC") + " shells at meteor showers to defend the colony from impact-related damage.\n\nRange: 16 tiles horizontally, 32 tiles vertically.";
 			}
 
 			public class MASSIVEHEATSINK

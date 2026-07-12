@@ -8,12 +8,9 @@ namespace Klei
 		public WorldGenSave()
 		{
 			this.data = new Data();
-			this.stats = new Dictionary<string, object>();
 		}
 
 		public Vector2I version;
-
-		public Dictionary<string, object> stats;
 
 		public Data data;
 

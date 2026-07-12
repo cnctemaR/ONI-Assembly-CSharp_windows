@@ -184,13 +184,13 @@ public class KAnim
 				return this.idx;
 			}
 
-			public AABB3 bbox;
-
 			public int firstElementIdx;
 
 			public int idx;
 
 			public int numElements;
+
+			public bool hasHead;
 
 			public static readonly KAnim.Anim.Frame InvalidFrame = new KAnim.Anim.Frame
 			{
@@ -201,19 +201,13 @@ public class KAnim
 		[Serializable]
 		public struct FrameElement
 		{
-			public KAnimHashedString fileHash;
+			public Matrix2x3 transform;
 
 			public KAnimHashedString symbol;
 
-			public int symbolIdx;
-
-			public KAnimHashedString folder;
-
 			public int frame;
 
-			public Matrix2x3 transform;
-
-			public Color multColour;
+			public float multAlpha;
 		}
 	}
 

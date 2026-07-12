@@ -12,7 +12,7 @@ public class MaterialSelectorSerializer : KMonoBehaviour
 		base.OnSpawn();
 		if (this.previouslySelectedElementsPerWorld == null)
 		{
-			this.previouslySelectedElementsPerWorld = new List<Dictionary<Tag, Tag>>[(int)ClusterManager.INVALID_WORLD_IDX];
+			this.previouslySelectedElementsPerWorld = new List<Dictionary<Tag, Tag>>[255];
 			if (this.previouslySelectedElements != null)
 			{
 				foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)

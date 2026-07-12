@@ -114,7 +114,7 @@ public class ProductInfoScreen : KScreen
 		{
 			buildingFacadeResource = Db.GetBuildingFacades().TryGet(facadeID);
 		}
-		if (buildingFacadeResource != null && buildingFacadeResource.PrefabID == def.PrefabID && Db.Get().Permits.Get(buildingFacadeResource.PermitId).IsUnlocked())
+		if (buildingFacadeResource != null && buildingFacadeResource.PrefabID == def.PrefabID && buildingFacadeResource.IsUnlocked())
 		{
 			this.facadeSelectionPanel.SelectedFacade = facadeID;
 		}

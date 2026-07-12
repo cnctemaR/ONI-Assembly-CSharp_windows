@@ -34,9 +34,18 @@ public abstract class ClusterGridEntity : KMonoBehaviour
 		return false;
 	}
 
+	public virtual bool KeepRotationWhenSpacingOutInHex()
+	{
+		return false;
+	}
+
 	public virtual bool ShowPath()
 	{
 		return true;
+	}
+
+	public virtual void OnClusterMapIconShown(ClusterRevealLevel levelUsed)
+	{
 	}
 
 	public abstract ClusterRevealLevel IsVisibleInFOW { get; }
@@ -152,5 +161,7 @@ public abstract class ClusterGridEntity : KMonoBehaviour
 		public string symbolSwapSymbol;
 
 		public Vector3 animOffset;
+
+		public float animPlaySpeedModifier;
 	}
 }

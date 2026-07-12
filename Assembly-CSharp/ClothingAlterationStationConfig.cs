@@ -40,7 +40,6 @@ public class ClothingAlterationStationConfig : IBuildingConfig
 		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
 		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_super_snazzy_suit_alteration_station_kanim") };
 		complexFabricatorWorkable.workingPstComplete = new HashedString[] { "working_pst_complete" };
-		complexFabricatorWorkable.AnimOffset = new Vector3(-1f, 0f, 0f);
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();

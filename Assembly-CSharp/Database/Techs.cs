@@ -371,7 +371,7 @@ namespace Database
 			new Tech("EnginesI", new List<string> { "SolidBooster", "MissionControl" }, this, null);
 			new Tech("EnginesII", new List<string> { "KeroseneEngine", "LiquidFuelTank", "OxidizerTank" }, this, null);
 			new Tech("EnginesIII", new List<string> { "OxidizerTankLiquid", "OxidizerTankCluster", "HydrogenEngine" }, this, null);
-			new Tech("Jetpacks", new List<string> { "JetSuit", "JetSuitMarker", "JetSuitLocker", "LiquidCargoBayCluster" }, this, null);
+			new Tech("Jetpacks", new List<string> { "JetSuit", "JetSuitMarker", "JetSuitLocker", "LiquidCargoBayCluster", "MissileFabricator", "MissileLauncher" }, this, null);
 			new Tech("SolidTransport", new List<string> { "SolidConduitInbox", "SolidConduit", "SolidConduitBridge", "SolidVent" }, this, null);
 			new Tech("Monuments", new List<string> { "MonumentBottom", "MonumentMiddle", "MonumentTop" }, this, null);
 			new Tech("SolidSpace", new List<string> { "SolidLogicValve", "SolidConduitOutbox", "SolidLimitValve", "SolidCargoBaySmall", "RocketInteriorSolidInput", "RocketInteriorSolidOutput", "ModularLaunchpadPortSolid", "ModularLaunchpadPortSolidUnloader" }, this, null);

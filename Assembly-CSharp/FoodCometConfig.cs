@@ -20,7 +20,7 @@ public class FoodCometConfig : IEntityConfig
 		comet.entityDamage = 0;
 		comet.totalTileDamage = 0f;
 		comet.splashRadius = 0;
-		comet.impactSound = "Meteor_Small_Impact";
+		comet.impactSound = "Meteor_dust_heavy_Impact";
 		comet.flyingSoundID = 0;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
 		comet.canHitDuplicants = true;

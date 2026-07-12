@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
@@ -23,7 +24,11 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		this.pickOutfitButton.onClick += this.OnClickPickOutfit;
 		this.editOutfitButton.onClick += delegate
 		{
-			new OutfitDesignerScreenConfig(this.selectedOutfit, this.Config.minionPersonality, this.Config.targetMinionInstance, new Action<ClothingOutfitTarget>(this.OnOutfitDesignerWritesToOutfitTarget)).ApplyAndOpenScreen();
+			if (this.selectedOutfit.IsNone())
+			{
+				return;
+			}
+			new OutfitDesignerScreenConfig(this.selectedOutfit.Unwrap(), this.Config.minionPersonality, this.Config.targetMinionInstance, new Action<ClothingOutfitTarget>(this.OnOutfitDesignerWritesToOutfitTarget)).ApplyAndOpenScreen();
 		};
 		this.renameOutfitButton.onClick += delegate
 		{
@@ -139,20 +144,52 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			this.<PopulateGallery>g__AddGridIconForTarget|29_0(Option.None);
 		}
 		OutfitBrowserScreenConfig outfitBrowserScreenConfig = this.Config;
+		ClothingOutfitUtility.OutfitType outfitType;
 		if (outfitBrowserScreenConfig.targetMinionInstance.HasValue)
 		{
 			outfitBrowserScreenConfig = this.Config;
-			this.<PopulateGallery>g__AddGridIconForTarget|29_0(ClothingOutfitTarget.FromMinion(outfitBrowserScreenConfig.targetMinionInstance.Value));
+			outfitType = outfitBrowserScreenConfig.outfitType.Expect("outfitType must be set if targetMinionInstance is set");
+			outfitBrowserScreenConfig = this.Config;
+			this.<PopulateGallery>g__AddGridIconForTarget|29_0(ClothingOutfitTarget.FromMinion(outfitType, outfitBrowserScreenConfig.targetMinionInstance.Value));
 		}
-		foreach (ClothingOutfitTarget clothingOutfitTarget in ClothingOutfitTarget.GetAll())
+		outfitBrowserScreenConfig = this.Config;
+		if (outfitBrowserScreenConfig.outfitType.IsSome())
 		{
-			this.<PopulateGallery>g__AddGridIconForTarget|29_0(clothingOutfitTarget);
+			using (IEnumerator<ClothingOutfitTarget> enumerator = (from outfit in ClothingOutfitTarget.GetAllTemplates()
+				where outfit.OutfitType == this.Config.outfitType.Unwrap()
+				select outfit).GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					ClothingOutfitTarget clothingOutfitTarget = enumerator.Current;
+					this.<PopulateGallery>g__AddGridIconForTarget|29_0(clothingOutfitTarget);
+				}
+				goto IL_0118;
+			}
 		}
+		foreach (ClothingOutfitTarget clothingOutfitTarget2 in ClothingOutfitTarget.GetAllTemplates())
+		{
+			this.<PopulateGallery>g__AddGridIconForTarget|29_0(clothingOutfitTarget2);
+		}
+		IL_0118:
 		this.addButtonGridItem.transform.SetAsLastSibling();
 		this.addButtonGridItem.SetActive(true);
 		this.addButtonGridItem.GetComponent<MultiToggle>().onClick = delegate
 		{
-			new OutfitDesignerScreenConfig(ClothingOutfitTarget.ForNewOutfit(), this.Config.minionPersonality, this.Config.targetMinionInstance, new Action<ClothingOutfitTarget>(this.OnOutfitDesignerWritesToOutfitTarget)).ApplyAndOpenScreen();
+			new Promise<ClothingOutfitUtility.OutfitType>(delegate(Action<ClothingOutfitUtility.OutfitType> resolve)
+			{
+				OutfitBrowserScreenConfig outfitBrowserScreenConfig2 = this.Config;
+				if (outfitBrowserScreenConfig2.outfitType.IsSome())
+				{
+					outfitBrowserScreenConfig2 = this.Config;
+					resolve(outfitBrowserScreenConfig2.outfitType.Unwrap());
+					return;
+				}
+				resolve(ClothingOutfitUtility.OutfitType.Clothing);
+			}).Then(delegate(ClothingOutfitUtility.OutfitType outfitType)
+			{
+				new OutfitDesignerScreenConfig(ClothingOutfitTarget.ForNewTemplateOutfit(outfitType), this.Config.minionPersonality, this.Config.targetMinionInstance, new Action<ClothingOutfitTarget>(this.OnOutfitDesignerWritesToOutfitTarget)).ApplyAndOpenScreen();
+			});
 		};
 		this.RefreshGallery();
 	}
@@ -169,16 +206,17 @@ public class OutfitBrowserScreen : KMonoBehaviour
 
 	private void SelectOutfit(string id, bool isFirstOpen = false)
 	{
-		this.SelectOutfit(ClothingOutfitTarget.FromId(id), isFirstOpen);
+		this.SelectOutfit(ClothingOutfitTarget.FromTemplateId(id), isFirstOpen);
 	}
 
 	private void SelectOutfit(Option<ClothingOutfitTarget> outfit, bool isFirstOpen = false)
 	{
 		this.selectionHeaderLabel.text = outfit.ReadName();
 		this.selectedOutfit = outfit;
-		this.dioramaMinionOrMannequin.current.SetOutfit(outfit);
+		ClothingOutfitUtility.OutfitType outfitType = outfit.AndThen<ClothingOutfitUtility.OutfitType>((ClothingOutfitTarget t) => t.OutfitType).UnwrapOr(ClothingOutfitUtility.OutfitType.Clothing, null);
+		this.dioramaMinionOrMannequin.current.SetOutfit(outfitType, outfit);
 		this.dioramaMinionOrMannequin.current.ReactToFullOutfitChange();
-		this.outfitDescriptionPanel.Refresh(outfit, ClothingOutfitUtility.OutfitType.Clothing);
+		this.outfitDescriptionPanel.Refresh(outfit, outfitType);
 		OutfitBrowserScreenConfig outfitBrowserScreenConfig = this.Config;
 		if (!outfitBrowserScreenConfig.minionPersonality.HasValue)
 		{
@@ -216,7 +254,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 	private void OnClickPickOutfit()
 	{
 		OutfitBrowserScreenConfig outfitBrowserScreenConfig = this.Config;
-		if (outfitBrowserScreenConfig.targetMinionInstance.HasValue)
+		if (outfitBrowserScreenConfig.targetMinionInstance.IsSome())
 		{
 			outfitBrowserScreenConfig = this.Config;
 			outfitBrowserScreenConfig.targetMinionInstance.Value.GetComponent<WearableAccessorizer>().ApplyClothingItems(this.selectedOutfit.ReadItemValues());
@@ -224,12 +262,14 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		else
 		{
 			outfitBrowserScreenConfig = this.Config;
-			if (outfitBrowserScreenConfig.minionPersonality.HasValue)
+			if (outfitBrowserScreenConfig.minionPersonality.IsSome())
 			{
 				ClothingOutfits clothingOutfits = Db.Get().Permits.ClothingOutfits;
 				outfitBrowserScreenConfig = this.Config;
-				clothingOutfits.SetDuplicantPersonalityOutfit(outfitBrowserScreenConfig.minionPersonality.Value.Id, this.selectedOutfit.GetId(), ClothingOutfitUtility.OutfitType.Clothing);
-				LockerNavigator.Instance.duplicantCatalogueScreen.GetComponent<MinionBrowserScreen>().RefreshPreview();
+				string id = outfitBrowserScreenConfig.minionPersonality.Value.Id;
+				Option<string> option = this.selectedOutfit.AndThen<string>((ClothingOutfitTarget o) => o.OutfitId);
+				outfitBrowserScreenConfig = this.Config;
+				clothingOutfits.SetDuplicantPersonalityOutfit(id, option, outfitBrowserScreenConfig.outfitType.Unwrap());
 			}
 		}
 		LockerNavigator.Instance.PopScreen();
@@ -324,7 +364,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		GameObject isUnownedOverlayGO = spawn.transform.GetChild(3).gameObject;
 		gameObject.SetActive(true);
 		gameObject2.SetActive(false);
-		gameObject.GetComponentInChildren<UIMannequin>().SetOutfit(target);
+		gameObject.GetComponentInChildren<UIMannequin>().SetOutfit(target.AndThen<ClothingOutfitUtility.OutfitType>((ClothingOutfitTarget t) => t.OutfitType).UnwrapOr(ClothingOutfitUtility.OutfitType.Clothing, null), target);
 		if (!target.HasValue)
 		{
 			gameObject2.SetActive(true);

@@ -46,6 +46,8 @@ public class DevTool_StoryTraits_Reveal : DevTool
 	{
 		yield return "MegaBrainTank";
 		yield return "GravitasCreatureManipulator";
+		yield return "LonelyMinionHouse";
+		yield return "FossilDig";
 		yield break;
 	}
 

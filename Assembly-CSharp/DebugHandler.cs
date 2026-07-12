@@ -95,7 +95,16 @@ public class DebugHandler : IInputHandler
 		string text = Path.Combine(Path.GetDirectoryName(activeSaveFilePath), "screenshot");
 		string fileName = Path.GetFileName(activeSaveFilePath);
 		Directory.CreateDirectory(text);
-		return Path.ChangeExtension(Path.Combine(text, fileName), ".png");
+		string text2 = string.Concat(new string[]
+		{
+			Path.GetFileNameWithoutExtension(fileName),
+			"_",
+			GameClock.Instance.GetCycle().ToString(),
+			"_",
+			global::System.DateTime.Now.ToString("yyyy-MM-dd_HH\\hmm\\mss\\s"),
+			".png"
+		});
+		return Path.Combine(text, text2);
 	}
 
 	public void OnKeyDown(KButtonEvent e)

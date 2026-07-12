@@ -20,6 +20,11 @@ public class TopLeftControlScreen : KScreen
 		this.UpdateSandboxToggleState();
 		MultiToggle multiToggle = this.sandboxToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnClickSandboxToggle));
+		MultiToggle multiToggle2 = this.kleiItemDropButton;
+		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.OnClickKleiItemDropButton));
+		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(new global::System.Action(this.RefreshKleiItemDropButton));
+		KleiItemsStatusRefresher.RequestRefreshFromServer();
+		this.RefreshKleiItemDropButton();
 		Game.Instance.Subscribe(-1948169901, delegate(object data)
 		{
 			this.UpdateSandboxToggleState();
@@ -80,6 +85,30 @@ public class TopLeftControlScreen : KScreen
 		this.UpdateSandboxToggleState();
 	}
 
+	private void RefreshKleiItemDropButton()
+	{
+		if (!KleiItemDropScreen.HasItemsToShow())
+		{
+			this.kleiItemDropButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.ITEM_DROP_SCREEN.IN_GAME_BUTTON.TOOLTIP_ERROR_NO_ITEMS);
+			this.kleiItemDropButton.ChangeState(1);
+			return;
+		}
+		this.kleiItemDropButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.ITEM_DROP_SCREEN.IN_GAME_BUTTON.TOOLTIP_ITEMS_AVAILABLE);
+		this.kleiItemDropButton.ChangeState(2);
+	}
+
+	private void OnClickKleiItemDropButton()
+	{
+		this.RefreshKleiItemDropButton();
+		if (!KleiItemDropScreen.HasItemsToShow())
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+			return;
+		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		global::UnityEngine.Object.FindObjectOfType<KleiItemDropScreen>(true).Show(true);
+	}
+
 	private bool CheckSandboxModeLocked()
 	{
 		return !SaveGame.Instance.sandboxEnabled;
@@ -91,8 +120,18 @@ public class TopLeftControlScreen : KScreen
 	private MultiToggle sandboxToggle;
 
 	[SerializeField]
+	private MultiToggle kleiItemDropButton;
+
+	[SerializeField]
 	private LocText locText;
 
 	[SerializeField]
 	private RectTransform secondaryRow;
+
+	private enum MultiToggleState
+	{
+		Disabled,
+		Off,
+		On
+	}
 }

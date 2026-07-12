@@ -139,6 +139,11 @@ namespace ProcGenGame
 			this.thread.Start();
 		}
 
+		private void StopThread()
+		{
+			this.thread = null;
+		}
+
 		private void BeginGeneration()
 		{
 			this.LogBeginGeneration();
@@ -178,7 +183,7 @@ namespace ProcGenGame
 					List<WorldTrait> list3 = new List<WorldTrait>();
 					if (!worldGen.RenderOffline(this.doSimSettle, ref array, ref array2, num, ref list3, worldGen.isStartingWorld))
 					{
-						this.thread = null;
+						this.StopThread();
 						return;
 					}
 					if (this.PerWorldGenCompleteCallback != null)
@@ -204,19 +209,18 @@ namespace ProcGenGame
 				{
 					this.worlds[0].ReportWorldGenError(new Exception(text), UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE_STORY);
 				}
-				DebugUtil.LogWarningArgs(Array.Empty<object>());
-				this.thread = null;
+				this.StopThread();
 				return;
 			}
 			DebugUtil.Separator();
 			DebugUtil.LogArgs(new object[] { "Placing worlds on cluster map" });
 			if (!this.AssignClusterLocations())
 			{
-				this.thread = null;
+				this.StopThread();
 				return;
 			}
 			this.Save();
-			this.thread = null;
+			this.StopThread();
 			DebugUtil.Separator();
 			DebugUtil.LogArgs(new object[] { "WORLDGEN COMPLETE\n\n\n" });
 			this.IsGenerationComplete = true;
@@ -404,7 +408,6 @@ namespace ProcGenGame
 									clusterLayoutSave.worlds.Add(new ClusterLayoutSave.World
 									{
 										data = worldGen.data,
-										stats = worldGen.stats,
 										name = worldGen.Settings.world.filePath,
 										isDiscovered = worldGen.isStartingWorld,
 										traits = worldGen.Settings.GetWorldTraitIDs().ToList<string>(),
@@ -458,7 +461,7 @@ namespace ProcGenGame
 					for (int num = 0; num != clusterLayoutSave.worlds.Count; num++)
 					{
 						ClusterLayoutSave.World world = clusterLayoutSave.worlds[num];
-						WorldGen worldGen2 = new WorldGen(world.name, world.data, world.stats, world.traits, world.storyTraits, false);
+						WorldGen worldGen2 = new WorldGen(world.name, world.data, world.traits, world.storyTraits, false);
 						cluster.worlds.Add(worldGen2);
 						if (num == clusterLayoutSave.currentWorldIdx)
 						{

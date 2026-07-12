@@ -2,7 +2,7 @@
 
 public class WorldParentChangedEventArgs
 {
-	public int lastParentId = (int)ClusterManager.INVALID_WORLD_IDX;
+	public int lastParentId = 255;
 
 	public WorldContainer world;
 }

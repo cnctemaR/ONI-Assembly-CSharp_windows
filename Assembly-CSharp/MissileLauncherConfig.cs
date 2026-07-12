@@ -1,0 +1,93 @@
+﻿using System;
+using System.Collections.Generic;
+using TUNING;
+using UnityEngine;
+
+public class MissileLauncherConfig : IBuildingConfig
+{
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
+	public override BuildingDef CreateBuildingDef()
+	{
+		string text = "MissileLauncher";
+		int num = 3;
+		int num2 = 5;
+		string text2 = "missile_launcher_kanim";
+		int num3 = 250;
+		float num4 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
+		buildingDef.AudioCategory = "Metal";
+		buildingDef.BaseTimeUntilRepair = 400f;
+		buildingDef.DefaultAnimState = "off";
+		buildingDef.RequiresPowerInput = true;
+		buildingDef.PowerInputOffset = new CellOffset(-1, 0);
+		buildingDef.EnergyConsumptionWhenActive = 240f;
+		buildingDef.InputConduitType = ConduitType.Solid;
+		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.ViewMode = OverlayModes.SolidConveyor.ID;
+		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
+		buildingDef.SelfHeatKilowattsWhenActive = 2f;
+		return buildingDef;
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		this.AddVisualizer(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		this.AddVisualizer(go);
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.AddOrGetDef<MissileLauncher.Def>();
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.showInUI = true;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
+		storage.storageFilters = new List<Tag> { "MissileBasic" };
+		storage.allowSettingOnlyFetchMarkedItems = false;
+		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
+		storage.capacityKg = 300f;
+		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
+		manualDeliveryKG.RequestedItemTag = "MissileBasic";
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		manualDeliveryKG.operationalRequirement = Operational.State.None;
+		manualDeliveryKG.refillMass = 5f;
+		manualDeliveryKG.MinimumMass = 1f;
+		manualDeliveryKG.capacity = storage.Capacity() / 10f;
+		SolidConduitConsumer solidConduitConsumer = go.AddOrGet<SolidConduitConsumer>();
+		solidConduitConsumer.alwaysConsume = true;
+		solidConduitConsumer.capacityKG = storage.Capacity();
+		this.AddVisualizer(go);
+	}
+
+	private void AddVisualizer(GameObject go)
+	{
+		RangeVisualizer rangeVisualizer = go.AddOrGet<RangeVisualizer>();
+		rangeVisualizer.RangeMin.x = MissileLauncher.Def.LaunchOffset.x - MissileLauncher.Def.launchRange.x;
+		rangeVisualizer.RangeMax.x = MissileLauncher.Def.LaunchOffset.x + MissileLauncher.Def.launchRange.x;
+		rangeVisualizer.RangeMin.y = MissileLauncher.Def.LaunchOffset.y;
+		rangeVisualizer.RangeMax.y = MissileLauncher.Def.LaunchOffset.y + MissileLauncher.Def.launchRange.y;
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		SymbolOverrideControllerUtil.AddToPrefab(go);
+	}
+
+	public const string ID = "MissileLauncher";
+}

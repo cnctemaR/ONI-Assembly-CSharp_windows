@@ -178,7 +178,7 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 						if (!flag3)
 						{
 							ClusterGridEntity adjacentAsteroid = clustercraft.GetAdjacentAsteroid();
-							flag3 = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : ((int)ClusterManager.INVALID_WORLD_IDX)) == myWorldId && clustercraft.Status == Clustercraft.CraftStatus.Launching;
+							flag3 = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : 255) == myWorldId && clustercraft.Status == Clustercraft.CraftStatus.Launching;
 						}
 					}
 					this.UpdateDetectionState(flag3, expectedDetectionForState);

@@ -17,7 +17,7 @@ namespace Klei.AI
 			global::Debug.Assert(period > 0f, "Season " + id + "'s Period cannot be 0 or negative");
 			if (randomizedEventStartTime == -1f)
 			{
-				this.randomizedEventStartTime = new MathUtil.MinMax(-0.05f * period, 0.05f * period);
+				this.randomizedEventStartTime = new MathUtil.MinMax(-0f * period, 0f * period);
 			}
 			else
 			{
@@ -32,18 +32,27 @@ namespace Klei.AI
 			this.numEventsToStartEachPeriod = numEventsToStartEachPeriod;
 		}
 
+		public virtual void AdditionalEventInstanceSetup(StateMachine.Instance generic_smi)
+		{
+		}
+
+		public virtual float GetSeasonPeriod()
+		{
+			return this.period;
+		}
+
 		public GameplaySeason AddEvent(GameplayEvent evt)
 		{
 			this.events.Add(evt);
 			return this;
 		}
 
-		public GameplaySeasonInstance Instantiate(int worldId)
+		public virtual GameplaySeasonInstance Instantiate(int worldId)
 		{
 			return new GameplaySeasonInstance(this, worldId);
 		}
 
-		public const float DEFAULT_PERCENTAGE_RANDOMIZED_EVENT_START = 0.05f;
+		public const float DEFAULT_PERCENTAGE_RANDOMIZED_EVENT_START = 0f;
 
 		public const float PERCENTAGE_WARNING = 0.4f;
 

@@ -90,6 +90,13 @@ public class ClusterGrid
 			select entity).ToList<ClusterGridEntity>();
 	}
 
+	public List<ClusterGridEntity> GetEntitiesOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
+	{
+		return (from entity in AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetEntitiesOnCell))
+			where entity.Layer == entityLayer
+			select entity).ToList<ClusterGridEntity>();
+	}
+
 	public ClusterGridEntity GetEntityOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
 	{
 		return AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetEntitiesOnCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
@@ -114,6 +121,30 @@ public class ClusterGrid
 		return (from entity in AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetHiddenEntitiesAtCell))
 			where entity.Layer == entityLayer
 			select entity).ToList<ClusterGridEntity>();
+	}
+
+	public bool GetVisibleUnidentifiedMeteorShowerWithinRadius(AxialI center, int radius, out ClusterMapMeteorShower.Instance result)
+	{
+		for (int i = 0; i <= radius; i++)
+		{
+			foreach (AxialI axialI in AxialUtil.GetRing(center, i))
+			{
+				if (this.IsValidCell(axialI) && this.GetFOWManager().IsLocationRevealed(axialI))
+				{
+					foreach (ClusterGridEntity clusterGridEntity in this.GetEntitiesOfLayerAtCell(axialI, EntityLayer.Craft))
+					{
+						ClusterMapMeteorShower.Instance smi = clusterGridEntity.GetSMI<ClusterMapMeteorShower.Instance>();
+						if (smi != null && !smi.HasBeenIdentified)
+						{
+							result = smi;
+							return true;
+						}
+					}
+				}
+			}
+		}
+		result = null;
+		return false;
 	}
 
 	public ClusterGridEntity GetAsteroidAtCell(AxialI cell)
@@ -224,6 +255,13 @@ public class ClusterGrid
 		}
 	}
 
+	public AxialI GetRandomCellAtEdgeOfUniverse()
+	{
+		int num = this.numRings - 1;
+		List<AxialI> rings = AxialUtil.GetRings(AxialI.ZERO, num, num);
+		return rings.ElementAt<AxialI>(global::UnityEngine.Random.Range(0, rings.Count));
+	}
+
 	public Vector3 GetPosition(ClusterGridEntity entity)
 	{
 		float num = (float)entity.Location.R;
@@ -273,16 +311,17 @@ public class ClusterGrid
 	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector)
 	{
 		string text;
-		return this.GetPath(start, end, destination_selector, out text);
+		return this.GetPath(start, end, destination_selector, out text, false);
 	}
 
-	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector, out string fail_reason)
+	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector, out string fail_reason, bool dodgeHiddenAsteroids = false)
 	{
-		ClusterGrid.<>c__DisplayClass38_0 CS$<>8__locals1;
+		ClusterGrid.<>c__DisplayClass41_0 CS$<>8__locals1;
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.destination_selector = destination_selector;
 		CS$<>8__locals1.start = start;
 		CS$<>8__locals1.end = end;
+		CS$<>8__locals1.dodgeHiddenAsteroids = dodgeHiddenAsteroids;
 		fail_reason = null;
 		if (!CS$<>8__locals1.destination_selector.canNavigateFogOfWar && !this.IsCellVisible(CS$<>8__locals1.end))
 		{
@@ -322,7 +361,7 @@ public class ClusterGrid
 		CS$<>8__locals1.frontier.Add(CS$<>8__locals1.start);
 		while (!CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end) && CS$<>8__locals1.frontier.Count > 0)
 		{
-			this.<GetPath>g__ExpandFrontier|38_0(ref CS$<>8__locals1);
+			this.<GetPath>g__ExpandFrontier|41_0(ref CS$<>8__locals1);
 		}
 		if (CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end))
 		{
@@ -373,7 +412,7 @@ public class ClusterGrid
 	}
 
 	[CompilerGenerated]
-	private void <GetPath>g__ExpandFrontier|38_0(ref ClusterGrid.<>c__DisplayClass38_0 A_1)
+	private void <GetPath>g__ExpandFrontier|41_0(ref ClusterGrid.<>c__DisplayClass41_0 A_1)
 	{
 		A_1.buffer.Clear();
 		foreach (AxialI axialI in A_1.frontier)
@@ -381,7 +420,7 @@ public class ClusterGrid
 			foreach (AxialI axialI2 in AxialI.DIRECTIONS)
 			{
 				AxialI neighbor = this.GetNeighbor(axialI, axialI2);
-				if (!A_1.visited.Contains(neighbor) && this.IsValidCell(neighbor) && (this.IsCellVisible(neighbor) || A_1.destination_selector.canNavigateFogOfWar) && (!this.HasVisibleAsteroidAtCell(neighbor) || !(neighbor != A_1.start) || !(neighbor != A_1.end)))
+				if (!A_1.visited.Contains(neighbor) && this.IsValidCell(neighbor) && (this.IsCellVisible(neighbor) || A_1.destination_selector.canNavigateFogOfWar) && (!this.HasVisibleAsteroidAtCell(neighbor) || !(neighbor != A_1.start) || !(neighbor != A_1.end)) && (!A_1.dodgeHiddenAsteroids || !(ClusterGrid.Instance.GetAsteroidAtCell(neighbor) != null) || ClusterGrid.Instance.GetAsteroidAtCell(neighbor).IsVisibleInFOW == ClusterRevealLevel.Visible || !(neighbor != A_1.start) || !(neighbor != A_1.end)))
 				{
 					A_1.buffer.Add(neighbor);
 					if (!A_1.cameFrom.ContainsKey(neighbor))

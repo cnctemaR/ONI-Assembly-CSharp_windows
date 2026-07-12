@@ -31,7 +31,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 		}
 	}
 
-	private void OnDisable()
+	protected override void OnDisable()
 	{
 		if (!base.gameObject.activeInHierarchy)
 		{

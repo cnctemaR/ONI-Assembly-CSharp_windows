@@ -452,7 +452,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			max.x += 4;
 			max.y += 4;
 			max.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, max.x));
-			max.y = Math.Min(vector2I.y + vector2I2.y - 1, Math.Max(vector2I.y, max.y));
+			max.y = Math.Min(vector2I.y + vector2I2.y - 1 + 20, Math.Max(vector2I.y, max.y));
 			return;
 		}
 		min.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, min.x));

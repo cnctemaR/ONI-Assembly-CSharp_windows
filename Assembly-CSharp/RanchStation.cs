@@ -282,6 +282,15 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			}
 		}
 
+		public Option<CavityInfo> GetCavityInfo()
+		{
+			if (this.ranch.IsNullOrDestroyed())
+			{
+				return Option.None;
+			}
+			return this.ranch.cavity;
+		}
+
 		public void RanchCreature()
 		{
 			if (this.activeRanchable.IsNullOrStopped())
@@ -341,6 +350,11 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				return;
 			}
 			this.rancher.Trigger(-364750427, null);
+		}
+
+		public List<RanchableMonitor.Instance> DEBUG_GetTargetRanchables()
+		{
+			return this.targetRanchables;
 		}
 
 		private const int QUEUE_SIZE = 2;

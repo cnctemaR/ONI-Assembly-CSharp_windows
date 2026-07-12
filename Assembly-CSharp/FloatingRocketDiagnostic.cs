@@ -24,7 +24,7 @@ public class FloatingRocketDiagnostic : ColonyDiagnostic
 			return diagnosticResult;
 		}
 		diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-		if (world.ParentWorldId == (int)ClusterManager.INVALID_WORLD_IDX || world.ParentWorldId == world.id)
+		if (world.ParentWorldId == 255 || world.ParentWorldId == world.id)
 		{
 			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.FLOATINGROCKETDIAGNOSTIC.NORMAL_FLIGHT;
 			if (component.Destination == component.Location)

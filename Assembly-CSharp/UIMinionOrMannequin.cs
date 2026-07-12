@@ -90,7 +90,7 @@ public class UIMinionOrMannequin : KMonoBehaviour
 
 		Option<Personality> Personality { get; }
 
-		void SetOutfit(IEnumerable<ClothingItemResource> clothingItems);
+		void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, IEnumerable<ClothingItemResource> clothingItems);
 
 		void React(UIMinionOrMannequinReactSource source);
 	}

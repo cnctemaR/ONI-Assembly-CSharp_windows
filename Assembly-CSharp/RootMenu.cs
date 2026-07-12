@@ -90,16 +90,26 @@ public class RootMenu : KScreen
 		}
 		if (gameObject != this.selectedGO)
 		{
+			if (this.selectedGO != null)
+			{
+				this.selectedGO.Unsubscribe(1980521255, new Action<object>(this.TriggerRefresh));
+			}
 			this.selectedGO = null;
 			this.CloseSubMenus();
 			if (flag)
 			{
 				this.selectedGO = gameObject;
+				this.selectedGO.Subscribe(1980521255, new Action<object>(this.TriggerRefresh));
 				this.AddSubMenu(this.detailsScreen);
 				this.AddSubMenu(this.userMenu);
 			}
 			this.userMenu.SetSelected(this.selectedGO);
 		}
+		this.Refresh();
+	}
+
+	public void TriggerRefresh(object obj)
+	{
 		this.Refresh();
 	}
 

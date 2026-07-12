@@ -130,7 +130,7 @@ public class KAnimBatchGroup
 
 	private int GetBuildDataSize()
 	{
-		return Mathf.CeilToInt((float)(this.data.GetBuildSymbolFrameCount() * 16) / 4f);
+		return Mathf.CeilToInt((float)(this.data.GetBuildSymbolFrameCount() * 12) / 4f);
 	}
 
 	private int GetAnimDataSize()
@@ -140,13 +140,13 @@ public class KAnimBatchGroup
 		if (animFrames.Count == 0)
 		{
 			num += this.data.symbolFrameInstances.Count * 4;
-			num += this.data.symbolFrameInstances.Count * 12;
+			num += this.data.symbolFrameInstances.Count * 8;
 		}
 		else
 		{
 			num += animFrames.Count * 4;
 			List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
-			num += animFrameElements.Count * 12;
+			num += animFrameElements.Count * 8;
 		}
 		return Mathf.CeilToInt((float)num / 4f);
 	}

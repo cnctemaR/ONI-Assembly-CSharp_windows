@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
 
 public class AsteroidGridEntity : ClusterGridEntity
@@ -43,6 +44,13 @@ public class AsteroidGridEntity : ClusterGridEntity
 				initialAnim = "orbit"
 			};
 			list.Add(animConfig);
+			animConfig = new ClusterGridEntity.AnimConfig
+			{
+				animFile = Assets.GetAnim("shower_asteroid_current_kanim"),
+				initialAnim = "off",
+				playMode = KAnim.PlayMode.Once
+			};
+			list.Add(animConfig);
 			return list;
 		}
 	}
@@ -74,6 +82,8 @@ public class AsteroidGridEntity : ClusterGridEntity
 	{
 		Game.Instance.Subscribe(-1298331547, new Action<object>(this.OnClusterLocationChanged));
 		Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnFogOfWarRevealed));
+		Game.Instance.Subscribe(78366336, new Action<object>(this.OnMeteorShowerEventChanged));
+		Game.Instance.Subscribe(1749562766, new Action<object>(this.OnMeteorShowerEventChanged));
 		if (ClusterGrid.Instance.IsCellVisible(this.m_location))
 		{
 			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.m_location, 1);
@@ -85,6 +95,8 @@ public class AsteroidGridEntity : ClusterGridEntity
 	{
 		Game.Instance.Unsubscribe(-1298331547, new Action<object>(this.OnClusterLocationChanged));
 		Game.Instance.Unsubscribe(-1991583975, new Action<object>(this.OnFogOfWarRevealed));
+		Game.Instance.Unsubscribe(78366336, new Action<object>(this.OnMeteorShowerEventChanged));
+		Game.Instance.Unsubscribe(1749562766, new Action<object>(this.OnMeteorShowerEventChanged));
 		base.OnCleanUp();
 	}
 
@@ -109,6 +121,53 @@ public class AsteroidGridEntity : ClusterGridEntity
 		}
 	}
 
+	public override void OnClusterMapIconShown(ClusterRevealLevel levelUsed)
+	{
+		base.OnClusterMapIconShown(levelUsed);
+		if (levelUsed == ClusterRevealLevel.Visible)
+		{
+			this.RefreshMeteorShowerEffect();
+		}
+	}
+
+	private void OnMeteorShowerEventChanged(object _worldID)
+	{
+		if ((int)_worldID == this.m_worldContainer.id)
+		{
+			this.RefreshMeteorShowerEffect();
+		}
+	}
+
+	public void RefreshMeteorShowerEffect()
+	{
+		if (ClusterMapScreen.Instance == null)
+		{
+			return;
+		}
+		KBatchedAnimController animController = ClusterMapScreen.Instance.GetEntityVisAnim(this).GetAnimController(2);
+		if (animController != null)
+		{
+			List<GameplayEventInstance> list = new List<GameplayEventInstance>();
+			GameplayEventManager.Instance.GetActiveEventsOfType<MeteorShowerEvent>(this.m_worldContainer.id, ref list);
+			bool flag = false;
+			string text = "off";
+			foreach (GameplayEventInstance gameplayEventInstance in list)
+			{
+				if (gameplayEventInstance != null && gameplayEventInstance.smi is MeteorShowerEvent.StatesInstance)
+				{
+					MeteorShowerEvent.StatesInstance statesInstance = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
+					if (statesInstance.IsInsideState(statesInstance.sm.running.bombarding))
+					{
+						flag = true;
+						text = "idle_loop";
+						break;
+					}
+				}
+			}
+			animController.Play(text, flag ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
+		}
+	}
+
 	public void OnFogOfWarRevealed(object data = null)
 	{
 		if (data == null)
@@ -123,19 +182,22 @@ public class AsteroidGridEntity : ClusterGridEntity
 		{
 			return;
 		}
-		WorldDetectedMessage worldDetectedMessage = new WorldDetectedMessage(this.m_worldContainer);
-		MusicManager.instance.PlaySong("Stinger_WorldDetected", false);
-		Messenger.Instance.QueueMessage(worldDetectedMessage);
-		if (!this.m_worldContainer.IsDiscovered)
+		if (DlcManager.FeatureClusterSpaceEnabled())
 		{
-			using (IEnumerator enumerator = Components.Clustercrafts.GetEnumerator())
+			WorldDetectedMessage worldDetectedMessage = new WorldDetectedMessage(this.m_worldContainer);
+			MusicManager.instance.PlaySong("Stinger_WorldDetected", false);
+			Messenger.Instance.QueueMessage(worldDetectedMessage);
+			if (!this.m_worldContainer.IsDiscovered)
 			{
-				while (enumerator.MoveNext())
+				using (IEnumerator enumerator = Components.Clustercrafts.GetEnumerator())
 				{
-					if (((Clustercraft)enumerator.Current).GetOrbitAsteroid() == this)
+					while (enumerator.MoveNext())
 					{
-						this.m_worldContainer.SetDiscovered(true);
-						break;
+						if (((Clustercraft)enumerator.Current).GetOrbitAsteroid() == this)
+						{
+							this.m_worldContainer.SetDiscovered(true);
+							break;
+						}
 					}
 				}
 			}

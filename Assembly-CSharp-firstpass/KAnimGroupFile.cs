@@ -219,32 +219,36 @@ public class KAnimGroupFile : ScriptableObject
 				hashedString = this.groups[i].swapTarget;
 				goto IL_0106;
 			}
-			IL_0221:
+			IL_021B:
 			i++;
 			continue;
 			IL_0106:
 			for (int j = 0; j < this.groups[i].animFiles.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].animFiles[j];
-				if (kanimFile != null && kanimFile.buildBytes != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
+				if (kanimFile != null)
 				{
-					if (kanimFile.buildBytes.Length == 0)
+					byte[] buildBytes = kanimFile.buildBytes;
+					if (buildBytes != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
 					{
-						global::Debug.LogWarning("Build File [" + kanimFile.GetData().name + "] has 0 bytes");
-					}
-					else
-					{
-						HashedString hashedString2 = new HashedString(kanimFile.name);
-						HashCache.Get().Add(hashedString2.HashValue, kanimFile.name);
-						KAnimFileData file = KGlobalAnimParser.Get().GetFile(kanimFile);
-						file.maxVisSymbolFrames = 0;
-						file.batchTag = hashedString;
-						file.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString2, new FastReader(kanimFile.buildBytes), kanimFile.textureList);
-						this.fileData.Add(kanimFile.GetInstanceID(), file);
+						if (buildBytes.Length == 0)
+						{
+							global::Debug.LogWarning("Build File [" + kanimFile.GetData().name + "] has 0 bytes");
+						}
+						else
+						{
+							HashedString hashedString2 = new HashedString(kanimFile.name);
+							HashCache.Get().Add(hashedString2.HashValue, kanimFile.name);
+							KAnimFileData file = KGlobalAnimParser.Get().GetFile(kanimFile);
+							file.maxVisSymbolFrames = 0;
+							file.batchTag = hashedString;
+							file.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString2, new FastReader(buildBytes), kanimFile.textureList);
+							this.fileData.Add(kanimFile.GetInstanceID(), file);
+						}
 					}
 				}
 			}
-			goto IL_0221;
+			goto IL_021B;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -319,25 +323,29 @@ public class KAnimGroupFile : ScriptableObject
 				for (int num2 = 0; num2 < this.groups[num].animFiles.Count; num2++)
 				{
 					KAnimFile kanimFile2 = this.groups[num].animFiles[num2];
-					if (kanimFile2 != null && kanimFile2.animBytes != null)
+					if (kanimFile2 != null)
 					{
-						if (kanimFile2.animBytes.Length == 0)
+						byte[] animBytes = kanimFile2.animBytes;
+						if (animBytes != null)
 						{
-							global::Debug.LogWarning("Anim File [" + kanimFile2.GetData().name + "] has 0 bytes");
-						}
-						else
-						{
-							if (!this.fileData.ContainsKey(kanimFile2.GetInstanceID()))
+							if (animBytes.Length == 0)
 							{
-								KAnimFileData file2 = KGlobalAnimParser.Get().GetFile(kanimFile2);
-								file2.maxVisSymbolFrames = 0;
-								file2.batchTag = this.groups[num].id;
-								this.fileData.Add(kanimFile2.GetInstanceID(), file2);
+								global::Debug.LogWarning("Anim File [" + kanimFile2.GetData().name + "] has 0 bytes");
 							}
-							HashedString hashedString3 = new HashedString(kanimFile2.name);
-							FastReader fastReader = new FastReader(kanimFile2.animBytes);
-							KAnimFileData kanimFileData = this.fileData[kanimFile2.GetInstanceID()];
-							KGlobalAnimParser.ParseAnimData(kbatchGroupData2, hashedString3, fastReader, kanimFileData);
+							else
+							{
+								if (!this.fileData.ContainsKey(kanimFile2.GetInstanceID()))
+								{
+									KAnimFileData file2 = KGlobalAnimParser.Get().GetFile(kanimFile2);
+									file2.maxVisSymbolFrames = 0;
+									file2.batchTag = this.groups[num].id;
+									this.fileData.Add(kanimFile2.GetInstanceID(), file2);
+								}
+								HashedString hashedString3 = new HashedString(kanimFile2.name);
+								FastReader fastReader = new FastReader(animBytes);
+								KAnimFileData kanimFileData = this.fileData[kanimFile2.GetInstanceID()];
+								KGlobalAnimParser.ParseAnimData(kbatchGroupData2, hashedString3, fastReader, kanimFileData);
+							}
 						}
 					}
 				}

@@ -19,9 +19,9 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 
 	public void Refresh(Option<ClothingOutfitTarget> outfit, ClothingOutfitUtility.OutfitType outfitType)
 	{
-		if (outfit.HasValue)
+		if (outfit.IsSome())
 		{
-			this.Refresh(outfit.Value.ReadName(), outfit.Value.ReadItems(), outfitType);
+			this.Refresh(outfit.Unwrap().ReadName(), outfit.Unwrap().ReadItems(), outfitType);
 			return;
 		}
 		if (outfitType == ClothingOutfitUtility.OutfitType.Clothing)
@@ -36,9 +36,9 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		this.Refresh(UI.OUTFIT_NAME.NONE_JOY_RESPONSE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
 	}
 
-	public void Refresh(OutfitDesignerScreen_OutfitState outfitState, ClothingOutfitUtility.OutfitType outfitType)
+	public void Refresh(OutfitDesignerScreen_OutfitState outfitState)
 	{
-		this.Refresh(outfitState.name, outfitState.GetItems(), outfitType);
+		this.Refresh(outfitState.name, outfitState.GetItems(), outfitState.outfitType);
 	}
 
 	public void Refresh(string name, string[] itemIds, ClothingOutfitUtility.OutfitType outfitType)
@@ -75,10 +75,10 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				{
 					this.outfitNameLabel.SetText(name);
 					this.outfitDescriptionLabel.gameObject.SetActive(false);
-					pooledDictionary.Add(PermitCategory.DupeTops, Option.None);
-					pooledDictionary.Add(PermitCategory.DupeGloves, Option.None);
-					pooledDictionary.Add(PermitCategory.DupeBottoms, Option.None);
-					pooledDictionary.Add(PermitCategory.DupeShoes, Option.None);
+					foreach (PermitCategory permitCategory in ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_CLOTHING)
+					{
+						pooledDictionary.Add(permitCategory, Option.None);
+					}
 				}
 				foreach (string text2 in itemIds)
 				{
@@ -95,10 +95,10 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				}
 				foreach (KeyValuePair<PermitCategory, Option<PermitResource>> keyValuePair in pooledDictionary)
 				{
-					PermitCategory permitCategory;
+					PermitCategory permitCategory2;
 					Option<PermitResource> option2;
-					keyValuePair.Deconstruct<PermitCategory, Option<PermitResource>>(out permitCategory, out option2);
-					PermitCategory permitCategory2 = permitCategory;
+					keyValuePair.Deconstruct<PermitCategory, Option<PermitResource>>(out permitCategory2, out option2);
+					PermitCategory permitCategory3 = permitCategory2;
 					Option<PermitResource> option3 = option2;
 					if (option3.HasValue)
 					{
@@ -106,7 +106,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 					}
 					else
 					{
-						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory2), KleiItemsUI.GetNoneClothingItemString(permitCategory2), null, 1f);
+						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory3), KleiItemsUI.GetNoneClothingItemString(permitCategory3), null, 1f);
 					}
 				}
 				foreach (PermitResource permitResource2 in pooledList)

@@ -187,7 +187,7 @@ public readonly struct Option<T> : IEquatable<Option<T>>, IEquatable<T>
 
 	public static bool operator ==(T lhs, Option<T> rhs)
 	{
-		return lhs.Equals(rhs);
+		return rhs.Equals(lhs);
 	}
 
 	public static bool operator !=(T lhs, Option<T> rhs)

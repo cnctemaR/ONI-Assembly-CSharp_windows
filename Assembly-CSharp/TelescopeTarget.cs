@@ -58,6 +58,11 @@ public class TelescopeTarget : ClusterGridEntity
 		base.Location = location;
 	}
 
+	public void SetTargetMeteorShower(ClusterMapMeteorShower.Instance meteorShower)
+	{
+		this.targetMeteorShower = meteorShower;
+	}
+
 	public override bool ShowName()
 	{
 		return true;
@@ -70,6 +75,12 @@ public class TelescopeTarget : ClusterGridEntity
 
 	public override float GetProgress()
 	{
+		if (this.targetMeteorShower != null)
+		{
+			return this.targetMeteorShower.IdentifyingProgress;
+		}
 		return SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().GetRevealCompleteFraction(base.Location);
 	}
+
+	private ClusterMapMeteorShower.Instance targetMeteorShower;
 }

@@ -234,7 +234,7 @@ namespace STRINGS
 
 				public static LocString MOONBASE = "Moonbase";
 
-				public static LocString COMET = "Comet";
+				public static LocString COMET = "Meteor";
 
 				public static LocString SPACEJUNK = "Spacejunk";
 

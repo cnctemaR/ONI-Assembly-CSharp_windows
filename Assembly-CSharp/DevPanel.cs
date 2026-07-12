@@ -52,6 +52,28 @@ public class DevPanel
 		this.currentDevToolIndex = this.devTools.Count - 1;
 	}
 
+	public bool NavGoBack()
+	{
+		Option<int> option = this.TryGetDevToolIndexByOffset(-1);
+		if (option.IsNone())
+		{
+			return false;
+		}
+		this.currentDevToolIndex = option.Unwrap();
+		return true;
+	}
+
+	public bool NavGoForward()
+	{
+		Option<int> option = this.TryGetDevToolIndexByOffset(1);
+		if (option.IsNone())
+		{
+			return false;
+		}
+		this.currentDevToolIndex = option.Unwrap();
+		return true;
+	}
+
 	public DevTool GetCurrentDevTool()
 	{
 		return this.devTools[this.currentDevToolIndex];

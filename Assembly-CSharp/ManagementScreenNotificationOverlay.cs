@@ -8,7 +8,7 @@ public class ManagementScreenNotificationOverlay : KMonoBehaviour
 	{
 	}
 
-	protected void OnDisable()
+	protected override void OnDisable()
 	{
 	}
 

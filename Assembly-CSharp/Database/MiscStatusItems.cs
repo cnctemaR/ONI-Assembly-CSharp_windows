@@ -275,6 +275,13 @@ namespace Database
 				str = str.Replace("{durability}", GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None));
 				return str;
 			};
+			this.ClusterMeteorRemainingTravelTime = this.CreateStatusItem("ClusterMeteorRemainingTravelTime", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ClusterMeteorRemainingTravelTime.resolveStringCallback = delegate(string str, object data)
+			{
+				float num2 = ((ClusterMapMeteorShower.Instance)data).ArrivalTime - GameUtil.GetCurrentTimeInCycles() * 600f;
+				str = str.Replace("{time}", GameUtil.GetFormattedCycles(num2, "F1", false));
+				return str;
+			};
 			this.ArtifactEntombed = this.CreateStatusItem("ArtifactEntombed", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.TearOpen = this.CreateStatusItem("TearOpen", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.TearClosed = this.CreateStatusItem("TearClosed", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -377,5 +384,7 @@ namespace Database
 		public StatusItem TearOpen;
 
 		public StatusItem TearClosed;
+
+		public StatusItem ClusterMeteorRemainingTravelTime;
 	}
 }

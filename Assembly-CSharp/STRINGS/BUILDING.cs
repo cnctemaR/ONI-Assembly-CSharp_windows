@@ -2329,14 +2329,14 @@ namespace STRINGS
 
 			public class COLONYLACKSREQUIREDSKILLPERK
 			{
-				public static LocString NAME = "Colony Lacks {Skills}";
+				public static LocString NAME = "Colony Lacks {Skills} Skill";
 
 				public static LocString TOOLTIP = "{Skills} Skill required to operate\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach {Skills} to a Duplicant";
 			}
 
 			public class CLUSTERCOLONYLACKSREQUIREDSKILLPERK
 			{
-				public static LocString NAME = "Local Colony Lacks {Skills}";
+				public static LocString NAME = "Local Colony Lacks {Skills} Skill";
 
 				public static LocString TOOLTIP = BUILDING.STATUSITEMS.COLONYLACKSREQUIREDSKILLPERK.TOOLTIP + ", or bring a Duplicant with the skill from another " + UI.CLUSTERMAP.PLANETOID;
 			}
@@ -2786,6 +2786,23 @@ namespace STRINGS
 				public static LocString NAME = "Awaiting Fuel: {0}";
 
 				public static LocString TOOLTIP = "This building requires <b>{1}</b> of {0} to operate";
+			}
+
+			public class FOSSILHUNT
+			{
+				public class PENDING_EXCAVATION
+				{
+					public static LocString NAME = "Awaiting Excavation";
+
+					public static LocString TOOLTIP = "Currently awaiting excavation by a Duplicant";
+				}
+
+				public class EXCAVATING
+				{
+					public static LocString NAME = "Excavation In Progress";
+
+					public static LocString TOOLTIP = "Currently being excavated by a Duplicant";
+				}
 			}
 
 			public class MEGABRAINTANK
@@ -3607,6 +3624,20 @@ namespace STRINGS
 				public static LocString NAME = "No Spice Selected";
 
 				public static LocString TOOLTIP = "Select a recipe to begin fabrication";
+			}
+
+			public class MISSILELAUNCHER_NOSURFACESIGHT
+			{
+				public static LocString NAME = "No Line of Sight";
+
+				public static LocString TOOLTIP = "This building has no view of space\n\nTo properly function, this building requires an unblocked view of space";
+			}
+
+			public class MISSILELAUNCHER_PARTIALLYBLOCKED
+			{
+				public static LocString NAME = "Limited Line of Sight";
+
+				public static LocString TOOLTIP = "This building has a partially obstructed view of space\n\nTo properly function, this building requires an unblocked view of space";
 			}
 		}
 

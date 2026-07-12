@@ -26,6 +26,7 @@ public class GassyMooCometConfig : IEntityConfig
 		gassyMooComet.flyingSoundID = 4;
 		gassyMooComet.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
 		gassyMooComet.addTiles = 0;
+		gassyMooComet.affectedByDifficulty = false;
 		gassyMooComet.destroyOnExplode = false;
 		gassyMooComet.craterPrefabs = new string[] { "Moo" };
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();

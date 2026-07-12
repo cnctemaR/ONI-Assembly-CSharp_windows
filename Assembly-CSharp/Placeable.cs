@@ -20,15 +20,31 @@ public class Placeable : KMonoBehaviour
 			reason = UI.TOOLS.PLACE.REASONS.CAN_OCCUPY_AREA;
 			return false;
 		}
-		if (this.placementRules.Contains(Placeable.PlacementRules.OnFoundation) && !this.occupyArea.TestAreaBelow(cell, null, new Func<int, object, bool>(this.FoundationTest)))
+		if (this.placementRules.Contains(Placeable.PlacementRules.OnFoundation))
 		{
-			reason = UI.TOOLS.PLACE.REASONS.ON_FOUNDATION;
-			return false;
+			bool flag = this.occupyArea.TestAreaBelow(cell, null, new Func<int, object, bool>(this.FoundationTest));
+			if (this.checkRootCellOnly)
+			{
+				flag = this.FoundationTest(Grid.CellBelow(cell), null);
+			}
+			if (!flag)
+			{
+				reason = UI.TOOLS.PLACE.REASONS.ON_FOUNDATION;
+				return false;
+			}
 		}
-		if (this.placementRules.Contains(Placeable.PlacementRules.VisibleToSpace) && !this.occupyArea.TestArea(cell, null, new Func<int, object, bool>(this.SunnySpaceTest)))
+		if (this.placementRules.Contains(Placeable.PlacementRules.VisibleToSpace))
 		{
-			reason = UI.TOOLS.PLACE.REASONS.VISIBLE_TO_SPACE;
-			return false;
+			bool flag2 = this.occupyArea.TestArea(cell, null, new Func<int, object, bool>(this.SunnySpaceTest));
+			if (this.checkRootCellOnly)
+			{
+				flag2 = this.SunnySpaceTest(cell, null);
+			}
+			if (!flag2)
+			{
+				reason = UI.TOOLS.PLACE.REASONS.VISIBLE_TO_SPACE;
+				return false;
+			}
 		}
 		reason = "ok!";
 		return true;
@@ -44,6 +60,10 @@ public class Placeable : KMonoBehaviour
 		int num2;
 		Grid.CellToXY(cell, out num, out num2);
 		int num3 = (int)Grid.WorldIdx[cell];
+		if (num3 == 255)
+		{
+			return false;
+		}
 		WorldContainer world = ClusterManager.Instance.GetWorld(num3);
 		int num4 = world.WorldOffset.y + world.WorldSize.y;
 		return !Grid.Solid[cell] && !Grid.Foundation[cell] && (Grid.ExposedToSunlight[cell] >= 253 || this.ClearPathToSky(num, num2, num4));
@@ -78,6 +98,8 @@ public class Placeable : KMonoBehaviour
 
 	[NonSerialized]
 	public int restrictWorldId;
+
+	public bool checkRootCellOnly;
 
 	public enum PlacementRules
 	{

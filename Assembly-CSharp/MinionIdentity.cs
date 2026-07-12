@@ -221,6 +221,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		this.GetSoleOwner().UnassignAll();
 		this.GetEquipment().UnequipAll();
 		Components.LiveMinionIdentities.Remove(this);
+		Game.Instance.Trigger(-1523247426, this);
 		Game.Instance.Trigger(2144209314, this);
 	}
 

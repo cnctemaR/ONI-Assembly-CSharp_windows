@@ -123,6 +123,7 @@ namespace Database
 			this.Research = this.Add("Research", new string[] { "Research" }, "", new string[0], DUPLICANTS.CHORES.RESEARCH.NAME, DUPLICANTS.CHORES.RESEARCH.STATUS, DUPLICANTS.CHORES.RESEARCH.TOOLTIP, false, 5000, null);
 			this.AnalyzeArtifact = this.Add("AnalyzeArtifact", new string[] { "Research", "Art" }, "", new string[0], DUPLICANTS.CHORES.ANALYZEARTIFACT.NAME, DUPLICANTS.CHORES.ANALYZEARTIFACT.STATUS, DUPLICANTS.CHORES.ANALYZEARTIFACT.TOOLTIP, false, 5000, null);
 			this.AnalyzeSeed = this.Add("AnalyzeSeed", new string[] { "Research", "Farming" }, "", new string[0], DUPLICANTS.CHORES.ANALYZESEED.NAME, DUPLICANTS.CHORES.ANALYZESEED.STATUS, DUPLICANTS.CHORES.ANALYZESEED.TOOLTIP, false, 5000, null);
+			this.ExcavateFossil = this.Add("ExcavateFossil", new string[] { "Research", "Art", "Dig" }, "", new string[0], DUPLICANTS.CHORES.EXCAVATEFOSSIL.NAME, DUPLICANTS.CHORES.EXCAVATEFOSSIL.STATUS, DUPLICANTS.CHORES.EXCAVATEFOSSIL.TOOLTIP, false, 5000, null);
 			this.ResearchFetch = this.Add("ResearchFetch", new string[] { "Research", "Hauling" }, "", new string[0], DUPLICANTS.CHORES.RESEARCHFETCH.NAME, DUPLICANTS.CHORES.RESEARCHFETCH.STATUS, DUPLICANTS.CHORES.RESEARCHFETCH.TOOLTIP, false, 5000, null);
 			this.GeneratePower = this.Add("GeneratePower", new string[] { "MachineOperating" }, "", new string[] { "StressHeal" }, DUPLICANTS.CHORES.GENERATEPOWER.NAME, DUPLICANTS.CHORES.GENERATEPOWER.STATUS, DUPLICANTS.CHORES.GENERATEPOWER.TOOLTIP, false, 5000, null);
 			this.CropTend = this.Add("CropTend", new string[] { "Farming" }, "", new string[0], DUPLICANTS.CHORES.CROP_TEND.NAME, DUPLICANTS.CHORES.CROP_TEND.STATUS, DUPLICANTS.CHORES.CROP_TEND.TOOLTIP, false, 5000, null);
@@ -198,9 +199,9 @@ namespace Database
 					this.Checkpoint, this.TravelTubeEntrance, this.WashHands, this.Recharge, this.ScrubOre, this.Ranch, this.MoveToSafety, this.Relocate, this.Research, this.Mop,
 					this.Toggle, this.Deconstruct, this.Demolish, this.Capture, this.EggSing, this.Art, this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker,
 					this.DropUnusedInventory, this.Harvest, this.Uproot, this.FarmingFabricate, this.PowerFabricate, this.Compound, this.Fabricate, this.Train, this.Cook, this.Build,
-					this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.FetchCritical, this.ResearchFetch, this.AnalyzeArtifact,
-					this.AnalyzeSeed, this.CreatureFetch, this.RanchingFetch, this.Fetch, this.Transport, this.FarmFetch, this.BuildFetch, this.CookFetch, this.DoctorFetch, this.MachineFetch,
-					this.PowerFetch, this.FabricateFetch, this.FoodFetch, this.StorageFetch, this.RepairFetch, this.EquipmentFetch
+					this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.FetchCritical, this.ResearchFetch, this.ExcavateFossil,
+					this.AnalyzeArtifact, this.AnalyzeSeed, this.CreatureFetch, this.RanchingFetch, this.Fetch, this.Transport, this.FarmFetch, this.BuildFetch, this.CookFetch, this.DoctorFetch,
+					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.FoodFetch, this.StorageFetch, this.RepairFetch, this.EquipmentFetch
 				},
 				new ChoreType[] { this.ReturnSuitIdle, this.EmoteIdle },
 				new ChoreType[] { this.Idle }
@@ -374,6 +375,8 @@ namespace Database
 		public ChoreType AnalyzeArtifact;
 
 		public ChoreType AnalyzeSeed;
+
+		public ChoreType ExcavateFossil;
 
 		public ChoreType Disinfect;
 

@@ -7,33 +7,33 @@ public static class UIMinionOrMannequinITargetExtensions
 {
 	public static void SetOutfit(this UIMinionOrMannequin.ITarget self, ClothingOutfitResource outfit)
 	{
-		self.SetOutfit(outfit.itemsInOutfit.Select<string, ClothingItemResource>((string itemId) => Db.Get().Permits.ClothingItems.Get(itemId)));
+		self.SetOutfit(outfit.outfitType, outfit.itemsInOutfit.Select<string, ClothingItemResource>((string itemId) => Db.Get().Permits.ClothingItems.Get(itemId)));
 	}
 
 	public static void SetOutfit(this UIMinionOrMannequin.ITarget self, OutfitDesignerScreen_OutfitState outfit)
 	{
-		self.SetOutfit(from itemId in outfit.GetItems()
+		self.SetOutfit(outfit.outfitType, from itemId in outfit.GetItems()
 			select Db.Get().Permits.ClothingItems.Get(itemId));
 	}
 
 	public static void SetOutfit(this UIMinionOrMannequin.ITarget self, ClothingOutfitTarget outfit)
 	{
-		self.SetOutfit(outfit.ReadItemValues());
+		self.SetOutfit(outfit.OutfitType, outfit.ReadItemValues());
 	}
 
-	public static void SetOutfit(this UIMinionOrMannequin.ITarget self, Option<ClothingOutfitTarget> outfit)
+	public static void SetOutfit(this UIMinionOrMannequin.ITarget self, ClothingOutfitUtility.OutfitType outfitType, Option<ClothingOutfitTarget> outfit)
 	{
 		if (outfit.HasValue)
 		{
 			self.SetOutfit(outfit.Value);
 			return;
 		}
-		self.ClearOutfit();
+		self.ClearOutfit(outfitType);
 	}
 
-	public static void ClearOutfit(this UIMinionOrMannequin.ITarget self)
+	public static void ClearOutfit(this UIMinionOrMannequin.ITarget self, ClothingOutfitUtility.OutfitType outfitType)
 	{
-		self.SetOutfit(UIMinionOrMannequinITargetExtensions.EMPTY_OUTFIT);
+		self.SetOutfit(outfitType, UIMinionOrMannequinITargetExtensions.EMPTY_OUTFIT);
 	}
 
 	public static void React(this UIMinionOrMannequin.ITarget self)
@@ -69,6 +69,8 @@ public static class UIMinionOrMannequinITargetExtensions
 			return UIMinionOrMannequinReactSource.OnGlovesChanged;
 		case PermitCategory.DupeShoes:
 			return UIMinionOrMannequinReactSource.OnShoesChanged;
+		case PermitCategory.DupeHats:
+			return UIMinionOrMannequinReactSource.OnHatChanged;
 		default:
 			DebugUtil.DevAssert(false, string.Format("Couldn't find a reaction for \"{0}\" clothing item category being changed", clothingChangedCategory), null);
 			return UIMinionOrMannequinReactSource.None;

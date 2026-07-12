@@ -307,7 +307,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 					KBatchedAnimController component = rocketModuleCluster.GetComponent<KBatchedAnimController>();
 					component.Offset = Vector3.up * this.DistanceAboveGround;
 					Vector3 positionIncludingOffset = component.PositionIncludingOffset;
-					int num3 = Grid.PosToCell(positionIncludingOffset);
+					int num3 = Grid.PosToCell(component.transform.GetPosition());
 					bool flag = Grid.IsValidCell(num3);
 					bool flag2 = flag && (int)Grid.WorldIdx[num3] == num;
 					if (component.enabled != flag2)
@@ -357,7 +357,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			this.not_grounded.launch_setup.Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{
 				smi.SetupLaunch();
-				this.distanceToSpace.Set((float)ConditionFlightPathIsClear.PadTopEdgeDistanceToCeilingEdge(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.CurrentPad.gameObject), smi, false);
+				this.distanceToSpace.Set((float)ConditionFlightPathIsClear.PadTopEdgeDistanceToOutOfScreenEdge(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.CurrentPad.gameObject), smi, false);
 				smi.GoTo(this.not_grounded.launch_loop);
 			});
 			this.not_grounded.launch_loop.EventTransition(GameHashes.DoReturnRocket, this.not_grounded.landing_setup, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)

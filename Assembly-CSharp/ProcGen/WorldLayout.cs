@@ -278,16 +278,24 @@ namespace ProcGen
 				break;
 			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
 			{
-				bool flag = vn.minDistanceToTag.ContainsKey(filter.tag.ToTag());
-				global::Debug.Assert(flag || filter.optional, "DistanceFromTag is missing tag " + filter.tag + ", consider marking the filter optional.");
-				if (flag && vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
+				Tag tag = filter.tag.ToTag();
+				bool flag = vn.minDistanceToTag.ContainsKey(tag);
+				if (!flag && tag == WorldGenTags.AtStart && !filter.ignoreIfMissingTag)
 				{
-					int num;
-					int i;
-					for (i = 0; i < filter.subworldNames.Count; i = num + 1)
+					DebugUtil.DevLogError("DistanceFromTag was used on a world without an AtStart tag, use ignoreIfMissingTag to skip it.");
+				}
+				else
+				{
+					global::Debug.Assert(flag || filter.ignoreIfMissingTag, "DistanceFromTag is missing tag " + filter.tag + ", use ignoreIfMissingTag.");
+					if (flag && vn.minDistanceToTag[tag] >= filter.minDistance && vn.minDistanceToTag[tag] <= filter.maxDistance)
 					{
-						hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[i]));
-						num = i;
+						int num;
+						int i;
+						for (i = 0; i < filter.subworldNames.Count; i = num + 1)
+						{
+							hashSet.UnionWith(subworlds.FindAll((WeightedSubWorld f) => f.subWorld.name == filter.subworldNames[i]));
+							num = i;
+						}
 					}
 				}
 				break;

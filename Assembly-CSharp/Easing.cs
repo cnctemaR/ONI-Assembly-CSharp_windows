@@ -115,6 +115,8 @@ public class Easing
 		return (1f - Mathf.Sqrt(1f - Mathf.Pow(2f * x, 2f))) / 2f;
 	};
 
+	public static readonly Easing.EasingFn EaseOutBack = (float x) => 1f + 2.70158f * Mathf.Pow(x - 1f, 3f) + 1.70158f * Mathf.Pow(x - 1f, 2f);
+
 	public static readonly Easing.EasingFn ElasticIn = delegate(float x)
 	{
 		if (x == 0f)

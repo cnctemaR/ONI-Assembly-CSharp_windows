@@ -177,8 +177,8 @@ namespace Database
 				Db.Get().SkillPerks.ConveyorBuild
 			}, new List<string>
 			{
-				this.Technicals2.Id,
-				this.Hauling2.Id
+				this.Hauling2.Id,
+				this.Technicals2.Id
 			}));
 			this.Basekeeping1 = this.AddSkill(new Skill("Basekeeping1", DUPLICANTS.ROLES.HANDYMAN.NAME, DUPLICANTS.ROLES.HANDYMAN.DESCRIPTION, "", 0, "hat_role_basekeeping1", "skillbadge_role_basekeeping1", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseStrengthGroundskeeper }, null));
 			this.Basekeeping2 = this.AddSkill(new Skill("Basekeeping2", DUPLICANTS.ROLES.PLUMBER.NAME, DUPLICANTS.ROLES.PLUMBER.DESCRIPTION, "", 1, "hat_role_basekeeping2", "skillbadge_role_basekeeping2", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk>
@@ -186,6 +186,7 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseStrengthPlumber,
 				Db.Get().SkillPerks.CanDoPlumbing
 			}, new List<string> { this.Basekeeping1.Id }));
+			this.Pyrotechnics = this.AddSkill(new Skill("Pyrotechnics", DUPLICANTS.ROLES.PYROTECHNIC.NAME, DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION, "", 2, "hat_role_technicals2", "skillbadge_role_technicals2", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanMakeMissiles }, new List<string> { this.Basekeeping2.Id }));
 			if (DlcManager.IsExpansion1Active())
 			{
 				this.Astronauting1 = this.AddSkill(new Skill("Astronauting1", DUPLICANTS.ROLES.USELESSSKILL.NAME, DUPLICANTS.ROLES.USELESSSKILL.DESCRIPTION, "EXPANSION1_ID", 3, "hat_role_astronaut1", "skillbadge_role_astronaut1", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseAthleticsMedium }, new List<string>
@@ -364,6 +365,8 @@ namespace Database
 		public Skill Basekeeping1;
 
 		public Skill Basekeeping2;
+
+		public Skill Pyrotechnics;
 
 		public Skill Astronauting1;
 

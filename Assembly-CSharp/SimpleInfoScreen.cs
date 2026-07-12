@@ -50,6 +50,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		this.worldElementsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
 		this.worldGeysersPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldGeysersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
+		this.worldMeteorShowersPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldMeteorShowersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_METEORSHOWERS);
 		this.worldBiomesPanel = global::Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.worldBiomesPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
 		this.StoragePanel = global::Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
@@ -302,7 +304,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		}
 		else if (component3 != null)
 		{
-			text = component3.Def.Effect;
+			text = component3.DescFlavour;
 			text2 = component3.Desc;
 		}
 		else if (component4 != null)
@@ -502,6 +504,7 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		bool flag = ManagementMenu.Instance.IsScreenOpen(ClusterMapScreen.Instance) && worldContainer != null && asteroidGridEntity != null;
 		this.worldBiomesPanel.gameObject.SetActive(flag);
 		this.worldGeysersPanel.gameObject.SetActive(flag);
+		this.worldMeteorShowersPanel.gameObject.SetActive(flag);
 		this.worldTraitsPanel.gameObject.SetActive(flag);
 		if (!flag)
 		{
@@ -529,18 +532,15 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					}
 					this.biomeRows[text].SetActive(true);
 				}
-				goto IL_022B;
+				goto IL_023C;
 			}
 		}
 		this.worldBiomesPanel.gameObject.SetActive(false);
-		IL_022B:
+		IL_023C:
 		List<Tag> list = new List<Tag>();
-		foreach (Geyser geyser in global::UnityEngine.Object.FindObjectsOfType<Geyser>())
+		foreach (Geyser geyser in Components.Geysers.GetItems(worldContainer.id))
 		{
-			if (geyser.GetMyWorldId() == worldContainer.id)
-			{
-				list.Add(geyser.PrefabID());
-			}
+			list.Add(geyser.PrefabID());
 		}
 		list.AddRange(SaveGame.Instance.worldGenSpawner.GetUnspawnedWithType<Geyser>(worldContainer.id));
 		list.AddRange(SaveGame.Instance.worldGenSpawner.GetSpawnersWithTag("OilWell", worldContainer.id, true));
@@ -588,25 +588,67 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			component4.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
 		}
 		this.geyserRows[tag3].gameObject.SetActive(list.Count == 0);
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair3 in this.meteorShowerRows)
+		{
+			keyValuePair3.Value.SetActive(false);
+		}
+		bool flag2 = false;
+		foreach (string text2 in worldContainer.GetSeasonIds())
+		{
+			GameplaySeason gameplaySeason = Db.Get().GameplaySeasons.TryGet(text2);
+			if (gameplaySeason != null)
+			{
+				foreach (GameplayEvent gameplayEvent in gameplaySeason.events)
+				{
+					if (gameplayEvent.tags.Contains(GameTags.SpaceDanger) && gameplayEvent is MeteorShowerEvent)
+					{
+						flag2 = true;
+						MeteorShowerEvent meteorShowerEvent = gameplayEvent as MeteorShowerEvent;
+						string id = meteorShowerEvent.Id;
+						global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(meteorShowerEvent.GetClusterMapMeteorShowerID(), "ui", false);
+						if (!this.meteorShowerRows.ContainsKey(id))
+						{
+							this.meteorShowerRows.Add(id, global::Util.KInstantiateUI(this.iconLabelRow, this.worldMeteorShowersPanel.Content.gameObject, true));
+							HierarchyReferences component5 = this.meteorShowerRows[id].GetComponent<HierarchyReferences>();
+							component5.GetReference<Image>("Icon").sprite = uisprite3.first;
+							component5.GetReference<Image>("Icon").color = uisprite3.second;
+							component5.GetReference<LocText>("NameLabel").SetText(Assets.GetPrefab(meteorShowerEvent.GetClusterMapMeteorShowerID()).GetProperName());
+							component5.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+						}
+						this.meteorShowerRows[id].SetActive(true);
+					}
+				}
+			}
+		}
+		Tag tag4 = "NoMeteorShowers";
+		if (!this.meteorShowerRows.ContainsKey(tag4))
+		{
+			this.meteorShowerRows.Add(tag4, global::Util.KInstantiateUI(this.iconLabelRow, this.worldMeteorShowersPanel.Content.gameObject, true));
+			HierarchyReferences component6 = this.meteorShowerRows[tag4].GetComponent<HierarchyReferences>();
+			component6.GetReference<Image>("Icon").sprite = Assets.GetSprite("icon_action_cancel");
+			component6.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_METEORSHOWERS);
+			component6.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+		}
+		this.meteorShowerRows[tag4].gameObject.SetActive(!flag2);
 		List<string> worldTraitIds = worldContainer.WorldTraitIds;
 		if (worldTraitIds != null)
 		{
-			for (int j = 0; j < worldTraitIds.Count; j++)
+			for (int i = 0; i < worldTraitIds.Count; i++)
 			{
-				if (j > this.worldTraitRows.Count - 1)
+				if (i > this.worldTraitRows.Count - 1)
 				{
 					this.CreateWorldTraitRow();
 				}
-				WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(worldTraitIds[j], false);
-				Image reference = this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<Image>("Icon");
+				WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(worldTraitIds[i], false);
+				Image reference = this.worldTraitRows[i].GetComponent<HierarchyReferences>().GetReference<Image>("Icon");
 				if (cachedWorldTrait != null)
 				{
 					Sprite sprite = Assets.GetSprite(cachedWorldTrait.filePath.Substring(cachedWorldTrait.filePath.LastIndexOf("/") + 1));
 					reference.gameObject.SetActive(true);
 					reference.sprite = ((sprite == null) ? Assets.GetSprite("unknown") : sprite);
 					reference.color = global::Util.ColorFromHex(cachedWorldTrait.colorHex);
-					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedWorldTrait.name));
-					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedWorldTrait.description));
+					this.worldTraitRows[i].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedWorldTrait.name));
+					this.worldTraitRows[i].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedWorldTrait.description));
 				}
 				else
 				{
@@ -614,13 +656,13 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					reference.gameObject.SetActive(true);
 					reference.sprite = sprite2;
 					reference.color = Color.white;
-					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.MISSING_TRAIT);
-					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip("");
+					this.worldTraitRows[i].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.MISSING_TRAIT);
+					this.worldTraitRows[i].AddOrGet<ToolTip>().SetSimpleTooltip("");
 				}
 			}
-			for (int k = 0; k < this.worldTraitRows.Count; k++)
+			for (int j = 0; j < this.worldTraitRows.Count; j++)
 			{
-				this.worldTraitRows[k].SetActive(k < worldTraitIds.Count);
+				this.worldTraitRows[j].SetActive(j < worldTraitIds.Count);
 			}
 			if (worldTraitIds.Count == 0)
 			{
@@ -638,24 +680,24 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				this.worldTraitRows[0].SetActive(true);
 			}
 		}
-		for (int l = this.surfaceConditionRows.Count - 1; l >= 0; l--)
+		for (int k = this.surfaceConditionRows.Count - 1; k >= 0; k--)
 		{
-			global::Util.KDestroyGameObject(this.surfaceConditionRows[l]);
+			global::Util.KDestroyGameObject(this.surfaceConditionRows[k]);
 		}
 		this.surfaceConditionRows.Clear();
 		GameObject gameObject = global::Util.KInstantiateUI(this.iconLabelRow, this.worldTraitsPanel.Content.gameObject, true);
-		HierarchyReferences component5 = gameObject.GetComponent<HierarchyReferences>();
-		component5.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_lights");
-		component5.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.LIGHT);
-		component5.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedLux(worldContainer.SunlightFixedTraits[worldContainer.sunlightFixedTrait]));
-		component5.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
+		HierarchyReferences component7 = gameObject.GetComponent<HierarchyReferences>();
+		component7.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_lights");
+		component7.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.LIGHT);
+		component7.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedLux(worldContainer.SunlightFixedTraits[worldContainer.sunlightFixedTrait]));
+		component7.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
 		this.surfaceConditionRows.Add(gameObject);
 		GameObject gameObject2 = global::Util.KInstantiateUI(this.iconLabelRow, this.worldTraitsPanel.Content.gameObject, true);
-		HierarchyReferences component6 = gameObject2.GetComponent<HierarchyReferences>();
-		component6.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_radiation");
-		component6.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.RADIATION);
-		component6.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedRads((float)worldContainer.CosmicRadiationFixedTraits[worldContainer.cosmicRadiationFixedTrait], GameUtil.TimeSlice.None));
-		component6.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
+		HierarchyReferences component8 = gameObject2.GetComponent<HierarchyReferences>();
+		component8.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_radiation");
+		component8.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.RADIATION);
+		component8.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedRads((float)worldContainer.CosmicRadiationFixedTraits[worldContainer.cosmicRadiationFixedTrait], GameUtil.TimeSlice.None));
+		component8.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
 		this.surfaceConditionRows.Add(gameObject2);
 	}
 
@@ -882,6 +924,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 	private CollapsibleDetailContentPanel worldGeysersPanel;
 
+	private CollapsibleDetailContentPanel worldMeteorShowersPanel;
+
 	private CollapsibleDetailContentPanel spacePOIPanel;
 
 	private CollapsibleDetailContentPanel worldTraitsPanel;
@@ -897,6 +941,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private Dictionary<Tag, GameObject> biomeRows = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, GameObject> geyserRows = new Dictionary<Tag, GameObject>();
+
+	private Dictionary<Tag, GameObject> meteorShowerRows = new Dictionary<Tag, GameObject>();
 
 	private List<GameObject> worldTraitRows = new List<GameObject>();
 

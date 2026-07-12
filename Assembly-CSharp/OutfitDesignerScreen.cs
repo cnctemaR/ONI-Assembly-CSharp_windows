@@ -36,13 +36,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		if (OutfitDesignerScreen.outfitTypeToCategoriesDict == null)
 		{
 			Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]> dictionary = new Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]>();
-			dictionary[ClothingOutfitUtility.OutfitType.Clothing] = new PermitCategory[]
-			{
-				PermitCategory.DupeTops,
-				PermitCategory.DupeGloves,
-				PermitCategory.DupeBottoms,
-				PermitCategory.DupeShoes
-			};
+			dictionary[ClothingOutfitUtility.OutfitType.Clothing] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_CLOTHING;
 			OutfitDesignerScreen.outfitTypeToCategoriesDict = dictionary;
 		}
 	}
@@ -56,12 +50,11 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	{
 		this.postponeConfiguration = false;
 		this.minionOrMannequin.TrySpawn();
-		if (this.Config.isValid)
+		if (!this.Config.isValid)
 		{
-			this.Configure(this.Config);
-			return;
+			throw new NotSupportedException("Cannot open OutfitDesignerScreen without a config. Make sure to call Configure() before enabling the screen");
 		}
-		this.Configure(OutfitDesignerScreenConfig.Mannequin(ClothingOutfitTarget.ForNewOutfit()));
+		this.Configure(this.Config);
 	}
 
 	protected override void OnCmpEnable()
@@ -110,7 +103,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		using (ListPool<ClothingItemResource, OutfitDesignerScreen>.PooledList pooledList = PoolsFor<OutfitDesignerScreen>.AllocateList<ClothingItemResource>())
 		{
 			this.outfitState.AddItemValuesTo(pooledList);
-			this.minionOrMannequin.SetFrom(config.minionPersonality).SetOutfit(pooledList);
+			this.minionOrMannequin.SetFrom(config.minionPersonality).SetOutfit(config.sourceTarget.OutfitType, pooledList);
 		}
 		this.PopulateCategories();
 		this.SelectCategory(OutfitDesignerScreen.outfitTypeToCategoriesDict[this.outfitState.outfitType][0]);
@@ -128,7 +121,10 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			componentInChildren.SetText(button_APPLY_TO_MINION.Replace(text, outfitDesignerScreenConfig.targetMinionInstance.Value.GetProperName()));
 			this.primaryButton.onClick += delegate
 			{
-				ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.FromMinion(this.Config.targetMinionInstance.Value);
+				OutfitDesignerScreenConfig outfitDesignerScreenConfig2 = this.Config;
+				ClothingOutfitUtility.OutfitType outfitType = outfitDesignerScreenConfig2.sourceTarget.OutfitType;
+				outfitDesignerScreenConfig2 = this.Config;
+				ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.FromMinion(outfitType, outfitDesignerScreenConfig2.targetMinionInstance.Value);
 				clothingOutfitTarget.WriteItems(this.outfitState.GetItems());
 				if (this.Config.onWriteToOutfitTargetFn != null)
 				{
@@ -172,12 +168,12 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			{
 				this.outfitState.destinationTarget.WriteName(this.outfitState.name);
 				this.outfitState.destinationTarget.WriteItems(this.outfitState.GetItems());
-				OutfitDesignerScreenConfig outfitDesignerScreenConfig2 = this.Config;
-				if (outfitDesignerScreenConfig2.minionPersonality.HasValue)
+				OutfitDesignerScreenConfig outfitDesignerScreenConfig3 = this.Config;
+				if (outfitDesignerScreenConfig3.minionPersonality.HasValue)
 				{
 					ClothingOutfits clothingOutfits = Db.Get().Permits.ClothingOutfits;
-					outfitDesignerScreenConfig2 = this.Config;
-					clothingOutfits.SetDuplicantPersonalityOutfit(outfitDesignerScreenConfig2.minionPersonality.Value.Id, this.outfitState.destinationTarget.Id, ClothingOutfitUtility.OutfitType.Clothing);
+					outfitDesignerScreenConfig3 = this.Config;
+					clothingOutfits.SetDuplicantPersonalityOutfit(outfitDesignerScreenConfig3.minionPersonality.Value.Id, this.outfitState.destinationTarget.OutfitId, this.outfitState.destinationTarget.OutfitType);
 				}
 				if (this.Config.onWriteToOutfitTargetFn != null)
 				{
@@ -221,7 +217,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	private void RefreshOutfitState()
 	{
 		this.selectionHeaderLabel.text = this.outfitState.name;
-		this.outfitDescriptionPanel.Refresh(this.outfitState, ClothingOutfitUtility.OutfitType.Clothing);
+		this.outfitDescriptionPanel.Refresh(this.outfitState);
 		this.UpdateSaveButtons();
 	}
 
@@ -268,10 +264,10 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.galleryHeaderLabel.text = PermitCategories.GetDisplayName(permitCategory);
 		this.RefreshCategories();
 		this.PopulateGallery();
-		ref Option<ClothingItemResource> itemSlotForCategory = ref this.outfitState.GetItemSlotForCategory(permitCategory);
-		if (itemSlotForCategory.HasValue)
+		Option<ClothingItemResource> itemForCategory = this.outfitState.GetItemForCategory(permitCategory);
+		if (itemForCategory.HasValue)
 		{
-			this.SelectPermit(itemSlotForCategory.Value);
+			this.SelectPermit(itemForCategory.Value);
 			return;
 		}
 		this.SelectPermit(null);
@@ -290,11 +286,15 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.RefreshGalleryFn = null;
 		this.galleryGridItemPool.ReturnAll();
 		this.<PopulateGallery>g__AddGridIconForPermit|48_0(null);
-		foreach (PermitResource permitResource in Db.Get().Permits.resources)
+		foreach (ClothingItemResource clothingItemResource in Db.Get().Permits.ClothingItems.resources)
 		{
-			if (permitResource.Category == this.SelectedCategory)
+			if (clothingItemResource.Category == this.SelectedCategory)
 			{
-				this.<PopulateGallery>g__AddGridIconForPermit|48_0(permitResource);
+				if (clothingItemResource.outfitType != this.Config.sourceTarget.OutfitType)
+				{
+					return;
+				}
+				this.<PopulateGallery>g__AddGridIconForPermit|48_0(clothingItemResource);
 			}
 		}
 		this.RefreshGallery();
@@ -308,7 +308,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.UpdateSaveButtons();
 	}
 
-	public unsafe void UpdateSelectedItemDetails()
+	public void UpdateSelectedItemDetails()
 	{
 		Option<ClothingItemResource> option = Option.None;
 		if (this.SelectedPermit != null)
@@ -319,10 +319,10 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				option = clothingItemResource;
 			}
 		}
-		*this.outfitState.GetItemSlotForCategory(this.SelectedCategory) = option;
+		this.outfitState.SetItemForCategory(this.SelectedCategory, option);
 		this.minionOrMannequin.current.SetOutfit(this.outfitState);
 		this.minionOrMannequin.current.ReactToClothingItemChange(this.SelectedCategory);
-		this.outfitDescriptionPanel.Refresh(this.outfitState, ClothingOutfitUtility.OutfitType.Clothing);
+		this.outfitDescriptionPanel.Refresh(this.outfitState);
 	}
 
 	private void RegisterPreventScreenPop()
@@ -402,25 +402,26 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			inputField.onValueChanged.AddListener(new UnityAction<string>(base.<MakeApplyToTemplatePopup>g__Refresh|1));
 			saveButton.onClick += delegate
 			{
+				ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.FromMinion(outfitState.outfitType, targetMinionInstance);
 				ClothingOutfitNameProposal.Result result = proposal.result;
-				ClothingOutfitTarget clothingOutfitTarget;
+				ClothingOutfitTarget clothingOutfitTarget2;
 				if (result != ClothingOutfitNameProposal.Result.NewOutfit)
 				{
 					if (result != ClothingOutfitNameProposal.Result.SameOutfit)
 					{
 						throw new NotSupportedException(string.Format("Can't save outfit with name \"{0}\", failed with result: {1}", proposal.candidateName, proposal.result));
 					}
-					clothingOutfitTarget = existingOutfitTemplate.Value;
+					clothingOutfitTarget2 = existingOutfitTemplate.Value;
 				}
 				else
 				{
-					clothingOutfitTarget = ClothingOutfitTarget.ForNewOutfit(proposal.candidateName);
+					clothingOutfitTarget2 = ClothingOutfitTarget.ForNewTemplateOutfit(outfitState.outfitType, proposal.candidateName);
 				}
+				clothingOutfitTarget2.WriteItems(outfitState.GetItems());
 				clothingOutfitTarget.WriteItems(outfitState.GetItems());
-				ClothingOutfitTarget.FromMinion(targetMinionInstance).WriteItems(outfitState.GetItems());
 				if (onWriteToOutfitTargetFn != null)
 				{
-					onWriteToOutfitTargetFn(clothingOutfitTarget);
+					onWriteToOutfitTargetFn(clothingOutfitTarget2);
 				}
 				dialog.Deactivate();
 				LockerNavigator.Instance.PopScreen();
@@ -432,10 +433,10 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			}
 			if (existingOutfitTemplate.Value.CanWriteName && existingOutfitTemplate.Value.CanWriteItems)
 			{
-				base.<MakeApplyToTemplatePopup>g__Refresh|1(existingOutfitTemplate.Value.Id);
+				base.<MakeApplyToTemplatePopup>g__Refresh|1(existingOutfitTemplate.Value.OutfitId);
 				return;
 			}
-			base.<MakeApplyToTemplatePopup>g__Refresh|1(ClothingOutfitTarget.ForCopyOf(existingOutfitTemplate.Value).Id);
+			base.<MakeApplyToTemplatePopup>g__Refresh|1(ClothingOutfitTarget.ForTemplateCopyOf(existingOutfitTemplate.Value).OutfitId);
 		});
 	}
 
@@ -468,11 +469,11 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			{
 				if (proposal.result == ClothingOutfitNameProposal.Result.NewOutfit)
 				{
-					ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.ForNewOutfit(proposal.candidateName);
+					ClothingOutfitTarget clothingOutfitTarget = ClothingOutfitTarget.ForNewTemplateOutfit(outfitTemplate.OutfitType, proposal.candidateName);
 					clothingOutfitTarget.WriteItems(outfitState.GetItems());
 					if (minionPersonality.HasValue)
 					{
-						Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(minionPersonality.Value.Id, clothingOutfitTarget.Id, ClothingOutfitUtility.OutfitType.Clothing);
+						Db.Get().Permits.ClothingOutfits.SetDuplicantPersonalityOutfit(minionPersonality.Value.Id, clothingOutfitTarget.OutfitId, clothingOutfitTarget.OutfitType);
 					}
 					if (onWriteToOutfitTargetFn != null)
 					{
@@ -484,7 +485,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				}
 				throw new NotSupportedException(string.Format("Can't save outfit with name \"{0}\", failed with result: {1}", proposal.candidateName, proposal.result));
 			};
-			base.<MakeCopyPopup>g__Refresh|1(ClothingOutfitTarget.ForCopyOf(outfitTemplate).Id);
+			base.<MakeCopyPopup>g__Refresh|1(ClothingOutfitTarget.ForTemplateCopyOf(outfitTemplate).OutfitId);
 		});
 	}
 

@@ -60,7 +60,7 @@ public class WarpPortal : Workable
 			return;
 		}
 		ClusterManager.Instance.GetWorld(this.GetTargetWorldID()).SetDiscovered(true);
-		SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.WarpWorldReveal, -1).smi as SimpleEvent.StatesInstance;
+		SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.WarpWorldReveal, -1, null).smi as SimpleEvent.StatesInstance;
 		statesInstance.minions = new GameObject[] { Components.LiveMinionIdentities[0].gameObject };
 		statesInstance.callback = delegate
 		{

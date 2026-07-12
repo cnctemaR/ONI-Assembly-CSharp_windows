@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FMODUnity;
 using KMod;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -94,6 +95,19 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static bool IsTagCountable(Tag tag)
 	{
 		return Assets.CountableTags.Contains(tag);
+	}
+
+	private static void TryAddSolidTransferArmConveyableTag(KPrefabID prefab)
+	{
+		if (prefab.HasAnyTags(STORAGEFILTERS.SOLID_TRANSFER_ARM_CONVEYABLE))
+		{
+			Assets.SolidTransferArmConeyableTags.Add(prefab.PrefabTag);
+		}
+	}
+
+	public static bool IsTagSolidTransferArmConveyable(Tag tag)
+	{
+		return Assets.SolidTransferArmConeyableTags.Contains(tag);
 	}
 
 	private void LoadAnims()
@@ -273,6 +287,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 		Assets.Prefabs.Add(prefab);
 		Assets.TryAddCountableTag(prefab);
+		Assets.TryAddSolidTransferArmConveyableTag(prefab);
 		if (Assets.OnAddPrefab != null)
 		{
 			Assets.OnAddPrefab(prefab);
@@ -469,6 +484,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static List<KPrefabID> Prefabs = new List<KPrefabID>();
 
 	private static HashSet<Tag> CountableTags = new HashSet<Tag>();
+
+	private static HashSet<Tag> SolidTransferArmConeyableTags = new HashSet<Tag>();
 
 	public List<Sprite> SpriteAssets;
 

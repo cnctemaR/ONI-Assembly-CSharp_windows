@@ -131,6 +131,11 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 		this.animController.GetComponent<WearableAccessorizer>().ApplyEquipment(equippable, animFile);
 	}
 
+	public void RemoveEquipment(Equippable equippable)
+	{
+		this.animController.GetComponent<WearableAccessorizer>().RemoveEquipment(equippable);
+	}
+
 	private void GetMinionIdentity(IAssignableIdentity assignableIdentity, out MinionIdentity minionIdentity, out StoredMinionIdentity storedMinionIdentity)
 	{
 		if (assignableIdentity is MinionAssignablesProxy)

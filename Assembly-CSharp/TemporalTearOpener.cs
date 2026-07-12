@@ -270,6 +270,11 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 			throw new NotImplementedException();
 		}
 
+		public int HorizontalGroupID()
+		{
+			return -1;
+		}
+
 		[Serialize]
 		private float m_particlesConsumed;
 

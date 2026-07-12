@@ -9,7 +9,7 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 		this.t = 0f;
 	}
 
-	public void OnDisable()
+	protected override void OnDisable()
 	{
 		ImageToggleState[] array = this.targetImageToggleStates;
 		for (int i = 0; i < array.Length; i++)

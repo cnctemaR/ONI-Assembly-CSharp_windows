@@ -3,22 +3,22 @@ using UnityEngine;
 
 public readonly struct OutfitDesignerScreenConfig
 {
-	public OutfitDesignerScreenConfig(Option<ClothingOutfitTarget> sourceTargetOpt, Option<Personality> minionPersonality, Option<GameObject> targetMinionInstance, Action<ClothingOutfitTarget> onWriteToOutfitTargetFn = null)
+	public OutfitDesignerScreenConfig(ClothingOutfitTarget sourceTarget, Option<Personality> minionPersonality, Option<GameObject> targetMinionInstance, Action<ClothingOutfitTarget> onWriteToOutfitTargetFn = null)
 	{
-		this.sourceTarget = (sourceTargetOpt.HasValue ? sourceTargetOpt.Value : ClothingOutfitTarget.ForNewOutfit());
-		this.outfitTemplate = (this.sourceTarget.IsTemplateOutfit() ? Option.Some<ClothingOutfitTarget>(this.sourceTarget) : Option.None);
+		this.sourceTarget = sourceTarget;
+		this.outfitTemplate = (sourceTarget.IsTemplateOutfit() ? Option.Some<ClothingOutfitTarget>(sourceTarget) : Option.None);
 		this.minionPersonality = minionPersonality;
 		this.targetMinionInstance = targetMinionInstance;
 		this.onWriteToOutfitTargetFn = onWriteToOutfitTargetFn;
 		this.isValid = true;
 		ClothingOutfitTarget.MinionInstance minionInstance;
-		if (this.sourceTarget.Is<ClothingOutfitTarget.MinionInstance>(out minionInstance))
+		if (sourceTarget.Is<ClothingOutfitTarget.MinionInstance>(out minionInstance))
 		{
 			global::Debug.Assert(targetMinionInstance.HasValue && targetMinionInstance == minionInstance.minionInstance);
 		}
 	}
 
-	public OutfitDesignerScreenConfig WithOutfit(Option<ClothingOutfitTarget> sourceTarget)
+	public OutfitDesignerScreenConfig WithOutfit(ClothingOutfitTarget sourceTarget)
 	{
 		return new OutfitDesignerScreenConfig(sourceTarget, this.minionPersonality, this.targetMinionInstance, this.onWriteToOutfitTargetFn);
 	}
@@ -28,23 +28,26 @@ public readonly struct OutfitDesignerScreenConfig
 		return new OutfitDesignerScreenConfig(this.sourceTarget, this.minionPersonality, this.targetMinionInstance, onWriteToOutfitTargetFn);
 	}
 
-	public static OutfitDesignerScreenConfig Mannequin(Option<ClothingOutfitTarget> outfit)
+	public static OutfitDesignerScreenConfig Mannequin(ClothingOutfitTarget outfit)
 	{
 		return new OutfitDesignerScreenConfig(outfit, Option.None, Option.None, null);
 	}
 
-	public static OutfitDesignerScreenConfig Minion(Option<ClothingOutfitTarget> outfit, Personality personality)
+	public static OutfitDesignerScreenConfig Minion(ClothingOutfitTarget outfit, Personality personality)
 	{
 		return new OutfitDesignerScreenConfig(outfit, personality, Option.None, null);
 	}
 
-	public static OutfitDesignerScreenConfig Minion(Option<ClothingOutfitTarget> outfit, GameObject targetMinionInstance)
+	public static OutfitDesignerScreenConfig Minion(ClothingOutfitTarget outfit, GameObject targetMinionInstance)
 	{
 		Personality personality = Db.Get().Personalities.Get(targetMinionInstance.GetComponent<MinionIdentity>().personalityResourceId);
-		return new OutfitDesignerScreenConfig(outfit.HasValue ? outfit.Value : ClothingOutfitTarget.FromMinion(targetMinionInstance), personality, targetMinionInstance, null);
+		ClothingOutfitTarget.MinionInstance minionInstance;
+		global::Debug.Assert(outfit.Is<ClothingOutfitTarget.MinionInstance>(out minionInstance));
+		global::Debug.Assert(minionInstance.minionInstance == targetMinionInstance);
+		return new OutfitDesignerScreenConfig(outfit, personality, targetMinionInstance, null);
 	}
 
-	public static OutfitDesignerScreenConfig Minion(Option<ClothingOutfitTarget> outfit, MinionBrowserScreen.GridItem item)
+	public static OutfitDesignerScreenConfig Minion(ClothingOutfitTarget outfit, MinionBrowserScreen.GridItem item)
 	{
 		MinionBrowserScreen.GridItem.PersonalityTarget personalityTarget = item as MinionBrowserScreen.GridItem.PersonalityTarget;
 		if (personalityTarget != null)

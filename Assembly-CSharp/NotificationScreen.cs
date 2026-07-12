@@ -13,27 +13,20 @@ public class NotificationScreen : KScreen
 		NotificationScreen.Instance = null;
 	}
 
-	private void OnAddNotifier(Notifier notifier)
-	{
-		notifier.OnAdd = (Action<Notification>)Delegate.Combine(notifier.OnAdd, new Action<Notification>(this.OnAddNotification));
-		notifier.OnRemove = (Action<Notification>)Delegate.Combine(notifier.OnRemove, new Action<Notification>(this.OnRemoveNotification));
-	}
-
-	private void OnRemoveNotifier(Notifier notifier)
-	{
-		notifier.OnAdd = (Action<Notification>)Delegate.Remove(notifier.OnAdd, new Action<Notification>(this.OnAddNotification));
-		notifier.OnRemove = (Action<Notification>)Delegate.Remove(notifier.OnRemove, new Action<Notification>(this.OnRemoveNotification));
-	}
-
-	private void OnAddNotification(Notification notification)
+	public void AddPendingNotification(Notification notification)
 	{
 		this.pendingNotifications.Add(notification);
 	}
 
-	private void OnRemoveNotification(Notification notification)
+	public void RemovePendingNotification(Notification notification)
 	{
 		this.dirty = true;
 		this.pendingNotifications.Remove(notification);
+		this.RemoveNotification(notification);
+	}
+
+	public void RemoveNotification(Notification notification)
+	{
 		NotificationScreen.Entry entry = null;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
 		if (entry == null)
@@ -54,12 +47,6 @@ public class NotificationScreen : KScreen
 	{
 		base.OnPrefabInit();
 		NotificationScreen.Instance = this;
-		Components.Notifiers.OnAdd += this.OnAddNotifier;
-		Components.Notifiers.OnRemove += this.OnRemoveNotifier;
-		foreach (Notifier notifier in Components.Notifiers.Items)
-		{
-			this.OnAddNotifier(notifier);
-		}
 		this.MessagesPrefab.gameObject.SetActive(false);
 		this.LabelPrefab.gameObject.SetActive(false);
 		this.InitNotificationSounds();
@@ -103,12 +90,6 @@ public class NotificationScreen : KScreen
 		this.ShowMessage((MessageNotification)notification2);
 	}
 
-	protected override void OnCleanUp()
-	{
-		Components.Notifiers.OnAdd -= this.OnAddNotifier;
-		Components.Notifiers.OnRemove -= this.OnRemoveNotifier;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -138,7 +119,7 @@ public class NotificationScreen : KScreen
 		this.dirty = true;
 	}
 
-	private void AddNotification(Notification notification)
+	public void AddNotification(Notification notification)
 	{
 		if (DebugHandler.NotificationsDisabled)
 		{
@@ -359,7 +340,7 @@ public class NotificationScreen : KScreen
 				this.dirty = true;
 				if (notification.Notifier == null)
 				{
-					this.OnRemoveNotification(notification);
+					this.RemovePendingNotification(notification);
 				}
 				else
 				{

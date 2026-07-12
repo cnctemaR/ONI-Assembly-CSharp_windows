@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Reflection;
 using ImGuiNET;
 using ImGuiObjectDrawer;
+using UnityEngine;
 
 public readonly struct ImGuiObjectTableDrawer<T>
 {
-	public ImGuiObjectTableDrawer(string tableId, ImGuiTableFlags flags, List<ImGuiObjectTableDrawer<T>.Column> columns)
+	public ImGuiObjectTableDrawer(string tableId, ImGuiTableFlags flags, List<ImGuiObjectTableDrawer<T>.Column> columns, float? maxHeight)
 	{
 		this.tableId = tableId;
 		this.useTableId = tableId != null;
 		this.flags = flags;
 		this.columns = columns;
+		this.fixedHeight = maxHeight;
 	}
 
 	public void Draw(IEnumerable<T> data)
@@ -25,7 +27,7 @@ public readonly struct ImGuiObjectTableDrawer<T>
 		{
 			ImGui.PushID(this.tableId);
 		}
-		if (ImGui.BeginTable("ID_table_contents", this.columns.Count, this.flags))
+		if (ImGui.BeginTable("ID_table_contents", this.columns.Count, this.flags, new Vector2(-1f, this.fixedHeight ?? (-1f))))
 		{
 			ImGui.TableSetupScrollFreeze(this.columns.Count, 1);
 			foreach (ImGuiObjectTableDrawer<T>.Column column in this.columns)
@@ -89,6 +91,8 @@ public readonly struct ImGuiObjectTableDrawer<T>
 
 	public readonly ImGuiTableFlags flags;
 
+	public readonly float? fixedHeight;
+
 	public readonly List<ImGuiObjectTableDrawer<T>.Column> columns;
 
 	public readonly struct Column
@@ -118,6 +122,25 @@ public readonly struct ImGuiObjectTableDrawer<T>
 		public ImGuiObjectTableDrawer<T>.Builder Flags(ImGuiTableFlags flags)
 		{
 			this.internal_flags = flags;
+			return this;
+		}
+
+		public ImGuiObjectTableDrawer<T>.Builder AddFlags(ImGuiTableFlags flags)
+		{
+			this.internal_flags |= flags;
+			return this;
+		}
+
+		public ImGuiObjectTableDrawer<T>.Builder RemoveFlags(ImGuiTableFlags flags)
+		{
+			this.internal_flags &= ~flags;
+			return this;
+		}
+
+		public ImGuiObjectTableDrawer<T>.Builder FixedHeight(float fixedHeight)
+		{
+			this.internal_fixedHeight = new float?(fixedHeight);
+			this.AddFlags(ImGuiTableFlags.ScrollY);
 			return this;
 		}
 
@@ -248,12 +271,14 @@ public readonly struct ImGuiObjectTableDrawer<T>
 
 		public ImGuiObjectTableDrawer<T> Build()
 		{
-			return new ImGuiObjectTableDrawer<T>(this.internal_id, this.internal_flags, this.internal_columns);
+			return new ImGuiObjectTableDrawer<T>(this.internal_id, this.internal_flags, this.internal_columns, this.internal_fixedHeight);
 		}
 
 		public string internal_id;
 
-		public ImGuiTableFlags internal_flags = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollY;
+		public ImGuiTableFlags internal_flags = ImGuiTableFlags.Reorderable | ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersOuterV | ImGuiTableFlags.SizingFixedFit;
+
+		public float? internal_fixedHeight;
 
 		public List<ImGuiObjectTableDrawer<T>.Column> internal_columns = new List<ImGuiObjectTableDrawer<T>.Column>();
 	}

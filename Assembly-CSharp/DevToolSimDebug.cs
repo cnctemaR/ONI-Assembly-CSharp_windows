@@ -286,18 +286,26 @@ public class DevToolSimDebug : DevTool
 					{
 						ImGui.Text("Is Room: True");
 						this.showBuildings = ImGui.CollapsingHeader("Buildings (" + room.buildings.Count.ToString() + ")");
-						if (!this.showBuildings)
+						if (this.showBuildings)
 						{
-							goto IL_0B91;
+							foreach (KPrefabID kprefabID in room.buildings)
+							{
+								ImGui.Text(kprefabID.ToString());
+							}
 						}
-						using (List<KPrefabID>.Enumerator enumerator4 = room.buildings.GetEnumerator())
+						this.showCreatures = ImGui.CollapsingHeader("Creatures (" + room.cavity.creatures.Count.ToString() + ")");
+						if (!this.showCreatures)
+						{
+							goto IL_0C0F;
+						}
+						using (List<KPrefabID>.Enumerator enumerator4 = room.cavity.creatures.GetEnumerator())
 						{
 							while (enumerator4.MoveNext())
 							{
-								KPrefabID kprefabID = enumerator4.Current;
-								ImGui.Text(kprefabID.ToString());
+								KPrefabID kprefabID2 = enumerator4.Current;
+								ImGui.Text(kprefabID2.ToString());
 							}
-							goto IL_0B91;
+							goto IL_0C0F;
 						}
 					}
 					ImGui.Text("Is Room: False");
@@ -306,7 +314,7 @@ public class DevToolSimDebug : DevTool
 				{
 					ImGui.Text("No Cavity Detected");
 				}
-				IL_0B91:
+				IL_0C0F:
 				ImGui.Unindent();
 			}
 			this.showPropertyInfo = ImGui.CollapsingHeader("Property Info");
@@ -496,6 +504,8 @@ public class DevToolSimDebug : DevTool
 	private bool showPropertyInfo;
 
 	private bool showBuildings;
+
+	private bool showCreatures;
 
 	private bool showPhysicsData;
 

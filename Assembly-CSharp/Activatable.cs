@@ -75,6 +75,11 @@ public class Activatable : Workable, ISidescreenButtonControl
 		this.activateChore = null;
 	}
 
+	public int HorizontalGroupID()
+	{
+		return -1;
+	}
+
 	public string SidescreenButtonText
 	{
 		get

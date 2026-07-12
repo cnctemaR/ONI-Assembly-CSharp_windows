@@ -13,12 +13,6 @@ public class NotificationManager : KMonoBehaviour
 	{
 		Debug.Assert(NotificationManager.Instance == null);
 		NotificationManager.Instance = this;
-		Components.Notifiers.OnAdd += this.OnAddNotifier;
-		Components.Notifiers.OnRemove += this.OnRemoveNotifier;
-		foreach (Notifier notifier in Components.Notifiers.Items)
-		{
-			this.OnAddNotifier(notifier);
-		}
 	}
 
 	protected override void OnForcedCleanUp()
@@ -26,26 +20,22 @@ public class NotificationManager : KMonoBehaviour
 		NotificationManager.Instance = null;
 	}
 
-	private void OnAddNotifier(Notifier notifier)
-	{
-		notifier.OnAdd = (Action<Notification>)Delegate.Combine(notifier.OnAdd, new Action<Notification>(this.OnAddNotification));
-		notifier.OnRemove = (Action<Notification>)Delegate.Combine(notifier.OnRemove, new Action<Notification>(this.OnRemoveNotification));
-	}
-
-	private void OnRemoveNotifier(Notifier notifier)
-	{
-		notifier.OnAdd = (Action<Notification>)Delegate.Remove(notifier.OnAdd, new Action<Notification>(this.OnAddNotification));
-		notifier.OnRemove = (Action<Notification>)Delegate.Remove(notifier.OnRemove, new Action<Notification>(this.OnRemoveNotification));
-	}
-
-	private void OnAddNotification(Notification notification)
+	public void AddNotification(Notification notification)
 	{
 		this.pendingNotifications.Add(notification);
+		if (NotificationScreen.Instance != null)
+		{
+			NotificationScreen.Instance.AddPendingNotification(notification);
+		}
 	}
 
-	private void OnRemoveNotification(Notification notification)
+	public void RemoveNotification(Notification notification)
 	{
 		this.pendingNotifications.Remove(notification);
+		if (NotificationScreen.Instance != null)
+		{
+			NotificationScreen.Instance.RemovePendingNotification(notification);
+		}
 		if (this.notifications.Remove(notification))
 		{
 			this.notificationRemoved(notification);

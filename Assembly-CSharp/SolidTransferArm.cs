@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Database;
 using FMODUnity;
 using Klei.AI;
 using KSerialization;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -203,7 +201,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private bool IsPickupableRelevantToMyInterests(KPrefabID prefabID, int storage_cell)
 	{
-		return prefabID.HasAnyTags(ref SolidTransferArm.tagBits) && this.IsCellReachable(storage_cell);
+		return Assets.IsTagSolidTransferArmConveyable(prefabID.PrefabTag) && this.IsCellReachable(storage_cell);
 	}
 
 	public Pickupable FindFetchTarget(Storage destination, FetchChore chore)
@@ -378,8 +376,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private float max_carry_weight = 1000f;
 
 	private List<Pickupable> pickupables = new List<Pickupable>();
-
-	public static TagBits tagBits = new TagBits(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS).ToArray<Tag>());
 
 	private KBatchedAnimController arm_anim_ctrl;
 

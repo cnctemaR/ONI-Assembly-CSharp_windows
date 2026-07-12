@@ -103,12 +103,12 @@ public readonly struct JoyResponseOutfitTarget
 
 		public Option<string> ReadFacadeId()
 		{
-			return this.personality.GetOutfit(ClothingOutfitUtility.OutfitType.JoyResponse);
+			return this.personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.JoyResponse);
 		}
 
 		public void WriteFacadeId(Option<string> facadeId)
 		{
-			this.personality.SetOutfit(ClothingOutfitUtility.OutfitType.JoyResponse, facadeId);
+			this.personality.SetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.JoyResponse, facadeId);
 		}
 
 		public readonly Personality personality;

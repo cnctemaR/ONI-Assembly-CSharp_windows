@@ -170,10 +170,6 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 
 	public bool allowMultipleEventInstances;
 
-	public int durration;
-
-	public int warning;
-
 	protected int basePriority;
 
 	protected int calculatedPriority;
@@ -193,10 +189,4 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 	public HashedString animFileName;
 
 	public List<Tag> tags;
-
-	public enum Occurance
-	{
-		Once,
-		Infinity
-	}
 }

@@ -39,7 +39,7 @@ public class GenericFabricatorConfig : IBuildingConfig
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_fabricator_generic_kanim") };
-		go.AddOrGet<ComplexFabricatorWorkable>().AnimOffset = new Vector3(-1f, 0f, 0f);
+		go.AddOrGet<ComplexFabricatorWorkable>();
 		complexFabricator.fetchChoreTypeIdHash = Db.Get().ChoreTypes.FabricateFetch.IdHash;
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
 		go.AddOrGet<LoopingSounds>();

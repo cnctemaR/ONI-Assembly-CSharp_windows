@@ -115,9 +115,10 @@ public class KGlobalAnimParser
 				float num3 = reader.ReadSingle();
 				float num4 = reader.ReadSingle();
 				float num5 = reader.ReadSingle();
-				frame.bbox = new AABB3(new Vector3(num2 - num4 * 0.5f, -(num3 + num5 * 0.5f), 0f) * 0.005f, new Vector3(num2 + num4 * 0.5f, -(num3 - num5 * 0.5f), 0f) * 0.005f);
-				float num6 = Math.Max(Math.Abs(frame.bbox.max.x), Math.Abs(frame.bbox.min.x));
-				float num7 = Math.Max(Math.Abs(frame.bbox.max.y), Math.Abs(frame.bbox.min.y));
+				Vector2 vector = new Vector2(num2 - num4 * 0.5f, -(num3 + num5 * 0.5f)) * 0.005f;
+				Vector2 vector2 = new Vector2(num2 + num4 * 0.5f, -(num3 - num5 * 0.5f)) * 0.005f;
+				float num6 = Math.Max(Math.Abs(vector2.x), Math.Abs(vector.x));
+				float num7 = Math.Max(Math.Abs(vector2.y), Math.Abs(vector.y));
 				float num8 = Math.Max(num6, num7);
 				anim.unScaledSize.x = Math.Max(anim.unScaledSize.x, num6 / 0.005f);
 				anim.unScaledSize.y = Math.Max(anim.unScaledSize.y, num7 / 0.005f);
@@ -125,20 +126,24 @@ public class KGlobalAnimParser
 				frame.idx = data.animFrames.Count;
 				frame.firstElementIdx = data.frameElements.Count;
 				frame.numElements = reader.ReadInt32();
+				frame.hasHead = false;
 				int num9 = 0;
 				for (int k = 0; k < frame.numElements; k++)
 				{
 					KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
-					frameElement.fileHash = fileNameHash;
 					frameElement.symbol = new KAnimHashedString(reader.ReadInt32());
 					frameElement.frame = reader.ReadInt32();
-					frameElement.folder = new KAnimHashedString(reader.ReadInt32());
+					if (new KAnimHashedString(reader.ReadInt32()) == KGlobalAnimParser.ANIM_HASH_HEAD_ANIM)
+					{
+						frame.hasHead = true;
+					}
 					reader.ReadInt32();
 					float num10 = reader.ReadSingle();
 					float num11 = reader.ReadSingle();
 					float num12 = reader.ReadSingle();
 					float num13 = reader.ReadSingle();
-					frameElement.multColour = new Color(num13, num12, num11, num10);
+					DebugUtil.DevAssert(num13 == num11 && num11 == num12, "Unhandled color values!", null);
+					frameElement.multAlpha = num13 * num10;
 					float num14 = reader.ReadSingle();
 					float num15 = reader.ReadSingle();
 					float num16 = reader.ReadSingle();
@@ -152,15 +157,13 @@ public class KGlobalAnimParser
 					frameElement.transform.m10 = num15;
 					frameElement.transform.m11 = num17;
 					frameElement.transform.m12 = num19;
-					int symbolIndex = data.GetSymbolIndex(frameElement.symbol);
-					if (symbolIndex == -1)
+					if (data.GetSymbolIndex(frameElement.symbol) == -1)
 					{
 						num9++;
 						frameElement.symbol = KGlobalAnimParser.MISSING_SYMBOL;
 					}
 					else
 					{
-						frameElement.symbolIdx = symbolIndex;
 						data.frameElements.Add(frameElement);
 						animFile.elementCount++;
 					}
@@ -173,7 +176,6 @@ public class KGlobalAnimParser
 			animFile.animCount++;
 		}
 		global::Debug.Assert(num == animFile.animCount);
-		data.animCount[fileNameHash] = animFile.animCount;
 		animFile.maxVisSymbolFrames = Math.Max(animFile.maxVisSymbolFrames, reader.ReadInt32());
 		data.UpdateMaxVisibleSymbols(animFile.maxVisSymbolFrames);
 		KGlobalAnimParser.ParseHashTable(reader);
@@ -417,6 +419,8 @@ public class KGlobalAnimParser
 	public static KAnimHashedString MISSING_SYMBOL = new KAnimHashedString("MISSING_SYMBOL");
 
 	public static string ANIM_COMMAND_FILE = "batchgroup.yaml";
+
+	private static KAnimHashedString ANIM_HASH_HEAD_ANIM = "head_anim";
 
 	public const float ANIM_SCALE = 0.005f;
 

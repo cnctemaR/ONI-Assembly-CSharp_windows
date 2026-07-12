@@ -11,13 +11,13 @@ namespace Database
 			base.Initialize();
 			foreach (ClothingItems.Info info in ClothingItems.Infos_All)
 			{
-				this.Add(info.id, info.name, info.desc, info.category, info.rarity, info.animFile);
+				this.Add(info.id, info.name, info.desc, info.outfitType, info.category, info.rarity, info.animFile);
 			}
 		}
 
-		public void Add(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile)
+		public void Add(string id, string name, string desc, ClothingOutfitUtility.OutfitType outfitType, PermitCategory category, PermitRarity rarity, string animFile)
 		{
-			ClothingItemResource clothingItemResource = new ClothingItemResource(id, name, desc, category, rarity, animFile);
+			ClothingItemResource clothingItemResource = new ClothingItemResource(id, name, desc, outfitType, category, rarity, animFile);
 			this.resources.Add(clothingItemResource);
 		}
 
@@ -100,7 +100,21 @@ namespace Database
 			new ClothingItems.Info("GlovesAthleticGreenKelly", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_KELLYGREEN.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_KELLYGREEN.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_athletic_green_kelly_kanim"),
 			new ClothingItems.Info("GlovesAthleticBlueCobalt", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_COBALT.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_COBALT.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_athletic_blue_cobalt_kanim"),
 			new ClothingItems.Info("GlovesAthleticPinkFlamingo", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_FLAMINGO.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_FLAMINGO.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_athletic_pink_flamingo_kanim"),
-			new ClothingItems.Info("GlovesAthleticGreyCharcoal", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_CHARCOAL.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_CHARCOAL.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_athletic_grey_charcoal_kanim")
+			new ClothingItems.Info("GlovesAthleticGreyCharcoal", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_CHARCOAL.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.GLOVES_ATHLETIC_CHARCOAL.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_athletic_grey_charcoal_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketBlueberry", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_BLUEBERRY.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_BLUEBERRY.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_blueberry_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketGrape", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_GRAPE.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_GRAPE.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_grape_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketLemon", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_LEMON.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_LEMON.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_lemon_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketLime", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_LIME.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_LIME.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_lime_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketSatsuma", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_SATSUMA.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_SATSUMA.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_satsuma_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketStrawberry", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_STRAWBERRY.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_STRAWBERRY.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_strawberry_kanim"),
+			new ClothingItems.Info("TopJellypuffJacketWatermelon", EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_WATERMELON.NAME, EQUIPMENT.PREFABS.CLOTHING_TOPS.FACADES.JELLYPUFFJACKET_WATERMELON.DESC, PermitCategory.DupeTops, PermitRarity.Nifty, "top_jellypuffjacket_watermelon_kanim"),
+			new ClothingItems.Info("GlovesCufflessBlueberry", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_BLUEBERRY.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_BLUEBERRY.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_blueberry_kanim"),
+			new ClothingItems.Info("GlovesCufflessGrape", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_GRAPE.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_GRAPE.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_grape_kanim"),
+			new ClothingItems.Info("GlovesCufflessLemon", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_LEMON.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_LEMON.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_lemon_kanim"),
+			new ClothingItems.Info("GlovesCufflessLime", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_LIME.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_LIME.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_lime_kanim"),
+			new ClothingItems.Info("GlovesCufflessSatsuma", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_SATSUMA.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_SATSUMA.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_satsuma_kanim"),
+			new ClothingItems.Info("GlovesCufflessStrawberry", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_STRAWBERRY.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_STRAWBERRY.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_strawberry_kanim"),
+			new ClothingItems.Info("GlovesCufflessWatermelon", EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_WATERMELON.NAME, EQUIPMENT.PREFABS.CLOTHING_GLOVES.FACADES.CUFFLESS_WATERMELON.DESC, PermitCategory.DupeGloves, PermitRarity.Common, "gloves_cuffless_watermelon_kanim")
 		};
 
 		public static ClothingItems.Info[] Infos_All = ClothingItems.Infos_Skins;
@@ -109,9 +123,15 @@ namespace Database
 		{
 			public Info(string id, string name, string desc, PermitCategory category, PermitRarity rarity, string animFile)
 			{
+				Option<ClothingOutfitUtility.OutfitType> outfitTypeFor = PermitCategories.GetOutfitTypeFor(category);
+				if (outfitTypeFor.IsNone())
+				{
+					throw new Exception(string.Format("Expected permit category {0} on ClothingItemResource \"{1}\" to have an {2} but none found.", category, id, "OutfitType"));
+				}
 				this.id = id;
 				this.name = name;
 				this.desc = desc;
+				this.outfitType = outfitTypeFor.Unwrap();
 				this.category = category;
 				this.rarity = rarity;
 				this.animFile = animFile;
@@ -122,6 +142,8 @@ namespace Database
 			public string name;
 
 			public string desc;
+
+			public ClothingOutfitUtility.OutfitType outfitType;
 
 			public PermitCategory category;
 

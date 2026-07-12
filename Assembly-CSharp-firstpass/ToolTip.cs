@@ -166,7 +166,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		ToolTipScreen.Instance.ClearToolTip(this);
 	}
 
-	private void OnDisable()
+	protected override void OnDisable()
 	{
 		if (ToolTipScreen.Instance)
 		{

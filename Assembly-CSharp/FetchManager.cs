@@ -223,10 +223,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		return pickup.pickupable;
 	}
 
-	public static TagBits disallowedTagBits = new TagBits(GameTags.Preserved);
-
-	public static TagBits disallowedTagMask = TagBits.MakeComplement(ref FetchManager.disallowedTagBits);
-
 	private static readonly FetchManager.PickupComparerIncludingPriority ComparerIncludingPriority = new FetchManager.PickupComparerIncludingPriority();
 
 	private static readonly FetchManager.PickupComparerNoPriority ComparerNoPriority = new FetchManager.PickupComparerNoPriority();
@@ -348,15 +344,13 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 				num3 = FetchManager.QuantizeRotValue(smi.RotValue);
 			}
 			KPrefabID kprefabID = pickupable.KPrefabID;
-			TagBits tagBits = new TagBits(ref FetchManager.disallowedTagMask);
-			kprefabID.AndTagBits(ref tagBits);
 			HandleVector<int>.Handle handle = this.fetchables.Allocate(new FetchManager.Fetchable
 			{
 				pickupable = pickupable,
 				foodQuality = num,
 				freshness = num3,
 				masterPriority = num2,
-				tagBitsHash = tagBits.GetHashCode()
+				tagBitsHash = kprefabID.GetTagsHash()
 			});
 			if (!smi.IsNullOrStopped())
 			{
@@ -379,8 +373,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			if (this.finalPickups.Count > 0)
 			{
 				FetchManager.Pickup pickup = this.finalPickups[0];
-				TagBits tagBits = new TagBits(ref FetchManager.disallowedTagMask);
-				pickup.pickupable.KPrefabID.AndTagBits(ref tagBits);
 				int num = pickup.tagBitsHash;
 				int num2 = this.finalPickups.Count;
 				int num3 = 0;
@@ -388,16 +380,10 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 				{
 					bool flag = false;
 					FetchManager.Pickup pickup2 = this.finalPickups[i];
-					TagBits tagBits2 = default(TagBits);
 					int tagBitsHash = pickup2.tagBitsHash;
-					if (pickup.masterPriority == pickup2.masterPriority)
+					if (pickup.masterPriority == pickup2.masterPriority && tagBitsHash == num)
 					{
-						tagBits2 = new TagBits(ref FetchManager.disallowedTagMask);
-						pickup2.pickupable.KPrefabID.AndTagBits(ref tagBits2);
-						if (pickup2.tagBitsHash == num && tagBits2.AreEqual(ref tagBits))
-						{
-							flag = true;
-						}
+						flag = true;
 					}
 					if (flag)
 					{
@@ -407,7 +393,6 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 					{
 						num3++;
 						pickup = pickup2;
-						tagBits = tagBits2;
 						num = tagBitsHash;
 						if (i > num3)
 						{
@@ -496,9 +481,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		public void UpdateTags(HandleVector<int>.Handle fetchable_handle)
 		{
 			FetchManager.Fetchable data = this.fetchables.GetData(fetchable_handle);
-			TagBits tagBits = new TagBits(ref FetchManager.disallowedTagMask);
-			data.pickupable.KPrefabID.AndTagBits(ref tagBits);
-			data.tagBitsHash = tagBits.GetHashCode();
+			data.tagBitsHash = data.pickupable.KPrefabID.GetTagsHash();
 			this.fetchables.SetData(fetchable_handle, data);
 		}
 

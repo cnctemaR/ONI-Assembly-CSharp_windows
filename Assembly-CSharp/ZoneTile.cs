@@ -33,9 +33,13 @@ public class ZoneTile : KMonoBehaviour
 	{
 		foreach (int num in this.building.PlacementCells)
 		{
-			SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
-			byte b = ((subWorldZoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)subWorldZoneType));
-			SimMessages.ModifyCellWorldZone(num, b);
+			GameObject gameObject;
+			if (!Grid.ObjectLayers[(int)this.building.Def.ObjectLayer].TryGetValue(num, out gameObject) || !(gameObject != base.gameObject) || !(gameObject != null) || !(gameObject.GetComponent<ZoneTile>() != null))
+			{
+				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
+				byte b = ((subWorldZoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)subWorldZoneType));
+				SimMessages.ModifyCellWorldZone(num, b);
+			}
 		}
 	}
 

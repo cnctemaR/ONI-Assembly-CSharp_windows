@@ -192,7 +192,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 			}
 		}
 		pooledHashSet.Recycle();
-		return (int)ClusterManager.INVALID_WORLD_IDX;
+		return 255;
 	}
 
 	private WorldContainer CreateAsteroidWorldContainer(WorldGen world)
@@ -637,7 +637,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private int activeWorldIdx;
 
-	public static byte INVALID_WORLD_IDX = byte.MaxValue;
+	public const byte INVALID_WORLD_IDX = 255;
 
 	public static Color[] worldColors = new Color[]
 	{

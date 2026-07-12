@@ -27,4 +27,6 @@ public class EffectPrefabs : MonoBehaviour
 	public GameObject GameplayEventDisplay;
 
 	public GameObject OpenTemporalTearBeam;
+
+	public GameObject MissileSmokeTrailFX;
 }

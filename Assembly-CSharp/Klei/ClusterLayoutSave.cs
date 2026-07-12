@@ -28,8 +28,6 @@ namespace Klei
 
 		public class World
 		{
-			public Dictionary<string, object> stats = new Dictionary<string, object>();
-
 			public Data data = new Data();
 
 			public string name = string.Empty;

@@ -37,7 +37,7 @@ public class WorldDetectedMessage : Message
 
 	public override bool IsValid()
 	{
-		return this.worldID != (int)ClusterManager.INVALID_WORLD_IDX;
+		return this.worldID != 255;
 	}
 
 	[Serialize]

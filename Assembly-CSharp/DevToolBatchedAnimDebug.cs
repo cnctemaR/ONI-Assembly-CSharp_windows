@@ -81,8 +81,15 @@ public class DevToolBatchedAnimDebug : DevTool
 							symbolEntry.priority
 						}));
 						ImGui.Text(string.Format("       firstFrameIdx = {0}, numFrames = {1}", symbolEntry.sourceSymbol.firstFrameIdx, symbolEntry.sourceSymbol.numFrames));
-						ImGui.Text(string.Format("   target: {0}", symbol.hash));
-						ImGui.Text(string.Format("       firstFrameIdx = {0}, numFrames = {1}", symbol.firstFrameIdx, symbol.numFrames));
+						if (symbol != null)
+						{
+							ImGui.Text(string.Format("   target: {0}", symbol.hash));
+							ImGui.Text(string.Format("       firstFrameIdx = {0}, numFrames = {1}", symbol.firstFrameIdx, symbol.numFrames));
+						}
+						else
+						{
+							ImGui.Text(string.Format("   target: does not contain the symbol '{0}' to override", symbolEntry.sourceSymbol.hash));
+						}
 					}
 				}
 				ImGui.EndChild();
@@ -117,7 +124,8 @@ public class DevToolBatchedAnimDebug : DevTool
 				for (int k = 0; k < frame.numElements; k++)
 				{
 					KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + k);
-					ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + k, frameElement.symbolIdx, frameElement.symbol));
+					int symbolIndex = batchGroupData.GetSymbolIndex(frameElement.symbol);
+					ImGui.Text(string.Format("FrameElement [{0}]: symbolIdx= {1} symbol= {2}", frame.firstElementIdx + k, symbolIndex, frameElement.symbol));
 				}
 				ImGui.EndTabItem();
 			}

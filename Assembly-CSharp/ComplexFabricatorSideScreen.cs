@@ -19,7 +19,8 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<ComplexFabricator>() != null;
+		ComplexFabricator component = target.GetComponent<ComplexFabricator>();
+		return component != null && component.enabled;
 	}
 
 	public override void SetTarget(GameObject target)
@@ -262,8 +263,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		}
 		if (this.recipeToggles.Count > 0)
 		{
-			this.buttonScrollContainer.GetComponent<LayoutElement>().minHeight = Mathf.Min(451f, 2f + (float)num * this.recipeButtonQueueHybrid.GetComponent<LayoutElement>().minHeight);
-			this.subtitleLabel.SetText(UI.UISIDESCREENS.FABRICATORSIDESCREEN.SUBTITLE);
+			VerticalLayoutGroup component4 = this.buttonContentContainer.GetComponent<VerticalLayoutGroup>();
+			this.buttonScrollContainer.GetComponent<LayoutElement>().minHeight = Mathf.Min(451f, (float)(component4.padding.top + component4.padding.bottom) + (float)num * this.recipeButtonQueueHybrid.GetComponent<LayoutElement>().minHeight + (float)(num - 1) * component4.spacing);
+			this.subtitleLabel.SetText(this.targetFab.SideScreenSubtitleLabel);
 			this.noRecipesDiscoveredLabel.gameObject.SetActive(false);
 		}
 		else
@@ -316,7 +318,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		this.RefreshIngredientAvailabilityVis();
 		if (toggle.isOn)
 		{
-			this.recipeScreen = (SelectedRecipeQueueScreen)DetailsScreen.Instance.SetSecondarySideScreen(this.recipeScreenPrefab, UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_DETAILS);
+			this.recipeScreen = (SelectedRecipeQueueScreen)DetailsScreen.Instance.SetSecondarySideScreen(this.recipeScreenPrefab, this.targetFab.SideScreenRecipeScreenTitle);
 			this.recipeScreen.SetRecipe(this, this.targetFab, this.selectedRecipe);
 			return;
 		}

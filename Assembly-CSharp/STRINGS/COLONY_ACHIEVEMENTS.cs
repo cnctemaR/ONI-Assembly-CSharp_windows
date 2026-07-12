@@ -297,7 +297,7 @@ namespace STRINGS
 
 				public static LocString ARM_VS_DUPE_FETCHES = "Deliveries this cycle: Auto-Sweepers: {1} Duplicants: {2}";
 
-				public static LocString EXOSUIT_CYCLES = "All Dupes completed a Exosuit errand for cycles: {0} / {1}";
+				public static LocString EXOSUIT_CYCLES = "All Dupes completed an Exosuit errand for cycles: {0} / {1}";
 
 				public static LocString EXOSUIT_THIS_CYCLE = "Dupes who completed Exosuit errands this cycle: {0} / {1}";
 

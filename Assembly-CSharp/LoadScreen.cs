@@ -830,7 +830,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					546664U,
+					550759U,
 					31
 				});
 			}
@@ -1018,12 +1018,24 @@ public class LoadScreen : KModalScreen
 		KImage reference = freeElement.GetReference<KImage>("DlcIcon");
 		if (firstSave.FileInfo.dlcId == "EXPANSION1_ID")
 		{
-			reference.enabled = true;
-			reference.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_FROM_SPACED_OUT_TOOLTIP);
+			reference.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_IS_SPACED_OUT_TOOLTIP);
+			reference.GetComponent<KImage>().sprite = Assets.GetSprite("SpacedOut_mini_logo");
 		}
 		else
 		{
-			reference.enabled = false;
+			reference.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_IS_VANILLA_TOOLTIP);
+			reference.GetComponent<KImage>().sprite = Assets.GetSprite("ONI_mini_logo");
+		}
+		if (!flag)
+		{
+			if (firstSave.FileInfo.dlcId == "EXPANSION1_ID")
+			{
+				freeElement.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_FROM_SPACED_OUT_TOOLTIP);
+			}
+			else
+			{
+				freeElement.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.LOADSCREEN.SAVE_FROM_VANILLA_TOOLTIP);
+			}
 		}
 		Component reference2 = freeElement.GetReference<RectTransform>("LocationIcons");
 		bool flag2 = this.CloudSavesVisible();
@@ -1146,7 +1158,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 31) || header.buildVersion > 546664U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 31) || header.buildVersion > 550759U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1225,10 +1237,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 546664U)
+		if (header.buildVersion > 550759U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 546664U.ToString();
+			text2 = 550759U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{

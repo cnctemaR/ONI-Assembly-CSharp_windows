@@ -297,6 +297,7 @@ namespace TUNING
 			{ "CosmicResearchCenter", "research" },
 			{ "DLC1CosmicResearchCenter", "research" },
 			{ "ArtifactAnalysisStation", "archaeology" },
+			{ "MissileFabricator", "meteordefense" },
 			{ "AstronautTrainingCenter", "exploration" },
 			{ "PowerControlStation", "industrialstation" },
 			{ "ResetSkillsStation", "industrialstation" },
@@ -315,6 +316,7 @@ namespace TUNING
 			{ "SuitLocker", "equipment" },
 			{ "JetSuitMarker", "equipment" },
 			{ "JetSuitLocker", "equipment" },
+			{ "MissileLauncher", "missiles" },
 			{ "LeadSuitMarker", "equipment" },
 			{ "LeadSuitLocker", "equipment" },
 			{ "SpaceHeater", "temperature" },
@@ -462,14 +464,14 @@ namespace TUNING
 			{ "KeroseneEngine", "engines" },
 			{ "HydrogenEngine", "engines" },
 			{ "SolidBooster", "engines" },
-			{ "LiquidFuelTank", "fuel and oxidizer" },
-			{ "OxidizerTank", "fuel and oxidizer" },
-			{ "OxidizerTankLiquid", "fuel and oxidizer" },
+			{ "LiquidFuelTank", "tanks" },
+			{ "OxidizerTank", "tanks" },
+			{ "OxidizerTankLiquid", "tanks" },
 			{ "CargoBay", "cargo" },
 			{ "GasCargoBay", "cargo" },
 			{ "LiquidCargoBay", "cargo" },
-			{ "SpecialCargoBay", "utility" },
-			{ "CommandModule", "command" },
+			{ "SpecialCargoBay", "cargo" },
+			{ "CommandModule", "rocketnav" },
 			{
 				RocketControlStationConfig.ID,
 				"rocketnav"
@@ -480,8 +482,8 @@ namespace TUNING
 			},
 			{ "MissionControl", "rocketnav" },
 			{ "MissionControlCluster", "rocketnav" },
-			{ "TouristModule", "utility" },
-			{ "ResearchModule", "utility" },
+			{ "TouristModule", "module" },
+			{ "ResearchModule", "module" },
 			{ "RocketInteriorPowerPlug", "fittings" },
 			{ "RocketInteriorLiquidInput", "fittings" },
 			{ "RocketInteriorLiquidOutput", "fittings" },
@@ -654,8 +656,8 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
 				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "DLC1CosmicResearchCenter", "Telescope", "GeoTuner", "PowerControlStation", "FarmStation",
-				"GeneticAnalysisStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation", "SuitFabricator",
-				"OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
+				"GeneticAnalysisStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "MissileFabricator", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation",
+				"SuitFabricator", "OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
@@ -754,7 +756,8 @@ namespace TUNING
 				LogicClusterLocationSensorConfig.ID,
 				"RailGun",
 				"RailGunPayloadOpener",
-				"LandingBeacon"
+				"LandingBeacon",
+				"MissileLauncher"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
 		};

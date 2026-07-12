@@ -30,7 +30,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 	protected override void OnWorldParentChanged(object data)
 	{
 		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
-		if (e == null || e.lastParentId == (int)ClusterManager.INVALID_WORLD_IDX)
+		if (e == null || e.lastParentId == 255)
 		{
 			return;
 		}

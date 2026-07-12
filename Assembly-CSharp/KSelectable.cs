@@ -90,22 +90,22 @@ public class KSelectable : KMonoBehaviour
 
 	private void ClearHighlight()
 	{
-		base.Trigger(-1201923725, false);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			component.HighlightColour = new Color(0f, 0f, 0f, 0f);
 		}
+		base.Trigger(-1201923725, false);
 	}
 
 	private void ApplyHighlight(float highlight)
 	{
-		base.Trigger(-1201923725, true);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			component.HighlightColour = new Color(highlight, highlight, highlight, highlight);
 		}
+		base.Trigger(-1201923725, true);
 	}
 
 	public void Select()

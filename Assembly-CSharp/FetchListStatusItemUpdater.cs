@@ -156,7 +156,7 @@ public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 
 	private List<FetchList2> fetchLists = new List<FetchList2>();
 
-	private int[] currentIterationIndex = new int[(int)ClusterManager.INVALID_WORLD_IDX];
+	private int[] currentIterationIndex = new int[255];
 
 	private int maxIteratingCount = 100;
 }

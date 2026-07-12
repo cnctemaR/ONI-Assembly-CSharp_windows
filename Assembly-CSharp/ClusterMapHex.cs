@@ -150,7 +150,10 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 
 	private void OnUnhover()
 	{
-		ClusterMapScreen.Instance.OnUnhoverHex(this);
+		if (ClusterMapScreen.Instance != null)
+		{
+			ClusterMapScreen.Instance.OnUnhoverHex(this);
+		}
 	}
 
 	private void UpdateHoverColors(bool validDestination)

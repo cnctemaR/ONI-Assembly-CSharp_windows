@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TUNING
 {
@@ -50,6 +51,12 @@ namespace TUNING
 			GameTags.Unbreathable
 		};
 
-		public static List<Tag> PAYLOADS = new List<Tag> { GameTags.RailGunPayloadEmptyable };
+		public static List<Tag> PAYLOADS = new List<Tag> { "RailGunPayload" };
+
+		public static Tag[] SOLID_TRANSFER_ARM_CONVEYABLE = new List<Tag>
+		{
+			GameTags.Seed,
+			GameTags.CropSeed
+		}.Concat<Tag>(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS)).ToArray<Tag>();
 	}
 }

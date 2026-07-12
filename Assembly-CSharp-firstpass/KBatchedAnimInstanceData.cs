@@ -78,9 +78,11 @@ public class KBatchedAnimInstanceData
 	{
 		KBatchedAnimInstanceData.AnimInstanceData animInstanceData = this.converter.animInstanceData[0];
 		animInstanceData.curAnimFrameIndex = (float)this.target.GetCurrentFrameIndex();
-		animInstanceData.thisIndex = (float)this_index;
 		animInstanceData.currentAnimNumFrames = (float)(this.target.IsVisible() ? this.target.GetCurrentNumFrames() : 0);
 		animInstanceData.currentAnimFirstFrameIdx = (float)this.target.GetFirstFrameIndex();
+		Vector4 positionData = this.target.GetPositionData();
+		animInstanceData.noOffset_x = positionData.x;
+		animInstanceData.noOffset_y = positionData.y;
 		if (!this.isTransformOverriden)
 		{
 			animInstanceData.transformMatrix = this.target.GetTransformMatrix();
@@ -117,7 +119,7 @@ public class KBatchedAnimInstanceData
 		public float curAnimFrameIndex;
 
 		[FieldOffset(4)]
-		public float thisIndex;
+		public float noOffset_x;
 
 		[FieldOffset(8)]
 		public float currentAnimNumFrames;
@@ -132,7 +134,7 @@ public class KBatchedAnimInstanceData
 		public float blend;
 
 		[FieldOffset(44)]
-		public float unused;
+		public float noOffset_y;
 
 		[FieldOffset(48)]
 		public Color highlightColour;

@@ -1012,6 +1012,13 @@ namespace STRINGS
 			});
 		}
 
+		public class MISSILE_BASIC
+		{
+			public static LocString NAME = "Blastshot";
+
+			public static LocString DESC = "An explosive projectile designed to defend against meteor showers.\n\nMust be launched by a " + UI.FormatAsLink("Meteor Blaster", "MISSILELAUNCHER") + ".";
+		}
+
 		public class DEBRISPAYLOAD
 		{
 			public static LocString NAME = "Rocket Debris";

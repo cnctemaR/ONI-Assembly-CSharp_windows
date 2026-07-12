@@ -32,15 +32,6 @@ public static class ClothingOutfitTargetExtensions
 		return ClothingOutfitTargetExtensions.NO_ITEM_VALUES;
 	}
 
-	public static Option<string> GetId(this Option<ClothingOutfitTarget> self)
-	{
-		if (self.HasValue)
-		{
-			return self.Value.Id;
-		}
-		return Option.None;
-	}
-
 	public static readonly string[] NO_ITEMS = new string[0];
 
 	public static readonly ClothingItemResource[] NO_ITEM_VALUES = new ClothingItemResource[0];

@@ -82,6 +82,14 @@ public class ConditionFlightPathIsClear : ProcessCondition
 		}
 	}
 
+	public static int PadTopEdgeDistanceToOutOfScreenEdge(GameObject launchpad)
+	{
+		WorldContainer myWorld = launchpad.GetMyWorld();
+		Vector2 maximumBounds = myWorld.maximumBounds;
+		int y = Grid.CellToXY(launchpad.GetComponent<LaunchPad>().RocketBottomPosition).y;
+		return (int)CameraController.GetHighestVisibleCell_Height((byte)myWorld.ParentWorldId) - y + 10;
+	}
+
 	public static int PadTopEdgeDistanceToCeilingEdge(GameObject launchpad)
 	{
 		Vector2 maximumBounds = launchpad.GetMyWorld().maximumBounds;
@@ -163,4 +171,6 @@ public class ConditionFlightPathIsClear : ProcessCondition
 	private int obstructedTile = -1;
 
 	public const int MAXIMUM_ROCKET_HEIGHT = 35;
+
+	public const float FIRE_FX_HEIGHT = 10f;
 }

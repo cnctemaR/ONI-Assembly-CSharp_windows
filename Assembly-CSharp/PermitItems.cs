@@ -16,6 +16,16 @@ public class PermitItems
 		yield break;
 	}
 
+	public static bool HasUnopenedItem()
+	{
+		return KleiItems.HasUnopenedItem(PermitItems.ItemToPermit);
+	}
+
+	public static bool HasUnclaimedRewards()
+	{
+		return KleiItems.HasUnclaimedRewards(PermitItems.ClaimableRewardSet);
+	}
+
 	public static bool IsPermitUnlocked(PermitResource permit)
 	{
 		return PermitItems.GetOwnedCount(permit) > 0;
@@ -172,12 +182,70 @@ public class PermitItems
 		new PermitItems.ItemInfo("balloon_babypokeshell_egg_kanim", 144U, "BalloonBabyPokeshellEgg"),
 		new PermitItems.ItemInfo("balloon_babypuft_egg_kanim", 145U, "BalloonBabyPuftEgg"),
 		new PermitItems.ItemInfo("balloon_babyshovole_egg_kanim", 146U, "BalloonBabyShovoleEgg"),
-		new PermitItems.ItemInfo("balloon_babypip_egg_kanim", 147U, "BalloonBabyPipEgg")
+		new PermitItems.ItemInfo("balloon_babypip_egg_kanim", 147U, "BalloonBabyPipEgg"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_blueberry", 150U, "TopJellypuffJacketBlueberry"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_grape", 151U, "TopJellypuffJacketGrape"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_lemon", 152U, "TopJellypuffJacketLemon"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_lime", 153U, "TopJellypuffJacketLime"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_satsuma", 154U, "TopJellypuffJacketSatsuma"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_strawberry", 155U, "TopJellypuffJacketStrawberry"),
+		new PermitItems.ItemInfo("top_jellypuffjacket_watermelon", 156U, "TopJellypuffJacketWatermelon"),
+		new PermitItems.ItemInfo("gloves_cuffless_blueberry", 157U, "GlovesCufflessBlueberry"),
+		new PermitItems.ItemInfo("gloves_cuffless_grape", 158U, "GlovesCufflessGrape"),
+		new PermitItems.ItemInfo("gloves_cuffless_lemon", 159U, "GlovesCufflessLemon"),
+		new PermitItems.ItemInfo("gloves_cuffless_lime", 160U, "GlovesCufflessLime"),
+		new PermitItems.ItemInfo("gloves_cuffless_satsuma", 161U, "GlovesCufflessSatsuma"),
+		new PermitItems.ItemInfo("gloves_cuffless_strawberry", 162U, "GlovesCufflessStrawberry"),
+		new PermitItems.ItemInfo("gloves_cuffless_watermelon", 163U, "GlovesCufflessWatermelon"),
+		new PermitItems.ItemInfo("flowervase_wall_retro_blue", 164U, "FlowerVaseWall_retro_green"),
+		new PermitItems.ItemInfo("flowervase_wall_retro_green", 165U, "FlowerVaseWall_retro_yellow"),
+		new PermitItems.ItemInfo("flowervase_wall_retro_red", 166U, "FlowerVaseWall_retro_red"),
+		new PermitItems.ItemInfo("flowervase_wall_retro_white", 167U, "FlowerVaseWall_retro_blue"),
+		new PermitItems.ItemInfo("flowervase_wall_retro_yellow", 168U, "FlowerVaseWall_retro_white"),
+		new PermitItems.ItemInfo("walls_basic_blue_cobalt", 169U, "ExteriorWall_basic_blue_cobalt"),
+		new PermitItems.ItemInfo("walls_basic_green_kelly", 170U, "ExteriorWall_basic_green_kelly"),
+		new PermitItems.ItemInfo("walls_basic_grey_charcoal", 171U, "ExteriorWall_basic_grey_charcoal"),
+		new PermitItems.ItemInfo("walls_basic_orange_satsuma", 172U, "ExteriorWall_basic_orange_satsuma"),
+		new PermitItems.ItemInfo("walls_basic_pink_flamingo", 173U, "ExteriorWall_basic_pink_flamingo"),
+		new PermitItems.ItemInfo("walls_basic_red_deep", 174U, "ExteriorWall_basic_red_deep"),
+		new PermitItems.ItemInfo("walls_basic_yellow_lemon", 175U, "ExteriorWall_basic_yellow_lemon"),
+		new PermitItems.ItemInfo("walls_blueberries", 176U, "ExteriorWall_blueberries"),
+		new PermitItems.ItemInfo("walls_grapes", 177U, "ExteriorWall_grapes"),
+		new PermitItems.ItemInfo("walls_lemon", 178U, "ExteriorWall_lemon"),
+		new PermitItems.ItemInfo("walls_lime", 179U, "ExteriorWall_lime"),
+		new PermitItems.ItemInfo("walls_satsuma", 180U, "ExteriorWall_satsuma"),
+		new PermitItems.ItemInfo("walls_strawberry", 181U, "ExteriorWall_strawberry"),
+		new PermitItems.ItemInfo("walls_watermelon", 182U, "ExteriorWall_watermelon"),
+		new PermitItems.ItemInfo("balloon_candy_blueberry", 183U, "BalloonCandyBlueberry"),
+		new PermitItems.ItemInfo("balloon_candy_grape", 184U, "BalloonCandyGrape"),
+		new PermitItems.ItemInfo("balloon_candy_lemon", 185U, "BalloonCandyLemon"),
+		new PermitItems.ItemInfo("balloon_candy_lime", 186U, "BalloonCandyLime"),
+		new PermitItems.ItemInfo("balloon_candy_orange", 187U, "BalloonCandyOrange"),
+		new PermitItems.ItemInfo("balloon_candy_strawberry", 188U, "BalloonCandyStrawberry"),
+		new PermitItems.ItemInfo("balloon_candy_watermelon", 189U, "BalloonCandyWatermelon")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);
 
 	private static Dictionary<string, string> ItemToPermit = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string, string>((PermitItems.ItemInfo x) => x.ItemType, (PermitItems.ItemInfo x) => x.PermitId);
+
+	private static PermitItems.BoxInfo[] BoxInfos = new PermitItems.BoxInfo[]
+	{
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_a", "Shipment X", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 80U, "ONI_giftbox_u44_box_a"),
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_b", "Shipment Y", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 81U, "ONI_giftbox_u44_box_b"),
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_c", "Shipment Z", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 82U, "ONI_giftbox_u44_box_c"),
+		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_a", "Team Players Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 148U, "ONI_giftbox_u44_box_b"),
+		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_b", "Pizzazz Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 149U, "ONI_giftbox_u44_box_c"),
+		new PermitItems.BoxInfo("MYSTERYBOX_u46_box_a", "Superfruits Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 190U, "ONI_giftbox_u44_box_a")
+	};
+
+	private const string MYSTERYBOX_U44_DESC = "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.";
+
+	private const string MYSTERYBOX_U45_DESC = "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.";
+
+	private const string MYSTERYBOX_U46_DESC = "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.";
+
+	private static HashSet<string> ClaimableRewardSet = new HashSet<string>(PermitItems.BoxInfos.Select<PermitItems.BoxInfo, string>((PermitItems.BoxInfo x) => x.ItemType));
 
 	private struct ItemInfo
 	{
@@ -193,5 +261,27 @@ public class PermitItems
 		public uint TypeId;
 
 		public string PermitId;
+	}
+
+	private struct BoxInfo
+	{
+		public BoxInfo(string type, string name, string desc, uint id, string icon)
+		{
+			this.ItemType = type;
+			this.Name = name;
+			this.Description = desc;
+			this.TypeId = id;
+			this.IconName = icon;
+		}
+
+		public string ItemType;
+
+		public string Name;
+
+		public string Description;
+
+		public uint TypeId;
+
+		public string IconName;
 	}
 }

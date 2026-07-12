@@ -64,7 +64,7 @@ public class GameplaySeasonManager : GameStateMachine<GameplaySeasonManager, Gam
 			IL_0146:
 			foreach (GameplaySeason gameplaySeason2 in list)
 			{
-				if (DlcManager.IsContentActive(gameplaySeason2.dlcId) && gameplaySeason2.startActive && !this.SeasonExists(gameplaySeason2))
+				if (DlcManager.IsContentActive(gameplaySeason2.dlcId) && gameplaySeason2.startActive && !this.SeasonExists(gameplaySeason2) && gameplaySeason2.events.Count > 0)
 				{
 					this.activeSeasons.Add(gameplaySeason2.Instantiate(this.GetWorldId()));
 				}

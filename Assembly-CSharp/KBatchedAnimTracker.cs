@@ -33,6 +33,18 @@ public class KBatchedAnimTracker : MonoBehaviour
 			return;
 		}
 		this.myAnim = base.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController kbatchedAnimController = this.myAnim;
+		kbatchedAnimController.getPositionDataFunctionInUse = (Func<Vector4>)Delegate.Combine(kbatchedAnimController.getPositionDataFunctionInUse, new Func<Vector4>(this.MyAnimGetPosition));
+	}
+
+	private Vector4 MyAnimGetPosition()
+	{
+		if (this.controller.transform == this.myAnim.transform.parent)
+		{
+			Vector3 pivotSymbolPosition = this.myAnim.GetPivotSymbolPosition();
+			return new Vector4(pivotSymbolPosition.x - this.controller.Offset.x, pivotSymbolPosition.y - this.controller.Offset.y, pivotSymbolPosition.x, pivotSymbolPosition.y);
+		}
+		return base.transform.GetPosition();
 	}
 
 	private void OnDestroy()
@@ -43,6 +55,11 @@ public class KBatchedAnimTracker : MonoBehaviour
 			this.controller.onAnimComplete -= this.OnAnimStop;
 			this.controller.onLayerChanged -= this.OnLayerChanged;
 			this.controller = null;
+		}
+		if (this.myAnim != null)
+		{
+			KBatchedAnimController kbatchedAnimController = this.myAnim;
+			kbatchedAnimController.getPositionDataFunctionInUse = (Func<Vector4>)Delegate.Remove(kbatchedAnimController.getPositionDataFunctionInUse, new Func<Vector4>(this.MyAnimGetPosition));
 		}
 		this.myAnim = null;
 	}

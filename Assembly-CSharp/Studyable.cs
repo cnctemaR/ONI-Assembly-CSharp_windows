@@ -79,6 +79,11 @@ public class Studyable : Workable, ISidescreenButtonControl
 		}
 	}
 
+	public int HorizontalGroupID()
+	{
+		return -1;
+	}
+
 	public void SetButtonTextOverride(ButtonMenuTextOverride text)
 	{
 		throw new NotImplementedException();

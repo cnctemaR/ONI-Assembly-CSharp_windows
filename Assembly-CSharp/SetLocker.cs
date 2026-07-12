@@ -106,6 +106,11 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		return true;
 	}
 
+	public int HorizontalGroupID()
+	{
+		return -1;
+	}
+
 	public void OnSidescreenButtonPressed()
 	{
 		if (this.chore == null)

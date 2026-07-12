@@ -112,7 +112,7 @@ public class RocketModuleSideScreen : SideScreenContent
 			this.removeModuleButton.isInteractable = false;
 			this.moveModuleDownButton.isInteractable = false;
 			this.moveModuleUpButton.isInteractable = false;
-			this.viewInteriorButton.isInteractable = component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX;
+			this.viewInteriorButton.isInteractable = component.GetMyWorldId() != 255;
 			this.viewInteriorButton.GetComponentInChildren<LocText>().SetText(UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.LABEL);
 			this.viewInteriorButton.GetComponent<ToolTip>().SetSimpleTooltip(this.viewInteriorButton.isInteractable ? UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.DESC.text : UI.UISIDESCREENS.ROCKETMODULESIDESCREEN.BUTTONVIEWEXTERIOR.INVALID.text);
 			return;
@@ -190,7 +190,7 @@ public class RocketModuleSideScreen : SideScreenContent
 		WorldContainer myWorld = component.GetMyWorld();
 		if (ClusterManager.Instance.activeWorld == targetWorld)
 		{
-			if (myWorld.id != (int)ClusterManager.INVALID_WORLD_IDX)
+			if (myWorld.id != 255)
 			{
 				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
 				ClusterManager.Instance.SetActiveWorld(myWorld.id);

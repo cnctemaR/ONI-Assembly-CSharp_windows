@@ -1340,6 +1340,22 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is delivering materials where they'll be needed to conduct " + UI.PRE_KEYWORD + "Research" + UI.PST_KEYWORD;
 			}
 
+			public class EXCAVATEFOSSIL
+			{
+				public static LocString NAME = "Excavate Fossil";
+
+				public static LocString STATUS = "Excavating a fossil";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is excavating a ",
+					UI.PRE_KEYWORD,
+					"Fossil",
+					UI.PST_KEYWORD,
+					" site"
+				});
+			}
+
 			public class FARMFETCH
 			{
 				public static LocString NAME = "Farming Supply";
@@ -2014,6 +2030,16 @@ namespace STRINGS
 				});
 			}
 
+			public class FOSSILHUNT
+			{
+				public class WORKEREXCAVATING
+				{
+					public static LocString NAME = "Excavating Fossil";
+
+					public static LocString TOOLTIP = "This Duplicant is carefully uncovering a " + UI.FormatAsLink("Fossil", "FOSSIL");
+				}
+			}
+
 			public class SLEEPING
 			{
 				public static LocString NAME = "Sleeping";
@@ -2507,6 +2533,20 @@ namespace STRINGS
 					"Attributes",
 					UI.PST_KEYWORD,
 					" <b>+3</b> at night"
+				});
+			}
+
+			public class METEORPHILE
+			{
+				public static LocString NAME = "Rock Fan";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is <i>really</i> into meteor showers\n• All ",
+					UI.PRE_KEYWORD,
+					"Attributes",
+					UI.PST_KEYWORD,
+					" <b>+3</b> during meteor showers"
 				});
 			}
 
@@ -6705,6 +6745,19 @@ namespace STRINGS
 				});
 			}
 
+			public class METEORPHILE
+			{
+				public static LocString NAME = "Rock Fan";
+
+				public static LocString DESC = "Meteor showers get this Duplicant really, really hyped";
+
+				public static LocString EXTENDED_DESC = "• During meteor showers: <b>{0}</b> bonus to all " + UI.PRE_KEYWORD + "Attributes" + UI.PST_KEYWORD;
+
+				public static LocString SHORT_DESC = "Gains Attribute bonuses during meteor showers.";
+
+				public static LocString SHORT_DESC_TOOLTIP = "During meteor showers: <b>+3</b> bonus to all " + UI.PRE_KEYWORD + "Attributes" + UI.PST_KEYWORD;
+			}
+
 			public class REGENERATION
 			{
 				public static LocString NAME = "Regenerative";
@@ -7279,6 +7332,17 @@ namespace STRINGS
 				public static LocString NAME = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_NAME + DUPLICANTS.ROLES.SENIOR_MEDIC.NAME;
 
 				public static LocString DESC = DUPLICANTS.ROLES.SENIOR_MEDIC.DESCRIPTION;
+
+				public static LocString SHORT_DESC = "Starts with a Tier 3 <b>Skill</b>";
+
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP;
+			}
+
+			public class GRANTSKILL_PYROTECHNICS
+			{
+				public static LocString NAME = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_NAME + DUPLICANTS.ROLES.PYROTECHNIC.NAME;
+
+				public static LocString DESC = DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION;
 
 				public static LocString SHORT_DESC = "Starts with a Tier 3 <b>Skill</b>";
 
@@ -8869,6 +8933,23 @@ namespace STRINGS
 					"Pipes",
 					UI.PST_KEYWORD,
 					" without making a mess"
+				});
+			}
+
+			public class PYROTECHNIC
+			{
+				public static LocString NAME = UI.FormatAsLink("Pyrotechnics", "PYROTECHNICS");
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Allows a Duplicant to make ",
+					UI.PRE_KEYWORD,
+					"Blastshot",
+					UI.PST_KEYWORD,
+					" for the ",
+					UI.PRE_KEYWORD,
+					"Meteor Blaster",
+					UI.PST_KEYWORD
 				});
 			}
 

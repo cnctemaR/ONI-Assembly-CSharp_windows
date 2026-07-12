@@ -17,7 +17,7 @@ public readonly struct ClothingOutfitNameProposal
 		{
 			return ClothingOutfitNameProposal.<ForNewOutfit>g__Make|3_0(ClothingOutfitNameProposal.Result.Error_NoInputName, ref CS$<>8__locals1);
 		}
-		if (ClothingOutfitTarget.DoesExist(CS$<>8__locals1.candidateName))
+		if (ClothingOutfitTarget.DoesTemplateExist(CS$<>8__locals1.candidateName))
 		{
 			return ClothingOutfitNameProposal.<ForNewOutfit>g__Make|3_0(ClothingOutfitNameProposal.Result.Error_NameAlreadyExists, ref CS$<>8__locals1);
 		}
@@ -32,7 +32,7 @@ public readonly struct ClothingOutfitNameProposal
 		{
 			return ClothingOutfitNameProposal.<FromExistingOutfit>g__Make|4_0(ClothingOutfitNameProposal.Result.Error_NoInputName, ref CS$<>8__locals1);
 		}
-		if (!ClothingOutfitTarget.DoesExist(CS$<>8__locals1.candidateName))
+		if (!ClothingOutfitTarget.DoesTemplateExist(CS$<>8__locals1.candidateName))
 		{
 			return ClothingOutfitNameProposal.<FromExistingOutfit>g__Make|4_0(ClothingOutfitNameProposal.Result.NewOutfit, ref CS$<>8__locals1);
 		}

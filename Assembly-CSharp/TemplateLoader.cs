@@ -82,10 +82,7 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		if (buildingDef.WidthInCells >= 3)
-		{
-			num--;
-		}
+		num -= (buildingDef.WidthInCells - 1) / 2;
 		GameObject gameObject = Scenario.PlaceBuilding(root_cell, num, location_y, prefab.id, prefab.element);
 		if (gameObject == null)
 		{

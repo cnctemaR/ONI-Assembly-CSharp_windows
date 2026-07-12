@@ -109,6 +109,8 @@ public class AudioMixerSnapshots : ScriptableObject
 
 	public EventReference FrontEndSupplyClosetSnapshot;
 
+	public EventReference FrontEndItemDropScreenSnapshot;
+
 	[SerializeField]
 	private EventReference[] snapshots;
 

@@ -491,7 +491,7 @@ public class MinionStartingStats : ITelepadDeliverable
 	{
 		if (personality.outfitIds.ContainsKey(ClothingOutfitUtility.OutfitType.Clothing))
 		{
-			Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromId(personality.outfitIds[ClothingOutfitUtility.OutfitType.Clothing]);
+			Option<ClothingOutfitTarget> option = ClothingOutfitTarget.TryFromTemplateId(personality.outfitIds[ClothingOutfitUtility.OutfitType.Clothing]);
 			if (option.HasValue)
 			{
 				go.GetComponent<WearableAccessorizer>().ApplyClothingItems(option.Value.ReadItemValues());

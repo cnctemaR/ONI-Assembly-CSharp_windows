@@ -239,7 +239,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 		else
 		{
-			zero = new Vector4((float)worldSize.x, (float)worldSize.y, 1f / (float)(worldSize.x + worldOffset.x), 1f / (float)(worldSize.y + worldOffset.y));
+			zero = new Vector4((float)worldSize.x, (float)worldSize.y, (float)worldOffset.x, (float)worldOffset.y);
 		}
 		return zero;
 	}

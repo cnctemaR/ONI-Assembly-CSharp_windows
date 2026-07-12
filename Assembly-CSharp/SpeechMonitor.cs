@@ -59,15 +59,10 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		{
 			return false;
 		}
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag);
-		KAnim.Anim.Frame frame = batchGroupData.GetFrame(currentFrameIndex);
-		for (int i = 0; i < frame.numElements; i++)
+		if (KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag).GetFrame(currentFrameIndex)
+			.hasHead)
 		{
-			if (batchGroupData.GetFrameElement(frame.firstElementIdx + i).folder == SpeechMonitor.ANIM_HASH_HEAD_ANIM)
-			{
-				flag = false;
-				break;
-			}
+			flag = true;
 		}
 		return flag;
 	}
@@ -164,8 +159,6 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 	public StateMachine<SpeechMonitor, SpeechMonitor.Instance, IStateMachineTarget, SpeechMonitor.Def>.TargetParameter mouth;
 
 	private static HashedString HASH_SNAPTO_MOUTH = "snapto_mouth";
-
-	private static KAnimHashedString ANIM_HASH_HEAD_ANIM = "head_anim";
 
 	public class Def : StateMachine.BaseDef
 	{

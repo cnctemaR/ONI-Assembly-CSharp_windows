@@ -158,9 +158,15 @@ public class Components
 
 	public static Components.Cmps<MissionControlClusterWorkable> MissionControlClusterWorkables = new Components.Cmps<MissionControlClusterWorkable>();
 
+	public static Components.Cmps<MinorFossilDigSite.Instance> MinorFossilDigSites = new Components.Cmps<MinorFossilDigSite.Instance>();
+
+	public static Components.Cmps<MajorFossilDigSite.Instance> MajorFossilDigSites = new Components.Cmps<MajorFossilDigSite.Instance>();
+
 	public static Components.CmpsByWorld<Geyser> Geysers = new Components.CmpsByWorld<Geyser>();
 
 	public static Components.CmpsByWorld<GeoTuner.Instance> GeoTuners = new Components.CmpsByWorld<GeoTuner.Instance>();
+
+	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
 
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 

@@ -83,12 +83,19 @@ public class LocString
 		{
 			if (!(fieldInfo.FieldType != typeof(LocString)))
 			{
-				string text2 = text + fieldInfo.Name;
-				LocString locString = (LocString)fieldInfo.GetValue(null);
-				locString.SetKey(text2);
-				string text3 = locString.text;
-				Strings.Add(new string[] { text2, text3 });
-				fieldInfo.SetValue(null, locString);
+				if (!fieldInfo.IsStatic)
+				{
+					DebugUtil.DevLogError("LocString fields must be static, skipping. " + parent_path);
+				}
+				else
+				{
+					string text2 = text + fieldInfo.Name;
+					LocString locString = (LocString)fieldInfo.GetValue(null);
+					locString.SetKey(text2);
+					string text3 = locString.text;
+					Strings.Add(new string[] { text2, text3 });
+					fieldInfo.SetValue(null, locString);
+				}
 			}
 		}
 		Type[] nestedTypes = type.GetNestedTypes(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);

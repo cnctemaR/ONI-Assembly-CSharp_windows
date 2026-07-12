@@ -294,11 +294,19 @@ public class MainMenu : KScreen
 			global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
 		}
 		this.RefreshInventoryNotification();
+		KleiItems.AddUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshInventoryNotification));
+	}
+
+	protected override void OnForcedCleanUp()
+	{
+		KleiItems.RemoveUserRewardInfoReceivedCallback(new KleiItems.UserRewardInfoReceivedCallback(this.RefreshInventoryNotification));
+		base.OnForcedCleanUp();
 	}
 
 	private void RefreshInventoryNotification()
 	{
-		this.lockerButton.GetComponent<HierarchyReferences>().GetReference<RectTransform>("AttentionIcon").gameObject.SetActive(false);
+		bool flag = PermitItems.HasUnclaimedRewards() || PermitItems.HasUnopenedItem();
+		this.lockerButton.GetComponent<HierarchyReferences>().GetReference<RectTransform>("AttentionIcon").gameObject.SetActive(flag);
 	}
 
 	private void UnregisterMotdRequest()
@@ -331,6 +339,11 @@ public class MainMenu : KScreen
 	public override void ScreenUpdate(bool topLevel)
 	{
 		this.refreshResumeButton = topLevel;
+		if (KleiItemDropScreen.Instance != null && KleiItemDropScreen.Instance.gameObject.activeInHierarchy != this.itemDropOpenFlag)
+		{
+			this.RefreshInventoryNotification();
+			this.itemDropOpenFlag = KleiItemDropScreen.Instance.gameObject.activeInHierarchy;
+		}
 	}
 
 	protected override void OnLoadLevel()
@@ -481,7 +494,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 546664U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
+				if (header.buildVersion > 550759U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 31)
 				{
 					flag = false;
 				}
@@ -730,6 +743,8 @@ public class MainMenu : KScreen
 	public string IntroShortName;
 
 	private KButton lockerButton;
+
+	private bool itemDropOpenFlag;
 
 	private static bool HasAutoresumedOnce = false;
 

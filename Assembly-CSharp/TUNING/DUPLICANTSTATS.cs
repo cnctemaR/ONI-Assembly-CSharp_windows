@@ -681,6 +681,12 @@ namespace TUNING
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
+				id = "Meteorphile",
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
 				id = "MoleHands",
 				rarity = DUPLICANTSTATS.RARITY_RARE,
 				dlcId = "",

@@ -126,7 +126,11 @@ public class MinionBrowserScreen : KMonoBehaviour
 
 	private void OnClickChangeOutfit()
 	{
-		OutfitBrowserScreenConfig.Minion(this.selectedGridItem).WithOutfit(this.selectedOutfit).ApplyAndOpenScreen();
+		if (this.selectedOutfitType.IsNone())
+		{
+			return;
+		}
+		OutfitBrowserScreenConfig.Minion(this.selectedOutfitType.Unwrap(), this.selectedGridItem).WithOutfit(this.selectedOutfit).ApplyAndOpenScreen();
 	}
 
 	private void RefreshPreviewButtonsInteractable()
@@ -162,11 +166,12 @@ public class MinionBrowserScreen : KMonoBehaviour
 		ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
 		if (outfitType2 != ClothingOutfitUtility.OutfitType.Clothing)
 		{
-			if (outfitType2 == ClothingOutfitUtility.OutfitType.JoyResponse)
+			if (outfitType2 != ClothingOutfitUtility.OutfitType.JoyResponse)
 			{
-				this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_JOY_RESPONSE;
-				this.changeOutfitButton.gameObject.SetActive(false);
+				throw new NotImplementedException();
 			}
+			this.editButtonText.text = UI.MINION_BROWSER_SCREEN.BUTTON_EDIT_JOY_RESPONSE;
+			this.changeOutfitButton.gameObject.SetActive(false);
 		}
 		else
 		{
@@ -179,12 +184,12 @@ public class MinionBrowserScreen : KMonoBehaviour
 			ClothingOutfitUtility.OutfitType outfitType3 = outfitType;
 			if (outfitType3 == ClothingOutfitUtility.OutfitType.Clothing)
 			{
-				OutfitDesignerScreenConfig.Minion(this.selectedOutfit, this.selectedGridItem).ApplyAndOpenScreen();
+				OutfitDesignerScreenConfig.Minion(this.selectedOutfit.IsSome() ? this.selectedOutfit.Unwrap() : ClothingOutfitTarget.ForNewTemplateOutfit(outfitType), this.selectedGridItem).ApplyAndOpenScreen();
 				return;
 			}
 			if (outfitType3 != ClothingOutfitUtility.OutfitType.JoyResponse)
 			{
-				return;
+				throw new NotImplementedException();
 			}
 			JoyResponseScreenConfig joyResponseScreenConfig = JoyResponseScreenConfig.From(this.selectedGridItem);
 			joyResponseScreenConfig = joyResponseScreenConfig.WithInitialSelection(this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().AndThen<BalloonArtistFacadeResource>((string id) => Db.Get().Permits.BalloonArtistFacades.Get(id)));
@@ -195,15 +200,17 @@ public class MinionBrowserScreen : KMonoBehaviour
 			ClothingOutfitUtility.OutfitType outfitType4 = outfitType;
 			if (outfitType4 == ClothingOutfitUtility.OutfitType.Clothing)
 			{
-				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget();
-				this.UIMinion.SetOutfit(this.selectedOutfit);
+				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(outfitType);
+				this.UIMinion.SetOutfit(outfitType, this.selectedOutfit);
 				this.outfitDescriptionPanel.Refresh(this.selectedOutfit, outfitType);
 				return;
 			}
 			if (outfitType4 != ClothingOutfitUtility.OutfitType.JoyResponse)
 			{
-				return;
+				throw new NotImplementedException();
 			}
+			this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType.Clothing);
+			this.UIMinion.SetOutfit(ClothingOutfitUtility.OutfitType.Clothing, this.selectedOutfit);
 			string text = this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().UnwrapOr(null, null);
 			this.outfitDescriptionPanel.Refresh((text != null) ? Db.Get().Permits.Get(text) : null, outfitType);
 		};
@@ -395,7 +402,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 
 		public abstract Personality GetPersonality();
 
-		public abstract Option<ClothingOutfitTarget> GetClothingOutfitTarget();
+		public abstract Option<ClothingOutfitTarget> GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType outfitType);
 
 		public abstract JoyResponseOutfitTarget GetJoyResponseOutfitTarget();
 
@@ -461,9 +468,9 @@ public class MinionBrowserScreen : KMonoBehaviour
 				return this.personality;
 			}
 
-			public override Option<ClothingOutfitTarget> GetClothingOutfitTarget()
+			public override Option<ClothingOutfitTarget> GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType outfitType)
 			{
-				return ClothingOutfitTarget.FromMinion(this.minionInstance);
+				return ClothingOutfitTarget.FromMinion(outfitType, this.minionInstance);
 			}
 
 			public override JoyResponseOutfitTarget GetJoyResponseOutfitTarget()
@@ -500,9 +507,9 @@ public class MinionBrowserScreen : KMonoBehaviour
 				return this.personality;
 			}
 
-			public override Option<ClothingOutfitTarget> GetClothingOutfitTarget()
+			public override Option<ClothingOutfitTarget> GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType outfitType)
 			{
-				return ClothingOutfitTarget.TryFromId(this.personality.GetOutfit(ClothingOutfitUtility.OutfitType.Clothing));
+				return ClothingOutfitTarget.TryFromTemplateId(this.personality.GetSelectedTemplateOutfitId(outfitType));
 			}
 
 			public override JoyResponseOutfitTarget GetJoyResponseOutfitTarget()

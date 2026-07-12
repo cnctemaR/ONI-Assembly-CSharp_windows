@@ -39,6 +39,7 @@ public class PioneerLanderConfig : IEntityConfig
 			Placeable.PlacementRules.VisibleToSpace,
 			Placeable.PlacementRules.RestrictToWorld
 		};
+		placeable.checkRootCellOnly = true;
 		EntityTemplates.CreateAndRegisterPreview("PioneerLander_Preview", Assets.GetAnim("rocket_pioneer_cargo_lander_kanim"), "place", ObjectLayer.Building, 3, 3);
 		return gameObject;
 	}

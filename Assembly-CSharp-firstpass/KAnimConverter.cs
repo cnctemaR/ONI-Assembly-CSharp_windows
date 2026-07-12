@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class KAnimConverter
 {
@@ -23,6 +24,8 @@ public class KAnimConverter
 		bool IsActive();
 
 		bool IsVisible();
+
+		Vector4 GetPositionData();
 
 		int GetCurrentNumFrames();
 

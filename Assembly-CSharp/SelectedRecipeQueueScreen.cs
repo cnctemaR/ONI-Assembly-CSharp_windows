@@ -54,6 +54,20 @@ public class SelectedRecipeQueueScreen : KScreen
 		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.CycleNextRecipe));
 	}
 
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		if (this.selectedRecipe != null)
+		{
+			GameObject prefab = Assets.GetPrefab(this.selectedRecipe.results[0].material);
+			Equippable equippable = ((prefab != null) ? prefab.GetComponent<Equippable>() : null);
+			if (equippable != null && equippable.GetBuildOverride() != null)
+			{
+				this.minionWidget.RemoveEquipment(equippable);
+			}
+		}
+	}
+
 	public void SetRecipe(ComplexFabricatorSideScreen owner, ComplexFabricator target, ComplexRecipe recipe)
 	{
 		this.ownerScreen = owner;

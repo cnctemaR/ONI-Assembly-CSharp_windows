@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using Database;
+using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class KleiItemDropScreen : KModalScreen
 {
@@ -27,26 +30,30 @@ public class KleiItemDropScreen : KModalScreen
 
 	public override void Show(bool show = true)
 	{
-		if (show)
+		if (!show)
 		{
-			base.Show(true);
-			return;
-		}
-		if (this.activePresentationRoutine != null)
-		{
-			base.StopCoroutine(this.activePresentationRoutine);
-		}
-		if (this.shouldDoCloseRoutine)
-		{
-			this.closeButton.gameObject.SetActive(false);
-			Updater.RunRoutine(this, this.AnimateScreenOutRoutine()).Then(delegate
+			if (this.activePresentationRoutine != null)
+			{
+				base.StopCoroutine(this.activePresentationRoutine);
+			}
+			if (this.shouldDoCloseRoutine)
+			{
+				this.closeButton.gameObject.SetActive(false);
+				Updater.RunRoutine(this, this.AnimateScreenOutRoutine()).Then(delegate
+				{
+					base.Show(false);
+				});
+				this.shouldDoCloseRoutine = false;
+			}
+			else
 			{
 				base.Show(false);
-			});
-			this.shouldDoCloseRoutine = false;
+			}
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndItemDropScreenSnapshot, STOP_MODE.ALLOWFADEOUT);
 			return;
 		}
-		base.Show(false);
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndItemDropScreenSnapshot);
+		base.Show(true);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -65,34 +72,58 @@ public class KleiItemDropScreen : KModalScreen
 		{
 			return;
 		}
-		if (KleiItems.HasUnopenedItem())
+		if (PermitItems.HasUnopenedItem())
 		{
 			this.PresentNextUnopenedItem(true);
 			this.shouldDoCloseRoutine = true;
 			return;
 		}
-		base.Show(false);
+		if (PermitItems.HasUnclaimedRewards())
+		{
+			this.PresentKleiRewardsPrompt(true);
+			this.shouldDoCloseRoutine = true;
+			return;
+		}
+		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.NOTHING_AVAILABLE);
+		this.PresentNoItemAvailablePrompt(true);
+		this.shouldDoCloseRoutine = true;
 	}
 
 	public void PresentNextUnopenedItem(bool firstItemPresentation = true)
 	{
 		foreach (KleiItems.ItemData itemData in PermitItems.IterateInventory())
 		{
-			global::Debug.LogError("UNIMPLEMENTED");
+			if (!itemData.IsOpened)
+			{
+				this.PresentItem(itemData, firstItemPresentation);
+				return;
+			}
 		}
-		this.Show(false);
+		if (PermitItems.HasUnclaimedRewards())
+		{
+			this.PresentKleiRewardsPrompt(false);
+			return;
+		}
+		this.PresentNoItemAvailablePrompt(false);
 	}
 
 	public void PresentItem(KleiItems.ItemData item, bool firstItemPresentation)
 	{
+		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.THANKS_FOR_PLAYING);
 		this.giftRevealed = false;
 		this.giftAcknowledged = false;
+		if (this.activePresentationRoutine != null)
+		{
+			base.StopCoroutine(this.activePresentationRoutine);
+		}
 		this.activePresentationRoutine = base.StartCoroutine(this.PresentItemRoutine(item, firstItemPresentation));
 		this.acceptButton.ClearOnClick();
 		this.acknowledgeButton.ClearOnClick();
+		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.PRINT_ITEM_BUTTON);
 		this.acceptButton.onClick += delegate
 		{
 			this.giftRevealed = true;
+			KleiItems.AddRequestItemOpened(item.ItemId);
 		};
 		this.acknowledgeButton.onClick += delegate
 		{
@@ -103,23 +134,72 @@ public class KleiItemDropScreen : KModalScreen
 		};
 	}
 
+	public void PresentKleiRewardsPrompt(bool firstItemPresentation)
+	{
+		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.WEB_REWARDS_AVAILABLE);
+		this.kleiRewardsAcknowledged = false;
+		this.acknowledgeButton.ClearOnClick();
+		this.acceptButton.ClearOnClick();
+		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.OPEN_URL_BUTTON);
+		this.acceptButton.onClick += delegate
+		{
+			this.kleiRewardsAcknowledged = true;
+			string text = "https://accounts.klei.com/account/rewards?game=ONI";
+			if (KleiAccount.KleiUserID != null)
+			{
+				text = text + "&expectedKU=" + KleiAccount.KleiUserID;
+			}
+			Application.OpenURL(text);
+			KleiItemsStatusRefresher.Active = true;
+		};
+		if (this.activePresentationRoutine != null)
+		{
+			base.StopCoroutine(this.activePresentationRoutine);
+		}
+		this.activePresentationRoutine = base.StartCoroutine(this.PresentKleiRewardsRoutine(firstItemPresentation));
+	}
+
+	public void PresentNoItemAvailablePrompt(bool firstItemPresentation)
+	{
+		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.NOTHING_AVAILABLE);
+		this.noItemAvailableAcknowledged = false;
+		this.acknowledgeButton.ClearOnClick();
+		this.acceptButton.ClearOnClick();
+		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.DISMISS_BUTTON);
+		this.acceptButton.onClick += delegate
+		{
+			this.noItemAvailableAcknowledged = true;
+		};
+		if (this.activePresentationRoutine != null)
+		{
+			base.StopCoroutine(this.activePresentationRoutine);
+		}
+		this.activePresentationRoutine = base.StartCoroutine(this.PresentNoItemAvailableRoutine(firstItemPresentation));
+	}
+
 	private IEnumerator AnimateScreenInRoutine()
 	{
+		float scaleFactor = base.transform.parent.GetComponent<CanvasScaler>().scaleFactor;
+		float OPEN_WIDTH = (float)Screen.width / scaleFactor;
+		float num = Mathf.Clamp((float)Screen.height / scaleFactor, 720f, 900f);
 		KFMOD.PlayUISound(GlobalAssets.GetSound("GiftItemDrop_Screen_Open", false));
+		this.userMessageLabel.gameObject.SetActive(false);
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, 720f), 0.5f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, num), 0.5f, Easing.CircInOut);
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
-		}, this.shieldMaskRect.sizeDelta, new Vector2(1152f, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut);
+		}, this.shieldMaskRect.sizeDelta, new Vector2(OPEN_WIDTH, this.shieldMaskRect.sizeDelta.y), 0.25f, Easing.CircInOut);
+		this.userMessageLabel.gameObject.SetActive(true);
 		yield break;
 	}
 
 	private IEnumerator AnimateScreenOutRoutine()
 	{
 		KFMOD.PlayUISound(GlobalAssets.GetSound("GiftItemDrop_Screen_Close", false));
+		this.userMessageLabel.gameObject.SetActive(false);
 		yield return Updater.Ease(delegate(Vector2 v2)
 		{
 			this.shieldMaskRect.sizeDelta = v2;
@@ -128,6 +208,89 @@ public class KleiItemDropScreen : KModalScreen
 		{
 			this.shieldMaskRect.sizeDelta = v2;
 		}, this.shieldMaskRect.sizeDelta, new Vector2(this.shieldMaskRect.sizeDelta.x, 0f), 0.25f, Easing.CircInOut);
+		yield break;
+	}
+
+	private IEnumerator PresentKleiRewardsRoutine(bool firstItem)
+	{
+		yield return null;
+		this.itemNameLabel.SetText("");
+		this.itemDescriptionLabel.SetText("");
+		this.itemRarityLabel.SetText("");
+		this.itemCategoryLabel.SetText("");
+		if (firstItem)
+		{
+			this.animatedPod.Play("idle", KAnim.PlayMode.Loop, 1f, 0f);
+			this.acceptButtonRect.gameObject.SetActive(false);
+			this.shieldMaskRect.sizeDelta = new Vector2(8f, 0f);
+			this.shieldMaskRect.gameObject.SetActive(true);
+		}
+		if (firstItem)
+		{
+			this.closeButton.gameObject.SetActive(false);
+			yield return Updater.WaitForSeconds(0.5f);
+			yield return this.AnimateScreenInRoutine();
+			yield return Updater.WaitForSeconds(0.125f);
+			this.closeButton.gameObject.SetActive(true);
+		}
+		else
+		{
+			yield return Updater.WaitForSeconds(0.25f);
+		}
+		Vector2 animate_offset = new Vector2(0f, -30f);
+		this.acceptButtonRect.FindOrAddComponent<CanvasGroup>().alpha = 0f;
+		this.acceptButtonRect.gameObject.SetActive(true);
+		this.acceptButtonPosition.SetOn(this.acceptButtonRect);
+		this.animatedPod.Play("powerup", KAnim.PlayMode.Once, 1f, 0f);
+		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+		yield return Updater.WaitForSeconds(1.25f);
+		yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
+		yield return Updater.Until(() => this.kleiRewardsAcknowledged);
+		yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
+		this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
+		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+		yield return Updater.WaitForSeconds(1f);
+		this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+		this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
+		this.Show(false);
+		yield break;
+	}
+
+	private IEnumerator PresentNoItemAvailableRoutine(bool firstItem)
+	{
+		yield return null;
+		this.itemNameLabel.SetText("");
+		this.itemDescriptionLabel.SetText("");
+		this.itemRarityLabel.SetText("");
+		this.itemCategoryLabel.SetText("");
+		if (firstItem)
+		{
+			this.animatedPod.Play("idle", KAnim.PlayMode.Loop, 1f, 0f);
+			this.acceptButtonRect.gameObject.SetActive(false);
+			this.shieldMaskRect.sizeDelta = new Vector2(8f, 0f);
+			this.shieldMaskRect.gameObject.SetActive(true);
+		}
+		if (firstItem)
+		{
+			this.closeButton.gameObject.SetActive(false);
+			yield return Updater.WaitForSeconds(0.5f);
+			yield return this.AnimateScreenInRoutine();
+			yield return Updater.WaitForSeconds(0.125f);
+			this.closeButton.gameObject.SetActive(true);
+		}
+		else
+		{
+			yield return Updater.WaitForSeconds(0.25f);
+		}
+		Vector2 animate_offset = new Vector2(0f, -30f);
+		this.acceptButtonRect.FindOrAddComponent<CanvasGroup>().alpha = 0f;
+		this.acceptButtonRect.gameObject.SetActive(true);
+		this.acceptButtonPosition.SetOn(this.acceptButtonRect);
+		yield return Updater.WaitForSeconds(0.75f);
+		yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
+		yield return Updater.Until(() => this.noItemAvailableAcknowledged);
+		yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
+		this.Show(false);
 		yield break;
 	}
 
@@ -141,6 +304,8 @@ public class KleiItemDropScreen : KModalScreen
 		}
 		this.itemNameLabel.SetText("");
 		this.itemDescriptionLabel.SetText("");
+		this.itemRarityLabel.SetText("");
+		this.itemCategoryLabel.SetText("");
 		this.permitVisualizer.ResetState();
 		if (firstItem)
 		{
@@ -177,29 +342,58 @@ public class KleiItemDropScreen : KModalScreen
 		PermitResource permit = Db.Get().Permits.Get(item.PermitId);
 		this.permitVisualizer.ConfigureWith(permit);
 		yield return this.permitVisualizer.AnimateIn();
+		KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("GiftItemDrop_Rarity", false), "GiftItemRarity", string.Format("{0}", permit.Rarity));
 		this.itemNameLabel.SetText(permit.Name);
 		this.itemDescriptionLabel.SetText(permit.Description);
-		this.itemNameLabelPosition.SetOn(this.itemNameLabel);
-		this.itemDescriptionLabelPosition.SetOn(this.itemDescriptionLabel);
-		yield return Updater.Parallel(new Updater[]
+		this.itemRarityLabel.SetText(permit.Rarity.GetLocStringName());
+		PermitCategory category = permit.Category;
+		string text;
+		if (category != PermitCategory.Building)
 		{
-			PresUtil.OffsetToAndFade(this.itemNameLabel.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut),
-			PresUtil.OffsetToAndFade(this.itemDescriptionLabel.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut)
-		});
+			if (category != PermitCategory.Artwork)
+			{
+				if (category != PermitCategory.JoyResponse)
+				{
+					text = PermitCategories.GetDisplayName(permit.Category);
+				}
+				else
+				{
+					text = PermitCategories.GetDisplayName(permit.Category);
+					if (permit is BalloonArtistFacadeResource)
+					{
+						text = PermitCategories.GetDisplayName(permit.Category) + ": " + UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSES.BALLOON_ARTIST;
+					}
+				}
+			}
+			else
+			{
+				text = Assets.GetPrefab((permit as ArtableStage).prefabId).GetProperName();
+			}
+		}
+		else
+		{
+			text = Assets.GetPrefab((permit as BuildingFacadeResource).PrefabID).GetProperName();
+		}
+		this.itemCategoryLabel.SetText(text);
+		this.itemTextContainerPosition.SetOn(this.itemTextContainer);
+		yield return Updater.Parallel(new Updater[] { PresUtil.OffsetToAndFade(this.itemTextContainer.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut) });
 		yield return Updater.Until(() => this.giftAcknowledged);
 		this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 		this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.Parallel(new Updater[]
-		{
-			PresUtil.OffsetFromAndFade(this.itemNameLabel.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut),
-			PresUtil.OffsetFromAndFade(this.itemDescriptionLabel.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut)
-		});
+		yield return Updater.Parallel(new Updater[] { PresUtil.OffsetFromAndFade(this.itemTextContainer.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut) });
 		this.itemNameLabel.SetText("");
 		this.itemDescriptionLabel.SetText("");
+		this.itemRarityLabel.SetText("");
+		this.itemCategoryLabel.SetText("");
 		yield return this.permitVisualizer.AnimateOut();
 		permit = null;
 		this.PresentNextUnopenedItem(false);
 		yield break;
+	}
+
+	public static bool HasItemsToShow()
+	{
+		return PermitItems.HasUnclaimedRewards() || PermitItems.HasUnopenedItem();
 	}
 
 	[SerializeField]
@@ -215,12 +409,24 @@ public class KleiItemDropScreen : KModalScreen
 	[SerializeField]
 	private KBatchedAnimController animatedPod;
 
+	[SerializeField]
+	private LocText userMessageLabel;
+
 	[Header("Item Info")]
+	[SerializeField]
+	private RectTransform itemTextContainer;
+
 	[SerializeField]
 	private LocText itemNameLabel;
 
 	[SerializeField]
 	private LocText itemDescriptionLabel;
+
+	[SerializeField]
+	private LocText itemRarityLabel;
+
+	[SerializeField]
+	private LocText itemCategoryLabel;
 
 	[Header("Accept Button")]
 	[SerializeField]
@@ -238,7 +444,13 @@ public class KleiItemDropScreen : KModalScreen
 
 	private bool giftAcknowledged;
 
+	private bool kleiRewardsAcknowledged;
+
+	private bool noItemAvailableAcknowledged;
+
 	public static KleiItemDropScreen Instance;
+
+	private const string REDEEM_MYSTERY_BOX_URL = "https://accounts.klei.com/account/rewards?game=ONI";
 
 	private bool shouldDoCloseRoutine;
 
@@ -246,7 +458,5 @@ public class KleiItemDropScreen : KModalScreen
 
 	private PrefabDefinedUIPosition acceptButtonPosition = new PrefabDefinedUIPosition();
 
-	private PrefabDefinedUIPosition itemNameLabelPosition = new PrefabDefinedUIPosition();
-
-	private PrefabDefinedUIPosition itemDescriptionLabelPosition = new PrefabDefinedUIPosition();
+	private PrefabDefinedUIPosition itemTextContainerPosition = new PrefabDefinedUIPosition();
 }

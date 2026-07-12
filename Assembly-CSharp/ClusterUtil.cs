@@ -17,7 +17,7 @@ public static class ClusterUtil
 	public static WorldContainer GetMyWorld(this GameObject gameObject)
 	{
 		int num = Grid.PosToCell(gameObject);
-		if (Grid.IsValidCell(num) && Grid.WorldIdx[num] != ClusterManager.INVALID_WORLD_IDX)
+		if (Grid.IsValidCell(num) && Grid.WorldIdx[num] != 255)
 		{
 			return ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]);
 		}
@@ -37,7 +37,7 @@ public static class ClusterUtil
 	public static int GetMyWorldId(this GameObject gameObject)
 	{
 		int num = Grid.PosToCell(gameObject);
-		if (Grid.IsValidCell(num) && Grid.WorldIdx[num] != ClusterManager.INVALID_WORLD_IDX)
+		if (Grid.IsValidCell(num) && Grid.WorldIdx[num] != 255)
 		{
 			return (int)Grid.WorldIdx[num];
 		}

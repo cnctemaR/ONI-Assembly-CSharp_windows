@@ -19,23 +19,26 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IEventSystem
 		if (num != -1)
 		{
 			string text = CodexCache.FormatLinkID(this.text.textInfo.linkInfo[num].GetLinkID());
-			if (!CodexCache.entries.ContainsKey(text))
+			if (this.overrideLinkAction == null || this.overrideLinkAction(text))
 			{
-				SubEntry subEntry = CodexCache.FindSubEntry(text);
-				if (subEntry == null || subEntry.disabled)
+				if (!CodexCache.entries.ContainsKey(text))
+				{
+					SubEntry subEntry = CodexCache.FindSubEntry(text);
+					if (subEntry == null || subEntry.disabled)
+					{
+						text = "PAGENOTFOUND";
+					}
+				}
+				else if (CodexCache.entries[text].disabled)
 				{
 					text = "PAGENOTFOUND";
 				}
+				if (!ManagementMenu.Instance.codexScreen.gameObject.activeInHierarchy)
+				{
+					ManagementMenu.Instance.ToggleCodex();
+				}
+				ManagementMenu.Instance.codexScreen.ChangeArticle(text, true, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			}
-			else if (CodexCache.entries[text].disabled)
-			{
-				text = "PAGENOTFOUND";
-			}
-			if (!ManagementMenu.Instance.codexScreen.gameObject.activeInHierarchy)
-			{
-				ManagementMenu.Instance.ToggleCodex();
-			}
-			ManagementMenu.Instance.codexScreen.ChangeArticle(text, true, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		}
 	}
 
@@ -127,4 +130,6 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IEventSystem
 	private LocText text;
 
 	private bool hoverLink;
+
+	public Func<string, bool> overrideLinkAction;
 }

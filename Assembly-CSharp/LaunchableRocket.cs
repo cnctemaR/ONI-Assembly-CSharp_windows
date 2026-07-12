@@ -189,7 +189,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 							smi.master.soundSpeakerObject.transform.SetParent(smi.master.gameObject.transform);
 						}
 						smi.master.soundSpeakerObject.transform.SetLocalPosition(smi.master.flightAnimOffset * Vector3.up);
-						if (Grid.PosToXY(positionIncludingOffset).y > Singleton<KBatchedAnimUpdater>.Instance.GetVisibleSize().y)
+						if (Grid.PosToXY(positionIncludingOffset).y > Singleton<KBatchedAnimUpdater>.Instance.GetVisibleSize().y + 20)
 						{
 							gameObject8.GetComponent<KBatchedAnimController>().enabled = false;
 						}

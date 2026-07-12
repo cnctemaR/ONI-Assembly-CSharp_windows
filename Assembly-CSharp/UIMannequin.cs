@@ -44,7 +44,7 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 		}
 	}
 
-	public void SetOutfit(IEnumerable<ClothingItemResource> outfit)
+	public void SetOutfit(ClothingOutfitUtility.OutfitType outfitType, IEnumerable<ClothingItemResource> outfit)
 	{
 		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
 		SymbolOverrideController component = this.SpawnedAvatar.GetComponent<SymbolOverrideController>();

@@ -14,6 +14,14 @@ public class QuestInstance : ISaveLoadable
 		}
 	}
 
+	public int CriteriaCount
+	{
+		get
+		{
+			return this.quest.Criteria.Length;
+		}
+	}
+
 	public string Name
 	{
 		get
@@ -85,6 +93,7 @@ public class QuestInstance : ISaveLoadable
 	public void Initialize(Quest quest)
 	{
 		this.quest = quest;
+		this.ValidateCriteriasOnLoad();
 		this.UpdateQuestProgress(false);
 	}
 
@@ -425,6 +434,43 @@ public class QuestInstance : ISaveLoadable
 			}
 		}
 		return array;
+	}
+
+	public void ValidateCriteriasOnLoad()
+	{
+		if (this.criteriaStates.Count != this.quest.Criteria.Length)
+		{
+			Dictionary<int, QuestInstance.CriteriaState> dictionary = new Dictionary<int, QuestInstance.CriteriaState>(this.quest.Criteria.Length);
+			for (int i = 0; i < this.quest.Criteria.Length; i++)
+			{
+				QuestCriteria questCriteria = this.quest.Criteria[i];
+				int hash = questCriteria.CriteriaId.GetHash();
+				if (this.criteriaStates.ContainsKey(hash))
+				{
+					dictionary[hash] = this.criteriaStates[hash];
+				}
+				else
+				{
+					QuestInstance.CriteriaState criteriaState = new QuestInstance.CriteriaState
+					{
+						Handle = i
+					};
+					if (questCriteria.TargetValues != null)
+					{
+						if ((questCriteria.EvaluationBehaviors & QuestCriteria.BehaviorFlags.TrackItems) == QuestCriteria.BehaviorFlags.TrackItems)
+						{
+							criteriaState.SatisfyingItems = new Tag[questCriteria.TargetValues.Length * questCriteria.RequiredCount];
+						}
+						if ((questCriteria.EvaluationBehaviors & QuestCriteria.BehaviorFlags.TrackValues) == QuestCriteria.BehaviorFlags.TrackValues)
+						{
+							criteriaState.CurrentValues = new float[questCriteria.TargetValues.Length * questCriteria.RequiredCount];
+						}
+					}
+					dictionary[hash] = criteriaState;
+				}
+			}
+			this.criteriaStates = dictionary;
+		}
 	}
 
 	public Action<QuestInstance, Quest.State, float> QuestProgressChanged;

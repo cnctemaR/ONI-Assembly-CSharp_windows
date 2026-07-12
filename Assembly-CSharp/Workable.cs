@@ -634,8 +634,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public float workTime;
 
-	public Vector3 AnimOffset = Vector3.zero;
-
 	protected bool showProgressBar = true;
 
 	public bool alwaysShowProgressBar;
@@ -716,7 +714,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public Action<Workable, Workable.WorkableEvent> OnWorkableEventCB;
 
-	private int skillsUpdateHandle = -1;
+	protected int skillsUpdateHandle = -1;
 
 	private int minionUpdateHandle = -1;
 

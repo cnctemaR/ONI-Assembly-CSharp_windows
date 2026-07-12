@@ -49,10 +49,7 @@ public class Notifier : KMonoBehaviour
 			{
 				notification.clickFocus = base.transform;
 			}
-			if (this.OnAdd != null)
-			{
-				this.OnAdd(notification);
-			}
+			NotificationManager.Instance.AddNotification(notification);
 			notification.GameTime = Time.time;
 		}
 		else
@@ -71,19 +68,12 @@ public class Notifier : KMonoBehaviour
 		if (notification.Notifier != null)
 		{
 			notification.Notifier = null;
-			if (this.OnRemove != null)
-			{
-				this.OnRemove(notification);
-			}
 		}
+		NotificationManager.Instance.RemoveNotification(notification);
 	}
 
 	[MyCmpGet]
 	private KSelectable Selectable;
-
-	public Action<Notification> OnAdd;
-
-	public Action<Notification> OnRemove;
 
 	public bool DisableNotifications;
 

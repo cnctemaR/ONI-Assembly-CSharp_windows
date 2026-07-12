@@ -158,9 +158,17 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 
 	private WorkChore<OilWellCap> CreateWorkChore()
 	{
-		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-		workChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
-		return workChore;
+		this.DepressurizeChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		this.DepressurizeChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
+		return this.DepressurizeChore;
+	}
+
+	private void CancelChore(string reason)
+	{
+		if (this.DepressurizeChore != null)
+		{
+			this.DepressurizeChore.Cancel(reason);
+		}
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -173,6 +181,7 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 	{
 		base.OnStopWork(worker);
 		this.smi.sm.working.Set(false, this.smi, false);
+		this.DepressurizeChore = null;
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -219,6 +228,8 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 		component.OnCopySettings(data);
 	});
 
+	private WorkChore<OilWellCap> DepressurizeChore;
+
 	private static readonly Chore.Precondition AllowedToDepressurize = new Chore.Precondition
 	{
 		id = "AllowedToDepressurize",
@@ -248,7 +259,10 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 		{
 			default_state = this.inoperational;
 			this.inoperational.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.operational, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational));
-			this.operational.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null).DefaultState(this.operational.idle);
+			this.operational.DefaultState(this.operational.idle).ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null).EventHandler(GameHashes.WorkChoreDisabled, delegate(OilWellCap.StatesInstance smi)
+			{
+				smi.master.CancelChore("WorkChoreDisabled");
+			});
 			this.operational.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.operational.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne)
 				.ParamTransition<bool>(this.working, this.operational.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
 				.EventTransition(GameHashes.OperationalChanged, this.inoperational, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Not(new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational)))

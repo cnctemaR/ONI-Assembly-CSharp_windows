@@ -39,7 +39,7 @@ public class ClustercraftInteriorDoor : KMonoBehaviour, ISidescreenButtonControl
 	public bool SidescreenButtonInteractable()
 	{
 		WorldContainer myWorld = base.gameObject.GetMyWorld();
-		return myWorld.ParentWorldId != (int)ClusterManager.INVALID_WORLD_IDX && myWorld.ParentWorldId != myWorld.id;
+		return myWorld.ParentWorldId != 255 && myWorld.ParentWorldId != myWorld.id;
 	}
 
 	public void OnSidescreenButtonPressed()
@@ -55,5 +55,10 @@ public class ClustercraftInteriorDoor : KMonoBehaviour, ISidescreenButtonControl
 	public void SetButtonTextOverride(ButtonMenuTextOverride text)
 	{
 		throw new NotImplementedException();
+	}
+
+	public int HorizontalGroupID()
+	{
+		return -1;
 	}
 }

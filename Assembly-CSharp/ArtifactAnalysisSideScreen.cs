@@ -60,7 +60,7 @@ public class ArtifactAnalysisSideScreen : SideScreenContent
 
 	private void OpenEvent(GameObject artifactPrefab)
 	{
-		SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.ArtifactReveal, -1).smi as SimpleEvent.StatesInstance;
+		SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.ArtifactReveal, -1, null).smi as SimpleEvent.StatesInstance;
 		statesInstance.artifact = artifactPrefab;
 		artifactPrefab.GetComponent<KPrefabID>();
 		artifactPrefab.GetComponent<InfoDescription>();

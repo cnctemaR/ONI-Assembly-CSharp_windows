@@ -31,15 +31,13 @@ public class KBatchGroupData
 	{
 		get
 		{
-			return this.symbolFrameInstances.Count * 16;
+			return this.symbolFrameInstances.Count * 12;
 		}
 	}
 
 	public List<KAnim.Anim> anims { get; private set; }
 
 	public Dictionary<KAnimHashedString, int> animIndex { get; private set; }
-
-	public Dictionary<KAnimHashedString, int> animCount { get; private set; }
 
 	public List<KAnim.Anim.Frame> animFrames { get; private set; }
 
@@ -55,8 +53,6 @@ public class KBatchGroupData
 
 	public Dictionary<KAnimHashedString, int> textureStartIndex { get; private set; }
 
-	public Dictionary<KAnimHashedString, int> firstSymbolIndex { get; private set; }
-
 	public List<Texture2D> textures { get; private set; }
 
 	public KBatchGroupData(HashedString id)
@@ -70,7 +66,6 @@ public class KBatchGroupData
 	{
 		this.anims = new List<KAnim.Anim>();
 		this.animIndex = new Dictionary<KAnimHashedString, int>();
-		this.animCount = new Dictionary<KAnimHashedString, int>();
 		this.animFrames = new List<KAnim.Anim.Frame>();
 		this.frameElements = new List<KAnim.Anim.FrameElement>();
 		this.builds = new List<KAnim.Build>();
@@ -79,7 +74,6 @@ public class KBatchGroupData
 		this.symbolFrameInstances = new List<KAnim.Build.SymbolFrameInstance>();
 		this.textures = new List<Texture2D>();
 		this.textureStartIndex = new Dictionary<KAnimHashedString, int>();
-		this.firstSymbolIndex = new Dictionary<KAnimHashedString, int>();
 	}
 
 	public void FreeResources()
@@ -93,11 +87,6 @@ public class KBatchGroupData
 		{
 			this.animIndex.Clear();
 			this.animIndex = null;
-		}
-		if (this.animCount != null)
-		{
-			this.animCount.Clear();
-			this.animCount = null;
 		}
 		if (this.animFrames != null)
 		{
@@ -134,17 +123,11 @@ public class KBatchGroupData
 			this.textureStartIndex.Clear();
 			this.textureStartIndex = null;
 		}
-		if (this.firstSymbolIndex != null)
-		{
-			this.firstSymbolIndex.Clear();
-			this.firstSymbolIndex = null;
-		}
 	}
 
 	public KAnim.Build AddNewBuildFile(KAnimHashedString fileHash)
 	{
 		this.textureStartIndex.Add(fileHash, this.textures.Count);
-		this.firstSymbolIndex.Add(fileHash, this.GetSymbolCount());
 		KAnim.Build build = new KAnim.Build();
 		build.textureStartIdx = this.textures.Count;
 		build.fileHash = fileHash;
@@ -300,19 +283,19 @@ public class KBatchGroupData
 		{
 			for (int i = 0; i < this.symbolFrameInstances.Count; i++)
 			{
-				this.WriteAnimFrame(data, start_index, i, i, 1, i);
+				this.WriteAnimFrame(data, start_index, i, 1);
 				start_index += 4;
 			}
 			for (int j = 0; j < this.symbolFrameInstances.Count; j++)
 			{
-				this.WriteAnimFrameElement(data, start_index, j, j, Matrix2x3.identity, Color.white);
-				start_index += 12;
+				this.WriteAnimFrameElement(data, start_index, j, Matrix2x3.identity, 1f);
+				start_index += 8;
 			}
 			return;
 		}
 		for (int k = 0; k < animFrames.Count; k++)
 		{
-			this.Write(data, start_index, k, animFrames[k]);
+			this.WriteAnimFrame(data, start_index, animFrames[k].firstElementIdx, animFrames[k].numElements);
 			start_index += 4;
 		}
 		for (int l = 0; l < animFrameElements.Count; l++)
@@ -320,11 +303,11 @@ public class KBatchGroupData
 			KAnim.Anim.FrameElement frameElement = animFrameElements[l];
 			if (frameElement.symbol == KGlobalAnimParser.MISSING_SYMBOL)
 			{
-				this.WriteAnimFrameElement(data, start_index, -1, l, Matrix2x3.identity, Color.white);
+				this.WriteAnimFrameElement(data, start_index, -1, Matrix2x3.identity, 1f);
 			}
 			else
 			{
-				KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(frameElement.symbolIdx);
+				KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(this.GetSymbolIndex(frameElement.symbol));
 				if (buildSymbol == null)
 				{
 					string[] array = new string[5];
@@ -338,9 +321,9 @@ public class KBatchGroupData
 					global::Debug.LogError(string.Concat(array));
 				}
 				int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
-				this.Write(data, start_index, frameIdx, l, frameElement);
+				this.WriteAnimFrameElement(data, start_index, frameIdx, frameElement.transform, frameElement.multAlpha);
 			}
-			start_index += 12;
+			start_index += 8;
 		}
 	}
 
@@ -361,112 +344,78 @@ public class KBatchGroupData
 
 	public int WriteBuildData(List<KAnim.Build.SymbolFrameInstance> symbol_frame_instances, NativeArray<float> data)
 	{
-		int i;
-		for (i = 0; i < symbol_frame_instances.Count; i++)
+		for (int i = 0; i < symbol_frame_instances.Count; i++)
 		{
-			this.Write(data, i * 16, i, this.symbolFrameInstances[i].buildImageIdx, symbol_frame_instances[i]);
+			this.Write(data, i * 12, i, this.symbolFrameInstances[i].buildImageIdx, symbol_frame_instances[i]);
 		}
-		return i * 16;
+		return symbol_frame_instances.Count * 12;
 	}
 
 	private void Write(NativeArray<float> data, int startIndex, int thisFrameIndex, int atlasIndex, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
 	{
-		data[startIndex++] = (float)atlasIndex;
-		data[startIndex++] = (float)thisFrameIndex;
-		data[startIndex++] = (float)symbol_frame_instance.symbolIdx;
+		data[startIndex] = (float)atlasIndex;
 		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
 		if (buildSymbol == null || symbolFrame == null)
 		{
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
-			data[startIndex++] = 0f;
+			data[startIndex + 1] = 0f;
+			data[startIndex + 2] = 0f;
 		}
 		else
 		{
-			data[startIndex++] = (float)buildSymbol.numFrames;
-			data[startIndex++] = (float)buildSymbol.flags;
-			if (this.firstSymbolIndex.ContainsKey(buildSymbol.build.fileHash))
-			{
-				data[startIndex++] = (float)this.firstSymbolIndex[buildSymbol.build.fileHash];
-			}
-			else
-			{
-				data[startIndex++] = 0f;
-			}
-			data[startIndex++] = (float)buildSymbol.symbolIndexInSourceBuild;
+			data[startIndex + 1] = (float)buildSymbol.flags;
+			data[startIndex + 2] = (float)buildSymbol.symbolIndexInSourceBuild;
 		}
-		data[startIndex++] = 3.452817E+09f;
+		data[startIndex + 3] = 3.452817E+09f;
 		if (symbolFrame == null)
 		{
 			return;
 		}
-		data[startIndex++] = symbolFrame.bboxMin.x;
-		data[startIndex++] = symbolFrame.bboxMin.y;
-		data[startIndex++] = symbolFrame.bboxMax.x;
-		data[startIndex++] = symbolFrame.bboxMax.y;
-		data[startIndex++] = symbolFrame.uvMin.x;
-		data[startIndex++] = symbolFrame.uvMin.y;
-		data[startIndex++] = symbolFrame.uvMax.x;
-		data[startIndex++] = symbolFrame.uvMax.y;
+		data[startIndex + 4] = symbolFrame.bboxMin.x;
+		data[startIndex + 5] = symbolFrame.bboxMin.y;
+		data[startIndex + 6] = symbolFrame.bboxMax.x;
+		data[startIndex + 7] = symbolFrame.bboxMax.y;
+		data[startIndex + 8] = symbolFrame.uvMin.x;
+		data[startIndex + 9] = symbolFrame.uvMin.y;
+		data[startIndex + 10] = symbolFrame.uvMax.x;
+		data[startIndex + 11] = symbolFrame.uvMax.y;
 	}
 
-	private void WriteAnimFrame(NativeArray<float> data, int startIndex, int firstElementIdx, int idx, int numElements, int thisFrameIndex)
+	private void WriteAnimFrame(NativeArray<float> data, int startIndex, int firstElementIdx, int numElements)
 	{
-		data[startIndex++] = (float)firstElementIdx;
-		data[startIndex++] = (float)numElements;
-		data[startIndex++] = (float)thisFrameIndex;
-		data[startIndex++] = (float)idx;
+		data[startIndex] = (float)firstElementIdx;
+		data[startIndex + 1] = (float)numElements;
 	}
 
-	private void Write(NativeArray<float> data, int startIndex, int thisFrameIndex, KAnim.Anim.Frame frame)
-	{
-		this.WriteAnimFrame(data, startIndex, frame.firstElementIdx, frame.idx, frame.numElements, thisFrameIndex);
-	}
-
-	private void WriteAnimFrameElement(NativeArray<float> data, int startIndex, int symbolFrameIdx, int thisFrameIndex, Matrix2x3 transform, Color colour)
+	private void WriteAnimFrameElement(NativeArray<float> data, int startIndex, int symbolFrameIdx, Matrix2x3 transform, float multAlpha)
 	{
 		if (symbolFrameIdx != -1010)
 		{
-			data[startIndex++] = (float)symbolFrameIdx;
-			data[startIndex++] = (float)thisFrameIndex;
-			data[startIndex++] = colour.r;
-			data[startIndex++] = colour.g;
-			data[startIndex++] = colour.b;
-			data[startIndex++] = colour.a;
-			data[startIndex++] = transform.m00;
-			data[startIndex++] = transform.m01;
-			data[startIndex++] = transform.m02;
-			data[startIndex++] = transform.m10;
-			data[startIndex++] = transform.m11;
-			data[startIndex++] = transform.m12;
+			data[startIndex] = (float)symbolFrameIdx;
+			data[startIndex + 1] = multAlpha;
+			data[startIndex + 2] = transform.m00;
+			data[startIndex + 3] = transform.m01;
+			data[startIndex + 4] = transform.m02;
+			data[startIndex + 5] = transform.m10;
+			data[startIndex + 6] = transform.m11;
+			data[startIndex + 7] = transform.m12;
 			return;
 		}
-		data[startIndex++] = (float)symbolFrameIdx;
-		data[startIndex++] = (float)thisFrameIndex;
-		data[startIndex++] = colour.r;
-		data[startIndex++] = colour.g;
-		data[startIndex++] = colour.b;
-		data[startIndex++] = colour.a;
-		data[startIndex++] = 0f;
-		data[startIndex++] = 0f;
-		data[startIndex++] = 0f;
-		data[startIndex++] = 0f;
-		data[startIndex++] = 0f;
-		data[startIndex++] = 0f;
+		data[startIndex] = (float)symbolFrameIdx;
+		data[startIndex + 1] = multAlpha;
+		data[startIndex + 2] = 0f;
+		data[startIndex + 3] = 0f;
+		data[startIndex + 4] = 0f;
+		data[startIndex + 5] = 0f;
+		data[startIndex + 6] = 0f;
+		data[startIndex + 7] = 0f;
 	}
 
-	private void Write(NativeArray<float> data, int startIndex, int symbolFrameIdx, int thisFrameIndex, KAnim.Anim.FrameElement element)
-	{
-		this.WriteAnimFrameElement(data, startIndex, symbolFrameIdx, thisFrameIndex, element.transform, element.multColour);
-	}
-
-	public const int SIZE_OF_SYMBOL_FRAME_ELEMENT = 16;
+	public const int SIZE_OF_SYMBOL_FRAME_ELEMENT = 12;
 
 	public const int SIZE_OF_ANIM_FRAME = 4;
 
-	public const int SIZE_OF_ANIM_FRAME_ELEMENT = 12;
+	public const int SIZE_OF_ANIM_FRAME_ELEMENT = 8;
 
 	private const int MAX_VISIBLE_SYMBOLS = 120;
 

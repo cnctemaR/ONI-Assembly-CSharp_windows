@@ -8,6 +8,7 @@ public static class KleiItemsStatusRefresher
 	private static void Initialize()
 	{
 		KleiItems.AddInventoryRefreshCallback(new KleiItems.InventoryRefreshCallback(KleiItemsStatusRefresher.OnRefreshResponseFromServer));
+		KleiItemsStatusRefresher.OnApplicationFocusReceiverMB.Create().OnGainFocus(new global::System.Action(KleiItemsStatusRefresher.RequestRefreshFromServer));
 	}
 
 	public static void RequestRefreshFromServer()
@@ -22,6 +23,7 @@ public static class KleiItemsStatusRefresher
 			return;
 		}
 		KleiItems.AddRequestInventoryRefresh();
+		KleiItems.AddRequestUserRewardsInfo();
 		KleiItemsStatusRefresher.realtimeOfLastServerRequest = realtimeSinceStartupAsDouble;
 	}
 
@@ -85,5 +87,41 @@ public static class KleiItemsStatusRefresher
 		}
 
 		private global::System.Action refreshUIFn;
+	}
+
+	public class OnApplicationFocusReceiverMB : MonoBehaviour
+	{
+		private void OnApplicationFocus(bool hasFocus)
+		{
+			if (hasFocus && this.onGainFocusFn != null)
+			{
+				this.onGainFocusFn();
+			}
+			if (!hasFocus && this.onLoseFocusFn != null)
+			{
+				this.onLoseFocusFn();
+			}
+		}
+
+		public void OnGainFocus(global::System.Action onGainFocusFn)
+		{
+			this.onGainFocusFn = (global::System.Action)Delegate.Combine(this.onGainFocusFn, onGainFocusFn);
+		}
+
+		public void OnLoseFocus(global::System.Action onLoseFocusFn)
+		{
+			this.onLoseFocusFn = (global::System.Action)Delegate.Combine(this.onLoseFocusFn, onLoseFocusFn);
+		}
+
+		public static KleiItemsStatusRefresher.OnApplicationFocusReceiverMB Create()
+		{
+			GameObject gameObject = new GameObject("OnApplicationFocusReceiverMB Instance");
+			global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
+			return gameObject.AddComponent<KleiItemsStatusRefresher.OnApplicationFocusReceiverMB>();
+		}
+
+		private global::System.Action onGainFocusFn;
+
+		private global::System.Action onLoseFocusFn;
 	}
 }

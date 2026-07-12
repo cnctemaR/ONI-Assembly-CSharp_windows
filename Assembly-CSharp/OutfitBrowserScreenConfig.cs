@@ -3,18 +3,23 @@ using UnityEngine;
 
 public readonly struct OutfitBrowserScreenConfig
 {
-	public OutfitBrowserScreenConfig(Option<ClothingOutfitTarget> selectedTarget, Option<Personality> minionPersonality, Option<GameObject> minionInstance)
+	public OutfitBrowserScreenConfig(Option<ClothingOutfitUtility.OutfitType> outfitType, Option<ClothingOutfitTarget> selectedTarget, Option<Personality> minionPersonality, Option<GameObject> minionInstance)
 	{
+		this.outfitType = outfitType;
 		this.selectedTarget = selectedTarget;
 		this.minionPersonality = minionPersonality;
 		this.isPickingOutfitForDupe = minionPersonality.HasValue || minionInstance.HasValue;
 		this.targetMinionInstance = minionInstance;
 		this.isValid = true;
+		if (minionPersonality.IsSome() || this.targetMinionInstance.IsSome())
+		{
+			global::Debug.Assert(outfitType.IsSome(), "If viewing outfits for a specific duplicant personality or instance, an outfitType must also be given.");
+		}
 	}
 
 	public OutfitBrowserScreenConfig WithOutfit(Option<ClothingOutfitTarget> sourceTarget)
 	{
-		return new OutfitBrowserScreenConfig(sourceTarget, this.minionPersonality, this.targetMinionInstance);
+		return new OutfitBrowserScreenConfig(this.outfitType, sourceTarget, this.minionPersonality, this.targetMinionInstance);
 	}
 
 	public string GetMinionName()
@@ -32,31 +37,31 @@ public readonly struct OutfitBrowserScreenConfig
 
 	public static OutfitBrowserScreenConfig Mannequin()
 	{
-		return new OutfitBrowserScreenConfig(Option.None, Option.None, Option.None);
+		return new OutfitBrowserScreenConfig(Option.None, Option.None, Option.None, Option.None);
 	}
 
-	public static OutfitBrowserScreenConfig Minion(Personality personality)
+	public static OutfitBrowserScreenConfig Minion(ClothingOutfitUtility.OutfitType outfitType, Personality personality)
 	{
-		return new OutfitBrowserScreenConfig(Option.None, personality, Option.None);
+		return new OutfitBrowserScreenConfig(outfitType, Option.None, personality, Option.None);
 	}
 
-	public static OutfitBrowserScreenConfig Minion(GameObject minionInstance)
+	public static OutfitBrowserScreenConfig Minion(ClothingOutfitUtility.OutfitType outfitType, GameObject minionInstance)
 	{
 		Personality personality = Db.Get().Personalities.Get(minionInstance.GetComponent<MinionIdentity>().personalityResourceId);
-		return new OutfitBrowserScreenConfig(ClothingOutfitTarget.FromMinion(minionInstance), personality, minionInstance);
+		return new OutfitBrowserScreenConfig(outfitType, ClothingOutfitTarget.FromMinion(outfitType, minionInstance), personality, minionInstance);
 	}
 
-	public static OutfitBrowserScreenConfig Minion(MinionBrowserScreen.GridItem item)
+	public static OutfitBrowserScreenConfig Minion(ClothingOutfitUtility.OutfitType outfitType, MinionBrowserScreen.GridItem item)
 	{
 		MinionBrowserScreen.GridItem.PersonalityTarget personalityTarget = item as MinionBrowserScreen.GridItem.PersonalityTarget;
 		if (personalityTarget != null)
 		{
-			return OutfitBrowserScreenConfig.Minion(personalityTarget.personality);
+			return OutfitBrowserScreenConfig.Minion(outfitType, personalityTarget.personality);
 		}
 		MinionBrowserScreen.GridItem.MinionInstanceTarget minionInstanceTarget = item as MinionBrowserScreen.GridItem.MinionInstanceTarget;
 		if (minionInstanceTarget != null)
 		{
-			return OutfitBrowserScreenConfig.Minion(minionInstanceTarget.minionInstance);
+			return OutfitBrowserScreenConfig.Minion(outfitType, minionInstanceTarget.minionInstance);
 		}
 		throw new NotImplementedException();
 	}
@@ -66,6 +71,8 @@ public readonly struct OutfitBrowserScreenConfig
 		LockerNavigator.Instance.outfitBrowserScreen.GetComponent<OutfitBrowserScreen>().Configure(this);
 		LockerNavigator.Instance.PushScreen(LockerNavigator.Instance.outfitBrowserScreen, null);
 	}
+
+	public readonly Option<ClothingOutfitUtility.OutfitType> outfitType;
 
 	public readonly Option<ClothingOutfitTarget> selectedTarget;
 

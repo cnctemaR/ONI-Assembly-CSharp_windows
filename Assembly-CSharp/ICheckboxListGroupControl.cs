@@ -14,14 +14,17 @@ public interface ICheckboxListGroupControl
 
 	public struct ListGroup
 	{
-		public ListGroup(string title, ICheckboxListGroupControl.CheckboxItem[] checkboxItems, Func<string, string> resolveTitleCallback = null)
+		public ListGroup(string title, ICheckboxListGroupControl.CheckboxItem[] checkboxItems, Func<string, string> resolveTitleCallback = null, global::System.Action onItemClicked = null)
 		{
 			this.title = title;
 			this.checkboxItems = checkboxItems;
 			this.resolveTitleCallback = resolveTitleCallback;
+			this.onItemClicked = onItemClicked;
 		}
 
 		public Func<string, string> resolveTitleCallback;
+
+		public global::System.Action onItemClicked;
 
 		public string title;
 
@@ -35,6 +38,8 @@ public interface ICheckboxListGroupControl
 		public string tooltip;
 
 		public bool isOn;
+
+		public Func<string, bool> overrideLinkActions;
 
 		public Func<string, object, string> resolveTooltipCallback;
 	}

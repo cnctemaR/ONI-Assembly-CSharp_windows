@@ -36,7 +36,7 @@ namespace Klei.AI
 			float currentTimeInCycles = GameUtil.GetCurrentTimeInCycles();
 			if (season.synchronizedToPeriod)
 			{
-				float seasonPeriod = this.GetSeasonPeriod();
+				float seasonPeriod = this.Season.GetSeasonPeriod();
 				this.nextPeriodTime = (Mathf.Floor(currentTimeInCycles / seasonPeriod) + 1f) * seasonPeriod;
 			}
 			else
@@ -48,7 +48,7 @@ namespace Klei.AI
 
 		private void CalculateNextEventTime()
 		{
-			float seasonPeriod = this.GetSeasonPeriod();
+			float seasonPeriod = this.Season.GetSeasonPeriod();
 			this.randomizedNextTime = global::UnityEngine.Random.Range(this.Season.randomizedEventStartTime.min, this.Season.randomizedEventStartTime.max);
 			float currentTimeInCycles = GameUtil.GetCurrentTimeInCycles();
 			float num = this.nextPeriodTime + this.randomizedNextTime;
@@ -83,7 +83,7 @@ namespace Klei.AI
 				list2.Sort();
 				int num = Mathf.Min(list2.Count, 5);
 				GameplayEvent gameplayEvent = list2[global::UnityEngine.Random.Range(0, num)];
-				GameplayEventManager.Instance.StartNewEvent(gameplayEvent, this.worldId);
+				GameplayEventManager.Instance.StartNewEvent(gameplayEvent, this.worldId, new Action<StateMachine.Instance>(this.Season.AdditionalEventInstanceSetup));
 				flag = true;
 			}
 			this.allEventWillNotRunAgain = true;
@@ -99,11 +99,6 @@ namespace Klei.AI
 				}
 			}
 			return flag;
-		}
-
-		private float GetSeasonPeriod()
-		{
-			return this.Season.period;
 		}
 
 		public bool ShouldGenerateEvents()

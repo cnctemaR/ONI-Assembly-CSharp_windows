@@ -336,6 +336,238 @@ namespace STRINGS
 					}
 				}
 			}
+
+			public static class FOSSILHUNT
+			{
+				public static LocString NAME = "Ancient Specimen";
+
+				public static LocString DESCRIPTION = "This asteroid has a few skeletons in its geological closet.\n\nTrack down the fossilized fragments of an ancient critter to assemble key pieces of Gravitas history and unlock a new resource.";
+
+				public static LocString DESCRIPTION_SHORT = "Track down the fossilized fragments of an ancient critter.";
+
+				public static LocString DESCRIPTION_BUILDINGMENU_COVERED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
+
+				public static LocString DESCRIPTION_REVEALED = "Unlocking full access to the fossil cache buried beneath the ancient specimen requires excavation of all deposit sites.";
+
+				public class MISC
+				{
+					public static LocString DECREASE_DECOR_ATTRIBUTE = "Obscured";
+				}
+
+				public class STATUSITEMS
+				{
+					public class FOSSILMINEPENDINGWORK
+					{
+						public static LocString NAME = "Work Errand";
+
+						public static LocString TOOLTIP = "Fossil mine will be operated once a Duplicant is available";
+					}
+
+					public class FOSSILIDLE
+					{
+						public static LocString NAME = "No Mining Orders Queued";
+
+						public static LocString TOOLTIP = "Select an excavation order to begin mining";
+					}
+
+					public class FOSSILEMPTY
+					{
+						public static LocString NAME = "Waiting For Materials";
+
+						public static LocString TOOLTIP = "Mining will begin once materials have been delivered";
+					}
+
+					public class FOSSILENTOMBED
+					{
+						public static LocString NAME = "Entombed";
+
+						public static LocString TOOLTIP = "This fossil must be dug out before it can be excavated";
+
+						public static LocString LINE_ITEM = "    • Entombed";
+					}
+				}
+
+				public class UISIDESCREENS
+				{
+					public static LocString DIG_SITE_EXCAVATE_BUTTON = "Excavate";
+
+					public static LocString DIG_SITE_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
+
+					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
+
+					public static LocString DIG_SITE_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
+
+					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON = "Main Site";
+
+					public static LocString MINOR_DIG_SITE_REVEAL_BUTTON_TOOLTIP = "Click to show this site";
+
+					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON = "Excavate";
+
+					public static LocString FOSSIL_BITS_EXCAVATE_BUTTON_TOOLTIP = "Carefully uncover and examine this fossil";
+
+					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON = "Cancel Excavation";
+
+					public static LocString FOSSIL_BITS_CANCEL_EXCAVATION_BUTTON_TOOLTIP = "Abandon excavation efforts";
+
+					public static LocString FABRICATOR_LIST_TITLE = "Mining Orders";
+
+					public static LocString FABRICATOR_RECIPE_SCREEN_TITLE = "Recipe";
+				}
+
+				public class BEGIN_POPUP
+				{
+					public static LocString NAME = "Story Trait: Ancient Specimen";
+
+					public static LocString CODEX_NAME = "First Encounter";
+
+					public static LocString DESCRIPTION = "I've discovered a fossilized critter buried in my colony—at least, part of one—but it does not resemble any of the species we have encountered on this asteroid.\n\nWhere did it come from? How did it get here? And what other questions might these bones hold the answer to?\n\nThere is only one way to find out.";
+
+					public static LocString BUTTON = "Close";
+				}
+
+				public class END_POPUP
+				{
+					public static LocString NAME = "Story Trait Complete: Ancient Specimen";
+
+					public static LocString CODEX_NAME = "Challenge Completed";
+
+					public static LocString DESCRIPTION = "My Duplicants have meticulously reassembled as much of the giant critter's scattered remains as they could find.\n\nTheir efforts have unearthed a seemingly bottomless fossil quarry beneath the largest fragment's dig site.\n\nNestled among the topmost bones was a handcrafted critter collar. It's too large to have belonged to any species traditionally categorized as companion animals.";
+
+					public static LocString BUTTON = "Activate Fossil Quarry";
+				}
+
+				public class REWARDS
+				{
+					public class MINED_FOSSIL
+					{
+						public static LocString DESC = "Mined " + UI.FormatAsLink("Fossil", "FOSSIL");
+					}
+				}
+
+				public class ENTITIES
+				{
+					public class FOSSIL_DIG_SITE
+					{
+						public static LocString NAME = "Ancient Specimen";
+
+						public static LocString DESC = "Here lies a significant portion of the remains of an enormous, long-dead critter.\n\nIt's not from around here.";
+					}
+
+					public class FOSSIL_RESIN
+					{
+						public static LocString NAME = "Amber Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in a resin-like substance.";
+					}
+
+					public class FOSSIL_ICE
+					{
+						public static LocString NAME = "Frozen Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in " + UI.FormatAsLink("Ice", "ICE") + ".";
+					}
+
+					public class FOSSIL_ROCK
+					{
+						public static LocString NAME = "Petrified Fossil";
+
+						public static LocString DESC = "The well-preserved partial remains of a critter of unknown origin.\n\nIt appears to belong to the same ancient specimen found at another site.\n\nThis fragment has been preserved in petrified " + UI.FormatAsLink("Dirt", "DIRT") + ".";
+					}
+
+					public class FOSSIL_BITS
+					{
+						public static LocString NAME = "Fossil Fragments";
+
+						public static LocString DESC = "Bony debris that can be excavated for " + UI.FormatAsLink("Fossil", "FOSSIL") + ".";
+					}
+				}
+
+				public class QUEST
+				{
+					public static LocString LINKED_TOOLTIP = "\n\nClick to show this site";
+				}
+
+				public class ICECRITTERDESIGN
+				{
+					public static LocString TITLE = "Organism Design Notes";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B363]</smallcaps>\n\n[LOG BEGINS]\n\n...Restricting our organism design to specifically target survival in an off-planet polar climate has narrowed our focus significantly, allowing development of this project to rapidly outpace the others.\n\nWe have successfully optimized for adaptive features such as the formation of protective adipose tissue at >40% of the organism's total mass. Dr. Bubare was concerned about the consequences for muscle mass, but results confirm that reductions fall within an acceptable range.\n\nOur next step is to adapt the organism's diet. It would be inadvisable to populate a new colony with carnivorous creatures of this size.\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...When I am alone in the lab, I find myself gravitating toward the enclosure to listen to the creature's melodic vocalizations. Sometimes the pitch changes slightly as I approach.\n\nI am not certain what that means.\n\n[LOG ENDS]\n------------------\n";
+
+						public static LocString CONTAINER2 = "[LOG BEGINS]\n\n...Some of the other departments have taken to calling our work here \"Project Meat Popsicle\". It is a crass misnomer. This species is not designed to be a food source: it must survive the Ceres climate long enough to establish a stable population that will enable the subsequent settlement party to access the essential research data stored in its DNA via Dr. Winslow's revolutionary genome-encoding technique.\n\nImagine, countless yottabytes' worth of scientific documentation wandering freely around a new colony...the ultimate self-sustaining archive, providing stable data storage that requires zero technological maintenance.\n\nIt gives new meaning to the term, \"living document.\"\n\n[LOG ENDS]\n------------------\n[LOG BEGINS]\n\n...Today is the day. My sonorous critter and her handful of progeny are ready to be transported to their new home. They are scheduled to arrive three months in the past, to ensure that they are well established before the settlement party's arrival next week.\n\nDr. Techna invited me to assist with the teleportation. I was relieved to be too busy to accept. I have heard rumors about previous shipments going awry. These stories are unsubstantiated, and yet...\n\nThe urgency of our mission sometimes necessitates non-ideal compromises.\n\nThe lab is so very quiet now.\n\n[LOG ENDS]\n------------------\n";
+					}
+				}
+
+				public class QUEST_AVAILABLE_NOTIFICATION
+				{
+					public static LocString NAME = "Fossil Excavated";
+
+					public static LocString TOOLTIP = "Additional fossils located";
+				}
+
+				public class QUEST_AVAILABLE_POPUP
+				{
+					public static LocString NAME = "Fossil Excavated";
+
+					public static LocString CHECK_BUTTON = "View Site";
+
+					public static LocString DESCRIPTION = "Success! My Duplicants have safely excavated a set of strange, fossilized remains.\n\nIt appears that there are more of this giant critter's bones strewn around the asteroid. It's vital that we reassemble this skeleton for deeper analysis.";
+				}
+
+				public class UNLOCK_DNADATA_NOTIFICATION
+				{
+					public static LocString NAME = "Fossil Data Decoded";
+
+					public static LocString TOOLTIP = "There was data stored in this fossilized critter's DNA";
+				}
+
+				public class UNLOCK_DNADATA_POPUP
+				{
+					public static LocString NAME = "Data Discovered in Fossil";
+
+					public static LocString VIEW_IN_CODEX = "View Data";
+				}
+
+				public class DNADATA_ENTRY
+				{
+					public static LocString TELEPORTFAILURE = "It appears that this creature's DNA was once used as a kind of genetic storage unit.";
+				}
+
+				public class DNADATA_ENTRY_EXPANDED
+				{
+					public static LocString TITLE = "SUBJECT: RESETTLEMENT LAUNCH PARTY";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+					public class BODY
+					{
+						public static LocString EMAILHEADER = "<smallcaps>To: <b>[REDACTED]</b><alpha=#AA><size=12></size></color>\nFrom: <b>[REDACTED]</b><alpha=#AA></smallcaps>\n------------------\n";
+
+						public static LocString CONTAINER1 = "<indent=5%>Dear [REDACTED]\n\nWe are pleased to announce that research objectives for Operation Piazzi's Planet are nearing completion. Thank you all for your patience as we navigated the unprecedented obstacles that such groundbreaking work entails.\n\nWe are aware of rumors regarding documents leaked from Dr. [REDACTED]'s files.\n\nRest assured that the contents of this supposed \"whistleblower\" effort are entirely fabricated—our technology is far too advanced to allow for the type of miscalculation that would result in OPP shipments arriving at their destination some 10,000 years prior to the targeted date.\n\nOur IT security team is currently investigating the document's digital footprint to determine its origin.\n\nTo express our gratitude for your continued support, we would like to invite key stakeholders to a private launch party held at the Gravitas Facility. The evening will be emceed by Dr. Olivia Broussard, who will present our groundbreaking prototypes along with a five-course meal featuring lab-crafted ingredients.\n\nDue to the sensitive nature of our work, we regret that no additional guests or dietary restrictions can be accommodated at this time.\n\nDirector Stern will be hosting a 30-minute Q&A session after dinner. Questions must be submitted at least 24 hours in advance.\n\nQueries about the [REDACTED] papers will be disregarded.\n\nPlease be advised that the contents of this e-mail will expire three minutes from the time of opening.</indent>";
+
+						public static LocString SIGNATURE = "\nSincerely,\n[REDACTED]\n<size=11>The Gravitas Facility</size>\n------------------\n";
+					}
+				}
+
+				public class HALLWAYRACES
+				{
+					public static LocString TITLE = "Unauthorized Activity";
+
+					public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+					public class BODY
+					{
+						public static LocString EMAILHEADER = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color></smallcaps>\n------------------\n";
+
+						public static LocString CONTAINER1 = "<indent=5%>Employees are advised that removing organisms from the bioengineering labs without an approved requisition form is strictly prohibited.\n\nGravitas projects are not designed to be ridden for sport. Injuries sustained during unsanctioned activities are not eligible for coverage under corporate health benefits.\n\nPlease find a comprehensive summary of company regulations attached.\n\n<alpha=#AA>[MISSING ATTACHMENT]</indent>";
+
+						public static LocString SIGNATURE = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+					}
+				}
+			}
 		}
 
 		public class QUESTS
@@ -366,6 +598,13 @@ namespace STRINGS
 				public static LocString NAME = "Nice Neighborhood";
 
 				public static LocString COMPLETE = "Success! All this excellent decor is really making the hermit feel at home.\n\nHe scrawled a thank-you note on the back of an old holiday card.";
+			}
+
+			public class FOSSILHUNTQUEST
+			{
+				public static LocString NAME = "Scattered Fragments";
+
+				public static LocString COMPLETE = "Each of the fossil deposits on this asteroid has been excavated, and its contents safely retrieved.\n\nThe ancient specimen's deeper cache of fossil can now be mined.";
 			}
 
 			public class CRITERIA
@@ -416,6 +655,49 @@ namespace STRINGS
 						"Food",
 						UI.PST_KEYWORD,
 						" items. Quality must be {0} or higher\n\nFoods Delivered:\n{1}"
+					});
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTSPECIMEN
+				{
+					public static LocString NAME = UI.FormatAsLink("Ancient Specimen", "MOVECAMERATOFossilDig");
+
+					public static LocString TOOLTIP = "Retrieve the largest deposit of the ancient critter's remains";
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTICEFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Frozen Fossil", "MOVECAMERATOFossilIce");
+
+					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in " + UI.PRE_KEYWORD + "Ice" + UI.PST_KEYWORD;
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTRESINFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Amber Fossil", "MOVECAMERATOFossilResin");
+
+					public static LocString TOOLTIP = "Retrieve a piece of the ancient critter that has been preserved in a strangely resin-like substance";
+
+					public static LocString NONE = "None";
+				}
+
+				public class LOSTROCKFOSSIL
+				{
+					public static LocString NAME = UI.FormatAsLink("Petrified Fossil", "MOVECAMERATOFossilRock");
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"Retrieve a piece of the ancient critter that has been preserved in ",
+						UI.PRE_KEYWORD,
+						"Rock",
+						UI.PST_KEYWORD,
+						" "
 					});
 
 					public static LocString NONE = "None";

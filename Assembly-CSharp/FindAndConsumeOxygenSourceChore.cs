@@ -159,6 +159,7 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 				.ScheduleChange(this.scheduleFailure, new StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.Transition.ConditionCallback(FindAndConsumeOxygenSourceChore.IsNotAllowedByScheduleAndChoreIsNotCritical))
 				.DefaultState(this.consume.pre)
 				.ToggleAnims("anim_bionic_kanim", 0f)
+				.ToggleTag(GameTags.RecoveringBreath)
 				.Enter("Add Symbol Override", delegate(FindAndConsumeOxygenSourceChore.Instance smi)
 				{
 					FindAndConsumeOxygenSourceChore.SetOverrideAnimSymbol(smi, true);

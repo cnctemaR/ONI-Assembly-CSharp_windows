@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{519F81DB-4094-464D-BDAE-9778D1A2C5D4}</ProjectGuid>
+    <ProjectGuid>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E6A2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Analytics</RootNamespace>
     <AssemblyName>UnityEngine.UnityAnalyticsCommonModule</AssemblyName>
@@ -20,11 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C588}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E656}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C5C3}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E691}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

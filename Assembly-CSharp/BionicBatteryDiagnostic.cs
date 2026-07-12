@@ -27,17 +27,25 @@ public class BionicBatteryDiagnostic : BionicColonyDiagnostic
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
 			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_DATA;
 		}
-		else if ((float)this.bionics.Count * this.recommendedJoulesPerBionic > this.tracker.GetAverageValue(this.trackerSampleCountSeconds))
+		else if (this.bionics.Count != 0)
 		{
-			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
-			float currentValue = this.tracker.GetCurrentValue();
-			float num = this.bionicJoulesPerCycle * (float)this.bionics.Count;
-			string formattedJoules = GameUtil.GetFormattedJoules(currentValue, "F1", GameUtil.TimeSlice.None);
-			string formattedJoules2 = GameUtil.GetFormattedJoules(Mathf.Abs(num), "F1", GameUtil.TimeSlice.None);
-			string text = UI.COLONY_DIAGNOSTICS.BIONICBATTERYDIAGNOSTIC.CRITERIA_BATTERIES.LOW_POWERBANKS;
-			text = text.Replace("{0}", formattedJoules);
-			text = text.Replace("{1}", formattedJoules2);
-			diagnosticResult.Message = text;
+			if (this.tracker.GetAverageValue(this.trackerSampleCountSeconds) == 0f)
+			{
+				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.BIONICBATTERYDIAGNOSTIC.CRITERIA_BATTERIES.NO_POWERBANKS;
+				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Bad;
+			}
+			else if ((float)this.bionics.Count * this.recommendedJoulesPerBionic > this.tracker.GetAverageValue(this.trackerSampleCountSeconds))
+			{
+				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
+				float currentValue = this.tracker.GetCurrentValue();
+				float num = this.bionicJoulesPerCycle * (float)this.bionics.Count;
+				string formattedJoules = GameUtil.GetFormattedJoules(currentValue, "F1", GameUtil.TimeSlice.None);
+				string formattedJoules2 = GameUtil.GetFormattedJoules(Mathf.Abs(num), "F1", GameUtil.TimeSlice.None);
+				string text = UI.COLONY_DIAGNOSTICS.BIONICBATTERYDIAGNOSTIC.CRITERIA_BATTERIES.LOW_POWERBANKS;
+				text = text.Replace("{0}", formattedJoules);
+				text = text.Replace("{1}", formattedJoules2);
+				diagnosticResult.Message = text;
+			}
 		}
 		return diagnosticResult;
 	}

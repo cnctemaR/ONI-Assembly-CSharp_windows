@@ -621,9 +621,20 @@ namespace STRINGS
 
 			public class POWERBANKCHARGERINPROGRESS
 			{
-				public static LocString NAME = "Recharging Powerbank at {0}";
+				public static LocString NAME = "Recharging Power Bank: {0}";
 
-				public static LocString TOOLTIP = UI.FormatAsLink("Power Bank Charger", "ELECTROBANKCHARGER") + " will drop the electrobank being charged whenever it reaches full charge.";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is currently charging a ",
+					UI.PRE_KEYWORD,
+					"Power Bank",
+					UI.PST_KEYWORD,
+					" at {0}\n\nThe ",
+					UI.PRE_KEYWORD,
+					"Power Bank",
+					UI.PST_KEYWORD,
+					" will be dropped once charging is complete"
+				});
 			}
 
 			public class CONSTRUCTABLEDIGUNREACHABLE

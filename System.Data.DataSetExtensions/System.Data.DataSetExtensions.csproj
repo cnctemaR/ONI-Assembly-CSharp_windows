@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{519F81DB-4094-464D-BDAE-9778D1A2C58D}</ProjectGuid>
+    <ProjectGuid>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E65B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data.DataSetExtensions</RootNamespace>
     <AssemblyName>System.Data.DataSetExtensions</AssemblyName>
@@ -32,19 +32,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C587}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E655}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C58C}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E65A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C58E}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E65C}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{519F81DB-4094-464D-BDAE-9778D1A2C58F}</Project>
+      <Project>{7A1AC9B1-28DF-4ED1-8FD4-5932F023E65D}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -693,9 +693,13 @@ public static class CodexEntryGenerator
 			}
 			list2.Add(new CodexSpacer());
 			list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
-			SubEntry subEntry = new SubEntry(UI.ExtractLinkID(gameObject.GetProperName()), "BOOSTER", list, gameObject.GetProperName());
-			subEntry.icon = first;
-			CodexCache.FindEntry("BOOSTER").subEntries.Add(subEntry);
+			string id = UI.ExtractLinkID(gameObject.GetProperName());
+			if (CodexCache.FindEntry("BOOSTER").subEntries.Find((SubEntry x) => x.id == id) == null)
+			{
+				SubEntry subEntry = new SubEntry(id, "BOOSTER", list, gameObject.GetProperName());
+				subEntry.icon = first;
+				CodexCache.FindEntry("BOOSTER").subEntries.Add(subEntry);
+			}
 		}
 	}
 

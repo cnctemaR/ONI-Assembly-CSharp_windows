@@ -193,7 +193,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Ranching Booster", "BOOSTER_RANCH1");
 
-				public static LocString DESC = "Grants a Bionic Duplicant the skills required to care for " + UI.FormatAsLink("Critters", "CREATURES") + "  in every way.";
+				public static LocString DESC = "Grants a Bionic Duplicant the skills required to care for " + UI.FormatAsLink("Critters", "CREATURES") + " in every way.";
 			}
 
 			public class BOOSTER_COOK1
@@ -1351,7 +1351,9 @@ namespace STRINGS
 					UI.FormatAsLink("Generators", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE"),
 					" to increase their ",
 					UI.FormatAsLink("Power", "POWER"),
-					" output.\n\nAlso used in the production of boosters for Bionic Duplicants."
+					" output.\n\nAlso used in the production of ",
+					UI.FormatAsLink("Boosters", "BOOSTER"),
+					" for Bionic Duplicants."
 				});
 
 				public static LocString TINKER_REQUIREMENT_NAME = "Skill: " + DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME;

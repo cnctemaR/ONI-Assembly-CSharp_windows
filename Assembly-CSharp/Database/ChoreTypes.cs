@@ -96,11 +96,12 @@ namespace Database
 			this.Narcolepsy = this.Add("Narcolepsy", new string[0], "Narcolepsy", new string[0], DUPLICANTS.CHORES.NARCOLEPSY.NAME, DUPLICANTS.CHORES.NARCOLEPSY.STATUS, DUPLICANTS.CHORES.NARCOLEPSY.TOOLTIP, false, -1, null);
 			this.ReturnSuitUrgent = this.Add("ReturnSuitUrgent", new string[0], "", new string[0], DUPLICANTS.CHORES.RETURNSUIT.NAME, DUPLICANTS.CHORES.RETURNSUIT.STATUS, DUPLICANTS.CHORES.RETURNSUIT.TOOLTIP, false, -1, null);
 			this.SleepDueToDisease = this.Add("SleepDueToDisease", new string[0], "Sleep", new string[] { "Vomit", "Cough", "EmoteHighPriority" }, DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS, DUPLICANTS.CHORES.RESTDUETODISEASE.TOOLTIP, false, -1, null);
+			this.BionicRestDueToDisease = this.Add("BionicRestDueToDisease", new string[0], "Heal", new string[] { "Vomit", "Cough", "EmoteHighPriority" }, DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS, DUPLICANTS.CHORES.RESTDUETODISEASE.TOOLTIP, false, -1, null);
 			this.Sleep = this.Add("Sleep", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.SLEEP.NAME, DUPLICANTS.CHORES.SLEEP.STATUS, DUPLICANTS.CHORES.SLEEP.TOOLTIP, false, -1, null);
-			this.BionicBedtimeMode = this.Add("BionicBedtimeMode", new string[0], "", new string[0], DUPLICANTS.CHORES.BIONICBEDTIMEMODE.NAME, DUPLICANTS.CHORES.BIONICBEDTIMEMODE.STATUS, DUPLICANTS.CHORES.BIONICBEDTIMEMODE.TOOLTIP, false, -1, null);
 			this.TakeMedicine = this.Add("TakeMedicine", new string[0], "", new string[0], DUPLICANTS.CHORES.TAKEMEDICINE.NAME, DUPLICANTS.CHORES.TAKEMEDICINE.STATUS, DUPLICANTS.CHORES.TAKEMEDICINE.TOOLTIP, false, -1, null);
 			this.GetDoctored = this.Add("GetDoctored", new string[0], "", new string[0], DUPLICANTS.CHORES.GETDOCTORED.NAME, DUPLICANTS.CHORES.GETDOCTORED.STATUS, DUPLICANTS.CHORES.GETDOCTORED.TOOLTIP, false, -1, null);
 			this.RestDueToDisease = this.Add("RestDueToDisease", new string[0], "RestDueToDisease", new string[] { "Vomit", "Cough", "EmoteHighPriority" }, DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS, DUPLICANTS.CHORES.RESTDUETODISEASE.TOOLTIP, false, -1, null);
+			this.BionicBedtimeMode = this.Add("BionicBedtimeMode", new string[0], "", new string[0], DUPLICANTS.CHORES.BIONICBEDTIMEMODE.NAME, DUPLICANTS.CHORES.BIONICBEDTIMEMODE.STATUS, DUPLICANTS.CHORES.BIONICBEDTIMEMODE.TOOLTIP, false, -1, null);
 			this.ScrubOre = this.Add("ScrubOre", new string[0], "", new string[0], DUPLICANTS.CHORES.SCRUBORE.NAME, DUPLICANTS.CHORES.SCRUBORE.STATUS, DUPLICANTS.CHORES.SCRUBORE.TOOLTIP, false, -1, null);
 			this.DeliverFood = this.Add("DeliverFood", new string[0], "", new string[0], DUPLICANTS.CHORES.DELIVERFOOD.NAME, DUPLICANTS.CHORES.DELIVERFOOD.STATUS, DUPLICANTS.CHORES.DELIVERFOOD.TOOLTIP, false, -1, null);
 			this.Sigh = this.Add("Sigh", new string[0], "Emote", new string[0], DUPLICANTS.CHORES.SIGH.NAME, DUPLICANTS.CHORES.SIGH.STATUS, DUPLICANTS.CHORES.SIGH.TOOLTIP, false, -1, null);
@@ -211,7 +212,7 @@ namespace Database
 				new ChoreType[] { this.LearnSkill, this.UnlearnSkill, this.Eat, this.ReloadElectrobank, this.BreakPee },
 				new ChoreType[] { this.FindOxygenSourceItem, this.BionicAbsorbOxygen },
 				new ChoreType[] { this.TakeMedicine },
-				new ChoreType[] { this.Heal, this.SleepDueToDisease, this.RestDueToDisease },
+				new ChoreType[] { this.Heal, this.SleepDueToDisease, this.RestDueToDisease, this.BionicRestDueToDisease },
 				new ChoreType[] { this.Sleep, this.BionicBedtimeMode, this.Narcolepsy },
 				new ChoreType[] { this.Doctor, this.GetDoctored },
 				new ChoreType[] { this.Emote, this.Hug },
@@ -344,6 +345,8 @@ namespace Database
 		public ChoreType GetDoctored;
 
 		public ChoreType RestDueToDisease;
+
+		public ChoreType BionicRestDueToDisease;
 
 		public ChoreType SleepDueToDisease;
 

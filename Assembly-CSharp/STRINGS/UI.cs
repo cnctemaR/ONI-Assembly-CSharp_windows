@@ -1110,30 +1110,46 @@ namespace STRINGS
 			{
 				public static LocString ALL_NAME = "Bionic Power";
 
-				public static LocString TOOLTIP_NAME = "<b>Power Banks</b>";
+				public static LocString TOOLTIP_NAME = "<b>Bionic Power</b>";
 
 				public class CRITERIA_BATTERIES
 				{
-					public static LocString PASS = "    • Power Bank supply is currently adequate";
+					public static LocString PASS = "    • " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " supply is currently adequate";
 
-					public static LocString NO_POWERBANKS = "    • Duplicants have no Power Banks";
+					public static LocString NO_POWERBANKS = "    • Colony has no " + UI.FormatAsLink("Power Banks", "ELECTROBANK") + "\n\nBionic Duplicants are at risk of becoming powerless";
 
-					public static LocString LOW_POWERBANKS = "The colony's " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " reserves are low:\n\n    • {0} are currently available\n    • {1} is being consumed per cycle";
+					public static LocString LOW_POWERBANKS = "    • " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " reserves are low:\n\n<indent=20px>    • {0} are currently available</indent>\n<indent=20px>    • {1} are being consumed per cycle</indent>";
 				}
 
 				public class CRITERIA_POWERLEVEL
 				{
-					public static LocString CRITICAL_MODE = "    • One or more Duplicants in desperate need of power banks";
+					public static LocString CRITICAL_MODE = "    • One or more Duplicants are in desperate need of " + UI.FormatAsLink("Power Banks", "ELECTROBANK");
 
-					public static LocString POWERLESS = "    • One or more Duplicants are incapacitated and in desperate need of power banks";
+					public static LocString POWERLESS = "    • One or more Duplicants are incapacitated and in desperate need of " + UI.FormatAsLink("Power Banks", "ELECTROBANK");
 				}
 
 				public static class CRITERIA
 				{
-					public static LocString CHECKENOUGHBATTERIES = "Check enough batteries";
+					public static LocString CHECKENOUGHBATTERIES = "Check enough power banks";
 
 					public static LocString CHECKPOWERLEVEL = "Check critical power level";
 				}
+			}
+		}
+
+		public class SELFCHARGINGBATTERYDIAGNOSTIC
+		{
+			public static LocString ALL_NAME = ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.NAME;
+
+			public static LocString TOOLTIP_NAME = ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.NAME;
+
+			public static LocString NORMAL = "    • Safe";
+
+			public static LocString CRITERIA_BATTERYLIFE_WARNING = "    • End-of-lifespan explosion imminent";
+
+			public static class CRITERIA
+			{
+				public static LocString CHECKSELFCHARGINGBATTERYLIFE = "Check lifespan";
 			}
 		}
 
@@ -11471,7 +11487,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "{0}";
 
-				public static LocString NONE_ROW_LABEL = "Unequip";
+				public static LocString NONE_ROW_LABEL = "Clear";
 
 				public static LocString NONE_ROW_TOOLTIP = "Click to remove any item currently assigned to the selected slot";
 

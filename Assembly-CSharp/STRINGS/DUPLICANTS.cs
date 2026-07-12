@@ -1924,6 +1924,8 @@ namespace STRINGS
 
 				public static LocString NOT_A_ROBOT = "Unavailable to Robots";
 
+				public static LocString IS_A_BIONIC = "Must be a Bionic Duplicant";
+
 				public static LocString NOT_A_BIONIC = "Unavailable to Bionic Duplicants";
 
 				public static LocString VALID_MOURNING_SITE = "Nowhere to mourn";
@@ -2568,7 +2570,7 @@ namespace STRINGS
 
 			public class BIONICMICROCHIPGENERATION
 			{
-				public static LocString NAME = "Programming Microchip {0}";
+				public static LocString NAME = "Programming Microchip: {0}";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -3497,7 +3499,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Oxygen Tank: {ConsumptionRate} O<sub>2</sub>";
 
-				public static LocString TOOLTIP = "Bionic Duplicants are fitted with internal " + UI.FormatAsLink("Oxygen", "OXYGEN") + " tanks";
+				public static LocString TOOLTIP = "Bionic Duplicants consume " + UI.FormatAsLink("Oxygen", "OXYGEN") + " from their internal tanks";
 			}
 
 			public class PICKUPDELIVERSTATUS
@@ -5586,9 +5588,9 @@ namespace STRINGS
 					{
 						"Estimated ",
 						UI.PRE_KEYWORD,
-						"Power Bank",
+						"Power",
 						UI.PST_KEYWORD,
-						" charge remaining: {0}"
+						" supply remaining: {0}"
 					});
 
 					public static LocString ELECTROBANK_DETAILS_LABEL = "Total Electrobanks {0} / {1}";
@@ -5822,6 +5824,20 @@ namespace STRINGS
 				public static LocString NAME = "Unrested: Cold Bedroom";
 
 				public static LocString TOOLTIP = "This Duplicant was shivering instead of sleeping";
+			}
+
+			public class BADSLEEPDEFRAGMENTING
+			{
+				public static LocString NAME = "Unrested: Too Bright";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant kept waking up because of the ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" produced by a Bionic Duplicant defragmenting nearby"
+				});
 			}
 
 			public class TERRIBLESLEEP

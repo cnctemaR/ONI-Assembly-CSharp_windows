@@ -26,6 +26,7 @@ public class BeOfflineChore : Chore<BeOfflineChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.BeOffline, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new BeOfflineChore.StatesInstance(this);
+		this.AddPrecondition(ChorePreconditions.instance.NotInTube, null);
 	}
 
 	public const string EFFECT_NAME = "BionicOffline";

@@ -75,7 +75,46 @@ public class StressShockChore : Chore<StressShockChore.StatesInstance>
 			{
 				base.sm.targetMoveLocation.Set(num, base.smi, false);
 				this.GoTo(base.sm.shocking.runAroundShockingStuff);
+				return;
 			}
+			num = this.FindMinionTarget();
+			if (num != -1 && num != Grid.PosToCell(base.gameObject))
+			{
+				base.sm.targetMoveLocation.Set(num, base.smi, false);
+				this.GoTo(base.sm.shocking.runAroundShockingStuff);
+				return;
+			}
+			base.sm.targetMoveLocation.Set(Grid.PosToCell(base.gameObject), base.smi, false);
+			this.GoTo(base.sm.shocking.standStillShockingStuff);
+		}
+
+		private int FindMinionTarget()
+		{
+			Navigator component = base.smi.gameObject.GetComponent<Navigator>();
+			if (component == null)
+			{
+				return Grid.InvalidCell;
+			}
+			int num = int.MaxValue;
+			int num2 = Grid.InvalidCell;
+			List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems(base.smi.gameObject.GetMyWorldId(), false);
+			for (int i = 0; i < worldItems.Count; i++)
+			{
+				if (!worldItems[i].IsNullOrDestroyed() && !(worldItems[i].gameObject == base.gameObject))
+				{
+					int num3 = Grid.PosToCell(worldItems[i]);
+					if (component.CanReach(num3))
+					{
+						int navigationCost = component.GetNavigationCost(num3);
+						if (navigationCost < num)
+						{
+							num = navigationCost;
+							num2 = num3;
+						}
+					}
+				}
+			}
+			return num2;
 		}
 
 		private int FindIdleCell()
@@ -92,6 +131,56 @@ public class StressShockChore : Chore<StressShockChore.StatesInstance>
 			}
 			minionPathFinderAbilities.SetIdleNavMaskEnabled(false);
 			return idleCellQuery.GetResultCell();
+		}
+
+		public void ShockUpdateRender(StressShockChore.StatesInstance smi, float dt)
+		{
+			if (smi.sm.faceLightningFX.Get(smi) != null)
+			{
+				smi.sm.faceLightningFX.Get(smi).transform.SetPosition(smi.FaceOriginLocation());
+			}
+			if (smi.sm.beamTarget.Get(smi) != null)
+			{
+				Vector3 vector = smi.sm.beamTarget.Get(smi).transform.position + Vector3.up / 2f;
+				if (smi.sm.beamFX.Get(smi) == null)
+				{
+					smi.MakeBeam();
+				}
+				if (!StressShockChore.CheckBlocked(Grid.PosToCell(smi.sm.beamFX.Get(smi).transform.position), Grid.PosToCell(vector)))
+				{
+					smi.AimBeam(vector, 0);
+				}
+			}
+		}
+
+		public void ShockUpdate200(StressShockChore.StatesInstance smi, float dt)
+		{
+			float num = dt * STRESS.SHOCKER.POWER_CONSUMPTION_RATE;
+			smi.sm.powerConsumed.Delta(num, smi);
+			smi.batteryMonitor.ConsumePower(num);
+			if (smi.sm.beamTarget.Get(smi) != null)
+			{
+				Health component = smi.sm.beamTarget.Get(smi).GetComponent<Health>();
+				if (component != null)
+				{
+					component.Damage(dt * STRESS.SHOCKER.DAMAGE_RATE);
+					return;
+				}
+				Electrobank component2 = smi.sm.beamTarget.Get(smi).GetComponent<Electrobank>();
+				if (component2 != null)
+				{
+					component2.Damage(dt * STRESS.SHOCKER.DAMAGE_RATE);
+					return;
+				}
+				if (smi.sm.beamTarget.Get(smi).HasTag(GameTags.Wires))
+				{
+					BuildingHP component3 = smi.sm.beamTarget.Get(smi).GetComponent<BuildingHP>();
+					if (component3 != null)
+					{
+						component3.DoDamage(Mathf.RoundToInt(dt * STRESS.SHOCKER.DAMAGE_RATE));
+					}
+				}
+			}
 		}
 
 		public void PickShockTarget(StressShockChore.StatesInstance smi)
@@ -317,51 +406,25 @@ public class StressShockChore : Chore<StressShockChore.StatesInstance>
 				.Update(delegate(StressShockChore.StatesInstance smi, float dt)
 				{
 					smi.PickShockTarget(smi);
-					float num2 = dt * STRESS.SHOCKER.POWER_CONSUMPTION_RATE;
-					smi.sm.powerConsumed.Delta(num2, smi);
-					smi.batteryMonitor.ConsumePower(num2);
-					if (smi.sm.beamTarget.Get(smi) != null)
-					{
-						Health component = smi.sm.beamTarget.Get(smi).GetComponent<Health>();
-						if (component != null)
-						{
-							component.Damage(dt * STRESS.SHOCKER.DAMAGE_RATE);
-							return;
-						}
-						Electrobank component2 = smi.sm.beamTarget.Get(smi).GetComponent<Electrobank>();
-						if (component2 != null)
-						{
-							component2.Damage(dt * STRESS.SHOCKER.DAMAGE_RATE);
-							return;
-						}
-						if (smi.sm.beamTarget.Get(smi).HasTag(GameTags.Wires))
-						{
-							BuildingHP component3 = smi.sm.beamTarget.Get(smi).GetComponent<BuildingHP>();
-							if (component3 != null)
-							{
-								component3.DoDamage(Mathf.RoundToInt(dt * STRESS.SHOCKER.DAMAGE_RATE));
-							}
-						}
-					}
+					smi.ShockUpdate200(smi, dt);
 				}, UpdateRate.SIM_200ms, false)
 				.Update(delegate(StressShockChore.StatesInstance smi, float dt)
 				{
-					if (smi.sm.faceLightningFX.Get(smi) != null)
-					{
-						smi.sm.faceLightningFX.Get(smi).transform.SetPosition(smi.FaceOriginLocation());
-					}
-					if (smi.sm.beamTarget.Get(smi) != null)
-					{
-						Vector3 vector = smi.sm.beamTarget.Get(smi).transform.position + Vector3.up / 2f;
-						if (smi.sm.beamFX.Get(smi) == null)
-						{
-							smi.MakeBeam();
-						}
-						if (!StressShockChore.CheckBlocked(Grid.PosToCell(smi.sm.beamFX.Get(smi).transform.position), Grid.PosToCell(vector)))
-						{
-							smi.AimBeam(vector, 0);
-						}
-					}
+					smi.ShockUpdateRender(smi, dt);
+				}, UpdateRate.RENDER_EVERY_TICK, false);
+			this.shocking.standStillShockingStuff.Toggle("BatteryDrain", new StateMachine<StressShockChore.States, StressShockChore.StatesInstance, StressShockChore, object>.State.Callback(StressShockChore.AddBatteryDrainModifier), new StateMachine<StressShockChore.States, StressShockChore.StatesInstance, StressShockChore, object>.State.Callback(StressShockChore.RemoveBatteryDrainModifier)).Enter(delegate(StressShockChore.StatesInstance smi)
+			{
+				smi.ShowBeam(true);
+			}).PlayAnim("interrupt_shocker", KAnim.PlayMode.Loop)
+				.ScheduleGoTo(2f, this.delay)
+				.Update(delegate(StressShockChore.StatesInstance smi, float dt)
+				{
+					smi.PickShockTarget(smi);
+					smi.ShockUpdate200(smi, dt);
+				}, UpdateRate.SIM_200ms, false)
+				.Update(delegate(StressShockChore.StatesInstance smi, float dt)
+				{
+					smi.ShockUpdateRender(smi, dt);
 				}, UpdateRate.RENDER_EVERY_TICK, false);
 			this.delay.ScheduleGoTo(0.5f, this.shocking);
 			this.complete.Enter(delegate(StressShockChore.StatesInstance smi)
@@ -402,6 +465,8 @@ public class StressShockChore : Chore<StressShockChore.StatesInstance>
 			public GameStateMachine<StressShockChore.States, StressShockChore.StatesInstance, StressShockChore, object>.State findDestination;
 
 			public GameStateMachine<StressShockChore.States, StressShockChore.StatesInstance, StressShockChore, object>.State runAroundShockingStuff;
+
+			public GameStateMachine<StressShockChore.States, StressShockChore.StatesInstance, StressShockChore, object>.State standStillShockingStuff;
 		}
 	}
 }

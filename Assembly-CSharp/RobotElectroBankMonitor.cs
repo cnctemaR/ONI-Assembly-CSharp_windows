@@ -172,11 +172,16 @@ public class RobotElectroBankMonitor : GameStateMachine<RobotElectroBankMonitor,
 					break;
 				}
 			}
+			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.ChargedPortableBattery))
+			{
+				KPrefabID component = gameObject.GetComponent<KPrefabID>();
+				this.batteryTags.Add(component.PrefabTag);
+			}
 			this.bankAmount = Db.Get().Amounts.InternalElectroBank.Lookup(master.gameObject);
 			this.electroBankStorage.Subscribe(-1697596308, new Action<object>(this.ElectroBankStorageChange));
 			this.ElectroBankStorageChange(null);
-			TreeFilterable component = base.GetComponent<TreeFilterable>();
-			component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
+			TreeFilterable component2 = base.GetComponent<TreeFilterable>();
+			component2.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component2.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		}
 
 		public void ElectroBankStorageChange(object data = null)
@@ -249,7 +254,7 @@ public class RobotElectroBankMonitor : GameStateMachine<RobotElectroBankMonitor,
 			if (this.fetchBatteryChore != null)
 			{
 				List<Tag> list = new List<Tag>();
-				foreach (Tag tag in DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(GameTags.ChargedPortableBattery))
+				foreach (Tag tag in this.batteryTags)
 				{
 					if (!allowed_tags.Contains(tag))
 					{
@@ -275,5 +280,7 @@ public class RobotElectroBankMonitor : GameStateMachine<RobotElectroBankMonitor,
 		private KBatchedAnimController animController;
 
 		private HashedString currentSymbolSwap;
+
+		private HashSet<Tag> batteryTags = new HashSet<Tag>();
 	}
 }

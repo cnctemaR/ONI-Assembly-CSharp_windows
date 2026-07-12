@@ -697,6 +697,15 @@ public class ChorePreconditions
 		precondition.canExecuteOnAnyThread = true;
 		this.IsNotABionic = precondition;
 		precondition = default(Chore.Precondition);
+		precondition.id = "IsBionic";
+		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_A_BIONIC;
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return context.consumerState.prefabid.PrefabTag == BionicMinionConfig.ID;
+		};
+		precondition.canExecuteOnAnyThread = true;
+		this.IsBionic = precondition;
+		precondition = default(Chore.Precondition);
 		precondition.id = "NotCurrentlyPeeing";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.CURRENTLY_PEEING;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
@@ -814,6 +823,8 @@ public class ChorePreconditions
 	public Chore.Precondition IsNotARobot;
 
 	public Chore.Precondition IsNotABionic;
+
+	public Chore.Precondition IsBionic;
 
 	public Chore.Precondition NotCurrentlyPeeing;
 

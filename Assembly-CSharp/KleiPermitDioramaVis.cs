@@ -82,9 +82,16 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					return this.buildingOnFloorVis;
 				}
 				BuildingFacadeResource buildingFacadeResource = permit as BuildingFacadeResource;
-				if (buildingFacadeResource != null && (buildingFacadeResource.PrefabID.Contains("WireRefined") || buildingFacadeResource.PrefabID.Contains("Logic")))
+				if (buildingFacadeResource != null)
 				{
-					return this.buildingWiresAndAutomationVis;
+					if (buildingFacadeResource.PrefabID.Contains("Wire") || buildingFacadeResource.PrefabID.Contains("Ribbon"))
+					{
+						return this.buildingWiresAndAutomationVis;
+					}
+					if (buildingFacadeResource.PrefabID.Contains("Logic"))
+					{
+						return this.buildingAutomationGatesVis;
+					}
 				}
 				if (buildingDef.PrefabID == "RockCrusher" || buildingDef.PrefabID == "GasReservoir" || buildingDef.PrefabID == "ArcadeMachine" || buildingDef.PrefabID == "MicrobeMusher" || buildingDef.PrefabID == "FlushToilet" || buildingDef.PrefabID == "WashSink" || buildingDef.PrefabID == "Headquarters" || buildingDef.PrefabID == "GourmetCookingStation")
 				{
@@ -114,7 +121,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					case BuildLocationRule.OnFloor:
 						break;
 					case BuildLocationRule.OnFloorOverSpace:
-						goto IL_02E3;
+						goto IL_02FC;
 					case BuildLocationRule.OnCeiling:
 						return this.buildingOnCeilingVis.WithAlignment(Alignment.Top());
 					case BuildLocationRule.OnWall:
@@ -124,13 +131,13 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 					default:
 						if (valueOrDefault != BuildLocationRule.OnFoundationRotatable)
 						{
-							goto IL_02E3;
+							goto IL_02FC;
 						}
 						break;
 					}
 					return this.buildingOnFloorVis;
 				}
-				IL_02E3:
+				IL_02FC:
 				return this.fallbackVis.WithError(string.Format("No visualization available for building with BuildLocationRule of {0}", buildLocationRule));
 			}
 		}
@@ -141,7 +148,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 			{
 				return this.fallbackVis.WithError("Couldn't find building def for Artable " + permit.Id);
 			}
-			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|23_0<Sculpture>(buildingDef2))
+			if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|24_0<Sculpture>(buildingDef2))
 			{
 				if (buildingDef2.PrefabID == "WoodSculpture")
 				{
@@ -151,11 +158,11 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 			}
 			else
 			{
-				if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|23_0<Painting>(buildingDef2))
+				if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|24_0<Painting>(buildingDef2))
 				{
 					return this.artablePaintingVis;
 				}
-				if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|23_0<MonumentPart>(buildingDef2))
+				if (KleiPermitDioramaVis.<GetPermitVisTarget>g__Has|24_0<MonumentPart>(buildingDef2))
 				{
 					return this.monumentPartVis;
 				}
@@ -219,7 +226,7 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetPermitVisTarget>g__Has|23_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetPermitVisTarget>g__Has|24_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -259,6 +266,9 @@ public class KleiPermitDioramaVis : KMonoBehaviour
 
 	[SerializeField]
 	private KleiPermitDioramaVis_WiresAndAutomation buildingWiresAndAutomationVis;
+
+	[SerializeField]
+	private KleiPermitDioramaVis_AutomationGates buildingAutomationGatesVis;
 
 	[SerializeField]
 	private KleiPermitDioramaVis_Wallpaper wallpaperVis;

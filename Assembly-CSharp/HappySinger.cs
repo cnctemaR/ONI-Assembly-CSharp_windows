@@ -15,7 +15,10 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 			.ToggleAnims("anim_idle_singer_kanim", 0f)
 			.EventHandler(GameHashes.TagsChanged, delegate(HappySinger.Instance smi, object obj)
 			{
-				smi.musicParticleFX.SetActive(!smi.HasTag(GameTags.Asleep));
+				if (smi.musicParticleFX != null)
+				{
+					smi.musicParticleFX.SetActive(!smi.HasTag(GameTags.Asleep));
+				}
 			})
 			.Enter(delegate(HappySinger.Instance smi)
 			{
@@ -33,9 +36,9 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 			}, UpdateRate.SIM_1000ms, false)
 			.Exit(delegate(HappySinger.Instance smi)
 			{
+				smi.musicParticleFX.SetActive(false);
 				Util.KDestroyGameObject(smi.musicParticleFX);
 				smi.ClearPasserbyReactable();
-				smi.musicParticleFX.SetActive(false);
 			});
 	}
 

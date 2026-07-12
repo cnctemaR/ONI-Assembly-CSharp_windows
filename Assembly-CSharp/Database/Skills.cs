@@ -191,7 +191,7 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseStrengthPlumber,
 				Db.Get().SkillPerks.CanDoPlumbing
 			}, new List<string> { this.Basekeeping1.Id }, "Minion"));
-			this.Pyrotechnics = this.AddSkill(new Skill("Pyrotechnics", DUPLICANTS.ROLES.PYROTECHNIC.NAME, DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION, "", 2, "hat_role_pyrotechnics", "skillbadge_role_technicals2", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanMakeMissiles }, new List<string> { this.Basekeeping2.Id }, "Minion"));
+			this.Pyrotechnics = this.AddSkill(new Skill("Pyrotechnics", DUPLICANTS.ROLES.PYROTECHNIC.NAME, DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION, "", 2, "hat_role_pyrotechnics", "skillbadge_role_basekeeping3", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanMakeMissiles }, new List<string> { this.Basekeeping2.Id }, "Minion"));
 			if (DlcManager.IsExpansion1Active())
 			{
 				this.Astronauting1 = this.AddSkill(new Skill("Astronauting1", DUPLICANTS.ROLES.USELESSSKILL.NAME, DUPLICANTS.ROLES.USELESSSKILL.DESCRIPTION, "EXPANSION1_ID", 3, "hat_role_astronaut1", "skillbadge_role_astronaut1", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseAthleticsMedium }, new List<string>

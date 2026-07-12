@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DDED2629-0B79-417F-B6F9-8B67F9A8DEAA}</ProjectGuid>
+    <ProjectGuid>{0A58D8F2-AA25-4336-AD95-36880C9A4353}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.VehiclesModule</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DDED2629-0B79-417F-B6F9-8B67F9A8DE79}</Project>
+      <Project>{0A58D8F2-AA25-4336-AD95-36880C9A4322}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{DDED2629-0B79-417F-B6F9-8B67F9A8DE8B}</Project>
+      <Project>{0A58D8F2-AA25-4336-AD95-36880C9A4334}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{DDED2629-0B79-417F-B6F9-8B67F9A8DE8F}</Project>
+      <Project>{0A58D8F2-AA25-4336-AD95-36880C9A4338}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -416,15 +416,15 @@ public static class Localization
 		}
 		if (!string.IsNullOrEmpty(text))
 		{
-			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + text });
+			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + text });
 		}
 		if (!string.IsNullOrEmpty(text2))
 		{
-			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following have mismatched <link> tags:\n" + text2 });
+			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following have mismatched <link> tags:\n" + text2 });
 		}
 		if (!string.IsNullOrEmpty(text3))
 		{
-			DebugUtil.LogErrorArgs(new object[] { "TRANSLATION ERROR! The following do not have the same amount of <link> tags as the english string which can cause nested link errors:\n" + text3 });
+			DebugUtil.LogArgs(new object[] { "TRANSLATION ERROR! The following do not have the same amount of <link> tags as the english string which can cause nested link errors:\n" + text3 });
 		}
 	}
 

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DDED2629-0B79-417F-B6F9-8B67F9A8DEA4}</ProjectGuid>
+    <ProjectGuid>{0A58D8F2-AA25-4336-AD95-36880C9A434D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UnityTestProtocolModule</RootNamespace>
     <AssemblyName>UnityEngine.UnityTestProtocolModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{DDED2629-0B79-417F-B6F9-8B67F9A8DE8F}</Project>
+      <Project>{0A58D8F2-AA25-4336-AD95-36880C9A4338}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

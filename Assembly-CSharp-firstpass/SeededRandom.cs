@@ -11,10 +11,10 @@ public class SeededRandom
 			seed = 0;
 		}
 		this.seed = seed;
-		this.rnd = new Random(seed);
+		this.rnd = new KRandom(seed);
 	}
 
-	public Random RandomSource()
+	public KRandom RandomSource()
 	{
 		return this.rnd;
 	}
@@ -41,5 +41,5 @@ public class SeededRandom
 		return rangeLow + (int)(this.rnd.NextDouble() * (double)num);
 	}
 
-	private Random rnd;
+	private KRandom rnd;
 }

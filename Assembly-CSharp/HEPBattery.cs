@@ -84,6 +84,11 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 
 		public void DoConsumeParticlesWhileDisabled(float dt)
 		{
+			if (this.m_skipFirstUpdate)
+			{
+				this.m_skipFirstUpdate = false;
+				return;
+			}
 			this.particleStorage.ConsumeAndGet(dt * base.def.particleDecayRate);
 			this.UpdateMeter(null);
 		}
@@ -223,6 +228,8 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 		public float particleThreshold = 50f;
 
 		public bool ShowWorkingStatus;
+
+		private bool m_skipFirstUpdate = true;
 
 		private MeterController meterController;
 

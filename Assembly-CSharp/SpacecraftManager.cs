@@ -45,7 +45,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	private void GenerateRandomDestinations()
 	{
-		global::System.Random random = new global::System.Random(SaveLoader.Instance.clusterDetailSave.globalWorldSeed);
+		KRandom krandom = new KRandom(SaveLoader.Instance.clusterDetailSave.globalWorldSeed);
 		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		List<List<string>> list = new List<List<string>>
 		{
@@ -165,14 +165,14 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				}
 			}
 		}
-		int num4 = random.Next(num2, num3);
+		int num4 = krandom.Next(num2, num3);
 		for (int k = 0; k < num4; k++)
 		{
-			int num5 = random.Next(0, list2.Count - 1);
+			int num5 = krandom.Next(0, list2.Count - 1);
 			int num6 = list2[num5];
 			list2.RemoveAt(num5);
 			List<string> list3 = list[num6];
-			string text = list3[random.Next(0, list3.Count)];
+			string text = list3[krandom.Next(0, list3.Count)];
 			SpaceDestination spaceDestination = new SpaceDestination(this.destinations.Count, text, num6);
 			this.destinations.Add(spaceDestination);
 		}

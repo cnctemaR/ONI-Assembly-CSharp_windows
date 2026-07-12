@@ -48,8 +48,8 @@ namespace STRINGS
 				{
 					"A worn out ",
 					UI.FormatAsLink("Atmo Suit", "ATMO_SUIT"),
-					".\n\nSuits can be repaired at a ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					".\n\nSuits can be repaired at an ",
+					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
 			}
@@ -136,8 +136,8 @@ namespace STRINGS
 				{
 					"A worn out ",
 					UI.FormatAsLink("Jet Suit", "JET_SUIT"),
-					".\n\nSuits can be repaired at a ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					".\n\nSuits can be repaired at an ",
+					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
 			}
@@ -182,8 +182,8 @@ namespace STRINGS
 				{
 					"A worn out ",
 					UI.FormatAsLink("Lead Suit", "LEAD_SUIT"),
-					".\n\nSuits can be repaired at a ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					".\n\nSuits can be repaired at an ",
+					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
 			}

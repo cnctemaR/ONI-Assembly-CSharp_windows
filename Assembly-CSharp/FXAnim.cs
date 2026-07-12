@@ -10,15 +10,18 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 		this.loop.Enter(delegate(FXAnim.Instance smi)
 		{
 			smi.Enter();
-		}).EventTransition(GameHashes.AnimQueueComplete, this.loop, null).Exit("Post", delegate(FXAnim.Instance smi)
+		}).EventTransition(GameHashes.AnimQueueComplete, this.restart, null).Exit("Post", delegate(FXAnim.Instance smi)
 		{
 			smi.Exit();
 		});
+		this.restart.GoTo(this.loop);
 	}
 
 	public StateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.TargetParameter fx;
 
 	public GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.State loop;
+
+	public GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.State restart;
 
 	public new class Instance : GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.GameInstance
 	{

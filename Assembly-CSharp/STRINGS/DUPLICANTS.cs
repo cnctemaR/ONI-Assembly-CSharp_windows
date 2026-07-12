@@ -4255,18 +4255,18 @@ namespace STRINGS
 
 			public class MINORIRRITATION
 			{
-				public static LocString NAME = "Minor Skin Irritation";
+				public static LocString NAME = "Minor Eye Irritation";
 
-				public static LocString TOOLTIP = "A gas or liquid caused this Duplicant bit of redness and itching";
+				public static LocString TOOLTIP = "A gas or liquid made this Duplicant's eyes sting a little";
 
 				public static LocString CAUSE = "Obtained by exposure to a harsh liquid or gas";
 			}
 
 			public class MAJORIRRITATION
 			{
-				public static LocString NAME = "Major Skin Irritation";
+				public static LocString NAME = "Major Eye Irritation";
 
-				public static LocString TOOLTIP = "Woah, something really messed up this Duplicant's face!\n\nCaused by exposure to a harsh liquid or gas";
+				public static LocString TOOLTIP = "Woah, something really messed up this Duplicant's eyes!\n\nCaused by exposure to a harsh liquid or gas";
 
 				public static LocString CAUSE = "Obtained by exposure to a harsh liquid or gas";
 			}
@@ -4659,7 +4659,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Sandbox Morale Adjustment";
 
-				public static LocString TOOLTIP = "This Duplicant has had their Morale adjusted temporarily with the Sandbox Tools.";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant has had their ",
+					UI.PRE_KEYWORD,
+					"Morale",
+					UI.PST_KEYWORD,
+					" temporarily adjusted using the Sandbox tools"
+				});
 			}
 
 			public class ROTTEMPERATURE
@@ -5702,28 +5709,56 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Minor Radiation Sickness";
 
-				public static LocString TOOLTIP = "Previous small-scale Radiation exposure is making this Duplicant slightly tired";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"A bit of ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has made this Duplicant feel sluggish"
+				});
 			}
 
 			public class RADIATIONEXPOSUREMAJOR
 			{
 				public static LocString NAME = "Major Radiation Sickness";
 
-				public static LocString TOOLTIP = "Previous large-scale Radiation exposure is making this Duplicant very tired";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Significant ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has left this Duplicant totally exhausted"
+				});
 			}
 
 			public class RADIATIONEXPOSUREEXTREME
 			{
 				public static LocString NAME = "Extreme Radiation Sickness";
 
-				public static LocString TOOLTIP = "Extreme Radiation exposure is hurting this Duplicant";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Dangerously high ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure is making this Duplicant wish they'd never been printed"
+				});
 			}
 
 			public class RADIATIONEXPOSUREDEADLY
 			{
 				public static LocString NAME = "Deadly Radiation Sickness";
 
-				public static LocString TOOLTIP = "Extreme Radiation exposure has incapacitated this Duplicant";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Extreme ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" exposure has incapacitated this Duplicant"
+				});
 			}
 
 			public class CHARGING
@@ -8521,7 +8556,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Suit Sustainability Training", "SUITDURABILITY");
 
-				public static LocString DESCRIPTION = "Suits equipped by this duplicant lose durability " + GameUtil.GetFormattedPercent(EQUIPMENT.SUITS.SUIT_DURABILITY_SKILL_BONUS * 100f, GameUtil.TimeSlice.None) + " slower.";
+				public static LocString DESCRIPTION = "Suits equipped by this Duplicant lose durability " + GameUtil.GetFormattedPercent(EQUIPMENT.SUITS.SUIT_DURABILITY_SKILL_BONUS * 100f, GameUtil.TimeSlice.None) + " slower.";
 			}
 
 			public class SUIT_EXPERT

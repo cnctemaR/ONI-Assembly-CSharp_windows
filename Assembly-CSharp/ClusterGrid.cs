@@ -65,7 +65,17 @@ public class ClusterGrid
 
 	public ClusterGridEntity GetVisibleEntityOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
 	{
-		return AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetVisibleEntitiesAtCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
+		if (this.IsValidCell(cell) && this.GetFOWManager().IsLocationRevealed(cell))
+		{
+			foreach (ClusterGridEntity clusterGridEntity in this.cellContents[cell])
+			{
+				if (clusterGridEntity.IsVisible && clusterGridEntity.Layer == entityLayer)
+				{
+					return clusterGridEntity;
+				}
+			}
+		}
+		return null;
 	}
 
 	public ClusterGridEntity GetVisibleEntityOfLayerAtAdjacentCell(AxialI cell, EntityLayer entityLayer)

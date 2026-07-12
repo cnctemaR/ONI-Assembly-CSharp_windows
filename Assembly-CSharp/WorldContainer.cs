@@ -74,6 +74,22 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public Dictionary<string, int> SunlightFixedTraits
+	{
+		get
+		{
+			return this.sunlightFixedTraits;
+		}
+	}
+
+	public Dictionary<string, int> CosmicRadiationFixedTraits
+	{
+		get
+		{
+			return this.cosmicRadiationFixedTraits;
+		}
+	}
+
 	public List<string> Biomes
 	{
 		get

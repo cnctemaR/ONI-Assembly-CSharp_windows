@@ -59,7 +59,9 @@ public class SweepBotConfig : IEntityConfig
 		});
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		gameObject.AddComponent<Storage>();
-		gameObject.AddComponent<Storage>().capacityKg = 500f;
+		Storage storage = gameObject.AddComponent<Storage>();
+		storage.capacityKg = 500f;
+		storage.storageFXOffset = new Vector3(0f, 0.5f, 0f);
 		gameObject.AddOrGet<OrnamentReceptacle>().AddDepositTag(GameTags.PedestalDisplayable);
 		gameObject.AddOrGet<DecorProvider>();
 		gameObject.AddOrGet<UserNameable>();

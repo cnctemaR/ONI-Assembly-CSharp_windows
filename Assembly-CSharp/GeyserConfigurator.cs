@@ -27,19 +27,19 @@ public class GeyserConfigurator : KMonoBehaviour
 
 	private GeyserConfigurator.GeyserInstanceConfiguration CreateRandomInstance(HashedString typeId, float min, float max)
 	{
-		global::System.Random random = new global::System.Random(SaveLoader.Instance.clusterDetailSave.globalWorldSeed + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y);
+		KRandom krandom = new KRandom(SaveLoader.Instance.clusterDetailSave.globalWorldSeed + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y);
 		return new GeyserConfigurator.GeyserInstanceConfiguration
 		{
 			typeId = typeId,
-			rateRoll = this.Roll(random, min, max),
-			iterationLengthRoll = this.Roll(random, 0f, 1f),
-			iterationPercentRoll = this.Roll(random, min, max),
-			yearLengthRoll = this.Roll(random, 0f, 1f),
-			yearPercentRoll = this.Roll(random, min, max)
+			rateRoll = this.Roll(krandom, min, max),
+			iterationLengthRoll = this.Roll(krandom, 0f, 1f),
+			iterationPercentRoll = this.Roll(krandom, min, max),
+			yearLengthRoll = this.Roll(krandom, 0f, 1f),
+			yearPercentRoll = this.Roll(krandom, min, max)
 		};
 	}
 
-	private float Roll(global::System.Random randomSource, float min, float max)
+	private float Roll(KRandom randomSource, float min, float max)
 	{
 		return (float)(randomSource.NextDouble() * (double)(max - min)) + min;
 	}

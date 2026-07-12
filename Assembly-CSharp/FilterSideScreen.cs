@@ -21,7 +21,7 @@ public class FilterSideScreen : SideScreenContent
 		}
 		else
 		{
-			flag = target.GetComponent<ElementFilter>() != null || target.GetComponent<RocketConduitStorageAccess>();
+			flag = target.GetComponent<ElementFilter>() != null || target.GetComponent<RocketConduitStorageAccess>() != null || target.GetComponent<DevPump>() != null;
 		}
 		return flag && target.GetComponent<Filterable>() != null;
 	}

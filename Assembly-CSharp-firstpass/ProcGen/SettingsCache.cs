@@ -273,6 +273,7 @@ namespace ProcGen
 		{
 			List<FileHandle> list = new List<FileHandle>();
 			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "traits")), "*.yaml", list);
+			list.Sort((FileHandle s1, FileHandle s2) => string.Compare(s1.full_path, s2.full_path, StringComparison.OrdinalIgnoreCase));
 			foreach (FileHandle fileHandle in list)
 			{
 				SettingsCache.LoadWorldTrait(fileHandle, path, prefix, errors);
@@ -467,7 +468,7 @@ namespace ProcGen
 			{
 				return new List<string>();
 			}
-			global::System.Random random = new global::System.Random(seed);
+			KRandom krandom = new KRandom(seed);
 			List<WorldTrait> list = new List<WorldTrait>(SettingsCache.traits.Values);
 			List<WorldTrait> list2 = new List<WorldTrait>();
 			TagSet tagSet = new TagSet();
@@ -487,11 +488,11 @@ namespace ProcGen
 					TagSet requiredTags = ((rule.requiredTags != null) ? new TagSet(rule.requiredTags) : null);
 					TagSet forbiddenTags = ((rule.forbiddenTags != null) ? new TagSet(rule.forbiddenTags) : null);
 					list3.RemoveAll((WorldTrait trait) => (requiredTags != null && !trait.traitTagsSet.ContainsAll(requiredTags)) || (forbiddenTags != null && trait.traitTagsSet.ContainsOne(forbiddenTags)) || (rule.forbiddenTraits != null && rule.forbiddenTraits.Contains(trait.filePath)) || !trait.IsValid(world, true));
-					int num = random.Next(rule.min, Mathf.Max(rule.min, rule.max + 1));
+					int num = krandom.Next(rule.min, Mathf.Max(rule.min, rule.max + 1));
 					int count = list2.Count;
 					while (list2.Count < count + num && list3.Count > 0)
 					{
-						int num2 = random.Next(list3.Count);
+						int num2 = krandom.Next(list3.Count);
 						WorldTrait worldTrait = list3[num2];
 						bool flag = false;
 						using (List<string>.Enumerator enumerator2 = worldTrait.exclusiveWith.GetEnumerator())

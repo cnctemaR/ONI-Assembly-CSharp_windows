@@ -158,9 +158,13 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 		if (rocketModuleCluster != null)
 		{
 			craftModuleInterface = rocketModuleCluster.CraftInterface;
-			return;
+			if (clusterCraft == null)
+			{
+				clusterCraft = craftModuleInterface.GetComponent<Clustercraft>();
+				return;
+			}
 		}
-		if (clusterCraft != null)
+		else if (clusterCraft != null)
 		{
 			craftModuleInterface = clusterCraft.ModuleInterface;
 		}

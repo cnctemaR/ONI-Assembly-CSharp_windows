@@ -4,7 +4,7 @@ public class PerlinNoise
 {
 	public PerlinNoise(int seed)
 	{
-		this._random = new Random(seed);
+		this._random = new KRandom(seed);
 		this.InitGradients();
 	}
 
@@ -80,7 +80,7 @@ public class PerlinNoise
 
 	private const int GradientSizeTable = 256;
 
-	private readonly Random _random;
+	private readonly KRandom _random;
 
 	private readonly double[] _gradients = new double[768];
 

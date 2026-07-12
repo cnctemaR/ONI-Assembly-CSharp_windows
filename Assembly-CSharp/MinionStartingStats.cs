@@ -95,7 +95,7 @@ public class MinionStartingStats : ITelepadDeliverable
 	{
 		int statDelta = 0;
 		List<string> selectedTraits = new List<string>();
-		global::System.Random randSeed = new global::System.Random();
+		KRandom randSeed = new KRandom();
 		Trait trait = Db.Get().traits.Get(this.personality.stresstrait);
 		this.stressTrait = trait;
 		Trait trait2 = Db.Get().traits.Get(this.personality.joyTrait);

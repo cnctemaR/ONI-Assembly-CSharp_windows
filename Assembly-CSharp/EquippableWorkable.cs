@@ -28,7 +28,6 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		base.SetWorkTime(1.5f);
 		this.equippable.OnAssign += this.RefreshChore;
-		Prioritizable.AddRef(base.gameObject);
 	}
 
 	private void CreateChore()
@@ -37,11 +36,12 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		this.chore = new EquipChore(this);
 	}
 
-	public void CancelChore()
+	public void CancelChore(string reason = "")
 	{
 		if (this.chore != null)
 		{
-			this.chore.Cancel("Manual equip");
+			this.chore.Cancel(reason);
+			Prioritizable.RemoveRef(this.equippable.gameObject);
 			this.chore = null;
 		}
 	}
@@ -50,8 +50,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		if (this.chore != null)
 		{
-			this.chore.Cancel("Equipment Reassigned");
-			this.chore = null;
+			this.CancelChore("Equipment Reassigned");
 		}
 		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this.equippable))
 		{
@@ -75,7 +74,6 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		this.workTimeRemaining = this.GetWorkTime();
 		base.OnStopWork(worker);
-		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	[MyCmpReq]

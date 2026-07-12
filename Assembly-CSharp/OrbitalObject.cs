@@ -97,7 +97,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		if (data.initialAnim.IsNullOrWhiteSpace())
 		{
 			KAnimFileData data2 = Assets.GetAnim(data.animFile).GetData();
-			int num = new global::System.Random().Next(0, data2.animCount - 1);
+			int num = new KRandom().Next(0, data2.animCount - 1);
 			return data2.GetAnim(num).name;
 		}
 		return data.initialAnim;

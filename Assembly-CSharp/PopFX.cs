@@ -62,7 +62,7 @@ public class PopFX : KMonoBehaviour
 
 	private void SetWorldActive(int worldId)
 	{
-		int num = Grid.PosToCell((this.trackTarget && this.targetTransform != null) ? this.targetTransform.position : this.startPos);
+		int num = Grid.PosToCell((this.trackTarget && this.targetTransform != null) ? this.targetTransform.position : (this.startPos + this.offset));
 		this.isActiveWorld = !Grid.IsValidCell(num) || (int)Grid.WorldIdx[num] == worldId;
 	}
 

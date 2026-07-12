@@ -130,7 +130,10 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 
 		public float GetRevealCompleteFraction(AxialI location)
 		{
-			global::Debug.Assert(ClusterGrid.Instance.IsValidCell(location), string.Format("GetRevealCompleteFraction called with invalid location: {0}", location));
+			if (!ClusterGrid.Instance.IsValidCell(location))
+			{
+				global::Debug.LogError(string.Format("GetRevealCompleteFraction called with invalid location: {0}, {1}", location.r, location.q));
+			}
 			if (DebugHandler.RevealFogOfWar)
 			{
 				return 1f;

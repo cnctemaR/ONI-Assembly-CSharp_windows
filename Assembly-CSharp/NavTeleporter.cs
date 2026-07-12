@@ -7,7 +7,7 @@ public class NavTeleporter : KMonoBehaviour
 		base.OnPrefabInit();
 		base.GetComponent<KPrefabID>().AddTag(GameTags.NavTeleporters, false);
 		this.Register();
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "NavTeleporterCellChanged");
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("NavTeleport.Changed", base.gameObject, this.GetCell(), GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
 	}
 
 	protected override void OnCleanUp()
@@ -19,6 +19,7 @@ public class NavTeleporter : KMonoBehaviour
 			Grid.HasNavTeleporter[cell] = false;
 		}
 		this.Deregister();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		Components.NavTeleporters.Remove(this);
 	}
 
@@ -91,7 +92,6 @@ public class NavTeleporter : KMonoBehaviour
 			return;
 		}
 		Grid.HasNavTeleporter[cell] = true;
-		Pathfinding.Instance.GetNavGrid(MinionConfig.MINION_NAV_GRID_NAME);
 		Pathfinding.Instance.AddDirtyNavGridCell(cell);
 		this.lastRegisteredCell = cell;
 		if (this.target != null)
@@ -124,7 +124,7 @@ public class NavTeleporter : KMonoBehaviour
 		Pathfinding.Instance.AddDirtyNavGridCell(this.lastRegisteredCell);
 	}
 
-	private void OnCellChanged()
+	public void OnCellChanged(object data = null)
 	{
 		this.Deregister();
 		this.Register();
@@ -145,4 +145,6 @@ public class NavTeleporter : KMonoBehaviour
 	public CellOffset offset;
 
 	private int overrideCell = -1;
+
+	private HandleVector<int>.Handle partitionerEntry;
 }

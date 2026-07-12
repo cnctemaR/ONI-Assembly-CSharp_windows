@@ -131,8 +131,15 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 				component3.SetOverrideCell(this.landerPlacementCell);
 				interiorDoor.GetComponent<NavTeleporter>().SetTarget(component3);
 				component3.SetTarget(interiorDoor.GetComponent<NavTeleporter>());
-				component2.SetPermission(this.ChosenDuplicant.assignableProxy.Get(), AccessControl.Permission.Both);
-				return;
+				using (List<MinionIdentity>.Enumerator enumerator = Components.MinionIdentities.GetWorldItems(interiorDoor.GetMyWorldId(), false).GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						MinionIdentity minionIdentity = enumerator.Current;
+						component2.SetPermission(minionIdentity.assignableProxy.Get(), (minionIdentity == this.ChosenDuplicant) ? AccessControl.Permission.Both : AccessControl.Permission.Neither);
+					}
+					return;
+				}
 			}
 			component3.SetOverrideCell(-1);
 			interiorDoor.GetComponent<NavTeleporter>().SetTarget(null);
@@ -256,6 +263,14 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 			{
 				GameObject gameObject = this.landerContainer.FindFirst(base.def.landerPrefabID);
 				return !(gameObject == null) && gameObject.GetComponent<MinionStorage>() != null;
+			}
+		}
+
+		public bool ModuleDeployed
+		{
+			get
+			{
+				return this.landerPlaced;
 			}
 		}
 

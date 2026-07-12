@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C0C72F7E-6603-42D7-A055-FEA60E3669C4}</ProjectGuid>
+    <ProjectGuid>{B57ED30F-6C6F-4003-AF15-CA41317F2C0D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1318,6 +1318,7 @@
     <Compile Include="KProfilerEnd.cs" />
     <Compile Include="KProfilerEndpoint.cs" />
     <Compile Include="KProfilerPluginEndpoint.cs" />
+    <Compile Include="KRandom.cs" />
     <Compile Include="KRectStretcher.cs" />
     <Compile Include="KScreen.cs" />
     <Compile Include="KScreenManager.cs" />
@@ -1398,6 +1399,7 @@
     <Compile Include="MIConvexHull\VoronoiMesh.2.cs" />
     <Compile Include="MIConvexHull\VoronoiMesh.cs" />
     <Compile Include="Modifier.cs" />
+    <Compile Include="MonoPInvokeCallbackAttribute.cs" />
     <Compile Include="MyAttributeManager.cs" />
     <Compile Include="MyAttributes.cs" />
     <Compile Include="MyCmp.cs" />
@@ -1521,7 +1523,486 @@
     <Compile Include="ProfilerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueuePool.cs" />
-    <Compile Include="RailAPI.cs" />
+    <Compile Include="RailCaptureVoiceCallback.cs" />
+    <Compile Include="RailEventCallBackFunction.cs" />
+    <Compile Include="RailEventCallBackHandler.cs" />
+    <Compile Include="RailWarningMessageCallbackFunction.cs" />
+    <Compile Include="rail\AcquireSessionTicketResponse.cs" />
+    <Compile Include="rail\AsyncAcquireGameServerSessionTicketResponse.cs" />
+    <Compile Include="rail\AsyncAddFavoriteGameServerResult.cs" />
+    <Compile Include="rail\AsyncDeleteStreamFileResult.cs" />
+    <Compile Include="rail\AsyncGetFavoriteGameServersResult.cs" />
+    <Compile Include="rail\AsyncGetMyFavoritesWorksResult.cs" />
+    <Compile Include="rail\AsyncGetMySubscribedWorksResult.cs" />
+    <Compile Include="rail\AsyncListFileResult.cs" />
+    <Compile Include="rail\AsyncModifyFavoritesWorksResult.cs" />
+    <Compile Include="rail\AsyncQueryQuotaResult.cs" />
+    <Compile Include="rail\AsyncQuerySpaceWorksInfoResult.cs" />
+    <Compile Include="rail\AsyncQuerySpaceWorksResult.cs" />
+    <Compile Include="rail\AsyncRateSpaceWorkResult.cs" />
+    <Compile Include="rail\AsyncReadFileResult.cs" />
+    <Compile Include="rail\AsyncReadStreamFileResult.cs" />
+    <Compile Include="rail\AsyncRemoveFavoriteGameServerResult.cs" />
+    <Compile Include="rail\AsyncRemoveSpaceWorkResult.cs" />
+    <Compile Include="rail\AsyncRenameStreamFileResult.cs" />
+    <Compile Include="rail\AsyncSearchSpaceWorksResult.cs" />
+    <Compile Include="rail\AsyncSubscribeSpaceWorksResult.cs" />
+    <Compile Include="rail\AsyncUpdateMetadataResult.cs" />
+    <Compile Include="rail\AsyncVoteSpaceWorkResult.cs" />
+    <Compile Include="rail\AsyncWriteFileResult.cs" />
+    <Compile Include="rail\AsyncWriteStreamFileResult.cs" />
+    <Compile Include="rail\BrowserDamageRectNeedsPaintRequest.cs" />
+    <Compile Include="rail\BrowserNeedsPaintRequest.cs" />
+    <Compile Include="rail\BrowserRenderNavigateResult.cs" />
+    <Compile Include="rail\BrowserRenderStateChanged.cs" />
+    <Compile Include="rail\BrowserRenderTitleChanged.cs" />
+    <Compile Include="rail\BrowserTryNavigateNewPageRequest.cs" />
+    <Compile Include="rail\CheckAllDlcsStateReadyResult.cs" />
+    <Compile Include="rail\ClearRoomMetadataResult.cs" />
+    <Compile Include="rail\CloseBrowserResult.cs" />
+    <Compile Include="rail\CompleteConsumeAssetsFinished.cs" />
+    <Compile Include="rail\CompleteConsumeByExchangeAssetsToFinished.cs" />
+    <Compile Include="rail\CreateBrowserOptions.cs" />
+    <Compile Include="rail\CreateBrowserResult.cs" />
+    <Compile Include="rail\CreateCustomerDrawBrowserOptions.cs" />
+    <Compile Include="rail\CreateGameServerOptions.cs" />
+    <Compile Include="rail\CreateGameServerResult.cs" />
+    <Compile Include="rail\CreateRoomResult.cs" />
+    <Compile Include="rail\CreateSessionFailed.cs" />
+    <Compile Include="rail\CreateSessionRequest.cs" />
+    <Compile Include="rail\CreateVoiceChannelOption.cs" />
+    <Compile Include="rail\CreateVoiceChannelResult.cs" />
+    <Compile Include="rail\DirectConsumeAssetsFinished.cs" />
+    <Compile Include="rail\DlcInstallFinished.cs" />
+    <Compile Include="rail\DlcInstallProgress.cs" />
+    <Compile Include="rail\DlcInstallStart.cs" />
+    <Compile Include="rail\DlcInstallStartResult.cs" />
+    <Compile Include="rail\DlcOwnershipChanged.cs" />
+    <Compile Include="rail\DlcRefundChanged.cs" />
+    <Compile Include="rail\DlcUninstallFinished.cs" />
+    <Compile Include="rail\EnumCommonLimit.cs" />
+    <Compile Include="rail\EnumLeaveRoomReason.cs" />
+    <Compile Include="rail\EnumRailAssetFlags.cs" />
+    <Compile Include="rail\EnumRailAssetOrigin.cs" />
+    <Compile Include="rail\EnumRailAssetState.cs" />
+    <Compile Include="rail\EnumRailComparisonType.cs" />
+    <Compile Include="rail\EnumRailDirtyWordsType.cs" />
+    <Compile Include="rail\EnumRailFriendType.cs" />
+    <Compile Include="rail\EnumRailGameContentDamageFlag.cs" />
+    <Compile Include="rail\EnumRailGamePlayingState.cs" />
+    <Compile Include="rail\EnumRailGameRefundState.cs" />
+    <Compile Include="rail\EnumRailIDDomain.cs" />
+    <Compile Include="rail\EnumRailIDValue.cs" />
+    <Compile Include="rail\EnumRailImagePixelFormat.cs" />
+    <Compile Include="rail\EnumRailLaunchAppType.cs" />
+    <Compile Include="rail\EnumRailModifyFavoritesSpaceWorkType.cs" />
+    <Compile Include="rail\EnumRailMouseActionType.cs" />
+    <Compile Include="rail\EnumRailNotifyWindowPosition.cs" />
+    <Compile Include="rail\EnumRailNotifyWindowType.cs" />
+    <Compile Include="rail\EnumRailOptionalValue.cs" />
+    <Compile Include="rail\EnumRailPlatformType.cs" />
+    <Compile Include="rail\EnumRailPlayerBannedStatus.cs" />
+    <Compile Include="rail\EnumRailPlayerOnLineState.cs" />
+    <Compile Include="rail\EnumRailPlayerOwnershipType.cs" />
+    <Compile Include="rail\EnumRailProductId.cs" />
+    <Compile Include="rail\EnumRailPropertyValueType.cs" />
+    <Compile Include="rail\EnumRailSmallObjectUpdateState.cs" />
+    <Compile Include="rail\EnumRailSortType.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkOrderBy.cs" />
+    <Compile Include="rail\EnumRailSpaceworkQueryType.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkRateValue.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkShareLevel.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkState.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkStatistic.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkSyncState.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkType.cs" />
+    <Compile Include="rail\EnumRailSpaceWorkVoteValue.cs" />
+    <Compile Include="rail\EnumRailStorageFileEnabledOS.cs" />
+    <Compile Include="rail\EnumRailStoreType.cs" />
+    <Compile Include="rail\EnumRailStreamOpenFileType.cs" />
+    <Compile Include="rail\EnumRailUserPlayedWithLimit.cs" />
+    <Compile Include="rail\EnumRailUsersInviteResponseType.cs" />
+    <Compile Include="rail\EnumRailUsersInviteType.cs" />
+    <Compile Include="rail\EnumRailUsersLimits.cs" />
+    <Compile Include="rail\EnumRailVoiceCaptureChannel.cs" />
+    <Compile Include="rail\EnumRailVoiceCaptureFormat.cs" />
+    <Compile Include="rail\EnumRailVoiceChannelJoinState.cs" />
+    <Compile Include="rail\EnumRailVoiceChannelSpeakerState.cs" />
+    <Compile Include="rail\EnumRailVoiceChannelUserSpeakingLimit.cs" />
+    <Compile Include="rail\EnumRailVoiceLeaveChannelReason.cs" />
+    <Compile Include="rail\EnumRailWindowType.cs" />
+    <Compile Include="rail\EnumRailWorkFileClass.cs" />
+    <Compile Include="rail\EnumRoomMemberActionStatus.cs" />
+    <Compile Include="rail\EnumRoomOwnerChangeReason.cs" />
+    <Compile Include="rail\EnumRoomType.cs" />
+    <Compile Include="rail\EventBase.cs" />
+    <Compile Include="rail\ExchangeAssetsFinished.cs" />
+    <Compile Include="rail\ExchangeAssetsToFinished.cs" />
+    <Compile Include="rail\GameServerInfo.cs" />
+    <Compile Include="rail\GameServerListFilter.cs" />
+    <Compile Include="rail\GameServerListFilterKey.cs" />
+    <Compile Include="rail\GameServerListSorter.cs" />
+    <Compile Include="rail\GameServerListSorterKeyType.cs" />
+    <Compile Include="rail\GameServerPlayerInfo.cs" />
+    <Compile Include="rail\GameServerRegisterToServerListResult.cs" />
+    <Compile Include="rail\GameServerStartSessionWithPlayerResponse.cs" />
+    <Compile Include="rail\GetAllRoomDataResult.cs" />
+    <Compile Include="rail\GetAuthenticateURLResult.cs" />
+    <Compile Include="rail\GetGameServerListResult.cs" />
+    <Compile Include="rail\GetGameServerMetadataResult.cs" />
+    <Compile Include="rail\GetGameServerPlayerListResult.cs" />
+    <Compile Include="rail\GetMemberMetadataResult.cs" />
+    <Compile Include="rail\GetRoomListResult.cs" />
+    <Compile Include="rail\GetRoomMembersResult.cs" />
+    <Compile Include="rail\GetRoomMetadataResult.cs" />
+    <Compile Include="rail\GetRoomTagResult.cs" />
+    <Compile Include="rail\GetUserRoomListResult.cs" />
+    <Compile Include="rail\GlobalAchievementReceived.cs" />
+    <Compile Include="rail\GlobalStatsRequestReceived.cs" />
+    <Compile Include="rail\IRailAchievementHelper.cs" />
+    <Compile Include="rail\IRailAchievementHelperImpl.cs" />
+    <Compile Include="rail\IRailAntiAddictionHelper.cs" />
+    <Compile Include="rail\IRailAntiAddictionHelperImpl.cs" />
+    <Compile Include="rail\IRailApps.cs" />
+    <Compile Include="rail\IRailAppsImpl.cs" />
+    <Compile Include="rail\IRailAssets.cs" />
+    <Compile Include="rail\IRailAssetsHelper.cs" />
+    <Compile Include="rail\IRailAssetsHelperImpl.cs" />
+    <Compile Include="rail\IRailAssetsImpl.cs" />
+    <Compile Include="rail\IRailBrowser.cs" />
+    <Compile Include="rail\IRailBrowserHelper.cs" />
+    <Compile Include="rail\IRailBrowserHelperImpl.cs" />
+    <Compile Include="rail\IRailBrowserImpl.cs" />
+    <Compile Include="rail\IRailBrowserRender.cs" />
+    <Compile Include="rail\IRailBrowserRenderImpl.cs" />
+    <Compile Include="rail\IRailComponent.cs" />
+    <Compile Include="rail\IRailDlcHelper.cs" />
+    <Compile Include="rail\IRailDlcHelperImpl.cs" />
+    <Compile Include="rail\IRailFactory.cs" />
+    <Compile Include="rail\IRailFactoryImpl.cs" />
+    <Compile Include="rail\IRailFile.cs" />
+    <Compile Include="rail\IRailFileImpl.cs" />
+    <Compile Include="rail\IRailFloatingWindow.cs" />
+    <Compile Include="rail\IRailFloatingWindowImpl.cs" />
+    <Compile Include="rail\IRailFriends.cs" />
+    <Compile Include="rail\IRailFriendsImpl.cs" />
+    <Compile Include="rail\IRailGame.cs" />
+    <Compile Include="rail\IRailGameImpl.cs" />
+    <Compile Include="rail\IRailGameServer.cs" />
+    <Compile Include="rail\IRailGameServerHelper.cs" />
+    <Compile Include="rail\IRailGameServerHelperImpl.cs" />
+    <Compile Include="rail\IRailGameServerImpl.cs" />
+    <Compile Include="rail\IRailGlobalAchievement.cs" />
+    <Compile Include="rail\IRailGlobalAchievementImpl.cs" />
+    <Compile Include="rail\IRailGlobalStats.cs" />
+    <Compile Include="rail\IRailGlobalStatsImpl.cs" />
+    <Compile Include="rail\IRailGroupChat.cs" />
+    <Compile Include="rail\IRailGroupChatHelper.cs" />
+    <Compile Include="rail\IRailGroupChatHelperImpl.cs" />
+    <Compile Include="rail\IRailGroupChatImpl.cs" />
+    <Compile Include="rail\IRailHttpResponse.cs" />
+    <Compile Include="rail\IRailHttpResponseImpl.cs" />
+    <Compile Include="rail\IRailHttpSession.cs" />
+    <Compile Include="rail\IRailHttpSessionHelper.cs" />
+    <Compile Include="rail\IRailHttpSessionHelperImpl.cs" />
+    <Compile Include="rail\IRailHttpSessionImpl.cs" />
+    <Compile Include="rail\IRailIMEHelper.cs" />
+    <Compile Include="rail\IRailIMEHelperImpl.cs" />
+    <Compile Include="rail\IRailInGameActivityHelper.cs" />
+    <Compile Include="rail\IRailInGameActivityHelperImpl.cs" />
+    <Compile Include="rail\IRailInGameCoin.cs" />
+    <Compile Include="rail\IRailInGameCoinImpl.cs" />
+    <Compile Include="rail\IRailInGamePurchase.cs" />
+    <Compile Include="rail\IRailInGamePurchaseImpl.cs" />
+    <Compile Include="rail\IRailInGameStorePurchaseHelper.cs" />
+    <Compile Include="rail\IRailInGameStorePurchaseHelperImpl.cs" />
+    <Compile Include="rail\IRailLeaderboard.cs" />
+    <Compile Include="rail\IRailLeaderboardEntries.cs" />
+    <Compile Include="rail\IRailLeaderboardEntriesImpl.cs" />
+    <Compile Include="rail\IRailLeaderboardHelper.cs" />
+    <Compile Include="rail\IRailLeaderboardHelperImpl.cs" />
+    <Compile Include="rail\IRailLeaderboardImpl.cs" />
+    <Compile Include="rail\IRailNetwork.cs" />
+    <Compile Include="rail\IRailNetworkImpl.cs" />
+    <Compile Include="rail\IRailPlayer.cs" />
+    <Compile Include="rail\IRailPlayerAchievement.cs" />
+    <Compile Include="rail\IRailPlayerAchievementImpl.cs" />
+    <Compile Include="rail\IRailPlayerImpl.cs" />
+    <Compile Include="rail\IRailPlayerStats.cs" />
+    <Compile Include="rail\IRailPlayerStatsImpl.cs" />
+    <Compile Include="rail\IRailRoom.cs" />
+    <Compile Include="rail\IRailRoomHelper.cs" />
+    <Compile Include="rail\IRailRoomHelperImpl.cs" />
+    <Compile Include="rail\IRailRoomImpl.cs" />
+    <Compile Include="rail\IRailScreenshot.cs" />
+    <Compile Include="rail\IRailScreenshotHelper.cs" />
+    <Compile Include="rail\IRailScreenshotHelperImpl.cs" />
+    <Compile Include="rail\IRailScreenshotImpl.cs" />
+    <Compile Include="rail\IRailSmallObjectServiceHelper.cs" />
+    <Compile Include="rail\IRailSmallObjectServiceHelperImpl.cs" />
+    <Compile Include="rail\IRailSpaceWork.cs" />
+    <Compile Include="rail\IRailSpaceWorkImpl.cs" />
+    <Compile Include="rail\IRailStatisticHelper.cs" />
+    <Compile Include="rail\IRailStatisticHelperImpl.cs" />
+    <Compile Include="rail\IRailStorageHelper.cs" />
+    <Compile Include="rail\IRailStorageHelperImpl.cs" />
+    <Compile Include="rail\IRailStreamFile.cs" />
+    <Compile Include="rail\IRailStreamFileImpl.cs" />
+    <Compile Include="rail\IRailSystemHelper.cs" />
+    <Compile Include="rail\IRailSystemHelperImpl.cs" />
+    <Compile Include="rail\IRailTextInputHelper.cs" />
+    <Compile Include="rail\IRailTextInputHelperImpl.cs" />
+    <Compile Include="rail\IRailThirdPartyAccountLoginHelper.cs" />
+    <Compile Include="rail\IRailThirdPartyAccountLoginHelperImpl.cs" />
+    <Compile Include="rail\IRailUsersHelper.cs" />
+    <Compile Include="rail\IRailUsersHelperImpl.cs" />
+    <Compile Include="rail\IRailUserSpaceHelper.cs" />
+    <Compile Include="rail\IRailUserSpaceHelperImpl.cs" />
+    <Compile Include="rail\IRailUtils.cs" />
+    <Compile Include="rail\IRailUtilsImpl.cs" />
+    <Compile Include="rail\IRailVoiceChannel.cs" />
+    <Compile Include="rail\IRailVoiceChannelImpl.cs" />
+    <Compile Include="rail\IRailVoiceHelper.cs" />
+    <Compile Include="rail\IRailVoiceHelperImpl.cs" />
+    <Compile Include="rail\IRailZoneServer.cs" />
+    <Compile Include="rail\IRailZoneServerHelper.cs" />
+    <Compile Include="rail\IRailZoneServerHelperImpl.cs" />
+    <Compile Include="rail\IRailZoneServerImpl.cs" />
+    <Compile Include="rail\JavascriptEventResult.cs" />
+    <Compile Include="rail\JoinRoomResult.cs" />
+    <Compile Include="rail\JoinVoiceChannelResult.cs" />
+    <Compile Include="rail\KickOffMemberResult.cs" />
+    <Compile Include="rail\LeaderboardAttachSpaceWork.cs" />
+    <Compile Include="rail\LeaderboardCreated.cs" />
+    <Compile Include="rail\LeaderboardData.cs" />
+    <Compile Include="rail\LeaderboardDisplayType.cs" />
+    <Compile Include="rail\LeaderboardEntry.cs" />
+    <Compile Include="rail\LeaderboardEntryReceived.cs" />
+    <Compile Include="rail\LeaderboardParameters.cs" />
+    <Compile Include="rail\LeaderboardReceived.cs" />
+    <Compile Include="rail\LeaderboardSortType.cs" />
+    <Compile Include="rail\LeaderboardType.cs" />
+    <Compile Include="rail\LeaderboardUploaded.cs" />
+    <Compile Include="rail\LeaderboardUploadType.cs" />
+    <Compile Include="rail\LeaveRoomResult.cs" />
+    <Compile Include="rail\LeaveVoiceChannelResult.cs" />
+    <Compile Include="rail\MergeAssetsFinished.cs" />
+    <Compile Include="rail\MergeAssetsToFinished.cs" />
+    <Compile Include="rail\NetworkCreateRawSessionFailed.cs" />
+    <Compile Include="rail\NetworkCreateRawSessionRequest.cs" />
+    <Compile Include="rail\NotifyMetadataChange.cs" />
+    <Compile Include="rail\NotifyRoomDestroy.cs" />
+    <Compile Include="rail\NotifyRoomGameServerChange.cs" />
+    <Compile Include="rail\NotifyRoomMemberChange.cs" />
+    <Compile Include="rail\NotifyRoomMemberKicked.cs" />
+    <Compile Include="rail\NotifyRoomOwnerChange.cs" />
+    <Compile Include="rail\NumberOfPlayerReceived.cs" />
+    <Compile Include="rail\OpenRoomResult.cs" />
+    <Compile Include="rail\PlayerAchievementReceived.cs" />
+    <Compile Include="rail\PlayerAchievementStored.cs" />
+    <Compile Include="rail\PlayerGetGamePurchaseKeyResult.cs" />
+    <Compile Include="rail\PlayerPersonalInfo.cs" />
+    <Compile Include="rail\PlayerStatsReceived.cs" />
+    <Compile Include="rail\PlayerStatsStored.cs" />
+    <Compile Include="rail\PublishScreenshotResult.cs" />
+    <Compile Include="rail\PurchaseProductDiscountType.cs" />
+    <Compile Include="rail\PurchaseProductOrderState.cs" />
+    <Compile Include="rail\QueryIsOwnedDlcsResult.cs" />
+    <Compile Include="rail\QueryMySubscribedSpaceWorksResult.cs" />
+    <Compile Include="rail\QueryPlayerBannedStatus.cs" />
+    <Compile Include="rail\QuerySubscribeWishPlayStateResult.cs" />
+    <Compile Include="rail\RailAntiAddictionActionType.cs" />
+    <Compile Include="rail\RailAntiAddictionGameOnlineTimeChanged.cs" />
+    <Compile Include="rail\RailAssetInfo.cs" />
+    <Compile Include="rail\RailAssetItem.cs" />
+    <Compile Include="rail\RailAssetProperty.cs" />
+    <Compile Include="rail\RailAssetsChanged.cs" />
+    <Compile Include="rail\RailBranchInfo.cs" />
+    <Compile Include="rail\RailCallBackHelper.cs" />
+    <Compile Include="rail\RailCoinInfo.cs" />
+    <Compile Include="rail\RailCoins.cs" />
+    <Compile Include="rail\RailComparableID.cs" />
+    <Compile Include="rail\RailConverter.cs" />
+    <Compile Include="rail\RailCrashBuffer.cs" />
+    <Compile Include="rail\RailCrashBufferImpl.cs" />
+    <Compile Include="rail\RailCrashInfo.cs" />
+    <Compile Include="rail\RailCurrencyExchangeCoinRate.cs" />
+    <Compile Include="rail\RailCustomizeAntiAddictionActions.cs" />
+    <Compile Include="rail\RailDirtyWordsCheckResult.cs" />
+    <Compile Include="rail\RailDiscountInfo.cs" />
+    <Compile Include="rail\RailDlcID.cs" />
+    <Compile Include="rail\RailDlcInfo.cs" />
+    <Compile Include="rail\RailDlcInstallProgress.cs" />
+    <Compile Include="rail\RailDlcOwned.cs" />
+    <Compile Include="rail\RAILEventID.cs" />
+    <Compile Include="rail\RailFinalize.cs" />
+    <Compile Include="rail\RailFriendInfo.cs" />
+    <Compile Include="rail\RailFriendMetadata.cs" />
+    <Compile Include="rail\RailFriendOnLineState.cs" />
+    <Compile Include="rail\RailFriendPlayedGameInfo.cs" />
+    <Compile Include="rail\RailFriendPlayedGamePlayState.cs" />
+    <Compile Include="rail\RailFriendsAddFriendRequest.cs" />
+    <Compile Include="rail\RailFriendsAddFriendResult.cs" />
+    <Compile Include="rail\RailFriendsClearMetadataResult.cs" />
+    <Compile Include="rail\RailFriendsGetInviteCommandLine.cs" />
+    <Compile Include="rail\RailFriendsGetMetadataResult.cs" />
+    <Compile Include="rail\RailFriendsListChanged.cs" />
+    <Compile Include="rail\RailFriendsMetadataChanged.cs" />
+    <Compile Include="rail\RailFriendsOnlineStateChanged.cs" />
+    <Compile Include="rail\RailFriendsQueryFriendPlayedGamesResult.cs" />
+    <Compile Include="rail\RailFriendsQueryPlayedWithFriendsGamesResult.cs" />
+    <Compile Include="rail\RailFriendsQueryPlayedWithFriendsListResult.cs" />
+    <Compile Include="rail\RailFriendsQueryPlayedWithFriendsTimeResult.cs" />
+    <Compile Include="rail\RailFriendsReportPlayedWithUserListResult.cs" />
+    <Compile Include="rail\RailFriendsSetMetadataResult.cs" />
+    <Compile Include="rail\RailGameActivityInfo.cs" />
+    <Compile Include="rail\RailGameActivityPlayerEvent.cs" />
+    <Compile Include="rail\RailGameDefineGamePlayingState.cs" />
+    <Compile Include="rail\RailGameID.cs" />
+    <Compile Include="rail\RailGamePeer.cs" />
+    <Compile Include="rail\RailGameSettingMetadataChanged.cs" />
+    <Compile Include="rail\RailGameSettingMetadataChangedSource.cs" />
+    <Compile Include="rail\RailGeneratedAssetItem.cs" />
+    <Compile Include="rail\RailGetAuthenticateURLOptions.cs" />
+    <Compile Include="rail\RailGetEncryptedGameTicketResult.cs" />
+    <Compile Include="rail\RailGetImageDataResult.cs" />
+    <Compile Include="rail\RailGetPlayerMetadataResult.cs" />
+    <Compile Include="rail\RailGroupInfo.cs" />
+    <Compile Include="rail\RailHttpSessionMethod.cs" />
+    <Compile Include="rail\RailHttpSessionResponse.cs" />
+    <Compile Include="rail\RailID.cs" />
+    <Compile Include="rail\RailImageDataDescriptor.cs" />
+    <Compile Include="rail\RailIMEHelperTextInputCompositionState.cs" />
+    <Compile Include="rail\RailIMEHelperTextInputSelectedResult.cs" />
+    <Compile Include="rail\RailIMETextInputCompositionState.cs" />
+    <Compile Include="rail\RailInGameCoinPurchaseCoinsResponse.cs" />
+    <Compile Include="rail\RailInGameCoinRequestCoinInfoResponse.cs" />
+    <Compile Include="rail\RailInGamePurchaseFinishOrderResponse.cs" />
+    <Compile Include="rail\RailInGamePurchasePurchaseProductsResponse.cs" />
+    <Compile Include="rail\RailInGamePurchasePurchaseProductsToAssetsResponse.cs" />
+    <Compile Include="rail\RailInGamePurchaseRequestAllProductsResponse.cs" />
+    <Compile Include="rail\RailInGamePurchaseRequestAllPurchasableProductsResponse.cs" />
+    <Compile Include="rail\RailInGameStorePurchasePayWindowClosed.cs" />
+    <Compile Include="rail\RailInGameStorePurchasePayWindowDisplayed.cs" />
+    <Compile Include="rail\RailInGameStorePurchaseResult.cs" />
+    <Compile Include="rail\RailInviteOptions.cs" />
+    <Compile Include="rail\RailKeyValue.cs" />
+    <Compile Include="rail\RailKeyValueResult.cs" />
+    <Compile Include="rail\RailListStreamFileOption.cs" />
+    <Compile Include="rail\RailNetworkSessionState.cs" />
+    <Compile Include="rail\RailNotifyNewGameActivities.cs" />
+    <Compile Include="rail\RailNotifyThirdPartyAccountQrCodeInfo.cs" />
+    <Compile Include="rail\RailObject.cs" />
+    <Compile Include="rail\RailObjectDelete.cs" />
+    <Compile Include="rail\RailOpenGameActivityWindowResult.cs" />
+    <Compile Include="rail\RailOpenGroupChatResult.cs" />
+    <Compile Include="rail\RailPlatformNotifyEventJoinGameByGameServer.cs" />
+    <Compile Include="rail\RailPlatformNotifyEventJoinGameByRoom.cs" />
+    <Compile Include="rail\RailPlatformNotifyEventJoinGameByUser.cs" />
+    <Compile Include="rail\RailPlayedWithFriendsGameItem.cs" />
+    <Compile Include="rail\RailPlayedWithFriendsTimeItem.cs" />
+    <Compile Include="rail\RailPlayerAccountType.cs" />
+    <Compile Include="rail\RailPlayerAchievementInfo.cs" />
+    <Compile Include="rail\RailProductItem.cs" />
+    <Compile Include="rail\RailPublishFileToUserSpaceOption.cs" />
+    <Compile Include="rail\RailPurchaseProductExtraInfo.cs" />
+    <Compile Include="rail\RailPurchaseProductInfo.cs" />
+    <Compile Include="rail\RailQueryGameActivityResult.cs" />
+    <Compile Include="rail\RailQueryGameOnlineTimeResult.cs" />
+    <Compile Include="rail\RailQueryGroupsInfoResult.cs" />
+    <Compile Include="rail\RailQuerySpaceWorkInfoResult.cs" />
+    <Compile Include="rail\RailQueryWorkFileOptions.cs" />
+    <Compile Include="rail\RailResult.cs" />
+    <Compile Include="rail\RailSessionTicket.cs" />
+    <Compile Include="rail\RailShowChatWindowWithFriendResult.cs" />
+    <Compile Include="rail\RailShowUserHomepageWindowResult.cs" />
+    <Compile Include="rail\RailSmallObjectDownloadInfo.cs" />
+    <Compile Include="rail\RailSmallObjectDownloadResult.cs" />
+    <Compile Include="rail\RailSmallObjectState.cs" />
+    <Compile Include="rail\RailSmallObjectStateQueryResult.cs" />
+    <Compile Include="rail\RailSpaceWorkDescriptor.cs" />
+    <Compile Include="rail\RailSpaceWorkFilter.cs" />
+    <Compile Include="rail\RailSpaceWorkSearchFilter.cs" />
+    <Compile Include="rail\RailSpaceWorkSyncProgress.cs" />
+    <Compile Include="rail\RailSpaceWorkUpdateOptions.cs" />
+    <Compile Include="rail\RailSpaceWorkVoteDetail.cs" />
+    <Compile Include="rail\RailStoreOptions.cs" />
+    <Compile Include="rail\RailStreamFileInfo.cs" />
+    <Compile Include="rail\RailStreamFileOption.cs" />
+    <Compile Include="rail\RailSwitchPlayerSelectedZoneResult.cs" />
+    <Compile Include="rail\RailSyncFileOption.cs" />
+    <Compile Include="rail\RailSystemState.cs" />
+    <Compile Include="rail\RailSystemStateChanged.cs" />
+    <Compile Include="rail\RailTextInputImeWindowOption.cs" />
+    <Compile Include="rail\RailTextInputResult.cs" />
+    <Compile Include="rail\RailTextInputWindowOption.cs" />
+    <Compile Include="rail\RailThirdPartyAccountInfo.cs" />
+    <Compile Include="rail\RailThirdPartyAccountLoginOptions.cs" />
+    <Compile Include="rail\RailThirdPartyAccountLoginResult.cs" />
+    <Compile Include="rail\RailUserPlayedWith.cs" />
+    <Compile Include="rail\RailUsersCancelInviteResult.cs" />
+    <Compile Include="rail\RailUsersGetInviteDetailResult.cs" />
+    <Compile Include="rail\RailUsersGetUserLimitsResult.cs" />
+    <Compile Include="rail\RailUsersInfoData.cs" />
+    <Compile Include="rail\RailUsersInviteJoinGameResult.cs" />
+    <Compile Include="rail\RailUsersInviteUsersResult.cs" />
+    <Compile Include="rail\RailUsersNotifyInviter.cs" />
+    <Compile Include="rail\RailUserSpaceDownloadProgress.cs" />
+    <Compile Include="rail\RailUserSpaceDownloadResult.cs" />
+    <Compile Include="rail\RailUsersRespondInvitation.cs" />
+    <Compile Include="rail\RailUtilsCrashType.cs" />
+    <Compile Include="rail\RailVoiceCaptureOption.cs" />
+    <Compile Include="rail\RailVoiceCaptureSpecification.cs" />
+    <Compile Include="rail\RailVoiceChannelID.cs" />
+    <Compile Include="rail\RailVoiceChannelUserSpeakingState.cs" />
+    <Compile Include="rail\RailWarningMessageLevel.cs" />
+    <Compile Include="rail\RailWindowClass.cs" />
+    <Compile Include="rail\RailWindowLayout.cs" />
+    <Compile Include="rail\RailWindowPosition.cs" />
+    <Compile Include="rail\RailZoneID.cs" />
+    <Compile Include="rail\rail_api.cs" />
+    <Compile Include="rail\RAIL_API_PINVOKE.cs" />
+    <Compile Include="rail\ReloadBrowserResult.cs" />
+    <Compile Include="rail\RequestAllAssetsFinished.cs" />
+    <Compile Include="rail\RequestLeaderboardEntryParam.cs" />
+    <Compile Include="rail\RoomDataReceived.cs" />
+    <Compile Include="rail\RoomInfo.cs" />
+    <Compile Include="rail\RoomInfoListFilter.cs" />
+    <Compile Include="rail\RoomInfoListFilterKey.cs" />
+    <Compile Include="rail\RoomInfoListSorter.cs" />
+    <Compile Include="rail\RoomMemberInfo.cs" />
+    <Compile Include="rail\RoomOptions.cs" />
+    <Compile Include="rail\ScreenshotRequestInfo.cs" />
+    <Compile Include="rail\SetGameServerMetadataResult.cs" />
+    <Compile Include="rail\SetMemberMetadataResult.cs" />
+    <Compile Include="rail\SetNewRoomOwnerResult.cs" />
+    <Compile Include="rail\SetRoomMaxMemberResult.cs" />
+    <Compile Include="rail\SetRoomMetadataResult.cs" />
+    <Compile Include="rail\SetRoomTagResult.cs" />
+    <Compile Include="rail\SetRoomTypeResult.cs" />
+    <Compile Include="rail\ShareStorageToSpaceWorkResult.cs" />
+    <Compile Include="rail\ShowFloatingWindowResult.cs" />
+    <Compile Include="rail\ShowNotifyWindow.cs" />
+    <Compile Include="rail\SpaceWorkID.cs" />
+    <Compile Include="rail\SplitAssetsFinished.cs" />
+    <Compile Include="rail\SplitAssetsToFinished.cs" />
+    <Compile Include="rail\StartConsumeAssetsFinished.cs" />
+    <Compile Include="rail\StartSessionWithPlayerResponse.cs" />
+    <Compile Include="rail\SyncSpaceWorkResult.cs" />
+    <Compile Include="rail\TakeScreenshotResult.cs" />
+    <Compile Include="rail\UpdateAssetsPropertyFinished.cs" />
+    <Compile Include="rail\UpdateConsumeAssetsFinished.cs" />
+    <Compile Include="rail\UploadLeaderboardParam.cs" />
+    <Compile Include="rail\UserSpaceDownloadProgress.cs" />
+    <Compile Include="rail\UserSpaceDownloadResult.cs" />
+    <Compile Include="rail\VoiceChannelAddUsersResult.cs" />
+    <Compile Include="rail\VoiceChannelInviteEvent.cs" />
+    <Compile Include="rail\VoiceChannelMemeberChangedEvent.cs" />
+    <Compile Include="rail\VoiceChannelPushToTalkKeyChangedEvent.cs" />
+    <Compile Include="rail\VoiceChannelRemoveUsersResult.cs" />
+    <Compile Include="rail\VoiceChannelSpeakingUsersChangedEvent.cs" />
+    <Compile Include="rail\VoiceChannelUsersSpeakingStateChangedEvent.cs" />
+    <Compile Include="rail\VoiceDataCapturedEvent.cs" />
     <Compile Include="ReadOnlyAttribute.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="RenderTextureDestroyer.cs" />
@@ -2120,6 +2601,7 @@
     <Compile Include="UpdateBucketWithUpdater.cs" />
     <Compile Include="UpdateManager.cs" />
     <Compile Include="UpdateRate.cs" />
+    <Compile Include="UTF8Marshaler.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="UtilHashes.cs" />
     <Compile Include="ValueArray.cs" />
@@ -2352,71 +2834,71 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669C6}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C0F}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669CA}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C13}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669CB}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C14}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669CE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C17}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669CF}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C18}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669D1}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C1A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669DB}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C24}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669DA}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C23}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669D3}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C1C}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669DC}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C25}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E1}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2A}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E8}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C31}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F2}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3B}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F3}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3C}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A07}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C50}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0D}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C56}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0A}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C53}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

@@ -27,6 +27,7 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 					num = Grid.CellLeft(Grid.PosToCell(smi.master.gameObject));
 				}
 				bool flag = false;
+				bool flag2 = false;
 				int num2;
 				int num3;
 				Grid.CellToXY(Grid.PosToCell(smi), out num2, out num3);
@@ -38,12 +39,18 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 					if (!(pickupable == null) && !(pickupable.gameObject == smi.gameObject))
 					{
 						int num4 = Grid.PosToCell(pickupable);
-						if (pickupable.PrefabID() == "SweepBot" && num4 == num && Vector3.Distance(smi.gameObject.transform.position, pickupable.gameObject.transform.position) < Grid.CellSizeInMeters)
+						if (Vector3.Distance(smi.gameObject.transform.position, pickupable.gameObject.transform.position) < Grid.CellSizeInMeters)
 						{
-							smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("bump");
-							smi2.sm.headingRight.Set(!smi2.sm.headingRight.Get(smi2), smi2);
-							flag = true;
-							break;
+							if (pickupable.PrefabID() == "SweepBot" && num4 == num)
+							{
+								smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("bump");
+								smi2.sm.headingRight.Set(!smi2.sm.headingRight.Get(smi2), smi2);
+								flag = true;
+							}
+							else if (pickupable.HasTag(GameTags.Creature))
+							{
+								flag2 = true;
+							}
 						}
 					}
 				}
@@ -60,7 +67,10 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 						smi.GoTo(this.reactFriendlyThing);
 						return;
 					}
-					smi.GoTo(this.reactScaryThing);
+					if (flag2)
+					{
+						smi.GoTo(this.reactScaryThing);
+					}
 				}
 			}
 		}, UpdateRate.SIM_33ms, false);

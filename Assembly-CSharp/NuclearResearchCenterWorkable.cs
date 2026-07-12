@@ -44,6 +44,16 @@ public class NuclearResearchCenterWorkable : Workable
 		return this.radiationStorage.IsEmpty() || activeResearch == null || activeResearch.PercentageCompleteResearchType("nuclear") >= 1f;
 	}
 
+	protected override void OnAbortWork(Worker worker)
+	{
+		base.OnAbortWork(worker);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+	}
+
 	public override float GetPercentComplete()
 	{
 		if (Research.Instance.GetActiveResearch() == null)

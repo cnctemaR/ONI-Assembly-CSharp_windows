@@ -29,16 +29,16 @@ public class HarvestablePOIConfigurator : KMonoBehaviour
 		int globalWorldSeed = SaveLoader.Instance.clusterDetailSave.globalWorldSeed;
 		ClusterGridEntity component = base.GetComponent<ClusterGridEntity>();
 		Vector3 position = ClusterGrid.Instance.GetPosition(component);
-		global::System.Random random = new global::System.Random(globalWorldSeed + (int)position.x + (int)position.y);
+		KRandom krandom = new KRandom(globalWorldSeed + (int)position.x + (int)position.y);
 		return new HarvestablePOIConfigurator.HarvestablePOIInstanceConfiguration
 		{
 			typeId = typeId,
-			capacityRoll = this.Roll(random, min, max),
-			rechargeRoll = this.Roll(random, min, max)
+			capacityRoll = this.Roll(krandom, min, max),
+			rechargeRoll = this.Roll(krandom, min, max)
 		};
 	}
 
-	private float Roll(global::System.Random randomSource, float min, float max)
+	private float Roll(KRandom randomSource, float min, float max)
 	{
 		return (float)(randomSource.NextDouble() * (double)(max - min)) + min;
 	}

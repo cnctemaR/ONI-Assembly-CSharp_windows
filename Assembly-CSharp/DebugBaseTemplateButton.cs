@@ -32,7 +32,7 @@ public class DebugBaseTemplateButton : KScreen
 		});
 		this.nameField.onValueChanged.AddListener(delegate
 		{
-			Util.ScrubInputField(this.nameField, true);
+			Util.ScrubInputField(this.nameField, true, false);
 		});
 	}
 

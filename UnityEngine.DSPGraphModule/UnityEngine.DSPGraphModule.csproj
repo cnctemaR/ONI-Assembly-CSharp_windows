@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C0C72F7E-6603-42D7-A055-FEA60E3669EC}</ProjectGuid>
+    <ProjectGuid>{B57ED30F-6C6F-4003-AF15-CA41317F2C35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Audio</RootNamespace>
     <AssemblyName>UnityEngine.DSPGraphModule</AssemblyName>
@@ -27,15 +27,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E4}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2D}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E8}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C31}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C47}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

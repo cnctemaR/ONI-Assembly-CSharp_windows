@@ -113,7 +113,13 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 		private bool IsResearchApplicable(NuclearResearchCenter.StatesInstance smi)
 		{
 			TechInstance activeResearch = Research.Instance.GetActiveResearch();
-			return activeResearch != null && activeResearch.tech.costsByResearchTypeID.ContainsKey(smi.master.researchTypeID) && activeResearch.progressInventory.PointsByTypeID[smi.master.researchTypeID] < activeResearch.tech.costsByResearchTypeID[smi.master.researchTypeID];
+			if (activeResearch != null && activeResearch.tech.costsByResearchTypeID.ContainsKey(smi.master.researchTypeID))
+			{
+				float num = activeResearch.progressInventory.PointsByTypeID[smi.master.researchTypeID];
+				float num2 = activeResearch.tech.costsByResearchTypeID[smi.master.researchTypeID];
+				return num < num2;
+			}
+			return false;
 		}
 
 		private bool HasRadiation(NuclearResearchCenter.StatesInstance smi)
@@ -169,7 +175,9 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 			Worker component = context.chore.driver.GetComponent<Worker>();
 			float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(component).Evaluate();
 			Worker worker = context.consumerState.worker;
-			return Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() > num;
+			float num2 = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
+			TechInstance activeResearch = Research.Instance.GetActiveResearch();
+			return num2 > num && activeResearch.PercentageCompleteResearchType(context.chore.gameObject.GetSMI<NuclearResearchCenter.StatesInstance>().master.researchTypeID) < 1f;
 		}
 
 		private WorkChore<NuclearResearchCenterWorkable> chore;

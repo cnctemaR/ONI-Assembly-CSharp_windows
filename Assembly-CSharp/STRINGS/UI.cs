@@ -642,6 +642,8 @@ namespace STRINGS
 
 				public static LocString NO_WORKING_TOILETS = "    • Colony has no working toilets";
 
+				public static LocString TOILET_URGENT = "    • Duplicants urgently need to use a toilet";
+
 				public static LocString FEW_TOILETS = "    • Toilet-to-Duplicant ratio is low";
 
 				public static LocString INOPERATIONAL = "    • One or more toilets are out of order";
@@ -653,6 +655,8 @@ namespace STRINGS
 					public static LocString CHECKHASANYTOILETS = "Check has any toilets";
 
 					public static LocString CHECKENOUGHTOILETS = "Check enough toilets";
+
+					public static LocString CHECKBLADDERS = "Check Duplicants really need to use the toilet";
 				}
 			}
 
@@ -921,11 +925,11 @@ namespace STRINGS
 
 				public static LocString NORMAL_ONE_IN_ORBIT = "    • {0} is in orbit waiting to land";
 
-				public static LocString NORMAL_IN_ORBIT = "    • There are {0} in orbit waiting to land";
+				public static LocString NORMAL_IN_ORBIT = "    • There are {0} rockets in orbit waiting to land";
 
-				public static LocString WARNING_ONE_ROCKETS_STRANDED = "    • No launch pads present. {0} stranded.";
+				public static LocString WARNING_ONE_ROCKETS_STRANDED = "    • No " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + " present. {0} stranded";
 
-				public static LocString WARNING_ROCKETS_STRANDED = "    • No launch pads present. {0} rockets stranded.";
+				public static LocString WARNING_ROCKETS_STRANDED = "    • No " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + " present. {0} rockets stranded";
 
 				public static LocString NORMAL_NO_ROCKETS = "    • No rockets waiting to land";
 
@@ -1095,7 +1099,7 @@ namespace STRINGS
 
 					public static LocString DESC = string.Concat(new string[]
 					{
-						"An asteroid containing ",
+						"An asteroid field containing ",
 						UI.FormatAsLink("Iron", "IRON"),
 						", ",
 						UI.FormatAsLink("Copper", "COPPER"),
@@ -1200,13 +1204,9 @@ namespace STRINGS
 						UI.FormatAsLink("Hydrogen", "HYDROGEN"),
 						" in ",
 						UI.FormatAsLink("gas", "ELEMENTS_GAS"),
-						" and ",
-						UI.FormatAsLink("solid", "ELEMENTS_SOLID"),
 						" form, and ",
 						UI.FormatAsLink("Methane", "SOLIDMETHANE"),
 						" in ",
-						UI.FormatAsLink("gas", "ELEMENTS_GAS"),
-						", ",
 						UI.FormatAsLink("solid", "ELEMENTS_SOLID"),
 						" and ",
 						UI.FormatAsLink("liquid", "ELEMENTS_LIQUID"),
@@ -1242,9 +1242,9 @@ namespace STRINGS
 						UI.FormatAsLink("Gold", "GOLD"),
 						", ",
 						UI.FormatAsLink("Fullerene", "FULLERENE"),
-						" and ",
-						UI.FormatAsLink("Pyrite", "FOOLSGOLD"),
-						".\n\nHarvesting resources requires a rocket equipped with a ",
+						", ",
+						UI.FormatAsLink("Regolith", "REGOLITH"),
+						" and more.\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
 					});
@@ -1258,9 +1258,9 @@ namespace STRINGS
 					{
 						"An asteroid field containing ",
 						UI.FormatAsLink("Tungsten", "TUNGSTEN"),
-						" and ",
+						", ",
 						UI.FormatAsLink("Wolframite", "WOLFRAMITE"),
-						".\n\nHarvesting resources requires a rocket equipped with a ",
+						" and more.\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
 					});
@@ -1289,13 +1289,11 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"An asteroid field containing ",
-						UI.FormatAsLink("Natural Gas", "METHANE"),
+						UI.FormatAsLink("Methane", "SOLIDMETHANE"),
 						", ",
 						UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
-						", ",
-						UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
 						" and ",
-						UI.FormatAsLink("Petroleum", "PETROLEUM"),
+						UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
@@ -1343,11 +1341,11 @@ namespace STRINGS
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"An asteroid field containing ",
-						UI.FormatAsLink("Copper Ore", "CUPRITE"),
+						UI.FormatAsLink("Polluted Ice", "DIRTYICE"),
 						", ",
 						UI.FormatAsLink("Ice", "ICE"),
 						", ",
-						UI.FormatAsLink("Cobalt Ore", "COBALTITE"),
+						UI.FormatAsLink("Snow", "SNOW"),
 						" and ",
 						UI.FormatAsLink("Aluminum Ore", "ALUMINUMORE"),
 						".\n\nHarvesting resources requires a rocket equipped with a ",
@@ -1440,7 +1438,7 @@ namespace STRINGS
 						UI.FormatAsLink("Bleach Stone", "BLEACHSTONE"),
 						", ",
 						UI.FormatAsLink("Rust", "RUST"),
-						",",
+						", ",
 						UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 						" and ",
 						UI.FormatAsLink("Sulfur", "SULFUR"),
@@ -1476,7 +1474,7 @@ namespace STRINGS
 					{
 						"An interplanetary body that consists of ",
 						UI.FormatAsLink("Salt Water", "SALTWATER"),
-						",",
+						", ",
 						UI.FormatAsLink("Brine", "BRINE"),
 						", ",
 						UI.FormatAsLink("Salt", "SALT"),
@@ -2742,7 +2740,7 @@ namespace STRINGS
 					{
 						public static LocString NAME = "Radiation";
 
-						public static LocString TOOLTIP = "Affects how much radiation a duplicant can be exposed to before they become sick, and how quickly a duplicant can recover from radiation exposure";
+						public static LocString TOOLTIP = "Affects how much radiation a Duplicant can be exposed to before they become sick, and how quickly a Duplicant can recover from radiation exposure";
 
 						public static class LEVELS
 						{
@@ -2775,7 +2773,7 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Easier";
 
-								public static LocString TOOLTIP = "Duplicants can be exposed to much more radiation before they get sick and recover from radiation much exposure faster";
+								public static LocString TOOLTIP = "Duplicants can be exposed to much more radiation before they get sick and recover from radiation exposure much faster";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Radiation Shielded (Difficulty Down)";
 							}
@@ -3047,11 +3045,11 @@ namespace STRINGS
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>BLAST OFF!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>The Piloting Skill now affects Rocket speed.</indent>\n•<indent=20px>Solar Panel Modules now partially block light while grounded.</indent>\n•<indent=20px>Performance optimizations for farms, Sweepys and the dig tool.</indent>\n•<indent=20px>Lots of bug fixes and polish work.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This minor update includes:\n\n•<indent=20px>Better mod management and mod uploading for WeGame users.</indent>\n•<indent=20px>Fixes for issues causing Linux users to see different worldgen results than other platforms.</indent>\n•<indent=20px>Numerous crash and bug fixes.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
-				public static LocString UPDATE_TEXT_EXPANSION1 = "";
+				public static LocString UPDATE_TEXT_EXPANSION1 = "LAUNCHED!";
 			}
 
 			public class LOADSCREEN
@@ -3355,7 +3353,54 @@ namespace STRINGS
 
 					public static LocString MANAGE_STEAM_SUBSCRIPTION = "Manage Steam Subscription";
 
+					public static LocString MANAGE_RAIL_SUBSCRIPTION = "Manage Subscription";
+
 					public static LocString MANAGE_LOCAL_MOD = "Manage Local Mod";
+				}
+
+				public class RAILMODUPLOAD
+				{
+					public static LocString TITLE = "Upload Mod";
+
+					public static LocString NAME = "Mod Name";
+
+					public static LocString DESCRIPTION = "Mod Description";
+
+					public static LocString VERSION = "Version Number";
+
+					public static LocString PREVIEW_IMAGE = "Preview Image Path";
+
+					public static LocString CONTENT_FOLDER = "Content Folder Path";
+
+					public static LocString SHARE_TYPE = "Share Type";
+
+					public static LocString SUBMIT = "Submit";
+
+					public static LocString SUBMIT_READY = "This mod is ready to submit";
+
+					public static LocString SUBMIT_NOT_READY = "The mod cannot be submitted. Check that all fields are properly entered and that the paths are valid.";
+
+					public static class MOD_SHARE_TYPE
+					{
+						public static LocString PRIVATE = "Private";
+
+						public static LocString TOOLTIP_PRIVATE = "This mod will only be visible to its creator";
+
+						public static LocString FRIEND = "Friend";
+
+						public static LocString TOOLTIP_FRIEND = "Friend";
+
+						public static LocString PUBLIC = "Public";
+
+						public static LocString TOOLTIP_PUBLIC = "This mod will be available to all players after publishing. It may be subject to review before being allowed to be published.";
+					}
+
+					public static class MOD_UPLOAD_RESULT
+					{
+						public static LocString SUCCESS = "Mod upload succeeded.";
+
+						public static LocString FAILURE = "Mod upload failed.";
+					}
 				}
 			}
 
@@ -5411,6 +5456,13 @@ namespace STRINGS
 
 					public static LocString VERY_LITTLE = "Trace amount";
 				}
+
+				public class SURFACE_CONDITIONS
+				{
+					public static LocString LIGHT = "Peak Light";
+
+					public static LocString RADIATION = "Cosmic Radiation";
+				}
 			}
 
 			public class POI
@@ -5434,7 +5486,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Rocket Speed: ";
 
-					public static LocString TOOLTIP = "<b>Rocket Speed</b> is calculated by dividing <b>Engine Power</b> by <b>Burden</b>.\nRockets operating on autopilot will have a reduced speed.\nRocket speed can be further increased by the skill of the Duplicant flying the rocket.";
+					public static LocString TOOLTIP = "<b>Rocket Speed</b> is calculated by dividing <b>Engine Power</b> by <b>Burden</b>.\n\nRockets operating on autopilot will have a reduced speed.\n\nRocket speed can be further increased by the skill of the Duplicant flying the rocket.";
 				}
 
 				public class FUEL_REMAINING
@@ -8102,6 +8154,8 @@ namespace STRINGS
 
 				public static LocString BUTTON_CLOSED = "Tear Closed";
 
+				public static LocString BUTTON_LABEL = "Enter Temporal Tear";
+
 				public static LocString CONFIRM_POPUP_MESSAGE = "Are you sure you want to fire this?";
 
 				public static LocString CONFIRM_POPUP_CONFIRM = "Yes, I'm ready for a meteor shower.";
@@ -8554,6 +8608,34 @@ namespace STRINGS
 					public static LocString COUNTING_DOWN = "5... 4... 3... 2... 1...";
 
 					public static LocString TAKING_OFF = "Liftoff!!";
+				}
+			}
+
+			public class AUTOPLUMBERSIDESCREEN
+			{
+				public static LocString TITLE = "Automatic Building Configuration";
+
+				public class BUTTONS
+				{
+					public class POWER
+					{
+						public static LocString TOOLTIP = "Add Dev Generator and Electrical Wires";
+					}
+
+					public class PIPES
+					{
+						public static LocString TOOLTIP = "Add Dev Pumps and Pipes";
+					}
+
+					public class SOLIDS
+					{
+						public static LocString TOOLTIP = "Spawn solid resources for a relevant recipe or conversions";
+					}
+
+					public class MINION
+					{
+						public static LocString TOOLTIP = "Spawn a Duplicant in front of the building";
+					}
 				}
 			}
 
@@ -9054,7 +9136,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Destination";
 
-				public static LocString FIRSTAVAILABLE = "Any landing pad";
+				public static LocString FIRSTAVAILABLE = "Any " + BUILDINGS.PREFABS.LAUNCHPAD.NAME;
 
 				public static LocString NONEAVAILABLE = "No landing site";
 
@@ -9070,7 +9152,7 @@ namespace STRINGS
 
 				public static LocString DROPDOWN_TOOLTIP_SITE_OBSTRUCTED = "Landing position on the platform is obstructed";
 
-				public static LocString DROPDOWN_TOOLTIP_PAD_DISABLED = "Landing pad is disabled";
+				public static LocString DROPDOWN_TOOLTIP_PAD_DISABLED = BUILDINGS.PREFABS.LAUNCHPAD.NAME + " is disabled";
 
 				public static LocString CHANGE_DESTINATION_BUTTON = "Change";
 

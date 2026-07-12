@@ -86,11 +86,6 @@ public class BuildingComplete : Building
 		base.OnSpawn();
 		this.primaryElement = base.GetComponent<PrimaryElement>();
 		int num = Grid.PosToCell(base.transform.GetPosition());
-		int[] array = base.PlacementCells;
-		for (int i = 0; i < array.Length; i++)
-		{
-			SimMessages.SetCellProperties(array[i], 128);
-		}
 		if (this.Def.IsFoundation)
 		{
 			foreach (int num2 in base.PlacementCells)
@@ -166,19 +161,19 @@ public class BuildingComplete : Building
 								AttributeModifier attributeModifier = enumerator.Current;
 								attributes.Add(attributeModifier);
 							}
-							goto IL_0363;
+							goto IL_0341;
 						}
-						goto IL_0303;
+						goto IL_02E1;
 					}
-					goto IL_0303;
-					IL_0363:
+					goto IL_02E1;
+					IL_0341:
 					k++;
 					continue;
-					IL_0303:
+					IL_02E1:
 					GameObject gameObject = Assets.TryGetPrefab(tag);
 					if (!(gameObject != null))
 					{
-						goto IL_0363;
+						goto IL_0341;
 					}
 					PrefabAttributeModifiers component2 = gameObject.GetComponent<PrefabAttributeModifiers>();
 					if (component2 != null)
@@ -187,9 +182,9 @@ public class BuildingComplete : Building
 						{
 							attributes.Add(attributeModifier2);
 						}
-						goto IL_0363;
+						goto IL_0341;
 					}
-					goto IL_0363;
+					goto IL_0341;
 				}
 			}
 		}

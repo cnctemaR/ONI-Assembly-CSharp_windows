@@ -34,7 +34,7 @@ public class SuitEquipper : KMonoBehaviour
 		foreach (AssignableSlotInstance assignableSlotInstance in base.GetComponent<MinionIdentity>().GetEquipment().Slots)
 		{
 			Equippable equippable2 = ((EquipmentSlotInstance)assignableSlotInstance).assignable as Equippable;
-			if (equippable2 && equippable2.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit))
+			if (equippable2 && equippable2.GetComponent<KPrefabID>().HasTag(GameTags.AirtightSuit) && equippable2.isEquipped)
 			{
 				equippable = equippable2;
 				break;

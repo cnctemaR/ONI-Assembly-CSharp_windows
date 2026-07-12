@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public static class WorldGenUtil
 {
-	public static void ShuffleSeeded<T>(this IList<T> list, Random rng)
+	public static void ShuffleSeeded<T>(this IList<T> list, KRandom rng)
 	{
 		int i = list.Count;
 		while (i > 1)

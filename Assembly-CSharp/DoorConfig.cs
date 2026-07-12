@@ -54,5 +54,10 @@ public class DoorConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 	}
 
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		go.AddTag(GameTags.NoCreatureIdling);
+	}
+
 	public const string ID = "Door";
 }

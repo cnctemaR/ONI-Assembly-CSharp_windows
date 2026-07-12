@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Klei.AI;
 using ProcGen;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -601,13 +602,22 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					this.CreateWorldTraitRow();
 				}
 				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraitIds[j], false);
+				Image reference = this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<Image>("Icon");
 				if (cachedTrait != null)
 				{
+					Sprite sprite = Assets.GetSprite(cachedTrait.filePath.Substring(cachedTrait.filePath.LastIndexOf("/") + 1));
+					reference.gameObject.SetActive(true);
+					reference.sprite = ((sprite == null) ? Assets.GetSprite("unknown") : sprite);
+					reference.color = global::Util.ColorFromHex(cachedTrait.colorHex);
 					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedTrait.name));
 					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedTrait.description));
 				}
 				else
 				{
+					Sprite sprite2 = Assets.GetSprite("NoTraits");
+					reference.gameObject.SetActive(true);
+					reference.sprite = sprite2;
+					reference.color = Color.white;
 					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.MISSING_TRAIT);
 					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip("");
 				}
@@ -622,11 +632,35 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				{
 					this.CreateWorldTraitRow();
 				}
+				Image reference2 = this.worldTraitRows[0].GetComponent<HierarchyReferences>().GetReference<Image>("Icon");
+				Sprite sprite3 = Assets.GetSprite("NoTraits");
+				reference2.gameObject.SetActive(true);
+				reference2.sprite = sprite3;
+				reference2.color = Color.black;
 				this.worldTraitRows[0].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(WORLD_TRAITS.NO_TRAITS.NAME_SHORTHAND);
 				this.worldTraitRows[0].AddOrGet<ToolTip>().SetSimpleTooltip(WORLD_TRAITS.NO_TRAITS.DESCRIPTION);
 				this.worldTraitRows[0].SetActive(true);
 			}
 		}
+		for (int l = this.surfaceConditionRows.Count - 1; l >= 0; l--)
+		{
+			global::Util.KDestroyGameObject(this.surfaceConditionRows[l]);
+		}
+		this.surfaceConditionRows.Clear();
+		GameObject gameObject = global::Util.KInstantiateUI(this.iconLabelRow, this.worldTraitsPanel.Content.gameObject, true);
+		HierarchyReferences component5 = gameObject.GetComponent<HierarchyReferences>();
+		component5.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_lights");
+		component5.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.LIGHT);
+		component5.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedLux(worldContainer.SunlightFixedTraits[worldContainer.sunlightFixedTrait]));
+		component5.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
+		this.surfaceConditionRows.Add(gameObject);
+		GameObject gameObject2 = global::Util.KInstantiateUI(this.iconLabelRow, this.worldTraitsPanel.Content.gameObject, true);
+		HierarchyReferences component6 = gameObject2.GetComponent<HierarchyReferences>();
+		component6.GetReference<Image>("Icon").sprite = Assets.GetSprite("overlay_radiation");
+		component6.GetReference<LocText>("NameLabel").SetText(UI.CLUSTERMAP.ASTEROIDS.SURFACE_CONDITIONS.RADIATION);
+		component6.GetReference<LocText>("ValueLabel").SetText(GameUtil.GetFormattedRads((float)worldContainer.CosmicRadiationFixedTraits[worldContainer.cosmicRadiationFixedTrait], GameUtil.TimeSlice.None));
+		component6.GetReference<LocText>("ValueLabel").alignment = TextAlignmentOptions.MidlineRight;
+		this.surfaceConditionRows.Add(gameObject2);
 	}
 
 	private void RefreshProcessConditions()
@@ -869,6 +903,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 	private Dictionary<Tag, GameObject> geyserRows = new Dictionary<Tag, GameObject>();
 
 	private List<GameObject> worldTraitRows = new List<GameObject>();
+
+	private List<GameObject> surfaceConditionRows = new List<GameObject>();
 
 	[SerializeField]
 	public GameObject spacerRow;

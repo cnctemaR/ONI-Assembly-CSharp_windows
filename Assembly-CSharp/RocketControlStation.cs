@@ -45,6 +45,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			{
 				return this.m_logicUsageRestrictionState;
 			}
+			base.smi.sm.AquireClustercraft(base.smi);
 			GameObject gameObject = base.smi.sm.clusterCraft.Get(base.smi);
 			return this.RestrictWhenGrounded && gameObject != null && gameObject.gameObject.HasTag(GameTags.RocketOnGround);
 		}
@@ -125,11 +126,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 		{
 			base.serializable = StateMachine.SerializeType.ParamsOnly;
 			default_state = this.unoperational;
-			this.root.Enter("SetTarget", delegate(RocketControlStation.StatesInstance smi)
-			{
-				this.clusterCraft.Set(this.GetRocket(smi), smi);
-				this.clusterCraft.Get(smi).Subscribe(-1582839653, new Action<object>(smi.master.OnTagsChanged));
-			}).Target(this.masterTarget).Exit(delegate(RocketControlStation.StatesInstance smi)
+			this.root.Enter("SetTarget", new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.State.Callback(this.AquireClustercraft)).Target(this.masterTarget).Exit(delegate(RocketControlStation.StatesInstance smi)
 			{
 				this.SetRocketSpeedModifiers(smi, 0.5f, 1f);
 			});
@@ -153,7 +150,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			}).ToggleChore(new Func<RocketControlStation.StatesInstance, Chore>(this.CreateLaunchChore), this.operational).Transition(this.launch.fadein, new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.IsInFlight), UpdateRate.SIM_200ms)
 				.Target(this.clusterCraft)
 				.EventTransition(GameHashes.RocketRequestLaunch, this.operational, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.RocketReadyForLaunch)))
-				.EventTransition(GameHashes.LaunchConditionChanged, this.launch, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.RocketReadyForLaunch)))
+				.EventTransition(GameHashes.LaunchConditionChanged, this.operational, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.RocketReadyForLaunch)))
 				.Target(this.masterTarget);
 			this.launch.fadein.Enter(delegate(RocketControlStation.StatesInstance smi)
 			{
@@ -194,6 +191,15 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			{
 				this.timeRemaining.Set(120f, smi);
 			});
+		}
+
+		public void AquireClustercraft(RocketControlStation.StatesInstance smi)
+		{
+			if (this.clusterCraft.IsNull(smi))
+			{
+				this.clusterCraft.Set(this.GetRocket(smi), smi);
+				this.clusterCraft.Get(smi).Subscribe(-1582839653, new Action<object>(smi.master.OnTagsChanged));
+			}
 		}
 
 		private void DecrementTime(RocketControlStation.StatesInstance smi, float dt)

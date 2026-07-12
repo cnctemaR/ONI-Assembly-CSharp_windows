@@ -205,7 +205,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		}
 		base.GetComponent<Storage>().Drop(storedOutfit.gameObject, true);
 		storedOutfit.GetComponent<Equippable>().Assign(equipment.GetComponent<IAssignableIdentity>());
-		storedOutfit.GetComponent<EquippableWorkable>().CancelChore();
+		storedOutfit.GetComponent<EquippableWorkable>().CancelChore("Manual equip");
 		equipment.Equip(storedOutfit.GetComponent<Equippable>());
 		this.returnSuitWorkable.CreateChore();
 	}
@@ -568,18 +568,23 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				{
 					return false;
 				}
-				SuitTank component = slot.assignable.GetComponent<SuitTank>();
-				if (component != null && component.NeedsRecharging())
+				Equippable component = slot.assignable.GetComponent<Equippable>();
+				if (component == null || !component.isEquipped)
 				{
-					return true;
+					return false;
 				}
-				JetSuitTank component2 = slot.assignable.GetComponent<JetSuitTank>();
+				SuitTank component2 = slot.assignable.GetComponent<SuitTank>();
 				if (component2 != null && component2.NeedsRecharging())
 				{
 					return true;
 				}
-				LeadSuitTank component3 = slot.assignable.GetComponent<LeadSuitTank>();
-				return component3 != null && component3.NeedsRecharging();
+				JetSuitTank component3 = slot.assignable.GetComponent<JetSuitTank>();
+				if (component3 != null && component3.NeedsRecharging())
+				{
+					return true;
+				}
+				LeadSuitTank component4 = slot.assignable.GetComponent<LeadSuitTank>();
+				return component4 != null && component4.NeedsRecharging();
 			}
 		};
 
@@ -595,7 +600,12 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 					return false;
 				}
 				AssignableSlotInstance slot2 = equipment2.GetSlot(Db.Get().AssignableSlots.Suit);
-				return !(slot2.assignable == null) && (slot2.assignable.GetComponent<SuitTank>() != null || slot2.assignable.GetComponent<JetSuitTank>() != null || slot2.assignable.GetComponent<LeadSuitTank>() != null);
+				if (slot2.assignable == null)
+				{
+					return false;
+				}
+				Equippable component5 = slot2.assignable.GetComponent<Equippable>();
+				return !(component5 == null) && component5.isEquipped && (slot2.assignable.GetComponent<SuitTank>() != null || slot2.assignable.GetComponent<JetSuitTank>() != null || slot2.assignable.GetComponent<LeadSuitTank>() != null);
 			}
 		};
 

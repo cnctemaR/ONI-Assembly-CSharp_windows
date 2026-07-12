@@ -343,7 +343,7 @@ public static class Sim
 			Transparent = 16,
 			Opaque = 32,
 			NotifyOnMelt = 64,
-			Constructed = 128
+			ConstructedTile = 128
 		}
 	}
 

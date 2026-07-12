@@ -276,7 +276,7 @@ public class GeneShuffler : Workable
 			{
 				smi.master.RefreshSideScreen();
 			}).WorkableStopTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pst);
-			this.working.pst.EventTransition(GameHashes.AnimQueueComplete, this.consumed, null);
+			this.working.pst.OnAnimQueueComplete(this.consumed);
 			this.consumed.PlayAnim("off", KAnim.PlayMode.Once).ParamTransition<bool>(this.isCharged, this.recharging, GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.IsTrue);
 			this.recharging.PlayAnim("recharging", KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		}

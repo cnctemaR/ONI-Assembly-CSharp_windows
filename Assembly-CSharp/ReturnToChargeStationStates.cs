@@ -19,13 +19,17 @@ public class ReturnToChargeStationStates : GameStateMachine<ReturnToChargeStatio
 		}, this.chargingstates.waitingForCharging, this.idle, false);
 		this.chargingstates.Enter(delegate(ReturnToChargeStationStates.Instance smi)
 		{
-			smi.master.GetComponent<Facing>().Face(this.GetSweepLocker(smi).gameObject.transform.position + Vector3.right);
-			Vector3 position = smi.transform.GetPosition();
-			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingUse);
-			smi.transform.SetPosition(position);
-			KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
-			component.enabled = false;
-			component.enabled = true;
+			Storage sweepLocker2 = this.GetSweepLocker(smi);
+			if (sweepLocker2 != null)
+			{
+				smi.master.GetComponent<Facing>().Face(sweepLocker2.gameObject.transform.position + Vector3.right);
+				Vector3 position = smi.transform.GetPosition();
+				position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingUse);
+				smi.transform.SetPosition(position);
+				KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
+				component.enabled = false;
+				component.enabled = true;
+			}
 		}).Exit(delegate(ReturnToChargeStationStates.Instance smi)
 		{
 			Vector3 position2 = smi.transform.GetPosition();

@@ -195,7 +195,7 @@ namespace ProcGen
 			return list;
 		}
 
-		public static Vector2 RandomInUnitCircle(global::System.Random rng = null)
+		public static Vector2 RandomInUnitCircle(KRandom rng = null)
 		{
 			if (rng == null)
 			{
@@ -207,7 +207,7 @@ namespace ProcGen
 			return new Vector2((float)(num3 * Math.Cos(num2)), (float)(num3 * Math.Sin(num2)));
 		}
 
-		public static List<Vector2I> GetBlob(Vector2 center, float radius, global::System.Random rng)
+		public static List<Vector2I> GetBlob(Vector2 center, float radius, KRandom rng)
 		{
 			List<Vector2> circle = Util.GetCircle(center, (int)Mathf.Ceil(radius + 0.5f));
 			circle.ShuffleSeeded<Vector2>(rng);
@@ -226,7 +226,7 @@ namespace ProcGen
 			return new List<Vector2I>(hashSet);
 		}
 
-		public static List<Vector2I> GetSplat(Vector2 center, float radius, global::System.Random rng)
+		public static List<Vector2I> GetSplat(Vector2 center, float radius, KRandom rng)
 		{
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
 			int num = Mathf.RoundToInt(6.2831855f * radius * 1f);

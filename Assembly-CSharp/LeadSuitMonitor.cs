@@ -47,7 +47,8 @@ public class LeadSuitMonitor : GameStateMachine<LeadSuitMonitor, LeadSuitMonitor
 		{
 			return;
 		}
-		if (gameObject.GetSMI<ExternalTemperatureMonitor.Instance>().AverageExternalTemperature >= smi.lead_suit_tank.coolingOperationalTemperature)
+		ExternalTemperatureMonitor.Instance smi2 = gameObject.GetSMI<ExternalTemperatureMonitor.Instance>();
+		if (smi2 != null && smi2.AverageExternalTemperature >= smi.lead_suit_tank.coolingOperationalTemperature)
 		{
 			smi.lead_suit_tank.batteryCharge -= 1f / smi.lead_suit_tank.batteryDuration * dt;
 			if (smi.lead_suit_tank.IsEmpty())

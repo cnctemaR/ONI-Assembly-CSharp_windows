@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 
 namespace STRINGS
 {
@@ -326,7 +327,7 @@ namespace STRINGS
 				{
 					"Allows Duplicants to store some of the ",
 					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
-					" found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\n Must be built via ",
+					" found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					"."
 				});
@@ -583,7 +584,7 @@ namespace STRINGS
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
 					" but are slightly faster.\n\nEngine must be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
-					".\n\n Once the engine has been built, more rocket modules can be added."
+					".\n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -635,7 +636,7 @@ namespace STRINGS
 
 				public static LocString DESC = "It's a generally good idea to pack some supplies when exploring unknown worlds.";
 
-				public static LocString EFFECT = "Delivers cargo to the surface of Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\n Must be built via Rocket Platform.";
+				public static LocString EFFECT = "Delivers cargo to the surface of Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\nMust be built via Rocket Platform.";
 			}
 
 			public class BATTERYMODULE
@@ -662,7 +663,7 @@ namespace STRINGS
 
 				public static LocString DESC = "That's one small step for Dupekind.";
 
-				public static LocString EFFECT = "Enables travel to Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".\n\nCan hold one Duplicant traveller.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid. \n\n Must be built via Rocket Platform.";
+				public static LocString EFFECT = "Enables travel to Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".\n\nCan hold one Duplicant traveller.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid. \n\nMust be built via Rocket Platform.";
 			}
 
 			public class SOLARPANELMODULE
@@ -679,7 +680,7 @@ namespace STRINGS
 					UI.FormatAsLink("Power", "POWER"),
 					" for use on rockets.\n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
-					". \n\n Must be exposed to space."
+					". \n\nMust be exposed to space."
 				});
 			}
 
@@ -1252,7 +1253,7 @@ namespace STRINGS
 				{
 					"Stores ",
 					UI.FormatAsLink("Oxylite", "OXYROCK"),
-					" and other oxidizers for burning rocket fuels.\n\n Must be built via ",
+					" and other oxidizers for burning rocket fuels.\n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					"."
 				});
@@ -1320,7 +1321,7 @@ namespace STRINGS
 				{
 					"Allows Duplicants to store most of the ",
 					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
-					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\n Must be built via ",
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					"."
 				});
@@ -1901,7 +1902,7 @@ namespace STRINGS
 				{
 					"Allows Duplicants to store most of the ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
-					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\n Must be built via ",
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					"."
 				});
@@ -1917,7 +1918,7 @@ namespace STRINGS
 				{
 					"Allows Duplicants to store some of the ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
-					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\n Must be built via ",
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\nMust be built via ",
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					"."
 				});
@@ -1988,7 +1989,7 @@ namespace STRINGS
 
 			public class LAUNCHPAD
 			{
-				public static LocString NAME = UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM");
+				public static LocString NAME = UI.FormatAsLink("Rocket Platform", "LAUNCHPAD");
 
 				public static LocString DESC = "A platform from which rockets can be launched and on which they can land.";
 
@@ -2002,7 +2003,7 @@ namespace STRINGS
 
 				public static LocString LOGIC_PORT_LANDED_ROCKET = "Landed Rocket";
 
-				public static LocString LOGIC_PORT_LANDED_ROCKET_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when its rocket is on the launch pad";
+				public static LocString LOGIC_PORT_LANDED_ROCKET_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when its rocket is on the " + BUILDINGS.PREFABS.LAUNCHPAD.NAME;
 
 				public static LocString LOGIC_PORT_LANDED_ROCKET_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 
@@ -2064,6 +2065,24 @@ namespace STRINGS
 					"Used to build the walls and floors of rooms.\n\nBlocks ",
 					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
 					" flow without obstructing ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					"."
+				});
+			}
+
+			public class DEVPUMPGAS
+			{
+				public static LocString NAME = UI.FormatAsLink("Dev Pump Gas", "DEVPUMPGAS");
+
+				public static LocString DESC = "Piping a pump's output to a building's intake will send gas to that building.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Draws in ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" and runs it through ",
+					UI.FormatAsLink("Pipes", "GASPIPING"),
+					".\n\nMust be immersed in ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
 					"."
 				});
@@ -2250,13 +2269,22 @@ namespace STRINGS
 				public static LocString EFFECT = "Generates testing power for late nights.";
 			}
 
+			public class DEVLIFESUPPORT
+			{
+				public static LocString NAME = "Dev Life Support";
+
+				public static LocString DESC = "Keeps Duplicants cozy and breathing.";
+
+				public static LocString EFFECT = "Generates warm, oxygen-rich air.";
+			}
+
 			public class DEVRADIATIONGENERATOR
 			{
 				public static LocString NAME = "Dev Radiation Emitter";
 
 				public static LocString DESC = "That's some <i>strong</i> coffee.";
 
-				public static LocString EFFECT = "Generates on-demand radiation to keep you cosy.";
+				public static LocString EFFECT = "Generates on-demand radiation to keep you cozy.";
 			}
 
 			public class GENERICFABRICATOR
@@ -2644,6 +2672,24 @@ namespace STRINGS
 					" out of a mix, sending it into a dedicated ",
 					UI.FormatAsLink("Filtered Output Pipe", "LIQUIDPIPING"),
 					".\n\nCan only filter one liquid type at a time."
+				});
+			}
+
+			public class DEVPUMPLIQUID
+			{
+				public static LocString NAME = UI.FormatAsLink("Dev Pump Liquid", "DEVPUMPLIQUID");
+
+				public static LocString DESC = "Piping a pump's output to a building's intake will send liquid to that building.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Draws in ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" and runs it through ",
+					UI.FormatAsLink("Pipes", "LIQUIDPIPING"),
+					".\n\nMust be submerged in ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					"."
 				});
 			}
 
@@ -3292,7 +3338,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
 
-				public static LocString EFFECT = "Reveals visitable Planetoids in space... in comfort!\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nBuilding must be exposed to space to function.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Reveals visitable Planetoids in space... in comfort!\n\nAssigned Duplicants must possess the ",
+					UI.FormatAsLink("Astronomy", "ASTRONOMY"),
+					" skill.\n\nExcellent sunburn protection  (100%), partial ",
+					UI.FormatAsLink("Radiation", "RADIATION"),
+					" protection (",
+					GameUtil.GetFormattedPercent(FIXEDTRAITS.COSMICRADIATION.TELESCOPE_RADIATION_SHIELDING * 100f, GameUtil.TimeSlice.None),
+					") .\n\nBuilding must be exposed to space to function."
+				});
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -6632,7 +6687,7 @@ namespace STRINGS
 
 				public static LocString DESC = "";
 
-				public static LocString EFFECT = "A lab window.\n\nSomeone once stared out this contemplating the results of an experiment.";
+				public static LocString EFFECT = "A lab window.\n\nSomeone once stared out of this, contemplating the results of an experiment.";
 			}
 
 			public class PROPGRAVITASLABWALL
@@ -6659,7 +6714,7 @@ namespace STRINGS
 
 				public static LocString DESC = "";
 
-				public static LocString EFFECT = "The granite wall of a once great scientific facility.";
+				public static LocString EFFECT = "The wall of a once-great scientific facility.";
 			}
 
 			public class PROPGRAVITASDISPLAY4

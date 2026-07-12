@@ -1869,6 +1869,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ParamTransition<ParameterType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Callback callback)
 		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self!", null);
 			if (this.parameterTransitions == null)
 			{
 				this.parameterTransitions = new List<StateMachine.ParameterTransition>();
@@ -1932,6 +1933,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State GoTo(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state)
 		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self", null);
 			string text = "(null)";
 			if (state != null)
 			{
@@ -2053,6 +2055,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State TagTransition(Tag[] tags, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, bool on_remove = false)
 		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self!", null);
 			if (this.transitions == null)
 			{
 				this.transitions = new List<StateMachine.BaseTransition>();
@@ -2069,6 +2072,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EventTransition(GameHashes evt, Func<StateMachineInstanceType, KMonoBehaviour> global_event_system_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback condition = null)
 		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self!", null);
 			if (this.transitions == null)
 			{
 				this.transitions = new List<StateMachine.BaseTransition>();

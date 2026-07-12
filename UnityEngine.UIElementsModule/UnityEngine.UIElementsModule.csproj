@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C0C72F7E-6603-42D7-A055-FEA60E366A0B}</ProjectGuid>
+    <ProjectGuid>{B57ED30F-6C6F-4003-AF15-CA41317F2C54}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UIElementsModule</RootNamespace>
     <AssemblyName>UnityEngine.UIElementsModule</AssemblyName>
@@ -508,31 +508,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E8}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C31}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F2}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3B}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F3}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3C}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C47}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreModule\UnityEngine.TextCoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A06}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4F}</Project>
       <Name>UnityEngine.TextCoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A07}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C50}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIElementsNativeModule\UnityEngine.UIElementsNativeModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0C}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C55}</Project>
       <Name>UnityEngine.UIElementsNativeModule</Name>
     </ProjectReference>
   </ItemGroup>

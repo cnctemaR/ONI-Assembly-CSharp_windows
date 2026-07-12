@@ -18,6 +18,10 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
+		if (this.building.Def.IsFoundation)
+		{
+			this.setConstructedTile = true;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -77,6 +81,10 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (this.setOpaque)
 		{
 			properties |= Sim.Cell.Properties.Opaque;
+		}
+		if (this.setConstructedTile)
+		{
+			properties |= Sim.Cell.Properties.ConstructedTile;
 		}
 		if (this.notifyOnMelt)
 		{
@@ -197,6 +205,9 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	[SerializeField]
 	public bool notifyOnMelt;
+
+	[SerializeField]
+	private bool setConstructedTile;
 
 	[SerializeField]
 	public float strengthMultiplier = 1f;

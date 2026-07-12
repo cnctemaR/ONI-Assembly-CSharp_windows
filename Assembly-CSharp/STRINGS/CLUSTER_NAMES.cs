@@ -141,7 +141,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Moonlet Cluster - Flipped";
 
-			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an inverted starting world";
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an inverted starting world.";
 		}
 
 		public static class MINICLUSTER_RADIOACTIVEOCEANSTART

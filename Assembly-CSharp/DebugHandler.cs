@@ -73,7 +73,7 @@ public class DebugHandler : IInputHandler
 			gameObject.GetComponent<MinionIdentity>().ValidateProxy();
 			Equipment component3 = gameObject.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<Equipment>();
 			component2.Assign(component3.GetComponent<IAssignableIdentity>());
-			gameObject2.GetComponent<EquippableWorkable>().CancelChore();
+			gameObject2.GetComponent<EquippableWorkable>().CancelChore("Debug Handler");
 			component3.Equip(component2);
 		}
 		gameObject.GetMyWorld().SetDupeVisited();
@@ -87,6 +87,15 @@ public class DebugHandler : IInputHandler
 	public static void ToggleDisableNotifications()
 	{
 		DebugHandler.NotificationsDisabled = !DebugHandler.NotificationsDisabled;
+	}
+
+	private string GetScreenshotFileName()
+	{
+		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
+		string text = Path.Combine(Path.GetDirectoryName(activeSaveFilePath), "screenshot");
+		string fileName = Path.GetFileName(activeSaveFilePath);
+		Directory.CreateDirectory(text);
+		return Path.ChangeExtension(Path.Combine(text, fileName), ".png");
 	}
 
 	public void OnKeyDown(KButtonEvent e)
@@ -217,7 +226,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B44;
+					goto IL_0B20;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -226,7 +235,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B44;
+					goto IL_0B20;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -235,19 +244,19 @@ public class DebugHandler : IInputHandler
 			}
 			else if (e.TryConsume(global::Action.SreenShot1x))
 			{
-				ScreenCapture.CaptureScreenshot(Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png"), 1);
+				ScreenCapture.CaptureScreenshot(this.GetScreenshotFileName(), 1);
 			}
 			else if (e.TryConsume(global::Action.SreenShot2x))
 			{
-				ScreenCapture.CaptureScreenshot(Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png"), 2);
+				ScreenCapture.CaptureScreenshot(this.GetScreenshotFileName(), 2);
 			}
 			else if (e.TryConsume(global::Action.SreenShot8x))
 			{
-				ScreenCapture.CaptureScreenshot(Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png"), 8);
+				ScreenCapture.CaptureScreenshot(this.GetScreenshotFileName(), 8);
 			}
 			else if (e.TryConsume(global::Action.SreenShot32x))
 			{
-				ScreenCapture.CaptureScreenshot(Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png"), 32);
+				ScreenCapture.CaptureScreenshot(this.GetScreenshotFileName(), 32);
 			}
 			else if (e.TryConsume(global::Action.DebugCellInfo))
 			{
@@ -331,7 +340,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B44;
+						goto IL_0B20;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -490,7 +499,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B44:
+		IL_0B20:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

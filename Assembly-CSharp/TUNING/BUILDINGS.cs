@@ -111,6 +111,7 @@ namespace TUNING
 				"LiquidConduitPreferentialFlow",
 				"LiquidConduitOverflow",
 				"LiquidPump",
+				"DevPumpLiquid",
 				"LiquidMiniPump",
 				"LiquidVent",
 				"LiquidFilter",
@@ -132,6 +133,7 @@ namespace TUNING
 				"GasConduitPreferentialFlow",
 				"GasConduitOverflow",
 				"GasPump",
+				"DevPumpGas",
 				"GasMiniPump",
 				"GasVent",
 				"GasVentHighPressure",
@@ -204,7 +206,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
 				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
-				"ExteriorWall", "SweepBotStation"
+				"ExteriorWall", "SweepBotStation", "DevLifeSupport"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{

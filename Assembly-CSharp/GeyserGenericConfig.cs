@@ -29,7 +29,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 				global::Debug.LogWarning("Could not load global world seed for geysers");
 			}
 			num = num + (int)inst.transform.GetPosition().x + (int)inst.transform.GetPosition().y;
-			int num2 = new global::System.Random(num).Next(0, configs.Count);
+			int num2 = new KRandom(num).Next(0, configs.Count);
 			GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, null, 0).SetActive(true);
 			inst.DeleteObject();
 		};

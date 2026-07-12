@@ -2888,6 +2888,16 @@ public abstract class OverlayModes
 			return "Radiation";
 		}
 
+		public override void Enable()
+		{
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().TechFilterRadiationOn);
+		}
+
+		public override void Disable()
+		{
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterRadiationOn, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		}
+
 		public static readonly HashedString ID = "Radiation";
 	}
 

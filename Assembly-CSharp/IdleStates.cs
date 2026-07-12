@@ -94,7 +94,7 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 			if (gameObject != null)
 			{
 				BuildingUnderConstruction component = gameObject.GetComponent<BuildingUnderConstruction>();
-				if (component != null && component.Def.IsFoundation)
+				if (component != null && (component.Def.IsFoundation || component.HasTag(GameTags.NoCreatureIdling)))
 				{
 					return false;
 				}

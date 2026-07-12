@@ -997,7 +997,11 @@ namespace STRINGS
 					UI.FormatAsLink("Germs", "DISEASE"),
 					", or unbreathable ",
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
-					". In order to utilize these suits, I'll need to hook up an Atmo Suit Dock to an Atmo Suit Checkpoint, then store one of the suits inside.\n\nDuplicants will equip a suit when they walk past the checkpoint in the chosen direction, and will unequip their suit when walking back the opposite way."
+					". In order to utilize these suits, I'll need to hook up an ",
+					UI.FormatAsLink("Atmo Suit Dock", "SUITLOCKER"),
+					" to an ",
+					UI.FormatAsLink("Atmo Suit Checkpoint", "SUITMARKER"),
+					" , then store one of the suits inside.\n\nDuplicants will equip a suit when they walk past the checkpoint in the chosen direction, and will unequip their suit when walking back the opposite way."
 				});
 			}
 
@@ -1021,7 +1025,7 @@ namespace STRINGS
 					UI.FormatAsHotkey("[L-SHIFT + F4]"),
 					" to check the scope of the Radiation field. Building thick walls around radiation emitters will dampen the field and protect my Duplicants from getting ",
 					UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
-					" ."
+					"."
 				});
 			}
 
@@ -1037,7 +1041,7 @@ namespace STRINGS
 					UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM"),
 					" and adding modules from the menu. All components of the Rocket Checklist will need to be complete before being capable of launching.\n\nA ",
 					UI.FormatAsLink("Telescope", "TELESCOPE"),
-					" needs to built on the surface of a Planetoid in order to use the ",
+					" needs to be built on the surface of a Planetoid in order to use the ",
 					UI.PRE_KEYWORD,
 					"Starmap Screen",
 					UI.PST_KEYWORD,

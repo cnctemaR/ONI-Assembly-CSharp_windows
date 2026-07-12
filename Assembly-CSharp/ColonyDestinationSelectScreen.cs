@@ -25,7 +25,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 			bool cloudSavesAvailable = SaveLoader.GetCloudSavesAvailable();
 			this.locationIcons.gameObject.SetActive(cloudSavesAvailable);
 		}
-		this.random = new global::System.Random();
+		this.random = new KRandom();
 	}
 
 	protected override void OnSpawn()
@@ -306,7 +306,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	[MyCmpReq]
 	private DestinationSelectPanel destinationMapPanel;
 
-	private global::System.Random random;
+	private KRandom random;
 
 	private bool isEditingCoordinate;
 }

@@ -38,12 +38,7 @@ public class PropSurfaceSatellite2Config : IEntityConfig
 	public void OnPrefabInit(GameObject inst)
 	{
 		SetLocker component = inst.GetComponent<SetLocker>();
-		component.possible_contents_ids = new string[][]
-		{
-			new string[] { "ResearchDatabank", "ResearchDatabank", "ResearchDatabank" },
-			new string[] { "ColdBreatherSeed", "ColdBreatherSeed", "ColdBreatherSeed" },
-			new string[] { "Atmo_Suit", "Glom", "Glom", "Glom" }
-		};
+		component.possible_contents_ids = PropSurfaceSatellite1Config.GetLockerBaseContents();
 		component.ChooseContents();
 		OccupyArea component2 = inst.GetComponent<OccupyArea>();
 		component2.objectLayers = new ObjectLayer[] { ObjectLayer.Building };

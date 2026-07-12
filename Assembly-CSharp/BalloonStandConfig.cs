@@ -30,6 +30,7 @@ public class BalloonStandConfig : IEntityConfig
 		GetBalloonWorkable component = inst.GetComponent<GetBalloonWorkable>();
 		WorkChore<GetBalloonWorkable> workChore = new WorkChore<GetBalloonWorkable>(Db.Get().ChoreTypes.JoyReaction, component, null, true, new Action<Chore>(this.MakeNewBalloonChore), null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, true, true);
 		workChore.AddPrecondition(this.HasNoBalloon, workChore);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, workChore);
 	}
 
 	private void MakeNewBalloonChore(Chore chore)
@@ -37,6 +38,7 @@ public class BalloonStandConfig : IEntityConfig
 		GetBalloonWorkable component = chore.target.GetComponent<GetBalloonWorkable>();
 		WorkChore<GetBalloonWorkable> workChore = new WorkChore<GetBalloonWorkable>(Db.Get().ChoreTypes.JoyReaction, component, null, true, new Action<Chore>(this.MakeNewBalloonChore), null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, true, true);
 		workChore.AddPrecondition(this.HasNoBalloon, workChore);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, workChore);
 	}
 
 	public BalloonStandConfig()

@@ -344,7 +344,7 @@ public class ClusterMapScreen : KScreen
 		return null;
 	}
 
-	private void Update()
+	public override void ScreenUpdate(bool topLevel)
 	{
 		float num = Mathf.Min(4f * Time.unscaledDeltaTime, 0.9f);
 		this.m_currentZoomScale = Mathf.Lerp(this.m_currentZoomScale, this.m_targetZoomScale, num);

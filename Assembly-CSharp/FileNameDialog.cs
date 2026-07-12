@@ -28,7 +28,7 @@ public class FileNameDialog : KModalScreen
 		this.closeButton.onClick += this.OnCancel;
 		this.inputField.onValueChanged.AddListener(delegate
 		{
-			Util.ScrubInputField(this.inputField, false);
+			Util.ScrubInputField(this.inputField, false, false);
 		});
 		this.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEdit));
 	}

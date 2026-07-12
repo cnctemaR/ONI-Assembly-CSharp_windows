@@ -18,19 +18,28 @@ public class DeliverToSweepLockerStates : GameStateMachine<DeliverToSweepLockerS
 		this.unloading.Enter(delegate(DeliverToSweepLockerStates.Instance smi)
 		{
 			Storage sweepLocker = this.GetSweepLocker(smi);
+			if (sweepLocker == null)
+			{
+				smi.GoTo(this.behaviourcomplete);
+				return;
+			}
 			Storage storage = smi.master.gameObject.GetComponents<Storage>()[1];
 			float num = Mathf.Max(0f, Mathf.Min(storage.MassStored(), sweepLocker.RemainingCapacity()));
 			for (int i = storage.items.Count - 1; i >= 0; i--)
 			{
-				float num2 = Mathf.Min(storage.items[i].GetComponent<PrimaryElement>().Mass, num);
-				if (num2 != 0f)
+				GameObject gameObject = storage.items[i];
+				if (!(gameObject == null))
 				{
-					storage.Transfer(sweepLocker, storage.items[i].GetComponent<KPrefabID>().PrefabTag, num2, false, false);
-				}
-				num -= num2;
-				if (num <= 0f)
-				{
-					break;
+					float num2 = Mathf.Min(gameObject.GetComponent<PrimaryElement>().Mass, num);
+					if (num2 != 0f)
+					{
+						storage.Transfer(sweepLocker, gameObject.GetComponent<KPrefabID>().PrefabTag, num2, false, false);
+					}
+					num -= num2;
+					if (num <= 0f)
+					{
+						break;
+					}
 				}
 			}
 			smi.master.GetComponent<KBatchedAnimController>().Play("dropoff", KAnim.PlayMode.Once, 1f, 0f);

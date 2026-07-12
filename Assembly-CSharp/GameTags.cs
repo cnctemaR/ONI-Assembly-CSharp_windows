@@ -393,6 +393,8 @@ public class GameTags
 
 	public static readonly Tag HasSuitTank = TagManager.Create("HasSuitTank");
 
+	public static readonly Tag NoCreatureIdling = TagManager.Create("NoCreatureIdling");
+
 	public static readonly Tag UnderConstruction = TagManager.Create("UnderConstruction");
 
 	public static readonly Tag Operational = TagManager.Create("Operational");

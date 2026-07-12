@@ -52,7 +52,7 @@ public class BaseNaming : KMonoBehaviour
 
 	private void OnEditing(string newName)
 	{
-		Util.ScrubInputField(this.inputField, false);
+		Util.ScrubInputField(this.inputField, false, false);
 		this.CheckBaseName(this.inputField.text);
 	}
 

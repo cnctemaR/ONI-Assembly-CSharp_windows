@@ -88,30 +88,32 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		PlantablePlot component = ((GameObject)data).GetComponent<PlantablePlot>();
 		if (component != null)
 		{
-			if (base.occupyingObject == null && (this.requestedEntityTag != component.requestedEntityTag || component.occupyingObject != null))
+			if (base.occupyingObject == null && (this.requestedEntityTag != component.requestedEntityTag || this.requestedEntityAdditionalFilterTag != component.requestedEntityAdditionalFilterTag || component.occupyingObject != null))
 			{
 				Tag tag = component.requestedEntityTag;
-				Tag requestedEntityAdditionalFilterTag = component.requestedEntityAdditionalFilterTag;
+				Tag tag2 = component.requestedEntityAdditionalFilterTag;
 				if (component.occupyingObject != null)
 				{
 					SeedProducer component2 = component.occupyingObject.GetComponent<SeedProducer>();
 					if (component2 != null)
 					{
 						tag = TagManager.Create(component2.seedInfo.seedId);
+						MutantPlant component3 = component.occupyingObject.GetComponent<MutantPlant>();
+						tag2 = (component3 ? component3.SubSpeciesID : Tag.Invalid);
 					}
 				}
 				base.CancelActiveRequest();
-				this.CreateOrder(tag, requestedEntityAdditionalFilterTag);
+				this.CreateOrder(tag, tag2);
 			}
 			if (base.occupyingObject != null)
 			{
-				Prioritizable component3 = base.GetComponent<Prioritizable>();
-				if (component3 != null)
+				Prioritizable component4 = base.GetComponent<Prioritizable>();
+				if (component4 != null)
 				{
-					Prioritizable component4 = base.occupyingObject.GetComponent<Prioritizable>();
-					if (component4 != null)
+					Prioritizable component5 = base.occupyingObject.GetComponent<Prioritizable>();
+					if (component5 != null)
 					{
-						component4.SetMasterPriority(component3.GetMasterPriority());
+						component5.SetMasterPriority(component4.GetMasterPriority());
 					}
 				}
 			}

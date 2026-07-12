@@ -341,16 +341,28 @@ public static class Util
 		return string.Format("{0:0}", value);
 	}
 
-	public static bool IsInputCharacterValid(char _char, bool isPath = false)
+	public static bool IsInputCharacterValid(char _char, bool isPath = false, bool allowNewLine = false)
 	{
-		return !Util.defaultInvalidUserInputChars.Contains(_char) && (isPath || !Util.additionalInvalidUserInputChars.Contains(_char));
+		return (!isPath && allowNewLine && _char == '\n') || (!Util.defaultInvalidUserInputChars.Contains(_char) && (isPath || !Util.additionalInvalidUserInputChars.Contains(_char)));
 	}
 
-	public static void ScrubInputField(TMP_InputField inputField, bool isPath = false)
+	public static bool IsInputStringValid(string input, bool isPath = false, bool allowNewLine = false)
+	{
+		for (int i = 0; i < input.Length; i++)
+		{
+			if (!Util.IsInputCharacterValid(input[i], isPath, allowNewLine))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void ScrubInputField(TMP_InputField inputField, bool isPath = false, bool allowNewLine = false)
 	{
 		for (int i = inputField.text.Length - 1; i >= 0; i--)
 		{
-			if (i < inputField.text.Length && !Util.IsInputCharacterValid(inputField.text[i], isPath))
+			if (i < inputField.text.Length && !Util.IsInputCharacterValid(inputField.text[i], isPath, allowNewLine))
 			{
 				inputField.text = inputField.text.Remove(i, 1);
 			}
@@ -666,7 +678,7 @@ public static class Util
 
 	private static HashSet<char> additionalInvalidUserInputChars = new HashSet<char>(new char[] { '<', '>', ':', '"', '/', '?', '*', '\\', '!', '.' });
 
-	private static global::System.Random random = new global::System.Random();
+	private static KRandom random = new KRandom();
 
 	private static string defaultRootFolder = Application.persistentDataPath;
 

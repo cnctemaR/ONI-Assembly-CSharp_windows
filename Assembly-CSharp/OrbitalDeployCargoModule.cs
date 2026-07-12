@@ -207,6 +207,14 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 			}
 		}
 
+		public bool ModuleDeployed
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		private Storage storage;
 
 		[Serialize]

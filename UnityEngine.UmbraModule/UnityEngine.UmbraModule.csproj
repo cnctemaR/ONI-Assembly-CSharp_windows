@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C0C72F7E-6603-42D7-A055-FEA60E366A0E}</ProjectGuid>
+    <ProjectGuid>{B57ED30F-6C6F-4003-AF15-CA41317F2C57}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UmbraModule</RootNamespace>
     <AssemblyName>UnityEngine.UmbraModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C47}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

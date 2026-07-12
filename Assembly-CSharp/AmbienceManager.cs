@@ -229,8 +229,11 @@ public class AmbienceManager : KMonoBehaviour
 			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, null);
 			this.allLayers.Add(this.facilityLayer);
 			this.loopingLayers.Add(this.facilityLayer);
-			this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, null);
-			this.allLayers.Add(this.radiationLayer);
+			if (Sim.IsRadiationEnabled())
+			{
+				this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, null);
+				this.allLayers.Add(this.radiationLayer);
+			}
 			for (int i = 0; i < 4; i++)
 			{
 				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], null);
@@ -380,9 +383,12 @@ public class AmbienceManager : KMonoBehaviour
 					layer.Stop();
 				}
 			}
-			this.radiationLayer.Start(emitter_position);
-			this.radiationLayer.UpdateAverageRadiation();
-			this.radiationLayer.UpdateParameters(emitter_position);
+			if (Sim.IsRadiationEnabled())
+			{
+				this.radiationLayer.Start(emitter_position);
+				this.radiationLayer.UpdateAverageRadiation();
+				this.radiationLayer.UpdateParameters(emitter_position);
+			}
 			this.oneShotLayers.Sort();
 			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{

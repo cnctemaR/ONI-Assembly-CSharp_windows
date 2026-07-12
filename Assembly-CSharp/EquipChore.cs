@@ -9,6 +9,8 @@ public class EquipChore : Chore<EquipChore.StatesInstance>
 		base.smi.sm.equippable_source.Set(equippable.gameObject, base.smi);
 		base.smi.sm.requested_units.Set(1f, base.smi);
 		this.showAvailabilityInHoverText = false;
+		Prioritizable.AddRef(equippable.gameObject);
+		Game.Instance.Trigger(1980521255, equippable.gameObject);
 		base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, equippable.GetComponent<Assignable>());
 		base.AddPrecondition(ChorePreconditions.instance.CanPickup, equippable.GetComponent<Pickupable>());
 	}

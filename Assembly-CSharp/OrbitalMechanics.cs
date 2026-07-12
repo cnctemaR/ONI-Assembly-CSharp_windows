@@ -92,12 +92,12 @@ public class OrbitalMechanics : KMonoBehaviour
 				if (smi2 != null && smi2.configuration.poiType.orbitalObject != null)
 				{
 					List<string> orbitalObject = smi2.configuration.poiType.orbitalObject;
-					global::System.Random random = new global::System.Random();
+					KRandom krandom = new KRandom();
 					float num = smi2.poiCapacity / smi2.configuration.GetMaxCapacity() * (float)smi2.configuration.poiType.maxNumOrbitingObjects;
 					int num2 = 0;
 					while ((float)num2 < num)
 					{
-						int num3 = random.Next(orbitalObject.Count);
+						int num3 = krandom.Next(orbitalObject.Count);
 						this.CreateOrbitalObject(orbitalObject[num3]);
 						num2++;
 					}

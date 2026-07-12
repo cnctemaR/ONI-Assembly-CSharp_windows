@@ -63,4 +63,8 @@ public class SapTreeConfig : IEntityConfig
 	private const int HEIGHT = 5;
 
 	private const int ATTACK_RADIUS = 2;
+
+	public const float MASS_EAT_RATE = 0.05f;
+
+	public const float KCAL_TO_KG_RATIO = 0.005f;
 }

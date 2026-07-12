@@ -85,8 +85,14 @@ public static class ClusterUtil
 			}
 			WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num]);
 			WorldContainer world2 = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[num2]);
-			DebugUtil.DevAssert(world != null, string.Format("{0} at {1} has a valid cell but no world", go, num), null);
-			DebugUtil.DevAssert(world2 != null, string.Format("{0} at {1} has a valid cell but no world", otherGo, num2), null);
+			if (world == null)
+			{
+				DebugUtil.DevLogError(string.Format("{0} at {1} has a valid cell but no world", go, num));
+			}
+			if (world2 == null)
+			{
+				DebugUtil.DevLogError(string.Format("{0} at {1} has a valid cell but no world", otherGo, num2));
+			}
 			if (world != null && world2 != null && world.ParentWorldId == world2.ParentWorldId)
 			{
 				return true;

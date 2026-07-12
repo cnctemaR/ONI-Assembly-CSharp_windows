@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C0C72F7E-6603-42D7-A055-FEA60E3669EB}</ProjectGuid>
+    <ProjectGuid>{B57ED30F-6C6F-4003-AF15-CA41317F2C34}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine</AssemblyName>
@@ -32,227 +32,227 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.AccessibilityModule\UnityEngine.AccessibilityModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669DE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C27}</Project>
       <Name>UnityEngine.AccessibilityModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AIModule\UnityEngine.AIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669DF}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C28}</Project>
       <Name>UnityEngine.AIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AndroidJNIModule\UnityEngine.AndroidJNIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E0}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C29}</Project>
       <Name>UnityEngine.AndroidJNIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E1}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2A}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ARModule\UnityEngine.ARModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E2}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2B}</Project>
       <Name>UnityEngine.ARModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E3}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2C}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E4}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2D}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ClothModule\UnityEngine.ClothModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E5}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2E}</Project>
       <Name>UnityEngine.ClothModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ClusterInputModule\UnityEngine.ClusterInputModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E6}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C2F}</Project>
       <Name>UnityEngine.ClusterInputModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ClusterRendererModule\UnityEngine.ClusterRendererModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E7}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C30}</Project>
       <Name>UnityEngine.ClusterRendererModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E8}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C31}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CrashReportingModule\UnityEngine.CrashReportingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669E9}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C32}</Project>
       <Name>UnityEngine.CrashReportingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669EA}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C33}</Project>
       <Name>UnityEngine.DirectorModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DSPGraphModule\UnityEngine.DSPGraphModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669EC}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C35}</Project>
       <Name>UnityEngine.DSPGraphModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.GameCenterModule\UnityEngine.GameCenterModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669ED}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C36}</Project>
       <Name>UnityEngine.GameCenterModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.GridModule\UnityEngine.GridModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669EF}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C38}</Project>
       <Name>UnityEngine.GridModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F1}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3A}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F2}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3B}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F3}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3C}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputModule\UnityEngine.InputModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F4}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3D}</Project>
       <Name>UnityEngine.InputModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.JSONSerializeModule\UnityEngine.JSONSerializeModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F5}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3E}</Project>
       <Name>UnityEngine.JSONSerializeModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.LocalizationModule\UnityEngine.LocalizationModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F6}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C3F}</Project>
       <Name>UnityEngine.LocalizationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F7}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C40}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PerformanceReportingModule\UnityEngine.PerformanceReportingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F8}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C41}</Project>
       <Name>UnityEngine.PerformanceReportingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669F9}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C42}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FA}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C43}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ScreenCaptureModule\UnityEngine.ScreenCaptureModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FD}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C46}</Project>
       <Name>UnityEngine.ScreenCaptureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FE}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C47}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SpriteMaskModule\UnityEngine.SpriteMaskModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E3669FF}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C48}</Project>
       <Name>UnityEngine.SpriteMaskModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SpriteShapeModule\UnityEngine.SpriteShapeModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A00}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C49}</Project>
       <Name>UnityEngine.SpriteShapeModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.StreamingModule\UnityEngine.StreamingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A01}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4A}</Project>
       <Name>UnityEngine.StreamingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SubsystemsModule\UnityEngine.SubsystemsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A03}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4C}</Project>
       <Name>UnityEngine.SubsystemsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TerrainModule\UnityEngine.TerrainModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A04}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4D}</Project>
       <Name>UnityEngine.TerrainModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TerrainPhysicsModule\UnityEngine.TerrainPhysicsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A05}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4E}</Project>
       <Name>UnityEngine.TerrainPhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreModule\UnityEngine.TextCoreModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A06}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C4F}</Project>
       <Name>UnityEngine.TextCoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A07}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C50}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TilemapModule\UnityEngine.TilemapModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A08}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C51}</Project>
       <Name>UnityEngine.TilemapModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIElementsModule\UnityEngine.UIElementsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0B}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C54}</Project>
       <Name>UnityEngine.UIElementsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIElementsNativeModule\UnityEngine.UIElementsNativeModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0C}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C55}</Project>
       <Name>UnityEngine.UIElementsNativeModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0D}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C56}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UNETModule\UnityEngine.UNETModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A0F}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C58}</Project>
       <Name>UnityEngine.UNETModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityAnalyticsModule\UnityEngine.UnityAnalyticsModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A10}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C59}</Project>
       <Name>UnityEngine.UnityAnalyticsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityConnectModule\UnityEngine.UnityConnectModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A11}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C5A}</Project>
       <Name>UnityEngine.UnityConnectModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityCurlModule\UnityEngine.UnityCurlModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A12}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C5B}</Project>
       <Name>UnityEngine.UnityCurlModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestAssetBundleModule\UnityEngine.UnityWebRequestAssetBundleModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A14}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C5D}</Project>
       <Name>UnityEngine.UnityWebRequestAssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestAudioModule\UnityEngine.UnityWebRequestAudioModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A15}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C5E}</Project>
       <Name>UnityEngine.UnityWebRequestAudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A16}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C5F}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestTextureModule\UnityEngine.UnityWebRequestTextureModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A17}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C60}</Project>
       <Name>UnityEngine.UnityWebRequestTextureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestWWWModule\UnityEngine.UnityWebRequestWWWModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A18}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C61}</Project>
       <Name>UnityEngine.UnityWebRequestWWWModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VehiclesModule\UnityEngine.VehiclesModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A19}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C62}</Project>
       <Name>UnityEngine.VehiclesModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VFXModule\UnityEngine.VFXModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1A}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C63}</Project>
       <Name>UnityEngine.VFXModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VideoModule\UnityEngine.VideoModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1B}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C64}</Project>
       <Name>UnityEngine.VideoModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VirtualTexturingModule\UnityEngine.VirtualTexturingModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1C}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C65}</Project>
       <Name>UnityEngine.VirtualTexturingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VRModule\UnityEngine.VRModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1D}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C66}</Project>
       <Name>UnityEngine.VRModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.WindModule\UnityEngine.WindModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1E}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C67}</Project>
       <Name>UnityEngine.WindModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.XRModule\UnityEngine.XRModule.csproj">
-      <Project>{C0C72F7E-6603-42D7-A055-FEA60E366A1F}</Project>
+      <Project>{B57ED30F-6C6F-4003-AF15-CA41317F2C68}</Project>
       <Name>UnityEngine.XRModule</Name>
     </ProjectReference>
   </ItemGroup>

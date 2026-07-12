@@ -143,11 +143,6 @@ public struct AxialI : IEquatable<AxialI>
 		return this.r ^ this.q;
 	}
 
-	public override string ToString()
-	{
-		return string.Format("{0}, {1}", this.r, this.q);
-	}
-
 	public static readonly AxialI ZERO = new AxialI(0, 0);
 
 	public static readonly AxialI NORTHWEST = new AxialI(0, -1);

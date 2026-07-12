@@ -136,6 +136,7 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 			reference3.selectedLabel.text = ((module.ChosenDuplicant != null) ? this.GetDuplicantRowName(module.ChosenDuplicant) : UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.SELECT_DUPLICANT.ToString());
 			reference4.gameObject.SetActive(true);
 			reference4.SetIdentityObject(module.ChosenDuplicant, false);
+			reference3.openButton.isInteractable = !module.ModuleDeployed;
 		}
 		else
 		{

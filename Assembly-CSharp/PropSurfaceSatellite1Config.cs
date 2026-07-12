@@ -35,15 +35,21 @@ public class PropSurfaceSatellite1Config : IEntityConfig
 		return gameObject;
 	}
 
-	public void OnPrefabInit(GameObject inst)
+	public static string[][] GetLockerBaseContents()
 	{
-		SetLocker component = inst.GetComponent<SetLocker>();
-		component.possible_contents_ids = new string[][]
+		string text = (DlcManager.FeatureClusterSpaceEnabled() ? "OrbitalResearchDatabank" : "ResearchDatabank");
+		return new string[][]
 		{
-			new string[] { "ResearchDatabank", "ResearchDatabank", "ResearchDatabank" },
+			new string[] { text, text, text },
 			new string[] { "ColdBreatherSeed", "ColdBreatherSeed", "ColdBreatherSeed" },
 			new string[] { "Atmo_Suit", "Glom", "Glom", "Glom" }
 		};
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+		SetLocker component = inst.GetComponent<SetLocker>();
+		component.possible_contents_ids = PropSurfaceSatellite1Config.GetLockerBaseContents();
 		component.ChooseContents();
 		OccupyArea component2 = inst.GetComponent<OccupyArea>();
 		component2.objectLayers = new ObjectLayer[] { ObjectLayer.Building };

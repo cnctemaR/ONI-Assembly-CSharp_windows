@@ -120,6 +120,10 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 
 	private void ToggleSelectable(bool isSelectable, ClusterMapRocketAnimator.StatesInstance smi)
 	{
+		if (smi.entity.IsNullOrDestroyed())
+		{
+			return;
+		}
 		KSelectable component = smi.entity.GetComponent<KSelectable>();
 		component.IsSelectable = isSelectable;
 		if (!isSelectable && component.IsSelected && ClusterMapScreen.Instance.GetMode() != ClusterMapScreen.Mode.SelectDestination)

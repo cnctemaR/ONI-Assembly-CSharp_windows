@@ -98,7 +98,7 @@ namespace STRINGS
 				UI.FormatAsLink("Tungsten", "TUNGSTEN"),
 				"production.\n\nThough my Duplicants appear more than happy to work in the Tundra Biome for short periods of time, I will need to provide proper ",
 				UI.FormatAsLink("equipment", "EQUIPMENT"),
-				" for them to avoid adverse affects to their wellbeing if they are working here for longer periods."
+				" for them to avoid adverse affects to their well-being if they are working here for longer periods."
 			});
 		}
 

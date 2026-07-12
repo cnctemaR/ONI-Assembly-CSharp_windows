@@ -267,6 +267,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
 				"ClusterTelescope",
+				"ClusterTelescopeEnclosed",
 				"LaunchPad",
 				"Gantry",
 				"SteamEngine",
@@ -296,7 +297,7 @@ namespace TUNING
 				"RailGunPayloadOpener",
 				"LandingBeacon"
 			}, ""),
-			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
+			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "RadiationLight", "ManualHighEnergyParticleSpawner", "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector", "HEPBattery", "HEPBridgeTile", "DevRadiationGenerator" }, "EXPANSION1_ID")
 		};
 
 		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>

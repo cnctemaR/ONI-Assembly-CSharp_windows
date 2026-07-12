@@ -17,15 +17,31 @@ public class CometDetectorSideScreen : SideScreenContent
 
 	private void RefreshOptions()
 	{
-		int num = 0;
-		this.SetRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("asteroid"), null);
+		if (this.clusterDetector != null)
+		{
+			int num = 0;
+			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("asteroid"), ClusterCometDetector.Instance.ClusterCometDetectorState.MeteorShower, null);
+			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.DUPEMADE, Assets.GetSprite("asteroid"), ClusterCometDetector.Instance.ClusterCometDetectorState.BallisticObject, null);
+			foreach (object obj in Components.Clustercrafts)
+			{
+				Clustercraft clustercraft = (Clustercraft)obj;
+				this.SetClusterRow(num++, clustercraft.Name, Assets.GetSprite("icon_category_rocketry"), ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket, clustercraft);
+			}
+			for (int i = num; i < this.rowContainer.childCount; i++)
+			{
+				this.rowContainer.GetChild(i).gameObject.SetActive(false);
+			}
+			return;
+		}
+		int num2 = 0;
+		this.SetRow(num2++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("asteroid"), null);
 		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
 		{
-			this.SetRow(num++, spacecraft.GetRocketName(), Assets.GetSprite("icon_category_rocketry"), spacecraft.launchConditions);
+			this.SetRow(num2++, spacecraft.GetRocketName(), Assets.GetSprite("icon_category_rocketry"), spacecraft.launchConditions);
 		}
-		for (int i = num; i < this.rowContainer.childCount; i++)
+		for (int j = num2; j < this.rowContainer.childCount; j++)
 		{
-			this.rowContainer.GetChild(i).gameObject.SetActive(false);
+			this.rowContainer.GetChild(j).gameObject.SetActive(false);
 		}
 	}
 
@@ -40,8 +56,41 @@ public class CometDetectorSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
-		this.detector = target.GetSMI<CometDetector.Instance>();
+		if (DlcManager.IsExpansion1Active())
+		{
+			this.clusterDetector = target.GetSMI<ClusterCometDetector.Instance>();
+		}
+		else
+		{
+			this.detector = target.GetSMI<CometDetector.Instance>();
+		}
 		this.RefreshOptions();
+	}
+
+	private void SetClusterRow(int idx, string name, Sprite icon, ClusterCometDetector.Instance.ClusterCometDetectorState state, Clustercraft rocketTarget = null)
+	{
+		GameObject gameObject;
+		if (idx < this.rowContainer.childCount)
+		{
+			gameObject = this.rowContainer.GetChild(idx).gameObject;
+		}
+		else
+		{
+			gameObject = Util.KInstantiateUI(this.rowPrefab, this.rowContainer.gameObject, true);
+		}
+		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+		component.GetReference<LocText>("label").text = name;
+		component.GetReference<Image>("icon").sprite = icon;
+		MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+		component2.ChangeState((this.clusterDetector.GetDetectorState() == state && this.clusterDetector.GetClustercraftTarget() == rocketTarget) ? 1 : 0);
+		ClusterCometDetector.Instance.ClusterCometDetectorState _state = state;
+		Clustercraft _rocketTarget = rocketTarget;
+		component2.onClick = delegate
+		{
+			this.clusterDetector.SetDetectorState(_state);
+			this.clusterDetector.SetClustercraftTarget(_rocketTarget);
+			this.RefreshOptions();
+		};
 	}
 
 	private void SetRow(int idx, string name, Sprite icon, LaunchConditionManager target)
@@ -70,10 +119,16 @@ public class CometDetectorSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
+		if (DlcManager.IsExpansion1Active())
+		{
+			return target.GetSMI<ClusterCometDetector.Instance>() != null;
+		}
 		return target.GetSMI<CometDetector.Instance>() != null;
 	}
 
 	private CometDetector.Instance detector;
+
+	private ClusterCometDetector.Instance clusterDetector;
 
 	public GameObject rowPrefab;
 

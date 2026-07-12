@@ -51,7 +51,6 @@ public class ScoutRoverConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalChemicalBattery.deltaAttribute.Id, -global::TUNING.ROBOTS.SCOUTBOT.BATTERY_DEPLETION_RATE, name, false, false, true));
 		component2.initialTraits.Add(ScoutRoverConfig.ROVER_BASE_TRAIT_ID);
 		gameObject.AddOrGet<AttributeConverters>();
-		gameObject.AddOrGet<AttributeLevels>();
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
 		gridVisibility.radius = 30;
 		gridVisibility.innerRadius = 20f;
@@ -84,10 +83,16 @@ public class ScoutRoverConfig : IEntityConfig
 			Storage.StoredItemModifier.Seal
 		});
 		gameObject.AddOrGetDef<CreatureDebugGoToMonitor.Def>();
+		Deconstructable deconstructable = gameObject.AddOrGet<Deconstructable>();
+		deconstructable.enabled = false;
+		deconstructable.audioSize = "medium";
+		deconstructable.looseEntityDeconstructable = true;
 		gameObject.AddOrGetDef<RobotAi.Def>();
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def(), true, -1).Add(new FallStates.Def(), true, -1).Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new IdleStates.Def(), true, Db.Get().ChoreTypes.Idle.priority);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Robots.Models.ScoutRover, null);
+		gameObject.AddOrGet<KPrefabID>().RemoveTag(GameTags.CreatureBrain);
+		gameObject.AddOrGet<KPrefabID>().AddTag(GameTags.DupeBrain, false);
 		Navigator navigator = gameObject.AddOrGet<Navigator>();
 		string text = "RobotNavGrid";
 		navigator.NavGridName = text;
@@ -97,7 +102,7 @@ public class ScoutRoverConfig : IEntityConfig
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		gameObject.AddOrGet<Sensors>();
 		gameObject.AddOrGet<Pickupable>().SetWorkTime(5f);
-		gameObject.AddOrGet<SnapOn>().snapPoints = new List<SnapOn.SnapPoint>(new SnapOn.SnapPoint[0]);
+		gameObject.AddOrGet<SnapOn>();
 		component.SetSymbolVisiblity("snapto_pivot", false);
 		return gameObject;
 	}
@@ -109,7 +114,143 @@ public class ScoutRoverConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return ScoutRoverConfig.CreateScout("ScoutRover", global::STRINGS.ROBOTS.MODELS.SCOUT.NAME, global::STRINGS.ROBOTS.MODELS.SCOUT.DESC, "scout_bot_kanim");
+		GameObject gameObject = ScoutRoverConfig.CreateScout("ScoutRover", global::STRINGS.ROBOTS.MODELS.SCOUT.NAME, global::STRINGS.ROBOTS.MODELS.SCOUT.DESC, "scout_bot_kanim");
+		this.SetupLaserEffects(gameObject);
+		return gameObject;
+	}
+
+	private void SetupLaserEffects(GameObject prefab)
+	{
+		GameObject gameObject = new GameObject("LaserEffect");
+		gameObject.transform.parent = prefab.transform;
+		KBatchedAnimEventToggler kbatchedAnimEventToggler = gameObject.AddComponent<KBatchedAnimEventToggler>();
+		kbatchedAnimEventToggler.eventSource = prefab;
+		kbatchedAnimEventToggler.enableEvent = "LaserOn";
+		kbatchedAnimEventToggler.disableEvent = "LaserOff";
+		kbatchedAnimEventToggler.entries = new List<KBatchedAnimEventToggler.Entry>();
+		ScoutRoverConfig.LaserEffect[] array = new ScoutRoverConfig.LaserEffect[]
+		{
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "DigEffect",
+				animFile = "laser_kanim",
+				anim = "idle",
+				context = "dig"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "BuildEffect",
+				animFile = "construct_beam_kanim",
+				anim = "loop",
+				context = "build"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "FetchLiquidEffect",
+				animFile = "hose_fx_kanim",
+				anim = "loop",
+				context = "fetchliquid"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "PaintEffect",
+				animFile = "paint_beam_kanim",
+				anim = "loop",
+				context = "paint"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "HarvestEffect",
+				animFile = "plant_harvest_beam_kanim",
+				anim = "loop",
+				context = "harvest"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "CaptureEffect",
+				animFile = "net_gun_fx_kanim",
+				anim = "loop",
+				context = "capture"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "AttackEffect",
+				animFile = "attack_beam_fx_kanim",
+				anim = "loop",
+				context = "attack"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "PickupEffect",
+				animFile = "vacuum_fx_kanim",
+				anim = "loop",
+				context = "pickup"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "StoreEffect",
+				animFile = "vacuum_reverse_fx_kanim",
+				anim = "loop",
+				context = "store"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "DisinfectEffect",
+				animFile = "plant_spray_beam_kanim",
+				anim = "loop",
+				context = "disinfect"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "TendEffect",
+				animFile = "plant_tending_beam_fx_kanim",
+				anim = "loop",
+				context = "tend"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "PowerTinkerEffect",
+				animFile = "electrician_beam_fx_kanim",
+				anim = "idle",
+				context = "powertinker"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "SpecialistDigEffect",
+				animFile = "senior_miner_beam_fx_kanim",
+				anim = "idle",
+				context = "specialistdig"
+			},
+			new ScoutRoverConfig.LaserEffect
+			{
+				id = "DemolishEffect",
+				animFile = "poi_demolish_fx_kanim",
+				anim = "idle",
+				context = "demolish"
+			}
+		};
+		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+		foreach (ScoutRoverConfig.LaserEffect laserEffect in array)
+		{
+			GameObject gameObject2 = new GameObject(laserEffect.id);
+			gameObject2.transform.parent = gameObject.transform;
+			gameObject2.AddOrGet<KPrefabID>().PrefabTag = new Tag(laserEffect.id);
+			KBatchedAnimTracker kbatchedAnimTracker = gameObject2.AddOrGet<KBatchedAnimTracker>();
+			kbatchedAnimTracker.controller = component;
+			kbatchedAnimTracker.symbol = new HashedString("scout_radar");
+			kbatchedAnimTracker.offset = new Vector3(195f, 0f, 0f);
+			kbatchedAnimTracker.useTargetPoint = true;
+			KBatchedAnimController kbatchedAnimController = gameObject2.AddOrGet<KBatchedAnimController>();
+			kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(laserEffect.animFile) };
+			KBatchedAnimEventToggler.Entry entry = new KBatchedAnimEventToggler.Entry
+			{
+				anim = laserEffect.anim,
+				context = laserEffect.context,
+				controller = kbatchedAnimController
+			};
+			kbatchedAnimEventToggler.entries.Add(entry);
+			gameObject2.AddOrGet<LoopingSounds>();
+		}
 	}
 
 	public void OnPrefabInit(GameObject inst)
@@ -173,11 +314,22 @@ public class ScoutRoverConfig : IEntityConfig
 
 	public static string ROVER_BASE_TRAIT_ID = "ScoutRoverBaseTrait";
 
-	public const int MAXIMUM_TECH_CONSTRUCTION_TIER = 1;
+	public const int MAXIMUM_TECH_CONSTRUCTION_TIER = 2;
 
 	public const float MASS = 100f;
 
 	private const float WIDTH = 1f;
 
 	private const float HEIGHT = 2f;
+
+	public struct LaserEffect
+	{
+		public string id;
+
+		public string animFile;
+
+		public string anim;
+
+		public HashedString context;
+	}
 }

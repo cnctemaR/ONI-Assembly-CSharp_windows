@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{94EC2357-A33E-4136-87AC-931A315E89D8}</ProjectGuid>
+    <ProjectGuid>{79A46B86-94ED-4A9A-BEC7-5BF408441783}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.GridModule</AssemblyName>
@@ -20,11 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{94EC2357-A33E-4136-87AC-931A315E89D1}</Project>
+      <Project>{79A46B86-94ED-4A9A-BEC7-5BF40844177C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{94EC2357-A33E-4136-87AC-931A315E89E7}</Project>
+      <Project>{79A46B86-94ED-4A9A-BEC7-5BF408441792}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

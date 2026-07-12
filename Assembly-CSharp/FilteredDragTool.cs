@@ -110,62 +110,65 @@ public class FilteredDragTool : DragTool
 
 	public string GetFilterLayerFromObjectLayer(ObjectLayer gamer_layer)
 	{
-		if (gamer_layer <= ObjectLayer.Backwall)
+		if (gamer_layer > ObjectLayer.FoundationTile)
 		{
-			if (gamer_layer == ObjectLayer.Building)
+			switch (gamer_layer)
 			{
-				return "Buildings";
+			case ObjectLayer.GasConduit:
+			case ObjectLayer.GasConduitConnection:
+				return "GasPipes";
+			case ObjectLayer.GasConduitTile:
+			case ObjectLayer.ReplacementGasConduit:
+			case ObjectLayer.LiquidConduitTile:
+			case ObjectLayer.ReplacementLiquidConduit:
+				goto IL_00AC;
+			case ObjectLayer.LiquidConduit:
+			case ObjectLayer.LiquidConduitConnection:
+				return "LiquidPipes";
+			case ObjectLayer.SolidConduit:
+				break;
+			default:
+				switch (gamer_layer)
+				{
+				case ObjectLayer.SolidConduitConnection:
+					break;
+				case ObjectLayer.LadderTile:
+				case ObjectLayer.ReplacementLadder:
+				case ObjectLayer.WireTile:
+				case ObjectLayer.ReplacementWire:
+					goto IL_00AC;
+				case ObjectLayer.Wire:
+				case ObjectLayer.WireConnectors:
+					return "Wires";
+				case ObjectLayer.LogicGate:
+				case ObjectLayer.LogicWire:
+					return "Logic";
+				default:
+					if (gamer_layer == ObjectLayer.Gantry)
+					{
+						goto IL_007C;
+					}
+					goto IL_00AC;
+				}
+				break;
 			}
+			return "SolidConduits";
+		}
+		if (gamer_layer != ObjectLayer.Building)
+		{
 			if (gamer_layer == ObjectLayer.Backwall)
 			{
 				return "BackWall";
 			}
-		}
-		else
-		{
 			if (gamer_layer != ObjectLayer.FoundationTile)
 			{
-				switch (gamer_layer)
-				{
-				case ObjectLayer.GasConduit:
-				case ObjectLayer.GasConduitConnection:
-					return "GasPipes";
-				case ObjectLayer.GasConduitTile:
-				case ObjectLayer.ReplacementGasConduit:
-				case ObjectLayer.LiquidConduitTile:
-				case ObjectLayer.ReplacementLiquidConduit:
-					goto IL_00A5;
-				case ObjectLayer.LiquidConduit:
-				case ObjectLayer.LiquidConduitConnection:
-					return "LiquidPipes";
-				case ObjectLayer.SolidConduit:
-					break;
-				default:
-					switch (gamer_layer)
-					{
-					case ObjectLayer.SolidConduitConnection:
-						break;
-					case ObjectLayer.LadderTile:
-					case ObjectLayer.ReplacementLadder:
-					case ObjectLayer.WireTile:
-					case ObjectLayer.ReplacementWire:
-						goto IL_00A5;
-					case ObjectLayer.Wire:
-					case ObjectLayer.WireConnectors:
-						return "Wires";
-					case ObjectLayer.LogicGate:
-					case ObjectLayer.LogicWire:
-						return "Logic";
-					default:
-						goto IL_00A5;
-					}
-					break;
-				}
-				return "SolidConduits";
+				goto IL_00AC;
 			}
 			return "Tiles";
 		}
-		IL_00A5:
+		IL_007C:
+		return "Buildings";
+		IL_00AC:
 		return "Default";
 	}
 

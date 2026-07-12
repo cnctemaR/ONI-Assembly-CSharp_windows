@@ -152,6 +152,7 @@ public class WorldContainer : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		SaveGame.Instance.materialSelectorSerializer.WipeWorldSelectionData(this.id);
 		ClusterManager.Instance.UnregisterWorldContainer(this);
 		base.OnCleanUp();
 	}
@@ -377,9 +378,9 @@ public class WorldContainer : KMonoBehaviour
 		if (!this.isDupeVisited)
 		{
 			this.dupeVisitedTimestamp = GameUtil.GetCurrentTimeInCycles();
+			this.isDupeVisited = true;
+			Game.Instance.Trigger(-434755240, this);
 		}
-		this.isDupeVisited = true;
-		Game.Instance.Trigger(-434755240, this);
 	}
 
 	public void SetRoverLanded()
@@ -511,7 +512,7 @@ public class WorldContainer : KMonoBehaviour
 	{
 		if (this.cosmicRadiationFixedTrait == null)
 		{
-			this.sunlightFixedTrait = FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
+			this.cosmicRadiationFixedTrait = FIXEDTRAITS.COSMICRADIATION.NAME.DEFAULT;
 		}
 		if (this.cosmicRadiationFixedTraits.ContainsKey(this.cosmicRadiationFixedTrait))
 		{

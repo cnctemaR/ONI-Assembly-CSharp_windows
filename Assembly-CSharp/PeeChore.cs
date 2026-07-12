@@ -78,7 +78,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 				.Exit(delegate(PeeChore.StatesInstance smi)
 				{
 					smi.master.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
-					float num = Mathf.Min(smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).value, 60f);
+					float num = Mathf.Min(smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).value, 100f);
 					smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).ApplyDelta(-num);
 					if (num >= 1f)
 					{

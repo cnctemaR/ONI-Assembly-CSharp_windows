@@ -24,7 +24,7 @@ public class BulbPlantConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 220f, "BulbPlantOriginal", global::STRINGS.CREATURES.SPECIES.BULBPLANT.NAME);
+		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "BulbPlantOriginal", global::STRINGS.CREATURES.SPECIES.BULBPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;

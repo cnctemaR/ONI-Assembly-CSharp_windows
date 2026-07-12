@@ -110,7 +110,7 @@ public class MaterialSelector : KScreen
 			this.selectedToggle = ktoggle;
 			if (recipe != null)
 			{
-				SaveGame.Instance.materialSelectorSerializer.SetSelectedElement(this.selectorIndex, recipe.Result, elem);
+				SaveGame.Instance.materialSelectorSerializer.SetSelectedElement(ClusterManager.Instance.activeWorldId, this.selectorIndex, recipe.Result, elem);
 			}
 			this.CurrentSelectedElement = elem;
 			if (this.selectMaterialActions != null)
@@ -190,7 +190,7 @@ public class MaterialSelector : KScreen
 		{
 			return false;
 		}
-		Tag previousElement = SaveGame.Instance.materialSelectorSerializer.GetPreviousElement(this.selectorIndex, this.activeRecipe.Result);
+		Tag previousElement = SaveGame.Instance.materialSelectorSerializer.GetPreviousElement(ClusterManager.Instance.activeWorldId, this.selectorIndex, this.activeRecipe.Result);
 		if (previousElement != null)
 		{
 			KToggle ktoggle;

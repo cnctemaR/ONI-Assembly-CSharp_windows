@@ -268,6 +268,7 @@ namespace Database
 			new Tech("DurableLifeSupport", new List<string> { "NoseconeBasic", "HabitatModuleMedium", "ArtifactAnalysisStation", "ArtifactCargoBay" }, this, null);
 			new Tech("NuclearResearch", new List<string> { "DeltaResearchPoint", "NuclearResearchCenter", "ManualHighEnergyParticleSpawner" }, this, null);
 			new Tech("AdvancedNuclearResearch", new List<string> { "HighEnergyParticleSpawner", "HighEnergyParticleRedirector" }, this, null);
+			new Tech("NuclearStorage", new List<string> { "HEPBattery" }, this, null);
 			new Tech("NuclearPropulsion", new List<string> { "HEPEngine" }, this, null);
 			new Tech("NotificationSystems", new List<string>
 			{
@@ -353,6 +354,7 @@ namespace Database
 			{
 				CometDetectorConfig.ID,
 				"Telescope",
+				"ClusterTelescopeEnclosed",
 				"AstronautTrainingCenter"
 			}, this, null);
 			new Tech("TravelTubes", new List<string> { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge", "VerticalWindTunnel" }, this, null);

@@ -196,7 +196,7 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 				{
 					smi.PlayKnockedOverImpactAnimation();
 				}
-				gameObject4.GetComponent<PrimaryElement>().AddDisease(Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(this.payload * 0.5f / 0.001f), "HEPImpact");
+				gameObject4.GetComponent<PrimaryElement>().AddDisease(Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(this.payload * 0.5f / 0.01f), "HEPImpact");
 				this.Collide(HighEnergyParticle.CollisionType.Minion);
 				return;
 			}
@@ -234,7 +234,7 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		{
 			this.payload -= 0.1f;
 			byte index = Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id);
-			int num3 = Mathf.FloorToInt(50f);
+			int num3 = Mathf.FloorToInt(5f);
 			SimMessages.ModifyDiseaseOnCell(num2, index, num3);
 		}
 		if (this.payload <= 0f)
@@ -364,7 +364,7 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 			smi.master.emitter.emitRadiusY = 6;
 			smi.master.emitter.emitRads = smi.master.payload * 0.5f * 600f / 9f;
 			smi.master.emitter.Refresh();
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(smi.master.gameObject), SimHashes.Fallout, CellEventLogger.Instance.ElementEmitted, smi.master.payload * 0.001f, 5000f, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(smi.master.payload * 0.5f / 0.001f), true, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(smi.master.gameObject), SimHashes.Fallout, CellEventLogger.Instance.ElementEmitted, smi.master.payload * 0.001f, 5000f, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.FloorToInt(smi.master.payload * 0.5f / 0.01f), true, -1);
 			smi.Schedule(1f, delegate(object obj)
 			{
 				global::UnityEngine.Object.Destroy(smi.master.gameObject);

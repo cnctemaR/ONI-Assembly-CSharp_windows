@@ -78,13 +78,13 @@ public class RadiationDiagnostic : ColonyDiagnostic
 			Vector3 position = gameObject.transform.position;
 			float num = sm.currentExposurePerCycle.Get(smi);
 			float num2 = sm.radiationExposure.Get(smi);
-			if (num > 60f && num2 > 30f)
+			if (num > 100f && num2 > 50f)
 			{
 				diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, gameObject);
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.RADIATIONDIAGNOSTIC.CRITERIA_RADIATION_EXPOSURE.FAIL_CONCERN;
 			}
-			if (num > 600f)
+			if (num > 1000f)
 			{
 				diagnosticResult.clickThroughTarget = new global::Tuple<Vector3, GameObject>(position, minionIdentity.gameObject);
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Warning;

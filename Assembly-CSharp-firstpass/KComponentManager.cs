@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentManager where T : new()
 {
@@ -11,9 +12,20 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		this.Name = base.GetType().Name;
 	}
 
+	protected void AddToCleanupList(KComponentManager<T>.CleanupInfo info)
+	{
+		this.cleanupMap.Add(info.instance);
+		this.cleanupList.Add(info);
+	}
+
+	protected bool IsInCleanupList(GameObject go)
+	{
+		return this.cleanupMap.Contains(go);
+	}
+
 	public bool Has(object go)
 	{
-		return !this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go) && !(this.GetHandle(go) == HandleVector<int>.InvalidHandle);
+		return !this.cleanupMap.Contains(go) && !(this.GetHandle(go) == HandleVector<int>.InvalidHandle);
 	}
 
 	protected HandleVector<int>.Handle InternalAddComponent(object instance, T cmp_values)
@@ -112,6 +124,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 		this.shadowCleanupList.AddRange(this.cleanupList);
 		this.cleanupList.Clear();
+		this.cleanupMap.Clear();
 		foreach (KComponentManager<T>.CleanupInfo cleanupInfo in this.shadowCleanupList)
 		{
 			this.OnCleanUp(cleanupInfo.handle);
@@ -126,6 +139,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		{
 			if (this.cleanupList[i].instance == instance)
 			{
+				this.cleanupMap.Remove(instance);
 				this.cleanupList[i] = this.cleanupList[this.cleanupList.Count - 1];
 				this.cleanupList.RemoveAt(this.cleanupList.Count - 1);
 				return;
@@ -139,6 +153,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		this.spawnList.Clear();
 		this.shadowSpawnList.Clear();
 		this.cleanupList.Clear();
+		this.cleanupMap.Clear();
 		this.shadowCleanupList.Clear();
 		this.instanceHandleMap.Clear();
 	}
@@ -161,7 +176,9 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	private HashSet<HandleVector<int>.Handle> shadowSpawnList = new HashSet<HandleVector<int>.Handle>();
 
-	protected List<KComponentManager<T>.CleanupInfo> cleanupList = new List<KComponentManager<T>.CleanupInfo>();
+	private List<KComponentManager<T>.CleanupInfo> cleanupList = new List<KComponentManager<T>.CleanupInfo>();
+
+	private HashSet<object> cleanupMap = new HashSet<object>();
 
 	private List<KComponentManager<T>.CleanupInfo> shadowCleanupList = new List<KComponentManager<T>.CleanupInfo>();
 

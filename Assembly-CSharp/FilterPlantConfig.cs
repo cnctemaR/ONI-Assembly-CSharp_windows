@@ -26,7 +26,7 @@ public class FilterPlantConfig : IEntityConfig
 		float num5 = 443.15f;
 		string text4 = SimHashes.Water.ToString();
 		string text5 = global::STRINGS.CREATURES.SPECIES.FILTERPLANT.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.Oxygen }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 220f, "FilterPlantOriginal", text5);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.Oxygen }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 2200f, "FilterPlantOriginal", text5);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

@@ -120,11 +120,14 @@ namespace ProcGen
 		{
 			foreach (World.TraitRule traitRule in this.worldTraitRules)
 			{
-				TagSet tagSet = ((traitRule.requiredTags != null) ? new TagSet(traitRule.requiredTags) : null);
-				TagSet tagSet2 = ((traitRule.forbiddenTags != null) ? new TagSet(traitRule.forbiddenTags) : null);
-				if ((tagSet == null || trait.traitTagsSet.ContainsAll(tagSet)) && (tagSet2 == null || !trait.traitTagsSet.ContainsOne(tagSet2)) && (traitRule.forbiddenTraits == null || !traitRule.forbiddenTraits.Contains(trait.filePath)) && trait.IsValid(this, false))
+				if (traitRule.specificTraits == null)
 				{
-					return true;
+					TagSet tagSet = ((traitRule.requiredTags != null) ? new TagSet(traitRule.requiredTags) : null);
+					TagSet tagSet2 = ((traitRule.forbiddenTags != null) ? new TagSet(traitRule.forbiddenTags) : null);
+					if ((tagSet == null || trait.traitTagsSet.ContainsAll(tagSet)) && (tagSet2 == null || !trait.traitTagsSet.ContainsOne(tagSet2)) && (traitRule.forbiddenTraits == null || !traitRule.forbiddenTraits.Contains(trait.filePath)) && trait.IsValid(this, false))
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -264,6 +267,7 @@ namespace ProcGen
 				this.zoneTypes = new List<SubWorld.ZoneType>();
 				this.subworldNames = new List<string>();
 				this.command = World.AllowedCellsFilter.Command.Replace;
+				this.optional = false;
 			}
 
 			public World.AllowedCellsFilter.TagCommand tagcommand { get; private set; }
@@ -281,6 +285,8 @@ namespace ProcGen
 			public List<SubWorld.ZoneType> zoneTypes { get; private set; }
 
 			public List<string> subworldNames { get; private set; }
+
+			public bool optional { get; set; }
 
 			public void Validate(string parentFile, List<WeightedSubworldName> parentCachedFiles)
 			{

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{94EC2357-A33E-4136-87AC-931A315E89BA}</ProjectGuid>
+    <ProjectGuid>{79A46B86-94ED-4A9A-BEC7-5BF408441765}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Core</RootNamespace>
     <AssemblyName>System.Core</AssemblyName>
@@ -633,15 +633,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Posix\Mono.Posix.csproj">
-      <Project>{94EC2357-A33E-4136-87AC-931A315E89B5}</Project>
+      <Project>{79A46B86-94ED-4A9A-BEC7-5BF408441760}</Project>
       <Name>Mono.Posix</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{94EC2357-A33E-4136-87AC-931A315E89B7}</Project>
+      <Project>{79A46B86-94ED-4A9A-BEC7-5BF408441762}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{94EC2357-A33E-4136-87AC-931A315E89BC}</Project>
+      <Project>{79A46B86-94ED-4A9A-BEC7-5BF408441767}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

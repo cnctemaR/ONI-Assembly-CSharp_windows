@@ -230,7 +230,11 @@ namespace Database
 			this.AwaitingStudy = this.CreateStatusItem("AwaitingStudy", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Studied = this.CreateStatusItem("Studied", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.HighEnergyParticleCount = this.CreateStatusItem("HighEnergyParticleCount", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-			this.HighEnergyParticleCount.resolveStringCallback = (string str, object data) => GameUtil.GetFormattedHighEnergyParticles(((GameObject)data).GetComponent<HighEnergyParticle>().payload, GameUtil.TimeSlice.None, true);
+			this.HighEnergyParticleCount.resolveStringCallback = delegate(string str, object data)
+			{
+				GameObject gameObject3 = (GameObject)data;
+				return GameUtil.GetFormattedHighEnergyParticles(gameObject3.IsNullOrDestroyed() ? 0f : gameObject3.GetComponent<HighEnergyParticle>().payload, GameUtil.TimeSlice.None, true);
+			};
 			this.Durability = this.CreateStatusItem("Durability", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Durability.resolveStringCallback = delegate(string str, object data)
 			{

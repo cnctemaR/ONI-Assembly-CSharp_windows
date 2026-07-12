@@ -27,7 +27,7 @@ public class SaltPlantConfig : IEntityConfig
 		float num5 = 393.15f;
 		string text4 = SimHashes.Salt.ToString();
 		string text5 = global::STRINGS.CREATURES.SPECIES.SALTPLANT.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 740f, "SaltPlantOriginal", text5);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 7400f, "SaltPlantOriginal", text5);
 		gameObject.AddOrGet<SaltPlant>();
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

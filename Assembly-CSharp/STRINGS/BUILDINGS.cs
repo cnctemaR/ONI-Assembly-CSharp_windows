@@ -1902,6 +1902,12 @@ namespace STRINGS
 
 				public static LocString LOGIC_PORT_READY_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 
+				public static LocString LOGIC_PORT_LANDED_ROCKET = "Landed Rocket";
+
+				public static LocString LOGIC_PORT_LANDED_ROCKET_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when its rocket is on the launch pad";
+
+				public static LocString LOGIC_PORT_LANDED_ROCKET_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+
 				public static LocString LOGIC_PORT_LAUNCH = "Launch Rocket";
 
 				public static LocString LOGIC_PORT_LAUNCH_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Launch rocket";
@@ -3178,6 +3184,17 @@ namespace STRINGS
 				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
 
 				public static LocString EFFECT = "Reveals visitable Planetoids in space.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nBuilding must be exposed to space to function.";
+
+				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
+			}
+
+			public class CLUSTERTELESCOPEENCLOSED
+			{
+				public static LocString NAME = UI.FormatAsLink("Enclosed Telescope", "TELESCOPE");
+
+				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
+
+				public static LocString EFFECT = "Reveals visitable Planetoids in space... in comfort!\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Astronomy", "ASTRONOMY") + " skill.\n\nBuilding must be exposed to space to function.";
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -5811,13 +5828,34 @@ namespace STRINGS
 
 				public static LocString DESC = "Radbolts are necessary for producing Materials Science research.";
 
-				public static LocString EFFECT = "Attracts nearby " + UI.FormatAsLink("Radiation", "RADIATION") + " to generate Radbolts.\n\nEmits generated Radbolts in the direction of your choosing.";
+				public static LocString EFFECT = "Attracts nearby " + UI.FormatAsLink("Radiation", "RADIATION") + " to generate Radbolts.\n\nEmits generated Radbolts in the direction of your choosing when the set Radbolt threshold is reached.\n\nRadbolts collected will rapidly decay while this building is disabled.";
 
 				public static LocString LOGIC_PORT = "Do not emit Radbolts";
 
 				public static LocString LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Emit Radbolts";
 
 				public static LocString LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Do not emit Radbolts";
+			}
+
+			public class HEPBATTERY
+			{
+				public static LocString NAME = UI.FormatAsLink("Radbolt Chamber", "HEPBATTERY");
+
+				public static LocString DESC = "Particles packed up and ready to go.";
+
+				public static LocString EFFECT = "Stores Radbolts in a high-energy state, ready for transport.\n\nRequires a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " to release radbolts from storage when the Radbolt threshold is reached.\n\nRadbolts in storage will rapidly decay while this building is disabled.";
+
+				public static LocString LOGIC_PORT = "Do not emit Radbolts";
+
+				public static LocString LOGIC_PORT_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Emit Radbolts";
+
+				public static LocString LOGIC_PORT_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Do not emit Radbolts";
+
+				public static LocString LOGIC_PORT_STORAGE = "Radbolt Storage";
+
+				public static LocString LOGIC_PORT_STORAGE_ACTIVE = "Sends a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when its Radbolt Storage is full";
+
+				public static LocString LOGIC_PORT_STORAGE_INACTIVE = "Otherwise, sends a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 			}
 
 			public class HEPBRIDGETILE
@@ -6478,35 +6516,45 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lab Window";
 
-				public static LocString DESC = "A lab window. Formerly a portal to the outside world.";
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "A lab window. Formerly a portal to the outside world.";
 			}
 
 			public class PROPGRAVITASLABWINDOWHORIZONTAL
 			{
 				public static LocString NAME = "Lab Window";
 
-				public static LocString DESC = "A lab window.\n\nSomeone once stared out this contemplating the results of an experiment.";
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "A lab window.\n\nSomeone once stared out this contemplating the results of an experiment.";
 			}
 
 			public class PROPGRAVITASLABWALL
 			{
 				public static LocString NAME = "Lab Wall";
 
-				public static LocString DESC = "A regular wall that once existed in a working lab.";
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "A regular wall that once existed in a working lab.";
 			}
 
 			public class GRAVITASDOOR
 			{
 				public static LocString NAME = "Gravitas Door";
 
-				public static LocString DESC = "An office door to an office that no longer exists.";
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "An office door to an office that no longer exists.";
 			}
 
 			public class PROPGRAVITASWALL
 			{
 				public static LocString NAME = "Wall";
 
-				public static LocString DESC = "The granite wall of a once great scientific facility.";
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "The granite wall of a once great scientific facility.";
 			}
 
 			public class PROPGRAVITASDISPLAY4

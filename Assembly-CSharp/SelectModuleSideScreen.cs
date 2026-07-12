@@ -243,7 +243,7 @@ public class SelectModuleSideScreen : KScreen
 		component.GetReference<LocText>("label");
 		Transform reference = component.GetReference<Transform>("content");
 		List<GameObject> prefabsWithComponent = Assets.GetPrefabsWithComponent<RocketModuleCluster>();
-		using (List<string>.Enumerator enumerator = this.moduleButtonSortOrder.GetEnumerator())
+		using (List<string>.Enumerator enumerator = SelectModuleSideScreen.moduleButtonSortOrder.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
@@ -460,15 +460,16 @@ public class SelectModuleSideScreen : KScreen
 		}
 		if (gameObject2 != null)
 		{
-			SelectTool.Instance.StartCoroutine(this.SelectNextFrame(gameObject2.GetComponent<KSelectable>(), buildingDef));
+			Vector2 anchoredPosition = this.mainContents.GetComponent<KScrollRect>().content.anchoredPosition;
+			SelectTool.Instance.StartCoroutine(this.SelectNextFrame(gameObject2.GetComponent<KSelectable>(), buildingDef, anchoredPosition.y));
 		}
 	}
 
-	private IEnumerator SelectNextFrame(KSelectable selectable, BuildingDef previousSelectedDef)
+	private IEnumerator SelectNextFrame(KSelectable selectable, BuildingDef previousSelectedDef, float scrollPosition)
 	{
 		yield return 0;
 		SelectTool.Instance.Select(selectable, false);
-		RocketModuleSideScreen.instance.ClickAddNew(previousSelectedDef);
+		RocketModuleSideScreen.instance.ClickAddNew(scrollPosition, previousSelectedDef);
 		yield break;
 	}
 
@@ -513,7 +514,7 @@ public class SelectModuleSideScreen : KScreen
 
 	private List<int> gameSubscriptionHandles = new List<int>();
 
-	private List<string> moduleButtonSortOrder = new List<string>
+	public static List<string> moduleButtonSortOrder = new List<string>
 	{
 		"CO2Engine", "SugarEngine", "SteamEngineCluster", "KeroseneEngineClusterSmall", "KeroseneEngineCluster", "HEPEngine", "HydrogenEngineCluster", "HabitatModuleSmall", "HabitatModuleMedium", "NoseconeBasic",
 		"NoseconeHarvest", "OrbitalCargoModule", "ScoutModule", "PioneerModule", "LiquidFuelTankCluster", "SmallOxidizerTank", "OxidizerTankCluster", "OxidizerTankLiquidCluster", "SolidCargoBaySmall", "LiquidCargoBaySmall",

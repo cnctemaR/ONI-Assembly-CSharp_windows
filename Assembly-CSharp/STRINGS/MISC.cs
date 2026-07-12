@@ -45,7 +45,7 @@ namespace STRINGS
 				UI.FormatAsLink("Brine Ice", "BRINEICE"),
 				" will liquify into ",
 				UI.FormatAsLink("Brine", "BRINE"),
-				"). Each ice element has a different freezing and melting point based upon their composition and state."
+				"). Each ice element has a different freezing and melting point based upon its composition and state."
 			});
 
 			public static LocString PHOSPHORUS = "Phosphorus";
@@ -60,7 +60,7 @@ namespace STRINGS
 
 			public static LocString REFINEDMETAL_DESC = string.Concat(new string[]
 			{
-				"Refined metals are purified forms of metal often used in higher tier electronics due to their tendency to be able to withstand higher temperatures when they are made into wires. Other benefits include the higher decor value for some metals which can greatly increase the wellbeing of a colony.\n\nMetal ore can be refined in either the ",
+				"Refined metals are purified forms of metal often used in higher-tier electronics due to their tendency to be able to withstand higher temperatures when they are made into wires. Other benefits include the increased decor value for some metals which can greatly improve the well-being of a colony.\n\nMetal ore can be refined in either the ",
 				UI.FormatAsLink("Rock Crusher", "ROCKCRUSHER"),
 				" or the ",
 				UI.FormatAsLink("Metal Refinery", "METALREFINERY"),
@@ -246,13 +246,13 @@ namespace STRINGS
 
 			public static LocString COMBUSTIBLELIQUID_DESC = string.Concat(new string[]
 			{
-				"Combustible Liquids are liquids that are able to be burned as fuel to be used in energy production such as in a ",
+				"Combustible Liquids are liquids that can be burned as fuel to be used in energy production such as in a ",
 				UI.FormatAsLink("Petroleum Generator", "PETROLEUMGENERATOR"),
 				" or a ",
 				UI.FormatAsLink("Petroleum Engine", "KEROSENEENGINE"),
 				".\n\nThough these liquids have other uses, such as fertilizer for growing a ",
 				UI.FormatAsLink("Nosh Bean", "BEANPLANTSEED"),
-				" their primary usefulness lies in their ability to be burned for ",
+				", their primary usefulness lies in their ability to be burned for ",
 				UI.FormatAsLink("power", "POWER"),
 				"."
 			});
@@ -1080,7 +1080,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on effective temperature management";
 
-				public static LocString MESSAGEBODY = "The temperature of an environment can have positive or negative effects on the wellbeing of my Duplicants, as well as the plants and critters in my colony. Selecting " + UI.FormatAsHotkey("[F3]") + " will open the Temperature Overlay where I can check for any hot or cold spots.\n\nI can use a Utility building like an Ice-E Fan or a Space Heater to make an area colder or warmer. However, I will have limited success changing the temperature of a room unless I build the area with insulating tiles to prevent cold or warm air from escaping.";
+				public static LocString MESSAGEBODY = "The temperature of an environment can have positive or negative effects on the well-being of my Duplicants, as well as the plants and critters in my colony. Selecting " + UI.FormatAsHotkey("[F3]") + " will open the Temperature Overlay where I can check for any hot or cold spots.\n\nI can use a Utility building like an Ice-E Fan or a Space Heater to make an area colder or warmer. However, I will have limited success changing the temperature of a room unless I build the area with insulating tiles to prevent cold or warm air from escaping.";
 			}
 
 			public class PLUMBING

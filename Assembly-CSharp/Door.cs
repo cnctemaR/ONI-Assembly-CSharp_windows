@@ -114,7 +114,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		for (int num3 = 0; num3 != num2; num3++)
 		{
 			int num4 = this.building.PlacementCells[num + num3];
-			Grid.FakeFloor[num4] = true;
+			Grid.FakeFloor.Add(num4);
 			Pathfinding.Instance.AddDirtyNavGridCell(num4);
 		}
 		List<int> list = new List<int>();
@@ -147,7 +147,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		{
 			SimMessages.ClearCellProperties(num, 12);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
-			Grid.FakeFloor[num] = false;
+			Grid.FakeFloor.Remove(num);
 			if (Grid.Element[num].IsSolid)
 			{
 				SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);

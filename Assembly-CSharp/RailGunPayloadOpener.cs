@@ -15,10 +15,6 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
 		this.payloadStorage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interact_railgun_emptier_kanim") };
 		this.payloadStorage.useGunForDelivery = false;
-		this.payloadStorage.synchronizeAnims = true;
-		this.payloadStorage.workAnims = new HashedString[] { "working_pre", "working_loop" };
-		this.payloadStorage.storageWorkTime = RailGunPayloadOpener.delivery_time;
-		this.payloadStorage.workingPstComplete = new HashedString[] { "working_pst" };
 		this.payloadStorage.SetOffsets(RailGunPayloadOpener.delivery_offset);
 		base.smi.StartSM();
 	}
@@ -66,6 +62,12 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 			Util.KDestroyGameObject(gameObject);
 			component.ConsumeIgnoringDisease(this.payloadStorage.items[0]);
 		}
+	}
+
+	public bool PowerOperationalChanged()
+	{
+		EnergyConsumer component = base.GetComponent<EnergyConsumer>();
+		return component != null && component.IsPowered;
 	}
 
 	bool ISecondaryOutput.HasSecondaryConduitType(ConduitType type)
@@ -151,18 +153,43 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.waiting;
+			default_state = this.unoperational;
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-			this.waiting.PlayAnim("on").EventTransition(GameHashes.OnStorageChange, this.working, (RailGunPayloadOpener.StatesInstance smi) => smi.HasPayload());
-			this.working.Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
+			this.unoperational.PlayAnim("off").EventTransition(GameHashes.OperationalFlagChanged, this.operational, (RailGunPayloadOpener.StatesInstance smi) => smi.master.PowerOperationalChanged()).Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
+			{
+				smi.GetComponent<Operational>().SetActive(false, true);
+				smi.GetComponent<ManualDeliveryKG>().Pause(true, "no_power");
+			});
+			this.operational.Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
+			{
+				smi.GetComponent<ManualDeliveryKG>().Pause(false, "power");
+			}).EventTransition(GameHashes.OperationalFlagChanged, this.unoperational, (RailGunPayloadOpener.StatesInstance smi) => !smi.master.PowerOperationalChanged()).DefaultState(this.operational.idle);
+			this.operational.idle.PlayAnim("on").EventTransition(GameHashes.OnStorageChange, this.operational.pre, (RailGunPayloadOpener.StatesInstance smi) => smi.HasPayload());
+			this.operational.pre.Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
+			{
+				smi.GetComponent<Operational>().SetActive(true, true);
+			}).PlayAnim("working_pre").OnAnimQueueComplete(this.operational.loop);
+			this.operational.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleGoTo(10f, this.operational.pst);
+			this.operational.pst.PlayAnim("working_pst").Exit(delegate(RailGunPayloadOpener.StatesInstance smi)
 			{
 				smi.master.EmptyPayload();
-				smi.GoTo(this.waiting);
-			});
+				smi.GetComponent<Operational>().SetActive(false, true);
+			}).OnAnimQueueComplete(this.operational.idle);
 		}
 
-		public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State waiting;
+		public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State unoperational;
 
-		public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State working;
+		public RailGunPayloadOpener.States.OperationalStates operational;
+
+		public class OperationalStates : GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State
+		{
+			public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State idle;
+
+			public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State pre;
+
+			public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State loop;
+
+			public GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.State pst;
+		}
 	}
 }

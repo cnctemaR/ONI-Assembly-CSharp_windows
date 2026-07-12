@@ -277,8 +277,10 @@ namespace ProcGen
 				}
 				break;
 			case World.AllowedCellsFilter.TagCommand.DistanceFromTag:
-				global::Debug.Assert(vn.minDistanceToTag.ContainsKey(filter.tag.ToTag()), filter.tag);
-				if (vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
+			{
+				bool flag = vn.minDistanceToTag.ContainsKey(filter.tag.ToTag());
+				global::Debug.Assert(flag || filter.optional, "DistanceFromTag is missing tag " + filter.tag + ", consider marking the filter optional.");
+				if (flag && vn.minDistanceToTag[filter.tag.ToTag()] >= filter.minDistance && vn.minDistanceToTag[filter.tag.ToTag()] <= filter.maxDistance)
 				{
 					int num;
 					int i;
@@ -289,6 +291,7 @@ namespace ProcGen
 					}
 				}
 				break;
+			}
 			}
 			return hashSet;
 		}

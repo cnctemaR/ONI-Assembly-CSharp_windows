@@ -87,6 +87,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 			attachableBuilding.onAttachmentNetworkChanged = (Action<object>)Delegate.Remove(attachableBuilding.onAttachmentNetworkChanged, new Action<object>(this.OnRocketLayoutChanged));
 			this.lastBaseAttachable = null;
 		}
+		this.RebuildLaunchTowerHeightHandler.ClearScheduler();
 		base.OnCleanUp();
 	}
 
@@ -142,6 +143,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 			}
 		}
 		this.CheckLandedRocketPassengerModuleStatus();
+		component.SendSignal(this.landedRocketPort, (landedRocket != null) ? 1 : 0);
 		if (landedRocket != null)
 		{
 			component.SendSignal(this.statusPort, (landedRocket.CraftInterface.CheckReadyForAutomatedLaunch() || landedRocket.CraftInterface.HasTag(GameTags.RocketNotOnGround)) ? 1 : 0);
@@ -239,7 +241,10 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 		if (!this.dirtyTowerHeight)
 		{
 			this.dirtyTowerHeight = true;
-			GameScheduler.Instance.ScheduleNextFrame("RebuildLaunchTowerHeight", new Action<object>(this.RebuildLaunchTowerHeight), null, null);
+			if (!this.RebuildLaunchTowerHeightHandler.IsValid)
+			{
+				this.RebuildLaunchTowerHeightHandler = GameScheduler.Instance.ScheduleNextFrame("RebuildLaunchTowerHeight", new Action<object>(this.RebuildLaunchTowerHeight), null, null);
+			}
 		}
 	}
 
@@ -251,6 +256,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 			this.tower.SetTowerHeight(landedRocket.CraftInterface.MaxHeight);
 		}
 		this.dirtyTowerHeight = false;
+		this.RebuildLaunchTowerHeightHandler.ClearScheduler();
 	}
 
 	public string GetProperName()
@@ -299,7 +305,11 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 
 	public HashedString statusPort;
 
+	public HashedString landedRocketPort;
+
 	private CellOffset baseModulePosition = new CellOffset(0, 2);
+
+	private SchedulerHandle RebuildLaunchTowerHeightHandler;
 
 	private AttachableBuilding lastBaseAttachable;
 

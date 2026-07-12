@@ -12,7 +12,7 @@ public struct GravityComponent
 		this.landOnFakeFloors = land_on_fake_floors;
 		KCollider2D component = transform.GetComponent<KCollider2D>();
 		this.extents = GravityComponent.GetExtents(component);
-		this.yOffset = GravityComponent.GetOffset(component).y;
+		this.bottomYOffset = GravityComponent.GetGroundOffset(component);
 	}
 
 	public static float GetGroundOffset(KCollider2D collider)
@@ -54,5 +54,5 @@ public struct GravityComponent
 
 	public Vector2 extents;
 
-	public float yOffset;
+	public float bottomYOffset;
 }

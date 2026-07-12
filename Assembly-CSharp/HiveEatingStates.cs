@@ -57,7 +57,7 @@ public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingSta
 
 		public void TurnOn()
 		{
-			this.emitter.emitRads = 60f * this.emitter.emitRate;
+			this.emitter.emitRads = 600f * this.emitter.emitRate;
 			this.emitter.Refresh();
 		}
 

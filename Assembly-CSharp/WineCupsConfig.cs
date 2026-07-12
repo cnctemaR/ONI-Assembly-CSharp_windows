@@ -24,7 +24,7 @@ public class WineCupsConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 90f, "WineCupsOriginal", global::STRINGS.CREATURES.SPECIES.WINECUPS.NAME);
+		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 900f, "WineCupsOriginal", global::STRINGS.CREATURES.SPECIES.WINECUPS.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = WineCupsConfig.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = WineCupsConfig.NEGATIVE_DECOR_EFFECT;

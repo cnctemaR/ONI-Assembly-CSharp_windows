@@ -197,7 +197,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.MarkArea();
 		}
-		if (Db.Get().TechItems.GetTechTierForItem(this.building.Def.PrefabID) > 1)
+		if (Db.Get().TechItems.GetTechTierForItem(this.building.Def.PrefabID) > 2)
 		{
 			this.requireMinionToWork = true;
 		}

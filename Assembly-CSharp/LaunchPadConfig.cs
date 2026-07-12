@@ -36,7 +36,11 @@ public class LaunchPadConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "idle";
 		buildingDef.CanMove = false;
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort("TriggerLaunch", new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LAUNCH, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LAUNCH_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LAUNCH_INACTIVE, false, false) };
-		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY_INACTIVE, false, false) };
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port>
+		{
+			LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_READY_INACTIVE, false, false),
+			LogicPorts.Port.OutputPort("LandedRocket", new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LANDED_ROCKET, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LANDED_ROCKET_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LAUNCHPAD.LOGIC_PORT_LANDED_ROCKET_INACTIVE, false, false)
+		};
 		return buildingDef;
 	}
 
@@ -55,6 +59,7 @@ public class LaunchPadConfig : IBuildingConfig
 		LaunchPad launchPad = go.AddOrGet<LaunchPad>();
 		launchPad.triggerPort = "TriggerLaunch";
 		launchPad.statusPort = "LaunchReady";
+		launchPad.landedRocketPort = "LandedRocket";
 		FakeFloorAdder fakeFloorAdder = go.AddOrGet<FakeFloorAdder>();
 		fakeFloorAdder.floorOffsets = new CellOffset[7];
 		for (int i = 0; i < 7; i++)
@@ -86,4 +91,6 @@ public class LaunchPadConfig : IBuildingConfig
 	private const string TRIGGER_LAUNCH_PORT_ID = "TriggerLaunch";
 
 	private const string LAUNCH_READY_PORT_ID = "LaunchReady";
+
+	private const string LANDED_ROCKET_ID = "LandedRocket";
 }

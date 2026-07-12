@@ -162,20 +162,26 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
-	private HandleVector<int>.Handle AddToLayer(Vector2I xy_min, int width, int height, ScenePartitionerLayer layer)
+	private HandleVector<int>.Handle AddToLayer(Extents ext, ScenePartitionerLayer layer)
 	{
-		return GameScenePartitioner.Instance.Add("Light2D", base.gameObject, xy_min.x, xy_min.y, width, height, layer, new Action<object>(this.OnWorldChanged));
+		return GameScenePartitioner.Instance.Add("Light2D", base.gameObject, ext, layer, new Action<object>(this.OnWorldChanged));
 	}
 
-	private void AddToScenePartitioner()
+	private Extents ComputeExtents()
 	{
 		Vector2I vector2I = Grid.CellToXY(this.origin);
 		int num = (int)this.Range;
 		Vector2I vector2I2 = new Vector2I(vector2I.x - num, vector2I.y - num);
 		int num2 = 2 * num;
 		int num3 = ((this.shape == global::LightShape.Circle) ? (2 * num) : num);
-		this.solidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.solidChangedLayer);
-		this.liquidPartitionerEntry = this.AddToLayer(vector2I2, num2, num3, GameScenePartitioner.Instance.liquidChangedLayer);
+		return new Extents(vector2I2.x, vector2I2.y, num2, num3);
+	}
+
+	private void AddToScenePartitioner()
+	{
+		Extents extents = this.ComputeExtents();
+		this.solidPartitionerEntry = this.AddToLayer(extents, GameScenePartitioner.Instance.solidChangedLayer);
+		this.liquidPartitionerEntry = this.AddToLayer(extents, GameScenePartitioner.Instance.liquidChangedLayer);
 	}
 
 	private void RemoveFromScenePartitioner()
@@ -189,8 +195,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private void MoveInScenePartitioner()
 	{
-		GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, this.origin);
-		GameScenePartitioner.Instance.UpdatePosition(this.liquidPartitionerEntry, this.origin);
+		GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, this.ComputeExtents());
+		GameScenePartitioner.Instance.UpdatePosition(this.liquidPartitionerEntry, this.ComputeExtents());
 	}
 
 	[ContextMenu("Refresh")]

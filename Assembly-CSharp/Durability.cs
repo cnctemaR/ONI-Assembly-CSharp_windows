@@ -7,6 +7,18 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Durability")]
 public class Durability : KMonoBehaviour
 {
+	public float TimeEquipped
+	{
+		get
+		{
+			return this.timeEquipped;
+		}
+		set
+		{
+			this.timeEquipped = value;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

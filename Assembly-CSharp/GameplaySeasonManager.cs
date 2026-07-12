@@ -91,7 +91,7 @@ public class GameplaySeasonManager : GameStateMachine<GameplaySeasonManager, Gam
 		{
 			foreach (GameplaySeasonInstance gameplaySeasonInstance in this.activeSeasons)
 			{
-				if (!gameplaySeasonInstance.ShouldGenerateEvents() && GameUtil.GetCurrentTimeInCycles() > gameplaySeasonInstance.NextEventTime)
+				if (gameplaySeasonInstance.ShouldGenerateEvents() && GameUtil.GetCurrentTimeInCycles() > gameplaySeasonInstance.NextEventTime)
 				{
 					int num = 0;
 					while (num < gameplaySeasonInstance.Season.numEventsToStartEachPeriod && gameplaySeasonInstance.StartEvent(false))

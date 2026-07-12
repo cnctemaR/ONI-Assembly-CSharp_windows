@@ -19,6 +19,18 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Components.ClusterTravelers.Add(this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.ClusterTravelers.Remove(this);
+		base.OnCleanUp();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.Subscribe<ClusterTraveler>(543433792, ClusterTraveler.ClusterDestinationChangedHandler);
@@ -34,9 +46,14 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	public int GetDestinationWorldID()
+	{
+		return this.m_destinationSelector.GetDestinationWorld();
+	}
+
 	public float TravelETA()
 	{
-		if (!this.IsTraveling())
+		if (!this.IsTraveling() || this.getSpeedCB == null)
 		{
 			return 0f;
 		}
@@ -45,7 +62,13 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 
 	public float RemainingTravelDistance()
 	{
-		return (float)this.RemainingTravelNodes() * 600f - this.m_movePotential;
+		int num = this.RemainingTravelNodes();
+		if (this.GetDestinationWorldID() >= 0)
+		{
+			num--;
+			num = Mathf.Max(num, 0);
+		}
+		return (float)num * 600f - this.m_movePotential;
 	}
 
 	public int RemainingTravelNodes()

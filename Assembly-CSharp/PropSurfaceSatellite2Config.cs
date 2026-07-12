@@ -57,7 +57,7 @@ public class PropSurfaceSatellite2Config : IEntityConfig
 		radiationEmitter.radiusProportionalToRads = false;
 		radiationEmitter.emitRadiusX = 12;
 		radiationEmitter.emitRadiusY = 12;
-		radiationEmitter.emitRads = 240f / ((float)radiationEmitter.emitRadiusX / 6f);
+		radiationEmitter.emitRads = 2400f / ((float)radiationEmitter.emitRadiusX / 6f);
 	}
 
 	public void OnSpawn(GameObject inst)

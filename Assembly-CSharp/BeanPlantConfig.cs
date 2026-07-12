@@ -25,7 +25,7 @@ public class BeanPlantConfig : IEntityConfig
 		float num4 = 273.15f;
 		float num5 = 323.15f;
 		string text4 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.025f, "BeanPlantSeed", true, true, true, true, 2400f, 0f, 980f, "BeanPlantOriginal", text4);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.025f, "BeanPlantSeed", true, true, true, true, 2400f, 0f, 9800f, "BeanPlantOriginal", text4);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

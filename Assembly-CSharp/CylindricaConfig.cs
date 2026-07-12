@@ -24,7 +24,7 @@ public class CylindricaConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 220f, "CylindricaOriginal", global::STRINGS.CREATURES.SPECIES.CYLINDRICA.NAME);
+		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "CylindricaOriginal", global::STRINGS.CREATURES.SPECIES.CYLINDRICA.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = CylindricaConfig.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = CylindricaConfig.NEGATIVE_DECOR_EFFECT;

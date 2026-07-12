@@ -271,38 +271,45 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public void TryEntombedEscape()
 		{
+			float timePlayedInSeconds = GameClock.Instance.GetTimePlayedInSeconds();
+			if (timePlayedInSeconds <= this.lastRecoverAttempt + this.recoverCooldown)
+			{
+				this.GoTo(base.sm.entombed.stuck);
+				return;
+			}
+			this.lastRecoverAttempt = timePlayedInSeconds;
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			int backCell = base.GetComponent<Facing>().GetBackCell();
 			int num2 = Grid.CellAbove(backCell);
 			int num3 = Grid.CellBelow(backCell);
 			foreach (int num4 in new int[] { backCell, num2, num3 })
 			{
-				if (this.IsValidNavCell(num4))
+				if (this.IsValidNavCell(num4) && !Grid.HasDoor[num4])
 				{
 					this.MoveToCell(num4, false);
 					return;
 				}
 			}
 			int num5 = Grid.PosToCell(base.transform.GetPosition());
-			for (int j = this.safeCells.Count - 1; j >= 0; j--)
-			{
-				int num6 = this.safeCells[j];
-				if (num6 != num && this.IsValidNavCell(num6))
-				{
-					this.MoveToCell(num6, false);
-					return;
-				}
-			}
 			foreach (CellOffset cellOffset in this.entombedEscapeOffsets)
 			{
 				if (Grid.IsCellOffsetValid(num5, cellOffset))
 				{
-					int num7 = Grid.OffsetCell(num5, cellOffset);
-					if (this.IsValidNavCell(num7))
+					int num6 = Grid.OffsetCell(num5, cellOffset);
+					if (this.IsValidNavCell(num6) && !Grid.HasDoor[num6])
 					{
-						this.MoveToCell(num7, false);
+						this.MoveToCell(num6, false);
 						return;
 					}
+				}
+			}
+			for (int k = this.safeCells.Count - 1; k >= 0; k--)
+			{
+				int num7 = this.safeCells[k];
+				if (num7 != num && this.IsValidNavCell(num7) && !Grid.HasDoor[num7])
+				{
+					this.MoveToCell(num7, false);
+					return;
 				}
 			}
 			foreach (CellOffset cellOffset2 in this.entombedEscapeOffsets)
@@ -311,7 +318,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				{
 					int num8 = Grid.OffsetCell(num5, cellOffset2);
 					int num9 = Grid.CellAbove(num8);
-					if (Grid.IsValidCell(num9) && !Grid.Solid[num8] && !Grid.Solid[num9] && !Grid.DupeImpassable[num8] && !Grid.DupeImpassable[num9])
+					if (Grid.IsValidCell(num9) && !Grid.Solid[num8] && !Grid.Solid[num9] && !Grid.DupeImpassable[num8] && !Grid.DupeImpassable[num9] && !Grid.HasDoor[num8] && !Grid.HasDoor[num9])
 					{
 						this.MoveToCell(num8, true);
 						return;
@@ -341,14 +348,12 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		private CellOffset[] entombedEscapeOffsets = new CellOffset[]
 		{
 			new CellOffset(0, 1),
-			new CellOffset(0, -1),
 			new CellOffset(1, 0),
 			new CellOffset(-1, 0),
 			new CellOffset(1, 1),
 			new CellOffset(-1, 1),
 			new CellOffset(1, -1),
-			new CellOffset(-1, -1),
-			new CellOffset(0, 2)
+			new CellOffset(-1, -1)
 		};
 
 		private Navigator navigator;
@@ -359,7 +364,11 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		private List<int> safeCells = new List<int>();
 
-		private int MAX_CELLS_TRACKED = 5;
+		private int MAX_CELLS_TRACKED = 3;
+
+		private float lastRecoverAttempt;
+
+		private float recoverCooldown = 0.33f;
 
 		private bool flipRecoverEmote;
 	}

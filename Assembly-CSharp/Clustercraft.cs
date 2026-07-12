@@ -306,6 +306,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 		return ClusterGrid.Instance.GetVisibleEntityOfLayerAtAdjacentCell(this.m_location, EntityLayer.Asteroid);
 	}
 
+	public ClusterGridEntity GetAdjacentAsteroid()
+	{
+		return ClusterGrid.Instance.GetVisibleEntityOfLayerAtAdjacentCell(this.m_location, EntityLayer.Asteroid);
+	}
+
 	private bool CheckDesinationInRange()
 	{
 		return this.m_clusterTraveler.CurrentPath != null && this.Speed * this.m_clusterTraveler.TravelETA() <= this.ModuleInterface.Range;
@@ -566,6 +571,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 			failReason = string.Format(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DROPDOWN_TOOLTIP_PATH_OBSTRUCTED, pad.GetProperName());
 			return Clustercraft.PadLandingStatus.CanNeverLand;
 		}
+		if (!pad.GetComponent<Operational>().IsOperational)
+		{
+			failReason = UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DROPDOWN_TOOLTIP_PAD_DISABLED;
+			return Clustercraft.PadLandingStatus.CanNeverLand;
+		}
 		int rocketBottomPosition = pad.RocketBottomPosition;
 		foreach (Ref<RocketModuleCluster> @ref in this.ModuleInterface.ClusterModules)
 		{
@@ -596,13 +606,20 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 	private LaunchPad FindValidLandingPad(AxialI location, bool mustLandImmediately)
 	{
 		LaunchPad launchPad = null;
+		int asteroidWorldIdAtLocation = ClusterUtil.GetAsteroidWorldIdAtLocation(location);
+		LaunchPad preferredLaunchPadForWorld = this.m_moduleInterface.GetPreferredLaunchPadForWorld(asteroidWorldIdAtLocation);
+		string text;
+		if (preferredLaunchPadForWorld != null && this.CanLandAtPad(preferredLaunchPadForWorld, out text) == Clustercraft.PadLandingStatus.CanLandImmediately)
+		{
+			return preferredLaunchPadForWorld;
+		}
 		foreach (object obj in Components.LaunchPads)
 		{
 			LaunchPad launchPad2 = (LaunchPad)obj;
 			if (launchPad2.GetMyWorldLocation() == location)
 			{
-				string text;
-				Clustercraft.PadLandingStatus padLandingStatus = this.CanLandAtPad(launchPad2, out text);
+				string text2;
+				Clustercraft.PadLandingStatus padLandingStatus = this.CanLandAtPad(launchPad2, out text2);
 				if (padLandingStatus == Clustercraft.PadLandingStatus.CanLandImmediately)
 				{
 					return launchPad2;
@@ -616,7 +633,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 		return launchPad;
 	}
 
-	private bool CanLandAtAsteroid(AxialI location, bool mustLandImmediately)
+	public bool CanLandAtAsteroid(AxialI location, bool mustLandImmediately)
 	{
 		LaunchPad destinationPad = this.m_moduleInterface.GetClusterDestinationSelector().GetDestinationPad();
 		global::Debug.Assert(destinationPad == null || destinationPad.GetMyWorldLocation() == location, "A rocket is trying to travel to an asteroid but has selected a landing pad at a different asteroid!");

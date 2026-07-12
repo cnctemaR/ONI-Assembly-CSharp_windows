@@ -23,7 +23,14 @@ public class FakeFloorAdder : KMonoBehaviour
 		{
 			CellOffset rotatedOffset = component.GetRotatedOffset(cellOffset);
 			int num2 = Grid.OffsetCell(num, rotatedOffset);
-			Grid.FakeFloor[num2] = active;
+			if (active)
+			{
+				Grid.FakeFloor.Add(num2);
+			}
+			else
+			{
+				Grid.FakeFloor.Remove(num2);
+			}
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 		this.isActive = active;

@@ -118,10 +118,11 @@ public class Worker : KMonoBehaviour
 						dt = Mathf.Min(this.workable.WorkTimeRemaining + 0.01f, 5f);
 					}
 					Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
-					if (workAttribute != null && workAttribute.IsTrainable)
+					AttributeLevels component3 = base.GetComponent<AttributeLevels>();
+					if (workAttribute != null && workAttribute.IsTrainable && component3 != null)
 					{
 						float attributeExperienceMultiplier = this.workable.GetAttributeExperienceMultiplier();
-						base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, dt, attributeExperienceMultiplier);
+						component3.AddExperience(workAttribute.Id, dt, attributeExperienceMultiplier);
 					}
 					string skillExperienceSkillGroup = this.workable.GetSkillExperienceSkillGroup();
 					if (this.resume != null && skillExperienceSkillGroup != null)

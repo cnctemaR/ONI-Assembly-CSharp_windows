@@ -21,9 +21,9 @@ public class SapTreeConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gravitas_sap_tree_kanim"), "idle", Grid.SceneLayer.BuildingFront, 5, 5, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Decoration }, 293f);
 		SapTree.Def def = gameObject.AddOrGetDef<SapTree.Def>();
 		def.foodSenseArea = new Vector2I(5, 1);
-		def.massEatRate = 5f;
-		def.kcalorieToKGConversionRatio = 0.0005f;
-		def.stomachSize = 50f;
+		def.massEatRate = 0.05f;
+		def.kcalorieToKGConversionRatio = 0.005f;
+		def.stomachSize = 5f;
 		def.oozeRate = 2f;
 		def.oozeOffsets = new List<Vector3>
 		{

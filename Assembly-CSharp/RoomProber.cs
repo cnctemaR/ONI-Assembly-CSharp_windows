@@ -394,7 +394,7 @@ public class RoomProber : ISim1000ms
 
 		private static bool IsWall(int cell)
 		{
-			return (Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != (Grid.BuildFlags)0 || Grid.HasDoor[cell];
+			return (Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor) || Grid.HasDoor[cell];
 		}
 
 		public bool ShouldContinue(int flood_cell)

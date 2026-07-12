@@ -20,7 +20,7 @@ public class SpiceVineConfig : IEntityConfig
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("vinespicenut_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Hanging }, 320f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 3);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 308.15f, 358.15f, 448.15f, null, true, 0f, 0.15f, SpiceNutConfig.ID, true, true, true, true, 2400f, 0f, 980f, "SpiceVineOriginal", global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 308.15f, 358.15f, 448.15f, null, true, 0f, 0.15f, SpiceNutConfig.ID, true, true, true, true, 2400f, 0f, 9800f, "SpiceVineOriginal", global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

@@ -80,7 +80,7 @@ public class MinionConfig : IEntityConfig
 			Assets.GetAnim("anim_construction_jetsuit_kanim")
 		};
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
-		kboxCollider2D.offset = new Vector2(0f, 0.8f);
+		kboxCollider2D.offset = new Vector2(0f, 0.75f);
 		kboxCollider2D.size = new Vector2(1f, 1.5f);
 		gameObject.AddOrGet<SnapOn>().snapPoints = new List<SnapOn.SnapPoint>(new SnapOn.SnapPoint[]
 		{

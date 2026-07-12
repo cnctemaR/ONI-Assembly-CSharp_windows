@@ -141,21 +141,21 @@ public class ColonyDestinationAsteroidBeltData
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
 		if (this.cluster != null && DlcManager.FeatureClusterSpaceEnabled())
 		{
-			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.cluster.name)), Strings.Get(this.cluster.description), Color.white, null));
+			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.cluster.name)), Strings.Get(this.cluster.description), Color.white, null, null));
 		}
-		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.startWorldName), null, Color.white, null));
-		list.Add(new AsteroidDescriptor(Strings.Get(this.startWorld.description), null, Color.white, null));
+		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.startWorldName), null, Color.white, null, null));
+		list.Add(new AsteroidDescriptor(Strings.Get(this.startWorld.description), null, Color.white, null, null));
 		if (DlcManager.FeatureClusterSpaceEnabled())
 		{
-			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.MOONNAMES, Array.Empty<object>()), null, Color.white, null));
+			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.MOONNAMES, Array.Empty<object>()), null, Color.white, null, null));
 			foreach (global::ProcGen.World world in this.worlds)
 			{
-				list.Add(new AsteroidDescriptor(string.Format("{0}", Strings.Get(world.name)), Strings.Get(world.description), Color.white, null));
+				list.Add(new AsteroidDescriptor(string.Format("{0}", Strings.Get(world.name)), Strings.Get(world.description), Color.white, null, null));
 			}
 		}
 		int num = Mathf.Clamp(this.difficulty, 0, ColonyDestinationAsteroidBeltData.survivalOptions.Count - 1);
 		global::Tuple<string, string, string> tuple = ColonyDestinationAsteroidBeltData.survivalOptions[num];
-		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third), null, Color.white, null));
+		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third), null, Color.white, null, null));
 		return list;
 	}
 
@@ -165,28 +165,23 @@ public class ColonyDestinationAsteroidBeltData
 		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
 		list2.Add(this.startWorld);
 		list2.AddRange(this.worlds);
-		int num = this.seed;
 		for (int i = 0; i < list2.Count; i++)
 		{
 			global::ProcGen.World world = list2[i];
-			List<string> randomTraits = SettingsCache.GetRandomTraits(num, world);
 			if (DlcManager.IsExpansion1Active())
 			{
-				list.Add(new AsteroidDescriptor("", null, Color.white, null));
-				list.Add(new AsteroidDescriptor(string.Format("<b>{0}</b>", Strings.Get(world.name)), null, Color.white, null));
+				list.Add(new AsteroidDescriptor("", null, Color.white, null, null));
+				list.Add(new AsteroidDescriptor(string.Format("<b>{0}</b>", Strings.Get(world.name)), null, Color.white, null, null));
 			}
-			foreach (string text in randomTraits)
+			List<WorldTrait> worldTraits = this.GetWorldTraits(world);
+			foreach (WorldTrait worldTrait in worldTraits)
 			{
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
-				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), global::Util.ColorFromHex(cachedTrait.colorHex), null));
+				string text = worldTrait.filePath.Substring(worldTrait.filePath.LastIndexOf("/") + 1);
+				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(worldTrait.name), worldTrait.colorHex), Strings.Get(worldTrait.description), global::Util.ColorFromHex(worldTrait.colorHex), null, text));
 			}
-			if (randomTraits.Count == 0)
+			if (worldTraits.Count == 0)
 			{
-				list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null));
-			}
-			if (num > 0)
-			{
-				num++;
+				list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null, "NoTraits"));
 			}
 		}
 		return list;
@@ -198,26 +193,21 @@ public class ColonyDestinationAsteroidBeltData
 		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
 		list2.Add(this.startWorld);
 		list2.AddRange(this.worlds);
-		int num = this.seed;
 		for (int i = 0; i < list2.Count; i++)
 		{
 			if (list2[i] == singleWorld)
 			{
 				global::ProcGen.World world = list2[i];
-				List<string> randomTraits = SettingsCache.GetRandomTraits(num, world);
-				foreach (string text in randomTraits)
+				List<WorldTrait> worldTraits = this.GetWorldTraits(world);
+				foreach (WorldTrait worldTrait in worldTraits)
 				{
-					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
-					list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), global::Util.ColorFromHex(cachedTrait.colorHex), null));
+					string text = worldTrait.filePath.Substring(worldTrait.filePath.LastIndexOf("/") + 1);
+					list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(worldTrait.name), worldTrait.colorHex), Strings.Get(worldTrait.description), global::Util.ColorFromHex(worldTrait.colorHex), null, text));
 				}
-				if (randomTraits.Count == 0)
+				if (worldTraits.Count == 0)
 				{
-					list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null));
+					list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null, "NoTraits"));
 				}
-			}
-			if (num > 0)
-			{
-				num++;
 			}
 		}
 		return list;
@@ -229,21 +219,21 @@ public class ColonyDestinationAsteroidBeltData
 		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
 		list2.Add(this.startWorld);
 		list2.AddRange(this.worlds);
-		int num = this.seed;
 		for (int i = 0; i < list2.Count; i++)
 		{
 			if (list2[i] == singleWorld)
 			{
 				global::ProcGen.World world = list2[i];
+				int num = this.seed;
+				if (num > 0)
+				{
+					num += this.cluster.worldPlacements.FindIndex((WorldPlacement x) => x.world == world.filePath);
+				}
 				foreach (string text in SettingsCache.GetRandomTraits(num, world))
 				{
 					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
 					list.Add(cachedTrait);
 				}
-			}
-			if (num > 0)
-			{
-				num++;
 			}
 		}
 		return list;

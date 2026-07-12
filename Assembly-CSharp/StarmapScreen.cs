@@ -7,6 +7,7 @@ using STRINGS;
 using TMPro;
 using TUNING;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -14,6 +15,10 @@ public class StarmapScreen : KModalScreen
 {
 	public override float GetSortKey()
 	{
+		if (base.isEditing)
+		{
+			return 50f;
+		}
 		return 20f;
 	}
 
@@ -501,6 +506,17 @@ public class StarmapScreen : KModalScreen
 		this.Refresh(null);
 	}
 
+	private void OnStartedTitlebarEditing()
+	{
+		base.isEditing = true;
+		KScreenManager.Instance.RefreshStack();
+	}
+
+	private void OnEndEditing(string data)
+	{
+		base.isEditing = false;
+	}
+
 	private void FillRocketListPanel()
 	{
 		this.ClearRocketListPanel();
@@ -519,13 +535,15 @@ public class StarmapScreen : KModalScreen
 		{
 			while (enumerator.MoveNext())
 			{
-				StarmapScreen.<>c__DisplayClass112_0 CS$<>8__locals1 = new StarmapScreen.<>c__DisplayClass112_0();
+				StarmapScreen.<>c__DisplayClass114_0 CS$<>8__locals1 = new StarmapScreen.<>c__DisplayClass114_0();
 				CS$<>8__locals1.<>4__this = this;
 				CS$<>8__locals1.rocket = enumerator.Current;
 				HierarchyReferences hierarchyReferences = global::Util.KInstantiateUI<HierarchyReferences>(this.listRocketTemplate.gameObject, this.rocketListContainer.gameObject, true);
 				BreakdownList component = hierarchyReferences.GetComponent<BreakdownList>();
 				MultiToggle component2 = hierarchyReferences.GetComponent<MultiToggle>();
 				EditableTitleBar component3 = hierarchyReferences.GetReference<RectTransform>("EditableTitle").GetComponent<EditableTitleBar>();
+				component3.OnStartedEditing += this.OnStartedTitlebarEditing;
+				component3.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEditing));
 				MultiToggle component4 = hierarchyReferences.GetReference<RectTransform>("LaunchRocketButton").GetComponent<MultiToggle>();
 				MultiToggle component5 = hierarchyReferences.GetReference<RectTransform>("LandRocketButton").GetComponent<MultiToggle>();
 				HierarchyReferences component6 = hierarchyReferences.GetReference<RectTransform>("ProgressBar").GetComponent<HierarchyReferences>();

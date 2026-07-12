@@ -684,23 +684,23 @@ public static class GameUtil
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.NONE;
 		}
-		if (radsPerCycle < 50f)
+		if (radsPerCycle < 100f)
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.VERY_LOW;
 		}
-		if (radsPerCycle < 100f)
+		if (radsPerCycle < 200f)
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.LOW;
 		}
-		if (radsPerCycle < 200f)
+		if (radsPerCycle < 400f)
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.MEDIUM;
 		}
-		if (radsPerCycle < 1000f)
+		if (radsPerCycle < 2000f)
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.HIGH;
 		}
-		if (radsPerCycle < 2000f)
+		if (radsPerCycle < 4000f)
 		{
 			return UI.OVERLAYS.RADIATION.RANGES.VERY_HIGH;
 		}

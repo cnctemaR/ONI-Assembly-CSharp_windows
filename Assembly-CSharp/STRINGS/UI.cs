@@ -912,6 +912,28 @@ namespace STRINGS
 				{
 				}
 			}
+
+			public class ROCKETINORBITDIAGNOSTIC
+			{
+				public static LocString ALL_NAME = "Rockets in Orbit";
+
+				public static LocString TOOLTIP_NAME = "<b>Rockets in Orbit</b>";
+
+				public static LocString NORMAL_ONE_IN_ORBIT = "    • {0} is in orbit waiting to land";
+
+				public static LocString NORMAL_IN_ORBIT = "    • There are {0} in orbit waiting to land";
+
+				public static LocString WARNING_ONE_ROCKETS_STRANDED = "    • No launch pads present. {0} stranded.";
+
+				public static LocString WARNING_ROCKETS_STRANDED = "    • No launch pads present. {0} rockets stranded.";
+
+				public static LocString NORMAL_NO_ROCKETS = "    • No rockets waiting to land";
+
+				public static class CRITERIA
+				{
+					public static LocString CHECKORBIT = "Check Orbiting Rockets";
+				}
+			}
 		}
 
 		public class TRACKERS
@@ -2939,13 +2961,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "RAD NEW WORLDS";
+				public static LocString IMAGE_HEADER = "BUFF AND SHINE";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>RAD NEW WORLDS UPDATE!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>Several new clusters options are available in both the Classic and Spaced Out! style categories. </indent>\n•<indent=20px>New Manual Radbolt Generator and Radiation Lamp buildings.</indent>\n•<indent=20px>Major revisions to Cosmic Research to allow for more ways of gathering research data.</indent>\n•<indent=20px>Bug fixes</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>BUFF AND SHINE UPDATE!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>Significant changes to radiation and radbolt tuning.</indent>\n•<indent=20px>Added the new Radbolt Chamber building for storing radbolts.</indent>\n•<indent=20px>Restored the Space Scanner and Enclosed Telescope to Spaced Out!</indent>\n•<indent=20px>Bug fixes and polish work.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -4238,6 +4260,11 @@ namespace STRINGS
 					public static LocString DESCRIPTION = UI.FormatAsLink("Exosuit", "EXOSUIT") + " Penalty Reduction";
 				}
 
+				public class EXOSUIT_DURABILITY
+				{
+					public static LocString DESCRIPTION = "Slows " + UI.FormatAsLink("Exosuit", "EXOSUIT") + " Durability Damage";
+				}
+
 				public class CONVEYOR_BUILD
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.SOLIDCONDUIT.NAME + " Construction";
@@ -5390,6 +5417,8 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Module Stats: ";
 
+					public static LocString NAME_HEADER = "Module Stats";
+
 					public static LocString TOOLTIP = "Properties of the selected module";
 				}
 
@@ -5403,6 +5432,10 @@ namespace STRINGS
 				public class MAX_HEIGHT
 				{
 					public static LocString NAME = "Height: {0}/{1}";
+
+					public static LocString NAME_RAW = "Height: ";
+
+					public static LocString NAME_MAX_SUPPORTED = "Maximum supported rocket height: ";
 
 					public static LocString TOOLTIP = "The {0} can support a total rocket height {1}";
 				}
@@ -6028,6 +6061,27 @@ namespace STRINGS
 						public static LocString FAILURE = "This rocket does not have enough oxidizer to reach its destination" + UI.HORIZONTAL_BR_RULE + "If the oxidizer tanks are full, a different Oxidizer Tank Module may be required";
 
 						public static LocString WARNING = "The rocket has enough oxidizer for a one-way trip to its destination, but will not be able to make it back";
+					}
+				}
+
+				public class ON_LAUNCHPAD
+				{
+					public class STATUS
+					{
+						public static LocString READY = "On a launch pad";
+
+						public static LocString FAILURE = "Not on a launch pad";
+
+						public static LocString WARNING = "No launch pad";
+					}
+
+					public class TOOLTIP
+					{
+						public static LocString READY = "On a launch pad";
+
+						public static LocString FAILURE = "Not on a launch pad";
+
+						public static LocString WARNING = "No launch pad";
 					}
 				}
 			}
@@ -8893,6 +8947,8 @@ namespace STRINGS
 				public static LocString COMETS = "Meteor Showers";
 
 				public static LocString ROCKETS = "Rocket Landing Ping";
+
+				public static LocString DUPEMADE = "Dupe-made Ballistics";
 			}
 
 			public class COMMAND_MODULE_SIDE_SCREEN
@@ -8923,6 +8979,8 @@ namespace STRINGS
 				public static LocString DROPDOWN_TOOLTIP_PATH_OBSTRUCTED = "Landing path obstructed";
 
 				public static LocString DROPDOWN_TOOLTIP_SITE_OBSTRUCTED = "Landing position on the platform is obstructed";
+
+				public static LocString DROPDOWN_TOOLTIP_PAD_DISABLED = "Landing pad is disabled";
 
 				public static LocString CHANGE_DESTINATION_BUTTON = "Change";
 
@@ -9675,7 +9733,7 @@ namespace STRINGS
 				public static LocString CANCELBUTTON = "Cancel";
 			}
 
-			public class HIGHENERGYPARTICLESPAWNERSIDESCREEN
+			public class RADBOLTTHRESHOLDSIDESCREEN
 			{
 				public static LocString TITLE = "Radbolt Threshold";
 

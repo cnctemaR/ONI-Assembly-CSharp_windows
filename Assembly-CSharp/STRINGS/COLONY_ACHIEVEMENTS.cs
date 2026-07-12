@@ -294,9 +294,9 @@ namespace STRINGS
 
 				public static LocString MORALE = "{0} morale: {1}";
 
-				public static LocString COLLECT_ARTIFACTS = "Study Terrestrial Artifacts at the Artifact Analysis Station.\nTerrestrial Artifacts studied: {collectedCount} / {neededCount}";
+				public static LocString COLLECT_ARTIFACTS = "Study different Terrestrial Artifacts at the Artifact Analysis Station.\nUnique Terrestrial Artifacts studied: {collectedCount} / {neededCount}";
 
-				public static LocString COLLECT_SPACE_ARTIFACTS = "Study Space Artifacts at the Artifact Analysis Station.\nSpace Artifacts studied: {collectedCount} / {neededCount}";
+				public static LocString COLLECT_SPACE_ARTIFACTS = "Study different Space Artifacts at the Artifact Analysis Station.\nUnique Space Artifacts studied: {collectedCount} / {neededCount}";
 
 				public static LocString ESTABLISH_COLONIES = "Establish colonies on {goalBaseCount} asteroids by building and activating Mini-Pods.\nColonies established: {baseCount} / {neededCount}.";
 

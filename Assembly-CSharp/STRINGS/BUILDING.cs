@@ -2260,7 +2260,7 @@ namespace STRINGS
 					"{Skills} Skill required to operate",
 					UI.HORIZONTAL_BR_RULE,
 					"Open the ",
-					UI.FormatAsManagementMenu("Skills Panel", "[L]"),
+					UI.FormatAsManagementMenu("Skills Panel", "[J]"),
 					" to teach {Skills} to a Duplicant"
 				});
 			}
@@ -2824,7 +2824,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Scan Quality: {Quality}";
 
-				public static LocString TOOLTIP = "This scanner dish is currently scanning at <b>{Quality}</b> effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tile obstructing the dish's line of sight on space";
+				public static LocString TOOLTIP = "This scanner dish is currently scanning at <b>{Quality}</b> effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby industrial machinery\n    • Rock or tile obstructing the dish's line of sight on space";
 			}
 
 			public class NETWORKQUALITY
@@ -2925,6 +2925,13 @@ namespace STRINGS
 				public static LocString NAME = "Broadcaster Out of Range";
 
 				public static LocString TOOLTIP = "This receiver is too far from the selected broadcaster to get signal updates";
+			}
+
+			public class LOSINGRADBOLTS
+			{
+				public static LocString NAME = "Radbolt Decay";
+
+				public static LocString TOOLTIP = "This building is unable to maintain the integrity of the radbolts it is storing";
 			}
 
 			public class TOP_PRIORITY_CHORE

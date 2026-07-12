@@ -62,7 +62,7 @@ namespace TUNING
 
 		public class COSMICRADIATION
 		{
-			public static int BASELINE = 25;
+			public static int BASELINE = 250;
 
 			public static int NONE = 0;
 
@@ -85,6 +85,8 @@ namespace TUNING
 			public static int VERY_VERY_HIGH = FIXEDTRAITS.COSMICRADIATION.BASELINE * 3;
 
 			public static int DEFAULT_VALUE = FIXEDTRAITS.COSMICRADIATION.MED;
+
+			public static float TELESCOPE_RADIATION_SHIELDING = 0.5f;
 
 			public class NAME
 			{

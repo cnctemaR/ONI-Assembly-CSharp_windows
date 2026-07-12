@@ -1137,10 +1137,10 @@ public class Grid
 		Solid = 1,
 		Foundation = 2,
 		Door = 4,
-		FakeFloor = 8,
-		DupePassable = 16,
-		DupeImpassable = 32,
-		CritterImpassable = 64
+		DupePassable = 8,
+		DupeImpassable = 16,
+		CritterImpassable = 32,
+		FakeFloor = 192
 	}
 
 	public struct BuildFlagsFoundationIndexer
@@ -1149,7 +1149,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.Foundation) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Foundation) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 			set
 			{
@@ -1164,7 +1164,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.Solid) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Solid) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 		}
 	}
@@ -1175,7 +1175,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupeImpassable) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupeImpassable) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 			set
 			{
@@ -1190,12 +1190,24 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.FakeFloor) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.FakeFloor) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
-			set
-			{
-				Grid.UpdateBuildMask(i, Grid.BuildFlags.FakeFloor, value);
-			}
+		}
+
+		public void Add(int i)
+		{
+			Grid.BuildFlags buildFlags = Grid.BuildMasks[i];
+			int num = (int)(((buildFlags & Grid.BuildFlags.FakeFloor) >> 6) + 1);
+			num = Math.Min(num, 3);
+			Grid.BuildMasks[i] = (buildFlags & ~Grid.BuildFlags.FakeFloor) | ((Grid.BuildFlags)(num << 6) & Grid.BuildFlags.FakeFloor);
+		}
+
+		public void Remove(int i)
+		{
+			Grid.BuildFlags buildFlags = Grid.BuildMasks[i];
+			int num = (int)(((buildFlags & Grid.BuildFlags.FakeFloor) >> 6) - Grid.BuildFlags.Solid);
+			num = Math.Max(num, 0);
+			Grid.BuildMasks[i] = (buildFlags & ~Grid.BuildFlags.FakeFloor) | ((Grid.BuildFlags)(num << 6) & Grid.BuildFlags.FakeFloor);
 		}
 	}
 
@@ -1205,7 +1217,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupePassable) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.DupePassable) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 			set
 			{
@@ -1220,7 +1232,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.CritterImpassable) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.CritterImpassable) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 			set
 			{
@@ -1235,7 +1247,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BuildMasks[i] & Grid.BuildFlags.Door) > (Grid.BuildFlags)0;
+				return (Grid.BuildMasks[i] & Grid.BuildFlags.Door) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
 			}
 			set
 			{

@@ -2466,15 +2466,11 @@ namespace STRINGS
 
 			public static LocString HEADER_1 = "Plant Mutations";
 
-			public static LocString PARAGRAPH_1 = "When selecting a seed to plant, a variety of mutations will be available to choose from that will affect how the plant develops.\n\nDifferent plants and critters have different mutations which allow them to thrive in different situations and produce different materials for harvest.\n\n";
+			public static LocString PARAGRAPH_1 = "Plants exposed to radiation sometimes drop mutated seeds when they are harvested. Each type of mutation has its own efficiencies and trade-offs.\n\nMutated seeds can be planted once they have been analyzed in the " + UI.FormatAsLink("Botanical Analyzer", "GENETICANALYSISSTATION") + ", but the resulting plants will produce no seeds of their own unless they are uprooted.\n\n";
 
-			public static LocString HEADER_2 = "Breeding";
+			public static LocString HEADER_2 = "Cultivating Mutated Seeds";
 
-			public static LocString PARAGRAPH_2 = "This is where the breeding information will go";
-
-			public static LocString HEADER_3 = "Dangers";
-
-			public static LocString PARAGRAPH_3 = "This is where the part about dangers will go\n\n";
+			public static LocString PARAGRAPH_2 = "Once mutated seeds have been analyzed in the Botanical Analyzer, they are ready to be planted. Continued exposure to naturally occurring radiation or a " + UI.FormatAsLink("Radiation Lamp", "RADIATIONLIGHT") + " is necessary to prevent wilting.\n\n";
 		}
 
 		public class HEALTH
@@ -2686,7 +2682,7 @@ namespace STRINGS
 
 			public static LocString HEADER_2 = "Radiation Sickness";
 
-			public static LocString PARAGRAPH_2 = "Duplicants who are exposed to Radioactive Contaminants will need to wear protection or they risk coming down with radiation sickness.\n\nSome Duplicants will have more of a natural resistance to radiation but prolonged exposure to radioactive contaminants will still increase their chances of becoming sick.\n\nConsuming Iodine Supplements and Seafood will pro-actively increase a Duplicant's radiation resistance, but will not cure a Duplicant's Radiation Sickness once they have become infected.\n\n";
+			public static LocString PARAGRAPH_2 = "Duplicants who are exposed to Radioactive Contaminants will need to wear protection or they risk coming down with radiation sickness.\n\nSome Duplicants will have more of a natural resistance to radiation but prolonged exposure to radioactive contaminants will still increase their chances of becoming sick.\n\nConsuming Iodine Supplements and Seafood will pro-actively increase a Duplicant's radiation resistance, but will not cure a Duplicant's Radiation Sickness once they have become infected.\n\nOn the other hand, exposure to radiation will kill food poisoning, slimelung and zombie spores on surfaces (including Duplicants).\n\n";
 
 			public static LocString HEADER_3 = "Nuclear Energy";
 

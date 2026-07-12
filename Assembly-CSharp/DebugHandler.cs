@@ -96,9 +96,17 @@ public class DebugHandler : IInputHandler
 		{
 			this.SpawnMinion(true);
 		}
+		else if (e.TryConsume(global::Action.DebugCheerEmote))
+		{
+			for (int i = 0; i < Components.MinionIdentities.Count; i++)
+			{
+				new EmoteChore(Components.MinionIdentities[i].GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				new EmoteChore(Components.MinionIdentities[i].GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+			}
+		}
 		else if (e.TryConsume(global::Action.DebugSpawnStressTest))
 		{
-			for (int i = 0; i < 60; i++)
+			for (int j = 0; j < 60; j++)
 			{
 				this.SpawnMinion(false);
 			}
@@ -201,7 +209,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0A2F;
+					goto IL_0B34;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -210,7 +218,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0A2F;
+					goto IL_0B34;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -315,7 +323,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0A2F;
+						goto IL_0B34;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -474,7 +482,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0A2F:
+		IL_0B34:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

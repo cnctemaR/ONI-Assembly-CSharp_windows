@@ -52,7 +52,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		Db.Get().Amounts.Bladder.Lookup(worker).SetValue(0f);
 		worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
 		AmountInstance amountInstance = Db.Get().Amounts.RadiationBalance.Lookup(worker);
-		float num = Math.Min(amountInstance.value, 60f);
+		float num = Math.Min(amountInstance.value, 100f);
 		if (num >= 1f)
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Math.Floor((double)num).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, worker.transform, Vector3.up * 2f, 1.5f, false, false);

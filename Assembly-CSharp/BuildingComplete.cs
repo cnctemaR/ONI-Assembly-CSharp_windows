@@ -70,10 +70,10 @@ public class BuildingComplete : Building
 		Components.EntombedBuildings.Remove(this);
 	}
 
-	public override void UpdatePosition(int cell)
+	public override void UpdatePosition()
 	{
-		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, cell);
-		base.UpdatePosition(cell);
+		base.UpdatePosition();
+		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, base.GetExtents());
 	}
 
 	private void OnObjectReplaced(object data)

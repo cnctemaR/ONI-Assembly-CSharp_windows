@@ -187,6 +187,7 @@ public enum Action
 	DebugTriggerException,
 	DebugTriggerError,
 	DebugTogglePersonalPriorityComparison,
+	DebugCheerEmote,
 	DebugDig,
 	DebugToggleUI,
 	DebugCollectGarbage,

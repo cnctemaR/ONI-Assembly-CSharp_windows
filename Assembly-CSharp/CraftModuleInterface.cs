@@ -14,6 +14,24 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 		}
 	}
 
+	public LaunchPad GetPreferredLaunchPadForWorld(int world_id)
+	{
+		if (this.preferredLaunchPad.ContainsKey(world_id))
+		{
+			return this.preferredLaunchPad[world_id].Get();
+		}
+		return null;
+	}
+
+	private void SetPreferredLaunchPadForWorld(LaunchPad pad)
+	{
+		if (!this.preferredLaunchPad.ContainsKey(pad.GetMyWorldId()))
+		{
+			this.preferredLaunchPad.Add(this.CurrentPad.GetMyWorldId(), new Ref<LaunchPad>());
+		}
+		this.preferredLaunchPad[this.CurrentPad.GetMyWorldId()].Set(this.CurrentPad);
+	}
+
 	public LaunchPad CurrentPad
 	{
 		get
@@ -471,6 +489,7 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		this.SortModuleListByPosition();
 		this.CurrentPad.Trigger(705820818, this);
+		this.SetPreferredLaunchPadForWorld(this.CurrentPad);
 		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
 		{
 			@ref.Get().Trigger(705820818, this);
@@ -708,6 +727,9 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	private List<Ref<RocketModuleCluster>> clusterModules = new List<Ref<RocketModuleCluster>>();
 
 	private Ref<RocketModuleCluster> bottomModule;
+
+	[Serialize]
+	private Dictionary<int, Ref<LaunchPad>> preferredLaunchPad = new Dictionary<int, Ref<LaunchPad>>();
 
 	[MyCmpReq]
 	private Clustercraft m_clustercraft;

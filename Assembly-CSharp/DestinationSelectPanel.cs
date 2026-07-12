@@ -250,7 +250,6 @@ public class DestinationSelectPanel : KMonoBehaviour
 	{
 		this.selectedIndex = this.clusterKeys.IndexOf(name);
 		this.asteroidData[name].ReInitialize(seed);
-		this.ShowMoons(this.asteroidData[name]);
 		return this.asteroidData[name];
 	}
 
@@ -264,7 +263,6 @@ public class DestinationSelectPanel : KMonoBehaviour
 		this.selectedIndex = 0;
 		string text = this.asteroidData.Keys.First<string>();
 		this.asteroidData[text].ReInitialize(seed);
-		this.ShowMoons(this.asteroidData[text]);
 		return this.asteroidData[text];
 	}
 

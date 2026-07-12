@@ -163,32 +163,36 @@ public class RocketModule : KMonoBehaviour
 
 	public void DeregisterComponents()
 	{
-		int num = Grid.PosToCell(this);
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.IsSelectable = false;
+		BuildingComplete component2 = base.GetComponent<BuildingComplete>();
+		if (component2 != null)
+		{
+			component2.UpdatePosition();
+		}
 		if (SelectTool.Instance.selected == component)
 		{
 			SelectTool.Instance.Select(null, false);
 		}
-		Deconstructable component2 = base.GetComponent<Deconstructable>();
-		if (component2 != null)
+		Deconstructable component3 = base.GetComponent<Deconstructable>();
+		if (component3 != null)
 		{
-			component2.SetAllowDeconstruction(false);
+			component3.SetAllowDeconstruction(false);
 		}
 		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		if (handle.IsValid())
 		{
 			GameComps.StructureTemperatures.Disable(handle);
 		}
-		FakeFloorAdder component3 = base.GetComponent<FakeFloorAdder>();
-		if (component3 != null)
-		{
-			component3.SetFloor(false);
-		}
-		AccessControl component4 = base.GetComponent<AccessControl>();
+		FakeFloorAdder component4 = base.GetComponent<FakeFloorAdder>();
 		if (component4 != null)
 		{
-			component4.SetRegistered(false);
+			component4.SetFloor(false);
+		}
+		AccessControl component5 = base.GetComponent<AccessControl>();
+		if (component5 != null)
+		{
+			component5.SetRegistered(false);
 		}
 		foreach (ManualDeliveryKG manualDeliveryKG in base.GetComponents<ManualDeliveryKG>())
 		{
@@ -200,15 +204,10 @@ public class RocketModule : KMonoBehaviour
 		{
 			components2[i].RemoveEndPoint();
 		}
-		ReorderableBuilding component5 = base.GetComponent<ReorderableBuilding>();
-		if (component5 != null)
-		{
-			component5.ShowReorderArm(false);
-		}
-		BuildingComplete component6 = base.GetComponent<BuildingComplete>();
+		ReorderableBuilding component6 = base.GetComponent<ReorderableBuilding>();
 		if (component6 != null)
 		{
-			component6.UpdatePosition(num);
+			component6.ShowReorderArm(false);
 		}
 		Workable component7 = base.GetComponent<Workable>();
 		if (component7 != null)
@@ -218,7 +217,7 @@ public class RocketModule : KMonoBehaviour
 		Structure component8 = base.GetComponent<Structure>();
 		if (component8 != null)
 		{
-			component8.UpdatePosition(num);
+			component8.UpdatePosition();
 		}
 		WireUtilitySemiVirtualNetworkLink component9 = base.GetComponent<WireUtilitySemiVirtualNetworkLink>();
 		if (component9 != null)
@@ -229,12 +228,16 @@ public class RocketModule : KMonoBehaviour
 
 	public void RegisterComponents()
 	{
-		int num = Grid.PosToCell(this);
 		base.GetComponent<KSelectable>().IsSelectable = true;
-		Deconstructable component = base.GetComponent<Deconstructable>();
+		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component != null)
 		{
-			component.SetAllowDeconstruction(true);
+			component.UpdatePosition();
+		}
+		Deconstructable component2 = base.GetComponent<Deconstructable>();
+		if (component2 != null)
+		{
+			component2.SetAllowDeconstruction(true);
 		}
 		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		if (handle.IsValid())
@@ -246,15 +249,15 @@ public class RocketModule : KMonoBehaviour
 		{
 			components[i].UpdateStoredItemCachedCells();
 		}
-		FakeFloorAdder component2 = base.GetComponent<FakeFloorAdder>();
-		if (component2 != null)
-		{
-			component2.SetFloor(true);
-		}
-		AccessControl component3 = base.GetComponent<AccessControl>();
+		FakeFloorAdder component3 = base.GetComponent<FakeFloorAdder>();
 		if (component3 != null)
 		{
-			component3.SetRegistered(true);
+			component3.SetFloor(true);
+		}
+		AccessControl component4 = base.GetComponent<AccessControl>();
+		if (component4 != null)
+		{
+			component4.SetRegistered(true);
 		}
 		ManualDeliveryKG[] components2 = base.GetComponents<ManualDeliveryKG>();
 		for (int i = 0; i < components2.Length; i++)
@@ -266,15 +269,10 @@ public class RocketModule : KMonoBehaviour
 		{
 			components3[i].AddEndpoint();
 		}
-		ReorderableBuilding component4 = base.GetComponent<ReorderableBuilding>();
-		if (component4 != null)
-		{
-			component4.ShowReorderArm(true);
-		}
-		BuildingComplete component5 = base.GetComponent<BuildingComplete>();
+		ReorderableBuilding component5 = base.GetComponent<ReorderableBuilding>();
 		if (component5 != null)
 		{
-			component5.UpdatePosition(num);
+			component5.ShowReorderArm(true);
 		}
 		Workable component6 = base.GetComponent<Workable>();
 		if (component6 != null)
@@ -284,7 +282,7 @@ public class RocketModule : KMonoBehaviour
 		Structure component7 = base.GetComponent<Structure>();
 		if (component7 != null)
 		{
-			component7.UpdatePosition(num);
+			component7.UpdatePosition();
 		}
 		WireUtilitySemiVirtualNetworkLink component8 = base.GetComponent<WireUtilitySemiVirtualNetworkLink>();
 		if (component8 != null)

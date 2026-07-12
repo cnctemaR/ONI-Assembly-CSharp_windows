@@ -30,7 +30,7 @@ public class SwampHarvestPlantConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, id, true, true, true, true, 2400f, 0f, 460f, "SwampHarvestPlantOriginal", gameObject.PrefabID().Name);
+		}, true, 0f, 0.15f, id, true, true, true, true, 2400f, 0f, 4600f, "SwampHarvestPlantOriginal", gameObject.PrefabID().Name);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(true);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

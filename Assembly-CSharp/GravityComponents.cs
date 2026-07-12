@@ -21,10 +21,9 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 		for (int i = 0; i < this.data.Count; i++)
 		{
 			GravityComponent gravityComponent = this.data[i];
-			if (gravityComponent.elapsedTime >= 0f && !(gravityComponent.transform == null))
+			if (gravityComponent.elapsedTime >= 0f && !(gravityComponent.transform == null) && !base.IsInCleanupList(gravityComponent.transform.gameObject))
 			{
-				Vector3 position = gravityComponent.transform.GetPosition();
-				Vector2 vector = position;
+				Vector2 vector = gravityComponent.transform.GetPosition();
 				Vector2 vector2 = new Vector2(gravityComponent.velocity.x, gravityComponent.velocity.y + -9.8f * dt);
 				float sqrMagnitude = vector2.sqrMagnitude;
 				if (sqrMagnitude > num)
@@ -32,7 +31,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					vector2 *= tuning.maxVelocity / Mathf.Sqrt(sqrMagnitude);
 				}
 				int num2 = Grid.PosToCell(vector);
-				bool flag = Grid.IsVisiblyInLiquid(vector + new Vector2(0f, gravityComponent.yOffset + gravityComponent.extents.y));
+				bool flag = Grid.IsVisiblyInLiquid(vector - new Vector2(0f, gravityComponent.bottomYOffset));
 				if (flag)
 				{
 					flag = true;
@@ -48,14 +47,15 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				gravityComponent.elapsedTime += dt;
 				Vector2 vector3 = vector + vector2 * dt;
 				Vector2 vector4 = vector3;
-				vector4.y = vector3.y + gravityComponent.yOffset - gravityComponent.extents.y;
-				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, gravityComponent.yOffset + gravityComponent.extents.y));
+				vector4.y = vector3.y - gravityComponent.bottomYOffset;
+				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, gravityComponent.bottomYOffset));
 				if (!flag && flag2)
 				{
 					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", new Vector3(vector3.x, vector3.y, 0f) + new Vector3(-0.38f, 0.75f, -0.1f), null, false, Grid.SceneLayer.FXFront, false);
 					kbatchedAnimController.Play("fx1", KAnim.PlayMode.Once, 1f, 0f);
 					kbatchedAnimController.destroyOnAnimComplete = true;
 				}
+				bool flag3 = false;
 				int num6 = Grid.PosToCell(vector4);
 				if (Grid.IsValidCell(num6))
 				{
@@ -71,65 +71,63 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 							}
 						}
 					}
-					bool flag3 = Grid.Solid[num6];
-					if (!flag3 && gravityComponent.landOnFakeFloors && Grid.FakeFloor[num6])
+					bool flag4 = Grid.Solid[num6];
+					if (!flag4 && gravityComponent.landOnFakeFloors && Grid.FakeFloor[num6])
 					{
 						Navigator component = gravityComponent.transform.GetComponent<Navigator>();
 						if (component)
 						{
-							flag3 = component.NavGrid.NavTable.IsValid(num6, NavType.Floor);
-							if (!flag3)
+							flag4 = component.NavGrid.NavTable.IsValid(num6, NavType.Floor);
+							if (!flag4)
 							{
 								int num7 = Grid.CellAbove(num6);
-								flag3 = component.NavGrid.NavTable.IsValid(num7, NavType.Hover);
+								flag4 = component.NavGrid.NavTable.IsValid(num7, NavType.Hover);
 							}
 						}
 					}
-					if (flag3)
+					if (flag4)
 					{
 						Vector3 vector5 = Grid.CellToPosCBC(Grid.CellAbove(num6), Grid.SceneLayer.Move);
-						float num8 = gravityComponent.extents.y - gravityComponent.yOffset;
-						vector3.y = vector5.y + num8;
+						vector3.y = vector5.y + gravityComponent.bottomYOffset;
 						gravityComponent.velocity.x = 0f;
-						gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
-						this.data[i] = gravityComponent;
+						flag3 = true;
+					}
+					else
+					{
+						Vector2 vector6 = vector3;
+						vector6.x -= gravityComponent.extents.x;
+						int num8 = Grid.PosToCell(vector6);
+						if (Grid.IsValidCell(num8) && Grid.Solid[num8])
+						{
+							vector3.x = Mathf.Floor(vector3.x - gravityComponent.extents.x) + (1f + gravityComponent.extents.x);
+							gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
+						}
+						else
+						{
+							Vector3 vector7 = vector3;
+							vector7.x += gravityComponent.extents.x;
+							int num9 = Grid.PosToCell(vector7);
+							if (Grid.IsValidCell(num9) && Grid.Solid[num9])
+							{
+								vector3.x = Mathf.Floor(vector3.x + gravityComponent.extents.x) - gravityComponent.extents.x;
+								gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
+							}
+						}
+					}
+				}
+				this.data[i] = gravityComponent;
+				int num10 = Grid.PosToCell(vector3);
+				if (!Grid.IsValidCell(num2) || Grid.WorldIdx[num2] == ClusterManager.INVALID_WORLD_IDX || Grid.IsValidCellInWorld(num10, (int)Grid.WorldIdx[num2]))
+				{
+					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y));
+					if (flag3)
+					{
 						gravityComponent.transform.gameObject.Trigger(1188683690, vector2);
 						if (gravityComponent.onLanded != null)
 						{
 							gravityComponent.onLanded();
 						}
 					}
-					else
-					{
-						Vector2 vector6 = vector3;
-						vector6.x -= gravityComponent.extents.x;
-						int num9 = Grid.PosToCell(vector6);
-						if (Grid.IsValidCell(num9) && Grid.Solid[num9])
-						{
-							vector3.x = Mathf.Floor(vector3.x - gravityComponent.extents.x) + (1f + gravityComponent.extents.x);
-							gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
-							this.data[i] = gravityComponent;
-						}
-						else
-						{
-							Vector3 vector7 = vector3;
-							vector7.x += gravityComponent.extents.x;
-							int num10 = Grid.PosToCell(vector7);
-							if (Grid.IsValidCell(num10) && Grid.Solid[num10])
-							{
-								vector3.x = Mathf.Floor(vector3.x + gravityComponent.extents.x) - gravityComponent.extents.x;
-								gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
-								this.data[i] = gravityComponent;
-							}
-						}
-						gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
-						this.data[i] = gravityComponent;
-					}
-				}
-				else
-				{
-					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
-					this.data[i] = gravityComponent;
 				}
 			}
 		}

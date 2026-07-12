@@ -12,11 +12,27 @@ public class ModularConduitPortController : GameStateMachine<ModularConduitPortC
 		this.on.finished.PlayAnim("finished", KAnim.PlayMode.Loop).ParamTransition<bool>(this.hasRocket, this.on.idle, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse).ParamTransition<bool>(this.isUnloading, this.on.unloading, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsTrue)
 			.ParamTransition<bool>(this.isLoading, this.on.loading, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsTrue)
 			.ToggleStatusItem(ModularConduitPortController.loadedStatusItem, null);
-		this.on.unloading.PlayAnim("unloading_pre").QueueAnim("unloading_loop", true, null).ParamTransition<bool>(this.isUnloading, this.on.unloading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
+		this.on.unloading.Enter("SetActive(true)", delegate(ModularConduitPortController.Instance smi)
+		{
+			smi.operational.SetActive(true, false);
+		}).Exit("SetActive(false)", delegate(ModularConduitPortController.Instance smi)
+		{
+			smi.operational.SetActive(false, false);
+		}).PlayAnim("unloading_pre")
+			.QueueAnim("unloading_loop", true, null)
+			.ParamTransition<bool>(this.isUnloading, this.on.unloading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
 			.ParamTransition<bool>(this.hasRocket, this.on.unloading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
 			.ToggleStatusItem(ModularConduitPortController.unloadingStatusItem, null);
 		this.on.unloading_pst.PlayAnim("unloading_pst").OnAnimQueueComplete(this.on.finished);
-		this.on.loading.PlayAnim("loading_pre").QueueAnim("loading_loop", true, null).ParamTransition<bool>(this.isLoading, this.on.loading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
+		this.on.loading.Enter("SetActive(true)", delegate(ModularConduitPortController.Instance smi)
+		{
+			smi.operational.SetActive(true, false);
+		}).Exit("SetActive(false)", delegate(ModularConduitPortController.Instance smi)
+		{
+			smi.operational.SetActive(false, false);
+		}).PlayAnim("loading_pre")
+			.QueueAnim("loading_loop", true, null)
+			.ParamTransition<bool>(this.isLoading, this.on.loading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
 			.ParamTransition<bool>(this.hasRocket, this.on.loading_pst, GameStateMachine<ModularConduitPortController, ModularConduitPortController.Instance, IStateMachineTarget, ModularConduitPortController.Def>.IsFalse)
 			.ToggleStatusItem(ModularConduitPortController.loadingStatusItem, null);
 		this.on.loading_pst.PlayAnim("loading_pst").OnAnimQueueComplete(this.on.finished);
@@ -117,5 +133,8 @@ public class ModularConduitPortController : GameStateMachine<ModularConduitPortC
 		{
 			return base.sm.isLoading.Get(this);
 		}
+
+		[MyCmpGet]
+		public Operational operational;
 	}
 }

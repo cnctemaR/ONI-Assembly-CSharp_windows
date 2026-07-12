@@ -130,6 +130,8 @@ public class Components
 
 	public static Components.Cmps<PassengerRocketModule> PassengerRocketModules = new Components.Cmps<PassengerRocketModule>();
 
+	public static Components.Cmps<ClusterTraveler> ClusterTravelers = new Components.Cmps<ClusterTraveler>();
+
 	public static Components.Cmps<LaunchPad> LaunchPads = new Components.Cmps<LaunchPad>();
 
 	public static Components.Cmps<WarpReceiver> WarpReceivers = new Components.Cmps<WarpReceiver>();

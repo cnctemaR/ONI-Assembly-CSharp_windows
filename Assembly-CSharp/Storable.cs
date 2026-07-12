@@ -11,18 +11,17 @@ public class Storable : KMonoBehaviour
 
 	public void OnStore(object data)
 	{
-		bool flag = data is Storage || (data != null && (bool)data);
-		KSelectable component = base.GetComponent<KSelectable>();
-		if (component)
-		{
-			component.IsSelectable = !flag;
-		}
 		this.RefreshStorageTags(data);
 	}
 
 	private void RefreshStorageTags(object data = null)
 	{
 		bool flag = data is Storage || (data != null && (bool)data);
+		Storage storage = (Storage)data;
+		if (storage != null && storage.gameObject == base.gameObject)
+		{
+			return;
+		}
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		SaveLoadRoot component2 = base.GetComponent<SaveLoadRoot>();
 		KSelectable component3 = base.GetComponent<KSelectable>();
@@ -32,7 +31,6 @@ public class Storable : KMonoBehaviour
 		}
 		if (flag)
 		{
-			Storage storage = data as Storage;
 			component.AddTag(GameTags.Stored, false);
 			if (storage == null || !storage.allowItemRemoval)
 			{

@@ -15,7 +15,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		KComponentManager<FallerComponent>.CleanupInfo cleanupInfo = new KComponentManager<FallerComponent>.CleanupInfo(go, handle);
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
-			this.cleanupList.Add(cleanupInfo);
+			base.AddToCleanupList(cleanupInfo);
 			return;
 		}
 		base.InternalRemoveComponent(cleanupInfo);

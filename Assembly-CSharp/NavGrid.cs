@@ -468,13 +468,13 @@ public class NavGrid
 			foreach (CellOffset cellOffset in this.voidOffsets)
 			{
 				int num2 = Grid.OffsetCell(cell, cellOffset.x, cellOffset.y);
-				if (Grid.IsValidCell(num2) && (Grid.BuildMasks[num2] & buildFlags) != (Grid.BuildFlags)0)
+				if (Grid.IsValidCell(num2) && (Grid.BuildMasks[num2] & buildFlags) != ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor))
 				{
 					if (this.isCritter)
 					{
 						return Grid.InvalidCell;
 					}
-					if ((Grid.BuildMasks[num2] & Grid.BuildFlags.DupePassable) == (Grid.BuildFlags)0)
+					if ((Grid.BuildMasks[num2] & Grid.BuildFlags.DupePassable) == ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor))
 					{
 						return Grid.InvalidCell;
 					}

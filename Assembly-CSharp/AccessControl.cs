@@ -41,10 +41,30 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);
 	}
 
+	private void CheckForBadData()
+	{
+		List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> list = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
+		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		{
+			if (keyValuePair.Key.Get() == null)
+			{
+				list.Add(keyValuePair);
+			}
+		}
+		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair2 in list)
+		{
+			this.savedPermissions.Remove(keyValuePair2);
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		this.isTeleporter = base.GetComponent<NavTeleporter>() != null;
 		base.OnSpawn();
+		if (this.savedPermissions.Count > 0)
+		{
+			this.CheckForBadData();
+		}
 		if (this.registered)
 		{
 			this.RegisterInGrid(true);
@@ -147,6 +167,11 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		this.SetGridRestrictions(null, this.DefaultPermission);
 		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
 		{
+			KPrefabID kprefabID = keyValuePair.Key.Get();
+			if (kprefabID == null)
+			{
+				DebugUtil.Assert(kprefabID == null, "Tried to set a duplicant-specific access restriction with a null key! This will result in an invisible default permission!");
+			}
 			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
 		}
 	}
@@ -173,7 +198,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 			}
 			if (component != null)
 			{
-				int[] array = component.PlacementCells;
+				this.registeredBuildingCells = component.PlacementCells;
+				int[] array = this.registeredBuildingCells;
 				for (int i = 0; i < array.Length; i++)
 				{
 					Grid.RegisterRestriction(array[i], orientation);
@@ -195,13 +221,14 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		{
 			if (component != null)
 			{
-				if (component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX)
+				if (component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX && this.registeredBuildingCells != null)
 				{
-					int[] array = component.PlacementCells;
+					int[] array = this.registeredBuildingCells;
 					for (int i = 0; i < array.Length; i++)
 					{
 						Grid.UnregisterRestriction(array[i]);
 					}
+					this.registeredBuildingCells = null;
 				}
 			}
 			else
@@ -265,10 +292,10 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		}
 		if (component != null)
 		{
-			int[] placementCells = component.PlacementCells;
-			for (int i = 0; i < placementCells.Length; i++)
+			int[] array = this.registeredBuildingCells;
+			for (int i = 0; i < array.Length; i++)
 			{
-				Grid.SetRestriction(placementCells[i], num, directions);
+				Grid.SetRestriction(array[i], num, directions);
 			}
 		}
 		else
@@ -295,10 +322,10 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		int num = ((kpid != null) ? kpid.InstanceID : (-1));
 		if (component != null)
 		{
-			int[] placementCells = component.PlacementCells;
-			for (int i = 0; i < placementCells.Length; i++)
+			int[] array = this.registeredBuildingCells;
+			for (int i = 0; i < array.Length; i++)
 			{
-				Grid.ClearRestriction(placementCells[i], num);
+				Grid.ClearRestriction(array[i], num);
 			}
 			return;
 		}
@@ -414,6 +441,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 	private CopyBuildingSettings copyBuildingSettings;
 
 	private bool isTeleporter;
+
+	private int[] registeredBuildingCells;
 
 	[Serialize]
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();

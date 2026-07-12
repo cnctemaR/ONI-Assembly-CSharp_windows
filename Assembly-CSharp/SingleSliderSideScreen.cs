@@ -16,7 +16,7 @@ public class SingleSliderSideScreen : SideScreenContent
 	public override bool IsValidForTarget(GameObject target)
 	{
 		KPrefabID component = target.GetComponent<KPrefabID>();
-		return target.GetComponent<ISingleSliderControl>() != null && !component.HasTag("HydrogenGenerator".ToTag()) && !component.HasTag("MethaneGenerator".ToTag()) && !component.HasTag("PetroleumGenerator".ToTag()) && !component.HasTag("DevGenerator".ToTag()) && !component.HasTag(GameTags.DeadReactor);
+		return (target.GetComponent<ISingleSliderControl>() != null || target.GetSMI<ISingleSliderControl>() != null) && !component.HasTag("HydrogenGenerator".ToTag()) && !component.HasTag("MethaneGenerator".ToTag()) && !component.HasTag("PetroleumGenerator".ToTag()) && !component.HasTag("DevGenerator".ToTag()) && !component.HasTag(GameTags.DeadReactor);
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -29,8 +29,12 @@ public class SingleSliderSideScreen : SideScreenContent
 		this.target = new_target.GetComponent<ISingleSliderControl>();
 		if (this.target == null)
 		{
-			global::Debug.LogError("The gameObject received does not contain a ISingleSliderControl implementation");
-			return;
+			this.target = new_target.GetSMI<ISingleSliderControl>();
+			if (this.target == null)
+			{
+				global::Debug.LogError("The gameObject received does not contain a ISingleSliderControl implementation");
+				return;
+			}
 		}
 		this.titleKey = this.target.SliderTitleKey;
 		for (int i = 0; i < this.sliderSets.Count; i++)

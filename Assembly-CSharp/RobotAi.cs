@@ -17,18 +17,20 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 		});
 		this.alive.DefaultState(this.alive.normal).TagTransition(GameTags.Dead, this.dead, false);
 		this.alive.normal.TagTransition(GameTags.Stored, this.alive.stored, false).ToggleStateMachine((RobotAi.Instance smi) => new FallMonitor.Instance(smi.master, false, null));
-		this.alive.stored.TagTransition(GameTags.Stored, this.alive.normal, true).ToggleBrain("stored").Enter(delegate(RobotAi.Instance smi)
-		{
-			smi.GetComponent<Navigator>().Pause("stored");
-		})
+		this.alive.stored.PlayAnim("in_storage").TagTransition(GameTags.Stored, this.alive.normal, true).ToggleBrain("stored")
+			.Enter(delegate(RobotAi.Instance smi)
+			{
+				smi.GetComponent<Navigator>().Pause("stored");
+			})
 			.Exit(delegate(RobotAi.Instance smi)
 			{
 				smi.GetComponent<Navigator>().Unpause("unstored");
 			});
-		this.dead.ToggleBrain("dead").ToggleStateMachine((RobotAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).Enter("RefreshUserMenu", delegate(RobotAi.Instance smi)
-		{
-			smi.RefreshUserMenu();
-		})
+		this.dead.ToggleBrain("dead").ToggleComponent<Deconstructable>(false).ToggleStateMachine((RobotAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master))
+			.Enter("RefreshUserMenu", delegate(RobotAi.Instance smi)
+			{
+				smi.RefreshUserMenu();
+			})
 			.Enter("DropStorage", delegate(RobotAi.Instance smi)
 			{
 				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);

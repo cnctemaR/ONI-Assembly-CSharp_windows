@@ -268,7 +268,8 @@ public class ResearchScreenSideBar : KScreen
 					toggle.ChangeState(this.filterStates[kvp.Key] ? 1 : 0);
 					if (this.filterStates[kvp.Key])
 					{
-						this.searchBox.text = kvp.Key;
+						StringEntry stringEntry = Strings.Get("STRINGS.UI.RESEARCHSCREEN.FILTER_BUTTONS." + kvp.Key.ToUpper());
+						this.searchBox.text = stringEntry.String;
 						return;
 					}
 					this.searchBox.text = "";

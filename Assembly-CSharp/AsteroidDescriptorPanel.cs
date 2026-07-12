@@ -63,15 +63,24 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 			GameObject gameObject = global::Util.KInstantiate(this.prefabTraitWidget, base.gameObject, null);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 			component.GetReference<LocText>("NameLabel").SetText("<b>" + descriptors[j].text + "</b>");
-			component.GetReference<Image>("Icon").color = descriptors[j].associatedColor;
-			LocText reference = component.GetReference<LocText>("DescLabel");
+			Image reference = component.GetReference<Image>("Icon");
+			reference.color = descriptors[j].associatedColor;
+			if (descriptors[j].associatedIcon != null)
+			{
+				Sprite sprite = Assets.GetSprite(descriptors[j].associatedIcon);
+				if (sprite != null)
+				{
+					reference.sprite = sprite;
+				}
+			}
+			LocText reference2 = component.GetReference<LocText>("DescLabel");
 			if (!string.IsNullOrEmpty(descriptors[j].tooltip))
 			{
-				reference.SetText(descriptors[j].tooltip);
+				reference2.SetText(descriptors[j].tooltip);
 			}
 			else
 			{
-				reference.gameObject.SetActive(false);
+				reference2.gameObject.SetActive(false);
 			}
 			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
 			gameObject.SetActive(true);
@@ -162,7 +171,13 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		RectTransform reference5 = component.GetReference<RectTransform>("TraitIconPrefab");
 		foreach (WorldTrait worldTrait in worldTraits)
 		{
-			global::Util.KInstantiateUI(reference5.gameObject, reference3.gameObject, true).GetComponent<Image>().color = global::Util.ColorFromHex(worldTrait.colorHex);
+			Image component3 = global::Util.KInstantiateUI(reference5.gameObject, reference3.gameObject, true).GetComponent<Image>();
+			Sprite sprite = Assets.GetSprite(worldTrait.filePath.Substring(worldTrait.filePath.LastIndexOf("/") + 1));
+			if (sprite != null)
+			{
+				component3.sprite = sprite;
+			}
+			component3.color = global::Util.ColorFromHex(worldTrait.colorHex);
 		}
 		string text = "";
 		if (worldTraits.Count > 0)

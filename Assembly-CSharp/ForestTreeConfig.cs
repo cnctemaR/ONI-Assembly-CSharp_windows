@@ -19,7 +19,7 @@ public class ForestTreeConfig : IEntityConfig
 		float num = 2f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("tree_kanim"), "idle_empty", Grid.SceneLayer.Building, 1, 2, tier, default(EffectorValues), SimHashes.Creature, new List<Tag>(), 298.15f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, 2400f, 0f, 980f, "ForestTreeOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, 2400f, 0f, 9800f, "ForestTreeOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
 		gameObject.AddOrGet<BuddingTrunk>();
 		gameObject.UpdateComponentRequirement<Harvestable>(false);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;

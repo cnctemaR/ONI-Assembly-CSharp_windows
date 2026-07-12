@@ -14,7 +14,7 @@ public abstract class KGameObjectComponentManager<T> : KComponentManager<T> wher
 		KComponentManager<T>.CleanupInfo cleanupInfo = new KComponentManager<T>.CleanupInfo(go, handle);
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
-			this.cleanupList.Add(cleanupInfo);
+			base.AddToCleanupList(cleanupInfo);
 			return;
 		}
 		base.RemoveFromCleanupList(go);

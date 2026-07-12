@@ -262,7 +262,7 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			num = disease.GetGrowthRateForTags(tags, (float)diseaseCount > growthRuleForElement.maxCountPerKG * environmentMass);
 		}
-		float num2 = DiseaseContainers.CalculateDelta(diseaseCount, elementIdx, environmentMass, environmentCell, temperature, num, disease, 1f);
+		float num2 = DiseaseContainers.CalculateDelta(diseaseCount, elementIdx, environmentMass, environmentCell, temperature, num, disease, 1f, Sim.IsRadiationEnabled());
 		this.currentGermsPanel.SetLabel("finaldelta", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0")), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE_TOOLTIP, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0")));
 		float num3 = Disease.GrowthRateToHalfLife(1f - num2 / (float)diseaseCount);
 		if (num3 > 0f)

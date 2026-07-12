@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 
 namespace STRINGS
 {
@@ -1464,7 +1465,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter",
 					UI.PST_KEYWORD,
-					"'s wellbeing"
+					"'s well-being"
 				});
 
 				public static LocString REPORT_NAME = "Deliver to {0}";
@@ -8498,11 +8499,11 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Allows the excavation of dangerous materials like " + ELEMENTS.CORIUM.NAME;
 			}
 
-			public class THERMAL_SUIT_WEARER
+			public class SUIT_DURABILITY
 			{
-				public static LocString NAME = "W.I.P. Skill";
+				public static LocString NAME = UI.FormatAsLink("Suit Sustainability Training", "SUITDURABILITY");
 
-				public static LocString DESCRIPTION = "Work in progress skill";
+				public static LocString DESCRIPTION = "Suits equipped by this duplicant lose durability " + GameUtil.GetFormattedPercent(EQUIPMENT.SUITS.SUIT_DURABILITY_SKILL_BONUS * 100f, GameUtil.TimeSlice.None) + " slower.";
 			}
 
 			public class SUIT_EXPERT

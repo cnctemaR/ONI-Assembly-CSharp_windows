@@ -24,7 +24,7 @@ public class SeaLettuceConfig : IEntityConfig
 			SimHashes.Water,
 			SimHashes.SaltWater,
 			SimHashes.Brine
-		}, false, 0f, 0.15f, "Lettuce", true, true, true, true, 2400f, 0f, 740f, SeaLettuceConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SEALETTUCE.NAME);
+		}, false, 0f, 0.15f, "Lettuce", true, true, true, true, 2400f, 0f, 7400f, SeaLettuceConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SEALETTUCE.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

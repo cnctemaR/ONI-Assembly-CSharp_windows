@@ -28,7 +28,7 @@ public class BaseBeeHiveConfig : IEntityConfig
 			HiveWorkableEmpty hiveWorkableEmpty = gameObject.AddOrGet<HiveWorkableEmpty>();
 			hiveWorkableEmpty.workTime = 15f;
 			hiveWorkableEmpty.overrideAnims = array;
-			hiveWorkableEmpty.workLayer = Grid.SceneLayer.BuildingFront;
+			hiveWorkableEmpty.workLayer = Grid.SceneLayer.Front;
 			RadiationEmitter radiationEmitter = gameObject.AddComponent<RadiationEmitter>();
 			radiationEmitter.emitRadiusX = 7;
 			radiationEmitter.emitRadiusY = 6;

@@ -232,6 +232,7 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 			this.TryAddDiagnosticToWorldCollection(ref list, new TrappedDuplicantDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new FarmDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new EntombedDiagnostic(worldID));
+			this.TryAddDiagnosticToWorldCollection(ref list, new RocketsInOrbitDiagnostic(worldID));
 			for (int i = 0; i < Db.Get().ChoreGroups.Count; i++)
 			{
 				this.TryAddDiagnosticToWorldCollection(ref list, new ChoreGroupDiagnostic(worldID, Db.Get().ChoreGroups[i]));

@@ -7,6 +7,26 @@ using UnityEngine;
 
 public class VomitChore : Chore<VomitChore.StatesInstance>
 {
+	private static KAnimFile GetAnimFileName(VomitChore.StatesInstance smi)
+	{
+		string text = "anim_vomit_kanim";
+		GameObject gameObject = smi.sm.vomiter.Get(smi);
+		if (gameObject == null)
+		{
+			return Assets.GetAnim(text);
+		}
+		MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
+		if (component == null)
+		{
+			return Assets.GetAnim(text);
+		}
+		if (component.model == BionicMinionConfig.MODEL)
+		{
+			return Assets.GetAnim("anim_bionic_vomit_kanim");
+		}
+		return Assets.GetAnim(text);
+	}
+
 	public VomitChore(ChoreType chore_type, IStateMachineTarget target, StatusItem status_item, Notification notification, Action<Chore> on_complete = null)
 		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
@@ -108,7 +128,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 			this.root.ToggleAnims("anim_emotes_default_kanim", 0f);
 			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null).ToggleAnims("anim_loco_vomiter_kanim", 0f)
 				.MoveTo((VomitChore.StatesInstance smi) => smi.GetVomitCell(), this.vomit, this.vomit, false);
-			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f).ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
+			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims(new Func<VomitChore.StatesInstance, KAnimFile>(VomitChore.GetAnimFileName)).ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
 				.DoNotification((VomitChore.StatesInstance smi) => smi.notification)
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Enter(delegate(VomitChore.StatesInstance smi)

@@ -60,6 +60,7 @@ public class OilWellCapConfig : IBuildingConfig
 		oilWellCap.addGasRate = 0.033333335f;
 		oilWellCap.maxGasPressure = 80.00001f;
 		oilWellCap.releaseGasRate = 0.44444448f;
+		go.AddOrGet<RequireInputs>().requireConduitHasMass = false;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -34,7 +34,7 @@ namespace STRINGS
 
 			public class BIONIC
 			{
-				public static LocString NAME = "Workshop";
+				public static LocString NAME = "";
 			}
 
 			public class HOSPITAL
@@ -91,13 +91,13 @@ namespace STRINGS
 
 			public class BIONICUPKEEP
 			{
-				public static LocString NAME = "Workshop";
+				public static LocString NAME = "";
 
-				public static LocString DESCRIPTION = "Where Bionic Duplicants can get the specialized care they need.\n\nUsing a " + BUILDINGS.PREFABS.GUNKEMPTIER.NAME + " in a Workshop will improve Bionic Duplicants' Morale.";
+				public static LocString DESCRIPTION = "";
 
-				public static LocString EFFECT = "- Morale bonus";
+				public static LocString EFFECT = "";
 
-				public static LocString TOOLTIP = "Using a gunk extractor in a Workshop will improve Bionic Duplicants' Morale";
+				public static LocString TOOLTIP = "";
 			}
 
 			public class PLUMBEDBATHROOM
@@ -203,7 +203,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Power Plant";
 
-				public static LocString DESCRIPTION = "The perfect place for Duplicants to flex their Electrical Engineering skills.\n\nHeavy-duty generators built within a Power Plant can be tuned up using microchips from power control stations to improve their " + UI.FormatAsLink("Power", "POWER") + " power production.";
+				public static LocString DESCRIPTION = "The perfect place for Duplicants to flex their Electrical Engineering skills.\n\nHeavy-duty generators built within a Power Plant can be tuned up using microchips from power control stations to improve their " + UI.FormatAsLink("Power", "POWER") + " production.";
 
 				public static LocString EFFECT = "- Enables " + ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME + " tune-ups on heavy-duty generators";
 
@@ -300,13 +300,13 @@ namespace STRINGS
 
 			public class BIONIC_UPKEEP
 			{
-				public static LocString NAME = "Workshop";
+				public static LocString NAME = "";
 
-				public static LocString DESCRIPTION = "A spa of sorts, for Duplicants who were built different.\n\nBionic Duplicants who access bionic service stations in a Workshop will get a nice little Morale boost.";
+				public static LocString DESCRIPTION = "";
 
-				public static LocString EFFECT = "- Morale bonus";
+				public static LocString EFFECT = "";
 
-				public static LocString TOOLTIP = "Bionic Duplicants get a Morale boost when using bionic service stations in a Workshop";
+				public static LocString TOOLTIP = "";
 			}
 		}
 
@@ -833,7 +833,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Basic generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
 
-				public static LocString DESCRIPTION = "For regular power needs";
+				public static LocString DESCRIPTION = "For basic power needs";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.LIGHTDUTYGENERATORTYPE.NAME;
 			}
@@ -842,7 +842,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Power building", "BUILDCATEGORYREQUIREMENTCLASSPOWERBUILDING");
 
-				public static LocString DESCRIPTION = "Power buildings";
+				public static LocString DESCRIPTION = "Buildings that generate, store, or manage power";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.POWERBUILDING.NAME;
 			}

@@ -36,7 +36,8 @@ public class GunkEmptierConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.BionicUpkeepType, false);
+		Prioritizable.AddRef(go);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
 		Storage storage = go.AddComponent<Storage>();
 		storage.capacityKg = GunkEmptierConfig.STORAGE_CAPACITY;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
@@ -45,6 +46,10 @@ public class GunkEmptierConfig : IBuildingConfig
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.LiquidGunk };
+		Ownable ownable = go.AddOrGet<Ownable>();
+		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
+		ownable.canBePublic = true;
+		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

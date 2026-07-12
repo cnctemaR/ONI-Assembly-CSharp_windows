@@ -31,6 +31,8 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		}).ScheduleGoTo((StressBehaviourMonitor.Instance smi) => smi.tierTwoReprieveDuration, this.stressed.tierTwo);
 	}
 
+	public const float TIER2_STRESS_RESPONSE_TIMEOUT = 150f;
+
 	public StateMachine<StressBehaviourMonitor, StressBehaviourMonitor.Instance, IStateMachineTarget, object>.FloatParameter timeInTierTwoStressResponse;
 
 	public GameStateMachine<StressBehaviourMonitor, StressBehaviourMonitor.Instance, IStateMachineTarget, object>.State satisfied;
@@ -77,6 +79,11 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		public Chore CreateTierTwoStressChore()
 		{
 			return this.tierTwoStressChoreCreator(base.GetComponent<ChoreProvider>());
+		}
+
+		public void ManualSetStressTier2TimeCounter(float timerValue)
+		{
+			base.sm.timeInTierTwoStressResponse.Set(timerValue, this, false);
 		}
 
 		public Func<ChoreProvider, Chore> tierOneStressChoreCreator;

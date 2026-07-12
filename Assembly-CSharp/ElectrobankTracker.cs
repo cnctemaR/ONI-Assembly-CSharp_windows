@@ -9,6 +9,8 @@ public class ElectrobankTracker : WorldResourceAmountTracker<ElectrobankTracker>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.ignoredTags = new Tag[GameTags.BionicIncompatibleBatteries.Count];
+		GameTags.BionicIncompatibleBatteries.CopyTo(this.ignoredTags, 0);
 		this.itemTag = GameTags.ChargedPortableBattery;
 	}
 

@@ -70,7 +70,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			if (component != null)
 			{
 				OxygenBreather oxygenBreather = component;
-				oxygenBreather.onSimConsume = (Action<Sim.MassConsumedCallback>)Delegate.Combine(oxygenBreather.onSimConsume, new Action<Sim.MassConsumedCallback>(this.OnAirConsumed));
+				oxygenBreather.onBreathableGasConsumed = (Action<SimHashes, float, float, byte, int>)Delegate.Combine(oxygenBreather.onBreathableGasConsumed, new Action<SimHashes, float, float, byte, int>(this.OnAirConsumed));
 			}
 		}
 
@@ -111,12 +111,12 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 		}
 
-		public void OnAirConsumed(Sim.MassConsumedCallback mass_cb_info)
+		public void OnAirConsumed(SimHashes elementConsumed, float massConsumed, float temperature, byte disseaseIDX, int disseaseCount)
 		{
-			if (mass_cb_info.diseaseIdx != 255)
+			if (disseaseIDX != 255)
 			{
-				Disease disease = Db.Get().Diseases[(int)mass_cb_info.diseaseIdx];
-				this.InjectDisease(disease, mass_cb_info.diseaseCount, ElementLoader.elements[(int)mass_cb_info.elemIdx].tag, Sickness.InfectionVector.Inhalation);
+				Disease disease = Db.Get().Diseases[(int)disseaseIDX];
+				this.InjectDisease(disease, disseaseCount, ElementLoader.FindElementByHash(elementConsumed).tag, Sickness.InfectionVector.Inhalation);
 			}
 		}
 

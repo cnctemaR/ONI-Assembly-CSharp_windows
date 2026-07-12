@@ -2459,18 +2459,18 @@ namespace STRINGS
 
 			public class SMALLELECTROBANKDISCHARGER
 			{
-				public static LocString NAME = UI.FormatAsLink("Wall Socket", "SMALLELECTROBANKDISCHARGER");
+				public static LocString NAME = UI.FormatAsLink("Compact Discharger", "SMALLELECTROBANKDISCHARGER");
 
-				public static LocString DESC = "It can also be placed on the ceiling.";
+				public static LocString DESC = "A small standalone power center that can be mounted on the floor or wall.";
 
-				public static LocString EFFECT = "Converts stored energy from " + UI.FormatAsLink("Eco Power Banks", "ELECTROBANK") + " into power for connected buildings.";
+				public static LocString EFFECT = "Converts stored energy from " + UI.FormatAsLink("Power Banks", "ELECTROBANK") + " into power for connected buildings.";
 			}
 
 			public class LARGEELECTROBANKDISCHARGER
 			{
-				public static LocString NAME = UI.FormatAsLink("Socket Station", "LARGEELECTROBANKDISCHARGER");
+				public static LocString NAME = UI.FormatAsLink("Large Discharger", "LARGEELECTROBANKDISCHARGER");
 
-				public static LocString DESC = "It's a real powerhouse.";
+				public static LocString DESC = "It's basically its own power grid.";
 
 				public static LocString EFFECT = "Efficiently converts stored energy from " + UI.FormatAsLink("Power Banks", "ELECTROBANK") + " into power for connected buildings.";
 			}
@@ -4847,6 +4847,149 @@ namespace STRINGS
 				public static LocString DESC = "The base of a monument must be constructed first.";
 
 				public static LocString EFFECT = "Builds the bottom section of a Great Monument.\n\nCan be customized.\n\nA Great Monument must be built to achieve the Colonize Imperative.";
+
+				public class FACADES
+				{
+					public class OPTION_A
+					{
+						public static LocString NAME = "On Asteroid I";
+
+						public static LocString DESC = "Standing tall.";
+					}
+
+					public class OPTION_B
+					{
+						public static LocString NAME = "On Asteroid II";
+
+						public static LocString DESC = "Standing purposefully.";
+					}
+
+					public class OPTION_C
+					{
+						public static LocString NAME = "On Asteroid III";
+
+						public static LocString DESC = "Their knees were knockin'.";
+					}
+
+					public class OPTION_D
+					{
+						public static LocString NAME = "Scientific Seat";
+
+						public static LocString DESC = "In celebration of science!";
+					}
+
+					public class OPTION_E
+					{
+						public static LocString NAME = "On Asteroid IV";
+
+						public static LocString DESC = "It's a confident stance.";
+					}
+
+					public class OPTION_F
+					{
+						public static LocString NAME = "On Asteroid V";
+
+						public static LocString DESC = "One knee tucked toward the other.";
+					}
+
+					public class OPTION_G
+					{
+						public static LocString NAME = "On Asteroid VI";
+
+						public static LocString DESC = "One small step for Duplicantkind...";
+					}
+
+					public class OPTION_H
+					{
+						public static LocString NAME = "Hatch Hunter";
+
+						public static LocString DESC = "Atop a pair of conquered critters.";
+					}
+
+					public class OPTION_I
+					{
+						public static LocString NAME = "Trash Tranquility";
+
+						public static LocString DESC = "Finding peace amid the debris.";
+					}
+
+					public class OPTION_J
+					{
+						public static LocString NAME = "Fish Stomper";
+
+						public static LocString DESC = "That can't be comfortable.";
+					}
+
+					public class OPTION_K
+					{
+						public static LocString NAME = "Egg Equanimity";
+
+						public static LocString DESC = "One must give the soul time to truly hatch.";
+					}
+
+					public class OPTION_L
+					{
+						public static LocString NAME = "Tilted Nosecone";
+
+						public static LocString DESC = "A slightly unbalanced base.";
+					}
+
+					public class OPTION_M
+					{
+						public static LocString NAME = "Sweet Seat";
+
+						public static LocString DESC = "In honor of the sugar engine.";
+					}
+
+					public class OPTION_N
+					{
+						public static LocString NAME = "CO2 Straddle";
+
+						public static LocString DESC = "Riding a carbon dioxide rocket engine to glory.";
+					}
+
+					public class OPTION_O
+					{
+						public static LocString NAME = "Petroleum Pose";
+
+						public static LocString DESC = "Atop a small petroleum rocket engine.";
+					}
+
+					public class OPTION_P
+					{
+						public static LocString NAME = "Spacefarer Stance";
+
+						public static LocString DESC = "Atop a solo spacefarer rocket nosecone.";
+					}
+
+					public class OPTION_Q
+					{
+						public static LocString NAME = "Seat of Power";
+
+						public static LocString DESC = "Atop a radbolt rocket engine.";
+					}
+
+					public class OPTION_R
+					{
+						public static LocString NAME = "Sweepy I";
+
+						public static LocString DESC = "Atop a sleeping Sweepy bot.";
+					}
+
+					public class OPTION_S
+					{
+						public static LocString NAME = "Sweepy II";
+
+						public static LocString DESC = "Atop a curious Sweepy bot.";
+					}
+
+					public class OPTION_T
+					{
+						public static LocString NAME = "Sweepy III";
+
+						public static LocString DESC = "Atop a happy lil' Sweepy bot.";
+					}
+				}
 			}
 
 			public class MONUMENTMIDDLE
@@ -4856,6 +4999,114 @@ namespace STRINGS
 				public static LocString DESC = "Customized sections of a Great Monument can be mixed and matched.";
 
 				public static LocString EFFECT = "Builds the middle section of a Great Monument.\n\nCan be customized.\n\nA Great Monument must be built to achieve the Colonize Imperative.";
+
+				public class FACADES
+				{
+					public class OPTION_A
+					{
+						public static LocString NAME = "Thumbs Up";
+
+						public static LocString DESC = "Good job, sculptor!";
+					}
+
+					public class OPTION_B
+					{
+						public static LocString NAME = "Big Wrench";
+
+						public static LocString DESC = "Lefty loose-y, righty tighty.";
+					}
+
+					public class OPTION_C
+					{
+						public static LocString NAME = "Um, Excuse Me";
+
+						public static LocString DESC = "Celebrates uncertainty.";
+					}
+
+					public class OPTION_D
+					{
+						public static LocString NAME = "Hands on Hips";
+
+						public static LocString DESC = "Makes the torso seem bigger and more intimidating than it is.";
+					}
+
+					public class OPTION_E
+					{
+						public static LocString NAME = "The Shrug";
+
+						public static LocString DESC = "Sometimes things are good enough just as they are.";
+					}
+
+					public class OPTION_F
+					{
+						public static LocString NAME = "You Betcha";
+
+						public static LocString DESC = "The finger gun of approval.";
+					}
+
+					public class OPTION_G
+					{
+						public static LocString NAME = "Well Hello There";
+
+						public static LocString DESC = "It's quite torso-forward.";
+					}
+
+					public class OPTION_H
+					{
+						public static LocString NAME = "Fists of Fury";
+
+						public static LocString DESC = "Let 'em fly!";
+					}
+
+					public class OPTION_I
+					{
+						public static LocString NAME = "Hatch Hug";
+
+						public static LocString DESC = "Cradling a cozy critter.";
+					}
+
+					public class OPTION_J
+					{
+						public static LocString NAME = "Casual Elegance";
+
+						public static LocString DESC = "Leaning casually, with grace.";
+					}
+
+					public class OPTION_K
+					{
+						public static LocString NAME = "Arms Ajar";
+
+						public static LocString DESC = "Hands hover slightly away from the body, as though raised in wonder.";
+					}
+
+					public class OPTION_L
+					{
+						public static LocString NAME = "Babes in Arms I";
+
+						public static LocString DESC = "Cradling a couple of smooth lil' critter babies.";
+					}
+
+					public class OPTION_M
+					{
+						public static LocString NAME = "Model Rocket";
+
+						public static LocString DESC = "Celebrates a cosmic undertaking.";
+					}
+
+					public class OPTION_N
+					{
+						public static LocString NAME = "Babes in Arms II";
+
+						public static LocString DESC = "An armful of chonky lil' critter babies.";
+					}
+
+					public class OPTION_O
+					{
+						public static LocString NAME = "Babes in Arms III";
+
+						public static LocString DESC = "Embracing buggy lil' critter babies.";
+					}
+				}
 			}
 
 			public class MONUMENTTOP
@@ -4865,6 +5116,191 @@ namespace STRINGS
 				public static LocString DESC = "Building a Great Monument will declare to the universe that this hunk of rock is your own.";
 
 				public static LocString EFFECT = "Builds the top section of a Great Monument.\n\nCan be customized.\n\nA Great Monument must be built to achieve the Colonize Imperative.";
+
+				public class FACADES
+				{
+					public class OPTION_A
+					{
+						public static LocString NAME = "Leira Noggin";
+
+						public static LocString DESC = "A massive replica of Leira's smiling face.";
+					}
+
+					public class OPTION_B
+					{
+						public static LocString NAME = "Gossmann Noggin";
+
+						public static LocString DESC = "A massive replica of Gossmann's determined gaze.";
+					}
+
+					public class OPTION_C
+					{
+						public static LocString NAME = "Puft Top";
+
+						public static LocString DESC = "A great-monument-sized puft.";
+					}
+
+					public class OPTION_D
+					{
+						public static LocString NAME = "Nikola Noggin";
+
+						public static LocString DESC = "A massive replica of Nikola's post-explosion expression.";
+					}
+
+					public class OPTION_E
+					{
+						public static LocString NAME = "Burt Noggin";
+
+						public static LocString DESC = "A massive replica of Burt's critter-spotting expression.";
+					}
+
+					public class OPTION_F
+					{
+						public static LocString NAME = "Rowan Noggin";
+
+						public static LocString DESC = "A massive replica of Rowan's serene smile.";
+					}
+
+					public class OPTION_G
+					{
+						public static LocString NAME = "Nisbet Noggin";
+
+						public static LocString DESC = "A massive replica of Nisbet when she sees someone whose name she's forgotten.";
+					}
+
+					public class OPTION_H
+					{
+						public static LocString NAME = "Ashkan Noggin";
+
+						public static LocString DESC = "A massive replica of Ashkan's fossil-discovering expression.";
+					}
+
+					public class OPTION_I
+					{
+						public static LocString NAME = "Ren Noggin";
+
+						public static LocString DESC = "A massive replica of Ren's smoochy face.";
+					}
+
+					public class OPTION_J
+					{
+						public static LocString NAME = "Hatch Top";
+
+						public static LocString DESC = "A great-monument-sized hatch.";
+					}
+
+					public class OPTION_K
+					{
+						public static LocString NAME = "Glossy Drecko Top";
+
+						public static LocString DESC = "A great-monument-sized glossy drecko.";
+					}
+
+					public class OPTION_L
+					{
+						public static LocString NAME = "Shove Vole Top";
+
+						public static LocString DESC = "A great-monument-sized shove vole.";
+					}
+
+					public class OPTION_M
+					{
+						public static LocString NAME = "Gassy Moo Top";
+
+						public static LocString DESC = "A great-monument-sized moo. Bigger and moo-ier than ever.";
+					}
+
+					public class OPTION_N
+					{
+						public static LocString NAME = "Morb Top";
+
+						public static LocString DESC = "A great-monument-sized morb.";
+					}
+
+					public class OPTION_O
+					{
+						public static LocString NAME = "Shine Bug Top";
+
+						public static LocString DESC = "A great-monument-sized shine bug.";
+					}
+
+					public class OPTION_P
+					{
+						public static LocString NAME = "Slickster Top";
+
+						public static LocString DESC = "A great-monument-sized slickster.";
+					}
+
+					public class OPTION_Q
+					{
+						public static LocString NAME = "Pacu Top";
+
+						public static LocString DESC = "A great-monument-sized underbite.";
+					}
+
+					public class OPTION_R
+					{
+						public static LocString NAME = "Beeta Top";
+
+						public static LocString DESC = "A great-monument-sized beeta.";
+					}
+
+					public class OPTION_S
+					{
+						public static LocString NAME = "Sweetle Top";
+
+						public static LocString DESC = "A great-monument-sized sweetle.";
+					}
+
+					public class OPTION_T
+					{
+						public static LocString NAME = "Plug Slug Top";
+
+						public static LocString DESC = "A great-monument-sized plug slug. Does not require a power source.";
+					}
+
+					public class OPTION_U
+					{
+						public static LocString NAME = "Grubgrub Top";
+
+						public static LocString DESC = "A great-monument-sized garden critter.";
+					}
+
+					public class OPTION_V
+					{
+						public static LocString NAME = "Rover Top";
+
+						public static LocString DESC = "It has no mouth, but still looks like it's smiling.";
+					}
+
+					public class OPTION_W
+					{
+						public static LocString NAME = "Radsick Top I";
+
+						public static LocString DESC = "A visual reminder about radiation safety.";
+					}
+
+					public class OPTION_X
+					{
+						public static LocString NAME = "Radsick Top II";
+
+						public static LocString DESC = "Progress comes at a price.";
+					}
+
+					public class OPTION_Y
+					{
+						public static LocString NAME = "Radsick Top III";
+
+						public static LocString DESC = "A cautionary tale for careless Duplicants.";
+					}
+
+					public class OPTION_Z
+					{
+						public static LocString NAME = "Radsick Top IV";
+
+						public static LocString DESC = "Excellent choice of decor for the entrance to highly radioactive site.";
+					}
+				}
 			}
 
 			public class MICROBEMUSHER
@@ -6116,6 +6552,8 @@ namespace STRINGS
 				public static LocString DESC = "Crafting stations allow Duplicants to make oxygen masks to wear in low breathability areas.";
 
 				public static LocString EFFECT = "Produces items and equipment for Duplicant use.\n\nDuplicants will not fabricate items unless recipes are queued.";
+
+				public static LocString RECIPE_DESCRIPTION = "Converts {0} to {1}";
 			}
 
 			public class ADVANCEDCRAFTINGTABLE
@@ -6127,20 +6565,26 @@ namespace STRINGS
 				public static LocString EFFECT = "Produces advanced electronics and bionic " + UI.FormatAsLink("Boosters", "BIONIC_UPGRADE") + ".\n\nDuplicants will not fabricate items unless recipes are queued.";
 
 				public static LocString BIONIC_COMPONENT_RECIPE_DESC = "Converts {0} to {1}";
+
+				public static LocString GENERIC_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+
+				public static LocString COLONY_HAS_BOOSTER_ASSIGNED_NONE = "My colony has no Bionic Duplicants with this booster assigned";
+
+				public static LocString COLONY_HAS_BOOSTER_ASSIGNED_COUNT = "My colony has {0} Bionic Duplicant(s) with this booster assigned";
 			}
 
 			public class DATAMINER
 			{
 				public static LocString NAME = UI.FormatAsLink("Data Miner", "DATAMINER");
 
-				public static LocString DESC = "Data banks can also be used to program robo-pilots and bionic boosters.";
+				public static LocString DESC = "Data banks can also be used to program robo-pilot rocket modules.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Mass-produces ",
-					UI.FormatAsLink("Data Banks", "ORBITAL_RESESARCH_DATABANK"),
+					UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank"),
 					" that can be processed into ",
-					UI.FormatAsLink("Data Analysis Research", "RESEARCH"),
+					UI.FormatAsLink(DatabankHelper.RESEARCH_NAME, "RESEARCH"),
 					" points.\n\nDuplicants will not fabricate items unless recipes are queued."
 				});
 
@@ -6160,9 +6604,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Remote Worker Dock", "REMOTEWORKERDOCK");
 
-				public static LocString DESC = "It's a Duplicant's duplicate.";
+				public static LocString NAME_FMT = "Dock {ID}";
 
-				public static LocString EFFECT = "Carries out machine operation instructions received from a connected " + UI.FormatAsLink("Remote Controller", "REMOTEWORKTERMINAL") + ".\n\nMust be placed within range of its target building.";
+				public static LocString DESC = "It's a Duplicant's duplicate's dock.";
+
+				public static LocString EFFECT = UI.FormatAsLink("Remote Worker Docks", "REMOTEWORKERDOCK") + " deploy automatons that operate machinery based on instructions received from a connected " + UI.FormatAsLink("Remote Controller", "REMOTEWORKTERMINAL") + ".\n\nMust be placed within range of its target building.";
 			}
 
 			public class SUITFABRICATOR
@@ -6171,7 +6617,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Exosuits can be filled with oxygen to allow Duplicants to safely enter hazardous areas.";
 
-				public static LocString EFFECT = "Forges protective " + UI.FormatAsLink("Exosuits", "EXOSUIT") + " for Duplicants to wear.\n\nDuplicants will not fabricate items unless recipes are queued.";
+				public static LocString EFFECT = "Forges protective " + UI.FormatAsLink("Exosuits", "EQUIPMENT") + " for Duplicants to wear.\n\nDuplicants will not fabricate items unless recipes are queued.";
 			}
 
 			public class CLOTHINGALTERATIONSTATION
@@ -7244,6 +7690,8 @@ namespace STRINGS
 				});
 
 				public static LocString HARDPLASTIC_RECIPE_DESCRIPTION = "Plastium is a highly heat-resistant, plastic-like " + UI.FormatAsLink("Solid Material", "ELEMENTS_SOLID") + " used for space buildings.";
+
+				public static LocString SELF_CHARGING_POWERBANK_RECIPE_DESCRIPTION = "Atomic Power Banks are portable, self-charging units used for isolated " + UI.FormatAsLink("Power", "POWER") + " grids.";
 			}
 
 			public class THERMALBLOCK

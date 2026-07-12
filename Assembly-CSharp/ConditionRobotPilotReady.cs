@@ -20,7 +20,7 @@ public class ConditionRobotPilotReady : ProcessCondition
 		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
 		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
-			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
+			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft && this.HasDestination())
 			{
 				global::UnityEngine.Object component = this.craftInterface.GetComponent<Clustercraft>();
 				ClusterTraveler component2 = this.craftInterface.GetComponent<ClusterTraveler>();
@@ -35,11 +35,7 @@ public class ConditionRobotPilotReady : ProcessCondition
 				{
 					status = ProcessCondition.Status.Ready;
 				}
-				else if (this.RocketHasDupeControlStation())
-				{
-					status = ProcessCondition.Status.Warning;
-				}
-				else if (flag2)
+				else if (flag2 || this.RocketHasDupeControlStation())
 				{
 					status = ProcessCondition.Status.Warning;
 				}
@@ -51,28 +47,42 @@ public class ConditionRobotPilotReady : ProcessCondition
 			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
 			if (spacecraftDestination == null)
 			{
-				status = ((this.module.GetDataBanksStored() >= 1f) ? ProcessCondition.Status.Warning : ProcessCondition.Status.Failure);
+				status = ProcessCondition.Status.Failure;
 			}
 			else if (this.module.HasResourcesToMove(spacecraftDestination.OneBasedDistance * 2))
 			{
 				status = ProcessCondition.Status.Ready;
 			}
-			else if (this.module.GetDataBanksStored() >= 1f)
+			else
 			{
-				status = ProcessCondition.Status.Warning;
+				status = ProcessCondition.Status.Failure;
 			}
 		}
 		return status;
+	}
+
+	private bool HasDestination()
+	{
+		if (this.craftRegisterType == LaunchableRocketRegisterType.Clustercraft)
+		{
+			return !this.module.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<RocketClusterDestinationSelector>().IsAtDestination();
+		}
+		if (this.craftRegisterType == LaunchableRocketRegisterType.Spacecraft)
+		{
+			int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.module.GetComponent<LaunchConditionManager>()).id;
+			return SpacecraftManager.instance.GetSpacecraftDestination(id) != null;
+		}
+		return false;
 	}
 
 	private bool RocketHasDupeControlStation()
 	{
 		if (this.craftInterface != null)
 		{
-			WorldContainer component = this.craftInterface.GetComponent<WorldContainer>();
-			if (component != null && Components.RocketControlStations.GetWorldItems(component.id, false).Count > 0)
+			PassengerRocketModule passengerModule = this.craftInterface.GetPassengerModule();
+			if (passengerModule != null)
 			{
-				return true;
+				return passengerModule.CheckPilotBoarded();
 			}
 		}
 		return false;
@@ -97,35 +107,80 @@ public class ConditionRobotPilotReady : ProcessCondition
 
 	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		if (status == ProcessCondition.Status.Ready)
+		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
+		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
-			LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
-			if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
+			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
 			{
-				if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft && this.craftInterface.GetClusterDestinationSelector().IsAtDestination())
+				if (status == ProcessCondition.Status.Ready)
 				{
-					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+					if (this.craftInterface.GetClusterDestinationSelector().IsAtDestination())
+					{
+						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+					}
+					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY;
+				}
+				else if (status == ProcessCondition.Status.Warning)
+				{
+					if (this.RocketHasDupeControlStation())
+					{
+						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING_NO_DATA_BANKS_HUMAN_PILOT;
+					}
+					ClusterTraveler component = this.craftInterface.GetComponent<ClusterTraveler>();
+					if (component == null || component.CurrentPath == null)
+					{
+						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
+					}
+					int num = component.RemainingTravelNodes() * 2 * this.module.dataBankConsumption;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num);
+				}
+				else
+				{
+					ClusterTraveler component2 = this.craftInterface.GetComponent<ClusterTraveler>();
+					if (this.HasDestination() && !(component2 == null) && component2.CurrentPath != null)
+					{
+						int num2 = component2.RemainingTravelNodes();
+						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, num2 * this.module.dataBankConsumption);
+					}
+					if (this.module.IsFull())
+					{
+						return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
+					}
+					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
+				}
+			}
+		}
+		else
+		{
+			int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.module.GetComponent<LaunchConditionManager>()).id;
+			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
+			if (status == ProcessCondition.Status.Ready)
+			{
+				return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY;
+			}
+			if (status == ProcessCondition.Status.Warning)
+			{
+				if (spacecraftDestination != null)
+				{
+					int num3 = spacecraftDestination.OneBasedDistance * 2;
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING, this.module.GetDataBanksStored(), num3);
 				}
 			}
 			else
 			{
-				int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.module.GetComponent<LaunchConditionManager>()).id;
-				if (SpacecraftManager.instance.GetSpacecraftDestination(id) == null)
+				if (spacecraftDestination != null)
+				{
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE, spacecraftDestination.OneBasedDistance * 2);
+				}
+				if (this.module.IsFull())
 				{
 					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION;
 				}
+				return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 			}
-			return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY;
 		}
-		if (status != ProcessCondition.Status.Warning)
-		{
-			return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE;
-		}
-		if (this.RocketHasDupeControlStation())
-		{
-			return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING_NO_DATA_BANKS_HUMAN_PILOT;
-		}
-		return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.WARNING;
+		DebugUtil.DevAssert(false, "Rocket type " + this.craftRegisterType.ToString() + " does not have a status tooltip for " + status.ToString(), null);
+		return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 	}
 
 	public override bool ShowInUI()

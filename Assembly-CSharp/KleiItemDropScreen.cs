@@ -403,7 +403,11 @@ public class KleiItemDropScreen : KModalScreen
 					}
 					else
 					{
-						categoryString = Assets.GetPrefab((permitResource as ArtableStage).prefabId).GetProperName();
+						categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+						if (permitResource is ArtableStage)
+						{
+							categoryString = Assets.GetPrefab((permitResource as ArtableStage).prefabId).GetProperName();
+						}
 					}
 				}
 				else

@@ -277,6 +277,27 @@ namespace Database
 				return str;
 			};
 			this.BionicExplorerBoosterReady = this.CreateStatusItem("BionicExplorerBoosterReady", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+			this.UnassignedBionicBooster = this.CreateStatusItem("UnassignedBionicBooster", "MISC", "status_item_pending_upgrade", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ElectrobankLifetimeRemaining = this.CreateStatusItem("ElectrobankLifetimeRemaining", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ElectrobankLifetimeRemaining.resolveStringCallback = delegate(string str, object data)
+			{
+				SelfChargingElectrobank selfChargingElectrobank = (SelfChargingElectrobank)data;
+				if (selfChargingElectrobank != null)
+				{
+					str = str.Replace("{0}", GameUtil.GetFormattedCycles(selfChargingElectrobank.LifetimeRemaining, "F1", false));
+				}
+				else
+				{
+					str = str.Replace("{0}", GameUtil.GetFormattedCycles(0f, "F1", false));
+				}
+				return str;
+			};
+			this.ElectrobankSelfCharging = this.CreateStatusItem("ElectrobankSelfCharging", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.ElectrobankSelfCharging.resolveStringCallback = delegate(string str, object data)
+			{
+				str = str.Replace("{0}", GameUtil.GetFormattedWattage((float)data, GameUtil.WattageFormatterUnit.Automatic, true));
+				return str;
+			};
 			this.StoredItemDurability = this.CreateStatusItem("StoredItemDurability", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.StoredItemDurability.resolveStringCallback = delegate(string str, object data)
 			{
@@ -410,5 +431,11 @@ namespace Database
 		public StatusItem BionicExplorerBooster;
 
 		public StatusItem BionicExplorerBoosterReady;
+
+		public StatusItem UnassignedBionicBooster;
+
+		public StatusItem ElectrobankLifetimeRemaining;
+
+		public StatusItem ElectrobankSelfCharging;
 	}
 }

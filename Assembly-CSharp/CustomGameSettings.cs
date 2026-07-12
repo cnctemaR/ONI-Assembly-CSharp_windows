@@ -146,6 +146,7 @@ public class CustomGameSettings : KMonoBehaviour
 		action(CustomGameSettingConfigs.FastWorkersMode);
 		action(CustomGameSettingConfigs.SaveToCloud);
 		action(CustomGameSettingConfigs.Teleporters);
+		action(CustomGameSettingConfigs.BionicWattage);
 		action3(CustomMixingSettingsConfigs.DLC2Mixing);
 		action3(CustomMixingSettingsConfigs.IceCavesMixing);
 		action3(CustomMixingSettingsConfigs.CarrotQuarryMixing);

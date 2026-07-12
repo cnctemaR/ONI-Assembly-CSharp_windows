@@ -9,7 +9,7 @@ public class RemoteWorkTerminalConfig : IBuildingConfig
 	{
 		string id = RemoteWorkTerminalConfig.ID;
 		int num = 3;
-		int num2 = 2;
+		int num2 = 3;
 		string text = "remote_work_terminal_kanim";
 		int num3 = 30;
 		float num4 = 60f;
@@ -49,7 +49,7 @@ public class RemoteWorkTerminalConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(RemoteWorkTerminalConfig.INPUT_MATERIAL, 0.006666667f, true)
+			new ElementConverter.ConsumedElement(RemoteWorkTerminalConfig.INPUT_MATERIAL, 0.013333334f, true)
 		};
 		elementConverter.showDescriptors = false;
 		go.AddOrGet<ElementConverterOperationalRequirement>();
@@ -63,11 +63,11 @@ public class RemoteWorkTerminalConfig : IBuildingConfig
 
 	public static string ID = "RemoteWorkTerminal";
 
-	public static readonly Tag INPUT_MATERIAL = new Tag("OrbitalResearchDatabank");
+	public static readonly Tag INPUT_MATERIAL = DatabankHelper.TAG;
 
 	public const float INPUT_CAPACITY = 10f;
 
-	public const float INPUT_CONSUMPTION_RATE_PER_S = 0.006666667f;
+	public const float INPUT_CONSUMPTION_RATE_PER_S = 0.013333334f;
 
 	public const float INPUT_REFILL_RATIO = 0.5f;
 }

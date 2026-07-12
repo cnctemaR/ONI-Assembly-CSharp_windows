@@ -50,6 +50,18 @@ public static class Strings
 		return Strings.TryGet(new StringKey(key), out result);
 	}
 
+	public static bool HasKey(StringKey key)
+	{
+		StringEntry stringEntry;
+		return Strings.TryGet(key, out stringEntry);
+	}
+
+	public static bool HasKey(string key)
+	{
+		StringEntry stringEntry;
+		return Strings.TryGet(new StringKey(key), out stringEntry);
+	}
+
 	public static void Add(params string[] value)
 	{
 		Strings.RootTable.Add(0, value);

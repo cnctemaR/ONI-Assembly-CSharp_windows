@@ -37,31 +37,23 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		base.Begin(context);
 	}
 
-	private static string GetConsumePreAnimName(ReloadElectrobankChore.Instance smi)
+	public static bool HasAnyDepletedBattery(ReloadElectrobankChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
-		{
-			return "consume_pre";
-		}
-		return "ladder_consume";
+		return smi.batteryMonitor.DepletedElectrobankCount > 0;
 	}
 
-	private static string GetConsumeLoopAnimName(ReloadElectrobankChore.Instance smi)
+	public static GameObject GetAnyEmptyBattery(ReloadElectrobankChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
-		{
-			return "consume_loop";
-		}
-		return "ladder_consume";
+		return smi.batteryMonitor.storage.FindFirst(GameTags.EmptyPortableBattery);
 	}
 
-	private static string GetConsumePstAnimName(ReloadElectrobankChore.Instance smi)
+	public static void RemoveDepletedElectrobank(ReloadElectrobankChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
+		GameObject anyEmptyBattery = ReloadElectrobankChore.GetAnyEmptyBattery(smi);
+		if (anyEmptyBattery != null)
 		{
-			return "consume_pst";
+			smi.batteryMonitor.storage.Drop(anyEmptyBattery, true);
 		}
-		return "ladder_consume";
 	}
 
 	public static void InstallElectrobank(ReloadElectrobankChore.Instance smi)
@@ -78,20 +70,24 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_BionicBattery, true);
 	}
 
-	public static void SetOverrideAnimSymbol(ReloadElectrobankChore.Instance smi, bool overriding)
+	private static void SetStoredItemVisibility(GameObject item, bool visible)
+	{
+		KBatchedAnimTracker component = item.GetComponent<KBatchedAnimTracker>();
+		if (component != null)
+		{
+			component.enabled = visible;
+		}
+		Storage.MakeItemInvisible(item, !visible, false);
+	}
+
+	public static void SetOverrideAnimSymbol(ReloadElectrobankChore.Instance smi, bool overriding, bool hideFromBack, GameObject electrobank)
 	{
 		string text = "object";
 		KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
 		SymbolOverrideController component2 = smi.gameObject.GetComponent<SymbolOverrideController>();
-		GameObject gameObject = smi.sm.pickedUpElectrobank.Get(smi);
-		if (gameObject != null)
+		if (electrobank != null && hideFromBack)
 		{
-			KBatchedAnimTracker component3 = gameObject.GetComponent<KBatchedAnimTracker>();
-			if (component3 != null)
-			{
-				component3.enabled = !overriding;
-			}
-			Storage.MakeItemInvisible(gameObject, overriding, false);
+			ReloadElectrobankChore.SetStoredItemVisibility(electrobank, !overriding);
 		}
 		if (!overriding)
 		{
@@ -99,7 +95,7 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			component.SetSymbolVisiblity(text, false);
 			return;
 		}
-		KAnim.Build.Symbol symbolByIndex = ((gameObject != null) ? gameObject.GetComponent<KBatchedAnimController>() : smi.cachedElectrobankSourcePrefabRef.GetComponent<KBatchedAnimController>()).AnimFiles[0].GetData().build.GetSymbolByIndex(0U);
+		KAnim.Build.Symbol symbolByIndex = ((electrobank != null) ? electrobank.GetComponent<KBatchedAnimController>() : smi.cachedElectrobankSourcePrefabRef.GetComponent<KBatchedAnimController>()).AnimFiles[0].GetData().build.GetSymbolByIndex(0U);
 		component2.AddSymbolOverride(text, symbolByIndex, 0);
 		component.SetSymbolVisiblity(text, true);
 	}
@@ -122,25 +118,41 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		{
 			default_state = this.fetch;
 			base.Target(this.dupe);
-			this.fetch.InitializeStates(this.dupe, this.electrobankSource, this.pickedUpElectrobank, this.amountRequested, this.actualunits, this.install, null).OnTargetLost(this.electrobankSource, this.electrobankLost);
-			this.install.DefaultState(this.install.pre).ToggleAnims("anim_bionic_kanim", 0f).Enter("Add Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
+			this.fetch.InitializeStates(this.dupe, this.electrobankSource, this.pickedUpElectrobank, this.amountRequested, this.actualunits, this.fetchCompleted, null).OnTargetLost(this.electrobankSource, this.electrobankLost);
+			this.fetchCompleted.EnterTransition(this.emptyDepleatedBatteries, new StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.Transition.ConditionCallback(ReloadElectrobankChore.HasAnyDepletedBattery)).GoTo(this.install);
+			this.emptyDepleatedBatteries.DefaultState(this.emptyDepleatedBatteries.animate);
+			this.emptyDepleatedBatteries.animate.ToggleAnims("anim_bionic_kanim", 0f).PlayAnim("discharge", KAnim.PlayMode.Once).Enter("Add Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
 			{
-				ReloadElectrobankChore.SetOverrideAnimSymbol(smi, true);
+				ReloadElectrobankChore.SetOverrideAnimSymbol(smi, true, false, ReloadElectrobankChore.GetAnyEmptyBattery(smi));
 			})
 				.Exit("Revert Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
 				{
-					ReloadElectrobankChore.SetOverrideAnimSymbol(smi, false);
+					ReloadElectrobankChore.SetOverrideAnimSymbol(smi, false, false, ReloadElectrobankChore.GetAnyEmptyBattery(smi));
+				})
+				.OnAnimQueueComplete(this.emptyDepleatedBatteries.end);
+			this.emptyDepleatedBatteries.end.Enter(new StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State.Callback(ReloadElectrobankChore.RemoveDepletedElectrobank)).EnterTransition(this.emptyDepleatedBatteries.animate, new StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.Transition.ConditionCallback(ReloadElectrobankChore.HasAnyDepletedBattery)).GoTo(this.install);
+			this.install.DefaultState(this.install.pre).ToggleAnims("anim_bionic_kanim", 0f).Enter("Add Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
+			{
+				ReloadElectrobankChore.SetOverrideAnimSymbol(smi, true, true, this.pickedUpElectrobank.Get(smi));
+			})
+				.Exit("Revert Symbol Override", delegate(ReloadElectrobankChore.Instance smi)
+				{
+					ReloadElectrobankChore.SetOverrideAnimSymbol(smi, false, true, this.pickedUpElectrobank.Get(smi));
 				});
-			this.install.pre.PlayAnim(new Func<ReloadElectrobankChore.Instance, string>(ReloadElectrobankChore.GetConsumePreAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.install.loop).ScheduleGoTo(3f, this.install.loop);
-			this.install.loop.PlayAnim(new Func<ReloadElectrobankChore.Instance, string>(ReloadElectrobankChore.GetConsumeLoopAnimName), KAnim.PlayMode.Loop).ScheduleGoTo(4.333f, this.install.pst);
-			this.install.pst.PlayAnim(new Func<ReloadElectrobankChore.Instance, string>(ReloadElectrobankChore.GetConsumePstAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
+			this.install.pre.PlayAnim("consume_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.install.loop).ScheduleGoTo(3f, this.install.loop);
+			this.install.loop.PlayAnim("consume_loop", KAnim.PlayMode.Loop).ScheduleGoTo(4.333f, this.install.pst);
+			this.install.pst.PlayAnim("consume_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
 			this.complete.Enter(new StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State.Callback(ReloadElectrobankChore.InstallElectrobank)).ReturnSuccess();
 			this.electrobankLost.Target(this.dupe).TriggerOnEnter(GameHashes.TargetElectrobankLost, null).ReturnFailure();
 		}
 
 		public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.FetchSubState fetch;
 
+		public ReloadElectrobankChore.States.EmptyDepleatedStates emptyDepleatedBatteries;
+
 		public ReloadElectrobankChore.States.InstallState install;
+
+		public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State fetchCompleted;
 
 		public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State complete;
 
@@ -150,6 +162,8 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 
 		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.TargetParameter electrobankSource;
 
+		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.TargetParameter lastDepleatedElectrobankFound;
+
 		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.TargetParameter pickedUpElectrobank;
 
 		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.TargetParameter messstation;
@@ -157,6 +171,13 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.FloatParameter actualunits;
 
 		public StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.FloatParameter amountRequested = new StateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.FloatParameter(1f);
+
+		public class EmptyDepleatedStates : GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State
+		{
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State animate;
+
+			public GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State end;
+		}
 
 		public class InstallState : GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State
 		{

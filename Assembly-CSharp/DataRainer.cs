@@ -19,8 +19,8 @@ public class DataRainer : GameStateMachine<DataRainer, DataRainer.Instance>
 			{
 				smi.GoTo(this.overjoyed.raining);
 			}
-		}).ToggleStatusItem(Db.Get().DuplicantStatusItems.DataRainerPlanning, null).EventTransition(GameHashes.ScheduleBlocksChanged, this.overjoyed.raining, (DataRainer.Instance smi) => smi.IsRecTime());
-		this.overjoyed.raining.ToggleStatusItem(Db.Get().DuplicantStatusItems.DataRainerRaining, null).EventTransition(GameHashes.ScheduleBlocksChanged, this.overjoyed.idle, (DataRainer.Instance smi) => !smi.IsRecTime()).ToggleChore((DataRainer.Instance smi) => new DataRainerChore(smi.master), this.overjoyed.idle);
+		}).ToggleStatusItem(Db.Get().DuplicantStatusItems.DataRainerPlanning, null).EventTransition(GameHashes.ScheduleBlocksTick, this.overjoyed.raining, (DataRainer.Instance smi) => smi.IsRecTime());
+		this.overjoyed.raining.ToggleStatusItem(Db.Get().DuplicantStatusItems.DataRainerRaining, null).EventTransition(GameHashes.ScheduleBlocksTick, this.overjoyed.idle, (DataRainer.Instance smi) => !smi.IsRecTime()).ToggleChore((DataRainer.Instance smi) => new DataRainerChore(smi.master), this.overjoyed.idle);
 		this.overjoyed.exitEarly.Enter(delegate(DataRainer.Instance smi)
 		{
 			smi.ExitJoyReactionEarly();

@@ -28,7 +28,7 @@ public class RemoteWorkerConfig : IEntityConfig
 			Assets.GetAnim("body_comp_default_kanim"),
 			Assets.GetAnim("anim_idles_default_kanim"),
 			Assets.GetAnim("anim_loco_new_kanim"),
-			Assets.GetAnim("anim_interacts_remote_work_dock_kanim")
+			Assets.GetAnim(RemoteWorkerConfig.DOCK_ANIM_OVERRIDES)
 		};
 		gameObject.AddOrGet<AnimEventHandler>();
 		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(gameObject);
@@ -62,7 +62,9 @@ public class RemoteWorkerConfig : IEntityConfig
 		gameObject.AddComponent<ChoreConsumer>();
 		gameObject.AddComponent<Pickupable>();
 		gameObject.AddComponent<SaveLoadRoot>();
-		gameObject.AddComponent<Storage>();
+		gameObject.AddComponent<Storage>().SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
+		gameObject.AddOrGet<Clearable>().isClearable = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = false;
 		return gameObject;
 	}
 
@@ -108,13 +110,15 @@ public class RemoteWorkerConfig : IEntityConfig
 		return this.GetRequiredDlcIds();
 	}
 
-	public static string ID = "RemoteWorker";
+	public static readonly string ID = "RemoteWorker";
 
 	public const float MASS_KG = 200f;
 
 	public const float DEBRIS_MASS_KG = 42f;
 
-	public static string IDLE_IN_DOCK_ANIM = "idle_in_dock";
+	public static readonly string DOCK_ANIM_OVERRIDES = "anim_interacts_remote_work_dock_kanim";
+
+	public static readonly string IDLE_IN_DOCK_ANIM = "in_dock_idle";
 
 	public static readonly string BUILD_MATERIAL = "Steel";
 

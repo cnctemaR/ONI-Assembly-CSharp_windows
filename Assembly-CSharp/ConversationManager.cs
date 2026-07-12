@@ -218,6 +218,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 	private static readonly Tag[] invalidConvoTags = new Tag[]
 	{
 		GameTags.Asleep,
+		GameTags.BionicBedTime,
 		GameTags.HoldingBreath,
 		GameTags.Dead
 	};

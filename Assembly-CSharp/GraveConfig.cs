@@ -29,17 +29,26 @@ public class GraveConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		GraveConfig.STORAGE_OVERRIDE_ANIM_FILES = new KAnimFile[] { Assets.GetAnim("anim_bury_dupe_kanim") };
-		Storage storage = go.AddOrGet<Storage>();
-		storage.showInUI = true;
-		storage.SetDefaultStoredItemModifiers(GraveConfig.StorageModifiers);
-		storage.overrideAnims = GraveConfig.STORAGE_OVERRIDE_ANIM_FILES;
-		storage.workAnims = GraveConfig.STORAGE_WORK_ANIMS;
-		storage.workingPstComplete = new HashedString[] { GraveConfig.STORAGE_PST_ANIM };
-		storage.synchronizeAnims = false;
-		storage.useGunForDelivery = false;
-		storage.workAnimPlayMode = KAnim.PlayMode.Once;
+		GraveStorage graveStorage = go.AddOrGet<GraveStorage>();
+		graveStorage.showInUI = true;
+		graveStorage.SetDefaultStoredItemModifiers(GraveConfig.StorageModifiers);
+		graveStorage.overrideAnims = GraveConfig.STORAGE_OVERRIDE_ANIM_FILES;
+		graveStorage.workAnims = GraveConfig.STORAGE_WORK_ANIMS;
+		graveStorage.workingPstComplete = new HashedString[] { GraveConfig.STORAGE_PST_ANIM };
+		graveStorage.synchronizeAnims = false;
+		graveStorage.useGunForDelivery = false;
+		graveStorage.workAnimPlayMode = KAnim.PlayMode.Once;
 		go.AddOrGet<Grave>();
 		Prioritizable.AddRef(go);
+		go.GetComponent<KPrefabID>().prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		GraveStorage graveStorage = go.AddOrGet<GraveStorage>();
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_bury_dupe_kanim") };
+		graveStorage.workerTypeOverrideAnims.Add(MinionConfig.ID, array);
+		graveStorage.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_bury_dupe_kanim") });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

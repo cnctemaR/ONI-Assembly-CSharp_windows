@@ -63,6 +63,12 @@ public class ScheduleScreenEntry : KMonoBehaviour
 
 	public void RefreshTimeOfDayPositioner()
 	{
+		if (this.schedule.ProgressTimetableIdx >= this.timetableRows.Count || this.schedule.ProgressTimetableIdx < 0)
+		{
+			KCrashReporter.ReportDevNotification("RefreshTimeOfDayPositionerError", Environment.StackTrace, string.Format("DevError: schedule.ProgressTimetableIdx is out of bounds. schedule.name:{0}, schedule.ProgressTimetableIdx:{1}, : timetableRows.Count:{2}", this.schedule.name, this.schedule.ProgressTimetableIdx, this.timetableRows.Count), true, null);
+			this.timeOfDayPositioner.SetTargetTimetable(null);
+			return;
+		}
 		GameObject gameObject = this.timetableRows[this.schedule.ProgressTimetableIdx];
 		this.timeOfDayPositioner.SetTargetTimetable(gameObject);
 	}

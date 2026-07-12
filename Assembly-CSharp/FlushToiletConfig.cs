@@ -37,9 +37,10 @@ public class FlushToiletConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		KPrefabID component = go.GetComponent<KPrefabID>();
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 5f;
 		flushToilet.massEmittedPerUse = 5f + DUPLICANTSTATS.STANDARD.Secretions.PEE_PER_TOILET_PEE;
@@ -48,11 +49,14 @@ public class FlushToiletConfig : IBuildingConfig
 		flushToilet.diseasePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE;
 		flushToilet.diseaseOnDupePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE / 20;
 		flushToilet.requireOutput = true;
-		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_toiletflush_kanim") };
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
-		toiletWorkableUse.overrideAnims = array;
 		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingFront;
 		toiletWorkableUse.resetProgressOnStop = true;
+		ToiletWorkableClean toiletWorkableClean = go.AddOrGet<ToiletWorkableClean>();
+		toiletWorkableClean.workTime = 90f;
+		toiletWorkableClean.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_toiletflush_kanim") };
+		toiletWorkableClean.workLayer = Grid.SceneLayer.BuildingFront;
+		toiletWorkableClean.SetIsCloggedByGunk(true);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
@@ -71,6 +75,18 @@ public class FlushToiletConfig : IBuildingConfig
 		ownable.canBePublic = true;
 		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
+		component.prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		ToiletWorkableUse component = go.GetComponent<ToiletWorkableUse>();
+		HashedString[] array = new HashedString[] { "working_pst" };
+		KAnimFile[] array2 = new KAnimFile[] { Assets.GetAnim("anim_interacts_toiletflush_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array2);
+		component.workerTypePstAnims.Add(MinionConfig.ID, array);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_toiletflush_kanim") });
+		component.workerTypePstAnims.Add(BionicMinionConfig.ID, new HashedString[] { "working_gunky_pst" });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

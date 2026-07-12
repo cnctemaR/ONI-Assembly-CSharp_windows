@@ -67,6 +67,11 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROOMS, CodexEntryGenerator.GenerateRoomsEntries(), Assets.GetSprite("codexIconRooms"), true, true, null));
 		text = CodexCache.FormatLinkID("STORYTRAITS");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.STORYTRAITS, new Dictionary<string, CodexEntry>(), Assets.GetSprite("codexIconStoryTraits"), true, true, null));
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		{
+			CodexEntryGenerator.GenerateBionicUpgradeEntries();
+			CodexEntryGenerator.GenerateElectrobankEntries();
+		}
 		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null, true, true, null);
 		CodexEntryGenerator.GeneratePageNotFound();
 		List<CategoryEntry> list = new List<CategoryEntry>();

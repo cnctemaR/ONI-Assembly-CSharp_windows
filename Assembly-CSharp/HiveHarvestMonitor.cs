@@ -14,7 +14,12 @@ public class HiveHarvestMonitor : GameStateMachine<HiveHarvestMonitor, HiveHarve
 		this.do_not_harvest.ParamTransition<bool>(this.shouldHarvest, this.harvest, (HiveHarvestMonitor.Instance smi, bool bShouldHarvest) => bShouldHarvest);
 		this.harvest.ParamTransition<bool>(this.shouldHarvest, this.do_not_harvest, (HiveHarvestMonitor.Instance smi, bool bShouldHarvest) => !bShouldHarvest).DefaultState(this.harvest.not_ready);
 		this.harvest.not_ready.EventTransition(GameHashes.OnStorageChange, this.harvest.ready, (HiveHarvestMonitor.Instance smi) => smi.storage.GetMassAvailable(smi.def.producedOre) >= smi.def.harvestThreshold);
-		this.harvest.ready.ToggleChore((HiveHarvestMonitor.Instance smi) => smi.CreateHarvestChore(), this.harvest.not_ready).EventTransition(GameHashes.OnStorageChange, this.harvest.not_ready, (HiveHarvestMonitor.Instance smi) => smi.storage.GetMassAvailable(smi.def.producedOre) < smi.def.harvestThreshold);
+		this.harvest.ready.ToggleChore((HiveHarvestMonitor.Instance smi) => smi.CreateHarvestChore(), new Action<HiveHarvestMonitor.Instance, Chore>(HiveHarvestMonitor.SetRemoteChore), this.harvest.not_ready).EventTransition(GameHashes.OnStorageChange, this.harvest.not_ready, (HiveHarvestMonitor.Instance smi) => smi.storage.GetMassAvailable(smi.def.producedOre) < smi.def.harvestThreshold);
+	}
+
+	private static void SetRemoteChore(HiveHarvestMonitor.Instance smi, Chore chore)
+	{
+		smi.remoteChore.SetChore(chore);
 	}
 
 	public StateMachine<HiveHarvestMonitor, HiveHarvestMonitor.Instance, IStateMachineTarget, HiveHarvestMonitor.Def>.BoolParameter shouldHarvest;
@@ -72,5 +77,8 @@ public class HiveHarvestMonitor : GameStateMachine<HiveHarvestMonitor, HiveHarve
 
 		[MyCmpReq]
 		public Storage storage;
+
+		[MyCmpAdd]
+		public ManuallySetRemoteWorkTargetComponent remoteChore;
 	}
 }

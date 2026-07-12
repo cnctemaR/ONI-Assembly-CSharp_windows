@@ -65,5 +65,7 @@ public class RocketControlStationConfig : IBuildingConfig
 
 	public const float SLOW_SPEED = 0.5f;
 
+	public const float SUPER_SPEED = 1.5f;
+
 	public const float DEFAULT_PILOT_MODIFIER = 1f;
 }

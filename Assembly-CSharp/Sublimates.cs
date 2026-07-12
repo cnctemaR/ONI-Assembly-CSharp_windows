@@ -66,6 +66,42 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		component.sublimatedMass *= num2;
 	}
 
+	private unsafe bool SimMightOffcellOverpressure(int cell, SimHashes offgass)
+	{
+		SimHashes id = Grid.Element[cell].id;
+		if (id == offgass || id == SimHashes.Vacuum)
+		{
+			return false;
+		}
+		IntPtr intPtr = stackalloc byte[(UIntPtr)12];
+		*intPtr = Grid.CellLeft(cell);
+		*(intPtr + 4) = Grid.CellRight(cell);
+		*(intPtr + (IntPtr)2 * 4) = Grid.CellAbove(cell);
+		ReadOnlySpan<int> readOnlySpan = new Span<int>(intPtr, 3);
+		bool flag = false;
+		ReadOnlySpan<int> readOnlySpan2 = readOnlySpan;
+		for (int i = 0; i < readOnlySpan2.Length; i++)
+		{
+			int num = *readOnlySpan2[i];
+			if (Grid.IsValidCell(num))
+			{
+				if (Grid.Element[num].id == id)
+				{
+					return false;
+				}
+				if (Grid.Element[num].id == offgass)
+				{
+					flag = true;
+					if (Grid.Mass[num] < this.info.maxDestinationMass)
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return flag;
+	}
+
 	public void Sim200ms(float dt)
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
@@ -120,7 +156,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 						num7 = (int)((float)this.info.diseaseCount * num8);
 					}
 					float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - num2);
-					if (num9 <= 0f)
+					if (num9 <= 0f || this.SimMightOffcellOverpressure(num, element.id))
 					{
 						this.RefreshStatusItem(Sublimates.EmitState.BlockedOnPressure);
 						return;
@@ -146,7 +182,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 			else if (this.sublimatedMass > 0f)
 			{
 				float num10 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - num2);
-				if (num10 > 0f)
+				if (num10 > 0f && !this.SimMightOffcellOverpressure(num, element.id))
 				{
 					this.Emit(num, num10, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
 					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num10);

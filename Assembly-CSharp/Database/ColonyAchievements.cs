@@ -350,6 +350,34 @@ namespace Database
 				Action<KMonoBehaviour> action9 = null;
 				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
 				this.RunAReactor = base.Add(new ColonyAchievement(text65, text66, text67, text68, flag9, list9, text69, text70, text71, text72, action9, default(EventReference), "thats_rad", array, "EXPANSION1_ID", null));
+				string text73 = "EfficientData";
+				string text74 = "EFFICIENT_DATAMINING";
+				string text75 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.DATA_DRIVEN;
+				string text76 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.DATA_DRIVEN_DESCRIPTION;
+				bool flag10 = false;
+				List<ColonyAchievementRequirement> list10 = new List<ColonyAchievementRequirement>();
+				list10.Add(new EfficientDataMiningCheck());
+				string text77 = "";
+				string text78 = "";
+				string text79 = "";
+				string text80 = "";
+				Action<KMonoBehaviour> action10 = null;
+				array = DlcManager.DLC3;
+				this.EfficientData = base.Add(new ColonyAchievement(text73, text74, text75, text76, flag10, list10, text77, text78, text79, text80, action10, default(EventReference), "efficient_data_mining", array, "DLC3_ID", null));
+				string text81 = "AllTheCircuits";
+				string text82 = "ALL_THE_CIRCUITS";
+				string text83 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MVB;
+				string text84 = string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MVB_DESCRIPTION, 8);
+				bool flag11 = false;
+				List<ColonyAchievementRequirement> list11 = new List<ColonyAchievementRequirement>();
+				list11.Add(new AllTheCircuitsCompleteCheck());
+				string text85 = "";
+				string text86 = "";
+				string text87 = "";
+				string text88 = "";
+				Action<KMonoBehaviour> action11 = null;
+				array = DlcManager.DLC3;
+				this.AllTheCircuits = base.Add(new ColonyAchievement(text81, text82, text83, text84, flag11, list11, text85, text86, text87, text88, action11, default(EventReference), "all_the_circuits", array, "DLC3_ID", null));
 			}
 		}
 
@@ -444,5 +472,9 @@ namespace Database
 		public ColonyAchievement RunAReactor;
 
 		public ColonyAchievement ActivateGeothermalPlant;
+
+		public ColonyAchievement EfficientData;
+
+		public ColonyAchievement AllTheCircuits;
 	}
 }

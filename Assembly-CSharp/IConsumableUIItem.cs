@@ -11,4 +11,14 @@ public interface IConsumableUIItem
 	int MinorOrder { get; }
 
 	bool Display { get; }
+
+	string OverrideSpriteName()
+	{
+		return null;
+	}
+
+	bool RevealTest()
+	{
+		return ConsumerManager.instance.isDiscovered(this.ConsumableId.ToTag());
+	}
 }

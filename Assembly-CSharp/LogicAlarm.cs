@@ -70,7 +70,7 @@ public class LogicAlarm : KMonoBehaviour, ISaveLoadable
 				}
 				if (this.zoomOnNotify)
 				{
-					CameraController.Instance.ActiveWorldStarWipe(base.gameObject.GetMyWorldId(), base.transform.GetPosition(), 8f, null);
+					GameUtil.FocusCameraOnWorld(base.gameObject.GetMyWorldId(), base.transform.GetPosition(), 8f, null, true);
 				}
 				this.UpdateVisualState();
 				return;

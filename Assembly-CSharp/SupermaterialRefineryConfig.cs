@@ -145,6 +145,23 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		complexRecipe6.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.VISCOGEL_RECIPE_DESCRIPTION;
 		complexRecipe6.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe6.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
+		if (DlcManager.IsAllContentSubscribed(new string[] { "DLC3_ID", "EXPANSION1_ID" }))
+		{
+			ComplexRecipe.RecipeElement[] array13 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(SimHashes.EnrichedUranium.CreateTag(), 10f)
+			};
+			ComplexRecipe.RecipeElement[] array14 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("SelfChargingElectrobank", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			ComplexRecipe complexRecipe7 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array13, array14), array13, array14, new string[] { "DLC3_ID" });
+			complexRecipe7.time = 80f;
+			complexRecipe7.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SELF_CHARGING_POWERBANK_RECIPE_DESCRIPTION;
+			complexRecipe7.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+			complexRecipe7.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
+			complexRecipe7.requiredTech = Db.Get().TechItems.selfChargingElectrobank.parentTechId;
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -83,6 +83,17 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		DiscoveredResources.Instance.OnDiscover += this.OnDiscover;
+		if (this.storageToFilterTag != Tag.Invalid)
+		{
+			foreach (Storage storage in base.GetComponents<Storage>())
+			{
+				if (storage.storageID == this.storageToFilterTag)
+				{
+					this.storage = storage;
+					break;
+				}
+			}
+		}
 		if (this.autoSelectStoredOnLoad && this.storage != null)
 		{
 			HashSet<Tag> hashSet = new HashSet<Tag>(this.acceptedTagSet);
@@ -141,6 +152,11 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 				this.UpdateFilters(component.GetTags());
 			}
 		}
+	}
+
+	public Storage GetFilterStorage()
+	{
+		return this.storage;
 	}
 
 	public HashSet<Tag> GetTags()
@@ -241,12 +257,17 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	private void RefreshTint()
 	{
 		bool flag = this.acceptedTagSet != null && this.acceptedTagSet.Count != 0;
-		base.GetComponent<KBatchedAnimController>().TintColour = (flag ? this.filterTint : this.noFilterTint);
+		if (this.tintOnNoFiltersSet)
+		{
+			base.GetComponent<KBatchedAnimController>().TintColour = (flag ? this.filterTint : this.noFilterTint);
+		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
 	}
 
 	[MyCmpReq]
 	private Storage storage;
+
+	public Tag storageToFilterTag = Tag.Invalid;
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
@@ -274,6 +295,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	public string allResourceFilterLabelString = UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTON;
 
 	public bool filterAllStoragesOnBuilding;
+
+	public bool tintOnNoFiltersSet = true;
 
 	public TreeFilterable.UISideScreenHeight uiHeight = TreeFilterable.UISideScreenHeight.Tall;
 

@@ -84,35 +84,35 @@ public class ModifierSet : ScriptableObject
 		Effect effect8 = new Effect("GunkHungover", DUPLICANTS.MODIFIERS.GUNKHUNGOVER.NAME, DUPLICANTS.MODIFIERS.GUNKHUNGOVER.TOOLTIP, 600f, true, false, true, null, -1f, 0f, null, "");
 		effect8.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.033333335f, DUPLICANTS.MODIFIERS.GUNKHUNGOVER.NAME, false, false, true));
 		this.effects.Add(effect8);
-		Effect effect9 = new Effect("NoLubrication", DUPLICANTS.MODIFIERS.NOLUBRICATION.NAME, DUPLICANTS.MODIFIERS.NOLUBRICATION.TOOLTIP, 0f, true, true, true, null, -1f, 0f, null, "");
-		effect9.Add(new AttributeModifier(Db.Get().Attributes.Athletics.Id, -5f, DUPLICANTS.MODIFIERS.NOLUBRICATION.NAME, false, false, true));
+		Effect effect9 = new Effect("NoLubricationMinor", DUPLICANTS.MODIFIERS.NOLUBRICATIONMINOR.NAME, DUPLICANTS.MODIFIERS.NOLUBRICATIONMINOR.TOOLTIP, 0f, true, true, true, null, -1f, 0f, null, "");
+		effect9.Add(new AttributeModifier(Db.Get().Attributes.Athletics.Id, -4f, DUPLICANTS.MODIFIERS.NOLUBRICATIONMINOR.NAME, false, false, true));
+		effect9.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.025f, DUPLICANTS.MODIFIERS.NOLUBRICATIONMINOR.NAME, false, false, true));
 		this.effects.Add(effect9);
-		Effect effect10 = new Effect("BionicOffline", DUPLICANTS.MODIFIERS.BIONICOFFLINE.NAME, DUPLICANTS.MODIFIERS.BIONICOFFLINE.TOOLTIP, 0f, false, true, true, null, -1f, 0f, null, "");
-		effect10.Add(new AttributeModifier(Db.Get().Amounts.BionicOil.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.BIONICOFFLINE.NAME, false, false, true));
+		Effect effect10 = new Effect("NoLubricationMajor", DUPLICANTS.MODIFIERS.NOLUBRICATIONMAJOR.NAME, DUPLICANTS.MODIFIERS.NOLUBRICATIONMAJOR.TOOLTIP, 0f, true, true, true, null, -1f, 0f, null, "");
+		effect10.Add(new AttributeModifier(Db.Get().Attributes.Athletics.Id, -8f, DUPLICANTS.MODIFIERS.NOLUBRICATIONMAJOR.NAME, false, false, true));
+		effect10.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.05f, DUPLICANTS.MODIFIERS.NOLUBRICATIONMINOR.NAME, false, false, true));
 		this.effects.Add(effect10);
-		Effect effect11 = new Effect("BionicBatterySaveMode", DUPLICANTS.MODIFIERS.BIONICBATTERYSAVEMODE.NAME, DUPLICANTS.MODIFIERS.BIONICBATTERYSAVEMODE.TOOLTIP, 0f, true, false, false, null, -1f, 0f, null, "");
-		effect11.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.MODIFIERS.BIONICBATTERYSAVEMODE.NAME, false, false, true));
+		Effect effect11 = new Effect("BionicOffline", DUPLICANTS.MODIFIERS.BIONICOFFLINE.NAME, DUPLICANTS.MODIFIERS.BIONICOFFLINE.TOOLTIP, 0f, false, true, true, null, -1f, 0f, null, "");
+		effect11.Add(new AttributeModifier(Db.Get().Amounts.BionicOil.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.BIONICOFFLINE.NAME, false, false, true));
 		this.effects.Add(effect11);
-		Effect effect12 = new Effect("WaterDamage", DUPLICANTS.MODIFIERS.WATERDAMAGE.NAME, DUPLICANTS.MODIFIERS.WATERDAMAGE.TOOLTIP, 120f, true, true, true, null, -1f, 0f, null, "");
-		effect12.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.MODIFIERS.WATERDAMAGE.NAME, false, false, true));
+		Effect effect12 = new Effect("BionicBedTimeEffect", DUPLICANTS.MODIFIERS.BIONICBEDTIMEEFFECT.NAME, DUPLICANTS.MODIFIERS.BIONICBEDTIMEEFFECT.TOOLTIP, 0f, false, false, false, null, -1f, 0f, null, "");
+		effect12.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.MODIFIERS.BIONICBEDTIMEEFFECT.NAME, false, false, true));
 		this.effects.Add(effect12);
-		Effect effect13 = new Effect("Slipped", DUPLICANTS.MODIFIERS.SLIPPED.NAME, DUPLICANTS.MODIFIERS.SLIPPED.TOOLTIP, 100f, false, true, true, null, -1f, 0f, null, "");
-		effect13.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.MODIFIERS.SLIPPED.NAME, false, false, true));
+		Effect effect13 = new Effect("BionicWaterStress", DUPLICANTS.MODIFIERS.BIONICWATERSTRESS.NAME, DUPLICANTS.MODIFIERS.BIONICWATERSTRESS.TOOLTIP, 0f, true, true, true, null, -1f, 0f, null, "");
+		effect13.Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.33333334f, DUPLICANTS.MODIFIERS.BIONICWATERSTRESS.NAME, false, false, true));
 		this.effects.Add(effect13);
-		foreach (Effect effect14 in BionicOilMonitor.LUBRICANT_TYPE_EFFECT.Values)
+		Effect effect14 = new Effect("RecentlySlippedTracker", DUPLICANTS.MODIFIERS.SLIPPED.NAME, DUPLICANTS.MODIFIERS.SLIPPED.TOOLTIP, 100f, false, false, true, null, -1f, 0f, null, "");
+		this.effects.Add(effect14);
+		foreach (Effect effect15 in BionicOilMonitor.LUBRICANT_TYPE_EFFECT.Values)
 		{
-			this.effects.Add(effect14);
+			this.effects.Add(effect15);
 		}
 		this.CreateRoomEffects();
 		this.CreateCritteEffects();
-		this.CreateBionicBoosterEffects();
 	}
 
 	private void CreateRoomEffects()
 	{
-		Effect effect = new Effect("RoomBionicUpkeep", DUPLICANTS.MODIFIERS.ROOMBIONICUPKEEP.NAME, DUPLICANTS.MODIFIERS.ROOMBIONICUPKEEP.TOOLTIP, 120f, true, true, false, null, -1f, 0f, null, "");
-		effect.Add(new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, 2f, DUPLICANTS.MODIFIERS.ROOMBIONICUPKEEP.NAME, false, false, true));
-		this.effects.Add(effect);
 	}
 
 	public void CreateCritteEffects()
@@ -151,30 +151,6 @@ public class ModifierSet : ScriptableObject
 		Effect effect11 = new Effect("GoldBellyWellFed", global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.TOOLTIP, 1f, true, true, false, null, -1f, 0f, null, "");
 		effect11.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, 100f / (GoldBellyConfig.SCALE_GROWTH_TIME_IN_CYCLES * 600f), global::STRINGS.CREATURES.MODIFIERS.GOLDBELLYWELLFED.NAME, false, false, true));
 		this.effects.Add(effect11);
-	}
-
-	public void CreateBionicBoosterEffects()
-	{
-		this.CreateAndAddBionicBoosterEffect("BionicPilotingBoost", "SpaceNavigation", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicConstructionBoost", "Construction", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicExcavationBoost", "Digging", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicMachineryBoost", "Machinery", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicAthleticsBoost", "Athletics", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicScienceBoost", "Learning", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicCookingBoost", "Cooking", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicMedicineBoost", "Caring", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicStrengthBoost", "Strength", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicCreativityBoost", "Art", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicAgricultureBoost", "Botanist", 10f);
-		this.CreateAndAddBionicBoosterEffect("BionicHusbandryBoost", "Ranching", 10f);
-	}
-
-	public Effect CreateAndAddBionicBoosterEffect(string name, string attributeID, float value)
-	{
-		Effect effect = new Effect(name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + name.ToUpper() + ".NAME"), Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + name.ToUpper() + ".TOOLTIP"), 0f, true, true, false, null, -1f, 0f, null, "");
-		effect.Add(new AttributeModifier(attributeID, value, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + name.ToUpper() + ".NAME"), false, false, true));
-		this.effects.Add(effect);
-		return effect;
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)

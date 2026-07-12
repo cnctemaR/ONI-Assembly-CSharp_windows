@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/RemoteWorkDock")]
@@ -61,9 +62,24 @@ public class RemoteWorkerDock : KMonoBehaviour
 		this.providers.Remove(provider);
 	}
 
+	private static string GenerateName()
+	{
+		string text = "";
+		for (int i = 0; i < 3; i++)
+		{
+			text += "011223345789"[global::UnityEngine.Random.Range(0, "011223345789".Length)].ToString();
+		}
+		return BUILDINGS.PREFABS.REMOTEWORKERDOCK.NAME_FMT.Replace("{ID}", text);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		UserNameable component = base.GetComponent<UserNameable>();
+		if (component.savedName == "" || component.savedName == BUILDINGS.PREFABS.REMOTEWORKERDOCK.NAME)
+		{
+			component.SetName(RemoteWorkerDock.GenerateName());
+		}
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		Components.RemoteWorkerDocks.Add(this.GetMyWorldId(), this);
 		this.add_provider_binding = new Action<IRemoteDockWorkTarget>(this.considerProvider);
@@ -110,7 +126,7 @@ public class RemoteWorkerDock : KMonoBehaviour
 		{
 			return;
 		}
-		ChoreConsumerState consumerState = this.remoteWorker.GetComponent<ChoreConsumer>().consumerState;
+		ChoreConsumerState consumerState = this.remoteWorker.ConsumerState;
 		consumerState.resume = duplicant_state.resume;
 		foreach (IRemoteDockWorkTarget remoteDockWorkTarget in this.providers)
 		{
@@ -270,19 +286,25 @@ public class RemoteWorkerDock : KMonoBehaviour
 	private Operational operational;
 
 	[MyCmpAdd]
-	private EnterableDock enter_;
+	private UserNameable nameable;
 
 	[MyCmpAdd]
-	private ExitableDock exit_;
+	private RemoteWorkerDock.NewWorker new_worker_;
 
 	[MyCmpAdd]
-	private WorkerRecharger recharger_;
+	private RemoteWorkerDock.EnterableDock enter_;
 
 	[MyCmpAdd]
-	private WorkerGunkRemover gunk_remover_;
+	private RemoteWorkerDock.ExitableDock exit_;
 
 	[MyCmpAdd]
-	private WorkerOilRefiller oil_refiller_;
+	private RemoteWorkerDock.WorkerRecharger recharger_;
+
+	[MyCmpAdd]
+	private RemoteWorkerDock.WorkerGunkRemover gunk_remover_;
+
+	[MyCmpAdd]
+	private RemoteWorkerDock.WorkerOilRefiller oil_refiller_;
 
 	private Guid status_item_handle;
 
@@ -295,4 +317,250 @@ public class RemoteWorkerDock : KMonoBehaviour
 	private Action<IRemoteDockWorkTarget> remove_provider_binding;
 
 	private bool activeFetch;
+
+	public class NewWorker : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.workAnims = RemoteWorkerDock.NewWorker.WORK_ANIMS;
+			this.workingPstComplete = null;
+			this.workingPstFailed = null;
+			this.workAnimPlayMode = KAnim.PlayMode.Once;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.resetProgressOnStop = true;
+			KAnim.Anim anim = Assets.GetAnim(RemoteWorkerConfig.DOCK_ANIM_OVERRIDES).GetData().GetAnim("new_worker");
+			base.SetWorkTime((float)anim.numFrames / anim.frameRate);
+		}
+
+		protected override void OnStartWork(WorkerBase worker)
+		{
+			base.OnStartWork(worker);
+		}
+
+		protected override void OnCompleteWork(WorkerBase worker)
+		{
+			base.OnCompleteWork(worker);
+			worker.GetComponent<RemoteWorkerSM>().Docked = true;
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "new_worker" };
+	}
+
+	public class EnterableDock : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.workerStatusItem = Db.Get().DuplicantStatusItems.EnteringDock;
+			this.workAnims = RemoteWorkerDock.EnterableDock.WORK_ANIMS;
+			this.workingPstComplete = null;
+			this.workingPstFailed = null;
+			this.workAnimPlayMode = KAnim.PlayMode.Once;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.resetProgressOnStop = true;
+			KAnim.Anim anim = Assets.GetAnim(RemoteWorkerConfig.DOCK_ANIM_OVERRIDES).GetData().GetAnim("enter_dock");
+			base.SetWorkTime((float)anim.numFrames / anim.frameRate);
+		}
+
+		protected override void OnCompleteWork(WorkerBase worker)
+		{
+			worker.GetComponent<RemoteWorkerSM>().Docked = true;
+			base.OnCompleteWork(worker);
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "enter_dock" };
+	}
+
+	public class ExitableDock : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.workAnims = RemoteWorkerDock.ExitableDock.WORK_ANIMS;
+			this.workingPstComplete = null;
+			this.workingPstFailed = null;
+			this.workAnimPlayMode = KAnim.PlayMode.Once;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.resetProgressOnStop = true;
+			KAnim.Anim anim = Assets.GetAnim(RemoteWorkerConfig.DOCK_ANIM_OVERRIDES).GetData().GetAnim("exit_dock");
+			base.SetWorkTime((float)anim.numFrames / anim.frameRate);
+		}
+
+		protected override void OnCompleteWork(WorkerBase worker)
+		{
+			base.OnCompleteWork(worker);
+			worker.GetComponent<RemoteWorkerSM>().Docked = false;
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "exit_dock" };
+	}
+
+	public class WorkerRecharger : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.workAnims = RemoteWorkerDock.WorkerRecharger.WORK_ANIMS;
+			this.workingPstComplete = RemoteWorkerDock.WorkerRecharger.WORK_PST_ANIM;
+			this.workingPstFailed = RemoteWorkerDock.WorkerRecharger.WORK_PST_ANIM;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.workerStatusItem = Db.Get().DuplicantStatusItems.RemoteWorkerRecharging;
+			base.SetWorkTime(float.PositiveInfinity);
+		}
+
+		protected override void OnStartWork(WorkerBase worker)
+		{
+			base.OnStartWork(worker);
+			RemoteWorkerCapacitor component = worker.GetComponent<RemoteWorkerCapacitor>();
+			this.progress = ((component != null) ? component.ChargeRatio : 0f);
+			if (this.progressBar != null)
+			{
+				this.progressBar.SetUpdateFunc(() => this.progress);
+			}
+		}
+
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
+		{
+			base.OnWorkTick(worker, dt);
+			RemoteWorkerCapacitor component = worker.GetComponent<RemoteWorkerCapacitor>();
+			if (component != null)
+			{
+				this.progress = component.ChargeRatio;
+				return component.ApplyDeltaEnergy(7.5f * dt) == 0f;
+			}
+			return true;
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "recharge_pre", "recharge_loop" };
+
+		private static readonly HashedString[] WORK_PST_ANIM = new HashedString[] { "recharge_pst" };
+
+		private float progress;
+	}
+
+	public class WorkerGunkRemover : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_remote_work_dock_kanim") };
+			this.workAnims = RemoteWorkerDock.WorkerGunkRemover.WORK_ANIMS;
+			this.workingPstComplete = RemoteWorkerDock.WorkerGunkRemover.WORK_PST_ANIM;
+			this.workingPstFailed = RemoteWorkerDock.WorkerGunkRemover.WORK_PST_ANIM;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.workerStatusItem = Db.Get().DuplicantStatusItems.RemoteWorkerDraining;
+			base.SetWorkTime(float.PositiveInfinity);
+		}
+
+		protected override void OnStartWork(WorkerBase worker)
+		{
+			base.OnStartWork(worker);
+			Storage component = worker.GetComponent<Storage>();
+			if (component != null)
+			{
+				this.progress = 1f - component.GetMassAvailable(SimHashes.LiquidGunk) / 20.000002f;
+			}
+			if (this.progressBar != null)
+			{
+				this.progressBar.SetUpdateFunc(() => this.progress);
+			}
+		}
+
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
+		{
+			base.OnWorkTick(worker, dt);
+			Storage component = worker.GetComponent<Storage>();
+			if (component != null)
+			{
+				float massAvailable = component.GetMassAvailable(SimHashes.LiquidGunk);
+				float num = Math.Min(massAvailable, 3.3333337f * dt);
+				this.progress = 1f - massAvailable / 20.000002f;
+				if (num > 0f)
+				{
+					component.TransferMass(this.storage, SimHashes.LiquidGunk.CreateTag(), num, false, false, true);
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "drain_gunk_pre", "drain_gunk_loop" };
+
+		private static readonly HashedString[] WORK_PST_ANIM = new HashedString[] { "drain_gunk_pst" };
+
+		[MyCmpGet]
+		private Storage storage;
+
+		private float progress;
+	}
+
+	public class WorkerOilRefiller : Workable
+	{
+		protected override void OnPrefabInit()
+		{
+			base.OnPrefabInit();
+			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_remote_work_dock_kanim") };
+			this.workAnims = RemoteWorkerDock.WorkerOilRefiller.WORK_ANIMS;
+			this.workingPstComplete = RemoteWorkerDock.WorkerOilRefiller.WORK_PST_ANIM;
+			this.workingPstFailed = RemoteWorkerDock.WorkerOilRefiller.WORK_PST_ANIM;
+			this.synchronizeAnims = true;
+			this.triggerWorkReactions = false;
+			this.workLayer = Grid.SceneLayer.BuildingUse;
+			this.workerStatusItem = Db.Get().DuplicantStatusItems.RemoteWorkerOiling;
+			base.SetWorkTime(float.PositiveInfinity);
+		}
+
+		protected override void OnStartWork(WorkerBase worker)
+		{
+			base.OnStartWork(worker);
+			Storage component = worker.GetComponent<Storage>();
+			if (component != null)
+			{
+				float massAvailable = component.GetMassAvailable(GameTags.LubricatingOil);
+				this.progress = massAvailable / 20.000002f;
+			}
+			if (this.progressBar != null)
+			{
+				this.progressBar.SetUpdateFunc(() => this.progress);
+			}
+		}
+
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
+		{
+			base.OnWorkTick(worker, dt);
+			Storage component = worker.GetComponent<Storage>();
+			if (component != null)
+			{
+				float massAvailable = component.GetMassAvailable(GameTags.LubricatingOil);
+				float num = Math.Min(20.000002f - massAvailable, 2.5000002f * dt);
+				this.progress = massAvailable / 20.000002f;
+				if (num > 0f)
+				{
+					this.storage.TransferMass(component, GameTags.LubricatingOil, num, false, false, true);
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static readonly HashedString[] WORK_ANIMS = new HashedString[] { "oil_pre", "oil_loop" };
+
+		private static readonly HashedString[] WORK_PST_ANIM = new HashedString[] { "oil_pst" };
+
+		[MyCmpGet]
+		private Storage storage;
+
+		private float progress;
+	}
 }

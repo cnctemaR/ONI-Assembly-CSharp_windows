@@ -29,6 +29,11 @@ public class StandardWorker : WorkerBase
 		return base.GetComponent<KBatchedAnimController>();
 	}
 
+	public override Attributes GetAttributes()
+	{
+		return base.gameObject.GetAttributes();
+	}
+
 	public override AttributeConverterInstance GetAttributeConverter(string id)
 	{
 		return base.GetComponent<AttributeConverters>().GetConverter(id);
@@ -66,6 +71,15 @@ public class StandardWorker : WorkerBase
 			return null;
 		}
 		return this.fetchOffsets;
+	}
+
+	public override CellOffset[] GetDeliveryCellOffsets()
+	{
+		if (this.deliveryOffsets.Length == 0)
+		{
+			return null;
+		}
+		return this.deliveryOffsets;
 	}
 
 	protected override void OnPrefabInit()
@@ -260,6 +274,10 @@ public class StandardWorker : WorkerBase
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, this.previousStatusItem.item, this.previousStatusItem.data);
 		}
+		else
+		{
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
+		}
 		if (target_workable != null)
 		{
 			target_workable.Unsubscribe(this.onWorkChoreDisabledHandle);
@@ -291,7 +309,11 @@ public class StandardWorker : WorkerBase
 		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 		if (component != null && component.choreDriver != null)
 		{
-			component.choreDriver.GetCurrentChore().Fail((text != null) ? text : "WorkChoreDisabled");
+			Chore currentChore = component.choreDriver.GetCurrentChore();
+			if (currentChore != null)
+			{
+				currentChore.Fail((text != null) ? text : "WorkChoreDisabled");
+			}
 		}
 	}
 
@@ -338,6 +360,7 @@ public class StandardWorker : WorkerBase
 		this.startWorkInfo = start_work_info;
 		Game.Instance.StartedWork();
 		Workable workable = this.GetWorkable();
+		this.surpressForceSyncOnUpdate = false;
 		if (this.state != WorkerBase.State.Idle)
 		{
 			string text = "";
@@ -376,6 +399,7 @@ public class StandardWorker : WorkerBase
 				{
 					this.AttachOverrideAnims(component);
 				}
+				this.surpressForceSyncOnUpdate = workable.surpressWorkerForceSync;
 				HashedString[] workAnims = workable.GetWorkAnims(this);
 				KAnim.PlayMode workAnimPlayMode = workable.GetWorkAnimPlayMode();
 				Vector3 workOffset = workable.GetWorkOffset();
@@ -429,7 +453,7 @@ public class StandardWorker : WorkerBase
 
 	private void Update()
 	{
-		if (this.state == WorkerBase.State.Working)
+		if (this.state == WorkerBase.State.Working && !this.surpressForceSyncOnUpdate)
 		{
 			this.ForceSyncAnims();
 		}
@@ -580,6 +604,8 @@ public class StandardWorker : WorkerBase
 
 	private bool successFullyCompleted;
 
+	private bool surpressForceSyncOnUpdate;
+
 	private Vector3 workAnimOffset = Vector3.zero;
 
 	public bool usesMultiTool = true;
@@ -587,6 +613,8 @@ public class StandardWorker : WorkerBase
 	public bool isFetchDrone;
 
 	public CellOffset[] fetchOffsets = new CellOffset[0];
+
+	public CellOffset[] deliveryOffsets = new CellOffset[0];
 
 	private static readonly EventSystem.IntraObjectHandler<StandardWorker> OnChoreInterruptDelegate = new EventSystem.IntraObjectHandler<StandardWorker>(delegate(StandardWorker component, object data)
 	{

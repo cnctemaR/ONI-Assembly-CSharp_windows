@@ -349,12 +349,8 @@ public class SandboxToolParameterMenu : KScreen
 		list.Add(searchFilter10);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter11 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS, delegate(object entity)
 		{
-			if ((entity as KPrefabID).gameObject == null)
-			{
-				return false;
-			}
-			GameObject gameObject4 = (entity as KPrefabID).gameObject;
-			return gameObject4 != null && (gameObject4.HasTag(GameTags.IndustrialIngredient) || gameObject4.HasTag(GameTags.IndustrialProduct) || gameObject4.HasTag(GameTags.Medicine) || gameObject4.HasTag(GameTags.MedicalSupplies) || gameObject4.HasTag(GameTags.ChargedPortableBattery));
+			KPrefabID kprefabID7 = entity as KPrefabID;
+			return !(kprefabID7 == null) && !(kprefabID7.gameObject == null) && !kprefabID7.HasTag(GameTags.DeprecatedContent) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(kprefabID7.requiredDlcIds) && (kprefabID7.HasTag(GameTags.IndustrialIngredient) || kprefabID7.HasTag(GameTags.IndustrialProduct) || kprefabID7.HasTag(GameTags.Medicine) || kprefabID7.HasTag(GameTags.MedicalSupplies) || kprefabID7.HasTag(GameTags.ChargedPortableBattery));
 		}, null, Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false));
 		list.Add(searchFilter11);
 		List<KPrefabID> list3 = new List<KPrefabID>();

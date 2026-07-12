@@ -62,7 +62,7 @@ public class PowerControlStationConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
 			component.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
-			tinkerstation.SetWorkTime(160f);
+			tinkerstation.toolProductionTime = 160f;
 		};
 	}
 

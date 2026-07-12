@@ -44,7 +44,7 @@ public class DevLifeSupport : KMonoBehaviour, ISim200ms
 	[MyCmpReq]
 	private ElementConsumer elementConsumer;
 
-	public float targetTemperature = 303.15f;
+	public float targetTemperature = 294.15f;
 
 	public int effectRadius = 7;
 

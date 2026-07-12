@@ -279,7 +279,9 @@ public class Tinkerable : Workable
 	{
 		if (this.roomTracker.IsInCorrectRoom())
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo = (this.userMenuAllowed ? new KIconButtonMenu.ButtonInfo("action_switch_toggle", UI.USERMENUACTIONS.TINKER.DISALLOW, new global::System.Action(this.OnClickToggleTinker), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.TINKER.TOOLTIP_DISALLOW, true) : new KIconButtonMenu.ButtonInfo("action_switch_toggle", UI.USERMENUACTIONS.TINKER.ALLOW, new global::System.Action(this.OnClickToggleTinker), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.TINKER.TOOLTIP_ALLOW, true));
+			string name = Db.Get().effects.Get(this.addedEffect).Name;
+			string properName = this.GetProperName();
+			KIconButtonMenu.ButtonInfo buttonInfo = (this.userMenuAllowed ? new KIconButtonMenu.ButtonInfo("action_switch_toggle", UI.USERMENUACTIONS.TINKER.DISALLOW, new global::System.Action(this.OnClickToggleTinker), global::Action.NumActions, null, null, null, string.Format(UI.USERMENUACTIONS.TINKER.TOOLTIP_DISALLOW, name, properName), true) : new KIconButtonMenu.ButtonInfo("action_switch_toggle", UI.USERMENUACTIONS.TINKER.ALLOW, new global::System.Action(this.OnClickToggleTinker), global::Action.NumActions, null, null, null, string.Format(UI.USERMENUACTIONS.TINKER.TOOLTIP_ALLOW, name, properName), true));
 			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}

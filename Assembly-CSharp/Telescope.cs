@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Database;
+using Klei;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -82,8 +83,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 			});
 			if (component != null)
 			{
-				this.workerGasProvider = component.GetGasProvider();
-				component.SetGasProvider(this);
+				component.AddGasProvider(this);
 			}
 			worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 			component2.AddTag(GameTags.Shaded, false);
@@ -96,7 +96,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		}
 		if (component != null)
 		{
-			component.SetGasProvider(this.workerGasProvider);
+			component.RemoveGasProvider(this);
 		}
 		worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 		base.ShowProgressBar(false);
@@ -177,7 +177,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return false;
 	}
 
-	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 	{
 		if (this.storage.items.Count <= 0)
 		{
@@ -188,9 +188,17 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		{
 			return false;
 		}
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		bool flag = component.Mass >= amount;
-		component.Mass = Mathf.Max(0f, component.Mass - amount);
+		float mass = gameObject.GetComponent<PrimaryElement>().Mass;
+		float num = 0f;
+		float num2 = 0f;
+		SimHashes simHashes = SimHashes.Vacuum;
+		SimUtil.DiseaseInfo diseaseInfo;
+		this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2, out simHashes);
+		bool flag = num >= amount;
+		if (onConsumptionCompletedCallback != null)
+		{
+			onConsumptionCompletedCallback(simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
+		}
 		return flag;
 	}
 
@@ -204,7 +212,20 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return primaryElement == null || primaryElement.Mass == 0f;
 	}
 
-	private OxygenBreather.IGasProvider workerGasProvider;
+	public bool HasOxygen()
+	{
+		if (this.storage.items.Count <= 0)
+		{
+			return true;
+		}
+		PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Breathable, 0f);
+		return primaryElement != null && primaryElement.Mass > 0f;
+	}
+
+	public bool IsBlocked()
+	{
+		return false;
+	}
 
 	private Operational operational;
 

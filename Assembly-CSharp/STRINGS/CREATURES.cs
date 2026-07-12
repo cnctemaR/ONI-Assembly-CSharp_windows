@@ -4614,7 +4614,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Regal Meal";
 
-				public static LocString TOOLTIP = "This critter's recent meal is boosting their crest growth";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's recent meal is boosting their ",
+					UI.PRE_KEYWORD,
+					"Regal Bammoth Crest",
+					UI.PST_KEYWORD,
+					" growth"
+				});
 			}
 
 			public class CRITTERCONDOINTERACTEFFECT

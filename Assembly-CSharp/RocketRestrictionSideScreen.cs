@@ -21,6 +21,10 @@ public class RocketRestrictionSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject new_target)
 	{
+		if (this.controlStation != null || this.controlStationLogicSubHandle != -1)
+		{
+			this.ClearTarget();
+		}
 		this.controlStation = new_target.GetComponent<RocketControlStation>();
 		this.controlStationLogicSubHandle = this.controlStation.Subscribe(1861523068, new Action<object>(this.UpdateButtonStates));
 		this.UpdateButtonStates(null);

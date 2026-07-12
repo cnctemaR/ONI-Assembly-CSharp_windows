@@ -13,9 +13,9 @@ public class BionicUpgrade_SM<SMType, StateMachineInstanceType> : GameStateMachi
 		return smi.IsOnline;
 	}
 
-	public static bool IsInBatterySaveMode(BionicUpgrade_SM<SMType, StateMachineInstanceType>.BaseInstance smi)
+	public static bool IsInBedTimeChore(BionicUpgrade_SM<SMType, StateMachineInstanceType>.BaseInstance smi)
 	{
-		return smi.IsInBatterySavingMode;
+		return smi.IsInBedTimeChore;
 	}
 
 	public GameStateMachine<SMType, StateMachineInstanceType, IStateMachineTarget, BionicUpgrade_SM<SMType, StateMachineInstanceType>.Def>.State Active;
@@ -29,6 +29,11 @@ public class BionicUpgrade_SM<SMType, StateMachineInstanceType> : GameStateMachi
 			this.UpgradeID = upgradeID;
 		}
 
+		public virtual string GetDescription()
+		{
+			return "";
+		}
+
 		public string UpgradeID;
 
 		public Func<StateMachine.Instance, StateMachine.Instance>[] StateMachinesWhenActive;
@@ -36,11 +41,11 @@ public class BionicUpgrade_SM<SMType, StateMachineInstanceType> : GameStateMachi
 
 	public abstract class BaseInstance : GameStateMachine<SMType, StateMachineInstanceType, IStateMachineTarget, BionicUpgrade_SM<SMType, StateMachineInstanceType>.Def>.GameInstance, BionicUpgradeComponent.IWattageController
 	{
-		public bool IsInBatterySavingMode
+		public bool IsInBedTimeChore
 		{
 			get
 			{
-				return this.batteryMonitor != null && this.batteryMonitor.IsBatterySaveModeActive;
+				return this.bedTimeMonitor != null && this.bedTimeMonitor.IsBedTimeChoreRunning;
 			}
 		}
 
@@ -64,8 +69,8 @@ public class BionicUpgrade_SM<SMType, StateMachineInstanceType> : GameStateMachi
 			: base(master, def)
 		{
 			this.batteryMonitor = base.gameObject.GetSMI<BionicBatteryMonitor.Instance>();
+			this.bedTimeMonitor = base.gameObject.GetSMI<BionicBedTimeMonitor.Instance>();
 			this.RegisterMonitorToUpgradeComponent();
-			base.Subscribe(-426516281, new Action<object>(this.OnBatterySavingModeChanged));
 		}
 
 		private void RegisterMonitorToUpgradeComponent()
@@ -97,30 +102,13 @@ public class BionicUpgrade_SM<SMType, StateMachineInstanceType> : GameStateMachi
 
 		public abstract string GetCurrentWattageCostName();
 
-		protected virtual void OnEnteringBatterySavingMode()
-		{
-		}
-
-		protected virtual void OnExitingBatterySavingMode()
-		{
-		}
-
-		private void OnBatterySavingModeChanged(object o)
-		{
-			if ((bool)o)
-			{
-				this.OnEnteringBatterySavingMode();
-				return;
-			}
-			this.OnExitingBatterySavingMode();
-		}
-
 		protected override void OnCleanUp()
 		{
 			this.UnregisterMonitorToUpgradeComponent();
-			base.Unsubscribe(-426516281, new Action<object>(this.OnBatterySavingModeChanged));
 			base.OnCleanUp();
 		}
+
+		protected BionicBedTimeMonitor.Instance bedTimeMonitor;
 
 		protected BionicBatteryMonitor.Instance batteryMonitor;
 

@@ -136,7 +136,7 @@ public class WarpPortal : Workable
 		yield return SequenceUtil.WaitForEndOfFrame;
 		int myWorldId = base.worker.GetMyWorldId();
 		int myWorldId2 = receiver.GetMyWorldId();
-		CameraController.Instance.ActiveWorldStarWipe(myWorldId2, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null);
+		GameUtil.FocusCameraOnWorld(myWorldId2, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null, true);
 		WorkerBase worker = base.worker;
 		worker.StopWork();
 		receiver.ReceiveWarpedDuplicant(worker);

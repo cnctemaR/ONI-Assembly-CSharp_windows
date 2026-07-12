@@ -13,6 +13,7 @@ public class BreathabilityDiagnostic : ColonyDiagnostic
 		this.icon = "overlay_oxygen";
 		base.AddCriterion("CheckSuffocation", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.CRITERIA.CHECKSUFFOCATION, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckSuffocation)));
 		base.AddCriterion("CheckLowBreathability", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.CRITERIA.CHECKLOWBREATHABILITY, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckLowBreathability)));
+		base.AddCriterion("CheckBionicOxygen", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.CRITERIA.CHECKLOWBIONICOXYGEN, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckLowBionicOxygen)));
 	}
 
 	private ColonyDiagnostic.DiagnosticResult CheckSuffocation()
@@ -46,6 +47,30 @@ public class BreathabilityDiagnostic : ColonyDiagnostic
 		if (Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Count != 0 && this.tracker.GetAverageValue(this.trackerSampleCountSeconds) < 60f)
 		{
 			return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Concern, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.POOR, null);
+		}
+		return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.NORMAL, null);
+	}
+
+	private ColonyDiagnostic.DiagnosticResult CheckLowBionicOxygen()
+	{
+		List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems(base.worldID, false);
+		if (worldItems.Count != 0)
+		{
+			foreach (MinionIdentity minionIdentity in worldItems)
+			{
+				if (minionIdentity.HasTag(GameTags.Minions.Models.Bionic))
+				{
+					BionicOxygenTankMonitor.Instance smi = minionIdentity.GetSMI<BionicOxygenTankMonitor.Instance>();
+					if (smi.OxygenPercentage <= 0f)
+					{
+						return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.DuplicantThreatening, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.NEAR_OR_EMPTY_BIONIC_TANKS, new global::Tuple<Vector3, GameObject>(minionIdentity.transform.position, minionIdentity.gameObject));
+					}
+					if (smi.OxygenPercentage < 0.5f)
+					{
+						return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Concern, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.POOR_BIONIC_TANKS, new global::Tuple<Vector3, GameObject>(minionIdentity.transform.position, minionIdentity.gameObject));
+					}
+				}
+			}
 		}
 		return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.NORMAL, null);
 	}

@@ -13,6 +13,7 @@ public class GeothermalControllerConfig : IEntityConfig
 			new GeothermalVent.ElementInfo
 			{
 				isSolid = false,
+				elementHash = SimHashes.Steam,
 				elementIdx = ElementLoader.FindElementByHash(SimHashes.Steam).idx,
 				mass = 100f,
 				temperature = 1102f,
@@ -22,6 +23,7 @@ public class GeothermalControllerConfig : IEntityConfig
 			new GeothermalVent.ElementInfo
 			{
 				isSolid = true,
+				elementHash = SimHashes.Lead,
 				elementIdx = ElementLoader.FindElementByHash(SimHashes.Lead).idx,
 				mass = 144f,
 				temperature = 502f,

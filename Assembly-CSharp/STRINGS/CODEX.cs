@@ -263,7 +263,7 @@ namespace STRINGS
 
 					public static LocString CONTAINER2 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...is it unethical to ask a hungry colony to choose between using edible crops for sustenance or for power production? Of course not.\n\nOur task is to provide as many options for survival as possible, not to dictate which options are morally superior.\n\nThe real question is whether or not the AI guide will be sufficiently advanced to notify them that the choices exist...\n\n...and whether single-use bio power banks that vaporize due to extreme thermal runaway will truly be the difference between a successful colony and an...<i>unsuccessful</i>...one.\n\n[LOG ENDS]\n------------------\n";
 
-					public static LocString CONTAINER3 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...word of our efforts has spread!\n\nThe bioengineers report that some of their creatures' eggs contain phosphorescent albumen that requires only basic processing in order to trigger chemical reactions that produce storable energy. It displays unprecedented biocompatibility with the prosthetics Dr. Gossmann has been developing.\n\nThe Director assigned us a half-dozen new graduates last week. They work the night shift—youth never sleeps! No one has met them yet, but their data is always neatly compiled for us to find in the morning.\n\n[LOG ENDS]\n------------------\n";
+					public static LocString CONTAINER3 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...word of our efforts has spread!\n\nThe bioengineers report that some of their creatures' eggs contain phosphorescent albumen that requires only basic processing in order to trigger chemical reactions that produce storable energy. It displays unprecedented biocompatibility with the prosthetics Dr. Gossmann has been developing.\n\nThe Director assigned us a half-dozen new graduates last week. They work the night shift—this generation never sleeps!\n\nNo one has met them yet, but their data is always neatly compiled for us to find in the morning.\n\nThey seem determined to prioritize the use of metallic and radioactive components rather than plant or animal-based ones.\n\nYouthful idealism, perhaps?\n\nNevertheless, their findings <i>are</i> quite compelling.\n\nI admire their mettle.\n\n[LOG ENDS]\n------------------\n";
 				}
 			}
 
@@ -1355,6 +1355,14 @@ namespace STRINGS
 
 			public static LocString ROLE_PERKS_DESC = "Job Training automatically provides permanent traits and stat increases that are retained even when a Duplicant switches jobs.";
 
+			public static LocString UNLOCK_ROLES_BIONIC = "System Optimizations";
+
+			public static LocString UNLOCK_ROLES_BIONIC_DESC = "Optimizations result from strategically combining and stacking installed bionic boosters.";
+
+			public static LocString ROLE_PERKS_BIONIC = "Booster Installation";
+
+			public static LocString ROLE_PERKS_BIONIC_DESC = "Installing boosters instantly grants bionic Duplicants stat and skill upgrades.";
+
 			public static LocString DIET = "Diet";
 
 			public static LocString PRODUCES = "Excretes";
@@ -1722,7 +1730,7 @@ namespace STRINGS
 
 				public static LocString FLAVOUR = "";
 
-				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Workshop", "BIONIC");
+				public static LocString ROOMSREQUIRING = "";
 			}
 
 			public class GENERATORTYPE
@@ -2840,13 +2848,25 @@ namespace STRINGS
 			}
 		}
 
+		public class BIONICBOOSTER
+		{
+			public static LocString TITLE = "Boosters";
+
+			public static LocString SUBTITLE = "Bionic Systems";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Boosters are programming modules designed to improve and expand Bionic Duplicants' abilities.\n\nBoosters consume a significant amount of processing power during access and implementation. Bionic Duplicants can expand their capacity for booster installation by accumulating skill points.\n\nBoosters can be combined to grant a broader range of skills, as well as to counteract bionic bugs that may exist in their original programming.";
+			}
+		}
+
 		public class CRAB_SHELL
 		{
 			public static LocString TITLE = "Pokeshell Molt";
 
 			public static LocString SUBTITLE = "Critter Byproduct";
 
-			public static LocString CONTAINER1 = "An exoskeleton discarded by an aquatic critter.";
+			public static LocString CONTAINER1 = "An exoskeleton discarded by an aquatic critter.\n\n";
 
 			public class BABY_CRAB_SHELL
 			{
@@ -2890,18 +2910,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Concat(new string[]
-				{
-					"Power Banks are portable ",
-					UI.FormatAsLink("Power", "POWER"),
-					" storage containers that can be used to supply electricity to mobile entities and isolated areas.\n\n",
-					UI.FormatAsLink("Organic Power Banks", "ELECTROBANK"),
-					" made from flora and fauna-based ingredients are single-use, as are ",
-					UI.FormatAsLink("Nuclear Power Banks", "ELECTROBANK"),
-					".\n\n",
-					UI.FormatAsLink("Eco Power Banks", "ELECTROBANK"),
-					" are rechargeable and can be reused indefinitely unless they are exposed to water damage."
-				});
+				public static LocString CONTAINER1 = "Power Banks are portable " + UI.FormatAsLink("Power", "POWER") + " storage containers that can be used to supply electricity to mobile entities and isolated areas.\n\nSingle-use power banks are easier to produce, but rechargeable and self-charging models are more efficient in the long run.\n\nCautious handling is required, as liquid exposure (or expiration, for self-charging power banks) can lead to explosions.";
 			}
 		}
 
@@ -2942,6 +2951,18 @@ namespace STRINGS
 			}
 		}
 
+		public class POWER_STATION_TOOLS
+		{
+			public static LocString TITLE = "Microchips";
+
+			public static LocString SUBTITLE = "Specialized Equipment";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Microchips are engineered tools containing countless lines of proprietary code. New applications are still being discovered.";
+			}
+		}
+
 		public class SWAMPLILYFLOWER
 		{
 			public static LocString TITLE = "Balm Lily Flower";
@@ -2960,7 +2981,7 @@ namespace STRINGS
 
 			public static LocString SUBTITLE = "Critter Byproduct";
 
-			public static LocString CONTAINER1 = "A splintery exoskeleton discarded by an aquatic critter.";
+			public static LocString CONTAINER1 = "A splintery exoskeleton discarded by an aquatic critter.\n\n";
 
 			public class BABY_VARIANT_WOOD_SHELL
 			{

@@ -70,8 +70,7 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		{
 			if (context.chore != null && !context.chore.target.isNull)
 			{
-				Vector3 vector = new Vector3(context.chore.target.gameObject.transform.position.x, context.chore.target.gameObject.transform.position.y + 1f, CameraController.Instance.transform.position.z);
-				CameraController.Instance.SetTargetPos(vector, 10f, true);
+				GameUtil.FocusCamera(new Vector3(context.chore.target.gameObject.transform.position.x, context.chore.target.gameObject.transform.position.y + 1f, CameraController.Instance.transform.position.z), 2f, true, true);
 			}
 		};
 	}

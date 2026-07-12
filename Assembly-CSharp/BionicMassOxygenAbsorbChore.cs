@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Instance>
 {
-	public BionicMassOxygenAbsorbChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.BionicAbsorbOxygen, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
+	public BionicMassOxygenAbsorbChore(IStateMachineTarget target, bool critical)
+		: base(critical ? Db.Get().ChoreTypes.BionicAbsorbOxygen_Critical : Db.Get().ChoreTypes.BionicAbsorbOxygen, target, target.GetComponent<ChoreProvider>(), false, null, null, null, critical ? PriorityScreen.PriorityClass.compulsory : PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new BionicMassOxygenAbsorbChore.Instance(this, target.gameObject);
 		Func<int> func = new Func<int>(base.smi.UpdateTargetCell);
 		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		this.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCellUntilBegun, func);
+	}
+
+	public override string ResolveString(string str)
+	{
+		float num = ((base.smi == null) ? 0f : base.smi.GetAverageMassConsumedPerSecond());
+		return string.Format(base.ResolveString(str), GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -24,8 +31,24 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			global::Debug.LogError("BionicMassAbsorbOxygenChore null BionicOxygenTankMonitor.Instance");
 			return;
 		}
+		base.smi.ResetMassTrackHistory();
 		base.smi.sm.dupe.Set(context.consumerState.consumer, base.smi);
 		base.Begin(context);
+	}
+
+	public static bool IsNotAllowedByScheduleAndChoreIsNotCritical(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		return !BionicMassOxygenAbsorbChore.IsCriticalChore(smi) && !BionicMassOxygenAbsorbChore.IsAllowedBySchedule(smi);
+	}
+
+	public static bool IsAllowedBySchedule(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		return BionicOxygenTankMonitor.IsAllowedToSeekOxygenBySchedule(smi.oxygenTankMonitor);
+	}
+
+	public static bool IsCriticalChore(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		return smi.master.choreType == Db.Get().ChoreTypes.BionicAbsorbOxygen_Critical;
 	}
 
 	public static void ResetOxygenTimer(BionicMassOxygenAbsorbChore.Instance smi)
@@ -48,6 +71,19 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		return smi.oxygenTankMonitor.SpaceAvailableInTank > 0f;
 	}
 
+	public static bool ChoreIsCriticalModeAndGiveUpOxygenLevelReached(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		return BionicMassOxygenAbsorbChore.IsCriticalChore(smi) && smi.oxygenTankMonitor.OxygenPercentage >= 0.25f;
+	}
+
+	public static void UpdateTargetSafeCellOnlyInCriticalMode(BionicMassOxygenAbsorbChore.Instance smi, float dt)
+	{
+		if (BionicMassOxygenAbsorbChore.IsCriticalChore(smi))
+		{
+			BionicMassOxygenAbsorbChore.RefreshTargetSafeCell(smi);
+		}
+	}
+
 	public static void AbsorbUpdate(BionicMassOxygenAbsorbChore.Instance smi, float dt)
 	{
 		float num = Mathf.Min(dt * BionicMassOxygenAbsorbChore.ABSORB_RATE, smi.oxygenTankMonitor.SpaceAvailableInTank);
@@ -62,6 +98,22 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 	{
 		BionicMassOxygenAbsorbChore.AbsorbUpdateData absorbUpdateData = (BionicMassOxygenAbsorbChore.AbsorbUpdateData)data;
 		absorbUpdateData.smi.OnSimConsume(mass_cb_info, absorbUpdateData.dt);
+	}
+
+	private static void ShowOxygenBar(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		if (NameDisplayScreen.Instance != null)
+		{
+			NameDisplayScreen.Instance.SetBionicOxygenTankDisplay(smi.gameObject, new Func<float>(smi.GetOxygen), true);
+		}
+	}
+
+	private static void HideOxygenBar(BionicMassOxygenAbsorbChore.Instance smi)
+	{
+		if (NameDisplayScreen.Instance != null)
+		{
+			NameDisplayScreen.Instance.SetBionicOxygenTankDisplay(smi.gameObject, null, false);
+		}
 	}
 
 	public static SimHashes GetNearBreathableElement(int centralCell, CellOffset[] range, out int elementCell)
@@ -110,19 +162,27 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		new CellOffset(-1, 0)
 	};
 
-	public const float GIVE_UP_DURATION = 2f;
-
 	public const float ABSORB_RATE_IDEAL_CHORE_DURATION = 30f;
 
 	public static readonly float ABSORB_RATE = BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG / 30f;
 
-	public const string ABSORB_ANIM_FILE = "anim_banshee_kanim";
+	public const int HISTORY_ROW_COUNT = 15;
 
-	public const string ABSORB_PRE_ANIM_NAME = "working_pre";
+	public const float LOW_OXYGEN_TRESHOLD = 2f;
 
-	public const string ABSORB_LOOP_ANIM_NAME = "working_loop";
+	public const float GIVE_UP_DURATION_CRTICIAL_MODE = 2f;
 
-	public const string ABSORB_PST_ANIM_NAME = "working_pst";
+	public const float GIVE_UP_DURATION_LOW_OXYGEN_MODE = 4f;
+
+	public const float CRITICAL_CHORE_GIVE_UP_OXYGEN_LEVEL_TRESHOLD = 0.25f;
+
+	public const string ABSORB_ANIM_FILE = "anim_bionic_absorb_kanim";
+
+	public const string ABSORB_PRE_ANIM_NAME = "absorb_pre";
+
+	public const string ABSORB_LOOP_ANIM_NAME = "absorb_loop";
+
+	public const string ABSORB_PST_ANIM_NAME = "absorb_pst";
 
 	public static CellOffset MouthCellOffset = new CellOffset(0, 1);
 
@@ -132,22 +192,29 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		{
 			default_state = this.move;
 			base.Target(this.dupe);
-			this.move.DefaultState(this.move.onGoing);
-			this.move.onGoing.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.RefreshTargetSafeCell)).Update(new Action<BionicMassOxygenAbsorbChore.Instance, float>(BionicMassOxygenAbsorbChore.UpdateTargetSafeCell), UpdateRate.SIM_200ms, false).MoveTo((BionicMassOxygenAbsorbChore.Instance smi) => smi.targetCell, this.absorb, this.move.fail, true);
+			this.move.DefaultState(this.move.onGoing).ScheduleChange(this.fail, new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.Transition.ConditionCallback(BionicMassOxygenAbsorbChore.IsNotAllowedByScheduleAndChoreIsNotCritical));
+			this.move.onGoing.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.RefreshTargetSafeCell)).Update(new Action<BionicMassOxygenAbsorbChore.Instance, float>(BionicMassOxygenAbsorbChore.UpdateTargetSafeCellOnlyInCriticalMode), UpdateRate.SIM_200ms, false).MoveTo((BionicMassOxygenAbsorbChore.Instance smi) => smi.targetCell, this.absorb, this.move.fail, true);
 			this.move.fail.ReturnFailure();
-			this.absorb.ToggleTag(GameTags.RecoveringBreath).ToggleAnims("anim_banshee_kanim", 0f).DefaultState(this.absorb.pre);
-			this.absorb.pre.PlayAnim("working_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.absorb.loop).ScheduleGoTo(3f, this.absorb.loop)
+			this.absorb.ScheduleChange(this.fail, new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.Transition.ConditionCallback(BionicMassOxygenAbsorbChore.IsNotAllowedByScheduleAndChoreIsNotCritical)).ToggleTag(GameTags.RecoveringBreath).ToggleAnims("anim_bionic_absorb_kanim", 0f)
+				.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.ShowOxygenBar))
+				.Exit(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.HideOxygenBar))
+				.DefaultState(this.absorb.pre);
+			this.absorb.pre.PlayAnim("absorb_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.absorb.loop).ScheduleGoTo(3f, this.absorb.loop)
 				.Exit(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.ResetOxygenTimer));
-			this.absorb.loop.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.ResetOxygenTimer)).ParamTransition<float>(this.SecondsPassedWithoutOxygen, this.absorb.pst, (BionicMassOxygenAbsorbChore.Instance smi, float secondsPassed) => secondsPassed > 2f).OnSignal(this.TankFilledSignal, this.absorb.pst)
-				.PlayAnim("working_loop", KAnim.PlayMode.Loop)
-				.Update(new Action<BionicMassOxygenAbsorbChore.Instance, float>(BionicMassOxygenAbsorbChore.AbsorbUpdate), UpdateRate.SIM_200ms, false);
-			this.absorb.pst.PlayAnim("working_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
+			this.absorb.loop.Enter(new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State.Callback(BionicMassOxygenAbsorbChore.ResetOxygenTimer)).ParamTransition<float>(this.SecondsPassedWithoutOxygen, this.absorb.pst, (BionicMassOxygenAbsorbChore.Instance smi, float secondsPassed) => secondsPassed > smi.GetGiveupTimerTimeout()).OnSignal(this.TankFilledSignal, this.absorb.pst)
+				.PlayAnim("absorb_loop", KAnim.PlayMode.Loop)
+				.Update(new Action<BionicMassOxygenAbsorbChore.Instance, float>(BionicMassOxygenAbsorbChore.AbsorbUpdate), UpdateRate.SIM_200ms, false)
+				.Transition(this.absorb.pst, new StateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.Transition.ConditionCallback(BionicMassOxygenAbsorbChore.ChoreIsCriticalModeAndGiveUpOxygenLevelReached), UpdateRate.SIM_200ms);
+			this.absorb.pst.PlayAnim("absorb_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
+			this.fail.ReturnFailure();
 			this.complete.ReturnSuccess();
 		}
 
 		public BionicMassOxygenAbsorbChore.States.MoveStates move;
 
 		public BionicMassOxygenAbsorbChore.States.MassAbsorbStates absorb;
+
+		public GameStateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State fail;
 
 		public GameStateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.State complete;
 
@@ -189,12 +256,25 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 
 	public class Instance : GameStateMachine<BionicMassOxygenAbsorbChore.States, BionicMassOxygenAbsorbChore.Instance, BionicMassOxygenAbsorbChore, object>.GameInstance
 	{
-		public float OXYGEN_MASS_GIVE_UP_TRESHOLD
+		public float CRITICAL_OXYGEN_MASS_GIVE_UP_TRESHOLD
 		{
 			get
 			{
-				return this.oxygenBreather.ConsumptionRate;
+				return this.oxygenBreather.ConsumptionRate * 8f;
 			}
+		}
+
+		public float GetGiveupTimerTimeout()
+		{
+			if (this.oxygenTankMonitor == null)
+			{
+				return 2f;
+			}
+			if (!BionicOxygenTankMonitor.AreOxygenLevelsCritical(this.oxygenTankMonitor))
+			{
+				return 4f;
+			}
+			return 2f;
 		}
 
 		public OxygenBreather oxygenBreather { get; private set; }
@@ -202,60 +282,92 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 		public Instance(BionicMassOxygenAbsorbChore master, GameObject duplicant)
 			: base(master)
 		{
-			this.query = new SafetyQuery(Game.Instance.safetyConditions.RecoverBreathChecker, base.GetComponent<KMonoBehaviour>(), int.MaxValue);
-			this.navigator = duplicant.GetComponent<Navigator>();
 			base.sm.dupe.Set(duplicant, base.smi, false);
-			this.dupePrefabID = duplicant.GetComponent<KPrefabID>();
 			this.oxygenTankMonitor = duplicant.GetSMI<BionicOxygenTankMonitor.Instance>();
 			this.oxygenBreather = duplicant.GetComponent<OxygenBreather>();
 		}
 
 		public int UpdateTargetCell()
 		{
-			this.query.Reset();
-			this.navigator.RunQuery(base.smi.query);
-			int num = base.smi.query.GetResultCell();
-			if (!this.oxygenBreather.IsBreathableElementAtCell(num, null))
+			this.oxygenTankMonitor.UpdatePotentialCellToAbsorbOxygen();
+			int absorbOxygenCell = this.oxygenTankMonitor.AbsorbOxygenCell;
+			this.targetCell = absorbOxygenCell;
+			return absorbOxygenCell;
+		}
+
+		public void ResetMassTrackHistory()
+		{
+			this.massAbsorbedHistory.Clear();
+			for (int i = 0; i < 15; i++)
 			{
-				num = PathFinder.InvalidCell;
+				this.massAbsorbedHistory.Enqueue(0f);
 			}
-			this.targetCell = num;
-			return this.targetCell;
+		}
+
+		public void AddMassToHistory(float mass_rate_this_tick)
+		{
+			if (this.massAbsorbedHistory.Count == 15)
+			{
+				this.massAbsorbedHistory.Dequeue();
+			}
+			this.massAbsorbedHistory.Enqueue(mass_rate_this_tick);
+		}
+
+		public float GetAverageMassConsumedPerSecond()
+		{
+			float num = 0f;
+			int num2 = 0;
+			foreach (float num3 in this.massAbsorbedHistory)
+			{
+				num += num3;
+				num2++;
+			}
+			if (num2 <= 0)
+			{
+				return 0f;
+			}
+			num /= (float)num2;
+			return num;
 		}
 
 		public void OnSimConsume(Sim.MassConsumedCallback mass_cb_info, float dt)
 		{
-			if (this.dupePrefabID == null || this.oxygenBreather == null || this.oxygenTankMonitor == null || this.dupePrefabID.HasTag(GameTags.Dead))
+			if (this.oxygenBreather == null || this.oxygenTankMonitor == null || this.oxygenBreather.prefabID.HasTag(GameTags.Dead))
 			{
 				return;
 			}
-			GameObject gameObject = this.dupePrefabID.gameObject;
-			if (mass_cb_info.mass <= this.OXYGEN_MASS_GIVE_UP_TRESHOLD * dt)
+			this.AddMassToHistory(mass_cb_info.mass / dt);
+			GameObject gameObject = this.oxygenBreather.gameObject;
+			float num = (BionicOxygenTankMonitor.AreOxygenLevelsCritical(this.oxygenTankMonitor) ? this.CRITICAL_OXYGEN_MASS_GIVE_UP_TRESHOLD : 2f);
+			if (this.GetAverageMassConsumedPerSecond() <= num)
 			{
 				base.sm.SecondsPassedWithoutOxygen.Set(base.sm.SecondsPassedWithoutOxygen.Get(base.smi) + dt, base.smi, false);
-				return;
 			}
-			if (ElementLoader.elements[(int)mass_cb_info.elemIdx].id == SimHashes.ContaminatedOxygen)
+			else
 			{
-				this.oxygenBreather.Trigger(-935848905, mass_cb_info);
+				BionicMassOxygenAbsorbChore.ResetOxygenTimer(base.smi);
 			}
-			float num = this.oxygenTankMonitor.AddGas(mass_cb_info);
-			if (num > Mathf.Epsilon)
+			float num2 = this.oxygenTankMonitor.AddGas(mass_cb_info);
+			if (num2 > Mathf.Epsilon)
 			{
-				SimMessages.EmitMass(Grid.PosToCell(gameObject), mass_cb_info.elemIdx, num, mass_cb_info.temperature, byte.MaxValue, 0, -1);
+				SimMessages.EmitMass(Grid.PosToCell(gameObject), mass_cb_info.elemIdx, num2, mass_cb_info.temperature, byte.MaxValue, 0, -1);
 			}
 			if (!BionicMassOxygenAbsorbChore.HasSpaceInOxygenTank(this))
 			{
 				base.sm.TankFilledSignal.Trigger(this);
 			}
-			BionicMassOxygenAbsorbChore.ResetOxygenTimer(base.smi);
 		}
 
-		public Navigator navigator;
+		public float GetOxygen()
+		{
+			if (this.oxygenTankMonitor != null)
+			{
+				return this.oxygenTankMonitor.OxygenPercentage;
+			}
+			return 0f;
+		}
 
-		public SafetyQuery query;
-
-		public KPrefabID dupePrefabID;
+		public Queue<float> massAbsorbedHistory = new Queue<float>();
 
 		public int targetCell = Grid.InvalidCell;
 

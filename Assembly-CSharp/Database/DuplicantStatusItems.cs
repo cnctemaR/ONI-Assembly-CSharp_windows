@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
-using UnityEngine;
 
 namespace Database
 {
@@ -104,14 +103,21 @@ namespace Database
 			this.BreathingO2.resolveStringCallback = delegate(string str, object data)
 			{
 				OxygenBreather oxygenBreather = (OxygenBreather)data;
-				float averageRate = Game.Instance.accumulators.GetAverageRate(oxygenBreather.O2Accumulator);
-				return str.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(-averageRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				float num = ((oxygenBreather.O2Accumulator == HandleVector<int>.InvalidHandle) ? 0f : Game.Instance.accumulators.GetAverageRate(oxygenBreather.O2Accumulator));
+				return str.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(-num, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			};
+			this.BreathingO2Bionic = this.CreateStatusItem("BreathingO2Bionic", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 130);
+			this.BreathingO2Bionic.resolveStringCallback = delegate(string str, object data)
+			{
+				OxygenBreather oxygenBreather2 = (OxygenBreather)data;
+				float num2 = ((oxygenBreather2.O2Accumulator == HandleVector<int>.InvalidHandle) ? 0f : Game.Instance.accumulators.GetAverageRate(oxygenBreather2.O2Accumulator));
+				return str.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(-num2, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 			};
 			this.EmittingCO2 = this.CreateStatusItem("EmittingCO2", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 130);
 			this.EmittingCO2.resolveStringCallback = delegate(string str, object data)
 			{
-				OxygenBreather oxygenBreather2 = (OxygenBreather)data;
-				return str.Replace("{EmittingRate}", GameUtil.GetFormattedMass(oxygenBreather2.CO2EmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				OxygenBreather oxygenBreather3 = (OxygenBreather)data;
+				return str.Replace("{EmittingRate}", GameUtil.GetFormattedMass(oxygenBreather3.CO2EmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 			};
 			this.Vomiting = this.CreateStatusItem("Vomiting", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Coughing = this.CreateStatusItem("Coughing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
@@ -229,6 +235,7 @@ namespace Database
 			this.Clearing.resolveStringCallback = func;
 			this.GeneratingPower = this.CreateStatusItem("GeneratingPower", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.GeneratingPower.resolveStringCallback = func;
+			this.CloggingToilet = this.CreateStatusItem("CLOGGINGTOILET", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Cold = this.CreateStatusItem("Cold", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Cold.resolveTooltipCallback = delegate(string str, object data)
 			{
@@ -236,13 +243,13 @@ namespace Database
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
 				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("ColdAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
 				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("ColdAir").SelfModifiers[2].Value.ToString());
-				float num = smi.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
-				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
+				float num3 = smi.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
+				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance = smi.attributes.Get("ThermalConductivityBarrier");
 				string text2 = "<b>" + attributeInstance.GetFormattedValue() + "</b>";
-				for (int num2 = 0; num2 != attributeInstance.Modifiers.Count; num2++)
+				for (int num4 = 0; num4 != attributeInstance.Modifiers.Count; num4++)
 				{
-					AttributeModifier attributeModifier = attributeInstance.Modifiers[num2];
+					AttributeModifier attributeModifier = attributeInstance.Modifiers[num4];
 					text2 += "\n";
 					text2 = string.Concat(new string[]
 					{
@@ -274,13 +281,13 @@ namespace Database
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
 				str = str.Replace("{StaminaModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[1].Value, GameUtil.TimeSlice.PerCycle));
 				str = str.Replace("{AthleticsModification}", Db.Get().effects.Get("WarmAir").SelfModifiers[2].Value.ToString());
-				float num3 = smi2.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
-				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic));
+				float num5 = smi2.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage * 1000f;
+				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num5, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance2 = smi2.attributes.Get("ThermalConductivityBarrier");
 				string text3 = "<b>" + attributeInstance2.GetFormattedValue() + "</b>";
-				for (int num4 = 0; num4 != attributeInstance2.Modifiers.Count; num4++)
+				for (int num6 = 0; num6 != attributeInstance2.Modifiers.Count; num6++)
 				{
-					AttributeModifier attributeModifier2 = attributeInstance2.Modifiers[num4];
+					AttributeModifier attributeModifier2 = attributeInstance2.Modifiers[num6];
 					text3 += "\n";
 					text3 = string.Concat(new string[]
 					{
@@ -327,7 +334,21 @@ namespace Database
 			this.SevereWounds.AddNotification(null, null, null);
 			this.BionicOfflineIncapacitated = this.CreateStatusItem("BionicOfflineIncapacitated", "DUPLICANTS", "status_electrobank", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
 			this.BionicOfflineIncapacitated.AddNotification(null, null, null);
-			this.BionicWantsOilChange = this.CreateStatusItem("BionicWantsOilChange", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicMicrochipGeneration = this.CreateStatusItem("BionicMicrochipGeneration", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicMicrochipGeneration.resolveStringCallback = delegate(string str, object data)
+			{
+				float num7 = ((BionicMicrochipMonitor.Instance)data).Progress * 100f;
+				str = string.Format(str, GameUtil.GetFormattedPercent(num7, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.BionicMicrochipGeneration.resolveTooltipCallback = delegate(string str, object data)
+			{
+				BionicMicrochipMonitor.Instance instance3 = (BionicMicrochipMonitor.Instance)data;
+				float num8 = 150f;
+				str = string.Format(str, GameUtil.GetFormattedTime(num8, "F0"));
+				return str;
+			};
+			this.BionicWantsOilChange = this.CreateStatusItem("BionicWantsOilChange", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.BionicWaitingForReboot = this.CreateStatusItem("BionicWaitingForReboot", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BionicBeingRebooted = this.CreateStatusItem("BionicBeingRebooted", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BionicRequiresSkillPerk = this.CreateStatusItem("BionicRequiresSkillPerk", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -351,9 +372,9 @@ namespace Database
 			this.Incapacitated.AddNotification(null, null, null);
 			this.Incapacitated.resolveStringCallback = delegate(string str, object data)
 			{
-				IncapacitationMonitor.Instance instance3 = (IncapacitationMonitor.Instance)data;
-				float bleedLifeTime = instance3.GetBleedLifeTime(instance3);
-				str = str.Replace("{CauseOfIncapacitation}", instance3.GetCauseOfIncapacitation().Name);
+				IncapacitationMonitor.Instance instance4 = (IncapacitationMonitor.Instance)data;
+				float bleedLifeTime = instance4.GetBleedLifeTime(instance4);
+				str = str.Replace("{CauseOfIncapacitation}", instance4.GetCauseOfIncapacitation().Name);
 				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(bleedLifeTime, "F0"));
 			};
 			this.Relocating = this.CreateStatusItem("Relocating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -375,8 +396,8 @@ namespace Database
 			this.BionicExplorerBooster = this.CreateStatusItem("BionicExplorerBooster", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 2);
 			this.BionicExplorerBooster.resolveStringCallback = delegate(string str, object data)
 			{
-				BionicUpgrade_ExplorerBoosterMonitor.Instance instance4 = (BionicUpgrade_ExplorerBoosterMonitor.Instance)data;
-				str = string.Format(str, GameUtil.GetFormattedPercent(instance4.CurrentProgress * 100f, GameUtil.TimeSlice.None));
+				BionicUpgrade_ExplorerBoosterMonitor.Instance instance5 = (BionicUpgrade_ExplorerBoosterMonitor.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance5.CurrentProgress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.ContactWithGerms = this.CreateStatusItem("ContactWithGerms", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
@@ -390,8 +411,7 @@ namespace Database
 			this.ContactWithGerms.statusItemClickCallback = delegate(object data)
 			{
 				GermExposureMonitor.ExposureStatusData exposureStatusData2 = (GermExposureMonitor.ExposureStatusData)data;
-				Vector3 lastExposurePosition = exposureStatusData2.owner.GetLastExposurePosition(exposureStatusData2.exposure_type.germ_id);
-				CameraController.Instance.CameraGoTo(lastExposurePosition, 2f, true);
+				GameUtil.FocusCamera(exposureStatusData2.owner.GetLastExposurePosition(exposureStatusData2.exposure_type.germ_id), 2f, true, true);
 				if (OverlayScreen.Instance.mode == OverlayModes.None.ID)
 				{
 					OverlayScreen.Instance.ToggleOverlay(OverlayModes.Disease.ID, true);
@@ -405,27 +425,26 @@ namespace Database
 				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermResistance.Lookup(exposureStatusData3.owner.gameObject);
 				string lastDiseaseSource = exposureStatusData3.owner.GetLastDiseaseSource(exposureStatusData3.exposure_type.germ_id);
 				GermExposureMonitor.Instance smi3 = exposureStatusData3.owner.GetSMI<GermExposureMonitor.Instance>();
-				float num5 = (float)exposureStatusData3.exposure_type.base_resistance + GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
+				float num9 = (float)exposureStatusData3.exposure_type.base_resistance + GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
 				float totalValue = attributeInstance3.GetTotalValue();
 				float resistanceToExposureType = smi3.GetResistanceToExposureType(exposureStatusData3.exposure_type, -1f);
 				float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
 				float exposureTier = smi3.GetExposureTier(exposureStatusData3.exposure_type.germ_id);
-				float num6 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)exposureTier - 1] - GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
+				float num10 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)exposureTier - 1] - GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
 				str = str.Replace("{Severity}", DUPLICANTS.STATUSITEMS.EXPOSEDTOGERMS.EXPOSURE_TIERS[(int)exposureTier - 1].ToString());
 				str = str.Replace("{Sickness}", name2);
 				str = str.Replace("{Source}", lastDiseaseSource);
-				str = str.Replace("{Base}", GameUtil.GetFormattedSimple(num5, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Base}", GameUtil.GetFormattedSimple(num9, GameUtil.TimeSlice.None, null));
 				str = str.Replace("{Dupe}", GameUtil.GetFormattedSimple(totalValue, GameUtil.TimeSlice.None, null));
 				str = str.Replace("{Total}", GameUtil.GetFormattedSimple(resistanceToExposureType, GameUtil.TimeSlice.None, null));
-				str = str.Replace("{ExposureLevelBonus}", GameUtil.GetFormattedSimple(num6, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{ExposureLevelBonus}", GameUtil.GetFormattedSimple(num10, GameUtil.TimeSlice.None, null));
 				str = str.Replace("{Chance}", GameUtil.GetFormattedPercent(contractionChance * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.ExposedToGerms.statusItemClickCallback = delegate(object data)
 			{
 				GermExposureMonitor.ExposureStatusData exposureStatusData4 = (GermExposureMonitor.ExposureStatusData)data;
-				Vector3 lastExposurePosition2 = exposureStatusData4.owner.GetLastExposurePosition(exposureStatusData4.exposure_type.germ_id);
-				CameraController.Instance.CameraGoTo(lastExposurePosition2, 2f, true);
+				GameUtil.FocusCamera(exposureStatusData4.owner.GetLastExposurePosition(exposureStatusData4.exposure_type.germ_id), 2f, true, true);
 				if (OverlayScreen.Instance.mode == OverlayModes.None.ID)
 				{
 					OverlayScreen.Instance.ToggleOverlay(OverlayModes.Disease.ID, true);
@@ -455,16 +474,16 @@ namespace Database
 			this.GasLiquidIrritation.resolveStringCallback = (string str, object data) => ((GasLiquidExposureMonitor.Instance)data).IsMajorIrritation() ? DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MAJOR : DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MINOR;
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GasLiquidExposureMonitor.Instance instance5 = (GasLiquidExposureMonitor.Instance)data;
+				GasLiquidExposureMonitor.Instance instance6 = (GasLiquidExposureMonitor.Instance)data;
 				string text7 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
 				string text8 = "";
-				Effect appliedEffect = instance5.sm.GetAppliedEffect(instance5);
+				Effect appliedEffect = instance6.sm.GetAppliedEffect(instance6);
 				if (appliedEffect != null)
 				{
 					text8 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance5.CurrentlyExposedToElement().name);
-				float currentExposure = instance5.sm.GetCurrentExposure(instance5);
+				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance6.CurrentlyExposedToElement().name);
+				float currentExposure = instance6.sm.GetCurrentExposure(instance6);
 				if (currentExposure < 0f)
 				{
 					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
@@ -477,8 +496,8 @@ namespace Database
 				{
 					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
-				float num7 = (instance5.exposure - instance5.minorIrritationThreshold) / Math.Abs(instance5.exposureRate);
-				string text10 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
+				float num11 = (instance6.exposure - instance6.minorIrritationThreshold) / Math.Abs(instance6.exposureRate);
+				string text10 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num11, "F0"));
 				return string.Concat(new string[] { text7, "\n\n", text8, "\n\n", text9, "\n\n", text10 });
 			};
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -514,8 +533,8 @@ namespace Database
 			this.WaxedForTransitTube = this.CreateStatusItem("WaxedForTransitTube", "DUPLICANTS", "action_speed_up", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.WaxedForTransitTube.resolveTooltipCallback = delegate(string str, object data)
 			{
-				float num8 = (float)data * 100f;
-				return str.Replace("{0}", GameUtil.GetFormattedPercent(num8, GameUtil.TimeSlice.None));
+				float num12 = (float)data * 100f;
+				return str.Replace("{0}", GameUtil.GetFormattedPercent(num12, GameUtil.TimeSlice.None));
 			};
 			this.JoyResponse_HasBalloon = this.CreateStatusItem("JoyResponse_HasBalloon", DUPLICANTS.MODIFIERS.HASBALLOON.NAME, DUPLICANTS.MODIFIERS.HASBALLOON.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HasBalloon.resolveTooltipCallback = delegate(string str, object data)
@@ -526,8 +545,8 @@ namespace Database
 			this.JoyResponse_HeardJoySinger = this.CreateStatusItem("JoyResponse_HeardJoySinger", DUPLICANTS.MODIFIERS.HEARDJOYSINGER.NAME, DUPLICANTS.MODIFIERS.HEARDJOYSINGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HeardJoySinger.resolveTooltipCallback = delegate(string str, object data)
 			{
-				InspirationEffectMonitor.Instance instance6 = (InspirationEffectMonitor.Instance)data;
-				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance6.sm.inspirationTimeRemaining.Get(instance6), "F1", false));
+				InspirationEffectMonitor.Instance instance7 = (InspirationEffectMonitor.Instance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance7.sm.inspirationTimeRemaining.Get(instance7), "F1", false));
 			};
 			this.JoyResponse_StickerBombing = this.CreateStatusItem("JoyResponse_StickerBombing", DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.NAME, DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -538,14 +557,14 @@ namespace Database
 			this.RemoteWorkerCapacitorStatus.resolveStringCallback = delegate(string str, object obj)
 			{
 				RemoteWorkerCapacitor remoteWorkerCapacitor = obj as RemoteWorkerCapacitor;
-				float num9 = 0f;
-				float num10 = 0f;
+				float num13 = 0f;
+				float num14 = 0f;
 				if (remoteWorkerCapacitor != null)
 				{
-					num9 = remoteWorkerCapacitor.Charge;
-					num10 = remoteWorkerCapacitor.ChargeRatio * 100f;
+					num13 = remoteWorkerCapacitor.Charge;
+					num14 = remoteWorkerCapacitor.ChargeRatio * 100f;
 				}
-				return str.Replace("{CHARGE}", GameUtil.GetFormattedJoules(num9, "F1", GameUtil.TimeSlice.None)).Replace("{RATIO}", GameUtil.GetFormattedPercent(num10, GameUtil.TimeSlice.None));
+				return str.Replace("{CHARGE}", GameUtil.GetFormattedJoules(num13, "F1", GameUtil.TimeSlice.None)).Replace("{RATIO}", GameUtil.GetFormattedPercent(num14, GameUtil.TimeSlice.None));
 			};
 			this.RemoteWorkerLowPower = this.CreateStatusItem("RemoteWorkerLowPower", DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWPOWER.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWPOWER.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, 2);
 			this.RemoteWorkerOutOfPower = this.CreateStatusItem("RemoteWorkerOutOfPower", DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFPOWER.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFPOWER.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
@@ -569,6 +588,8 @@ namespace Database
 		public StatusItem PendingPacification;
 
 		public StatusItem Dead;
+
+		public StatusItem CloggingToilet;
 
 		public StatusItem MoveToSuitNotRequired;
 
@@ -631,6 +652,8 @@ namespace Database
 		public StatusItem Slippering;
 
 		public StatusItem BreathingO2;
+
+		public StatusItem BreathingO2Bionic;
 
 		public StatusItem EmittingCO2;
 
@@ -751,6 +774,8 @@ namespace Database
 		public StatusItem BionicRequiresSkillPerk;
 
 		public StatusItem BionicWantsOilChange;
+
+		public StatusItem BionicMicrochipGeneration;
 
 		public StatusItem InstallingElectrobank;
 

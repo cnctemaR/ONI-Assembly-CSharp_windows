@@ -45,7 +45,8 @@ namespace TUNING
 			GameTags.Other,
 			GameTags.StoryTraitResource,
 			GameTags.Dehydrated,
-			GameTags.ChargedPortableBattery
+			GameTags.ChargedPortableBattery,
+			GameTags.BionicUpgrade
 		};
 
 		public static List<Tag> SPECIAL_STORAGE = new List<Tag>

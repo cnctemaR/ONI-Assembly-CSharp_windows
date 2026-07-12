@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
@@ -40,19 +41,56 @@ public class ConsumablesTableScreen : TableScreen
 		}
 		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
 		{
+			Tag[] array = new Tag[GameTags.BionicIncompatibleBatteries.Count];
+			GameTags.BionicIncompatibleBatteries.CopyTo(array, 0);
 			List<GameObject> prefabsWithTag2 = Assets.GetPrefabsWithTag(GameTags.ChargedPortableBattery);
-			for (int k = 0; k < prefabsWithTag.Count; k++)
+			for (int k = 0; k < prefabsWithTag2.Count; k++)
 			{
-				Electrobank component2 = prefabsWithTag2[k].GetComponent<Electrobank>();
-				if (component2)
+				if (!prefabsWithTag2[k].HasTag(GameTags.DeprecatedContent))
 				{
-					list.Add(component2);
+					if (array != null)
+					{
+						bool flag = false;
+						foreach (Tag tag in array)
+						{
+							if (prefabsWithTag2[k].HasTag(tag))
+							{
+								flag = true;
+								break;
+							}
+						}
+						if (flag)
+						{
+							goto IL_024B;
+						}
+					}
+					Electrobank component2 = prefabsWithTag2[k].GetComponent<Electrobank>();
+					if (component2)
+					{
+						list.Add(component2);
+					}
+					else
+					{
+						DebugUtil.DevLogErrorFormat("Prefab tagged ChargedPortableBattery does not have Electrobank component: {0}", new object[] { prefabsWithTag2[k] });
+					}
 				}
-				else
-				{
-					DebugUtil.DevLogErrorFormat("Prefab tagged ChargedPortableBattery does not have Electrobank component: {0}", new object[] { prefabsWithTag2[k] });
-				}
+				IL_024B:;
 			}
+			SymbolicConsumableItem symbolicConsumableItem = new SymbolicConsumableItem(ConsumerManager.OXYGEN_TANK_ID, MISC.TAGS.OXYGENCANISTER, 1, 1, true, "ui_sprite_oxygen_canister", delegate
+			{
+				using (IEnumerator enumerator = Components.LiveMinionIdentities.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						if (((MinionIdentity)enumerator.Current).HasTag(GameTags.Minions.Models.Bionic))
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			});
+			list.Add(symbolicConsumableItem);
 		}
 		list.Sort(delegate(IConsumableUIItem a, IConsumableUIItem b)
 		{
@@ -69,13 +107,13 @@ public class ConsumablesTableScreen : TableScreen
 		List<ConsumableInfoTableColumn> list4 = new List<ConsumableInfoTableColumn>();
 		base.StartScrollableContent("consumableScroller");
 		int num = 0;
-		for (int l = 0; l < list.Count; l++)
+		for (int m = 0; m < list.Count; m++)
 		{
-			if (list[l].Display)
+			if (list[m].Display)
 			{
-				if (list[l].MajorOrder != num && l != 0)
+				if (list[m].MajorOrder != num && m != 0)
 				{
-					string text = "QualityDivider_" + list[l].MajorOrder.ToString();
+					string text = "QualityDivider_" + list[m].MajorOrder.ToString();
 					ConsumableInfoTableColumn[] quality_group_columns = list4.ToArray();
 					DividerColumn dividerColumn = new DividerColumn(delegate
 					{
@@ -84,9 +122,9 @@ public class ConsumablesTableScreen : TableScreen
 							return true;
 						}
 						ConsumableInfoTableColumn[] quality_group_columns2 = quality_group_columns;
-						for (int m = 0; m < quality_group_columns2.Length; m++)
+						for (int n = 0; n < quality_group_columns2.Length; n++)
 						{
-							if (quality_group_columns2[m].isRevealed)
+							if (quality_group_columns2[n].isRevealed)
 							{
 								return true;
 							}
@@ -97,15 +135,15 @@ public class ConsumablesTableScreen : TableScreen
 					base.RegisterColumn(text, dividerColumn);
 					list4.Clear();
 				}
-				ConsumableInfoTableColumn consumableInfoTableColumn = this.AddConsumableInfoColumn(list[l].ConsumableId, list[l], new Action<IAssignableIdentity, GameObject>(this.on_load_consumable_info), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_consumable_info), new Action<GameObject>(this.on_click_consumable_info), new Action<GameObject, TableScreen.ResultValues>(this.set_value_consumable_info), new Comparison<IAssignableIdentity>(this.compare_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_consumable_info));
+				ConsumableInfoTableColumn consumableInfoTableColumn = this.AddConsumableInfoColumn(list[m].ConsumableId, list[m], new Action<IAssignableIdentity, GameObject>(this.on_load_consumable_info), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_consumable_info), new Action<GameObject>(this.on_click_consumable_info), new Action<GameObject, TableScreen.ResultValues>(this.set_value_consumable_info), new Comparison<IAssignableIdentity>(this.compare_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_consumable_info));
 				list2.Add(consumableInfoTableColumn);
-				num = list[l].MajorOrder;
+				num = list[m].MajorOrder;
 				list4.Add(consumableInfoTableColumn);
 			}
 		}
 		string text2 = "SuperCheckConsumable";
-		CheckboxTableColumn[] array = list2.ToArray();
-		base.AddSuperCheckboxColumn(text2, array, new Action<IAssignableIdentity, GameObject>(base.on_load_value_checkbox_column_super), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_checkbox_column_super), new Action<GameObject>(base.on_press_checkbox_column_super), new Action<GameObject, TableScreen.ResultValues>(base.set_value_checkbox_column_super), null, new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info_super));
+		CheckboxTableColumn[] array3 = list2.ToArray();
+		base.AddSuperCheckboxColumn(text2, array3, new Action<IAssignableIdentity, GameObject>(base.on_load_value_checkbox_column_super), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_checkbox_column_super), new Action<GameObject>(base.on_press_checkbox_column_super), new Action<GameObject, TableScreen.ResultValues>(base.set_value_checkbox_column_super), null, new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info_super));
 	}
 
 	private void refresh_scrollers()
@@ -544,13 +582,16 @@ public class ConsumablesTableScreen : TableScreen
 		{
 		case TableRow.RowType.Header:
 		{
-			GameObject prefab = Assets.GetPrefab(consumable_info.ConsumableId.ToTag());
-			if (prefab == null)
+			Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
+			GameObject gameObject = Assets.TryGetPrefab(consumable_info.ConsumableId.ToTag());
+			if (gameObject == null)
 			{
+				image.sprite = Assets.GetSprite(consumable_info.OverrideSpriteName());
+				image.material = Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial;
+				image.color = Color.white;
 				return;
 			}
-			KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
-			Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
+			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 			if (component2.AnimFiles.Length != 0)
 			{
 				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui", false, "");
@@ -740,7 +781,7 @@ public class ConsumablesTableScreen : TableScreen
 
 	protected ConsumableInfoTableColumn AddConsumableInfoColumn(string id, IConsumableUIItem consumable_info, Action<IAssignableIdentity, GameObject> load_value_action, Func<IAssignableIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, TableScreen.ResultValues> set_value_action, Comparison<IAssignableIdentity> sort_comparison, Action<IAssignableIdentity, GameObject, ToolTip> on_tooltip, Action<IAssignableIdentity, GameObject, ToolTip> on_sort_tooltip)
 	{
-		ConsumableInfoTableColumn consumableInfoTableColumn = new ConsumableInfoTableColumn(consumable_info, load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => "");
+		ConsumableInfoTableColumn consumableInfoTableColumn = new ConsumableInfoTableColumn(consumable_info, load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => "", () => DebugHandler.InstantBuildMode || consumable_info.RevealTest());
 		consumableInfoTableColumn.scrollerID = "consumableScroller";
 		if (base.RegisterColumn(id, consumableInfoTableColumn))
 		{

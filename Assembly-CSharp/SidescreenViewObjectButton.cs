@@ -56,12 +56,12 @@ public class SidescreenViewObjectButton : KMonoBehaviour, ISidescreenButtonContr
 			SidescreenViewObjectButton.Mode trackMode = this.TrackMode;
 			if (trackMode == SidescreenViewObjectButton.Mode.Target)
 			{
-				CameraController.Instance.CameraGoTo(this.Target.transform.GetPosition(), 2f, true);
+				GameUtil.FocusCamera(this.Target.transform.GetPosition(), 2f, true, true);
 				return;
 			}
 			if (trackMode == SidescreenViewObjectButton.Mode.Cell)
 			{
-				CameraController.Instance.CameraGoTo(Grid.CellToPos(this.TargetCell), 2f, true);
+				GameUtil.FocusCamera(Grid.CellToPos(this.TargetCell), 2f, true, true);
 				return;
 			}
 		}

@@ -85,6 +85,9 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		return false;
 	}
 
+	[MyCmpAdd]
+	private ManuallySetRemoteWorkTargetComponent remoteChore;
+
 	[MyCmpGet]
 	private Operational operational;
 
@@ -139,6 +142,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 			}
 			DesalinatorWorkableEmpty component = base.master.GetComponent<DesalinatorWorkableEmpty>();
 			this.emptyChore = new WorkChore<DesalinatorWorkableEmpty>(Db.Get().ChoreTypes.EmptyDesalinator, component, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+			base.smi.master.remoteChore.SetChore(this.emptyChore);
 		}
 
 		public void CancelEmptyChore()
@@ -147,6 +151,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 			{
 				this.emptyChore.Cancel("Cancelled");
 				this.emptyChore = null;
+				base.smi.master.remoteChore.SetChore(null);
 			}
 		}
 

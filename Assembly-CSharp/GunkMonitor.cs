@@ -10,19 +10,17 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.idle;
-		this.idle.EnterTransition(this.mildUrge, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.IsGunkLevelsOverMildUrgeThreshold)).OnSignal(this.GunkChangedSignal, this.mildUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverMildUrgeThreshold));
-		this.mildUrge.EnterTransition(this.criticalUrge, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold)).ToggleThought(Db.Get().Thoughts.ExpellGunkDesire, null).OnSignal(this.GunkChangedSignal, this.criticalUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold))
-			.OnSignal(this.GunkMaxedOutSignal, this.criticalUrge)
-			.OnSignal(this.GunkEmptiedSignal, this.idle)
-			.DefaultState(this.mildUrge.prevented);
-		this.mildUrge.prevented.EventTransition(GameHashes.ScheduleBlocksChanged, this.mildUrge.allowed, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling)).EventTransition(GameHashes.ScheduleChanged, this.mildUrge.allowed, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling));
-		this.mildUrge.allowed.EventTransition(GameHashes.ScheduleBlocksChanged, this.mildUrge.prevented, GameStateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Not(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling))).EventTransition(GameHashes.ScheduleChanged, this.mildUrge.prevented, GameStateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Not(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling))).ToggleUrge(Db.Get().Urges.Pee)
-			.ToggleUrge(Db.Get().Urges.GunkPee);
-		this.criticalUrge.EnterTransition(this.cantHold, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.CanNotHoldGunkAnymore)).OnSignal(this.GunkMaxedOutSignal, this.cantHold).OnSignal(this.GunkEmptiedSignal, this.idle)
+		this.root.Update(new Action<GunkMonitor.Instance, float>(GunkMonitor.GunkAmountWatcherUpdate), UpdateRate.SIM_200ms, false);
+		this.idle.OnSignal(this.gunkValueChangedSignal, this.mildUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverMildUrgeThreshold));
+		this.mildUrge.OnSignal(this.gunkValueChangedSignal, this.criticalUrge, new Func<GunkMonitor.Instance, bool>(GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold)).OnSignal(this.gunkValueChangedSignal, this.idle, new Func<GunkMonitor.Instance, bool>(GunkMonitor.DoesNotWantToExpellGunk)).DefaultState(this.mildUrge.prevented);
+		this.mildUrge.prevented.ScheduleChange(this.mildUrge.allowed, new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling));
+		this.mildUrge.allowed.ScheduleChange(this.mildUrge.prevented, GameStateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Not(new StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Transition.ConditionCallback(GunkMonitor.ScheduleAllowsExpelling))).ToggleUrge(Db.Get().Urges.Pee).ToggleUrge(Db.Get().Urges.GunkPee);
+		this.criticalUrge.OnSignal(this.gunkValueChangedSignal, this.idle, new Func<GunkMonitor.Instance, bool>(GunkMonitor.DoesNotWantToExpellGunk)).OnSignal(this.gunkValueChangedSignal, this.mildUrge, (GunkMonitor.Instance smi) => !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi)).OnSignal(this.gunkValueChangedSignal, this.cantHold, new Func<GunkMonitor.Instance, bool>(GunkMonitor.CanNotHoldGunkAnymore))
 			.ToggleUrge(Db.Get().Urges.GunkPee)
 			.ToggleUrge(Db.Get().Urges.Pee)
 			.ToggleEffect("GunkSick")
 			.ToggleExpression(Db.Get().Expressions.FullBladder, null)
+			.ToggleThought(Db.Get().Thoughts.ExpellGunkDesire, null)
 			.ToggleAnims("anim_loco_walk_slouch_kanim", 0f)
 			.ToggleAnims("anim_idle_slouch_kanim", 0f);
 		this.cantHold.ToggleUrge(Db.Get().Urges.GunkPee).ToggleThought(Db.Get().Thoughts.ExpellingGunk, null).ToggleChore((GunkMonitor.Instance smi) => new BionicGunkSpillChore(smi.master), this.emptyRemaining);
@@ -64,7 +62,14 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 		smi.GetComponent<Effects>().Add("GunkHungover", true);
 	}
 
-	public static readonly float GUNK_CAPACITY = 50f;
+	public static void GunkAmountWatcherUpdate(GunkMonitor.Instance smi, float dt)
+	{
+		smi.GunkAmountWatcherUpdate(dt);
+	}
+
+	public const float BIONIC_RADS_REMOVED_WHEN_PEE = 300f;
+
+	public static readonly float GUNK_CAPACITY = 80f;
 
 	public const string GUNK_FULL_EFFECT_NAME = "GunkSick";
 
@@ -82,11 +87,7 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 
 	public GameStateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.State emptyRemaining;
 
-	public StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Signal GunkChangedSignal;
-
-	public StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Signal GunkMaxedOutSignal;
-
-	public StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Signal GunkEmptiedSignal;
+	public StateMachine<GunkMonitor, GunkMonitor.Instance, IStateMachineTarget, GunkMonitor.Def>.Signal gunkValueChangedSignal;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -153,27 +154,35 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 		{
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
 			this.gunkAmount = Db.Get().Amounts.BionicGunk.Lookup(base.gameObject);
-			this.oilAmount = Db.Get().Amounts.BionicOil.Lookup(base.gameObject);
-			AmountInstance amountInstance = this.oilAmount;
-			amountInstance.OnValueChanged = (Action<float>)Delegate.Combine(amountInstance.OnValueChanged, new Action<float>(this.OnOilValueChanged));
-			AmountInstance amountInstance2 = this.gunkAmount;
-			amountInstance2.OnValueChanged = (Action<float>)Delegate.Combine(amountInstance2.OnValueChanged, new Action<float>(this.OnGunkValueChanged));
 			this.schedulable = base.GetComponent<Schedulable>();
 		}
 
-		private void OnMaxGunkBuildupReached()
+		public override void StartSM()
 		{
-			base.sm.GunkMaxedOutSignal.Trigger(base.smi);
+			this.oilMonitor = base.gameObject.GetSMI<BionicOilMonitor.Instance>();
+			BionicOilMonitor.Instance instance = this.oilMonitor;
+			instance.OnOilValueChanged = (Action<float>)Delegate.Combine(instance.OnOilValueChanged, new Action<float>(this.OnOilValueChanged));
+			this.LastAmountOfGunkObserved = this.CurrentGunkMass;
+			base.StartSM();
 		}
 
-		private void OnGunkEmptied()
+		public void GunkAmountWatcherUpdate(float dt)
 		{
-			base.sm.GunkEmptiedSignal.Trigger(base.smi);
+			if (this.LastAmountOfGunkObserved != this.CurrentGunkMass)
+			{
+				this.LastAmountOfGunkObserved = this.CurrentGunkMass;
+				base.sm.gunkValueChangedSignal.Trigger(this);
+			}
 		}
 
-		private void OnGunkValueChanged(float delta)
+		protected override void OnCleanUp()
 		{
-			base.sm.GunkChangedSignal.Trigger(base.smi);
+			if (this.oilMonitor != null)
+			{
+				BionicOilMonitor.Instance instance = this.oilMonitor;
+				instance.OnOilValueChanged = (Action<float>)Delegate.Remove(instance.OnOilValueChanged, new Action<float>(this.OnOilValueChanged));
+			}
+			base.OnCleanUp();
 		}
 
 		private void OnOilValueChanged(float delta)
@@ -185,22 +194,10 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 
 		public void SetGunkMassValue(float value)
 		{
-			bool flag = this.CurrentGunkMass != value;
+			float currentGunkMass = this.CurrentGunkMass;
 			this.gunkAmount.SetValue(value);
-			if (flag)
-			{
-				if (this.CurrentGunkMass <= 0f)
-				{
-					this.OnGunkEmptied();
-					return;
-				}
-				if (this.IsGunkBuildupAtMax)
-				{
-					this.OnMaxGunkBuildupReached();
-					return;
-				}
-				base.sm.GunkChangedSignal.Trigger(this);
-			}
+			this.LastAmountOfGunkObserved = this.CurrentGunkMass;
+			base.sm.gunkValueChangedSignal.Trigger(this);
 		}
 
 		public void ExpellGunk(float mass, Storage targetStorage = null)
@@ -213,18 +210,21 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 				int num2 = Grid.PosToCell(base.transform.position);
 				byte index = Db.Get().Diseases.GetIndex(DUPLICANTSTATS.BIONICS.Secretions.PEE_DISEASE);
 				float num3 = num / GunkMonitor.GUNK_CAPACITY;
-				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
-				if (equippable != null)
-				{
-					equippable.GetComponent<Storage>().AddLiquid(GunkMonitor.GunkElement, num, this.bodyTemperature.value, index, (int)((float)DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE * num3), false, true);
-				}
-				else if (targetStorage != null)
+				if (targetStorage != null)
 				{
 					targetStorage.AddLiquid(GunkMonitor.GunkElement, num, this.bodyTemperature.value, index, (int)((float)DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE * num3), false, true);
 				}
 				else
 				{
-					SimMessages.AddRemoveSubstance(num2, GunkMonitor.GunkElement, CellEventLogger.Instance.Vomit, num, this.bodyTemperature.value, index, (int)((float)DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE * num3), true, -1);
+					Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+					if (equippable != null)
+					{
+						equippable.GetComponent<Storage>().AddLiquid(GunkMonitor.GunkElement, num, this.bodyTemperature.value, index, (int)((float)DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE * num3), false, true);
+					}
+					else
+					{
+						SimMessages.AddRemoveSubstance(num2, GunkMonitor.GunkElement, CellEventLogger.Instance.Vomit, num, this.bodyTemperature.value, index, (int)((float)DUPLICANTSTATS.BIONICS.Secretions.DISEASE_PER_PEE * num3), true, -1);
+					}
 				}
 				if (Sim.IsRadiationEnabled())
 				{
@@ -232,7 +232,7 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 					AmountInstance amountInstance = Db.Get().Amounts.RadiationBalance.Lookup(component);
 					RadiationMonitor.Instance smi = component.GetSMI<RadiationMonitor.Instance>();
 					float num4 = DUPLICANTSTATS.STANDARD.BaseStats.BLADDER_INCREASE_PER_SECOND / DUPLICANTSTATS.BIONICS.BaseStats.BLADDER_INCREASE_PER_SECOND;
-					float num5 = Math.Min(amountInstance.value, 100f * num4 * smi.difficultySettingMod * num3);
+					float num5 = Math.Min(amountInstance.value, 300f * num4 * smi.difficultySettingMod * num3);
 					if (num5 >= 1f)
 					{
 						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Math.Floor((double)num5).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, component.transform, Vector3.up * 2f, 1.5f, false, false);
@@ -248,7 +248,9 @@ public class GunkMonitor : GameStateMachine<GunkMonitor, GunkMonitor.Instance, I
 			this.ExpellGunk(this.CurrentGunkMass, targetStorage);
 		}
 
-		private AmountInstance oilAmount;
+		private float LastAmountOfGunkObserved;
+
+		private BionicOilMonitor.Instance oilMonitor;
 
 		private AmountInstance gunkAmount;
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance>
+public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, MoveToLocationMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -10,20 +10,30 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 		this.moving.ToggleChore((MoveToLocationMonitor.Instance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.MoveTo, (MoveChore.StatesInstance smii) => smi.targetCell, false), this.satisfied);
 	}
 
-	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, MoveToLocationMonitor.Def>.State satisfied;
 
-	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.State moving;
+	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, MoveToLocationMonitor.Def>.State moving;
 
-	public new class Instance : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	public class Def : StateMachine.BaseDef
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Tag[] invalidTagsForMoveTo = new Tag[0];
+	}
+
+	public new class Instance : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, MoveToLocationMonitor.Def>.GameInstance
+	{
+		public Instance(IStateMachineTarget master, MoveToLocationMonitor.Def def)
+			: base(master, def)
 		{
 			master.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+			this.kPrefabID = base.GetComponent<KPrefabID>();
 		}
 
 		private void OnRefreshUserMenu(object data)
 		{
+			if (this.kPrefabID.HasAnyTags(base.def.invalidTagsForMoveTo))
+			{
+				return;
+			}
 			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.MOVETOLOCATION.NAME, new global::System.Action(this.OnClickMoveToLocation), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP, true), 0.2f);
 		}
 
@@ -46,5 +56,7 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 		}
 
 		public int targetCell;
+
+		private KPrefabID kPrefabID;
 	}
 }

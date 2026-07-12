@@ -49,12 +49,16 @@ public class ResearchScreen : KModalScreen
 		this.zoomCenterLock = true;
 	}
 
-	public void ZoomToTech(string techID)
+	public void ZoomToTech(string techID, bool highlight = false)
 	{
 		Vector2 vector = this.entryMap[Db.Get().Techs.Get(techID)].rectTransform().GetLocalPosition() + new Vector2(-this.foreground.rectTransform().rect.size.x / 2f, this.foreground.rectTransform().rect.size.y / 2f);
 		this.forceTargetPosition = -vector;
 		this.zoomingToTarget = true;
 		this.targetZoom = this.maxZoom;
+		if (highlight)
+		{
+			this.sideBar.SetSearch(Db.Get().Techs.Get(techID).Name);
+		}
 	}
 
 	private void Update()

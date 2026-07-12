@@ -133,32 +133,43 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Oxygen",
 					UI.PST_KEYWORD,
-					" tanks that enable them to work in low breathability areas"
+					" tanks that enable them to work in low breathability areas\n\nThey will prioritize ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD,
+					" intake from equipped ",
+					UI.PRE_KEYWORD,
+					"Exosuits",
+					UI.PST_KEYWORD,
+					" to conserve their internal tanks"
 				});
+
+				public static LocString TOOLTIP_MASS_LINE = "Current mass: {0} / {1}";
+
+				public static LocString TOOLTIP_MASS_ROW_DETAIL = "    • {0}: {1}{2}";
+
+				public static LocString TOOLTIP_GERM_DETAIL = " - {0}";
 			}
 
 			public class BIONICOIL
 			{
-				public static LocString NAME = "Oil";
+				public static LocString NAME = "Gear Oil";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"Bionic Duplicants will slow down significantly when ",
 					UI.PRE_KEYWORD,
-					"Oil",
+					"Gear Oil",
 					UI.PST_KEYWORD,
-					" levels reach zero\n\nDuplicants can obtain ",
-					UI.PRE_KEYWORD,
-					"Phyto Oil",
-					UI.PST_KEYWORD,
-					" or ",
-					UI.PRE_KEYWORD,
-					"Crude Oil",
-					UI.PST_KEYWORD,
-					" at the ",
+					" levels reach zero\n\nThey can oil their joints by visiting a ",
 					UI.PRE_KEYWORD,
 					"Lubrication Station",
-					UI.PST_KEYWORD
+					UI.PST_KEYWORD,
+					" or using ",
+					UI.PRE_KEYWORD,
+					"Gear Balm",
+					UI.PST_KEYWORD,
+					" "
 				});
 			}
 
@@ -174,7 +185,7 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" when too much ",
 					UI.PRE_KEYWORD,
-					"Liquid Gunk",
+					"Gunk",
 					UI.PST_KEYWORD,
 					" builds up in their bionic parts\n\nRegular visits to the ",
 					UI.PRE_KEYWORD,
@@ -523,20 +534,13 @@ namespace STRINGS
 				});
 			}
 
-			public class BEBATTERYSAVEMODE
+			public class BIONICBEDTIMEMODE
 			{
-				public static LocString NAME = "Standby Mode";
+				public static LocString NAME = "Defragment";
 
-				public static LocString STATUS = "Standby Mode";
+				public static LocString STATUS = "Defragmenting";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant is resting\n\nTheir ",
-					UI.PRE_KEYWORD,
-					"Power",
-					UI.PST_KEYWORD,
-					" consumption is at a minimum"
-				});
+				public static LocString TOOLTIP = "This Duplicant is reorganizing their data cache during bedtime";
 			}
 
 			public class GENESHUFFLE
@@ -636,9 +640,9 @@ namespace STRINGS
 
 			public class EXPELLGUNK
 			{
-				public static LocString NAME = "Expel Liquid Gunk";
+				public static LocString NAME = "Expel Gunk";
 
-				public static LocString STATUS = "Expelling liquid gunk";
+				public static LocString STATUS = "Expelling gunk";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -960,7 +964,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Refill Oxygen Tank";
 
-				public static LocString STATUS = "Refilling oxygen tank";
+				public static LocString STATUS = "Refilling oxygen tank: {0} O<sub>2</sub>";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -1932,6 +1936,8 @@ namespace STRINGS
 
 				public static LocString CAN_PICKUP = "Cannot pickup";
 
+				public static LocString CANPICKUPANYASSIGNEDUPGRADE = "Cannot pick up any assigned boosters";
+
 				public static LocString IS_AWAKE = "{Selected} is sleeping";
 
 				public static LocString IS_STANDING = "{Selected} must stand";
@@ -2023,6 +2029,8 @@ namespace STRINGS
 				public static LocString REMOTE_CHORE_NO_REMOTE_WORKER = "No Remote Worker at Dock";
 
 				public static LocString REMOTE_CHORE_DOCK_UNAVAILABLE = "Remote Worker Already Busy";
+
+				public static LocString CAN_FETCH_DRONE_COMPLETE_FETCH = "Flydo cannot complete chore";
 			}
 		}
 
@@ -2558,17 +2566,35 @@ namespace STRINGS
 				});
 			}
 
+			public class BIONICMICROCHIPGENERATION
+			{
+				public static LocString NAME = "Programming Microchip {0}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is programming a microchip for use in ",
+					UI.PRE_KEYWORD,
+					"Booster",
+					UI.PST_KEYWORD,
+					" production\n\nBionic Duplicants will program microchips while defragmenting\n\nThey will produce 1 microchip every {0}"
+				});
+			}
+
 			public class BIONICWANTSOILCHANGE
 			{
-				public static LocString NAME = "Low Oil";
+				public static LocString NAME = "Low Gear Oil";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"This Duplicant is almost out of ",
 					UI.PRE_KEYWORD,
-					"Oil",
+					"Gear Oil",
 					UI.PST_KEYWORD,
-					" and needs to visit a ",
+					"\n\nThey need to find ",
+					UI.PRE_KEYWORD,
+					"Gear Balm",
+					UI.PST_KEYWORD,
+					" or visit a ",
 					UI.PRE_KEYWORD,
 					"Lubrication Station",
 					UI.PST_KEYWORD
@@ -2600,6 +2626,24 @@ namespace STRINGS
 					"Skills",
 					UI.PST_KEYWORD,
 					" can reboot this Duplicant's bionic systems:\n\n{Skills}"
+				});
+			}
+
+			public class CLOGGINGTOILET
+			{
+				public static LocString NAME = "Clogging a toilet";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is clogging a toilet with ",
+					UI.PRE_KEYWORD,
+					"Gunk",
+					UI.PST_KEYWORD,
+					"\n\nThey couldn't get to a ",
+					UI.PRE_KEYWORD,
+					"Gunk Extractor",
+					UI.PST_KEYWORD,
+					" in time"
 				});
 			}
 
@@ -3449,6 +3493,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Duplicants breathe out " + UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE");
 			}
 
+			public class BREATHINGO2BIONIC
+			{
+				public static LocString NAME = "Oxygen Tank: {ConsumptionRate} O<sub>2</sub>";
+
+				public static LocString TOOLTIP = "Bionic Duplicants are fitted with internal " + UI.FormatAsLink("Oxygen", "OXYGEN") + " tanks";
+			}
+
 			public class PICKUPDELIVERSTATUS
 			{
 				public static LocString NAME = DUPLICANTS.STATUSITEMS.GENERIC_DELIVER.NAME;
@@ -4156,7 +4207,7 @@ namespace STRINGS
 
 				public class POWERSTATUS
 				{
-					public static LocString NAME = "[{CHARGE} Power Remaining ({RATIO})]";
+					public static LocString NAME = "Power Remaining: {CHARGE} ({RATIO})";
 
 					public static LocString TOOLTIP = string.Concat(new string[]
 					{
@@ -4164,7 +4215,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Power",
 						UI.PST_KEYWORD,
-						" gets low, it will return to its dock to recharge"
+						" gets low, the remote worker will return to its dock to recharge"
 					});
 				}
 
@@ -4198,11 +4249,11 @@ namespace STRINGS
 
 				public class HIGHGUNK
 				{
-					public static LocString NAME = "Gunk Clogged";
+					public static LocString NAME = "Gunk Buildup";
 
 					public static LocString TOOLTIP = string.Concat(new string[]
 					{
-						"This remote worker will dock to remove ",
+						"This remote worker will return to its dock to remove ",
 						UI.PRE_KEYWORD,
 						"Gunk",
 						UI.PST_KEYWORD,
@@ -4212,7 +4263,7 @@ namespace STRINGS
 
 				public class FULLGUNK
 				{
-					public static LocString NAME = "Full of Gunk";
+					public static LocString NAME = "Gunk Clogged";
 
 					public static LocString TOOLTIP = string.Concat(new string[]
 					{
@@ -4226,20 +4277,20 @@ namespace STRINGS
 
 				public class LOWOIL
 				{
-					public static LocString NAME = "Low Oil";
+					public static LocString NAME = "Low Gear Oil";
 
-					public static LocString TOOLTIP = "This remote worker is low on oil\n\nIt will dock to refuel before accepting new chores";
+					public static LocString TOOLTIP = "This remote worker is low on gear oil\n\nIt will dock to replenish its stores before accepting new chores";
 				}
 
 				public class OUTOFOIL
 				{
-					public static LocString NAME = "No Oil";
+					public static LocString NAME = "No Gear Oil";
 
 					public static LocString TOOLTIP = string.Concat(new string[]
 					{
 						"This remote worker cannot function without ",
 						UI.PRE_KEYWORD,
-						"Oil",
+						"Gear Oil",
 						UI.PST_KEYWORD,
 						"\n\nIt must be returned to its dock"
 					});
@@ -4254,7 +4305,7 @@ namespace STRINGS
 
 				public class OILING
 				{
-					public static LocString NAME = "Refilling Oil";
+					public static LocString NAME = "Refilling Gear Oil";
 
 					public static LocString TOOLTIP = "This remote worker is lubricating its joints";
 				}
@@ -4834,24 +4885,16 @@ namespace STRINGS
 
 			public class ROOMBIONICUPKEEP
 			{
-				public static LocString NAME = "Workshop";
+				public static LocString NAME = "";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant used a ",
-					BUILDINGS.PREFABS.GUNKEMPTIER.NAME,
-					" in a ",
-					UI.PRE_KEYWORD,
-					"Workshop",
-					UI.PST_KEYWORD
-				});
+				public static LocString TOOLTIP = "";
 			}
 
 			public class FRESHOIL
 			{
 				public static LocString NAME = "Fresh Oil";
 
-				public static LocString TOOLTIP = "This Duplicant recently used a " + BUILDINGS.PREFABS.OILCHANGER.NAME + " and feels pretty slick" + UI.PST_KEYWORD;
+				public static LocString TOOLTIP = "This Duplicant recently used a " + BUILDINGS.PREFABS.OILCHANGER.NAME + " and feels pretty slick";
 			}
 
 			public class ROOMBARRACKS
@@ -5122,23 +5165,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant just couldn't hold it all in anymore";
 			}
 
-			public class CLOGGINGTOILET
-			{
-				public static LocString NAME = "Clogging a toilet";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant is clogging a toilet with ",
-					UI.PRE_KEYWORD,
-					"Liquid Gunk",
-					UI.PST_KEYWORD,
-					"\n\nThey really should have used a ",
-					UI.PRE_KEYWORD,
-					"Gunk Extractor",
-					UI.PST_KEYWORD
-				});
-			}
-
 			public class GUNKHUNGOVER
 			{
 				public static LocString NAME = "Gunk Mouth";
@@ -5147,13 +5173,35 @@ namespace STRINGS
 				{
 					"This Duplicant recently expelled built-up ",
 					UI.PRE_KEYWORD,
-					"Liquid Gunk",
+					"Gunk",
 					UI.PST_KEYWORD,
 					" and can still taste it"
 				});
 			}
 
-			public class NOLUBRICATION
+			public class NOLUBRICATIONMINOR
+			{
+				public static LocString NAME = "Grinding Gears (Reduced)";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant's out of ",
+					UI.PRE_KEYWORD,
+					"Gear Oil",
+					UI.PST_KEYWORD,
+					" and cannot function properly\n\nThey need to find ",
+					UI.PRE_KEYWORD,
+					"Gear Balm",
+					UI.PST_KEYWORD,
+					" or visit a ",
+					UI.PRE_KEYWORD,
+					"Lubrication Station",
+					UI.PST_KEYWORD,
+					" as soon as possible"
+				});
+			}
+
+			public class NOLUBRICATIONMAJOR
 			{
 				public static LocString NAME = "Grinding Gears";
 
@@ -5161,9 +5209,13 @@ namespace STRINGS
 				{
 					"This Duplicant's out of ",
 					UI.PRE_KEYWORD,
-					"Oil",
+					"Gear Oil",
 					UI.PST_KEYWORD,
-					" and cannot function properly\n\nThey need to visit a ",
+					" and cannot function properly\n\nThey need to find ",
+					UI.PRE_KEYWORD,
+					"Gear Balm",
+					UI.PST_KEYWORD,
+					" or visit a ",
 					UI.PRE_KEYWORD,
 					"Lubrication Station",
 					UI.PST_KEYWORD,
@@ -5185,19 +5237,19 @@ namespace STRINGS
 				});
 			}
 
-			public class WATERDAMAGE
+			public class BIONICWATERSTRESS
 			{
-				public static LocString NAME = "Liquid Damage";
+				public static LocString NAME = "Liquid Exposure";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant's bionic parts recently came into contact with incompatible ",
+					"This Duplicant's bionic parts are currently in contact with incompatible ",
 					UI.PRE_KEYWORD,
 					"Liquids",
 					UI.PST_KEYWORD,
 					"\n\nProlonged exposure could have serious ",
 					UI.PRE_KEYWORD,
-					"Health",
+					"Stress",
 					UI.PST_KEYWORD,
 					" consequences"
 				});
@@ -5210,18 +5262,11 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant recently lost their footing on a slippery floor and feels embarrassed";
 			}
 
-			public class BIONICBATTERYSAVEMODE
+			public class BIONICBEDTIMEEFFECT
 			{
-				public static LocString NAME = "Peaceful Processing";
+				public static LocString NAME = "Defragmenting";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant is enjoying a reprieve from the demands of high-wattage life\n\n",
-					UI.PRE_KEYWORD,
-					"Stress",
-					UI.PST_KEYWORD,
-					" is reduced while in Standby Mode"
-				});
+				public static LocString TOOLTIP = "This Duplicant is decluttering their internal data cache\n\nIt's helping them relax";
 			}
 
 			public class DUPLICANTGOTMILK
@@ -5467,13 +5512,13 @@ namespace STRINGS
 
 			public class STRESSSHOCKER
 			{
-				public static LocString NAME = "Deafening Shriek";
+				public static LocString NAME = "Shocking Temper";
 
-				public static LocString TOOLTIP = "This Duplicant is wailing at the top of their lungs as a result of " + UI.PRE_KEYWORD + "Stress" + UI.PST_KEYWORD;
+				public static LocString TOOLTIP = "This Duplicant is short-circuiting as a result of " + UI.PRE_KEYWORD + "Stress" + UI.PST_KEYWORD;
 
-				public static LocString NOTIFICATION_NAME = "Banshee Wailing";
+				public static LocString NOTIFICATION_NAME = "Stress Zapping";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became so " + UI.FormatAsLink("Stressed", "STRESS") + " they began wailing:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became so " + UI.FormatAsLink("Stressed", "STRESS") + " they began emitting electrical zaps:";
 			}
 
 			public class BANSHEE_WAILING_RECOVERY
@@ -5531,28 +5576,35 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Wattage";
 
-				public static LocString ESTIMATED_LIFE_TIME_REMAINING = string.Concat(new string[]
-				{
-					"Estimated ",
-					UI.PRE_KEYWORD,
-					"Power Bank",
-					UI.PST_KEYWORD,
-					" lifetime remaining: {0}"
-				});
-
-				public static LocString CURRENT_WATTAGE_TOOLTIP_LABEL = "Current Wattage: {0}";
-
-				public static LocString POTENTIAL_EXTRA_WATTAGE_TOOLTIP_LABEL = "Potential Wattage: {0}";
-
-				public static LocString STANDARD_ACTIVE_TEMPLATE = "{0}: {1}";
-
-				public static LocString STANDARD_INACTIVE_TEMPLATE = "{0}: {1}";
-
-				public static LocString SAVING_MODE_TEMPLATE = "{0} ({1}): {2}";
-
 				public static LocString BASE_NAME = "Base";
 
 				public static LocString SAVING_MODE_NAME = "Standby Mode";
+
+				public class TOOLTIP
+				{
+					public static LocString ESTIMATED_LIFE_TIME_REMAINING = string.Concat(new string[]
+					{
+						"Estimated ",
+						UI.PRE_KEYWORD,
+						"Power Bank",
+						UI.PST_KEYWORD,
+						" charge remaining: {0}"
+					});
+
+					public static LocString ELECTROBANK_DETAILS_LABEL = "Total Electrobanks {0} / {1}";
+
+					public static LocString ELECTROBANK_ROW = "{0} {1}: {2}";
+
+					public static LocString ELECTROBANK_EMPTY_ROW = "{0} Empty";
+
+					public static LocString CURRENT_WATTAGE_LABEL = "Current Wattage: {0}";
+
+					public static LocString POTENTIAL_EXTRA_WATTAGE_LABEL = "Potential Wattage: {0}";
+
+					public static LocString STANDARD_ACTIVE_TEMPLATE = "{0}: {1}";
+
+					public static LocString STANDARD_INACTIVE_TEMPLATE = "{0}: {1}";
+				}
 			}
 
 			public class FLOORSLEEP
@@ -6725,6 +6777,16 @@ namespace STRINGS
 				});
 			}
 
+			public class BREAKX
+			{
+				public static LocString NAME = "{0} Shift Break";
+			}
+
+			public class BREAKX_BIONIC
+			{
+				public static LocString NAME = "{0} Shift Break (Bionic)";
+			}
+
 			public class POWERTINKER
 			{
 				public static LocString NAME = "Engie's Tune-Up";
@@ -7223,174 +7285,6 @@ namespace STRINGS
 					" by someone's Banshee Wail"
 				});
 			}
-
-			public class BIONICPILOTINGBOOST
-			{
-				public static LocString NAME = "Piloting Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased rocket piloting skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Rocketry Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICCONSTRUCTIONBOOST
-			{
-				public static LocString NAME = "Construction Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased construction skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Building Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICEXCAVATIONBOOST
-			{
-				public static LocString NAME = "Excavation Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased excavation skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Digging Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICMACHINERYBOOST
-			{
-				public static LocString NAME = "Machinery Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased machine operating skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Operating Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICATHLETICSBOOST
-			{
-				public static LocString NAME = "Athletics Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has extra zip in their step thanks to the ",
-					UI.PRE_KEYWORD,
-					"Athletics Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICSCIENCEBOOST
-			{
-				public static LocString NAME = "Science Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased scientific research skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Researching Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICCOOKINGBOOST
-			{
-				public static LocString NAME = "Cuisine Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased culinary skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Cooking Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICMEDICINEBOOST
-			{
-				public static LocString NAME = "Medicine Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased medical skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Doctoring Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICSTRENGTHBOOST
-			{
-				public static LocString NAME = "Strength Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant is extra strong thanks to the ",
-					UI.PRE_KEYWORD,
-					"Strength Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICCREATIVITYBOOST
-			{
-				public static LocString NAME = "Creativity Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased decorating skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Creativity Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICAGRICULTUREBOOST
-			{
-				public static LocString NAME = "Agriculture Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased agricultural skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Farming Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
-
-			public class BIONICHUSBANDRYBOOST
-			{
-				public static LocString NAME = "Husbandry Boost";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant has increased critter husbandry skills thanks to the ",
-					UI.PRE_KEYWORD,
-					"Ranching Booster",
-					UI.PST_KEYWORD,
-					" they have installed"
-				});
-			}
 		}
 
 		public class CONGENITALTRAITS
@@ -7453,6 +7347,15 @@ namespace STRINGS
 			public static LocString IGNORED_EFFECTS = "Immune to <b>{0}</b>";
 
 			public static LocString IGNORED_EFFECTS_TOOLTIP = "{0}: {1}";
+
+			public static LocString STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP = string.Concat(new string[]
+			{
+				"Bionic Duplicants use boosters to increase their skills and attributes\n\nBoosters can be crafted at the ",
+				BUILDINGS.PREFABS.CRAFTINGTABLE.NAME,
+				" and ",
+				BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME,
+				"\n\nPreinstalled booster effects:"
+			});
 
 			public static LocString GRANTED_SKILL_SHARED_NAME = "Skilled: ";
 
@@ -8580,103 +8483,202 @@ namespace STRINGS
 				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP;
 			}
 
-			public class BIONICBASELINE
+			public class STARTWITHBOOSTER_DIG1
 			{
-				public static LocString NAME = "Bionic Bug: Gormless";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG1.NAME;
 
-				public static LocString DESC = "This Duplicant has built-in limitations that cannot be changed";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG1.DESC;
 
-				public static LocString SHORT_DESC = "";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Intelligence is one thing, instinct is another. This Duplicant struggles with both";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTDIGGING
+			public class STARTWITHBOOSTER_CONSTRUCT1
 			{
-				public static LocString NAME = "Bionic Booster: Excavation";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_CONSTRUCT1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Excavation Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_CONSTRUCT1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Digging</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_CONSTRUCT1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Excavation Booster gives them increased <b>Digging</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTBUILDING
+			public class STARTWITHBOOSTER_CARRY1
 			{
-				public static LocString NAME = "Bionic Booster: Building";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_CARRY1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Building Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_CARRY1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Construction</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_CARRY1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Building Booster gives them increased <b>Construction</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTCOOKING
+			public class STARTWITHBOOSTER_MEDICINE1
 			{
-				public static LocString NAME = "Bionic Booster: Cooking";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_MEDICINE1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Cooking Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_MEDICINE1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Cuisine</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_MEDICINE1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Cooking Booster gives them increased <b>Cuisine</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTART
+			public class STARTWITHBOOSTER_DIG2
 			{
-				public static LocString NAME = "Bionic Booster: Decorating";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG2.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Decorating Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG2.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Creativity</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG2.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Decorating Booster gives them increased <b>Creativity</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTFARMING
+			public class STARTWITHBOOSTER_FARM1
 			{
-				public static LocString NAME = "Bionic Booster: Farming";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_FARM1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Farming Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_FARM1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Agriculture</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_FARM1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Farming Booster gives them increased <b>Agriculture</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTRANCHING
+			public class STARTWITHBOOSTER_RANCH1
 			{
-				public static LocString NAME = "Bionic Booster: Ranching";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_RANCH1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Ranching Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_RANCH1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Husbandry</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_RANCH1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Ranching Booster gives them increased <b>Husbandry</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTMEDICINE
+			public class STARTWITHBOOSTER_COOK1
 			{
-				public static LocString NAME = "Bionic Booster: Doctoring";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_COOK1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Doctoring Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_COOK1.DESC;
 
-				public static LocString SHORT_DESC = "Increased <b>Medicine</b>";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_COOK1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Doctoring Booster gives them increased <b>Medicine</b>";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
 			}
 
-			public class DEFAULTBIONICBOOSTEXPLORER
+			public class STARTWITHBOOSTER_OP1
 			{
-				public static LocString NAME = "Bionic Booster: Dowsing";
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_OP1.NAME;
 
-				public static LocString DESC = "This Duplicant begins with a pre-installed <b>Dowsing Booster</b>";
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_OP1.DESC;
 
-				public static LocString SHORT_DESC = "Locates undiscovered geysers";
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_OP1.NAME + "</b>";
 
-				public static LocString SHORT_DESC_TOOLTIP = "Bionic Duplicants can install boosters that provide an immediate increase to specific skills\n\nThis Duplicant's pre-installed Dowsing Booster allows them to locate undiscovered geysers";
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
+			}
+
+			public class STARTWITHBOOSTER_ART1
+			{
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_ART1.NAME;
+
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_ART1.DESC;
+
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_ART1.NAME + "</b>";
+
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
+			}
+
+			public class STARTWITHBOOSTER_SUITS1
+			{
+				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_SUITS1.NAME;
+
+				public static LocString DESC = ITEMS.BIONIC_BOOSTERS.BOOSTER_SUITS1.DESC;
+
+				public static LocString SHORT_DESC = "Starts with a preinstalled <b>" + ITEMS.BIONIC_BOOSTERS.BOOSTER_SUITS1.NAME + "</b>";
+
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.STARTING_BIONIC_BOOSTER_SHARED_DESC_TOOLTIP;
+			}
+
+			public class BIONICBUG1
+			{
+				public static LocString NAME = "Bionic Bug: Rigid Thinking";
+
+				public static LocString DESC = "This Duplicant's bionic systems are quite inflexible";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG2
+			{
+				public static LocString NAME = "Bionic Bug: Dissociative";
+
+				public static LocString DESC = "This Duplicant's bionic systems are built without \"connector\" parts";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG3
+			{
+				public static LocString NAME = "Bionic Bug: All Thumbs";
+
+				public static LocString DESC = "This Duplicant's bionic systems aren't designed to operate other systems";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG4
+			{
+				public static LocString NAME = "Bionic Bug: Overengineered";
+
+				public static LocString DESC = "This Duplicant's bionic systems rarely get past the processing stage";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG5
+			{
+				public static LocString NAME = "Bionic Bug: Late Bloomer";
+
+				public static LocString DESC = "This Duplicant's bionic systems weren't built for speed";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG6
+			{
+				public static LocString NAME = "Bionic Bug: Urbanite";
+
+				public static LocString DESC = "This Duplicant's bionic systems were designed by someone who'd never seen a plant in real life";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
+			}
+
+			public class BIONICBUG7
+			{
+				public static LocString NAME = "Bionic Bug: Error Prone";
+
+				public static LocString DESC = "This Duplicant's bionic systems err on the side of erring";
+
+				public static LocString SHORT_DESC = "No passive attribute leveling";
+
+				public static LocString SHORT_DESC_TOOLTIP = "Does not level up attributes while performing errands\n\nRequires boosters to improve skills";
 			}
 		}
 
@@ -9015,7 +9017,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Ulti";
 
-				public static LocString DESC = "The only dance move this {0} knows is The Robot.";
+				public static LocString DESC = "This {0}'s favorite dance move is The Robot. They don't get why others think that's funny.";
 			}
 		}
 
@@ -9807,9 +9809,9 @@ namespace STRINGS
 
 			public class BIONICOILDELTA
 			{
-				public static LocString NAME = "Oil";
+				public static LocString NAME = "Gear Oil";
 
-				public static LocString DESC = "Determines how quickly a Duplicant's bionic parts gains or reduces " + UI.PRE_KEYWORD + "Oil" + UI.PST_KEYWORD;
+				public static LocString DESC = "Determines how quickly a Duplicant's bionic parts lose " + UI.PRE_KEYWORD + "Gear Oil" + UI.PST_KEYWORD;
 			}
 
 			public class BLADDERDELTA
@@ -10033,6 +10035,20 @@ namespace STRINGS
 				public static LocString NAME = "Maximum Radiation";
 
 				public static LocString DESC = "Largest amount of ambient Radiation this plant can tolerate";
+			}
+
+			public class BIONICBOOSTERSLOTS
+			{
+				public static LocString NAME = "Booster Slots";
+
+				public static LocString DESC = "The number of boosters this Bionic Duplicant can install at once";
+			}
+
+			public class BIONICBATTERYCOUNTCAPACITY
+			{
+				public static LocString NAME = "Power Banks";
+
+				public static LocString DESC = "The number of power banks this Bionic Duplicant can store";
 			}
 		}
 
@@ -10431,6 +10447,76 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "This skill doesn't really do anything right now.";
 			}
+
+			public class BIONICS_A1
+			{
+				public static LocString NAME = UI.FormatAsLink("Booster Processing I", "BIONICS_A1");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster.";
+			}
+
+			public class BIONICS_A2
+			{
+				public static LocString NAME = UI.FormatAsLink("Booster Processing II", "BIONICS_A2");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster, and increases runspeed.";
+			}
+
+			public class BIONICS_A3
+			{
+				public static LocString NAME = UI.FormatAsLink("Complex Processing", "BIONICS_A3");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster, and reduces the runspeed loss experienced while wearing exosuits.";
+			}
+
+			public class BIONICS_B1
+			{
+				public static LocString NAME = UI.FormatAsLink("Improved Gears I", "BIONICS_B1");
+
+				public static LocString DESCRIPTION = "Significantly reduces the negative impacts of low " + UI.FormatAsLink("Gear Oil", "GEAROIL") + ".";
+			}
+
+			public class BIONICS_B2
+			{
+				public static LocString NAME = UI.FormatAsLink("Improved Gears II", "BIONICS_B2");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster.";
+			}
+
+			public class BIONICS_B3
+			{
+				public static LocString NAME = UI.FormatAsLink("Top Gear", "BIONICS_B3");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster, and eliminates the runspeed loss experienced while wearing exosuits.";
+			}
+
+			public class BIONICS_C1
+			{
+				public static LocString NAME = UI.FormatAsLink("Schematics", "BIONICS_C1");
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Allows Bionic Duplicants to perform research using a ",
+					BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME,
+					", and craft items at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME,
+					"."
+				});
+			}
+
+			public class BIONICS_C2
+			{
+				public static LocString NAME = UI.FormatAsLink("Advanced Schematics", "BIONICS_C2");
+
+				public static LocString DESCRIPTION = "Allows Bionic Duplicants to install an additional booster and increase their runspeed.";
+			}
+
+			public class BIONICS_C3
+			{
+				public static LocString NAME = UI.FormatAsLink("Power Banking", "BIONICS_C3");
+
+				public static LocString DESCRIPTION = "Increases " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " storage capacity to maximize work time between replacements.";
+			}
 		}
 
 		public class THOUGHTS
@@ -10463,6 +10549,11 @@ namespace STRINGS
 			public class EXPELLGUNKDESIRE
 			{
 				public static LocString TOOLTIP = "Expel Gunk";
+			}
+
+			public class REFILLOILDESIRE
+			{
+				public static LocString TOOLTIP = "Low Gear Oil";
 			}
 
 			public class EXPELLINGSPOILEDOIL

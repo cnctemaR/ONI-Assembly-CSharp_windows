@@ -25,6 +25,7 @@ public class OwnablesSecondSideScreenRow : KMonoBehaviour
 		this.item = item_assignable;
 		this.changeAssignmentListenerIDX = this.item.Subscribe(684616645, new Action<object>(this._OnItemAssignationChanged));
 		this.destroyListenerIDX = this.item.Subscribe(1969584890, new Action<object>(this._OnRowItemDestroyed));
+		this.customTooltipFunc = this.item.customAssignmentUITooltipFunc;
 		this.Refresh();
 	}
 
@@ -45,11 +46,19 @@ public class OwnablesSecondSideScreenRow : KMonoBehaviour
 			{
 				this.statusLabel.SetText(OwnablesSecondSideScreenRow.NOT_ASSIGNED);
 			}
-			InfoDescription component = this.item.gameObject.GetComponent<InfoDescription>();
-			bool flag2 = component != null && !string.IsNullOrEmpty(component.description);
-			string text = (flag2 ? component.description : properName);
-			this.tooltip.SizingSetting = (flag2 ? ToolTip.ToolTipSizeSetting.MaxWidthWrapContent : ToolTip.ToolTipSizeSetting.DynamicWidthNoWrap);
-			this.tooltip.SetSimpleTooltip(text);
+			if (this.customTooltipFunc == null)
+			{
+				InfoDescription component = this.item.gameObject.GetComponent<InfoDescription>();
+				bool flag2 = component != null && !string.IsNullOrEmpty(component.description);
+				string text = (flag2 ? component.description : properName);
+				this.tooltip.SizingSetting = (flag2 ? ToolTip.ToolTipSizeSetting.MaxWidthWrapContent : ToolTip.ToolTipSizeSetting.DynamicWidthNoWrap);
+				this.tooltip.SetSimpleTooltip(text);
+			}
+			else
+			{
+				this.tooltip.SizingSetting = ToolTip.ToolTipSizeSetting.MaxWidthWrapContent;
+				this.tooltip.SetSimpleTooltip(this.customTooltipFunc(this.minionSlotInstance.assignables));
+			}
 		}
 		else
 		{
@@ -123,7 +132,7 @@ public class OwnablesSecondSideScreenRow : KMonoBehaviour
 			{
 				gameObject = this.item.assignee.GetOwners()[0].GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 			}
-			GameUtil.FocusCamera(gameObject.transform, false);
+			GameUtil.FocusCamera(gameObject.transform, false, true);
 		}
 	}
 
@@ -152,6 +161,8 @@ public class OwnablesSecondSideScreenRow : KMonoBehaviour
 	public Action<OwnablesSecondSideScreenRow> OnRowItemDestroyed;
 
 	public Action<OwnablesSecondSideScreenRow> OnRowClicked;
+
+	public Func<Assignables, string> customTooltipFunc;
 
 	private MultiToggle toggle;
 

@@ -18,19 +18,19 @@ public class RemoteWorkerOilMonitor : StateMachineComponent<RemoteWorkerOilMonit
 
 	public float OilLevel()
 	{
-		return this.Oil / 60f;
+		return this.Oil / 20.000002f;
 	}
 
 	[MyCmpGet]
 	private Storage storage;
 
-	public const float CAPACITY_KG = 60f;
+	public const float CAPACITY_KG = 20.000002f;
 
-	public const float LOW_LEVEL = 12f;
+	public const float LOW_LEVEL = 4.0000005f;
 
-	public const float FILL_RATE_KG_PER_S = 1f;
+	public const float FILL_RATE_KG_PER_S = 2.5000002f;
 
-	public const float CONSUMPTION_RATE_KG_PER_S = 0.1f;
+	public const float CONSUMPTION_RATE_KG_PER_S = 0.033333335f;
 
 	public class StatesInstance : GameStateMachine<RemoteWorkerOilMonitor.States, RemoteWorkerOilMonitor.StatesInstance, RemoteWorkerOilMonitor, object>.GameInstance
 	{
@@ -53,12 +53,12 @@ public class RemoteWorkerOilMonitor : StateMachineComponent<RemoteWorkerOilMonit
 
 		public static bool IsOkForOil(RemoteWorkerOilMonitor.StatesInstance smi)
 		{
-			return smi.master.Oil > 12f;
+			return smi.master.Oil > 4.0000005f;
 		}
 
 		public static bool IsLowOnOil(RemoteWorkerOilMonitor.StatesInstance smi)
 		{
-			return smi.master.Oil >= float.Epsilon && smi.master.Oil < 12f;
+			return smi.master.Oil >= float.Epsilon && smi.master.Oil < 4.0000005f;
 		}
 
 		public static bool IsOutOfOil(RemoteWorkerOilMonitor.StatesInstance smi)

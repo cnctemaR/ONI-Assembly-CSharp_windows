@@ -2536,9 +2536,9 @@ public static class GameUtil
 		return num * 1000f;
 	}
 
-	public static void FocusCamera(Transform target, bool select = true)
+	public static void FocusCamera(Transform target, bool select = true, bool show_back_button = true)
 	{
-		GameUtil.FocusCamera(target.GetPosition());
+		GameUtil.FocusCamera(target.GetPosition(), 2f, true, show_back_button);
 		if (select)
 		{
 			KSelectable component = target.GetComponent<KSelectable>();
@@ -2546,14 +2546,27 @@ public static class GameUtil
 		}
 	}
 
-	public static void FocusCamera(Vector3 position)
+	public static void FocusCameraOnWorld(int worldID, Vector3 pos, float forceOrthgraphicSize = 10f, global::System.Action callback = null, bool show_back_button = true)
 	{
-		CameraController.Instance.CameraGoTo(position, 2f, true);
+		CameraController.Instance.ActiveWorldStarWipe(worldID, pos, forceOrthgraphicSize, callback);
+		if (show_back_button && NotificationScreen_TemporaryActions.Instance != null)
+		{
+			NotificationScreen_TemporaryActions.Instance.CreateCameraReturnActionButton(CameraController.Instance.transform.position);
+		}
 	}
 
-	public static void FocusCamera(int cell)
+	public static void FocusCamera(int cell, bool show_back_button = true)
 	{
-		GameUtil.FocusCamera(Grid.CellToPos(cell));
+		GameUtil.FocusCamera(Grid.CellToPos(cell), 2f, true, show_back_button);
+	}
+
+	public static void FocusCamera(Vector3 position, float speed = 2f, bool playSound = true, bool show_back_button = true)
+	{
+		CameraController.Instance.CameraGoTo(position, speed, playSound);
+		if (show_back_button && NotificationScreen_TemporaryActions.Instance != null)
+		{
+			NotificationScreen_TemporaryActions.Instance.CreateCameraReturnActionButton(CameraController.Instance.transform.position);
+		}
 	}
 
 	public static string RandomValueFromSeparatedString(string source, string separator = "\n")

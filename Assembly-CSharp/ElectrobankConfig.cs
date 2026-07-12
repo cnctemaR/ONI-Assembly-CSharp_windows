@@ -13,6 +13,10 @@ public class ElectrobankConfig : IEntityConfig
 			GameTags.ChargedPortableBattery,
 			GameTags.PedestalDisplayable
 		});
+		if (!Assets.IsTagCountable(GameTags.ChargedPortableBattery))
+		{
+			Assets.AddCountableTag(GameTags.ChargedPortableBattery);
+		}
 		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddTag(GameTags.IndustrialProduct);
 		gameObject.AddComponent<Electrobank>().rechargeable = true;

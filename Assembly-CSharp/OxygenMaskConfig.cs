@@ -80,6 +80,7 @@ public class OxygenMaskConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = 20f;
 		suitTank.elementTag = GameTags.Breathable;
+		suitTank.SafeCellFlagsToIgnoreOnEquipped = SafeCellQuery.SafeFlags.IsBreathable;
 		Durability durability = go.AddComponent<Durability>();
 		durability.wornEquipmentPrefabID = "Worn_Oxygen_Mask";
 		durability.durabilityLossPerCycle = global::TUNING.EQUIPMENT.SUITS.OXYGEN_MASK_DECAY;

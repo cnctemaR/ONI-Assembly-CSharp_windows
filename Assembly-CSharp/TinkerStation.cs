@@ -137,7 +137,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 			{
 				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
-				base.SetWorkTime(this.workTime);
+				base.SetWorkTime(this.toolProductionTime);
 				return;
 			}
 		}
@@ -210,6 +210,8 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 	public bool useFilteredStorage;
 
 	protected FilteredStorage filteredStorage;
+
+	public float toolProductionTime = 160f;
 
 	public bool alwaysTinker;
 

@@ -893,19 +893,32 @@ public class StarmapScreen : KModalScreen
 		{
 			this.rocketDetailsRange.AddRow().ShowData(UI.STARMAP.ROCKETSTATS.SOLID_BOOSTER, GameUtil.GetFormattedDistance(num));
 		}
-		BreakdownListRow breakdownListRow = this.rocketDetailsRange.AddRow();
-		breakdownListRow.ShowStatusData(UI.STARMAP.ROCKETSTATS.TOTAL_THRUST, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetTotalThrust() * 1000f), BreakdownListRow.Status.Green);
-		breakdownListRow.SetImportant(true);
-		float num2 = -(this.currentCommandModule.rocketStats.GetTotalThrust() - this.currentCommandModule.rocketStats.GetRocketMaxDistance());
-		this.rocketThrustWidget.gameObject.SetActive(true);
+		if (this.currentCommandModule.robotPilotControlled)
+		{
+			RoboPilotModule component = this.currentCommandModule.GetComponent<RoboPilotModule>();
+			BreakdownListRow breakdownListRow = this.rocketDetailsRange.AddRow();
+			float num2 = component.GetDataBankRange() * 1000f;
+			BreakdownListRow.Status status = BreakdownListRow.Status.Red;
+			if (this.selectedDestination != null && num2 >= (float)this.selectedDestination.OneBasedDistance * 10000f)
+			{
+				status = BreakdownListRow.Status.Green;
+			}
+			breakdownListRow.ShowStatusData(UI.STARMAP.ROCKETSTATS.ROBO_PILOT_RANGE, GameUtil.GetFormattedDistance(num2), status);
+			breakdownListRow.AddTooltip(string.Format(UI.STARMAP.ROCKETSTATS.ROBO_PILOT_EFFICIENCY, GameUtil.GetFormattedDistance(RoboPilotCommandModuleConfig.DATABANKRANGE * 1000f)));
+		}
 		BreakdownListRow breakdownListRow2 = this.rocketDetailsRange.AddRow();
-		breakdownListRow2.ShowStatusData(UI.STARMAP.ROCKETSTATUS.WEIGHTPENALTY, this.DisplayDistance(num2), BreakdownListRow.Status.Red);
-		breakdownListRow2.SetHighlighted(true);
+		breakdownListRow2.ShowStatusData(UI.STARMAP.ROCKETSTATS.TOTAL_THRUST, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetTotalThrust() * 1000f), BreakdownListRow.Status.Green);
+		breakdownListRow2.SetImportant(true);
+		float num3 = -(this.currentCommandModule.rocketStats.GetTotalThrust() - this.currentCommandModule.rocketStats.GetRocketMaxDistance());
+		this.rocketThrustWidget.gameObject.SetActive(true);
+		BreakdownListRow breakdownListRow3 = this.rocketDetailsRange.AddRow();
+		breakdownListRow3.ShowStatusData(UI.STARMAP.ROCKETSTATUS.WEIGHTPENALTY, this.DisplayDistance(num3), BreakdownListRow.Status.Red);
+		breakdownListRow3.SetHighlighted(true);
 		this.rocketDetailsRange.AddCustomRow(this.rocketThrustWidget.gameObject);
 		this.rocketThrustWidget.Draw(this.currentCommandModule);
-		BreakdownListRow breakdownListRow3 = this.rocketDetailsRange.AddRow();
-		breakdownListRow3.ShowData(UI.STARMAP.ROCKETSTATS.TOTAL_RANGE, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetRocketMaxDistance() * 1000f));
-		breakdownListRow3.SetImportant(true);
+		BreakdownListRow breakdownListRow4 = this.rocketDetailsRange.AddRow();
+		breakdownListRow4.ShowData(UI.STARMAP.ROCKETSTATS.TOTAL_RANGE, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetRocketMaxDistance() * 1000f));
+		breakdownListRow4.SetImportant(true);
 	}
 
 	private void UpdateMassDisplay()

@@ -619,6 +619,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Duplicants cannot reach this rocket module";
 			}
 
+			public class POWERBANKCHARGERINPROGRESS
+			{
+				public static LocString NAME = "Recharging Powerbank at {0}";
+
+				public static LocString TOOLTIP = UI.FormatAsLink("Power Bank Charger", "ELECTROBANKCHARGER") + " will drop the electrobank being charged whenever it reaches full charge.";
+			}
+
 			public class CONSTRUCTABLEDIGUNREACHABLE
 			{
 				public static LocString NAME = "Unreachable Dig";
@@ -1710,6 +1717,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This amenity cannot be used while full\n\nEmptying it will produce " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 			}
 
+			public class TOILETNEEDSEMPTYINGGUNK
+			{
+				public static LocString NAME = "Requires Emptying";
+
+				public static LocString TOOLTIP = "This amenity cannot be used while full\n\nEmptying it will produce " + UI.FormatAsLink("Gunk", "LIQUIDGUNK");
+			}
+
 			public class DESALINATORNEEDSEMPTYING
 			{
 				public static LocString NAME = "Requires Emptying";
@@ -1747,6 +1761,20 @@ namespace STRINGS
 				public static LocString NAME = "Out of Order";
 
 				public static LocString TOOLTIP = "This amenity requires maintenance";
+			}
+
+			public class UNUSABLEGUNKED
+			{
+				public static LocString NAME = "Out of Order: Gunk";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Someone dumped ",
+					UI.FormatAsLink("Gunk", "LIQUIDGUNK"),
+					" here instead of in a ",
+					UI.FormatAsLink("Gunk Extractor", "GUNKEMPTIER"),
+					"\n\nThis amenity requires maintenance"
+				});
 			}
 
 			public class NORESEARCHSELECTED
@@ -3540,6 +3568,55 @@ namespace STRINGS
 				public static LocString NAME = "Autopilot Engaged";
 
 				public static LocString TOOLTIP = "This rocket has entered autopilot mode and will fly at reduced speed\n\nIt can resume full speed once a Duplicant pilot takes over";
+			}
+
+			public class INFLIGHTPILOTED
+			{
+				public static LocString NAME = "Piloted";
+
+				public static LocString DUPE_TOOLTIP = "Duplicant pilot's <b>Skill</b>: +{0} speed boost";
+
+				public static LocString ROBO_TOOLTIP = "Piloted by a " + UI.PRE_KEYWORD + "Robo-Pilot" + UI.PST_KEYWORD;
+			}
+
+			public class INFLIGHTUNPILOTED
+			{
+				public static LocString NAME = "Unpiloted";
+
+				public static LocString TOOLTIP = "Inactive rocket module: -{penalty} speed {modules}";
+
+				public static LocString ROBO_PILOT_ONLY_TOOLTIP = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"Robo-Pilot",
+					UI.PST_KEYWORD,
+					" has run out of ",
+					UI.PRE_KEYWORD,
+					"Data Banks",
+					UI.PST_KEYWORD,
+					"\n\nThis rocket is stranded"
+				});
+			}
+
+			public class INFLIGHTAUTOPILOTED
+			{
+				public static LocString NAME = "Autopilot Engaged";
+
+				public static LocString TOOLTIP = "This rocket's {modules} is inactive\n\nThis rocket has entered autopilot mode and will fly at reduced speed\n    •  -{penalty} speed";
+			}
+
+			public class INFLIGHTSUPERPILOT
+			{
+				public static LocString NAME = "Multi-Piloted";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This rocket is being piloted by a Duplicant and a ",
+					UI.PRE_KEYWORD,
+					"Robo-Pilot",
+					UI.PST_KEYWORD,
+					"\n    • Multi-Piloted: +{1} speed boost\n    • Duplicant pilot skill: +{0} speed boost"
+				});
 			}
 
 			public class ROCKETCHECKLISTINCOMPLETE

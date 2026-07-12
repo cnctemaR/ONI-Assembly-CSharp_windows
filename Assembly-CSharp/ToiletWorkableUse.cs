@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -34,6 +35,31 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		{
 			roomOfGameObject.roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), worker.GetComponent<Effects>());
 		}
+		if (worker != null)
+		{
+			this.last_user_id = worker.gameObject.PrefabID();
+		}
+	}
+
+	public override HashedString[] GetWorkPstAnims(WorkerBase worker, bool successfully_completed)
+	{
+		HashedString[] array = null;
+		if (this.workerTypePstAnims.TryGetValue(worker.PrefabID(), out array))
+		{
+			this.workingPstComplete = array;
+			this.workingPstFailed = array;
+		}
+		return base.GetWorkPstAnims(worker, successfully_completed);
+	}
+
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
+	{
+		KAnimFile[] array = null;
+		if (this.workerTypeOverrideAnims.TryGetValue(worker.PrefabID(), out array))
+		{
+			this.overrideAnims = array;
+		}
+		return base.GetAnim(worker);
 	}
 
 	protected override void OnStopWork(WorkerBase worker)
@@ -93,15 +119,33 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		}
 		else
 		{
-			base.Trigger(261445693, worker);
+			base.Trigger(1234642927, worker);
 		}
 		base.OnCompleteWork(worker);
 	}
 
+	public override StatusItem GetWorkerStatusItem()
+	{
+		if (base.worker != null && base.worker.gameObject.HasTag(GameTags.Minions.Models.Bionic))
+		{
+			return Db.Get().DuplicantStatusItems.CloggingToilet;
+		}
+		return base.GetWorkerStatusItem();
+	}
+
+	public Dictionary<Tag, KAnimFile[]> workerTypeOverrideAnims = new Dictionary<Tag, KAnimFile[]>();
+
+	public Dictionary<Tag, HashedString[]> workerTypePstAnims = new Dictionary<Tag, HashedString[]>();
+
 	[Serialize]
 	public int timesUsed;
 
+	[Serialize]
+	public Tag last_user_id;
+
+	[Serialize]
 	public SimHashes lastElementRemovedFromDupe = SimHashes.DirtyWater;
 
+	[Serialize]
 	public float lastAmountOfWasteMassRemovedFromDupe;
 }

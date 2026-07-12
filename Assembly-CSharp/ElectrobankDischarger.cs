@@ -31,6 +31,7 @@ public class ElectrobankDischarger : Generator
 		this.filteredStorage.FilterChanged();
 		Storage storage = this.storage;
 		storage.onDestroyItemsDropped = (Action<List<GameObject>>)Delegate.Combine(storage.onDestroyItemsDropped, new Action<List<GameObject>>(this.OnBatteriesDroppedFromDeconstruction));
+		this.UpdateSymbolSwap();
 	}
 
 	private void OnBatteriesDroppedFromDeconstruction(List<GameObject> items)
@@ -58,6 +59,7 @@ public class ElectrobankDischarger : Generator
 	{
 		this.RefreshCells(null);
 		this.RefreshOperationalActive(null);
+		this.UpdateSymbolSwap();
 	}
 
 	public void UpdateMeter()
@@ -67,6 +69,20 @@ public class ElectrobankDischarger : Generator
 			this.meterController = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		}
 		this.meterController.SetPositionPercent(this.smi.master.ElectrobankJoulesStored / 120000f);
+	}
+
+	public void UpdateSymbolSwap()
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		SymbolOverrideController component2 = component.GetComponent<SymbolOverrideController>();
+		component.SetSymbolVisiblity("electrobank_l", false);
+		if (this.storage.items.Count > 0)
+		{
+			KAnim.Build.Symbol symbol = this.storage.items[0].GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.symbols[0];
+			component2.AddSymbolOverride("electrobank_s", symbol, 0);
+			return;
+		}
+		component2.RemoveSymbolOverride("electrobank_s", 0);
 	}
 
 	private void RefreshOperationalActive(object data = null)

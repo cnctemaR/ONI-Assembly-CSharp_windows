@@ -51,6 +51,13 @@ namespace Database
 			this.Basekeeping = base.Add(new SkillGroup("Basekeeping", Db.Get().ChoreGroups.Basekeeping.Id, DUPLICANTS.CHOREGROUPS.BASEKEEPING.NAME, "icon_errand_tidy", "icon_archetype_tidy"));
 			this.Basekeeping.relevantAttributes = new List<Klei.AI.Attribute> { Db.Get().ChoreGroups.Basekeeping.attribute };
 			this.Basekeeping.requiredChoreGroups = new List<string> { Db.Get().ChoreGroups.Basekeeping.Id };
+			if (DlcManager.IsContentSubscribed("DLC3_ID"))
+			{
+				this.BionicSkills = base.Add(new SkillGroup("BionicSkills", null, "", "", ""));
+				this.BionicSkills.relevantAttributes = new List<Klei.AI.Attribute>();
+				this.BionicSkills.requiredChoreGroups = new List<string>();
+				this.BionicSkills.allowAsAptitude = false;
+			}
 		}
 
 		public SkillGroup Mining;
@@ -78,5 +85,7 @@ namespace Database
 		public SkillGroup MedicalAid;
 
 		public SkillGroup Basekeeping;
+
+		public SkillGroup BionicSkills;
 	}
 }

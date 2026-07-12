@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/OilWellCap")]
-public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IElementEmitter
+public class OilWellCap : RemoteWorkable, ISingleSliderControl, ISliderControl, IElementEmitter
 {
 	public SimHashes Element
 	{
@@ -38,6 +38,14 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 		get
 		{
 			return UI.UNITSUFFIXES.PERCENT;
+		}
+	}
+
+	public override Chore RemoteDockChore
+	{
+		get
+		{
+			return this.DepressurizeChore;
 		}
 	}
 

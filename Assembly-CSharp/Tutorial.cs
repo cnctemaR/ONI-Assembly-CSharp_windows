@@ -567,6 +567,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private bool FoodSourceExistsOnStartingWorld()
 	{
+		if (Components.GetMinionIdentitiesByModel(MinionConfig.MODEL).Count <= 0)
+		{
+			return true;
+		}
 		using (List<ComplexFabricator>.Enumerator enumerator = Components.ComplexFabricators.Items.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
@@ -587,7 +591,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private bool ToiletExists()
 	{
-		return Components.Toilets.Count > 0;
+		return Components.Toilets.Count > 0 || Components.GunkExtractors.Count > 0;
 	}
 
 	private void ZoomToNextOxygenGenerator()

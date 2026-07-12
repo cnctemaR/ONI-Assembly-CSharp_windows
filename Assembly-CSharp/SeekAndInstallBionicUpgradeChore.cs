@@ -1,16 +1,25 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class SeekAndInstallBionicUpgradeChore : Chore<SeekAndInstallBionicUpgradeChore.Instance>
 {
 	public SeekAndInstallBionicUpgradeChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.SeekAndInstallUpgrade, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
+		Chore.Precondition precondition = default(Chore.Precondition);
+		precondition.id = "CanPickupAnyAssignedUpgrade";
+		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.CANPICKUPANYASSIGNEDUPGRADE;
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return ((BionicUpgradesMonitor.Instance)data).GetAnyReachableAssignedSlot() != null;
+		};
+		precondition.canExecuteOnAnyThread = false;
+		this.CanPickupAnyAssignedUpgrade = precondition;
+		base..ctor(Db.Get().ChoreTypes.SeekAndInstallUpgrade, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		base.smi = new SeekAndInstallBionicUpgradeChore.Instance(this, target.gameObject);
-		BionicUpgradeComponent assignedUpgradeComponent = target.gameObject.GetSMI<BionicUpgradesMonitor.Instance>().GetAnyReachableAssignedSlot().assignedUpgradeComponent;
+		BionicUpgradesMonitor.Instance smi = target.gameObject.GetSMI<BionicUpgradesMonitor.Instance>();
 		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, assignedUpgradeComponent.GetComponent<Pickupable>());
-		this.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, assignedUpgradeComponent);
+		this.AddPrecondition(this.CanPickupAnyAssignedUpgrade, smi);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -40,7 +49,7 @@ public class SeekAndInstallBionicUpgradeChore : Chore<SeekAndInstallBionicUpgrad
 
 	public static void SetOverrideAnimSymbol(SeekAndInstallBionicUpgradeChore.Instance smi, bool overriding)
 	{
-		string text = "object";
+		string text = "booster";
 		KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
 		SymbolOverrideController component2 = smi.gameObject.GetComponent<SymbolOverrideController>();
 		GameObject gameObject = smi.sm.pickedUpgrade.Get(smi);
@@ -63,6 +72,10 @@ public class SeekAndInstallBionicUpgradeChore : Chore<SeekAndInstallBionicUpgrad
 
 	public static bool IsBionicUpgradeAssignedTo(GameObject bionicUpgradeGameObject, GameObject ownerInQuestion)
 	{
+		if (bionicUpgradeGameObject == null)
+		{
+			return false;
+		}
 		Assignable component = bionicUpgradeGameObject.GetComponent<BionicUpgradeComponent>();
 		IAssignableIdentity component2 = ownerInQuestion.GetComponent<IAssignableIdentity>();
 		return component.IsAssignedTo(component2);
@@ -77,8 +90,14 @@ public class SeekAndInstallBionicUpgradeChore : Chore<SeekAndInstallBionicUpgrad
 			BionicUpgradeComponent component = gameObject.GetComponent<BionicUpgradeComponent>();
 			storage.Remove(component.gameObject, true);
 			smi.upgradeMonitor.InstallUpgrade(component);
+			if (PopFXManager.Instance != null)
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, component.GetProperName(), smi.gameObject.transform, Vector3.up, 1.5f, true, false);
+			}
 		}
 	}
+
+	private Chore.Precondition CanPickupAnyAssignedUpgrade;
 
 	public class States : GameStateMachine<SeekAndInstallBionicUpgradeChore.States, SeekAndInstallBionicUpgradeChore.Instance, SeekAndInstallBionicUpgradeChore>
 	{

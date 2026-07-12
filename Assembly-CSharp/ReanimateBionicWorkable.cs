@@ -9,6 +9,7 @@ public class ReanimateBionicWorkable : Workable
 		base.OnPrefabInit();
 		this.workAnims = new HashedString[] { "offline_battery_change_pre", "offline_battery_change_loop" };
 		this.workingPstComplete = new HashedString[] { "offline_battery_change_pst" };
+		this.workingPstFailed = new HashedString[] { "offline_battery_change_failed" };
 		base.SetWorkTime(30f);
 		this.readyForSkillWorkStatusItem = Db.Get().DuplicantStatusItems.BionicRequiresSkillPerk;
 		base.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.InstallingElectrobank);

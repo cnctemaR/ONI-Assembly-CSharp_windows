@@ -375,7 +375,7 @@ public class NotificationScreen : KScreen
 				int myWorldId = nextClickedNotification.clickFocus.gameObject.GetMyWorldId();
 				if (myWorldId != -1)
 				{
-					CameraController.Instance.ActiveWorldStarWipe(myWorldId, position, 10f, null);
+					GameUtil.FocusCameraOnWorld(myWorldId, position, 10f, null, true);
 				}
 				else if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
 				{

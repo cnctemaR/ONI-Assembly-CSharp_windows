@@ -25,6 +25,7 @@ public class ElectrobankCharger : GameStateMachine<ElectrobankCharger, Electroba
 			{
 				smi.master.GetComponent<Operational>().SetActive(false, false);
 			})
+			.ToggleStatusItem(Db.Get().BuildingStatusItems.PowerBankChargerInProgress, null)
 			.Update(delegate(ElectrobankCharger.Instance smi, float dt)
 			{
 				smi.ChargeInternal(smi, dt);
@@ -75,7 +76,7 @@ public class ElectrobankCharger : GameStateMachine<ElectrobankCharger, Electroba
 
 		public void ChargeInternal(ElectrobankCharger.Instance smi, float dt)
 		{
-			smi.sm.internalChargeAmount.Delta(dt * 480f, smi);
+			smi.sm.internalChargeAmount.Delta(dt * 400f, smi);
 			this.UpdateMeter();
 		}
 

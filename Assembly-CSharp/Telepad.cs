@@ -151,7 +151,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			{
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.POPFX.EXTRA_POWERBANKS_BIONIC, base.gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("SandboxTool_Spawner", false));
-				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("DisposableElectrobank_BasicSingleHarvestPlant"), Grid.CellToPosCBC(cellTarget, Grid.SceneLayer.Front) - Vector3.right / 2f);
+				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("DisposableElectrobank_RawMetal"), Grid.CellToPosCBC(cellTarget, Grid.SceneLayer.Front) - Vector3.right / 2f);
 				gameObject.SetActive(true);
 				Vector2 vector = new Vector2((-2.5f + 5f * ((float)i / 5f)) / 2f, 2f);
 				if (GameComps.Fallers.Has(gameObject))
@@ -162,6 +162,17 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				yield return new WaitForSeconds(0.25f);
 				num = i;
 			}
+			yield return new WaitForSeconds(0.35f);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, ITEMS.LUBRICATIONSTICK.NAME, base.gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("SandboxTool_Spawner", false));
+			GameObject gameObject2 = Util.KInstantiate(Assets.GetPrefab("LubricationStick"), Grid.CellToPosCBC(cellTarget, Grid.SceneLayer.Front) - Vector3.right / 2f);
+			gameObject2.SetActive(true);
+			Vector2 vector2 = new Vector2(3.75f, 2.5f);
+			if (GameComps.Fallers.Has(gameObject2))
+			{
+				GameComps.Fallers.Remove(gameObject2);
+			}
+			GameComps.Fallers.Add(gameObject2, vector2);
 			yield return 0;
 			yield break;
 		}
@@ -202,12 +213,12 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			{
 				smi.master.meter.SetPositionPercent(0f);
 			}).PlayAnims((Telepad.StatesInstance smi) => Telepad.States.workingAnims, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
-			this.bonusDelivery.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.bonusDelivery.loop);
-			this.bonusDelivery.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleAction("SpawnBonusDelivery", 1f, delegate(Telepad.StatesInstance smi)
+			this.bonusDelivery.pre.PlayAnim("bionic_working_pre").OnAnimQueueComplete(this.bonusDelivery.loop);
+			this.bonusDelivery.loop.PlayAnim("bionic_working_loop", KAnim.PlayMode.Loop).ScheduleAction("SpawnBonusDelivery", 1f, delegate(Telepad.StatesInstance smi)
 			{
 				smi.master.StartCoroutine(smi.SpawnExtraPowerBanks());
 			}).ScheduleGoTo(3f, this.bonusDelivery.pst);
-			this.bonusDelivery.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.idle);
+			this.bonusDelivery.pst.PlayAnim("bionic_working_pst").OnAnimQueueComplete(this.idle);
 		}
 
 		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal openPortal;

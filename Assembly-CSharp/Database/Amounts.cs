@@ -67,8 +67,8 @@ namespace Database
 			this.ElementGrowth.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Beckoning = this.CreateAmount("Beckoning", 0f, 100f, true, Units.Flat, 100.5f, true, "STRINGS.CREATURES", "ui_icon_moo", null, null);
 			this.Beckoning.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
-			this.BionicOxygenTank = this.CreateAmount("BionicOxygenTank", 0f, BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG, true, Units.Flat, 60f, true, "STRINGS.DUPLICANTS", "ui_icon_breath", null, null);
-			this.BionicOxygenTank.SetDisplayer(new BionicOxygenTankDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.BionicOxygenTank = this.CreateAmount("BionicOxygenTank", 0f, BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG, true, Units.Flat, 60f, true, "STRINGS.DUPLICANTS", "ui_icon_oxygentank", null, null);
+			this.BionicOxygenTank.SetDisplayer(new BionicOxygenTankDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond));
 			this.BionicOxygenTank.debugSetValue = delegate(AmountInstance instance, float val)
 			{
 				BionicOxygenTankMonitor.Instance smi = instance.gameObject.GetSMI<BionicOxygenTankMonitor.Instance>();
@@ -90,7 +90,7 @@ namespace Database
 				float num4;
 				smi.storage.ConsumeAndGetDisease(GameTags.Breathable, num2, out num3, out diseaseInfo, out num4);
 			};
-			this.BionicInternalBattery = this.CreateAmount("BionicInternalBattery", 0f, 360000f, false, Units.Flat, 4000f, true, "STRINGS.DUPLICANTS", "ui_icon_battery", null, null);
+			this.BionicInternalBattery = this.CreateAmount("BionicInternalBattery", 0f, 480000f, true, Units.Flat, 4000f, true, "STRINGS.DUPLICANTS", "ui_icon_battery", null, null);
 			this.BionicInternalBattery.SetDisplayer(new BionicBatteryDisplayer());
 			this.BionicInternalBattery.debugSetValue = delegate(AmountInstance instance, float val)
 			{
@@ -110,7 +110,7 @@ namespace Database
 				float num6 = currentCharge - val;
 				smi2.ConsumePower(num6);
 			};
-			this.BionicOil = this.CreateAmount("BionicOil", 0f, 200f, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_liquid", null, null);
+			this.BionicOil = this.CreateAmount("BionicOil", 0f, 200f, true, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_liquid", null, null);
 			this.BionicOil.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.BionicGunk = this.CreateAmount("BionicGunk", 0f, GunkMonitor.GUNK_CAPACITY, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_gunk", null, null);
 			this.BionicGunk.SetDisplayer(new BionicGunkDisplayer(GameUtil.TimeSlice.PerCycle));

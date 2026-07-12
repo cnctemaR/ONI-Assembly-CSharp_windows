@@ -77,7 +77,12 @@ public class ComplexRecipe
 	public Sprite GetUIIcon()
 	{
 		Sprite sprite = null;
-		KBatchedAnimController component = Assets.GetPrefab((this.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? this.ingredients[0].material : this.results[0].material).GetComponent<KBatchedAnimController>();
+		Tag tag = ((this.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? this.ingredients[0].material : this.results[0].material);
+		if (this.nameDisplay == ComplexRecipe.RecipeNameDisplay.Custom && !string.IsNullOrEmpty(this.customSpritePrefabID))
+		{
+			tag = this.customSpritePrefabID;
+		}
+		KBatchedAnimController component = Assets.GetPrefab(tag).GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, "");
@@ -184,7 +189,11 @@ public class ComplexRecipe
 
 	public string customName;
 
+	public string customSpritePrefabID;
+
 	public string description;
+
+	public Func<string> runTimeDescription;
 
 	public List<Tag> fabricators;
 

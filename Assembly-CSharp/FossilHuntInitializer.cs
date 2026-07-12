@@ -26,7 +26,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 		string text = rowLinkID.Replace("MOVECAMERATO", "");
 		if (Components.MajorFossilDigSites.Count > 0 && CodexCache.FormatLinkID(Components.MajorFossilDigSites[0].gameObject.PrefabID().ToString()) == text)
 		{
-			GameUtil.FocusCamera(Components.MajorFossilDigSites[0].transform, true);
+			GameUtil.FocusCamera(Components.MajorFossilDigSites[0].transform, true, true);
 			return false;
 		}
 		foreach (object obj in Components.MinorFossilDigSites)
@@ -34,7 +34,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 			MinorFossilDigSite.Instance instance = (MinorFossilDigSite.Instance)obj;
 			if (CodexCache.FormatLinkID(instance.PrefabID().ToString()) == text)
 			{
-				CameraController.Instance.CameraGoTo(instance.transform.GetPosition(), 2f, true);
+				GameUtil.FocusCamera(instance.transform.GetPosition(), 2f, true, true);
 				SelectTool.Instance.Select(instance.gameObject.GetComponent<KSelectable>(), false);
 				return false;
 			}
@@ -337,7 +337,7 @@ public class FossilHuntInitializer : StoryTraitStateMachine<FossilHuntInitialize
 				.AddOption(CODEX.STORY_TRAITS.FOSSILHUNT.QUEST_AVAILABLE_POPUP.CHECK_BUTTON, delegate(InfoDialogScreen dialog)
 				{
 					dialog.Deactivate();
-					GameUtil.FocusCamera(base.transform, true);
+					GameUtil.FocusCamera(base.transform, true, true);
 				}, false);
 		}
 

@@ -106,6 +106,11 @@ public class OwnablesSecondSideScreen : KScreen
 		int worldID = ((this.OwnerIdentity == null) ? 255 : gameObject.GetMyWorldId());
 		List<Assignable> list = null;
 		int num = 0;
+		bool showItemsAssignedToOthers = true;
+		if (this.Slot != null && (this.Slot is EquipmentSlotInstance || this.Slot.ID.Contains("BionicUpgrade")))
+		{
+			showItemsAssignedToOthers = false;
+		}
 		if (worldID != 255)
 		{
 			list = Components.AssignableItems.Items.FindAll(delegate(Assignable i)
@@ -119,7 +124,20 @@ public class OwnablesSecondSideScreen : KScreen
 					{
 						gameObject2 = equippable.assignee.GetOwners()[0].GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 					}
-					flag = gameObject2.GetMyWorldId() == worldID;
+					flag = flag && gameObject2.GetMyWorldId() == worldID;
+				}
+				bool flag2 = i.assignee != null && i.assignee.GetSoleOwner() == this.OwnerIdentity.GetSoleOwner();
+				bool flag3 = flag2 && this.Slot.assignable == i;
+				if (!showItemsAssignedToOthers)
+				{
+					if (i.assignee != null && !flag2)
+					{
+						flag = false;
+					}
+					if (flag2 && !flag3)
+					{
+						flag = false;
+					}
 				}
 				return flag;
 			});

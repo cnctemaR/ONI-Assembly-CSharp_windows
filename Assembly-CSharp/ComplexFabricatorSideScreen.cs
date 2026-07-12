@@ -202,6 +202,10 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 						{
 							image.sprite = this.radboltSprite;
 						}
+						else if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Custom)
+						{
+							image.sprite = recipe.GetUIIcon();
+						}
 						else
 						{
 							image.sprite = uisprite2.first;
@@ -260,6 +264,10 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				component3.ClearMultiStringTooltip();
 				component3.AddMultiStringTooltip(recipe.GetUIName(false), this.styleTooltipHeader);
 				component3.AddMultiStringTooltip(recipe.description, this.styleTooltipBody);
+				if (recipe.runTimeDescription != null)
+				{
+					component3.AddMultiStringTooltip("\n" + recipe.runTimeDescription(), this.styleTooltipBody);
+				}
 				newToggle.onClick += delegate
 				{
 					this.ToggleClicked(newToggle);

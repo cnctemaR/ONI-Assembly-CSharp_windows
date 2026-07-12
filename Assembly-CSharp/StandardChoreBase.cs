@@ -127,9 +127,26 @@ public abstract class StandardChoreBase : Chore
 		this.End(reason);
 	}
 
+	public override void Reserve(ChoreDriver reserver)
+	{
+		if (this.driver != null && this.driver != reserver && reserver != null)
+		{
+			Debug.LogErrorFormat("Chore.Reserve: driver already set {0} {1} {2}, provider {3}, driver {4} -> {5}", new object[]
+			{
+				this.id,
+				base.GetType(),
+				this.choreType.Id,
+				this.provider,
+				this.driver,
+				reserver
+			});
+		}
+		this.driver = reserver;
+	}
+
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		if (this.driver != null)
+		if (this.driver != null && this.driver != context.consumerState.choreDriver)
 		{
 			Debug.LogErrorFormat("Chore.Begin driver already set {0} {1} {2}, provider {3}, driver {4} -> {5}", new object[]
 			{

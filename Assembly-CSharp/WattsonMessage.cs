@@ -184,7 +184,7 @@ public class WattsonMessage : KScreen
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{
 			CameraController.Instance.OrthographicSize = TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize;
-			CameraController.Instance.CameraGoHome(0.5f);
+			CameraController.Instance.CameraGoHome(0.5f, false);
 			this.startFade = true;
 			MusicManager.instance.PlaySong(this.WelcomeMusic, false);
 		}, null, null));
@@ -268,7 +268,7 @@ public class WattsonMessage : KScreen
 	{
 		if (e.TryConsume(global::Action.Escape))
 		{
-			CameraController.Instance.CameraGoHome(2f);
+			CameraController.Instance.CameraGoHome(2f, false);
 			this.Deactivate();
 		}
 		e.Consumed = true;

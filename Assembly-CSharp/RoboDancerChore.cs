@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using TUNING;
 using UnityEngine;
 
@@ -28,13 +29,14 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 		{
 			default_state = this.goToStand;
 			base.Target(this.roboDancer);
-			this.idle.EventTransition(GameHashes.ScheduleBlocksChanged, this.goToStand, (RoboDancerChore.StatesInstance smi) => !smi.IsRecTime());
+			this.idle.EventTransition(GameHashes.ScheduleBlocksTick, this.goToStand, (RoboDancerChore.StatesInstance smi) => !smi.IsRecTime());
 			this.goToStand.MoveTo((RoboDancerChore.StatesInstance smi) => smi.GetTargetCell(), this.dancing, this.idle, false);
 			this.dancing.ToggleEffect("Dancing").ToggleAnims("anim_bionic_joy_kanim", 0f).DefaultState(this.dancing.pre)
 				.Update(delegate(RoboDancerChore.StatesInstance smi, float dt)
 				{
 					RoboDancer.Instance smi2 = this.roboDancer.Get(smi).GetSMI<RoboDancer.Instance>();
 					RoboDancer sm = smi2.sm;
+					sm.hasAudience.Set(smi.HasAudience(), smi2, false);
 					sm.timeSpentDancing.Set(sm.timeSpentDancing.Get(smi2) + dt, smi2, false);
 				}, UpdateRate.SIM_33ms, false)
 				.Exit(delegate(RoboDancerChore.StatesInstance smi)
@@ -74,8 +76,16 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 	public class StatesInstance : GameStateMachine<RoboDancerChore.States, RoboDancerChore.StatesInstance, RoboDancerChore, object>.GameInstance
 	{
 		public StatesInstance(RoboDancerChore master, GameObject roboDancer)
-			: base(master)
 		{
+			Chore.Precondition precondition = default(Chore.Precondition);
+			precondition.id = "IsNotRoboHyped";
+			precondition.description = "__ Duplicant hasn't watched the dance yet";
+			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				return !(context.consumerState.consumer == null) && !context.consumerState.gameObject.GetComponent<Effects>().HasEffect(WatchRoboDancerWorkable.TRACKING_EFFECT);
+			};
+			this.IsNotRoboHyped = precondition;
+			base..ctor(master);
 			this.roboDancer = roboDancer;
 			base.sm.roboDancer.Set(roboDancer, base.smi, false);
 		}
@@ -106,6 +116,23 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 			return Grid.PosToCell(base.master.gameObject);
 		}
 
+		public bool HasAudience()
+		{
+			if (base.smi.watchWorkables == null)
+			{
+				return false;
+			}
+			WatchRoboDancerWorkable[] array = base.smi.watchWorkables;
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (array[i].worker)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void CreateAudienceWorkables()
 		{
 			int num = Grid.PosToCell(base.gameObject);
@@ -118,20 +145,29 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 				Vector3Int.right * 2,
 				Vector3Int.right * 3
 			};
+			int num2 = 0;
 			for (int i = 0; i < this.audienceWorkables.Length; i++)
 			{
-				int num2 = Grid.OffsetCell(num, array[i].x, array[i].y);
-				if (Grid.IsValidCellInWorld(num2, (int)Grid.WorldIdx[num]))
+				int num3 = Grid.OffsetCell(num, array[i].x, array[i].y);
+				if (Grid.IsValidCellInWorld(num3, (int)Grid.WorldIdx[num]))
 				{
-					GameObject gameObject = ChoreHelpers.CreateLocator("WatchRoboDancerWorkable", Grid.CellToPos(num2));
+					GameObject gameObject = ChoreHelpers.CreateLocator("WatchRoboDancerWorkable", Grid.CellToPos(num3));
 					this.audienceWorkables[i] = gameObject;
 					KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
 					kselectable.SetName("WatchRoboDancerWorkable");
 					kselectable.IsSelectable = false;
 					WatchRoboDancerWorkable watchRoboDancerWorkable = gameObject.AddOrGet<WatchRoboDancerWorkable>();
 					watchRoboDancerWorkable.owner = this.roboDancer;
-					new WorkChore<WatchRoboDancerWorkable>(Db.Get().ChoreTypes.JoyReaction, watchRoboDancerWorkable, null, true, null, null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, false, true).AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
+					WorkChore<WatchRoboDancerWorkable> workChore = new WorkChore<WatchRoboDancerWorkable>(Db.Get().ChoreTypes.JoyReaction, watchRoboDancerWorkable, null, true, null, null, null, true, Db.Get().ScheduleBlockTypes.Recreation, false, true, null, false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
+					workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
+					workChore.AddPrecondition(this.IsNotRoboHyped, workChore);
+					num2++;
 				}
+			}
+			this.watchWorkables = new WatchRoboDancerWorkable[num2];
+			for (int j = 0; j < num2; j++)
+			{
+				this.watchWorkables[j] = this.audienceWorkables[j].GetComponent<WatchRoboDancerWorkable>();
 			}
 		}
 
@@ -149,10 +185,15 @@ public class RoboDancerChore : Chore<RoboDancerChore.StatesInstance>, IWorkerPri
 					ChoreHelpers.DestroyLocator(this.audienceWorkables[i]);
 				}
 			}
+			this.watchWorkables = null;
 		}
 
 		private GameObject roboDancer;
 
 		private GameObject[] audienceWorkables = new GameObject[4];
+
+		private WatchRoboDancerWorkable[] watchWorkables;
+
+		private Chore.Precondition IsNotRoboHyped;
 	}
 }

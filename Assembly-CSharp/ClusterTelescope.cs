@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Database;
+using Klei;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -306,7 +307,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			}
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
-			Klei.AI.Attributes attributes = worker.GetAttributes();
+			global::Klei.AI.Attributes attributes = worker.GetAttributes();
 			KSelectable component3 = base.GetComponent<KSelectable>();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
@@ -325,8 +326,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 					attributes.Add(this.radiationShielding);
 					if (component2 != null)
 					{
-						this.workerGasProvider = component2.GetGasProvider();
-						component2.SetGasProvider(this);
+						component2.AddGasProvider(this);
 					}
 					worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 					component.AddTag(GameTags.Shaded, false);
@@ -345,7 +345,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				attributes.Remove(this.radiationShielding);
 				if (component2 != null)
 				{
-					component2.SetGasProvider(this.workerGasProvider);
+					component2.RemoveGasProvider(this);
 				}
 				worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 				component.RemoveTag(GameTags.Shaded);
@@ -422,7 +422,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return false;
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 		{
 			if (this.storage.items.Count <= 0)
 			{
@@ -433,9 +433,17 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			{
 				return false;
 			}
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			bool flag = component.Mass >= amount;
-			component.Mass = Mathf.Max(0f, component.Mass - amount);
+			float mass = gameObject.GetComponent<PrimaryElement>().Mass;
+			float num = 0f;
+			float num2 = 0f;
+			SimHashes simHashes = SimHashes.Vacuum;
+			SimUtil.DiseaseInfo diseaseInfo;
+			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2, out simHashes);
+			bool flag = num >= amount;
+			if (onConsumptionCompletedCallback != null)
+			{
+				onConsumptionCompletedCallback(simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
+			}
 			return flag;
 		}
 
@@ -449,6 +457,21 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return primaryElement == null || primaryElement.Mass == 0f;
 		}
 
+		public bool HasOxygen()
+		{
+			if (this.storage.items.Count <= 0)
+			{
+				return false;
+			}
+			PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Breathable, 0f);
+			return primaryElement != null && primaryElement.Mass > 0f;
+		}
+
+		public bool IsBlocked()
+		{
+			return false;
+		}
+
 		[MySmiReq]
 		private ClusterTelescope.Instance m_telescope;
 
@@ -457,8 +480,6 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		private GameObject telescopeTargetMarker;
 
 		private AxialI currentTarget;
-
-		private OxygenBreather.IGasProvider workerGasProvider;
 
 		[MyCmpGet]
 		private Storage storage;
@@ -511,7 +532,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			}
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
-			Klei.AI.Attributes attributes = worker.GetAttributes();
+			global::Klei.AI.Attributes attributes = worker.GetAttributes();
 			KSelectable component3 = base.GetComponent<KSelectable>();
 			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
@@ -537,8 +558,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				if (this.m_telescope.providesOxygen)
 				{
 					attributes.Add(this.radiationShielding);
-					this.workerGasProvider = component2.GetGasProvider();
-					component2.SetGasProvider(this);
+					component2.AddGasProvider(this);
 					component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 					component.AddTag(GameTags.Shaded, false);
 				}
@@ -554,7 +574,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			if (this.m_telescope.providesOxygen)
 			{
 				attributes.Remove(this.radiationShielding);
-				component2.SetGasProvider(this.workerGasProvider);
+				component2.RemoveGasProvider(this);
 				component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 				component.RemoveTag(GameTags.Shaded);
 			}
@@ -628,7 +648,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return false;
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 		{
 			if (this.storage.items.Count <= 0)
 			{
@@ -639,9 +659,17 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			{
 				return false;
 			}
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			bool flag = component.Mass >= amount;
-			component.Mass = Mathf.Max(0f, component.Mass - amount);
+			float mass = gameObject.GetComponent<PrimaryElement>().Mass;
+			float num = 0f;
+			float num2 = 0f;
+			SimHashes simHashes = SimHashes.Vacuum;
+			SimUtil.DiseaseInfo diseaseInfo;
+			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2, out simHashes);
+			bool flag = num >= amount;
+			if (onConsumptionCompletedCallback != null)
+			{
+				onConsumptionCompletedCallback(simHashes, num, num2, diseaseInfo.idx, diseaseInfo.count);
+			}
 			return flag;
 		}
 
@@ -655,6 +683,21 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return !(gameObject == null) && gameObject.GetComponent<PrimaryElement>().Mass > 0f;
 		}
 
+		public bool HasOxygen()
+		{
+			if (this.storage.items.Count <= 0)
+			{
+				return false;
+			}
+			GameObject gameObject = this.storage.items[0];
+			return !(gameObject == null) && gameObject.GetComponent<PrimaryElement>().Mass > 0f;
+		}
+
+		public bool IsBlocked()
+		{
+			return false;
+		}
+
 		[MySmiReq]
 		private ClusterTelescope.Instance m_telescope;
 
@@ -663,8 +706,6 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		private GameObject telescopeTargetMarker;
 
 		private ClusterMapMeteorShower.Instance currentTarget;
-
-		private OxygenBreather.IGasProvider workerGasProvider;
 
 		[MyCmpGet]
 		private Storage storage;

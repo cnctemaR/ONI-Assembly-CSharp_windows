@@ -164,12 +164,7 @@ public class ChorePreconditions
 				return true;
 			}
 			PeeChoreMonitor.Instance smi = context.consumerState.gameObject.GetSMI<PeeChoreMonitor.Instance>();
-			if (smi != null)
-			{
-				return smi.IsInsideState(smi.sm.critical);
-			}
-			GunkMonitor.Instance smi2 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
-			return smi2 != null && smi2.IsInsideState(smi2.sm.criticalUrge);
+			return smi != null && smi.IsInsideState(smi.sm.critical);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsPreferredAssignableOrUrgentBladder = precondition;
@@ -458,8 +453,8 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			StaminaMonitor.Instance smi3 = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
-			return smi3 == null || !smi3.IsInsideState(smi3.sm.sleepy.sleeping);
+			StaminaMonitor.Instance smi2 = context.consumerState.consumer.GetSMI<StaminaMonitor.Instance>();
+			return smi2 == null || !smi2.IsInsideState(smi2.sm.sleepy.sleeping);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsAwake = precondition;
@@ -648,8 +643,13 @@ public class ChorePreconditions
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.BLADDER_FULL;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			BladderMonitor.Instance smi4 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
-			return smi4 != null && smi4.NeedsToPee();
+			BladderMonitor.Instance smi3 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
+			if (smi3 != null && smi3.NeedsToPee())
+			{
+				return true;
+			}
+			GunkMonitor.Instance smi4 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
+			return smi4 != null && GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi4);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsBladderFull = precondition;
@@ -659,7 +659,12 @@ public class ChorePreconditions
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			BladderMonitor.Instance smi5 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
-			return smi5 == null || !smi5.NeedsToPee();
+			if (smi5 != null && smi5.NeedsToPee())
+			{
+				return false;
+			}
+			GunkMonitor.Instance smi6 = context.consumerState.gameObject.GetSMI<GunkMonitor.Instance>();
+			return smi6 == null || !GunkMonitor.IsGunkLevelsOverCriticalUrgeThreshold(smi6);
 		};
 		precondition.canExecuteOnAnyThread = false;
 		this.IsBladderNotFull = precondition;
@@ -701,7 +706,7 @@ public class ChorePreconditions
 			if (currentChore3 != null)
 			{
 				string id = currentChore3.choreType.Id;
-				flag = id != Db.Get().ChoreTypes.BreakPee.Id && id != Db.Get().ChoreTypes.Pee.Id;
+				flag = id != Db.Get().ChoreTypes.BreakPee.Id && id != Db.Get().ChoreTypes.Pee.Id && id != Db.Get().ChoreTypes.ExpellGunk.Id;
 			}
 			return flag;
 		};

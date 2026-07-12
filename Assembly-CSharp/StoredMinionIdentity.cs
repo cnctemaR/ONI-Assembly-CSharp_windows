@@ -457,4 +457,13 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public Dictionary<string, float> savedAttributeValues;
 
 	public MinionModifiers minionModifiers;
+
+	public interface IStoredMinionExtension
+	{
+		void PushTo(StoredMinionIdentity destination);
+
+		void PullFrom(StoredMinionIdentity source);
+
+		void AddStoredMinionGameObjectRequirements(GameObject storedMinionGameObject);
+	}
 }

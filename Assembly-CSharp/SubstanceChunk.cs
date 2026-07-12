@@ -14,6 +14,7 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		Color color = base.GetComponent<PrimaryElement>().Element.substance.colour;
 		color.a = 1f;
 		base.GetComponent<KBatchedAnimController>().SetSymbolTint(SubstanceChunk.symbolToTint, color);
+		base.GetComponent<KBatchedAnimController>().SetSymbolTint(SubstanceChunk.symbolToTint2, color);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -33,4 +34,6 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 	}
 
 	private static readonly KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
+
+	private static readonly KAnimHashedString symbolToTint2 = new KAnimHashedString("substance_tinter_cap");
 }

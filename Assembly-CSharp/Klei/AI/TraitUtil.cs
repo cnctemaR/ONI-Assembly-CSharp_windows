@@ -136,5 +136,19 @@ namespace Klei.AI
 			}
 			return text;
 		}
+
+		public static global::System.Action CreateBionicUpgradeTrait(string id, string effectsDescription)
+		{
+			return delegate
+			{
+				string name = Strings.Get("STRINGS.DUPLICANTS.TRAITS." + id.ToUpper() + ".NAME");
+				string desc = Strings.Get("STRINGS.DUPLICANTS.TRAITS." + id.ToUpper() + ".DESC");
+				Trait trait = Db.Get().CreateTrait(id, name, desc, null, true, null, true, true);
+				trait.TooltipCB = () => desc + "\n\n" + effectsDescription;
+				trait.NameCB = () => name;
+				string shortDescTooltip = Strings.Get("STRINGS.DUPLICANTS.TRAITS." + trait.Id.ToUpper() + ".SHORT_DESC_TOOLTIP");
+				trait.ShortDescTooltipCB = () => shortDescTooltip + "\n\n" + effectsDescription;
+			};
+		}
 	}
 }

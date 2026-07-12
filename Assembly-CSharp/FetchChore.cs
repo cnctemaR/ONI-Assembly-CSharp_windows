@@ -171,6 +171,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
 		this.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
+		this.AddPrecondition(FetchChore.CanFetchDroneComplete, destination);
 		Deconstructable component = this.target.GetComponent<Deconstructable>();
 		if (component != null)
 		{
@@ -306,13 +307,42 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 				}
 				context.data = pickupable;
 				int num;
-				if (context.consumerState.consumer.GetNavigationCost(pickupable, out num))
+				if (context.consumerState.worker.IsFetchDrone())
+				{
+					if ((pickupable.targetWorkable == null || pickupable.targetWorkable.GetComponent<Pickupable>() != null) && context.consumerState.consumer.GetNavigationCost(pickupable, out num))
+					{
+						context.cost += num;
+						return true;
+					}
+				}
+				else if (context.consumerState.consumer.GetNavigationCost(pickupable, out num))
 				{
 					context.cost += num;
 					return true;
 				}
 			}
 			return false;
+		}
+	};
+
+	public static readonly Chore.Precondition CanFetchDroneComplete = new Chore.Precondition
+	{
+		id = "CanFetchDroneComplete",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_FETCH_DRONE_COMPLETE_FETCH,
+		canExecuteOnAnyThread = true,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			if (!context.consumerState.worker.IsFetchDrone())
+			{
+				return true;
+			}
+			Pickupable pickupable2 = (Pickupable)context.data;
+			if (pickupable2 == null)
+			{
+				return false;
+			}
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
+			return !(kmonoBehaviour == null) && !(kmonoBehaviour.gameObject == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell, context.consumerState.worker.GetFetchCellOffsets()));
 		}
 	};
 

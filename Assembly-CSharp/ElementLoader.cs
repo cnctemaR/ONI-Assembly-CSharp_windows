@@ -200,6 +200,20 @@ public class ElementLoader
 		return ElementLoader.GetElement(tag);
 	}
 
+	public static List<Element> FindElements(Func<Element, bool> filter)
+	{
+		List<Element> list = new List<Element>();
+		foreach (int num in ElementLoader.elementTable.Keys)
+		{
+			Element element = ElementLoader.elementTable[num];
+			if (filter(element))
+			{
+				list.Add(element);
+			}
+		}
+		return list;
+	}
+
 	public static Element FindElementByHash(SimHashes hash)
 	{
 		Element element = null;

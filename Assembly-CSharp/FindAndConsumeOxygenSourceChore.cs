@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceChore.Instance>
 {
-	public FindAndConsumeOxygenSourceChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.FindOxygenSourceItem, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
+	public FindAndConsumeOxygenSourceChore(IStateMachineTarget target, bool critical)
+		: base(critical ? Db.Get().ChoreTypes.FindOxygenSourceItem_Critical : Db.Get().ChoreTypes.FindOxygenSourceItem, target, target.GetComponent<ChoreProvider>(), false, null, null, null, critical ? PriorityScreen.PriorityClass.compulsory : PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new FindAndConsumeOxygenSourceChore.Instance(this, target.gameObject);
 		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
@@ -38,31 +38,19 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 		base.Begin(context);
 	}
 
-	private static string GetConsumePreAnimName(FindAndConsumeOxygenSourceChore.Instance smi)
+	public static bool IsNotAllowedByScheduleAndChoreIsNotCritical(FindAndConsumeOxygenSourceChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
-		{
-			return "consume_canister_pre";
-		}
-		return "ladder_consume";
+		return !FindAndConsumeOxygenSourceChore.IsCriticalChore(smi) && !FindAndConsumeOxygenSourceChore.IsAllowedBySchedule(smi);
 	}
 
-	private static string GetConsumeLoopAnimName(FindAndConsumeOxygenSourceChore.Instance smi)
+	public static bool IsAllowedBySchedule(FindAndConsumeOxygenSourceChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
-		{
-			return "consume_canister_loop";
-		}
-		return "ladder_consume";
+		return BionicOxygenTankMonitor.IsAllowedToSeekOxygenBySchedule(smi.oxygenTankMonitor);
 	}
 
-	private static string GetConsumePstAnimName(FindAndConsumeOxygenSourceChore.Instance smi)
+	public static bool IsCriticalChore(FindAndConsumeOxygenSourceChore.Instance smi)
 	{
-		if (smi.GetComponent<Navigator>().CurrentNavType != NavType.Ladder)
-		{
-			return "consume_canister_pst";
-		}
-		return "ladder_consume";
+		return smi.master.choreType == Db.Get().ChoreTypes.FindOxygenSourceItem_Critical;
 	}
 
 	public static void ExtractOxygenFromItem(FindAndConsumeOxygenSourceChore.Instance smi)
@@ -101,28 +89,26 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 
 	public static void SetOverrideAnimSymbol(FindAndConsumeOxygenSourceChore.Instance smi, bool overriding)
 	{
-		string text = "object";
-		KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
-		SymbolOverrideController component2 = smi.gameObject.GetComponent<SymbolOverrideController>();
 		GameObject gameObject = smi.sm.pickedUpItem.Get(smi);
 		if (gameObject != null)
 		{
-			KBatchedAnimTracker component3 = gameObject.GetComponent<KBatchedAnimTracker>();
-			if (component3 != null)
+			KBatchedAnimTracker component = gameObject.GetComponent<KBatchedAnimTracker>();
+			if (component != null)
 			{
-				component3.enabled = !overriding;
+				component.enabled = !overriding;
 			}
 			Storage.MakeItemInvisible(gameObject, overriding, false);
 		}
 		if (!overriding)
 		{
-			component2.RemoveSymbolOverride(text, 0);
-			component.SetSymbolVisiblity(text, false);
+			smi.RemoveSymbolOverrideObject();
 			return;
 		}
-		KAnim.Build.Symbol symbolByIndex = gameObject.GetComponent<KBatchedAnimController>().CurrentAnim.animFile.build.GetSymbolByIndex(0U);
-		component2.AddSymbolOverride(text, symbolByIndex, 0);
-		component.SetSymbolVisiblity(text, true);
+		if (gameObject != null)
+		{
+			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			smi.ShowBottleSymbolOverrideObject(component2.Element);
+		}
 	}
 
 	public static void TriggerOxygenItemLostSignal(FindAndConsumeOxygenSourceChore.Instance smi)
@@ -133,7 +119,23 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 		}
 	}
 
-	public const float LOOP_LENGTH = 4.333f;
+	public static float GetConsumeDuration(FindAndConsumeOxygenSourceChore.Instance smi)
+	{
+		float num = smi.sm.actualunits.Get(smi) / BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG;
+		return Mathf.Max(24f * num, 4.333f);
+	}
+
+	public const string CANISTER_BODY_SYMBOL_NAME = "canister";
+
+	public const string CANISTER_CAP_SYMBOL_NAME = "cap";
+
+	public const string CANISTER_CAP_COLOR_SYMBOL_NAME = "substance_tinter_cap";
+
+	public const string CANISTER_BODY_COLOR_SYMBOL_NAME = "substance_tinter";
+
+	public const float MAX_LOOP_DURATION = 24f;
+
+	public const float MIN_LOOP_DURATION = 4.333f;
 
 	public static readonly Chore.Precondition OxygenSourceItemIsNotNull = new Chore.Precondition
 	{
@@ -152,9 +154,10 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 		{
 			default_state = this.fetch;
 			base.Target(this.dupe);
-			this.fetch.InitializeStates(this.dupe, this.oxygenSourceItem, this.pickedUpItem, this.amountRequested, this.actualunits, this.install, null).OnTargetLost(this.oxygenSourceItem, this.oxygenSourceLost);
-			this.install.Target(this.pickedUpItem).OnTargetLost(this.pickedUpItem, this.oxygenSourceLost).Target(this.dupe)
-				.DefaultState(this.install.pre)
+			this.fetch.InitializeStates(this.dupe, this.oxygenSourceItem, this.pickedUpItem, this.amountRequested, this.actualunits, this.consume, null).OnTargetLost(this.oxygenSourceItem, this.oxygenSourceLost).ScheduleChange(this.scheduleFailure, new StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.Transition.ConditionCallback(FindAndConsumeOxygenSourceChore.IsNotAllowedByScheduleAndChoreIsNotCritical));
+			this.consume.Target(this.pickedUpItem).OnTargetLost(this.pickedUpItem, this.oxygenSourceLost).Target(this.dupe)
+				.ScheduleChange(this.scheduleFailure, new StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.Transition.ConditionCallback(FindAndConsumeOxygenSourceChore.IsNotAllowedByScheduleAndChoreIsNotCritical))
+				.DefaultState(this.consume.pre)
 				.ToggleAnims("anim_bionic_kanim", 0f)
 				.Enter("Add Symbol Override", delegate(FindAndConsumeOxygenSourceChore.Instance smi)
 				{
@@ -164,20 +167,23 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 				{
 					FindAndConsumeOxygenSourceChore.SetOverrideAnimSymbol(smi, false);
 				});
-			this.install.pre.PlayAnim(new Func<FindAndConsumeOxygenSourceChore.Instance, string>(FindAndConsumeOxygenSourceChore.GetConsumePreAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.install.loop).ScheduleGoTo(3f, this.install.loop);
-			this.install.loop.PlayAnim(new Func<FindAndConsumeOxygenSourceChore.Instance, string>(FindAndConsumeOxygenSourceChore.GetConsumeLoopAnimName), KAnim.PlayMode.Loop).ScheduleGoTo(4.333f, this.install.pst);
-			this.install.pst.PlayAnim(new Func<FindAndConsumeOxygenSourceChore.Instance, string>(FindAndConsumeOxygenSourceChore.GetConsumePstAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
+			this.consume.pre.PlayAnim("consume_canister_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.consume.loop).ScheduleGoTo(3f, this.consume.loop);
+			this.consume.loop.PlayAnim("consume_canister_loop", KAnim.PlayMode.Loop).ScheduleGoTo(new Func<FindAndConsumeOxygenSourceChore.Instance, float>(FindAndConsumeOxygenSourceChore.GetConsumeDuration), this.consume.pst);
+			this.consume.pst.PlayAnim("consume_canister_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.complete).ScheduleGoTo(3f, this.complete);
 			this.complete.Enter(new StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.State.Callback(FindAndConsumeOxygenSourceChore.ExtractOxygenFromItem)).ReturnSuccess();
+			this.scheduleFailure.Target(this.dupe).ReturnFailure();
 			this.oxygenSourceLost.Target(this.dupe).Enter(new StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.State.Callback(FindAndConsumeOxygenSourceChore.TriggerOxygenItemLostSignal)).ReturnFailure();
 		}
 
 		public GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.FetchSubState fetch;
 
-		public FindAndConsumeOxygenSourceChore.States.InstallState install;
+		public FindAndConsumeOxygenSourceChore.States.InstallState consume;
 
 		public GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.State complete;
 
 		public GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.State oxygenSourceLost;
+
+		public GameStateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.State scheduleFailure;
 
 		public StateMachine<FindAndConsumeOxygenSourceChore.States, FindAndConsumeOxygenSourceChore.Instance, FindAndConsumeOxygenSourceChore, object>.TargetParameter dupe;
 
@@ -213,5 +219,86 @@ public class FindAndConsumeOxygenSourceChore : Chore<FindAndConsumeOxygenSourceC
 			: base(master)
 		{
 		}
+
+		public void ShowBottleSymbolOverrideObject(Element elementOfCanister)
+		{
+			if (this.canisterBodySymbolOverrideObject == null)
+			{
+				KAnimFile[] anims = elementOfCanister.substance.anims;
+				GameObject gameObject = Util.NewGameObject(base.gameObject, "canister_symbol");
+				gameObject.transform.SetParent(base.gameObject.transform, false);
+				gameObject.SetActive(false);
+				this.canisterBodySymbolOverrideObject = gameObject.AddComponent<KBatchedAnimController>();
+				this.canisterBodySymbolOverrideObject.AnimFiles = anims;
+				this.canisterBodySymbolOverrideObject.initialAnim = "idle1";
+				this.canisterBodySymbolOverrideObject.SetSymbolVisiblity("cap", false);
+				this.canisterBodySymbolOverrideObject.SetSymbolVisiblity("substance_tinter_cap", false);
+				KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
+				kbatchedAnimTracker.symbol = new HashedString("canister");
+				kbatchedAnimTracker.offset = Vector3.zero;
+				kbatchedAnimTracker.matchParentOffset = true;
+				kbatchedAnimTracker.forceAlwaysAlive = true;
+				kbatchedAnimTracker.forceAlwaysVisible = true;
+				gameObject.SetActive(true);
+				Color32 colour = elementOfCanister.substance.colour;
+				colour.a = byte.MaxValue;
+				this.canisterBodySymbolOverrideObject.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+			}
+			if (this.canisterCapSymbolOverrideObject == null)
+			{
+				KAnimFile[] anims2 = elementOfCanister.substance.anims;
+				GameObject gameObject2 = Util.NewGameObject(base.gameObject, "canister_cap_symbol");
+				gameObject2.transform.SetParent(base.gameObject.transform, false);
+				gameObject2.SetActive(false);
+				this.canisterCapSymbolOverrideObject = gameObject2.AddComponent<KBatchedAnimController>();
+				this.canisterCapSymbolOverrideObject.AnimFiles = anims2;
+				this.canisterCapSymbolOverrideObject.initialAnim = "cap";
+				KBatchedAnimTracker kbatchedAnimTracker2 = gameObject2.AddComponent<KBatchedAnimTracker>();
+				kbatchedAnimTracker2.symbol = new HashedString("cap");
+				kbatchedAnimTracker2.offset = Vector3.zero;
+				kbatchedAnimTracker2.matchParentOffset = true;
+				kbatchedAnimTracker2.forceAlwaysAlive = true;
+				kbatchedAnimTracker2.forceAlwaysVisible = true;
+				gameObject2.SetActive(true);
+				Color32 colour2 = elementOfCanister.substance.colour;
+				colour2.a = byte.MaxValue;
+				this.canisterCapSymbolOverrideObject.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour2);
+			}
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			bool flag;
+			Vector3 vector = component.GetSymbolTransform("canister", out flag).GetColumn(3);
+			vector.z = this.canisterBodySymbolOverrideObject.transform.parent.position.z - 0.01f;
+			this.canisterBodySymbolOverrideObject.transform.position = vector;
+			bool flag2;
+			Vector3 vector2 = component.GetSymbolTransform("canister", out flag2).GetColumn(3);
+			vector2.z = vector.z - 0.01f;
+			this.canisterCapSymbolOverrideObject.transform.position = vector2;
+			component.SetSymbolVisiblity("canister", false);
+			component.SetSymbolVisiblity("cap", false);
+		}
+
+		public void RemoveSymbolOverrideObject()
+		{
+			if (this.canisterBodySymbolOverrideObject != null)
+			{
+				this.canisterBodySymbolOverrideObject.gameObject.DeleteObject();
+				this.canisterBodySymbolOverrideObject = null;
+			}
+			if (this.canisterCapSymbolOverrideObject != null)
+			{
+				this.canisterCapSymbolOverrideObject.gameObject.DeleteObject();
+				this.canisterCapSymbolOverrideObject = null;
+			}
+		}
+
+		protected override void OnCleanUp()
+		{
+			this.RemoveSymbolOverrideObject();
+			base.OnCleanUp();
+		}
+
+		public KBatchedAnimController canisterBodySymbolOverrideObject;
+
+		public KBatchedAnimController canisterCapSymbolOverrideObject;
 	}
 }

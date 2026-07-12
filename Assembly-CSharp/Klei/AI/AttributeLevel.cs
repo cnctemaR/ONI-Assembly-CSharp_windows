@@ -43,8 +43,8 @@ namespace Klei.AI
 
 		public float GetExperienceForNextLevel()
 		{
-			float num = Mathf.Pow((float)this.level / (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER) * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f;
-			return Mathf.Pow(((float)this.level + 1f) / (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER) * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f - num;
+			float num = Mathf.Pow((float)this.level / (float)this.maxGainedLevel, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER) * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f;
+			return Mathf.Pow(((float)this.level + 1f) / (float)this.maxGainedLevel, DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER) * (float)DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE * 600f - num;
 		}
 
 		public float GetPercentComplete()
@@ -71,7 +71,7 @@ namespace Klei.AI
 
 		public bool AddExperience(AttributeLevels levels, float experience)
 		{
-			if (this.level >= DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL)
+			if (this.level >= this.maxGainedLevel)
 			{
 				return false;
 			}
@@ -99,5 +99,7 @@ namespace Klei.AI
 		public AttributeModifier modifier;
 
 		public Notification notification;
+
+		public int maxGainedLevel = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL;
 	}
 }

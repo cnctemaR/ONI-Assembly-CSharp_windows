@@ -51,8 +51,7 @@ public class RoboPilotModuleConfig : IBuildingConfig
 	{
 		Prioritizable.AddRef(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.LaunchButtonRocketModule, false);
-		RoboPilotModule roboPilotModule = go.AddOrGet<RoboPilotModule>();
-		roboPilotModule.dataBankType = "OrbitalResearchDatabank";
+		go.AddOrGet<RoboPilotModule>();
 		go.AddOrGet<LaunchableRocketCluster>();
 		go.AddOrGet<RobotCommandConditions>();
 		go.AddOrGet<RocketProcessConditionDisplayTarget>();
@@ -66,7 +65,7 @@ public class RoboPilotModuleConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 20f;
-		manualDeliveryKG.requestedItemTag = roboPilotModule.dataBankType;
+		manualDeliveryKG.requestedItemTag = DatabankHelper.TAG;
 		manualDeliveryKG.MinimumMass = 1f;
 		BuildingTemplates.ExtendBuildingToRocketModuleCluster(go, null, ROCKETRY.BURDEN.MODERATE, 0f, 0f);
 		go.GetComponent<ReorderableBuilding>().buildConditions.Add(new LimitOneRoboPilotModule());

@@ -213,7 +213,7 @@ public class ToolTipScreen : KScreen
 				}
 				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
 				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
-				this.toolTipIsBlank = component2.text == "" && this.toolTipIsBlank;
+				this.toolTipIsBlank = (component2.text == null || component2.text == "") && this.toolTipIsBlank;
 				if (component.minHeight != component2.preferredHeight)
 				{
 					component.minHeight = component2.preferredHeight;

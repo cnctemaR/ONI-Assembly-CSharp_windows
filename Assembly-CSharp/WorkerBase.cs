@@ -15,6 +15,8 @@ public abstract class WorkerBase : KMonoBehaviour
 
 	public abstract Workable GetWorkable();
 
+	public abstract Attributes GetAttributes();
+
 	public abstract AttributeConverterInstance GetAttributeConverter(string id);
 
 	public abstract Guid OfferStatusItem(StatusItem item, object data = null);
@@ -30,6 +32,8 @@ public abstract class WorkerBase : KMonoBehaviour
 	public abstract WorkerBase.WorkResult Work(float dt);
 
 	public abstract CellOffset[] GetFetchCellOffsets();
+
+	public abstract CellOffset[] GetDeliveryCellOffsets();
 
 	public abstract void SetWorkCompleteData(object data);
 

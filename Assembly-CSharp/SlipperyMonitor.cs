@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor.Instance, IStateMachineTarget, SlipperyMonitor.Def>
@@ -38,11 +39,13 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 		return global::UnityEngine.Random.value <= 0.05f;
 	}
 
-	public const string EFFECT_NAME = "Slipped";
+	public const string EFFECT_NAME = "RecentlySlippedTracker";
 
 	public const float SLIP_FAIL_TIMEOUT = 8f;
 
 	public const float PROBABILITY_OF_SLIP = 0.05f;
+
+	public const float STRESS_DAMAGE = 3f;
 
 	public GameStateMachine<SlipperyMonitor, SlipperyMonitor.Instance, IStateMachineTarget, SlipperyMonitor.Def>.State safe;
 
@@ -72,7 +75,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 		{
 			get
 			{
-				return this.effects.HasEffect("Slipped") || this.effects.HasImmunityTo(this.effect);
+				return this.effects.HasEffect("RecentlySlippedTracker") || this.effects.HasImmunityTo(this.effect);
 			}
 		}
 
@@ -80,7 +83,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 			: base(master, def)
 		{
 			this.effects = base.GetComponent<Effects>();
-			this.effect = Db.Get().effects.Get("Slipped");
+			this.effect = Db.Get().effects.Get("RecentlySlippedTracker");
 		}
 
 		public SlipperyMonitor.SlipReactable CreateReactable()
@@ -126,6 +129,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 		protected override void InternalBegin()
 		{
 			this.startTime = Time.time;
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, DUPLICANTS.MODIFIERS.SLIPPED.NAME, this.gameObject.transform, 1.5f, false);
 			KBatchedAnimController component = this.reactor.GetComponent<KBatchedAnimController>();
 			component.AddAnimOverrides(Assets.GetAnim("anim_slip_kanim"), 1f);
 			component.Play("slip_pre", KAnim.PlayMode.Once, 1f, 0f);
@@ -139,13 +143,21 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 			if (Time.time - this.startTime > 4.3f)
 			{
 				base.Cleanup();
-				this.ApplyEffect();
+				this.ApplyStress();
+				this.ApplyTrackerEffect();
 			}
 		}
 
-		public void ApplyEffect()
+		public void ApplyTrackerEffect()
 		{
-			this.smi.effects.Add("Slipped", true);
+			this.smi.effects.Add("RecentlySlippedTracker", true);
+		}
+
+		private void ApplyStress()
+		{
+			this.smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.Stress.Id).ApplyDelta(3f);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, 3f.ToString() + "% " + Db.Get().Amounts.Stress.Name, this.gameObject.transform, 1.5f, false);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, 3f, DUPLICANTS.MODIFIERS.SLIPPED.NAME, this.gameObject.GetProperName());
 		}
 
 		protected override void InternalEnd()

@@ -95,14 +95,23 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		get
 		{
 			float num = this.EnginePower / this.TotalBurden;
-			float num2 = num * this.AutoPilotMultiplier * this.PilotSkillMultiplier;
-			float num3 = 1f;
+			float num2 = num * this.PilotSkillMultiplier;
+			bool flag = this.AutoPilotMultiplier > 0.5f;
+			bool flag2 = this.ModuleInterface.GetPassengerModule() != null;
 			RoboPilotModule robotPilotModule = this.ModuleInterface.GetRobotPilotModule();
-			if (robotPilotModule != null)
+			bool flag3 = robotPilotModule != null && robotPilotModule.GetDataBanksStored() > 1f;
+			if (flag3 && flag)
 			{
-				num3 += robotPilotModule.FlightEfficiencyModifier();
+				num2 *= 1.5f;
 			}
-			num2 *= num3;
+			else if (!flag && flag2)
+			{
+				num2 *= 0.5f;
+			}
+			else if (!flag3 && !flag2)
+			{
+				num2 = 0f;
+			}
 			if (this.controlStationBuffTimeRemaining > 0f)
 			{
 				num2 += num * 0.20000005f;
@@ -374,7 +383,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		case Clustercraft.CombustionResource.All:
 			return this.m_moduleInterface.BurnableMassRemaining / this.FuelPerDistance >= 600f * (float)hexes - 0.001f;
 		default:
-			return false;
+		{
+			bool flag;
+			RocketModuleCluster primaryPilotModule = this.m_moduleInterface.GetPrimaryPilotModule(out flag);
+			return flag && primaryPilotModule.GetComponent<RoboPilotModule>().HasResourcesToMove(hexes);
+		}
 		}
 	}
 
@@ -797,26 +810,33 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 			num += cargoBayCluster.MaxCapacity;
 			num2 += cargoBayCluster.RemainingCapacity;
 		}
-		if (this.Status == Clustercraft.CraftStatus.Grounded || num <= 0f)
+		if (this.Status != Clustercraft.CraftStatus.Grounded && num > 0f)
+		{
+			if (num2 == 0f)
+			{
+				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, null);
+				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
+			}
+			else
+			{
+				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
+				if (this.cargoStatusHandle == Guid.Empty)
+				{
+					this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
+				}
+				else
+				{
+					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, true);
+					this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
+				}
+			}
+		}
+		else
 		{
 			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
 			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
-			return;
 		}
-		if (num2 == 0f)
-		{
-			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, null);
-			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, false);
-			return;
-		}
-		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightAllCargoFull, false);
-		if (this.cargoStatusHandle == Guid.Empty)
-		{
-			this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
-			return;
-		}
-		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, true);
-		this.cargoStatusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.FlightCargoRemaining, num2);
+		this.UpdatePilotedStatusItems();
 	}
 
 	private void UpdateGroundTags()
@@ -837,6 +857,64 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		this.SetTagOnGameObject(go, GameTags.RocketNotOnGround, this.status > Clustercraft.CraftStatus.Grounded);
 		this.SetTagOnGameObject(go, GameTags.RocketInSpace, this.status == Clustercraft.CraftStatus.InFlight);
 		this.SetTagOnGameObject(go, GameTags.EntityInSpace, this.status == Clustercraft.CraftStatus.InFlight);
+	}
+
+	private void UpdatePilotedStatusItems()
+	{
+		if (this.Status == Clustercraft.CraftStatus.Grounded)
+		{
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightUnpiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightPiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightSuperPilot, false);
+			return;
+		}
+		bool flag = false;
+		bool flag2 = false;
+		this.GetPilotedStatus(out flag, out flag2);
+		if (flag && flag2)
+		{
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.InFlightSuperPilot, this);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightUnpiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightAutoPiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightPiloted, false);
+			return;
+		}
+		if (flag || flag2)
+		{
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.InFlightPiloted, this);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightUnpiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightAutoPiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightSuperPilot, false);
+			return;
+		}
+		if (this.ModuleInterface.GetPassengerModule() != null)
+		{
+			this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.InFlightAutoPiloted, this);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightUnpiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightPiloted, false);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightSuperPilot, false);
+			return;
+		}
+		this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.InFlightUnpiloted, this);
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightAutoPiloted, false);
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightPiloted, false);
+		this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.InFlightSuperPilot, false);
+	}
+
+	public void GetPilotedStatus(out bool dupe_piloted, out bool robo_piloted)
+	{
+		dupe_piloted = false;
+		robo_piloted = false;
+		global::UnityEngine.Object passengerModule = this.ModuleInterface.GetPassengerModule();
+		RoboPilotModule robotPilotModule = this.ModuleInterface.GetRobotPilotModule();
+		if (passengerModule != null)
+		{
+			dupe_piloted = this.AutoPilotMultiplier > 0.5f;
+		}
+		if (robotPilotModule != null)
+		{
+			robo_piloted = robotPilotModule.GetDataBanksStored() > 0f;
+		}
 	}
 
 	private void SetTagOnGameObject(GameObject go, Tag tag, bool set)

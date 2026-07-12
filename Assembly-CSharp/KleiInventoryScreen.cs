@@ -662,189 +662,565 @@ public class KleiInventoryScreen : KModalScreen
 			}
 			string text = buildingDef.PrefabID;
 			uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
-			if (num <= 2076384603U)
+			if (num <= 1938276536U)
 			{
-				if (num <= 1633134164U)
+				if (num <= 1036100273U)
 				{
-					if (num <= 595816591U)
+					if (num <= 297556592U)
 					{
-						if (num != 228062815U)
+						if (num <= 228062815U)
 						{
-							if (num != 595816591U)
+							if (num != 38823703U)
 							{
-								goto IL_038D;
+								if (num != 112031228U)
+								{
+									if (num != 228062815U)
+									{
+										goto IL_087F;
+									}
+									if (!(text == "LuxuryBed"))
+									{
+										goto IL_087F;
+									}
+									string id = permit.Id;
+									if (id == "LuxuryBed_boat")
+									{
+										return "elegantbed_boat";
+									}
+									if (!(id == "LuxuryBed_bouncy"))
+									{
+										return "elegantbed";
+									}
+									return "elegantbed_bouncy";
+								}
+								else
+								{
+									if (!(text == "LogicGateDemultiplexer"))
+									{
+										goto IL_087F;
+									}
+									goto IL_084F;
+								}
 							}
-							if (!(text == "FlowerVase"))
+							else
 							{
-								goto IL_038D;
+								if (!(text == "LogicGateXOR"))
+								{
+									goto IL_087F;
+								}
+								goto IL_084F;
+							}
+						}
+						else if (num != 228549509U)
+						{
+							if (num != 296872528U)
+							{
+								if (num != 297556592U)
+								{
+									goto IL_087F;
+								}
+								if (!(text == "LogicRibbonBridge"))
+								{
+									goto IL_087F;
+								}
+								goto IL_084F;
+							}
+							else if (!(text == "ItemPedestal"))
+							{
+								goto IL_087F;
 							}
 						}
 						else
 						{
-							if (!(text == "LuxuryBed"))
+							if (!(text == "WashSink"))
 							{
-								goto IL_038D;
+								goto IL_087F;
 							}
-							string id = permit.Id;
-							if (id == "LuxuryBed_boat")
-							{
-								return "elegantbed_boat";
-							}
-							if (!(id == "LuxuryBed_bouncy"))
-							{
-								return "elegantbed";
-							}
-							return "elegantbed_bouncy";
+							return "sink";
 						}
 					}
-					else if (num != 1607642960U)
+					else if (num <= 595816591U)
+					{
+						if (num != 301047391U)
+						{
+							if (num != 585850236U)
+							{
+								if (num != 595816591U)
+								{
+									goto IL_087F;
+								}
+								if (!(text == "FlowerVase"))
+								{
+									goto IL_087F;
+								}
+								goto IL_07B7;
+							}
+							else if (!(text == "GravitasPedestal"))
+							{
+								goto IL_087F;
+							}
+						}
+						else
+						{
+							if (!(text == "WireRefined"))
+							{
+								goto IL_087F;
+							}
+							goto IL_0837;
+						}
+					}
+					else if (num != 674245745U)
+					{
+						if (num != 781890915U)
+						{
+							if (num != 1036100273U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "WireRefinedBridgeHighWattage"))
+							{
+								goto IL_087F;
+							}
+							goto IL_0837;
+						}
+						else
+						{
+							if (!(text == "LogicGateNOT"))
+							{
+								goto IL_087F;
+							}
+							goto IL_084F;
+						}
+					}
+					else
+					{
+						if (!(text == "CraftingTable"))
+						{
+							goto IL_087F;
+						}
+						return "craftingstation";
+					}
+					return "sculpture";
+				}
+				if (num <= 1526604543U)
+				{
+					if (num <= 1232204109U)
+					{
+						if (num != 1038415088U)
+						{
+							if (num != 1089791339U)
+							{
+								if (num != 1232204109U)
+								{
+									goto IL_087F;
+								}
+								if (!(text == "WireBridge"))
+								{
+									goto IL_087F;
+								}
+								goto IL_0837;
+							}
+							else
+							{
+								if (!(text == "Refrigerator"))
+								{
+									goto IL_087F;
+								}
+								return "refrigerator";
+							}
+						}
+						else
+						{
+							if (!(text == "LogicGateFILTER"))
+							{
+								goto IL_087F;
+							}
+							goto IL_084F;
+						}
+					}
+					else if (num != 1269853127U)
+					{
+						if (num != 1398532937U)
+						{
+							if (num != 1526604543U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "StorageLockerSmart"))
+							{
+								goto IL_087F;
+							}
+							return "storagelockersmart";
+						}
+						else
+						{
+							if (!(text == "LogicGateMultiplexer"))
+							{
+								goto IL_087F;
+							}
+							goto IL_084F;
+						}
+					}
+					else
+					{
+						if (!(text == "AdvancedResearchCenter"))
+						{
+							goto IL_087F;
+						}
+						return "advancedresearchcenter";
+					}
+				}
+				else if (num <= 1734850496U)
+				{
+					if (num != 1607642960U)
 					{
 						if (num != 1633134164U)
 						{
-							goto IL_038D;
+							if (num != 1734850496U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "RockCrusher"))
+							{
+								goto IL_087F;
+							}
+							return "rockrefinery";
 						}
-						if (!(text == "CeilingLight"))
+						else
 						{
-							goto IL_038D;
+							if (!(text == "CeilingLight"))
+							{
+								goto IL_087F;
+							}
+							goto IL_07FB;
 						}
-						return "ceilingLight";
 					}
 					else
 					{
 						if (!(text == "FlushToilet"))
 						{
-							goto IL_038D;
+							goto IL_087F;
 						}
 						return "flushtoilate";
 					}
 				}
-				else if (num <= 1943253450U)
+				else if (num != 1815117387U)
 				{
-					if (num != 1734850496U)
+					if (num != 1908704479U)
+					{
+						if (num != 1938276536U)
+						{
+							goto IL_087F;
+						}
+						if (!(text == "Wire"))
+						{
+							goto IL_087F;
+						}
+						goto IL_0837;
+					}
+					else
+					{
+						if (!(text == "LogicGateAND"))
+						{
+							goto IL_087F;
+						}
+						goto IL_084F;
+					}
+				}
+				else
+				{
+					if (!(text == "LogicGateOR"))
+					{
+						goto IL_087F;
+					}
+					goto IL_084F;
+				}
+			}
+			else if (num <= 3132083755U)
+			{
+				if (num <= 2406622476U)
+				{
+					if (num <= 2041738741U)
 					{
 						if (num != 1943253450U)
 						{
-							goto IL_038D;
+							if (num != 2028863301U)
+							{
+								if (num != 2041738741U)
+								{
+									goto IL_087F;
+								}
+								if (!(text == "CookingStation"))
+								{
+									goto IL_087F;
+								}
+								return "grill";
+							}
+							else if (!(text == "FlowerVaseHanging"))
+							{
+								goto IL_087F;
+							}
 						}
-						if (!(text == "WaterCooler"))
+						else
 						{
-							goto IL_038D;
+							if (!(text == "WaterCooler"))
+							{
+								goto IL_087F;
+							}
+							return "watercooler";
 						}
-						return "watercooler";
+					}
+					else if (num != 2076384603U)
+					{
+						if (num != 2402859370U)
+						{
+							if (num != 2406622476U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "WireBridgeHighWattage"))
+							{
+								goto IL_087F;
+							}
+							goto IL_0837;
+						}
+						else
+						{
+							if (!(text == "StorageLocker"))
+							{
+								goto IL_087F;
+							}
+							return "storagelocker";
+						}
 					}
 					else
 					{
-						if (!(text == "RockCrusher"))
+						if (!(text == "GasReservoir"))
 						{
-							goto IL_038D;
+							goto IL_087F;
 						}
-						return "rockrefinery";
+						return "gasstorage";
 					}
 				}
-				else if (num != 2028863301U)
+				else if (num <= 2818521706U)
 				{
-					if (num != 2076384603U)
-					{
-						goto IL_038D;
-					}
-					if (!(text == "GasReservoir"))
-					{
-						goto IL_038D;
-					}
-					return "gasstorage";
-				}
-				else if (!(text == "FlowerVaseHanging"))
-				{
-					goto IL_038D;
-				}
-			}
-			else if (num <= 3048425356U)
-			{
-				if (num <= 2722382738U)
-				{
-					if (num != 2402859370U)
+					if (num != 2691468069U)
 					{
 						if (num != 2722382738U)
 						{
-							goto IL_038D;
+							if (num != 2818521706U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "GourmetCookingStation"))
+							{
+								goto IL_087F;
+							}
+							return "gasrange";
 						}
-						if (!(text == "PlanterBox"))
+						else
 						{
-							goto IL_038D;
+							if (!(text == "PlanterBox"))
+							{
+								goto IL_087F;
+							}
+							return "planterbox";
 						}
-						return "planterbox";
 					}
 					else
 					{
-						if (!(text == "StorageLocker"))
+						if (!(text == "ResearchCenter"))
 						{
-							goto IL_038D;
+							goto IL_087F;
 						}
-						return "storagelocker";
+						return "researchcenter";
 					}
 				}
 				else if (num != 2899744071U)
 				{
 					if (num != 3048425356U)
 					{
-						goto IL_038D;
+						if (num != 3132083755U)
+						{
+							goto IL_087F;
+						}
+						if (!(text == "FlowerVaseWall"))
+						{
+							goto IL_087F;
+						}
 					}
-					if (!(text == "Bed"))
+					else
 					{
-						goto IL_038D;
+						if (!(text == "Bed"))
+						{
+							goto IL_087F;
+						}
+						return "bed";
 					}
-					return "bed";
 				}
 				else
 				{
 					if (!(text == "ExteriorWall"))
 					{
-						goto IL_038D;
+						goto IL_087F;
 					}
 					return "wall";
 				}
 			}
-			else if (num <= 3534553076U)
+			else if (num <= 3562718686U)
 			{
-				if (num != 3132083755U)
+				if (num <= 3371266309U)
+				{
+					if (num != 3228988836U)
+					{
+						if (num != 3347778080U)
+						{
+							if (num != 3371266309U)
+							{
+								goto IL_087F;
+							}
+							if (!(text == "LogicRibbon"))
+							{
+								goto IL_087F;
+							}
+							goto IL_084F;
+						}
+						else
+						{
+							if (!(text == "LogicGateBUFFER"))
+							{
+								goto IL_087F;
+							}
+							goto IL_084F;
+						}
+					}
+					else
+					{
+						if (!(text == "LogicWire"))
+						{
+							goto IL_087F;
+						}
+						goto IL_084F;
+					}
+				}
+				else if (num != 3422134480U)
 				{
 					if (num != 3534553076U)
 					{
-						goto IL_038D;
+						if (num != 3562718686U)
+						{
+							goto IL_087F;
+						}
+						if (!(text == "Headquarters"))
+						{
+							goto IL_087F;
+						}
+						return "headquarters";
 					}
-					if (!(text == "MassageTable"))
+					else
 					{
-						goto IL_038D;
+						if (!(text == "MassageTable"))
+						{
+							goto IL_087F;
+						}
+						return "massagetable";
 					}
-					return "massagetable";
 				}
-				else if (!(text == "FlowerVaseWall"))
+				else
 				{
-					goto IL_038D;
+					if (!(text == "MicrobeMusher"))
+					{
+						goto IL_087F;
+					}
+					return "microbemusher";
 				}
 			}
-			else if (num != 3903452895U)
+			else if (num <= 3873680366U)
 			{
-				if (num != 3958671086U)
+				if (num != 3681463987U)
 				{
-					goto IL_038D;
+					if (num != 3716494409U)
+					{
+						if (num != 3873680366U)
+						{
+							goto IL_087F;
+						}
+						if (!(text == "WireRefinedBridge"))
+						{
+							goto IL_087F;
+						}
+						goto IL_0837;
+					}
+					else
+					{
+						if (!(text == "HighWattageWire"))
+						{
+							goto IL_087F;
+						}
+						goto IL_0837;
+					}
 				}
-				if (!(text == "FlowerVaseHangingFancy"))
+				else
 				{
-					goto IL_038D;
+					if (!(text == "FloorLamp"))
+					{
+						goto IL_087F;
+					}
+					goto IL_07FB;
 				}
+			}
+			else if (num <= 3958671086U)
+			{
+				if (num != 3903452895U)
+				{
+					if (num != 3958671086U)
+					{
+						goto IL_087F;
+					}
+					if (!(text == "FlowerVaseHangingFancy"))
+					{
+						goto IL_087F;
+					}
+				}
+				else
+				{
+					if (!(text == "EggCracker"))
+					{
+						goto IL_087F;
+					}
+					return "eggcracker";
+				}
+			}
+			else if (num != 4217645425U)
+			{
+				if (num != 4243975822U)
+				{
+					goto IL_087F;
+				}
+				if (!(text == "WireRefinedHighWattage"))
+				{
+					goto IL_087F;
+				}
+				goto IL_0837;
 			}
 			else
 			{
-				if (!(text == "EggCracker"))
+				if (!(text == "LogicWireBridge"))
 				{
-					goto IL_038D;
+					goto IL_087F;
 				}
-				return "eggcracker";
+				goto IL_084F;
 			}
+			IL_07B7:
 			return "flowervase";
+			IL_07FB:
+			return "ceilingLight";
+			IL_0837:
+			return "wire";
+			IL_084F:
+			return "logicwire";
 		}
-		IL_038D:
+		IL_087F:
 		if (permit.Category == PermitCategory.Artwork)
 		{
 			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);
@@ -852,7 +1228,6 @@ public class KleiInventoryScreen : KModalScreen
 			{
 				return "HUD";
 			}
-			ArtableStage artableStage = (ArtableStage)permit;
 			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Sculpture>(buildingDef2))
 			{
 				string text = buildingDef2.PrefabID;
@@ -866,9 +1241,16 @@ public class KleiInventoryScreen : KModalScreen
 				}
 				return "woodsculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
+			else
 			{
-				return "painting";
+				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
+				{
+					return "painting";
+				}
+				if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<MonumentPart>(buildingDef2))
+				{
+					return "HUD";
+				}
 			}
 		}
 		if (permit.Category == PermitCategory.JoyResponse && permit is BalloonArtistFacadeResource)

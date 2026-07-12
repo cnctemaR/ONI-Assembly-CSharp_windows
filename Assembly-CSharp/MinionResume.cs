@@ -229,6 +229,52 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		this.targetHat = target;
 	}
 
+	public void ClearAdditionalHats()
+	{
+		this.AdditionalHats.Clear();
+	}
+
+	public void AddAdditionalHat(string context, string hat)
+	{
+		MinionResume.HatInfo hatInfo = null;
+		foreach (MinionResume.HatInfo hatInfo2 in this.AdditionalHats)
+		{
+			if (hatInfo2.Source == context && hatInfo2.Hat == hat)
+			{
+				hatInfo = hatInfo2;
+				break;
+			}
+		}
+		if (hatInfo != null)
+		{
+			hatInfo.count++;
+			return;
+		}
+		this.AdditionalHats.Add(new MinionResume.HatInfo(context, hat));
+	}
+
+	public void RemoveAdditionalHat(string context, string hat)
+	{
+		MinionResume.HatInfo hatInfo = null;
+		foreach (MinionResume.HatInfo hatInfo2 in this.AdditionalHats)
+		{
+			if (hatInfo2.Source == context && hatInfo2.Hat == hat)
+			{
+				hatInfo2.count--;
+				hatInfo = hatInfo2;
+				break;
+			}
+		}
+		if (hatInfo != null && hatInfo.count <= 0)
+		{
+			this.AdditionalHats.Remove(hatInfo);
+			if (this.currentHat == hat)
+			{
+				this.RemoveHat();
+			}
+		}
+	}
+
 	public void SetCurrentRole(string role_id)
 	{
 		this.currentRole = role_id;
@@ -242,7 +288,38 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		}
 	}
 
-	private void ApplySkillPerks(string skillId)
+	public void ApplyAdditionalSkillPerks(SkillPerk[] perks)
+	{
+		foreach (SkillPerk skillPerk in perks)
+		{
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			{
+				this.AdditionalGrantedSkillPerkIDs.Add(skillPerk.IdHash);
+				if (skillPerk.OnApply != null)
+				{
+					skillPerk.OnApply(this);
+				}
+			}
+		}
+		Game.Instance.Trigger(-1523247426, null);
+	}
+
+	public void RemoveAdditionalSkillPerks(SkillPerk[] perks)
+	{
+		foreach (SkillPerk skillPerk in perks)
+		{
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			{
+				this.AdditionalGrantedSkillPerkIDs.Remove(skillPerk.IdHash);
+				if (skillPerk.OnRemove != null)
+				{
+					skillPerk.OnRemove(this);
+				}
+			}
+		}
+	}
+
+	private void ApplySkillPerksForSkill(string skillId)
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
@@ -253,7 +330,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		}
 	}
 
-	private void RemoveSkillPerks(string skillId)
+	private void RemoveSkillPerksForSkill(string skillId)
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
@@ -367,7 +444,35 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 
 	public bool OwnsHat(string hatId)
 	{
+		using (List<MinionResume.HatInfo>.Enumerator enumerator = this.AdditionalHats.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current.Hat == hatId)
+				{
+					return true;
+				}
+			}
+		}
 		return this.ownedHats.ContainsKey(hatId) && this.ownedHats[hatId];
+	}
+
+	public List<MinionResume.HatInfo> GetAllHats()
+	{
+		List<MinionResume.HatInfo> list = new List<MinionResume.HatInfo>();
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
+		{
+			if (keyValuePair.Value)
+			{
+				Skill skill = Db.Get().Skills.TryGet(keyValuePair.Key);
+				if (!skill.hat.IsNullOrWhiteSpace())
+				{
+					list.Add(new MinionResume.HatInfo(skill.Name, skill.hat));
+				}
+			}
+		}
+		list.AddRange(this.AdditionalHats);
+		return list;
 	}
 
 	public void SkillLearned()
@@ -382,8 +487,17 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		}
 		if (this.targetHat != null && this.currentHat != this.targetHat)
 		{
-			new PutOnHatChore(this, Db.Get().ChoreTypes.SwitchHat);
+			this.CreateHatChangeChore();
 		}
+	}
+
+	public void CreateHatChangeChore()
+	{
+		if (this.lastHatChore != null)
+		{
+			this.lastHatChore.Cancel("New Hat");
+		}
+		this.lastHatChore = new PutOnHatChore(this, Db.Get().ChoreTypes.SwitchHat);
 	}
 
 	public void MasterSkill(string skillId)
@@ -393,7 +507,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 			base.gameObject.GetComponent<ChoreConsumer>().AddUrge(Db.Get().Urges.LearnSkill);
 		}
 		this.MasteryBySkillID[skillId] = true;
-		this.ApplySkillPerks(skillId);
+		this.ApplySkillPerksForSkill(skillId);
 		this.UpdateExpectations();
 		this.UpdateMorale();
 		this.TriggerMasterSkillEvents();
@@ -417,7 +531,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		if (this.MasteryBySkillID.ContainsKey(skillId))
 		{
 			this.MasteryBySkillID.Remove(skillId);
-			this.RemoveSkillPerks(skillId);
+			this.RemoveSkillPerksForSkill(skillId);
 			this.UpdateExpectations();
 			this.UpdateMorale();
 			this.TriggerMasterSkillEvents();
@@ -433,7 +547,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 		if (!this.HasBeenGrantedSkill(skillId))
 		{
 			this.MasteryBySkillID[skillId] = true;
-			this.ApplySkillPerks(skillId);
+			this.ApplySkillPerksForSkill(skillId);
 			this.GrantedSkillIDs.Add(skillId);
 			this.UpdateExpectations();
 			this.UpdateMorale();
@@ -613,6 +727,16 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 
 	public bool HasPerk(HashedString perkId)
 	{
+		using (List<HashedString>.Enumerator enumerator = this.AdditionalGrantedSkillPerkIDs.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current == perkId)
+				{
+					return true;
+				}
+			}
+		}
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
 			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).GivesPerk(perkId))
@@ -625,6 +749,16 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 
 	public bool HasPerk(SkillPerk perk)
 	{
+		using (List<HashedString>.Enumerator enumerator = this.AdditionalGrantedSkillPerkIDs.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current == perk.IdHash)
+				{
+					return true;
+				}
+			}
+		}
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
 			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).GivesPerk(perk))
@@ -638,6 +772,8 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	public void RemoveHat()
 	{
 		MinionResume.RemoveHat(base.GetComponent<KBatchedAnimController>());
+		this.currentHat = null;
+		this.targetHat = null;
 	}
 
 	public static void RemoveHat(KBatchedAnimController controller)
@@ -771,6 +907,10 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	[Serialize]
 	public List<string> GrantedSkillIDs = new List<string>();
 
+	private List<HashedString> AdditionalGrantedSkillPerkIDs = new List<HashedString>();
+
+	private List<MinionResume.HatInfo> AdditionalHats = new List<MinionResume.HatInfo>();
+
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
 
@@ -796,6 +936,8 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 
 	private Notification lastSkillNotification;
 
+	private PutOnHatChore lastHatChore;
+
 	private AttributeModifier skillsMoraleExpectationModifier;
 
 	private AttributeModifier skillsMoraleModifier;
@@ -805,6 +947,22 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	public float DEBUG_ActiveExperienceGained;
 
 	public float DEBUG_SecondsAlive;
+
+	public class HatInfo
+	{
+		public string Source { get; }
+
+		public string Hat { get; }
+
+		public HatInfo(string source, string hat)
+		{
+			this.Source = source;
+			this.Hat = hat;
+			this.count = 1;
+		}
+
+		public int count;
+	}
 
 	public enum SkillMasteryConditions
 	{

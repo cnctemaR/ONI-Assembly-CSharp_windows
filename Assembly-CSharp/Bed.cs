@@ -6,20 +6,8 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/Bed")]
 public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
 {
-	private bool CanSleepOwnablePrecondition(MinionAssignablesProxy worker)
-	{
-		bool flag = false;
-		MinionIdentity minionIdentity = worker.target as MinionIdentity;
-		if (minionIdentity != null)
-		{
-			flag = Db.Get().Amounts.Stamina.Lookup(minionIdentity) != null;
-		}
-		return flag;
-	}
-
 	protected override void OnPrefabInit()
 	{
-		this.ownable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.CanSleepOwnablePrecondition));
 		base.OnPrefabInit();
 		this.showProgressBar = false;
 	}
@@ -120,16 +108,13 @@ public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
 	}
 
 	[MyCmpReq]
-	private Ownable ownable;
-
-	[MyCmpReq]
 	private Sleepable sleepable;
 
 	private WorkerBase targetWorker;
 
 	public string[] effects;
 
-	private static Dictionary<string, string> roomSleepingEffects = new Dictionary<string, string>
+	public static readonly Dictionary<string, string> roomSleepingEffects = new Dictionary<string, string>
 	{
 		{ "Barracks", "BarracksStamina" },
 		{ "Luxury Barracks", "BarracksStamina" },

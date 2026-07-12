@@ -20,6 +20,8 @@ namespace TUNING
 
 			public static float POWER_CONSUMPTION_RATE = 2000f;
 
+			public static float FAKE_POWER_CONSUMPTION_RATE = STRESS.SHOCKER.POWER_CONSUMPTION_RATE * 0.25f;
+
 			public static float MAX_POWER_USE = 120000f;
 		}
 	}

@@ -25,7 +25,7 @@ public static class BaseMinionConfig
 
 	public static Sprite GetSpriteForMinionModel(Tag model)
 	{
-		return Assets.GetSprite(string.Format("ui_duplicant_{0}_portrait", model.ToString().ToLower()));
+		return Assets.GetSprite(string.Format("ui_duplicant_{0}_selection", model.ToString().ToLower()));
 	}
 
 	public static GameObject BaseMinion(Tag model, string[] minionAttributes, string[] minionAmounts, AttributeModifier[] minionTraits)
@@ -62,12 +62,11 @@ public static class BaseMinionConfig
 		gameObject.AddOrGet<Health>();
 		gameObject.AddOrGet<MinionIdentity>();
 		OxygenBreather oxygenBreather = gameObject.AddOrGet<OxygenBreather>();
-		oxygenBreather.O2toCO2conversion = statsFor.BaseStats.OXYGEN_TO_CO2_CONVERSION;
 		oxygenBreather.lowOxygenThreshold = statsFor.BaseStats.LOW_OXYGEN_THRESHOLD;
 		oxygenBreather.noOxygenThreshold = statsFor.BaseStats.NO_OXYGEN_THRESHOLD;
+		oxygenBreather.O2toCO2conversion = statsFor.BaseStats.OXYGEN_TO_CO2_CONVERSION;
 		oxygenBreather.mouthOffset = new Vector2f(0.25f, 0.97f);
 		oxygenBreather.minCO2ToEmit = statsFor.BaseStats.MIN_CO2_TO_EMIT;
-		oxygenBreather.breathableCells = OxygenBreather.DEFAULT_BREATHABLE_OFFSETS;
 		WarmBlooded warmBlooded = gameObject.AddOrGet<WarmBlooded>();
 		warmBlooded.complexity = WarmBlooded.ComplexityType.FullHomeostasis;
 		warmBlooded.IdealTemperature = statsFor.Temperature.Internal.IDEAL;
@@ -337,11 +336,10 @@ public static class BaseMinionConfig
 	{
 		Sensors component = go.GetComponent<Sensors>();
 		component.Add(new PathProberSensor(component));
-		component.Add(new SafeCellSensor(component));
+		component.Add(new SafeCellSensor(component, true));
 		component.Add(new IdleCellSensor(component));
 		component.Add(new PickupableSensor(component));
 		component.Add(new ClosestEdibleSensor(component));
-		component.Add(new BreathableAreaSensor(component));
 		component.Add(new AssignableReachabilitySensor(component));
 		component.Add(new MingleCellSensor(component));
 		component.Add(new BalloonStandCellSensor(component));
@@ -421,7 +419,7 @@ public static class BaseMinionConfig
 
 	public static Func<RationalAi.Instance, StateMachine.Instance>[] BaseRationalAiStateMachines()
 	{
-		Func<RationalAi.Instance, StateMachine.Instance>[] array = new Func<RationalAi.Instance, StateMachine.Instance>[40];
+		Func<RationalAi.Instance, StateMachine.Instance>[] array = new Func<RationalAi.Instance, StateMachine.Instance>[42];
 		array[0] = (RationalAi.Instance smi) => new RadiationMonitor.Instance(smi.master);
 		array[1] = (RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master);
 		array[2] = (RationalAi.Instance smi) => new StressMonitor.Instance(smi.master);
@@ -447,28 +445,30 @@ public static class BaseMinionConfig
 		array[19] = (RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master);
 		array[20] = (RationalAi.Instance smi) => new FallMonitor.Instance(smi.master, true, "anim_emotes_default_kanim");
 		array[21] = (RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master);
-		array[22] = (RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master);
-		array[23] = (RationalAi.Instance smi) => new RocketPassengerMonitor.Instance(smi.master);
-		array[24] = (RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master, new ReactionMonitor.Def());
-		array[25] = (RationalAi.Instance smi) => new SuitWearer.Instance(smi.master);
-		array[26] = (RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master);
-		array[27] = (RationalAi.Instance smi) => new MingleMonitor.Instance(smi.master);
-		array[28] = (RationalAi.Instance smi) => new MournMonitor.Instance(smi.master);
-		array[29] = (RationalAi.Instance smi) => new SpeechMonitor.Instance(smi.master, new SpeechMonitor.Def());
-		array[30] = (RationalAi.Instance smi) => new BlinkMonitor.Instance(smi.master, new BlinkMonitor.Def());
-		array[31] = (RationalAi.Instance smi) => new ConversationMonitor.Instance(smi.master, new ConversationMonitor.Def());
-		array[32] = (RationalAi.Instance smi) => new CoughMonitor.Instance(smi.master, new CoughMonitor.Def());
-		array[33] = (RationalAi.Instance smi) => new GameplayEventMonitor.Instance(smi.master, new GameplayEventMonitor.Def());
-		array[34] = (RationalAi.Instance smi) => new GasLiquidExposureMonitor.Instance(smi.master, new GasLiquidExposureMonitor.Def());
-		array[35] = (RationalAi.Instance smi) => new InspirationEffectMonitor.Instance(smi.master, new InspirationEffectMonitor.Def());
-		array[36] = (RationalAi.Instance smi) => new SlipperyMonitor.Instance(smi.master, new SlipperyMonitor.Def());
-		array[37] = (RationalAi.Instance smi) => new PressureMonitor.Instance(smi.master, new PressureMonitor.Def());
-		array[38] = (RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def
+		array[22] = (RationalAi.Instance smi) => new SafeCellMonitor.Instance(smi.master, new SafeCellMonitor.Def());
+		array[23] = (RationalAi.Instance smi) => new SuffocationMonitor.Instance(smi.master, new SuffocationMonitor.Def());
+		array[24] = (RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master, new MoveToLocationMonitor.Def());
+		array[25] = (RationalAi.Instance smi) => new RocketPassengerMonitor.Instance(smi.master);
+		array[26] = (RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master, new ReactionMonitor.Def());
+		array[27] = (RationalAi.Instance smi) => new SuitWearer.Instance(smi.master);
+		array[28] = (RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master);
+		array[29] = (RationalAi.Instance smi) => new MingleMonitor.Instance(smi.master);
+		array[30] = (RationalAi.Instance smi) => new MournMonitor.Instance(smi.master);
+		array[31] = (RationalAi.Instance smi) => new SpeechMonitor.Instance(smi.master, new SpeechMonitor.Def());
+		array[32] = (RationalAi.Instance smi) => new BlinkMonitor.Instance(smi.master, new BlinkMonitor.Def());
+		array[33] = (RationalAi.Instance smi) => new ConversationMonitor.Instance(smi.master, new ConversationMonitor.Def());
+		array[34] = (RationalAi.Instance smi) => new CoughMonitor.Instance(smi.master, new CoughMonitor.Def());
+		array[35] = (RationalAi.Instance smi) => new GameplayEventMonitor.Instance(smi.master, new GameplayEventMonitor.Def());
+		array[36] = (RationalAi.Instance smi) => new GasLiquidExposureMonitor.Instance(smi.master, new GasLiquidExposureMonitor.Def());
+		array[37] = (RationalAi.Instance smi) => new InspirationEffectMonitor.Instance(smi.master, new InspirationEffectMonitor.Def());
+		array[38] = (RationalAi.Instance smi) => new SlipperyMonitor.Instance(smi.master, new SlipperyMonitor.Def());
+		array[39] = (RationalAi.Instance smi) => new PressureMonitor.Instance(smi.master, new PressureMonitor.Def());
+		array[40] = (RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def
 		{
 			fleethresholdState = DUPLICANTSTATS.GetStatsFor(smi.MinionModel).Combat.FLEE_THRESHOLD,
 			offsets = BaseMinionConfig.ATTACK_OFFSETS
 		});
-		array[39] = (RationalAi.Instance smi) => new RecreationTimeMonitor.Instance(smi.master, new RecreationTimeMonitor.Def());
+		array[41] = (RationalAi.Instance smi) => new RecreationTimeMonitor.Instance(smi.master, new RecreationTimeMonitor.Def());
 		return array;
 	}
 

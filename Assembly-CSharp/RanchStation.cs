@@ -8,10 +8,15 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 	{
 		default_state = this.Operational;
 		this.Unoperational.TagTransition(GameTags.Operational, this.Operational, false);
-		this.Operational.TagTransition(GameTags.Operational, this.Unoperational, true).ToggleChore((RanchStation.Instance smi) => smi.CreateChore(), this.Unoperational, this.Unoperational).Update("FindRanachable", delegate(RanchStation.Instance smi, float dt)
+		this.Operational.TagTransition(GameTags.Operational, this.Unoperational, true).ToggleChore((RanchStation.Instance smi) => smi.CreateChore(), new Action<RanchStation.Instance, Chore>(RanchStation.SetRemoteChore), this.Unoperational, this.Unoperational).Update("FindRanachable", delegate(RanchStation.Instance smi, float dt)
 		{
 			smi.FindRanchable(null);
 		}, UpdateRate.SIM_200ms, false);
+	}
+
+	private static void SetRemoteChore(RanchStation.Instance smi, Chore chore)
+	{
+		smi.remoteChore.SetChore(chore);
 	}
 
 	public StateMachine<RanchStation, RanchStation.Instance, IStateMachineTarget, RanchStation.Def>.BoolParameter RancherIsReady;
@@ -24,7 +29,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 	{
 		public Func<GameObject, RanchStation.Instance, bool> IsCritterEligibleToBeRanchedCb;
 
-		public Action<GameObject> OnRanchCompleteCb;
+		public Action<GameObject, WorkerBase> OnRanchCompleteCb;
 
 		public Action<GameObject, float, Workable> OnRanchWorkTick;
 
@@ -280,7 +285,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			global::Debug.Assert(this.activeRanchable.GetMaster() != null, "GetMaster was null");
 			global::Debug.Assert(base.def != null, "def was null");
 			global::Debug.Assert(base.def.OnRanchCompleteCb != null, "onRanchCompleteCb cb was null");
-			base.def.OnRanchCompleteCb(this.activeRanchable.gameObject);
+			base.def.OnRanchCompleteCb(this.activeRanchable.gameObject, this.rancher);
 			this.targetRanchables.Remove(this.activeRanchable.Monitor);
 			this.activeRanchable.Trigger(1827504087, null);
 			this.activeRanchable = null;
@@ -369,6 +374,9 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		{
 			return this.targetRanchables;
 		}
+
+		[MyCmpAdd]
+		public ManuallySetRemoteWorkTargetComponent remoteChore;
 
 		private const int QUEUE_SIZE = 2;
 

@@ -364,7 +364,7 @@ public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1
 		this.UpdateChore();
 	}
 
-	public void CompleteWorkingOrder()
+	public virtual void CompleteWorkingOrder()
 	{
 		if (!this.HasWorkingOrder)
 		{

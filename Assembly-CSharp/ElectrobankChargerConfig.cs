@@ -60,5 +60,7 @@ public class ElectrobankChargerConfig : IBuildingConfig
 
 	public const string ID = "ElectrobankCharger";
 
-	public const float CHARGE_RATE = 480f;
+	public const float BUILDING_WATTAGE_COST = 480f;
+
+	public const float CHARGE_RATE = 400f;
 }

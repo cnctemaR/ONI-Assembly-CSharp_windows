@@ -13,6 +13,7 @@ public class OilChangerWorkableUse : Workable, IGameObjectEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.operational = base.GetComponent<Operational>();
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;
 		this.attributeConverter = Db.Get().AttributeConverters.ToiletSpeed;
@@ -33,6 +34,7 @@ public class OilChangerWorkableUse : Workable, IGameObjectEffectDescriptor
 		{
 			roomOfGameObject.roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), worker.GetComponent<Effects>());
 		}
+		this.operational.SetActive(true, false);
 	}
 
 	protected override void OnStopWork(WorkerBase worker)
@@ -43,6 +45,7 @@ public class OilChangerWorkableUse : Workable, IGameObjectEffectDescriptor
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 			worker.transform.SetPosition(position);
 		}
+		this.operational.SetActive(false, false);
 		base.OnStopWork(worker);
 	}
 
@@ -89,4 +92,6 @@ public class OilChangerWorkableUse : Workable, IGameObjectEffectDescriptor
 		}
 		base.OnCompleteWork(worker);
 	}
+
+	private Operational operational;
 }

@@ -179,6 +179,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
 			this.meter.SetSymbolTint(new KAnimHashedString("water1"), colour);
 			this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+			this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
 			this.OnStorageChange(null);
 		}
 

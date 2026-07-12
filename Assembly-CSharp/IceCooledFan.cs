@@ -127,6 +127,9 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 	[SerializeField]
 	public Tag consumptionTag;
 
+	[MyCmpAdd]
+	private ManuallySetRemoteWorkTargetComponent remoteChore;
+
 	private float LOW_ICE_TEMP = 173.15f;
 
 	[MyCmpAdd]
@@ -202,7 +205,7 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 			{
 				smi.master.workable.SetWorkTime(float.PositiveInfinity);
 			});
-			this.workable.ToggleChore(new Func<IceCooledFan.StatesInstance, Chore>(this.CreateUseChore), this.work_pst).EventTransition(GameHashes.ActiveChanged, this.workable.cooling, (IceCooledFan.StatesInstance smi) => smi.master.workable.worker != null).EventTransition(GameHashes.OperationalChanged, this.workable.cooling, (IceCooledFan.StatesInstance smi) => smi.master.workable.worker != null)
+			this.workable.ToggleChore(new Func<IceCooledFan.StatesInstance, Chore>(IceCooledFan.States.CreateUseChore), new Action<IceCooledFan.StatesInstance, Chore>(IceCooledFan.States.SetRemoteChore), this.work_pst).EventTransition(GameHashes.ActiveChanged, this.workable.cooling, (IceCooledFan.StatesInstance smi) => smi.master.workable.worker != null).EventTransition(GameHashes.OperationalChanged, this.workable.cooling, (IceCooledFan.StatesInstance smi) => smi.master.workable.worker != null)
 				.Transition(this.unworkable, (IceCooledFan.StatesInstance smi) => !smi.IsWorkable(), UpdateRate.SIM_200ms);
 			this.workable.cooling.EventTransition(GameHashes.OperationalChanged, this.unworkable, (IceCooledFan.StatesInstance smi) => smi.master.workable.worker == null).EventHandler(GameHashes.ActiveChanged, delegate(IceCooledFan.StatesInstance smi)
 			{
@@ -241,7 +244,12 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 				});
 		}
 
-		private Chore CreateUseChore(IceCooledFan.StatesInstance smi)
+		private static void SetRemoteChore(IceCooledFan.StatesInstance smi, Chore chore)
+		{
+			smi.master.remoteChore.SetChore(chore);
+		}
+
+		private static Chore CreateUseChore(IceCooledFan.StatesInstance smi)
 		{
 			return new WorkChore<IceCooledFanWorkable>(Db.Get().ChoreTypes.IceCooledFan, smi.master.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}

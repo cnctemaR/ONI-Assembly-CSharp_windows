@@ -25,7 +25,10 @@ public class FetchDrone : KMonoBehaviour
 		};
 		for (int i = 0; i < array.Length; i++)
 		{
-			this.choreConsumer.SetPermittedByUser(array[i], false);
+			if (array[i] != null)
+			{
+				this.choreConsumer.SetPermittedByUser(array[i], false);
+			}
 		}
 		foreach (Storage storage in base.GetComponents<Storage>())
 		{
@@ -48,9 +51,6 @@ public class FetchDrone : KMonoBehaviour
 		Vector3 vector = this.animController.GetSymbolTransform(FetchDrone.HASH_SNAPTO_THING, out flag).GetColumn(3);
 		vector.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingUse);
 		gameObject.transform.SetPosition(vector);
-		this.pickupableKBAC = gameObject.AddComponent<KBatchedAnimController>();
-		this.pickupableKBAC.AnimFiles = new KAnimFile[] { Assets.GetAnim("algae_kanim") };
-		this.pickupableKBAC.sceneLayer = Grid.SceneLayer.BuildingUse;
 		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
 		kbatchedAnimTracker.symbol = FetchDrone.HASH_SNAPTO_THING;
 		kbatchedAnimTracker.offset = Vector3.zero;
@@ -58,31 +58,21 @@ public class FetchDrone : KMonoBehaviour
 
 	private void OnStorageChanged(object data)
 	{
-		this.ShowPickupSymbol(!this.pickupableStorage.IsEmpty());
+		base.GetComponent<Storage>();
+		GameObject gameObject = (GameObject)data;
+		this.RemoveTracker(gameObject);
+		this.ShowPickupSymbol(gameObject);
 	}
 
-	private void ShowPickupSymbol(bool show)
+	private void ShowPickupSymbol(GameObject pickupable)
 	{
-		this.pickupableKBAC.gameObject.SetActive(show);
-		if (show)
+		bool flag = this.pickupableStorage.items.Contains(pickupable);
+		if (flag)
 		{
-			Pickupable component = this.pickupableStorage.items[0].GetComponent<Pickupable>();
-			if (component != null)
-			{
-				KBatchedAnimController component2 = component.GetComponent<KBatchedAnimController>();
-				if (component.GetComponent<MinionIdentity>())
-				{
-					this.AddAnimTracker(component2.gameObject);
-				}
-				else
-				{
-					this.pickupableKBAC.SwapAnims(component2.AnimFiles);
-					this.pickupableKBAC.Play(component2.currentAnim, KAnim.PlayMode.Loop, 1f, 0f);
-				}
-			}
+			this.AddAnimTracker(pickupable);
 		}
-		this.animController.SetSymbolVisiblity(FetchDrone.BOTTOM, !show);
-		this.animController.SetSymbolVisiblity(FetchDrone.BOTTOM_CARRY, show);
+		this.animController.SetSymbolVisiblity(FetchDrone.BOTTOM, !flag);
+		this.animController.SetSymbolVisiblity(FetchDrone.BOTTOM_CARRY, flag);
 	}
 
 	private void AddAnimTracker(GameObject go)
@@ -94,11 +84,25 @@ public class FetchDrone : KMonoBehaviour
 		}
 		if (component.AnimFiles != null && component.AnimFiles.Length != 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
 		{
-			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
+			KBatchedAnimTracker kbatchedAnimTracker = go.GetComponent<KBatchedAnimTracker>();
+			if (kbatchedAnimTracker != null && kbatchedAnimTracker.controller == this.animController)
+			{
+				return;
+			}
+			kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
 			kbatchedAnimTracker.useTargetPoint = false;
 			kbatchedAnimTracker.fadeOut = false;
-			kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
+			kbatchedAnimTracker.symbol = ((go.GetComponent<Brain>() != null) ? new HashedString("snapTo_pivot") : new HashedString("snapTo_thing"));
 			kbatchedAnimTracker.forceAlwaysVisible = true;
+		}
+	}
+
+	private void RemoveTracker(GameObject go)
+	{
+		KBatchedAnimTracker kbatchedAnimTracker = ((go != null) ? go.GetComponent<KBatchedAnimTracker>() : null);
+		if (kbatchedAnimTracker != null && kbatchedAnimTracker.controller == this.animController)
+		{
+			global::UnityEngine.Object.Destroy(kbatchedAnimTracker);
 		}
 	}
 
@@ -107,8 +111,6 @@ public class FetchDrone : KMonoBehaviour
 	private static string BOTTOM = "bottom";
 
 	private static string BOTTOM_CARRY = "bottom_carry";
-
-	private KBatchedAnimController pickupableKBAC;
 
 	private KBatchedAnimController animController;
 

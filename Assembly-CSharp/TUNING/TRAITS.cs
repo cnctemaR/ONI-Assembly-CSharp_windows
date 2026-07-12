@@ -164,7 +164,7 @@ namespace TUNING
 		private static void OnAddRoboDancer(GameObject go)
 		{
 			new RoboDancer.Instance(go.GetComponent<KMonoBehaviour>()).StartSM();
-			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_walk_robotdance_kanim", null, Db.Get().Expressions.Neutral).StartSM();
+			new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), null, "anim_loco_walk_robotdance_kanim", Db.Get().Expressions.Music).StartSM();
 		}
 
 		public static float EARLYBIRD_MODIFIER = 2f;
@@ -223,15 +223,13 @@ namespace TUNING
 			TraitUtil.CreateDisabledTaskTrait("Joshua", DUPLICANTS.CONGENITALTRAITS.JOSHUA.NAME, DUPLICANTS.CONGENITALTRAITS.JOSHUA.DESC, "Combat", true),
 			TraitUtil.CreateComponentTrait<Stinky>("Liam", DUPLICANTS.CONGENITALTRAITS.LIAM.NAME, DUPLICANTS.CONGENITALTRAITS.LIAM.DESC, false, null),
 			TraitUtil.CreateNamedTrait("AncientKnowledge", DUPLICANTS.TRAITS.ANCIENTKNOWLEDGE.NAME, DUPLICANTS.TRAITS.ANCIENTKNOWLEDGE.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostDigging", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTDIGGING.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTDIGGING.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostBuilding", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTBUILDING.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTBUILDING.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostCooking", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTCOOKING.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTCOOKING.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostArt", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTART.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTART.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostFarming", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTFARMING.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTFARMING.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostRanching", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTRANCHING.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTRANCHING.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostMedicine", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTMEDICINE.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTMEDICINE.DESC, true),
-			TraitUtil.CreateNamedTrait("DefaultBionicBoostExplorer", DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTEXPLORER.NAME, DUPLICANTS.TRAITS.DEFAULTBIONICBOOSTEXPLORER.DESC, true),
-			TraitUtil.CreateAttributeEffectTrait("BionicBaseline", DUPLICANTS.TRAITS.BIONICBASELINE.NAME, DUPLICANTS.TRAITS.BIONICBASELINE.DESC, new string[] { "Art", "Caring", "Cooking" }, new float[] { -3f, -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug1", DUPLICANTS.TRAITS.BIONICBUG1.NAME, DUPLICANTS.TRAITS.BIONICBUG1.DESC, new string[] { "Learning", "Strength" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug2", DUPLICANTS.TRAITS.BIONICBUG2.NAME, DUPLICANTS.TRAITS.BIONICBUG2.DESC, new string[] { "Ranching", "Caring" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug3", DUPLICANTS.TRAITS.BIONICBUG3.NAME, DUPLICANTS.TRAITS.BIONICBUG3.DESC, new string[] { "Digging", "Machinery" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug4", DUPLICANTS.TRAITS.BIONICBUG4.NAME, DUPLICANTS.TRAITS.BIONICBUG4.DESC, new string[] { "Construction", "Art" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug5", DUPLICANTS.TRAITS.BIONICBUG5.NAME, DUPLICANTS.TRAITS.BIONICBUG5.DESC, new string[] { "Athletics", "Botanist" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug6", DUPLICANTS.TRAITS.BIONICBUG6.NAME, DUPLICANTS.TRAITS.BIONICBUG6.DESC, new string[] { "Cooking", "Botanist" }, new float[] { -3f, -3f }, false),
+			TraitUtil.CreateAttributeEffectTrait("BionicBug7", DUPLICANTS.TRAITS.BIONICBUG7.NAME, DUPLICANTS.TRAITS.BIONICBUG7.DESC, new string[] { "Caring", "Learning" }, new float[] { -3f, -3f }, false),
 			TraitUtil.CreateComponentTrait<Chatty>("Chatty", DUPLICANTS.TRAITS.CHATTY.NAME, DUPLICANTS.TRAITS.CHATTY.DESC, true, null),
 			TraitUtil.CreateDisabledTaskTrait("CantResearch", DUPLICANTS.TRAITS.CANTRESEARCH.NAME, DUPLICANTS.TRAITS.CANTRESEARCH.DESC, "Research", true),
 			TraitUtil.CreateDisabledTaskTrait("CantBuild", DUPLICANTS.TRAITS.CANTBUILD.NAME, DUPLICANTS.TRAITS.CANTBUILD.DESC, "Build", false),
@@ -359,11 +357,11 @@ namespace TUNING
 
 			public static float MAX_MORALE_EXCESS = 20f;
 
-			public static float MIN_REACTION_CHANCE = 2f;
+			public static float MIN_REACTION_CHANCE = 0.083333336f;
 
-			public static float MAX_REACTION_CHANCE = 5f;
+			public static float MAX_REACTION_CHANCE = 0.20833333f;
 
-			public static float JOY_REACTION_DURATION = 570f;
+			public static float JOY_REACTION_DURATION = 1800f;
 
 			public const float CHARISMATIC_CHANCE = 1f;
 

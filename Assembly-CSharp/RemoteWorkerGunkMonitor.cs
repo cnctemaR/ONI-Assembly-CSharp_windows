@@ -18,17 +18,17 @@ public class RemoteWorkerGunkMonitor : StateMachineComponent<RemoteWorkerGunkMon
 
 	public float GunkLevel()
 	{
-		return this.Gunk / 600f;
+		return this.Gunk / 20.000002f;
 	}
 
 	[MyCmpGet]
 	private Storage storage;
 
-	public const float CAPACITY_KG = 600f;
+	public const float CAPACITY_KG = 20.000002f;
 
-	public const float HIGH_LEVEL = 480f;
+	public const float HIGH_LEVEL = 16.000002f;
 
-	public const float DRAIN_AMOUNT_KG_PER_S = 1f;
+	public const float DRAIN_AMOUNT_KG_PER_S = 3.3333337f;
 
 	public class StatesInstance : GameStateMachine<RemoteWorkerGunkMonitor.States, RemoteWorkerGunkMonitor.StatesInstance, RemoteWorkerGunkMonitor, object>.GameInstance
 	{
@@ -51,17 +51,17 @@ public class RemoteWorkerGunkMonitor : StateMachineComponent<RemoteWorkerGunkMon
 
 		public static bool IsGunkLevelOk(RemoteWorkerGunkMonitor.StatesInstance smi)
 		{
-			return smi.master.Gunk < 480f;
+			return smi.master.Gunk < 16.000002f;
 		}
 
 		public static bool IsGunkHigh(RemoteWorkerGunkMonitor.StatesInstance smi)
 		{
-			return smi.master.Gunk >= 480f && smi.master.Gunk < 600f;
+			return smi.master.Gunk >= 16.000002f && smi.master.Gunk < 20.000002f;
 		}
 
 		public static bool IsFullOfGunk(RemoteWorkerGunkMonitor.StatesInstance smi)
 		{
-			return smi.master.Gunk >= 600f;
+			return smi.master.Gunk >= 20.000002f;
 		}
 
 		private GameStateMachine<RemoteWorkerGunkMonitor.States, RemoteWorkerGunkMonitor.StatesInstance, RemoteWorkerGunkMonitor, object>.State ok;

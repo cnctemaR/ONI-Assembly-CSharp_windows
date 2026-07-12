@@ -48,6 +48,7 @@ public class MilkPressConfig : IBuildingConfig
 		complexFabricatorWorkable.workingPstComplete = new HashedString[] { "working_pst_complete" };
 		complexFabricator.storeProduced = true;
 		complexFabricator.inStorage.SetDefaultStoredItemModifiers(MilkPressConfig.RefineryStoredItemModifiers);
+		complexFabricator.buildStorage.SetDefaultStoredItemModifiers(MilkPressConfig.RefineryStoredItemModifiers);
 		complexFabricator.outStorage.SetDefaultStoredItemModifiers(MilkPressConfig.RefineryStoredItemModifiers);
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;

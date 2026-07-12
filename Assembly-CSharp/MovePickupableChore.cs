@@ -6,14 +6,14 @@ using UnityEngine;
 public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 {
 	public MovePickupableChore(IStateMachineTarget target, GameObject pickupable, Action<Chore> onEnd)
-		: base((pickupable.GetComponent<CreatureBrain>() == null) ? Db.Get().ChoreTypes.Fetch : Db.Get().ChoreTypes.Ranch, target, target.GetComponent<ChoreProvider>(), false, null, null, onEnd, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
+		: base((!Movable.IsCritterPickupable(pickupable)) ? Db.Get().ChoreTypes.Fetch : Db.Get().ChoreTypes.Ranch, target, target.GetComponent<ChoreProvider>(), false, null, null, onEnd, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new MovePickupableChore.StatesInstance(this);
 		Pickupable component = pickupable.GetComponent<Pickupable>();
 		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, target.GetComponent<Storage>());
 		this.AddPrecondition(ChorePreconditions.instance.IsNotARobot, "FetchDrone");
 		this.AddPrecondition(ChorePreconditions.instance.IsNotTransferArm, this);
-		if (pickupable.GetComponent<CreatureBrain>())
+		if (Movable.IsCritterPickupable(pickupable))
 		{
 			this.AddPrecondition(MovePickupableChore.CanReachCritter, pickupable);
 			this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures);
@@ -134,7 +134,15 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 			}).MoveTo<Capturable>(this.pickupablesource, this.fetch.wrangle, null, null, null);
 			this.fetch.wrangle.EnterTransition(this.fetch.approach, (MovePickupableChore.StatesInstance smi) => this.pickupablesource.Get(smi).HasTag(GameTags.Creatures.Bagged)).ToggleWork<Capturable>(this.pickupablesource, this.fetch.approach, null, null);
 			this.fetch.approach.MoveTo<IApproachable>(this.pickupablesource, this.fetch.pickup, new Func<MovePickupableChore.StatesInstance, CellOffset[]>(this.GetFetcherOffset), null, null);
-			this.fetch.pickup.DoPickup(this.pickupablesource, this.pickup, this.actualamount, this.approachstorage, this.delivering.deliverfail);
+			this.fetch.pickup.DoPickup(this.pickupablesource, this.pickup, this.actualamount, this.approachstorage, this.delivering.deliverfail).Exit(delegate(MovePickupableChore.StatesInstance smi)
+			{
+				GameObject gameObject2 = this.pickup.Get(smi);
+				Movable movable = ((gameObject2 != null) ? gameObject2.GetComponent<Movable>() : null);
+				if (movable != null && movable.onPickupComplete != null)
+				{
+					movable.onPickupComplete(gameObject2);
+				}
+			});
 			this.approachstorage.DefaultState(this.approachstorage.deliveryStorage);
 			this.approachstorage.deliveryStorage.InitializeStates(this.deliverer, this.deliverypoint, new Func<MovePickupableChore.StatesInstance, CellOffset[]>(this.GetFetcherOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance);
 			this.delivering.storing.Target(this.deliverer).DoDelivery(this.deliverer, this.deliverypoint, this.success, this.delivering.deliverfail);
@@ -144,20 +152,20 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 				Storage component = this.deliverypoint.Get(smi).GetComponent<Storage>();
 				Storage component2 = this.deliverer.Get(smi).GetComponent<Storage>();
 				float num = this.actualamount.Get(smi);
-				GameObject gameObject2 = this.pickup.Get(smi);
-				num += gameObject2.GetComponent<PrimaryElement>().Mass;
+				GameObject gameObject3 = this.pickup.Get(smi);
+				num += gameObject3.GetComponent<PrimaryElement>().Mass;
 				this.actualamount.Set(num, smi, false);
 				component2.Transfer(this.pickup.Get(smi), component, false, false);
-				this.DropPickupable(component, gameObject2);
+				this.DropPickupable(component, gameObject3);
 				CancellableMove component3 = component.GetComponent<CancellableMove>();
-				Movable component4 = gameObject2.GetComponent<Movable>();
+				Movable component4 = gameObject3.GetComponent<Movable>();
 				component3.RemoveMovable(component4);
 				component4.ClearMove();
 				if (!this.IsDeliveryComplete(smi))
 				{
-					GameObject gameObject3 = this.pickupablesource.Get(smi);
+					GameObject gameObject4 = this.pickupablesource.Get(smi);
 					int num2 = Grid.PosToCell(this.deliverypoint.Get(smi));
-					if (this.pickupablesource.Get(smi) == null || Grid.PosToCell(gameObject3) == num2)
+					if (this.pickupablesource.Get(smi) == null || Grid.PosToCell(gameObject4) == num2)
 					{
 						GameObject nextTarget = component3.GetNextTarget();
 						this.pickupablesource.Set(nextTarget, smi, false);
@@ -188,9 +196,16 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 					gameObject.transform.SetPosition(vector);
 					gameObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 				}
-				return;
 			}
-			storage.DropAll(false, false, default(Vector3), true, null);
+			else
+			{
+				storage.DropAll(false, false, default(Vector3), true, null);
+			}
+			Movable component = delivered.GetComponent<Movable>();
+			if (component.onDeliveryComplete != null)
+			{
+				component.onDeliveryComplete(delivered);
+			}
 		}
 
 		private bool IsDeliveryComplete(MovePickupableChore.StatesInstance smi)

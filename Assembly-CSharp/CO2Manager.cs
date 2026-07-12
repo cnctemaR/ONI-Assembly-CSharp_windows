@@ -71,7 +71,7 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 						bool flag3 = false;
 						int num5 = -1;
 						int num6 = -1;
-						foreach (CellOffset cellOffset in OxygenBreather.DEFAULT_BREATHABLE_OFFSETS)
+						foreach (CellOffset cellOffset in GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS)
 						{
 							int num7 = Grid.OffsetCell(num3, cellOffset);
 							if (Grid.IsValidCell(num7))

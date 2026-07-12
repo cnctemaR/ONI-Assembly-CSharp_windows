@@ -14,7 +14,7 @@ public class FetchDroneConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 300f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Creatures, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity("FetchDrone", this.name, this.desc, 300f, true, Assets.GetAnim("swoopy_bot_kanim"), "idle_loop", Grid.SceneLayer.Move, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.isMovable = true;
 		gameObject.AddOrGet<LoopingSounds>();
@@ -30,7 +30,7 @@ public class FetchDroneConfig : IEntityConfig
 		Trait trait = Db.Get().CreateTrait(text, this.name, this.name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Attributes.CarryAmount.Id, global::TUNING.ROBOTS.FETCHDRONE.CARRY_CAPACITY, this.name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalElectroBank.maxAttribute.Id, 120000f, this.name, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalElectroBank.deltaAttribute.Id, -30f, this.name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalElectroBank.deltaAttribute.Id, -50f, this.name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, global::TUNING.ROBOTS.FETCHDRONE.HIT_POINTS, this.name, false, false, true));
 		modifiers.initialTraits.Add(text);
 		gameObject.AddOrGet<AttributeConverters>();
@@ -54,15 +54,13 @@ public class FetchDroneConfig : IEntityConfig
 			CellOffset.none,
 			new CellOffset(0, 1)
 		};
-		RobotElectroBankMonitor.Def def = gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>();
-		def.lowBatteryWarningPercent = 0.2f;
-		def.wattage = 200f;
+		gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>().lowBatteryWarningPercent = 0.2f;
 		gameObject.AddOrGet<FetchDrone>();
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.fxPrefix = Storage.FXPrefix.PickedUp;
 		storage.dropOnLoad = true;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
-		gameObject.AddOrGetDef<CreatureDebugGoToMonitor.Def>();
+		gameObject.AddOrGetDef<DebugGoToMonitor.Def>();
 		Deconstructable deconstructable = gameObject.AddOrGet<Deconstructable>();
 		deconstructable.enabled = false;
 		deconstructable.audioSize = "medium";
@@ -70,14 +68,19 @@ public class FetchDroneConfig : IEntityConfig
 		Storage storage2 = gameObject.AddComponent<Storage>();
 		storage2.storageID = GameTags.ChargedPortableBattery;
 		storage2.showInUI = true;
+		storage2.storageFilters = new List<Tag> { GameTags.ChargedPortableBattery };
+		TreeFilterable treeFilterable = gameObject.AddOrGet<TreeFilterable>();
+		treeFilterable.storageToFilterTag = storage2.storageID;
+		treeFilterable.dropIncorrectOnFilterChange = false;
+		treeFilterable.tintOnNoFiltersSet = false;
 		ManualDeliveryKG manualDeliveryKG = gameObject.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage2);
 		manualDeliveryKG.RequestedItemTag = GameTags.ChargedPortableBattery;
-		manualDeliveryKG.capacity = 1.2f;
+		manualDeliveryKG.capacity = 1f;
 		manualDeliveryKG.refillMass = 1.2f;
 		manualDeliveryKG.MinimumMass = 1f;
-		manualDeliveryKG.MassPerUnit = 20f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		manualDeliveryKG.MassPerUnit = 21f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.RepairFetch.IdHash;
 		gameObject.AddOrGetDef<RobotElectroBankMonitor.Def>().lowBatteryWarningPercent = 0.2f;
 		gameObject.AddOrGetDef<RobotAi.Def>().DeleteOnDead = true;
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def
@@ -100,7 +103,9 @@ public class FetchDroneConfig : IEntityConfig
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		pickupable.handleFallerComponents = false;
 		pickupable.SetWorkTime(5f);
+		gameObject.AddOrGet<Clearable>().isClearable = false;
 		gameObject.AddOrGet<SnapOn>();
+		gameObject.AddOrGet<Movable>();
 		FetchDroneConfig.SetupLaserEffects(gameObject);
 		component.SetSymbolVisiblity("snapto_pivot", false);
 		component.SetSymbolVisiblity("snapto_thing", false);
@@ -110,6 +115,7 @@ public class FetchDroneConfig : IEntityConfig
 		gameObject.AddOrGet<DrowningMonitor>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		gameObject.AddOrGet<Health>();
+		gameObject.AddOrGetDef<MoveToLocationMonitor.Def>().invalidTagsForMoveTo = new Tag[] { GameTags.Robots.Behaviours.NoElectroBank };
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		return gameObject;
 	}
@@ -259,16 +265,34 @@ public class FetchDroneConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
-		inst.GetComponent<StandardWorker>().fetchOffsets = new CellOffset[] { CellOffset.up };
-		Sensors component = inst.GetComponent<Sensors>();
-		component.Add(new PathProberSensor(component));
-		component.Add(new PickupableSensor(component));
-		PathProber component2 = inst.GetComponent<PathProber>();
-		if (component2 != null)
+		StandardWorker component = inst.GetComponent<StandardWorker>();
+		component.fetchOffsets = new CellOffset[] { CellOffset.up };
+		component.deliveryOffsets = new CellOffset[]
 		{
-			component2.SetGroupProber(MinionGroupProber.Get());
+			CellOffset.up,
+			CellOffset.leftdown,
+			CellOffset.down,
+			CellOffset.rightdown
+		};
+		Sensors component2 = inst.GetComponent<Sensors>();
+		component2.Add(new PathProberSensor(component2));
+		component2.Add(new PickupableSensor(component2));
+		PathProber component3 = inst.GetComponent<PathProber>();
+		if (component3 != null)
+		{
+			component3.SetGroupProber(MinionGroupProber.Get());
 		}
 		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("Flydo_flying_LP", false));
+		Movable component4 = inst.GetComponent<Movable>();
+		component4.tagRequiredForMove = GameTags.Robots.Behaviours.NoElectroBank;
+		component4.onDeliveryComplete = delegate(GameObject go)
+		{
+			go.GetComponent<KBatchedAnimController>().Play("dead_battery", KAnim.PlayMode.Once, 1f, 0f);
+		};
+		component4.onPickupComplete = delegate(GameObject go)
+		{
+			go.GetComponent<KBatchedAnimController>().Play("in_storage", KAnim.PlayMode.Once, 1f, 0f);
+		};
 	}
 
 	public const string ID = "FetchDrone";

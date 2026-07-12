@@ -20,12 +20,12 @@ public class CoughMonitor : GameStateMachine<CoughMonitor, CoughMonitor.Instance
 		{
 			return;
 		}
-		Sim.MassConsumedCallback massConsumedCallback = (Sim.MassConsumedCallback)data;
-		float num = ((smi.lastConsumeTime <= 0f) ? 0f : (timeInCycles - smi.lastConsumeTime));
+		float num = (float)data;
+		float num2 = ((smi.lastConsumeTime <= 0f) ? 0f : (timeInCycles - smi.lastConsumeTime));
 		smi.lastConsumeTime = timeInCycles;
-		smi.amountConsumed -= 0.05f * num;
+		smi.amountConsumed -= 0.05f * num2;
 		smi.amountConsumed = Mathf.Max(smi.amountConsumed, 0f);
-		smi.amountConsumed += massConsumedCallback.mass;
+		smi.amountConsumed += num;
 		if (smi.amountConsumed >= 1f)
 		{
 			this.shouldCough.Set(true, smi, false);

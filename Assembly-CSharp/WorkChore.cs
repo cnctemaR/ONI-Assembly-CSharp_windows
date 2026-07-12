@@ -55,6 +55,10 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			this.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, base.smi.sm.workable.Get<Assignable>(base.smi));
 		}
+		if (override_anims != null)
+		{
+			this.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
+		}
 		WorkableType workableType = target as WorkableType;
 		if (workableType != null)
 		{

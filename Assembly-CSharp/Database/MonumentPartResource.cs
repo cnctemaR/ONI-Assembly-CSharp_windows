@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEngine;
+using STRINGS;
 
 namespace Database
 {
@@ -20,17 +20,11 @@ namespace Database
 			this.part = part;
 		}
 
-		public global::Tuple<Sprite, Color> GetUISprite()
-		{
-			Sprite sprite = Assets.GetSprite("unknown");
-			return new global::Tuple<Sprite, Color>(sprite, (sprite != null) ? Color.white : Color.clear);
-		}
-
 		public override PermitPresentationInfo GetPermitPresentationInfo()
 		{
 			PermitPresentationInfo permitPresentationInfo = default(PermitPresentationInfo);
-			permitPresentationInfo.sprite = this.GetUISprite().first;
-			permitPresentationInfo.SetFacadeForText("_monument part");
+			permitPresentationInfo.sprite = Def.GetUISpriteFromMultiObjectAnim(this.AnimFile, "ui", false, "");
+			permitPresentationInfo.SetFacadeForText(UI.KLEI_INVENTORY_SCREEN.MONUMENT_PART_FACADE_FOR);
 			return permitPresentationInfo;
 		}
 

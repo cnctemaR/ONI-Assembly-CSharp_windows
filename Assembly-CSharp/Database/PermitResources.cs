@@ -24,6 +24,7 @@ namespace Database
 			this.BalloonArtistFacades = new BalloonArtistFacades(this.Root);
 			this.Permits.Add(this.BalloonArtistFacades.Id, this.BalloonArtistFacades.resources);
 			this.MonumentParts = new MonumentParts(this.Root);
+			this.Permits.Add(this.MonumentParts.Id, this.MonumentParts.resources);
 			foreach (IEnumerable<PermitResource> enumerable in this.Permits.Values)
 			{
 				this.resources.AddRange(enumerable);

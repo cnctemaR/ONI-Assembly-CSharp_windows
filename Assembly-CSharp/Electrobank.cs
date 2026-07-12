@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameObjectEffectDescriptor
+public class Electrobank : KMonoBehaviour, ISim1000ms, ISim200ms, IConsumableUIItem, IGameObjectEffectDescriptor
 {
 	public string ID { get; private set; }
 
@@ -34,11 +34,25 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		base.Subscribe(856640610, new Action<object>(this.ClearHealthBar));
+		this.radiationEmitter = base.GetComponent<RadiationEmitter>();
+		this.UpdateRadiationEmitter();
 	}
 
 	private void OnCraft(object data)
 	{
 		WorldResourceAmountTracker<ElectrobankTracker>.Get().RegisterAmountProduced(this.Charge);
+	}
+
+	private void UpdateRadiationEmitter()
+	{
+		if (this.radiationEmitter == null)
+		{
+			return;
+		}
+		bool flag = this.timeSincePowerDrawn < 0.5f;
+		this.radiationEmitter.emitRads = (flag ? this.radioactivityTuning : 0f);
+		this.radiationEmitter.Refresh();
 	}
 
 	public static GameObject ReplaceEmptyWithCharged(GameObject EmptyElectrobank, bool dropFromStorage = false)
@@ -86,9 +100,15 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 		return gameObject;
 	}
 
-	public void AddPower(float joules)
+	public float AddPower(float joules)
 	{
-		this.charge = Mathf.Clamp(this.charge + joules, 0f, Electrobank.capacity);
+		if (joules < 0f)
+		{
+			joules = 0f;
+		}
+		float num = Mathf.Min(joules, Electrobank.capacity - this.charge);
+		this.charge += num;
+		return num;
 	}
 
 	public float RemovePower(float joules, bool dropWhenEmpty)
@@ -97,16 +117,26 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 		this.charge -= num;
 		if (this.charge <= 0f)
 		{
-			if (this.rechargeable)
-			{
-				Electrobank.ReplaceChargedWithEmpty(base.gameObject, dropWhenEmpty);
-			}
-			else
-			{
-				Util.KDestroyGameObject(base.gameObject);
-			}
+			this.OnEmpty(dropWhenEmpty);
+		}
+		if (num > 0f)
+		{
+			this.timeSincePowerDrawn = 0f;
 		}
 		return num;
+	}
+
+	protected virtual void OnEmpty(bool dropWhenEmpty)
+	{
+		if (this.rechargeable)
+		{
+			Electrobank.ReplaceChargedWithEmpty(base.gameObject, dropWhenEmpty);
+			return;
+		}
+		if (!this.keepEmpty)
+		{
+			Util.KDestroyGameObject(base.gameObject);
+		}
 	}
 
 	public void FullyCharge()
@@ -114,7 +144,7 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 		this.charge = Electrobank.capacity;
 	}
 
-	public void Explode()
+	public virtual void Explode()
 	{
 		int num = Grid.PosToCell(base.gameObject.transform.position);
 		float num2 = Grid.Temperature[num];
@@ -123,7 +153,40 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 		SimMessages.ReplaceElement(num, Grid.Element[num].id, CellEventLogger.Instance.SandBoxTool, Grid.Mass[num], num2, Grid.DiseaseIdx[num], Grid.DiseaseCount[num], -1);
 		Game.Instance.SpawnFX(SpawnFXHashes.MeteorImpactMetal, base.gameObject.transform.position, 0f);
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Battery_explode", false), base.gameObject.transform.position, 1f);
-		Electrobank.ReplaceEmptyWithGarbage(base.gameObject, false);
+		if (this.rechargeable)
+		{
+			Electrobank.ReplaceEmptyWithGarbage(base.gameObject, false);
+			return;
+		}
+		base.gameObject.DeleteObject();
+	}
+
+	protected void LaunchNearbyStuff()
+	{
+		ListPool<ScenePartitionerEntry, Comet>.PooledList pooledList = ListPool<ScenePartitionerEntry, Comet>.Allocate();
+		Vector3 position = base.transform.position;
+		GameScenePartitioner.Instance.GatherEntries((int)position.x - 3, (int)position.y - 3, 6, 6, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
+		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+		{
+			GameObject gameObject = (scenePartitionerEntry.obj as Pickupable).gameObject;
+			if (!(gameObject.GetComponent<MinionIdentity>() != null) && !(gameObject.GetComponent<CreatureBrain>() != null) && gameObject.GetDef<RobotAi.Def>() == null)
+			{
+				Vector2 vector = gameObject.transform.GetPosition() - position;
+				vector = vector.normalized;
+				vector *= (float)global::UnityEngine.Random.Range(4, 6);
+				vector.y += (float)global::UnityEngine.Random.Range(2, 4);
+				if (GameComps.Fallers.Has(gameObject))
+				{
+					GameComps.Fallers.Remove(gameObject);
+				}
+				if (GameComps.Gravities.Has(gameObject))
+				{
+					GameComps.Gravities.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, vector);
+			}
+		}
+		pooledList.Recycle();
 	}
 
 	public void Sim1000ms(float dt)
@@ -132,20 +195,69 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 		{
 			return;
 		}
-		if (Grid.IsValidCell(this.pickupable.cachedCell) && Grid.Element[this.pickupable.cachedCell].HasTag(GameTags.AnyWater))
+		this.EvaluateWaterDamage(dt);
+		this.UpdateHealthBar();
+	}
+
+	public virtual void Sim200ms(float dt)
+	{
+		this.UpdateRadiationEmitter();
+		this.timeSincePowerDrawn = Mathf.Min(this.timeSincePowerDrawn + dt, 10f);
+	}
+
+	private void EvaluateWaterDamage(float dt)
+	{
+		if (Grid.IsValidCell(this.pickupable.cachedCell) && Grid.Element[this.pickupable.cachedCell].HasTag(GameTags.AnyWater) && global::UnityEngine.Random.Range(1, 101) > 75)
 		{
-			this.Damage(dt);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.POWER_BANK_WATER_DAMAGE, base.transform, 1.5f, false);
+			this.Damage(global::UnityEngine.Random.Range(0f, dt));
 		}
 	}
 
-	private void Damage(float amount)
+	public void Damage(float amount)
 	{
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, DUPLICANTS.MODIFIERS.WATERDAMAGE.NAME, base.transform, 1.5f, false);
-		Game.Instance.SpawnFX(SpawnFXHashes.BuildingSpark, Grid.PosToCell(base.gameObject), 0f);
-		this.health -= amount;
-		if (this.health <= 0f)
+		Game.Instance.SpawnFX(SpawnFXHashes.ElectrobankDamage, Grid.PosToCell(base.gameObject), 0f);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Battery_sparks_short", false), base.gameObject.transform.position, 1f);
+		this.currentHealth -= amount;
+		if (this.healthBar == null)
+		{
+			this.CreateHealthBar();
+		}
+		this.healthBar.Update();
+		this.lastDamageTime = Time.time;
+		if (this.currentHealth <= 0f)
 		{
 			this.Explode();
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.ClearHealthBar(null);
+		base.OnCleanUp();
+	}
+
+	public void CreateHealthBar()
+	{
+		this.healthBar = ProgressBar.CreateProgressBar(base.gameObject, () => this.currentHealth / 10f);
+		this.healthBar.SetVisibility(true);
+		this.healthBar.barColor = Util.ColorFromHex("CC3333");
+	}
+
+	public void UpdateHealthBar()
+	{
+		if (this.healthBar != null && Time.time - this.lastDamageTime > 5f)
+		{
+			this.ClearHealthBar(null);
+		}
+	}
+
+	public void ClearHealthBar(object data = null)
+	{
+		if (this.healthBar != null)
+		{
+			Util.KDestroyGameObject(this.healthBar);
+			this.healthBar = null;
 		}
 	}
 
@@ -203,10 +315,27 @@ public class Electrobank : KMonoBehaviour, ISim1000ms, IConsumableUIItem, IGameO
 	[Serialize]
 	private float charge = Electrobank.capacity;
 
+	private const float MAX_HEALTH = 10f;
+
 	[Serialize]
-	private float health = 10f;
+	private float currentHealth = 10f;
+
+	[Serialize]
+	private float timeSincePowerDrawn = 0.5f;
+
+	private const float RADIATION_EMITTER_TIMEOUT = 0.5f;
+
+	public float radioactivityTuning;
+
+	private RadiationEmitter radiationEmitter;
+
+	private float lastDamageTime;
+
+	public ProgressBar healthBar;
 
 	public bool rechargeable;
+
+	public bool keepEmpty;
 
 	[MyCmpGet]
 	private Pickupable pickupable;

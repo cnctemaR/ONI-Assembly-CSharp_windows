@@ -28,7 +28,7 @@ public class DataRainerChore : Chore<DataRainerChore.StatesInstance>, IWorkerPri
 		{
 			default_state = this.goToStand;
 			base.Target(this.dataRainer);
-			this.idle.EventTransition(GameHashes.ScheduleBlocksChanged, this.goToStand, (DataRainerChore.StatesInstance smi) => !smi.IsRecTime());
+			this.idle.EventTransition(GameHashes.ScheduleBlocksTick, this.goToStand, (DataRainerChore.StatesInstance smi) => !smi.IsRecTime());
 			this.goToStand.MoveTo((DataRainerChore.StatesInstance smi) => smi.GetTargetCell(), this.raining, this.idle, false);
 			this.raining.ToggleAnims("anim_bionic_joy_kanim", 0f).DefaultState(this.raining.loop).Update(delegate(DataRainerChore.StatesInstance smi, float dt)
 			{

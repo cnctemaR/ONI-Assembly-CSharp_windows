@@ -53,6 +53,7 @@ public class SmallElectrobankDischargerConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<LogicOperationalController>();
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "SmallElectrobankDischarger";

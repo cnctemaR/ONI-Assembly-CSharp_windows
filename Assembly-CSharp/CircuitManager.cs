@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using STRINGS;
 using UnityEngine;
 
 public class CircuitManager
@@ -413,16 +412,11 @@ public class CircuitManager
 			}
 			this.UpdateBatteryConnectionStatus(circuitInfo4.inputTransformers, flag5, num14);
 			this.circuitInfo[num14] = circuitInfo4;
-			for (int num15 = 0; num15 < circuitInfo4.generators.Count; num15++)
-			{
-				Generator generator4 = circuitInfo4.generators[num15];
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -generator4.JoulesAvailable, StringFormatter.Replace(BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION, "{Generator}", generator4.gameObject.GetProperName()), null);
-			}
 		}
-		for (int num16 = 0; num16 < this.circuitInfo.Count; num16++)
+		for (int num15 = 0; num15 < this.circuitInfo.Count; num15++)
 		{
-			CircuitManager.CircuitInfo circuitInfo5 = this.circuitInfo[num16];
-			this.CheckCircuitOverloaded(0.2f, num16, circuitInfo5.wattsUsed);
+			CircuitManager.CircuitInfo circuitInfo5 = this.circuitInfo[num15];
+			this.CheckCircuitOverloaded(0.2f, num15, circuitInfo5.wattsUsed);
 		}
 	}
 

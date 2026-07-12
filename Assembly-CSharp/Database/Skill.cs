@@ -6,7 +6,7 @@ namespace Database
 {
 	public class Skill : Resource
 	{
-		public Skill(string id, string name, string description, string dlcId, int tier, string hat, string badge, string skillGroup, List<SkillPerk> perks = null, List<string> priorSkills = null)
+		public Skill(string id, string name, string description, string dlcId, int tier, string hat, string badge, string skillGroup, List<SkillPerk> perks = null, List<string> priorSkills = null, string requiredDuplicantModel = "Minion")
 			: base(id, name)
 		{
 			this.description = description;
@@ -25,6 +25,7 @@ namespace Database
 			{
 				this.priorSkills = new List<string>();
 			}
+			this.requiredDuplicantModel = requiredDuplicantModel;
 		}
 
 		public int GetMoraleExpectation()
@@ -69,5 +70,7 @@ namespace Database
 		public List<SkillPerk> perks;
 
 		public List<string> priorSkills;
+
+		public string requiredDuplicantModel;
 	}
 }

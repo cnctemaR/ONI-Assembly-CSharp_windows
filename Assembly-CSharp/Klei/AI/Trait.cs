@@ -25,6 +25,15 @@ namespace Klei.AI
 			this.ignoredEffects = list.ToArray();
 		}
 
+		public string GetName()
+		{
+			if (this.NameCB != null)
+			{
+				return this.NameCB();
+			}
+			return this.Name;
+		}
+
 		public string GetTooltip()
 		{
 			string text;
@@ -155,6 +164,12 @@ namespace Klei.AI
 		public Func<string> TooltipCB;
 
 		public Func<string> ExtendedTooltip;
+
+		public Func<string> ShortDescCB;
+
+		public Func<string> ShortDescTooltipCB;
+
+		public Func<string> NameCB;
 
 		public ChoreGroup[] disabledChoreGroups;
 

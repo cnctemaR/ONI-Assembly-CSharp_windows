@@ -285,9 +285,37 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		return prefab.GetProperName();
 	}
 
+	private string GetSpawnableEffects()
+	{
+		GameObject prefab = Assets.GetPrefab(this.info.id);
+		if (prefab == null)
+		{
+			return "";
+		}
+		string text = "";
+		IGameObjectEffectDescriptor[] components = prefab.GetComponents<IGameObjectEffectDescriptor>();
+		if (components != null)
+		{
+			IGameObjectEffectDescriptor[] array = components;
+			for (int i = 0; i < array.Length; i++)
+			{
+				List<Descriptor> descriptors = array[i].GetDescriptors(prefab);
+				if (descriptors != null)
+				{
+					foreach (Descriptor descriptor in descriptors)
+					{
+						text = text + descriptor.text + "\n";
+					}
+				}
+			}
+		}
+		return text;
+	}
+
 	private void SetInfoText()
 	{
 		this.characterName.SetText(this.GetSpawnableName());
+		this.effects.SetText(this.GetSpawnableEffects());
 		this.description.SetText(this.GetSpawnableDescription());
 		this.itemName.SetText(this.GetSpawnableName());
 		this.quantity.SetText(this.GetSpawnableQuantityOnly());
@@ -524,6 +552,9 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	[SerializeField]
 	private LocText description;
+
+	[SerializeField]
+	private LocText effects;
 
 	[SerializeField]
 	private KToggle selectButton;

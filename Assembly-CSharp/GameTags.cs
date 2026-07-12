@@ -100,7 +100,7 @@ public class GameTags
 
 	public static readonly Tag BionicUpgrade = TagManager.Create("BionicUpgrade");
 
-	public static readonly Tag BatterySaveMode = TagManager.Create("BatterySaveMode");
+	public static readonly Tag BionicBedTime = TagManager.Create("BionicBedTime");
 
 	public static readonly Tag CharmedArtifact = TagManager.Create("CharmedArtifact");
 
@@ -388,9 +388,13 @@ public class GameTags
 
 	public static readonly Tag Equipped = TagManager.Create("Equipped");
 
+	public static readonly Tag DisposablePortableBattery = TagManager.Create("DisposablePortableBattery");
+
 	public static readonly Tag ChargedPortableBattery = TagManager.Create("ChargedPortableBattery");
 
 	public static readonly Tag EmptyPortableBattery = TagManager.Create("EmptyPortableBattery");
+
+	public static readonly Tag SolidLubricant = TagManager.Create("SolidLubricant");
 
 	public static readonly Tag Entombed = TagManager.Create("Entombed");
 
@@ -606,7 +610,9 @@ public class GameTags
 		GameTags.Compostable,
 		GameTags.HighEnergyParticle,
 		GameTags.StoryTraitResource,
-		GameTags.Dehydrated
+		GameTags.Dehydrated,
+		GameTags.ChargedPortableBattery,
+		GameTags.BionicUpgrade
 	};
 
 	public static TagSet IgnoredMaterialCategories = new TagSet
@@ -635,9 +641,17 @@ public class GameTags
 		GameTags.Other,
 		GameTags.ManufacturedMaterial,
 		GameTags.CookingIngredient,
-		GameTags.RareMaterials,
-		GameTags.ChargedPortableBattery
+		GameTags.RareMaterials
 	};
+
+	public static TagSet BionicCompatibleBatteries = new TagSet
+	{
+		"Electrobank",
+		GameTags.DisposablePortableBattery,
+		GameTags.EmptyPortableBattery
+	};
+
+	public static TagSet BionicIncompatibleBatteries = new TagSet { "SelfChargingElectrobank" };
 
 	public static TagSet MaterialBuildingElements = new TagSet
 	{
@@ -962,6 +976,8 @@ public class GameTags
 			public static readonly Tag EmoteBehaviour = TagManager.Create("EmoteBehaviour");
 
 			public static readonly Tag TrappedBehaviour = TagManager.Create("TrappedBehaviour");
+
+			public static readonly Tag NoElectroBank = TagManager.Create("NoElectroBank");
 		}
 	}
 }

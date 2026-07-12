@@ -38,13 +38,13 @@ public class RanchStationConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
 		def.IsCritterEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
-		def.OnRanchCompleteCb = delegate(GameObject creature_go)
+		def.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
-			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation;
-			RancherChore.RancherChoreStates.Instance smi2 = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>();
-			GameObject gameObject = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>().sm.rancher.Get(smi2);
-			float num = 1f + gameObject.GetAttributes().Get(Db.Get().Attributes.Ranching.Id).GetTotalValue() * 0.1f;
-			creature_go.GetComponent<Effects>().Add("Ranched", true).timeRemaining *= num;
+			creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>();
+			Attributes attributes = rancher_wb.GetAttributes();
+			float num = ((attributes != null) ? attributes.Get(Db.Get().Attributes.Ranching.Id).GetTotalValue() : 0f);
+			float num2 = 1f + num * 0.1f;
+			creature_go.GetComponent<Effects>().Add("Ranched", true).timeRemaining *= num2;
 			AmountInstance amountInstance = Db.Get().Amounts.HitPoints.Lookup(creature_go);
 			if (amountInstance != null)
 			{
@@ -57,12 +57,12 @@ public class RanchStationConfig : IBuildingConfig
 		def.WorkTime = 12f;
 		def.GetTargetRanchCell = delegate(RanchStation.Instance smi)
 		{
-			int num2 = Grid.InvalidCell;
+			int num3 = Grid.InvalidCell;
 			if (!smi.IsNullOrStopped())
 			{
-				num2 = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
+				num3 = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
 			}
-			return num2;
+			return num3;
 		};
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;

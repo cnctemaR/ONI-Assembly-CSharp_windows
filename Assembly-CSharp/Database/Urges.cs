@@ -21,7 +21,6 @@ namespace Database
 			this.Shower = base.Add(new Urge("Shower"));
 			this.Eat = base.Add(new Urge("Eat"));
 			this.ReloadElectrobank = base.Add(new Urge("ReloadElectrobank"));
-			this.RemoveDischargedElectrobank = base.Add(new Urge("RemoveDischargedElectrobank"));
 			this.Pee = base.Add(new Urge("Pee"));
 			this.RestDueToDisease = base.Add(new Urge("RestDueToDisease"));
 			this.Sleep = base.Add(new Urge("Sleep"));
@@ -50,8 +49,6 @@ namespace Database
 		public Urge Narcolepsy;
 
 		public Urge Eat;
-
-		public Urge RemoveDischargedElectrobank;
 
 		public Urge ReloadElectrobank;
 

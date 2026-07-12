@@ -10,7 +10,6 @@ public static class PathFinderQueries
 		PathFinderQueries.cellOffsetQuery = new CellOffsetQuery();
 		PathFinderQueries.safeCellQuery = new SafeCellQuery();
 		PathFinderQueries.idleCellQuery = new IdleCellQuery();
-		PathFinderQueries.breathableCellQuery = new BreathableCellQuery();
 		PathFinderQueries.drawNavGridQuery = new DrawNavGridQuery();
 		PathFinderQueries.plantableCellQuery = new PlantableCellQuery();
 		PathFinderQueries.mineableCellQuery = new MineableCellQuery();
@@ -30,8 +29,6 @@ public static class PathFinderQueries
 	public static SafeCellQuery safeCellQuery = new SafeCellQuery();
 
 	public static IdleCellQuery idleCellQuery = new IdleCellQuery();
-
-	public static BreathableCellQuery breathableCellQuery = new BreathableCellQuery();
 
 	public static DrawNavGridQuery drawNavGridQuery = new DrawNavGridQuery();
 

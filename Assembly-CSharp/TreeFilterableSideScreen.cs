@@ -274,7 +274,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 			return;
 		}
 		this.contentMask.GetComponent<LayoutElement>().minHeight = (float)((this.targetFilterable.uiHeight == TreeFilterable.UISideScreenHeight.Tall) ? 380 : 256);
-		this.storage = this.targetFilterable.GetComponent<Storage>();
+		this.storage = this.targetFilterable.GetFilterStorage();
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		this.storage.Subscribe(1163645216, new Action<object>(this.OnOnlySpicedItemsSettingChanged));
 		this.OnOnlyFetchMarkedItemsSettingChanged(null);

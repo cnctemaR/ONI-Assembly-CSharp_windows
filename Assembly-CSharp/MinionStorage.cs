@@ -82,6 +82,11 @@ public class MinionStorage : KMonoBehaviour
 			Schedulable component10 = dest_id.GetComponent<Schedulable>();
 			schedule.Assign(component10);
 		}
+		StoredMinionIdentity.IStoredMinionExtension[] components = src_id.GetComponents<StoredMinionIdentity.IStoredMinionExtension>();
+		for (int i = 0; i < components.Length; i++)
+		{
+			components[i].PushTo(dest_id);
+		}
 	}
 
 	private static void StoreModifiers(MinionIdentity src_id, StoredMinionIdentity dest_id)
@@ -101,6 +106,7 @@ public class MinionStorage : KMonoBehaviour
 
 	private static void CopyMinion(StoredMinionIdentity src_id, MinionIdentity dest_id)
 	{
+		dest_id.Subscribe(1589886948, new Action<object>(MinionStorage.OnDeserializedMinionSpawned));
 		dest_id.SetName(src_id.storedName);
 		dest_id.nameStringKey = src_id.nameStringKey;
 		dest_id.model = src_id.model;
@@ -171,15 +177,6 @@ public class MinionStorage : KMonoBehaviour
 		dest_id.assignableProxy = new Ref<MinionAssignablesProxy>();
 		dest_id.assignableProxy.Set(src_id.assignableProxy.Get());
 		dest_id.assignableProxy.Get().SetTarget(dest_id, dest_id.gameObject);
-		Equipment equipment = dest_id.GetEquipment();
-		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
-		{
-			Equippable equippable = assignableSlotInstance.assignable as Equippable;
-			if (equippable != null)
-			{
-				equipment.Equip(equippable);
-			}
-		}
 		Schedulable component5 = src_id.GetComponent<Schedulable>();
 		Schedule schedule = component5.GetSchedule();
 		if (schedule != null)
@@ -188,6 +185,26 @@ public class MinionStorage : KMonoBehaviour
 			Schedulable component6 = dest_id.GetComponent<Schedulable>();
 			schedule.Assign(component6);
 		}
+		StoredMinionIdentity.IStoredMinionExtension[] components = dest_id.GetComponents<StoredMinionIdentity.IStoredMinionExtension>();
+		for (int i = 0; i < components.Length; i++)
+		{
+			components[i].PullFrom(src_id);
+		}
+	}
+
+	private static void OnDeserializedMinionSpawned(object deserializedMinionOBJ)
+	{
+		MinionIdentity component = ((GameObject)deserializedMinionOBJ).GetComponent<MinionIdentity>();
+		Equipment equipment = component.GetEquipment();
+		foreach (AssignableSlotInstance assignableSlotInstance in equipment.Slots)
+		{
+			Equippable equippable = assignableSlotInstance.assignable as Equippable;
+			if (equippable != null)
+			{
+				equipment.Equip(equippable);
+			}
+		}
+		component.Unsubscribe(1589886948, new Action<object>(MinionStorage.OnDeserializedMinionSpawned));
 	}
 
 	public static void RedirectInstanceTracker(GameObject src_minion, GameObject dest_minion)

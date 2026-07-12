@@ -53,7 +53,10 @@ public class UIDupeRandomizer : MonoBehaviour
 			List<string> list = new List<string>();
 			foreach (Skill skill in Db.Get().Skills.resources)
 			{
-				list.Add(skill.hat);
+				if (skill.requiredDuplicantModel.IsNullOrWhiteSpace() || skill.requiredDuplicantModel == personality.model)
+				{
+					list.Add(skill.hat);
+				}
 			}
 			string text = list[global::UnityEngine.Random.Range(0, list.Count)];
 			UIDupeRandomizer.AddAccessory(dupe, this.slots.Hat.Lookup(text));

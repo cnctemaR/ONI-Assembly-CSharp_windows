@@ -8,6 +8,8 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 		: base(sensors, shouldStartActive)
 	{
 		this.navigator = base.GetComponent<Navigator>();
+		this.consumableConsumer = base.GetComponent<ConsumableConsumer>();
+		this.storage = base.GetComponent<Storage>();
 		this.itemSearchTag = itemSearchTag;
 	}
 
@@ -25,11 +27,20 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 		return int.MaxValue;
 	}
 
+	public virtual HashSet<Tag> GetForbbidenTags()
+	{
+		if (!(this.consumableConsumer == null))
+		{
+			return this.consumableConsumer.forbiddenTagSet;
+		}
+		return new HashSet<Tag>(0);
+	}
+
 	public override void Update()
 	{
-		HashSet<Tag> forbiddenTagSet = base.GetComponent<ConsumableConsumer>().forbiddenTagSet;
+		HashSet<Tag> forbbidenTags = this.GetForbbidenTags();
 		int maxValue = int.MaxValue;
-		Pickupable pickupable = this.FindClosestPickupable(base.GetComponent<Storage>(), forbiddenTagSet, out maxValue, this.itemSearchTag, this.requiredTags);
+		Pickupable pickupable = this.FindClosestPickupable(this.storage, forbbidenTags, out maxValue, this.itemSearchTag, this.requiredTags);
 		bool flag = this.itemInReachButNotPermitted;
 		T t = default(T);
 		bool flag2 = false;
@@ -42,7 +53,7 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 		else
 		{
 			int num;
-			flag = this.FindClosestPickupable(base.GetComponent<Storage>(), new HashSet<Tag>(), out num, this.itemSearchTag, this.requiredTags) != null;
+			flag = this.FindClosestPickupable(this.storage, new HashSet<Tag>(), out num, this.itemSearchTag, this.requiredTags) != null;
 		}
 		if (t != this.item || this.isThereAnyItemAvailable != flag2)
 		{
@@ -109,4 +120,8 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 	protected bool itemInReachButNotPermitted;
 
 	private Navigator navigator;
+
+	protected ConsumableConsumer consumableConsumer;
+
+	private Storage storage;
 }

@@ -87,30 +87,20 @@ public class Spacecraft
 			}
 			StoredMinionIdentity component = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
 			string text = Db.Get().Attributes.SpaceNavigation.Id;
-			using (Dictionary<string, bool>.Enumerator enumerator = component.MasteryBySkillID.GetEnumerator())
+			foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
 			{
-				while (enumerator.MoveNext())
+				foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
 				{
-					KeyValuePair<string, bool> keyValuePair = enumerator.Current;
-					foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
+					if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
 					{
-						if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+						SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
+						if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)
 						{
-							SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
-							if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)
-							{
-								num += skillAttributePerk.modifier.Value;
-							}
+							num += skillAttributePerk.modifier.Value;
 						}
 					}
 				}
-				return num;
 			}
-		}
-		RoboPilotModule component2 = this.launchConditions.GetComponent<RoboPilotModule>();
-		if (component2 != null && component2.GetDataBanksStored() >= 1f)
-		{
-			num += component2.FlightEfficiencyModifier();
 		}
 		return num;
 	}

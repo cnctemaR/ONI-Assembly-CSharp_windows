@@ -363,4 +363,8 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	private List<Func<MinionAssignablesProxy, bool>> autoassignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();
 
 	private List<Func<MinionAssignablesProxy, bool>> assignmentPreconditions = new List<Func<MinionAssignablesProxy, bool>>();
+
+	public Func<Assignables, string> customAssignmentUITooltipFunc;
+
+	public Func<Assignables, string> customAssignablesUITooltipFunc;
 }

@@ -91,26 +91,35 @@ public class DevToolEntity : DevTool
 				{
 					DevToolSceneInspector.Inspect(gameObject);
 				}
-				WildnessMonitor.Instance smi = gameObject.GetSMI<WildnessMonitor.Instance>();
+				JoyBehaviourMonitor.Instance smi = gameObject.GetSMI<JoyBehaviourMonitor.Instance>();
 				if (smi.IsNullOrDestroyed())
+				{
+					ImGuiEx.Button("Duplicant: Make Overjoyed", "No JoyBehaviourMonitor.Instance found on the selected GameObject");
+				}
+				else if (ImGui.Button("Duplicant: Make Overjoyed"))
+				{
+					smi.GoToOverjoyed();
+				}
+				WildnessMonitor.Instance smi2 = gameObject.GetSMI<WildnessMonitor.Instance>();
+				if (smi2.IsNullOrDestroyed())
 				{
 					ImGuiEx.Button("Taming: Covert to Tamed", "No WildnessMonitor.Instance found on the selected GameObject");
 				}
 				else
 				{
-					WildnessMonitor wildnessMonitor = (WildnessMonitor)smi.GetStateMachine();
-					if (smi.GetCurrentState() != wildnessMonitor.tame)
+					WildnessMonitor wildnessMonitor = (WildnessMonitor)smi2.GetStateMachine();
+					if (smi2.GetCurrentState() != wildnessMonitor.tame)
 					{
 						if (ImGui.Button("Taming: Convert to Tamed"))
 						{
-							smi.wildness.SetValue(0f);
-							smi.GoTo(wildnessMonitor.tame);
+							smi2.wildness.SetValue(0f);
+							smi2.GoTo(wildnessMonitor.tame);
 						}
 					}
 					else if (ImGui.Button("Taming: Convert to Untamed"))
 					{
-						smi.wildness.value = smi.wildness.GetMax();
-						smi.GoTo(wildnessMonitor.wild);
+						smi2.wildness.value = smi2.wildness.GetMax();
+						smi2.GoTo(wildnessMonitor.wild);
 					}
 				}
 			}

@@ -45,6 +45,7 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		this.AddDiagnostic<StressDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<RadiationDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<ReactorDiagnostic>(world, this.contentContainer, this.diagnosticRows);
+		this.AddDiagnostic<BionicBatteryDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<FloatingRocketDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<RocketFuelDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<RocketOxidizerDiagnostic>(world, this.contentContainer, this.diagnosticRows);

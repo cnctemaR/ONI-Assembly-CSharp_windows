@@ -630,7 +630,7 @@ public class DlcManager
 		},
 		{
 			"DLC3_ID",
-			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(1f, 0.26666668f, 0.003921569f))
+			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(0.79607844f, 0.3882353f, 0.95686275f))
 		}
 	};
 

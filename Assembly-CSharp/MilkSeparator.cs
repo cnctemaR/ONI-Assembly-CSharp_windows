@@ -71,7 +71,9 @@ public class MilkSeparator : GameStateMachine<MilkSeparator, MilkSeparator.Insta
 
 	private static Chore CreateEmptyChore(MilkSeparator.Instance smi)
 	{
-		return new WorkChore<EmptyMilkSeparatorWorkable>(Db.Get().ChoreTypes.EmptyStorage, smi.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		WorkChore<EmptyMilkSeparatorWorkable> workChore = new WorkChore<EmptyMilkSeparatorWorkable>(Db.Get().ChoreTypes.EmptyStorage, smi.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
+		return workChore;
 	}
 
 	public const string WORK_PRE_ANIM_NAME = "separating_pre";

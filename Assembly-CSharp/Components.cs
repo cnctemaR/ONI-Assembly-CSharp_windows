@@ -5,6 +5,16 @@ using UnityEngine;
 
 public class Components
 {
+	public static Components.Cmps<MinionIdentity> GetMinionIdentitiesByModel(Tag tag)
+	{
+		Components.Cmps<MinionIdentity> cmps = null;
+		if (Components.MinionIdentitiesByModel.TryGetValue(tag, out cmps))
+		{
+			return cmps;
+		}
+		return new Components.Cmps<MinionIdentity>();
+	}
+
 	public static Components.Cmps<RobotAi.Instance> LiveRobotsIdentities = new Components.Cmps<RobotAi.Instance>();
 
 	public static Components.Cmps<MinionIdentity> LiveMinionIdentities = new Components.Cmps<MinionIdentity>();
@@ -24,6 +34,8 @@ public class Components
 	public static Components.CmpsByWorld<Sleepable> NormalBeds = new Components.CmpsByWorld<Sleepable>();
 
 	public static Components.Cmps<IUsable> Toilets = new Components.Cmps<IUsable>();
+
+	public static Components.Cmps<GunkEmptierWorkable> GunkExtractors = new Components.Cmps<GunkEmptierWorkable>();
 
 	public static Components.Cmps<Pickupable> Pickupables = new Components.Cmps<Pickupable>();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -351,7 +352,7 @@ public class ResearchScreenSideBar : KScreen
 				{
 					action = (<>9__0 = delegate
 					{
-						this.researchScreen.ZoomToTech(techID);
+						this.researchScreen.ZoomToTech(techID, false);
 					});
 				}
 				component2.onClick = (global::System.Action)Delegate.Combine(onClick, action);
@@ -366,7 +367,7 @@ public class ResearchScreenSideBar : KScreen
 		MultiToggle component3 = gameObject.GetComponent<MultiToggle>();
 		component3.onClick = (global::System.Action)Delegate.Combine(component3.onClick, new global::System.Action(delegate
 		{
-			this.researchScreen.ZoomToTech(techID);
+			this.researchScreen.ZoomToTech(techID, false);
 		}));
 		return gameObject;
 	}
@@ -453,6 +454,13 @@ public class ResearchScreenSideBar : KScreen
 			this.filterButtons[keyValuePair.Key].GetComponent<MultiToggle>().ChangeState(this.filterStates[keyValuePair.Key] ? 1 : 0);
 		}
 		this.SetCompletionFilter(ResearchScreenSideBar.CompletionState.All);
+	}
+
+	public void SetSearch(string newSearch)
+	{
+		newSearch = UI.StripLinkFormatting(newSearch);
+		this.searchBox.text = newSearch;
+		this.UpdateCurrentSearch(newSearch);
 	}
 
 	[Header("Containers")]

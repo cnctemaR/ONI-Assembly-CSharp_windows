@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using TUNING;
 using UnityEngine;
 
 namespace Klei.AI
@@ -35,6 +36,7 @@ namespace Klei.AI
 				{
 					AttributeLevel attributeLevel = new AttributeLevel(attributeInstance);
 					this.levels.Add(attributeLevel);
+					attributeLevel.maxGainedLevel = this.maxAttributeLevel;
 					attributeLevel.Apply(this);
 				}
 			}
@@ -88,6 +90,10 @@ namespace Klei.AI
 
 		public bool AddExperience(string attribute_id, float time_spent, float multiplier)
 		{
+			if (this.maxAttributeLevel == 0)
+			{
+				return false;
+			}
 			AttributeLevel attributeLevel = this.GetAttributeLevel(attribute_id);
 			if (attributeLevel == null)
 			{
@@ -145,6 +151,8 @@ namespace Klei.AI
 		}
 
 		private List<AttributeLevel> levels = new List<AttributeLevel>();
+
+		public int maxAttributeLevel = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL;
 
 		[Serialize]
 		private AttributeLevels.LevelSaveLoad[] saveLoadLevels = new AttributeLevels.LevelSaveLoad[0];

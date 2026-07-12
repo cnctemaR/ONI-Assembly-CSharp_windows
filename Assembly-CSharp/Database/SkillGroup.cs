@@ -28,5 +28,7 @@ namespace Database
 		public string choreGroupIcon;
 
 		public string archetypeIcon;
+
+		public bool allowAsAptitude = true;
 	}
 }

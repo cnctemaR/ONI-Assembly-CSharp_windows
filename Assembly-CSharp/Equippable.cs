@@ -57,7 +57,26 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			}
 			if (this.assignee != null)
 			{
-				this.assignee.GetSoleOwner().GetComponent<Equipment>().Equip(this);
+				Equipment component = this.assignee.GetSoleOwner().GetComponent<Equipment>();
+				bool flag = true;
+				global::UnityEngine.Object component2 = component.GetComponent<MinionAssignablesProxy>();
+				GameObject gameObject = null;
+				if (component2 != null)
+				{
+					gameObject = component.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+					if (gameObject != null)
+					{
+						flag = gameObject.GetComponent<KPrefabID>().isSpawned;
+					}
+				}
+				if (flag)
+				{
+					this.EquipToAssignable();
+				}
+				else
+				{
+					gameObject.Subscribe(1589886948, new Action<object>(this.OnAsigneeSpawnedAndReadyForEquip));
+				}
 			}
 			else
 			{
@@ -66,6 +85,21 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			}
 		}
 		base.Subscribe<Equippable>(1969584890, Equippable.SetDestroyedTrueDelegate);
+	}
+
+	private void EquipToAssignable()
+	{
+		if (this.assignee != null)
+		{
+			this.assignee.GetSoleOwner().GetComponent<Equipment>().Equip(this);
+		}
+	}
+
+	private void OnAsigneeSpawnedAndReadyForEquip(object o)
+	{
+		GameObject gameObject = (GameObject)o;
+		this.EquipToAssignable();
+		gameObject.Unsubscribe(1589886948, new Action<object>(this.OnAsigneeSpawnedAndReadyForEquip));
 	}
 
 	public KAnimFile GetBuildOverride()

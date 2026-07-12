@@ -6,6 +6,10 @@ public class LightSymbolTracker : KMonoBehaviour, IRenderEveryTick
 {
 	public void RenderEveryTick(float dt)
 	{
+		if (!base.enabled)
+		{
+			return;
+		}
 		Vector3 vector = Vector3.zero;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		bool flag;

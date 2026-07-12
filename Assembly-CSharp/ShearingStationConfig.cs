@@ -51,7 +51,7 @@ public class ShearingStationConfig : IBuildingConfig
 			IShearable smi = creature_go.GetSMI<IShearable>();
 			return smi != null && smi.IsFullyGrown();
 		};
-		def.OnRanchCompleteCb = delegate(GameObject creature_go)
+		def.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
 			creature_go.GetSMI<IShearable>().Shear();
 		};

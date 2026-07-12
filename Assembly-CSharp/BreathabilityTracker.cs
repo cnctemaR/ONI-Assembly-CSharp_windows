@@ -22,12 +22,12 @@ public class BreathabilityTracker : WorldTracker
 			OxygenBreather component = minionIdentity.GetComponent<OxygenBreather>();
 			if (!(component == null))
 			{
-				OxygenBreather.IGasProvider gasProvider = component.GetGasProvider();
+				OxygenBreather.IGasProvider currentGasProvider = component.GetCurrentGasProvider();
 				num2++;
-				if (!component.IsSuffocating)
+				if (!component.IsOutOfOxygen)
 				{
 					num += 100f;
-					if (gasProvider.IsLowOxygen())
+					if (currentGasProvider.IsLowOxygen())
 					{
 						num -= 50f;
 					}

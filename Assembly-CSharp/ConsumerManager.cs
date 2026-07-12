@@ -31,6 +31,7 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 			{
 				list.Add(gameObject.PrefabID());
 			}
+			list.Add(ConsumerManager.OXYGEN_TANK_ID);
 			return list;
 		}
 	}
@@ -43,6 +44,12 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Edible))
 			{
 				list.Add(gameObject.PrefabID());
+			}
+			Tag[] array = new Tag[GameTags.BionicIncompatibleBatteries.Count];
+			GameTags.BionicIncompatibleBatteries.CopyTo(array, 0);
+			foreach (Tag tag in array)
+			{
+				list.Add(tag);
 			}
 			return list;
 		}
@@ -140,4 +147,6 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	private List<Tag> defaultForbiddenTagsList = new List<Tag>();
+
+	public static string OXYGEN_TANK_ID = ClosestOxygenCanisterSensor.GenericBreathableGassesTankTag.ToString();
 }

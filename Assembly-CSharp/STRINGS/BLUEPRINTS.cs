@@ -636,6 +636,734 @@ namespace STRINGS
 			public static LocString DESC = "Southwest of <i>what</i>, Duplicants aren't sure. But they like it.";
 		}
 
+		public class PERMIT_MONUMENT_BASE_A_FROSTY
+		{
+			public static LocString NAME = "Patty Pose";
+
+			public static LocString DESC = "Looks and smells just like Bammoth \"business.\"";
+		}
+
+		public class PERMIT_MONUMENT_BASE_B_FROSTY
+		{
+			public static LocString NAME = "Squash Stand";
+
+			public static LocString DESC = "The plume curls upward to facilitate floor-sweeping.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_C_FROSTY
+		{
+			public static LocString NAME = "Lumen Landing";
+
+			public static LocString DESC = "It's radiant, though it emits no actual light.";
+		}
+
+		public class PERMIT_MONUMENT_MID_A_FROSTY
+		{
+			public static LocString NAME = "Recoiling";
+
+			public static LocString DESC = "It's trying to get away from something.";
+		}
+
+		public class PERMIT_MONUMENT_MID_B_FROSTY
+		{
+			public static LocString NAME = "Berry Bounty Trunk";
+
+			public static LocString DESC = "Carved sherberries are just about as palatable as real ones.";
+		}
+
+		public class PERMIT_MONUMENT_MID_C_FROSTY
+		{
+			public static LocString NAME = "Seal Snuggles";
+
+			public static LocString DESC = "Never, <i>ever</i> run while holding spigot seals.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_A_FROSTY
+		{
+			public static LocString NAME = "Liam Noggin";
+
+			public static LocString DESC = "A giant Resting Ewwww Face topper.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_B_FROSTY
+		{
+			public static LocString NAME = "Freyja Noggin";
+
+			public static LocString DESC = "A cooler-than-cool topper.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_C_FROSTY
+		{
+			public static LocString NAME = "Pei Noggin";
+
+			public static LocString DESC = "Everyone loves Pei Day!";
+		}
+
+		public class PERMIT_ATMO_BELT_3TONE_PURPLE
+		{
+			public static LocString NAME = "Tricolor Atmo Belt";
+
+			public static LocString DESC = "Complementary colors garner countless compliments.";
+		}
+
+		public class PERMIT_ATMO_BELT_CIRCUIT
+		{
+			public static LocString NAME = "Bionic Atmo Belt";
+
+			public static LocString DESC = "The belt itself is not bionic, but the Duplicant wearing it probably is.";
+		}
+
+		public class PERMIT_ATMOSUIT_BASIC_PURPLE_WILDBERRY
+		{
+			public static LocString NAME = "Crisp Violet Atmo Suit";
+
+			public static LocString DESC = "The shoulders are as purple as a paleontologist's prose.";
+		}
+
+		public class PERMIT_ATMO_SHOES_BIOCIRCUIT
+		{
+			public static LocString NAME = "Bionic Atmo Boots";
+
+			public static LocString DESC = "Standard-issue footwear for...augmented...employees.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_PLUM
+		{
+			public static LocString NAME = "Plum Atmo Gloves";
+
+			public static LocString DESC = "Purpley-reddish gloves for hostile environments.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_BIOCIRCUIT
+		{
+			public static LocString NAME = "Bionic Atmo Gloves";
+
+			public static LocString DESC = "Eye-catching accents ensure that the wearer knows where their hands are at all times.";
+		}
+
+		public class PERMIT_ATMO_HELMET_GAUDYSWEATER_PURPLE
+		{
+			public static LocString NAME = "Deepset Atmo Helmet";
+
+			public static LocString DESC = "Makes facial features appear farther away.";
+		}
+
+		public class PERMIT_ATMO_HELMET_BIOCIRCUIT
+		{
+			public static LocString NAME = "Bionic Atmo Helmet";
+
+			public static LocString DESC = "Featuring 360-degree panoramic views and cool non-functional neck buttons.";
+		}
+
+		public class PERMIT_JUMPSUIT_VSUIT_STELLAR
+		{
+			public static LocString NAME = "Aerodynamic Flightsuit";
+
+			public static LocString DESC = "Flatlock seams on the double V accents reduce drag. They also look nice.";
+		}
+
+		public class PERMIT_PJ_BIOCIRCUIT_WILDBERRY
+		{
+			public static LocString NAME = "Bionic Jammies";
+
+			public static LocString DESC = "This plush onesie soothes workers who feel really wired.";
+		}
+
+		public class PERMIT_PANTS_EXTENDEDWAIST_BLUE_WHEEZEWORT
+		{
+			public static LocString NAME = "High-Waisted Wheezy Pants";
+
+			public static LocString DESC = "The built-in invisible elastic waistband supports deep belly breathing.";
+		}
+
+		public class PERMIT_PANTS_SNAPJACKET_BRINE
+		{
+			public static LocString NAME = "Tear-Away Pants";
+
+			public static LocString DESC = "Most wearers consider these single-use.";
+		}
+
+		public class PERMIT_SHOES_BASIC_BLUE_WHEEZY
+		{
+			public static LocString NAME = "Basic Wheezy Shoes";
+
+			public static LocString DESC = "A fresh pair of Wheezewort-blue shoes that go with everything.";
+		}
+
+		public class PERMIT_SHOES_FUTURESPACE_BLUE
+		{
+			public static LocString NAME = "Future Chic Booties";
+
+			public static LocString DESC = "If they're not stylish yet, they will be someday.";
+		}
+
+		public class PERMIT_SHOES_VSUIT_STELLAR
+		{
+			public static LocString NAME = "Stellar Flight Boots";
+
+			public static LocString DESC = "Now with built-in arch support!";
+		}
+
+		public class PERMIT_GLOVES_BASIC_BLUE_WHEEZEWORT
+		{
+			public static LocString NAME = "Basic Wheezy Gloves";
+
+			public static LocString DESC = "A good, solid pair of blue gloves that go with everything.";
+		}
+
+		public class PERMIT_GLOVES_PUFFER_ORANGE
+		{
+			public static LocString NAME = "Cadmium Jelly Gloves";
+
+			public static LocString DESC = "A cozy little orange puffer jacket for every finger.";
+		}
+
+		public class PERMIT_GLOVES_FUTURESPACE_BLUE
+		{
+			public static LocString NAME = "Future Chic Gloves";
+
+			public static LocString DESC = "One metallic wrist ruffle is fancy. These gloves have two.";
+		}
+
+		public class PERMIT_GLOVES_VSUIT_STELLAR
+		{
+			public static LocString NAME = "Stellar Flight Gloves";
+
+			public static LocString DESC = "Interstellar flights call for truly stellar gloves.";
+		}
+
+		public class PERMIT_GLOVES_SNAPJACKET_BRINE
+		{
+			public static LocString NAME = "Brine Gloves";
+
+			public static LocString DESC = "Some adventurers are a little salty, which is to be expected.";
+		}
+
+		public class PERMIT_GLOVES_METAL_GREY
+		{
+			public static LocString NAME = "Steel Gloves";
+
+			public static LocString DESC = "They're constantly covered in fingerprints.";
+		}
+
+		public class PERMIT_TOP_VEST_PUFFER_ORANGE
+		{
+			public static LocString NAME = "Cadmium Vest";
+
+			public static LocString DESC = "Keeps the core warm, lets the pits breathe.";
+		}
+
+		public class PERMIT_TOP_SPACETOP_WHITE
+		{
+			public static LocString NAME = "Space Expo Shirt";
+
+			public static LocString DESC = "Swag from a convention that no one remembers attending.";
+		}
+
+		public class PERMIT_TOP_SNAPJACKET_BRINE
+		{
+			public static LocString NAME = "Starched Blazer";
+
+			public static LocString DESC = "It's very, <i>very</i> structured.";
+		}
+
+		public class PERMIT_TOP_METAL_GREY
+		{
+			public static LocString NAME = "All-Metal Jacket";
+
+			public static LocString DESC = "Can also be used as a posture corrector.";
+		}
+
+		public class PERMIT_DRESS_FUTURESPACE_BLUE
+		{
+			public static LocString NAME = "Sculpted Steel Dress";
+
+			public static LocString DESC = "Handcrafted from decommissioned rockets.";
+		}
+
+		public class PERMIT_PEDESTAL_SCREW_CHROME
+		{
+			public static LocString NAME = UI.FormatAsLink("Chrome Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "A display stand with a cool, steely industrial aesthetic.";
+		}
+
+		public class PERMIT_PEDESTAL_SCREW_BRASS
+		{
+			public static LocString NAME = UI.FormatAsLink("Brass Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "A display stand with a warm, brassy industrial aesthetic.";
+		}
+
+		public class PERMIT_PEDESTAL_ARCADE
+		{
+			public static LocString NAME = UI.FormatAsLink("Arcade Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "It's playful, though it can't actually <i>be</i> played.";
+		}
+
+		public class PERMIT_PEDESTAL_BATTERY
+		{
+			public static LocString NAME = UI.FormatAsLink("Power Bank Pedestal", "ITEMPEDESTAL");
+
+			public static LocString DESC = "Items displayed on this pedestal make a really \"power-full\" statement.";
+		}
+
+		public class PERMIT_HQBASE_CYBERPUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Retro LED Printing Pod", "HEADQUARTERS");
+
+			public static LocString DESC = "There's something profoundly hopeful about it.";
+		}
+
+		public class PERMIT_RESEARCH_CENTER_CYBERPUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Retro LED Research Station", "RESEARCHCENTER");
+
+			public static LocString DESC = "Doin' research for the future, while diggin' the vibes of the past.";
+		}
+
+		public class PERMIT_RESEARCH_CENTER2_CYBERPUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Retro LED Super Computer", "ADVANCEDRESEARCHCENTER");
+
+			public static LocString DESC = "Old-school cool, newfangled fact-finding.";
+		}
+
+		public class PERMIT_CRAFTINGSTATION_CYBERPUNK
+		{
+			public static LocString NAME = "Retro LED Crafting Table";
+
+			public static LocString DESC = "Building a better tomorrow, today.";
+		}
+
+		public class PERMIT_LOGIC_DEMULTIPLEXER_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Signal Distributor", "LOGICGATEDEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MULTIPLEXER_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Signal Selector", "LOGICGATEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_FILTER_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt FILTER Gate", "LOGICGATEFILTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BUFFER_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt BUFFER Gate", "LOGICGATEBUFFER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_NOT_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt NOT Gate", "LOGICGATENOT");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_COUNTER_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Signal Counter", "LOGICCOUNTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_OR_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt OR Gate", "LOGICGATEOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_AND_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt AND Gate", "LOGICGATEAND");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_XOR_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt XOR Gate", "LOGICGATEXOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MEMORY_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Cobalt Memory Toggle", "LOGICMEMORY");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_DEMULTIPLEXER_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Signal Distributor", "LOGICGATEDEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MULTIPLEXER_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Signal Selector", "LOGICGATEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_FILTER_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal FILTER Gate", "LOGICGATEFILTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BUFFER_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal BUFFER Gate", "LOGICGATEBUFFER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_NOT_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal NOT Gate", "LOGICGATENOT");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_COUNTER_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Signal Counter", "LOGICCOUNTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_OR_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal OR Gate", "LOGICGATEOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_AND_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal AND Gate", "LOGICGATEAND");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_XOR_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal XOR Gate", "LOGICGATEXOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MEMORY_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Memory Toggle", "LOGICMEMORY");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_DEMULTIPLEXER_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Signal Distributor", "LOGICGATEDEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MULTIPLEXER_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Signal Selector", "LOGICGATEMULTIPLEXER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_FILTER_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug FILTER Gate", "LOGICGATEFILTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BUFFER_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug BUFFER Gate", "LOGICGATEBUFFER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_NOT_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug NOT Gate", "LOGICGATENOT");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_COUNTER_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Signal Counter", "LOGICCOUNTER");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_OR_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug OR Gate", "LOGICGATEOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_AND_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug AND Gate", "LOGICGATEAND");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_XOR_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug XOR Gate", "LOGICGATEXOR");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_MEMORY_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Memory Toggle", "LOGICMEMORY");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BRIDGE_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Automation Wire Bridge", "LOGICWIREBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_WIRES_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Automation Wire", "LOGICWIRE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Automation Ribbon", "LOGICRIBBON");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_BRIDGE_FLAMINGO
+		{
+			public static LocString NAME = UI.FormatAsLink("Petal Automation Ribbon Bridge", "LOGICRIBBONBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BRIDGE_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Automation Wire Bridge", "LOGICWIREBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_WIRES_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Automation Wire", "LOGICWIRE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Automation Ribbon", "LOGICRIBBON");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_BRIDGE_LEMON
+		{
+			public static LocString NAME = UI.FormatAsLink("Brightslug Automation Ribbon Bridge", "LOGICRIBBONBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_BRIDGE_BOGEY
+		{
+			public static LocString NAME = UI.FormatAsLink("Mulch Automation Wire Bridge", "LOGICWIREBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_WIRES_BOGEY
+		{
+			public static LocString NAME = UI.FormatAsLink("Mulch Automation Wire", "LOGICWIRE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_BOGEY
+		{
+			public static LocString NAME = UI.FormatAsLink("Mulch Automation Ribbon", "LOGICRIBBON");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_LOGIC_RIBBON_BRIDGE_BOGEY
+		{
+			public static LocString NAME = UI.FormatAsLink("Mulch Automation Ribbon Bridge", "LOGICRIBBONBRIDGE");
+
+			public static LocString DESC = "Color-coded automation buildings are automatically more interesting.";
+		}
+
+		public class PERMIT_UTILITIES_ELECTRIC_CONDUCT_NET_PINK
+		{
+			public static LocString NAME = UI.FormatAsLink("Gamma Conductive Wire", "WIREREFINEDHIGHWATTAGE");
+
+			public static LocString DESC = "Color-coded wires make it easy to see which ones to cut...or not cut.";
+		}
+
+		public class PERMIT_UTILITIES_ELECTRIC_CONDUCT_DIAMOND_ORCHID
+		{
+			public static LocString NAME = UI.FormatAsLink("Bubblegum Conductive Wire", "WIREREFINEDHIGHWATTAGE");
+
+			public static LocString DESC = "Color-coded wires make it easy to see which ones to cut...or not cut.";
+		}
+
+		public class PERMIT_UTILITIES_ELECTRIC_CONDUCT_SCALE_LIME
+		{
+			public static LocString NAME = UI.FormatAsLink("Leach Conductive Wire", "WIREREFINEDHIGHWATTAGE");
+
+			public static LocString DESC = "Color-coded wires make it easy to see which ones to cut...or not cut.";
+		}
+
+		public class PERMIT_WALLS_CIRCUIT_LIGHTCOBALT
+		{
+			public static LocString NAME = UI.FormatAsLink("Mech Circuit", "EXTERIORWALL");
+
+			public static LocString DESC = "It really makes power plants feel like h-Ohm.";
+		}
+
+		public class PERMIT_WALLS_CIRCUIT_BOGEY
+		{
+			public static LocString NAME = UI.FormatAsLink("Quantum Circuit", "EXTERIORWALL");
+
+			public static LocString DESC = "Physicists say it changed color the moment it was observed.";
+		}
+
+		public class PERMIT_WALLS_CIRCUIT_PUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Phage Circuit", "EXTERIORWALL");
+
+			public static LocString DESC = "Named for the designer's favorite bacteria-munching virus.";
+		}
+
+		public class PERMIT_WALLS_ARCADE
+		{
+			public static LocString NAME = UI.FormatAsLink("Arcade", "EXTERIORWALL");
+
+			public static LocString DESC = "For those who miss the carpet-burned elbows of their home planet.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_A_BIONIC
+		{
+			public static LocString NAME = "Steela Noggin";
+
+			public static LocString DESC = "Each individual ringlet is heavy enough to crush a Duplicant.";
+		}
+
+		public class PERMIT_MONUMENT_MID_A_BIONIC
+		{
+			public static LocString NAME = "Tickled Trunk";
+
+			public static LocString DESC = "Featuring the fluttery palms of a delighted Bionic Duplicant.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_A_BIONIC
+		{
+			public static LocString NAME = "Balmy Bionic Base";
+
+			public static LocString DESC = "It's a bit greasy.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_B_BIONIC
+		{
+			public static LocString NAME = "Edwiredo Noggin";
+
+			public static LocString DESC = "It's a special Ed-ition topper.";
+		}
+
+		public class PERMIT_MONUMENT_MID_B_BIONIC
+		{
+			public static LocString NAME = "Power Forward";
+
+			public static LocString DESC = "Charging ahead with portable power.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_B_BIONIC
+		{
+			public static LocString NAME = "Mount Microchip";
+
+			public static LocString DESC = "Some Duplicants climb things just because they're there.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_C_BIONIC
+		{
+			public static LocString NAME = "Ulti Noggin";
+
+			public static LocString DESC = "The smug mug of a winner.";
+		}
+
+		public class PERMIT_MONUMENT_MID_C_BIONIC
+		{
+			public static LocString NAME = "Hogger Trunk";
+
+			public static LocString DESC = "In this universe, ya get what ya take.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_C_BIONIC
+		{
+			public static LocString NAME = "Gimme a Boost Base";
+
+			public static LocString DESC = "The winner takes it all.";
+		}
+
+		public class PERMIT_UTILITYELECTRICBRIDGECONDUCTIVE_SCALE_LIME
+		{
+			public static LocString NAME = "Leach Conductive Wire Bridge";
+
+			public static LocString DESC = "Color-coded wire bridges make it easy to see how things are connected.";
+		}
+
+		public class PERMIT_UTILITYELECTRICBRIDGECONDUCTIVE_NET_PINK
+		{
+			public static LocString NAME = "Gamma Conductive Wire Bridge";
+
+			public static LocString DESC = "Color-coded wire bridges make it easy to see how things are connected.";
+		}
+
+		public class PERMIT_UTILITYELECTRICBRIDGECONDUCTIVE_DIAMOND_ORCHID
+		{
+			public static LocString NAME = "Bubblegum Conductive Wire Bridge";
+
+			public static LocString DESC = "Color-coded wire bridges make it easy to see how things are connected.";
+		}
+
 		public class PERMIT_ELEGANTBED_HATCH
 		{
 			public static LocString NAME = UI.FormatAsLink("Hatch Bed", "LUXURYBED");

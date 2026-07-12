@@ -18,11 +18,11 @@ public class ApothecaryConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
-		buildingDef.RequiresPowerInput = true;
-		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
+		buildingDef.RequiresPowerInput = false;
+		buildingDef.EnergyConsumptionWhenActive = 0f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
-		buildingDef.ViewMode = OverlayModes.Power.ID;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(default(CellOffset));
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
 		return buildingDef;
@@ -35,6 +35,7 @@ public class ApothecaryConfig : IBuildingConfig
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Apothecary apothecary = go.AddOrGet<Apothecary>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, apothecary);
+		apothecary.inStorage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		go.AddOrGet<ComplexFabricatorWorkable>();
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
@@ -43,6 +44,7 @@ public class ApothecaryConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<PoweredActiveStoppableController.Def>();
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	public const string ID = "Apothecary";

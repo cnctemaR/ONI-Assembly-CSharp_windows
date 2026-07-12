@@ -313,7 +313,7 @@ public class PauseScreen : KModalButtonMenu
 	{
 		foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
 		{
-			if (!(keyValuePair.Value.id == "DLC3_ID") && !this.dlcActivationButtons.ContainsKey(keyValuePair.Key))
+			if (!this.dlcActivationButtons.ContainsKey(keyValuePair.Key))
 			{
 				GameObject gameObject = global::Util.KInstantiateUI(this.dlcActivationButtonPrefab, this.dlcActivationButtonPrefab.transform.parent.gameObject, true);
 				Sprite sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(keyValuePair.Key));

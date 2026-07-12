@@ -611,7 +611,10 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		if (zoomToTech != null)
 		{
-			this.researchScreen.ZoomToTech(zoomToTech);
+			UIScheduler.Instance.Schedule("ResearchCameraFocus", 0.25f, delegate(object data)
+			{
+				this.researchScreen.ZoomToTech(zoomToTech, true);
+			}, null, null);
 		}
 	}
 

@@ -70,12 +70,19 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	{
 		get
 		{
+			float num = 0f;
 			RocketEngineCluster engine = this.GetEngine();
 			if (engine != null)
 			{
-				return this.BurnableMassRemaining / engine.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance;
+				num = this.BurnableMassRemaining / engine.GetComponent<RocketModuleCluster>().performanceStats.FuelKilogramPerDistance;
 			}
-			return 0f;
+			bool flag;
+			RocketModuleCluster primaryPilotModule = this.GetPrimaryPilotModule(out flag);
+			if (flag)
+			{
+				num = Mathf.Min(primaryPilotModule.GetComponent<RoboPilotModule>().GetDataBankRange(), num);
+			}
+			return num;
 		}
 	}
 
@@ -556,6 +563,28 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 		return null;
 	}
 
+	public RocketModuleCluster GetPrimaryPilotModule(out bool is_robo_pilot)
+	{
+		is_robo_pilot = false;
+		RocketModuleCluster rocketModuleCluster = null;
+		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+		{
+			RocketModuleCluster rocketModuleCluster2 = @ref.Get();
+			if (rocketModuleCluster2.GetComponent<PassengerRocketModule>() != null)
+			{
+				rocketModuleCluster = rocketModuleCluster2;
+				is_robo_pilot = false;
+				break;
+			}
+			if (rocketModuleCluster2.GetComponent<RoboPilotModule>())
+			{
+				is_robo_pilot = true;
+				rocketModuleCluster = rocketModuleCluster2;
+			}
+		}
+		return rocketModuleCluster;
+	}
+
 	public PassengerRocketModule GetPassengerModule()
 	{
 		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
@@ -676,7 +705,6 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 	public void CompleteSelfDestruct(object data = null)
 	{
 		global::Debug.Assert(this.HasTag(GameTags.RocketInSpace), "Self Destruct is only valid for in-space rockets!");
-		SimHashes elementID = this.GetPassengerModule().GetComponent<PrimaryElement>().ElementID;
 		List<RocketModule> list = new List<RocketModule>();
 		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
 		{
@@ -714,6 +742,8 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 			Deconstructable component2 = rocketModule.GetComponent<Deconstructable>();
 			list2.AddRange(component2.ForceDestroyAndGetMaterials());
 		}
+		bool flag3;
+		SimHashes elementID = this.GetPrimaryPilotModule(out flag3).GetComponent<PrimaryElement>().ElementID;
 		List<Storage> list5 = new List<Storage>();
 		foreach (GameObject gameObject2 in list2)
 		{

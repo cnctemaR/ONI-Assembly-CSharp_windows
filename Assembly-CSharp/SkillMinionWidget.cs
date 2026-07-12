@@ -76,12 +76,9 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 			this.morale.text = string.Format("{0}/{1}", attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue());
 			this.RefreshToolTip(component);
 			List<IListableOption> list = new List<IListableOption>();
-			foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
+			foreach (MinionResume.HatInfo hatInfo in component.GetAllHats())
 			{
-				if (keyValuePair.Value)
-				{
-					list.Add(new SkillListable(keyValuePair.Key));
-				}
+				list.Add(new HatListable(hatInfo.Source, hatInfo.Hat));
 			}
 			this.hatDropDown.Initialize(list, new Action<IListableOption, object>(this.OnHatDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.hatDropDownSort), new Action<DropDownEntry, object>(this.hatDropEntryRefreshAction), false, minionIdentity);
 			text = (string.IsNullOrEmpty(component.TargetHat) ? component.CurrentHat : component.TargetHat);
@@ -150,7 +147,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 			.sprite = Assets.GetSprite(string.IsNullOrEmpty(hat) ? "hat_role_none" : hat);
 	}
 
-	private void OnHatDropEntryClick(IListableOption skill, object data)
+	private void OnHatDropEntryClick(IListableOption hatOption, object data)
 	{
 		MinionIdentity minionIdentity;
 		StoredMinionIdentity storedMinionIdentity;
@@ -160,17 +157,17 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 			return;
 		}
 		MinionResume component = minionIdentity.GetComponent<MinionResume>();
-		if (skill != null)
+		if (hatOption != null)
 		{
 			base.GetComponent<HierarchyReferences>().GetReference("selectedHat").GetComponent<Image>()
-				.sprite = Assets.GetSprite((skill as SkillListable).skillHat);
+				.sprite = Assets.GetSprite((hatOption as HatListable).hat);
 			if (component != null)
 			{
-				string skillHat = (skill as SkillListable).skillHat;
-				component.SetHats(component.CurrentHat, skillHat);
-				if (component.OwnsHat(skillHat))
+				string hat = (hatOption as HatListable).hat;
+				component.SetHats(component.CurrentHat, hat);
+				if (component.OwnsHat(hat))
 				{
-					new PutOnHatChore(component, Db.Get().ChoreTypes.SwitchHat);
+					component.CreateHatChangeChore();
 				}
 			}
 		}
@@ -191,8 +188,8 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 	{
 		if (entry.entryData != null)
 		{
-			SkillListable skillListable = entry.entryData as SkillListable;
-			entry.image.sprite = Assets.GetSprite(skillListable.skillHat);
+			HatListable hatListable = entry.entryData as HatListable;
+			entry.image.sprite = Assets.GetSprite(hatListable.hat);
 		}
 	}
 

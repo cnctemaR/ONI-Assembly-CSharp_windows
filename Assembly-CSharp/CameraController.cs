@@ -676,7 +676,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			if (e.TryConsume(global::Action.CameraHome))
 			{
-				this.CameraGoHome(2f);
+				this.CameraGoHome(2f, true);
 				return;
 			}
 			if (e.TryConsume(global::Action.PanLeft))
@@ -706,13 +706,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.panning = false;
 	}
 
-	public void CameraGoHome(float speed = 2f)
+	public void CameraGoHome(float speed = 2f, bool showCameraReturnButton = false)
 	{
 		GameObject activeTelepad = GameUtil.GetActiveTelepad();
 		if (activeTelepad != null && ClusterUtil.ActiveWorldHasPrinter())
 		{
-			Vector3 vector = new Vector3(activeTelepad.transform.GetPosition().x, activeTelepad.transform.GetPosition().y + 1f, base.transform.GetPosition().z);
-			this.SetTargetPos(vector, 10f, true);
+			GameUtil.FocusCamera(new Vector3(activeTelepad.transform.GetPosition().x, activeTelepad.transform.GetPosition().y + 1f, base.transform.GetPosition().z), speed, true, showCameraReturnButton);
 			this.SetOverrideZoomSpeed(speed);
 		}
 	}
@@ -1233,7 +1232,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			if (Grid.IsValidCell(num) && !Grid.IsVisible(num))
 			{
 				global::Debug.LogWarning("Resetting Camera Position... camera was saved in an undiscovered area of the map.");
-				this.CameraGoHome(2f);
+				this.CameraGoHome(2f, false);
 				return;
 			}
 			base.transform.SetPosition(CameraSaveData.position);

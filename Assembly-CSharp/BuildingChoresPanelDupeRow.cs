@@ -37,8 +37,7 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 
 	private void OnClick()
 	{
-		Vector3 vector = this.choreConsumer.gameObject.transform.GetPosition() + Vector3.up;
-		CameraController.Instance.SetTargetPos(vector, 10f, true);
+		GameUtil.FocusCamera(this.choreConsumer.gameObject.transform.GetPosition() + Vector3.up, 2f, true, true);
 	}
 
 	private static string TooltipForDupe(Chore.Precondition.Context context, ChoreConsumer choreConsumer, int rank)

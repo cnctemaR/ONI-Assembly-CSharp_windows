@@ -74,7 +74,8 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		OxygenBreather component = targetGameObject.GetComponent<OxygenBreather>();
 		if (component != null)
 		{
-			component.SetGasProvider(this);
+			component.GetComponent<Sensors>().GetSensor<SafeCellSensor>().AddIgnoredFlagsSet("SuitTank", this.SafeCellFlagsToIgnoreOnEquipped);
+			component.AddGasProvider(this);
 		}
 		targetGameObject.AddTag(GameTags.HasSuitTank);
 	}
@@ -89,7 +90,8 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 			OxygenBreather component = targetGameObject.GetComponent<OxygenBreather>();
 			if (component != null)
 			{
-				component.SetGasProvider(new GasBreatherFromWorldProvider());
+				component.GetComponent<Sensors>().GetSensor<SafeCellSensor>().RemoveIgnoredFlagsSet("SuitTank");
+				component.RemoveGasProvider(this);
 			}
 			targetGameObject.RemoveTag(GameTags.HasSuitTank);
 		}
@@ -97,28 +99,27 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public void OnSetOxygenBreather(OxygenBreather oxygen_breather)
 	{
-		this.suitSuffocationMonitor = new SuitSuffocationMonitor.Instance(oxygen_breather, this);
-		this.suitSuffocationMonitor.StartSM();
 	}
 
 	public void OnClearOxygenBreather(OxygenBreather oxygen_breather)
 	{
-		this.suitSuffocationMonitor.StopSM("Removed suit tank");
-		this.suitSuffocationMonitor = null;
 	}
 
-	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 	{
 		if (this.IsEmpty())
 		{
 			return false;
 		}
-		float num;
-		SimUtil.DiseaseInfo diseaseInfo;
+		float num = 0f;
+		SimHashes simHashes = SimHashes.Vacuum;
 		float num2;
-		this.storage.ConsumeAndGetDisease(this.elementTag, gas_consumed, out num, out diseaseInfo, out num2);
-		Game.Instance.accumulators.Accumulate(oxygen_breather.O2Accumulator, num);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -num, oxygen_breather.GetProperName(), null);
+		SimUtil.DiseaseInfo diseaseInfo;
+		this.storage.ConsumeAndGetDisease(this.elementTag, amount, out num2, out diseaseInfo, out num, out simHashes);
+		if (onConsumptionCompletedCallback != null)
+		{
+			onConsumptionCompletedCallback(simHashes, num2, num, diseaseInfo.idx, diseaseInfo.count);
+		}
 		base.Trigger(608245985, base.gameObject);
 		return true;
 	}
@@ -135,7 +136,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public bool IsLowOxygen()
 	{
-		return this.IsEmpty();
+		return this.NeedsRecharging();
 	}
 
 	[ContextMenu("SetToRefillAmount")]
@@ -162,6 +163,18 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		this.storage.AddGasChunk(SimHashes.Oxygen, this.capacity, 15f, 0, 0, false, false);
 	}
 
+	public bool HasOxygen()
+	{
+		return !this.IsEmpty();
+	}
+
+	public bool IsBlocked()
+	{
+		return false;
+	}
+
+	public SafeCellQuery.SafeFlags SafeCellFlagsToIgnoreOnEquipped = (SafeCellQuery.SafeFlags)464;
+
 	[Serialize]
 	public string element;
 
@@ -178,8 +191,6 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	public const float REFILL_PERCENT = 0.25f;
 
 	public bool underwaterSupport;
-
-	private SuitSuffocationMonitor.Instance suitSuffocationMonitor;
 
 	private static readonly EventSystem.IntraObjectHandler<SuitTank> OnEquippedDelegate = new EventSystem.IntraObjectHandler<SuitTank>(delegate(SuitTank component, object data)
 	{

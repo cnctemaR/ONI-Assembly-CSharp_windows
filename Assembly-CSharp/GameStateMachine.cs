@@ -1402,6 +1402,43 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleRecurringChore(Func<StateMachineInstanceType, Chore> callback, Action<StateMachineInstanceType, Chore> processChore, Func<StateMachineInstanceType, bool> condition = null)
+		{
+			int data_idx = this.CreateDataTableEntry();
+			int callback_data_idx = this.CreateDataTableEntry();
+			this.Enter("ToggleRecurringChoreEnter()", delegate(StateMachineInstanceType smi)
+			{
+				if (condition == null || condition(smi))
+				{
+					Chore chore = this.SetupChore(callback, this, this, smi, data_idx, callback_data_idx, true, true);
+					processChore(smi, chore);
+				}
+			});
+			this.Exit("ToggleRecurringChoreExit()", delegate(StateMachineInstanceType smi)
+			{
+				this.ClearChore(smi, data_idx, callback_data_idx);
+				processChore(smi, null);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleChore(Func<StateMachineInstanceType, Chore> callback, Action<StateMachineInstanceType, Chore> processChore, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State target_state)
+		{
+			int data_idx = this.CreateDataTableEntry();
+			int callback_data_idx = this.CreateDataTableEntry();
+			this.Enter("ToggleChoreEnter()", delegate(StateMachineInstanceType smi)
+			{
+				Chore chore = this.SetupChore(callback, target_state, target_state, smi, data_idx, callback_data_idx, false, false);
+				processChore(smi, chore);
+			});
+			this.Exit("ToggleChoreExit()", delegate(StateMachineInstanceType smi)
+			{
+				this.ClearChore(smi, data_idx, callback_data_idx);
+				processChore(smi, null);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleChore(Func<StateMachineInstanceType, Chore> callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State target_state)
 		{
 			int data_idx = this.CreateDataTableEntry();
@@ -1413,6 +1450,25 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("ToggleChoreExit()", delegate(StateMachineInstanceType smi)
 			{
 				this.ClearChore(smi, data_idx, callback_data_idx);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleChore(Func<StateMachineInstanceType, Chore> callback, Action<StateMachineInstanceType, Chore> processChore, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state)
+		{
+			int data_idx = this.CreateDataTableEntry();
+			int callback_data_idx = this.CreateDataTableEntry();
+			bool is_success_state_reentrant = success_state == this;
+			bool is_failure_state_reentrant = failure_state == this;
+			this.Enter("ToggleChoreEnter()", delegate(StateMachineInstanceType smi)
+			{
+				Chore chore = this.SetupChore(callback, success_state, failure_state, smi, data_idx, callback_data_idx, is_success_state_reentrant, is_failure_state_reentrant);
+				processChore(smi, chore);
+			});
+			this.Exit("ToggleChoreExit()", delegate(StateMachineInstanceType smi)
+			{
+				this.ClearChore(smi, data_idx, callback_data_idx);
+				processChore(smi, null);
 			});
 			return this;
 		}
@@ -2171,6 +2227,21 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EnterGoTo(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state)
+		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self", null);
+			string text = "(null)";
+			if (state != null)
+			{
+				text = state.name;
+			}
+			this.Enter("GoTo(" + text + ")", delegate(StateMachineInstanceType smi)
+			{
+				smi.GoTo(state);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State GoTo(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state)
 		{
 			DebugUtil.DevAssert(state != this, "Can't transition to self", null);
@@ -2375,6 +2446,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EventTransition(GameHashes evt, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback condition = null)
 		{
 			return this.EventTransition(evt, null, state, condition);
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ScheduleChange(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State targetState, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback callback)
+		{
+			return this.EventTransition(GameHashes.ScheduleBlocksChanged, targetState, callback).EventTransition(GameHashes.ScheduleChanged, targetState, callback).EventTransition(GameHashes.ScheduleBlocksTick, targetState, callback);
 		}
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ReturnSuccess()

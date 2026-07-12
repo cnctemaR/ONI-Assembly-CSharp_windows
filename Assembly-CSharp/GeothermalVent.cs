@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstance>, ISim200ms
+public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstance>, ISim200ms, ISaveLoadable
 {
 	public bool IsQuestEntombed()
 	{
@@ -67,6 +68,29 @@ public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstanc
 		}
 		this.SimRegister();
 		base.smi.StartSM();
+	}
+
+	[OnDeserialized]
+	internal void OnDeserializedMethod()
+	{
+		bool flag = false;
+		for (int i = 0; i < this.availableMaterial.Count; i++)
+		{
+			GeothermalVent.ElementInfo elementInfo = this.availableMaterial[i];
+			Element element = ElementLoader.FindElementByHash(elementInfo.elementHash);
+			if (element == null)
+			{
+				element = ElementLoader.FindElementByHash(SimHashes.Steam);
+				elementInfo.elementHash = SimHashes.Steam;
+				elementInfo.isSolid = false;
+			}
+			elementInfo.elementIdx = element.idx;
+			this.availableMaterial[i] = elementInfo;
+		}
+		if (flag)
+		{
+			global::Debug.LogWarning("Invalid geothermal vent content in save was converted to steam on load.");
+		}
 	}
 
 	protected void SimRegister()
@@ -382,6 +406,8 @@ public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstanc
 		}
 
 		public bool isSolid;
+
+		public SimHashes elementHash;
 
 		public ushort elementIdx;
 

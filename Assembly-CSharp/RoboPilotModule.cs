@@ -10,14 +10,37 @@ public class RoboPilotModule : KMonoBehaviour
 		this.UpdateMeter(null);
 		this.databankStorage.SetOffsets(RoboPilotModule.dataDeliveryOffsets);
 		base.Subscribe(-1697596308, new Action<object>(this.UpdateMeter));
+		base.Subscribe(-778359855, new Action<object>(this.PlayDeliveryAnimation));
 		base.Subscribe(-887025858, new Action<object>(this.OnRocketLanded));
-		base.GetComponent<RocketModuleCluster>().CraftInterface.Subscribe(1655598572, new Action<object>(this.OnLaunchConditionChanged));
+		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
+		if (component != null)
+		{
+			component.CraftInterface.Subscribe(1655598572, new Action<object>(this.OnLaunchConditionChanged));
+			return;
+		}
+		base.Subscribe(705820818, new Action<object>(this.OnRocketLaunched));
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.Unsubscribe(-1697596308, new Action<object>(this.UpdateMeter));
+		base.Unsubscribe(-887025858, new Action<object>(this.OnRocketLanded));
+		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
+		if (component != null)
+		{
+			component.CraftInterface.Unsubscribe(1655598572, new Action<object>(this.OnLaunchConditionChanged));
+		}
+		else
+		{
+			base.Unsubscribe(705820818, new Action<object>(this.OnRocketLaunched));
+		}
+		base.OnCleanUp();
 	}
 
 	private void OnLaunchConditionChanged(object data)
 	{
 		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
-		if (component.CraftInterface.IsLaunchRequested())
+		if (component != null && component.CraftInterface.IsLaunchRequested())
 		{
 			component.CraftInterface.GetComponent<Clustercraft>().Launch(false);
 		}
@@ -29,14 +52,33 @@ public class RoboPilotModule : KMonoBehaviour
 		{
 			LaunchConditionManager launchConditionManager = base.GetComponent<RocketModule>().FindLaunchConditionManager();
 			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(launchConditionManager);
-			float num = Math.Min((float)(SpacecraftManager.instance.GetSpacecraftDestination(spacecraftFromLaunchConditionManager.id).OneBasedDistance * this.dataBankConsumption), this.databankStorage.MassStored());
-			this.databankStorage.ConsumeIgnoringDisease(this.dataBankType, num);
+			float num = Math.Min((float)(SpacecraftManager.instance.GetSpacecraftDestination(spacecraftFromLaunchConditionManager.id).OneBasedDistance * this.dataBankConsumption * 2), this.databankStorage.MassStored());
+			this.databankStorage.ConsumeIgnoringDisease(DatabankHelper.TAG, num);
 		}
+	}
+
+	private void OnRocketLaunched(object o)
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		component.Play("launch_pre", KAnim.PlayMode.Once, 1f, 0f);
+		component.Queue("launch", KAnim.PlayMode.Once, 1f, 0f);
+		component.Queue("launch_pst", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	public void ConsumeDataBanksInFlight()
 	{
-		this.databankStorage.ConsumeIgnoringDisease(this.dataBankType, (float)this.dataBankConsumption);
+		if (this.databankStorage != null)
+		{
+			this.databankStorage.ConsumeIgnoringDisease(DatabankHelper.TAG, (float)this.dataBankConsumption);
+		}
+	}
+
+	private void PlayDeliveryAnimation(object data = null)
+	{
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		HashedString currentAnim = component.currentAnim;
+		component.Play("databank_delivery_reaction", KAnim.PlayMode.Once, 1f, 0f);
+		component.Queue(currentAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	private void UpdateMeter(object data = null)
@@ -46,7 +88,12 @@ public class RoboPilotModule : KMonoBehaviour
 
 	public bool HasResourcesToMove(int distance)
 	{
-		return this.databankStorage.MassStored() > (float)(distance * this.dataBankConsumption);
+		return this.databankStorage.UnitsStored() >= (float)(distance * this.dataBankConsumption);
+	}
+
+	public bool IsFull()
+	{
+		return this.databankStorage.MassStored() >= this.databankStorage.Capacity();
 	}
 
 	public float GetDataBanksStored()
@@ -55,16 +102,20 @@ public class RoboPilotModule : KMonoBehaviour
 		{
 			return 0f;
 		}
-		return this.databankStorage.MassStored();
+		return this.databankStorage.UnitsStored();
 	}
 
-	public float FlightEfficiencyModifier()
+	public float GetDataBankRange()
 	{
-		if (this.GetDataBanksStored() > 0f)
+		if (this.databankStorage == null)
 		{
-			return this.flightEfficiencyModifier;
+			return 0f;
 		}
-		return 0f;
+		if (this.consumeDataBanksOnLand)
+		{
+			return this.databankStorage.UnitsStored() / (float)this.dataBankConsumption * RoboPilotCommandModuleConfig.DATABANKRANGE;
+		}
+		return this.databankStorage.UnitsStored() / (float)this.dataBankConsumption * 600f;
 	}
 
 	private MeterController meter;
@@ -72,10 +123,6 @@ public class RoboPilotModule : KMonoBehaviour
 	private Storage databankStorage;
 
 	public int dataBankConsumption = 2;
-
-	public Tag dataBankType;
-
-	private float flightEfficiencyModifier = 0.1f;
 
 	public bool consumeDataBanksOnLand;
 

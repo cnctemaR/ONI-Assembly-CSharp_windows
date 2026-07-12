@@ -37,10 +37,14 @@ public class PropSurfaceSatellite1Config : IEntityConfig
 
 	public static string[][] GetLockerBaseContents()
 	{
-		string text = (DlcManager.FeatureClusterSpaceEnabled() ? "OrbitalResearchDatabank" : "ResearchDatabank");
 		return new string[][]
 		{
-			new string[] { text, text, text },
+			new string[]
+			{
+				DatabankHelper.ID,
+				DatabankHelper.ID,
+				DatabankHelper.ID
+			},
 			new string[] { "ColdBreatherSeed", "ColdBreatherSeed", "ColdBreatherSeed" },
 			new string[] { "Atmo_Suit", "Glom", "Glom", "Glom" }
 		};

@@ -48,9 +48,9 @@ public class RemoteWorkerDockConfig : IBuildingConfig
 	{
 		go.AddOrGet<RemoteWorkerDock>();
 		go.AddOrGet<RemoteWorkerDockAnimSM>();
-		go.AddOrGet<Storage>();
 		go.AddOrGet<Operational>();
 		go.AddOrGet<UserNameable>();
+		go.AddComponent<Storage>().SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.capacityTag = GameTags.LubricatingOil;

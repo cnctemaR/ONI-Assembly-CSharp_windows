@@ -390,6 +390,7 @@ public class GeothermalController : StateMachineComponent<GeothermalController.S
 					return;
 				}
 			}
+			elementInfo.elementHash = element.id;
 			elementInfo.elementIdx = elementIdx;
 			elementInfo.mass = mass;
 			elementInfo.temperature = temperature;

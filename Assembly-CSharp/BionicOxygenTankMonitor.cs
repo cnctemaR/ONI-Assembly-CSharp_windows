@@ -11,36 +11,56 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.fistSpawn;
 		this.fistSpawn.ParamTransition<bool>(this.HasSpawnedBefore, this.safe, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.IsTrue).Enter(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.StartWithFullTank));
-		this.safe.Transition(this.lowOxygen, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe)), UpdateRate.SIM_200ms);
-		this.lowOxygen.Transition(this.safe, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe), UpdateRate.SIM_200ms).Transition(this.critical, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical), UpdateRate.SIM_200ms).DefaultState(this.lowOxygen.idle);
-		this.lowOxygen.idle.EventTransition(GameHashes.ScheduleBlocksChanged, this.lowOxygen.scheduleSearch, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsAllowedToSeekOxygenSourceItemsBySchedule)).EventTransition(GameHashes.ScheduleChanged, this.lowOxygen.scheduleSearch, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsAllowedToSeekOxygenSourceItemsBySchedule));
-		this.lowOxygen.scheduleSearch.EventTransition(GameHashes.ScheduleBlocksChanged, this.lowOxygen.idle, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsAllowedToSeekOxygenSourceItemsBySchedule))).EventTransition(GameHashes.ScheduleChanged, this.lowOxygen.idle, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsAllowedToSeekOxygenSourceItemsBySchedule))).Enter(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.EnableOxygenSourceSensors))
-			.ToggleUrge(Db.Get().Urges.FindOxygenRefill)
-			.ToggleRecurringChore((BionicOxygenTankMonitor.Instance smi) => new FindAndConsumeOxygenSourceChore(smi.master), null)
-			.Exit(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.DisableOxygenSourceSensors));
+		this.safe.Transition(this.low, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe)), UpdateRate.SIM_200ms);
+		this.low.DefaultState(this.low.idle);
+		this.low.idle.Transition(this.critical, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical), UpdateRate.SIM_200ms).Transition(this.safe, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe), UpdateRate.SIM_200ms).ScheduleChange(this.low.schedule, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsAllowedToSeekOxygenBySchedule));
+		this.low.schedule.ToggleUrge(Db.Get().Urges.FindOxygenRefill).DefaultState(this.low.schedule.enableSensors).Exit(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.DisableOxygenSourceSensors));
+		this.low.schedule.enableSensors.Enter(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.EnableOxygenSourceSensors)).GoTo(this.low.schedule.oxygenCanisterMode);
+		this.low.schedule.oxygenCanisterMode.DefaultState(this.low.schedule.oxygenCanisterMode.running);
+		this.low.schedule.oxygenCanisterMode.running.ScheduleChange(this.low.idle, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsNotAllowedToSeekOxygenSourceItemsByScheduleAndSeekChoreHasNotBegun)).OnSignal(this.OxygenSourceItemLostSignal, this.low.schedule.environmentAbsorbMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.NoOxygenSourceAvailableButAbsorbCellAvailable)).OnSignal(this.AbsorbCellChangedSignal, this.low.schedule.environmentAbsorbMode, (BionicOxygenTankMonitor.Instance smi) => !BionicOxygenTankMonitor.FindOxygenSourceChoreIsRunning(smi) && BionicOxygenTankMonitor.NoOxygenSourceAvailableButAbsorbCellAvailable(smi))
+			.Transition(this.critical, (BionicOxygenTankMonitor.Instance smi) => BionicOxygenTankMonitor.AreOxygenLevelsCritical(smi) && !BionicOxygenTankMonitor.FindOxygenSourceChoreIsRunning(smi), UpdateRate.SIM_200ms)
+			.Update(new Action<BionicOxygenTankMonitor.Instance, float>(BionicOxygenTankMonitor.UpdateAbsorbCellIfNoOxygenSourceAvailable), UpdateRate.SIM_200ms, false)
+			.ToggleChore((BionicOxygenTankMonitor.Instance smi) => new FindAndConsumeOxygenSourceChore(smi.master, false), this.low.schedule.oxygenCanisterMode.ends, this.low.schedule.oxygenCanisterMode.ends);
+		this.low.schedule.oxygenCanisterMode.ends.EnterTransition(this.safe, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe)).GoTo(this.low.idle);
+		this.low.schedule.environmentAbsorbMode.DefaultState(this.low.schedule.environmentAbsorbMode.running);
+		this.low.schedule.environmentAbsorbMode.running.ScheduleChange(this.low.idle, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.IsNotAllowedToSeekOxygenSourceItemsByScheduleAndAbsorbChoreHasNotBegun)).OnSignal(this.ClosestOxygenSourceChanged, this.low.schedule.oxygenCanisterMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.OxygenSourceItemAvailableAndAbsorbChoreNotStarted)).Transition(this.critical, (BionicOxygenTankMonitor.Instance smi) => BionicOxygenTankMonitor.AreOxygenLevelsCritical(smi) && !BionicOxygenTankMonitor.AbsorbChoreIsRunning(smi), UpdateRate.SIM_200ms)
+			.ToggleChore((BionicOxygenTankMonitor.Instance smi) => new BionicMassOxygenAbsorbChore(smi.master, false), this.low.schedule.environmentAbsorbMode.ends, this.low.schedule.environmentAbsorbMode.ends);
+		this.low.schedule.environmentAbsorbMode.ends.EnterTransition(this.safe, new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsSafe)).GoTo(this.low.idle);
 		this.critical.ToggleUrge(Db.Get().Urges.FindOxygenRefill).Exit(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.DisableOxygenSourceSensors)).DefaultState(this.critical.enableSensors);
-		this.critical.enableSensors.Enter(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.EnableOxygenSourceSensors)).GoTo(this.critical.seekingOxygenSourceMode);
-		this.critical.seekingOxygenSourceMode.Transition(this.lowOxygen, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical)), UpdateRate.SIM_200ms).OnSignal(this.ClosestOxygenSourceChanged, this.critical.environmentAbsorbMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.NoOxygenSourceAvailable)).OnSignal(this.OxygenSourceItemLostSignal, this.critical.environmentAbsorbMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.NoOxygenSourceAvailable))
-			.ToggleRecurringChore((BionicOxygenTankMonitor.Instance smi) => new FindAndConsumeOxygenSourceChore(smi.master), null);
+		this.critical.enableSensors.Enter(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State.Callback(BionicOxygenTankMonitor.EnableOxygenSourceSensors)).GoTo(this.critical.oxygenCanisterMode);
+		this.critical.oxygenCanisterMode.DefaultState(this.critical.oxygenCanisterMode.running);
+		this.critical.oxygenCanisterMode.running.OnSignal(this.ClosestOxygenSourceChanged, this.critical.environmentAbsorbMode, (BionicOxygenTankMonitor.Instance smi) => !BionicOxygenTankMonitor.FindOxygenSourceChoreIsRunning(smi) && BionicOxygenTankMonitor.NoOxygenSourceAvailableButAbsorbCellAvailable(smi)).OnSignal(this.OxygenSourceItemLostSignal, this.critical.environmentAbsorbMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.NoOxygenSourceAvailableButAbsorbCellAvailable)).OnSignal(this.AbsorbCellChangedSignal, this.critical.environmentAbsorbMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.NoOxygenSourceAvailableButAbsorbCellAvailable))
+			.Update(new Action<BionicOxygenTankMonitor.Instance, float>(BionicOxygenTankMonitor.UpdateAbsorbCellIfNoOxygenSourceAvailable), UpdateRate.SIM_200ms, false)
+			.ToggleChore((BionicOxygenTankMonitor.Instance smi) => new FindAndConsumeOxygenSourceChore(smi.master, true), this.critical.oxygenCanisterMode.ends, this.critical.oxygenCanisterMode.ends);
+		this.critical.oxygenCanisterMode.ends.EnterTransition(this.low, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical))).GoTo(this.critical.oxygenCanisterMode.running);
 		this.critical.environmentAbsorbMode.DefaultState(this.critical.environmentAbsorbMode.running);
-		this.critical.environmentAbsorbMode.running.ToggleChore((BionicOxygenTankMonitor.Instance smi) => new BionicMassOxygenAbsorbChore(smi.master), this.critical.environmentAbsorbMode.success, this.critical.environmentAbsorbMode.failed);
-		this.critical.environmentAbsorbMode.failed.EnterTransition(this.lowOxygen, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical))).GoTo(this.critical.seekingOxygenSourceMode);
-		this.critical.environmentAbsorbMode.success.EnterTransition(this.lowOxygen, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical))).GoTo(this.critical.seekingOxygenSourceMode);
+		this.critical.environmentAbsorbMode.running.OnSignal(this.ClosestOxygenSourceChanged, this.critical.oxygenCanisterMode, new Func<BionicOxygenTankMonitor.Instance, bool>(BionicOxygenTankMonitor.OxygenSourceItemAvailableAndAbsorbChoreNotStarted)).ToggleChore((BionicOxygenTankMonitor.Instance smi) => new BionicMassOxygenAbsorbChore(smi.master, true), this.critical.environmentAbsorbMode.ends, this.critical.environmentAbsorbMode.ends);
+		this.critical.environmentAbsorbMode.ends.EnterTransition(this.low, GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Not(new StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Transition.ConditionCallback(BionicOxygenTankMonitor.AreOxygenLevelsCritical))).GoTo(this.critical.oxygenCanisterMode);
 	}
 
-	public static bool IsAllowedToSeekOxygenSourceItemsBySchedule(BionicOxygenTankMonitor.Instance smi)
+	public static bool IsAllowedToSeekOxygenBySchedule(BionicOxygenTankMonitor.Instance smi)
 	{
 		return smi.IsAllowedToSeekOxygenBySchedule;
 	}
 
+	public static bool IsNotAllowedToSeekOxygenSourceItemsByScheduleAndSeekChoreHasNotBegun(BionicOxygenTankMonitor.Instance smi)
+	{
+		return !BionicOxygenTankMonitor.IsAllowedToSeekOxygenBySchedule(smi) && !BionicOxygenTankMonitor.FindOxygenSourceChoreIsRunning(smi);
+	}
+
+	public static bool IsNotAllowedToSeekOxygenSourceItemsByScheduleAndAbsorbChoreHasNotBegun(BionicOxygenTankMonitor.Instance smi)
+	{
+		return !BionicOxygenTankMonitor.IsAllowedToSeekOxygenBySchedule(smi) && !BionicOxygenTankMonitor.AbsorbChoreIsRunning(smi);
+	}
+
 	public static bool AreOxygenLevelsSafe(BionicOxygenTankMonitor.Instance smi)
 	{
-		return smi.OxygenPercentage >= 0.5f;
+		return smi.OxygenPercentage >= 0.85f;
 	}
 
 	public static bool AreOxygenLevelsCritical(BionicOxygenTankMonitor.Instance smi)
 	{
-		return smi.OxygenPercentage < 0.2f;
+		return smi.OxygenPercentage < 0.05f;
 	}
 
 	public static bool IsThereAnOxygenSourceItemAvailable(BionicOxygenTankMonitor.Instance smi)
@@ -48,9 +68,46 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 		return smi.GetClosestOxygenSource() != null;
 	}
 
+	public static bool AbsorbCellUnavailable(BionicOxygenTankMonitor.Instance smi)
+	{
+		return smi.AbsorbOxygenCell == Grid.InvalidCell;
+	}
+
+	public static bool AbsorbCellAvailable(BionicOxygenTankMonitor.Instance smi)
+	{
+		return smi.AbsorbOxygenCell != Grid.InvalidCell;
+	}
+
 	public static bool NoOxygenSourceAvailable(BionicOxygenTankMonitor.Instance smi)
 	{
 		return smi.GetClosestOxygenSource() == null;
+	}
+
+	public static bool NoOxygenSourceAvailableButAbsorbCellAvailable(BionicOxygenTankMonitor.Instance smi)
+	{
+		return BionicOxygenTankMonitor.NoOxygenSourceAvailable(smi) && BionicOxygenTankMonitor.AbsorbCellAvailable(smi);
+	}
+
+	public static bool OxygenSourceItemAvailableAndAbsorbChoreNotStarted(BionicOxygenTankMonitor.Instance smi)
+	{
+		return BionicOxygenTankMonitor.IsThereAnOxygenSourceItemAvailable(smi) && !BionicOxygenTankMonitor.AbsorbChoreIsRunning(smi);
+	}
+
+	public static bool AbsorbChoreIsRunning(BionicOxygenTankMonitor.Instance smi)
+	{
+		return BionicOxygenTankMonitor.ChoreIsRunning(smi, Db.Get().ChoreTypes.BionicAbsorbOxygen) || BionicOxygenTankMonitor.ChoreIsRunning(smi, Db.Get().ChoreTypes.BionicAbsorbOxygen_Critical);
+	}
+
+	public static bool FindOxygenSourceChoreIsRunning(BionicOxygenTankMonitor.Instance smi)
+	{
+		return BionicOxygenTankMonitor.ChoreIsRunning(smi, Db.Get().ChoreTypes.FindOxygenSourceItem) || BionicOxygenTankMonitor.ChoreIsRunning(smi, Db.Get().ChoreTypes.FindOxygenSourceItem_Critical);
+	}
+
+	public static bool ChoreIsRunning(BionicOxygenTankMonitor.Instance smi, ChoreType type)
+	{
+		ChoreDriver component = smi.GetComponent<ChoreDriver>();
+		Chore chore = ((component == null) ? null : component.GetCurrentChore());
+		return chore != null && chore.choreType == type;
 	}
 
 	public static void StartWithFullTank(BionicOxygenTankMonitor.Instance smi)
@@ -68,17 +125,25 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 		smi.SetOxygenSourceSensorsActiveState(false);
 	}
 
+	public static void UpdateAbsorbCellIfNoOxygenSourceAvailable(BionicOxygenTankMonitor.Instance smi, float dt)
+	{
+		if (BionicOxygenTankMonitor.NoOxygenSourceAvailable(smi))
+		{
+			smi.UpdatePotentialCellToAbsorbOxygen();
+		}
+	}
+
 	public const SimHashes INITIAL_TANK_ELEMENT = SimHashes.Oxygen;
 
 	public static readonly Tag INITIAL_TANK_ELEMENT_TAG = SimHashes.Oxygen.CreateTag();
 
-	public const float SAFE_TRESHOLD = 0.5f;
+	public const float SAFE_TRESHOLD = 0.85f;
 
-	public const float CRITICAL_TRESHOLD = 0.2f;
+	public const float CRITICAL_TRESHOLD = 0.05f;
 
-	public const float OXYGEN_TANK_CAPACITY_IN_SECONDS = 1800f;
+	public const float OXYGEN_TANK_CAPACITY_IN_SECONDS = 2400f;
 
-	public static readonly float OXYGEN_TANK_CAPACITY_KG = 1800f * DUPLICANTSTATS.BIONICS.BaseStats.OXYGEN_USED_PER_SECOND;
+	public static readonly float OXYGEN_TANK_CAPACITY_KG = 2400f * DUPLICANTSTATS.BIONICS.BaseStats.OXYGEN_USED_PER_SECOND;
 
 	public static float INITIAL_OXYGEN_TEMP = DUPLICANTSTATS.BIONICS.Temperature.Internal.IDEAL;
 
@@ -86,11 +151,13 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 
 	public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State safe;
 
-	public BionicOxygenTankMonitor.LowOxygenStates lowOxygen;
+	public BionicOxygenTankMonitor.LowOxygenStates low;
 
-	public BionicOxygenTankMonitor.CriticalStates critical;
+	public BionicOxygenTankMonitor.SeekOxygenStates critical;
 
 	private StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.BoolParameter HasSpawnedBefore;
+
+	public StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Signal AbsorbCellChangedSignal;
 
 	public StateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.Signal OxygenSourceItemLostSignal;
 
@@ -100,29 +167,27 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 	{
 	}
 
-	public class EnvironmentAbsorbStates : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State
+	public class ChoreState : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State
 	{
 		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State running;
 
-		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State success;
-
-		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State failed;
+		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State ends;
 	}
 
-	public class CriticalStates : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State
+	public class SeekOxygenStates : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State
 	{
 		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State enableSensors;
 
-		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State seekingOxygenSourceMode;
+		public BionicOxygenTankMonitor.ChoreState oxygenCanisterMode;
 
-		public BionicOxygenTankMonitor.EnvironmentAbsorbStates environmentAbsorbMode;
+		public BionicOxygenTankMonitor.ChoreState environmentAbsorbMode;
 	}
 
 	public class LowOxygenStates : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State
 	{
 		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State idle;
 
-		public GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.State scheduleSearch;
+		public BionicOxygenTankMonitor.SeekOxygenStates schedule;
 	}
 
 	public new class Instance : GameStateMachine<BionicOxygenTankMonitor, BionicOxygenTankMonitor.Instance, IStateMachineTarget, BionicOxygenTankMonitor.Def>.GameInstance, OxygenBreather.IGasProvider
@@ -167,18 +232,24 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 			}
 		}
 
+		public int AbsorbOxygenCell { get; private set; } = Grid.InvalidCell;
+
 		public Storage storage { get; private set; }
 
 		public Instance(IStateMachineTarget master, BionicOxygenTankMonitor.Def def)
 			: base(master, def)
 		{
+			this.query = new AbsorbCellQuery();
+			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this, false);
 			Sensors component = base.GetComponent<Sensors>();
 			this.schedulable = base.GetComponent<Schedulable>();
-			this.oxygenSourceSensors = new ClosestPickupableSensor<Pickupable>[]
-			{
-				component.GetSensor<ClosestOxygenCanisterSensor>(),
-				component.GetSensor<ClosestOxyliteSensor>()
-			};
+			this.navigator = base.GetComponent<Navigator>();
+			this.oxygenBreather = base.GetComponent<OxygenBreather>();
+			this.brain = base.GetComponent<MinionBrain>();
+			this.dataHolder = base.GetComponent<MinionStorageDataHolder>();
+			MinionStorageDataHolder minionStorageDataHolder = this.dataHolder;
+			minionStorageDataHolder.OnCopyBegins = (Action<StoredMinionIdentity>)Delegate.Combine(minionStorageDataHolder.OnCopyBegins, new Action<StoredMinionIdentity>(this.OnCopyMinionBegins));
+			this.oxygenSourceSensors = new ClosestPickupableSensor<Pickupable>[] { component.GetSensor<ClosestOxygenCanisterSensor>() };
 			for (int i = 0; i < this.oxygenSourceSensors.Length; i++)
 			{
 				ClosestPickupableSensor<Pickupable> closestPickupableSensor = this.oxygenSourceSensors[i];
@@ -217,9 +288,39 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 			base.sm.HasSpawnedBefore.Set(true, this, false);
 		}
 
+		private void OnCopyMinionBegins(StoredMinionIdentity destination)
+		{
+			MinionStorageDataHolder.DataPackData dataPackData = new MinionStorageDataHolder.DataPackData
+			{
+				Bools = new bool[] { base.sm.HasSpawnedBefore.Get(this) }
+			};
+			this.dataHolder.UpdateData<BionicOxygenTankMonitor.Instance>(dataPackData);
+		}
+
+		public override void StartSM()
+		{
+			base.StartSM();
+			this.RefreshAmountInstance();
+		}
+
+		public override void OnParamsDeserialized()
+		{
+			MinionStorageDataHolder.DataPack dataPack = this.dataHolder.GetDataPack<BionicOxygenTankMonitor.Instance>();
+			if (dataPack != null && dataPack.IsStoringNewData)
+			{
+				MinionStorageDataHolder.DataPackData dataPackData = dataPack.ReadData();
+				if (dataPackData != null)
+				{
+					bool flag = dataPackData.Bools[0];
+					base.sm.HasSpawnedBefore.Set(flag, this, false);
+				}
+			}
+			base.OnParamsDeserialized();
+		}
+
 		private void CompareOxygenSources()
 		{
-			Pickupable item = this.closestOxygenSource;
+			Pickupable pickupable = null;
 			float num = 2.1474836E+09f;
 			for (int i = 0; i < this.oxygenSourceSensors.Length; i++)
 			{
@@ -228,14 +329,31 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 				if ((float)itemNavCost < num)
 				{
 					num = (float)itemNavCost;
-					item = closestPickupableSensor.GetItem();
+					pickupable = closestPickupableSensor.GetItem();
 				}
 			}
-			bool flag = item != this.closestOxygenSource;
-			this.closestOxygenSource = item;
+			bool flag = pickupable != this.closestOxygenSource;
+			this.closestOxygenSource = pickupable;
 			if (flag)
 			{
 				base.sm.ClosestOxygenSourceChanged.Trigger(this);
+			}
+		}
+
+		public void UpdatePotentialCellToAbsorbOxygen()
+		{
+			this.query.Reset(this.brain, BionicOxygenTankMonitor.AreOxygenLevelsCritical(this));
+			this.navigator.RunQuery(base.smi.query);
+			int num = base.smi.query.GetResultCell();
+			if (num == Grid.PosToCell(base.gameObject) && !GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(num, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, this.oxygenBreather).IsBreathable)
+			{
+				num = PathFinder.InvalidCell;
+			}
+			bool flag = this.AbsorbOxygenCell != num;
+			this.AbsorbOxygenCell = num;
+			if (flag)
+			{
+				base.sm.AbsorbCellChangedSignal.Trigger(this);
 			}
 		}
 
@@ -267,18 +385,21 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 			}
 		}
 
-		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
+		public bool ConsumeGas(OxygenBreather oxygen_breather, float amount, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 		{
 			if (this.IsEmpty)
 			{
 				return false;
 			}
-			float num;
-			SimUtil.DiseaseInfo diseaseInfo;
+			SimHashes simHashes = SimHashes.Vacuum;
+			float num = 0f;
 			float num2;
-			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num, out diseaseInfo, out num2);
-			Game.Instance.accumulators.Accumulate(oxygen_breather.O2Accumulator, num);
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -num, oxygen_breather.GetProperName(), null);
+			SimUtil.DiseaseInfo diseaseInfo;
+			this.storage.ConsumeAndGetDisease(GameTags.Breathable, amount, out num2, out diseaseInfo, out num, out simHashes);
+			if (onConsumptionCompletedCallback != null)
+			{
+				onConsumptionCompletedCallback(simHashes, amount, num, diseaseInfo.idx, diseaseInfo.count);
+			}
 			return true;
 		}
 
@@ -292,7 +413,17 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 
 		public bool IsLowOxygen()
 		{
-			return this.IsEmpty;
+			return this.OxygenPercentage < 0.05f;
+		}
+
+		public bool HasOxygen()
+		{
+			return !this.IsEmpty;
+		}
+
+		public bool IsBlocked()
+		{
+			return false;
 		}
 
 		public bool ShouldEmitCO2()
@@ -307,6 +438,11 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 
 		protected override void OnCleanUp()
 		{
+			if (this.dataHolder != null)
+			{
+				MinionStorageDataHolder minionStorageDataHolder = this.dataHolder;
+				minionStorageDataHolder.OnCopyBegins = (Action<StoredMinionIdentity>)Delegate.Remove(minionStorageDataHolder.OnCopyBegins, new Action<StoredMinionIdentity>(this.OnCopyMinionBegins));
+			}
 			if (this.storage != null)
 			{
 				Storage storage = this.storage;
@@ -324,5 +460,15 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 		private ClosestPickupableSensor<Pickupable>[] oxygenSourceSensors;
 
 		private Pickupable closestOxygenSource;
+
+		private Navigator navigator;
+
+		private AbsorbCellQuery query;
+
+		private OxygenBreather oxygenBreather;
+
+		private MinionBrain brain;
+
+		private MinionStorageDataHolder dataHolder;
 	}
 }

@@ -48,7 +48,7 @@ namespace TUNING
 
 			public static readonly float HIT_POINTS = 100f;
 
-			public const float BATTERY_DEPLETION_RATE = 30f;
+			public const float BATTERY_DEPLETION_RATE = 50f;
 		}
 	}
 }

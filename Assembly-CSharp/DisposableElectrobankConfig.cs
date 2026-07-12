@@ -9,11 +9,24 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 	public List<GameObject> CreatePrefabs()
 	{
 		List<GameObject> list = new List<GameObject>();
+		if (!DlcManager.IsContentSubscribed("DLC3_ID"))
+		{
+			return list;
+		}
 		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_RawMetal", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_METAL_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_METAL_ORE.DESC, 20f, SimHashes.Cuprite, "electrobank_popcan_kanim", DlcManager.DLC3, null, "object"));
-		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_BasicSingleHarvestPlant", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_MUCKROOT.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_MUCKROOT.DESC, 20f, SimHashes.Creature, "electrobank_muckroot_kanim", DlcManager.DLC3, null, "object"));
-		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_LightBugEgg", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_LIGHTBUGEGG.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_LIGHTBUGEGG.DESC, 20f, SimHashes.Creature, "electrobank_shinebug_egg_kanim", DlcManager.DLC3, null, "object"));
-		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_Sucrose", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SUCROSE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SUCROSE.DESC, 20f, SimHashes.Sucrose, "electrobank_sucrose_kanim", DlcManager.DLC3, null, "object"));
-		list.Add(this.CreateDisposableElectrobank("DisposableElectrobank_UraniumOre", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.DESC, 20f, SimHashes.UraniumOre, "electrobank_uranium_kanim", DlcManager.DLC3.Append<string>(DlcManager.EXPANSION1), null, "object"));
+		if (DlcManager.IsExpansion1Active())
+		{
+			GameObject gameObject = this.CreateDisposableElectrobank("DisposableElectrobank_UraniumOre", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_URANIUM_ORE.DESC, 10f, SimHashes.UraniumOre, "electrobank_uranium_kanim", DlcManager.DLC3, null, "object");
+			RadiationEmitter radiationEmitter = gameObject.AddOrGet<RadiationEmitter>();
+			radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
+			radiationEmitter.radiusProportionalToRads = false;
+			radiationEmitter.emitRadiusX = 5;
+			radiationEmitter.emitRadiusY = radiationEmitter.emitRadiusX;
+			radiationEmitter.emitRads = 60f;
+			radiationEmitter.emissionOffset = new Vector3(0f, 0f, 0f);
+			list.Add(gameObject);
+			gameObject.GetComponent<Electrobank>().radioactivityTuning = radiationEmitter.emitRads;
+		}
 		list.RemoveAll((GameObject t) => t == null);
 		return list;
 	}
@@ -27,8 +40,13 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, description, mass, true, Assets.GetAnim(animName), initialAnim, Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.ChargedPortableBattery,
-			GameTags.PedestalDisplayable
+			GameTags.PedestalDisplayable,
+			GameTags.DisposablePortableBattery
 		});
+		if (!Assets.IsTagCountable(GameTags.ChargedPortableBattery))
+		{
+			Assets.AddCountableTag(GameTags.ChargedPortableBattery);
+		}
 		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddComponent<Electrobank>();
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));
@@ -51,12 +69,6 @@ public class DisposableElectrobankConfig : IMultiEntityConfig
 	public static Dictionary<Tag, ComplexRecipe> recipes = new Dictionary<Tag, ComplexRecipe>();
 
 	public const string ID_METAL_ORE = "DisposableElectrobank_RawMetal";
-
-	public const string ID_MUCKROOT = "DisposableElectrobank_BasicSingleHarvestPlant";
-
-	public const string ID_LIGHTBUG_EGG = "DisposableElectrobank_LightBugEgg";
-
-	public const string ID_SUCROSE = "DisposableElectrobank_Sucrose";
 
 	public const string ID_URANIUM_ORE = "DisposableElectrobank_UraniumOre";
 }

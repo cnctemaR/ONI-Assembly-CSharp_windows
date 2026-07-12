@@ -53,6 +53,10 @@ public class Movable : Workable
 				{
 					this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
 				}
+				if (this.tagsChangedHandle < 0)
+				{
+					this.tagsChangedHandle = base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+				}
 				base.gameObject.AddTag(GameTags.MarkedForMove);
 			}
 			else
@@ -60,7 +64,7 @@ public class Movable : Workable
 				this.isMarkedForMove = false;
 			}
 		}
-		if (this.IsCritter())
+		if (Movable.IsCritterPickupable(base.gameObject))
 		{
 			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
@@ -129,6 +133,14 @@ public class Movable : Workable
 		}
 	}
 
+	private void OnTagsChanged(object data)
+	{
+		if (this.isMarkedForMove && !this.HasTagRequiredToMove() && this.StorageProxy != null)
+		{
+			this.StorageProxy.GetComponent<CancellableMove>().OnCancel(this);
+		}
+	}
+
 	public void ClearMove()
 	{
 		if (this.isMarkedForMove)
@@ -148,6 +160,11 @@ public class Movable : Workable
 			{
 				base.Unsubscribe(2127324410, new Action<object>(this.CleanupMove));
 				this.cancelHandle = -1;
+			}
+			if (this.tagsChangedHandle != -1)
+			{
+				base.Unsubscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+				this.tagsChangedHandle = -1;
 			}
 		}
 		this.UpdateStatusItem();
@@ -178,12 +195,17 @@ public class Movable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.pickupable.KPrefabID.HasTag(GameTags.Stored))
+		if (this.pickupable.KPrefabID.HasTag(GameTags.Stored) || !this.HasTagRequiredToMove())
 		{
 			return;
 		}
 		KIconButtonMenu.ButtonInfo buttonInfo = (this.isMarkedForMove ? new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.PICKUPABLEMOVE.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.PICKUPABLEMOVE.TOOLTIP_OFF, true) : new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.PICKUPABLEMOVE.NAME, new global::System.Action(this.OnClickMove), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.PICKUPABLEMOVE.TOOLTIP, true));
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
+	}
+
+	private bool HasTagRequiredToMove()
+	{
+		return this.tagRequiredForMove == Tag.Invalid || this.pickupable.KPrefabID.HasTag(this.tagRequiredForMove);
 	}
 
 	public void MoveToLocation(int cell)
@@ -203,21 +225,17 @@ public class Movable : Workable
 		this.StorageProxy.GetComponent<CancellableMove>().SetMovable(this);
 		base.gameObject.AddTag(GameTags.MarkedForMove);
 		this.cancelHandle = base.Subscribe(2127324410, new Action<object>(this.CleanupMove));
+		this.tagsChangedHandle = base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		this.UpdateStatusItem();
 	}
 
 	private void UpdateStatusItem()
 	{
-		if (this.IsCritter())
+		if (Movable.IsCritterPickupable(base.gameObject))
 		{
 			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
 			base.UpdateStatusItem(null);
 		}
-	}
-
-	private bool IsCritter()
-	{
-		return base.GetComponent<Capturable>() != null;
 	}
 
 	public bool CanMoveTo(int cell)
@@ -243,8 +261,15 @@ public class Movable : Workable
 		}
 	}
 
+	public static bool IsCritterPickupable(GameObject pickupable_go)
+	{
+		return pickupable_go.GetComponent<Capturable>();
+	}
+
 	[MyCmpReq]
 	private Pickupable pickupable;
+
+	public Tag tagRequiredForMove = Tag.Invalid;
 
 	[Serialize]
 	private bool isMarkedForMove;
@@ -258,7 +283,13 @@ public class Movable : Workable
 
 	private int cancelHandle = -1;
 
+	private int tagsChangedHandle = -1;
+
 	private Guid pendingMoveGuid;
 
 	private Guid storageUnreachableGuid;
+
+	public Action<GameObject> onDeliveryComplete;
+
+	public Action<GameObject> onPickupComplete;
 }

@@ -74,9 +74,22 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.target = target;
 		this.selectedRecipe = recipe;
 		this.recipeName.text = recipe.GetUIName(false);
-		global::Tuple<Sprite, Color> tuple = ((recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? Def.GetUISprite(recipe.ingredients[0].material, "ui", false) : Def.GetUISprite(recipe.results[0].material, recipe.results[0].facadeID));
+		global::Tuple<Sprite, Color> tuple;
+		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
+		{
+			tuple = Def.GetUISprite(recipe.ingredients[0].material, "ui", false);
+		}
+		else if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Custom && !string.IsNullOrEmpty(recipe.customSpritePrefabID))
+		{
+			tuple = Def.GetUISprite(recipe.customSpritePrefabID, "ui", false);
+		}
+		else
+		{
+			tuple = Def.GetUISprite(recipe.results[0].material, recipe.results[0].facadeID);
+		}
 		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
 		{
+			this.recipeIcon.sprite = owner.radboltSprite;
 			this.recipeIcon.sprite = owner.radboltSprite;
 		}
 		else
@@ -176,9 +189,16 @@ public class SelectedRecipeQueueScreen : KScreen
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.recipeElementDescriptorPrefab, this.EffectsDescriptorPanel.gameObject, true);
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				component.GetReference<LocText>("Label").SetText(descriptorWithSprite.descriptor.IndentedText());
-				component.GetReference<Image>("Icon").sprite = ((descriptorWithSprite.tintedSprite == null) ? null : descriptorWithSprite.tintedSprite.first);
-				component.GetReference<Image>("Icon").color = ((descriptorWithSprite.tintedSprite == null) ? Color.white : descriptorWithSprite.tintedSprite.second);
+				Image reference = component.GetReference<Image>("Icon");
+				bool flag = descriptorWithSprite.tintedSprite != null && descriptorWithSprite.tintedSprite.first != null;
+				reference.sprite = ((descriptorWithSprite.tintedSprite == null) ? null : descriptorWithSprite.tintedSprite.first);
+				reference.gameObject.SetActive(flag);
+				if (!flag)
+				{
+					reference.gameObject.transform.parent.GetComponent<HorizontalLayoutGroup>().padding.left = 30;
+				}
+				reference.color = ((descriptorWithSprite.tintedSprite == null) ? Color.white : descriptorWithSprite.tintedSprite.second);
+				component.GetReference<LocText>("Label").SetText(flag ? descriptorWithSprite.descriptor.IndentedText() : descriptorWithSprite.descriptor.text);
 				component.GetReference<RectTransform>("FilterControls").gameObject.SetActive(false);
 				component.GetReference<ToolTip>("Tooltip").SetSimpleTooltip(descriptorWithSprite.descriptor.tooltipText);
 				this.recipeEffectsDescriptorRows.Add(descriptorWithSprite, gameObject);

@@ -35,7 +35,7 @@ public class LeadSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("ColdAir"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WarmAir"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
-		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Slipped"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("RecentlySlippedTracker"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
@@ -98,6 +98,7 @@ public class LeadSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * 400f;
 		suitTank.elementTag = GameTags.Breathable;
+		suitTank.SafeCellFlagsToIgnoreOnEquipped = (SafeCellQuery.SafeFlags)496;
 		go.AddComponent<LeadSuitTank>().batteryDuration = 200f;
 		go.AddComponent<HelmetController>();
 		KPrefabID component = go.GetComponent<KPrefabID>();

@@ -98,6 +98,27 @@ public abstract class BlueprintProvider
 		});
 	}
 
+	protected void AddMonumentPart(BlueprintProvider.MonumentPart part, PermitRarity rarity, string permitId, string animFile)
+	{
+		string text = "";
+		switch (part)
+		{
+		case BlueprintProvider.MonumentPart.Bottom:
+			text = "base";
+			break;
+		case BlueprintProvider.MonumentPart.Middle:
+			text = "mid";
+			break;
+		case BlueprintProvider.MonumentPart.Top:
+			text = "top";
+			break;
+		}
+		this.blueprintCollection.monumentParts.Add(new MonumentPartInfo(permitId, Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".NAME"), Strings.Get("STRINGS.BLUEPRINTS." + permitId.ToUpper() + ".DESC"), rarity, animFile, permitId.Replace("permit_", ""), text, (MonumentPartResource.Part)part, this.dlcIds)
+		{
+			dlcIds = this.dlcIds
+		});
+	}
+
 	public virtual string[] GetDlcIds()
 	{
 		return DlcManager.AVAILABLE_ALL_VERSIONS;
@@ -158,6 +179,13 @@ public abstract class BlueprintProvider
 	public enum JoyResponseType
 	{
 		BallonSet
+	}
+
+	public enum MonumentPart
+	{
+		Bottom,
+		Top = 2,
+		Middle = 1
 	}
 
 	protected readonly ref struct ArtableInfoAuthoringHelper

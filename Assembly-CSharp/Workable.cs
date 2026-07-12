@@ -673,6 +673,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public bool alwaysShowProgressBar;
 
+	public bool surpressWorkerForceSync;
+
 	protected bool lightEfficiencyBonus = true;
 
 	protected Guid lightEfficiencyBonusStatusItemHandle;

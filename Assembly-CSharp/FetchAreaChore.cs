@@ -143,8 +143,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				pickupable = fetchChore.FindFetchTarget(context.consumerState);
 			}
 			global::Debug.Assert(pickupable != null, "root_fetchable was null");
-			List<Pickupable> list = new List<Pickupable>();
-			list.Add(pickupable);
+			ListPool<Pickupable, FetchAreaChore>.PooledList pooledList3 = ListPool<Pickupable, FetchAreaChore>.Allocate();
+			pooledList3.Add(pickupable);
 			float num4 = pickupable.UnreservedAmount;
 			float minTakeAmount = pickupable.MinTakeAmount;
 			int num5 = 0;
@@ -164,12 +164,29 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Pickupable pickupable2 = obj as Pickupable;
 				KPrefabID kprefabID = pickupable2.KPrefabID;
-				if (!kprefabID.HasTag(GameTags.StoredPrivate) && !(kprefabID.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(kprefabID.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || kprefabID.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || kprefabID.HasTag(this.rootChore.requiredTag)) && !kprefabID.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !kprefabID.HasTag(GameTags.MarkedForMove))
+				if (!(pickupable2 == pickupable) && !kprefabID.HasTag(GameTags.StoredPrivate) && !(kprefabID.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(kprefabID.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || kprefabID.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || kprefabID.HasTag(this.rootChore.requiredTag)) && !kprefabID.HasAnyTags(this.rootChore.forbiddenTags) && !pooledList3.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !kprefabID.HasTag(GameTags.MarkedForMove))
 				{
+					if (!pickupable2.storage.IsNullOrDestroyed())
+					{
+						bool flag = true;
+						foreach (Chore.Precondition.Context context2 in pooledList)
+						{
+							FetchChore fetchChore2 = context2.chore as FetchChore;
+							if (!FetchManager.IsFetchablePickup(pickupable2, fetchChore2, fetchChore2.destination))
+							{
+								flag = false;
+								break;
+							}
+						}
+						if (!flag)
+						{
+							continue;
+						}
+					}
 					float unreservedAmount = pickupable2.UnreservedAmount;
-					list.Add(pickupable2);
+					pooledList3.Add(pickupable2);
 					num4 += unreservedAmount;
-					if (list.Count >= 10)
+					if (pooledList3.Count >= 10)
 					{
 						break;
 					}
@@ -191,17 +208,17 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num10 = 0;
 			while (num10 < pooledList.Count && num9 < num4)
 			{
-				Chore.Precondition.Context context2 = pooledList[num10];
-				FetchChore fetchChore2 = context2.chore as FetchChore;
-				if (fetchChore2 != this.rootChore && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagsHash == this.rootChore.tagsHash && fetchChore2.requiredTag == this.rootChore.requiredTag && fetchChore2.forbidHash == this.rootChore.forbidHash)
+				Chore.Precondition.Context context3 = pooledList[num10];
+				FetchChore fetchChore3 = context3.chore as FetchChore;
+				if (fetchChore3 != this.rootChore && fetchChore3.overrideTarget == null && fetchChore3.driver == null && fetchChore3.tagsHash == this.rootChore.tagsHash && fetchChore3.requiredTag == this.rootChore.requiredTag && fetchChore3.forbidHash == this.rootChore.forbidHash)
 				{
-					num8 = Mathf.Min(fetchChore2.originalAmount, num4 - num9);
+					num8 = Mathf.Min(fetchChore3.originalAmount, num4 - num9);
 					if (minTakeAmount > 0f)
 					{
 						num8 -= num8 % minTakeAmount;
 					}
-					this.chores.Add(fetchChore2);
-					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num8, new Action<FetchChore>(this.OnFetchChoreCancelled)));
+					this.chores.Add(fetchChore3);
+					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context3, num8, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 					num9 += num8;
 					if (this.deliveries.Count >= 10)
 					{
@@ -214,9 +231,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			float num11 = num9;
 			this.fetchables.Clear();
 			int num12 = 0;
-			while (num12 < list.Count && num11 > 0f)
+			while (num12 < pooledList3.Count && num11 > 0f)
 			{
-				Pickupable pickupable3 = list[num12];
+				Pickupable pickupable3 = pooledList3[num12];
 				num11 -= pickupable3.UnreservedAmount;
 				this.fetchables.Add(pickupable3);
 				num12++;
@@ -225,6 +242,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			this.reservations.Clear();
 			pooledList.Recycle();
 			pooledList2.Recycle();
+			pooledList3.Recycle();
 		}
 
 		public void End()
@@ -706,7 +724,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupDelivery();
 			});
-			this.delivering.movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetFetchOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance).Enter(delegate(FetchAreaChore.StatesInstance smi)
+			this.delivering.movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetDeliveryOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance).Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				if (this.deliveryObject.Get(smi) != null && this.deliveryObject.Get(smi).GetComponent<MinionIdentity>() != null)
 				{
@@ -735,6 +753,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				return null;
 			}
 			return component.GetFetchCellOffsets();
+		}
+
+		private CellOffset[] GetDeliveryOffset(FetchAreaChore.StatesInstance smi)
+		{
+			WorkerBase component = this.fetcher.Get(smi).GetComponent<WorkerBase>();
+			if (!(component != null))
+			{
+				return null;
+			}
+			return component.GetDeliveryCellOffsets();
 		}
 
 		public FetchAreaChore.States.FetchStates fetching;

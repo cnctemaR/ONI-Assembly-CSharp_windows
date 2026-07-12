@@ -17,14 +17,25 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.offline;
-		this.root.Exit(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.RemoveBaseOilDeltaModifier));
+		this.root.Update(new Action<BionicOilMonitor.Instance, float>(BionicOilMonitor.OilAmountInstanceWatcherUpdate), UpdateRate.SIM_200ms, false).Exit(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.RemoveBaseOilDeltaModifier));
 		this.offline.EventTransition(GameHashes.BionicOnline, this.online, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.IsBionicOnline)).Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.RemoveBaseOilDeltaModifier));
-		this.online.EventTransition(GameHashes.BionicOffline, this.offline, GameStateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Not(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.IsBionicOnline))).Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.AddBaseOilDeltaModifier)).DefaultState(this.online.idle);
+		this.online.EventTransition(GameHashes.BionicOffline, this.offline, GameStateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Not(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.IsBionicOnline))).Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.AddBaseOilDeltaModifier)).DefaultState(this.online.idle)
+			.Enter(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.EnableSolidLubricationSensor))
+			.Exit(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State.Callback(BionicOilMonitor.DisableSolidLubricationSensor));
 		this.online.idle.EnterTransition(this.online.seeking, new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.WantsOilChange)).OnSignal(this.OilValueChanged, this.online.seeking, new Func<BionicOilMonitor.Instance, bool>(BionicOilMonitor.WantsOilChange));
 		this.online.seeking.OnSignal(this.OilFilledSignal, this.online.idle).OnSignal(this.OilValueChanged, this.online.idle, new Func<BionicOilMonitor.Instance, bool>(BionicOilMonitor.HasDecentAmountOfOil)).DefaultState(this.online.seeking.hasOil)
-			.ToggleUrge(Db.Get().Urges.OilRefill);
+			.ToggleThought(Db.Get().Thoughts.RefillOilDesire, null)
+			.ToggleUrge(Db.Get().Urges.OilRefill)
+			.ToggleChore((BionicOilMonitor.Instance smi) => new UseSolidLubricantChore(smi.master), this.online.idle);
 		this.online.seeking.hasOil.EnterTransition(this.online.seeking.noOil, GameStateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Not(new StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Transition.ConditionCallback(BionicOilMonitor.HasAnyAmountOfOil))).OnSignal(this.OilRanOutSignal, this.online.seeking.noOil).ToggleStatusItem(Db.Get().DuplicantStatusItems.BionicWantsOilChange, null);
-		this.online.seeking.noOil.ToggleEffect("NoLubrication");
+		this.online.seeking.noOil.Enter(delegate(BionicOilMonitor.Instance smi)
+		{
+			smi.currentNoLubricationEffectApplied = smi.effects.Add(smi.GetEffect(), false).effect.IdHash;
+		}).Exit(delegate(BionicOilMonitor.Instance smi)
+		{
+			smi.effects.Remove(smi.currentNoLubricationEffectApplied);
+		}).ToggleReactable(new Func<BionicOilMonitor.Instance, Reactable>(BionicOilMonitor.GrindingGearsReactable))
+			.EventTransition(GameHashes.AssignedRoleChanged, this.online.seeking.hasOil, null);
 	}
 
 	public static bool IsBionicOnline(BionicOilMonitor.Instance smi)
@@ -57,6 +68,36 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 		smi.SetBaseDeltaModifierActiveState(false);
 	}
 
+	public static void OilAmountInstanceWatcherUpdate(BionicOilMonitor.Instance smi, float dt)
+	{
+		float lastOilAmountMassRecorded = smi.LastOilAmountMassRecorded;
+		float num = smi.CurrentOilMass - lastOilAmountMassRecorded;
+		if (num != 0f)
+		{
+			smi.LastOilAmountMassRecorded = smi.CurrentOilMass;
+			if (!smi.HasOil)
+			{
+				smi.ReportOilRanOut();
+			}
+			smi.ReportOilValueChanged(num);
+		}
+	}
+
+	public static void EnableSolidLubricationSensor(BionicOilMonitor.Instance smi)
+	{
+		smi.SetSolidLubricationSensorActiveState(true);
+	}
+
+	public static void DisableSolidLubricationSensor(BionicOilMonitor.Instance smi)
+	{
+		smi.SetSolidLubricationSensorActiveState(false);
+	}
+
+	private static Reactable GrindingGearsReactable(BionicOilMonitor.Instance smi)
+	{
+		return smi.GetGrindingGearReactable();
+	}
+
 	// Note: this type is marked as 'beforefieldinit'.
 	static BionicOilMonitor()
 	{
@@ -74,7 +115,9 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 
 	public const float OIL_REFILL_TRESHOLD = 0.2f;
 
-	public const string NO_OIL_EFFECT_NAME = "NoLubrication";
+	public const string NO_OIL_EFFECT_NAME_MINOR = "NoLubricationMinor";
+
+	public const string NO_OIL_EFFECT_NAME_MAJOR = "NoLubricationMajor";
 
 	public GameStateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.State offline;
 
@@ -85,6 +128,8 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 	public StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Signal OilRanOutSignal;
 
 	public StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Signal OilValueChanged;
+
+	public StateMachine<BionicOilMonitor, BionicOilMonitor.Instance, IStateMachineTarget, BionicOilMonitor.Def>.Signal OnClosestSolidLubricantChangedSignal;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -148,33 +193,46 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 			: base(master, def)
 		{
 			this.oilAmount = Db.Get().Amounts.BionicOil.Lookup(base.gameObject);
-			AmountInstance oilAmount = this.oilAmount;
-			oilAmount.OnMaxValueReached = (global::System.Action)Delegate.Combine(oilAmount.OnMaxValueReached, new global::System.Action(this.OnOilTankFilled));
-			AmountInstance oilAmount2 = this.oilAmount;
-			oilAmount2.OnMinValueReached = (global::System.Action)Delegate.Combine(oilAmount2.OnMinValueReached, new global::System.Action(this.OnOilRanOut));
-			AmountInstance oilAmount3 = this.oilAmount;
-			oilAmount3.OnValueChanged = (Action<float>)Delegate.Combine(oilAmount3.OnValueChanged, new Action<float>(this.OnOilValueChanged));
 			this.batterySMI = base.gameObject.GetSMI<BionicBatteryMonitor.Instance>();
 		}
 
 		public override void StartSM()
 		{
+			this.closestSolidLubricantSensor = base.GetComponent<Sensors>().GetSensor<ClosestLubricantSensor>();
+			ClosestLubricantSensor closestLubricantSensor = this.closestSolidLubricantSensor;
+			closestLubricantSensor.OnItemChanged = (Action<Pickupable>)Delegate.Combine(closestLubricantSensor.OnItemChanged, new Action<Pickupable>(this.OnClosestSolidLubricantChanged));
+			this.LastOilAmountMassRecorded = this.CurrentOilMass;
 			base.StartSM();
 		}
 
-		private void OnOilTankFilled()
+		public string GetEffect()
+		{
+			if (!this.resume.HasPerk(Db.Get().SkillPerks.EfficientBionicGears))
+			{
+				return "NoLubricationMajor";
+			}
+			return "NoLubricationMinor";
+		}
+
+		private void ReportOilTankFilled()
 		{
 			base.sm.OilFilledSignal.Trigger(this);
 		}
 
-		private void OnOilRanOut()
+		public void ReportOilRanOut()
 		{
 			base.sm.OilRanOutSignal.Trigger(this);
 		}
 
-		private void OnOilValueChanged(float delta)
+		public void ReportOilValueChanged(float delta)
 		{
 			base.sm.OilValueChanged.Trigger(this);
+			Action<float> onOilValueChanged = this.OnOilValueChanged;
+			if (onOilValueChanged == null)
+			{
+				return;
+			}
+			onOilValueChanged(delta);
 		}
 
 		public void SetOilMassValue(float value)
@@ -212,11 +270,54 @@ public class BionicOilMonitor : GameStateMachine<BionicOilMonitor, BionicOilMoni
 		public void RefillOil(float amount)
 		{
 			this.oilAmount.SetValue(this.CurrentOilMass + amount);
-			this.OnOilTankFilled();
+			this.ReportOilTankFilled();
 		}
+
+		private void OnClosestSolidLubricantChanged(Pickupable newItem)
+		{
+			base.sm.OnClosestSolidLubricantChangedSignal.Trigger(this);
+		}
+
+		public Pickupable GetClosestSolidLubricant()
+		{
+			return this.closestSolidLubricantSensor.GetItem();
+		}
+
+		public void SetSolidLubricationSensorActiveState(bool shouldItBeActive)
+		{
+			this.closestSolidLubricantSensor.SetActive(shouldItBeActive);
+			if (shouldItBeActive)
+			{
+				this.closestSolidLubricantSensor.Update();
+			}
+		}
+
+		public Reactable GetGrindingGearReactable()
+		{
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, Db.Get().Emotes.Minion.GrindingGears.Id, Db.Get().ChoreTypes.EmoteHighPriority, 0f, 10f, float.PositiveInfinity, 0f);
+			Emote grindingGears = Db.Get().Emotes.Minion.GrindingGears;
+			selfEmoteReactable.SetEmote(grindingGears);
+			selfEmoteReactable.SetThought(Db.Get().Thoughts.RefillOilDesire);
+			selfEmoteReactable.preventChoreInterruption = true;
+			return selfEmoteReactable;
+		}
+
+		public float LastOilAmountMassRecorded = -1f;
+
+		public Action<float> OnOilValueChanged;
 
 		private BionicBatteryMonitor.Instance batterySMI;
 
+		[MyCmpGet]
+		private MinionResume resume;
+
+		[MyCmpGet]
+		public Effects effects;
+
+		public HashedString currentNoLubricationEffectApplied;
+
 		private AttributeModifier BaseOilDeltaModifier = new AttributeModifier(Db.Get().Amounts.BionicOil.deltaAttribute.Id, -0.033333335f, BionicMinionConfig.NAME, false, false, true);
+
+		private ClosestLubricantSensor closestSolidLubricantSensor;
 	}
 }

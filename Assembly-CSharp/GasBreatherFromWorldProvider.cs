@@ -2,20 +2,64 @@
 
 public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 {
+	public GasBreatherFromWorldProvider.BreathableCellData GetBestBreathableCellAtCurrentLocation()
+	{
+		return GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(Grid.PosToCell(this.oxygenBreather), GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, this.oxygenBreather);
+	}
+
+	public static GasBreatherFromWorldProvider.BreathableCellData GetBestBreathableCellAroundSpecificCell(int theSpecificCell, CellOffset[] breathRange, OxygenBreather breather)
+	{
+		if (breathRange == null)
+		{
+			breathRange = GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS;
+		}
+		float num = 0f;
+		int num2 = theSpecificCell;
+		SimHashes simHashes = SimHashes.Vacuum;
+		foreach (CellOffset cellOffset in breathRange)
+		{
+			int num3 = Grid.OffsetCell(theSpecificCell, cellOffset);
+			SimHashes simHashes2;
+			float breathableCellMass = GasBreatherFromWorldProvider.GetBreathableCellMass(num3, out simHashes2);
+			if (breathableCellMass > num && breathableCellMass > breather.noOxygenThreshold)
+			{
+				num = breathableCellMass;
+				num2 = num3;
+				simHashes = simHashes2;
+			}
+		}
+		return new GasBreatherFromWorldProvider.BreathableCellData
+		{
+			Cell = num2,
+			ElementID = simHashes,
+			Mass = num,
+			IsBreathable = (simHashes != SimHashes.Vacuum)
+		};
+	}
+
+	private static float GetBreathableCellMass(int cell, out SimHashes elementID)
+	{
+		elementID = SimHashes.Vacuum;
+		if (Grid.IsValidCell(cell))
+		{
+			Element element = Grid.Element[cell];
+			if (element.HasTag(GameTags.Breathable))
+			{
+				elementID = element.id;
+				return Grid.Mass[cell];
+			}
+		}
+		return 0f;
+	}
+
 	public void OnSetOxygenBreather(OxygenBreather oxygen_breather)
 	{
-		this.suffocationMonitor = new SuffocationMonitor.Instance(oxygen_breather);
-		this.suffocationMonitor.StartSM();
-		this.safeCellMonitor = new SafeCellMonitor.Instance(oxygen_breather);
-		this.safeCellMonitor.StartSM();
 		this.oxygenBreather = oxygen_breather;
 		this.nav = this.oxygenBreather.GetComponent<Navigator>();
 	}
 
 	public void OnClearOxygenBreather(OxygenBreather oxygen_breather)
 	{
-		this.suffocationMonitor.StopSM("Removed gas provider");
-		this.safeCellMonitor.StopSM("Removed gas provider");
 	}
 
 	public bool ShouldEmitCO2()
@@ -30,50 +74,69 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	public bool IsLowOxygen()
 	{
-		return this.oxygenBreather.IsLowOxygenAtMouthCell();
+		GasBreatherFromWorldProvider.BreathableCellData bestBreathableCellAtCurrentLocation = this.GetBestBreathableCellAtCurrentLocation();
+		return bestBreathableCellAtCurrentLocation.IsBreathable && bestBreathableCellAtCurrentLocation.Mass < this.oxygenBreather.lowOxygenThreshold;
 	}
 
-	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
+	public bool HasOxygen()
+	{
+		return this.oxygenBreather.prefabID.HasTag(GameTags.RecoveringBreath) || this.oxygenBreather.prefabID.HasTag(GameTags.InTransitTube) || this.GetBestBreathableCellAtCurrentLocation().IsBreathable;
+	}
+
+	public bool IsBlocked()
+	{
+		return this.oxygenBreather.HasTag(GameTags.HasSuitTank);
+	}
+
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float mass_to_consume, Action<SimHashes, float, float, byte, int> onConsumptionCompletedCallback)
 	{
 		if (this.nav.CurrentNavType != NavType.Tube)
 		{
-			SimHashes getBreathableElement = oxygen_breather.GetBreathableElement;
-			if (getBreathableElement == SimHashes.Vacuum)
+			GasBreatherFromWorldProvider.BreathableCellData bestBreathableCellAtCurrentLocation = this.GetBestBreathableCellAtCurrentLocation();
+			if (!bestBreathableCellAtCurrentLocation.IsBreathable)
 			{
 				return false;
 			}
-			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), this, "GasBreatherFromWorldProvider");
-			SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
+			SimHashes elementID = bestBreathableCellAtCurrentLocation.ElementID;
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), onConsumptionCompletedCallback, "GasBreatherFromWorldProvider");
+			SimMessages.ConsumeMass(bestBreathableCellAtCurrentLocation.Cell, elementID, mass_to_consume, 3, handle.index);
 		}
 		return true;
 	}
 
 	private static void OnSimConsumeCallback(Sim.MassConsumedCallback mass_cb_info, object data)
 	{
-		((GasBreatherFromWorldProvider)data).OnSimConsume(mass_cb_info);
-	}
-
-	private void OnSimConsume(Sim.MassConsumedCallback mass_cb_info)
-	{
-		if (this.oxygenBreather == null || this.oxygenBreather.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
+		Action<SimHashes, float, float, byte, int> action = (Action<SimHashes, float, float, byte, int>)data;
+		SimHashes id = ElementLoader.elements[(int)mass_cb_info.elemIdx].id;
+		if (action == null)
 		{
 			return;
 		}
-		if (ElementLoader.elements[(int)mass_cb_info.elemIdx].id == SimHashes.ContaminatedOxygen)
-		{
-			this.oxygenBreather.Trigger(-935848905, mass_cb_info);
-		}
-		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, mass_cb_info.mass);
-		float num = -mass_cb_info.mass;
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.oxygenBreather.GetProperName(), null);
-		this.oxygenBreather.Consume(mass_cb_info);
+		action(id, mass_cb_info.mass, mass_cb_info.temperature, mass_cb_info.diseaseIdx, mass_cb_info.diseaseCount);
 	}
 
-	private SuffocationMonitor.Instance suffocationMonitor;
-
-	private SafeCellMonitor.Instance safeCellMonitor;
+	public static CellOffset[] DEFAULT_BREATHABLE_OFFSETS = new CellOffset[]
+	{
+		new CellOffset(0, 0),
+		new CellOffset(0, 1),
+		new CellOffset(1, 1),
+		new CellOffset(-1, 1),
+		new CellOffset(1, 0),
+		new CellOffset(-1, 0)
+	};
 
 	private OxygenBreather oxygenBreather;
 
 	private Navigator nav;
+
+	public struct BreathableCellData
+	{
+		public int Cell;
+
+		public SimHashes ElementID;
+
+		public float Mass;
+
+		public bool IsBreathable;
+	}
 }

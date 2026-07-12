@@ -46,6 +46,14 @@ public static class KleiPermitVisUtil
 		buildingKAnim.rectTransform().sizeDelta = 176f * Vector2.one;
 	}
 
+	public static void ConfigureToRenderBuilding(KBatchedAnimController buildingKAnim, MonumentPartResource monumentPermit)
+	{
+		buildingKAnim.Stop();
+		buildingKAnim.SwapAnims(new KAnimFile[] { monumentPermit.AnimFile });
+		buildingKAnim.Play(monumentPermit.State, KAnim.PlayMode.Once, 1f, 0f);
+		buildingKAnim.rectTransform().sizeDelta = 176f * Vector2.one;
+	}
+
 	public static void ConfigureBuildingPosition(RectTransform transform, PrefabDefinedUIPosition anchorPosition, BuildingDef buildingDef, Alignment alignment)
 	{
 		anchorPosition.SetOn(transform);
@@ -120,16 +128,28 @@ public static class KleiPermitVisUtil
 		else
 		{
 			ArtableStage artableStage = permit as ArtableStage;
-			if (artableStage == null)
+			if (artableStage != null)
 			{
-				return null;
+				BuildingComplete component2 = Assets.GetPrefab(artableStage.prefabId).GetComponent<BuildingComplete>();
+				if (component2 == null || !component2)
+				{
+					return null;
+				}
+				return component2.Def;
 			}
-			BuildingComplete component2 = Assets.GetPrefab(artableStage.prefabId).GetComponent<BuildingComplete>();
-			if (component2 == null || !component2)
+			else
 			{
-				return null;
+				if (!(permit is MonumentPartResource))
+				{
+					return null;
+				}
+				BuildingComplete component3 = Assets.GetPrefab("MonumentBottom").GetComponent<BuildingComplete>();
+				if (component3 == null || !component3)
+				{
+					return null;
+				}
+				return component3.Def;
 			}
-			return component2.Def;
 		}
 	}
 

@@ -37,7 +37,14 @@ public abstract class WorldResourceAmountTracker<T> : KMonoBehaviour where T : K
 
 	public float CountAmount(Dictionary<string, float> unitCountByID, WorldInventory inventory, bool excludeUnreachable = true)
 	{
+		float num;
+		return this.CountAmount(unitCountByID, out num, inventory, excludeUnreachable);
+	}
+
+	public float CountAmount(Dictionary<string, float> unitCountByID, out float totalUnitsFound, WorldInventory inventory, bool excludeUnreachable)
+	{
 		float num = 0f;
+		totalUnitsFound = 0f;
 		ICollection<Pickupable> pickupables = inventory.GetPickupables(this.itemTag, false);
 		if (pickupables != null)
 		{
@@ -45,6 +52,22 @@ public abstract class WorldResourceAmountTracker<T> : KMonoBehaviour where T : K
 			{
 				if (!pickupable.KPrefabID.HasTag(GameTags.StoredPrivate))
 				{
+					if (this.ignoredTags != null)
+					{
+						bool flag = false;
+						foreach (Tag tag in this.ignoredTags)
+						{
+							if (pickupable.KPrefabID.HasTag(tag))
+							{
+								flag = true;
+								break;
+							}
+						}
+						if (flag)
+						{
+							continue;
+						}
+					}
 					WorldResourceAmountTracker<T>.ItemData itemData = this.GetItemData(pickupable);
 					num += itemData.amountValue;
 					if (unitCountByID != null)
@@ -56,6 +79,7 @@ public abstract class WorldResourceAmountTracker<T> : KMonoBehaviour where T : K
 						string id = itemData.ID;
 						unitCountByID[id] += itemData.units;
 					}
+					totalUnitsFound += itemData.units;
 				}
 			}
 		}
@@ -91,6 +115,8 @@ public abstract class WorldResourceAmountTracker<T> : KMonoBehaviour where T : K
 	public Dictionary<string, float> amountsConsumedByID = new Dictionary<string, float>();
 
 	protected Tag itemTag;
+
+	protected Tag[] ignoredTags;
 
 	protected struct ItemData
 	{

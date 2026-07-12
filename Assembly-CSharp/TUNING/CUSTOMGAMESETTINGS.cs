@@ -14,5 +14,16 @@ namespace TUNING
 
 			public const float DISABLED = 0f;
 		}
+
+		public class BIONICWATTAGE
+		{
+			public const float VERYHARD = 200f;
+
+			public const float HARD = 100f;
+
+			public const float EASY = -100f;
+
+			public const float VERYEASY = -150f;
+		}
 	}
 }

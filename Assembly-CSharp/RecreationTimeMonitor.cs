@@ -29,6 +29,10 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 
 	public const int MAX_BONUS = 5;
 
+	public const float BONUS_DURATION_STANDARD = 600f;
+
+	public const float BONUS_DURATION_BIONICS = 1800f;
+
 	public GameStateMachine<RecreationTimeMonitor, RecreationTimeMonitor.Instance, IStateMachineTarget, RecreationTimeMonitor.Def>.State idle;
 
 	public GameStateMachine<RecreationTimeMonitor, RecreationTimeMonitor.Instance, IStateMachineTarget, RecreationTimeMonitor.Def>.State bonusActive;
@@ -42,6 +46,7 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 		public Instance(IStateMachineTarget master, RecreationTimeMonitor.Def def)
 			: base(master, def)
 		{
+			this.bonus_duration = ((base.gameObject.PrefabID() == BionicMinionConfig.ID) ? 1800f : 600f);
 			this.schedulable = master.GetComponent<Schedulable>();
 			this.moraleModifier = new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, 0f, delegate
 			{
@@ -68,7 +73,7 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 		{
 			for (int i = this.moraleAddedTimes.Count - 1; i >= 0; i--)
 			{
-				if (GameClock.Instance.GetTime() - this.moraleAddedTimes[i] > 600f)
+				if (GameClock.Instance.GetTime() - this.moraleAddedTimes[i] > this.bonus_duration)
 				{
 					this.moraleAddedTimes.RemoveAt(i);
 				}
@@ -111,7 +116,7 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 			List<ScheduleBlock> blocks = schedule.GetBlocks();
 			int currentBlockIdx = schedule.GetCurrentBlockIdx();
 			int num = 24;
-			if (GameClock.Instance.GetTime() <= 600f)
+			if (GameClock.Instance.GetTime() <= this.bonus_duration)
 			{
 				num = Math.Min(currentBlockIdx, Mathf.FloorToInt(GameClock.Instance.GetTime() / 25f));
 			}
@@ -152,5 +157,7 @@ public class RecreationTimeMonitor : GameStateMachine<RecreationTimeMonitor, Rec
 		private AttributeModifier moraleModifier;
 
 		private int shiftValue;
+
+		private float bonus_duration;
 	}
 }

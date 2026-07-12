@@ -139,97 +139,152 @@ namespace STRINGS
 			}
 		}
 
+		public class LUBRICATIONSTICK
+		{
+			public static LocString NAME = UI.FormatAsLink("Gear Balm", "LUBRICATIONSTICK");
+
+			public static LocString SUBHEADER = "Mechanical Lubricant";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Provides a small amount of lubricating ",
+				UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL"),
+				".\n\nCan be produced at the ",
+				BUILDINGS.PREFABS.APOTHECARY.NAME,
+				"."
+			});
+
+			public static LocString RECIPEDESC = "A self-administered mechanical lubricant for Duplicants with bionic parts.";
+		}
+
 		public class BIONIC_BOOSTERS
 		{
-			public class EXPLORER_BOOSTER
-			{
-				public static LocString NAME = "Dowsing Booster";
+			public static LocString FABRICATION_SOURCE = "This booster can be manufactured at the {0}.";
 
-				public static LocString DESC = "Enables a Bionic Duplicant to regularly uncover hidden geysers.";
+			public class BOOSTER_DIG1
+			{
+				public static LocString NAME = UI.FormatAsLink("Digging Booster", "BOOSTER_DIG1");
+
+				public static LocString DESC = "Grants a Bionic Duplicant the skill required to dig hard things.";
 			}
 
-			public class PILOTING_BOOSTER
+			public class BOOSTER_DIG2
 			{
-				public static LocString NAME = "Rocketry Booster";
+				public static LocString NAME = UI.FormatAsLink("Extreme Digging Booster", "BOOSTER_DIG2");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's rocket piloting skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant the digging skill required to get through anything.";
 			}
 
-			public class CONSTRUCTION_BOOSTER
+			public class BOOSTER_CONSTRUCT1
 			{
-				public static LocString NAME = "Building Booster";
+				public static LocString NAME = UI.FormatAsLink("Construction Booster", "BOOSTER_CONSTRUCT1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's construction skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant the ability to build fast, and demolish buildings that others cannot.";
 			}
 
-			public class EXCAVATION_BOOSTER
+			public class BOOSTER_FARM1
 			{
-				public static LocString NAME = "Excavation Booster";
+				public static LocString NAME = UI.FormatAsLink("Crop Tending Booster", "BOOSTER_FARM1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's digging skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant unparalleled farming and botanical analysis skills.";
 			}
 
-			public class MACHINERY_BOOSTER
+			public class BOOSTER_RANCH1
 			{
-				public static LocString NAME = "Operating Booster";
+				public static LocString NAME = UI.FormatAsLink("Ranching Booster", "BOOSTER_RANCH1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's machinery skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant the skills required to care for " + UI.FormatAsLink("Critters", "CREATURES") + "  in every way.";
 			}
 
-			public class ATHLETICS_BOOSTER
+			public class BOOSTER_COOK1
 			{
-				public static LocString NAME = "Athletics Booster";
+				public static LocString NAME = UI.FormatAsLink("Grilling Booster", "BOOSTER_COOK1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's runspeed.";
+				public static LocString DESC = "Grants a Bionic Duplicant deliciously professional culinary skills.";
 			}
 
-			public class SCIENCE_BOOSTER
+			public class BOOSTER_ART1
 			{
-				public static LocString NAME = "Researching Booster";
+				public static LocString NAME = UI.FormatAsLink("Masterworks Art Booster", "BOOSTER_ART1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's science researching skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant flawless decorating skills.";
 			}
 
-			public class COOKING_BOOSTER
+			public class BOOSTER_RESEARCH1
 			{
-				public static LocString NAME = "Cooking Booster";
+				public static LocString NAME = UI.FormatAsLink("Researching Booster", "BOOSTER_RESEARCH1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's culinary skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant the expertise required to study " + UI.FormatAsLink("geysers", "GEYSERS") + " and other advanced topics.";
 			}
 
-			public class MEDICINE_BOOSTER
+			public class BOOSTER_RESEARCH2
 			{
-				public static LocString NAME = "Doctoring Booster";
+				public static LocString NAME = UI.FormatAsLink("Astronomy Booster", "BOOSTER_RESEARCH2");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's doctoring skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant a keen grasp of science and usage of space-research buildings.";
 			}
 
-			public class STRENGTH_BOOSTER
+			public class BOOSTER_RESEARCH3
 			{
-				public static LocString NAME = "Strength Booster";
+				public static LocString NAME = UI.FormatAsLink("Applied Sciences Booster", "BOOSTER_RESEARCH3");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's carrying capacity and tidying speed.";
+				public static LocString DESC = "Grants a Bionic Duplicant a deeply pragmatic approach to scientific research.";
 			}
 
-			public class CREATIVITY_BOOSTER
+			public class BOOSTER_PILOT1
 			{
-				public static LocString NAME = "Decorating Booster";
+				public static LocString NAME = UI.FormatAsLink("Piloting Booster", "BOOSTER_PILOT1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's creativity.";
+				public static LocString DESC = "Grants a Bionic Duplicant the expertise required to explore the skies in person.";
 			}
 
-			public class AGRICULTURE_BOOSTER
+			public class BOOSTER_PILOTVANILLA1
 			{
-				public static LocString NAME = "Farming Booster";
+				public static LocString NAME = UI.FormatAsLink("Rocketry Booster", "BOOSTER_PILOTVANILLA1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's agricultural skills.";
+				public static LocString DESC = "Grants a Bionic Duplicant the expertise required to command a rocket.";
 			}
 
-			public class HUSBANDRY_BOOSTER
+			public class BOOSTER_SUITS1
 			{
-				public static LocString NAME = "Ranching Booster";
+				public static LocString NAME = UI.FormatAsLink("Suit Training Booster", "BOOSTER_SUITS1");
 
-				public static LocString DESC = "Increases a Bionic Duplicant's husbandry skills.";
+				public static LocString DESC = "Enables a Bionic Duplicant to maximize durability of equipped " + UI.FormatAsLink("Exosuits", "EQUIPMENT") + " and maintain their runspeed.";
+			}
+
+			public class BOOSTER_CARRY1
+			{
+				public static LocString NAME = UI.FormatAsLink("Strength Booster", "BOOSTER_CARRY1");
+
+				public static LocString DESC = "Grants a Bionic Duplicant increased carrying capacity and athletic prowess.";
+			}
+
+			public class BOOSTER_OP1
+			{
+				public static LocString NAME = UI.FormatAsLink("Electrical Engineering Booster", "BOOSTER_OP1");
+
+				public static LocString DESC = "Grants a Bionic Duplicant the skills requried to tinker and solder to their heart's content.";
+			}
+
+			public class BOOSTER_OP2
+			{
+				public static LocString NAME = UI.FormatAsLink("Mechatronics Engineering Booster", "BOOSTER_OP2");
+
+				public static LocString DESC = "Grants a Bionic Duplicant complete mastery of engineering skills.";
+			}
+
+			public class BOOSTER_MEDICINE1
+			{
+				public static LocString NAME = UI.FormatAsLink("Advanced Medical Booster", "BOOSTER_MEDICINE1");
+
+				public static LocString DESC = "Grants a Bionic Duplicant the ability to perform all doctoring errands.";
+			}
+
+			public class BOOSTER_TIDY1
+			{
+				public static LocString NAME = UI.FormatAsLink("Tidying Booster", "BOOSTER_TIDY1");
+
+				public static LocString DESC = "Grants a Bionic Duplicant the full range of tidying skills, including blasting unwanted meteors out of the sky.";
 			}
 		}
 
@@ -1140,119 +1195,9 @@ namespace STRINGS
 
 		public class INDUSTRIAL_PRODUCTS
 		{
-			public class ELECTROBANK_MUCKROOT
-			{
-				public static LocString NAME = UI.FormatAsLink("Muckroot Power Bank", "ELECTROBANK");
-
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A disposable organic ",
-					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
-					" made with ",
-					UI.FormatAsLink("Muckroot", "BASICFORAGEPLANT"),
-					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
-					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
-					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Muckroot Power Banks", "ELECTROBANK"),
-					" at the ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
-				});
-			}
-
-			public class ELECTROBANK_CARROT
-			{
-				public static LocString NAME = UI.FormatAsLink("Squash Power Bank", "ELECTROBANK");
-
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A disposable organic ",
-					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
-					" made with ",
-					UI.FormatAsLink("Plume Squash", "CARROT"),
-					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
-					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
-					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Squash Power Banks", "ELECTROBANK"),
-					" at the ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
-				});
-			}
-
-			public class ELECTROBANK_LIGHTBUGEGG
-			{
-				public static LocString NAME = UI.FormatAsLink("Shine Egg Power Bank", "ELECTROBANK");
-
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A disposable organic ",
-					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
-					" made with ",
-					UI.FormatAsLink("Shine Nymph Egg", "LIGHTBUG"),
-					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
-					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
-					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Shine Egg Power Banks", "ELECTROBANK"),
-					" at the ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
-				});
-			}
-
-			public class ELECTROBANK_SUCROSE
-			{
-				public static LocString NAME = UI.FormatAsLink("Sucrose Power Bank", "ELECTROBANK");
-
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A disposable organic ",
-					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
-					" made with ",
-					UI.FormatAsLink("Sucrose", "SUCROSE"),
-					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
-					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
-					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Sucrose Power Banks", "ELECTROBANK"),
-					" at the ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
-				});
-			}
-
-			public class ELECTROBANK_STATERPILLAR
-			{
-				public static LocString NAME = UI.FormatAsLink("Slug Egg Power Bank", "ELECTROBANK");
-
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A disposable organic ",
-					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
-					" made with ",
-					UI.FormatAsLink("Plug Slug Egg", "STATERPILLAR"),
-					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
-					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
-					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Slug Egg Power Banks", "ELECTROBANK"),
-					" at the ",
-					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
-				});
-			}
-
 			public class ELECTROBANK_URANIUM_ORE
 			{
-				public static LocString NAME = UI.FormatAsLink("Nuclear Power Bank", "ELECTROBANK");
+				public static LocString NAME = UI.FormatAsLink("Uranium Ore Power Bank", "ELECTROBANK_URANIUM_ORE");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1261,20 +1206,20 @@ namespace STRINGS
 					" made with ",
 					UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
 					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Large Dischargers", "LARGEELECTROBANKDISCHARGER"),
 					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Compact Dischargers", "SMALLELECTROBANKDISCHARGER"),
 					".\n\nDuplicants can produce new ",
-					UI.FormatAsLink("Nuclear Power Banks", "ELECTROBANK"),
+					UI.FormatAsLink("Uranium Ore Power Banks", "ELECTROBANK"),
 					" at the ",
 					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
+					".\n\nMust be kept dry."
 				});
 			}
 
 			public class ELECTROBANK_METAL_ORE
 			{
-				public static LocString NAME = UI.FormatAsLink("Metal Power Bank", "ELECTROBANK");
+				public static LocString NAME = UI.FormatAsLink("Metal Power Bank", "ELECTROBANK_METAL_ORE");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
@@ -1283,14 +1228,36 @@ namespace STRINGS
 					" made with ",
 					UI.FormatAsLink("Metal Ore", "METAL"),
 					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Large Dischargers", "LARGEELECTROBANKDISCHARGER"),
 					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Compact Dischargers", "SMALLELECTROBANKDISCHARGER"),
 					".\n\nDuplicants can produce new ",
 					UI.FormatAsLink("Metal Power Banks", "ELECTROBANK"),
 					" at the ",
 					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
-					"."
+					".\n\nMust be kept dry."
+				});
+			}
+
+			public class ELECTROBANK_SELFCHARGING
+			{
+				public static LocString NAME = UI.FormatAsLink("Atomic Power Bank", "ELECTROBANK_SELFCHARGING");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A self-charging ",
+					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
+					" made with ",
+					ELEMENTS.ENRICHEDURANIUM.NAME,
+					".\n\nIt can power buildings via ",
+					UI.FormatAsLink("Large Dischargers", "LARGEELECTROBANKDISCHARGER"),
+					" or ",
+					UI.FormatAsLink("Compact Dischargers", "SMALLELECTROBANKDISCHARGER"),
+					".\n\nIts low ",
+					UI.FormatAsLink("wattage", "POWER"),
+					" and high ",
+					UI.FormatAsLink("Radioactivity", "RADIATION"),
+					" make it unsuitable for Bionic Duplicant use."
 				});
 			}
 
@@ -1303,14 +1270,14 @@ namespace STRINGS
 					"A rechargeable ",
 					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
 					".\n\nIt can power buildings via ",
-					UI.FormatAsLink("Socket Stations", "LARGEELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Large Dischargers", "LARGEELECTROBANKDISCHARGER"),
 					" or ",
-					UI.FormatAsLink("Wall Sockets", "SMALLELECTROBANKDISCHARGER"),
+					UI.FormatAsLink("Compact Dischargers", "SMALLELECTROBANKDISCHARGER"),
 					".\n\nDuplicants can produce new ",
 					UI.FormatAsLink("Eco Power Banks", "ELECTROBANK"),
 					" at the ",
 					UI.FormatAsLink("Soldering Station", "ADVANCEDCRAFTINGTABLE"),
-					"."
+					".\n\nMust be kept dry."
 				});
 			}
 
@@ -1332,7 +1299,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Power Bank Scrap", "ELECTROBANK");
 
-				public static LocString DESC = "A " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " that has reached the end of its life cycle.\n\nIt can be salvaged for metal ore.";
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A ",
+					UI.FormatAsLink("Power Bank", "ELECTROBANK"),
+					" that has reached the end of its lifetime.\n\nIt can be salvaged for ",
+					UI.FormatAsLink("Abyssalite", "KATAIRITE"),
+					" at the ",
+					UI.FormatAsLink("Rock Crusher", "ROCKCRUSHER"),
+					"."
+				});
 			}
 
 			public class FUEL_BRICK
@@ -1372,12 +1348,10 @@ namespace STRINGS
 					"A specialized ",
 					ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME,
 					" created by a professional engineer.\n\nTunes up ",
-					UI.PRE_KEYWORD,
-					"Generators",
-					UI.PST_KEYWORD,
+					UI.FormatAsLink("Generators", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE"),
 					" to increase their ",
 					UI.FormatAsLink("Power", "POWER"),
-					" output."
+					" output.\n\nAlso used in the production of boosters for Bionic Duplicants."
 				});
 
 				public static LocString TINKER_REQUIREMENT_NAME = "Skill: " + DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME;
@@ -1469,12 +1443,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Data Bank", "RESEARCH_DATABANK");
 
+				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "RESEARCH_DATABANK");
+
 				public static LocString DESC = "Raw data that can be processed into " + UI.FormatAsLink("Interstellar Research", "RESEARCH") + " points.";
 			}
 
 			public class ORBITAL_RESEARCH_DATABANK
 			{
 				public static LocString NAME = UI.FormatAsLink("Data Bank", "ORBITAL_RESEARCH_DATABANK");
+
+				public static LocString NAME_PLURAL = UI.FormatAsLink("Data Banks", "ORBITAL_RESEARCH_DATABANK");
 
 				public static LocString DESC = "Raw Data that can be processed into " + UI.FormatAsLink("Data Analysis Research", "RESEARCH") + " points.";
 

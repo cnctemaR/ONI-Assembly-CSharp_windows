@@ -144,7 +144,7 @@ public class MainMenu : KScreen
 			{
 				DLC1_STORE_URL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
 				DLC2_STORE_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
-				DLC3_STORE_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
+				DLC3_STORE_URL = "https://store.steampowered.com/app/3302470/Oxygen_Not_Included_The_Bionic_Booster_Pack/";
 			}
 			MultiToggle reference = this.logoDLC1.GetReference<MultiToggle>("multitoggle");
 			reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
@@ -518,7 +518,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 644960U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 35)
+				if (header.buildVersion > 646687U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 35)
 				{
 					flag = false;
 				}

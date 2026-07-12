@@ -145,6 +145,13 @@ namespace Database
 						anim = "zapped"
 					}
 				}, "anim_bionic_kanim");
+				this.GrindingGears = new Emote(this, "GrindingGears", new EmoteStep[]
+				{
+					new EmoteStep
+					{
+						anim = "react"
+					}
+				}, "anim_bionic_react_grinding_gears_kanim");
 				this.Sneeze_Short = new Emote(this, "Short Sneeze", new EmoteStep[]
 				{
 					new EmoteStep
@@ -249,6 +256,8 @@ namespace Database
 			public Emote WaterDamage;
 
 			public Emote Sneeze_Short;
+
+			public Emote GrindingGears;
 
 			public Emote Concern;
 

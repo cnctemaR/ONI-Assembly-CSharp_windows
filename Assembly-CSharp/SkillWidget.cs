@@ -22,8 +22,12 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 			return;
 		}
 		this.Name.text = skill.Name;
-		LocText name = this.Name;
-		name.text = name.text + "\n(" + Db.Get().SkillGroups.Get(skill.skillGroup).Name + ")";
+		SkillGroup skillGroup = Db.Get().SkillGroups.Get(skill.skillGroup);
+		if (!string.IsNullOrEmpty(skillGroup.choreGroupID))
+		{
+			LocText name = this.Name;
+			name.text = name.text + "\n(" + skillGroup.Name + ")";
+		}
 		this.skillID = skillID;
 		this.tooltip.SetSimpleTooltip(this.SkillTooltip(skill));
 		MinionIdentity minionIdentity;

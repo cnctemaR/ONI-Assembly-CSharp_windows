@@ -248,7 +248,7 @@ public class EventInfoScreen : KModalScreen
 			WorldContainer myWorld = eventInfoData.clickFocus.gameObject.GetMyWorld();
 			if (myWorld != null && myWorld.IsDiscovered)
 			{
-				CameraController.Instance.ActiveWorldStarWipe(myWorld.id, eventInfoData.clickFocus.position, 10f, null);
+				GameUtil.FocusCameraOnWorld(myWorld.id, eventInfoData.clickFocus.position, 10f, null, true);
 			}
 		}
 		return eventInfoScreen;

@@ -18,6 +18,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.fillMeter = new MeterController(component2, "meter_target", "meter", this.meterOffset, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
 		this.contaminationMeter = new MeterController(component2, "meter_target", "meter_dirty", this.meterOffset, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
+		this.gunkMeter = new MeterController(component2, "meter_target", "meter_gunky", this.meterOffset, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
 		Components.Toilets.Add(this);
 		Components.BasicBuildings.Add(this);
 		base.smi.StartSM();
@@ -112,9 +113,15 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		base.smi.sm.outputBlocked.Set(flag, base.smi, false);
 	}
 
+	private static readonly HashedString[] CLOGGED_ANIMS = new HashedString[] { "full_gunk_pre", "full_gunk" };
+
+	private const string UNCLOG_ANIM = "full_gunk_pst";
+
 	private MeterController fillMeter;
 
 	private MeterController contaminationMeter;
+
+	private MeterController gunkMeter;
 
 	public Meter.Offset meterOffset = Meter.Offset.Behind;
 
@@ -153,12 +160,45 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	public class SMInstance : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.GameInstance
 	{
+		public bool IsClogged
+		{
+			get
+			{
+				return base.sm.isClogged.Get(this);
+			}
+		}
+
 		public SMInstance(FlushToilet master)
 			: base(master)
 		{
 			this.activeUseChores = new List<Chore>();
 			this.UpdateFullnessState();
 			this.UpdateDirtyState();
+		}
+
+		public void CreateCleanChore()
+		{
+			if (this.cleanChore != null)
+			{
+				this.cleanChore.Cancel("dupe");
+			}
+			ToiletWorkableClean component = base.GetComponent<ToiletWorkableClean>();
+			component.SetIsCloggedByGunk(this.IsClogged);
+			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+		}
+
+		public void CancelCleanChore()
+		{
+			if (this.cleanChore != null)
+			{
+				this.cleanChore.Cancel("Cancelled");
+				this.cleanChore = null;
+			}
+		}
+
+		private void OnCleanComplete(object o)
+		{
+			base.sm.isClogged.Set(false, this, false);
 		}
 
 		public bool HasValidConnections()
@@ -184,16 +224,32 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			return flag;
 		}
 
+		public void SetDirtyStatesForClogged()
+		{
+			bool flag = base.GetComponent<ToiletWorkableUse>().last_user_id == BionicMinionConfig.ID;
+			this.SetDirtyStateMeterPercentage((float)(flag ? 0 : 1), (float)(flag ? 1 : 0));
+		}
+
+		public void SetDirtyStateMeterPercentage(float contaminationPercentage, float gunkPercentage)
+		{
+			base.master.contaminationMeter.SetPositionPercent(contaminationPercentage);
+			base.master.gunkMeter.SetPositionPercent(gunkPercentage);
+		}
+
 		public void UpdateDirtyState()
 		{
-			float percentComplete = base.GetComponent<ToiletWorkableUse>().GetPercentComplete();
-			base.master.contaminationMeter.SetPositionPercent(percentComplete);
+			ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
+			float percentComplete = component.GetPercentComplete();
+			bool flag = component.last_user_id == BionicMinionConfig.ID;
+			this.SetDirtyStateMeterPercentage(flag ? 0f : percentComplete, flag ? percentComplete : 0f);
 		}
 
 		public void Flush()
 		{
+			bool flag = base.GetComponent<ToiletWorkableUse>().last_user_id == BionicMinionConfig.ID;
 			base.master.fillMeter.SetPositionPercent(0f);
-			base.master.contaminationMeter.SetPositionPercent(1f);
+			base.master.contaminationMeter.SetPositionPercent(flag ? 0f : 1f);
+			base.master.gunkMeter.SetPositionPercent(flag ? 1f : 0f);
 			base.smi.ShowFillMeter();
 			WorkerBase worker = base.master.GetComponent<ToiletWorkableUse>().worker;
 			base.master.Flush(worker);
@@ -203,6 +259,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		{
 			base.master.fillMeter.gameObject.SetActive(true);
 			base.master.contaminationMeter.gameObject.SetActive(false);
+			base.master.gunkMeter.gameObject.SetActive(false);
 		}
 
 		public bool HasContaminatedMass()
@@ -220,11 +277,15 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		public void ShowContaminatedMeter()
 		{
+			bool flag = base.GetComponent<ToiletWorkableUse>().last_user_id == BionicMinionConfig.ID;
 			base.master.fillMeter.gameObject.SetActive(false);
-			base.master.contaminationMeter.gameObject.SetActive(true);
+			base.master.contaminationMeter.gameObject.SetActive(!flag);
+			base.master.gunkMeter.gameObject.SetActive(flag);
 		}
 
 		public List<Chore> activeUseChores;
+
+		private Chore cleanChore;
 	}
 
 	public class States : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>
@@ -232,6 +293,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.disconnected;
+			base.serializable = StateMachine.SerializeType.ParamsOnly;
 			this.disconnected.PlayAnim("off").EventTransition(GameHashes.ConduitConnectionChanged, this.backedup, (FlushToilet.SMInstance smi) => smi.HasValidConnections()).Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(false, false);
@@ -242,14 +304,14 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 				{
 					smi.GetComponent<Operational>().SetActive(false, false);
 				});
-			this.filling.PlayAnim("off").Enter(delegate(FlushToilet.SMInstance smi)
+			this.filling.PlayAnim("on").Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(true, false);
 			}).EventTransition(GameHashes.ConduitConnectionChanged, this.disconnected, (FlushToilet.SMInstance smi) => !smi.HasValidConnections())
 				.ParamTransition<bool>(this.outputBlocked, this.backedup, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue)
 				.EventTransition(GameHashes.OnStorageChange, this.ready, (FlushToilet.SMInstance smi) => smi.UpdateFullnessState())
 				.EventTransition(GameHashes.OperationalChanged, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.fillingInactive.PlayAnim("off").Enter(delegate(FlushToilet.SMInstance smi)
+			this.fillingInactive.PlayAnim("on").Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(false, false);
 			}).EventTransition(GameHashes.OperationalChanged, this.filling, (FlushToilet.SMInstance smi) => smi.GetComponent<Operational>().IsOperational)
@@ -258,16 +320,19 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			{
 				smi.master.fillMeter.SetPositionPercent(1f);
 				smi.master.contaminationMeter.SetPositionPercent(0f);
+				smi.master.gunkMeter.SetPositionPercent(0f);
 			})
-				.PlayAnim("off")
+				.PlayAnim("on")
+				.EventHandler(GameHashes.FlushGunk, new GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.GameEvent.Callback(this.OnFlushedGunk))
 				.EventTransition(GameHashes.ConduitConnectionChanged, this.disconnected, (FlushToilet.SMInstance smi) => !smi.HasValidConnections())
 				.ParamTransition<bool>(this.outputBlocked, this.backedup, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue)
-				.ToggleChore(new Func<FlushToilet.SMInstance, Chore>(this.CreateUrgentUseChore), this.flushing)
-				.ToggleChore(new Func<FlushToilet.SMInstance, Chore>(this.CreateBreakUseChore), this.flushing);
-			this.ready.idle.Enter(delegate(FlushToilet.SMInstance smi)
+				.ToggleChore(new Func<FlushToilet.SMInstance, Chore>(this.CreateUrgentUseChore), this.ready.completed)
+				.ToggleChore(new Func<FlushToilet.SMInstance, Chore>(this.CreateBreakUseChore), this.ready.completed);
+			this.ready.idle.ParamTransition<bool>(this.isClogged, this.clogged, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue).Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(false, false);
-			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToilet, null).WorkableStartTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToilet, null)
+				.WorkableStartTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
 			this.ready.inuse.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.ShowContaminatedMeter();
@@ -275,13 +340,42 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			{
 				smi.UpdateDirtyState();
 			}, UpdateRate.SIM_200ms, false)
-				.WorkableCompleteTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.flushing)
+				.WorkableCompleteTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.completed)
 				.WorkableStopTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.flushed);
+			this.ready.completed.ParamTransition<bool>(this.isClogged, this.clogged, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue).GoTo(this.flushing);
+			this.clogged.PlayAnims((FlushToilet.SMInstance smi) => FlushToilet.CLOGGED_ANIMS, KAnim.PlayMode.Once).Enter(delegate(FlushToilet.SMInstance smi)
+			{
+				smi.ShowContaminatedMeter();
+			}).Enter(new StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State.Callback(this.SetDirtyStatesForClogged))
+				.Enter(new StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State.Callback(this.CreateCleanChore))
+				.Exit(new StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State.Callback(this.CancelCleanChore))
+				.ParamTransition<bool>(this.isClogged, this.unclogged, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsFalse);
+			this.unclogged.PlayAnim("full_gunk_pst").OnAnimQueueComplete(this.flushing);
 			this.flushing.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.Flush();
 			}).PlayAnim("flush").OnAnimQueueComplete(this.flushed);
-			this.flushed.EventTransition(GameHashes.OnStorageChange, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.HasContaminatedMass()).ParamTransition<bool>(this.outputBlocked, this.backedup, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue);
+			this.flushed.EventTransition(GameHashes.OnStorageChange, this.fillingInactive, (FlushToilet.SMInstance smi) => !smi.HasContaminatedMass()).ParamTransition<bool>(this.outputBlocked, this.backedup, GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.IsTrue).PlayAnim("on");
+		}
+
+		public void OnFlushedGunk(FlushToilet.SMInstance smi, object o)
+		{
+			smi.sm.isClogged.Set(true, smi, false);
+		}
+
+		public void SetDirtyStatesForClogged(FlushToilet.SMInstance smi)
+		{
+			smi.SetDirtyStatesForClogged();
+		}
+
+		public void CreateCleanChore(FlushToilet.SMInstance smi)
+		{
+			smi.CreateCleanChore();
+		}
+
+		public void CancelCleanChore(FlushToilet.SMInstance smi)
+		{
+			smi.CancelCleanChore();
 		}
 
 		private Chore CreateUrgentUseChore(FlushToilet.SMInstance smi)
@@ -323,17 +417,25 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State filling;
 
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State clogged;
+
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State unclogged;
+
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State flushing;
 
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State flushed;
 
 		public StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.BoolParameter outputBlocked;
 
+		public StateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.BoolParameter isClogged;
+
 		public class ReadyStates : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State
 		{
 			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State idle;
 
 			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State inuse;
+
+			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State completed;
 		}
 	}
 }

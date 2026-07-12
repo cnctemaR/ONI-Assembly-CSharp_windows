@@ -40,23 +40,18 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list.Add(new CarePackageInfo("SpaceTreeSeed", 1f, () => Immigration.CycleCondition(24)));
 		list.Add(new CarePackageInfo("HardSkinBerryPlantSeed", 3f, null));
 		dictionary.Add(text, list);
-		dictionary.Add("DLC3_ID", new List<CarePackageInfo>
-		{
-			new CarePackageInfo("DisposableElectrobank_BasicSingleHarvestPlant", 5f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_CONSTRUCTION, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_EXCAVATION, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_MACHINERY, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_ATHLETICS, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_COOKING, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_MEDICINE, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_STRENGTH, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_CREATIVITY, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_AGRICULTURE, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_HUSBANDRY, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_SCIENCE, 1f, null),
-			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_PILOTING, 1f, null)
-		});
+		string text2 = "DLC3_ID";
+		List<CarePackageInfo> list2 = new List<CarePackageInfo>();
+		list2.Add(new CarePackageInfo("DisposableElectrobank_RawMetal", 3f, () => Immigration.CycleCondition(12)));
+		dictionary.Add(text2, list2);
 		this.carePackagesByDlc = dictionary;
+		foreach (KeyValuePair<Tag, BionicUpgradeComponentConfig.BionicUpgradeData> keyValuePair in BionicUpgradeComponentConfig.UpgradesData)
+		{
+			if (keyValuePair.Value.isCarePackage)
+			{
+				this.carePackagesByDlc["DLC3_ID"].Add(new CarePackageInfo(keyValuePair.Key.Name, 1f, () => Immigration.HasMinionModelCondition(BionicMinionConfig.MODEL)));
+			}
+		}
 	}
 
 	private void ConfigureCarePackages()
@@ -226,6 +221,12 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 	private static bool DiscoveredCondition(Tag tag)
 	{
 		return DiscoveredResources.Instance.IsDiscovered(tag);
+	}
+
+	private static bool HasMinionModelCondition(Tag model)
+	{
+		Components.Cmps<MinionIdentity> cmps;
+		return Components.LiveMinionIdentitiesByModel.TryGetValue(model, out cmps) && cmps.Count > 0;
 	}
 
 	public bool ImmigrantsAvailable

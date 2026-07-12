@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class RemoteWorker : StandardWorker
 {
+	public override Attributes GetAttributes()
+	{
+		RemoteWorkerDock homeDepot = this.remoteWorkerSM.HomeDepot;
+		WorkerBase workerBase = ((homeDepot != null) ? homeDepot.GetActiveTerminalWorker() : null) ?? null;
+		if (workerBase != null)
+		{
+			return workerBase.GetAttributes();
+		}
+		return null;
+	}
+
 	public override AttributeConverterInstance GetAttributeConverter(string id)
 	{
 		RemoteWorkerDock homeDepot = this.remoteWorkerSM.HomeDepot;

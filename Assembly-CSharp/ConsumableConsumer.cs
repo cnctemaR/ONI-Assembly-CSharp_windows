@@ -24,21 +24,29 @@ public class ConsumableConsumer : KMonoBehaviour
 		if (ConsumerManager.instance != null)
 		{
 			this.forbiddenTagSet = new HashSet<Tag>(ConsumerManager.instance.DefaultForbiddenTagsList);
-			if (this.HasTag(GameTags.Minions.Models.Standard))
-			{
-				this.dietaryRestrictionTagSet = new HashSet<Tag>(ConsumerManager.instance.StandardDuplicantDietaryRestrictions);
-				return;
-			}
-			if (this.HasTag(GameTags.Minions.Models.Bionic))
-			{
-				this.dietaryRestrictionTagSet = new HashSet<Tag>(ConsumerManager.instance.BionicDuplicantDietaryRestrictions);
-				return;
-			}
+			this.SetModelDietaryRestrictions();
+			return;
 		}
-		else
+		this.forbiddenTagSet = new HashSet<Tag>();
+		this.dietaryRestrictionTagSet = new HashSet<Tag>();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.SetModelDietaryRestrictions();
+	}
+
+	private void SetModelDietaryRestrictions()
+	{
+		if (this.HasTag(GameTags.Minions.Models.Standard))
 		{
-			this.forbiddenTagSet = new HashSet<Tag>();
-			this.dietaryRestrictionTagSet = new HashSet<Tag>();
+			this.dietaryRestrictionTagSet = new HashSet<Tag>(ConsumerManager.instance.StandardDuplicantDietaryRestrictions);
+			return;
+		}
+		if (this.HasTag(GameTags.Minions.Models.Bionic))
+		{
+			this.dietaryRestrictionTagSet = new HashSet<Tag>(ConsumerManager.instance.BionicDuplicantDietaryRestrictions);
 		}
 	}
 
@@ -77,7 +85,6 @@ public class ConsumableConsumer : KMonoBehaviour
 	[Serialize]
 	public HashSet<Tag> forbiddenTagSet;
 
-	[Serialize]
 	public HashSet<Tag> dietaryRestrictionTagSet;
 
 	public global::System.Action consumableRulesChanged;

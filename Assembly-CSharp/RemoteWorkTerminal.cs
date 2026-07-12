@@ -11,6 +11,9 @@ public class RemoteWorkTerminal : Workable
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_remote_terminal_kanim") };
 		this.InitializeWorkingInteracts();
 		this.synchronizeAnims = true;
+		this.showProgressBar = false;
+		this.workLayer = Grid.SceneLayer.BuildingUse;
+		this.surpressWorkerForceSync = true;
 		this.kbac.onAnimComplete += this.PlayNextWorkingAnim;
 	}
 
@@ -21,10 +24,10 @@ public class RemoteWorkTerminal : Workable
 			return;
 		}
 		KAnimFileData data = this.overrideAnims[0].GetData();
-		RemoteWorkTerminal.NUM_WORKING_INTERACTS = 1;
+		RemoteWorkTerminal.NUM_WORKING_INTERACTS = 0;
 		for (;;)
 		{
-			string text = string.Format("working_loop_{0}", RemoteWorkTerminal.NUM_WORKING_INTERACTS);
+			string text = string.Format("working_loop_{0}", RemoteWorkTerminal.NUM_WORKING_INTERACTS + 1);
 			if (data.GetAnim(text) == null)
 			{
 				break;

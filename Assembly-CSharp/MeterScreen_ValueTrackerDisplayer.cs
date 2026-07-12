@@ -42,6 +42,11 @@ public abstract class MeterScreen_ValueTrackerDisplayer : KMonoBehaviour
 		return this.worldLiveMinionIdentities;
 	}
 
+	protected virtual List<MinionIdentity> GetAllMinionsFromAllWorlds()
+	{
+		return new List<MinionIdentity>(Components.LiveMinionIdentities.Items.Where<MinionIdentity>((MinionIdentity x) => !x.IsNullOrDestroyed()));
+	}
+
 	public LocText Label;
 
 	public ToolTip Tooltip;

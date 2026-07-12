@@ -64,21 +64,29 @@ public class DebugHandler : IInputHandler
 		minionStartingStats.Apply(gameObject);
 		if (addAtmoSuit)
 		{
-			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("Atmo_Suit"), vector, Grid.SceneLayer.Creatures, null, 0);
-			gameObject2.SetActive(true);
-			SuitTank component = gameObject2.GetComponent<SuitTank>();
-			GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(GameTags.Oxygen), vector, Grid.SceneLayer.Ore, null, 0);
-			gameObject3.GetComponent<PrimaryElement>().Units = component.capacity;
-			gameObject3.SetActive(true);
-			component.storage.Store(gameObject3, true, false, true, false);
-			Equippable component2 = gameObject2.GetComponent<Equippable>();
-			gameObject.GetComponent<MinionIdentity>().ValidateProxy();
-			Equipment component3 = gameObject.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<Equipment>();
-			component2.Assign(component3.GetComponent<IAssignableIdentity>());
-			gameObject2.GetComponent<EquippableWorkable>().CancelChore("Debug Handler");
-			component3.Equip(component2);
+			gameObject.Subscribe(1589886948, new Action<object>(this.AddAtmosuitAfterSpawn));
 		}
 		gameObject.GetMyWorld().SetDupeVisited();
+	}
+
+	private void AddAtmosuitAfterSpawn(object o)
+	{
+		GameObject gameObject = (GameObject)o;
+		Vector3 localPosition = gameObject.transform.localPosition;
+		GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("Atmo_Suit"), localPosition, Grid.SceneLayer.Creatures, null, 0);
+		gameObject2.SetActive(true);
+		SuitTank component = gameObject2.GetComponent<SuitTank>();
+		GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(GameTags.Oxygen), localPosition, Grid.SceneLayer.Ore, null, 0);
+		gameObject3.GetComponent<PrimaryElement>().Units = component.capacity;
+		gameObject3.SetActive(true);
+		component.storage.Store(gameObject3, true, false, true, false);
+		Equippable component2 = gameObject2.GetComponent<Equippable>();
+		gameObject.GetComponent<MinionIdentity>().ValidateProxy();
+		Equipment component3 = gameObject.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<Equipment>();
+		component2.Assign(component3.GetComponent<IAssignableIdentity>());
+		component2.isEquipped = true;
+		gameObject2.GetComponent<EquippableWorkable>().CancelChore("Debug Handler");
+		gameObject.Unsubscribe(1589886948, new Action<object>(this.AddAtmosuitAfterSpawn));
 	}
 
 	public static void SetDebugEnabled(bool debugEnabled)
@@ -236,7 +244,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0CAD;
+					goto IL_0CB6;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -245,7 +253,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0CAD;
+					goto IL_0CB6;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -351,7 +359,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0CAD;
+						goto IL_0CB6;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -364,7 +372,7 @@ public class DebugHandler : IInputHandler
 					if (selected != null)
 					{
 						Navigator component = selected.GetComponent<Navigator>();
-						if (component != null)
+						if (component != null && component.IsMoving())
 						{
 							component.Stop(false, true);
 						}
@@ -522,7 +530,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0CAD:
+		IL_0CB6:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

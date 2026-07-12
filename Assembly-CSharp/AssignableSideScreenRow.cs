@@ -115,6 +115,10 @@ public class AssignableSideScreenRow : KMonoBehaviour
 	{
 		ToolTip component = base.GetComponent<ToolTip>();
 		component.ClearMultiStringTooltip();
+		if (this.sideScreen.targetAssignable.customAssignablesUITooltipFunc != null)
+		{
+			return this.sideScreen.targetAssignable.customAssignablesUITooltipFunc(this.targetIdentity.GetSoleOwner());
+		}
 		if (this.targetIdentity != null && !this.targetIdentity.IsNull())
 		{
 			AssignableSideScreenRow.AssignableState assignableState = this.currentState;

@@ -196,15 +196,10 @@ public class MinionStartingStats : ITelepadDeliverable
 		}
 		if (this.personality.model == GameTags.Minions.Models.Bionic)
 		{
-			string[] default_BIONIC_TRAITS = BionicMinionConfig.DEFAULT_BIONIC_TRAITS;
-			for (int i = 0; i < default_BIONIC_TRAITS.Length; i++)
-			{
-				string id = default_BIONIC_TRAITS[i];
-				DUPLICANTSTATS.TraitVal traitVal = DUPLICANTSTATS.BIONICTRAITS.Find((DUPLICANTSTATS.TraitVal match) => match.id == id);
-				CS$<>8__locals1.<GenerateTraits>g__SelectTrait|1(traitVal, Db.Get().traits.Get(id), true);
-			}
-			DUPLICANTSTATS.TraitVal random = DUPLICANTSTATS.BIONICUPGRADETRAITS.GetRandom<DUPLICANTSTATS.TraitVal>();
-			CS$<>8__locals1.<GenerateTraits>g__SelectTrait|1(random, Db.Get().traits.Get(random.id), true);
+			DUPLICANTSTATS.TraitVal random = DUPLICANTSTATS.BIONICBUGTRAITS.GetRandom<DUPLICANTSTATS.TraitVal>();
+			CS$<>8__locals1.<GenerateTraits>g__SelectTrait|1(random, Db.Get().traits.Get(random.id), false);
+			DUPLICANTSTATS.TraitVal traitVal = ((CS$<>8__locals1.guaranteedAptitudeID == null) ? DUPLICANTSTATS.BIONICUPGRADETRAITS.GetRandom<DUPLICANTSTATS.TraitVal>() : this.GetBionicTraitsCompatibleWithArchetype(CS$<>8__locals1.guaranteedAptitudeID).GetRandom<DUPLICANTSTATS.TraitVal>());
+			CS$<>8__locals1.<GenerateTraits>g__SelectTrait|1(traitVal, Db.Get().traits.Get(traitVal.id), true);
 			this.IsValid = true;
 			return CS$<>8__locals1.statDelta;
 		}
@@ -254,11 +249,11 @@ public class MinionStartingStats : ITelepadDeliverable
 				num7 = Mathf.Min(DUPLICANTSTATS.RARITY_LEGENDARY, num7);
 			}
 			List<DUPLICANTSTATS.TraitVal> list2 = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
-			for (int k = list2.Count - 1; k > -1; k--)
+			for (int j = list2.Count - 1; j > -1; j--)
 			{
-				if (list2[k].rarity != num7)
+				if (list2[j].rarity != num7)
 				{
-					list2.RemoveAt(k);
+					list2.RemoveAt(j);
 					num6--;
 				}
 			}
@@ -352,9 +347,9 @@ public class MinionStartingStats : ITelepadDeliverable
 				this.Traits.Add(trait4);
 				if (trait4.disabledChoreGroups != null)
 				{
-					for (int j = 0; j < trait4.disabledChoreGroups.Length; j++)
+					for (int i = 0; i < trait4.disabledChoreGroups.Length; i++)
 					{
-						CS$<>8__locals1.disabled_chore_groups.Add(trait4.disabledChoreGroups[j]);
+						CS$<>8__locals1.disabled_chore_groups.Add(trait4.disabledChoreGroups[i]);
 					}
 				}
 				if (positiveTrait2)
@@ -406,8 +401,13 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	private void GenerateAptitudes(string guaranteedAptitudeID = null)
 	{
+		if (this.personality.model == BionicMinionConfig.MODEL)
+		{
+			return;
+		}
 		int num = global::UnityEngine.Random.Range(1, 4);
 		List<SkillGroup> list = new List<SkillGroup>(Db.Get().SkillGroups.resources);
+		list.RemoveAll((SkillGroup match) => !match.allowAsAptitude);
 		list.Shuffle<SkillGroup>();
 		if (guaranteedAptitudeID != null)
 		{
@@ -565,9 +565,9 @@ public class MinionStartingStats : ITelepadDeliverable
 			body = HashCache.Get().Add(string.Format("torso_{0:000}", p.body)),
 			hat = HashedString.Invalid,
 			faceFX = HashedString.Invalid,
-			armLowerSkin = HashCache.Get().Add(string.Format("arm_lower_{0:000}", p.headShape)),
-			armUpperSkin = HashCache.Get().Add(string.Format("arm_upper_{0:000}", p.headShape)),
-			legSkin = HashCache.Get().Add(string.Format("leg_skin_{0:000}", p.headShape)),
+			armLowerSkin = HashCache.Get().Add(string.Format("arm_lower_{0:000}", (p.arm_skin != 0) ? p.arm_skin : p.headShape)),
+			armUpperSkin = HashCache.Get().Add(string.Format("arm_upper_{0:000}", (p.arm_skin != 0) ? p.arm_skin : p.headShape)),
+			legSkin = HashCache.Get().Add(string.Format("leg_skin_{0:000}", (p.leg_skin != 0) ? p.leg_skin : p.headShape)),
 			neck = HashCache.Get().Add((p.neck != 0) ? string.Format("neck_{0:000}", p.neck) : "neck"),
 			legs = HashCache.Get().Add((p.leg != 0) ? string.Format("leg_{0:000}", p.leg) : "leg"),
 			belt = HashCache.Get().Add((p.belt != 0) ? string.Format("belt_{0:000}", p.belt) : "belt"),
@@ -615,6 +615,20 @@ public class MinionStartingStats : ITelepadDeliverable
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		new EmoteChore(gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
 		return gameObject;
+	}
+
+	private List<DUPLICANTSTATS.TraitVal> GetBionicTraitsCompatibleWithArchetype(string guaranteedAptitudeID)
+	{
+		if (!DUPLICANTSTATS.ARCHETYPE_BIONIC_TRAIT_COMPATIBILITY.ContainsKey(guaranteedAptitudeID))
+		{
+			global::Debug.LogError("Need to add attribute " + guaranteedAptitudeID + " to ARCHETYPE_BIONIC_TRAIT_COMPATIBILITY");
+		}
+		List<DUPLICANTSTATS.TraitVal> list = DUPLICANTSTATS.BIONICUPGRADETRAITS.FindAll((DUPLICANTSTATS.TraitVal t) => DUPLICANTSTATS.ARCHETYPE_BIONIC_TRAIT_COMPATIBILITY[guaranteedAptitudeID].Contains(t.id) || DUPLICANTSTATS.ARCHETYPE_BIONIC_TRAIT_COMPATIBILITY[guaranteedAptitudeID].Contains(t.id.Replace("StartWith", "")));
+		if (list.Count <= 0)
+		{
+			list = DUPLICANTSTATS.BIONICUPGRADETRAITS;
+		}
+		return list;
 	}
 
 	private bool AreTraitAndAptitudesExclusive(DUPLICANTSTATS.TraitVal traitVal, Dictionary<SkillGroup, float> aptitudes)

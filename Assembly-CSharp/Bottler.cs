@@ -159,6 +159,7 @@ public class Bottler : Workable, IUserControlledCapacity
 		this.workerMeter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
 		this.workerMeter.SetSymbolTint(new KAnimHashedString("water1"), colour);
 		this.workerMeter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+		this.workerMeter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
 	}
 
 	private void CleanupBottleProxyObject()
@@ -204,6 +205,11 @@ public class Bottler : Workable, IUserControlledCapacity
 			Pickupable component2 = gameObject.GetComponent<Pickupable>();
 			component2.targetWorkable = component2;
 			component2.RemoveTag(this.SourceTag);
+			FetchableMonitor.Instance instance = component2.GetSMI<FetchableMonitor.Instance>();
+			if (instance != null)
+			{
+				instance.SetForceUnfetchable(false);
+			}
 			pickupableStartWorkInfo.setResultCb(gameObject);
 		}
 		else
@@ -380,7 +386,7 @@ public class Bottler : Workable, IUserControlledCapacity
 			public Instance(Bottler master)
 				: base(master)
 			{
-				this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "bottle", "off", Meter.Offset.UserSpecified, Grid.SceneLayer.BuildingFront, new string[] { "bottle", "substance_tinter" });
+				this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "bottle", "off", Meter.Offset.UserSpecified, Grid.SceneLayer.BuildingFront, new string[] { "bottle", "substance_tinter", "substance_tinter_cap" });
 			}
 
 			public void UpdateMeter()
@@ -397,6 +403,7 @@ public class Bottler : Workable, IUserControlledCapacity
 				this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
 				this.meter.SetSymbolTint(new KAnimHashedString("water1"), colour);
 				this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+				this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
 			}
 		}
 	}

@@ -15,7 +15,13 @@ public class RocketStats
 		float totalMass = this.GetTotalMass();
 		float totalThrust = this.GetTotalThrust();
 		float num = ROCKETRY.CalculateMassWithPenalty(totalMass);
-		return Mathf.Max(0f, totalThrust - num);
+		float num2 = Mathf.Max(0f, totalThrust - num);
+		RoboPilotModule component = this.commandModule.GetComponent<RoboPilotModule>();
+		if (component != null)
+		{
+			num2 = Mathf.Min(num2, component.GetDataBankRange());
+		}
+		return num2;
 	}
 
 	public float GetTotalMass()

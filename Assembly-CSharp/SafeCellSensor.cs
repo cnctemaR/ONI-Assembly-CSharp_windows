@@ -1,10 +1,40 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 
 public class SafeCellSensor : Sensor
 {
-	public SafeCellSensor(Sensors sensors)
-		: base(sensors)
+	private SafeCellQuery.SafeFlags GetIgnoredFlags()
+	{
+		SafeCellQuery.SafeFlags safeFlags = (SafeCellQuery.SafeFlags)0;
+		foreach (string text in this.ignoredFlagsSets.Keys)
+		{
+			SafeCellQuery.SafeFlags safeFlags2 = this.ignoredFlagsSets[text];
+			safeFlags |= safeFlags2;
+		}
+		return safeFlags;
+	}
+
+	public void AddIgnoredFlagsSet(string setID, SafeCellQuery.SafeFlags flagsToIgnore)
+	{
+		if (this.ignoredFlagsSets.ContainsKey(setID))
+		{
+			this.ignoredFlagsSets[setID] = flagsToIgnore;
+			return;
+		}
+		this.ignoredFlagsSets.Add(setID, flagsToIgnore);
+	}
+
+	public void RemoveIgnoredFlagsSet(string setID)
+	{
+		if (this.ignoredFlagsSets.ContainsKey(setID))
+		{
+			this.ignoredFlagsSets.Remove(setID);
+		}
+	}
+
+	public SafeCellSensor(Sensors sensors, bool startEnabled = true)
+		: base(sensors, startEnabled)
 	{
 		this.navigator = base.GetComponent<Navigator>();
 		this.brain = base.GetComponent<MinionBrain>();
@@ -46,7 +76,7 @@ public class SafeCellSensor : Sensor
 	{
 		MinionPathFinderAbilities minionPathFinderAbilities = (MinionPathFinderAbilities)this.navigator.GetCurrentAbilities();
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(true);
-		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain, avoid_light);
+		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain, avoid_light, this.GetIgnoredFlags());
 		this.navigator.RunQuery(safeCellQuery);
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(false);
 		this.cell = safeCellQuery.GetResultCell();
@@ -90,4 +120,6 @@ public class SafeCellSensor : Sensor
 	private Traits traits;
 
 	private int cell = Grid.InvalidCell;
+
+	private Dictionary<string, SafeCellQuery.SafeFlags> ignoredFlagsSets = new Dictionary<string, SafeCellQuery.SafeFlags>();
 }

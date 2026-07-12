@@ -24,6 +24,14 @@ public class StoredMinionConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject go)
 	{
+		StoredMinionIdentity.IStoredMinionExtension[] components = Assets.GetPrefab(BionicMinionConfig.ID).GetComponents<StoredMinionIdentity.IStoredMinionExtension>();
+		if (components != null)
+		{
+			for (int i = 0; i < components.Length; i++)
+			{
+				components[i].AddStoredMinionGameObjectRequirements(go);
+			}
+		}
 	}
 
 	public void OnSpawn(GameObject go)

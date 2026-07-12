@@ -306,6 +306,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		this.pendingDestruction = true;
 	}
 
+	public void SetUnityEditorConfigOverride(string filename)
+	{
+	}
+
 	public const int InvalidInstanceID = -1;
 
 	private static int nextUniqueID = 0;

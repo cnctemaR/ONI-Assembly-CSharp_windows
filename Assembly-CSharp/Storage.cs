@@ -944,30 +944,43 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	public void ConsumeAndGetDisease(Tag tag, float amount, out float amount_consumed, out SimUtil.DiseaseInfo disease_info, out float aggregate_temperature)
 	{
+		SimHashes simHashes;
+		this.ConsumeAndGetDisease(tag, amount, out amount_consumed, out disease_info, out aggregate_temperature, out simHashes);
+	}
+
+	public void ConsumeAndGetDisease(Tag tag, float amount, out float amount_consumed, out SimUtil.DiseaseInfo disease_info, out float aggregate_temperature, out SimHashes mostRelevantItemElement)
+	{
 		DebugUtil.Assert(tag.IsValid);
 		amount_consumed = 0f;
 		disease_info = SimUtil.DiseaseInfo.Invalid;
+		mostRelevantItemElement = SimHashes.Vacuum;
 		aggregate_temperature = 0f;
 		bool flag = false;
-		int num = 0;
-		while (num < this.items.Count && amount > 0f)
+		float num = 0f;
+		int num2 = 0;
+		while (num2 < this.items.Count && amount > 0f)
 		{
-			GameObject gameObject = this.items[num];
+			GameObject gameObject = this.items[num2];
 			if (!(gameObject == null) && gameObject.HasTag(tag))
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				if (component.Units > 0f)
 				{
 					flag = true;
-					float num2 = Math.Min(component.Units, amount);
-					global::Debug.Assert(num2 > 0f, "Delta amount was zero, which should be impossible.");
-					aggregate_temperature = SimUtil.CalculateFinalTemperature(amount_consumed, aggregate_temperature, num2, component.Temperature);
-					SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(component, num2 / component.Units);
+					float num3 = Math.Min(component.Units, amount);
+					global::Debug.Assert(num3 > 0f, "Delta amount was zero, which should be impossible.");
+					aggregate_temperature = SimUtil.CalculateFinalTemperature(amount_consumed, aggregate_temperature, num3, component.Temperature);
+					SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(component, num3 / component.Units);
 					disease_info = SimUtil.CalculateFinalDiseaseInfo(disease_info, percentOfDisease);
-					component.Units -= num2;
+					component.Units -= num3;
 					component.ModifyDiseaseCount(-percentOfDisease.count, "Storage.ConsumeAndGetDisease");
-					amount -= num2;
-					amount_consumed += num2;
+					amount -= num3;
+					amount_consumed += num3;
+					if (num3 > num)
+					{
+						num = num3;
+						mostRelevantItemElement = component.ElementID;
+					}
 				}
 				if (component.Units <= 0f && !component.KeepZeroMassObject)
 				{
@@ -984,7 +997,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 					onStorageChange(gameObject);
 				}
 			}
-			num++;
+			num2++;
 		}
 		if (!flag)
 		{

@@ -27,9 +27,9 @@ public class DataMinerConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
-		buildingDef.EnergyConsumptionWhenActive = 2000f;
+		buildingDef.EnergyConsumptionWhenActive = 1000f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
-		buildingDef.SelfHeatKilowattsWhenActive = 5f;
+		buildingDef.SelfHeatKilowattsWhenActive = 3f;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
@@ -42,6 +42,7 @@ public class DataMinerConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = false;
 		go.AddOrGet<LogicOperationalController>();
+		go.AddOrGet<CopyBuildingSettings>();
 		DataMiner dataMiner = go.AddOrGet<DataMiner>();
 		dataMiner.duplicantOperated = false;
 		dataMiner.showProgressBar = true;
@@ -58,8 +59,8 @@ public class DataMinerConfig : IBuildingConfig
 		string text = ComplexRecipeManager.MakeObsoleteRecipeID("DataMiner", this.OUTPUT_MATERIAL_TAG);
 		string text2 = ComplexRecipeManager.MakeRecipeID("DataMiner", array, array2);
 		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
-		complexRecipe.time = 0.0033333334f;
-		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(this.INPUT_MATERIAL).name, "TODO");
+		complexRecipe.time = 200f;
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(this.INPUT_MATERIAL).name, this.OUTPUT_MATERIAL_NAME);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("DataMiner") };
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe.sortOrder = 300;
@@ -73,27 +74,29 @@ public class DataMinerConfig : IBuildingConfig
 
 	public const string ID = "DataMiner";
 
-	public const float POWER_USAGE_W = 2000f;
+	public const float POWER_USAGE_W = 1000f;
 
-	public const float BASE_UNITS_PRODUCED_PER_CYCLE = 2f;
+	public const float BASE_UNITS_PRODUCED_PER_CYCLE = 3f;
 
-	public const float BASE_DTU_PRODUCTION = 5f;
+	public const float BASE_DTU_PRODUCTION = 3f;
 
 	public const float STORAGE_CAPACITY_KG = 1000f;
 
 	public const float MASS_CONSUMED_PER_BANK_KG = 5f;
 
-	public const float BASE_DURATION = 0.0033333334f;
+	public const float BASE_DURATION_SECONDS = 200f;
 
-	public static MathUtil.MinMax PRODUCTION_RATE_SCALE = new MathUtil.MinMax(0.6f, 4f);
+	public static MathUtil.MinMax PRODUCTION_RATE_SCALE = new MathUtil.MinMax(0.6f, 5.3333335f);
 
-	public static MathUtil.MinMax TEMPERATURE_SCALING_RANGE = new MathUtil.MinMax(5f, 350f);
+	public static MathUtil.MinMax TEMPERATURE_SCALING_RANGE = new MathUtil.MinMax(10f, 325f);
 
 	public SimHashes INPUT_MATERIAL = SimHashes.Polypropylene;
 
 	public Tag INPUT_MATERIAL_TAG = SimHashes.Polypropylene.CreateTag();
 
-	public Tag OUTPUT_MATERIAL_TAG = OrbitalResearchDatabankConfig.TAG;
+	public Tag OUTPUT_MATERIAL_TAG = DatabankHelper.TAG;
 
-	public const float BASE_PRODUCTION_PROGRESS_PER_TICK = 0.00066666666f;
+	public string OUTPUT_MATERIAL_NAME = DatabankHelper.NAME;
+
+	public const float BASE_PRODUCTION_PROGRESS_PER_TICK = 0.001f;
 }

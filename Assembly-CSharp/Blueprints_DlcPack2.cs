@@ -5,7 +5,7 @@ public class Blueprints_DlcPack2 : BlueprintProvider
 {
 	public override string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
 	}
 
 	public override void SetupBlueprints()

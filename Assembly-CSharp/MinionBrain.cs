@@ -140,7 +140,7 @@ public class MinionBrain : Brain
 		WorldContainer myWorld = notification.clickFocus.gameObject.GetMyWorld();
 		if (myWorld != null && myWorld.IsDiscovered)
 		{
-			CameraController.Instance.ActiveWorldStarWipe(myWorld.id, position, 10f, null);
+			GameUtil.FocusCameraOnWorld(myWorld.id, position, 10f, null, true);
 		}
 		base.gameObject.AddOrGet<Notifier>().Remove(notification);
 	}

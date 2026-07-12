@@ -18,7 +18,8 @@ public class AtmoSuit : KMonoBehaviour
 			return;
 		}
 		Equippable component = base.GetComponent<Equippable>();
-		bool flag = base.GetComponent<Storage>().Has(GameTags.AnyWater);
+		Storage component2 = base.GetComponent<Storage>();
+		bool flag = component2.Has(GameTags.AnyWater) || component2.Has(SimHashes.LiquidGunk.CreateTag());
 		if (component.assignee != null && flag)
 		{
 			Ownables soleOwner = component.assignee.GetSoleOwner();
@@ -28,10 +29,10 @@ public class AtmoSuit : KMonoBehaviour
 				if (targetGameObject)
 				{
 					AssignableSlotInstance slot = ((KMonoBehaviour)component.assignee).GetComponent<Equipment>().GetSlot(component.slot);
-					Effects component2 = targetGameObject.GetComponent<Effects>();
-					if (component2 != null && !component2.HasEffect("SoiledSuit") && !slot.IsUnassigning())
+					Effects component3 = targetGameObject.GetComponent<Effects>();
+					if (component3 != null && !component3.HasEffect("SoiledSuit") && !slot.IsUnassigning())
 					{
-						component2.Add("SoiledSuit", true);
+						component3.Add("SoiledSuit", true);
 					}
 				}
 			}

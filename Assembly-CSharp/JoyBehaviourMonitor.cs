@@ -23,13 +23,7 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 				smi.GoToOverjoyed();
 			}
 			smi.GetComponent<KPrefabID>().RemoveTag(GameTags.PleasantConversation);
-		}).EventHandler(GameHashes.SleepFinished, delegate(JoyBehaviourMonitor.Instance smi)
-		{
-			if (smi.ShouldBeOverjoyed())
-			{
-				smi.GoToOverjoyed();
-			}
-		}).EventHandler(GameHashes.PowerSaveFinished, delegate(JoyBehaviourMonitor.Instance smi)
+		}).EventHandler(GameHashes.ScheduleBlocksTick, delegate(JoyBehaviourMonitor.Instance smi)
 		{
 			if (smi.ShouldBeOverjoyed())
 			{

@@ -7,6 +7,11 @@ using UnityEngine.UI;
 
 public class RemoteWorkTerminalSidescreen : SideScreenContent
 {
+	public override string GetTitle()
+	{
+		return UI.UISIDESCREENS.REMOTE_WORK_TERMINAL_SIDE_SCREEN.TITLE;
+	}
+
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
@@ -41,7 +46,7 @@ public class RemoteWorkTerminalSidescreen : SideScreenContent
 	private void RefreshOptions(object data = null)
 	{
 		int num = 0;
-		this.SetRow(num++, UI.UISIDESCREENS.GEOTUNERSIDESCREEN.NOTHING, Assets.GetSprite("action_building_disabled"), null);
+		this.SetRow(num++, UI.UISIDESCREENS.REMOTE_WORK_TERMINAL_SIDE_SCREEN.NOTHING_SELECTED, Assets.GetSprite("action_building_disabled"), null);
 		foreach (RemoteWorkerDock remoteWorkerDock in Components.RemoteWorkerDocks.GetItems(this.targetTerminal.GetMyWorldId()))
 		{
 			remoteWorkerDock.GetProperName();
@@ -97,9 +102,13 @@ public class RemoteWorkTerminalSidescreen : SideScreenContent
 		};
 		component2.onDoubleClick = delegate
 		{
-			CameraController.Instance.CameraGoTo((dock == null) ? this.targetTerminal.transform.GetPosition() : dock.transform.GetPosition(), 2f, true);
+			GameUtil.FocusCamera((dock == null) ? this.targetTerminal.transform.GetPosition() : dock.transform.GetPosition(), 2f, true, true);
 			return true;
 		};
+		if (!gameObject.activeSelf)
+		{
+			gameObject.SetActive(true);
+		}
 	}
 
 	private RemoteWorkTerminal targetTerminal;

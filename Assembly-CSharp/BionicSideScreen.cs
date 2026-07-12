@@ -7,16 +7,17 @@ public class BionicSideScreen : SideScreenContent
 	private void OnBionicUpgradeSlotClicked(BionicSideScreenUpgradeSlot slotClicked)
 	{
 		bool flag = slotClicked == null || this.lastSlotSelected == slotClicked.upgradeSlot.GetAssignableSlotInstance();
+		bool flag2 = !flag && slotClicked.upgradeSlot.IsLocked;
 		this.lastSlotSelected = (flag ? null : slotClicked.upgradeSlot.GetAssignableSlotInstance());
 		this.RefreshSelectedStateInSlots();
 		AssignableSlot bionicUpgrade = Db.Get().AssignableSlots.BionicUpgrade;
-		AssignableSlotInstance assignableSlotInstance = (flag ? null : slotClicked.upgradeSlot.GetAssignableSlotInstance());
+		AssignableSlotInstance assignableSlotInstance = ((flag || flag2) ? null : slotClicked.upgradeSlot.GetAssignableSlotInstance());
 		if (this.ownableSidescreen != null)
 		{
 			this.ownableSidescreen.SetSelectedSlot(assignableSlotInstance);
 			return;
 		}
-		if (flag)
+		if (flag || flag2)
 		{
 			DetailsScreen.Instance.ClearSecondarySideScreen();
 			return;
@@ -35,7 +36,7 @@ public class BionicSideScreen : SideScreenContent
 
 	public void RecreateBionicSlots()
 	{
-		int num = ((this.upgradeMonitor != null) ? this.upgradeMonitor.def.SlotCount : 0);
+		int num = ((this.upgradeMonitor != null) ? this.upgradeMonitor.upgradeComponentSlots.Length : 0);
 		for (int i = 0; i < Mathf.Max(num, this.bionicSlots.Count); i++)
 		{
 			if (i >= this.bionicSlots.Count)
@@ -66,11 +67,6 @@ public class BionicSideScreen : SideScreenContent
 		return bionicSideScreenUpgradeSlot;
 	}
 
-	private void OnBionicUpgradeChanged(object o)
-	{
-		this.RecreateBionicSlots();
-	}
-
 	private void OnBionicBecameOnline(object o)
 	{
 		this.RefreshSlots();
@@ -86,19 +82,42 @@ public class BionicSideScreen : SideScreenContent
 		this.RefreshSlots();
 	}
 
-	private void OnBionicBatterySaveModeChanged(object o)
+	private void OnBionicBedTimeChoreStateChanged(object o)
 	{
 		this.RefreshSlots();
 	}
 
+	private void OnBionicUpgradeComponentSlotCountChanged(object o)
+	{
+		this.RefreshSlots();
+	}
+
+	private void OnBionicUpgradeChanged(object o)
+	{
+		this.RecreateBionicSlots();
+	}
+
+	private void OnBionicTagsChanged(object o)
+	{
+		if (o == null)
+		{
+			return;
+		}
+		if (((TagChangedEventData)o).tag == GameTags.BionicBedTime)
+		{
+			this.OnBionicBedTimeChoreStateChanged(o);
+		}
+	}
+
 	private void RefreshSlots()
 	{
-		for (int i = 0; i < this.bionicSlots.Count; i++)
+		for (int i = this.bionicSlots.Count - 1; i >= 0; i--)
 		{
 			BionicSideScreenUpgradeSlot bionicSideScreenUpgradeSlot = this.bionicSlots[i];
 			if (bionicSideScreenUpgradeSlot != null)
 			{
 				bionicSideScreenUpgradeSlot.Refresh();
+				bionicSideScreenUpgradeSlot.gameObject.transform.SetAsFirstSibling();
 			}
 		}
 	}
@@ -130,20 +149,27 @@ public class BionicSideScreen : SideScreenContent
 			this.upgradeMonitor.Unsubscribe(160824499, new Action<object>(this.OnBionicBecameOnline));
 			this.upgradeMonitor.Unsubscribe(-1730800797, new Action<object>(this.OnBionicBecameOffline));
 			this.upgradeMonitor.Unsubscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
+			this.upgradeMonitor.Unsubscribe(1095596132, new Action<object>(this.OnBionicUpgradeComponentSlotCountChanged));
 		}
 		if (this.batteryMonitor != null)
 		{
 			this.batteryMonitor.Unsubscribe(1361471071, new Action<object>(this.OnBionicWattageChanged));
-			this.batteryMonitor.Unsubscribe(-426516281, new Action<object>(this.OnBionicBatterySaveModeChanged));
+		}
+		if (this.bedTimeMonitor != null)
+		{
+			this.bedTimeMonitor.Unsubscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
 		}
 		this.batteryMonitor = target.GetSMI<BionicBatteryMonitor.Instance>();
 		this.upgradeMonitor = target.GetSMI<BionicUpgradesMonitor.Instance>();
+		this.bedTimeMonitor = target.GetSMI<BionicBedTimeMonitor.Instance>();
 		this.upgradeMonitor.Subscribe(160824499, new Action<object>(this.OnBionicBecameOnline));
 		this.upgradeMonitor.Subscribe(-1730800797, new Action<object>(this.OnBionicBecameOffline));
 		this.upgradeMonitor.Subscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
+		this.batteryMonitor.Subscribe(1095596132, new Action<object>(this.OnBionicUpgradeComponentSlotCountChanged));
 		this.batteryMonitor.Subscribe(1361471071, new Action<object>(this.OnBionicWattageChanged));
-		this.batteryMonitor.Subscribe(-426516281, new Action<object>(this.OnBionicBatterySaveModeChanged));
+		this.bedTimeMonitor.Subscribe(-1582839653, new Action<object>(this.OnBionicTagsChanged));
 		this.RecreateBionicSlots();
+		this.RefreshSlots();
 	}
 
 	protected override void OnShow(bool show)
@@ -162,6 +188,7 @@ public class BionicSideScreen : SideScreenContent
 		{
 			this.upgradeMonitor.Unsubscribe(2000325176, new Action<object>(this.OnBionicUpgradeChanged));
 		}
+		this.bedTimeMonitor = null;
 		this.upgradeMonitor = null;
 		this.lastSlotSelected = null;
 	}
@@ -183,6 +210,8 @@ public class BionicSideScreen : SideScreenContent
 	private BionicUpgradesMonitor.Instance upgradeMonitor;
 
 	private BionicBatteryMonitor.Instance batteryMonitor;
+
+	private BionicBedTimeMonitor.Instance bedTimeMonitor;
 
 	private List<BionicSideScreenUpgradeSlot> bionicSlots = new List<BionicSideScreenUpgradeSlot>();
 

@@ -153,9 +153,20 @@ namespace STRINGS
 
 			public static LocString LIQUID = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID");
 
-			public static LocString LUBRICATINGOIL = "Gear Oil";
+			public static LocString LUBRICATINGOIL = UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL");
 
 			public static LocString LUBRICATINGOIL_DESC = "Gear oils are lubricating fluids useful in the maintenance of complex machinery, protecting gear systems from damage and minimizing friction between moving parts to support optimal performance.";
+
+			public static LocString REMOTEOPERABLE = UI.FormatAsLink("Remote Workable", "REMOTEOPERABLE");
+
+			public static LocString REMOTEOPERABLE_DESC = string.Concat(new string[]
+			{
+				"These buildings can be operated from a distance by a ",
+				UI.FormatAsLink("Remote Controller", "REMOTEWORKTERMINAL"),
+				" so long as they are built within range of a ",
+				UI.FormatAsLink("Remote Worker Dock", "REMOTEWORKERDOCK"),
+				"."
+			});
 
 			public static LocString SLIPPERY = "Slippery";
 
@@ -350,6 +361,8 @@ namespace STRINGS
 
 			public static LocString WOODLOG = UI.FormatAsLink("Wood", "WOODLOG");
 
+			public static LocString OXYGENCANISTER = "Oxygen Canister";
+
 			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString HABITAT_MODULE = "Habitat Module";
@@ -392,7 +405,7 @@ namespace STRINGS
 
 			public static LocString WARP_PORTAL = "Teleportal";
 
-			public static LocString BIONIC_UPGRADE = "Boosters";
+			public static LocString BIONICUPGRADE = "Boosters";
 
 			public static LocString FARMING = "Farm Build-Delivery";
 
@@ -879,6 +892,13 @@ namespace STRINGS
 				});
 			}
 
+			public class UNASSIGNEDBIONICBOOSTER
+			{
+				public static LocString NAME = "Unassigned";
+
+				public static LocString TOOLTIP = "This booster has not yet been assigned to a Bionic Duplicant";
+			}
+
 			public class STOREDITEMDURABILITY
 			{
 				public static LocString NAME = "Durability: {durability}";
@@ -926,6 +946,20 @@ namespace STRINGS
 				public static LocString NAME = "Carve Errand";
 
 				public static LocString TOOLTIP = "Rock will be carved once a Duplicant is available";
+			}
+
+			public class ELECTROBANKLIFETIMEREMAINING
+			{
+				public static LocString NAME = "Lifetime Remaining: {0}";
+
+				public static LocString TOOLTIP = "Self-charging will continue for {0}\n\nWhen lifetime reaches zero, this  " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " will explode";
+			}
+
+			public class ELECTROBANKSELFCHARGING
+			{
+				public static LocString NAME = "Self-Charging: {0}";
+
+				public static LocString TOOLTIP = "This " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " is always slowly charging itself";
 			}
 		}
 
@@ -1355,14 +1389,14 @@ namespace STRINGS
 
 			public class GUNKEDTOILET
 			{
-				public static LocString NAME = "Tutorial: Clogged Toilets";
+				public static LocString NAME = "Tutorial: Gunked Toilets";
 
 				public static LocString TOOLTIP = "Notes on unclogging toilets";
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"Bionic Duplicants can dump built-up ",
-					UI.FormatAsLink("Liquid Gunk", "LIQUIDGUNK"),
+					UI.FormatAsLink("Gunk", "LIQUIDGUNK"),
 					" into ",
 					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
 					" if no other options are available. This invariably clogs the plumbing, however, and must be removed before facilities can be used by other Duplicants.\n\nBuilding a ",
@@ -1381,12 +1415,14 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
-					"My Duplicants may slip and fall on wet surfaces. I can help them avoid undue ",
+					"My Duplicants may slip and fall on wet surfaces, and Duplicants with bionic systems can experience disruptive glitching.\n\nI can help my colony avoid undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
 					" and potential injury by using the ",
 					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" to clean up spills. Building ",
 					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+					" and ",
+					UI.FormatAsLink("Gunk Extractors", "GUNKEMPTIER"),
 					" can help minimize the incidence of spills."
 				});
 			}
@@ -1401,11 +1437,9 @@ namespace STRINGS
 				{
 					"Bionic Duplicants with insufficient ",
 					UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL"),
-					" will slow down significantly to avoid grinding their gears.\n\nI can keep them running smoothly by producing ",
-					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
-					" out of ",
-					UI.FormatAsLink("Slime", "SLIME"),
-					" and building a ",
+					" will slow down significantly to avoid grinding their gears.\n\nI can keep them running smoothly by supplying ",
+					UI.FormatAsLink("Gear Balm", "LUBRICATIONSTICK"),
+					", or by building a ",
 					UI.FormatAsLink("Lubrication Station", "OILCHANGER"),
 					" from the ",
 					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8),
@@ -2199,7 +2233,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Discovered";
 
-				public static LocString MESSAGEBODY = "My new Bionic Duplicant came programmed with {0} technology. How crafty!";
+				public static LocString MESSAGEBODY = "My new Bionic Duplicant has built-in programming that they've shared with the colony.\n\nNew buildings have become available:\n  • {0}";
+
+				public static LocString TOOLTIP = "{0} research discovered!";
 			}
 
 			public class BIONICLIQUIDDAMAGE

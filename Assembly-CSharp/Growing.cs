@@ -51,6 +51,10 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				}
 			}
 		}
+		if (this.maturity == null)
+		{
+			KCrashReporter.ReportDevNotification("Maturity.OnNewGameSpawn", Environment.StackTrace, "", false, null);
+		}
 		this.maturity.SetValue(this.maturity.maxAttribute.GetTotalValue() * global::UnityEngine.Random.Range(0f, 1f));
 	}
 

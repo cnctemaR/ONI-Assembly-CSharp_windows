@@ -39,6 +39,9 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 	[MyCmpGet]
 	private Storage storage;
 
+	[MyCmpAdd]
+	private ManuallySetRemoteWorkTargetComponent remoteChore;
+
 	[SerializeField]
 	public float flipInterval = 600f;
 
@@ -107,7 +110,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingWaste, null)
 				.PlayAnim("idle_half");
 			this.inert.EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("on").ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingCompostFlip, null)
-				.ToggleChore(new Func<Compost.StatesInstance, Chore>(this.CreateFlipChore), this.composting);
+				.ToggleChore(new Func<Compost.StatesInstance, Chore>(Compost.States.CreateFlipChore), new Action<Compost.StatesInstance, Chore>(Compost.States.SetRemoteChore), this.composting);
 			this.composting.Enter("Composting", delegate(Compost.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
@@ -127,7 +130,12 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 			}).PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.empty, (Compost.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
 		}
 
-		private Chore CreateFlipChore(Compost.StatesInstance smi)
+		private static void SetRemoteChore(Compost.StatesInstance smi, Chore chore)
+		{
+			smi.master.remoteChore.SetChore(chore);
+		}
+
+		private static Chore CreateFlipChore(Compost.StatesInstance smi)
 		{
 			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -103,6 +104,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer, ICircui
 	{
 		base.OnSpawn();
 		Components.Generators.Add(this);
+		this.cachedPrefabId = base.gameObject.PrefabID();
 		base.Subscribe<Generator>(-1582839653, Generator.OnTagsChangedDelegate);
 		this.OnTagsChanged(null);
 		this.capacity = Generator.CalculateCapacity(this.building.Def, null);
@@ -197,21 +199,24 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer, ICircui
 
 	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
-		global::Debug.Assert(base.GetComponent<Battery>() == null);
-		this.joulesAvailable = Mathf.Clamp(this.joulesAvailable + joulesAvailable, 0f, canOverPower ? float.MaxValue : this.Capacity);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, this.GetProperName(), null);
-		if (!Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(this.PrefabID()))
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, joulesAvailable, this.selectable.GetProperName(), null);
+		float num = this.joulesAvailable + joulesAvailable;
+		this.joulesAvailable = Mathf.Clamp(num, 0f, canOverPower ? float.MaxValue : this.Capacity);
+		if (num > joulesAvailable)
 		{
-			Game.Instance.savedInfo.powerCreatedbyGeneratorType.Add(this.PrefabID(), 0f);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, this.joulesAvailable - num, StringFormatter.Replace(BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION, "{Generator}", base.gameObject.GetProperName()), null);
+		}
+		if (!Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(this.cachedPrefabId))
+		{
+			Game.Instance.savedInfo.powerCreatedbyGeneratorType.Add(this.cachedPrefabId, 0f);
 		}
 		Dictionary<Tag, float> powerCreatedbyGeneratorType = Game.Instance.savedInfo.powerCreatedbyGeneratorType;
-		Tag tag = this.PrefabID();
+		Tag tag = this.cachedPrefabId;
 		powerCreatedbyGeneratorType[tag] += this.joulesAvailable;
 	}
 
 	public void AssignJoulesAvailable(float joulesAvailable)
 	{
-		global::Debug.Assert(base.GetComponent<PowerTransformer>() != null);
 		this.joulesAvailable = joulesAvailable;
 	}
 
@@ -236,6 +241,8 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer, ICircui
 
 	[SerializeField]
 	public int powerDistributionOrder;
+
+	private Tag cachedPrefabId;
 
 	public static readonly Operational.Flag generatorConnectedFlag = new Operational.Flag("GeneratorConnected", Operational.Flag.Type.Requirement);
 

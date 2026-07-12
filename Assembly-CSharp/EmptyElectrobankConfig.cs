@@ -13,6 +13,10 @@ public class EmptyElectrobankConfig : IEntityConfig
 			GameTags.EmptyPortableBattery,
 			GameTags.PedestalDisplayable
 		});
+		if (!Assets.IsTagCountable(GameTags.EmptyPortableBattery))
+		{
+			Assets.AddCountableTag(GameTags.EmptyPortableBattery);
+		}
 		gameObject.GetComponent<KCollider2D>();
 		gameObject.AddTag(GameTags.IndustrialProduct);
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));

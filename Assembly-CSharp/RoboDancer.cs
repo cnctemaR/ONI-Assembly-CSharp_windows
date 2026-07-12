@@ -8,7 +8,7 @@ public class RoboDancer : GameStateMachine<RoboDancer, RoboDancer.Instance>
 		default_state = this.neutral;
 		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.TagTransition(GameTags.Overjoyed, this.overjoyed, false);
-		this.overjoyed.TagTransition(GameTags.Overjoyed, this.neutral, true).DefaultState(this.overjoyed.idle).ParamTransition<float>(this.timeSpentDancing, this.overjoyed.exitEarly, (RoboDancer.Instance smi, float p) => p >= TRAITS.JOY_REACTIONS.ROBO_DANCER.DANCE_DURATION)
+		this.overjoyed.TagTransition(GameTags.Overjoyed, this.neutral, true).DefaultState(this.overjoyed.idle).ParamTransition<float>(this.timeSpentDancing, this.overjoyed.exitEarly, (RoboDancer.Instance smi, float p) => p >= TRAITS.JOY_REACTIONS.ROBO_DANCER.DANCE_DURATION && !this.hasAudience.Get(smi))
 			.Exit(delegate(RoboDancer.Instance smi)
 			{
 				this.timeSpentDancing.Set(0f, smi, false);
@@ -28,6 +28,8 @@ public class RoboDancer : GameStateMachine<RoboDancer, RoboDancer.Instance>
 	}
 
 	public StateMachine<RoboDancer, RoboDancer.Instance, IStateMachineTarget, object>.FloatParameter timeSpentDancing;
+
+	public StateMachine<RoboDancer, RoboDancer.Instance, IStateMachineTarget, object>.BoolParameter hasAudience;
 
 	public GameStateMachine<RoboDancer, RoboDancer.Instance, IStateMachineTarget, object>.State neutral;
 

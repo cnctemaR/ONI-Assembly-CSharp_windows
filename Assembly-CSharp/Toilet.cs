@@ -123,6 +123,14 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		return list;
 	}
 
+	private static readonly HashedString[] FULL_ANIMS = new HashedString[] { "full_pre", "full" };
+
+	private const string EXIT_FULL_ANIM_NAME = "full_pst";
+
+	private const string EXIT_FULL_GUNK_ANIM_NAME = "full_gunk_pst";
+
+	private static readonly HashedString[] GUNK_CLOGGED_ANIMS = new HashedString[] { "full_gunk_pre", "full_gunk" };
+
 	[SerializeField]
 	public Toilet.SpawnInfo solidWastePerUse;
 
@@ -183,6 +191,14 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 	public class StatesInstance : GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.GameInstance
 	{
+		public bool IsCloggedWithGunk
+		{
+			get
+			{
+				return base.sm.cloggedWithGunk.Get(this);
+			}
+		}
+
 		public StatesInstance(Toilet master)
 			: base(master)
 		{
@@ -230,6 +246,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 				this.cleanChore.Cancel("dupe");
 			}
 			ToiletWorkableClean component = base.master.GetComponent<ToiletWorkableClean>();
+			component.SetIsCloggedByGunk(this.IsCloggedWithGunk);
 			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 		}
 
@@ -260,6 +277,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			Tag tag2 = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
 			this.DropFromStorage(tag);
 			this.DropFromStorage(tag2);
+			base.sm.cloggedWithGunk.Set(false, this, false);
 			base.master.meter.SetPositionPercent((float)base.master.FlushesUsed / (float)base.master.maxFlushes);
 		}
 
@@ -275,6 +293,21 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			base.master.FlushMultiple(worker, base.master.maxFlushes - base.master.FlushesUsed);
 		}
 
+		public void FlushGunk()
+		{
+			base.sm.cloggedWithGunk.Set(true, this, false);
+			this.Flush();
+		}
+
+		public HashedString[] GetCloggedAnimations()
+		{
+			if (this.IsCloggedWithGunk)
+			{
+				return Toilet.GUNK_CLOGGED_ANIMS;
+			}
+			return Toilet.FULL_ANIMS;
+		}
+
 		public Chore cleanChore;
 
 		public List<Chore> activeUseChores;
@@ -287,6 +320,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.needsdirt;
+			base.serializable = StateMachine.SerializeType.ParamsOnly;
 			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => smi.RequiresDirtDelivery()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
 			this.needsdirt.Enter(delegate(Toilet.StatesInstance smi)
 			{
@@ -295,18 +329,19 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 					smi.master.manualdeliverykg.RequestDelivery();
 				}
 			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => !smi.RequiresDirtDelivery());
-			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet, null).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
+			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ParamTransition<int>(this.flushes, this.earlyclean, (Toilet.StatesInstance smi, int p) => smi.IsCloggedWithGunk).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet, null)
+				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
 				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateBreakUseChore), null)
 				.ToggleTag(GameTags.Usable)
 				.EventHandler(GameHashes.Flush, delegate(Toilet.StatesInstance smi, object data)
 				{
 					smi.Flush();
 				})
-				.EventHandler(GameHashes.FlushAll, delegate(Toilet.StatesInstance smi, object data)
+				.EventHandler(GameHashes.FlushGunk, delegate(Toilet.StatesInstance smi, object data)
 				{
-					smi.FlushAll();
+					smi.FlushGunk();
 				});
-			this.earlyclean.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.earlyWaitingForClean);
+			this.earlyclean.PlayAnims(new Func<Toilet.StatesInstance, HashedString[]>(Toilet.States.GetCloggedAnimations), KAnim.PlayMode.Once).OnAnimQueueComplete(this.earlyWaitingForClean);
 			this.earlyWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CreateCleanChore();
@@ -314,9 +349,16 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			{
 				smi.CancelCleanChore();
 			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
-				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null)
-				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved());
-			this.full.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.fullWaitingForClean);
+				.ToggleMainStatusItem(delegate(Toilet.StatesInstance smi)
+				{
+					if (!smi.sm.cloggedWithGunk.Get(smi))
+					{
+						return Db.Get().BuildingStatusItems.Unusable;
+					}
+					return Db.Get().BuildingStatusItems.UnusableGunked;
+				}, null)
+				.EventTransition(GameHashes.OnStorageChange, this.exit_full, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved());
+			this.full.PlayAnims(new Func<Toilet.StatesInstance, HashedString[]>(Toilet.States.GetCloggedAnimations), KAnim.PlayMode.Once).OnAnimQueueComplete(this.fullWaitingForClean);
 			this.fullWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
 			{
 				smi.CreateCleanChore();
@@ -324,8 +366,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			{
 				smi.CancelCleanChore();
 			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
-				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null)
-				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved())
+				.ToggleMainStatusItem(delegate(Toilet.StatesInstance smi)
+				{
+					if (!smi.sm.cloggedWithGunk.Get(smi))
+					{
+						return Db.Get().BuildingStatusItems.Unusable;
+					}
+					return Db.Get().BuildingStatusItems.UnusableGunked;
+				}, null)
+				.EventTransition(GameHashes.OnStorageChange, this.exit_full, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved())
 				.Enter(delegate(Toilet.StatesInstance smi)
 				{
 					smi.Schedule(smi.monsterSpawnTime, delegate
@@ -333,11 +382,32 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 						smi.master.SpawnMonster();
 					}, null);
 				});
+			this.exit_full.PlayAnim(new Func<Toilet.StatesInstance, string>(Toilet.States.GetUnclogedAnimation), KAnim.PlayMode.Once).OnAnimQueueComplete(this.empty).Exit(new StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State.Callback(Toilet.States.ClearCloggedByGunkFlag))
+				.ScheduleGoTo(0.74f, this.empty);
 			this.empty.PlayAnim("off").Enter("ClearFlushes", delegate(Toilet.StatesInstance smi)
 			{
 				smi.master.FlushesUsed = 0;
 			}).GoTo(this.needsdirt);
 			this.notoperational.EventTransition(GameHashes.OperationalChanged, this.needsdirt, (Toilet.StatesInstance smi) => smi.Get<Operational>().IsOperational).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null);
+		}
+
+		private static void ClearCloggedByGunkFlag(Toilet.StatesInstance smi)
+		{
+			smi.sm.cloggedWithGunk.Set(false, smi, false);
+		}
+
+		public static string GetUnclogedAnimation(Toilet.StatesInstance smi)
+		{
+			if (!smi.sm.cloggedWithGunk.Get(smi))
+			{
+				return "full_pst";
+			}
+			return "full_gunk_pst";
+		}
+
+		public static HashedString[] GetCloggedAnimations(Toilet.StatesInstance smi)
+		{
+			return smi.GetCloggedAnimations();
 		}
 
 		private Chore CreateUrgentUseChore(Toilet.StatesInstance smi)
@@ -386,7 +456,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State fullWaitingForClean;
 
-		private static readonly HashedString[] FULL_ANIMS = new HashedString[] { "full_pre", "full" };
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State exit_full;
+
+		public StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.BoolParameter cloggedWithGunk;
 
 		public StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter flushes = new StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter(0);
 

@@ -524,6 +524,12 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 	public Dictionary<int, int> cyclesRocketDupeMoraleAboveRequirement = new Dictionary<int, int>();
 
 	[Serialize]
+	public bool efficientlyGatheredData;
+
+	[Serialize]
+	public bool fullyBoostedBionic;
+
+	[Serialize]
 	private int geothermalProgress;
 
 	private const int GEO_DISCOVERED_BIT = 1;

@@ -38,6 +38,9 @@ public class BedConfig : IBuildingConfig
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 		sleepable.workLayer = Grid.SceneLayer.BuildingFront;
+		DefragmentationZone defragmentationZone = go.AddOrGet<DefragmentationZone>();
+		defragmentationZone.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_bionic_kanim") };
+		defragmentationZone.workLayer = Grid.SceneLayer.BuildingFront;
 		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.Bed.Id;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}

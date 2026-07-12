@@ -1,4 +1,5 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/ResearchCenter")]
@@ -30,7 +31,9 @@ public class DataMiner : ComplexFabricator
 
 	protected override float ComputeWorkProgress(float dt, ComplexRecipe recipe)
 	{
-		return base.ComputeWorkProgress(dt, recipe) * this.EfficiencyRate;
+		float efficiencyRate = this.EfficiencyRate;
+		this.minEfficiency = Mathf.Min(this.minEfficiency, efficiencyRate);
+		return base.ComputeWorkProgress(dt, recipe) * efficiencyRate;
 	}
 
 	protected override void OnSpawn()
@@ -38,6 +41,16 @@ public class DataMiner : ComplexFabricator
 		base.OnSpawn();
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.DataMinerEfficiency, this);
+	}
+
+	public override void CompleteWorkingOrder()
+	{
+		if (this.minEfficiency == DataMinerConfig.PRODUCTION_RATE_SCALE.max)
+		{
+			SaveGame.Instance.ColonyAchievementTracker.efficientlyGatheredData = true;
+		}
+		this.minEfficiency = DataMinerConfig.PRODUCTION_RATE_SCALE.max;
+		base.CompleteWorkingOrder();
 	}
 
 	public override void Sim1000ms(float dt)
@@ -48,6 +61,9 @@ public class DataMiner : ComplexFabricator
 
 	[MyCmpReq]
 	private PrimaryElement pe;
+
+	[Serialize]
+	private float minEfficiency = DataMinerConfig.PRODUCTION_RATE_SCALE.max;
 
 	private MeterController meter;
 }

@@ -134,19 +134,6 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
 			}, 2, null, true, true, null, 10));
-			if (DlcManager.IsContentSubscribed("DLC3_ID"))
-			{
-				this.BionicUpkeep = base.Add(new RoomType("BionicUpkeep", ROOMS.TYPES.BIONICUPKEEP.NAME, ROOMS.TYPES.BIONICUPKEEP.DESCRIPTION, ROOMS.TYPES.BIONICUPKEEP.TOOLTIP, ROOMS.TYPES.BIONICUPKEEP.EFFECT, Db.Get().RoomTypeCategories.Bionic, RoomConstraints.BIONIC_GUNKEMPTIER, new RoomConstraints.Constraint[]
-				{
-					RoomConstraints.BIONIC_LUBRICATION,
-					RoomConstraints.MINIMUM_SIZE_12,
-					RoomConstraints.MAXIMUM_SIZE_64
-				}, new RoomDetails.Detail[]
-				{
-					RoomDetails.SIZE,
-					RoomDetails.BUILDING_COUNT
-				}, 1, null, false, false, new string[] { "RoomBionicUpkeep" }, 11));
-			}
 			this.PowerPlant = base.Add(new RoomType("PowerPlant", ROOMS.TYPES.POWER_PLANT.NAME, ROOMS.TYPES.POWER_PLANT.DESCRIPTION, ROOMS.TYPES.POWER_PLANT.TOOLTIP, ROOMS.TYPES.POWER_PLANT.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.POWER_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,

@@ -79,6 +79,9 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 	[MyCmpReq]
 	private OccupyArea occupyArea;
 
+	[MyCmpAdd]
+	private ManuallySetRemoteWorkTargetComponent remoteChore;
+
 	private const bool hasMeter = true;
 
 	private MeterController meter;
@@ -125,11 +128,16 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			{
 				smi.TestAreaPressure();
 			}, UpdateRate.SIM_1000ms, false).ParamTransition<bool>(this.isOverPressure, this.overpressure, GameStateMachine<OilRefinery.States, OilRefinery.StatesInstance, OilRefinery, object>.IsTrue).Transition(this.needResources, (OilRefinery.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false), UpdateRate.SIM_200ms)
-				.ToggleChore((OilRefinery.StatesInstance smi) => new WorkChore<OilRefinery.WorkableTarget>(Db.Get().ChoreTypes.Fabricate, smi.master.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true), this.needResources);
+				.ToggleChore((OilRefinery.StatesInstance smi) => new WorkChore<OilRefinery.WorkableTarget>(Db.Get().ChoreTypes.Fabricate, smi.master.workable, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true), new Action<OilRefinery.StatesInstance, Chore>(OilRefinery.States.SetRemoteChore), this.needResources);
 			this.overpressure.Update("Test Pressure Update", delegate(OilRefinery.StatesInstance smi, float dt)
 			{
 				smi.TestAreaPressure();
 			}, UpdateRate.SIM_1000ms, false).ParamTransition<bool>(this.isOverPressure, this.ready, GameStateMachine<OilRefinery.States, OilRefinery.StatesInstance, OilRefinery, object>.IsFalse).ToggleStatusItem(Db.Get().BuildingStatusItems.PressureOk, null);
+		}
+
+		private static void SetRemoteChore(OilRefinery.StatesInstance smi, Chore chore)
+		{
+			smi.master.remoteChore.SetChore(chore);
 		}
 
 		public StateMachine<OilRefinery.States, OilRefinery.StatesInstance, OilRefinery, object>.BoolParameter isOverPressure;

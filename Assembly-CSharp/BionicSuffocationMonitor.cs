@@ -60,7 +60,7 @@ public class BionicSuffocationMonitor : GameStateMachine<BionicSuffocationMonito
 
 		public bool IsBreathing()
 		{
-			return !this.oxygenBreather.IsSuffocating || base.master.GetComponent<KPrefabID>().HasTag(GameTags.RecoveringBreath) || this.oxygenBreather.HasTag(GameTags.InTransitTube);
+			return this.oxygenBreather.HasOxygen || base.master.GetComponent<KPrefabID>().HasTag(GameTags.RecoveringBreath) || this.oxygenBreather.HasTag(GameTags.InTransitTube);
 		}
 
 		public bool HasSuffocated()

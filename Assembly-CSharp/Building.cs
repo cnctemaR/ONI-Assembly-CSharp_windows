@@ -129,7 +129,7 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		Notifier notifier = building.AddOrGet<Notifier>();
 		Notification notification = new Notification(MISC.NOTIFICATIONS.BUILDING_MELTED.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BUILDING_MELTED.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + notifier.GetProperName(), true, 0f, delegate(object o)
 		{
-			GameUtil.FocusCamera(pos);
+			GameUtil.FocusCamera(pos, 2f, true, true);
 		}, null, null, true, true, false);
 		notifier.Add(notification, "");
 	}

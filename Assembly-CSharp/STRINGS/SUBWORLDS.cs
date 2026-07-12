@@ -160,8 +160,10 @@ namespace STRINGS
 				UI.FormatAsLink("Ceramic", "CERAMIC"),
 				" or ",
 				UI.FormatAsLink("Obsidian", "OBSIDIAN"),
-				".\n\nThough ",
-				UI.FormatAsLink("Exosuits", "EXOSUIT"),
+				".\n\nThough exosuits such as ",
+				UI.FormatAsLink("Atmo Suits", "ATMO_SUIT"),
+				" and ",
+				UI.FormatAsLink("Jet Suits", "JET_SUIT"),
 				" will provide some protection for my Duplicants, there is still a danger they will overheat if spending an extended amount of time in this Biome. I should ensure that suitable medical facilities have been constructed nearby to take care of any medical emergencies."
 			});
 		}

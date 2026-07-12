@@ -59,10 +59,8 @@ public class MinionConfig : IEntityConfig
 		Sensors component = go.GetComponent<Sensors>();
 		component.Add(new ToiletSensor(component));
 		BaseMinionConfig.BaseOnSpawn(go, MinionConfig.MODEL, this.RATIONAL_AI_STATE_MACHINES);
-		if (go.GetComponent<OxygenBreather>().GetGasProvider() == null)
-		{
-			go.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
-		}
+		go.GetComponent<OxygenBreather>().AddGasProvider(new GasBreatherFromWorldProvider());
+		go.Trigger(1589886948, go);
 	}
 
 	public string[] GetDlcIds()

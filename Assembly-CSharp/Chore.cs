@@ -64,6 +64,8 @@ public abstract class Chore
 
 	public abstract void Fail(string reason);
 
+	public abstract void Reserve(ChoreDriver reserver);
+
 	public abstract void Begin(Chore.Precondition.Context context);
 
 	public abstract bool InProgress();

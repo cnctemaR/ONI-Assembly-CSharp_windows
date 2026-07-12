@@ -8,7 +8,11 @@ public class BionicMinionConfig : IEntityConfig
 {
 	public static string[] GetAttributes()
 	{
-		return BaseMinionConfig.BaseMinionAttributes();
+		return BaseMinionConfig.BaseMinionAttributes().Append<string>(new string[]
+		{
+			Db.Get().Attributes.BionicBoosterSlots.Id,
+			Db.Get().Attributes.BionicBatteryCountCapacity.Id
+		});
 	}
 
 	public static string[] GetAmounts()
@@ -30,6 +34,7 @@ public class BionicMinionConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = BaseMinionConfig.BaseMinion(BionicMinionConfig.MODEL, BionicMinionConfig.GetAttributes(), BionicMinionConfig.GetAmounts(), BionicMinionConfig.GetTraits());
+		gameObject.AddOrGet<AttributeLevels>().maxAttributeLevel = 0;
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.storageID = GameTags.StoragesIds.BionicBatteryStorage;
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
@@ -39,11 +44,7 @@ public class BionicMinionConfig : IEntityConfig
 			Storage.StoredItemModifier.Seal,
 			Storage.StoredItemModifier.Insulate
 		});
-		storage.storageFilters = new List<Tag>
-		{
-			GameTags.ChargedPortableBattery,
-			GameTags.EmptyPortableBattery
-		};
+		storage.storageFilters = new List<Tag>(GameTags.BionicCompatibleBatteries);
 		storage.allowItemRemoval = false;
 		storage.showInUI = false;
 		Storage storage2 = gameObject.AddComponent<Storage>();
@@ -77,6 +78,8 @@ public class BionicMinionConfig : IEntityConfig
 		manualDeliveryKG.refillMass = 0f;
 		gameObject.AddOrGet<ReanimateBionicWorkable>();
 		gameObject.AddOrGet<WarmBlooded>().complexity = WarmBlooded.ComplexityType.HomeostasisWithoutCaloriesImpact;
+		gameObject.AddOrGet<BionicMinionStorageExtension>();
+		gameObject.AddOrGet<MinionStorageDataHolder>();
 		return gameObject;
 	}
 
@@ -94,17 +97,19 @@ public class BionicMinionConfig : IEntityConfig
 		Sensors component = go.GetComponent<Sensors>();
 		component.Add(new ClosestElectrobankSensor(component, true));
 		component.Add(new ClosestOxygenCanisterSensor(component, false));
-		component.Add(new ClosestOxyliteSensor(component, false));
+		component.Add(new ClosestLubricantSensor(component, false));
 		BaseMinionConfig.BaseOnSpawn(go, BionicMinionConfig.MODEL, this.RATIONAL_AI_STATE_MACHINES);
+		component.GetSensor<SafeCellSensor>().AddIgnoredFlagsSet(BionicMinionConfig.ID, SafeCellQuery.SafeFlags.IsBreathable);
 		BionicOxygenTankMonitor.Instance smi = go.GetSMI<BionicOxygenTankMonitor.Instance>();
-		if (go.GetComponent<OxygenBreather>().GetGasProvider() == null)
+		if (smi != null)
 		{
-			go.GetComponent<OxygenBreather>().SetGasProvider(smi);
+			go.GetComponent<OxygenBreather>().AddGasProvider(smi);
 		}
-		this.UnlockCraftingTable(go);
+		this.BionicFreeDiscoveries(go);
+		go.Trigger(1589886948, go);
 	}
 
-	private void UnlockCraftingTable(GameObject instance)
+	private void BionicFreeDiscoveries(GameObject instance)
 	{
 		GameScheduler.Instance.Schedule("BionicUnlockCraftingTable", 8f, delegate(object data)
 		{
@@ -112,10 +117,11 @@ public class BionicMinionConfig : IEntityConfig
 			if (!techItem.IsComplete())
 			{
 				Notifier component = Game.Instance.GetComponent<Notifier>();
-				Notification notification = new Notification(MISC.NOTIFICATIONS.BIONICRESEARCHUNLOCK.NAME, NotificationType.MessageImportant, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BIONICRESEARCHUNLOCK.MESSAGEBODY.Replace("{0}", Assets.GetPrefab("CraftingTable").GetProperName()), Assets.GetPrefab("CraftingTable").GetProperName(), false, 0f, null, null, null, true, false, false);
+				Notification notification = new Notification(MISC.NOTIFICATIONS.BIONICRESEARCHUNLOCK.NAME, NotificationType.MessageImportant, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BIONICRESEARCHUNLOCK.MESSAGEBODY.Replace("{0}", Assets.GetPrefab("CraftingTable").GetProperName()), Assets.GetPrefab("CraftingTable").GetProperName(), true, 0f, null, null, null, true, true, false);
 				component.Add(notification, "");
 				techItem.POIUnlocked();
 			}
+			DiscoveredResources.Instance.Discover(PowerControlStationConfig.TINKER_TOOLS);
 		}, null, null);
 	}
 
@@ -127,19 +133,20 @@ public class BionicMinionConfig : IEntityConfig
 	public BionicMinionConfig()
 	{
 		Func<RationalAi.Instance, StateMachine.Instance>[] array = BaseMinionConfig.BaseRationalAiStateMachines();
-		Func<RationalAi.Instance, StateMachine.Instance>[] array2 = new Func<RationalAi.Instance, StateMachine.Instance>[9];
+		Func<RationalAi.Instance, StateMachine.Instance>[] array2 = new Func<RationalAi.Instance, StateMachine.Instance>[10];
 		array2[0] = (RationalAi.Instance smi) => new BreathMonitor.Instance(smi.master)
 		{
 			canRecoverBreath = false
 		};
-		array2[1] = (RationalAi.Instance smi) => new BionicSuffocationMonitor.Instance(smi.master, new BionicSuffocationMonitor.Def());
-		array2[2] = (RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master, new string[] { "CarpetFeet" });
-		array2[3] = (RationalAi.Instance smi) => new BionicBatteryMonitor.Instance(smi.master, new BionicBatteryMonitor.Def());
-		array2[4] = (RationalAi.Instance smi) => new BionicOilMonitor.Instance(smi.master, new BionicOilMonitor.Def());
-		array2[5] = (RationalAi.Instance smi) => new GunkMonitor.Instance(smi.master, new GunkMonitor.Def());
-		array2[6] = (RationalAi.Instance smi) => new BionicWaterDamageMonitor.Instance(smi.master, new BionicWaterDamageMonitor.Def());
-		array2[7] = (RationalAi.Instance smi) => new BionicUpgradesMonitor.Instance(smi.master, new BionicUpgradesMonitor.Def());
-		array2[8] = (RationalAi.Instance smi) => new BionicOxygenTankMonitor.Instance(smi.master, new BionicOxygenTankMonitor.Def());
+		array2[1] = (RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master, new string[] { "CarpetFeet" });
+		array2[2] = (RationalAi.Instance smi) => new BionicBatteryMonitor.Instance(smi.master, new BionicBatteryMonitor.Def());
+		array2[3] = (RationalAi.Instance smi) => new BionicBedTimeMonitor.Instance(smi.master, new BionicBedTimeMonitor.Def());
+		array2[4] = (RationalAi.Instance smi) => new BionicMicrochipMonitor.Instance(smi.master, new BionicMicrochipMonitor.Def());
+		array2[5] = (RationalAi.Instance smi) => new BionicOilMonitor.Instance(smi.master, new BionicOilMonitor.Def());
+		array2[6] = (RationalAi.Instance smi) => new GunkMonitor.Instance(smi.master, new GunkMonitor.Def());
+		array2[7] = (RationalAi.Instance smi) => new BionicWaterDamageMonitor.Instance(smi.master, new BionicWaterDamageMonitor.Def());
+		array2[8] = (RationalAi.Instance smi) => new BionicUpgradesMonitor.Instance(smi.master, new BionicUpgradesMonitor.Def());
+		array2[9] = (RationalAi.Instance smi) => new BionicOxygenTankMonitor.Instance(smi.master, new BionicOxygenTankMonitor.Def());
 		this.RATIONAL_AI_STATE_MACHINES = array.Append<Func<RationalAi.Instance, StateMachine.Instance>>(array2);
 		base..ctor();
 	}

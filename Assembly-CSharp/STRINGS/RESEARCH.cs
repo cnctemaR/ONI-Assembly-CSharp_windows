@@ -225,15 +225,30 @@ namespace STRINGS
 				public static LocString DESC = "Enables access to the " + UI.FormatAsOverlay("Conveyor Overlay") + ".";
 			}
 
-			public class DISPOSABLE_ELECTROBANK_ORGANIC
+			public class LUBRICATION_STICK
 			{
-				public static LocString NAME = UI.PRE_KEYWORD + "Organic Power Bank" + UI.PST_KEYWORD + " Pattern";
+				public static LocString NAME = UI.PRE_KEYWORD + "Gear Balm" + UI.PST_KEYWORD + " Pattern";
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"Enables fabrication of ",
 					UI.PRE_KEYWORD,
-					"Organic Power Banks",
+					"Gear Balm",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.APOTHECARY.NAME
+				});
+			}
+
+			public class DISPOSABLE_ELECTROBANK_METAL_ORE
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Metal Power Bank" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Metal Power Banks",
 					UI.PST_KEYWORD,
 					" at the ",
 					BUILDINGS.PREFABS.CRAFTINGTABLE.NAME
@@ -242,13 +257,13 @@ namespace STRINGS
 
 			public class DISPOSABLE_ELECTROBANK_URANIUM_ORE
 			{
-				public static LocString NAME = UI.PRE_KEYWORD + "Nuclear Power Bank" + UI.PST_KEYWORD + " Pattern";
+				public static LocString NAME = UI.PRE_KEYWORD + "Uranium Ore Power Bank" + UI.PST_KEYWORD + " Pattern";
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"Enables fabrication of ",
 					UI.PRE_KEYWORD,
-					"Nuclear Power Banks",
+					"Uranium Ore Power Banks",
 					UI.PST_KEYWORD,
 					" at the ",
 					BUILDINGS.PREFABS.CRAFTINGTABLE.NAME
@@ -264,6 +279,36 @@ namespace STRINGS
 					"Enables fabrication of ",
 					UI.PRE_KEYWORD,
 					"Eco Power Banks",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class SELFCHARGINGELECTROBANK
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Atomic Power Bank" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Atomic Power Bank",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.SUPERMATERIALREFINERY.NAME
+				});
+			}
+
+			public class FETCHDRONE
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Flydo" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Flydo",
 					UI.PST_KEYWORD,
 					" at the ",
 					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME

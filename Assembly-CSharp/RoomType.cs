@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -117,8 +118,9 @@ public class RoomType : Resource
 		return null;
 	}
 
-	public void TriggerRoomEffects(KPrefabID triggerer, Effects target)
+	public void TriggerRoomEffects(KPrefabID triggerer, Effects target, out List<EffectInstance> result)
 	{
+		result = null;
 		if (this.primary_constraint == null)
 		{
 			return;
@@ -133,11 +135,18 @@ public class RoomType : Resource
 		}
 		if (this.primary_constraint.building_criteria(triggerer))
 		{
+			result = new List<EffectInstance>();
 			foreach (string text in this.effects)
 			{
-				target.Add(text, true);
+				result.Add(target.Add(text, true));
 			}
 		}
+	}
+
+	public void TriggerRoomEffects(KPrefabID triggerer, Effects target)
+	{
+		List<EffectInstance> list;
+		this.TriggerRoomEffects(triggerer, target, out list);
 	}
 
 	public enum RoomIdentificationResult

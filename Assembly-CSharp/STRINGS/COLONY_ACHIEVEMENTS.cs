@@ -206,6 +206,14 @@ namespace STRINGS
 
 			public static LocString SURVIVE_IN_A_ROCKET_DESCRIPTION = "Have the Duplicants in one rocket survive in space for {0} cycles in a row with a morale of {1} or higher.";
 
+			public static LocString DATA_DRIVEN = "Data Driven";
+
+			public static LocString DATA_DRIVEN_DESCRIPTION = "Produce a Data Bank using a Data Miner operating at maximum efficiency.";
+
+			public static LocString MVB = "Most Valuable Bionic";
+
+			public static LocString MVB_DESCRIPTION = "Install {0} boosters in a single Bionic Duplicant.";
+
 			public class STATUS
 			{
 				public static LocString PLATFORM_UNLOCKING_DISABLED = "Platform achievements cannot be unlocked because a debug command was used in this colony. ";

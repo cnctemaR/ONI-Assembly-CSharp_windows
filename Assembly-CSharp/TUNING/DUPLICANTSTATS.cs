@@ -169,6 +169,62 @@ namespace TUNING
 			}
 		};
 
+		public static Dictionary<string, List<string>> ARCHETYPE_BIONIC_TRAIT_COMPATIBILITY = new Dictionary<string, List<string>>
+		{
+			{
+				"Mining",
+				new List<string> { "Booster_Dig1", "Booster_Dig2" }
+			},
+			{
+				"Building",
+				new List<string> { "Booster_Construct1" }
+			},
+			{
+				"Farming",
+				new List<string> { "Booster_Farm1" }
+			},
+			{
+				"Ranching",
+				new List<string> { "Booster_Ranch1" }
+			},
+			{
+				"Cooking",
+				new List<string> { "Booster_Cook1" }
+			},
+			{
+				"Art",
+				new List<string> { "Booster_Art1" }
+			},
+			{
+				"Research",
+				new List<string> { "Booster_Research1", "Booster_Research2", "Booster_Research3" }
+			},
+			{
+				"Suits",
+				new List<string> { "Booster_Suits1" }
+			},
+			{
+				"Hauling",
+				new List<string> { "Booster_Tidy1", "Booster_Carry1" }
+			},
+			{
+				"Technicals",
+				new List<string> { "Booster_Op1", "Booster_Op2" }
+			},
+			{
+				"MedicalAid",
+				new List<string> { "Booster_Medicine1" }
+			},
+			{
+				"Basekeeping",
+				new List<string> { "Booster_Tidy1", "Booster_Carry1" }
+			},
+			{
+				"Rocketry",
+				new List<string> { "Booster_PilotVanilla1", "Booster_Pilot1" }
+			}
+		};
+
 		public static int RARITY_LEGENDARY = 5;
 
 		public static int RARITY_EPIC = 4;
@@ -614,58 +670,46 @@ namespace TUNING
 			}
 		};
 
-		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICBUGTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "BionicBaseline",
+				id = "BionicBug1",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug2",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug3",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug4",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug5",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug6",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBug7",
 				dlcId = "DLC3_ID"
 			}
 		};
 
-		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICUPGRADETRAITS = new List<DUPLICANTSTATS.TraitVal>
-		{
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostDigging",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostBuilding",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostCooking",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostArt",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostFarming",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostRanching",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostMedicine",
-				dlcId = "DLC3_ID"
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "DefaultBionicBoostExplorer",
-				dlcId = "DLC3_ID"
-			}
-		};
+		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICUPGRADETRAITS = new List<DUPLICANTSTATS.TraitVal>();
 
 		public static readonly List<DUPLICANTSTATS.TraitVal> SPECIALTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
@@ -1031,7 +1075,7 @@ namespace TUNING
 		{
 			BaseStats = new DUPLICANTSTATS.BASESTATS
 			{
-				NO_OXYGEN_THRESHOLD = 0.5f,
+				NO_OXYGEN_THRESHOLD = 0.1f,
 				MAX_CALORIES = 0f
 			}
 		};

@@ -234,6 +234,10 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 		this.TryAddDiagnosticToWorldCollection(ref list, new RadiationDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new ReactorDiagnostic(worldID));
 		this.TryAddDiagnosticToWorldCollection(ref list, new IdleDiagnostic(worldID));
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		{
+			this.TryAddDiagnosticToWorldCollection(ref list, new BionicBatteryDiagnostic(worldID));
+		}
 		if (ClusterManager.Instance.GetWorld(worldID).IsModuleInterior)
 		{
 			this.TryAddDiagnosticToWorldCollection(ref list, new FloatingRocketDiagnostic(worldID));

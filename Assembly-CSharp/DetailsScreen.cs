@@ -273,7 +273,11 @@ public class DetailsScreen : KTabMenu
 		}
 		else
 		{
-			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
+			text = UI.ExtractLinkID(component.GetProperName());
+			if (string.IsNullOrEmpty(text))
+			{
+				text = CodexCache.FormatLinkID(component.PrefabID().ToString());
+			}
 		}
 		if (CodexCache.entries.ContainsKey(text) || CodexCache.FindSubEntry(text) != null)
 		{

@@ -84,7 +84,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 			{
 				if (!this.hasDeletedDefaultBionicSchedule)
 				{
-					Schedule schedule2 = this.AddSchedule(Db.Get().ScheduleGroups.allGroups, "_Bionics Default", false);
+					Schedule schedule2 = this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT_BIONIC, true);
 					schedule2.AddTimetable(Schedule.GetScheduleBlocksFromGroupDefaults(Db.Get().ScheduleGroups.allGroups));
 					schedule2.AddTimetable(Schedule.GetScheduleBlocksFromGroupDefaults(Db.Get().ScheduleGroups.allGroups));
 					for (int i = 0; i < schedule2.GetBlocks().Count; i++)
@@ -95,13 +95,9 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 					{
 						schedule2.SetBlockGroup(schedule2.GetBlocks().Count - j, Db.Get().ScheduleGroups.Sleep);
 					}
-					for (int k = 7; k <= 10; k++)
+					for (int k = 7; k <= 12; k++)
 					{
 						schedule2.SetBlockGroup(schedule2.GetBlocks().Count - k, Db.Get().ScheduleGroups.Recreation);
-					}
-					for (int l = 11; l <= 11; l++)
-					{
-						schedule2.SetBlockGroup(schedule2.GetBlocks().Count - l, Db.Get().ScheduleGroups.Hygene);
 					}
 					schedule = schedule2;
 					schedule2.isDefaultForBionics = true;

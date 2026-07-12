@@ -46,6 +46,13 @@ namespace Database
 			}
 			this.Immunity = base.Add(new Klei.AI.Attribute("Immunity", true, Klei.AI.Attribute.Display.Details, false, 0f, null, null, null, null));
 			this.Immunity.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
+			if (DlcManager.IsContentSubscribed("DLC3_ID"))
+			{
+				this.BionicBoosterSlots = base.Add(new Klei.AI.Attribute("BionicBoosterSlots", false, Klei.AI.Attribute.Display.Details, false, 2f, null, null, null, null));
+				this.BionicBoosterSlots.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
+				this.BionicBatteryCountCapacity = base.Add(new Klei.AI.Attribute("BionicBatteryCountCapacity", false, Klei.AI.Attribute.Display.Details, false, 4f, null, null, null, null));
+				this.BionicBatteryCountCapacity.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
+			}
 			this.ThermalConductivityBarrier = base.Add(new Klei.AI.Attribute("ThermalConductivityBarrier", false, Klei.AI.Attribute.Display.Details, false, 0f, null, null, null, null));
 			this.ThermalConductivityBarrier.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Distance, GameUtil.TimeSlice.None));
 			this.Insulation = base.Add(new Klei.AI.Attribute("Insulation", false, Klei.AI.Attribute.Display.General, true, 0f, null, null, null, null));
@@ -133,6 +140,10 @@ namespace Database
 		public Klei.AI.Attribute Immunity;
 
 		public Klei.AI.Attribute GermResistance;
+
+		public Klei.AI.Attribute BionicBoosterSlots;
+
+		public Klei.AI.Attribute BionicBatteryCountCapacity;
 
 		public Klei.AI.Attribute Insulation;
 

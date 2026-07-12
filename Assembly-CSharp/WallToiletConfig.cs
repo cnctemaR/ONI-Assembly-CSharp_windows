@@ -38,9 +38,10 @@ public class WallToiletConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		KPrefabID component = go.GetComponent<KPrefabID>();
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 2.5f;
 		flushToilet.massEmittedPerUse = 2.5f + DUPLICANTSTATS.STANDARD.Secretions.PEE_PER_TOILET_PEE;
@@ -50,9 +51,7 @@ public class WallToiletConfig : IBuildingConfig
 		flushToilet.diseaseOnDupePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE / 5;
 		flushToilet.requireOutput = false;
 		flushToilet.meterOffset = Meter.Offset.Infront;
-		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_toilet_wall_kanim") };
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
-		toiletWorkableUse.overrideAnims = array;
 		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingUse;
 		toiletWorkableUse.resetProgressOnStop = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
@@ -87,7 +86,24 @@ public class WallToiletConfig : IBuildingConfig
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
 		ownable.canBePublic = true;
+		ToiletWorkableClean toiletWorkableClean = go.AddOrGet<ToiletWorkableClean>();
+		toiletWorkableClean.workTime = 90f;
+		toiletWorkableClean.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_toilet_wall_kanim") };
+		toiletWorkableClean.workLayer = Grid.SceneLayer.BuildingFront;
+		toiletWorkableClean.SetIsCloggedByGunk(true);
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
+		component.prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		ToiletWorkableUse component = go.GetComponent<ToiletWorkableUse>();
+		HashedString[] array = new HashedString[] { "working_pst" };
+		KAnimFile[] array2 = new KAnimFile[] { Assets.GetAnim("anim_interacts_toilet_wall_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array2);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_toilet_wall_kanim") });
+		component.workerTypePstAnims.Add(MinionConfig.ID, array);
+		component.workerTypePstAnims.Add(BionicMinionConfig.ID, new HashedString[] { "working_gunky_pst" });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -67,6 +67,22 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		return -1;
 	}
 
+	public Tag GetMinionModel()
+	{
+		MinionIdentity component = this.GetTargetGameObject().GetComponent<MinionIdentity>();
+		if (component != null)
+		{
+			return component.model;
+		}
+		StoredMinionIdentity component2 = this.GetTargetGameObject().GetComponent<StoredMinionIdentity>();
+		if (component2 != null)
+		{
+			return component2.model;
+		}
+		global::Debug.LogError("Could not get minion model");
+		return Tag.Invalid;
+	}
+
 	public void SetTarget(IAssignableIdentity target, GameObject targetGO)
 	{
 		global::Debug.Assert(target != null, "target was null");
@@ -123,6 +139,7 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 					component2.Add(equipmentSlotInstance);
 				}
 			}
+			BionicUpgradesMonitor.CreateAssignableSlots(this);
 		}
 		this.slotsConfigured = true;
 	}

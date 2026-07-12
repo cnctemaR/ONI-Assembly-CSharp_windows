@@ -260,7 +260,7 @@ public class PinnedResourcesPanel : KScreen, IRender1000ms
 		Tag tag2 = tag;
 		if (!AllResourcesScreen.Instance.units.ContainsKey(tag))
 		{
-			AllResourcesScreen.Instance.units.Add(tag, GameUtil.MeasureUnit.quantity);
+			return;
 		}
 		if (!inventory.HasValidCount)
 		{

@@ -62,7 +62,12 @@ public class EntityConfigManager : KMonoBehaviour
 
 	public void RegisterEntity(IEntityConfig config)
 	{
-		KPrefabID component = config.CreatePrefab().GetComponent<KPrefabID>();
+		GameObject gameObject = config.CreatePrefab();
+		if (gameObject == null)
+		{
+			return;
+		}
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.requiredDlcIds = config.GetDlcIds();
 		component.prefabInitFn += config.OnPrefabInit;
 		component.prefabSpawnFn += config.OnSpawn;

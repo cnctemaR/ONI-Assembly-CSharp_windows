@@ -179,7 +179,7 @@ public class GeoTunerSideScreen : SideScreenContent
 		{
 			if (geyser != null)
 			{
-				CameraController.Instance.CameraGoTo(geyser.transform.GetPosition(), 2f, true);
+				GameUtil.FocusCamera(geyser.transform.GetPosition(), 2f, true, true);
 				return true;
 			}
 			return false;

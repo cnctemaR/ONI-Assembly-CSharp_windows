@@ -86,16 +86,30 @@ public class MinionSelectScreen : CharacterSelectionController
 		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NewBaseSetupSnapshot);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, STOP_MODE.ALLOWFADEOUT);
+		int num = 0;
 		this.selectedDeliverables.Clear();
 		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{
 			CharacterContainer characterContainer = (CharacterContainer)telepadDeliverableContainer;
 			this.selectedDeliverables.Add(characterContainer.Stats);
+			if (characterContainer.Stats.personality.model == BionicMinionConfig.MODEL)
+			{
+				num++;
+			}
 		}
 		NewBaseScreen.Instance.Init(SaveLoader.Instance.Cluster, this.selectedDeliverables.ToArray());
 		if (this.OnProceedEvent != null)
 		{
 			this.OnProceedEvent();
+		}
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID") && Components.RoleStations.Count > 0)
+		{
+			BuildingFacade component = Components.RoleStations[0].GetComponent<BuildingFacade>();
+			bool flag = !component.IsOriginal;
+			if (num == 3 || (!flag && num > 0))
+			{
+				component.ApplyBuildingFacade(Db.GetBuildingFacades().Get("permit_hqbase_cyberpunk"), false);
+			}
 		}
 		Game.Instance.Trigger(-838649377, null);
 		BuildWatermark.Instance.gameObject.SetActive(false);

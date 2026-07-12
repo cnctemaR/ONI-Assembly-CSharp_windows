@@ -18,6 +18,10 @@ public class TimeOfDayPositioner : KMonoBehaviour
 
 	private void Update()
 	{
+		if (this.targetRect == null)
+		{
+			return;
+		}
 		if (base.transform.parent != this.targetRect.transform)
 		{
 			base.transform.parent = this.targetRect.transform;

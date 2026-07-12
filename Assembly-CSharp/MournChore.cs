@@ -21,6 +21,26 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		return -1;
 	}
 
+	private static KAnimFile GetAnimFileName(MournChore.StatesInstance smi)
+	{
+		string text = "anim_react_mourning_kanim";
+		GameObject gameObject = smi.sm.mourner.Get(smi);
+		if (gameObject == null)
+		{
+			return Assets.GetAnim(text);
+		}
+		MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
+		if (component == null)
+		{
+			return Assets.GetAnim(text);
+		}
+		if (component.model == BionicMinionConfig.MODEL)
+		{
+			return Assets.GetAnim("anim_bionic_react_mourning_kanim");
+		}
+		return Assets.GetAnim(text);
+	}
+
 	public MournChore(IStateMachineTarget master)
 		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
@@ -141,7 +161,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		{
 			default_state = this.findOffset;
 			base.Target(this.mourner);
-			this.root.ToggleAnims("anim_react_mourning_kanim", 0f).Exit("DestroyLocator", delegate(MournChore.StatesInstance smi)
+			this.root.ToggleAnims(new Func<MournChore.StatesInstance, KAnimFile>(MournChore.GetAnimFileName)).Exit("DestroyLocator", delegate(MournChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
 			});

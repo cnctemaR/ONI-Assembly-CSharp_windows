@@ -29,8 +29,9 @@ public class OuthouseConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		KPrefabID component = go.GetComponent<KPrefabID>();
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
 		Toilet toilet = go.AddOrGet<Toilet>();
 		toilet.maxFlushes = 15;
 		toilet.dirtUsedPerFlush = 13f;
@@ -39,15 +40,13 @@ public class OuthouseConfig : IBuildingConfig
 		toilet.diseaseId = DUPLICANTSTATS.STANDARD.Secretions.PEE_DISEASE;
 		toilet.diseasePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE;
 		toilet.diseaseOnDupePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE;
-		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_outhouse_kanim") };
-		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
-		toiletWorkableUse.overrideAnims = array;
-		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingFront;
+		go.AddOrGet<ToiletWorkableUse>().workLayer = Grid.SceneLayer.BuildingFront;
 		ToiletWorkableClean toiletWorkableClean = go.AddOrGet<ToiletWorkableClean>();
 		toiletWorkableClean.workTime = 90f;
-		toiletWorkableClean.overrideAnims = array;
+		toiletWorkableClean.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_outhouse_kanim") };
 		toiletWorkableClean.workLayer = Grid.SceneLayer.BuildingFront;
 		Prioritizable.AddRef(go);
+		toiletWorkableClean.SetIsCloggedByGunk(false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;
@@ -64,6 +63,15 @@ public class OuthouseConfig : IBuildingConfig
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
 		ownable.canBePublic = true;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
+		component.prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		ToiletWorkableUse component = go.GetComponent<ToiletWorkableUse>();
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_outhouse_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_outhouse_kanim") });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

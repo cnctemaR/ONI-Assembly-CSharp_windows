@@ -7,31 +7,51 @@ using UnityEngine;
 
 public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>
 {
+	public static void CreateAssignableSlots(MinionAssignablesProxy minionAssignablesProxy)
+	{
+		AssignableSlot bionicUpgrade = Db.Get().AssignableSlots.BionicUpgrade;
+		int num = Mathf.Max(0, 7);
+		for (int i = 0; i < num; i++)
+		{
+			string text = (i + 2).ToString();
+			BionicUpgradesMonitor.AddAssignableSlot(bionicUpgrade, text, minionAssignablesProxy);
+		}
+	}
+
+	private static void AddAssignableSlot(AssignableSlot bionicUpgradeSlot, string IDSufix, MinionAssignablesProxy minionAssignablesProxy)
+	{
+		Ownables component = minionAssignablesProxy.GetComponent<Ownables>();
+		if (bionicUpgradeSlot is OwnableSlot)
+		{
+			OwnableSlotInstance ownableSlotInstance = new OwnableSlotInstance(component, (OwnableSlot)bionicUpgradeSlot);
+			OwnableSlotInstance ownableSlotInstance2 = ownableSlotInstance;
+			ownableSlotInstance2.ID += IDSufix;
+			component.Add(ownableSlotInstance);
+			return;
+		}
+		if (bionicUpgradeSlot is EquipmentSlot)
+		{
+			Equipment component2 = component.GetComponent<Equipment>();
+			EquipmentSlotInstance equipmentSlotInstance = new EquipmentSlotInstance(component2, (EquipmentSlot)bionicUpgradeSlot);
+			EquipmentSlotInstance equipmentSlotInstance2 = equipmentSlotInstance;
+			equipmentSlotInstance2.ID += IDSufix;
+			component2.Add(equipmentSlotInstance);
+		}
+	}
+
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.initialize;
-		this.initialize.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.InitializeSlots)).EnterTransition(this.firstSpawn, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.IsFirstTimeSpawningThisBionic)).GoTo(this.inactive);
-		this.firstSpawn.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.SpawnAndInstallInitialUpgrade)).GoTo(this.inactive);
+		this.initialize.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.InitializeSlots)).EnterTransition(this.firstSpawn, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.IsFirstTimeSpawningThisBionic)).EnterGoTo(this.inactive);
+		this.firstSpawn.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.SpawnAndInstallInitialUpgrade));
 		this.inactive.EventTransition(GameHashes.BionicOnline, this.active, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.IsBionicOnline)).Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.UpdateBatteryMonitorWattageModifiers));
-		this.active.DefaultState(this.active.idle).EventTransition(GameHashes.BionicOffline, this.inactive, GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Not(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.IsBionicOnline))).OnSignal(this.UpgradeInstallationStarted, this.installing)
-			.OnSignal(this.UpgradeUninstallStarted, this.uninstalling)
-			.EventHandler(GameHashes.BionicUpgradeWattageChanged, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.UpdateBatteryMonitorWattageModifiers))
-			.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.UpdateBatteryMonitorWattageModifiers))
-			.ToggleStateMachineList(new Func<BionicUpgradesMonitor.Instance, Func<BionicUpgradesMonitor.Instance, StateMachine.Instance>[]>(BionicUpgradesMonitor.GetUpgradesSMIs));
+		this.active.DefaultState(this.active.idle).EventTransition(GameHashes.BionicOffline, this.inactive, GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Not(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.IsBionicOnline))).EventHandler(GameHashes.BionicUpgradeWattageChanged, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.UpdateBatteryMonitorWattageModifiers))
+			.Enter(new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State.Callback(BionicUpgradesMonitor.UpdateBatteryMonitorWattageModifiers));
 		this.active.idle.OnSignal(this.UpgradeSlotAssignationChanged, this.active.seeking, new Func<BionicUpgradesMonitor.Instance, bool>(BionicUpgradesMonitor.WantsToInstallNewUpgrades));
-		this.active.seeking.OnSignal(this.UpgradeSlotAssignationChanged, this.active.idle, new Func<BionicUpgradesMonitor.Instance, bool>(BionicUpgradesMonitor.DoesNotWantsToInstallNewUpgrades)).DefaultState(this.active.seeking.unreachable);
-		this.active.seeking.unreachable.EventTransition(GameHashes.NavigationCellChanged, this.active.seeking.inProgress, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.CanReachUpgradeToInstall));
+		this.active.seeking.OnSignal(this.UpgradeSlotAssignationChanged, this.active.idle, new Func<BionicUpgradesMonitor.Instance, bool>(BionicUpgradesMonitor.DoesNotWantsToInstallNewUpgrades)).DefaultState(this.active.seeking.inProgress);
 		this.active.seeking.inProgress.ToggleChore((BionicUpgradesMonitor.Instance smi) => new SeekAndInstallBionicUpgradeChore(smi.master), this.active.idle, this.active.seeking.failed);
-		this.active.seeking.failed.EnterTransition(this.active.idle, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.DoesNotWantsToInstallNewUpgrades)).GoTo(this.active.seeking.unreachable);
-		this.installing.ScheduleActionNextFrame("Active Delay", delegate(BionicUpgradesMonitor.Instance smi)
-		{
-			smi.GoTo(this.active);
-		});
-		this.uninstalling.ScheduleActionNextFrame("Delayed Redirection", delegate(BionicUpgradesMonitor.Instance smi)
-		{
-			smi.GoTo(this.active);
-		});
+		this.active.seeking.failed.EnterTransition(this.active.idle, new StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Transition.ConditionCallback(BionicUpgradesMonitor.DoesNotWantsToInstallNewUpgrades)).GoTo(this.active.seeking.inProgress);
 	}
 
 	public static void InitializeSlots(BionicUpgradesMonitor.Instance smi)
@@ -42,16 +62,6 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 	public static bool IsBionicOnline(BionicUpgradesMonitor.Instance smi)
 	{
 		return smi.IsOnline;
-	}
-
-	public static bool CanReachUpgradeToInstall(BionicUpgradesMonitor.Instance smi)
-	{
-		return smi.HasAnyUpgradeAssignedAndReachable;
-	}
-
-	public static bool CanNotReachUpgradeToInstall(BionicUpgradesMonitor.Instance smi)
-	{
-		return !BionicUpgradesMonitor.CanReachUpgradeToInstall(smi);
 	}
 
 	public static bool WantsToInstallNewUpgrades(BionicUpgradesMonitor.Instance smi)
@@ -79,11 +89,6 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		smi.UpdateBatteryMonitorWattageModifiers();
 	}
 
-	public static Func<StateMachine.Instance, StateMachine.Instance>[] GetUpgradesSMIs(BionicUpgradesMonitor.Instance smi)
-	{
-		return smi.GetUpgradesSMIs();
-	}
-
 	public static void SpawnAndInstallInitialUpgrade(BionicUpgradesMonitor.Instance smi)
 	{
 		string text = smi.GetComponent<Traits>().GetTraitIds().Find((string t) => DUPLICANTSTATS.BIONICUPGRADETRAITS.Find((DUPLICANTSTATS.TraitVal st) => st.id == t).id == t);
@@ -97,17 +102,14 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			smi.InstallUpgrade(component2);
 		}
 		smi.sm.InitialUpgradeSpawned.Set(true, smi, false);
+		smi.GoTo(smi.sm.inactive);
 	}
 
-	public const int MAX_SLOT_COUNT = 3;
+	public const int MAX_POSSIBLE_SLOT_COUNT = 8;
 
 	public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State initialize;
 
 	public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State firstSpawn;
-
-	public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State installing;
-
-	public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State uninstalling;
 
 	public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State inactive;
 
@@ -115,21 +117,14 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 
 	private StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Signal UpgradeSlotAssignationChanged;
 
-	private StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Signal UpgradeUninstallStarted;
-
-	private StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.Signal UpgradeInstallationStarted;
-
 	private StateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.BoolParameter InitialUpgradeSpawned;
 
 	public class Def : StateMachine.BaseDef
 	{
-		public int SlotCount = 3;
 	}
 
 	public class SeekingStates : GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State
 	{
-		public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State unreachable;
-
 		public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State inProgress;
 
 		public GameStateMachine<BionicUpgradesMonitor, BionicUpgradesMonitor.Instance, IStateMachineTarget, BionicUpgradesMonitor.Def>.State failed;
@@ -160,14 +155,6 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			}
 		}
 
-		public bool HasAnyUpgradeAssignedAndReachable
-		{
-			get
-			{
-				return this.GetAnyReachableAssignedSlot() != null;
-			}
-		}
-
 		public bool HasAnyUpgradeInstalled
 		{
 			get
@@ -176,15 +163,106 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			}
 		}
 
+		public int UnlockedSlotCount
+		{
+			get
+			{
+				return Math.Clamp((int)base.gameObject.GetAttributes().Get(Db.Get().Attributes.BionicBoosterSlots.Id).GetTotalValue(), 0, 8);
+			}
+		}
+
+		public int AssignedSlotCount
+		{
+			get
+			{
+				int num = 0;
+				for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
+				{
+					if (this.upgradeComponentSlots[i].assignedUpgradeComponent != null)
+					{
+						num++;
+					}
+				}
+				return num;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, BionicUpgradesMonitor.Def def)
 			: base(master, def)
 		{
 			IAssignableIdentity component = base.GetComponent<IAssignableIdentity>();
+			this.dataHolder = base.GetComponent<MinionStorageDataHolder>();
+			MinionStorageDataHolder minionStorageDataHolder = this.dataHolder;
+			minionStorageDataHolder.OnCopyBegins = (Action<StoredMinionIdentity>)Delegate.Combine(minionStorageDataHolder.OnCopyBegins, new Action<StoredMinionIdentity>(this.OnCopyMinionBegins));
 			this.batteryMonitor = base.gameObject.GetSMI<BionicBatteryMonitor.Instance>();
+			this.navigator = base.GetComponent<Navigator>();
 			this.minionOwnables = component.GetSoleOwner();
 			this.upgradesStorage = base.gameObject.GetComponents<Storage>().FindFirst<Storage>((Storage s) => s.storageID == GameTags.StoragesIds.BionicUpgradeStorage);
-			this.CreateAssignableSlots();
 			this.CreateUpgradeSlots();
+			base.Subscribe(540773776, new Action<object>(this.OnSlotCountAttributeChanged));
+			Game.Instance.Trigger(-1523247426, this);
+		}
+
+		private void OnCopyMinionBegins(StoredMinionIdentity destination)
+		{
+			Tag[] array = new Tag[this.upgradeComponentSlots.Length];
+			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
+			{
+				array[i] = this.upgradeComponentSlots[i].InstalledUpgradeID;
+			}
+			MinionStorageDataHolder.DataPackData dataPackData = new MinionStorageDataHolder.DataPackData
+			{
+				Bools = new bool[] { base.smi.sm.InitialUpgradeSpawned.Get(base.smi) },
+				Tags = array
+			};
+			this.dataHolder.UpdateData<BionicUpgradesMonitor.Instance>(dataPackData);
+		}
+
+		public override void OnParamsDeserialized()
+		{
+			MinionStorageDataHolder.DataPack dataPack = this.dataHolder.GetDataPack<BionicUpgradesMonitor.Instance>();
+			if (dataPack != null && dataPack.IsStoringNewData)
+			{
+				MinionStorageDataHolder.DataPackData dataPackData = dataPack.ReadData();
+				if (dataPackData != null)
+				{
+					base.sm.InitialUpgradeSpawned.Set(dataPackData.Bools[0], base.smi, false);
+					if (dataPackData.Tags != null)
+					{
+						for (int i = 0; i < Mathf.Min(dataPackData.Tags.Length, this.upgradeComponentSlots.Length); i++)
+						{
+							Tag tag = dataPackData.Tags[i];
+							this.upgradeComponentSlots[i].DeserializeAction_OverrideInstalledUpgradePrefabID(tag);
+						}
+					}
+				}
+			}
+			base.OnParamsDeserialized();
+		}
+
+		protected override void OnCleanUp()
+		{
+			if (this.dataHolder != null)
+			{
+				MinionStorageDataHolder minionStorageDataHolder = this.dataHolder;
+				minionStorageDataHolder.OnCopyBegins = (Action<StoredMinionIdentity>)Delegate.Remove(minionStorageDataHolder.OnCopyBegins, new Action<StoredMinionIdentity>(this.OnCopyMinionBegins));
+			}
+			base.OnCleanUp();
+		}
+
+		public void LockSlot(BionicUpgradesMonitor.UpgradeComponentSlot slot)
+		{
+			this.UninstallUpgrade(slot);
+			if (slot.HasUpgradeComponentAssigned && slot.HasSpawned)
+			{
+				slot.InternalUninstall();
+			}
+			slot.InternalLock();
+		}
+
+		public void UnlockSlot(BionicUpgradesMonitor.UpgradeComponentSlot slot)
+		{
+			slot.InternalUnlock();
 		}
 
 		public void InstallUpgrade(BionicUpgradeComponent upgradeComponent)
@@ -194,29 +272,31 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			{
 				return;
 			}
-			base.sm.UpgradeInstallationStarted.Trigger(this);
 			slotForAssignedUpgrade.InternalInstall();
+			Game.Instance.Trigger(-1523247426, this);
 		}
 
 		public void UninstallUpgrade(BionicUpgradesMonitor.UpgradeComponentSlot slot)
 		{
 			if (slot != null && slot.HasUpgradeInstalled)
 			{
-				base.sm.UpgradeUninstallStarted.Trigger(this);
 				slot.InternalUninstall();
+				Game.Instance.Trigger(-1523247426, this);
 			}
 		}
 
 		public void UpdateBatteryMonitorWattageModifiers()
 		{
-			bool flag = false;
+			bool flag = true;
+			bool flag2 = false;
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
+				flag &= this.upgradeComponentSlots[i].HasUpgradeInstalled;
 				string text = "UPGRADE_SLOT_" + i.ToString();
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = this.upgradeComponentSlots[i];
 				if (!upgradeComponentSlot.HasUpgradeInstalled)
 				{
-					flag |= this.batteryMonitor.RemoveModifier(text, false);
+					flag2 |= this.batteryMonitor.RemoveModifier(text, false);
 				}
 				else
 				{
@@ -227,59 +307,52 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 						value = upgradeComponentSlot.installedUpgradeComponent.CurrentWattage,
 						potentialValue = upgradeComponentSlot.installedUpgradeComponent.PotentialWattage
 					};
-					flag |= this.batteryMonitor.AddOrUpdateModifier(wattageModifier, false);
+					flag2 |= this.batteryMonitor.AddOrUpdateModifier(wattageModifier, false);
 				}
 			}
-			if (flag)
+			if (flag2)
 			{
 				this.batteryMonitor.Trigger(1361471071, null);
 			}
+			if (flag)
+			{
+				SaveGame.Instance.ColonyAchievementTracker.fullyBoostedBionic = true;
+			}
 		}
 
-		public Func<StateMachine.Instance, StateMachine.Instance>[] GetUpgradesSMIs()
+		private void OnSlotCountAttributeChanged(object data)
 		{
-			List<Func<StateMachine.Instance, StateMachine.Instance>> list = new List<Func<StateMachine.Instance, StateMachine.Instance>>();
+			int unlockedSlotCount = this.UnlockedSlotCount;
+			bool flag = false;
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = this.upgradeComponentSlots[i];
-				if (upgradeComponentSlot.installedUpgradeComponent != null && upgradeComponentSlot.StateMachine != null)
+				bool flag2 = i >= unlockedSlotCount;
+				if (upgradeComponentSlot.IsLocked != flag2)
 				{
-					list.Add(upgradeComponentSlot.StateMachine);
+					flag = true;
+					if (flag2)
+					{
+						this.LockSlot(upgradeComponentSlot);
+					}
+					else
+					{
+						this.UnlockSlot(upgradeComponentSlot);
+					}
 				}
 			}
-			return list.ToArray();
-		}
-
-		private void CreateAssignableSlots()
-		{
-			AssignableSlot bionicUpgrade = Db.Get().AssignableSlots.BionicUpgrade;
-			Equipment component = this.minionOwnables.GetComponent<Equipment>();
-			int num = Mathf.Max(0, 2);
-			for (int i = 0; i < num; i++)
+			this.UpdateBatteryMonitorWattageModifiers();
+			if (flag)
 			{
-				string text = (i + 2).ToString();
-				if (bionicUpgrade is OwnableSlot)
-				{
-					OwnableSlotInstance ownableSlotInstance = new OwnableSlotInstance(this.minionOwnables, (OwnableSlot)bionicUpgrade);
-					OwnableSlotInstance ownableSlotInstance2 = ownableSlotInstance;
-					ownableSlotInstance2.ID += text;
-					this.minionOwnables.Add(ownableSlotInstance);
-				}
-				else if (bionicUpgrade is EquipmentSlot)
-				{
-					EquipmentSlotInstance equipmentSlotInstance = new EquipmentSlotInstance(component, (EquipmentSlot)bionicUpgrade);
-					EquipmentSlotInstance equipmentSlotInstance2 = equipmentSlotInstance;
-					equipmentSlotInstance2.ID += text;
-					component.Add(equipmentSlotInstance);
-				}
+				base.Trigger(1095596132, null);
 			}
 		}
 
 		private void CreateUpgradeSlots()
 		{
 			AssignableSlot bionicUpgrade = Db.Get().AssignableSlots.BionicUpgrade;
-			AssignableSlotInstance[] slots = this.minionOwnables.GetSlots(bionicUpgrade);
-			this.upgradeComponentSlots = new BionicUpgradesMonitor.UpgradeComponentSlot[slots.Length];
+			this.minionOwnables.GetSlots(bionicUpgrade);
+			this.upgradeComponentSlots = new BionicUpgradesMonitor.UpgradeComponentSlot[8];
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = new BionicUpgradesMonitor.UpgradeComponentSlot();
@@ -291,18 +364,36 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		{
 			AssignableSlot bionicUpgrade = Db.Get().AssignableSlots.BionicUpgrade;
 			AssignableSlotInstance[] slots = this.minionOwnables.GetSlots(bionicUpgrade);
+			int unlockedSlotCount = this.UnlockedSlotCount;
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
-				AssignableSlotInstance assignableSlotInstance = slots[i];
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = this.upgradeComponentSlots[i];
-				upgradeComponentSlot.Initialize(assignableSlotInstance, this.upgradesStorage);
-				upgradeComponentSlot.OnInstalledUpgradeReassigned = (Action<BionicUpgradesMonitor.UpgradeComponentSlot, IAssignableIdentity>)Delegate.Combine(upgradeComponentSlot.OnInstalledUpgradeReassigned, new Action<BionicUpgradesMonitor.UpgradeComponentSlot, IAssignableIdentity>(this.OnInstalledUpgradeComponentReassigned));
-				upgradeComponentSlot.OnAssignedUpgradeChanged = (Action<BionicUpgradesMonitor.UpgradeComponentSlot>)Delegate.Combine(upgradeComponentSlot.OnAssignedUpgradeChanged, new Action<BionicUpgradesMonitor.UpgradeComponentSlot>(this.OnSlotAssignationChanged));
+				this.InitializeUpgradeSlot(upgradeComponentSlot, slots[i]);
 			}
 			for (int j = 0; j < this.upgradeComponentSlots.Length; j++)
 			{
-				this.upgradeComponentSlots[j].OnSpawn(this);
+				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot2 = this.upgradeComponentSlots[j];
+				upgradeComponentSlot2.OnSpawn(this);
+				bool flag = j >= unlockedSlotCount;
+				if (flag != upgradeComponentSlot2.IsLocked)
+				{
+					if (flag)
+					{
+						this.LockSlot(upgradeComponentSlot2);
+					}
+					else
+					{
+						this.UnlockSlot(upgradeComponentSlot2);
+					}
+				}
 			}
+		}
+
+		private void InitializeUpgradeSlot(BionicUpgradesMonitor.UpgradeComponentSlot slot, AssignableSlotInstance assignableSlotInstance)
+		{
+			slot.Initialize(assignableSlotInstance, this.upgradesStorage, this);
+			slot.OnInstalledUpgradeReassigned = (Action<BionicUpgradesMonitor.UpgradeComponentSlot, IAssignableIdentity>)Delegate.Combine(slot.OnInstalledUpgradeReassigned, new Action<BionicUpgradesMonitor.UpgradeComponentSlot, IAssignableIdentity>(this.OnInstalledUpgradeComponentReassigned));
+			slot.OnAssignedUpgradeChanged = (Action<BionicUpgradesMonitor.UpgradeComponentSlot>)Delegate.Combine(slot.OnAssignedUpgradeChanged, new Action<BionicUpgradesMonitor.UpgradeComponentSlot>(this.OnSlotAssignationChanged));
 		}
 
 		private void OnSlotAssignationChanged(BionicUpgradesMonitor.UpgradeComponentSlot slot)
@@ -346,16 +437,21 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 
 		public BionicUpgradesMonitor.UpgradeComponentSlot GetAnyReachableAssignedSlot()
 		{
-			Navigator component = base.GetComponent<Navigator>();
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = this.upgradeComponentSlots[i];
-				if (upgradeComponentSlot != null && !upgradeComponentSlot.HasUpgradeInstalled && upgradeComponentSlot.HasUpgradeComponentAssigned && component.CanReach(upgradeComponentSlot.assignedUpgradeComponent.GetComponent<IApproachable>()))
+				if (upgradeComponentSlot != null && !upgradeComponentSlot.HasUpgradeInstalled && upgradeComponentSlot.HasUpgradeComponentAssigned && this.IsBionicUpgradeComponentObjectAbleToBePickedUp(upgradeComponentSlot.assignedUpgradeComponent))
 				{
 					return upgradeComponentSlot;
 				}
 			}
 			return null;
+		}
+
+		public bool IsBionicUpgradeComponentObjectAbleToBePickedUp(BionicUpgradeComponent upgradecComponent)
+		{
+			Pickupable component = upgradecComponent.GetComponent<Pickupable>();
+			return !(component == null) && !component.KPrefabID.HasTag(GameTags.StoredPrivate) && component.CouldBePickedUpByMinion(base.gameObject) && this.navigator.CanReach(component);
 		}
 
 		private BionicUpgradesMonitor.UpgradeComponentSlot GetAnyInstalledUpgradeSlot()
@@ -371,17 +467,30 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			return null;
 		}
 
-		public BionicUpgradesMonitor.UpgradeComponentSlot GetFirstEmptySlot()
+		public BionicUpgradesMonitor.UpgradeComponentSlot GetFirstEmptyAvailableSlot()
 		{
 			for (int i = 0; i < this.upgradeComponentSlots.Length; i++)
 			{
 				BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot = this.upgradeComponentSlots[i];
-				if (!upgradeComponentSlot.HasUpgradeInstalled && !upgradeComponentSlot.HasUpgradeComponentAssigned)
+				if (!upgradeComponentSlot.IsLocked && !upgradeComponentSlot.HasUpgradeInstalled && !upgradeComponentSlot.HasUpgradeComponentAssigned)
 				{
 					return upgradeComponentSlot;
 				}
 			}
 			return null;
+		}
+
+		public int CountBoosterAssignments(Tag boosterID)
+		{
+			int num = 0;
+			foreach (BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot in this.upgradeComponentSlots)
+			{
+				if (!(upgradeComponentSlot.assignedUpgradeComponent == null) && upgradeComponentSlot.assignedUpgradeComponent.PrefabID() == boosterID)
+				{
+					num++;
+				}
+			}
+			return num;
 		}
 
 		[Serialize]
@@ -392,6 +501,20 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		private Storage upgradesStorage;
 
 		private Ownables minionOwnables;
+
+		private MinionStorageDataHolder dataHolder;
+
+		private Navigator navigator;
+
+		[SerializationConfig(MemberSerialization.OptIn)]
+		private struct StorageDataHolderData
+		{
+			[Serialize]
+			public bool initialUpgradesSpawned;
+
+			[Serialize]
+			public Tag[] upgradeComponentSlotsInstalledTags;
+		}
 	}
 
 	[SerializationConfig(MemberSerialization.OptIn)]
@@ -422,6 +545,8 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		}
 
 		public bool HasSpawned { get; private set; }
+
+		public bool IsLocked { get; private set; }
 
 		public float WattageCost
 		{
@@ -485,11 +610,17 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			}
 		}
 
-		public void Initialize(AssignableSlotInstance assignableSlotInstance, Storage storage)
+		public void DeserializeAction_OverrideInstalledUpgradePrefabID(Tag installedUpgradePrefabID)
+		{
+			this.installedUpgradePrefabID = installedUpgradePrefabID;
+		}
+
+		public void Initialize(AssignableSlotInstance assignableSlotInstance, Storage storage, BionicUpgradesMonitor.Instance master)
 		{
 			this.assignableSlotInstance = assignableSlotInstance;
 			this.assignableSlotInstance.assignables.GetComponent<MinionAssignablesProxy>().GetTargetGameObject().Subscribe(-1585839766, new Action<object>(this.OnAssignablesChanged));
 			this.storage = storage;
+			this.master = master;
 			this._lastAssignedUpgradeComponent = this.assignedUpgradeComponent;
 		}
 
@@ -528,10 +659,15 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 				if (gameObject != null)
 				{
 					this._installedUpgradeComponent = gameObject.GetComponent<BionicUpgradeComponent>();
+					this.StartBoosterSM();
 				}
 			}
 			if (this.HasUpgradeInstalled && this.installedUpgradeComponent != null)
 			{
+				if (!this.HasUpgradeComponentAssigned)
+				{
+					this.installedUpgradeComponent.Assign(this.assignableSlotInstance.assignables.GetComponent<MinionAssignablesProxy>(), this.assignableSlotInstance);
+				}
 				this.SubscribeToInstallledUpgradeAssignable();
 			}
 			this.HasSpawned = true;
@@ -577,6 +713,12 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 			}
 		}
 
+		private void StartBoosterSM()
+		{
+			this._upgradeSmi = this.installedUpgradeComponent.StateMachine(this.master);
+			this._upgradeSmi.StartSM();
+		}
+
 		public void InternalInstall()
 		{
 			if (!this.HasUpgradeInstalled && this.HasUpgradeComponentAssigned)
@@ -585,6 +727,7 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 				this.installedUpgradePrefabID = this.assignedUpgradeComponent.PrefabID();
 				this._installedUpgradeComponent = this.assignedUpgradeComponent;
 				this.SubscribeToInstallledUpgradeAssignable();
+				this.StartBoosterSM();
 				GameObject targetGameObject = this.assignableSlotInstance.assignables.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 				if (targetGameObject != null)
 				{
@@ -603,12 +746,27 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 				this.storage.Drop(gameObject, true);
 				this.installedUpgradePrefabID = Tag.Invalid;
 				this._installedUpgradeComponent = null;
+				if (this._upgradeSmi != null)
+				{
+					this._upgradeSmi.StopSM("Uninstall");
+					this._upgradeSmi = null;
+				}
 				GameObject targetGameObject = this.assignableSlotInstance.assignables.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
 				if (targetGameObject != null)
 				{
 					targetGameObject.Trigger(2000325176, null);
 				}
 			}
+		}
+
+		public void InternalLock()
+		{
+			this.IsLocked = true;
+		}
+
+		public void InternalUnlock()
+		{
+			this.IsLocked = false;
 		}
 
 		private BionicUpgradeComponent _installedUpgradeComponent;
@@ -627,5 +785,9 @@ public class BionicUpgradesMonitor : GameStateMachine<BionicUpgradesMonitor, Bio
 		private Storage storage;
 
 		private int installedUpgradeSubscribeCallbackIDX = -1;
+
+		private StateMachine.Instance _upgradeSmi;
+
+		private BionicUpgradesMonitor.Instance master;
 	}
 }

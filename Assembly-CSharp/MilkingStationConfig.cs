@@ -70,7 +70,7 @@ public class MilkingStationConfig : IBuildingConfig
 			}
 			return num;
 		};
-		ranch_station.OnRanchCompleteCb = delegate(GameObject creature_go)
+		ranch_station.OnRanchCompleteCb = delegate(GameObject creature_go, WorkerBase rancher_wb)
 		{
 			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation;
 			AmountInstance amountInstance = creature_go.GetAmounts().Get(Db.Get().Amounts.MilkProduction.Id);

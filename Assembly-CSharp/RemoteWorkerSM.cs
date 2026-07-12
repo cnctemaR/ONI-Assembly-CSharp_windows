@@ -25,7 +25,12 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 
 	public void SetNextChore(Chore.Precondition.Context next)
 	{
+		if (this.nextChore != null)
+		{
+			this.nextChore.Value.chore.Reserve(null);
+		}
 		this.nextChore = new Chore.Precondition.Context?(next);
+		next.chore.Reserve(this.driver);
 	}
 
 	public void StartNextChore()
@@ -59,6 +64,14 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 		}
 	}
 
+	public ChoreConsumerState ConsumerState
+	{
+		get
+		{
+			return this.consumer.consumerState;
+		}
+	}
+
 	public bool ActivelyControlled { get; set; }
 
 	public bool ActivelyWorking { get; set; }
@@ -79,7 +92,7 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 		float num;
 		SimUtil.DiseaseInfo diseaseInfo;
 		float num2;
-		this.storage.ConsumeAndGetDisease(GameTags.LubricatingOil, 0.1f * dt, out num, out diseaseInfo, out num2);
+		this.storage.ConsumeAndGetDisease(GameTags.LubricatingOil, 0.033333335f * dt, out num, out diseaseInfo, out num2);
 		if (num > 0f)
 		{
 			this.storage.AddElement(SimHashes.LiquidGunk, num, num2, diseaseInfo.idx, diseaseInfo.count, true, true);
@@ -113,6 +126,9 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 	private ChoreDriver driver;
 
 	[MyCmpGet]
+	private ChoreConsumer consumer;
+
+	[MyCmpGet]
 	private Storage storage;
 
 	public bool playNewWorker;
@@ -122,18 +138,16 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 
 	private Chore.Precondition.Context? nextChore;
 
-	private const string LostAnim_pre = "incapacitate_pre";
+	private const string LostAnim_pre = "sos_pre";
 
-	private const string LostAnim_loop = "incapacitate_loop";
+	private const string LostAnim_loop = "sos_loop";
 
-	private const string DeathAnim = "incapacitate_death";
+	private const string LostAnim_pst = "sos_pst";
+
+	private const string DeathAnim = "explode";
 
 	[Serialize]
 	private Ref<RemoteWorkerDock> homeDepot;
-
-	private Chore.Precondition.Context enterDockContext;
-
-	private Chore.Precondition.Context exitDockContext;
 
 	public class StatesInstance : GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.GameInstance
 	{
@@ -156,8 +170,8 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 				.Transition(this.uncontrolled, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasRemoteOperator)), UpdateRate.SIM_200ms)
 				.Transition(this.incapacitated.lost, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.CanReachDepot)), UpdateRate.SIM_200ms)
 				.Transition(this.incapacitated.die, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasHomeDepot)), UpdateRate.SIM_200ms)
-				.Update(new Action<RemoteWorkerSM.StatesInstance, float>(RemoteWorkerSM.States.TickResources), UpdateRate.RENDER_200ms, false);
-			this.controlled.exit_dock.ToggleWork<ExitableDock>(this.homedock, this.controlled.working, this.controlled.working, (RemoteWorkerSM.StatesInstance _) => true);
+				.Update(new Action<RemoteWorkerSM.StatesInstance, float>(RemoteWorkerSM.States.TickResources), UpdateRate.SIM_200ms, false);
+			this.controlled.exit_dock.ToggleWork<RemoteWorkerDock.ExitableDock>(this.homedock, this.controlled.working, this.controlled.working, (RemoteWorkerSM.StatesInstance _) => true);
 			this.controlled.working.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
 				smi.master.ActivelyWorking = true;
@@ -177,39 +191,42 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 			});
 			this.controlled.working.do_work.Exit(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State.Callback(RemoteWorkerSM.States.ClearChore)).Transition(this.controlled.working.find_work, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasChore)), UpdateRate.SIM_200ms);
 			this.controlled.no_work.Transition(this.controlled.working.do_work, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasChore), UpdateRate.SIM_200ms).Transition(this.controlled.working.find_work, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasChoreQueued), UpdateRate.SIM_200ms);
-			this.uncontrolled.EnterTransition(this.uncontrolled.working.new_worker, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsNewWorker)).EnterTransition(this.uncontrolled.idle, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsInsideDock)).EnterTransition(this.uncontrolled.approach_dock, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsInsideDock)))
+			this.uncontrolled.EnterTransition(this.uncontrolled.working.new_worker, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsNewWorker)).EnterTransition(this.uncontrolled.idle, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.And(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsInsideDock), GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsNewWorker)))).EnterTransition(this.uncontrolled.approach_dock, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.And(GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsInsideDock)), GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.IsNewWorker))))
 				.Transition(this.controlled.working.find_work, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasRemoteOperator), UpdateRate.SIM_200ms)
 				.Transition(this.incapacitated.lost, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.CanReachDepot)), UpdateRate.SIM_200ms)
 				.Transition(this.incapacitated.die, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasHomeDepot)), UpdateRate.SIM_200ms);
 			this.uncontrolled.approach_dock.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
 				smi.master.Available = true;
-			}).MoveTo<IApproachable>(this.homedock, this.uncontrolled.working.enter, this.uncontrolled.idle, null, null);
+			}).MoveTo<IApproachable>(this.homedock, this.uncontrolled.working.enter, this.incapacitated.lost, null, null);
 			this.uncontrolled.working.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
 				smi.master.Available = false;
 			});
-			this.uncontrolled.working.new_worker.ToggleWork<NewWorker>(this.homedock, this.uncontrolled.working.recharge, this.uncontrolled.working.recharge, (RemoteWorkerSM.StatesInstance _) => true);
-			this.uncontrolled.working.enter.ToggleWork<EnterableDock>(this.homedock, this.uncontrolled.working.recharge, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
-			this.uncontrolled.working.recharge.ToggleWork<WorkerRecharger>(this.homedock, this.uncontrolled.working.recharge_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
+			this.uncontrolled.working.new_worker.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
+			{
+				smi.master.playNewWorker = false;
+			}).ToggleWork<RemoteWorkerDock.NewWorker>(this.homedock, this.uncontrolled.working.recharge, this.uncontrolled.working.recharge, (RemoteWorkerSM.StatesInstance _) => true);
+			this.uncontrolled.working.enter.ToggleWork<RemoteWorkerDock.EnterableDock>(this.homedock, this.uncontrolled.working.recharge, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
+			this.uncontrolled.working.recharge.ToggleWork<RemoteWorkerDock.WorkerRecharger>(this.homedock, this.uncontrolled.working.recharge_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
 			this.uncontrolled.working.recharge_pst.OnAnimQueueComplete(this.uncontrolled.working.drain_gunk).ScheduleGoTo(1f, this.uncontrolled.working.drain_gunk);
-			this.uncontrolled.working.drain_gunk.ToggleWork<WorkerGunkRemover>(this.homedock, this.uncontrolled.working.drain_gunk_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
+			this.uncontrolled.working.drain_gunk.ToggleWork<RemoteWorkerDock.WorkerGunkRemover>(this.homedock, this.uncontrolled.working.drain_gunk_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
 			this.uncontrolled.working.drain_gunk_pst.OnAnimQueueComplete(this.uncontrolled.working.fill_oil).ScheduleGoTo(1f, this.uncontrolled.working.fill_oil);
-			this.uncontrolled.working.fill_oil.ToggleWork<WorkerOilRefiller>(this.homedock, this.uncontrolled.working.fill_oil_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
+			this.uncontrolled.working.fill_oil.ToggleWork<RemoteWorkerDock.WorkerOilRefiller>(this.homedock, this.uncontrolled.working.fill_oil_pst, this.uncontrolled.idle, (RemoteWorkerSM.StatesInstance _) => true);
 			this.uncontrolled.working.fill_oil_pst.OnAnimQueueComplete(this.uncontrolled.idle).ScheduleGoTo(1f, this.uncontrolled.idle);
 			this.uncontrolled.idle.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
 				smi.master.Available = true;
 			}).PlayAnim(RemoteWorkerConfig.IDLE_IN_DOCK_ANIM, KAnim.PlayMode.Loop).Transition(this.uncontrolled.working.recharge, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.And(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.RequiresMaintnence), new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.DockIsOperational)), UpdateRate.SIM_1000ms);
-			this.incapacitated.ToggleAnims("anim_incapacitated_kanim", 0f);
 			this.incapacitated.lost.Enter(delegate(RemoteWorkerSM.StatesInstance smi)
 			{
-				smi.Play("incapacitate_pre", KAnim.PlayMode.Once);
-				smi.Queue("incapacitate_loop", KAnim.PlayMode.Loop);
+				smi.Play("sos_pre", KAnim.PlayMode.Once);
+				smi.Queue("sos_loop", KAnim.PlayMode.Loop);
 				RemoteWorkerSM.States.ClearChore(smi);
-			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.UnreachableDock, null).Transition(this.controlled, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.CanReachDepot), UpdateRate.SIM_200ms)
+			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.UnreachableDock, null).Transition(this.incapacitated.lost_recovery, new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.CanReachDepot), UpdateRate.SIM_200ms)
 				.Transition(this.incapacitated.die, GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Not(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.Transition.ConditionCallback(RemoteWorkerSM.States.HasHomeDepot)), UpdateRate.SIM_200ms);
-			this.incapacitated.die.Enter(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State.Callback(RemoteWorkerSM.States.ClearChore)).PlayAnim("incapacitate_death").OnAnimQueueComplete(this.incapacitated.explode)
+			this.incapacitated.lost_recovery.PlayAnim("sos_pst").OnAnimQueueComplete(this.controlled);
+			this.incapacitated.die.Enter(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State.Callback(RemoteWorkerSM.States.ClearChore)).PlayAnim("explode").OnAnimQueueComplete(this.incapacitated.explode)
 				.ToggleStatusItem(Db.Get().DuplicantStatusItems.NoHomeDock, null);
 			this.incapacitated.explode.Enter(new StateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State.Callback(RemoteWorkerSM.States.Explode));
 		}
@@ -359,6 +376,8 @@ public class RemoteWorkerSM : StateMachineComponent<RemoteWorkerSM.StatesInstanc
 		public class IncapacitatedStates : GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State
 		{
 			public GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State lost;
+
+			public GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State lost_recovery;
 
 			public GameStateMachine<RemoteWorkerSM.States, RemoteWorkerSM.StatesInstance, RemoteWorkerSM, object>.State die;
 

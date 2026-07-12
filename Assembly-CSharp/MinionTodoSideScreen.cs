@@ -127,14 +127,14 @@ public class MinionTodoSideScreen : SideScreenContent
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		MinionTodoChoreEntry minionTodoChoreEntry = null;
 		int num = 0;
-		Schedulable component = DetailsScreen.Instance.target.GetComponent<Schedulable>();
-		string text = "";
-		Schedule schedule = component.GetSchedule();
+		Schedule schedule = DetailsScreen.Instance.target.GetComponent<Schedulable>().GetSchedule();
 		if (schedule != null)
 		{
-			text = schedule.GetCurrentScheduleBlock().name;
+			ScheduleBlock currentScheduleBlock = schedule.GetCurrentScheduleBlock();
+			string name = currentScheduleBlock.name;
+			this.currentShiftLabel.SetText(string.Format(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CURRENT_SCHEDULE_BLOCK, name).ToUpper());
+			this.currentShiftIcon.color = Db.Get().ScheduleGroups.Get(currentScheduleBlock.GroupId).uiColor;
 		}
-		this.currentScheduleBlockLabel.SetText(string.Format(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CURRENT_SCHEDULE_BLOCK, text));
 		this.choreTargets.Clear();
 		bool flag = false;
 		this.activeChoreEntries = 0;
@@ -238,6 +238,10 @@ public class MinionTodoSideScreen : SideScreenContent
 	public GameObject taskEntryContainer;
 
 	public MinionTodoChoreEntry currentTask;
+
+	public LocText currentShiftLabel;
+
+	public Image currentShiftIcon;
 
 	public LocText currentScheduleBlockLabel;
 

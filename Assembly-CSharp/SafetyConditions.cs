@@ -18,19 +18,26 @@ public class SafetyConditions
 			return Grid.Solid[num3];
 		});
 		this.IsNotLiquid = new SafetyChecker.Condition("IsNotLiquid", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !Grid.Element[cell].IsLiquid);
+		this.IsNotCoveredInLiquid = new SafetyChecker.Condition("IsNotCoveredInLiquid", num *= 2, delegate(int cell, int cost, SafetyChecker.Context context)
+		{
+			int num4 = Grid.CellAbove(cell);
+			return Grid.IsValidCell(num4) && (!Grid.Element[cell].IsLiquid || !Grid.Element[num4].IsLiquid);
+		});
 		this.IsNotLadder = new SafetyChecker.Condition("IsNotLadder", num *= 2, (int cell, int cost, SafetyChecker.Context context) => !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !context.navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole));
 		this.IsNotDoor = new SafetyChecker.Condition("IsNotDoor", num *= 2, delegate(int cell, int cost, SafetyChecker.Context context)
 		{
-			int num4 = Grid.CellAbove(cell);
-			return !Grid.HasDoor[cell] && Grid.IsValidCell(num4) && !Grid.HasDoor[num4];
+			int num5 = Grid.CellAbove(cell);
+			return !Grid.HasDoor[cell] && Grid.IsValidCell(num5) && !Grid.HasDoor[num5];
 		});
 		this.IsCorrectTemperature = new SafetyChecker.Condition("IsCorrectTemperature", num *= 2, (int cell, int cost, SafetyChecker.Context context) => Grid.Temperature[cell] > 285.15f && Grid.Temperature[cell] < 303.15f);
 		this.IsWarming = new SafetyChecker.Condition("IsWarming", num *= 2, (int cell, int cost, SafetyChecker.Context context) => WarmthProvider.IsWarmCell(cell));
 		this.IsCooling = new SafetyChecker.Condition("IsCooling", num *= 2, (int cell, int cost, SafetyChecker.Context context) => false);
-		this.HasSomeOxygen = new SafetyChecker.Condition("HasSomeOxygen", num *= 2, (int cell, int cost, SafetyChecker.Context context) => context.oxygenBreather == null || context.oxygenBreather.IsBreathableElementAtCell(cell, null));
+		this.HasSomeOxygen = new SafetyChecker.Condition("HasSomeOxygen", num *= 2, (int cell, int cost, SafetyChecker.Context context) => context.oxygenBreather == null || GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(cell, Grid.DefaultOffset, context.oxygenBreather).IsBreathable);
+		this.HasSomeOxygenAround = new SafetyChecker.Condition("HasSomeOxygenAround", num *= 2, (int cell, int cost, SafetyChecker.Context context) => context.oxygenBreather == null || GasBreatherFromWorldProvider.GetBestBreathableCellAroundSpecificCell(cell, GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS, context.oxygenBreather).IsBreathable);
 		this.IsClear = new SafetyChecker.Condition("IsClear", num * 2, (int cell, int cost, SafetyChecker.Context context) => context.minionBrain.IsCellClear(cell));
 		this.WarmUpChecker = new SafetyChecker(new List<SafetyChecker.Condition> { this.IsWarming }.ToArray());
 		this.CoolDownChecker = new SafetyChecker(new List<SafetyChecker.Condition> { this.IsCooling }.ToArray());
+		this.AbsorbCellCellChecker = new SafetyChecker(new List<SafetyChecker.Condition> { this.IsNotCoveredInLiquid, this.IsNotDoor, this.HasSomeOxygenAround }.ToArray());
 		List<SafetyChecker.Condition> list = new List<SafetyChecker.Condition>();
 		list.Add(this.HasSomeOxygen);
 		list.Add(this.IsNotDoor);
@@ -45,6 +52,8 @@ public class SafetyConditions
 
 	public SafetyChecker.Condition IsNotLiquid;
 
+	public SafetyChecker.Condition IsNotCoveredInLiquid;
+
 	public SafetyChecker.Condition IsNotLadder;
 
 	public SafetyChecker.Condition IsCorrectTemperature;
@@ -54,6 +63,8 @@ public class SafetyConditions
 	public SafetyChecker.Condition IsCooling;
 
 	public SafetyChecker.Condition HasSomeOxygen;
+
+	public SafetyChecker.Condition HasSomeOxygenAround;
 
 	public SafetyChecker.Condition IsClear;
 
@@ -70,6 +81,8 @@ public class SafetyConditions
 	public SafetyChecker CoolDownChecker;
 
 	public SafetyChecker RecoverBreathChecker;
+
+	public SafetyChecker AbsorbCellCellChecker;
 
 	public SafetyChecker VomitCellChecker;
 

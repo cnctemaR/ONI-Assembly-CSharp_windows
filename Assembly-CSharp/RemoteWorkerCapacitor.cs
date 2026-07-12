@@ -37,7 +37,7 @@ public class RemoteWorkerCapacitor : StateMachineComponent<RemoteWorkerCapacitor
 	{
 		get
 		{
-			return this.charge < 15f;
+			return this.charge < 12f;
 		}
 	}
 
@@ -52,13 +52,13 @@ public class RemoteWorkerCapacitor : StateMachineComponent<RemoteWorkerCapacitor
 	[Serialize]
 	private float charge;
 
-	public const float LOW_LEVEL = 15f;
+	public const float LOW_LEVEL = 12f;
 
 	public const float POWER_USE_RATE_J_PER_S = -0.1f;
 
-	public const float POWER_CHARGE_RATE_J_PER_S = 4f;
+	public const float POWER_CHARGE_RATE_J_PER_S = 7.5f;
 
-	public const float CAPACITY = 60f;
+	public const float CAPACITY_J = 60f;
 
 	public class StatesInstance : GameStateMachine<RemoteWorkerCapacitor.States, RemoteWorkerCapacitor.StatesInstance, RemoteWorkerCapacitor, object>.GameInstance
 	{

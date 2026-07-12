@@ -41,7 +41,7 @@ public class Sensor
 		}
 	}
 
-	public void SetActive(bool enabled)
+	public virtual void SetActive(bool enabled)
 	{
 		this.IsEnabled = enabled;
 	}

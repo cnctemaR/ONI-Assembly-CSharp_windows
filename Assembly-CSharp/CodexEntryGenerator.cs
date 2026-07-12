@@ -641,6 +641,60 @@ public static class CodexEntryGenerator
 		return dictionary;
 	}
 
+	public static void GenerateElectrobankEntries()
+	{
+		CodexEntry codexEntry = new CodexEntry("ROOT", new List<ContentContainer>(), CODEX.ELECTROBANK.TITLE);
+		codexEntry.id = "ELECTROBANKS";
+		codexEntry.icon = Assets.GetSprite("upgrade_disc");
+		codexEntry.parentId = "EQUIPMENT";
+		CodexCache.AddEntry(codexEntry.id, codexEntry, null);
+		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<Electrobank>())
+		{
+			if (!gameObject.HasTag(GameTags.DeprecatedContent))
+			{
+				List<ContentContainer> list = new List<ContentContainer>();
+				CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
+				Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
+				CodexEntryGenerator.GenerateImageContainers(first, list);
+				list.Add(new ContentContainer(new List<ICodexWidget>
+				{
+					new CodexText(gameObject.GetComponent<InfoDescription>().description, CodexTextStyle.Body, null),
+					new CodexSpacer()
+				}, ContentContainer.ContentLayout.Vertical));
+				SubEntry subEntry = new SubEntry(UI.ExtractLinkID(gameObject.GetProperName()), "ELECTROBANKS", list, gameObject.GetProperName());
+				subEntry.icon = first;
+				CodexCache.FindEntry("ELECTROBANKS").subEntries.Add(subEntry);
+			}
+		}
+	}
+
+	public static void GenerateBionicUpgradeEntries()
+	{
+		CodexEntry codexEntry = new CodexEntry("ROOT", new List<ContentContainer>(), CODEX.BIONICBOOSTER.TITLE);
+		codexEntry.id = "BOOSTER";
+		codexEntry.icon = Assets.GetSprite("upgrade_disc");
+		codexEntry.parentId = "EQUIPMENT";
+		CodexCache.AddEntry(codexEntry.id, codexEntry, null);
+		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<BionicUpgradeComponent>())
+		{
+			BionicUpgradeComponent component = gameObject.GetComponent<BionicUpgradeComponent>();
+			List<ContentContainer> list = new List<ContentContainer>();
+			CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
+			Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
+			CodexEntryGenerator.GenerateImageContainers(first, list);
+			List<ICodexWidget> list2 = new List<ICodexWidget>();
+			foreach (Descriptor descriptor in component.GetDescriptors(gameObject))
+			{
+				list2.Add(new CodexText(descriptor.text, CodexTextStyle.Body, null));
+			}
+			list2.Add(new CodexSpacer());
+			list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+			SubEntry subEntry = new SubEntry(UI.ExtractLinkID(gameObject.GetProperName()), "BOOSTER", list, gameObject.GetProperName());
+			subEntry.icon = first;
+			CodexCache.FindEntry("BOOSTER").subEntries.Add(subEntry);
+		}
+	}
+
 	public static Dictionary<string, CodexEntry> GenerateBiomeEntries()
 	{
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
@@ -1187,8 +1241,15 @@ public static class CodexEntryGenerator
 	private static void GenerateSkillRequirementsAndPerksContainers(Skill skill, List<ContentContainer> containers)
 	{
 		List<ICodexWidget> list = new List<ICodexWidget>();
-		CodexText codexText = new CodexText(CODEX.HEADERS.ROLE_PERKS, CodexTextStyle.Subtitle, null);
-		CodexText codexText2 = new CodexText(CODEX.HEADERS.ROLE_PERKS_DESC, CodexTextStyle.Body, null);
+		string text = CODEX.HEADERS.ROLE_PERKS;
+		string text2 = CODEX.HEADERS.ROLE_PERKS_DESC;
+		if (skill.dlcId == "DLC3_ID")
+		{
+			text = CODEX.HEADERS.ROLE_PERKS_BIONIC;
+			text2 = CODEX.HEADERS.ROLE_PERKS_BIONIC_DESC;
+		}
+		CodexText codexText = new CodexText(text, CodexTextStyle.Subtitle, null);
+		CodexText codexText2 = new CodexText(text2, CodexTextStyle.Body, null);
 		list.Add(codexText);
 		list.Add(new CodexDividerLine());
 		list.Add(codexText2);
@@ -1226,8 +1287,15 @@ public static class CodexEntryGenerator
 		}
 		bool flag2 = false;
 		List<ICodexWidget> list2 = new List<ICodexWidget>();
-		CodexText codexText3 = new CodexText(CODEX.HEADERS.UNLOCK_ROLES, CodexTextStyle.Subtitle, null);
-		CodexText codexText4 = new CodexText(CODEX.HEADERS.UNLOCK_ROLES_DESC, CodexTextStyle.Body, null);
+		string text2 = CODEX.HEADERS.UNLOCK_ROLES;
+		string text3 = CODEX.HEADERS.UNLOCK_ROLES_DESC;
+		if (skill.dlcId == "DLC3_ID")
+		{
+			text2 = CODEX.HEADERS.UNLOCK_ROLES_BIONIC;
+			text3 = CODEX.HEADERS.UNLOCK_ROLES_BIONIC_DESC;
+		}
+		CodexText codexText3 = new CodexText(text2, CodexTextStyle.Subtitle, null);
+		CodexText codexText4 = new CodexText(text3, CodexTextStyle.Body, null);
 		list2.Add(codexText3);
 		list2.Add(new CodexDividerLine());
 		list2.Add(codexText4);

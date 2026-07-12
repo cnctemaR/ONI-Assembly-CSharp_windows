@@ -54,7 +54,7 @@ public class RoboPilotCommandModuleConfig : IBuildingConfig
 		launchConditionManager.statusPort = "LaunchReady";
 		RoboPilotModule roboPilotModule = go.AddOrGet<RoboPilotModule>();
 		roboPilotModule.consumeDataBanksOnLand = true;
-		roboPilotModule.dataBankType = "ResearchDatabank";
+		roboPilotModule.dataBankConsumption = 1;
 		Storage storage = go.AddComponent<Storage>();
 		storage.showInUI = true;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
@@ -64,7 +64,7 @@ public class RoboPilotCommandModuleConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 20f;
-		manualDeliveryKG.requestedItemTag = roboPilotModule.dataBankType;
+		manualDeliveryKG.requestedItemTag = DatabankHelper.TAG;
 		manualDeliveryKG.MinimumMass = 1f;
 		go.AddOrGet<CommandModule>().robotPilotControlled = true;
 		go.AddOrGet<RobotCommandConditions>();
@@ -77,6 +77,10 @@ public class RoboPilotCommandModuleConfig : IBuildingConfig
 	}
 
 	public const string ID = "RoboPilotCommandModule";
+
+	public static float DATABANKCONSUMPTION = 2f;
+
+	public static float DATABANKRANGE = 10000f / RoboPilotCommandModuleConfig.DATABANKCONSUMPTION;
 
 	private const string TRIGGER_LAUNCH_PORT_ID = "TriggerLaunch";
 

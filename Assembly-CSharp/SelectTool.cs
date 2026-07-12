@@ -61,7 +61,7 @@ public class SelectTool : InterfaceTool
 		WorldContainer worldFromPosition = ClusterManager.Instance.GetWorldFromPosition(pos);
 		if (worldFromPosition != null)
 		{
-			CameraController.Instance.ActiveWorldStarWipe(worldFromPosition.id, pos, 10f, null);
+			GameUtil.FocusCameraOnWorld(worldFromPosition.id, pos, 10f, null, true);
 			return;
 		}
 		DebugUtil.DevLogError("DevError: specified camera focus position has null world - possible out of bounds location");

@@ -11,7 +11,7 @@ public class RemoteChore : WorkChore<RemoteWorkTerminal>
 		this.AddPrecondition(RemoteChore.RemoteTerminalHasDock, terminal);
 		this.AddPrecondition(RemoteChore.RemoteDockHasWorker, terminal);
 		this.AddPrecondition(RemoteChore.RemoteDockAvailable, terminal);
-		this.AddPrecondition(RemoteChore.RemoteTerminalHasChore, terminal);
+		this.AddPrecondition(RemoteChore.RemoteChoreSubchorePreconditions, terminal);
 		this.AddPrecondition(RemoteChore.RemoteDockOperational, terminal);
 	}
 
@@ -21,50 +21,96 @@ public class RemoteChore : WorkChore<RemoteWorkTerminal>
 		context.RunPreconditions();
 		if (!context.IsComplete())
 		{
-			incomplete_contexts.Add(context);
+			ListPool<Chore.Precondition.Context, Chore.Precondition>.PooledList pooledList = ListPool<Chore.Precondition.Context, Chore.Precondition>.Allocate();
+			ListPool<Chore.Precondition.Context, Chore.Precondition>.PooledList pooledList2 = ListPool<Chore.Precondition.Context, Chore.Precondition>.Allocate();
+			ListPool<Chore.Precondition.Context, Chore.Precondition>.PooledList pooledList3 = ListPool<Chore.Precondition.Context, Chore.Precondition>.Allocate();
+			RemoteWorkerDock currentDock = this.terminal.CurrentDock;
+			if (currentDock != null)
+			{
+				currentDock.CollectChores(duplicantState, pooledList, pooledList3, pooledList2, is_attempting_override);
+			}
+			foreach (Chore.Precondition.Context context2 in pooledList)
+			{
+				context.data = context2;
+				context.SetPriority(context2.chore);
+				incomplete_contexts.Add(context);
+			}
+			foreach (Chore.Precondition.Context context3 in pooledList3)
+			{
+				context.data = context3;
+				context.SetPriority(context3.chore);
+				incomplete_contexts.Add(context);
+			}
+			List<Chore.PreconditionInstance> preconditions = context.chore.GetPreconditions();
+			context.failedPreconditionId = 0;
+			while (context.failedPreconditionId < preconditions.Count && !(preconditions[context.failedPreconditionId].condition.id == RemoteChore.RemoteChoreSubchorePreconditions.id))
+			{
+				context.failedPreconditionId++;
+			}
+			foreach (Chore.Precondition.Context context4 in pooledList2)
+			{
+				context.data = context4;
+				context.SetPriority(context4.chore);
+				failed_contexts.Add(context);
+			}
+			pooledList.Recycle();
+			pooledList2.Recycle();
+			pooledList3.Recycle();
 			return;
 		}
 		if (context.IsSuccess())
 		{
-			List<Chore.Precondition.Context> list = new List<Chore.Precondition.Context>();
-			List<Chore.Precondition.Context> list2 = new List<Chore.Precondition.Context>();
-			List<Chore.Precondition.Context> list3 = new List<Chore.Precondition.Context>();
-			RemoteWorkerDock currentDock = this.terminal.CurrentDock;
-			if (currentDock != null)
+			ListPool<Chore.Precondition.Context, Chore.Precondition>.PooledList pooledList4 = ListPool<Chore.Precondition.Context, Chore.Precondition>.Allocate();
+			ListPool<Chore.Precondition.Context, Chore.Precondition>.PooledList pooledList5 = ListPool<Chore.Precondition.Context, Chore.Precondition>.Allocate();
+			RemoteWorkerDock currentDock2 = this.terminal.CurrentDock;
+			if (currentDock2 != null)
 			{
-				currentDock.CollectChores(duplicantState, list, list2, list3, is_attempting_override);
+				currentDock2.CollectChores(duplicantState, pooledList4, null, pooledList5, is_attempting_override);
 			}
-			if (list2.Count > 0)
+			foreach (Chore.Precondition.Context context5 in pooledList4)
 			{
-				incomplete_contexts.Add(context);
-				return;
+				context.data = context5;
+				context.SetPriority(context5.chore);
+				succeeded_contexts.Add(context);
 			}
-			foreach (Chore.Precondition.Context context2 in list)
+			foreach (Chore.Precondition.Context context6 in pooledList5)
 			{
-				succeeded_contexts.Add(new Chore.Precondition.Context(context.chore, context.consumerState, context.isAttemptingOverride, context2));
+				context.data = context6;
+				context.SetPriority(context6.chore);
+				failed_contexts.Add(context);
 			}
-			using (List<Chore.Precondition.Context>.Enumerator enumerator = list3.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					Chore.Precondition.Context context3 = enumerator.Current;
-					failed_contexts.Add(new Chore.Precondition.Context(context.chore, context.consumerState, context.isAttemptingOverride, context3));
-				}
-				return;
-			}
+			pooledList4.Recycle();
+			pooledList5.Recycle();
+			return;
 		}
 		failed_contexts.Add(context);
 	}
 
-	public override void Begin(Chore.Precondition.Context context)
+	public override void PrepareChore(ref Chore.Precondition.Context context)
 	{
-		base.Begin(context);
+		base.PrepareChore(ref context);
+		DebugUtil.Assert(this.active_subchore == null);
+		this.active_subchore = ((Chore.Precondition.Context)context.data).chore;
 		RemoteWorkerDock currentDock = this.terminal.CurrentDock;
 		if (currentDock == null)
 		{
 			return;
 		}
 		currentDock.SetNextChore(this.terminal, (Chore.Precondition.Context)context.data);
+	}
+
+	protected override void End(string reason)
+	{
+		if (this.active_subchore != null && this.active_subchore.driver != null && !this.active_subchore.driver.HasChore())
+		{
+			this.active_subchore.Reserve(null);
+		}
+		this.active_subchore = null;
+		base.End(reason);
+		if (this.terminal.worker != null)
+		{
+			this.terminal.StopWork(this.terminal.worker, true);
+		}
 	}
 
 	private static Chore.Precondition RemoteTerminalHasDock = new Chore.Precondition
@@ -115,27 +161,28 @@ public class RemoteChore : WorkChore<RemoteWorkTerminal>
 		canExecuteOnAnyThread = true
 	};
 
-	private static Chore.Precondition RemoteTerminalHasChore = new Chore.Precondition
+	private static Chore.Precondition RemoteChoreSubchorePreconditions = new Chore.Precondition
 	{
 		id = "RemoteChorePreconditionsMet",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.REMOTE_CHORE_SUBCHORE_PRECONDITIONS,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			RemoteWorkTerminal remoteWorkTerminal3 = data as RemoteWorkTerminal;
-			List<Chore.Precondition.Context> list = new List<Chore.Precondition.Context>();
-			List<Chore.Precondition.Context> list2 = new List<Chore.Precondition.Context>();
-			if (remoteWorkTerminal3 != null)
+			if (context.data == null)
 			{
-				RemoteWorkerDock currentDock3 = remoteWorkTerminal3.CurrentDock;
-				if (currentDock3 != null)
-				{
-					currentDock3.CollectChores(context.consumerState, list, null, list2, false);
-				}
+				return true;
 			}
-			return list.Count > 0;
+			Chore.Precondition.Context context2 = (Chore.Precondition.Context)context.data;
+			if (context2.failedPreconditionId != -1)
+			{
+				return false;
+			}
+			context2.RunPreconditions();
+			return context2.failedPreconditionId == -1;
 		},
 		canExecuteOnAnyThread = false
 	};
 
 	private RemoteWorkTerminal terminal;
+
+	private Chore active_subchore;
 }

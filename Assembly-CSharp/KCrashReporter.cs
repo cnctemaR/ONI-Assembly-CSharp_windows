@@ -728,7 +728,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 646687;
+		public int build = 646843;
 
 		public string callstack = "";
 

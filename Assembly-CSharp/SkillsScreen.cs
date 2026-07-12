@@ -632,10 +632,6 @@ public class SkillsScreen : KModalScreen
 				num2--;
 			}
 		}
-		if (this.skillGroupRow.Count < num)
-		{
-			num2 -= num - this.skillGroupRow.Count;
-		}
 		num = num2;
 		List<Skill> skillsBySkillGroup = this.GetSkillsBySkillGroup(skill.skillGroup);
 		int num3 = 0;

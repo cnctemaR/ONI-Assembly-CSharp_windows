@@ -661,9 +661,13 @@ public static class CodexEntryGenerator
 					new CodexText(gameObject.GetComponent<InfoDescription>().description, CodexTextStyle.Body, null),
 					new CodexSpacer()
 				}, ContentContainer.ContentLayout.Vertical));
-				SubEntry subEntry = new SubEntry(UI.ExtractLinkID(gameObject.GetProperName()), "ELECTROBANKS", list, gameObject.GetProperName());
-				subEntry.icon = first;
-				CodexCache.FindEntry("ELECTROBANKS").subEntries.Add(subEntry);
+				string id = UI.ExtractLinkID(gameObject.GetProperName());
+				if (CodexCache.FindEntry("ELECTROBANKS").subEntries.Find((SubEntry x) => x.id == id) == null)
+				{
+					SubEntry subEntry = new SubEntry(id, "ELECTROBANKS", list, gameObject.GetProperName());
+					subEntry.icon = first;
+					CodexCache.FindEntry("ELECTROBANKS").subEntries.Add(subEntry);
+				}
 			}
 		}
 	}

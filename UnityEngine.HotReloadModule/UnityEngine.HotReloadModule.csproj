@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7212B6AF-89F1-46F4-8268-E4D09F87A075}</ProjectGuid>
+    <ProjectGuid>{5E348941-8C3F-44C4-8CE6-A809C8382699}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.HotReloadModule</RootNamespace>
     <AssemblyName>UnityEngine.HotReloadModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A082}</Project>
+      <Project>{5E348941-8C3F-44C4-8CE6-A809C83826A6}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

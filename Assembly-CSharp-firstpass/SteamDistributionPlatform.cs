@@ -117,7 +117,7 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 	{
 		get
 		{
-			return SteamManager.Initialized && SteamApps.BIsSubscribedApp(new AppId_t(1452490U));
+			return false;
 		}
 	}
 

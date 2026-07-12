@@ -143,7 +143,7 @@ namespace KMod
 				packagedModInfo = new Mod.PackagedModInfo
 				{
 					supportedContent = "vanilla_id",
-					lastWorkingBuild = 0
+					minimumSupportedBuild = 0
 				};
 				if (this.ScanContentFromSourceForTranslationsOnly(""))
 				{
@@ -200,11 +200,8 @@ namespace KMod
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion = (from v in list2
-						where (long)v.info.lastWorkingBuild >= 466292L
-						orderby v.info.lastWorkingBuild
-						select v).Concat<Mod.ArchivedVersion>(from v in list2
-						where (long)v.info.lastWorkingBuild < 466292L
-						orderby v.info.lastWorkingBuild descending
+						where (long)v.info.minimumSupportedBuild <= 469008L
+						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion == null)
 					{
@@ -251,7 +248,15 @@ namespace KMod
 				this.ModDevLogError(string.Format("\t{0}: {1} in folder '{2}' does not specify supportedContent. Make sure you spelled it correctly in your mod_info!", this.label, "mod_info.yaml", text));
 				return null;
 			}
-			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': {2} at {3}", new object[] { this.label, text, packagedModInfo.supportedContent, packagedModInfo.lastWorkingBuild }));
+			if (packagedModInfo.lastWorkingBuild != 0)
+			{
+				this.ModDevLogError(string.Format("\t{0}: {1} in folder '{2}' is using `{3}`, please upgrade this to `{4}`", new object[] { this.label, "mod_info.yaml", text, "lastWorkingBuild", "minimumSupportedBuild" }));
+				if (packagedModInfo.minimumSupportedBuild == 0)
+				{
+					packagedModInfo.minimumSupportedBuild = packagedModInfo.lastWorkingBuild;
+				}
+			}
+			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': {2} at {3}", new object[] { this.label, text, packagedModInfo.supportedContent, packagedModInfo.minimumSupportedBuild }));
 			return packagedModInfo;
 		}
 
@@ -746,7 +751,14 @@ namespace KMod
 		{
 			public string supportedContent { get; set; }
 
+			[Obsolete("Use minimumSupportedBuild instead!")]
 			public int lastWorkingBuild { get; set; }
+
+			public int minimumSupportedBuild { get; set; }
+
+			public int APIVersion { get; set; }
+
+			public string version { get; set; }
 		}
 	}
 }

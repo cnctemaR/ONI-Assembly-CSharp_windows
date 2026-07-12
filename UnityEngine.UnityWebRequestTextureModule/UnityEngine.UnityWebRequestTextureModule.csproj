@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7212B6AF-89F1-46F4-8268-E4D09F87A099}</ProjectGuid>
+    <ProjectGuid>{5E348941-8C3F-44C4-8CE6-A809C83826BD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestTextureModule</AssemblyName>
@@ -20,19 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A06E}</Project>
+      <Project>{5E348941-8C3F-44C4-8CE6-A809C8382692}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A076}</Project>
+      <Project>{5E348941-8C3F-44C4-8CE6-A809C838269A}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A082}</Project>
+      <Project>{5E348941-8C3F-44C4-8CE6-A809C83826A6}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A098}</Project>
+      <Project>{5E348941-8C3F-44C4-8CE6-A809C83826BC}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

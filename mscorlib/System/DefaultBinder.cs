@@ -360,94 +360,6 @@ namespace System
 		}
 
 		[SecuritySafeCritical]
-		public override MethodBase SelectMethod(BindingFlags bindingAttr, MethodBase[] match, Type[] types, ParameterModifier[] modifiers)
-		{
-			Type[] array = new Type[types.Length];
-			for (int i = 0; i < types.Length; i++)
-			{
-				array[i] = types[i].UnderlyingSystemType;
-				if (!(array[i] is RuntimeType))
-				{
-					throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "types");
-				}
-			}
-			types = array;
-			if (match == null || match.Length == 0)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Array may not be empty."), "match");
-			}
-			MethodBase[] array2 = (MethodBase[])match.Clone();
-			int num = 0;
-			for (int i = 0; i < array2.Length; i++)
-			{
-				ParameterInfo[] parametersNoCopy = array2[i].GetParametersNoCopy();
-				if (parametersNoCopy.Length == types.Length)
-				{
-					int j;
-					for (j = 0; j < types.Length; j++)
-					{
-						Type parameterType = parametersNoCopy[j].ParameterType;
-						if (!(parameterType == types[j]) && !(parameterType == typeof(object)))
-						{
-							if (parameterType.IsPrimitive)
-							{
-								if (!(types[j].UnderlyingSystemType is RuntimeType))
-								{
-									break;
-								}
-								if (!DefaultBinder.CanConvertPrimitive((RuntimeType)types[j].UnderlyingSystemType, (RuntimeType)parameterType.UnderlyingSystemType))
-								{
-									break;
-								}
-							}
-							else if (!parameterType.IsAssignableFrom(types[j]))
-							{
-								break;
-							}
-						}
-					}
-					if (j == types.Length)
-					{
-						array2[num++] = array2[i];
-					}
-				}
-			}
-			if (num == 0)
-			{
-				return null;
-			}
-			if (num == 1)
-			{
-				return array2[0];
-			}
-			int num2 = 0;
-			bool flag = false;
-			int[] array3 = new int[types.Length];
-			for (int i = 0; i < types.Length; i++)
-			{
-				array3[i] = i;
-			}
-			for (int i = 1; i < num; i++)
-			{
-				int num3 = DefaultBinder.FindMostSpecificMethod(array2[num2], array3, null, array2[i], array3, null, types, null);
-				if (num3 == 0)
-				{
-					flag = true;
-				}
-				else if (num3 == 2)
-				{
-					flag = false;
-					num2 = i;
-				}
-			}
-			if (flag)
-			{
-				throw new AmbiguousMatchException(Environment.GetResourceString("Ambiguous match found."));
-			}
-			return array2[num2];
-		}
-
-		[SecuritySafeCritical]
 		public override PropertyInfo SelectProperty(BindingFlags bindingAttr, PropertyInfo[] match, Type returnType, Type[] indexes, ParameterModifier[] modifiers)
 		{
 			if (indexes != null)
@@ -1043,6 +955,167 @@ namespace System
 			return type2 == type || DefaultBinder.CanConvertPrimitive((RuntimeType)type2, type);
 		}
 
+		internal static bool CompareMethodSig(MethodBase m1, MethodBase m2)
+		{
+			ParameterInfo[] parametersNoCopy = m1.GetParametersNoCopy();
+			ParameterInfo[] parametersNoCopy2 = m2.GetParametersNoCopy();
+			if (parametersNoCopy.Length != parametersNoCopy2.Length)
+			{
+				return false;
+			}
+			int num = parametersNoCopy.Length;
+			for (int i = 0; i < num; i++)
+			{
+				if (parametersNoCopy[i].ParameterType != parametersNoCopy2[i].ParameterType)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public sealed override MethodBase SelectMethod(BindingFlags bindingAttr, MethodBase[] match, Type[] types, ParameterModifier[] modifiers)
+		{
+			Type[] array = new Type[types.Length];
+			for (int i = 0; i < types.Length; i++)
+			{
+				array[i] = types[i].UnderlyingSystemType;
+				if (!array[i].IsRuntimeImplemented() && !(array[i] is SignatureType))
+				{
+					throw new ArgumentException("Type must be a type provided by the runtime.", "types");
+				}
+			}
+			types = array;
+			if (match == null || match.Length == 0)
+			{
+				throw new ArgumentException("Array may not be empty.", "match");
+			}
+			MethodBase[] array2 = (MethodBase[])match.Clone();
+			int num = 0;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				ParameterInfo[] parametersNoCopy = array2[i].GetParametersNoCopy();
+				if (parametersNoCopy.Length == types.Length)
+				{
+					int j;
+					for (j = 0; j < types.Length; j++)
+					{
+						Type parameterType = parametersNoCopy[j].ParameterType;
+						if (!types[j].MatchesParameterTypeExactly(parametersNoCopy[j]) && !(parameterType == typeof(object)))
+						{
+							Type type = types[j];
+							SignatureType signatureType = type as SignatureType;
+							if (signatureType != null)
+							{
+								MethodInfo methodInfo = array2[i] as MethodInfo;
+								if (methodInfo == null)
+								{
+									break;
+								}
+								type = signatureType.TryResolveAgainstGenericMethod(methodInfo);
+								if (type == null)
+								{
+									break;
+								}
+							}
+							if (parameterType.IsPrimitive)
+							{
+								if (!type.UnderlyingSystemType.IsRuntimeImplemented())
+								{
+									break;
+								}
+								if (!DefaultBinder.CanChangePrimitive(type.UnderlyingSystemType, parameterType.UnderlyingSystemType))
+								{
+									break;
+								}
+							}
+							else if (!parameterType.IsAssignableFrom(type))
+							{
+								break;
+							}
+						}
+					}
+					if (j == types.Length)
+					{
+						array2[num++] = array2[i];
+					}
+				}
+			}
+			if (num == 0)
+			{
+				return null;
+			}
+			if (num == 1)
+			{
+				return array2[0];
+			}
+			int num2 = 0;
+			bool flag = false;
+			int[] array3 = new int[types.Length];
+			for (int i = 0; i < types.Length; i++)
+			{
+				array3[i] = i;
+			}
+			for (int i = 1; i < num; i++)
+			{
+				int num3 = DefaultBinder.FindMostSpecificMethod(array2[num2], array3, null, array2[i], array3, null, types, null);
+				if (num3 == 0)
+				{
+					flag = true;
+				}
+				else if (num3 == 2)
+				{
+					flag = false;
+					num2 = i;
+				}
+			}
+			if (flag)
+			{
+				throw new AmbiguousMatchException("Ambiguous match found.");
+			}
+			return array2[num2];
+		}
+
+		private static bool CanChangePrimitive(Type source, Type target)
+		{
+			return DefaultBinder.CanPrimitiveWiden(source, target);
+		}
+
+		private static bool CanChangePrimitiveObjectToType(object source, Type type)
+		{
+			return DefaultBinder.CanPrimitiveWiden(source.GetType(), type);
+		}
+
+		private static bool CanPrimitiveWiden(Type source, Type target)
+		{
+			DefaultBinder.Primitives primitives = DefaultBinder._primitiveConversions[(int)Type.GetTypeCode(source)];
+			DefaultBinder.Primitives primitives2 = (DefaultBinder.Primitives)(1 << (int)Type.GetTypeCode(target));
+			return (primitives & primitives2) > (DefaultBinder.Primitives)0;
+		}
+
+		private static DefaultBinder.Primitives[] _primitiveConversions = new DefaultBinder.Primitives[]
+		{
+			(DefaultBinder.Primitives)0,
+			(DefaultBinder.Primitives)0,
+			(DefaultBinder.Primitives)0,
+			DefaultBinder.Primitives.Boolean,
+			DefaultBinder.Primitives.Char | DefaultBinder.Primitives.UInt16 | DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.UInt32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.UInt64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.SByte | DefaultBinder.Primitives.Int16 | DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Char | DefaultBinder.Primitives.Byte | DefaultBinder.Primitives.Int16 | DefaultBinder.Primitives.UInt16 | DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.UInt32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.UInt64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Int16 | DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.UInt16 | DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.UInt32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.UInt64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Int32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.UInt32 | DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.UInt64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Int64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.UInt64 | DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Single | DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Double,
+			DefaultBinder.Primitives.Decimal,
+			DefaultBinder.Primitives.DateTime,
+			(DefaultBinder.Primitives)0,
+			DefaultBinder.Primitives.String
+		};
+
 		internal class BinderState
 		{
 			internal BinderState(int[] argsMap, int originalSize, bool isParamArray)
@@ -1057,6 +1130,26 @@ namespace System
 			internal int m_originalSize;
 
 			internal bool m_isParamArray;
+		}
+
+		[Flags]
+		private enum Primitives
+		{
+			Boolean = 8,
+			Char = 16,
+			SByte = 32,
+			Byte = 64,
+			Int16 = 128,
+			UInt16 = 256,
+			Int32 = 512,
+			UInt32 = 1024,
+			Int64 = 2048,
+			UInt64 = 4096,
+			Single = 8192,
+			Double = 16384,
+			Decimal = 32768,
+			DateTime = 65536,
+			String = 262144
 		}
 	}
 }

@@ -10,10 +10,6 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 		public int TotalIterationCount;
 
-		internal int NumPhases;
-
 		internal IntPtr StartEndIndex;
-
-		internal IntPtr PhaseData;
 	}
 }

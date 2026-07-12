@@ -7,28 +7,12 @@ namespace System.Runtime.CompilerServices
 	{
 		public FixedBufferAttribute(Type elementType, int length)
 		{
-			this.elementType = elementType;
-			this.length = length;
+			this.ElementType = elementType;
+			this.Length = length;
 		}
 
-		public Type ElementType
-		{
-			get
-			{
-				return this.elementType;
-			}
-		}
+		public Type ElementType { get; }
 
-		public int Length
-		{
-			get
-			{
-				return this.length;
-			}
-		}
-
-		private Type elementType;
-
-		private int length;
+		public int Length { get; }
 	}
 }

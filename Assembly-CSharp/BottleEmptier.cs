@@ -81,6 +81,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	[Serialize]
 	public bool allowManualPumpingStationFetching;
 
+	[Serialize]
+	public bool emit = true;
+
 	public bool isGasEmptier;
 
 	private static Dictionary<bool, string[]> manualPumpingAffectedBuildings = new Dictionary<bool, string[]>();
@@ -105,6 +108,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			TreeFilterable component = base.master.GetComponent<TreeFilterable>();
 			component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
+			this.meter.meterController.GetComponent<KBatchedAnimTracker>().synchronizeEnabledState = false;
+			this.meter.meterController.enabled = false;
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 			base.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		}
@@ -150,8 +155,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		private void OnStorageChange(object data)
 		{
-			Storage component = base.GetComponent<Storage>();
-			this.meter.SetPositionPercent(Mathf.Clamp01(component.RemainingCapacity() / component.capacityKg));
+			this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.RemainingCapacity() / this.storage.capacityKg));
+			this.meter.meterController.enabled = this.storage.MassStored() > 0f;
 		}
 
 		private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -166,23 +171,28 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				return;
 			}
-			this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), firstPrimaryElement.Element.substance.colour);
-			this.meter.SetSymbolTint(new KAnimHashedString("water1"), firstPrimaryElement.Element.substance.colour);
 			base.GetComponent<KBatchedAnimController>().SetSymbolTint(new KAnimHashedString("leak_ceiling"), firstPrimaryElement.Element.substance.colour);
+			this.meter.meterController.SwapAnims(firstPrimaryElement.Element.substance.anims);
+			this.meter.meterController.Play("empty", KAnim.PlayMode.Paused, 1f, 0f);
+			Color32 colour = firstPrimaryElement.Element.substance.colour;
+			colour.a = byte.MaxValue;
+			this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
+			this.meter.SetSymbolTint(new KAnimHashedString("water1"), colour);
+			this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+			this.OnStorageChange(null);
 		}
 
 		private PrimaryElement GetFirstPrimaryElement()
 		{
-			Storage component = base.GetComponent<Storage>();
-			for (int i = 0; i < component.Count; i++)
+			for (int i = 0; i < this.storage.Count; i++)
 			{
-				GameObject gameObject = component[i];
+				GameObject gameObject = this.storage[i];
 				if (!(gameObject == null))
 				{
-					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-					if (!(component2 == null))
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (!(component == null))
 					{
-						return component2;
+						return component;
 					}
 				}
 			}
@@ -191,12 +201,15 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		public void Emit(float dt)
 		{
+			if (!base.smi.master.emit)
+			{
+				return;
+			}
 			PrimaryElement firstPrimaryElement = this.GetFirstPrimaryElement();
 			if (firstPrimaryElement == null)
 			{
 				return;
 			}
-			Storage component = base.GetComponent<Storage>();
 			float num = Mathf.Min(firstPrimaryElement.Mass, base.master.emptyRate * dt);
 			if (num <= 0f)
 			{
@@ -206,7 +219,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			float num2;
 			SimUtil.DiseaseInfo diseaseInfo;
 			float num3;
-			component.ConsumeAndGetDisease(prefabTag, num, out num2, out diseaseInfo, out num3);
+			this.storage.ConsumeAndGetDisease(prefabTag, num, out num2, out diseaseInfo, out num3);
 			Vector3 position = base.transform.GetPosition();
 			position.y += 1.8f;
 			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
@@ -225,6 +238,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			}
 			SimMessages.ModifyCell(num4, idx, num3, num2, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
 		}
+
+		[MyCmpGet]
+		public Storage storage;
 
 		private FetchChore chore;
 	}
@@ -279,7 +295,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			};
 			this.root.ToggleStatusItem(this.statusItem, (BottleEmptier.StatesInstance smi) => smi.master);
 			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");
-			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.emptying, (BottleEmptier.StatesInstance smi) => !smi.GetComponent<Storage>().IsEmpty()).Enter("CreateChore", delegate(BottleEmptier.StatesInstance smi)
+			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.emptying, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().MassStored() > 0f).Enter("CreateChore", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.CreateChore();
 			})
@@ -288,7 +304,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 					smi.CancelChore();
 				})
 				.PlayAnim("on");
-			this.emptying.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().IsEmpty()).Enter("StartMeter", delegate(BottleEmptier.StatesInstance smi)
+			this.emptying.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().MassStored() == 0f).Enter("StartMeter", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.StartMeter();
 			})

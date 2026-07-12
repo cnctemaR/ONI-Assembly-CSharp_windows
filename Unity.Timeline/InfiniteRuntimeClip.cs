@@ -44,6 +44,12 @@ namespace UnityEngine.Timeline
 			this.m_Playable.SetTime(localTime);
 		}
 
+		public override void DisableAt(double localTime, double rootDuration, FrameData frameData)
+		{
+			this.m_Playable.SetTime(localTime);
+			this.enable = false;
+		}
+
 		private Playable m_Playable;
 
 		private static readonly long kIntervalEnd = DiscreteTime.GetNearestTick(TimelineClip.kMaxTimeValue);

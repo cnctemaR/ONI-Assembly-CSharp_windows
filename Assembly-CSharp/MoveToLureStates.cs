@@ -7,7 +7,15 @@ public class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureSta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.move;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME, CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME;
+		string text2 = CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.move.MoveTo(new Func<MoveToLureStates.Instance, int>(MoveToLureStates.GetLureCell), new Func<MoveToLureStates.Instance, CellOffset[]>(MoveToLureStates.GetLureOffsets), this.arrive_at_lure, this.behaviourcomplete, false);
 		this.arrive_at_lure.Enter(delegate(MoveToLureStates.Instance smi)
 		{

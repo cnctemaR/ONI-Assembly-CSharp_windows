@@ -2,17 +2,17 @@
 
 namespace System
 {
-	internal struct DTSubString
+	internal ref struct DTSubString
 	{
-		internal char this[int relativeIndex]
+		internal unsafe char this[int relativeIndex]
 		{
 			get
 			{
-				return this.s[this.index + relativeIndex];
+				return (char)(*this.s[this.index + relativeIndex]);
 			}
 		}
 
-		internal string s;
+		internal ReadOnlySpan<char> s;
 
 		internal int index;
 

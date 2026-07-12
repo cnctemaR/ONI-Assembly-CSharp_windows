@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	public class DesignerTransactionCloseEventArgs : EventArgs
 	{
 		[Obsolete("This constructor is obsolete. Use DesignerTransactionCloseEventArgs(bool, bool) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
@@ -18,28 +12,12 @@ namespace System.ComponentModel.Design
 
 		public DesignerTransactionCloseEventArgs(bool commit, bool lastTransaction)
 		{
-			this.commit = commit;
-			this.lastTransaction = lastTransaction;
+			this.TransactionCommitted = commit;
+			this.LastTransaction = lastTransaction;
 		}
 
-		public bool TransactionCommitted
-		{
-			get
-			{
-				return this.commit;
-			}
-		}
+		public bool TransactionCommitted { get; }
 
-		public bool LastTransaction
-		{
-			get
-			{
-				return this.lastTransaction;
-			}
-		}
-
-		private bool commit;
-
-		private bool lastTransaction;
+		public bool LastTransaction { get; }
 	}
 }

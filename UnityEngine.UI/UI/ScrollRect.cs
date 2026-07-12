@@ -133,7 +133,7 @@ namespace UnityEngine.UI
 					this.m_HorizontalScrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.SetHorizontalNormalizedPosition));
 				}
 				this.m_HorizontalScrollbar = value;
-				if (this.m_HorizontalScrollbar)
+				if (this.m_Horizontal && this.m_HorizontalScrollbar)
 				{
 					this.m_HorizontalScrollbar.onValueChanged.AddListener(new UnityAction<float>(this.SetHorizontalNormalizedPosition));
 				}
@@ -154,7 +154,7 @@ namespace UnityEngine.UI
 					this.m_VerticalScrollbar.onValueChanged.RemoveListener(new UnityAction<float>(this.SetVerticalNormalizedPosition));
 				}
 				this.m_VerticalScrollbar = value;
-				if (this.m_VerticalScrollbar)
+				if (this.m_Vertical && this.m_VerticalScrollbar)
 				{
 					this.m_VerticalScrollbar.onValueChanged.AddListener(new UnityAction<float>(this.SetVerticalNormalizedPosition));
 				}
@@ -311,11 +311,11 @@ namespace UnityEngine.UI
 		protected override void OnEnable()
 		{
 			base.OnEnable();
-			if (this.m_HorizontalScrollbar)
+			if (this.m_Horizontal && this.m_HorizontalScrollbar)
 			{
 				this.m_HorizontalScrollbar.onValueChanged.AddListener(new UnityAction<float>(this.SetHorizontalNormalizedPosition));
 			}
-			if (this.m_VerticalScrollbar)
+			if (this.m_Vertical && this.m_VerticalScrollbar)
 			{
 				this.m_VerticalScrollbar.onValueChanged.AddListener(new UnityAction<float>(this.SetVerticalNormalizedPosition));
 			}
@@ -501,55 +501,58 @@ namespace UnityEngine.UI
 			this.UpdateBounds();
 			float unscaledDeltaTime = Time.unscaledDeltaTime;
 			Vector2 vector = this.CalculateOffset(Vector2.zero);
-			if (!this.m_Dragging && (vector != Vector2.zero || this.m_Velocity != Vector2.zero))
+			if (unscaledDeltaTime > 0f)
 			{
-				Vector2 vector2 = this.m_Content.anchoredPosition;
-				for (int i = 0; i < 2; i++)
+				if (!this.m_Dragging && (vector != Vector2.zero || this.m_Velocity != Vector2.zero))
 				{
-					if (this.m_MovementType == ScrollRect.MovementType.Elastic && vector[i] != 0f)
+					Vector2 vector2 = this.m_Content.anchoredPosition;
+					for (int i = 0; i < 2; i++)
 					{
-						float num = this.m_Velocity[i];
-						float num2 = this.m_Elasticity;
-						if (this.m_Scrolling)
+						if (this.m_MovementType == ScrollRect.MovementType.Elastic && vector[i] != 0f)
 						{
-							num2 *= 3f;
+							float num = this.m_Velocity[i];
+							float num2 = this.m_Elasticity;
+							if (this.m_Scrolling)
+							{
+								num2 *= 3f;
+							}
+							vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, num2, float.PositiveInfinity, unscaledDeltaTime);
+							if (Mathf.Abs(num) < 1f)
+							{
+								num = 0f;
+							}
+							this.m_Velocity[i] = num;
 						}
-						vector2[i] = Mathf.SmoothDamp(this.m_Content.anchoredPosition[i], this.m_Content.anchoredPosition[i] + vector[i], ref num, num2, float.PositiveInfinity, unscaledDeltaTime);
-						if (Mathf.Abs(num) < 1f)
+						else if (this.m_Inertia)
 						{
-							num = 0f;
+							ref Vector2 ptr = ref this.m_Velocity;
+							int num3 = i;
+							ptr[num3] *= Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
+							if (Mathf.Abs(this.m_Velocity[i]) < 1f)
+							{
+								this.m_Velocity[i] = 0f;
+							}
+							ptr = ref vector2;
+							num3 = i;
+							ptr[num3] += this.m_Velocity[i] * unscaledDeltaTime;
 						}
-						this.m_Velocity[i] = num;
-					}
-					else if (this.m_Inertia)
-					{
-						ref Vector2 ptr = ref this.m_Velocity;
-						int num3 = i;
-						ptr[num3] *= Mathf.Pow(this.m_DecelerationRate, unscaledDeltaTime);
-						if (Mathf.Abs(this.m_Velocity[i]) < 1f)
+						else
 						{
 							this.m_Velocity[i] = 0f;
 						}
-						ptr = ref vector2;
-						num3 = i;
-						ptr[num3] += this.m_Velocity[i] * unscaledDeltaTime;
 					}
-					else
+					if (this.m_MovementType == ScrollRect.MovementType.Clamped)
 					{
-						this.m_Velocity[i] = 0f;
+						vector = this.CalculateOffset(vector2 - this.m_Content.anchoredPosition);
+						vector2 += vector;
 					}
+					this.SetContentAnchoredPosition(vector2);
 				}
-				if (this.m_MovementType == ScrollRect.MovementType.Clamped)
+				if (this.m_Dragging && this.m_Inertia)
 				{
-					vector = this.CalculateOffset(vector2 - this.m_Content.anchoredPosition);
-					vector2 += vector;
+					Vector3 vector3 = (this.m_Content.anchoredPosition - this.m_PrevPosition) / unscaledDeltaTime;
+					this.m_Velocity = Vector3.Lerp(this.m_Velocity, vector3, unscaledDeltaTime * 10f);
 				}
-				this.SetContentAnchoredPosition(vector2);
-			}
-			if (this.m_Dragging && this.m_Inertia)
-			{
-				Vector3 vector3 = (this.m_Content.anchoredPosition - this.m_PrevPosition) / unscaledDeltaTime;
-				this.m_Velocity = Vector3.Lerp(this.m_Velocity, vector3, unscaledDeltaTime * 10f);
 			}
 			if (this.m_ViewBounds != this.m_PrevViewBounds || this.m_ContentBounds != this.m_PrevContentBounds || this.m_Content.anchoredPosition != this.m_PrevPosition)
 			{

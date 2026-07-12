@@ -277,7 +277,7 @@ namespace KMod
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 626616L
+						where (long)v.info.minimumSupportedBuild <= 642443L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 == null)
@@ -405,65 +405,62 @@ namespace KMod
 		private Content AddDirectory(string directory)
 		{
 			Content content = (Content)0;
-			string text = directory.TrimEnd(new char[] { '/' });
-			if (text != null)
+			string text = directory.TrimEnd('/');
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
+			if (num <= 1519694028U)
 			{
-				uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
-				if (num <= 1519694028U)
+				if (num != 948591336U)
 				{
-					if (num != 948591336U)
+					if (num != 1318520008U)
 					{
-						if (num != 1318520008U)
+						if (num == 1519694028U)
 						{
-							if (num == 1519694028U)
-							{
-								if (text == "elements")
-								{
-									content |= Content.LayerableFiles;
-								}
-							}
-						}
-						else if (text == "buildingfacades")
-						{
-							content |= Content.Animation;
-						}
-					}
-					else if (text == "templates")
-					{
-						content |= Content.LayerableFiles;
-					}
-				}
-				else if (num <= 3037049615U)
-				{
-					if (num != 2960291089U)
-					{
-						if (num == 3037049615U)
-						{
-							if (text == "worldgen")
+							if (text == "elements")
 							{
 								content |= Content.LayerableFiles;
 							}
 						}
 					}
-					else if (text == "strings")
+					else if (text == "buildingfacades")
 					{
-						content |= Content.Strings;
+						content |= Content.Animation;
 					}
 				}
-				else if (num != 3319670096U)
+				else if (text == "templates")
 				{
-					if (num == 3570262116U)
+					content |= Content.LayerableFiles;
+				}
+			}
+			else if (num <= 3037049615U)
+			{
+				if (num != 2960291089U)
+				{
+					if (num == 3037049615U)
 					{
-						if (text == "codex")
+						if (text == "worldgen")
 						{
 							content |= Content.LayerableFiles;
 						}
 					}
 				}
-				else if (text == "anim")
+				else if (text == "strings")
 				{
-					content |= Content.Animation;
+					content |= Content.Strings;
 				}
+			}
+			else if (num != 3319670096U)
+			{
+				if (num == 3570262116U)
+				{
+					if (text == "codex")
+					{
+						content |= Content.LayerableFiles;
+					}
+				}
+			}
+			else if (text == "anim")
+			{
+				content |= Content.Animation;
 			}
 			return content;
 		}

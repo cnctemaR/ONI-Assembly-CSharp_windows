@@ -55,7 +55,7 @@ namespace System.Data.SqlClient.SNI
 				array = new SecurityBuffer[0];
 			}
 			SecurityBuffer securityBuffer = new SecurityBuffer(NegotiateStreamPal.QueryMaxTokenSize(text), SecurityBufferType.SECBUFFER_TOKEN);
-			ContextFlagsPal contextFlagsPal = ContextFlagsPal.MutualAuth | ContextFlagsPal.Confidentiality | ContextFlagsPal.Connection;
+			ContextFlagsPal contextFlagsPal = ContextFlagsPal.Delegate | ContextFlagsPal.MutualAuth | ContextFlagsPal.Confidentiality | ContextFlagsPal.Connection;
 			string @string = Encoding.UTF8.GetString(serverName);
 			SecurityStatusPal securityStatusPal = NegotiateStreamPal.InitializeSecurityContext(safeFreeCredentials, ref securityContext, @string, contextFlagsPal, array, securityBuffer, ref contextFlags);
 			if (securityStatusPal.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded || securityStatusPal.ErrorCode == SecurityStatusPalErrorCode.CompAndContinue)
@@ -78,9 +78,9 @@ namespace System.Data.SqlClient.SNI
 			}
 			if (securityStatusPal.ErrorCode == SecurityStatusPalErrorCode.InternalError)
 			{
-				throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + securityStatusPal);
+				throw new InvalidOperationException(SQLMessage.KerberosTicketMissingError() + "\n" + securityStatusPal.ToString());
 			}
-			throw new Exception(SQLMessage.SSPIGenerateError() + "\n" + securityStatusPal);
+			throw new InvalidOperationException(SQLMessage.SSPIGenerateError() + "\n" + securityStatusPal.ToString());
 		}
 
 		private static bool IsErrorStatus(SecurityStatusPalErrorCode errorCode)
@@ -120,11 +120,18 @@ namespace System.Data.SqlClient.SNI
 
 		public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync)
 		{
+			SNIPacket snipacket = packet.Clone();
+			uint num;
 			if (sync)
 			{
-				return handle.Send(packet.Clone());
+				num = handle.Send(snipacket);
+				snipacket.Dispose();
 			}
-			return handle.SendAsync(packet.Clone(), null);
+			else
+			{
+				num = handle.SendAsync(snipacket, true, null);
+			}
+			return num;
 		}
 
 		public SNIHandle CreateConnectionHandle(object callbackObject, string fullServerName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool parallel, bool isIntegratedSecurity)
@@ -189,13 +196,25 @@ namespace System.Data.SqlClient.SNI
 
 		private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
 		{
-			string hostName = Dns.GetHostEntry(hostNameOrAddress).HostName;
-			string text = "MSSQLSvc/" + hostName;
+			IPHostEntry iphostEntry = null;
+			string text;
+			try
+			{
+				iphostEntry = Dns.GetHostEntry(hostNameOrAddress);
+			}
+			catch (SocketException)
+			{
+			}
+			finally
+			{
+				text = ((iphostEntry != null) ? iphostEntry.HostName : null) ?? hostNameOrAddress;
+			}
+			string text2 = "MSSQLSvc/" + text;
 			if (!string.IsNullOrWhiteSpace(portOrInstanceName))
 			{
-				text = text + ":" + portOrInstanceName;
+				text2 = text2 + ":" + portOrInstanceName;
 			}
-			return Encoding.UTF8.GetBytes(text);
+			return Encoding.UTF8.GetBytes(text2);
 		}
 
 		private SNITCPHandle CreateTcpHandle(DataSource details, long timerExpire, object callbackObject, bool parallel)
@@ -245,7 +264,7 @@ namespace System.Data.SqlClient.SNI
 
 		public uint ReadAsync(SNIHandle handle, out SNIPacket packet)
 		{
-			packet = new SNIPacket(null);
+			packet = null;
 			return handle.ReceiveAsync(ref packet);
 		}
 

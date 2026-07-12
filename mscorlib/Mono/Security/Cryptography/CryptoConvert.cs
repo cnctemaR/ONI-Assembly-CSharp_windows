@@ -46,12 +46,55 @@ namespace Mono.Security.Cryptography
 			return null;
 		}
 
+		internal static bool TryImportCapiPrivateKeyBlob(byte[] blob, int offset)
+		{
+			bool flag;
+			try
+			{
+				RSAParameters parametersFromCapiPrivateKeyBlob = CryptoConvert.GetParametersFromCapiPrivateKeyBlob(blob, offset);
+				new RSAManaged().ImportParameters(parametersFromCapiPrivateKeyBlob);
+				flag = true;
+			}
+			catch (CryptographicException)
+			{
+				flag = false;
+			}
+			return flag;
+		}
+
 		public static RSA FromCapiPrivateKeyBlob(byte[] blob)
 		{
 			return CryptoConvert.FromCapiPrivateKeyBlob(blob, 0);
 		}
 
 		public static RSA FromCapiPrivateKeyBlob(byte[] blob, int offset)
+		{
+			RSAParameters parametersFromCapiPrivateKeyBlob = CryptoConvert.GetParametersFromCapiPrivateKeyBlob(blob, offset);
+			RSA rsa = null;
+			try
+			{
+				rsa = RSA.Create();
+				rsa.ImportParameters(parametersFromCapiPrivateKeyBlob);
+			}
+			catch (CryptographicException ex)
+			{
+				try
+				{
+					rsa = new RSACryptoServiceProvider(new CspParameters
+					{
+						Flags = CspProviderFlags.UseMachineKeyStore
+					});
+					rsa.ImportParameters(parametersFromCapiPrivateKeyBlob);
+				}
+				catch
+				{
+					throw ex;
+				}
+			}
+			return rsa;
+		}
+
+		private static RSAParameters GetParametersFromCapiPrivateKeyBlob(byte[] blob, int offset)
 		{
 			if (blob == null)
 			{
@@ -62,6 +105,7 @@ namespace Mono.Security.Cryptography
 				throw new ArgumentException("blob is too small.");
 			}
 			RSAParameters rsaparameters = default(RSAParameters);
+			RSAParameters rsaparameters2;
 			try
 			{
 				if (blob[offset] != 7 || blob[offset + 1] != 2 || blob[offset + 2] != 0 || blob[offset + 3] != 0 || CryptoConvert.ToUInt32LE(blob, offset + 8) != 843141970U)
@@ -106,33 +150,13 @@ namespace Mono.Security.Cryptography
 					Buffer.BlockCopy(blob, num2, rsaparameters.D, 0, num3);
 					Array.Reverse<byte>(rsaparameters.D);
 				}
+				rsaparameters2 = rsaparameters;
 			}
 			catch (Exception ex)
 			{
 				throw new CryptographicException("Invalid blob.", ex);
 			}
-			RSA rsa = null;
-			try
-			{
-				rsa = RSA.Create();
-				rsa.ImportParameters(rsaparameters);
-			}
-			catch (CryptographicException ex2)
-			{
-				try
-				{
-					rsa = new RSACryptoServiceProvider(new CspParameters
-					{
-						Flags = CspProviderFlags.UseMachineKeyStore
-					});
-					rsa.ImportParameters(rsaparameters);
-				}
-				catch
-				{
-					throw ex2;
-				}
-			}
-			return rsa;
+			return rsaparameters2;
 		}
 
 		public static DSA FromCapiPrivateKeyBlobDSA(byte[] blob)
@@ -313,12 +337,57 @@ namespace Mono.Security.Cryptography
 			return array;
 		}
 
+		internal static bool TryImportCapiPublicKeyBlob(byte[] blob, int offset)
+		{
+			bool flag;
+			try
+			{
+				RSAParameters parametersFromCapiPublicKeyBlob = CryptoConvert.GetParametersFromCapiPublicKeyBlob(blob, offset);
+				new RSAManaged().ImportParameters(parametersFromCapiPublicKeyBlob);
+				flag = true;
+			}
+			catch (CryptographicException)
+			{
+				flag = false;
+			}
+			return flag;
+		}
+
 		public static RSA FromCapiPublicKeyBlob(byte[] blob)
 		{
 			return CryptoConvert.FromCapiPublicKeyBlob(blob, 0);
 		}
 
 		public static RSA FromCapiPublicKeyBlob(byte[] blob, int offset)
+		{
+			RSAParameters parametersFromCapiPublicKeyBlob = CryptoConvert.GetParametersFromCapiPublicKeyBlob(blob, offset);
+			RSA rsa2;
+			try
+			{
+				RSA rsa = null;
+				try
+				{
+					rsa = RSA.Create();
+					rsa.ImportParameters(parametersFromCapiPublicKeyBlob);
+				}
+				catch (CryptographicException)
+				{
+					rsa = new RSACryptoServiceProvider(new CspParameters
+					{
+						Flags = CspProviderFlags.UseMachineKeyStore
+					});
+					rsa.ImportParameters(parametersFromCapiPublicKeyBlob);
+				}
+				rsa2 = rsa;
+			}
+			catch (Exception ex)
+			{
+				throw new CryptographicException("Invalid blob.", ex);
+			}
+			return rsa2;
+		}
+
+		private static RSAParameters GetParametersFromCapiPublicKeyBlob(byte[] blob, int offset)
 		{
 			if (blob == null)
 			{
@@ -328,7 +397,7 @@ namespace Mono.Security.Cryptography
 			{
 				throw new ArgumentException("blob is too small.");
 			}
-			RSA rsa2;
+			RSAParameters rsaparameters2;
 			try
 			{
 				if (blob[offset] != 6 || blob[offset + 1] != 2 || blob[offset + 2] != 0 || blob[offset + 3] != 0 || CryptoConvert.ToUInt32LE(blob, offset + 8) != 826364754U)
@@ -348,27 +417,13 @@ namespace Mono.Security.Cryptography
 				rsaparameters.Modulus = new byte[num3];
 				Buffer.BlockCopy(blob, num2, rsaparameters.Modulus, 0, num3);
 				Array.Reverse<byte>(rsaparameters.Modulus);
-				RSA rsa = null;
-				try
-				{
-					rsa = RSA.Create();
-					rsa.ImportParameters(rsaparameters);
-				}
-				catch (CryptographicException)
-				{
-					rsa = new RSACryptoServiceProvider(new CspParameters
-					{
-						Flags = CspProviderFlags.UseMachineKeyStore
-					});
-					rsa.ImportParameters(rsaparameters);
-				}
-				rsa2 = rsa;
+				rsaparameters2 = rsaparameters;
 			}
 			catch (Exception ex)
 			{
 				throw new CryptographicException("Invalid blob.", ex);
 			}
-			return rsa2;
+			return rsaparameters2;
 		}
 
 		public static DSA FromCapiPublicKeyBlobDSA(byte[] blob)

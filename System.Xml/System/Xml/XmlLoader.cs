@@ -439,61 +439,61 @@ namespace System.Xml
 					{
 						xmlNode.AppendChildForLoad(xmlElement, this.doc);
 						xmlNode = xmlElement;
-						goto IL_01FD;
+						goto IL_01FC;
 					}
 					xmlNode2 = xmlElement;
-					goto IL_01E8;
+					goto IL_01E7;
 				}
 				case XmlNodeType.Attribute:
 					xmlNode2 = this.LoadAttributeNodeDirect();
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.Text:
 					xmlNode2 = new XmlText(this.reader.Value, this.doc);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.CDATA:
 					xmlNode2 = new XmlCDataSection(this.reader.Value, this.doc);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.EntityReference:
 					xmlNode2 = this.LoadEntityReferenceNode(true);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.ProcessingInstruction:
 					xmlNode2 = new XmlProcessingInstruction(this.reader.Name, this.reader.Value, this.doc);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.Comment:
 					xmlNode2 = new XmlComment(this.reader.Value, this.doc);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.Whitespace:
 					if (this.preserveWhitespace)
 					{
 						xmlNode2 = new XmlWhitespace(this.reader.Value, this.doc);
-						goto IL_01E8;
+						goto IL_01E7;
 					}
-					goto IL_01FD;
+					goto IL_01FC;
 				case XmlNodeType.SignificantWhitespace:
 					xmlNode2 = new XmlSignificantWhitespace(this.reader.Value, this.doc);
-					goto IL_01E8;
+					goto IL_01E7;
 				case XmlNodeType.EndElement:
 					if (xmlNode.ParentNode == null)
 					{
 						return xmlNode;
 					}
 					xmlNode = xmlNode.ParentNode;
-					goto IL_01FD;
+					goto IL_01FC;
 				case XmlNodeType.EndEntity:
-					goto IL_01FD;
+					goto IL_01FC;
 				}
 				break;
-				IL_01FD:
+				IL_01FC:
 				if (!xmlReader.Read())
 				{
 					goto Block_7;
 				}
 				continue;
-				IL_01E8:
+				IL_01E7:
 				if (xmlNode != null)
 				{
 					xmlNode.AppendChildForLoad(xmlNode2, this.doc);
-					goto IL_01FD;
+					goto IL_01FC;
 				}
 				return xmlNode2;
 			}

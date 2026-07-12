@@ -3,7 +3,16 @@ using UnityEngine;
 
 public class Sensor
 {
+	public bool IsEnabled { get; private set; } = true;
+
 	public string Name { get; private set; }
+
+	public Sensor(Sensors sensors, bool active)
+	{
+		this.sensors = sensors;
+		this.SetActive(active);
+		this.Name = base.GetType().Name;
+	}
 
 	public Sensor(Sensors sensors)
 	{
@@ -30,6 +39,11 @@ public class Sensor
 		{
 			return this.gameObject.transform;
 		}
+	}
+
+	public void SetActive(bool enabled)
+	{
+		this.IsEnabled = enabled;
 	}
 
 	public void Trigger(int hash, object data = null)

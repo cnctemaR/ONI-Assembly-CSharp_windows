@@ -166,7 +166,10 @@ namespace System.Linq.Expressions
 				array3[i - 1] = (array2[i] = Expression.Parameter(argument.Type, null));
 				array[i] = Expression.Assign(array2[i], argument);
 			}
-			indexExpression = Expression.MakeIndex(array2[0], indexExpression.Indexer, new TrueReadOnlyCollection<Expression>(array3));
+			Expression expression = array2[0];
+			PropertyInfo indexer = indexExpression.Indexer;
+			Expression[] array4 = array3;
+			indexExpression = Expression.MakeIndex(expression, indexer, new TrueReadOnlyCollection<Expression>(array4));
 			if (!isPrefix)
 			{
 				ParameterExpression parameterExpression = (array2[i] = Expression.Parameter(indexExpression.Type, null));

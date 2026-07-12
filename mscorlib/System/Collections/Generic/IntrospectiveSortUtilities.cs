@@ -4,7 +4,7 @@ namespace System.Collections.Generic
 {
 	internal static class IntrospectiveSortUtilities
 	{
-		internal static int FloorLog2(int n)
+		internal static int FloorLog2PlusOne(int n)
 		{
 			int num = 0;
 			while (n >= 1)

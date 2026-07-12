@@ -65,7 +65,7 @@ namespace UnityEngine
 			return new UnitySynchronizationContext(this.m_AsyncWorkQueue, this.m_MainThreadID);
 		}
 
-		private void Exec()
+		public void Exec()
 		{
 			List<UnitySynchronizationContext.WorkRequest> asyncWorkQueue = this.m_AsyncWorkQueue;
 			lock (asyncWorkQueue)
@@ -76,7 +76,7 @@ namespace UnityEngine
 			while (this.m_CurrentFrameWork.Count > 0)
 			{
 				UnitySynchronizationContext.WorkRequest workRequest = this.m_CurrentFrameWork[0];
-				this.m_CurrentFrameWork.Remove(workRequest);
+				this.m_CurrentFrameWork.RemoveAt(0);
 				workRequest.Invoke();
 			}
 		}
@@ -157,14 +157,13 @@ namespace UnityEngine
 				{
 					this.m_DelagateCallback(this.m_DelagateState);
 				}
-				catch (Exception ex)
+				finally
 				{
-					Debug.LogException(ex);
-				}
-				bool flag = this.m_WaitHandle != null;
-				if (flag)
-				{
-					this.m_WaitHandle.Set();
+					ManualResetEvent waitHandle = this.m_WaitHandle;
+					if (waitHandle != null)
+					{
+						waitHandle.Set();
+					}
 				}
 			}
 

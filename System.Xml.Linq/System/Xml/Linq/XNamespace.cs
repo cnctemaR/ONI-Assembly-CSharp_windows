@@ -8,16 +8,16 @@ namespace System.Xml.Linq
 	{
 		internal XNamespace(string namespaceName)
 		{
-			this.namespaceName = namespaceName;
-			this.hashCode = namespaceName.GetHashCode();
-			this.names = new XHashtable<XName>(new XHashtable<XName>.ExtractKeyDelegate(XNamespace.ExtractLocalName), 8);
+			this._namespaceName = namespaceName;
+			this._hashCode = namespaceName.GetHashCode();
+			this._names = new XHashtable<XName>(new XHashtable<XName>.ExtractKeyDelegate(XNamespace.ExtractLocalName), 8);
 		}
 
 		public string NamespaceName
 		{
 			get
 			{
-				return this.namespaceName;
+				return this._namespaceName;
 			}
 		}
 
@@ -32,14 +32,14 @@ namespace System.Xml.Linq
 
 		public override string ToString()
 		{
-			return this.namespaceName;
+			return this._namespaceName;
 		}
 
 		public static XNamespace None
 		{
 			get
 			{
-				return XNamespace.EnsureNamespace(ref XNamespace.refNone, string.Empty);
+				return XNamespace.EnsureNamespace(ref XNamespace.s_refNone, string.Empty);
 			}
 		}
 
@@ -47,7 +47,7 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				return XNamespace.EnsureNamespace(ref XNamespace.refXml, "http://www.w3.org/XML/1998/namespace");
+				return XNamespace.EnsureNamespace(ref XNamespace.s_refXml, "http://www.w3.org/XML/1998/namespace");
 			}
 		}
 
@@ -55,7 +55,7 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				return XNamespace.EnsureNamespace(ref XNamespace.refXmlns, "http://www.w3.org/2000/xmlns/");
+				return XNamespace.EnsureNamespace(ref XNamespace.s_refXmlns, "http://www.w3.org/2000/xmlns/");
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace System.Xml.Linq
 
 		public override int GetHashCode()
 		{
-			return this.hashCode;
+			return this._hashCode;
 		}
 
 		public static bool operator ==(XNamespace left, XNamespace right)
@@ -110,11 +110,11 @@ namespace System.Xml.Linq
 		internal XName GetName(string localName, int index, int count)
 		{
 			XName xname;
-			if (this.names.TryGetValue(localName, index, count, out xname))
+			if (this._names.TryGetValue(localName, index, count, out xname))
 			{
 				return xname;
 			}
-			return this.names.Add(new XName(this, localName.Substring(index, count)));
+			return this._names.Add(new XName(this, localName.Substring(index, count)));
 		}
 
 		internal static XNamespace Get(string namespaceName, int index, int count)
@@ -123,14 +123,14 @@ namespace System.Xml.Linq
 			{
 				return XNamespace.None;
 			}
-			if (XNamespace.namespaces == null)
+			if (XNamespace.s_namespaces == null)
 			{
-				Interlocked.CompareExchange<XHashtable<WeakReference>>(ref XNamespace.namespaces, new XHashtable<WeakReference>(new XHashtable<WeakReference>.ExtractKeyDelegate(XNamespace.ExtractNamespace), 32), null);
+				Interlocked.CompareExchange<XHashtable<WeakReference>>(ref XNamespace.s_namespaces, new XHashtable<WeakReference>(new XHashtable<WeakReference>.ExtractKeyDelegate(XNamespace.ExtractNamespace), 32), null);
 			}
 			for (;;)
 			{
 				WeakReference weakReference;
-				if (!XNamespace.namespaces.TryGetValue(namespaceName, index, count, out weakReference))
+				if (!XNamespace.s_namespaces.TryGetValue(namespaceName, index, count, out weakReference))
 				{
 					if (count == "http://www.w3.org/XML/1998/namespace".Length && string.CompareOrdinal(namespaceName, index, "http://www.w3.org/XML/1998/namespace", 0, count) == 0)
 					{
@@ -140,7 +140,7 @@ namespace System.Xml.Linq
 					{
 						goto Block_7;
 					}
-					weakReference = XNamespace.namespaces.Add(new WeakReference(new XNamespace(namespaceName.Substring(index, count))));
+					weakReference = XNamespace.s_namespaces.Add(new WeakReference(new XNamespace(namespaceName.Substring(index, count))));
 				}
 				XNamespace xnamespace = ((weakReference != null) ? ((XNamespace)weakReference.Target) : null);
 				if (!(xnamespace == null))
@@ -196,19 +196,19 @@ namespace System.Xml.Linq
 
 		internal const string xmlnsPrefixNamespace = "http://www.w3.org/2000/xmlns/";
 
-		private static XHashtable<WeakReference> namespaces;
+		private static XHashtable<WeakReference> s_namespaces;
 
-		private static WeakReference refNone;
+		private static WeakReference s_refNone;
 
-		private static WeakReference refXml;
+		private static WeakReference s_refXml;
 
-		private static WeakReference refXmlns;
+		private static WeakReference s_refXmlns;
 
-		private string namespaceName;
+		private string _namespaceName;
 
-		private int hashCode;
+		private int _hashCode;
 
-		private XHashtable<XName> names;
+		private XHashtable<XName> _names;
 
 		private const int NamesCapacity = 8;
 

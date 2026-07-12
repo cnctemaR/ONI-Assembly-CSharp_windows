@@ -9,17 +9,34 @@ public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateM
 		default_state = this.goingtoeat;
 		this.root.Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.SetTarget)).Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.SetOffset)).Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.ReserveEdible))
 			.Exit(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.UnreserveEdible));
-		this.goingtoeat.MoveTo(new Func<EatStates.Instance, int>(EatStates.GetEdibleCell), this.eating, null, false).ToggleStatusItem(CREATURES.STATUSITEMS.HUNGRY.NAME, CREATURES.STATUSITEMS.HUNGRY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.eating.Face(this.target, 0f).DefaultState(this.eating.pre).ToggleStatusItem(CREATURES.STATUSITEMS.EATING.NAME, CREATURES.STATUSITEMS.EATING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.eating.pre.QueueAnim("eat_pre", false, null).OnAnimQueueComplete(this.eating.loop);
-		this.eating.loop.Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.EatComplete)).QueueAnim("eat_loop", true, null).ScheduleGoTo(3f, this.eating.pst);
-		this.eating.pst.QueueAnim("eat_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);
+		GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State state = this.goingtoeat.MoveTo(new Func<EatStates.Instance, int>(EatStates.GetEdibleCell), this.eating, null, false);
+		string text = CREATURES.STATUSITEMS.HUNGRY.NAME;
+		string text2 = CREATURES.STATUSITEMS.HUNGRY.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory);
+		GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State state2 = this.eating.Face(this.target, 0f).DefaultState(this.eating.pre);
+		string text4 = CREATURES.STATUSITEMS.EATING.NAME;
+		string text5 = CREATURES.STATUSITEMS.EATING.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory);
+		this.eating.pre.QueueAnim((EatStates.Instance smi) => smi.eatAnims[0], false, null).OnAnimQueueComplete(this.eating.loop);
+		this.eating.loop.Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.EatComplete)).QueueAnim((EatStates.Instance smi) => smi.eatAnims[1], true, null).ScheduleGoTo(3f, this.eating.pst);
+		this.eating.pst.QueueAnim((EatStates.Instance smi) => smi.eatAnims[2], false, null).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.WantsToEat, false);
 	}
 
 	private static void SetTarget(EatStates.Instance smi)
 	{
 		smi.sm.target.Set(smi.GetSMI<SolidConsumerMonitor.Instance>().targetEdible, smi, false);
+		smi.OverrideEatAnims(smi, smi.GetSMI<SolidConsumerMonitor.Instance>().GetTargetEdibleEatAnims());
 	}
 
 	private static void SetOffset(EatStates.Instance smi)
@@ -82,6 +99,12 @@ public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateM
 
 	public new class Instance : GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.GameInstance
 	{
+		public void OverrideEatAnims(EatStates.Instance smi, string[] preLoopPstAnims)
+		{
+			global::Debug.Assert(preLoopPstAnims != null && preLoopPstAnims.Length == 3);
+			smi.eatAnims = preLoopPstAnims;
+		}
+
 		public Instance(Chore<EatStates.Instance> chore, EatStates.Def def)
 			: base(chore, def)
 		{
@@ -94,6 +117,8 @@ public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateM
 		}
 
 		public Element lastMealElement;
+
+		public string[] eatAnims = new string[] { "eat_pre", "eat_loop", "eat_pst" };
 	}
 
 	public class EatingState : GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State

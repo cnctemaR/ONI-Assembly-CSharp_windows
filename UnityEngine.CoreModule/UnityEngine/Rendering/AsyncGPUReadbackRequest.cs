@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Graphics/Texture.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/Texture.h")]
 	public struct AsyncGPUReadbackRequest
 	{
 		public void Update()
@@ -95,6 +95,18 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public bool forcePlayerLoopUpdate
+		{
+			get
+			{
+				return this.GetForcePlayerLoopUpdate();
+			}
+			set
+			{
+				this.SetForcePlayerLoopUpdate(value);
+			}
+		}
+
 		private bool IsDone()
 		{
 			return AsyncGPUReadbackRequest.IsDone_Injected(ref this);
@@ -128,6 +140,16 @@ namespace UnityEngine.Rendering
 		private int GetDepth()
 		{
 			return AsyncGPUReadbackRequest.GetDepth_Injected(ref this);
+		}
+
+		private bool GetForcePlayerLoopUpdate()
+		{
+			return AsyncGPUReadbackRequest.GetForcePlayerLoopUpdate_Injected(ref this);
+		}
+
+		private void SetForcePlayerLoopUpdate(bool b)
+		{
+			AsyncGPUReadbackRequest.SetForcePlayerLoopUpdate_Injected(ref this, b);
 		}
 
 		internal void SetScriptingCallback(Action<AsyncGPUReadbackRequest> callback)
@@ -166,6 +188,12 @@ namespace UnityEngine.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetDepth_Injected(ref AsyncGPUReadbackRequest _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetForcePlayerLoopUpdate_Injected(ref AsyncGPUReadbackRequest _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetForcePlayerLoopUpdate_Injected(ref AsyncGPUReadbackRequest _unity_self, bool b);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetScriptingCallback_Injected(ref AsyncGPUReadbackRequest _unity_self, Action<AsyncGPUReadbackRequest> callback);

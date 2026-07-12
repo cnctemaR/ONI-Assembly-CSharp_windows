@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using TUNING;
 
 public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance>
 {
@@ -86,7 +87,7 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 
 		public float IdealTemperatureDelta()
 		{
-			return this.temperature.value - 310.15f;
+			return this.temperature.value - DUPLICANTSTATS.STANDARD.Temperature.Internal.IDEAL;
 		}
 
 		public int GetWarmUpCell()

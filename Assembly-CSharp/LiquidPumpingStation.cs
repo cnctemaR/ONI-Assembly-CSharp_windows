@@ -203,10 +203,10 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		return 0f;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
-		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
+		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.GetStartWorkInfo();
 		float amount = pickupableStartWorkInfo.amount;
 		Element element = pickupableStartWorkInfo.originalPickupable.PrimaryElement.Element;
 		this.session = new LiquidPumpingStation.WorkSession(Grid.PosToCell(this), element.id, pickupableStartWorkInfo.originalPickupable.GetComponent<SubstanceChunk>(), amount, base.gameObject);
@@ -214,7 +214,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		this.meter.SetSymbolTint(new KAnimHashedString("meter_target"), element.substance.colour);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (this.session != null)
@@ -229,7 +229,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.GetPosition()).GetComponent<Pickupable>();
 				component3.TotalAmount = consumedAmount;
 				component3.Trigger(1335436905, source.GetComponent<Pickupable>());
-				worker.workCompleteData = component3;
+				worker.SetWorkCompleteData(component3);
 				this.Sim200ms(0f);
 				if (component3 != null)
 				{
@@ -266,7 +266,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		}
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.session != null)
 		{

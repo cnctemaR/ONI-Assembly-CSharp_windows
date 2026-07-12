@@ -9,7 +9,7 @@ namespace System.Runtime.Remoting.Messaging
 	[StructLayout(LayoutKind.Sequential)]
 	internal class MonoMethodMessage : IMethodCallMessage, IMethodMessage, IMessage, IMethodReturnMessage, IInternalMessage
 	{
-		internal void InitMessage(MonoMethod method, object[] out_args)
+		internal void InitMessage(RuntimeMethodInfo method, object[] out_args)
 		{
 			this.method = method;
 			ParameterInfo[] parametersInternal = method.GetParametersInternal();
@@ -57,7 +57,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			if (method != null)
 			{
-				this.InitMessage((MonoMethod)method, out_args);
+				this.InitMessage((RuntimeMethodInfo)method, out_args);
 				return;
 			}
 			this.args = null;
@@ -65,7 +65,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		internal MonoMethodMessage(MethodInfo minfo, object[] in_args, object[] out_args)
 		{
-			this.InitMessage((MonoMethod)minfo, out_args);
+			this.InitMessage((RuntimeMethodInfo)minfo, out_args);
 			int num = in_args.Length;
 			for (int i = 0; i < num; i++)
 			{
@@ -456,7 +456,7 @@ namespace System.Runtime.Remoting.Messaging
 			return outCount > 0 || flag;
 		}
 
-		private MonoMethod method;
+		private RuntimeMethodInfo method;
 
 		private object[] args;
 
@@ -478,12 +478,8 @@ namespace System.Runtime.Remoting.Messaging
 
 		private MCMDictionary properties;
 
-		private Type[] methodSignature;
-
 		private Identity identity;
 
-		internal static string CallContextKey = "__CallContext";
-
-		internal static string UriKey = "__Uri";
+		private Type[] methodSignature;
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Effects/Shadow", 14)]
+	[AddComponentMenu("UI/Effects/Shadow", 80)]
 	public class Shadow : BaseMeshEffect
 	{
 		protected Shadow()
@@ -114,12 +115,12 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<UIVertex> list = ListPool<UIVertex>.Get();
+			List<UIVertex> list = CollectionPool<List<UIVertex>, UIVertex>.Get();
 			vh.GetUIVertexStream(list);
 			this.ApplyShadow(list, this.effectColor, 0, list.Count, this.effectDistance.x, this.effectDistance.y);
 			vh.Clear();
 			vh.AddUIVertexTriangleStream(list);
-			ListPool<UIVertex>.Release(list);
+			CollectionPool<List<UIVertex>, UIVertex>.Release(list);
 		}
 
 		[SerializeField]

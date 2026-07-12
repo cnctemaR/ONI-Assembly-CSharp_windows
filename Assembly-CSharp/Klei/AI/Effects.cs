@@ -318,6 +318,7 @@ namespace Klei.AI
 			}
 			Effects.EffectImmunity effectImmunity2 = new Effects.EffectImmunity(effect, giverID, shouldSave);
 			this.effectImmunites.Add(effectImmunity2);
+			base.Trigger(1152870979, effectImmunity2);
 		}
 
 		public void RemoveImmunity(Effect effect, string ID)
@@ -335,6 +336,7 @@ namespace Klei.AI
 			if (flag)
 			{
 				this.effectImmunites.Remove(effectImmunity);
+				base.Trigger(964452195, effectImmunity);
 			}
 		}
 

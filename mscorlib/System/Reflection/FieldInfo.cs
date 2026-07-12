@@ -3,28 +3,30 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Reflection
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_FieldInfo))]
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class FieldInfo : MemberInfo, _FieldInfo
 	{
-		public abstract FieldAttributes Attributes { get; }
-
-		public abstract RuntimeFieldHandle FieldHandle { get; }
-
-		public abstract Type FieldType { get; }
-
-		public abstract object GetValue(object obj);
-
 		public override MemberTypes MemberType
 		{
 			get
 			{
 				return MemberTypes.Field;
+			}
+		}
+
+		public abstract FieldAttributes Attributes { get; }
+
+		public abstract Type FieldType { get; }
+
+		public bool IsInitOnly
+		{
+			get
+			{
+				return (this.Attributes & FieldAttributes.InitOnly) > FieldAttributes.PrivateScope;
 			}
 		}
 
@@ -36,6 +38,30 @@ namespace System.Reflection
 			}
 		}
 
+		public bool IsNotSerialized
+		{
+			get
+			{
+				return (this.Attributes & FieldAttributes.NotSerialized) > FieldAttributes.PrivateScope;
+			}
+		}
+
+		public bool IsPinvokeImpl
+		{
+			get
+			{
+				return (this.Attributes & FieldAttributes.PinvokeImpl) > FieldAttributes.PrivateScope;
+			}
+		}
+
+		public bool IsSpecialName
+		{
+			get
+			{
+				return (this.Attributes & FieldAttributes.SpecialName) > FieldAttributes.PrivateScope;
+			}
+		}
+
 		public bool IsStatic
 		{
 			get
@@ -44,27 +70,11 @@ namespace System.Reflection
 			}
 		}
 
-		public bool IsInitOnly
+		public bool IsAssembly
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.InitOnly) > FieldAttributes.PrivateScope;
-			}
-		}
-
-		public bool IsPublic
-		{
-			get
-			{
-				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public;
-			}
-		}
-
-		public bool IsPrivate
-		{
-			get
-			{
-				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Private;
+				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Assembly;
 			}
 		}
 
@@ -73,14 +83,6 @@ namespace System.Reflection
 			get
 			{
 				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Family;
-			}
-		}
-
-		public bool IsAssembly
-		{
-			get
-			{
-				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Assembly;
 			}
 		}
 
@@ -100,37 +102,104 @@ namespace System.Reflection
 			}
 		}
 
-		public bool IsPinvokeImpl
+		public bool IsPrivate
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.PinvokeImpl) == FieldAttributes.PinvokeImpl;
+				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Private;
 			}
 		}
 
-		public bool IsSpecialName
+		public bool IsPublic
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.SpecialName) == FieldAttributes.SpecialName;
+				return (this.Attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public;
 			}
 		}
 
-		public bool IsNotSerialized
+		public virtual bool IsSecurityCritical
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.NotSerialized) == FieldAttributes.NotSerialized;
+				return true;
 			}
 		}
 
-		public abstract void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture);
+		public virtual bool IsSecuritySafeCritical
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public virtual bool IsSecurityTransparent
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public abstract RuntimeFieldHandle FieldHandle { get; }
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public static bool operator ==(FieldInfo left, FieldInfo right)
+		{
+			return left == right || (left != null && right != null && left.Equals(right));
+		}
+
+		public static bool operator !=(FieldInfo left, FieldInfo right)
+		{
+			return !(left == right);
+		}
+
+		public abstract object GetValue(object obj);
 
 		[DebuggerHidden]
 		[DebuggerStepThrough]
 		public void SetValue(object obj, object value)
 		{
-			this.SetValue(obj, value, BindingFlags.Default, null, null);
+			this.SetValue(obj, value, BindingFlags.Default, Type.DefaultBinder, null);
+		}
+
+		public abstract void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture);
+
+		[CLSCompliant(false)]
+		public virtual void SetValueDirect(TypedReference obj, object value)
+		{
+			throw new NotSupportedException("This non-CLS method is not implemented.");
+		}
+
+		[CLSCompliant(false)]
+		public virtual object GetValueDirect(TypedReference obj)
+		{
+			throw new NotSupportedException("This non-CLS method is not implemented.");
+		}
+
+		public virtual object GetRawConstantValue()
+		{
+			throw new NotSupportedException("This non-CLS method is not implemented.");
+		}
+
+		public virtual Type[] GetOptionalCustomModifiers()
+		{
+			throw NotImplemented.ByDesign;
+		}
+
+		public virtual Type[] GetRequiredCustomModifiers()
+		{
+			throw NotImplemented.ByDesign;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -163,18 +232,6 @@ namespace System.Reflection
 		internal virtual int GetFieldOffset()
 		{
 			throw new SystemException("This method should not be called");
-		}
-
-		[CLSCompliant(false)]
-		public virtual object GetValueDirect(TypedReference obj)
-		{
-			throw new NotSupportedException(Environment.GetResourceString("This non-CLS method is not implemented."));
-		}
-
-		[CLSCompliant(false)]
-		public virtual void SetValueDirect(TypedReference obj, object value)
-		{
-			throw new NotSupportedException(Environment.GetResourceString("This non-CLS method is not implemented."));
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -217,101 +274,75 @@ namespace System.Reflection
 			return array;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Type[] GetTypeModifiers(bool optional);
-
-		public virtual Type[] GetOptionalCustomModifiers()
+		internal CustomAttributeData[] GetPseudoCustomAttributesData()
 		{
-			Type[] typeModifiers = this.GetTypeModifiers(true);
-			if (typeModifiers == null)
+			int num = 0;
+			if (this.IsNotSerialized)
 			{
-				return Type.EmptyTypes;
+				num++;
 			}
-			return typeModifiers;
-		}
-
-		public virtual Type[] GetRequiredCustomModifiers()
-		{
-			Type[] typeModifiers = this.GetTypeModifiers(false);
-			if (typeModifiers == null)
+			if (this.DeclaringType.IsExplicitLayout)
 			{
-				return Type.EmptyTypes;
+				num++;
 			}
-			return typeModifiers;
-		}
-
-		public virtual object GetRawConstantValue()
-		{
-			throw new NotSupportedException("This non-CLS method is not implemented.");
-		}
-
-		public override bool Equals(object obj)
-		{
-			return obj == this;
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		public static bool operator ==(FieldInfo left, FieldInfo right)
-		{
-			return left == right || (!((left == null) ^ (right == null)) && left.Equals(right));
-		}
-
-		public static bool operator !=(FieldInfo left, FieldInfo right)
-		{
-			return left != right && (((left == null) ^ (right == null)) || !left.Equals(right));
-		}
-
-		public virtual bool IsSecurityCritical
-		{
-			get
+			MarshalAsAttribute marshal_info = this.get_marshal_info();
+			if (marshal_info != null)
 			{
-				throw new NotSupportedException();
+				num++;
 			}
-		}
-
-		public virtual bool IsSecuritySafeCritical
-		{
-			get
+			if (num == 0)
 			{
-				throw new NotSupportedException();
+				return null;
 			}
-		}
-
-		public virtual bool IsSecurityTransparent
-		{
-			get
+			CustomAttributeData[] array = new CustomAttributeData[num];
+			num = 0;
+			if (this.IsNotSerialized)
 			{
-				throw new NotSupportedException();
+				array[num++] = new CustomAttributeData(typeof(NonSerializedAttribute).GetConstructor(Type.EmptyTypes));
 			}
+			if (this.DeclaringType.IsExplicitLayout)
+			{
+				CustomAttributeTypedArgument[] array2 = new CustomAttributeTypedArgument[]
+				{
+					new CustomAttributeTypedArgument(typeof(int), this.GetFieldOffset())
+				};
+				array[num++] = new CustomAttributeData(typeof(FieldOffsetAttribute).GetConstructor(new Type[] { typeof(int) }), array2, EmptyArray<CustomAttributeNamedArgument>.Value);
+			}
+			if (marshal_info != null)
+			{
+				CustomAttributeTypedArgument[] array3 = new CustomAttributeTypedArgument[]
+				{
+					new CustomAttributeTypedArgument(typeof(UnmanagedType), marshal_info.Value)
+				};
+				array[num++] = new CustomAttributeData(typeof(MarshalAsAttribute).GetConstructor(new Type[] { typeof(UnmanagedType) }), array3, EmptyArray<CustomAttributeNamedArgument>.Value);
+			}
+			return array;
 		}
 
 		void _FieldInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		Type _FieldInfo.GetType()
 		{
-			return base.GetType();
+			ThrowStub.ThrowNotSupportedException();
+			return null;
 		}
 
 		void _FieldInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		void _FieldInfo.GetTypeInfoCount(out uint pcTInfo)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		void _FieldInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 	}
 }

@@ -27,14 +27,20 @@ public class Sensors : KMonoBehaviour
 	public void Add(Sensor sensor)
 	{
 		this.sensors.Add(sensor);
-		sensor.Update();
+		if (sensor.IsEnabled)
+		{
+			sensor.Update();
+		}
 	}
 
 	public void UpdateSensors()
 	{
 		foreach (Sensor sensor in this.sensors)
 		{
-			sensor.Update();
+			if (sensor.IsEnabled)
+			{
+				sensor.Update();
+			}
 		}
 	}
 

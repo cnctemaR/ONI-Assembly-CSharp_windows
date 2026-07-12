@@ -85,7 +85,7 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		base.OnSpawn();
 		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		navGrid.OnNavGridUpdateComplete = (Action<HashSet<int>>)Delegate.Combine(navGrid.OnNavGridUpdateComplete, new Action<HashSet<int>>(this.OnNavGridUpdateComplete));
+		navGrid.OnNavGridUpdateComplete = (Action<IEnumerable<int>>)Delegate.Combine(navGrid.OnNavGridUpdateComplete, new Action<IEnumerable<int>>(this.OnNavGridUpdateComplete));
 		NavTable navTable = navGrid.NavTable;
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
@@ -120,12 +120,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		layer.OnEvent = (Action<int, object>)Delegate.Remove(layer.OnEvent, action);
 	}
 
-	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
-	{
-		this.partitioner.TriggerEvent(cells, layer, event_data);
-	}
-
-	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
+	public void TriggerEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		this.partitioner.TriggerEvent(cells, layer, event_data);
 	}
@@ -158,16 +153,6 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
 	}
 
-	public void UnsafeReadonlyGatherEntries(Extents extents, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
-	{
-		this.UnsafeReadonlyGatherEntries(extents.x, extents.y, extents.width, extents.height, layer, gathered_entries);
-	}
-
-	public void UnsafeReadonlyGatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
-	{
-		this.partitioner.UnsafeReadonlyGatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, gathered_entries);
-	}
-
 	public void Iterate<IteratorType>(int x, int y, int width, int height, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
 	{
 		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
@@ -188,17 +173,27 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.Iterate<IteratorType>(num - radius, num2 - radius, radius * 2, radius * 2, layer, ref iterator);
 	}
 
+	public IEnumerable<object> AsyncSafeEnumerate(int x, int y, int width, int height, ScenePartitionerLayer layer)
+	{
+		return this.partitioner.AsyncSafeEnumerate(x, y, width, height, layer);
+	}
+
+	public IEnumerable<object> AsyncSafeEnumerate(int cell, int radius, ScenePartitionerLayer layer)
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		return this.AsyncSafeEnumerate(num - radius, num2 - radius, radius * 2, radius * 2, layer);
+	}
+
 	private void OnValidNavCellChanged(int cell, NavType nav_type)
 	{
 		this.changedCells.Add(cell);
 	}
 
-	private void OnNavGridUpdateComplete(HashSet<int> dirty_nav_cells)
+	private void OnNavGridUpdateComplete(IEnumerable<int> dirty_nav_cells)
 	{
-		if (dirty_nav_cells.Count > 0)
-		{
-			GameScenePartitioner.Instance.TriggerEvent(dirty_nav_cells, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, null);
-		}
+		GameScenePartitioner.Instance.TriggerEvent(dirty_nav_cells, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, null);
 		if (this.changedCells.Count > 0)
 		{
 			GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.validNavCellChangedLayer, null);

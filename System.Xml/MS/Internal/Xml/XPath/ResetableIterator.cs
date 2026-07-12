@@ -22,19 +22,6 @@ namespace MS.Internal.Xml.XPath
 
 		public abstract void Reset();
 
-		public virtual bool MoveToPosition(int pos)
-		{
-			this.Reset();
-			for (int i = this.CurrentPosition; i < pos; i++)
-			{
-				if (!this.MoveNext())
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
 		public abstract override int CurrentPosition { get; }
 	}
 }

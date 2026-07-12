@@ -342,7 +342,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			ClothingOutfitUtility.OutfitType outfitType;
 			List<ResourceRef<ClothingItemResource>> list;
-			keyValuePair.Deconstruct<ClothingOutfitUtility.OutfitType, List<ResourceRef<ClothingItemResource>>>(out outfitType, out list);
+			keyValuePair.Deconstruct(out outfitType, out list);
 			ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
 			if (forOutfitType != null)
 			{

@@ -32,7 +32,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
 			{
-				throw new ArgumentException(global::SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses.", new object[] { "TCP" }), "family");
+				throw new ArgumentException(SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses.", new object[] { "TCP" }), "family");
 			}
 			this.m_Family = family;
 			this.initialize();
@@ -346,7 +346,7 @@ namespace System.Net.Sockets
 			}
 			if (!this.Client.Connected)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The operation is not allowed on non-connected sockets."));
+				throw new InvalidOperationException(SR.GetString("The operation is not allowed on non-connected sockets."));
 			}
 			if (this.m_DataStream == null)
 			{

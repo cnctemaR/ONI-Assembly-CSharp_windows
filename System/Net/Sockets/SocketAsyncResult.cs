@@ -99,7 +99,7 @@ namespace System.Net.Sockets
 			base.IsCompleted = true;
 			Socket socket = this.socket;
 			SocketOperation socketOperation = this.operation;
-			if (base.AsyncCallback != null)
+			if (!base.CompletedSynchronously && base.AsyncCallback != null)
 			{
 				ThreadPool.UnsafeQueueUserWorkItem(delegate(object state)
 				{
@@ -176,7 +176,7 @@ namespace System.Net.Sockets
 
 		public EndPoint EndPoint;
 
-		public byte[] Buffer;
+		public Memory<byte> Buffer;
 
 		public int Offset;
 

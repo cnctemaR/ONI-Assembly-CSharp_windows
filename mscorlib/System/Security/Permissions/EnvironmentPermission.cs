@@ -34,7 +34,7 @@ namespace System.Security.Permissions
 			case EnvironmentPermissionAccess.NoAccess:
 				break;
 			case EnvironmentPermissionAccess.Read:
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				foreach (string text in pathList.Split(';', StringSplitOptions.None))
 				{
 					if (!this.readList.Contains(text))
 					{
@@ -43,7 +43,7 @@ namespace System.Security.Permissions
 				}
 				return;
 			case EnvironmentPermissionAccess.Write:
-				foreach (string text2 in pathList.Split(new char[] { ';' }))
+				foreach (string text2 in pathList.Split(';', StringSplitOptions.None))
 				{
 					if (!this.writeList.Contains(text2))
 					{
@@ -52,7 +52,7 @@ namespace System.Security.Permissions
 				}
 				return;
 			case EnvironmentPermissionAccess.AllAccess:
-				foreach (string text3 in pathList.Split(new char[] { ';' }))
+				foreach (string text3 in pathList.Split(';', StringSplitOptions.None))
 				{
 					if (!this.readList.Contains(text3))
 					{
@@ -145,7 +145,7 @@ namespace System.Security.Permissions
 			string pathList = environmentPermission.GetPathList(EnvironmentPermissionAccess.Read);
 			if (pathList != null)
 			{
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				foreach (string text in pathList.Split(';', StringSplitOptions.None))
 				{
 					if (this.readList.Contains(text))
 					{
@@ -157,7 +157,7 @@ namespace System.Security.Permissions
 			string pathList2 = environmentPermission.GetPathList(EnvironmentPermissionAccess.Write);
 			if (pathList2 != null)
 			{
-				foreach (string text2 in pathList2.Split(new char[] { ';' }))
+				foreach (string text2 in pathList2.Split(';', StringSplitOptions.None))
 				{
 					if (this.writeList.Contains(text2))
 					{
@@ -225,14 +225,14 @@ namespace System.Security.Permissions
 				break;
 			case EnvironmentPermissionAccess.Read:
 				this.readList.Clear();
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				foreach (string text in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.readList.Add(text);
 				}
 				return;
 			case EnvironmentPermissionAccess.Write:
 				this.writeList.Clear();
-				foreach (string text2 in pathList.Split(new char[] { ';' }))
+				foreach (string text2 in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.writeList.Add(text2);
 				}
@@ -240,7 +240,7 @@ namespace System.Security.Permissions
 			case EnvironmentPermissionAccess.AllAccess:
 				this.readList.Clear();
 				this.writeList.Clear();
-				foreach (string text3 in pathList.Split(new char[] { ';' }))
+				foreach (string text3 in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.readList.Add(text3);
 					this.writeList.Add(text3);

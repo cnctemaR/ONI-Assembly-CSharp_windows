@@ -100,7 +100,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new HashSet<Tag> { GameTags.Minion }, FetchChore.MatchCriteria.MatchID, GameTags.Corpse, null, null, true, null, null, null, Operational.State.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new HashSet<Tag> { GameTags.BaseMinion }, FetchChore.MatchCriteria.MatchTags, GameTags.Corpse, null, null, true, null, null, null, Operational.State.Operational, 0);
 			this.chore.allowMultifetch = false;
 		}
 

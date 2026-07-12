@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -15,7 +14,7 @@ namespace MS.Internal.Xml.XPath
 		private VariableQuery(VariableQuery other)
 			: base(other)
 		{
-			this.variable = other.variable;
+			this._variable = other._variable;
 		}
 
 		public override void SetXsltContext(XsltContext context)
@@ -27,8 +26,8 @@ namespace MS.Internal.Xml.XPath
 			if (this.xsltContext != context)
 			{
 				this.xsltContext = context;
-				this.variable = this.xsltContext.ResolveVariable(this.prefix, this.name);
-				if (this.variable == null)
+				this._variable = this.xsltContext.ResolveVariable(this.prefix, this.name);
+				if (this._variable == null)
 				{
 					throw XPathException.Create("The variable '{0}' is undefined.", base.QName);
 				}
@@ -41,18 +40,18 @@ namespace MS.Internal.Xml.XPath
 			{
 				throw XPathException.Create("Namespace Manager or XsltContext needed. This query has a prefix, variable, or user-defined function.");
 			}
-			return base.ProcessResult(this.variable.Evaluate(this.xsltContext));
+			return base.ProcessResult(this._variable.Evaluate(this.xsltContext));
 		}
 
 		public override XPathResultType StaticType
 		{
 			get
 			{
-				if (this.variable != null)
+				if (this._variable != null)
 				{
 					return base.GetXPathType(this.Evaluate(null));
 				}
-				XPathResultType xpathResultType = ((this.variable != null) ? this.variable.VariableType : XPathResultType.Any);
+				XPathResultType xpathResultType = ((this._variable != null) ? this._variable.VariableType : XPathResultType.Any);
 				if (xpathResultType == XPathResultType.Error)
 				{
 					xpathResultType = XPathResultType.Any;
@@ -66,13 +65,6 @@ namespace MS.Internal.Xml.XPath
 			return new VariableQuery(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("name", (this.prefix.Length != 0) ? (this.prefix + ":" + this.name) : this.name);
-			w.WriteEndElement();
-		}
-
-		private IXsltContextVariable variable;
+		private IXsltContextVariable _variable;
 	}
 }

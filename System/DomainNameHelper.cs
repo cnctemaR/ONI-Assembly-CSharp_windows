@@ -256,7 +256,7 @@ namespace System
 				}
 				catch (ArgumentException)
 				{
-					throw new UriFormatException(global::SR.GetString("An invalid Unicode character by IDN standards was specified in the host."));
+					throw new UriFormatException(SR.GetString("An invalid Unicode character by IDN standards was specified in the host."));
 				}
 				return ascii;
 			}
@@ -345,7 +345,7 @@ namespace System
 					}
 					catch (ArgumentException)
 					{
-						throw new UriFormatException(global::SR.GetString("An invalid Unicode character by IDN standards was specified in the host."));
+						throw new UriFormatException(SR.GetString("An invalid Unicode character by IDN standards was specified in the host."));
 					}
 					text3 += idnMapping.GetUnicode(text4);
 					if (flag)

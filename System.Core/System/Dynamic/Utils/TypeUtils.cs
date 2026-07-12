@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -183,7 +184,104 @@ namespace System.Dynamic.Utils
 			}
 			Type nonNullableType = source.GetNonNullableType();
 			Type nonNullableType2 = dest.GetNonNullableType();
-			return nonNullableType.IsAssignableFrom(nonNullableType2) || nonNullableType2.IsAssignableFrom(nonNullableType) || (source.IsInterface || dest.IsInterface) || TypeUtils.IsLegalExplicitVariantDelegateConversion(source, dest) || source == typeof(object) || dest == typeof(object);
+			return nonNullableType.IsAssignableFrom(nonNullableType2) || nonNullableType2.IsAssignableFrom(nonNullableType) || (source.IsInterface || dest.IsInterface) || TypeUtils.IsLegalExplicitVariantDelegateConversion(source, dest) || ((source.IsArray || dest.IsArray) && source.StrictHasReferenceConversionTo(dest, true));
+		}
+
+		private static bool StrictHasReferenceConversionTo(this Type source, Type dest, bool skipNonArray)
+		{
+			for (;;)
+			{
+				if (!skipNonArray)
+				{
+					if (source.IsValueType | dest.IsValueType)
+					{
+						break;
+					}
+					if (source.IsAssignableFrom(dest) || dest.IsAssignableFrom(source))
+					{
+						return true;
+					}
+					if (source.IsInterface)
+					{
+						if (dest.IsInterface || (dest.IsClass && !dest.IsSealed))
+						{
+							return true;
+						}
+					}
+					else if (dest.IsInterface && source.IsClass && !source.IsSealed)
+					{
+						return true;
+					}
+				}
+				if (!source.IsArray)
+				{
+					goto IL_00B2;
+				}
+				if (!dest.IsArray)
+				{
+					goto IL_00AA;
+				}
+				if (source.GetArrayRank() != dest.GetArrayRank() || source.IsSZArray != dest.IsSZArray)
+				{
+					return false;
+				}
+				source = source.GetElementType();
+				dest = dest.GetElementType();
+				skipNonArray = false;
+			}
+			return false;
+			IL_00AA:
+			return TypeUtils.HasArrayToInterfaceConversion(source, dest);
+			IL_00B2:
+			if (dest.IsArray)
+			{
+				return TypeUtils.HasInterfaceToArrayConversion(source, dest) || TypeUtils.IsImplicitReferenceConversion(typeof(Array), source);
+			}
+			return TypeUtils.IsLegalExplicitVariantDelegateConversion(source, dest);
+		}
+
+		private static bool HasArrayToInterfaceConversion(Type source, Type dest)
+		{
+			if (!source.IsSZArray || !dest.IsInterface || !dest.IsGenericType)
+			{
+				return false;
+			}
+			Type[] genericArguments = dest.GetGenericArguments();
+			if (genericArguments.Length != 1)
+			{
+				return false;
+			}
+			Type genericTypeDefinition = dest.GetGenericTypeDefinition();
+			foreach (Type type in TypeUtils.s_arrayAssignableInterfaces)
+			{
+				if (TypeUtils.AreEquivalent(genericTypeDefinition, type))
+				{
+					return source.GetElementType().StrictHasReferenceConversionTo(genericArguments[0], false);
+				}
+			}
+			return false;
+		}
+
+		private static bool HasInterfaceToArrayConversion(Type source, Type dest)
+		{
+			if (!dest.IsSZArray || !source.IsInterface || !source.IsGenericType)
+			{
+				return false;
+			}
+			Type[] genericArguments = source.GetGenericArguments();
+			if (genericArguments.Length != 1)
+			{
+				return false;
+			}
+			Type genericTypeDefinition = source.GetGenericTypeDefinition();
+			foreach (Type type in TypeUtils.s_arrayAssignableInterfaces)
+			{
+				if (TypeUtils.AreEquivalent(genericTypeDefinition, type))
+				{
+					return genericArguments[0].StrictHasReferenceConversionTo(dest.GetElementType(), false);
+				}
+			}
+			return false;
 		}
 
 		private static bool IsCovariant(Type t)
@@ -501,11 +599,11 @@ namespace System.Dynamic.Utils
 			{
 				if (!allowByRef && type.IsByRef)
 				{
-					throw Error.TypeMustNotBeByRef(paramName);
+					throw global::System.Linq.Expressions.Error.TypeMustNotBeByRef(paramName);
 				}
 				if (!allowPointer && type.IsPointer)
 				{
-					throw Error.TypeMustNotBePointer(paramName);
+					throw global::System.Linq.Expressions.Error.TypeMustNotBePointer(paramName);
 				}
 			}
 		}
@@ -518,40 +616,7 @@ namespace System.Dynamic.Utils
 			}
 			if (type.ContainsGenericParameters)
 			{
-				throw type.IsGenericTypeDefinition ? Error.TypeIsGeneric(type, paramName, index) : Error.TypeContainsGenericParameters(type, paramName, index);
-			}
-			return true;
-		}
-
-		private static Assembly MsCorLib
-		{
-			get
-			{
-				Assembly assembly;
-				if ((assembly = TypeUtils.s_mscorlib) == null)
-				{
-					assembly = (TypeUtils.s_mscorlib = typeof(object).Assembly);
-				}
-				return assembly;
-			}
-		}
-
-		public static bool CanCache(this Type t)
-		{
-			if (t.Assembly != TypeUtils.MsCorLib)
-			{
-				return false;
-			}
-			if (t.IsGenericType)
-			{
-				Type[] genericArguments = t.GetGenericArguments();
-				for (int i = 0; i < genericArguments.Length; i++)
-				{
-					if (!genericArguments[i].CanCache())
-					{
-						return false;
-					}
-				}
+				throw type.IsGenericTypeDefinition ? global::System.Linq.Expressions.Error.TypeIsGeneric(type, paramName, index) : global::System.Linq.Expressions.Error.TypeContainsGenericParameters(type, paramName, index);
 			}
 			return true;
 		}
@@ -590,6 +655,8 @@ namespace System.Dynamic.Utils
 			return typeCode - TypeCode.Single <= 1;
 		}
 
-		private static Assembly s_mscorlib;
+		private static readonly Type[] s_arrayAssignableInterfaces = (from i in typeof(int[]).GetInterfaces()
+			where i.IsGenericType
+			select i.GetGenericTypeDefinition()).ToArray<Type>();
 	}
 }

@@ -655,7 +655,7 @@ namespace Microsoft.CSharp
 			{
 				if (!(e is CodeLabeledStatement))
 				{
-					throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+					throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 				}
 				this.GenerateLabeledStatement((CodeLabeledStatement)e);
 			}
@@ -811,7 +811,7 @@ namespace Microsoft.CSharp
 			}
 			if (!(e.Value is bool))
 			{
-				throw new ArgumentException(global::SR.Format("Invalid Primitive Type: {0}. Consider using CodeObjectCreateExpression.", e.Value.GetType().ToString()));
+				throw new ArgumentException(SR.Format("Invalid Primitive Type: {0}. Consider using CodeObjectCreateExpression.", e.Value.GetType().ToString()));
 			}
 			if ((bool)e.Value)
 			{
@@ -996,7 +996,7 @@ namespace Microsoft.CSharp
 		{
 			if (e.Comment == null)
 			{
-				throw new ArgumentException(global::SR.Format("The 'Comment' property of the CodeCommentStatement '{0}' cannot be null.", "e"), "e");
+				throw new ArgumentException(SR.Format("The 'Comment' property of the CodeCommentStatement '{0}' cannot be null.", "e"), "e");
 			}
 			this.GenerateComment(e.Comment);
 		}
@@ -1354,7 +1354,7 @@ namespace Microsoft.CSharp
 			{
 				throw new ArgumentNullException("e");
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void GenerateField(CodeMemberField e)
@@ -1692,8 +1692,7 @@ namespace Microsoft.CSharp
 
 		private void OutputVTableModifier(MemberAttributes attributes)
 		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
 			{
 				this.Output.Write("new ");
 			}
@@ -2798,7 +2797,7 @@ namespace Microsoft.CSharp
 		{
 			if (!this.IsValidIdentifier(value))
 			{
-				throw new ArgumentException(global::SR.Format("Identifier '{0}' is not valid.", value));
+				throw new ArgumentException(SR.Format("Identifier '{0}' is not valid.", value));
 			}
 		}
 
@@ -3241,7 +3240,7 @@ namespace Microsoft.CSharp
 				if (ea[i] != null)
 				{
 					this.ResolveReferencedAssemblies(options, ea[i]);
-					array[i] = options.TempFiles.AddExtension(i + this.FileExtension);
+					array[i] = options.TempFiles.AddExtension(i.ToString() + this.FileExtension);
 					using (FileStream fileStream = new FileStream(array[i], FileMode.Create, FileAccess.Write, FileShare.Read))
 					{
 						using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
@@ -3282,7 +3281,7 @@ namespace Microsoft.CSharp
 			string[] array = new string[sources.Length];
 			for (int i = 0; i < sources.Length; i++)
 			{
-				string text = options.TempFiles.AddExtension(i + this.FileExtension);
+				string text = options.TempFiles.AddExtension(i.ToString() + this.FileExtension);
 				using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.Read))
 				{
 					using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
@@ -3485,19 +3484,28 @@ namespace Microsoft.CSharp
 			}
 			ProcessStartInfo startInfo = process.StartInfo;
 			startInfo.Arguments += CSharpCodeGenerator.BuildArgs(options, fileNames, this._provOptions);
-			Mutex mcsOutMutex = new Mutex();
-			process.StartInfo.EnvironmentVariables["MONO_GC_PARAMS"] = string.Empty;
+			ManualResetEvent stderr_completed = new ManualResetEvent(false);
+			ManualResetEvent stdout_completed = new ManualResetEvent(false);
+			process.StartInfo.EnvironmentVariables.Remove("MONO_GC_PARAMS");
 			process.StartInfo.CreateNoWindow = true;
 			process.StartInfo.UseShellExecute = false;
+			process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 			process.StartInfo.RedirectStandardOutput = true;
 			process.StartInfo.RedirectStandardError = true;
 			process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args)
 			{
 				if (args.Data != null)
 				{
-					mcsOutMutex.WaitOne();
 					results.Output.Add(args.Data);
-					mcsOutMutex.ReleaseMutex();
+					return;
+				}
+				stderr_completed.Set();
+			};
+			process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args)
+			{
+				if (args.Data == null)
+				{
+					stdout_completed.Set();
 				}
 			};
 			process.StartInfo.StandardOutputEncoding = (process.StartInfo.StandardErrorEncoding = Encoding.UTF8);
@@ -3523,8 +3531,8 @@ namespace Microsoft.CSharp
 			}
 			finally
 			{
-				process.CancelErrorRead();
-				process.CancelOutputRead();
+				stderr_completed.WaitOne(TimeSpan.FromSeconds(30.0));
+				stdout_completed.WaitOne(TimeSpan.FromSeconds(30.0));
 				process.Close();
 			}
 			bool flag = true;
@@ -3563,7 +3571,7 @@ namespace Microsoft.CSharp
 						fileStream.Read(array, 0, array.Length);
 						results.CompiledAssembly = Assembly.Load(array, null);
 						fileStream.Close();
-						goto IL_0351;
+						goto IL_039F;
 					}
 				}
 				results.PathToAssembly = options.OutputAssembly;
@@ -3572,7 +3580,7 @@ namespace Microsoft.CSharp
 			{
 				results.CompiledAssembly = null;
 			}
-			IL_0351:
+			IL_039F:
 			return results;
 		}
 
@@ -3693,7 +3701,7 @@ namespace Microsoft.CSharp
 				}
 				if (string.Empty != match.Result("${column}"))
 				{
-					compilerError.Column = int.Parse(match.Result("${column}").Trim(new char[] { '+' }));
+					compilerError.Column = int.Parse(match.Result("${column}").Trim('+'));
 				}
 				string text = match.Result("${level}");
 				if (text == "warning")

@@ -1,10 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	internal class SendMouseEvents
 	{
+		private static void UpdateMouse()
+		{
+			bool flag = SendMouseEvents.s_GetMouseState != null;
+			if (flag)
+			{
+				KeyValuePair<int, Vector2> keyValuePair = SendMouseEvents.s_GetMouseState();
+				SendMouseEvents.s_MousePosition = keyValuePair.Value;
+				SendMouseEvents.s_MouseButtonPressedThisFrame = keyValuePair.Key == 2;
+				SendMouseEvents.s_MouseButtonIsPressed = keyValuePair.Key != 0;
+			}
+			else
+			{
+				bool flag2 = !Input.CheckDisabled();
+				if (flag2)
+				{
+					SendMouseEvents.s_MousePosition = Input.mousePosition;
+					SendMouseEvents.s_MouseButtonPressedThisFrame = Input.GetMouseButtonDown(0);
+					SendMouseEvents.s_MouseButtonIsPressed = Input.GetMouseButton(0);
+				}
+				else
+				{
+					SendMouseEvents.s_MousePosition = default(Vector2);
+					SendMouseEvents.s_MouseButtonPressedThisFrame = false;
+					SendMouseEvents.s_MouseButtonIsPressed = false;
+				}
+			}
+		}
+
 		[RequiredByNativeCode]
 		private static void SetMouseMoved()
 		{
@@ -14,7 +43,8 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void DoSendMouseEvents(int skipRTCameras)
 		{
-			Vector3 mousePosition = Input.mousePosition;
+			SendMouseEvents.UpdateMouse();
+			Vector2 vector = SendMouseEvents.s_MousePosition;
 			int allCamerasCount = Camera.allCamerasCount;
 			bool flag = SendMouseEvents.m_Cameras == null || SendMouseEvents.m_Cameras.Length != allCamerasCount;
 			if (flag)
@@ -35,15 +65,15 @@ namespace UnityEngine
 					if (!flag3)
 					{
 						int targetDisplay = camera.targetDisplay;
-						Vector3 vector = Display.RelativeMouseAt(mousePosition);
-						bool flag4 = vector != Vector3.zero;
+						Vector3 vector2 = Display.RelativeMouseAt(vector);
+						bool flag4 = vector2 != Vector3.zero;
 						if (flag4)
 						{
-							int num = (int)vector.z;
+							int num = (int)vector2.z;
 							bool flag5 = num != targetDisplay;
 							if (flag5)
 							{
-								goto IL_0358;
+								goto IL_0368;
 							}
 							float num2 = (float)Screen.width;
 							float num3 = (float)Screen.height;
@@ -53,24 +83,24 @@ namespace UnityEngine
 								num2 = (float)Display.displays[targetDisplay].systemWidth;
 								num3 = (float)Display.displays[targetDisplay].systemHeight;
 							}
-							Vector2 vector2 = new Vector2(vector.x / num2, vector.y / num3);
-							bool flag7 = vector2.x < 0f || vector2.x > 1f || vector2.y < 0f || vector2.y > 1f;
+							Vector2 vector3 = new Vector2(vector2.x / num2, vector2.y / num3);
+							bool flag7 = vector3.x < 0f || vector3.x > 1f || vector3.y < 0f || vector3.y > 1f;
 							if (flag7)
 							{
-								goto IL_0358;
+								goto IL_0368;
 							}
 						}
 						else
 						{
-							vector = mousePosition;
+							vector2 = vector;
 						}
-						bool flag8 = !camera.pixelRect.Contains(vector);
+						bool flag8 = !camera.pixelRect.Contains(vector2);
 						if (!flag8)
 						{
 							bool flag9 = camera.eventMask == 0;
 							if (!flag9)
 							{
-								Ray ray = camera.ScreenPointToRay(vector);
+								Ray ray = camera.ScreenPointToRay(vector2);
 								float z = ray.direction.z;
 								float num4 = (Mathf.Approximately(0f, z) ? float.PositiveInfinity : Mathf.Abs((camera.farClipPlane - camera.nearClipPlane) / z));
 								GameObject gameObject = CameraRaycastHelper.RaycastTry(camera, ray, num4, camera.cullingMask & camera.eventMask);
@@ -108,7 +138,7 @@ namespace UnityEngine
 							}
 						}
 					}
-					IL_0358:;
+					IL_0368:;
 				}
 			}
 			for (int k = 0; k < SendMouseEvents.m_CurrentHit.Length; k++)
@@ -120,13 +150,13 @@ namespace UnityEngine
 
 		private static void SendEvents(int i, SendMouseEvents.HitInfo hit)
 		{
-			bool mouseButtonDown = Input.GetMouseButtonDown(0);
-			bool mouseButton = Input.GetMouseButton(0);
-			bool flag = mouseButtonDown;
-			if (flag)
+			bool flag = SendMouseEvents.s_MouseButtonPressedThisFrame;
+			bool flag2 = SendMouseEvents.s_MouseButtonIsPressed;
+			bool flag3 = flag;
+			if (flag3)
 			{
-				bool flag2 = hit;
-				if (flag2)
+				bool flag4 = hit;
+				if (flag4)
 				{
 					SendMouseEvents.m_MouseDownHit[i] = hit;
 					SendMouseEvents.m_MouseDownHit[i].SendMessage("OnMouseDown");
@@ -134,14 +164,14 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag3 = !mouseButton;
-				if (flag3)
+				bool flag5 = !flag2;
+				if (flag5)
 				{
-					bool flag4 = SendMouseEvents.m_MouseDownHit[i];
-					if (flag4)
+					bool flag6 = SendMouseEvents.m_MouseDownHit[i];
+					if (flag6)
 					{
-						bool flag5 = SendMouseEvents.HitInfo.Compare(hit, SendMouseEvents.m_MouseDownHit[i]);
-						if (flag5)
+						bool flag7 = SendMouseEvents.HitInfo.Compare(hit, SendMouseEvents.m_MouseDownHit[i]);
+						if (flag7)
 						{
 							SendMouseEvents.m_MouseDownHit[i].SendMessage("OnMouseUpAsButton");
 						}
@@ -151,31 +181,31 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool flag6 = SendMouseEvents.m_MouseDownHit[i];
-					if (flag6)
+					bool flag8 = SendMouseEvents.m_MouseDownHit[i];
+					if (flag8)
 					{
 						SendMouseEvents.m_MouseDownHit[i].SendMessage("OnMouseDrag");
 					}
 				}
 			}
-			bool flag7 = SendMouseEvents.HitInfo.Compare(hit, SendMouseEvents.m_LastHit[i]);
-			if (flag7)
+			bool flag9 = SendMouseEvents.HitInfo.Compare(hit, SendMouseEvents.m_LastHit[i]);
+			if (flag9)
 			{
-				bool flag8 = hit;
-				if (flag8)
+				bool flag10 = hit;
+				if (flag10)
 				{
 					hit.SendMessage("OnMouseOver");
 				}
 			}
 			else
 			{
-				bool flag9 = SendMouseEvents.m_LastHit[i];
-				if (flag9)
+				bool flag11 = SendMouseEvents.m_LastHit[i];
+				if (flag11)
 				{
 					SendMouseEvents.m_LastHit[i].SendMessage("OnMouseExit");
 				}
-				bool flag10 = hit;
-				if (flag10)
+				bool flag12 = hit;
+				if (flag12)
 				{
 					hit.SendMessage("OnMouseEnter");
 					hit.SendMessage("OnMouseOver");
@@ -200,6 +230,14 @@ namespace UnityEngine
 
 		private static Camera[] m_Cameras;
 
+		public static Func<KeyValuePair<int, Vector2>> s_GetMouseState;
+
+		private static Vector2 s_MousePosition;
+
+		private static bool s_MouseButtonPressedThisFrame;
+
+		private static bool s_MouseButtonIsPressed;
+
 		private struct HitInfo
 		{
 			public void SendMessage(string name)
@@ -220,6 +258,13 @@ namespace UnityEngine
 			public GameObject target;
 
 			public Camera camera;
+		}
+
+		public enum LeftMouseButtonState
+		{
+			NotPressed,
+			Pressed,
+			PressedThisFrame
 		}
 	}
 }

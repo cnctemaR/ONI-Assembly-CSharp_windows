@@ -9,11 +9,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	public class RenderTexture : Texture
 	{
 		public override extern int width
@@ -40,13 +40,24 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("ColorFormat")]
-		public new extern GraphicsFormat graphicsFormat
+		[NativeName("GetColorFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsFormat GetColorFormat(bool suppressWarnings);
+
+		[NativeName("SetColorFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetColorFormat(GraphicsFormat format);
+
+		public new GraphicsFormat graphicsFormat
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.GetColorFormat(true);
+			}
+			set
+			{
+				this.SetColorFormat(value);
+			}
 		}
 
 		[NativeProperty("MipMap")]
@@ -87,7 +98,17 @@ namespace UnityEngine
 		{
 			get
 			{
-				return GraphicsFormatUtility.GetRenderTextureFormat(this.graphicsFormat);
+				bool flag = this.graphicsFormat > GraphicsFormat.None;
+				RenderTextureFormat renderTextureFormat;
+				if (flag)
+				{
+					renderTextureFormat = GraphicsFormatUtility.GetRenderTextureFormat(this.graphicsFormat);
+				}
+				else
+				{
+					renderTextureFormat = ((this.GetDescriptor().shadowSamplingMode != ShadowSamplingMode.None) ? RenderTextureFormat.Shadowmap : RenderTextureFormat.Depth);
+				}
+				return renderTextureFormat;
 			}
 			set
 			{
@@ -96,6 +117,14 @@ namespace UnityEngine
 		}
 
 		public extern GraphicsFormat stencilFormat
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern GraphicsFormat depthStencilFormat
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -201,6 +230,12 @@ namespace UnityEngine
 			return renderBuffer;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetMipMapCount(int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetShadowSamplingMode(ShadowSamplingMode samplingMode);
+
 		public RenderBuffer colorBuffer
 		{
 			get
@@ -223,6 +258,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DiscardContents(bool discardColor, bool discardDepth);
 
+		[Obsolete("This function has no effect.", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void MarkRestoreExpected();
 
@@ -338,61 +374,119 @@ namespace UnityEngine
 			this.SetRenderTextureDescriptor(textureToCopy.descriptor);
 		}
 
+		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth, DefaultFormat format)
-			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format))
-		{
-		}
-
-		public RenderTexture(int width, int height, int depth, GraphicsFormat format)
-		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Render);
-			if (!flag)
-			{
-				RenderTexture.Internal_Create(this);
-				this.width = width;
-				this.height = height;
-				this.depth = depth;
-				this.graphicsFormat = format;
-				this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(format));
-			}
-		}
-
-		public RenderTexture(int width, int height, int depth, GraphicsFormat format, int mipCount)
-		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Render);
-			if (!flag)
-			{
-				RenderTexture.Internal_Create(this);
-				this.width = width;
-				this.height = height;
-				this.depth = depth;
-				this.graphicsFormat = format;
-				this.descriptor = new RenderTextureDescriptor(width, height, format, depth, mipCount);
-				this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(format));
-			}
-		}
-
-		public RenderTexture(int width, int height, int depth, [UnityEngine.Internal.DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat format, [UnityEngine.Internal.DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite)
-			: this(width, height, depth, RenderTexture.GetCompatibleFormat(format, readWrite))
+			: this(width, height, RenderTexture.GetDefaultColorFormat(format), RenderTexture.GetDefaultDepthStencilFormat(format, depth), Texture.GenerateAllMips)
 		{
 		}
 
 		[ExcludeFromDocs]
+		public RenderTexture(int width, int height, int depth, GraphicsFormat format)
+			: this(width, height, depth, format, Texture.GenerateAllMips)
+		{
+		}
+
+		[ExcludeFromDocs]
+		public RenderTexture(int width, int height, int depth, GraphicsFormat format, int mipCount)
+		{
+			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, FormatUsage.Render);
+			if (!flag)
+			{
+				RenderTexture.Internal_Create(this);
+				this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(depth, format);
+				this.width = width;
+				this.height = height;
+				this.graphicsFormat = format;
+				this.SetMipMapCount(mipCount);
+				this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(format));
+			}
+		}
+
+		[ExcludeFromDocs]
+		public RenderTexture(int width, int height, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int mipCount)
+		{
+			bool flag = colorFormat != GraphicsFormat.None && !base.ValidateFormat(colorFormat, FormatUsage.Render);
+			if (!flag)
+			{
+				RenderTexture.Internal_Create(this);
+				this.width = width;
+				this.height = height;
+				this.depthStencilFormat = depthStencilFormat;
+				this.graphicsFormat = colorFormat;
+				this.SetMipMapCount(mipCount);
+				this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(colorFormat));
+			}
+		}
+
+		[ExcludeFromDocs]
+		public RenderTexture(int width, int height, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat)
+			: this(width, height, colorFormat, depthStencilFormat, Texture.GenerateAllMips)
+		{
+		}
+
+		public RenderTexture(int width, int height, int depth, [DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat format, [DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite)
+		{
+			this.Initialize(width, height, depth, format, readWrite, Texture.GenerateAllMips);
+		}
+
+		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth, RenderTextureFormat format)
-			: this(width, height, depth, RenderTexture.GetCompatibleFormat(format, RenderTextureReadWrite.Default))
+			: this(width, height, depth, format, Texture.GenerateAllMips)
 		{
 		}
 
 		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth)
-			: this(width, height, depth, RenderTexture.GetCompatibleFormat(RenderTextureFormat.Default, RenderTextureReadWrite.Default))
+			: this(width, height, depth, RenderTextureFormat.Default)
 		{
 		}
 
 		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth, RenderTextureFormat format, int mipCount)
-			: this(width, height, depth, RenderTexture.GetCompatibleFormat(format, RenderTextureReadWrite.Default), mipCount)
 		{
+			this.Initialize(width, height, depth, format, RenderTextureReadWrite.Default, mipCount);
+		}
+
+		private void Initialize(int width, int height, int depth, RenderTextureFormat format, RenderTextureReadWrite readWrite, int mipCount)
+		{
+			GraphicsFormat compatibleFormat = RenderTexture.GetCompatibleFormat(format, readWrite);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depth, format);
+			bool flag = compatibleFormat > GraphicsFormat.None;
+			if (flag)
+			{
+				bool flag2 = !base.ValidateFormat(compatibleFormat, FormatUsage.Render);
+				if (flag2)
+				{
+					return;
+				}
+			}
+			RenderTexture.Internal_Create(this);
+			this.width = width;
+			this.height = height;
+			this.depthStencilFormat = depthStencilFormatLegacy;
+			this.graphicsFormat = compatibleFormat;
+			this.SetMipMapCount(mipCount);
+			this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(compatibleFormat));
+		}
+
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, GraphicsFormat colorFormat)
+		{
+			return (colorFormat == GraphicsFormat.ShadowAuto) ? GraphicsFormatUtility.GetDepthStencilFormat(depthBits, 0) : GraphicsFormatUtility.GetDepthStencilFormat(depthBits);
+		}
+
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, RenderTextureFormat format)
+		{
+			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, format == RenderTextureFormat.Shadowmap);
+		}
+
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, DefaultFormat format)
+		{
+			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, format == DefaultFormat.Shadow);
+		}
+
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, bool requestedShadowMap)
+		{
+			return requestedShadowMap ? GraphicsFormatUtility.GetDepthStencilFormat(depthBits, 0) : GraphicsFormatUtility.GetDepthStencilFormat(depthBits);
 		}
 
 		public RenderTextureDescriptor descriptor
@@ -410,36 +504,86 @@ namespace UnityEngine
 
 		private static void ValidateRenderTextureDesc(RenderTextureDescriptor desc)
 		{
-			bool flag = !SystemInfo.IsFormatSupported(desc.graphicsFormat, FormatUsage.Render);
+			bool flag = desc.graphicsFormat == GraphicsFormat.None && desc.depthStencilFormat == GraphicsFormat.None;
 			if (flag)
 			{
-				throw new ArgumentException("RenderTextureDesc graphicsFormat must be a supported GraphicsFormat. " + desc.graphicsFormat.ToString() + " is not supported.", "desc.graphicsFormat");
+				throw new ArgumentException("RenderTextureDesc graphicsFormat and depthStencilFormat cannot both be None.");
 			}
-			bool flag2 = desc.width <= 0;
+			bool flag2 = desc.graphicsFormat != GraphicsFormat.None && !SystemInfo.IsFormatSupported(desc.graphicsFormat, FormatUsage.Render);
 			if (flag2)
+			{
+				throw new ArgumentException("RenderTextureDesc graphicsFormat must be a supported GraphicsFormat. " + desc.graphicsFormat.ToString() + " is not supported on this platform.", "desc.graphicsFormat");
+			}
+			bool flag3 = desc.depthStencilFormat != GraphicsFormat.None && !GraphicsFormatUtility.IsDepthStencilFormat(desc.depthStencilFormat);
+			if (flag3)
+			{
+				throw new ArgumentException("RenderTextureDesc depthStencilFormat must be a supported depth/stencil GraphicsFormat. " + desc.depthStencilFormat.ToString() + " is not supported on this platform.", "desc.depthStencilFormat");
+			}
+			bool flag4 = desc.width <= 0;
+			if (flag4)
 			{
 				throw new ArgumentException("RenderTextureDesc width must be greater than zero.", "desc.width");
 			}
-			bool flag3 = desc.height <= 0;
-			if (flag3)
+			bool flag5 = desc.height <= 0;
+			if (flag5)
 			{
 				throw new ArgumentException("RenderTextureDesc height must be greater than zero.", "desc.height");
 			}
-			bool flag4 = desc.volumeDepth <= 0;
-			if (flag4)
+			bool flag6 = desc.volumeDepth <= 0;
+			if (flag6)
 			{
 				throw new ArgumentException("RenderTextureDesc volumeDepth must be greater than zero.", "desc.volumeDepth");
 			}
-			bool flag5 = desc.msaaSamples != 1 && desc.msaaSamples != 2 && desc.msaaSamples != 4 && desc.msaaSamples != 8;
-			if (flag5)
+			bool flag7 = desc.msaaSamples != 1 && desc.msaaSamples != 2 && desc.msaaSamples != 4 && desc.msaaSamples != 8;
+			if (flag7)
 			{
 				throw new ArgumentException("RenderTextureDesc msaaSamples must be 1, 2, 4, or 8.", "desc.msaaSamples");
 			}
-			bool flag6 = desc.depthBufferBits != 0 && desc.depthBufferBits != 16 && desc.depthBufferBits != 24;
-			if (flag6)
+			bool flag8 = desc.dimension == TextureDimension.CubeArray && desc.volumeDepth % 6 != 0;
+			if (flag8)
 			{
-				throw new ArgumentException("RenderTextureDesc depthBufferBits must be 0, 16, or 24.", "desc.depthBufferBits");
+				throw new ArgumentException("RenderTextureDesc volumeDepth must be a multiple of 6 when dimension is CubeArray", "desc.volumeDepth");
 			}
+			bool flag9 = desc.graphicsFormat != GraphicsFormat.ShadowAuto && desc.graphicsFormat != GraphicsFormat.DepthAuto && GraphicsFormatUtility.IsDepthStencilFormat(desc.graphicsFormat);
+			if (flag9)
+			{
+				throw new ArgumentException("RenderTextureDesc graphicsFormat must not be a depth/stencil format. " + desc.graphicsFormat.ToString() + " is not supported.", "desc.graphicsFormat");
+			}
+		}
+
+		internal static GraphicsFormat GetDefaultColorFormat(DefaultFormat format)
+		{
+			GraphicsFormat graphicsFormat;
+			if (format != DefaultFormat.DepthStencil)
+			{
+				if (format != DefaultFormat.Shadow)
+				{
+					graphicsFormat = SystemInfo.GetGraphicsFormat(format);
+				}
+				else
+				{
+					graphicsFormat = GraphicsFormat.ShadowAuto;
+				}
+			}
+			else
+			{
+				graphicsFormat = GraphicsFormat.DepthAuto;
+			}
+			return graphicsFormat;
+		}
+
+		internal static GraphicsFormat GetDefaultDepthStencilFormat(DefaultFormat format, int depth)
+		{
+			GraphicsFormat graphicsFormat;
+			if (format - DefaultFormat.DepthStencil > 1)
+			{
+				graphicsFormat = RenderTexture.GetDepthStencilFormatLegacy(depth, format);
+			}
+			else
+			{
+				graphicsFormat = SystemInfo.GetGraphicsFormat(format);
+			}
+			return graphicsFormat;
 		}
 
 		internal static GraphicsFormat GetCompatibleFormat(RenderTextureFormat renderTextureFormat, RenderTextureReadWrite readWrite)
@@ -467,9 +611,9 @@ namespace UnityEngine
 			return RenderTexture.GetTemporary_Internal(desc);
 		}
 
-		private static RenderTexture GetTemporaryImpl(int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
+		private static RenderTexture GetTemporaryImpl(int width, int height, GraphicsFormat depthStencilFormat, GraphicsFormat colorFormat, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
 		{
-			return RenderTexture.GetTemporary(new RenderTextureDescriptor(width, height, format, depthBuffer)
+			return RenderTexture.GetTemporary(new RenderTextureDescriptor(width, height, colorFormat, depthStencilFormat)
 			{
 				msaaSamples = antiAliasing,
 				memoryless = memorylessMode,
@@ -479,80 +623,82 @@ namespace UnityEngine
 		}
 
 		[ExcludeFromDocs]
-		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, [UnityEngine.Internal.DefaultValue("1")] int antiAliasing, [UnityEngine.Internal.DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [UnityEngine.Internal.DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [UnityEngine.Internal.DefaultValue("false")] bool useDynamicScale)
+		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, [DefaultValue("1")] int antiAliasing, [DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [DefaultValue("false")] bool useDynamicScale)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, format, antiAliasing, memorylessMode, vrUsage, useDynamicScale);
+			return RenderTexture.GetTemporaryImpl(width, height, RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format), format, antiAliasing, memorylessMode, vrUsage, useDynamicScale);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing, RenderTextureMemoryless memorylessMode, VRTextureUsage vrUsage)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, format, antiAliasing, memorylessMode, vrUsage, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, antiAliasing, memorylessMode, vrUsage, false);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing, RenderTextureMemoryless memorylessMode)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, format, antiAliasing, memorylessMode, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, antiAliasing, memorylessMode, VRTextureUsage.None);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, format, antiAliasing, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, antiAliasing, RenderTextureMemoryless.None);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, format, 1, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, 1);
 		}
 
-		public static RenderTexture GetTemporary(int width, int height, [UnityEngine.Internal.DefaultValue("0")] int depthBuffer, [UnityEngine.Internal.DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat format, [UnityEngine.Internal.DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite, [UnityEngine.Internal.DefaultValue("1")] int antiAliasing, [UnityEngine.Internal.DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [UnityEngine.Internal.DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [UnityEngine.Internal.DefaultValue("false")] bool useDynamicScale)
+		public static RenderTexture GetTemporary(int width, int height, [DefaultValue("0")] int depthBuffer, [DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat format, [DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite, [DefaultValue("1")] int antiAliasing, [DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [DefaultValue("false")] bool useDynamicScale)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, GraphicsFormatUtility.GetGraphicsFormat(format, readWrite), antiAliasing, memorylessMode, vrUsage, useDynamicScale);
+			GraphicsFormat compatibleFormat = RenderTexture.GetCompatibleFormat(format, readWrite);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format);
+			return RenderTexture.GetTemporaryImpl(width, height, depthStencilFormatLegacy, compatibleFormat, antiAliasing, memorylessMode, vrUsage, useDynamicScale);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing, RenderTextureMemoryless memorylessMode, VRTextureUsage vrUsage)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(format, readWrite), antiAliasing, memorylessMode, vrUsage, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, readWrite, antiAliasing, memorylessMode, vrUsage, false);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing, RenderTextureMemoryless memorylessMode)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(format, readWrite), antiAliasing, memorylessMode, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, readWrite, antiAliasing, memorylessMode, VRTextureUsage.None);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(format, readWrite), antiAliasing, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, readWrite, antiAliasing, RenderTextureMemoryless.None);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(format, readWrite), 1, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, readWrite, 1);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, RenderTextureFormat format)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(format, RenderTextureReadWrite.Default), 1, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, format, RenderTextureReadWrite.Default);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, depthBuffer, RenderTexture.GetCompatibleFormat(RenderTextureFormat.Default, RenderTextureReadWrite.Default), 1, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, depthBuffer, RenderTextureFormat.Default);
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, 0, RenderTexture.GetCompatibleFormat(RenderTextureFormat.Default, RenderTextureReadWrite.Default), 1, RenderTextureMemoryless.None, VRTextureUsage.None, false);
+			return RenderTexture.GetTemporary(width, height, 0);
 		}
 
 		[Obsolete("Use RenderTexture.dimension instead.", false)]
@@ -581,8 +727,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("RenderTexture.enabled is always now, no need to use it.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("RenderTexture.enabled is always now, no need to use it.", false)]
 		public static bool enabled
 		{
 			get

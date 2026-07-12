@@ -11,7 +11,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformIOS>("0f8eb3f400726694eb47beb1a9f94ce8");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -19,12 +19,12 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.IPhonePlayer, this);
 		}
 
-		public override void LoadPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
+		internal override void LoadPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
 		{
 			PlatformIOS.StaticLoadPlugins(this, coreSystem, reportResult);
 		}

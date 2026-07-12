@@ -46,8 +46,8 @@ namespace Mono.Security
 			Buffer.BlockCopy(data, 2 + num, this.m_aValue, 0, num2);
 			if ((this.m_nTag & 32) == 32)
 			{
-				int num3 = 2 + num;
-				this.Decode(data, ref num3, data.Length);
+				int num3 = 0;
+				this.Decode(this.m_aValue, ref num3, this.m_aValue.Length);
 			}
 		}
 

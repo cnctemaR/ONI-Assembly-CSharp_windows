@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB58D}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F08}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.TLS</RootNamespace>
     <AssemblyName>UnityEngine.TLSModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net20</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -19,8 +19,12 @@
     <Compile Include="UnityTLSNativeLibrary.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -12,23 +12,23 @@ namespace System.ComponentModel
 
 		public LicenseProviderAttribute(string typeName)
 		{
-			this.licenseProviderName = typeName;
+			this._licenseProviderName = typeName;
 		}
 
 		public LicenseProviderAttribute(Type type)
 		{
-			this.licenseProviderType = type;
+			this._licenseProviderType = type;
 		}
 
 		public Type LicenseProvider
 		{
 			get
 			{
-				if (this.licenseProviderType == null && this.licenseProviderName != null)
+				if (this._licenseProviderType == null && this._licenseProviderName != null)
 				{
-					this.licenseProviderType = Type.GetType(this.licenseProviderName);
+					this._licenseProviderType = Type.GetType(this._licenseProviderName);
 				}
-				return this.licenseProviderType;
+				return this._licenseProviderType;
 			}
 		}
 
@@ -36,12 +36,12 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				string fullName = this.licenseProviderName;
-				if (fullName == null && this.licenseProviderType != null)
+				string text = this._licenseProviderName;
+				if (text == null && this._licenseProviderType != null)
 				{
-					fullName = this.licenseProviderType.FullName;
+					text = this._licenseProviderType.FullName;
 				}
-				return base.GetType().FullName + fullName;
+				return base.GetType().FullName + text;
 			}
 		}
 
@@ -69,8 +69,8 @@ namespace System.ComponentModel
 
 		public static readonly LicenseProviderAttribute Default = new LicenseProviderAttribute();
 
-		private Type licenseProviderType;
+		private Type _licenseProviderType;
 
-		private string licenseProviderName;
+		private string _licenseProviderName;
 	}
 }

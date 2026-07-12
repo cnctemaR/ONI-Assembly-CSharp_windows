@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Policy
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum PolicyStatementAttribute
 	{
-		Nothing = 0,
+		All = 3,
 		Exclusive = 1,
 		LevelFinal = 2,
-		All = 3
+		Nothing = 0
 	}
 }

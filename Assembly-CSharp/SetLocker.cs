@@ -22,16 +22,22 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		if (this.contents == null)
 		{
 			this.ChooseContents();
-			return;
 		}
-		string[] array = this.contents;
-		for (int i = 0; i < array.Length; i++)
+		else
 		{
-			if (Assets.GetPrefab(array[i]) == null)
+			string[] array = this.contents;
+			for (int i = 0; i < array.Length; i++)
 			{
-				this.ChooseContents();
-				return;
+				if (Assets.GetPrefab(array[i]) == null)
+				{
+					this.ChooseContents();
+					break;
+				}
 			}
+		}
+		if (this.pendingRummage)
+		{
+			this.ActivateChore(null);
 		}
 	}
 
@@ -78,6 +84,9 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		{
 			return;
 		}
+		Prioritizable.AddRef(base.gameObject);
+		base.Trigger(1980521255, null);
+		this.pendingRummage = true;
 		base.GetComponent<Workable>().SetWorkTime(1.5f);
 		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, delegate(Chore o)
 		{
@@ -91,6 +100,9 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		{
 			return;
 		}
+		this.pendingRummage = false;
+		Prioritizable.RemoveRef(base.gameObject);
+		base.Trigger(1980521255, null);
 		this.chore.Cancel("User cancelled");
 		this.chore = null;
 	}
@@ -100,7 +112,9 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		this.used = true;
 		base.smi.GoTo(base.smi.sm.open);
 		this.chore = null;
+		this.pendingRummage = false;
 		Game.Instance.userMenu.Refresh(base.gameObject);
+		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	public string SidescreenButtonText
@@ -154,6 +168,9 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 		throw new NotImplementedException();
 	}
 
+	[MyCmpAdd]
+	private Prioritizable prioritizable;
+
 	public string[][] possible_contents_ids;
 
 	public string machineSound;
@@ -168,6 +185,9 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	private string[] contents;
 
 	public bool dropOnDeconstruct;
+
+	[Serialize]
+	private bool pendingRummage;
 
 	[Serialize]
 	private bool used;

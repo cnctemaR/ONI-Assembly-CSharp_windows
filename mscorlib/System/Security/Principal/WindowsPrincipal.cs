@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Permissions;
+using Mono;
 using Unity;
 
 namespace System.Security.Principal
@@ -81,7 +82,10 @@ namespace System.Security.Principal
 			}
 			if (Environment.IsUnix)
 			{
-				return WindowsPrincipal.IsMemberOfGroupName(this.Token, role);
+				using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(role))
+				{
+					return WindowsPrincipal.IsMemberOfGroupName(this.Token, safeStringMarshal.Value);
+				}
 			}
 			if (this.m_roles == null)
 			{
@@ -131,7 +135,7 @@ namespace System.Security.Principal
 		private static extern bool IsMemberOfGroupId(IntPtr user, IntPtr group);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsMemberOfGroupName(IntPtr user, string group);
+		private static extern bool IsMemberOfGroupName(IntPtr user, IntPtr group);
 
 		public virtual IEnumerable<Claim> DeviceClaims
 		{

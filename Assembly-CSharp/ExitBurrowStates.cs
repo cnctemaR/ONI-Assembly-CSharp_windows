@@ -6,7 +6,15 @@ public class ExitBurrowStates : GameStateMachine<ExitBurrowStates, ExitBurrowSta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.exiting;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.EMERGING.NAME, CREATURES.STATUSITEMS.EMERGING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<ExitBurrowStates, ExitBurrowStates.Instance, IStateMachineTarget, ExitBurrowStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.EMERGING.NAME;
+		string text2 = CREATURES.STATUSITEMS.EMERGING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.exiting.PlayAnim("emerge").Enter(new StateMachine<ExitBurrowStates, ExitBurrowStates.Instance, IStateMachineTarget, ExitBurrowStates.Def>.State.Callback(ExitBurrowStates.MoveToCellAbove)).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToExitBurrow, false);
 	}

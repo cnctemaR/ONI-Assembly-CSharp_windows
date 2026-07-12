@@ -794,10 +794,14 @@ namespace System.Xml
 						{
 							this.writeNodeBuffer = new char[1024];
 						}
-						int read;
-						while ((read = reader.ReadValueChunk(this.writeNodeBuffer, 0, 1024)) > 0)
+						for (;;)
 						{
-							await this.WriteCharsAsync(this.writeNodeBuffer, 0, read).ConfigureAwait(false);
+							int num = reader.ReadValueChunk(this.writeNodeBuffer, 0, 1024);
+							if (num <= 0)
+							{
+								break;
+							}
+							await this.WriteCharsAsync(this.writeNodeBuffer, 0, num).ConfigureAwait(false);
 						}
 					}
 					else
@@ -857,10 +861,14 @@ namespace System.Xml
 						{
 							this.writeNodeBuffer = new char[1024];
 						}
-						int read;
-						while ((read = await reader.ReadValueChunkAsync(this.writeNodeBuffer, 0, 1024).ConfigureAwait(false)) > 0)
+						for (;;)
 						{
-							await this.WriteCharsAsync(this.writeNodeBuffer, 0, read).ConfigureAwait(false);
+							object obj = await reader.ReadValueChunkAsync(this.writeNodeBuffer, 0, 1024).ConfigureAwait(false);
+							if (obj <= 0)
+							{
+								break;
+							}
+							await this.WriteCharsAsync(this.writeNodeBuffer, 0, obj).ConfigureAwait(false);
 						}
 					}
 					else

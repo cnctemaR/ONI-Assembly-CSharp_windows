@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -6,8 +8,8 @@ namespace System.Xml.Linq
 	{
 		public ElementWriter(XmlWriter writer)
 		{
-			this.writer = writer;
-			this.resolver = default(NamespaceResolver);
+			this._writer = writer;
+			this._resolver = default(NamespaceResolver);
 		}
 
 		public void WriteElement(XElement e)
@@ -33,13 +35,13 @@ namespace System.Xml.Linq
 							xnode = ((XNode)e.content).next;
 							continue;
 						}
-						this.writer.WriteString(text);
+						this._writer.WriteString(text);
 						this.WriteFullEndElement();
 					}
 				}
 				else
 				{
-					xnode.WriteTo(this.writer);
+					xnode.WriteTo(this._writer);
 				}
 				while (xnode != xelement && xnode == xnode.parent.content)
 				{
@@ -54,6 +56,51 @@ namespace System.Xml.Linq
 			}
 		}
 
+		public async Task WriteElementAsync(XElement e, CancellationToken cancellationToken)
+		{
+			this.PushAncestors(e);
+			XElement root = e;
+			XNode i = e;
+			for (;;)
+			{
+				e = i as XElement;
+				if (e != null)
+				{
+					await this.WriteStartElementAsync(e, cancellationToken).ConfigureAwait(false);
+					if (e.content == null)
+					{
+						await this.WriteEndElementAsync(cancellationToken).ConfigureAwait(false);
+					}
+					else
+					{
+						string text = e.content as string;
+						if (text == null)
+						{
+							i = ((XNode)e.content).next;
+							continue;
+						}
+						cancellationToken.ThrowIfCancellationRequested();
+						await this._writer.WriteStringAsync(text).ConfigureAwait(false);
+						await this.WriteFullEndElementAsync(cancellationToken).ConfigureAwait(false);
+					}
+				}
+				else
+				{
+					await i.WriteToAsync(this._writer, cancellationToken).ConfigureAwait(false);
+				}
+				while (i != root && i == i.parent.content)
+				{
+					i = i.parent;
+					await this.WriteFullEndElementAsync(cancellationToken).ConfigureAwait(false);
+				}
+				if (i == root)
+				{
+					break;
+				}
+				i = i.next;
+			}
+		}
+
 		private string GetPrefixOfNamespace(XNamespace ns, bool allowDefaultNamespace)
 		{
 			string namespaceName = ns.NamespaceName;
@@ -61,7 +108,7 @@ namespace System.Xml.Linq
 			{
 				return string.Empty;
 			}
-			string prefixOfNamespace = this.resolver.GetPrefixOfNamespace(ns, allowDefaultNamespace);
+			string prefixOfNamespace = this._resolver.GetPrefixOfNamespace(ns, allowDefaultNamespace);
 			if (prefixOfNamespace != null)
 			{
 				return prefixOfNamespace;
@@ -94,7 +141,7 @@ namespace System.Xml.Linq
 						xattribute = xattribute.next;
 						if (xattribute.IsNamespaceDeclaration)
 						{
-							this.resolver.AddFirst((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
+							this._resolver.AddFirst((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
 						}
 					}
 					while (xattribute != e.lastAttr);
@@ -104,7 +151,7 @@ namespace System.Xml.Linq
 
 		private void PushElement(XElement e)
 		{
-			this.resolver.PushScope();
+			this._resolver.PushScope();
 			XAttribute xattribute = e.lastAttr;
 			if (xattribute != null)
 			{
@@ -113,7 +160,7 @@ namespace System.Xml.Linq
 					xattribute = xattribute.next;
 					if (xattribute.IsNamespaceDeclaration)
 					{
-						this.resolver.Add((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
+						this._resolver.Add((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
 					}
 				}
 				while (xattribute != e.lastAttr);
@@ -122,21 +169,35 @@ namespace System.Xml.Linq
 
 		private void WriteEndElement()
 		{
-			this.writer.WriteEndElement();
-			this.resolver.PopScope();
+			this._writer.WriteEndElement();
+			this._resolver.PopScope();
+		}
+
+		private async Task WriteEndElementAsync(CancellationToken cancellationToken)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			await this._writer.WriteEndElementAsync().ConfigureAwait(false);
+			this._resolver.PopScope();
 		}
 
 		private void WriteFullEndElement()
 		{
-			this.writer.WriteFullEndElement();
-			this.resolver.PopScope();
+			this._writer.WriteFullEndElement();
+			this._resolver.PopScope();
+		}
+
+		private async Task WriteFullEndElementAsync(CancellationToken cancellationToken)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			await this._writer.WriteFullEndElementAsync().ConfigureAwait(false);
+			this._resolver.PopScope();
 		}
 
 		private void WriteStartElement(XElement e)
 		{
 			this.PushElement(e);
 			XNamespace xnamespace = e.Name.Namespace;
-			this.writer.WriteStartElement(this.GetPrefixOfNamespace(xnamespace, true), e.Name.LocalName, xnamespace.NamespaceName);
+			this._writer.WriteStartElement(this.GetPrefixOfNamespace(xnamespace, true), e.Name.LocalName, xnamespace.NamespaceName);
 			XAttribute xattribute = e.lastAttr;
 			if (xattribute != null)
 			{
@@ -146,14 +207,34 @@ namespace System.Xml.Linq
 					xnamespace = xattribute.Name.Namespace;
 					string localName = xattribute.Name.LocalName;
 					string namespaceName = xnamespace.NamespaceName;
-					this.writer.WriteAttributeString(this.GetPrefixOfNamespace(xnamespace, false), localName, (namespaceName.Length == 0 && localName == "xmlns") ? "http://www.w3.org/2000/xmlns/" : namespaceName, xattribute.Value);
+					this._writer.WriteAttributeString(this.GetPrefixOfNamespace(xnamespace, false), localName, (namespaceName.Length == 0 && localName == "xmlns") ? "http://www.w3.org/2000/xmlns/" : namespaceName, xattribute.Value);
 				}
 				while (xattribute != e.lastAttr);
 			}
 		}
 
-		private XmlWriter writer;
+		private async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
+		{
+			this.PushElement(e);
+			XNamespace xnamespace = e.Name.Namespace;
+			await this._writer.WriteStartElementAsync(this.GetPrefixOfNamespace(xnamespace, true), e.Name.LocalName, xnamespace.NamespaceName).ConfigureAwait(false);
+			XAttribute a = e.lastAttr;
+			if (a != null)
+			{
+				do
+				{
+					a = a.next;
+					xnamespace = a.Name.Namespace;
+					string localName = a.Name.LocalName;
+					string namespaceName = xnamespace.NamespaceName;
+					await this._writer.WriteAttributeStringAsync(this.GetPrefixOfNamespace(xnamespace, false), localName, (namespaceName.Length == 0 && localName == "xmlns") ? "http://www.w3.org/2000/xmlns/" : namespaceName, a.Value).ConfigureAwait(false);
+				}
+				while (a != e.lastAttr);
+			}
+		}
 
-		private NamespaceResolver resolver;
+		private XmlWriter _writer;
+
+		private NamespaceResolver _resolver;
 	}
 }

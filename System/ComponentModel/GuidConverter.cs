@@ -2,11 +2,9 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class GuidConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -21,9 +19,11 @@ namespace System.ComponentModel
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
+			string text = value as string;
+			if (text != null)
 			{
-				return new Guid(((string)value).Trim());
+				text = text.Trim();
+				return new Guid(text);
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

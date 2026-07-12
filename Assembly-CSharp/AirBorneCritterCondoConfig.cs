@@ -21,6 +21,7 @@ public class AirBorneCritterCondoConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER3, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.AudioSize = "small";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		return buildingDef;
 	}

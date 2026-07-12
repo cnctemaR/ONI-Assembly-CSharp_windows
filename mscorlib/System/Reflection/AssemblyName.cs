@@ -6,8 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
-using System.Security.Cryptography;
-using System.Security.Permissions;
 using System.Text;
 using Mono;
 using Mono.Security;
@@ -15,9 +13,9 @@ using Mono.Security.Cryptography;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_AssemblyName))]
+	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AssemblyName : ICloneable, ISerializable, IDeserializationCallback, _AssemblyName
@@ -60,7 +58,6 @@ namespace System.Reflection
 			}
 		}
 
-		[MonoLimitation("Not used, as the values are too limited;  Mono supports more")]
 		public ProcessorArchitecture ProcessorArchitecture
 		{
 			get
@@ -323,38 +320,17 @@ namespace System.Reflection
 				byte b = this.publicKey[0];
 				if (b != 0)
 				{
-					if (b != 6)
+					if (b == 6)
 					{
-						if (b != 7)
-						{
-							return false;
-						}
-						return false;
+						return CryptoConvert.TryImportCapiPublicKeyBlob(this.publicKey, 0);
+					}
+					if (b != 7)
+					{
 					}
 				}
-				else
+				else if (this.publicKey.Length > 12 && this.publicKey[12] == 6)
 				{
-					if (this.publicKey.Length <= 12 || this.publicKey[12] != 6)
-					{
-						return false;
-					}
-					try
-					{
-						CryptoConvert.FromCapiPublicKeyBlob(this.publicKey, 12);
-						return true;
-					}
-					catch (CryptographicException)
-					{
-						return false;
-					}
-				}
-				try
-				{
-					CryptoConvert.FromCapiPublicKeyBlob(this.publicKey);
-					return true;
-				}
-				catch (CryptographicException)
-				{
+					return CryptoConvert.TryImportCapiPublicKeyBlob(this.publicKey, 12);
 				}
 				return false;
 			}
@@ -445,7 +421,6 @@ namespace System.Reflection
 		}
 
 		[SecurityCritical]
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
@@ -546,7 +521,12 @@ namespace System.Reflection
 			}
 			set
 			{
-				throw new NotImplementedException();
+				if (value == null)
+				{
+					this.cultureinfo = null;
+					return;
+				}
+				this.cultureinfo = new CultureInfo(value);
 			}
 		}
 
@@ -596,17 +576,17 @@ namespace System.Reflection
 				this.publicKey = EmptyArray<byte>.Value;
 				this.flags |= AssemblyNameFlags.PublicKey;
 			}
-			if (*(&native->public_key_token.FixedElementField) != 0)
+			if (native->public_key_token.FixedElementField != 0)
 			{
 				byte[] array = new byte[8];
 				int i = 0;
 				int num = 0;
 				while (i < 8)
 				{
-					array[i] = (byte)(RuntimeMarshal.AsciHexDigitValue((int)(&native->public_key_token.FixedElementField)[num++]) << 4);
+					array[i] = (byte)(RuntimeMarshal.AsciHexDigitValue((int)(*((ref native->public_key_token.FixedElementField) + num++))) << 4);
 					byte[] array2 = array;
 					int num2 = i;
-					array2[num2] |= (byte)RuntimeMarshal.AsciHexDigitValue((int)(&native->public_key_token.FixedElementField)[num++]);
+					array2[num2] |= (byte)RuntimeMarshal.AsciHexDigitValue((int)(*((ref native->public_key_token.FixedElementField) + num++)));
 					i++;
 				}
 				this.keyToken = array;
@@ -621,7 +601,7 @@ namespace System.Reflection
 		internal unsafe static AssemblyName Create(Assembly assembly, bool fillCodebase)
 		{
 			AssemblyName assemblyName = new AssemblyName();
-			MonoAssemblyName* nativeName = AssemblyName.GetNativeName(assembly._mono_assembly);
+			MonoAssemblyName* nativeName = AssemblyName.GetNativeName(assembly.MonoAssembly);
 			assemblyName.FillName(nativeName, fillCodebase ? assembly.CodeBase : null, true, true, true, false);
 			return assemblyName;
 		}

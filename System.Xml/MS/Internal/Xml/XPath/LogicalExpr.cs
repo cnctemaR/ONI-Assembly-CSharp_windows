@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -9,30 +8,30 @@ namespace MS.Internal.Xml.XPath
 	{
 		public LogicalExpr(Operator.Op op, Query opnd1, Query opnd2)
 		{
-			this.op = op;
-			this.opnd1 = opnd1;
-			this.opnd2 = opnd2;
+			this._op = op;
+			this._opnd1 = opnd1;
+			this._opnd2 = opnd2;
 		}
 
 		private LogicalExpr(LogicalExpr other)
 			: base(other)
 		{
-			this.op = other.op;
-			this.opnd1 = Query.Clone(other.opnd1);
-			this.opnd2 = Query.Clone(other.opnd2);
+			this._op = other._op;
+			this._opnd1 = Query.Clone(other._opnd1);
+			this._opnd2 = Query.Clone(other._opnd2);
 		}
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			this.opnd1.SetXsltContext(context);
-			this.opnd2.SetXsltContext(context);
+			this._opnd1.SetXsltContext(context);
+			this._opnd2.SetXsltContext(context);
 		}
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
 		{
-			Operator.Op op = this.op;
-			object obj = this.opnd1.Evaluate(nodeIterator);
-			object obj2 = this.opnd2.Evaluate(nodeIterator);
+			Operator.Op op = this._op;
+			object obj = this._opnd1.Evaluate(nodeIterator);
+			object obj2 = this._opnd2.Evaluate(nodeIterator);
 			int num = (int)base.GetXPathType(obj);
 			int num2 = (int)base.GetXPathType(obj2);
 			if (num < num2)
@@ -47,9 +46,9 @@ namespace MS.Internal.Xml.XPath
 			}
 			if (op == Operator.Op.EQ || op == Operator.Op.NE)
 			{
-				return LogicalExpr.CompXsltE[num][num2](op, obj, obj2);
+				return LogicalExpr.s_CompXsltE[num][num2](op, obj, obj2);
 			}
-			return LogicalExpr.CompXsltO[num][num2](op, obj, obj2);
+			return LogicalExpr.s_CompXsltO[num][num2](op, obj, obj2);
 		}
 
 		private static bool cmpQueryQueryE(Operator.Op op, object val1, object val2)
@@ -370,15 +369,6 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("op", this.op.ToString());
-			this.opnd1.PrintQuery(w);
-			this.opnd2.PrintQuery(w);
-			w.WriteEndElement();
-		}
-
 		// Note: this type is marked as 'beforefieldinit'.
 		static LogicalExpr()
 		{
@@ -413,7 +403,7 @@ namespace MS.Internal.Xml.XPath
 				new LogicalExpr.cmpXslt(LogicalExpr.cmpRtfQueryE),
 				new LogicalExpr.cmpXslt(LogicalExpr.cmpRtfRtfE)
 			};
-			LogicalExpr.CompXsltE = array;
+			LogicalExpr.s_CompXsltE = array;
 			LogicalExpr.cmpXslt[][] array6 = new LogicalExpr.cmpXslt[5][];
 			int num5 = 0;
 			LogicalExpr.cmpXslt[] array7 = new LogicalExpr.cmpXslt[5];
@@ -445,18 +435,18 @@ namespace MS.Internal.Xml.XPath
 				new LogicalExpr.cmpXslt(LogicalExpr.cmpRtfQueryO),
 				new LogicalExpr.cmpXslt(LogicalExpr.cmpRtfRtfO)
 			};
-			LogicalExpr.CompXsltO = array6;
+			LogicalExpr.s_CompXsltO = array6;
 		}
 
-		private Operator.Op op;
+		private Operator.Op _op;
 
-		private Query opnd1;
+		private Query _opnd1;
 
-		private Query opnd2;
+		private Query _opnd2;
 
-		private static readonly LogicalExpr.cmpXslt[][] CompXsltE;
+		private static readonly LogicalExpr.cmpXslt[][] s_CompXsltE;
 
-		private static readonly LogicalExpr.cmpXslt[][] CompXsltO;
+		private static readonly LogicalExpr.cmpXslt[][] s_CompXsltO;
 
 		private delegate bool cmpXslt(Operator.Op op, object val1, object val2);
 
@@ -464,32 +454,32 @@ namespace MS.Internal.Xml.XPath
 		{
 			public NodeSet(object opnd)
 			{
-				this.opnd = (Query)opnd;
-				this.current = null;
+				this._opnd = (Query)opnd;
+				this._current = null;
 			}
 
 			public bool MoveNext()
 			{
-				this.current = this.opnd.Advance();
-				return this.current != null;
+				this._current = this._opnd.Advance();
+				return this._current != null;
 			}
 
 			public void Reset()
 			{
-				this.opnd.Reset();
+				this._opnd.Reset();
 			}
 
 			public string Value
 			{
 				get
 				{
-					return this.current.Value;
+					return this._current.Value;
 				}
 			}
 
-			private Query opnd;
+			private Query _opnd;
 
-			private XPathNavigator current;
+			private XPathNavigator _current;
 		}
 	}
 }

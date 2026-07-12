@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Concurrent;
 
 namespace System.Runtime.Serialization
 {
@@ -7,22 +7,9 @@ namespace System.Runtime.Serialization
 	{
 		internal static SerializationEvents GetSerializationEventsForType(Type t)
 		{
-			SerializationEvents serializationEvents;
-			if ((serializationEvents = (SerializationEvents)SerializationEventsCache.cache[t]) == null)
-			{
-				object syncRoot = SerializationEventsCache.cache.SyncRoot;
-				lock (syncRoot)
-				{
-					if ((serializationEvents = (SerializationEvents)SerializationEventsCache.cache[t]) == null)
-					{
-						serializationEvents = new SerializationEvents(t);
-						SerializationEventsCache.cache[t] = serializationEvents;
-					}
-				}
-			}
-			return serializationEvents;
+			return SerializationEventsCache.s_cache.GetOrAdd(t, (Type type) => new SerializationEvents(type));
 		}
 
-		private static Hashtable cache = new Hashtable();
+		private static readonly ConcurrentDictionary<Type, SerializationEvents> s_cache = new ConcurrentDictionary<Type, SerializationEvents>();
 	}
 }

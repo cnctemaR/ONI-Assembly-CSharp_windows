@@ -39,9 +39,19 @@ namespace System.Runtime.CompilerServices
 			return ref source;
 		}
 
+		public unsafe static void* AsPointer<T>(ref T value)
+		{
+			return (void*)(&value);
+		}
+
 		public unsafe static ref T AsRef<T>(void* source)
 		{
 			return ref *(T*)source;
+		}
+
+		public static ref T AsRef<T>(in T source)
+		{
+			return ref source;
 		}
 
 		public static IntPtr ByteOffset<T>(ref T origin, ref T target)
@@ -69,6 +79,11 @@ namespace System.Runtime.CompilerServices
 			return *(T*)source;
 		}
 
+		public unsafe static T ReadUnaligned<T>(void* source)
+		{
+			return *(T*)source;
+		}
+
 		public static T ReadUnaligned<T>(ref byte source)
 		{
 			return source;
@@ -87,6 +102,27 @@ namespace System.Runtime.CompilerServices
 		public static void WriteUnaligned<T>(ref byte destination, T value)
 		{
 			destination = value;
+		}
+
+		public unsafe static void WriteUnaligned<T>(void* destination, T value)
+		{
+			*(T*)destination = value;
+		}
+
+		public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
+		{
+			return (ref left) != (ref right);
+		}
+
+		public static bool IsAddressLessThan<T>(ref T left, ref T right)
+		{
+			return (ref left) < (ref right);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static ref T AddByteOffset<T>(ref T source, ulong byteOffset)
+		{
+			return Unsafe.AddByteOffset<T>(ref source, (IntPtr)byteOffset);
 		}
 	}
 }

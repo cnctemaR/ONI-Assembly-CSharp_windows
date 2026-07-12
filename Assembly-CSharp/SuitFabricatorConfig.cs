@@ -64,6 +64,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 			sortOrder = 1
 		};
+		AtmoSuitConfig.recipe.RequiresAllIngredientsDiscovered = true;
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.Aluminum.CreateTag(), 300f, true),
@@ -82,6 +83,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 			sortOrder = 1
 		};
+		AtmoSuitConfig.recipe.RequiresAllIngredientsDiscovered = true;
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.Iron.CreateTag(), 300f, true),
@@ -100,6 +102,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 			sortOrder = 1
 		};
+		AtmoSuitConfig.recipe.RequiresAllIngredientsDiscovered = true;
 		if (ElementLoader.FindElementByHash(SimHashes.Cobalt) != null)
 		{
 			ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
@@ -120,6 +123,7 @@ public class SuitFabricatorConfig : IBuildingConfig
 				requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 				sortOrder = 1
 			};
+			AtmoSuitConfig.recipe.RequiresAllIngredientsDiscovered = true;
 		}
 		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
 		{

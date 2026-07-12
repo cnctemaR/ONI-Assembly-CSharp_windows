@@ -1,17 +1,19 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Threading;
-using Unity;
 
 namespace System.Net
 {
 	[Serializable]
 	public class HttpWebResponse : WebResponse, ISerializable, IDisposable
 	{
+		public HttpWebResponse()
+		{
+		}
+
 		internal HttpWebResponse(Uri uri, string method, HttpStatusCode status, WebHeaderCollection headers)
 		{
 			this.uri = uri;
@@ -132,6 +134,10 @@ namespace System.Net
 				if (this.contentType == null)
 				{
 					this.contentType = this.webHeaders["Content-Type"];
+				}
+				if (this.contentType == null)
+				{
+					this.contentType = string.Empty;
 				}
 				return this.contentType;
 			}
@@ -365,13 +371,6 @@ namespace System.Net
 			{
 			}
 			this.cookieCollection = cookieCollection;
-		}
-
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public HttpWebResponse()
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private Uri uri;

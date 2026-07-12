@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Security;
 
 namespace System.Runtime.Serialization
 {
-	internal class SerializationEvents
+	internal sealed class SerializationEvents
 	{
+		internal SerializationEvents(Type t)
+		{
+			this._onSerializingMethods = this.GetMethodsWithAttribute(typeof(OnSerializingAttribute), t);
+			this._onSerializedMethods = this.GetMethodsWithAttribute(typeof(OnSerializedAttribute), t);
+			this._onDeserializingMethods = this.GetMethodsWithAttribute(typeof(OnDeserializingAttribute), t);
+			this._onDeserializedMethods = this.GetMethodsWithAttribute(typeof(OnDeserializedAttribute), t);
+		}
+
 		private List<MethodInfo> GetMethodsWithAttribute(Type attribute, Type t)
 		{
-			List<MethodInfo> list = new List<MethodInfo>();
+			List<MethodInfo> list = null;
 			Type type = t;
 			while (type != null && type != typeof(object))
 			{
@@ -17,114 +24,84 @@ namespace System.Runtime.Serialization
 				{
 					if (methodInfo.IsDefined(attribute, false))
 					{
+						if (list == null)
+						{
+							list = new List<MethodInfo>();
+						}
 						list.Add(methodInfo);
 					}
 				}
 				type = type.BaseType;
 			}
-			list.Reverse();
-			if (list.Count != 0)
+			if (list != null)
 			{
-				return list;
+				list.Reverse();
 			}
-			return null;
-		}
-
-		internal SerializationEvents(Type t)
-		{
-			this.m_OnSerializingMethods = this.GetMethodsWithAttribute(typeof(OnSerializingAttribute), t);
-			this.m_OnSerializedMethods = this.GetMethodsWithAttribute(typeof(OnSerializedAttribute), t);
-			this.m_OnDeserializingMethods = this.GetMethodsWithAttribute(typeof(OnDeserializingAttribute), t);
-			this.m_OnDeserializedMethods = this.GetMethodsWithAttribute(typeof(OnDeserializedAttribute), t);
+			return list;
 		}
 
 		internal bool HasOnSerializingEvents
 		{
 			get
 			{
-				return this.m_OnSerializingMethods != null || this.m_OnSerializedMethods != null;
+				return this._onSerializingMethods != null || this._onSerializedMethods != null;
 			}
 		}
 
-		[SecuritySafeCritical]
 		internal void InvokeOnSerializing(object obj, StreamingContext context)
 		{
-			if (this.m_OnSerializingMethods != null)
-			{
-				SerializationEventHandler serializationEventHandler = null;
-				foreach (MethodInfo methodInfo in this.m_OnSerializingMethods)
-				{
-					SerializationEventHandler serializationEventHandler2 = (SerializationEventHandler)Delegate.CreateDelegateNoSecurityCheck((RuntimeType)typeof(SerializationEventHandler), obj, methodInfo);
-					serializationEventHandler = (SerializationEventHandler)Delegate.Combine(serializationEventHandler, serializationEventHandler2);
-				}
-				serializationEventHandler(context);
-			}
+			SerializationEvents.InvokeOnDelegate(obj, context, this._onSerializingMethods);
 		}
 
-		[SecuritySafeCritical]
 		internal void InvokeOnDeserializing(object obj, StreamingContext context)
 		{
-			if (this.m_OnDeserializingMethods != null)
-			{
-				SerializationEventHandler serializationEventHandler = null;
-				foreach (MethodInfo methodInfo in this.m_OnDeserializingMethods)
-				{
-					SerializationEventHandler serializationEventHandler2 = (SerializationEventHandler)Delegate.CreateDelegateNoSecurityCheck((RuntimeType)typeof(SerializationEventHandler), obj, methodInfo);
-					serializationEventHandler = (SerializationEventHandler)Delegate.Combine(serializationEventHandler, serializationEventHandler2);
-				}
-				serializationEventHandler(context);
-			}
+			SerializationEvents.InvokeOnDelegate(obj, context, this._onDeserializingMethods);
 		}
 
-		[SecuritySafeCritical]
 		internal void InvokeOnDeserialized(object obj, StreamingContext context)
 		{
-			if (this.m_OnDeserializedMethods != null)
-			{
-				SerializationEventHandler serializationEventHandler = null;
-				foreach (MethodInfo methodInfo in this.m_OnDeserializedMethods)
-				{
-					SerializationEventHandler serializationEventHandler2 = (SerializationEventHandler)Delegate.CreateDelegateNoSecurityCheck((RuntimeType)typeof(SerializationEventHandler), obj, methodInfo);
-					serializationEventHandler = (SerializationEventHandler)Delegate.Combine(serializationEventHandler, serializationEventHandler2);
-				}
-				serializationEventHandler(context);
-			}
+			SerializationEvents.InvokeOnDelegate(obj, context, this._onDeserializedMethods);
 		}
 
-		[SecurityCritical]
 		internal SerializationEventHandler AddOnSerialized(object obj, SerializationEventHandler handler)
 		{
-			if (this.m_OnSerializedMethods != null)
-			{
-				foreach (MethodInfo methodInfo in this.m_OnSerializedMethods)
-				{
-					SerializationEventHandler serializationEventHandler = (SerializationEventHandler)Delegate.CreateDelegateNoSecurityCheck((RuntimeType)typeof(SerializationEventHandler), obj, methodInfo);
-					handler = (SerializationEventHandler)Delegate.Combine(handler, serializationEventHandler);
-				}
-			}
-			return handler;
+			return SerializationEvents.AddOnDelegate(obj, handler, this._onSerializedMethods);
 		}
 
-		[SecurityCritical]
 		internal SerializationEventHandler AddOnDeserialized(object obj, SerializationEventHandler handler)
 		{
-			if (this.m_OnDeserializedMethods != null)
+			return SerializationEvents.AddOnDelegate(obj, handler, this._onDeserializedMethods);
+		}
+
+		private static void InvokeOnDelegate(object obj, StreamingContext context, List<MethodInfo> methods)
+		{
+			SerializationEventHandler serializationEventHandler = SerializationEvents.AddOnDelegate(obj, null, methods);
+			if (serializationEventHandler == null)
 			{
-				foreach (MethodInfo methodInfo in this.m_OnDeserializedMethods)
+				return;
+			}
+			serializationEventHandler(context);
+		}
+
+		private static SerializationEventHandler AddOnDelegate(object obj, SerializationEventHandler handler, List<MethodInfo> methods)
+		{
+			if (methods != null)
+			{
+				foreach (MethodInfo methodInfo in methods)
 				{
-					SerializationEventHandler serializationEventHandler = (SerializationEventHandler)Delegate.CreateDelegateNoSecurityCheck((RuntimeType)typeof(SerializationEventHandler), obj, methodInfo);
+					SerializationEventHandler serializationEventHandler = (SerializationEventHandler)methodInfo.CreateDelegate(typeof(SerializationEventHandler), obj);
 					handler = (SerializationEventHandler)Delegate.Combine(handler, serializationEventHandler);
 				}
 			}
 			return handler;
 		}
 
-		private List<MethodInfo> m_OnSerializingMethods;
+		private readonly List<MethodInfo> _onSerializingMethods;
 
-		private List<MethodInfo> m_OnSerializedMethods;
+		private readonly List<MethodInfo> _onSerializedMethods;
 
-		private List<MethodInfo> m_OnDeserializingMethods;
+		private readonly List<MethodInfo> _onDeserializingMethods;
 
-		private List<MethodInfo> m_OnDeserializedMethods;
+		private readonly List<MethodInfo> _onDeserializedMethods;
 	}
 }

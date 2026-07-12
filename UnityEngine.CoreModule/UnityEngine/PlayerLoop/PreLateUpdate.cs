@@ -14,6 +14,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct PhysicsLateUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct AIUpdatePostScript
 		{
 		}
@@ -50,11 +55,6 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct UpdateMasterServerInterface
-		{
-		}
-
-		[RequiredByNativeCode]
-		public struct UNetUpdate
 		{
 		}
 

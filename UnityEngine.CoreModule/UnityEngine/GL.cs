@@ -5,11 +5,11 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
-	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
+	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
 	[NativeHeader("Runtime/Camera/CameraUtil.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	public sealed class GL
 	{
 		[NativeName("ImmediateVertex")]
@@ -20,6 +20,10 @@ namespace UnityEngine
 		{
 			GL.Vertex3(v.x, v.y, v.z);
 		}
+
+		[NativeName("ImmediateVertices")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern void Vertices(Vector3* v, Vector3* coords, Vector4* colors, int length);
 
 		[NativeName("ImmediateTexCoordAll")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -119,12 +123,12 @@ namespace UnityEngine
 			GL.MultMatrix_Injected(ref m);
 		}
 
-		[NativeName("InsertCustomMarker")]
 		[Obsolete("IssuePluginEvent(eventID) is deprecated. Use IssuePluginEvent(callback, eventID) instead.", false)]
+		[NativeName("InsertCustomMarker")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void IssuePluginEvent(int eventID);
 
-		[Obsolete("SetRevertBackfacing(revertBackFaces) is deprecated. Use invertCulling property instead.", false)]
+		[Obsolete("SetRevertBackfacing(revertBackFaces) is deprecated. Use invertCulling property instead. (UnityUpgradable) -> invertCulling", false)]
 		[NativeName("SetUserBackfaceMode")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetRevertBackfacing(bool revertBackFaces);

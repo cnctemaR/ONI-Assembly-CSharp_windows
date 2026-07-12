@@ -1784,8 +1784,7 @@ namespace System.Xml.Serialization
 			}
 			SpecialMapping specialMapping = (SpecialMapping)text.Mapping;
 			this.WriteSourceBeginTyped(member.ArraySource, specialMapping.TypeDesc);
-			TypeKind kind = specialMapping.TypeDesc.Kind;
-			if (kind == TypeKind.Node)
+			if (specialMapping.TypeDesc.Kind == TypeKind.Node)
 			{
 				MethodInfo method5 = typeof(XmlSerializationReader).GetMethod("get_Reader", CodeGenerator.InstanceBindingFlags, null, CodeGenerator.EmptyTypeArray, null);
 				MethodInfo method6 = typeof(XmlReader).GetMethod("ReadString", CodeGenerator.InstanceBindingFlags, null, CodeGenerator.EmptyTypeArray, null);

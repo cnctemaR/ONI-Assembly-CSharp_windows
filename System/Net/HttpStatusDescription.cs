@@ -11,7 +11,7 @@ namespace System.Net
 
 		internal static string Get(int code)
 		{
-			if (code <= 207)
+			if (code <= 226)
 			{
 				switch (code)
 				{
@@ -21,6 +21,8 @@ namespace System.Net
 					return "Switching Protocols";
 				case 102:
 					return "Processing";
+				case 103:
+					return "Early Hints";
 				default:
 					switch (code)
 					{
@@ -40,6 +42,14 @@ namespace System.Net
 						return "Partial Content";
 					case 207:
 						return "Multi-Status";
+					case 208:
+						return "Already Reported";
+					default:
+						if (code == 226)
+						{
+							return "IM Used";
+						}
+						break;
 					}
 					break;
 				}
@@ -64,6 +74,8 @@ namespace System.Net
 					break;
 				case 307:
 					return "Temporary Redirect";
+				case 308:
+					return "Permanent Redirect";
 				default:
 					switch (code)
 					{
@@ -106,9 +118,31 @@ namespace System.Net
 					case 418:
 					case 419:
 					case 420:
-					case 421:
 					case 425:
+					case 427:
+					case 430:
+					case 432:
+					case 433:
+					case 434:
+					case 435:
+					case 436:
+					case 437:
+					case 438:
+					case 439:
+					case 440:
+					case 441:
+					case 442:
+					case 443:
+					case 444:
+					case 445:
+					case 446:
+					case 447:
+					case 448:
+					case 449:
+					case 450:
 						break;
+					case 421:
+						return "Misdirected Request";
 					case 422:
 						return "Unprocessable Entity";
 					case 423:
@@ -117,6 +151,14 @@ namespace System.Net
 						return "Failed Dependency";
 					case 426:
 						return "Upgrade Required";
+					case 428:
+						return "Precondition Required";
+					case 429:
+						return "Too Many Requests";
+					case 431:
+						return "Request Header Fields Too Large";
+					case 451:
+						return "Unavailable For Legal Reasons";
 					default:
 						switch (code)
 						{
@@ -132,8 +174,16 @@ namespace System.Net
 							return "Gateway Timeout";
 						case 505:
 							return "Http Version Not Supported";
+						case 506:
+							return "Variant Also Negotiates";
 						case 507:
 							return "Insufficient Storage";
+						case 508:
+							return "Loop Detected";
+						case 510:
+							return "Not Extended";
+						case 511:
+							return "Network Authentication Required";
 						}
 						break;
 					}

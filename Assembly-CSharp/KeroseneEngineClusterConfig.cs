@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class KeroseneEngineClusterConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -31,7 +31,7 @@ public class KeroseneEngineClusterConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.GeneratorWattageRating = 480f;
-		buildingDef.GeneratorBaseCapacity = 20000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.RequiresPowerOutput = false;
 		buildingDef.CanMove = true;

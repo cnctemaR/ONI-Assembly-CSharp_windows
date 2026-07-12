@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Odbc;
 using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Reflection;
 
 namespace System.Data.Common
@@ -11,7 +14,15 @@ namespace System.Data.Common
 	{
 		public static DbProviderFactory GetFactory(string providerInvariantName)
 		{
-			ADP.CheckArgumentLength(providerInvariantName, "providerInvariantName");
+			return DbProviderFactories.GetFactory(providerInvariantName, true);
+		}
+
+		public static DbProviderFactory GetFactory(string providerInvariantName, bool throwOnError)
+		{
+			if (throwOnError)
+			{
+				ADP.CheckArgumentLength(providerInvariantName, "providerInvariantName");
+			}
 			DataTable providerTable = DbProviderFactories.GetProviderTable();
 			if (providerTable != null)
 			{
@@ -21,7 +32,11 @@ namespace System.Data.Common
 					return DbProviderFactories.GetFactory(dataRow);
 				}
 			}
-			throw ADP.ConfigProviderNotFound();
+			if (throwOnError)
+			{
+				throw ADP.ConfigProviderNotFound();
+			}
+			return null;
 		}
 
 		public static DbProviderFactory GetFactory(DataRow providerRow)
@@ -184,7 +199,7 @@ namespace System.Data.Common
 						DbProviderFactories._initState = ConnectionState.Connecting;
 						try
 						{
-							DataSet dataSet = PrivilegedConfigurationManager.GetSection("system.data") as DataSet;
+							DataSet dataSet = global::System.Configuration.PrivilegedConfigurationManager.GetSection("system.data") as DataSet;
 							DbProviderFactories._providerTable = ((dataSet != null) ? DbProviderFactories.IncludeFrameworkFactoryClasses(dataSet.Tables["DbProviderFactories"]) : DbProviderFactories.IncludeFrameworkFactoryClasses(null));
 						}
 						finally
@@ -194,6 +209,66 @@ namespace System.Data.Common
 					}
 				}
 			}
+		}
+
+		public static bool TryGetFactory(string providerInvariantName, out DbProviderFactory factory)
+		{
+			factory = DbProviderFactories.GetFactory(providerInvariantName, false);
+			return factory != null;
+		}
+
+		public static IEnumerable<string> GetProviderInvariantNames()
+		{
+			return DbProviderFactories._registeredFactories.Keys.ToList<string>();
+		}
+
+		public static void RegisterFactory(string providerInvariantName, string factoryTypeAssemblyQualifiedName)
+		{
+			ADP.CheckArgumentLength(providerInvariantName, "providerInvariantName");
+			ADP.CheckArgumentLength(factoryTypeAssemblyQualifiedName, "factoryTypeAssemblyQualifiedName");
+			DbProviderFactories._registeredFactories[providerInvariantName] = new DbProviderFactories.ProviderRegistration(factoryTypeAssemblyQualifiedName, null);
+		}
+
+		private static DbProviderFactory GetFactoryInstance(Type providerFactoryClass)
+		{
+			ADP.CheckArgumentNull(providerFactoryClass, "providerFactoryClass");
+			if (!providerFactoryClass.IsSubclassOf(typeof(DbProviderFactory)))
+			{
+				throw ADP.Argument(SR.Format("The type '{0}' doesn't inherit from DbProviderFactory.", providerFactoryClass.FullName));
+			}
+			FieldInfo field = providerFactoryClass.GetField("Instance", BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
+			if (null == field)
+			{
+				throw ADP.InvalidOperation("The requested .NET Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.");
+			}
+			if (!field.FieldType.IsSubclassOf(typeof(DbProviderFactory)))
+			{
+				throw ADP.InvalidOperation("The requested .NET Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.");
+			}
+			object value = field.GetValue(null);
+			if (value == null)
+			{
+				throw ADP.InvalidOperation("The requested .NET Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.");
+			}
+			return (DbProviderFactory)value;
+		}
+
+		public static void RegisterFactory(string providerInvariantName, Type providerFactoryClass)
+		{
+			DbProviderFactories.RegisterFactory(providerInvariantName, DbProviderFactories.GetFactoryInstance(providerFactoryClass));
+		}
+
+		public static void RegisterFactory(string providerInvariantName, DbProviderFactory factory)
+		{
+			ADP.CheckArgumentLength(providerInvariantName, "providerInvariantName");
+			ADP.CheckArgumentNull(factory, "factory");
+			DbProviderFactories._registeredFactories[providerInvariantName] = new DbProviderFactories.ProviderRegistration(factory.GetType().AssemblyQualifiedName, factory);
+		}
+
+		public static bool UnregisterFactory(string providerInvariantName)
+		{
+			DbProviderFactories.ProviderRegistration providerRegistration;
+			return !string.IsNullOrWhiteSpace(providerInvariantName) && DbProviderFactories._registeredFactories.TryRemove(providerInvariantName, out providerRegistration);
 		}
 
 		private const string AssemblyQualifiedName = "AssemblyQualifiedName";
@@ -206,10 +281,27 @@ namespace System.Data.Common
 
 		private const string Description = "Description";
 
+		private const string InstanceFieldName = "Instance";
+
+		private static ConcurrentDictionary<string, DbProviderFactories.ProviderRegistration> _registeredFactories = new ConcurrentDictionary<string, DbProviderFactories.ProviderRegistration>();
+
 		private static ConnectionState _initState;
 
 		private static DataTable _providerTable;
 
 		private static object _lockobj = new object();
+
+		private struct ProviderRegistration
+		{
+			internal ProviderRegistration(string factoryTypeAssemblyQualifiedName, DbProviderFactory factoryInstance)
+			{
+				this.FactoryTypeAssemblyQualifiedName = factoryTypeAssemblyQualifiedName;
+				this.FactoryInstance = factoryInstance;
+			}
+
+			internal readonly string FactoryTypeAssemblyQualifiedName { get; }
+
+			internal readonly DbProviderFactory FactoryInstance { get; }
+		}
 	}
 }

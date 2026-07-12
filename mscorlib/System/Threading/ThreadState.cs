@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Threading
 {
-	[ComVisible(true)]
 	[Flags]
-	[Serializable]
 	public enum ThreadState
 	{
 		Running = 0,

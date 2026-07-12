@@ -1,0 +1,253 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition.Primitives;
+using System.Linq;
+using System.Reflection;
+using Microsoft.Internal;
+using Microsoft.Internal.Collections;
+
+namespace System.ComponentModel.Composition.ReflectionModel
+{
+	internal class ReflectionComposablePartDefinition : ComposablePartDefinition, ICompositionElement
+	{
+		public ReflectionComposablePartDefinition(IReflectionPartCreationInfo creationInfo)
+		{
+			Assumes.NotNull<IReflectionPartCreationInfo>(creationInfo);
+			this._creationInfo = creationInfo;
+		}
+
+		public Type GetPartType()
+		{
+			return this._creationInfo.GetPartType();
+		}
+
+		public Lazy<Type> GetLazyPartType()
+		{
+			return this._creationInfo.GetLazyPartType();
+		}
+
+		public ConstructorInfo GetConstructor()
+		{
+			if (this._constructor == null)
+			{
+				ConstructorInfo constructor = this._creationInfo.GetConstructor();
+				object @lock = this._lock;
+				lock (@lock)
+				{
+					if (this._constructor == null)
+					{
+						this._constructor = constructor;
+					}
+				}
+			}
+			return this._constructor;
+		}
+
+		public override IEnumerable<ExportDefinition> ExportDefinitions
+		{
+			get
+			{
+				if (this._exports == null)
+				{
+					ExportDefinition[] array = this._creationInfo.GetExports().ToArray<ExportDefinition>();
+					object @lock = this._lock;
+					lock (@lock)
+					{
+						if (this._exports == null)
+						{
+							this._exports = array;
+						}
+					}
+				}
+				return this._exports;
+			}
+		}
+
+		public override IEnumerable<ImportDefinition> ImportDefinitions
+		{
+			get
+			{
+				if (this._imports == null)
+				{
+					ImportDefinition[] array = this._creationInfo.GetImports().ToArray<ImportDefinition>();
+					object @lock = this._lock;
+					lock (@lock)
+					{
+						if (this._imports == null)
+						{
+							this._imports = array;
+						}
+					}
+				}
+				return this._imports;
+			}
+		}
+
+		public override IDictionary<string, object> Metadata
+		{
+			get
+			{
+				if (this._metadata == null)
+				{
+					IDictionary<string, object> dictionary = this._creationInfo.GetMetadata().AsReadOnly();
+					object @lock = this._lock;
+					lock (@lock)
+					{
+						if (this._metadata == null)
+						{
+							this._metadata = dictionary;
+						}
+					}
+				}
+				return this._metadata;
+			}
+		}
+
+		internal bool IsDisposalRequired
+		{
+			get
+			{
+				return this._creationInfo.IsDisposalRequired;
+			}
+		}
+
+		public override ComposablePart CreatePart()
+		{
+			if (this.IsDisposalRequired)
+			{
+				return new DisposableReflectionComposablePart(this);
+			}
+			return new ReflectionComposablePart(this);
+		}
+
+		internal override ComposablePartDefinition GetGenericPartDefinition()
+		{
+			GenericSpecializationPartCreationInfo genericSpecializationPartCreationInfo = this._creationInfo as GenericSpecializationPartCreationInfo;
+			if (genericSpecializationPartCreationInfo != null)
+			{
+				return genericSpecializationPartCreationInfo.OriginalPart;
+			}
+			return null;
+		}
+
+		internal override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
+		{
+			if (this.IsGeneric())
+			{
+				List<Tuple<ComposablePartDefinition, ExportDefinition>> list = null;
+				IEnumerable<object> enumerable = ((definition.Metadata.Count > 0) ? definition.Metadata.GetValue<IEnumerable<object>>("System.ComponentModel.Composition.GenericParameters") : null);
+				if (enumerable != null)
+				{
+					Type[] array = null;
+					if (ReflectionComposablePartDefinition.TryGetGenericTypeParameters(enumerable, out array))
+					{
+						foreach (Type[] array2 in this.GetCandidateParameters(array))
+						{
+							ComposablePartDefinition composablePartDefinition = null;
+							if (this.TryMakeGenericPartDefinition(array2, out composablePartDefinition))
+							{
+								IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> exports = composablePartDefinition.GetExports(definition);
+								if (exports != ComposablePartDefinition._EmptyExports)
+								{
+									list = list.FastAppendToListAllowNulls<Tuple<ComposablePartDefinition, ExportDefinition>>(exports);
+								}
+							}
+						}
+					}
+				}
+				IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> enumerable2 = list;
+				return enumerable2 ?? ComposablePartDefinition._EmptyExports;
+			}
+			return base.GetExports(definition);
+		}
+
+		private IEnumerable<Type[]> GetCandidateParameters(Type[] genericParameters)
+		{
+			foreach (ExportDefinition exportDefinition in this.ExportDefinitions)
+			{
+				int[] value = exportDefinition.Metadata.GetValue<int[]>("System.ComponentModel.Composition.GenericExportParametersOrderMetadataName");
+				if (value != null && value.Length == genericParameters.Length)
+				{
+					yield return GenericServices.Reorder<Type>(genericParameters, value);
+				}
+			}
+			IEnumerator<ExportDefinition> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		private static bool TryGetGenericTypeParameters(IEnumerable<object> genericParameters, out Type[] genericTypeParameters)
+		{
+			genericTypeParameters = genericParameters as Type[];
+			if (genericTypeParameters == null)
+			{
+				object[] array = genericParameters.AsArray<object>();
+				genericTypeParameters = new Type[array.Length];
+				for (int i = 0; i < array.Length; i++)
+				{
+					genericTypeParameters[i] = array[i] as Type;
+					if (genericTypeParameters[i] == null)
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		internal bool TryMakeGenericPartDefinition(Type[] genericTypeParameters, out ComposablePartDefinition genericPartDefinition)
+		{
+			genericPartDefinition = null;
+			if (!GenericSpecializationPartCreationInfo.CanSpecialize(this.Metadata, genericTypeParameters))
+			{
+				return false;
+			}
+			genericPartDefinition = new ReflectionComposablePartDefinition(new GenericSpecializationPartCreationInfo(this._creationInfo, this, genericTypeParameters));
+			return true;
+		}
+
+		string ICompositionElement.DisplayName
+		{
+			get
+			{
+				return this._creationInfo.DisplayName;
+			}
+		}
+
+		ICompositionElement ICompositionElement.Origin
+		{
+			get
+			{
+				return this._creationInfo.Origin;
+			}
+		}
+
+		public override string ToString()
+		{
+			return this._creationInfo.DisplayName;
+		}
+
+		public override bool Equals(object obj)
+		{
+			ReflectionComposablePartDefinition reflectionComposablePartDefinition = obj as ReflectionComposablePartDefinition;
+			return reflectionComposablePartDefinition != null && this._creationInfo.Equals(reflectionComposablePartDefinition._creationInfo);
+		}
+
+		public override int GetHashCode()
+		{
+			return this._creationInfo.GetHashCode();
+		}
+
+		private readonly IReflectionPartCreationInfo _creationInfo;
+
+		private volatile IEnumerable<ImportDefinition> _imports;
+
+		private volatile IEnumerable<ExportDefinition> _exports;
+
+		private volatile IDictionary<string, object> _metadata;
+
+		private volatile ConstructorInfo _constructor;
+
+		private object _lock = new object();
+	}
+}

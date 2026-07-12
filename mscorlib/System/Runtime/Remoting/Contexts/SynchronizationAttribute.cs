@@ -105,8 +105,8 @@ namespace System.Runtime.Remoting.Contexts
 			}
 		}
 
-		[ComVisible(true)]
 		[SecurityCritical]
+		[ComVisible(true)]
 		public override void GetPropertiesForNewContext(IConstructionCallMessage ctorMsg)
 		{
 			if (this._flavor != 1)

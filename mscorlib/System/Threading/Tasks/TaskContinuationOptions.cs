@@ -3,7 +3,6 @@
 namespace System.Threading.Tasks
 {
 	[Flags]
-	[Serializable]
 	public enum TaskContinuationOptions
 	{
 		None = 0,

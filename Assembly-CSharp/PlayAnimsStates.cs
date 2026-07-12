@@ -5,7 +5,15 @@ public class PlayAnimsStates : GameStateMachine<PlayAnimsStates, PlayAnimsStates
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.animating;
-		this.root.ToggleStatusItem("Unused", "Unused", "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemName, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemTooltip, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<PlayAnimsStates, PlayAnimsStates.Instance, IStateMachineTarget, PlayAnimsStates.Def>.State root = this.root;
+		string text = "Unused";
+		string text2 = "Unused";
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemName, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemTooltip, main);
 		this.animating.Enter("PlayAnims", delegate(PlayAnimsStates.Instance smi)
 		{
 			smi.PlayAnims();

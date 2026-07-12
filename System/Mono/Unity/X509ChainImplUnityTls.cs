@@ -6,10 +6,20 @@ namespace Mono.Unity
 {
 	internal class X509ChainImplUnityTls : X509ChainImpl
 	{
-		internal X509ChainImplUnityTls(UnityTls.unitytls_x509list_ref nativeCertificateChain)
+		internal X509ChainImplUnityTls(UnityTls.unitytls_x509list_ref nativeCertificateChain, bool reverseOrder = false)
 		{
 			this.elements = null;
+			this.ownedList = null;
 			this.nativeCertificateChain = nativeCertificateChain;
+			this.reverseOrder = reverseOrder;
+		}
+
+		internal unsafe X509ChainImplUnityTls(UnityTls.unitytls_x509list* ownedList, UnityTls.unitytls_errorstate* errorState, bool reverseOrder = false)
+		{
+			this.elements = null;
+			this.ownedList = ownedList;
+			this.nativeCertificateChain = UnityTls.NativeInterface.unitytls_x509list_get_ref(ownedList, errorState);
+			this.reverseOrder = reverseOrder;
 		}
 
 		public override bool IsValid
@@ -48,7 +58,7 @@ namespace Mono.Unity
 				this.elements = new X509ChainElementCollection();
 				UnityTls.unitytls_errorstate unitytls_errorstate = UnityTls.NativeInterface.unitytls_errorstate_create();
 				UnityTls.unitytls_x509_ref unitytls_x509_ref = UnityTls.NativeInterface.unitytls_x509list_get_x509(this.nativeCertificateChain, (IntPtr)0, &unitytls_errorstate);
-				int num = 0;
+				int num = 1;
 				while (unitytls_x509_ref.handle != UnityTls.NativeInterface.UNITYTLS_INVALID_HANDLE)
 				{
 					IntPtr intPtr = UnityTls.NativeInterface.unitytls_x509_export_der(unitytls_x509_ref, null, (IntPtr)0, &unitytls_errorstate);
@@ -69,8 +79,26 @@ namespace Mono.Unity
 					unitytls_x509_ref = UnityTls.NativeInterface.unitytls_x509list_get_x509(this.nativeCertificateChain, (IntPtr)num, &unitytls_errorstate);
 					num++;
 				}
+				if (this.reverseOrder)
+				{
+					X509ChainElementCollection x509ChainElementCollection = new X509ChainElementCollection();
+					for (int i = this.elements.Count - 1; i >= 0; i--)
+					{
+						x509ChainElementCollection.Add(this.elements[i].Certificate);
+					}
+					this.elements = x509ChainElementCollection;
+				}
 				return this.elements;
 			}
+		}
+
+		public override void AddStatus(X509ChainStatusFlags error)
+		{
+			if (this.chainStatusList == null)
+			{
+				this.chainStatusList = new List<X509ChainStatus>();
+			}
+			this.chainStatusList.Add(new X509ChainStatus(error));
 		}
 
 		public override X509ChainPolicy ChainPolicy
@@ -94,15 +122,6 @@ namespace Mono.Unity
 			}
 		}
 
-		public void AddStatus(X509ChainStatusFlags errorCode)
-		{
-			if (this.chainStatusList == null)
-			{
-				this.chainStatusList = new List<X509ChainStatus>();
-			}
-			this.chainStatusList.Add(new X509ChainStatus(errorCode));
-		}
-
 		public override bool Build(X509Certificate2 certificate)
 		{
 			return false;
@@ -116,6 +135,11 @@ namespace Mono.Unity
 				this.elements.Clear();
 				this.elements = null;
 			}
+			if (this.ownedList != null)
+			{
+				UnityTls.NativeInterface.unitytls_x509list_free(this.ownedList);
+				this.ownedList = null;
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -126,10 +150,14 @@ namespace Mono.Unity
 
 		private X509ChainElementCollection elements;
 
+		private unsafe UnityTls.unitytls_x509list* ownedList;
+
 		private UnityTls.unitytls_x509list_ref nativeCertificateChain;
 
 		private X509ChainPolicy policy = new X509ChainPolicy();
 
 		private List<X509ChainStatus> chainStatusList;
+
+		private bool reverseOrder;
 	}
 }

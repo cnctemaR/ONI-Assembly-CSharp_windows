@@ -13,7 +13,7 @@ namespace UnityEngine.Networking
 		private static extern IntPtr Create(DownloadHandlerScript obj);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreatePreallocated(DownloadHandlerScript obj, byte[] preallocatedBuffer);
+		private static extern IntPtr CreatePreallocated(DownloadHandlerScript obj, [Unmarshalled] byte[] preallocatedBuffer);
 
 		private void InternalCreateScript()
 		{

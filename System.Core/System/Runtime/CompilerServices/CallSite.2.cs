@@ -5,7 +5,7 @@ using System.Dynamic.Utils;
 using System.Linq.Expressions;
 using System.Linq.Expressions.Compiler;
 using System.Reflection;
-using System.Security;
+using System.Threading;
 
 namespace System.Runtime.CompilerServices
 {
@@ -37,6 +37,29 @@ namespace System.Runtime.CompilerServices
 		internal CallSite<T> CreateMatchMaker()
 		{
 			return new CallSite<T>();
+		}
+
+		internal CallSite GetMatchmaker()
+		{
+			CallSite callSite = this._cachedMatchmaker;
+			if (callSite != null)
+			{
+				callSite = Interlocked.Exchange<CallSite>(ref this._cachedMatchmaker, null);
+			}
+			CallSite callSite2;
+			if ((callSite2 = callSite) == null)
+			{
+				(callSite2 = new CallSite<T>())._match = true;
+			}
+			return callSite2;
+		}
+
+		internal void ReleaseMatchmaker(CallSite matchMaker)
+		{
+			if (this.Rules != null)
+			{
+				this._cachedMatchmaker = matchMaker;
+			}
 		}
 
 		public static CallSite<T> Create(CallSiteBinder binder)
@@ -125,29 +148,23 @@ namespace System.Runtime.CompilerServices
 				{
 					if (typeFromHandle == DelegateHelpers.GetActionType(array.AddFirst(typeof(CallSite))))
 					{
-						methodInfo = typeof(UpdateDelegates).GetMethod("UpdateAndExecuteVoid" + array.Length, BindingFlags.Static | BindingFlags.NonPublic);
-						methodInfo2 = typeof(UpdateDelegates).GetMethod("NoMatchVoid" + array.Length, BindingFlags.Static | BindingFlags.NonPublic);
+						methodInfo = typeof(UpdateDelegates).GetMethod("UpdateAndExecuteVoid" + array.Length.ToString(), BindingFlags.Static | BindingFlags.NonPublic);
+						methodInfo2 = typeof(UpdateDelegates).GetMethod("NoMatchVoid" + array.Length.ToString(), BindingFlags.Static | BindingFlags.NonPublic);
 					}
 				}
 				else if (typeFromHandle == DelegateHelpers.GetFuncType(array.AddFirst(typeof(CallSite))))
 				{
-					methodInfo = typeof(UpdateDelegates).GetMethod("UpdateAndExecute" + (array.Length - 1), BindingFlags.Static | BindingFlags.NonPublic);
-					methodInfo2 = typeof(UpdateDelegates).GetMethod("NoMatch" + (array.Length - 1), BindingFlags.Static | BindingFlags.NonPublic);
+					methodInfo = typeof(UpdateDelegates).GetMethod("UpdateAndExecute" + (array.Length - 1).ToString(), BindingFlags.Static | BindingFlags.NonPublic);
+					methodInfo2 = typeof(UpdateDelegates).GetMethod("NoMatch" + (array.Length - 1).ToString(), BindingFlags.Static | BindingFlags.NonPublic);
 				}
 				if (methodInfo != null)
 				{
-					CallSite<T>.s_cachedNoMatch = (T)((object)CallSite<T>.CreateDelegateHelper(typeFromHandle, methodInfo2.MakeGenericMethod(array)));
-					return (T)((object)CallSite<T>.CreateDelegateHelper(typeFromHandle, methodInfo.MakeGenericMethod(array)));
+					CallSite<T>.s_cachedNoMatch = (T)((object)methodInfo2.MakeGenericMethod(array).CreateDelegate(typeFromHandle));
+					return (T)((object)methodInfo.MakeGenericMethod(array).CreateDelegate(typeFromHandle));
 				}
 			}
 			CallSite<T>.s_cachedNoMatch = this.CreateCustomNoMatchDelegate(invokeMethod);
 			return this.CreateCustomUpdateDelegate(invokeMethod);
-		}
-
-		[SecuritySafeCritical]
-		private static Delegate CreateDelegateHelper(Type delegateType, MethodInfo method)
-		{
-			return method.CreateDelegate(delegateType);
 		}
 
 		private static bool IsSimpleSignature(MethodInfo invoke, out Type[] sig)
@@ -177,8 +194,8 @@ namespace System.Runtime.CompilerServices
 		{
 			Type returnType = invoke.GetReturnType();
 			bool flag = returnType == typeof(void);
-			ArrayBuilder<Expression> arrayBuilder = new ArrayBuilder<Expression>(13);
-			ArrayBuilder<ParameterExpression> arrayBuilder2 = new ArrayBuilder<ParameterExpression>(8 + (flag ? 0 : 1));
+			global::System.Collections.Generic.ArrayBuilder<Expression> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<Expression>(13);
+			global::System.Collections.Generic.ArrayBuilder<ParameterExpression> arrayBuilder2 = new global::System.Collections.Generic.ArrayBuilder<ParameterExpression>(8 + (flag ? 0 : 1));
 			ParameterExpression[] array = Array.ConvertAll<ParameterInfo, ParameterExpression>(invoke.GetParametersCached(), (ParameterInfo p) => Expression.Parameter(p.ParameterType, p.Name));
 			LabelTarget labelTarget = Expression.Label(returnType);
 			Type[] array2 = new Type[] { typeof(T) };
@@ -207,49 +224,51 @@ namespace System.Runtime.CompilerServices
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression, Expression.Call(CachedReflectionInfo.CallSiteOps_CreateMatchmaker.MakeGenericMethod(array2), parameterExpression2)));
 			Expression expression2 = Expression.Call(CachedReflectionInfo.CallSiteOps_GetMatch, parameterExpression);
 			Expression expression3 = Expression.Call(CachedReflectionInfo.CallSiteOps_ClearMatch, parameterExpression);
-			Expression expression4 = Expression.Invoke(parameterExpression4, new TrueReadOnlyCollection<Expression>(array));
-			Expression expression5 = Expression.Call(CachedReflectionInfo.CallSiteOps_UpdateRules.MakeGenericMethod(array2), parameterExpression2, parameterExpression8);
-			Expression expression6;
+			Expression expression4 = parameterExpression4;
+			Expression[] array4 = array;
+			Expression expression5 = Expression.Invoke(expression4, new TrueReadOnlyCollection<Expression>(array4));
+			Expression expression6 = Expression.Call(CachedReflectionInfo.CallSiteOps_UpdateRules.MakeGenericMethod(array2), parameterExpression2, parameterExpression8);
+			Expression expression7;
 			if (flag)
 			{
-				expression6 = Expression.Block(expression4, Expression.IfThen(expression2, Expression.Block(expression5, Expression.Return(labelTarget))));
+				expression7 = Expression.Block(expression5, Expression.IfThen(expression2, Expression.Block(expression6, Expression.Return(labelTarget))));
 			}
 			else
 			{
-				expression6 = Expression.Block(Expression.Assign(parameterExpression6, expression4), Expression.IfThen(expression2, Expression.Block(expression5, Expression.Return(labelTarget, parameterExpression6))));
+				expression7 = Expression.Block(Expression.Assign(parameterExpression6, expression5), Expression.IfThen(expression2, Expression.Block(expression6, Expression.Return(labelTarget, parameterExpression6))));
 			}
-			Expression expression7 = Expression.Assign(parameterExpression4, Expression.ArrayAccess(parameterExpression3, new TrueReadOnlyCollection<Expression>(new Expression[] { parameterExpression8 })));
-			Expression expression8 = expression7;
+			Expression expression8 = Expression.Assign(parameterExpression4, Expression.ArrayAccess(parameterExpression3, new TrueReadOnlyCollection<Expression>(new Expression[] { parameterExpression8 })));
+			Expression expression9 = expression8;
 			LabelTarget labelTarget2 = Expression.Label();
-			Expression expression9 = Expression.IfThen(Expression.Equal(parameterExpression8, parameterExpression7), Expression.Break(labelTarget2));
-			Expression expression10 = Expression.PreIncrementAssign(parameterExpression8);
-			arrayBuilder.UncheckedAdd(Expression.IfThen(Expression.NotEqual(Expression.Assign(parameterExpression3, Expression.Call(CachedReflectionInfo.CallSiteOps_GetRules.MakeGenericMethod(array2), parameterExpression2)), Expression.Constant(null, parameterExpression3.Type)), Expression.Block(Expression.Assign(parameterExpression7, Expression.ArrayLength(parameterExpression3)), Expression.Assign(parameterExpression8, Utils.Constant(0)), Expression.Loop(Expression.Block(expression9, expression8, Expression.IfThen(Expression.NotEqual(Expression.Convert(parameterExpression4, typeof(object)), Expression.Convert(parameterExpression5, typeof(object))), Expression.Block(Expression.Assign(expression, parameterExpression4), expression6, expression3)), expression10), labelTarget2, null))));
+			Expression expression10 = Expression.IfThen(Expression.Equal(parameterExpression8, parameterExpression7), Expression.Break(labelTarget2));
+			Expression expression11 = Expression.PreIncrementAssign(parameterExpression8);
+			arrayBuilder.UncheckedAdd(Expression.IfThen(Expression.NotEqual(Expression.Assign(parameterExpression3, Expression.Call(CachedReflectionInfo.CallSiteOps_GetRules.MakeGenericMethod(array2), parameterExpression2)), Expression.Constant(null, parameterExpression3.Type)), Expression.Block(Expression.Assign(parameterExpression7, Expression.ArrayLength(parameterExpression3)), Expression.Assign(parameterExpression8, Utils.Constant(0)), Expression.Loop(Expression.Block(expression10, expression9, Expression.IfThen(Expression.NotEqual(Expression.Convert(parameterExpression4, typeof(object)), Expression.Convert(parameterExpression5, typeof(object))), Expression.Block(Expression.Assign(expression, parameterExpression4), expression7, expression3)), expression11), labelTarget2, null))));
 			ParameterExpression parameterExpression9 = Expression.Variable(typeof(RuleCache<T>), "cache");
 			arrayBuilder2.UncheckedAdd(parameterExpression9);
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression9, Expression.Call(CachedReflectionInfo.CallSiteOps_GetRuleCache.MakeGenericMethod(array2), parameterExpression2)));
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression3, Expression.Call(CachedReflectionInfo.CallSiteOps_GetCachedRules.MakeGenericMethod(array2), parameterExpression9)));
 			if (flag)
 			{
-				expression6 = Expression.Block(expression4, Expression.IfThen(expression2, Expression.Return(labelTarget)));
+				expression7 = Expression.Block(expression5, Expression.IfThen(expression2, Expression.Return(labelTarget)));
 			}
 			else
 			{
-				expression6 = Expression.Block(Expression.Assign(parameterExpression6, expression4), Expression.IfThen(expression2, Expression.Return(labelTarget, parameterExpression6)));
+				expression7 = Expression.Block(Expression.Assign(parameterExpression6, expression5), Expression.IfThen(expression2, Expression.Return(labelTarget, parameterExpression6)));
 			}
-			Expression expression11 = Expression.TryFinally(expression6, Expression.IfThen(expression2, Expression.Block(Expression.Call(CachedReflectionInfo.CallSiteOps_AddRule.MakeGenericMethod(array2), parameterExpression2, parameterExpression4), Expression.Call(CachedReflectionInfo.CallSiteOps_MoveRule.MakeGenericMethod(array2), parameterExpression9, parameterExpression4, parameterExpression8))));
-			expression8 = Expression.Assign(expression, expression7);
+			Expression expression12 = Expression.TryFinally(expression7, Expression.IfThen(expression2, Expression.Block(Expression.Call(CachedReflectionInfo.CallSiteOps_AddRule.MakeGenericMethod(array2), parameterExpression2, parameterExpression4), Expression.Call(CachedReflectionInfo.CallSiteOps_MoveRule.MakeGenericMethod(array2), parameterExpression9, parameterExpression4, parameterExpression8))));
+			expression9 = Expression.Assign(expression, expression8);
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression8, Utils.Constant(0)));
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression7, Expression.ArrayLength(parameterExpression3)));
-			arrayBuilder.UncheckedAdd(Expression.Loop(Expression.Block(expression9, expression8, expression11, expression3, expression10), labelTarget2, null));
+			arrayBuilder.UncheckedAdd(Expression.Loop(Expression.Block(expression10, expression9, expression12, expression3, expression11), labelTarget2, null));
 			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression4, Expression.Constant(null, parameterExpression4.Type)));
 			ParameterExpression parameterExpression10 = Expression.Variable(typeof(object[]), "args");
-			Expression[] array4 = Array.ConvertAll<ParameterExpression, Expression>(array3, (ParameterExpression p) => CallSite<T>.Convert(p, typeof(object)));
+			Expression[] array5 = Array.ConvertAll<ParameterExpression, Expression>(array3, (ParameterExpression p) => CallSite<T>.Convert(p, typeof(object)));
 			arrayBuilder2.UncheckedAdd(parameterExpression10);
-			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression10, Expression.NewArrayInit(typeof(object), new TrueReadOnlyCollection<Expression>(array4))));
-			Expression expression12 = Expression.Assign(expression, parameterExpression5);
-			expression8 = Expression.Assign(expression, Expression.Assign(parameterExpression4, Expression.Call(CachedReflectionInfo.CallSiteOps_Bind.MakeGenericMethod(array2), Expression.Property(parameterExpression2, "Binder"), parameterExpression2, parameterExpression10)));
-			expression11 = Expression.TryFinally(expression6, Expression.IfThen(expression2, Expression.Call(CachedReflectionInfo.CallSiteOps_AddRule.MakeGenericMethod(array2), parameterExpression2, parameterExpression4)));
-			arrayBuilder.UncheckedAdd(Expression.Loop(Expression.Block(expression12, expression8, expression11, expression3), null, null));
+			arrayBuilder.UncheckedAdd(Expression.Assign(parameterExpression10, Expression.NewArrayInit(typeof(object), new TrueReadOnlyCollection<Expression>(array5))));
+			Expression expression13 = Expression.Assign(expression, parameterExpression5);
+			expression9 = Expression.Assign(expression, Expression.Assign(parameterExpression4, Expression.Call(CachedReflectionInfo.CallSiteOps_Bind.MakeGenericMethod(array2), Expression.Property(parameterExpression2, "Binder"), parameterExpression2, parameterExpression10)));
+			expression12 = Expression.TryFinally(expression7, Expression.IfThen(expression2, Expression.Call(CachedReflectionInfo.CallSiteOps_AddRule.MakeGenericMethod(array2), parameterExpression2, parameterExpression4)));
+			arrayBuilder.UncheckedAdd(Expression.Loop(Expression.Block(expression13, expression9, expression12, expression3), null, null));
 			arrayBuilder.UncheckedAdd(Expression.Default(labelTarget.Type));
 			return Expression.Lambda<T>(Expression.Label(labelTarget, Expression.Block(arrayBuilder2.ToReadOnly<ParameterExpression>(), arrayBuilder.ToReadOnly<Expression>())), "CallSite.Target", true, new TrueReadOnlyCollection<ParameterExpression>(array)).Compile();
 		}
@@ -272,6 +291,8 @@ namespace System.Runtime.CompilerServices
 		public T Target;
 
 		internal T[] Rules;
+
+		internal CallSite _cachedMatchmaker;
 
 		private static T s_cachedUpdate;
 

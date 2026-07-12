@@ -7,7 +7,7 @@ namespace System.Xml.Linq
 	{
 		public XNodeBuilder(XContainer container)
 		{
-			this.root = container;
+			this._root = container;
 		}
 
 		public override XmlWriterSettings Settings
@@ -29,9 +29,17 @@ namespace System.Xml.Linq
 			}
 		}
 
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				this.Close();
+			}
+		}
+
 		public override void Close()
 		{
-			this.root.Add(this.content);
+			this._root.Add(this._content);
 		}
 
 		public override void Flush()
@@ -45,7 +53,7 @@ namespace System.Xml.Linq
 
 		public override void WriteBase64(byte[] buffer, int index, int count)
 		{
-			throw new NotSupportedException(Res.GetString("NotSupported_WriteBase64"));
+			throw new NotSupportedException("This XmlWriter does not support base64 encoded data.");
 		}
 
 		public override void WriteCData(string text)
@@ -75,12 +83,12 @@ namespace System.Xml.Linq
 
 		public override void WriteEndAttribute()
 		{
-			XAttribute xattribute = new XAttribute(this.attrName, this.attrValue);
-			this.attrName = null;
-			this.attrValue = null;
-			if (this.parent != null)
+			XAttribute xattribute = new XAttribute(this._attrName, this._attrValue);
+			this._attrName = null;
+			this._attrValue = null;
+			if (this._parent != null)
 			{
-				this.parent.Add(xattribute);
+				this._parent.Add(xattribute);
 				return;
 			}
 			this.Add(xattribute);
@@ -92,7 +100,7 @@ namespace System.Xml.Linq
 
 		public override void WriteEndElement()
 		{
-			this.parent = ((XElement)this.parent).parent;
+			this._parent = ((XElement)this._parent).parent;
 		}
 
 		public override void WriteEntityRef(string name)
@@ -119,19 +127,19 @@ namespace System.Xml.Linq
 			}
 			if (!(name == "quot"))
 			{
-				throw new NotSupportedException(Res.GetString("NotSupported_WriteEntityRef"));
+				throw new NotSupportedException("This XmlWriter does not support entity references.");
 			}
 			this.AddString("\"");
 		}
 
 		public override void WriteFullEndElement()
 		{
-			XElement xelement = (XElement)this.parent;
+			XElement xelement = (XElement)this._parent;
 			if (xelement.IsEmpty)
 			{
 				xelement.Add(string.Empty);
 			}
-			this.parent = xelement.parent;
+			this._parent = xelement.parent;
 		}
 
 		public override void WriteProcessingInstruction(string name, string text)
@@ -159,8 +167,8 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("prefix");
 			}
-			this.attrName = XNamespace.Get((prefix.Length == 0) ? string.Empty : namespaceName).GetName(localName);
-			this.attrValue = string.Empty;
+			this._attrName = XNamespace.Get((prefix.Length == 0) ? string.Empty : namespaceName).GetName(localName);
+			this._attrValue = string.Empty;
 		}
 
 		public override void WriteStartDocument()
@@ -198,18 +206,18 @@ namespace System.Xml.Linq
 
 		private void Add(object o)
 		{
-			if (this.content == null)
+			if (this._content == null)
 			{
-				this.content = new List<object>();
+				this._content = new List<object>();
 			}
-			this.content.Add(o);
+			this._content.Add(o);
 		}
 
 		private void AddNode(XNode n)
 		{
-			if (this.parent != null)
+			if (this._parent != null)
 			{
-				this.parent.Add(n);
+				this._parent.Add(n);
 			}
 			else
 			{
@@ -218,7 +226,7 @@ namespace System.Xml.Linq
 			XContainer xcontainer = n as XContainer;
 			if (xcontainer != null)
 			{
-				this.parent = xcontainer;
+				this._parent = xcontainer;
 			}
 		}
 
@@ -228,27 +236,27 @@ namespace System.Xml.Linq
 			{
 				return;
 			}
-			if (this.attrValue != null)
+			if (this._attrValue != null)
 			{
-				this.attrValue += s;
+				this._attrValue += s;
 				return;
 			}
-			if (this.parent != null)
+			if (this._parent != null)
 			{
-				this.parent.Add(s);
+				this._parent.Add(s);
 				return;
 			}
 			this.Add(s);
 		}
 
-		private List<object> content;
+		private List<object> _content;
 
-		private XContainer parent;
+		private XContainer _parent;
 
-		private XName attrName;
+		private XName _attrName;
 
-		private string attrValue;
+		private string _attrValue;
 
-		private XContainer root;
+		private XContainer _root;
 	}
 }

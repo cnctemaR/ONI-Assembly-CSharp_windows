@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Mono.Net.Security;
@@ -13,15 +12,15 @@ namespace Mono.Unity
 {
 	internal class UnityTlsContext : MobileTlsContext
 	{
-		public unsafe UnityTlsContext(MobileAuthenticatedStream parent, bool serverMode, string targetHost, SslProtocols enabledProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool askForClientCert)
-			: base(parent, serverMode, targetHost, enabledProtocols, serverCertificate, clientCertificates, askForClientCert)
+		public unsafe UnityTlsContext(MobileAuthenticatedStream parent, MonoSslAuthenticationOptions options)
+			: base(parent, options)
 		{
 			this.handle = GCHandle.Alloc(this);
 			UnityTls.unitytls_errorstate unitytls_errorstate = UnityTls.NativeInterface.unitytls_errorstate_create();
 			UnityTls.unitytls_tlsctx_protocolrange unitytls_tlsctx_protocolrange = new UnityTls.unitytls_tlsctx_protocolrange
 			{
-				min = UnityTlsConversions.GetMinProtocol(enabledProtocols),
-				max = UnityTlsConversions.GetMaxProtocol(enabledProtocols)
+				min = UnityTlsConversions.GetMinProtocol(options.EnabledSslProtocols),
+				max = UnityTlsConversions.GetMaxProtocol(options.EnabledSslProtocols)
 			};
 			this.readCallback = new UnityTls.unitytls_tlsctx_read_callback(UnityTlsContext.ReadCallback);
 			this.writeCallback = new UnityTls.unitytls_tlsctx_write_callback(UnityTlsContext.WriteCallback);
@@ -31,18 +30,18 @@ namespace Mono.Unity
 				read = this.readCallback,
 				data = (void*)((IntPtr)this.handle)
 			};
-			if (serverMode)
+			if (options.ServerMode)
 			{
 				UnityTls.unitytls_x509list* ptr;
 				UnityTls.unitytls_key* ptr2;
-				UnityTlsContext.ExtractNativeKeyAndChainFromManagedCertificate(serverCertificate, &unitytls_errorstate, out ptr, out ptr2);
+				UnityTlsContext.ExtractNativeKeyAndChainFromManagedCertificate(options.ServerCertificate, &unitytls_errorstate, out ptr, out ptr2);
 				try
 				{
 					UnityTls.unitytls_x509list_ref unitytls_x509list_ref = UnityTls.NativeInterface.unitytls_x509list_get_ref(ptr, &unitytls_errorstate);
 					UnityTls.unitytls_key_ref unitytls_key_ref = UnityTls.NativeInterface.unitytls_key_get_ref(ptr2, &unitytls_errorstate);
 					Mono.Unity.Debug.CheckAndThrow(unitytls_errorstate, "Failed to parse server key/certificate", AlertDescription.InternalError);
 					this.tlsContext = UnityTls.NativeInterface.unitytls_tlsctx_create_server(unitytls_tlsctx_protocolrange, unitytls_tlsctx_callbacks, unitytls_x509list_ref.handle, unitytls_key_ref.handle, &unitytls_errorstate);
-					if (askForClientCert)
+					if (base.AskForClientCertificate)
 					{
 						UnityTls.unitytls_x509list* ptr3 = null;
 						try
@@ -56,7 +55,7 @@ namespace Mono.Unity
 							UnityTls.NativeInterface.unitytls_x509list_free(ptr3);
 						}
 					}
-					goto IL_025E;
+					goto IL_026F;
 				}
 				finally
 				{
@@ -64,7 +63,7 @@ namespace Mono.Unity
 					UnityTls.NativeInterface.unitytls_key_free(ptr2);
 				}
 			}
-			byte[] bytes = Encoding.UTF8.GetBytes(targetHost);
+			byte[] bytes = Encoding.UTF8.GetBytes(options.TargetHost);
 			byte[] array;
 			byte* ptr4;
 			if ((array = bytes) == null || array.Length == 0)
@@ -79,7 +78,7 @@ namespace Mono.Unity
 			array = null;
 			this.certificateCallback = new UnityTls.unitytls_tlsctx_certificate_callback(UnityTlsContext.CertificateCallback);
 			UnityTls.NativeInterface.unitytls_tlsctx_set_certificate_callback(this.tlsContext, this.certificateCallback, (void*)((IntPtr)this.handle), &unitytls_errorstate);
-			IL_025E:
+			IL_026F:
 			this.verifyCallback = new UnityTls.unitytls_tlsctx_x509verify_callback(UnityTlsContext.VerifyCallback);
 			UnityTls.NativeInterface.unitytls_tlsctx_set_x509verify_callback(this.tlsContext, this.verifyCallback, (void*)((IntPtr)this.handle), &unitytls_errorstate);
 			Mono.Unity.Debug.CheckAndThrow(unitytls_errorstate, "Failed to create UnityTls context", AlertDescription.InternalError);
@@ -103,7 +102,7 @@ namespace Mono.Unity
 			{
 				nativeCertChain = UnityTls.NativeInterface.unitytls_x509list_create(errorState);
 				CertHelper.AddCertificateToNativeChain(nativeCertChain, cert, errorState);
-				byte[] array = Mono.Security.Cryptography.PKCS8.PrivateKeyInfo.Encode(x509Certificate.PrivateKey);
+				byte[] array = PKCS8.PrivateKeyInfo.Encode(x509Certificate.PrivateKey);
 				try
 				{
 					byte[] array2;
@@ -171,7 +170,7 @@ namespace Mono.Unity
 			}
 		}
 
-		public override X509Certificate RemoteCertificate
+		public override X509Certificate2 RemoteCertificate
 		{
 			get
 			{
@@ -272,6 +271,24 @@ namespace Mono.Unity
 				return new ValueTuple<int, bool>(0, false);
 			}
 			return new ValueTuple<int, bool>(num, true);
+		}
+
+		public override bool CanRenegotiate
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override void Renegotiate()
+		{
+			throw new NotSupportedException();
+		}
+
+		public override bool PendingRenegotiation()
+		{
+			return false;
 		}
 
 		public unsafe override void Shutdown()
@@ -484,7 +501,7 @@ namespace Mono.Unity
 			UnityTls.unitytls_x509verify_result unitytls_x509verify_result;
 			try
 			{
-				using (X509ChainImplUnityTls x509ChainImplUnityTls = new X509ChainImplUnityTls(chain))
+				using (X509ChainImplUnityTls x509ChainImplUnityTls = new X509ChainImplUnityTls(chain, false))
 				{
 					using (X509Chain x509Chain = new X509Chain(x509ChainImplUnityTls))
 					{
@@ -525,7 +542,7 @@ namespace Mono.Unity
 				{
 					throw new TlsException(AlertDescription.InternalError, "Cannot request client certificate before receiving one from the server.");
 				}
-				this.localClientCertificate = base.SelectClientCertificate(this.remoteCertificate, null);
+				this.localClientCertificate = base.SelectClientCertificate(null);
 				if (this.localClientCertificate == null)
 				{
 					*chain = new UnityTls.unitytls_x509list_ref
@@ -583,7 +600,7 @@ namespace Mono.Unity
 
 		private X509Certificate localClientCertificate;
 
-		private X509Certificate remoteCertificate;
+		private X509Certificate2 remoteCertificate;
 
 		private MonoTlsConnectionInfo connectioninfo;
 

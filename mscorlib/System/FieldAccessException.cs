@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class FieldAccessException : MemberAccessException
 	{
 		public FieldAccessException()
-			: base(Environment.GetResourceString("Attempted to access a field that is not accessible by the caller."))
+			: base("Attempted to access a field that is not accessible by the caller.")
 		{
-			base.SetErrorCode(-2146233081);
+			base.HResult = -2146233081;
 		}
 
 		public FieldAccessException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233081);
+			base.HResult = -2146233081;
 		}
 
 		public FieldAccessException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233081);
+			base.HResult = -2146233081;
 		}
 
 		protected FieldAccessException(SerializationInfo info, StreamingContext context)

@@ -1,342 +1,370 @@
 ﻿using System;
-using System.Security;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System
 {
 	public static class BitConverter
 	{
-		private unsafe static bool AmILittleEndian()
-		{
-			double num = 1.0;
-			byte* ptr = (byte*)(&num);
-			return *ptr == 0;
-		}
-
 		public static byte[] GetBytes(bool value)
 		{
 			return new byte[] { value ? 1 : 0 };
 		}
 
-		public static byte[] GetBytes(char value)
+		public static bool TryWriteBytes(Span<byte> destination, bool value)
 		{
-			return BitConverter.GetBytes((short)value);
+			if (destination.Length < 1)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<byte>(MemoryMarshal.GetReference<byte>(destination), value ? 1 : 0);
+			return true;
 		}
 
-		[SecuritySafeCritical]
+		public unsafe static byte[] GetBytes(char value)
+		{
+			byte[] array = new byte[2];
+			*Unsafe.As<byte, char>(ref array[0]) = value;
+			return array;
+		}
+
+		public static bool TryWriteBytes(Span<byte> destination, char value)
+		{
+			if (destination.Length < 2)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<char>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
 		public unsafe static byte[] GetBytes(short value)
 		{
-			byte[] array2;
-			byte[] array = (array2 = new byte[2]);
-			byte* ptr;
-			if (array == null || array2.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &array2[0];
-			}
-			*(short*)ptr = value;
-			array2 = null;
+			byte[] array = new byte[2];
+			*Unsafe.As<byte, short>(ref array[0]) = value;
 			return array;
 		}
 
-		[SecuritySafeCritical]
+		public static bool TryWriteBytes(Span<byte> destination, short value)
+		{
+			if (destination.Length < 2)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<short>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
 		public unsafe static byte[] GetBytes(int value)
 		{
-			byte[] array2;
-			byte[] array = (array2 = new byte[4]);
-			byte* ptr;
-			if (array == null || array2.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &array2[0];
-			}
-			*(int*)ptr = value;
-			array2 = null;
+			byte[] array = new byte[4];
+			*Unsafe.As<byte, int>(ref array[0]) = value;
 			return array;
 		}
 
-		[SecuritySafeCritical]
+		public static bool TryWriteBytes(Span<byte> destination, int value)
+		{
+			if (destination.Length < 4)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<int>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
 		public unsafe static byte[] GetBytes(long value)
 		{
-			byte[] array2;
-			byte[] array = (array2 = new byte[8]);
-			byte* ptr;
-			if (array == null || array2.Length == 0)
+			byte[] array = new byte[8];
+			*Unsafe.As<byte, long>(ref array[0]) = value;
+			return array;
+		}
+
+		public static bool TryWriteBytes(Span<byte> destination, long value)
+		{
+			if (destination.Length < 8)
 			{
-				ptr = null;
+				return false;
 			}
-			else
-			{
-				ptr = &array2[0];
-			}
-			*(long*)ptr = value;
-			array2 = null;
+			Unsafe.WriteUnaligned<long>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
+		[CLSCompliant(false)]
+		public unsafe static byte[] GetBytes(ushort value)
+		{
+			byte[] array = new byte[2];
+			*Unsafe.As<byte, ushort>(ref array[0]) = value;
 			return array;
 		}
 
 		[CLSCompliant(false)]
-		public static byte[] GetBytes(ushort value)
+		public static bool TryWriteBytes(Span<byte> destination, ushort value)
 		{
-			return BitConverter.GetBytes((short)value);
+			if (destination.Length < 2)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<ushort>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
 		}
 
 		[CLSCompliant(false)]
-		public static byte[] GetBytes(uint value)
+		public unsafe static byte[] GetBytes(uint value)
 		{
-			return BitConverter.GetBytes((int)value);
+			byte[] array = new byte[4];
+			*Unsafe.As<byte, uint>(ref array[0]) = value;
+			return array;
 		}
 
 		[CLSCompliant(false)]
-		public static byte[] GetBytes(ulong value)
+		public static bool TryWriteBytes(Span<byte> destination, uint value)
 		{
-			return BitConverter.GetBytes((long)value);
+			if (destination.Length < 4)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<uint>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
 		}
 
-		[SecuritySafeCritical]
+		[CLSCompliant(false)]
+		public unsafe static byte[] GetBytes(ulong value)
+		{
+			byte[] array = new byte[8];
+			*Unsafe.As<byte, ulong>(ref array[0]) = value;
+			return array;
+		}
+
+		[CLSCompliant(false)]
+		public static bool TryWriteBytes(Span<byte> destination, ulong value)
+		{
+			if (destination.Length < 8)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<ulong>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
 		public unsafe static byte[] GetBytes(float value)
 		{
-			return BitConverter.GetBytes(*(int*)(&value));
+			byte[] array = new byte[4];
+			*Unsafe.As<byte, float>(ref array[0]) = value;
+			return array;
 		}
 
-		[SecuritySafeCritical]
+		public static bool TryWriteBytes(Span<byte> destination, float value)
+		{
+			if (destination.Length < 4)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<float>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
+		}
+
 		public unsafe static byte[] GetBytes(double value)
 		{
-			return BitConverter.GetBytes(*(long*)(&value));
+			byte[] array = new byte[8];
+			*Unsafe.As<byte, double>(ref array[0]) = value;
+			return array;
+		}
+
+		public static bool TryWriteBytes(Span<byte> destination, double value)
+		{
+			if (destination.Length < 8)
+			{
+				return false;
+			}
+			Unsafe.WriteUnaligned<double>(MemoryMarshal.GetReference<byte>(destination), value);
+			return true;
 		}
 
 		public static char ToChar(byte[] value, int startIndex)
 		{
-			if (value == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 2)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
 			return (char)BitConverter.ToInt16(value, startIndex);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static short ToInt16(byte[] value, int startIndex)
+		public static char ToChar(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 2)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<char>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public static short ToInt16(byte[] value, int startIndex)
 		{
 			if (value == null)
 			{
 				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			if (startIndex >= value.Length)
 			{
 				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
 			if (startIndex > value.Length - 2)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
 			}
-			fixed (byte* ptr = &value[startIndex])
-			{
-				byte* ptr2 = ptr;
-				if (startIndex % 2 == 0)
-				{
-					return *(short*)ptr2;
-				}
-				if (BitConverter.IsLittleEndian)
-				{
-					return (short)((int)(*ptr2) | ((int)ptr2[1] << 8));
-				}
-				return (short)(((int)(*ptr2) << 8) | (int)ptr2[1]);
-			}
+			return Unsafe.ReadUnaligned<short>(ref value[startIndex]);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static int ToInt32(byte[] value, int startIndex)
+		public static short ToInt16(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 2)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<short>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public static int ToInt32(byte[] value, int startIndex)
 		{
 			if (value == null)
 			{
 				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			if (startIndex >= value.Length)
 			{
 				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
 			if (startIndex > value.Length - 4)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
 			}
-			fixed (byte* ptr = &value[startIndex])
-			{
-				byte* ptr2 = ptr;
-				if (startIndex % 4 == 0)
-				{
-					return *(int*)ptr2;
-				}
-				if (BitConverter.IsLittleEndian)
-				{
-					return (int)(*ptr2) | ((int)ptr2[1] << 8) | ((int)ptr2[2] << 16) | ((int)ptr2[3] << 24);
-				}
-				return ((int)(*ptr2) << 24) | ((int)ptr2[1] << 16) | ((int)ptr2[2] << 8) | (int)ptr2[3];
-			}
+			return Unsafe.ReadUnaligned<int>(ref value[startIndex]);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static long ToInt64(byte[] value, int startIndex)
+		public static int ToInt32(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 4)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<int>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public static long ToInt64(byte[] value, int startIndex)
 		{
 			if (value == null)
 			{
 				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			if (startIndex >= value.Length)
 			{
 				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
 			if (startIndex > value.Length - 8)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
 			}
-			fixed (byte* ptr = &value[startIndex])
+			return Unsafe.ReadUnaligned<long>(ref value[startIndex]);
+		}
+
+		public static long ToInt64(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 8)
 			{
-				byte* ptr2 = ptr;
-				if (startIndex % 8 == 0)
-				{
-					return *(long*)ptr2;
-				}
-				if (BitConverter.IsLittleEndian)
-				{
-					ulong num = (ulong)((int)(*ptr2) | ((int)ptr2[1] << 8) | ((int)ptr2[2] << 16) | ((int)ptr2[3] << 24));
-					int num2 = (int)ptr2[4] | ((int)ptr2[5] << 8) | ((int)ptr2[6] << 16) | ((int)ptr2[7] << 24);
-					return (long)(num | (ulong)((ulong)((long)num2) << 32));
-				}
-				int num3 = ((int)(*ptr2) << 24) | ((int)ptr2[1] << 16) | ((int)ptr2[2] << 8) | (int)ptr2[3];
-				return (long)((ulong)(((int)ptr2[4] << 24) | ((int)ptr2[5] << 16) | ((int)ptr2[6] << 8) | (int)ptr2[7]) | (ulong)((ulong)((long)num3) << 32));
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
 			}
+			return Unsafe.ReadUnaligned<long>(MemoryMarshal.GetReference<byte>(value));
 		}
 
 		[CLSCompliant(false)]
 		public static ushort ToUInt16(byte[] value, int startIndex)
 		{
-			if (value == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 2)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
 			return (ushort)BitConverter.ToInt16(value, startIndex);
+		}
+
+		[CLSCompliant(false)]
+		public static ushort ToUInt16(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 2)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<ushort>(MemoryMarshal.GetReference<byte>(value));
 		}
 
 		[CLSCompliant(false)]
 		public static uint ToUInt32(byte[] value, int startIndex)
 		{
-			if (value == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 4)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
 			return (uint)BitConverter.ToInt32(value, startIndex);
+		}
+
+		[CLSCompliant(false)]
+		public static uint ToUInt32(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 4)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<uint>(MemoryMarshal.GetReference<byte>(value));
 		}
 
 		[CLSCompliant(false)]
 		public static ulong ToUInt64(byte[] value, int startIndex)
 		{
-			if (value == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 8)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
 			return (ulong)BitConverter.ToInt64(value, startIndex);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static float ToSingle(byte[] value, int startIndex)
+		[CLSCompliant(false)]
+		public static ulong ToUInt64(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 8)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<ulong>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public static float ToSingle(byte[] value, int startIndex)
+		{
+			return BitConverter.Int32BitsToSingle(BitConverter.ToInt32(value, startIndex));
+		}
+
+		public static float ToSingle(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 4)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<float>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public static double ToDouble(byte[] value, int startIndex)
+		{
+			return BitConverter.Int64BitsToDouble(BitConverter.ToInt64(value, startIndex));
+		}
+
+		public static double ToDouble(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 8)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<double>(MemoryMarshal.GetReference<byte>(value));
+		}
+
+		public unsafe static string ToString(byte[] value, int startIndex, int length)
 		{
 			if (value == null)
 			{
 				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 4)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
-			int num = BitConverter.ToInt32(value, startIndex);
-			return *(float*)(&num);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe static double ToDouble(byte[] value, int startIndex)
-		{
-			if (value == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-			}
-			if ((ulong)startIndex >= (ulong)((long)value.Length))
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-			}
-			if (startIndex > value.Length - 8)
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
-			}
-			long num = BitConverter.ToInt64(value, startIndex);
-			return *(double*)(&num);
-		}
-
-		private static char GetHexValue(int i)
-		{
-			if (i < 10)
-			{
-				return (char)(i + 48);
-			}
-			return (char)(i - 10 + 65);
-		}
-
-		public static string ToString(byte[] value, int startIndex, int length)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
 			}
 			if (startIndex < 0 || (startIndex >= value.Length && startIndex > 0))
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("length", "Value must be positive.");
 			}
 			if (startIndex > value.Length - length)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
 			}
 			if (length == 0)
 			{
@@ -344,26 +372,31 @@ namespace System
 			}
 			if (length > 715827882)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("The specified length exceeds the maximum value of {0}.", new object[] { 715827882 }));
+				throw new ArgumentOutOfRangeException("length", SR.Format("The specified length exceeds the maximum value of {0}.", 715827882));
 			}
-			int num = length * 3;
-			char[] array = new char[num];
-			int num2 = startIndex;
-			for (int i = 0; i < num; i += 3)
+			return string.Create<ValueTuple<byte[], int, int>>(length * 3 - 1, new ValueTuple<byte[], int, int>(value, startIndex, length), delegate(Span<char> dst, [TupleElementNames(new string[] { "value", "startIndex", "length" })] ValueTuple<byte[], int, int> state)
 			{
-				byte b = value[num2++];
-				array[i] = BitConverter.GetHexValue((int)(b / 16));
-				array[i + 1] = BitConverter.GetHexValue((int)(b % 16));
-				array[i + 2] = '-';
-			}
-			return new string(array, 0, array.Length - 1);
+				ReadOnlySpan<byte> readOnlySpan = new ReadOnlySpan<byte>(state.Item1, state.Item2, state.Item3);
+				int i = 0;
+				int num = 0;
+				byte b = *readOnlySpan[i++];
+				*dst[num++] = "0123456789ABCDEF"[b >> 4];
+				*dst[num++] = "0123456789ABCDEF"[(int)(b & 15)];
+				while (i < readOnlySpan.Length)
+				{
+					b = *readOnlySpan[i++];
+					*dst[num++] = '-';
+					*dst[num++] = "0123456789ABCDEF"[b >> 4];
+					*dst[num++] = "0123456789ABCDEF"[(int)(b & 15)];
+				}
+			});
 		}
 
 		public static string ToString(byte[] value)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
 			return BitConverter.ToString(value, 0, value.Length);
 		}
@@ -372,7 +405,7 @@ namespace System
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
 			return BitConverter.ToString(value, startIndex, value.Length - startIndex);
 		}
@@ -381,31 +414,60 @@ namespace System
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
 			}
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
 			if (startIndex > value.Length - 1)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
 			}
-			return value[startIndex] != 0;
+			return value[startIndex] > 0;
 		}
 
-		[SecuritySafeCritical]
+		public static bool ToBoolean(ReadOnlySpan<byte> value)
+		{
+			if (value.Length < 1)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.value);
+			}
+			return Unsafe.ReadUnaligned<byte>(MemoryMarshal.GetReference<byte>(value)) > 0;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static long DoubleToInt64Bits(double value)
 		{
 			return *(long*)(&value);
 		}
 
-		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static double Int64BitsToDouble(long value)
 		{
 			return *(double*)(&value);
 		}
 
-		public static readonly bool IsLittleEndian = BitConverter.AmILittleEndian();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static int SingleToInt32Bits(float value)
+		{
+			return *(int*)(&value);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static float Int32BitsToSingle(int value)
+		{
+			return *(float*)(&value);
+		}
+
+		unsafe static BitConverter()
+		{
+			ushort num = 4660;
+			byte* ptr = (byte*)(&num);
+			BitConverter.IsLittleEndian = *ptr == 52;
+		}
+
+		[Intrinsic]
+		public static readonly bool IsLittleEndian;
 	}
 }

@@ -261,7 +261,7 @@ public class AudioMixer
 				}
 				else
 				{
-					StaminaMonitor.Instance smi = Components.LiveMinionIdentities[i].GetComponent<Worker>().GetSMI<StaminaMonitor.Instance>();
+					StaminaMonitor.Instance smi = Components.LiveMinionIdentities[i].GetComponent<WorkerBase>().GetSMI<StaminaMonitor.Instance>();
 					if (smi != null && smi.IsSleeping())
 					{
 						num3++;
@@ -287,7 +287,7 @@ public class AudioMixer
 			eventDescription.getUserProperty("buses", out user_PROPERTY);
 			string text = user_PROPERTY.stringValue();
 			char c = '-';
-			string[] array = text.Split(new char[] { c });
+			string[] array = text.Split(c, StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				float num = 1f;

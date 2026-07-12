@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
@@ -27,9 +28,15 @@ namespace UnityEngine.Networking
 			this.InternalCreateAudioClip(uri.AbsoluteUri, audioType);
 		}
 
-		protected override byte[] GetData()
+		protected override NativeArray<byte> GetNativeData()
 		{
-			return DownloadHandler.InternalGetByteArray(this);
+			return DownloadHandler.InternalGetNativeArray(this, ref this.m_NativeData);
+		}
+
+		public override void Dispose()
+		{
+			DownloadHandler.DisposeNativeArray(ref this.m_NativeData);
+			base.Dispose();
 		}
 
 		protected override string GetText()
@@ -64,5 +71,7 @@ namespace UnityEngine.Networking
 		{
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerAudioClip>(www).audioClip;
 		}
+
+		private NativeArray<byte> m_NativeData;
 	}
 }

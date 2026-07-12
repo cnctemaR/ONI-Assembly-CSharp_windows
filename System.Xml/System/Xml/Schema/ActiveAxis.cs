@@ -9,40 +9,40 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.currentDepth;
+				return this._currentDepth;
 			}
 		}
 
 		internal void Reactivate()
 		{
-			this.isActive = true;
-			this.currentDepth = -1;
+			this._isActive = true;
+			this._currentDepth = -1;
 		}
 
 		internal ActiveAxis(Asttree axisTree)
 		{
-			this.axisTree = axisTree;
-			this.currentDepth = -1;
-			this.axisStack = new ArrayList(axisTree.SubtreeArray.Count);
+			this._axisTree = axisTree;
+			this._currentDepth = -1;
+			this._axisStack = new ArrayList(axisTree.SubtreeArray.Count);
 			for (int i = 0; i < axisTree.SubtreeArray.Count; i++)
 			{
 				AxisStack axisStack = new AxisStack((ForwardAxis)axisTree.SubtreeArray[i], this);
-				this.axisStack.Add(axisStack);
+				this._axisStack.Add(axisStack);
 			}
-			this.isActive = true;
+			this._isActive = true;
 		}
 
 		public bool MoveToStartElement(string localname, string URN)
 		{
-			if (!this.isActive)
+			if (!this._isActive)
 			{
 				return false;
 			}
-			this.currentDepth++;
+			this._currentDepth++;
 			bool flag = false;
-			for (int i = 0; i < this.axisStack.Count; i++)
+			for (int i = 0; i < this._axisStack.Count; i++)
 			{
-				AxisStack axisStack = (AxisStack)this.axisStack[i];
+				AxisStack axisStack = (AxisStack)this._axisStack[i];
 				if (axisStack.Subtree.IsSelfAxis)
 				{
 					if (axisStack.Subtree.IsDss || this.CurrentDepth == 0)
@@ -50,7 +50,7 @@ namespace System.Xml.Schema
 						flag = true;
 					}
 				}
-				else if (this.CurrentDepth != 0 && axisStack.MoveToChild(localname, URN, this.currentDepth))
+				else if (this.CurrentDepth != 0 && axisStack.MoveToChild(localname, URN, this._currentDepth))
 				{
 					flag = true;
 				}
@@ -60,33 +60,33 @@ namespace System.Xml.Schema
 
 		public virtual bool EndElement(string localname, string URN)
 		{
-			if (this.currentDepth == 0)
+			if (this._currentDepth == 0)
 			{
-				this.isActive = false;
-				this.currentDepth--;
+				this._isActive = false;
+				this._currentDepth--;
 			}
-			if (!this.isActive)
+			if (!this._isActive)
 			{
 				return false;
 			}
-			for (int i = 0; i < this.axisStack.Count; i++)
+			for (int i = 0; i < this._axisStack.Count; i++)
 			{
-				((AxisStack)this.axisStack[i]).MoveToParent(localname, URN, this.currentDepth);
+				((AxisStack)this._axisStack[i]).MoveToParent(localname, URN, this._currentDepth);
 			}
-			this.currentDepth--;
+			this._currentDepth--;
 			return false;
 		}
 
 		public bool MoveToAttribute(string localname, string URN)
 		{
-			if (!this.isActive)
+			if (!this._isActive)
 			{
 				return false;
 			}
 			bool flag = false;
-			for (int i = 0; i < this.axisStack.Count; i++)
+			for (int i = 0; i < this._axisStack.Count; i++)
 			{
-				if (((AxisStack)this.axisStack[i]).MoveToAttribute(localname, URN, this.currentDepth + 1))
+				if (((AxisStack)this._axisStack[i]).MoveToAttribute(localname, URN, this._currentDepth + 1))
 				{
 					flag = true;
 				}
@@ -94,12 +94,12 @@ namespace System.Xml.Schema
 			return flag;
 		}
 
-		private int currentDepth;
+		private int _currentDepth;
 
-		private bool isActive;
+		private bool _isActive;
 
-		private Asttree axisTree;
+		private Asttree _axisTree;
 
-		private ArrayList axisStack;
+		private ArrayList _axisStack;
 	}
 }

@@ -54,7 +54,7 @@ public class WaterCoolerConfig : IBuildingConfig
 				new CellOffset(0, 0)
 			}
 		};
-		def.overrideFileName = "anim_interacts_watercooler_kanim";
+		def.overrideFileName = new Func<GameObject, string>(this.GetImmunityProviderAnimFileName);
 		def.overrideAnims = new string[] { "working_pre", "working_loop", "working_pst" };
 		def.specialRequirements = new Func<GameObject, bool>(this.RefreshFromHeatCondition);
 		HeatImmunityProvider.Def def2 = def;
@@ -65,6 +65,20 @@ public class WaterCoolerConfig : IBuildingConfig
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Recommended;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
+	}
+
+	private string GetImmunityProviderAnimFileName(GameObject theEntitySeekingImmunity)
+	{
+		if (theEntitySeekingImmunity == null)
+		{
+			return "anim_interacts_watercooler_kanim";
+		}
+		MinionIdentity component = theEntitySeekingImmunity.GetComponent<MinionIdentity>();
+		if (component != null && component.model == BionicMinionConfig.MODEL)
+		{
+			return "anim_bionic_interacts_watercooler_kanim";
+		}
+		return "anim_interacts_watercooler_kanim";
 	}
 
 	private void ApplyImmunityEffectWhenDrankRecreationally(GameObject duplicant, GameObject waterCoolerInstance)

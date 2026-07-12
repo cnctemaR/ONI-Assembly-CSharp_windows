@@ -18,7 +18,7 @@ namespace System.Security.Permissions
 				this.SetUnrestricted(false);
 				return;
 			}
-			throw new ArgumentException(global::SR.GetString("Invalid permission state."));
+			throw new ArgumentException(SR.GetString("Invalid permission state."));
 		}
 
 		public TypeDescriptorPermission(TypeDescriptorPermissionFlags flag)
@@ -83,7 +83,7 @@ namespace System.Security.Permissions
 			}
 			catch (InvalidCastException)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, global::SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
 			}
 			return permission;
 		}
@@ -104,7 +104,7 @@ namespace System.Security.Permissions
 			}
 			catch (InvalidCastException)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, global::SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
 			}
 			return flag;
 		}
@@ -130,7 +130,7 @@ namespace System.Security.Permissions
 			}
 			catch (InvalidCastException)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, global::SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.GetString("Operation on type '{0}' attempted with target of incorrect type."), base.GetType().FullName));
 			}
 			return permission;
 		}
@@ -144,7 +144,7 @@ namespace System.Security.Permissions
 		{
 			if ((type & ~TypeDescriptorPermissionFlags.RestrictedRegistrationAccess) != TypeDescriptorPermissionFlags.NoFlags)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, global::SR.GetString("Illegal enum value: {0}."), (int)type));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.GetString("Illegal enum value: {0}."), (int)type));
 			}
 		}
 
@@ -173,7 +173,7 @@ namespace System.Security.Permissions
 			string text = securityElement.Attribute("class");
 			if (text == null || text.IndexOf(base.GetType().FullName, StringComparison.Ordinal) == -1)
 			{
-				throw new ArgumentException(global::SR.GetString("The value of \"class\" attribute is invalid."), "securityElement");
+				throw new ArgumentException(SR.GetString("The value of \"class\" attribute is invalid."), "securityElement");
 			}
 			string text2 = securityElement.Attribute("Unrestricted");
 			if (text2 != null && string.Compare(text2, "true", StringComparison.OrdinalIgnoreCase) == 0)
@@ -195,7 +195,7 @@ namespace System.Security.Permissions
 		{
 			if ((flags & ~TypeDescriptorPermissionFlags.RestrictedRegistrationAccess) != TypeDescriptorPermissionFlags.NoFlags)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, global::SR.GetString("Illegal enum value: {0}."), (int)flags));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.GetString("Illegal enum value: {0}."), (int)flags));
 			}
 		}
 

@@ -1,35 +1,30 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Xml.XPath;
 
 namespace MS.Internal.Xml.XPath
 {
 	internal class Function : AstNode
 	{
-		public Function(Function.FunctionType ftype, ArrayList argumentList)
+		public Function(Function.FunctionType ftype, List<AstNode> argumentList)
 		{
-			this.functionType = ftype;
-			this.argumentList = new ArrayList(argumentList);
+			this._functionType = ftype;
+			this._argumentList = new List<AstNode>(argumentList);
 		}
 
-		public Function(string prefix, string name, ArrayList argumentList)
+		public Function(string prefix, string name, List<AstNode> argumentList)
 		{
-			this.functionType = Function.FunctionType.FuncUserDefined;
-			this.prefix = prefix;
-			this.name = name;
-			this.argumentList = new ArrayList(argumentList);
-		}
-
-		public Function(Function.FunctionType ftype)
-		{
-			this.functionType = ftype;
+			this._functionType = Function.FunctionType.FuncUserDefined;
+			this._prefix = prefix;
+			this._name = name;
+			this._argumentList = new List<AstNode>(argumentList);
 		}
 
 		public Function(Function.FunctionType ftype, AstNode arg)
 		{
-			this.functionType = ftype;
-			this.argumentList = new ArrayList();
-			this.argumentList.Add(arg);
+			this._functionType = ftype;
+			this._argumentList = new List<AstNode>();
+			this._argumentList.Add(arg);
 		}
 
 		public override AstNode.AstType Type
@@ -44,7 +39,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return Function.ReturnTypes[(int)this.functionType];
+				return Function.ReturnTypes[(int)this._functionType];
 			}
 		}
 
@@ -52,15 +47,15 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.functionType;
+				return this._functionType;
 			}
 		}
 
-		public ArrayList ArgumentList
+		public List<AstNode> ArgumentList
 		{
 			get
 			{
-				return this.argumentList;
+				return this._argumentList;
 			}
 		}
 
@@ -68,7 +63,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 		}
 
@@ -76,17 +71,17 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.name;
+				return this._name;
 			}
 		}
 
-		private Function.FunctionType functionType;
+		private Function.FunctionType _functionType;
 
-		private ArrayList argumentList;
+		private List<AstNode> _argumentList;
 
-		private string name;
+		private string _name;
 
-		private string prefix;
+		private string _prefix;
 
 		internal static XPathResultType[] ReturnTypes = new XPathResultType[]
 		{

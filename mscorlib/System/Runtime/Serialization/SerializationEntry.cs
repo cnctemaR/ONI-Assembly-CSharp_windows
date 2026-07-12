@@ -1,16 +1,21 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
-	public struct SerializationEntry
+	public readonly struct SerializationEntry
 	{
+		internal SerializationEntry(string entryName, object entryValue, Type entryType)
+		{
+			this._name = entryName;
+			this._value = entryValue;
+			this._type = entryType;
+		}
+
 		public object Value
 		{
 			get
 			{
-				return this.m_value;
+				return this._value;
 			}
 		}
 
@@ -18,7 +23,7 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.m_name;
+				return this._name;
 			}
 		}
 
@@ -26,21 +31,14 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.m_type;
+				return this._type;
 			}
 		}
 
-		internal SerializationEntry(string entryName, object entryValue, Type entryType)
-		{
-			this.m_value = entryValue;
-			this.m_name = entryName;
-			this.m_type = entryType;
-		}
+		private readonly string _name;
 
-		private Type m_type;
+		private readonly object _value;
 
-		private object m_value;
-
-		private string m_name;
+		private readonly Type _type;
 	}
 }

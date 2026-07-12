@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Contexts;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public static class Monitor
 	{
-		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Enter(object obj);
 
@@ -30,8 +25,8 @@ namespace System.Threading
 			throw new ArgumentException(Environment.GetResourceString("Argument must be initialized to false"), "lockTaken");
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Exit(object obj);
 

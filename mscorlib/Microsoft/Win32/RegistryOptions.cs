@@ -3,7 +3,6 @@
 namespace Microsoft.Win32
 {
 	[Flags]
-	[Serializable]
 	public enum RegistryOptions
 	{
 		None = 0,

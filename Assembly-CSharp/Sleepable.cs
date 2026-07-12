@@ -15,15 +15,19 @@ public class Sleepable : Workable
 		this.synchronizeAnims = false;
 		this.triggerWorkReactions = false;
 		this.lightEfficiencyBonus = false;
+		this.approachable = base.GetComponent<IApproachable>();
 	}
 
 	protected override void OnSpawn()
 	{
-		Components.Sleepables.Add(this);
+		if (this.isNormalBed)
+		{
+			Components.NormalBeds.Add(base.gameObject.GetMyWorldId(), this);
+		}
 		base.SetWorkTime(float.PositiveInfinity);
 	}
 
-	public override HashedString[] GetWorkAnims(Worker worker)
+	public override HashedString[] GetWorkAnims(WorkerBase worker)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (base.GetComponent<Building>() != null && component != null && component.CurrentHat != null)
@@ -33,7 +37,7 @@ public class Sleepable : Workable
 		return Sleepable.normalWorkAnims;
 	}
 
-	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
+	public override HashedString[] GetWorkPstAnims(WorkerBase worker, bool successfully_completed)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (base.GetComponent<Building>() != null && component != null && component.CurrentHat != null)
@@ -43,7 +47,7 @@ public class Sleepable : Workable
 		return Sleepable.normalWorkPstAnim;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		KAnimControllerBase animController = this.GetAnimController();
@@ -62,7 +66,7 @@ public class Sleepable : Workable
 		this.isDoneSleeping = false;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.isDoneSleeping)
 		{
@@ -80,7 +84,7 @@ public class Sleepable : Workable
 		return false;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (this.operational != null)
@@ -110,7 +114,7 @@ public class Sleepable : Workable
 		}
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}
@@ -118,15 +122,18 @@ public class Sleepable : Workable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Components.Sleepables.Remove(this);
+		if (this.isNormalBed)
+		{
+			Components.NormalBeds.Remove(base.gameObject.GetMyWorldId(), this);
+		}
 	}
 
 	private void PlayPstAnim(object data)
 	{
-		Worker worker = (Worker)data;
-		if (worker != null && worker.workable != null)
+		WorkerBase workerBase = (WorkerBase)data;
+		if (workerBase != null && workerBase.GetWorkable() != null)
 		{
-			KAnimControllerBase component = worker.workable.gameObject.GetComponent<KAnimControllerBase>();
+			KAnimControllerBase component = workerBase.GetWorkable().gameObject.GetComponent<KAnimControllerBase>();
 			if (component != null)
 			{
 				component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
@@ -135,6 +142,11 @@ public class Sleepable : Workable
 	}
 
 	private const float STRECH_CHANCE = 0.33f;
+
+	[MyCmpGet]
+	public Assignable assignable;
+
+	public IApproachable approachable;
 
 	[MyCmpGet]
 	private Operational operational;
@@ -148,6 +160,8 @@ public class Sleepable : Workable
 	private float wakeTime;
 
 	private bool isDoneSleeping;
+
+	public bool isNormalBed = true;
 
 	public ClinicDreamable Dreamable;
 

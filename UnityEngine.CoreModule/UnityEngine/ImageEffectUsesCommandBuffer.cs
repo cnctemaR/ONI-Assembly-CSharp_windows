@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[AttributeUsage(AttributeTargets.Method)]
+	[UsedByNativeCode]
 	public sealed class ImageEffectUsesCommandBuffer : Attribute
 	{
 	}

@@ -2,8 +2,6 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
-	[Serializable]
 	public sealed class CurrencyWrapper
 	{
 		public CurrencyWrapper(decimal obj)
@@ -15,7 +13,7 @@ namespace System.Runtime.InteropServices
 		{
 			if (!(obj is decimal))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Decimal."), "obj");
+				throw new ArgumentException("Object must be of type Decimal.", "obj");
 			}
 			this.m_WrappedObject = (decimal)obj;
 		}

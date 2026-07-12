@@ -9,7 +9,7 @@ namespace System.Net
 		internal UploadFileCompletedEventArgs(byte[] result, Exception exception, bool cancelled, object userToken)
 			: base(exception, cancelled, userToken)
 		{
-			this.m_Result = result;
+			this._result = result;
 		}
 
 		public byte[] Result
@@ -17,7 +17,7 @@ namespace System.Net
 			get
 			{
 				base.RaiseExceptionIfNecessary();
-				return this.m_Result;
+				return this._result;
 			}
 		}
 
@@ -26,6 +26,6 @@ namespace System.Net
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private byte[] m_Result;
+		private readonly byte[] _result;
 	}
 }

@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public ImmutableObjectAttribute(bool immutable)
 		{
-			this.immutable = immutable;
+			this.Immutable = immutable;
 		}
 
-		public bool Immutable
-		{
-			get
-			{
-				return this.immutable;
-			}
-		}
+		public bool Immutable { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -25,7 +19,9 @@ namespace System.ComponentModel
 				return true;
 			}
 			ImmutableObjectAttribute immutableObjectAttribute = obj as ImmutableObjectAttribute;
-			return immutableObjectAttribute != null && immutableObjectAttribute.Immutable == this.immutable;
+			bool? flag = ((immutableObjectAttribute != null) ? new bool?(immutableObjectAttribute.Immutable) : null);
+			bool immutable = this.Immutable;
+			return (flag.GetValueOrDefault() == immutable) & (flag != null);
 		}
 
 		public override int GetHashCode()
@@ -43,7 +39,5 @@ namespace System.ComponentModel
 		public static readonly ImmutableObjectAttribute No = new ImmutableObjectAttribute(false);
 
 		public static readonly ImmutableObjectAttribute Default = ImmutableObjectAttribute.No;
-
-		private bool immutable = true;
 	}
 }

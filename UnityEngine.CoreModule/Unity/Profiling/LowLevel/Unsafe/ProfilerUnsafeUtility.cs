@@ -8,19 +8,31 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling.LowLevel.Unsafe
 {
-	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerMarker.bindings.h")]
+	[IgnoredByDeepProfiler]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerUnsafeUtility.bindings.h")]
 	public static class ProfilerUnsafeUtility
 	{
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern ushort GetCategoryByName(string name);
+		internal static extern ushort CreateCategory(string name, ProfilerCategoryColor colorIndex);
+
+		[RequiredMember]
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern ushort CreateCategory__Unmanaged(byte* name, int nameLen, ProfilerCategoryColor colorIndex);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static ushort CreateCategory(char* name, int nameLen, ProfilerCategoryColor colorIndex)
+		{
+			return ProfilerUnsafeUtility.CreateCategory_Unsafe(name, nameLen, colorIndex);
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern ushort GetCategoryByName__Unmanaged(byte* name, int nameLen);
+		private unsafe static extern ushort CreateCategory_Unsafe(char* name, int nameLen, ProfilerCategoryColor colorIndex);
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static ushort GetCategoryByName(char* name, int nameLen)
 		{
 			return ProfilerUnsafeUtility.GetCategoryByName_Unsafe(name, nameLen);
@@ -39,14 +51,23 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		}
 
 		[ThreadSafe]
+		internal static Color32 GetCategoryColor(ProfilerCategoryColor colorIndex)
+		{
+			Color32 color;
+			ProfilerUnsafeUtility.GetCategoryColor_Injected(colorIndex, out color);
+			return color;
+		}
+
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr CreateMarker(string name, ushort categoryId, MarkerFlags flags, int metadataCount);
 
+		[RequiredMember]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern IntPtr CreateMarker__Unmanaged(byte* name, int nameLen, ushort categoryId, MarkerFlags flags, int metadataCount);
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static IntPtr CreateMarker(char* name, int nameLen, ushort categoryId, MarkerFlags flags, int metadataCount)
 		{
 			return ProfilerUnsafeUtility.CreateMarker_Unsafe(name, nameLen, categoryId, flags, metadataCount);
@@ -58,13 +79,18 @@ namespace Unity.Profiling.LowLevel.Unsafe
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetMarkerMetadata(IntPtr markerPtr, int index, string name, byte type, byte unit);
+		internal static extern IntPtr GetMarker(string name);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetMarkerMetadata(IntPtr markerPtr, int index, string name, byte type, byte unit);
+
+		[ThreadSafe]
+		[RequiredMember]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern void SetMarkerMetadata__Unmanaged(IntPtr markerPtr, int index, byte* name, int nameLen, byte type, byte unit);
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void SetMarkerMetadata(IntPtr markerPtr, int index, char* name, int nameLen, byte type, byte unit)
 		{
 			ProfilerUnsafeUtility.SetMarkerMetadata_Unsafe(markerPtr, index, name, nameLen, type, unit);
@@ -94,11 +120,12 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* CreateCounterValue(out IntPtr counterPtr, string name, ushort categoryId, MarkerFlags flags, byte dataType, byte dataUnit, int dataSize, ProfilerCounterOptions counterOptions);
 
+		[RequiredMember]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern void* CreateCounterValue__Unmanaged(out IntPtr counterPtr, byte* name, int nameLen, ushort categoryId, MarkerFlags flags, byte dataType, byte dataUnit, int dataSize, ProfilerCounterOptions counterOptions);
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void* CreateCounterValue(out IntPtr counterPtr, char* name, int nameLen, ushort categoryId, MarkerFlags flags, byte dataType, byte dataUnit, int dataSize, ProfilerCounterOptions counterOptions)
 		{
 			return ProfilerUnsafeUtility.CreateCounterValue_Unsafe(out counterPtr, name, nameLen, categoryId, flags, dataType, dataUnit, dataSize, counterOptions);
@@ -139,7 +166,7 @@ namespace Unity.Profiling.LowLevel.Unsafe
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_BeginWithObject(IntPtr markerPtr, global::UnityEngine.Object contextUnityObject);
+		internal static extern void Internal_BeginWithObject(IntPtr markerPtr, Object contextUnityObject);
 
 		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -165,6 +192,9 @@ namespace Unity.Profiling.LowLevel.Unsafe
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetCategoryDescription_Injected(ushort categoryId, out ProfilerCategoryDescription ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCategoryColor_Injected(ProfilerCategoryColor colorIndex, out Color32 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_TimestampToNanosecondsConversionRatio_Injected(out ProfilerUnsafeUtility.TimestampConversionRatio ret);
@@ -204,9 +234,15 @@ namespace Unity.Profiling.LowLevel.Unsafe
 
 		public const ushort CategoryInternal = 24;
 
+		public const ushort CategoryFileIO = 25;
+
 		public const ushort CategoryInput = 30;
 
 		public const ushort CategoryVirtualTexturing = 31;
+
+		internal const ushort CategoryGPU = 32;
+
+		public const ushort CategoryPhysics2D = 33;
 
 		internal const ushort CategoryAny = 65535;
 

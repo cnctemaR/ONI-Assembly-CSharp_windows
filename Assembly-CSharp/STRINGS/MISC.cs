@@ -75,10 +75,14 @@ namespace STRINGS
 			{
 				"Plastic monomers are organic compounds that can be processed into ",
 				UI.FormatAsLink("Plastics", "PLASTIC"),
-				" that have valuable applications as advanced building materials. Plastics derived from these monomers can also be used as packaging materials for ",
+				" that have valuable applications as advanced building materials.\n\nPlastics derived from these monomers can also be used as packaging materials for ",
 				UI.FormatAsLink("Food", "FOOD"),
 				" preservation."
 			});
+
+			public static LocString UNREFINEDOIL = UI.FormatAsLink("Unrefined Oil", "RAWOIL");
+
+			public static LocString UNREFINEDOIL_DESC = "Oils in their raw, minimally processed forms. They can be refined at the " + UI.FormatAsLink("Oil Refinery", "OILREFINERY") + ".";
 
 			public static LocString REFINEDMETAL = UI.FormatAsLink("Refined Metal", "REFINEDMETAL");
 
@@ -149,7 +153,17 @@ namespace STRINGS
 
 			public static LocString LIQUID = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID");
 
+			public static LocString LUBRICATINGOIL = "Gear Oil";
+
+			public static LocString LUBRICATINGOIL_DESC = "Gear oils are lubricating fluids useful in the maintenance of complex machinery, protecting gear systems from damage and minimizing friction between moving parts to support optimal performance.";
+
+			public static LocString SLIPPERY = "Slippery";
+
 			public static LocString LEAD = UI.FormatAsLink("Lead", "LEAD");
+
+			public static LocString CHARGEDPORTABLEBATTERY = UI.FormatAsLink("Power Banks", "ELECTROBANK");
+
+			public static LocString EMPTYPORTABLEBATTERY = UI.FormatAsLink("Empty Eco Power Banks", "ELECTROBANK_EMPTY");
 
 			public static LocString SPECIAL = "Special";
 
@@ -199,13 +213,13 @@ namespace STRINGS
 
 			public static LocString EMITSLIGHT = UI.FormatAsLink("Light Emitter", "LIGHT");
 
-			public static LocString BED = "Bed";
+			public static LocString BED = "Beds";
 
 			public static LocString MESSSTATION = "Dining Table";
 
 			public static LocString TOY = "Toy";
 
-			public static LocString SUIT = "Suit";
+			public static LocString SUIT = "Suits";
 
 			public static LocString MULTITOOL = "Multitool";
 
@@ -269,9 +283,9 @@ namespace STRINGS
 				". They typically have a low melting point, although more advanced plastics have been developed to circumvent this issue."
 			});
 
-			public static LocString TOILET = "Toilet";
+			public static LocString TOILET = "Toilets";
 
-			public static LocString MASSAGE_TABLE = "Massage Table";
+			public static LocString MASSAGE_TABLE = "Massage Tables";
 
 			public static LocString POWERSTATION = "Power Station";
 
@@ -340,24 +354,35 @@ namespace STRINGS
 
 			public static LocString HABITAT_MODULE = "Habitat Module";
 
-			public static LocString COMBUSTIBLEGAS = "Combustible Gas";
+			public static LocString COMBUSTIBLEGAS = UI.FormatAsLink("Combustible Gas", "COMBUSTIBLEGAS");
+
+			public static LocString COMBUSTIBLEGAS_DESC = string.Concat(new string[]
+			{
+				"Combustible Gases can be burned as fuel to be used in the production of ",
+				UI.FormatAsLink("Power", "POWER"),
+				" and ",
+				UI.FormatAsLink("Food", "FOOD"),
+				"."
+			});
 
 			public static LocString COMBUSTIBLELIQUID = UI.FormatAsLink("Combustible Liquid", "COMBUSTIBLELIQUID");
 
 			public static LocString COMBUSTIBLELIQUID_DESC = string.Concat(new string[]
 			{
-				"Combustible Liquids are liquids that can be burned as fuel to be used in energy production such as in a ",
+				"Combustible Liquids can be burned as fuels to be used in energy production, such as in a ",
 				UI.FormatAsLink("Petroleum Generator", "PETROLEUMGENERATOR"),
 				" or a ",
 				UI.FormatAsLink("Petroleum Engine", "KEROSENEENGINE"),
 				".\n\nThough these liquids have other uses, such as fertilizer for growing a ",
 				UI.FormatAsLink("Nosh Bean", "BEANPLANTSEED"),
 				", their primary usefulness lies in their ability to be burned for ",
-				UI.FormatAsLink("power", "POWER"),
+				UI.FormatAsLink("Power", "POWER"),
 				"."
 			});
 
-			public static LocString COMBUSTIBLESOLID = "Combustible Solid";
+			public static LocString COMBUSTIBLESOLID = UI.FormatAsLink("Combustible Solid", "COMBUSTIBLESOLID");
+
+			public static LocString COMBUSTIBLESOLID_DESC = "Combustible Solids can be burned as fuel to be used in " + UI.FormatAsLink("Power", "POWER") + " production.";
 
 			public static LocString UNIDENTIFIEDSEED = "Seed (Unidentified Mutation)";
 
@@ -366,6 +391,8 @@ namespace STRINGS
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 
 			public static LocString WARP_PORTAL = "Teleportal";
+
+			public static LocString BIONIC_UPGRADE = "Boosters";
 
 			public static LocString FARMING = "Farm Build-Delivery";
 
@@ -831,6 +858,27 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Items lose durability each time they are equipped, and can no longer be put on by a Duplicant once they reach 0% durability\n\nRepair of this item can be done in the appropriate fabrication station";
 			}
 
+			public class BIONICEXPLORERBOOSTER
+			{
+				public static LocString NAME = "Stored Geodata: {0}";
+
+				public static LocString TOOLTIP = UI.PRE_KEYWORD + "Dowsing Boosters" + UI.PST_KEYWORD + " retain geodata gathered by Bionic Duplicants\n\nWhen dowsing is complete and this booster is installed in a Bionic Duplicant, a new geyser will be revealed";
+			}
+
+			public class BIONICEXPLORERBOOSTERREADY
+			{
+				public static LocString NAME = "Dowsing Complete";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Dowsing Booster",
+					UI.PST_KEYWORD,
+					" has sufficient geodata stored to reveal a new geyser\n\nIt must be installed in a Bionic Duplicant in order to function"
+				});
+			}
+
 			public class STOREDITEMDURABILITY
 			{
 				public static LocString NAME = "Durability: {durability}";
@@ -886,6 +934,8 @@ namespace STRINGS
 			public static LocString RESOURCE_EATEN = "Resource Eaten";
 
 			public static LocString RESOURCE_SELECTION_CHANGED = "Changed to {0}";
+
+			public static LocString EXTRA_POWERBANKS_BIONIC = "Extra Power Banks";
 		}
 
 		public class NOTIFICATIONS
@@ -1282,6 +1332,84 @@ namespace STRINGS
 					" the building and going to the Energy Tab.\n\nI can use the Power Overlay ",
 					UI.FormatAsHotKey(global::Action.Overlay2),
 					" to quickly check the status of all my circuits. If the Consumers are taking more wattage than the Generators are creating, the Batteries will drain and there will be brownouts.\n\nAdditionally, if the Consumers are pulling more wattage through the Wires than the Wires can handle, they will overload and burn out. To correct both these situations, I will need to reorganize my Consumers onto separate circuits."
+				});
+			}
+
+			public class BIONICBATTERY
+			{
+				public static LocString NAME = "Tutorial: Powering Bionics";
+
+				public static LocString TOOLTIP = "Notes on Duplicant power bank needs";
+
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Bionic Duplicants require ",
+					UI.FormatAsLink("Power Banks", "ELECTROBANK"),
+					" to function. Bionic Duplicants who run out of ",
+					UI.FormatAsLink("Power", "POWER"),
+					" will become incapacitated and require another Duplicant to reboot them.\n\nBasic power banks can be made at the ",
+					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					"."
+				});
+			}
+
+			public class GUNKEDTOILET
+			{
+				public static LocString NAME = "Tutorial: Clogged Toilets";
+
+				public static LocString TOOLTIP = "Notes on unclogging toilets";
+
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Bionic Duplicants can dump built-up ",
+					UI.FormatAsLink("Liquid Gunk", "LIQUIDGUNK"),
+					" into ",
+					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+					" if no other options are available. This invariably clogs the plumbing, however, and must be removed before facilities can be used by other Duplicants.\n\nBuilding a ",
+					UI.FormatAsLink("Gunk Extractor", "GUNKEMPTIER"),
+					" from the ",
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5),
+					" will ensure that Bionic Duplicants can dispose of their waste appropriately."
+				});
+			}
+
+			public class SLIPPERYSURFACE
+			{
+				public static LocString NAME = "Tutorial: Wet Surfaces";
+
+				public static LocString TOOLTIP = "Notes on slipping hazards";
+
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"My Duplicants may slip and fall on wet surfaces. I can help them avoid undue ",
+					UI.FormatAsLink("Stress", "STRESS"),
+					" and potential injury by using the ",
+					UI.FormatAsTool("Mop Tool", global::Action.Mop),
+					" to clean up spills. Building ",
+					UI.FormatAsLink("Toilets", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE"),
+					" can help minimize the incidence of spills."
+				});
+			}
+
+			public class BIONICOIL
+			{
+				public static LocString NAME = "Tutorial: Oiling Bionics";
+
+				public static LocString TOOLTIP = "Notes on keeping Bionics working efficiently";
+
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Bionic Duplicants with insufficient ",
+					UI.FormatAsLink("Gear Oil", "LUBRICATINGOIL"),
+					" will slow down significantly to avoid grinding their gears.\n\nI can keep them running smoothly by producing ",
+					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
+					" out of ",
+					UI.FormatAsLink("Slime", "SLIME"),
+					" and building a ",
+					UI.FormatAsLink("Lubrication Station", "OILCHANGER"),
+					" from the ",
+					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8),
+					"."
 				});
 			}
 
@@ -2066,6 +2194,20 @@ namespace STRINGS
 
 				public static LocString BUTTON_VIEW_LORE = "View entry";
 			}
+
+			public class BIONICRESEARCHUNLOCK
+			{
+				public static LocString NAME = "Research Discovered";
+
+				public static LocString MESSAGEBODY = "My new Bionic Duplicant came programmed with {0} technology. How crafty!";
+			}
+
+			public class BIONICLIQUIDDAMAGE
+			{
+				public static LocString NAME = "Liquid Damage";
+
+				public static LocString TOOLTIP = "This Duplicant stepped in liquid and damaged their bionic systems!";
+			}
 		}
 
 		public class TUTORIAL
@@ -2087,11 +2229,11 @@ namespace STRINGS
 
 			public class MOVEPICKUPABLEPLACER
 			{
-				public static LocString NAME = "Move Here";
+				public static LocString NAME = "Relocate Here";
 
 				public static LocString PLACER_STATUS = "Next Destination";
 
-				public static LocString PLACER_STATUS_TOOLTIP = "Click to see where this item will be moved to";
+				public static LocString PLACER_STATUS_TOOLTIP = "Click to see where this item will be relocated to";
 			}
 		}
 

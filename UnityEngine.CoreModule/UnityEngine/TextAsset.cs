@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -21,11 +23,26 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_CreateInstance([Writable] TextAsset self, string text);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetDataPtr();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern long GetDataSize();
+
 		public string text
 		{
 			get
 			{
-				return TextAsset.DecodeString(this.bytes);
+				byte[] bytes = this.bytes;
+				return (bytes.Length == 0) ? string.Empty : TextAsset.DecodeString(bytes);
+			}
+		}
+
+		public long dataSize
+		{
+			get
+			{
+				return this.GetDataSize();
 			}
 		}
 
@@ -51,6 +68,19 @@ namespace UnityEngine
 			{
 				TextAsset.Internal_CreateInstance(this, text);
 			}
+		}
+
+		public unsafe NativeArray<T> GetData<T>() where T : struct
+		{
+			long dataSize = this.GetDataSize();
+			long num = (long)UnsafeUtility.SizeOf<T>();
+			bool flag = dataSize % num != 0L;
+			if (flag)
+			{
+				throw new ArgumentException(string.Format("Type passed to {0} can't capture the asset data. Data size is {1} which is not a multiple of type size {2}", "GetData", dataSize, num));
+			}
+			long num2 = dataSize / num;
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)this.GetDataPtr(), (int)num2, Allocator.None);
 		}
 
 		internal string GetPreview(int maxChars)

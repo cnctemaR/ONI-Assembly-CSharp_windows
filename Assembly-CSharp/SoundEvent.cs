@@ -122,16 +122,16 @@ public class SoundEvent : AnimEvent
 
 	protected void PlaySound(AnimEventManager.EventPlayerData behaviour, string sound)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.controller.transform.GetPosition();
 		vector.z = 0f;
 		if (SoundEvent.ObjectIsSelectedAndVisible(behaviour.controller.gameObject))
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}
-		KBatchedAnimController component = behaviour.GetComponent<KBatchedAnimController>();
-		if (component != null)
+		KBatchedAnimController controller = behaviour.controller;
+		if (controller != null)
 		{
-			Vector3 offset = component.Offset;
+			Vector3 offset = controller.Offset;
 			vector.x += offset.x;
 			vector.y += offset.y;
 		}
@@ -154,12 +154,12 @@ public class SoundEvent : AnimEvent
 		{
 			if (this.looping)
 			{
-				LoopingSounds component2 = behaviour.GetComponent<LoopingSounds>();
-				if (component2 == null)
+				LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
+				if (component == null)
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ");
 				}
-				else if (!component2.StartSound(sound, behaviour, this.noiseValues, this.ignorePause, this.shouldCameraScalePosition))
+				else if (!component.StartSound(sound, behaviour, this.noiseValues, this.ignorePause, this.shouldCameraScalePosition))
 				{
 					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
@@ -231,7 +231,7 @@ public class SoundEvent : AnimEvent
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
-			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			Vector3 vector = behaviour.controller.transform.GetPosition();
 			vector.z = 0f;
 			if (objectIsSelectedAndVisible)
 			{

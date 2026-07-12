@@ -10,7 +10,9 @@ namespace Unity.Profiling.LowLevel
 		ScriptInvoke = 32,
 		ScriptDeepProfiler = 64,
 		AvailabilityEditor = 4,
+		AvailabilityNonDevelopment = 8,
 		Warning = 16,
-		Counter = 128
+		Counter = 128,
+		SampleGPU = 256
 	}
 }

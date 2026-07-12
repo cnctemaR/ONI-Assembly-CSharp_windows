@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeClass("Matrix4x4f")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[Il2CppEagerStaticClassConstruction]
+	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
 	public struct Matrix4x4 : IEquatable<Matrix4x4>, IFormattable
 	{
 		[ThreadSafe]
@@ -189,6 +189,12 @@ namespace UnityEngine
 			return Matrix4x4.Frustum(fp.left, fp.right, fp.bottom, fp.top, fp.zNear, fp.zFar);
 		}
 
+		[FreeFunction("MatrixScripting::Internal_CompareApproximately", IsThreadSafe = true)]
+		internal static bool CompareApproximately(Matrix4x4 a, Matrix4x4 b, float threshold)
+		{
+			return Matrix4x4.CompareApproximately_Injected(ref a, ref b, threshold);
+		}
+
 		public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)
 		{
 			this.m00 = column0.x;
@@ -211,10 +217,12 @@ namespace UnityEngine
 
 		public float this[int row, int column]
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this[row + column * 4];
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this[row + column * 4] = value;
@@ -339,17 +347,20 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
 			return this.GetColumn(0).GetHashCode() ^ (this.GetColumn(1).GetHashCode() << 2) ^ (this.GetColumn(2).GetHashCode() >> 2) ^ (this.GetColumn(3).GetHashCode() >> 1);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals(object other)
 		{
 			bool flag = !(other is Matrix4x4);
 			return !flag && this.Equals((Matrix4x4)other);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Matrix4x4 other)
 		{
 			return this.GetColumn(0).Equals(other.GetColumn(0)) && this.GetColumn(1).Equals(other.GetColumn(1)) && this.GetColumn(2).Equals(other.GetColumn(2)) && this.GetColumn(3).Equals(other.GetColumn(3));
@@ -441,6 +452,11 @@ namespace UnityEngine
 				throw new IndexOutOfRangeException("Invalid row index!");
 			}
 			return vector;
+		}
+
+		public Vector3 GetPosition()
+		{
+			return new Vector3(this.m03, this.m13, this.m23);
 		}
 
 		public void SetColumn(int index, Vector4 column)
@@ -593,28 +609,37 @@ namespace UnityEngine
 
 		public static Matrix4x4 identity
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Matrix4x4.identityMatrix;
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = string.IsNullOrEmpty(format);
 			if (flag)
 			{
 				format = "F5";
+			}
+			bool flag2 = formatProvider == null;
+			if (flag2)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
 			return UnityString.Format("{0}\t{1}\t{2}\t{3}\n{4}\t{5}\t{6}\t{7}\n{8}\t{9}\t{10}\t{11}\n{12}\t{13}\t{14}\t{15}\n", new object[]
 			{
@@ -678,6 +703,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Frustum_Injected(float left, float right, float bottom, float top, float zNear, float zFar, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CompareApproximately_Injected(ref Matrix4x4 a, ref Matrix4x4 b, float threshold);
 
 		[NativeName("m_Data[0]")]
 		public float m00;

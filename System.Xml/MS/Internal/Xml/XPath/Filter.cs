@@ -7,8 +7,8 @@ namespace MS.Internal.Xml.XPath
 	{
 		public Filter(AstNode input, AstNode condition)
 		{
-			this.input = input;
-			this.condition = condition;
+			this._input = input;
+			this._condition = condition;
 		}
 
 		public override AstNode.AstType Type
@@ -31,7 +31,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.input;
+				return this._input;
 			}
 		}
 
@@ -39,12 +39,12 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.condition;
+				return this._condition;
 			}
 		}
 
-		private AstNode input;
+		private AstNode _input;
 
-		private AstNode condition;
+		private AstNode _condition;
 	}
 }

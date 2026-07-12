@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Selectable", 70)]
+	[AddComponentMenu("UI/Selectable", 35)]
 	[ExecuteAlways]
 	[SelectionBase]
 	[DisallowMultipleComponent]
@@ -194,35 +194,34 @@ namespace UnityEngine.UI
 
 		protected override void OnCanvasGroupChanged()
 		{
-			bool flag = true;
-			Transform transform = base.transform;
-			while (transform != null)
-			{
-				transform.GetComponents<CanvasGroup>(this.m_CanvasGroupCache);
-				bool flag2 = false;
-				for (int i = 0; i < this.m_CanvasGroupCache.Count; i++)
-				{
-					if (!this.m_CanvasGroupCache[i].interactable)
-					{
-						flag = false;
-						flag2 = true;
-					}
-					if (this.m_CanvasGroupCache[i].ignoreParentGroups)
-					{
-						flag2 = true;
-					}
-				}
-				if (flag2)
-				{
-					break;
-				}
-				transform = transform.parent;
-			}
+			bool flag = this.ParentGroupAllowsInteraction();
 			if (flag != this.m_GroupsAllowInteraction)
 			{
 				this.m_GroupsAllowInteraction = flag;
 				this.OnSetProperty();
 			}
+		}
+
+		private bool ParentGroupAllowsInteraction()
+		{
+			Transform transform = base.transform;
+			while (transform != null)
+			{
+				transform.GetComponents<CanvasGroup>(this.m_CanvasGroupCache);
+				for (int i = 0; i < this.m_CanvasGroupCache.Count; i++)
+				{
+					if (this.m_CanvasGroupCache[i].enabled && !this.m_CanvasGroupCache[i].interactable)
+					{
+						return false;
+					}
+					if (this.m_CanvasGroupCache[i].ignoreParentGroups)
+					{
+						return true;
+					}
+				}
+				transform = transform.parent;
+			}
+			return true;
 		}
 
 		public virtual bool IsInteractable()
@@ -256,6 +255,7 @@ namespace UnityEngine.UI
 			Selectable.s_Selectables[this.m_CurrentIndex] = this;
 			Selectable.s_SelectableCount++;
 			this.isPointerDown = false;
+			this.m_GroupsAllowInteraction = this.ParentGroupAllowsInteraction();
 			this.DoStateTransition(this.currentSelectionState, true);
 			this.m_EnableCalled = true;
 		}
@@ -284,6 +284,14 @@ namespace UnityEngine.UI
 			this.InstantClearState();
 			base.OnDisable();
 			this.m_EnableCalled = false;
+		}
+
+		private void OnApplicationFocus(bool hasFocus)
+		{
+			if (!hasFocus && this.IsPressed())
+			{
+				this.InstantClearState();
+			}
 		}
 
 		protected Selectable.SelectionState currentSelectionState

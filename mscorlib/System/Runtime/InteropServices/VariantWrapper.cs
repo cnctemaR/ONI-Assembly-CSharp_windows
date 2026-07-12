@@ -2,7 +2,6 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Serializable]
 	public sealed class VariantWrapper
 	{
 		public VariantWrapper(object obj)

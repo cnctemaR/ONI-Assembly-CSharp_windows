@@ -1,95 +1,57 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
+using System.Globalization;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[Serializable]
 	public struct CustomAttributeTypedArgument
 	{
-		public CustomAttributeTypedArgument(Type argumentType, object value)
-		{
-			if (argumentType == null)
-			{
-				throw new ArgumentNullException("argumentType");
-			}
-			this.argumentType = argumentType;
-			this.value = value;
-			if (value is Array)
-			{
-				Array array = (Array)value;
-				Type elementType = array.GetType().GetElementType();
-				CustomAttributeTypedArgument[] array2 = new CustomAttributeTypedArgument[array.GetLength(0)];
-				for (int i = 0; i < array2.Length; i++)
-				{
-					array2[i] = new CustomAttributeTypedArgument(elementType, array.GetValue(i));
-				}
-				this.value = new ReadOnlyCollection<CustomAttributeTypedArgument>(array2);
-			}
-		}
-
 		public CustomAttributeTypedArgument(object value)
 		{
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
 			}
-			this.argumentType = value.GetType();
-			this.value = value;
+			this.Value = CustomAttributeTypedArgument.CanonicalizeValue(value);
+			this.ArgumentType = value.GetType();
 		}
 
-		public Type ArgumentType
+		public CustomAttributeTypedArgument(Type argumentType, object value)
 		{
-			get
+			if (argumentType == null)
 			{
-				return this.argumentType;
+				throw new ArgumentNullException("argumentType");
+			}
+			this.Value = ((value == null) ? null : CustomAttributeTypedArgument.CanonicalizeValue(value));
+			this.ArgumentType = argumentType;
+			Array array = value as Array;
+			if (array != null)
+			{
+				Type elementType = array.GetType().GetElementType();
+				CustomAttributeTypedArgument[] array2 = new CustomAttributeTypedArgument[array.GetLength(0)];
+				for (int i = 0; i < array2.Length; i++)
+				{
+					object value2 = array.GetValue(i);
+					Type type = ((elementType == typeof(object) && value2 != null) ? value2.GetType() : elementType);
+					array2[i] = new CustomAttributeTypedArgument(type, value2);
+				}
+				this.Value = new ReadOnlyCollection<CustomAttributeTypedArgument>(array2);
 			}
 		}
 
-		public object Value
-		{
-			get
-			{
-				return this.value;
-			}
-		}
+		public readonly Type ArgumentType { get; }
 
-		public override string ToString()
-		{
-			string text = ((this.value != null) ? this.value.ToString() : string.Empty);
-			if (this.argumentType == typeof(string))
-			{
-				return "\"" + text + "\"";
-			}
-			if (this.argumentType == typeof(Type))
-			{
-				return "typeof (" + text + ")";
-			}
-			if (this.argumentType.IsEnum)
-			{
-				return "(" + this.argumentType.Name + ")" + text;
-			}
-			return text;
-		}
+		public readonly object Value { get; }
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is CustomAttributeTypedArgument))
-			{
-				return false;
-			}
-			CustomAttributeTypedArgument customAttributeTypedArgument = (CustomAttributeTypedArgument)obj;
-			if (!(customAttributeTypedArgument.argumentType == this.argumentType) || this.value == null)
-			{
-				return customAttributeTypedArgument.value == null;
-			}
-			return this.value.Equals(customAttributeTypedArgument.value);
+			return obj == this;
 		}
 
 		public override int GetHashCode()
 		{
-			return (this.argumentType.GetHashCode() << 16) + ((this.value != null) ? this.value.GetHashCode() : 0);
+			return base.GetHashCode();
 		}
 
 		public static bool operator ==(CustomAttributeTypedArgument left, CustomAttributeTypedArgument right)
@@ -102,8 +64,70 @@ namespace System.Reflection
 			return !left.Equals(right);
 		}
 
-		private Type argumentType;
+		public override string ToString()
+		{
+			return this.ToString(false);
+		}
 
-		private object value;
+		internal string ToString(bool typed)
+		{
+			if (this.ArgumentType == null)
+			{
+				return base.ToString();
+			}
+			string text;
+			try
+			{
+				if (this.ArgumentType.IsEnum)
+				{
+					text = string.Format(CultureInfo.CurrentCulture, typed ? "{0}" : "({1}){0}", this.Value, this.ArgumentType.FullNameOrDefault);
+				}
+				else if (this.Value == null)
+				{
+					text = string.Format(CultureInfo.CurrentCulture, typed ? "null" : "({0})null", this.ArgumentType.NameOrDefault);
+				}
+				else if (this.ArgumentType == typeof(string))
+				{
+					text = string.Format(CultureInfo.CurrentCulture, "\"{0}\"", this.Value);
+				}
+				else if (this.ArgumentType == typeof(char))
+				{
+					text = string.Format(CultureInfo.CurrentCulture, "'{0}'", this.Value);
+				}
+				else if (this.ArgumentType == typeof(Type))
+				{
+					text = string.Format(CultureInfo.CurrentCulture, "typeof({0})", ((Type)this.Value).FullNameOrDefault);
+				}
+				else if (this.ArgumentType.IsArray)
+				{
+					IList<CustomAttributeTypedArgument> list = this.Value as IList<CustomAttributeTypedArgument>;
+					Type elementType = this.ArgumentType.GetElementType();
+					string text2 = string.Format(CultureInfo.CurrentCulture, "new {0}[{1}] {{ ", elementType.IsEnum ? elementType.FullNameOrDefault : elementType.NameOrDefault, list.Count);
+					for (int i = 0; i < list.Count; i++)
+					{
+						text2 += string.Format(CultureInfo.CurrentCulture, (i == 0) ? "{0}" : ", {0}", list[i].ToString(elementType != typeof(object)));
+					}
+					text = text2 + " }";
+				}
+				else
+				{
+					text = string.Format(CultureInfo.CurrentCulture, typed ? "{0}" : "({1}){0}", this.Value, this.ArgumentType.NameOrDefault);
+				}
+			}
+			catch (MissingMetadataException)
+			{
+				text = base.ToString();
+			}
+			return text;
+		}
+
+		private static object CanonicalizeValue(object value)
+		{
+			if (value.GetType().IsEnum)
+			{
+				return ((Enum)value).GetValue();
+			}
+			return value;
+		}
 	}
 }

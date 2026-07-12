@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class TypeDescriptionProvider
 	{
 		protected TypeDescriptionProvider()
@@ -26,16 +24,17 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("objectType");
 			}
-			return SecurityUtils.SecureCreateInstance(objectType, args);
+			return Activator.CreateInstance(objectType, args);
 		}
 
 		public virtual IDictionary GetCache(object instance)
 		{
-			if (this._parent != null)
+			TypeDescriptionProvider parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetCache(instance);
+				return null;
 			}
-			return null;
+			return parent.GetCache(instance);
 		}
 
 		public virtual ICustomTypeDescriptor GetExtendedTypeDescriptor(object instance)
@@ -44,11 +43,12 @@ namespace System.ComponentModel
 			{
 				return this._parent.GetExtendedTypeDescriptor(instance);
 			}
-			if (this._emptyDescriptor == null)
+			TypeDescriptionProvider.EmptyCustomTypeDescriptor emptyCustomTypeDescriptor;
+			if ((emptyCustomTypeDescriptor = this._emptyDescriptor) == null)
 			{
-				this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
+				emptyCustomTypeDescriptor = (this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor());
 			}
-			return this._emptyDescriptor;
+			return emptyCustomTypeDescriptor;
 		}
 
 		protected internal virtual IExtenderProvider[] GetExtenderProviders(object instance)
@@ -61,7 +61,7 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("instance");
 			}
-			return new IExtenderProvider[0];
+			return Array.Empty<IExtenderProvider>();
 		}
 
 		public virtual string GetFullComponentName(object component)
@@ -133,11 +133,12 @@ namespace System.ComponentModel
 			{
 				return this._parent.GetTypeDescriptor(objectType, instance);
 			}
-			if (this._emptyDescriptor == null)
+			TypeDescriptionProvider.EmptyCustomTypeDescriptor emptyCustomTypeDescriptor;
+			if ((emptyCustomTypeDescriptor = this._emptyDescriptor) == null)
 			{
-				this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor();
+				emptyCustomTypeDescriptor = (this._emptyDescriptor = new TypeDescriptionProvider.EmptyCustomTypeDescriptor());
 			}
-			return this._emptyDescriptor;
+			return emptyCustomTypeDescriptor;
 		}
 
 		public virtual bool IsSupportedType(Type type)
@@ -149,7 +150,7 @@ namespace System.ComponentModel
 			return this._parent == null || this._parent.IsSupportedType(type);
 		}
 
-		private TypeDescriptionProvider _parent;
+		private readonly TypeDescriptionProvider _parent;
 
 		private TypeDescriptionProvider.EmptyCustomTypeDescriptor _emptyDescriptor;
 

@@ -180,17 +180,17 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Stunned, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.Stunned);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		int num = this.NaturalBuildingCell();
 		if (Grid.Solid[num])

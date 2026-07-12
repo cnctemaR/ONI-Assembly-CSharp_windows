@@ -27,7 +27,7 @@ namespace System.Diagnostics
 				}
 				if (value.Length == 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "value" }), "value");
+					throw new ArgumentException(SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "value" }), "value");
 				}
 				this.name = value;
 			}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Unity;
 
 namespace System.Security.Claims
 {
@@ -11,7 +10,7 @@ namespace System.Security.Claims
 		[Obsolete("Use ClaimsAuthenticationManager to add claims to a ClaimsIdentity", true)]
 		public static void AddDynamicRoleClaims(ClaimsIdentity claimsIdentity, IEnumerable<Claim> claims)
 		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
+			claimsIdentity.ExternalClaims.Add(claims);
 		}
 	}
 }

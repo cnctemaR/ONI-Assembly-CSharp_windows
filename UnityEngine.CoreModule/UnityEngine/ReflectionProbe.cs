@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
@@ -12,9 +14,9 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Camera/ReflectionProbes.h")]
 	public sealed class ReflectionProbe : Behaviour
 	{
-		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
-		[NativeName("ProbeType")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[NativeName("ProbeType")]
+		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
 		public extern ReflectionProbeType type
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -252,7 +254,7 @@ namespace UnityEngine
 			return this.RenderProbe(null);
 		}
 
-		public int RenderProbe([UnityEngine.Internal.DefaultValue("null")] RenderTexture targetTexture)
+		public int RenderProbe([DefaultValue("null")] RenderTexture targetTexture)
 		{
 			return this.ScheduleRender(this.timeSlicingMode, targetTexture);
 		}
@@ -263,10 +265,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int ScheduleRender(ReflectionProbeTimeSlicingMode timeSlicingMode, RenderTexture targetTexture);
 
-		[FreeFunction("CubemapGPUBlend")]
 		[NativeHeader("Runtime/Camera/CubemapGPUUtility.h")]
+		[FreeFunction("CubemapGPUBlend")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool BlendCubemap(Texture src, Texture dst, float blend, RenderTexture target);
+
+		[NativeMethod("UpdateSampleData")]
+		[StaticAccessor("GetReflectionProbes()")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void UpdateCachedState();
 
 		[StaticAccessor("GetReflectionProbes()")]
 		public static extern int minBakedCubemapResolution
@@ -303,9 +310,6 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<ReflectionProbe, ReflectionProbe.ReflectionProbeEvent> reflectionProbeChanged;
 
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static event Action<Cubemap> defaultReflectionSet;
-
 		[RequiredByNativeCode]
 		private static void CallReflectionProbeEvent(ReflectionProbe probe, ReflectionProbe.ReflectionProbeEvent probeEvent)
 		{
@@ -317,12 +321,59 @@ namespace UnityEngine
 			}
 		}
 
-		[RequiredByNativeCode]
-		private static void CallSetDefaultReflection(Cubemap defaultReflectionCubemap)
+		[Obsolete("ReflectionProbe.defaultReflectionSet has been deprecated. Use ReflectionProbe.defaultReflectionTexture. (UnityUpgradable) -> UnityEngine.ReflectionProbe.defaultReflectionTexture", false)]
+		public static event Action<Cubemap> defaultReflectionSet
 		{
-			Action<Cubemap> action = ReflectionProbe.defaultReflectionSet;
-			bool flag = action != null;
-			if (flag)
+			add
+			{
+				bool flag = ReflectionProbe.registeredDefaultReflectionTextureActions.Any<Action<Texture>>((Action<Texture> h) => h.Method == value.Method);
+				if (!flag)
+				{
+					Action<Texture> action = delegate(Texture b)
+					{
+						Cubemap cubemap = b as Cubemap;
+						bool flag2 = cubemap != null;
+						if (flag2)
+						{
+							value(cubemap);
+						}
+					};
+					ReflectionProbe.defaultReflectionTexture += action;
+					ReflectionProbe.registeredDefaultReflectionSetActions[value.Method.GetHashCode()] = action;
+				}
+			}
+			remove
+			{
+				Action<Texture> action;
+				bool flag = ReflectionProbe.registeredDefaultReflectionSetActions.TryGetValue(value.Method.GetHashCode(), out action);
+				if (flag)
+				{
+					ReflectionProbe.defaultReflectionTexture -= action;
+					ReflectionProbe.registeredDefaultReflectionSetActions.Remove(value.Method.GetHashCode());
+				}
+			}
+		}
+
+		public static event Action<Texture> defaultReflectionTexture
+		{
+			add
+			{
+				bool flag = ReflectionProbe.registeredDefaultReflectionTextureActions.Any<Action<Texture>>((Action<Texture> h) => h.Method == value.Method) || ReflectionProbe.registeredDefaultReflectionSetActions.ContainsKey(value.Method.GetHashCode());
+				if (!flag)
+				{
+					ReflectionProbe.registeredDefaultReflectionTextureActions.Add(value);
+				}
+			}
+			remove
+			{
+				ReflectionProbe.registeredDefaultReflectionTextureActions.Remove(value);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void CallSetDefaultReflection(Texture defaultReflectionCubemap)
+		{
+			foreach (Action<Texture> action in ReflectionProbe.registeredDefaultReflectionTextureActions)
 			{
 				action(defaultReflectionCubemap);
 			}
@@ -354,6 +405,10 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_defaultTextureHDRDecodeValues_Injected(out Vector4 ret);
+
+		private static Dictionary<int, Action<Texture>> registeredDefaultReflectionSetActions = new Dictionary<int, Action<Texture>>();
+
+		private static List<Action<Texture>> registeredDefaultReflectionTextureActions = new List<Action<Texture>>();
 
 		public enum ReflectionProbeEvent
 		{

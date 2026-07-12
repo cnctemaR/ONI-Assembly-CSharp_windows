@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Configuration.Assemblies
 {
-	[Obsolete]
 	[ComVisible(true)]
+	[Obsolete]
 	[Serializable]
 	public struct AssemblyHash : ICloneable
 	{

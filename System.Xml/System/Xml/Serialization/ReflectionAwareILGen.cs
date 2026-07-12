@@ -151,7 +151,7 @@ namespace System.Xml.Serialization
 				}
 				else if (initValue.Source == "fixup.Source" || initValue.Source == "e.Current")
 				{
-					string[] array = initValue.Source.Split(new char[] { '.' });
+					string[] array = initValue.Source.Split('.', StringSplitOptions.None);
 					object variable = initValue.ILG.GetVariable(array[0]);
 					PropertyInfo property = initValue.ILG.GetVariableType(variable).GetProperty(array[1]);
 					initValue.ILG.LoadMember(variable, property);

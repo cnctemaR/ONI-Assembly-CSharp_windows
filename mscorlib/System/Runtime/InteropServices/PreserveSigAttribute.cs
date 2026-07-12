@@ -3,8 +3,8 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class PreserveSigAttribute : Attribute
 	{
 		internal static Attribute GetCustomAttribute(RuntimeMethodInfo method)

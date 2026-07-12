@@ -11,7 +11,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/MinionResume")]
-public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
+public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 {
 	public MinionIdentity GetIdentity
 	{
@@ -134,13 +134,16 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				Skill skill = Db.Get().Skills.Get(keyValuePair2.Key);
 				foreach (SkillPerk skillPerk in skill.perks)
 				{
-					if (skillPerk.OnRemove != null)
+					if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
 					{
-						skillPerk.OnRemove(this);
-					}
-					if (skillPerk.OnApply != null)
-					{
-						skillPerk.OnApply(this);
+						if (skillPerk.OnRemove != null)
+						{
+							skillPerk.OnRemove(this);
+						}
+						if (skillPerk.OnApply != null)
+						{
+							skillPerk.OnApply(this);
+						}
 					}
 				}
 				if (!this.ownedHats.ContainsKey(skill.hat))
@@ -243,7 +246,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
-			if (skillPerk.OnApply != null)
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds) && skillPerk.OnApply != null)
 			{
 				skillPerk.OnApply(this);
 			}
@@ -254,7 +257,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		foreach (SkillPerk skillPerk in Db.Get().Skills.Get(skillId).perks)
 		{
-			if (skillPerk.OnRemove != null)
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds) && skillPerk.OnRemove != null)
 			{
 				skillPerk.OnRemove(this);
 			}
@@ -442,6 +445,35 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
+	public void UngrantSkill(string skillId)
+	{
+		if (this.GrantedSkillIDs != null)
+		{
+			this.GrantedSkillIDs.RemoveAll((string match) => match == skillId);
+		}
+		this.UnmasterSkill(skillId);
+	}
+
+	public Sprite GetSkillGrantSourceIcon(string skillID)
+	{
+		if (!this.GrantedSkillIDs.Contains(skillID))
+		{
+			return null;
+		}
+		BionicUpgradesMonitor.Instance smi = base.gameObject.GetSMI<BionicUpgradesMonitor.Instance>();
+		if (smi != null)
+		{
+			foreach (BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot in smi.upgradeComponentSlots)
+			{
+				if (upgradeComponentSlot.HasUpgradeInstalled)
+				{
+					return Def.GetUISprite(upgradeComponentSlot.installedUpgradeComponent.gameObject, "ui", false).first;
+				}
+			}
+		}
+		return Assets.GetSprite("skill_granted_trait");
+	}
+
 	private void TriggerMasterSkillEvents()
 	{
 		base.Trigger(540773776, null);
@@ -572,7 +604,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
-	public void AddExperienceWithAptitude(string skillGroupId, float amount, float buildingMultiplier)
+	public override void AddExperienceWithAptitude(string skillGroupId, float amount, float buildingMultiplier)
 	{
 		float num = amount * this.GetAptitudeExperienceMultiplier(skillGroupId, buildingMultiplier) * SKILLS.ACTIVE_EXPERIENCE_PORTION;
 		this.DEBUG_ActiveExperienceGained += num;

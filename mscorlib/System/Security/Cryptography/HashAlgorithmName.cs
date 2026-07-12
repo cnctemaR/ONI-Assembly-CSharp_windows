@@ -2,7 +2,7 @@
 
 namespace System.Security.Cryptography
 {
-	public struct HashAlgorithmName : IEquatable<HashAlgorithmName>
+	public readonly struct HashAlgorithmName : IEquatable<HashAlgorithmName>
 	{
 		public static HashAlgorithmName MD5
 		{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -17,33 +16,33 @@ namespace MS.Internal.Xml.XPath
 			{
 				opnd2 = new BooleanFunctions(Function.FunctionType.FuncBoolean, opnd2);
 			}
-			this.opnd1 = opnd1;
-			this.opnd2 = opnd2;
-			this.isOr = op == Operator.Op.OR;
+			this._opnd1 = opnd1;
+			this._opnd2 = opnd2;
+			this._isOr = op == Operator.Op.OR;
 		}
 
 		private BooleanExpr(BooleanExpr other)
 			: base(other)
 		{
-			this.opnd1 = Query.Clone(other.opnd1);
-			this.opnd2 = Query.Clone(other.opnd2);
-			this.isOr = other.isOr;
+			this._opnd1 = Query.Clone(other._opnd1);
+			this._opnd2 = Query.Clone(other._opnd2);
+			this._isOr = other._isOr;
 		}
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			this.opnd1.SetXsltContext(context);
-			this.opnd2.SetXsltContext(context);
+			this._opnd1.SetXsltContext(context);
+			this._opnd2.SetXsltContext(context);
 		}
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
 		{
-			object obj = this.opnd1.Evaluate(nodeIterator);
-			if ((bool)obj == this.isOr)
+			object obj = this._opnd1.Evaluate(nodeIterator);
+			if ((bool)obj == this._isOr)
 			{
 				return obj;
 			}
-			return this.opnd2.Evaluate(nodeIterator);
+			return this._opnd2.Evaluate(nodeIterator);
 		}
 
 		public override XPathNodeIterator Clone()
@@ -59,19 +58,10 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("op", (this.isOr ? Operator.Op.OR : Operator.Op.AND).ToString());
-			this.opnd1.PrintQuery(w);
-			this.opnd2.PrintQuery(w);
-			w.WriteEndElement();
-		}
+		private Query _opnd1;
 
-		private Query opnd1;
+		private Query _opnd2;
 
-		private Query opnd2;
-
-		private bool isOr;
+		private bool _isOr;
 	}
 }

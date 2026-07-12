@@ -7,22 +7,16 @@ namespace System.ComponentModel
 	{
 		public ListBindableAttribute(bool listBindable)
 		{
-			this.listBindable = listBindable;
+			this.ListBindable = listBindable;
 		}
 
 		public ListBindableAttribute(BindableSupport flags)
 		{
-			this.listBindable = flags > BindableSupport.No;
-			this.isDefault = flags == BindableSupport.Default;
+			this.ListBindable = flags > BindableSupport.No;
+			this._isDefault = flags == BindableSupport.Default;
 		}
 
-		public bool ListBindable
-		{
-			get
-			{
-				return this.listBindable;
-			}
-		}
+		public bool ListBindable { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -31,7 +25,7 @@ namespace System.ComponentModel
 				return true;
 			}
 			ListBindableAttribute listBindableAttribute = obj as ListBindableAttribute;
-			return listBindableAttribute != null && listBindableAttribute.ListBindable == this.listBindable;
+			return listBindableAttribute != null && listBindableAttribute.ListBindable == this.ListBindable;
 		}
 
 		public override int GetHashCode()
@@ -41,7 +35,7 @@ namespace System.ComponentModel
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(ListBindableAttribute.Default) || this.isDefault;
+			return this.Equals(ListBindableAttribute.Default) || this._isDefault;
 		}
 
 		public static readonly ListBindableAttribute Yes = new ListBindableAttribute(true);
@@ -50,8 +44,6 @@ namespace System.ComponentModel
 
 		public static readonly ListBindableAttribute Default = ListBindableAttribute.Yes;
 
-		private bool listBindable;
-
-		private bool isDefault;
+		private bool _isDefault;
 	}
 }

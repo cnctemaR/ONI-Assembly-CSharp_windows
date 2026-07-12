@@ -143,6 +143,7 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	private void RefreshQueueCountDisplay()
 	{
+		this.ResearchRequiredContainer.SetActive(!this.selectedRecipe.IsRequiredTechUnlocked());
 		bool flag = this.target.GetRecipeQueueCount(this.selectedRecipe) == ComplexFabricator.QUEUE_INFINITE;
 		if (!flag)
 		{
@@ -294,6 +295,8 @@ public class SelectedRecipeQueueScreen : KScreen
 	public KButton InfiniteButton;
 
 	public GameObject InfiniteIcon;
+
+	public GameObject ResearchRequiredContainer;
 
 	private ComplexFabricator target;
 

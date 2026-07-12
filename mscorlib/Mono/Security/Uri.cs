@@ -245,7 +245,7 @@ namespace Mono.Security
 			{
 				if (Uri.GetDefaultPort(this.scheme) != this.port)
 				{
-					return this.host + ":" + this.port;
+					return this.host + ":" + this.port.ToString();
 				}
 				return this.host;
 			}
@@ -389,7 +389,7 @@ namespace Mono.Security
 					this.segments = new string[0];
 					return this.segments;
 				}
-				string[] array = this.path.Split(new char[] { '/' });
+				string[] array = this.path.Split('/', StringSplitOptions.None);
 				this.segments = array;
 				bool flag = this.path.EndsWith("/");
 				if (array.Length != 0 && flag)
@@ -1097,7 +1097,7 @@ namespace Mono.Security
 		private static string Reduce(string path)
 		{
 			path = path.Replace('\\', '/');
-			string[] array = path.Split(new char[] { '/' });
+			string[] array = path.Split('/', StringSplitOptions.None);
 			List<string> list = new List<string>();
 			int num = array.Length;
 			for (int i = 0; i < num; i++)

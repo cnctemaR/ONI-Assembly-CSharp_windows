@@ -1,46 +1,42 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using UnityEngine.Bindings;
+using Unity.Profiling;
+using Unity.Profiling.LowLevel;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[NativeHeader("Runtime/Profiler/ScriptBindings/Recorder.bindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Profiler/Recorder.h")]
-	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Recorder
 	{
 		internal Recorder()
 		{
 		}
 
-		internal Recorder(IntPtr ptr)
+		internal Recorder(ProfilerRecorderHandle handle)
 		{
-			this.m_Ptr = ptr;
-		}
-
-		protected override void Finalize()
-		{
-			try
+			bool flag = !handle.Valid;
+			if (!flag)
 			{
-				bool flag = this.m_Ptr != IntPtr.Zero;
-				if (flag)
+				this.m_RecorderCPU = new ProfilerRecorder(handle, 1, (ProfilerRecorderOptions)153);
+				bool flag2 = (ProfilerRecorderHandle.GetDescription(handle).Flags & MarkerFlags.SampleGPU) > MarkerFlags.Default;
+				if (flag2)
 				{
-					Recorder.DisposeNative(this.m_Ptr);
+					this.m_RecorderGPU = new ProfilerRecorder(handle, 1, (ProfilerRecorderOptions)217);
 				}
 			}
-			finally
-			{
-				base.Finalize();
-			}
+		}
+
+		~Recorder()
+		{
+			this.m_RecorderCPU.Dispose();
+			this.m_RecorderGPU.Dispose();
 		}
 
 		public static Recorder Get(string samplerName)
 		{
-			IntPtr @internal = Recorder.GetInternal(samplerName);
-			bool flag = @internal == IntPtr.Zero;
+			ProfilerRecorderHandle profilerRecorderHandle = ProfilerRecorderHandle.Get(ProfilerCategory.Any, samplerName);
+			bool flag = !profilerRecorderHandle.Valid;
 			Recorder recorder;
 			if (flag)
 			{
@@ -48,56 +44,46 @@ namespace UnityEngine.Profiling
 			}
 			else
 			{
-				recorder = new Recorder(@internal);
+				recorder = new Recorder(profilerRecorderHandle);
 			}
 			return recorder;
 		}
-
-		[NativeMethod(Name = "ProfilerBindings::GetRecorderInternal", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetInternal(string samplerName);
 
 		public bool isValid
 		{
 			get
 			{
-				return this.m_Ptr != IntPtr.Zero;
+				return this.m_RecorderCPU.handle > 0UL;
 			}
 		}
-
-		[NativeMethod(Name = "ProfilerBindings::DisposeNativeRecorder", IsFreeFunction = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisposeNative(IntPtr ptr);
 
 		public bool enabled
 		{
 			get
 			{
-				return this.isValid && this.IsEnabled();
+				return this.m_RecorderCPU.IsRunning;
 			}
 			set
 			{
-				bool isValid = this.isValid;
-				if (isValid)
-				{
-					this.SetEnabled(value);
-				}
+				this.SetEnabled(value);
 			}
 		}
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsEnabled();
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetEnabled(bool enabled);
 
 		public long elapsedNanoseconds
 		{
 			get
 			{
-				return this.isValid ? this.GetElapsedNanoseconds() : 0L;
+				bool flag = !this.m_RecorderCPU.Valid;
+				long num;
+				if (flag)
+				{
+					num = 0L;
+				}
+				else
+				{
+					num = this.m_RecorderCPU.LastValue;
+				}
+				return num;
 			}
 		}
 
@@ -105,23 +91,43 @@ namespace UnityEngine.Profiling
 		{
 			get
 			{
-				return this.isValid ? this.GetGpuElapsedNanoseconds() : 0L;
+				bool flag = !this.m_RecorderGPU.Valid;
+				long num;
+				if (flag)
+				{
+					num = 0L;
+				}
+				else
+				{
+					num = this.m_RecorderGPU.LastValue;
+				}
+				return num;
 			}
 		}
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern long GetElapsedNanoseconds();
-
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern long GetGpuElapsedNanoseconds();
 
 		public int sampleBlockCount
 		{
 			get
 			{
-				return this.isValid ? this.GetSampleBlockCount() : 0;
+				bool flag = !this.m_RecorderCPU.Valid;
+				int num;
+				if (flag)
+				{
+					num = 0;
+				}
+				else
+				{
+					bool flag2 = this.m_RecorderCPU.Count != 1;
+					if (flag2)
+					{
+						num = 0;
+					}
+					else
+					{
+						num = (int)this.m_RecorderCPU.GetSample(0).Count;
+					}
+				}
+				return num;
 			}
 		}
 
@@ -129,28 +135,74 @@ namespace UnityEngine.Profiling
 		{
 			get
 			{
-				return this.isValid ? this.GetGpuSampleBlockCount() : 0;
+				bool flag = !this.m_RecorderGPU.Valid;
+				int num;
+				if (flag)
+				{
+					num = 0;
+				}
+				else
+				{
+					bool flag2 = this.m_RecorderGPU.Count != 1;
+					if (flag2)
+					{
+						num = 0;
+					}
+					else
+					{
+						num = (int)this.m_RecorderGPU.GetSample(0).Count;
+					}
+				}
+				return num;
 			}
 		}
 
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetSampleBlockCount();
+		public void FilterToCurrentThread()
+		{
+			bool flag = !this.m_RecorderCPU.Valid;
+			if (!flag)
+			{
+				this.m_RecorderCPU.FilterToCurrentThread();
+			}
+		}
 
-		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetGpuSampleBlockCount();
+		public void CollectFromAllThreads()
+		{
+			bool flag = !this.m_RecorderCPU.Valid;
+			if (!flag)
+			{
+				this.m_RecorderCPU.CollectFromAllThreads();
+			}
+		}
 
-		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void FilterToCurrentThread();
+		private void SetEnabled(bool state)
+		{
+			if (state)
+			{
+				this.m_RecorderCPU.Start();
+				bool valid = this.m_RecorderGPU.Valid;
+				if (valid)
+				{
+					this.m_RecorderGPU.Start();
+				}
+			}
+			else
+			{
+				this.m_RecorderCPU.Stop();
+				bool valid2 = this.m_RecorderGPU.Valid;
+				if (valid2)
+				{
+					this.m_RecorderGPU.Stop();
+				}
+			}
+		}
 
-		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CollectFromAllThreads();
-
-		internal IntPtr m_Ptr;
+		private const ProfilerRecorderOptions s_RecorderDefaultOptions = (ProfilerRecorderOptions)153;
 
 		internal static Recorder s_InvalidRecorder = new Recorder();
+
+		private ProfilerRecorder m_RecorderCPU;
+
+		private ProfilerRecorder m_RecorderGPU;
 	}
 }

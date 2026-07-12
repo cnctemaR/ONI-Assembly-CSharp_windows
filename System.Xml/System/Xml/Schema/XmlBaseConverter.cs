@@ -942,11 +942,13 @@ namespace System.Xml.Schema
 		{
 			if (value < -2147483648m || value > 2147483647m)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"Int32"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (int)value;
 		}
@@ -955,11 +957,13 @@ namespace System.Xml.Schema
 		{
 			if (value < -9223372036854775808m || value > 9223372036854775807m)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"Int64"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (long)value;
 		}
@@ -968,11 +972,13 @@ namespace System.Xml.Schema
 		{
 			if (value < 0m || value > 18446744073709551615m)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"UInt64"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (ulong)value;
 		}
@@ -981,11 +987,13 @@ namespace System.Xml.Schema
 		{
 			if (value < 0 || value > 255)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"Byte"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (byte)value;
 		}
@@ -994,11 +1002,13 @@ namespace System.Xml.Schema
 		{
 			if (value < -32768 || value > 32767)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"Int16"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (short)value;
 		}
@@ -1007,11 +1017,13 @@ namespace System.Xml.Schema
 		{
 			if (value < -128 || value > 127)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"SByte"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (sbyte)value;
 		}
@@ -1020,11 +1032,13 @@ namespace System.Xml.Schema
 		{
 			if (value < 0 || value > 65535)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"UInt16"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (ushort)value;
 		}
@@ -1033,11 +1047,13 @@ namespace System.Xml.Schema
 		{
 			if (value < -2147483648L || value > 2147483647L)
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"Int32"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (int)value;
 		}
@@ -1046,11 +1062,13 @@ namespace System.Xml.Schema
 		{
 			if (value < 0L || value > (long)((ulong)(-1)))
 			{
-				throw new OverflowException(Res.GetString("Value '{0}' was either too large or too small for {1}.", new string[]
+				string text = "Value '{0}' was either too large or too small for {1}.";
+				object[] array = new string[]
 				{
 					XmlConvert.ToString(value),
 					"UInt32"
-				}));
+				};
+				throw new OverflowException(Res.GetString(text, array));
 			}
 			return (uint)value;
 		}

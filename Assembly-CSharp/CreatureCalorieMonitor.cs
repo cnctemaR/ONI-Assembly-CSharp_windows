@@ -119,22 +119,27 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 				string text2 = "";
 				if (stomach.diet.CanEatAnyPlantDirectly)
 				{
-					text2 = string.Join("\n", stomach.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>(delegate(KeyValuePair<Tag, float> t)
-					{
-						float num3 = -calorie_loss_per_second / t.Value;
-						GameObject prefab = Assets.GetPrefab(t.Key.ToString());
-						IPlantConsumptionInstructions plantConsumptionInstructions = prefab.GetComponent<IPlantConsumptionInstructions>();
-						plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : prefab.GetSMI<IPlantConsumptionInstructions>());
-						if (plantConsumptionInstructions == null)
+					text2 = string.Join("\n", (from s in stomach.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>(delegate(KeyValuePair<Tag, float> t)
 						{
-							return "";
-						}
-						return UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", plantConsumptionInstructions.GetFormattedConsumptionPerCycle(num3));
-					}).ToArray<string>());
-					text2 += "\n";
+							float num3 = -calorie_loss_per_second / t.Value;
+							GameObject prefab = Assets.GetPrefab(t.Key.ToString());
+							IPlantConsumptionInstructions plantConsumptionInstructions = prefab.GetComponent<IPlantConsumptionInstructions>();
+							plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : prefab.GetSMI<IPlantConsumptionInstructions>());
+							if (plantConsumptionInstructions == null)
+							{
+								return null;
+							}
+							return UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", plantConsumptionInstructions.GetFormattedConsumptionPerCycle(num3));
+						})
+						where !string.IsNullOrEmpty(s)
+						select s).ToArray<string>());
 				}
 				if (this.diet.CanEatAnyNonDirectlyEdiblePlant)
 				{
+					if (this.diet.CanEatAnyPlantDirectly)
+					{
+						text2 += "\n";
+					}
 					Diet.Info info;
 					text2 += string.Join("\n", (from t in stomach.diet.consumedTags.FindAll((KeyValuePair<Tag, float> t) => this.diet.directlyEatenPlantInfos.FirstOrDefault<Diet.Info>((Diet.Info info) => info.consumedTags.Contains(t.Key)) == null)
 						select UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());

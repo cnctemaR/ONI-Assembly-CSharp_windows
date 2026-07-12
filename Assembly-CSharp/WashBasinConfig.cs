@@ -28,12 +28,13 @@ public class WashBasinConfig : IBuildingConfig
 		handSanitizer.massConsumedPerUse = 5f;
 		handSanitizer.consumedElement = SimHashes.Water;
 		handSanitizer.outputElement = SimHashes.DirtyWater;
-		handSanitizer.diseaseRemovalCount = 120000;
+		handSanitizer.diseaseRemovalCount = WashBasinConfig.DISEASE_REMOVAL_COUNT;
 		handSanitizer.maxUses = 40;
 		handSanitizer.dumpWhenFull = true;
 		go.AddOrGet<DirectionControl>();
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
-		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_washbasin_kanim") };
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_washbasin_kanim") };
+		work.overrideAnims = array;
 		work.workTime = 5f;
 		work.trackUses = true;
 		Storage storage = go.AddOrGet<Storage>();
@@ -46,6 +47,15 @@ public class WashBasinConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = 40f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		HandSanitizer.Work component = go.GetComponent<HandSanitizer.Work>();
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_washbasin_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_washbasin_kanim") });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -54,7 +64,7 @@ public class WashBasinConfig : IBuildingConfig
 
 	public const string ID = "WashBasin";
 
-	public const int DISEASE_REMOVAL_COUNT = 120000;
+	public static readonly int DISEASE_REMOVAL_COUNT = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE + 20000;
 
 	public const float WATER_PER_USE = 5f;
 

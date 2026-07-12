@@ -76,6 +76,11 @@ namespace UnityEngine.U2D
 			return spriteChannelInfo;
 		}
 
+		public void SetLocalAABB(Bounds bounds)
+		{
+			this.SetLocalAABB_Injected(ref bounds);
+		}
+
 		public NativeArray<Bounds> GetBounds()
 		{
 			return this.GetNativeDataArray<Bounds>(SpriteShapeDataType.BoundingBox);
@@ -95,6 +100,15 @@ namespace UnityEngine.U2D
 			texcoords = this.GetChannelDataArray<Vector2>(SpriteShapeDataType.ChannelTexCoord0, VertexAttribute.TexCoord0);
 		}
 
+		public void GetChannels(int dataSize, out NativeArray<ushort> indices, out NativeSlice<Vector3> vertices, out NativeSlice<Vector2> texcoords, out NativeSlice<Color32> colors)
+		{
+			this.SetMeshChannelInfo(dataSize, dataSize, 8);
+			indices = this.GetNativeDataArray<ushort>(SpriteShapeDataType.Index);
+			vertices = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelVertex, VertexAttribute.Position);
+			texcoords = this.GetChannelDataArray<Vector2>(SpriteShapeDataType.ChannelTexCoord0, VertexAttribute.TexCoord0);
+			colors = this.GetChannelDataArray<Color32>(SpriteShapeDataType.ChannelColor, VertexAttribute.Color);
+		}
+
 		public void GetChannels(int dataSize, out NativeArray<ushort> indices, out NativeSlice<Vector3> vertices, out NativeSlice<Vector2> texcoords, out NativeSlice<Vector4> tangents)
 		{
 			this.SetMeshChannelInfo(dataSize, dataSize, 4);
@@ -104,12 +118,33 @@ namespace UnityEngine.U2D
 			tangents = this.GetChannelDataArray<Vector4>(SpriteShapeDataType.ChannelTangent, VertexAttribute.Tangent);
 		}
 
+		public void GetChannels(int dataSize, out NativeArray<ushort> indices, out NativeSlice<Vector3> vertices, out NativeSlice<Vector2> texcoords, out NativeSlice<Color32> colors, out NativeSlice<Vector4> tangents)
+		{
+			this.SetMeshChannelInfo(dataSize, dataSize, 12);
+			indices = this.GetNativeDataArray<ushort>(SpriteShapeDataType.Index);
+			vertices = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelVertex, VertexAttribute.Position);
+			texcoords = this.GetChannelDataArray<Vector2>(SpriteShapeDataType.ChannelTexCoord0, VertexAttribute.TexCoord0);
+			colors = this.GetChannelDataArray<Color32>(SpriteShapeDataType.ChannelColor, VertexAttribute.Color);
+			tangents = this.GetChannelDataArray<Vector4>(SpriteShapeDataType.ChannelTangent, VertexAttribute.Tangent);
+		}
+
 		public void GetChannels(int dataSize, out NativeArray<ushort> indices, out NativeSlice<Vector3> vertices, out NativeSlice<Vector2> texcoords, out NativeSlice<Vector4> tangents, out NativeSlice<Vector3> normals)
 		{
 			this.SetMeshChannelInfo(dataSize, dataSize, 6);
 			indices = this.GetNativeDataArray<ushort>(SpriteShapeDataType.Index);
 			vertices = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelVertex, VertexAttribute.Position);
 			texcoords = this.GetChannelDataArray<Vector2>(SpriteShapeDataType.ChannelTexCoord0, VertexAttribute.TexCoord0);
+			tangents = this.GetChannelDataArray<Vector4>(SpriteShapeDataType.ChannelTangent, VertexAttribute.Tangent);
+			normals = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelNormal, VertexAttribute.Normal);
+		}
+
+		public void GetChannels(int dataSize, out NativeArray<ushort> indices, out NativeSlice<Vector3> vertices, out NativeSlice<Vector2> texcoords, out NativeSlice<Color32> colors, out NativeSlice<Vector4> tangents, out NativeSlice<Vector3> normals)
+		{
+			this.SetMeshChannelInfo(dataSize, dataSize, 14);
+			indices = this.GetNativeDataArray<ushort>(SpriteShapeDataType.Index);
+			vertices = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelVertex, VertexAttribute.Position);
+			texcoords = this.GetChannelDataArray<Vector2>(SpriteShapeDataType.ChannelTexCoord0, VertexAttribute.TexCoord0);
+			colors = this.GetChannelDataArray<Color32>(SpriteShapeDataType.ChannelColor, VertexAttribute.Color);
 			tangents = this.GetChannelDataArray<Vector4>(SpriteShapeDataType.ChannelTangent, VertexAttribute.Tangent);
 			normals = this.GetChannelDataArray<Vector3>(SpriteShapeDataType.ChannelNormal, VertexAttribute.Normal);
 		}
@@ -128,5 +163,8 @@ namespace UnityEngine.U2D
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetChannelInfo_Injected(VertexAttribute channel, out SpriteChannelInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetLocalAABB_Injected(ref Bounds bounds);
 	}
 }

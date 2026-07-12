@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/MinionGroupProber")]
-public class MinionGroupProber : KMonoBehaviour, IGroupProber
+public class MinionGroupProber : KMonoBehaviour, IGroupProber, ISim200ms
 {
 	public static void DestroyInstance()
 	{
@@ -20,42 +20,12 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 		base.OnPrefabInit();
 		MinionGroupProber.Instance = this;
 		this.cells = new Dictionary<object, short>[Grid.CellCount];
-	}
-
-	private bool IsReachable_AssumeLock(int cell)
-	{
-		if (!Grid.IsValidCell(cell))
+		for (int i = 0; i < Grid.CellCount; i++)
 		{
-			return false;
+			this.cells[i] = new Dictionary<object, short>();
 		}
-		Dictionary<object, short> dictionary = this.cells[cell];
-		if (dictionary == null)
-		{
-			return false;
-		}
-		bool flag = false;
-		foreach (KeyValuePair<object, short> keyValuePair in dictionary)
-		{
-			object key = keyValuePair.Key;
-			short value = keyValuePair.Value;
-			KeyValuePair<short, short> keyValuePair2;
-			if (this.valid_serial_nos.TryGetValue(key, out keyValuePair2) && (value == keyValuePair2.Key || value == keyValuePair2.Value))
-			{
-				flag = true;
-				break;
-			}
-			this.pending_removals.Add(key);
-		}
-		foreach (object obj in this.pending_removals)
-		{
-			dictionary.Remove(obj);
-			if (dictionary.Count == 0)
-			{
-				this.cells[cell] = null;
-			}
-		}
-		this.pending_removals.Clear();
-		return flag;
+		this.cell_cleanup_index = 0;
+		this.cell_checks_per_frame = Grid.CellCount / 500;
 	}
 
 	public bool IsReachable(int cell)
@@ -64,13 +34,17 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 		{
 			return false;
 		}
-		bool flag = false;
-		object obj = this.access;
-		lock (obj)
+		foreach (KeyValuePair<object, short> keyValuePair in this.cells[cell])
 		{
-			flag = this.IsReachable_AssumeLock(cell);
+			object key = keyValuePair.Key;
+			short value = keyValuePair.Value;
+			KeyValuePair<short, short> keyValuePair2;
+			if (this.valid_serial_nos.TryGetValue(key, out keyValuePair2) && (value == keyValuePair2.Key || value == keyValuePair2.Value))
+			{
+				return true;
+			}
 		}
-		return flag;
+		return false;
 	}
 
 	public bool IsReachable(int cell, CellOffset[] offsets)
@@ -79,49 +53,30 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 		{
 			return false;
 		}
-		bool flag = false;
-		object obj = this.access;
-		lock (obj)
+		foreach (CellOffset cellOffset in offsets)
 		{
-			foreach (CellOffset cellOffset in offsets)
+			if (this.IsReachable(Grid.OffsetCell(cell, cellOffset)))
 			{
-				if (this.IsReachable_AssumeLock(Grid.OffsetCell(cell, cellOffset)))
-				{
-					flag = true;
-					break;
-				}
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 
 	public bool IsAllReachable(int cell, CellOffset[] offsets)
 	{
-		if (!Grid.IsValidCell(cell))
+		if (this.IsReachable(cell))
 		{
-			return false;
+			return true;
 		}
-		bool flag = false;
-		object obj = this.access;
-		lock (obj)
+		foreach (CellOffset cellOffset in offsets)
 		{
-			if (this.IsReachable_AssumeLock(cell))
+			if (this.IsReachable(Grid.OffsetCell(cell, cellOffset)))
 			{
-				flag = true;
-			}
-			else
-			{
-				foreach (CellOffset cellOffset in offsets)
-				{
-					if (this.IsReachable_AssumeLock(Grid.OffsetCell(cell, cellOffset)))
-					{
-						flag = true;
-						break;
-					}
-				}
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 
 	public bool IsReachable(Workable workable)
@@ -131,15 +86,11 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 
 	public void Occupy(object prober, short serial_no, IEnumerable<int> cells)
 	{
-		object obj = this.access;
-		lock (obj)
+		foreach (int num in cells)
 		{
-			foreach (int num in cells)
+			Dictionary<object, short> dictionary = this.cells[num];
+			lock (dictionary)
 			{
-				if (this.cells[num] == null)
-				{
-					this.cells[num] = new Dictionary<object, short>();
-				}
 				this.cells[num][prober] = serial_no;
 			}
 		}
@@ -165,6 +116,29 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 		return flag2;
 	}
 
+	public void Sim200ms(float dt)
+	{
+		int i = 0;
+		while (i < this.cell_checks_per_frame)
+		{
+			this.pending_removals.Clear();
+			foreach (KeyValuePair<object, short> keyValuePair in this.cells[this.cell_cleanup_index])
+			{
+				KeyValuePair<short, short> keyValuePair2;
+				if (!this.valid_serial_nos.TryGetValue(keyValuePair.Key, out keyValuePair2) || (keyValuePair2.Key != keyValuePair.Value && keyValuePair2.Value != keyValuePair.Value))
+				{
+					this.pending_removals.Add(keyValuePair.Key);
+				}
+			}
+			foreach (object obj in this.pending_removals)
+			{
+				this.cells[this.cell_cleanup_index].Remove(obj);
+			}
+			i++;
+			this.cell_cleanup_index = (this.cell_cleanup_index + 1) % this.cells.Length;
+		}
+	}
+
 	private static MinionGroupProber Instance;
 
 	private Dictionary<object, short>[] cells;
@@ -172,6 +146,10 @@ public class MinionGroupProber : KMonoBehaviour, IGroupProber
 	private Dictionary<object, KeyValuePair<short, short>> valid_serial_nos = new Dictionary<object, KeyValuePair<short, short>>();
 
 	private List<object> pending_removals = new List<object>();
+
+	private int cell_cleanup_index;
+
+	private int cell_checks_per_frame;
 
 	private readonly object access = new object();
 }

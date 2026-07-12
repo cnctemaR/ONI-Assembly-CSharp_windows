@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class NuclearReactorConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -26,7 +26,7 @@ public class NuclearReactorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 0f;
-		buildingDef.GeneratorBaseCapacity = 10000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.RequiresPowerOutput = false;
 		buildingDef.ThermalConductivity = 0.1f;
@@ -44,6 +44,8 @@ public class NuclearReactorConfig : IBuildingConfig
 		buildingDef.Entombable = false;
 		buildingDef.Breakable = false;
 		buildingDef.Invincible = true;
+		buildingDef.DiseaseCellVisName = "RadiationSickness";
+		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
 		return buildingDef;
 	}

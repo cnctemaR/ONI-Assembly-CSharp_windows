@@ -38,6 +38,14 @@ namespace System.Data.Odbc
 			base.HResult = -2146232009;
 		}
 
+		private OdbcException(SerializationInfo si, StreamingContext sc)
+		{
+			this._odbcErrors = new OdbcErrorCollection();
+			base..ctor(si, sc);
+			this._odbcErrors = (OdbcErrorCollection)si.GetValue("odbcErrors", typeof(OdbcErrorCollection));
+			base.HResult = -2146232009;
+		}
+
 		public OdbcErrorCollection Errors
 		{
 			get
@@ -50,6 +58,8 @@ namespace System.Data.Odbc
 		public override void GetObjectData(SerializationInfo si, StreamingContext context)
 		{
 			base.GetObjectData(si, context);
+			si.AddValue("odbcRetcode", ODBC32.RETCODE.SUCCESS, typeof(ODBC32.RETCODE));
+			si.AddValue("odbcErrors", this._odbcErrors, typeof(OdbcErrorCollection));
 		}
 
 		public override string Source
@@ -71,7 +81,7 @@ namespace System.Data.Odbc
 
 		internal OdbcException()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private OdbcErrorCollection _odbcErrors;

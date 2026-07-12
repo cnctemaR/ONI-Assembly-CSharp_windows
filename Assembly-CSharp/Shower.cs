@@ -21,7 +21,7 @@ public class Shower : Workable, IGameObjectEffectDescriptor
 		this.smi.StartSM();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
 		base.WorkTimeRemaining = this.workTime * instance.GetDirtiness();
@@ -30,12 +30,12 @@ public class Shower : Workable, IGameObjectEffectDescriptor
 		base.OnStartWork(worker);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.smi.SetActive(false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		Effects component = worker.GetComponent<Effects>();
@@ -60,7 +60,7 @@ public class Shower : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		PrimaryElement component = worker.GetComponent<PrimaryElement>();
 		if (component.DiseaseCount > 0)
@@ -82,7 +82,7 @@ public class Shower : Workable, IGameObjectEffectDescriptor
 		return false;
 	}
 
-	protected override void OnAbortWork(Worker worker)
+	protected override void OnAbortWork(WorkerBase worker)
 	{
 		base.OnAbortWork(worker);
 		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
@@ -145,7 +145,9 @@ public class Shower : Workable, IGameObjectEffectDescriptor
 
 		private Chore CreateShowerChore(Shower.ShowerSM.Instance smi)
 		{
-			return new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			WorkChore<Shower> workChore = new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			workChore.AddPrecondition(ChorePreconditions.instance.IsNotABionic, smi);
+			return workChore;
 		}
 
 		private void UpdateStatusItems(Shower.ShowerSM.Instance smi, float dt)

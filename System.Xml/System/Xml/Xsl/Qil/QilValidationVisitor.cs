@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Xml.Utils;
 
 namespace System.Xml.Xsl.Qil
 {
@@ -19,7 +18,7 @@ namespace System.Xml.Xsl.Qil
 		[Conditional("DEBUG")]
 		internal static void SetError(QilNode n, string message)
 		{
-			message = Res.GetString("QIL Validation Error! '{0}'.", new object[] { message });
+			message = SR.Format("QIL Validation Error! '{0}'.", message);
 			string text = n.Annotation as string;
 			if (text != null)
 			{
@@ -28,8 +27,8 @@ namespace System.Xml.Xsl.Qil
 			n.Annotation = message;
 		}
 
-		private SubstitutionList subs = new SubstitutionList();
+		private SubstitutionList _subs = new SubstitutionList();
 
-		private QilTypeChecker typeCheck = new QilTypeChecker();
+		private QilTypeChecker _typeCheck = new QilTypeChecker();
 	}
 }

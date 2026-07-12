@@ -73,7 +73,7 @@ public class Diggable : Workable
 		return this.cached_cell;
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);
 		if (this.overrideAnims != null && this.overrideAnims.Length != 0)
@@ -127,7 +127,7 @@ public class Diggable : Workable
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					if (enumerator.Current.condition.id == ChorePreconditions.instance.HasSkillPerk.id)
 					{
 						flag = true;
 						break;
@@ -148,7 +148,7 @@ public class Diggable : Workable
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					if (enumerator.Current.condition.id == ChorePreconditions.instance.HasSkillPerk.id)
 					{
 						flag2 = true;
 						break;
@@ -169,7 +169,7 @@ public class Diggable : Workable
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					if (enumerator.Current.condition.id == ChorePreconditions.instance.HasSkillPerk.id)
 					{
 						flag3 = true;
 						break;
@@ -190,7 +190,7 @@ public class Diggable : Workable
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.id == ChorePreconditions.instance.HasSkillPerk.id)
+					if (enumerator.Current.condition.id == ChorePreconditions.instance.HasSkillPerk.id)
 					{
 						flag4 = true;
 						break;
@@ -207,7 +207,7 @@ public class Diggable : Workable
 		else
 		{
 			this.requiredSkillPerk = null;
-			this.chore.GetPreconditions().Remove(this.chore.GetPreconditions().Find((Chore.PreconditionInstance o) => o.id == ChorePreconditions.instance.HasSkillPerk.id));
+			this.chore.GetPreconditions().Remove(this.chore.GetPreconditions().Find((Chore.PreconditionInstance o) => o.condition.id == ChorePreconditions.instance.HasSkillPerk.id));
 		}
 		this.UpdateStatusItem(null);
 		bool flag5 = false;
@@ -258,13 +258,13 @@ public class Diggable : Workable
 		return this.originalDigElement.tag.Name;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		Diggable.DoDigTick(this.cached_cell, dt);
 		return this.isDigComplete;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		if (this.isDigComplete)
 		{
@@ -272,7 +272,7 @@ public class Diggable : Workable
 		}
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		if (Grid.Element[this.cached_cell].hardness == 255)
 		{

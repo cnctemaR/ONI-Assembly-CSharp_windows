@@ -2,8 +2,6 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
-	[Serializable]
 	public sealed class UnknownWrapper
 	{
 		public UnknownWrapper(object obj)

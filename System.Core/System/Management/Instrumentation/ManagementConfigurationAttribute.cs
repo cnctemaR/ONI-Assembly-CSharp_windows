@@ -17,7 +17,6 @@ namespace System.Management.Instrumentation
 			}
 			set
 			{
-				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -30,7 +29,6 @@ namespace System.Management.Instrumentation
 			}
 			set
 			{
-				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 	}

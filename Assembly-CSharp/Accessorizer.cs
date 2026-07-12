@@ -217,6 +217,39 @@ public class Accessorizer : KMonoBehaviour
 		this.UpdateHairBasedOnHat();
 	}
 
+	public void ApplyBodyData(KCompBuilder.BodyData bodyData)
+	{
+		this.accessories.Clear();
+		if (this.animController == null)
+		{
+			this.animController = base.GetComponent<KAnimControllerBase>();
+		}
+		foreach (string text in new string[] { "snapTo_hat", "snapTo_hat_hair", "snapTo_goggles", "snapTo_headFX", "snapTo_neck", "snapTo_chest", "snapTo_pivot", "skirt", "necklace" })
+		{
+			this.animController.GetComponent<SymbolOverrideController>().RemoveSymbolOverride(text, 0);
+			this.animController.SetSymbolVisiblity(text, false);
+		}
+		this.AddAccessory(Db.Get().AccessorySlots.Eyes.Lookup(bodyData.eyes));
+		this.AddAccessory(Db.Get().AccessorySlots.Hair.Lookup(bodyData.hair));
+		this.AddAccessory(Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(bodyData.hair)));
+		this.AddAccessory(Db.Get().AccessorySlots.HeadShape.Lookup(bodyData.headShape));
+		this.AddAccessory(Db.Get().AccessorySlots.Mouth.Lookup(bodyData.mouth));
+		this.AddAccessory(Db.Get().AccessorySlots.Body.Lookup(bodyData.body));
+		this.AddAccessory(Db.Get().AccessorySlots.Arm.Lookup(bodyData.arms));
+		this.AddAccessory(Db.Get().AccessorySlots.ArmLower.Lookup(bodyData.armslower));
+		this.AddAccessory(Db.Get().AccessorySlots.Neck.Lookup(bodyData.neck));
+		this.AddAccessory(Db.Get().AccessorySlots.Pelvis.Lookup(bodyData.pelvis));
+		this.AddAccessory(Db.Get().AccessorySlots.Leg.Lookup(bodyData.legs));
+		this.AddAccessory(Db.Get().AccessorySlots.Foot.Lookup(bodyData.foot));
+		this.AddAccessory(Db.Get().AccessorySlots.Hand.Lookup(bodyData.hand));
+		this.AddAccessory(Db.Get().AccessorySlots.Cuff.Lookup(bodyData.cuff));
+		this.AddAccessory(Db.Get().AccessorySlots.Belt.Lookup(bodyData.belt));
+		this.AddAccessory(Db.Get().AccessorySlots.ArmLowerSkin.Lookup(bodyData.armLowerSkin));
+		this.AddAccessory(Db.Get().AccessorySlots.ArmUpperSkin.Lookup(bodyData.armUpperSkin));
+		this.AddAccessory(Db.Get().AccessorySlots.LegSkin.Lookup(bodyData.legSkin));
+		this.UpdateHairBasedOnHat();
+	}
+
 	public void UpdateHairBasedOnHat()
 	{
 		if (!this.GetAccessory(Db.Get().AccessorySlots.Hat).IsNullOrDestroyed())

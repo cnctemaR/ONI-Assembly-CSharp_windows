@@ -9,8 +9,8 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 		base.smi = new RecoverFromHeatChore.Instance(this, target.gameObject);
 		HeatImmunityMonitor.Instance chillyBones = target.gameObject.GetSMI<HeatImmunityMonitor.Instance>();
 		Func<int> func = () => chillyBones.ShelterCell;
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class States : GameStateMachine<RecoverFromHeatChore.States, RecoverFromHeatChore.Instance, RecoverFromHeatChore>
@@ -38,7 +38,15 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 					smi.UpdateImmunityProvider();
 				}, UpdateRate.SIM_200ms, true);
 			this.approach.InitializeStates(this.entityRecovering, this.locator, this.recover, null, null, null);
-			this.recover.OnTargetLost(this.heatImmunityProvider, null).ToggleAnims(new Func<RecoverFromHeatChore.Instance, HashedString>(RecoverFromHeatChore.States.GetAnimFileName)).DefaultState(this.recover.pre)
+			this.recover.OnTargetLost(this.heatImmunityProvider, null).Enter("AnimOverride", delegate(RecoverFromHeatChore.Instance smi)
+			{
+				smi.cachedAnimName = RecoverFromHeatChore.States.GetAnimFileName(smi);
+				smi.GetComponent<KAnimControllerBase>().AddAnimOverrides(Assets.GetAnim(smi.cachedAnimName), 0f);
+			}).Exit(delegate(RecoverFromHeatChore.Instance smi)
+			{
+				smi.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(Assets.GetAnim(smi.cachedAnimName));
+			})
+				.DefaultState(this.recover.pre)
 				.ToggleTag(GameTags.RecoveringFromHeat);
 			this.recover.pre.Face(this.heatImmunityProvider, 0f).PlayAnim(new Func<RecoverFromHeatChore.Instance, string>(RecoverFromHeatChore.States.GetPreAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.recover.loop);
 			this.recover.loop.PlayAnim(new Func<RecoverFromHeatChore.Instance, string>(RecoverFromHeatChore.States.GetLoopAnimName), KAnim.PlayMode.Once).OnAnimQueueComplete(this.recover.pst);
@@ -66,7 +74,7 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 
 		public static HashedString GetAnimFileName(RecoverFromHeatChore.Instance smi)
 		{
-			return RecoverFromHeatChore.States.GetAnimFromHeatImmunityProvider(smi, (HeatImmunityProvider.Instance p) => p.AnimFileName);
+			return RecoverFromHeatChore.States.GetAnimFromHeatImmunityProvider(smi, (HeatImmunityProvider.Instance p) => p.GetAnimFileName(smi.sm.entityRecovering.Get(smi)));
 		}
 
 		public static string GetPreAnimName(RecoverFromHeatChore.Instance smi)
@@ -187,5 +195,7 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 		}
 
 		private int targetCell;
+
+		public HashedString cachedAnimName;
 	}
 }

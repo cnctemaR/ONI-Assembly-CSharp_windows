@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum PortableExecutableKinds
 	{
 		NotAPortableExecutableImage = 0,

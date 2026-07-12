@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class LicenseContext : IServiceProvider
 	{
 		public virtual LicenseUsageMode UsageMode

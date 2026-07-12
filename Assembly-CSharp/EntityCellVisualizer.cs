@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
+using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -451,7 +452,7 @@ public class EntityCellVisualizer : KMonoBehaviour
 
 	protected Dictionary<GameObject, Image> icons;
 
-	public string DiseaseCellVisName = "FoodPoisoning";
+	public string DiseaseCellVisName = DUPLICANTSTATS.STANDARD.Secretions.PEE_DISEASE;
 
 	[Flags]
 	public enum Ports

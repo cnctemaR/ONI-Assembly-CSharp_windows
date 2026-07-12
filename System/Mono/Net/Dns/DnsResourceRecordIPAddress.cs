@@ -16,7 +16,10 @@ namespace Mono.Net.Dns
 
 		public override string ToString()
 		{
-			return base.ToString() + " Address: " + this.address;
+			string text = base.ToString();
+			string text2 = " Address: ";
+			IPAddress ipaddress = this.address;
+			return text + text2 + ((ipaddress != null) ? ipaddress.ToString() : null);
 		}
 
 		public IPAddress Address

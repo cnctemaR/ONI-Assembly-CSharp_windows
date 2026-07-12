@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.ComponentModel.Design
 {
 	[Flags]
-	[ComVisible(true)]
 	public enum SelectionTypes
 	{
 		Auto = 1,

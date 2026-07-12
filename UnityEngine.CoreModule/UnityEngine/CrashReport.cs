@@ -38,8 +38,8 @@ namespace UnityEngine
 			object obj = CrashReport.reportsLock;
 			lock (obj)
 			{
-				bool flag = CrashReport.internalReports != null;
-				if (!flag)
+				bool flag2 = CrashReport.internalReports != null;
+				if (!flag2)
 				{
 					string[] reports = CrashReport.GetReports();
 					CrashReport.internalReports = new List<CrashReport>(reports.Length);
@@ -78,8 +78,8 @@ namespace UnityEngine
 				object obj = CrashReport.reportsLock;
 				lock (obj)
 				{
-					bool flag = CrashReport.internalReports.Count > 0;
-					if (flag)
+					bool flag2 = CrashReport.internalReports.Count > 0;
+					if (flag2)
 					{
 						return CrashReport.internalReports[CrashReport.internalReports.Count - 1];
 					}

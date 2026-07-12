@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class InterfaceTypeAttribute : Attribute
 	{
 		public InterfaceTypeAttribute(ComInterfaceType interfaceType)

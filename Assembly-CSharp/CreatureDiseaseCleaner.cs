@@ -6,7 +6,15 @@ public class CreatureDiseaseCleaner : GameStateMachine<CreatureDiseaseCleaner, C
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.cleaning;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.CLEANING.NAME, CREATURES.STATUSITEMS.CLEANING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<CreatureDiseaseCleaner, CreatureDiseaseCleaner.Instance, IStateMachineTarget, CreatureDiseaseCleaner.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.CLEANING.NAME;
+		string text2 = CREATURES.STATUSITEMS.CLEANING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.cleaning.DefaultState(this.cleaning.clean_pre).ScheduleGoTo((CreatureDiseaseCleaner.Instance smi) => smi.def.cleanDuration, this.cleaning.clean_pst);
 		this.cleaning.clean_pre.PlayAnim("clean_water_pre").OnAnimQueueComplete(this.cleaning.clean);
 		this.cleaning.clean.Enter(delegate(CreatureDiseaseCleaner.Instance smi)

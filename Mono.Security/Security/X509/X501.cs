@@ -127,6 +127,10 @@ namespace Mono.Security.X509
 						{
 							sb.Append("I=");
 						}
+						else if (asn3.CompareValue(X501.serialNumber))
+						{
+							sb.Append("SERIALNUMBER=");
+						}
 						else
 						{
 							sb.Append("OID.");
@@ -143,21 +147,18 @@ namespace Mono.Security.X509
 							}
 							text = stringBuilder.ToString();
 						}
+						else if (asn2.Tag == 20)
+						{
+							text = Encoding.UTF7.GetString(asn2.Value);
+						}
 						else
 						{
-							if (asn2.Tag == 20)
-							{
-								text = Encoding.UTF7.GetString(asn2.Value);
-							}
-							else
-							{
-								text = Encoding.UTF8.GetString(asn2.Value);
-							}
-							char[] array = new char[] { ',', '+', '"', '\\', '<', '>', ';' };
-							if (quotes && (text.IndexOfAny(array, 0, text.Length) > 0 || text.StartsWith(" ") || text.EndsWith(" ")))
-							{
-								text = "\"" + text + "\"";
-							}
+							text = Encoding.UTF8.GetString(asn2.Value);
+						}
+						char[] array = new char[] { ',', '+', '"', '=', '<', '>', ';', '#', '\n' };
+						if (quotes && (text.IndexOfAny(array, 0, text.Length) > 0 || text.StartsWith(" ") || text.EndsWith(" ")))
+						{
+							text = "\"" + text.Replace("\"", "") + "\"";
 						}
 						sb.Append(text);
 						if (i < entry.Count - 1)
@@ -173,119 +174,128 @@ namespace Mono.Security.X509
 		{
 			string text = attributeType.ToUpper(CultureInfo.InvariantCulture).Trim();
 			uint num = global::<PrivateImplementationDetails>.ComputeStringHash(text);
-			if (num <= 3255563174U)
+			if (num <= 3322673650U)
 			{
-				if (num <= 1795334850U)
+				if (num <= 2078582897U)
 				{
-					if (num != 902722544U)
+					if (num <= 1627558660U)
 					{
-						if (num != 1627558660U)
+						if (num != 902722544U)
 						{
-							if (num != 1795334850U)
+							if (num != 1627558660U)
 							{
-								goto IL_0281;
+								goto IL_02BD;
 							}
-							if (!(text == "ST"))
-							{
-								goto IL_0281;
-							}
-						}
-						else
-						{
 							if (!(text == "SN"))
 							{
-								goto IL_0281;
+								goto IL_02BD;
 							}
 							return new X520.Surname();
 						}
-					}
-					else
-					{
-						if (!(text == "DC"))
+						else
 						{
-							goto IL_0281;
+							if (!(text == "DC"))
+							{
+								goto IL_02BD;
+							}
+							return new X520.DomainComponent();
 						}
-						return new X520.DomainComponent();
 					}
-				}
-				else if (num <= 2161779444U)
-				{
-					if (num != 2078582897U)
+					else if (num != 1795334850U)
 					{
-						if (num != 2161779444U)
+						if (num != 2078582897U)
 						{
-							goto IL_0281;
+							goto IL_02BD;
 						}
-						if (!(text == "CN"))
-						{
-							goto IL_0281;
-						}
-						return new X520.CommonName();
-					}
-					else
-					{
 						if (!(text == "OU"))
 						{
-							goto IL_0281;
+							goto IL_02BD;
 						}
 						return new X520.OrganizationalUnitName();
 					}
+					else if (!(text == "ST"))
+					{
+						goto IL_02BD;
+					}
 				}
-				else if (num != 3222007936U)
+				else if (num <= 3222007936U)
 				{
-					if (num != 3255563174U)
+					if (num != 2161779444U)
 					{
-						goto IL_0281;
+						if (num != 3222007936U)
+						{
+							goto IL_02BD;
+						}
+						if (!(text == "E"))
+						{
+							goto IL_02BD;
+						}
+						return new X520.EmailAddress();
 					}
-					if (!(text == "G"))
+					else
 					{
-						goto IL_0281;
+						if (!(text == "CN"))
+						{
+							goto IL_02BD;
+						}
+						return new X520.CommonName();
 					}
-					return new X520.GivenName();
+				}
+				else if (num != 3255563174U)
+				{
+					if (num != 3322673650U)
+					{
+						goto IL_02BD;
+					}
+					if (!(text == "C"))
+					{
+						goto IL_02BD;
+					}
+					return new X520.CountryName();
 				}
 				else
 				{
-					if (!(text == "E"))
+					if (!(text == "G"))
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
-					return new X520.EmailAddress();
+					return new X520.GivenName();
 				}
 			}
 			else if (num <= 3423339364U)
 			{
 				if (num <= 3373006507U)
 				{
-					if (num != 3322673650U)
+					if (num != 3369459556U)
 					{
 						if (num != 3373006507U)
 						{
-							goto IL_0281;
+							goto IL_02BD;
 						}
 						if (!(text == "L"))
 						{
-							goto IL_0281;
+							goto IL_02BD;
 						}
 						return new X520.LocalityName();
 					}
 					else
 					{
-						if (!(text == "C"))
+						if (!(text == "SERIALNUMBER"))
 						{
-							goto IL_0281;
+							goto IL_02BD;
 						}
-						return new X520.CountryName();
+						return new X520.SerialNumber();
 					}
 				}
 				else if (num != 3389784126U)
 				{
 					if (num != 3423339364U)
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 					if (!(text == "I"))
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 					return new X520.Initial();
 				}
@@ -293,7 +303,7 @@ namespace Mono.Security.X509
 				{
 					if (!(text == "O"))
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 					return new X520.OrganizationName();
 				}
@@ -304,18 +314,18 @@ namespace Mono.Security.X509
 				{
 					if (num != 3591115554U)
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 					if (!(text == "S"))
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 				}
 				else
 				{
 					if (!(text == "T"))
 					{
-						goto IL_0281;
+						goto IL_02BD;
 					}
 					return new X520.Title();
 				}
@@ -324,11 +334,11 @@ namespace Mono.Security.X509
 			{
 				if (num != 4293667421U)
 				{
-					goto IL_0281;
+					goto IL_02BD;
 				}
 				if (!(text == "DNQUALIFIER"))
 				{
-					goto IL_0281;
+					goto IL_02BD;
 				}
 				return new X520.DnQualifier();
 			}
@@ -336,12 +346,12 @@ namespace Mono.Security.X509
 			{
 				if (!(text == "UID"))
 				{
-					goto IL_0281;
+					goto IL_02BD;
 				}
 				return new X520.UserId();
 			}
 			return new X520.StateOrProvinceName();
-			IL_0281:
+			IL_02BD:
 			if (text.StartsWith("OID."))
 			{
 				return new X520.Oid(text.Substring(4));
@@ -572,6 +582,8 @@ namespace Mono.Security.X509
 		private static byte[] stateOrProvinceName = new byte[] { 85, 4, 8 };
 
 		private static byte[] streetAddress = new byte[] { 85, 4, 9 };
+
+		private static byte[] serialNumber = new byte[] { 85, 4, 5 };
 
 		private static byte[] domainComponent = new byte[] { 9, 146, 38, 137, 147, 242, 44, 100, 1, 25 };
 

@@ -102,14 +102,14 @@ public class Deconstructable : Workable
 		this.reconstructable = base.GetComponent<Reconstructable>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("DeconstructBar");
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, false);
 		base.Trigger(1830962028, this);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.Trigger(-702296337, this);
 		if (this.reconstructable != null)
@@ -175,11 +175,19 @@ public class Deconstructable : Workable
 		return this.TriggerDestroy(temperature, diseaseIdx, diseaseCount);
 	}
 
-	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count, Worker tile_worker)
+	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count, WorkerBase tile_worker)
 	{
 		if (this == null || this.destroyed)
 		{
 			return null;
+		}
+		if (base.transform.parent != null)
+		{
+			Storage component = base.transform.parent.GetComponent<Storage>();
+			if (component != null)
+			{
+				component.Remove(base.gameObject, true);
+			}
 		}
 		List<GameObject> list = this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count, tile_worker);
 		this.destroyed = true;
@@ -247,7 +255,7 @@ public class Deconstructable : Workable
 		}
 	}
 
-	public void SpawnItemsFromConstruction(Worker chore_worker)
+	public void SpawnItemsFromConstruction(WorkerBase chore_worker)
 	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		float temperature = component.Temperature;
@@ -256,7 +264,7 @@ public class Deconstructable : Workable
 		this.SpawnItemsFromConstruction(temperature, diseaseIdx, diseaseCount, chore_worker);
 	}
 
-	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count, Worker construction_worker)
+	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count, WorkerBase construction_worker)
 	{
 		List<GameObject> list = new List<GameObject>();
 		if (!this.allowDeconstruction)
@@ -299,7 +307,7 @@ public class Deconstructable : Workable
 		return list;
 	}
 
-	public GameObject SpawnItem(Vector3 position, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count, Worker chore_worker)
+	public GameObject SpawnItem(Vector3 position, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count, WorkerBase chore_worker)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);

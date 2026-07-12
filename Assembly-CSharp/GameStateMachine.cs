@@ -10,6 +10,16 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		base.InitializeStates(out default_state);
 	}
 
+	public static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback And(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback first_condition, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback second_condition)
+	{
+		return (StateMachineInstanceType smi) => first_condition(smi) && second_condition(smi);
+	}
+
+	public static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback Or(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback first_condition, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback second_condition)
+	{
+		return (StateMachineInstanceType smi) => first_condition(smi) || second_condition(smi);
+	}
+
 	public static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback Not(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback transition_cb)
 	{
 		return (StateMachineInstanceType smi) => !transition_cb(smi);
@@ -50,6 +60,14 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<GameObject>.Callback IsNotNull = (StateMachineInstanceType smi, GameObject p) => p != null;
 
 	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<GameObject>.Callback IsNull = (StateMachineInstanceType smi, GameObject p) => p == null;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsZero_Int = (StateMachineInstanceType smi, int p) => p == 0;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsLTEOne_Int = (StateMachineInstanceType smi, int p) => p <= 1;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsGTOne_Int = (StateMachineInstanceType smi, int p) => p > 1;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<int>.Callback IsGTZero_Int = (StateMachineInstanceType smi, int p) => p > 0;
 
 	public class PreLoopPostState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
@@ -1599,6 +1617,38 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStateMachineList(Func<StateMachineInstanceType, Func<StateMachineInstanceType, StateMachine.Instance>[]> getListCallback)
+		{
+			int data_idx = this.CreateDataTableEntry();
+			this.Enter("EnableListOfStateMachines()", delegate(StateMachineInstanceType smi)
+			{
+				Func<StateMachineInstanceType, StateMachine.Instance>[] array = getListCallback(smi);
+				StateMachine.Instance[] array2 = new StateMachine.Instance[array.Length];
+				for (int i = 0; i < array.Length; i++)
+				{
+					StateMachine.Instance instance = array[i](smi);
+					instance.StartSM();
+					array2[i] = instance;
+				}
+				smi.dataTable[data_idx] = array2;
+			});
+			this.Exit("DisableListOfStateMachines()", delegate(StateMachineInstanceType smi)
+			{
+				Func<StateMachineInstanceType, StateMachine.Instance>[] array3 = getListCallback(smi);
+				StateMachine.Instance[] array4 = (StateMachine.Instance[])smi.dataTable[data_idx];
+				for (int j = array3.Length - 1; j >= 0; j--)
+				{
+					StateMachine.Instance instance2 = array4[j];
+					if (instance2 != null)
+					{
+						instance2.StopSM("ToggleListOfStateMachines.Exit");
+					}
+				}
+				smi.dataTable[data_idx] = null;
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStateMachine(Func<StateMachineInstanceType, StateMachine.Instance> callback)
 		{
 			int data_idx = this.CreateDataTableEntry();
@@ -1751,13 +1801,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				if (validate_callback(smi))
 				{
-					Worker.WorkResult workResult = state_target.Get<Worker>(smi).Work(dt);
-					if (workResult == Worker.WorkResult.Success)
+					WorkerBase.WorkResult workResult = state_target.Get<WorkerBase>(smi).Work(dt);
+					if (workResult == WorkerBase.WorkResult.Success)
 					{
 						smi.GoTo(success_state);
 						return;
 					}
-					if (workResult == Worker.WorkResult.Failed)
+					if (workResult == WorkerBase.WorkResult.Failed)
 					{
 						smi.GoTo(failure_state);
 						return;
@@ -1770,7 +1820,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			}, UpdateRate.SIM_33ms, false);
 			this.Exit("StopWork()", delegate(StateMachineInstanceType smi)
 			{
-				state_target.Get<Worker>(smi).StopWork();
+				state_target.Get<WorkerBase>(smi).StopWork();
 			});
 			return this;
 		}
@@ -1781,7 +1831,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.ToggleWork(typeof(WorkableType).Name, delegate(StateMachineInstanceType smi)
 			{
 				Workable workable = source_target.Get<WorkableType>(smi);
-				state_target.Get<Worker>(smi).StartWork(new Worker.StartWorkInfo(workable));
+				state_target.Get<WorkerBase>(smi).StartWork(new WorkerBase.StartWorkInfo(workable));
 			}, (StateMachineInstanceType smi) => source_target.Get<WorkableType>(smi) != null && (is_valid_cb == null || is_valid_cb(smi)), success_state, failure_state);
 			return this;
 		}
@@ -1792,9 +1842,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.ToggleWork("Eat", delegate(StateMachineInstanceType smi)
 			{
 				Edible edible = source_target.Get<Edible>(smi);
-				Worker worker = state_target.Get<Worker>(smi);
+				WorkerBase workerBase = state_target.Get<WorkerBase>(smi);
 				float num = amount.Get(smi);
-				worker.StartWork(new Edible.EdibleStartWorkInfo(edible, num));
+				workerBase.StartWork(new Edible.EdibleStartWorkInfo(edible, num));
 			}, (StateMachineInstanceType smi) => source_target.Get<Edible>(smi) != null, success_state, failure_state);
 			return this;
 		}
@@ -1804,9 +1854,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.ToggleWork("Sleep", delegate(StateMachineInstanceType smi)
 			{
-				Worker worker = state_target.Get<Worker>(smi);
+				WorkerBase workerBase = state_target.Get<WorkerBase>(smi);
 				Sleepable sleepable = bed.Get<Sleepable>(smi);
-				worker.StartWork(new Worker.StartWorkInfo(sleepable));
+				workerBase.StartWork(new WorkerBase.StartWorkInfo(sleepable));
 			}, (StateMachineInstanceType smi) => bed.Get<Sleepable>(smi) != null, success_state, failure_state);
 			return this;
 		}
@@ -1815,9 +1865,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		{
 			this.ToggleWork("Pickup", delegate(StateMachineInstanceType smi)
 			{
-				Worker worker = worker_param.Get<Worker>(smi);
+				WorkerBase workerBase = worker_param.Get<WorkerBase>(smi);
 				Storage storage = storage_param.Get<Storage>(smi);
-				worker.StartWork(new Worker.StartWorkInfo(storage));
+				workerBase.StartWork(new WorkerBase.StartWorkInfo(storage));
 			}, (StateMachineInstanceType smi) => storage_param.Get<Storage>(smi) != null, success_state, failure_state);
 			return this;
 		}
@@ -1828,9 +1878,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.ToggleWork("Pickup", delegate(StateMachineInstanceType smi)
 			{
 				Pickupable pickupable = source_target.Get<Pickupable>(smi);
-				Worker worker = state_target.Get<Worker>(smi);
+				WorkerBase workerBase = state_target.Get<WorkerBase>(smi);
 				float num = amount.Get(smi);
-				worker.StartWork(new Pickupable.PickupableStartWorkInfo(pickupable, num, delegate(GameObject result)
+				workerBase.StartWork(new Pickupable.PickupableStartWorkInfo(pickupable, num, delegate(GameObject result)
 				{
 					result_target.Set(result, smi, false);
 				}));
@@ -2211,6 +2261,36 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Enter("MoveTo(" + move_parameter.name + ")", delegate(StateMachineInstanceType smi)
 			{
 				offsets = override_offsets;
+				IApproachable approachable = move_parameter.Get<ApproachableType>(smi);
+				KMonoBehaviour kmonoBehaviour = move_parameter.Get<KMonoBehaviour>(smi);
+				if (kmonoBehaviour == null)
+				{
+					smi.GoTo(fail_state);
+					return;
+				}
+				Navigator component = state_target.Get(smi).GetComponent<Navigator>();
+				if (offsets == null)
+				{
+					offsets = approachable.GetOffsets();
+				}
+				component.GoTo(kmonoBehaviour, offsets, tactic);
+			});
+			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
+			{
+				state_target.Get<Navigator>(smi).Stop(false, true);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo<ApproachableType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, NavTactic tactic = null) where ApproachableType : IApproachable
+		{
+			this.EventTransition(GameHashes.DestinationReached, success_state, null);
+			this.EventTransition(GameHashes.NavigationFailed, fail_state, null);
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			CellOffset[] offsets;
+			this.Enter("MoveTo(" + move_parameter.name + ")", delegate(StateMachineInstanceType smi)
+			{
+				offsets = override_offsets(smi);
 				IApproachable approachable = move_parameter.Get<ApproachableType>(smi);
 				KMonoBehaviour kmonoBehaviour = move_parameter.Get<KMonoBehaviour>(smi);
 				if (kmonoBehaviour == null)
@@ -2617,6 +2697,12 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, CellOffset[] override_offsets = null, NavTactic tactic = null)
 		{
 			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, failure_state, override_offsets, (tactic == null) ? NavigationTactics.ReduceTravelDistance : tactic);
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, NavTactic tactic = null)
+		{
+			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, override_offsets, failure_state, (tactic == null) ? NavigationTactics.ReduceTravelDistance : tactic);
 			return this;
 		}
 	}

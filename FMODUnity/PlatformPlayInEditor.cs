@@ -13,7 +13,7 @@ namespace FMODUnity
 			base.Identifier = "playInEditor";
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -21,14 +21,14 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.OSXEditor, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.WindowsEditor, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.LinuxEditor, this);
 		}
 
-		public override bool IsIntrinsic
+		internal override bool IsIntrinsic
 		{
 			get
 			{
@@ -36,7 +36,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override string GetBankFolder()
+		internal override string GetBankFolder()
 		{
 			Settings instance = Settings.Instance;
 			string text = instance.SourceBankPath;
@@ -47,11 +47,11 @@ namespace FMODUnity
 			return text;
 		}
 
-		public override void LoadStaticPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
+		internal override void LoadStaticPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
 		{
 		}
 
-		public override void InitializeProperties()
+		internal override void InitializeProperties()
 		{
 			base.InitializeProperties();
 			Platform.PropertyAccessors.LiveUpdate.Set(this, TriStateBool.Enabled);
@@ -61,7 +61,7 @@ namespace FMODUnity
 			Platform.PropertyAccessors.VirtualChannelCount.Set(this, 1024);
 		}
 
-		public override List<CodecChannelCount> DefaultCodecChannels
+		internal override List<CodecChannelCount> DefaultCodecChannels
 		{
 			get
 			{

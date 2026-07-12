@@ -7,8 +7,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[StaticAccessor("AudioSourceBindings", StaticAccessorType.DoubleColon)]
 	[RequireComponent(typeof(Transform))]
+	[StaticAccessor("AudioSourceBindings", StaticAccessorType.DoubleColon)]
 	public sealed class AudioSource : AudioBehaviour
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

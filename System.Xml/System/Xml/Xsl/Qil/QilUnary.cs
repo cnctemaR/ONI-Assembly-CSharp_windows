@@ -7,7 +7,7 @@ namespace System.Xml.Xsl.Qil
 		public QilUnary(QilNodeType nodeType, QilNode child)
 			: base(nodeType)
 		{
-			this.child = child;
+			this._child = child;
 		}
 
 		public override int Count
@@ -26,7 +26,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				return this.child;
+				return this._child;
 			}
 			set
 			{
@@ -34,7 +34,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				this.child = value;
+				this._child = value;
 			}
 		}
 
@@ -42,14 +42,14 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.child;
+				return this._child;
 			}
 			set
 			{
-				this.child = value;
+				this._child = value;
 			}
 		}
 
-		private QilNode child;
+		private QilNode _child;
 	}
 }

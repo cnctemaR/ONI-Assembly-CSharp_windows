@@ -571,8 +571,8 @@ namespace System.Net.NetworkInformation
 			{
 				get
 				{
-					byte b = this.Type;
-					switch (b)
+					byte type = this.Type;
+					switch (type)
 					{
 					case 0:
 						return IPStatus.Success;
@@ -599,21 +599,23 @@ namespace System.Net.NetworkInformation
 					case 4:
 						return IPStatus.SourceQuench;
 					default:
-						switch (b)
+						switch (type)
 						{
 						case 8:
 							return IPStatus.Success;
 						case 11:
-							b = this.Code;
-							if (b == 0)
+						{
+							byte code = this.Code;
+							if (code == 0)
 							{
 								return IPStatus.TimeExceeded;
 							}
-							if (b == 1)
+							if (code == 1)
 							{
 								return IPStatus.TtlReassemblyTimeExceeded;
 							}
 							break;
+						}
 						case 12:
 							return IPStatus.ParameterProblem;
 						}

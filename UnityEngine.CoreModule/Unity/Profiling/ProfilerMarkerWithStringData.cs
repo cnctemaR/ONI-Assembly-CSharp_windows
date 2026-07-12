@@ -19,7 +19,7 @@ namespace Unity.Profiling
 		}
 
 		[Pure]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ProfilerMarkerWithStringData.AutoScope Auto(bool enabled, Func<string> parameterValue)
 		{
 			ProfilerMarkerWithStringData.AutoScope autoScope;
@@ -35,7 +35,7 @@ namespace Unity.Profiling
 		}
 
 		[Pure]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe ProfilerMarkerWithStringData.AutoScope Auto(string value)
 		{
 			bool flag = value == null;
@@ -61,20 +61,20 @@ namespace Unity.Profiling
 			return new ProfilerMarkerWithStringData.AutoScope(this._marker);
 		}
 
-		private const MethodImplOptions AggressiveInlining = (MethodImplOptions)256;
+		private const MethodImplOptions AggressiveInlining = MethodImplOptions.AggressiveInlining;
 
 		private IntPtr _marker;
 
 		public struct AutoScope : IDisposable
 		{
-			[MethodImpl((MethodImplOptions)256)]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			internal AutoScope(IntPtr marker)
 			{
 				this._marker = marker;
 			}
 
 			[Pure]
-			[MethodImpl((MethodImplOptions)256)]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			public void Dispose()
 			{
 				bool flag = this._marker != IntPtr.Zero;

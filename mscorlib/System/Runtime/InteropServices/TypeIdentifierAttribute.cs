@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 	[ComVisible(false)]
+	[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 	public sealed class TypeIdentifierAttribute : Attribute
 	{
 		public TypeIdentifierAttribute()

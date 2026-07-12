@@ -9,7 +9,7 @@ namespace System.ComponentModel
 		{
 			try
 			{
-				this.value = TypeDescriptor.GetConverter(type).ConvertFromInvariantString(value);
+				this.Value = TypeDescriptor.GetConverter(type).ConvertFromInvariantString(value);
 			}
 			catch
 			{
@@ -18,61 +18,55 @@ namespace System.ComponentModel
 
 		public AmbientValueAttribute(char value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(byte value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(short value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(int value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(long value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(float value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(double value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(bool value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(string value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public AmbientValueAttribute(object value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
-		public object Value
-		{
-			get
-			{
-				return this.value;
-			}
-		}
+		public object Value { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -85,18 +79,16 @@ namespace System.ComponentModel
 			{
 				return false;
 			}
-			if (this.value != null)
+			if (this.Value == null)
 			{
-				return this.value.Equals(ambientValueAttribute.Value);
+				return ambientValueAttribute.Value == null;
 			}
-			return ambientValueAttribute.Value == null;
+			return this.Value.Equals(ambientValueAttribute.Value);
 		}
 
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
 		}
-
-		private readonly object value;
 	}
 }

@@ -360,7 +360,7 @@ namespace UnityEngine.SocialPlatforms
 			return texture2D;
 		}
 
-		private static LocalUser m_LocalUser = null;
+		private static LocalUser m_LocalUser;
 
 		private List<UserProfile> m_Friends = new List<UserProfile>();
 

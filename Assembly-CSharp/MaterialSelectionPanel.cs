@@ -266,7 +266,7 @@ public class MaterialSelectionPanel : KScreen, IRender200ms
 		{
 			return selectedElemInfo;
 		}
-		string[] array = _materialCategoryTag.ToString().Split(new char[] { '&' });
+		string[] array = _materialCategoryTag.ToString().Split('&', StringSplitOptions.None);
 		for (int i = 0; i < array.Length; i++)
 		{
 			Tag tag = array[i];

@@ -65,7 +65,7 @@ namespace System.Diagnostics
 				}
 				if (value.Length == 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Generic_ArgCantBeEmptyString", new object[] { "Delimiter" }));
+					throw new ArgumentException(SR.GetString("Generic_ArgCantBeEmptyString", new object[] { "Delimiter" }));
 				}
 				lock (this)
 				{

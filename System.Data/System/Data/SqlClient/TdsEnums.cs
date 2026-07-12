@@ -291,6 +291,16 @@ namespace System.Data.SqlClient
 
 		public const byte FEATUREEXT_GLOBALTRANSACTIONS = 5;
 
+		public const byte FEATUREEXT_FEDAUTH = 2;
+
+		public const byte FEDAUTHLIB_LIVEID = 0;
+
+		public const byte FEDAUTHLIB_SECURITYTOKEN = 1;
+
+		public const byte FEDAUTHLIB_ADAL = 2;
+
+		public const byte FEDAUTHLIB_RESERVED = 127;
+
 		public const byte MAX_LOG_NAME = 30;
 
 		public const byte MAX_PROG_NAME = 10;
@@ -781,7 +791,16 @@ namespace System.Data.SqlClient
 		{
 			None = 0U,
 			SessionRecovery = 1U,
+			FedAuth = 2U,
 			GlobalTransactions = 8U
+		}
+
+		public enum FedAuthLibrary : byte
+		{
+			LiveId,
+			SecurityToken,
+			ADAL,
+			Default = 127
 		}
 
 		internal enum TransactionManagerRequestType

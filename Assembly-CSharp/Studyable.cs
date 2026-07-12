@@ -184,7 +184,7 @@ public class Studyable : Workable, ISidescreenButtonControl
 		this.Refresh();
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.studied = true;

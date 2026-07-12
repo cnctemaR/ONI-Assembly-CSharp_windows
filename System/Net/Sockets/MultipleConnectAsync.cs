@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
@@ -7,20 +10,28 @@ namespace System.Net.Sockets
 	{
 		public bool StartConnectAsync(SocketAsyncEventArgs args, DnsEndPoint endPoint)
 		{
-			object obj = this.lockObject;
+			object lockObject = this._lockObject;
 			bool flag2;
-			lock (obj)
+			lock (lockObject)
 			{
-				this.userArgs = args;
-				this.endPoint = endPoint;
-				if (this.state == MultipleConnectAsync.State.Canceled)
+				if (endPoint.AddressFamily != AddressFamily.Unspecified && endPoint.AddressFamily != AddressFamily.InterNetwork && endPoint.AddressFamily != AddressFamily.InterNetworkV6)
 				{
-					this.SyncFail(new SocketException(SocketError.OperationAborted));
+					NetEventSource.Fail(this, FormattableStringFactory.Create("Unexpected endpoint address family: {0}", new object[] { endPoint.AddressFamily }), "StartConnectAsync");
+				}
+				this._userArgs = args;
+				this._endPoint = endPoint;
+				if (this._state == MultipleConnectAsync.State.Canceled)
+				{
+					this.SyncFail(new SocketException(995));
 					flag2 = false;
 				}
 				else
 				{
-					this.state = MultipleConnectAsync.State.DnsQuery;
+					if (this._state != MultipleConnectAsync.State.NotStarted)
+					{
+						NetEventSource.Fail(this, "MultipleConnectAsync.StartConnectAsync(): Unexpected object state", "StartConnectAsync");
+					}
+					this._state = MultipleConnectAsync.State.DnsQuery;
 					IAsyncResult asyncResult = Dns.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(this.DnsCallback), null);
 					if (asyncResult.CompletedSynchronously)
 					{
@@ -46,32 +57,40 @@ namespace System.Net.Sockets
 		private bool DoDnsCallback(IAsyncResult result, bool sync)
 		{
 			Exception ex = null;
-			object obj = this.lockObject;
-			lock (obj)
+			object lockObject = this._lockObject;
+			lock (lockObject)
 			{
-				if (this.state == MultipleConnectAsync.State.Canceled)
+				if (this._state == MultipleConnectAsync.State.Canceled)
 				{
 					return true;
 				}
+				if (this._state != MultipleConnectAsync.State.DnsQuery)
+				{
+					NetEventSource.Fail(this, "MultipleConnectAsync.DoDnsCallback(): Unexpected object state", "DoDnsCallback");
+				}
 				try
 				{
-					this.addressList = Dns.EndGetHostAddresses(result);
+					this._addressList = Dns.EndGetHostAddresses(result);
+					if (this._addressList == null)
+					{
+						NetEventSource.Fail(this, "MultipleConnectAsync.DoDnsCallback(): EndGetHostAddresses returned null!", "DoDnsCallback");
+					}
 				}
 				catch (Exception ex2)
 				{
-					this.state = MultipleConnectAsync.State.Completed;
+					this._state = MultipleConnectAsync.State.Completed;
 					ex = ex2;
 				}
 				if (ex == null)
 				{
-					this.state = MultipleConnectAsync.State.ConnectAttempt;
-					this.internalArgs = new SocketAsyncEventArgs();
-					this.internalArgs.Completed += this.InternalConnectCallback;
-					this.internalArgs.SetBuffer(this.userArgs.Buffer, this.userArgs.Offset, this.userArgs.Count);
+					this._state = MultipleConnectAsync.State.ConnectAttempt;
+					this._internalArgs = new SocketAsyncEventArgs();
+					this._internalArgs.Completed += this.InternalConnectCallback;
+					this._internalArgs.CopyBufferFrom(this._userArgs);
 					ex = this.AttemptConnection();
 					if (ex != null)
 					{
-						this.state = MultipleConnectAsync.State.Completed;
+						this._state = MultipleConnectAsync.State.Completed;
 					}
 				}
 			}
@@ -81,25 +100,26 @@ namespace System.Net.Sockets
 		private void InternalConnectCallback(object sender, SocketAsyncEventArgs args)
 		{
 			Exception ex = null;
-			object obj = this.lockObject;
-			lock (obj)
+			object lockObject = this._lockObject;
+			lock (lockObject)
 			{
-				if (this.state == MultipleConnectAsync.State.Canceled)
+				if (this._state == MultipleConnectAsync.State.Canceled)
 				{
-					ex = new SocketException(SocketError.OperationAborted);
+					ex = new SocketException(995);
 				}
 				else if (args.SocketError == SocketError.Success)
 				{
-					this.state = MultipleConnectAsync.State.Completed;
+					this._state = MultipleConnectAsync.State.Completed;
 				}
 				else if (args.SocketError == SocketError.OperationAborted)
 				{
-					ex = new SocketException(SocketError.OperationAborted);
-					this.state = MultipleConnectAsync.State.Canceled;
+					ex = new SocketException(995);
+					this._state = MultipleConnectAsync.State.Canceled;
 				}
 				else
 				{
 					SocketError socketError = args.SocketError;
+					args.in_progress = 0;
 					Exception ex2 = this.AttemptConnection();
 					if (ex2 == null)
 					{
@@ -108,13 +128,13 @@ namespace System.Net.Sockets
 					SocketException ex3 = ex2 as SocketException;
 					if (ex3 != null && ex3.SocketErrorCode == SocketError.NoData)
 					{
-						ex = new SocketException(socketError);
+						ex = new SocketException((int)socketError);
 					}
 					else
 					{
 						ex = ex2;
 					}
-					this.state = MultipleConnectAsync.State.Completed;
+					this._state = MultipleConnectAsync.State.Completed;
 				}
 			}
 			if (ex == null)
@@ -127,23 +147,48 @@ namespace System.Net.Sockets
 
 		private Exception AttemptConnection()
 		{
+			Exception ex;
 			try
 			{
-				Socket socket = null;
-				IPAddress ipaddress = this.GetNextAddress(out socket);
-				if (ipaddress == null)
+				Socket socket;
+				IPAddress nextAddress = this.GetNextAddress(out socket);
+				if (nextAddress == null)
 				{
-					return new SocketException(SocketError.NoData);
+					ex = new SocketException(11004);
 				}
-				this.internalArgs.RemoteEndPoint = new IPEndPoint(ipaddress, this.endPoint.Port);
-				if (!socket.ConnectAsync(this.internalArgs))
+				else
 				{
-					return new SocketException(this.internalArgs.SocketError);
+					this._internalArgs.RemoteEndPoint = new IPEndPoint(nextAddress, this._endPoint.Port);
+					ex = this.AttemptConnection(socket, this._internalArgs);
+				}
+			}
+			catch (Exception ex2)
+			{
+				if (ex2 is ObjectDisposedException)
+				{
+					NetEventSource.Fail(this, "unexpected ObjectDisposedException", "AttemptConnection");
+				}
+				ex = ex2;
+			}
+			return ex;
+		}
+
+		private Exception AttemptConnection(Socket attemptSocket, SocketAsyncEventArgs args)
+		{
+			try
+			{
+				if (attemptSocket == null)
+				{
+					NetEventSource.Fail(null, "attemptSocket is null!", "AttemptConnection");
+				}
+				if (!attemptSocket.ConnectAsync(args))
+				{
+					this.InternalConnectCallback(null, args);
 				}
 			}
 			catch (ObjectDisposedException)
 			{
-				return new SocketException(SocketError.OperationAborted);
+				return new SocketException(995);
 			}
 			catch (Exception ex)
 			{
@@ -154,11 +199,11 @@ namespace System.Net.Sockets
 
 		protected abstract void OnSucceed();
 
-		protected void Succeed()
+		private void Succeed()
 		{
 			this.OnSucceed();
-			this.userArgs.FinishWrapperConnectSuccess(this.internalArgs.ConnectSocket, this.internalArgs.BytesTransferred, this.internalArgs.SocketFlags);
-			this.internalArgs.Dispose();
+			this._userArgs.FinishWrapperConnectSuccess(this._internalArgs.ConnectSocket, this._internalArgs.BytesTransferred, this._internalArgs.SocketFlags);
+			this._internalArgs.Dispose();
 		}
 
 		protected abstract void OnFail(bool abortive);
@@ -177,49 +222,57 @@ namespace System.Net.Sockets
 		private void SyncFail(Exception e)
 		{
 			this.OnFail(false);
-			if (this.internalArgs != null)
+			if (this._internalArgs != null)
 			{
-				this.internalArgs.Dispose();
+				this._internalArgs.Dispose();
 			}
 			SocketException ex = e as SocketException;
 			if (ex != null)
 			{
-				this.userArgs.FinishConnectByNameSyncFailure(ex, 0, SocketFlags.None);
+				this._userArgs.FinishConnectByNameSyncFailure(ex, 0, SocketFlags.None);
 				return;
 			}
-			throw e;
+			ExceptionDispatchInfo.Throw(e);
 		}
 
 		private void AsyncFail(Exception e)
 		{
 			this.OnFail(false);
-			if (this.internalArgs != null)
+			if (this._internalArgs != null)
 			{
-				this.internalArgs.Dispose();
+				this._internalArgs.Dispose();
 			}
-			this.userArgs.FinishOperationAsyncFailure(e, 0, SocketFlags.None);
+			this._userArgs.FinishOperationAsyncFailure(e, 0, SocketFlags.None);
 		}
 
 		public void Cancel()
 		{
 			bool flag = false;
-			object obj = this.lockObject;
-			lock (obj)
+			object lockObject = this._lockObject;
+			lock (lockObject)
 			{
-				switch (this.state)
+				switch (this._state)
 				{
 				case MultipleConnectAsync.State.NotStarted:
 					flag = true;
 					break;
 				case MultipleConnectAsync.State.DnsQuery:
-					ThreadPool.QueueUserWorkItem(new WaitCallback(this.CallAsyncFail));
+					Task.Factory.StartNew(delegate(object s)
+					{
+						this.CallAsyncFail(s);
+					}, null, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 					flag = true;
 					break;
 				case MultipleConnectAsync.State.ConnectAttempt:
 					flag = true;
 					break;
+				case MultipleConnectAsync.State.Completed:
+					break;
+				default:
+					NetEventSource.Fail(this, "Unexpected object state", "Cancel");
+					break;
 				}
-				this.state = MultipleConnectAsync.State.Canceled;
+				this._state = MultipleConnectAsync.State.Canceled;
 			}
 			if (flag)
 			{
@@ -229,24 +282,24 @@ namespace System.Net.Sockets
 
 		private void CallAsyncFail(object ignored)
 		{
-			this.AsyncFail(new SocketException(SocketError.OperationAborted));
+			this.AsyncFail(new SocketException(995));
 		}
 
 		protected abstract IPAddress GetNextAddress(out Socket attemptSocket);
 
-		protected SocketAsyncEventArgs userArgs;
+		protected SocketAsyncEventArgs _userArgs;
 
-		protected SocketAsyncEventArgs internalArgs;
+		protected SocketAsyncEventArgs _internalArgs;
 
-		protected DnsEndPoint endPoint;
+		protected DnsEndPoint _endPoint;
 
-		protected IPAddress[] addressList;
+		protected IPAddress[] _addressList;
 
-		protected int nextAddress;
+		protected int _nextAddress;
 
-		private MultipleConnectAsync.State state;
+		private MultipleConnectAsync.State _state;
 
-		private object lockObject = new object();
+		private object _lockObject = new object();
 
 		private enum State
 		{

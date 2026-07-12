@@ -7,9 +7,9 @@ namespace System.Xml.Xsl.Qil
 		public QilTernary(QilNodeType nodeType, QilNode left, QilNode center, QilNode right)
 			: base(nodeType)
 		{
-			this.left = left;
-			this.center = center;
-			this.right = right;
+			this._left = left;
+			this._center = center;
+			this._right = right;
 		}
 
 		public override int Count
@@ -27,11 +27,11 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					return this.left;
+					return this._left;
 				case 1:
-					return this.center;
+					return this._center;
 				case 2:
-					return this.right;
+					return this._right;
 				default:
 					throw new IndexOutOfRangeException();
 				}
@@ -41,13 +41,13 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					this.left = value;
+					this._left = value;
 					return;
 				case 1:
-					this.center = value;
+					this._center = value;
 					return;
 				case 2:
-					this.right = value;
+					this._right = value;
 					return;
 				default:
 					throw new IndexOutOfRangeException();
@@ -59,11 +59,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.left;
+				return this._left;
 			}
 			set
 			{
-				this.left = value;
+				this._left = value;
 			}
 		}
 
@@ -71,11 +71,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.center;
+				return this._center;
 			}
 			set
 			{
-				this.center = value;
+				this._center = value;
 			}
 		}
 
@@ -83,18 +83,18 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.right;
+				return this._right;
 			}
 			set
 			{
-				this.right = value;
+				this._right = value;
 			}
 		}
 
-		private QilNode left;
+		private QilNode _left;
 
-		private QilNode center;
+		private QilNode _center;
 
-		private QilNode right;
+		private QilNode _right;
 	}
 }

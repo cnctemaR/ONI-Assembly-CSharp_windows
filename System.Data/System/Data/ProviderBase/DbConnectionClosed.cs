@@ -20,11 +20,6 @@ namespace System.Data.ProviderBase
 			}
 		}
 
-		protected override void Activate(Transaction transaction)
-		{
-			throw ADP.ClosedConnectionError();
-		}
-
 		public override DbTransaction BeginTransaction(IsolationLevel il)
 		{
 			throw ADP.ClosedConnectionError();
@@ -41,10 +36,10 @@ namespace System.Data.ProviderBase
 
 		protected override void Deactivate()
 		{
-			throw ADP.ClosedConnectionError();
+			ADP.ClosedConnectionError();
 		}
 
-		public override void EnlistTransaction(Transaction transaction)
+		protected internal override DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
 		{
 			throw ADP.ClosedConnectionError();
 		}
@@ -57,6 +52,16 @@ namespace System.Data.ProviderBase
 		internal override bool TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
 		{
 			return base.TryOpenConnectionInternal(outerConnection, connectionFactory, retry, userOptions);
+		}
+
+		protected override void Activate(Transaction transaction)
+		{
+			throw ADP.ClosedConnectionError();
+		}
+
+		public override void EnlistTransaction(Transaction transaction)
+		{
+			throw ADP.ClosedConnectionError();
 		}
 	}
 }

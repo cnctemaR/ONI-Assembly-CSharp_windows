@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 
 internal static class SR
 {
@@ -42,13 +43,28 @@ internal static class SR
 		return string.Format(CultureInfo.InvariantCulture, resourceFormat, p1, p2);
 	}
 
+	internal static string Format(CultureInfo ci, string resourceFormat, object p1, object p2)
+	{
+		return string.Format(ci, resourceFormat, p1, p2);
+	}
+
 	internal static string Format(string resourceFormat, object p1, object p2, object p3)
 	{
 		return string.Format(CultureInfo.InvariantCulture, resourceFormat, p1, p2, p3);
 	}
 
+	internal static string GetResourceString(string str)
+	{
+		return str;
+	}
+
 	public static string GetResourceString(string resourceKey, string defaultString)
 	{
+		FieldInfo field = typeof(SR).GetField(resourceKey);
+		if (field != null)
+		{
+			return field.GetValue(null).ToString();
+		}
 		return defaultString;
 	}
 
@@ -267,6 +283,8 @@ internal static class SR
 	public const string Data_ArgumentNull = "'{0}' argument cannot be null.";
 
 	public const string Data_ArgumentContainsNull = "'{0}' argument contains null value.";
+
+	public const string Data_TypeNotAllowed = "Type '{0}' is not allowed here. See https://go.microsoft.com/fwlink/?linkid=2132227 for more details.";
 
 	public const string DataColumns_OutOfRange = "Cannot find column {0}.";
 
@@ -960,6 +978,16 @@ internal static class SR
 
 	public const string Xml_ElementTypeNotFound = "Cannot find ElementType name='{0}'.";
 
+	public const string ADP_DbProviderFactories_InvariantNameNotFound = "The specified invariant name '{0}' wasn't found in the list of registered .NET Data Providers.";
+
+	public const string ADP_DbProviderFactories_NoInstance = "The requested .NET Data Provider's implementation does not have an Instance field of a System.Data.Common.DbProviderFactory derived type.";
+
+	public const string ADP_DbProviderFactories_FactoryNotLoadable = "The registered .NET Data Provider's DbProviderFactory implementation type '{0}' couldn't be loaded.";
+
+	public const string ADP_DbProviderFactories_NoAssemblyQualifiedName = "The missing .NET Data Provider's assembly qualified name is required.";
+
+	public const string ADP_DbProviderFactories_NotAFactoryType = "The type '{0}' doesn't inherit from DbProviderFactory.";
+
 	public const string ADP_ConnectionAlreadyOpen = "The connection was not closed. {0}";
 
 	public const string ADP_InternalConnectionError = "Internal DbConnection Error: {0}";
@@ -994,7 +1022,7 @@ internal static class SR
 
 	public const string ArgumentOutOfRange_NeedNonNegNum = "Non-negative number required.";
 
-	public const string ADP_DeriveParametersNotSupported = "{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{1}.";
+	public const string ADP_DeriveParametersNotSupported = "{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType. {1}.";
 
 	public const string ADP_NoStoredProcedureExists = "The stored procedure '{0}' doesn't exist.";
 
@@ -1054,6 +1082,8 @@ internal static class SR
 
 	public const string ADP_UnknownDataType = "No mapping exists from object type {0} to a known managed provider native type.";
 
+	public const string ADP_UnknownDataTypeCode = "Unable to handle an unknown TypeCode {0} returned by Type {1}.";
+
 	public const string ADP_DbTypeNotSupported = "No mapping exists from DbType {0} to a known {1}.";
 
 	public const string ADP_VersionDoesNotSupportDataType = "The version of SQL Server in use does not support datatype '{0}'.";
@@ -1091,6 +1121,8 @@ internal static class SR
 	public const string SQL_EncryptionNotSupportedByServer = "The instance of SQL Server you attempted to connect to does not support encryption.";
 
 	public const string SQL_InvalidSQLServerVersionUnknown = "Unsupported SQL Server version.  The .Net Framework SqlClient Data Provider can only be used with SQL Server versions 7.0 and later.";
+
+	public const string SQL_CannotCreateNormalizer = "Cannot create normalizer for '{0}'.";
 
 	public const string SQL_CannotModifyPropertyAsyncOperationInProgress = "{0} cannot be changed while async operation is in progress.";
 
@@ -1146,7 +1178,7 @@ internal static class SR
 
 	public const string SQL_SSPIGenerateError = "Failed to generate SSPI context.";
 
-	public const string SQL_KerberosTicketMissingError = "Cannot access Kerberos ticket. Ensure Kerberos has been initialized with 'kinit'.";
+	public const string SQL_KerberosTicketMissingError = "Cannot authenticate using Kerberos. Ensure Kerberos has been initialized on the client with 'kinit' and a Service Principal Name has been registered for the SQL Server to allow Kerberos authentication.";
 
 	public const string SQL_SqlServerBrowserNotAccessible = "Cannot connect to SQL Server Browser. Ensure SQL Server Browser has been started.";
 
@@ -1262,6 +1294,10 @@ internal static class SR
 
 	public const string SqlMisc_SubclassMustOverride = "Subclass did not override a required method.";
 
+	public const string SqlUdtReason_NoUdtAttribute = "no UDT attribute";
+
+	public const string SQLUDT_InvalidSqlType = "Specified type is not registered on the target server. {0}.";
+
 	public const string Sql_InternalError = "Internal Error";
 
 	public const string ADP_OperationAborted = "Operation aborted.";
@@ -1321,6 +1357,20 @@ internal static class SR
 	public const string SqlProvider_MissingSortOrdinal = "The sort ordinal {0} was not specified.";
 
 	public const string SqlProvider_SortOrdinalGreaterThanFieldCount = "The sort ordinal {0} on field {1} exceeds the total number of fields.";
+
+	public const string SQLUDT_MaxByteSizeValue = "range: 0-8000";
+
+	public const string SQLUDT_Unexpected = "unexpected error encountered in SqlClient data provider. {0}";
+
+	public const string SQLUDT_UnexpectedUdtTypeName = "UdtTypeName property must be set only for UDT parameters.";
+
+	public const string SQLUDT_InvalidUdtTypeName = "UdtTypeName property must be set for UDT parameters.";
+
+	public const string SqlUdt_InvalidUdtMessage = "'{0}' is an invalid user defined type, reason: {1}.";
+
+	public const string SQL_UDTTypeName = "SqlParameter.UdtTypeName is an invalid multipart name";
+
+	public const string SQL_InvalidUdt3PartNameFormat = "Invalid 3 part name format for UdtTypeName.";
 
 	public const string IEnumerableOfSqlDataRecordHasNoRows = "There are no records in the SqlDataRecord enumeration. To send a table-valued parameter with no rows, use a null reference for the value instead.";
 
@@ -1598,6 +1648,36 @@ internal static class SR
 
 	public const string MDF_UnableToBuildCollection = "Unable to build schema collection '{0}';";
 
+	public const string ADP_InvalidArgumentLength = "The length of argument '{0}' exceeds its limit of '{1}'.";
+
+	public const string ADP_MustBeReadOnly = "{0} must be marked as read only.";
+
+	public const string ADP_InvalidMixedUsageOfSecureAndClearCredential = "Cannot use Credential with UserID, UID, Password, or PWD connection string keywords.";
+
+	public const string ADP_InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity = "Cannot use Credential with Integrated Security connection string keyword.";
+
+	public const string SQL_ChangePasswordArgumentMissing = "The '{0}' argument must not be null or empty.";
+
+	public const string SQL_ChangePasswordConflictsWithSSPI = "ChangePassword can only be used with SQL authentication, not with integrated security.";
+
+	public const string SQL_ChangePasswordRequiresYukon = "ChangePassword requires SQL Server 9.0 or later.";
+
+	public const string SQL_ChangePasswordUseOfUnallowedKey = "The keyword '{0}' must not be specified in the connectionString argument to ChangePassword.";
+
+	public const string SQL_ParsingErrorWithState = "Internal connection fatal error. Error state: {0}.";
+
+	public const string SQL_ParsingErrorValue = "Internal connection fatal error. Error state: {0}, Value: {1}.";
+
+	public const string ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity = "Cannot set the AccessToken property if the 'Integrated Security' connection string keyword has been set to 'true' or 'SSPI'.";
+
+	public const string ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword = "Cannot set the AccessToken property if 'UserID', 'UID', 'Password', or 'PWD' has been specified in connection string.";
+
+	public const string ADP_InvalidMixedUsageOfCredentialAndAccessToken = "Cannot set the Credential property if the AccessToken property is already set.";
+
+	public const string SQL_ParsingErrorFeatureId = "Internal connection fatal error. Error state: {0}, Feature Id: {1}.";
+
+	public const string SQL_ParsingErrorAuthLibraryType = "Internal connection fatal error. Error state: {0}, Authentication Library Type: {1}.";
+
 	public const string ADP_CollectionIsParent = "The {0} with is already contained by this {1}.";
 
 	public const string ADP_InvalidDataDirectory = "The DataDirectory substitute is not a string.";
@@ -1617,8 +1697,6 @@ internal static class SR
 	public const string ADP_DataReaderNoData = "No data exists for the row/column.";
 
 	public const string ADP_NumericToDecimalOverflow = "The numerical value is too large to fit into a 96 bit decimal.";
-
-	public const string ADP_UnknownDataTypeCode = "Unable to handle an unknown TypeCode {0} returned by Type {1}.";
 
 	public const string ADP_DbRecordReadOnly = "'{0}' cannot be called when the record is read only.";
 

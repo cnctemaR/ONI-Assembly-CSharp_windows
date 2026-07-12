@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -6,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass(null)]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
-	[RequiredByNativeCode]
+	[NativeClass(null)]
 	[ExtensionOfNativeClass]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{
@@ -18,8 +19,8 @@ namespace UnityEngine
 			ScriptableObject.CreateScriptableObject(this);
 		}
 
-		[Obsolete("Use EditorUtility.SetDirty instead")]
 		[NativeConditional("ENABLE_MONO")]
+		[Obsolete("Use EditorUtility.SetDirty instead")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDirty();
 
@@ -38,6 +39,26 @@ namespace UnityEngine
 			return (T)((object)ScriptableObject.CreateInstance(typeof(T)));
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		internal static ScriptableObject CreateInstance(Type type, Action<ScriptableObject> initialize)
+		{
+			bool flag = !typeof(ScriptableObject).IsAssignableFrom(type);
+			if (flag)
+			{
+				throw new ArgumentException("Type must inherit ScriptableObject.", "type");
+			}
+			ScriptableObject scriptableObject = ScriptableObject.CreateScriptableObjectInstanceFromType(type, false);
+			try
+			{
+				initialize(scriptableObject);
+			}
+			finally
+			{
+				ScriptableObject.ResetAndApplyDefaultInstances(scriptableObject);
+			}
+			return scriptableObject;
+		}
+
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CreateScriptableObject([Writable] ScriptableObject self);
@@ -46,7 +67,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern ScriptableObject CreateScriptableObjectInstanceFromName(string className);
 
-		[FreeFunction("Scripting::CreateScriptableObjectWithType")]
+		[NativeMethod(Name = "Scripting::CreateScriptableObjectWithType", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern ScriptableObject CreateScriptableObjectInstanceFromType(Type type, bool applyDefaultsAndReset);
 

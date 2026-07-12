@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public sealed class EventHandlerList : IDisposable
 	{
-		public EventHandlerList()
-		{
-		}
-
 		internal EventHandlerList(Component parent)
 		{
-			this.parent = parent;
+			this._parent = parent;
+		}
+
+		public EventHandlerList()
+		{
 		}
 
 		public Delegate this[object key]
@@ -20,25 +18,25 @@ namespace System.ComponentModel
 			get
 			{
 				EventHandlerList.ListEntry listEntry = null;
-				if (this.parent == null || this.parent.CanRaiseEventsInternal)
+				if (this._parent == null || this._parent.CanRaiseEventsInternal)
 				{
 					listEntry = this.Find(key);
 				}
-				if (listEntry != null)
+				if (listEntry == null)
 				{
-					return listEntry.handler;
+					return null;
 				}
-				return null;
+				return listEntry._handler;
 			}
 			set
 			{
 				EventHandlerList.ListEntry listEntry = this.Find(key);
 				if (listEntry != null)
 				{
-					listEntry.handler = value;
+					listEntry._handler = value;
 					return;
 				}
-				this.head = new EventHandlerList.ListEntry(key, value, this.head);
+				this._head = new EventHandlerList.ListEntry(key, value, this._head);
 			}
 		}
 
@@ -47,33 +45,33 @@ namespace System.ComponentModel
 			EventHandlerList.ListEntry listEntry = this.Find(key);
 			if (listEntry != null)
 			{
-				listEntry.handler = Delegate.Combine(listEntry.handler, value);
+				listEntry._handler = Delegate.Combine(listEntry._handler, value);
 				return;
 			}
-			this.head = new EventHandlerList.ListEntry(key, value, this.head);
+			this._head = new EventHandlerList.ListEntry(key, value, this._head);
 		}
 
 		public void AddHandlers(EventHandlerList listToAddFrom)
 		{
-			for (EventHandlerList.ListEntry next = listToAddFrom.head; next != null; next = next.next)
+			for (EventHandlerList.ListEntry listEntry = listToAddFrom._head; listEntry != null; listEntry = listEntry._next)
 			{
-				this.AddHandler(next.key, next.handler);
+				this.AddHandler(listEntry._key, listEntry._handler);
 			}
 		}
 
 		public void Dispose()
 		{
-			this.head = null;
+			this._head = null;
 		}
 
 		private EventHandlerList.ListEntry Find(object key)
 		{
-			EventHandlerList.ListEntry next = this.head;
-			while (next != null && next.key != key)
+			EventHandlerList.ListEntry listEntry = this._head;
+			while (listEntry != null && listEntry._key != key)
 			{
-				next = next.next;
+				listEntry = listEntry._next;
 			}
-			return next;
+			return listEntry;
 		}
 
 		public void RemoveHandler(object key, Delegate value)
@@ -81,28 +79,28 @@ namespace System.ComponentModel
 			EventHandlerList.ListEntry listEntry = this.Find(key);
 			if (listEntry != null)
 			{
-				listEntry.handler = Delegate.Remove(listEntry.handler, value);
+				listEntry._handler = Delegate.Remove(listEntry._handler, value);
 			}
 		}
 
-		private EventHandlerList.ListEntry head;
+		private EventHandlerList.ListEntry _head;
 
-		private Component parent;
+		private Component _parent;
 
 		private sealed class ListEntry
 		{
 			public ListEntry(object key, Delegate handler, EventHandlerList.ListEntry next)
 			{
-				this.next = next;
-				this.key = key;
-				this.handler = handler;
+				this._next = next;
+				this._key = key;
+				this._handler = handler;
 			}
 
-			internal EventHandlerList.ListEntry next;
+			internal EventHandlerList.ListEntry _next;
 
-			internal object key;
+			internal object _key;
 
-			internal Delegate handler;
+			internal Delegate _handler;
 		}
 	}
 }

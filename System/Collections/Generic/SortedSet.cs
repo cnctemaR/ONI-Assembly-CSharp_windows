@@ -423,8 +423,6 @@ namespace System.Collections.Generic
 
 		void ICollection.CopyTo(Array array, int index)
 		{
-			SortedSet<T>.<>c__DisplayClass53_0 CS$<>8__locals1 = new SortedSet<T>.<>c__DisplayClass53_0();
-			CS$<>8__locals1.index = index;
 			if (array == null)
 			{
 				throw new ArgumentNullException("array");
@@ -437,18 +435,18 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentException("The lower bound of target array must be zero.", "array");
 			}
-			if (CS$<>8__locals1.index < 0)
+			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", CS$<>8__locals1.index, "Non-negative number required.");
+				throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
 			}
-			if (array.Length - CS$<>8__locals1.index < this.Count)
+			if (array.Length - index < this.Count)
 			{
 				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
 			}
 			T[] array2 = array as T[];
 			if (array2 != null)
 			{
-				this.CopyTo(array2, CS$<>8__locals1.index);
+				this.CopyTo(array2, index);
 				return;
 			}
 			object[] objects = array as object[];
@@ -461,8 +459,8 @@ namespace System.Collections.Generic
 				this.InOrderTreeWalk(delegate(SortedSet<T>.Node node)
 				{
 					object[] objects2 = objects;
-					int index2 = CS$<>8__locals1.index;
-					CS$<>8__locals1.index = index2 + 1;
+					int index2 = index;
+					index = index2 + 1;
 					objects2[index2] = node.Item;
 					return true;
 				});

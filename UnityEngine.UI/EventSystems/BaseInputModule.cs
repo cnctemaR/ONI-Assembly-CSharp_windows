@@ -1,11 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace UnityEngine.EventSystems
 {
 	[RequireComponent(typeof(EventSystem))]
 	public abstract class BaseInputModule : UIBehaviour
 	{
+		internal bool sendPointerHoverToParent
+		{
+			get
+			{
+				return this.m_SendPointerHoverToParent;
+			}
+			set
+			{
+				this.m_SendPointerHoverToParent = value;
+			}
+		}
+
 		public BaseInput input
 		{
 			get
@@ -140,6 +153,8 @@ namespace UnityEngine.EventSystems
 				int count = currentPointerData.hovered.Count;
 				for (int i = 0; i < count; i++)
 				{
+					currentPointerData.fullyExited = true;
+					ExecuteEvents.Execute<IPointerMoveHandler>(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerMoveHandler);
 					ExecuteEvents.Execute<IPointerExitHandler>(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
 				}
 				currentPointerData.hovered.Clear();
@@ -151,28 +166,73 @@ namespace UnityEngine.EventSystems
 			}
 			if (currentPointerData.pointerEnter == newEnterTarget && newEnterTarget)
 			{
+				if (currentPointerData.IsPointerMoving())
+				{
+					int count2 = currentPointerData.hovered.Count;
+					for (int j = 0; j < count2; j++)
+					{
+						ExecuteEvents.Execute<IPointerMoveHandler>(currentPointerData.hovered[j], currentPointerData, ExecuteEvents.pointerMoveHandler);
+					}
+				}
 				return;
 			}
 			GameObject gameObject = BaseInputModule.FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
+			Component component = (Component)newEnterTarget.GetComponentInParent<IPointerExitHandler>();
+			GameObject gameObject2 = ((component != null) ? component.gameObject : null);
 			if (currentPointerData.pointerEnter != null)
 			{
 				Transform transform = currentPointerData.pointerEnter.transform;
-				while (transform != null && (!(gameObject != null) || !(gameObject.transform == transform)))
+				while (transform != null && (!this.m_SendPointerHoverToParent || !(gameObject != null) || !(gameObject.transform == transform)) && (this.m_SendPointerHoverToParent || !(gameObject2 == transform.gameObject)))
 				{
+					currentPointerData.fullyExited = transform.gameObject != gameObject && currentPointerData.pointerEnter != newEnterTarget;
+					ExecuteEvents.Execute<IPointerMoveHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
 					ExecuteEvents.Execute<IPointerExitHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
 					currentPointerData.hovered.Remove(transform.gameObject);
-					transform = transform.parent;
+					if (this.m_SendPointerHoverToParent)
+					{
+						transform = transform.parent;
+					}
+					if (gameObject != null && gameObject.transform == transform)
+					{
+						break;
+					}
+					if (!this.m_SendPointerHoverToParent)
+					{
+						transform = transform.parent;
+					}
 				}
 			}
+			GameObject pointerEnter = currentPointerData.pointerEnter;
 			currentPointerData.pointerEnter = newEnterTarget;
 			if (newEnterTarget != null)
 			{
 				Transform transform2 = newEnterTarget.transform;
-				while (transform2 != null && transform2.gameObject != gameObject)
+				while (transform2 != null)
 				{
+					currentPointerData.reentered = transform2.gameObject == gameObject && transform2.gameObject != pointerEnter;
+					if (this.m_SendPointerHoverToParent && currentPointerData.reentered)
+					{
+						break;
+					}
 					ExecuteEvents.Execute<IPointerEnterHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
+					ExecuteEvents.Execute<IPointerMoveHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
 					currentPointerData.hovered.Add(transform2.gameObject);
-					transform2 = transform2.parent;
+					if (!this.m_SendPointerHoverToParent && transform2.gameObject.GetComponent<IPointerEnterHandler>() != null)
+					{
+						break;
+					}
+					if (this.m_SendPointerHoverToParent)
+					{
+						transform2 = transform2.parent;
+					}
+					if (gameObject != null && gameObject.transform == transform2)
+					{
+						break;
+					}
+					if (!this.m_SendPointerHoverToParent)
+					{
+						transform2 = transform2.parent;
+					}
 				}
 			}
 		}
@@ -226,8 +286,20 @@ namespace UnityEngine.EventSystems
 			return true;
 		}
 
+		public virtual int ConvertUIToolkitPointerId(PointerEventData sourcePointerData)
+		{
+			if (sourcePointerData.pointerId >= 0)
+			{
+				return PointerId.touchPointerIdBase + sourcePointerData.pointerId;
+			}
+			return PointerId.mousePointerId;
+		}
+
 		[NonSerialized]
 		protected List<RaycastResult> m_RaycastResultCache = new List<RaycastResult>();
+
+		[SerializeField]
+		private bool m_SendPointerHoverToParent = true;
 
 		private AxisEventData m_AxisEventData;
 

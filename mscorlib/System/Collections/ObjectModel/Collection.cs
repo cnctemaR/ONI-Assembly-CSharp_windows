@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace System.Collections.ObjectModel
 {
+	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
-	[ComVisible(false)]
 	[Serializable]
 	public class Collection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>
 	{
@@ -54,9 +51,9 @@ namespace System.Collections.ObjectModel
 				{
 					ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 				}
-				if (index < 0 || index >= this.items.Count)
+				if (index >= this.items.Count)
 				{
-					ThrowHelper.ThrowArgumentOutOfRangeException();
+					ThrowHelper.ThrowArgumentOutOfRange_IndexException();
 				}
 				this.SetItem(index, value);
 			}
@@ -107,9 +104,9 @@ namespace System.Collections.ObjectModel
 			{
 				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 			}
-			if (index < 0 || index > this.items.Count)
+			if (index > this.items.Count)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_ListInsert);
+				ThrowHelper.ThrowArgumentOutOfRange_IndexException();
 			}
 			this.InsertItem(index, item);
 		}
@@ -135,9 +132,9 @@ namespace System.Collections.ObjectModel
 			{
 				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 			}
-			if (index < 0 || index >= this.items.Count)
+			if (index >= this.items.Count)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException();
+				ThrowHelper.ThrowArgumentOutOfRange_IndexException();
 			}
 			this.RemoveItem(index);
 		}
@@ -187,19 +184,12 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (this._syncRoot == null)
+				ICollection collection = this.items as ICollection;
+				if (collection == null)
 				{
-					ICollection collection = this.items as ICollection;
-					if (collection != null)
-					{
-						this._syncRoot = collection.SyncRoot;
-					}
-					else
-					{
-						Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-					}
+					return this;
 				}
-				return this._syncRoot;
+				return collection.SyncRoot;
 			}
 		}
 
@@ -219,7 +209,7 @@ namespace System.Collections.ObjectModel
 			}
 			if (index < 0)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+				ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
 			}
 			if (array.Length - index < this.Count)
 			{
@@ -235,12 +225,12 @@ namespace System.Collections.ObjectModel
 			Type typeFromHandle = typeof(T);
 			if (!elementType.IsAssignableFrom(typeFromHandle) && !typeFromHandle.IsAssignableFrom(elementType))
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 			object[] array3 = array as object[];
 			if (array3 == null)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 			int count = this.items.Count;
 			try
@@ -252,7 +242,7 @@ namespace System.Collections.ObjectModel
 			}
 			catch (ArrayTypeMismatchException)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 		}
 
@@ -364,8 +354,5 @@ namespace System.Collections.ObjectModel
 		}
 
 		private IList<T> items;
-
-		[NonSerialized]
-		private object _syncRoot;
 	}
 }

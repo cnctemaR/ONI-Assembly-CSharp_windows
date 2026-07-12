@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
 	public interface IEventBindingService
 	{
 		string CreateUniqueMethodName(IComponent component, EventDescriptor e);

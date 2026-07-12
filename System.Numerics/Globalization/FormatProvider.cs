@@ -1,39 +1,43 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Security;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Globalization
 {
 	internal class FormatProvider
 	{
-		[SecurityCritical]
-		internal unsafe static string FormatBigInteger(int precision, int scale, bool sign, string format, NumberFormatInfo numberFormatInfo, char[] digits, int startIndex)
+		internal unsafe static void FormatBigInteger(ref ValueStringBuilder sb, int precision, int scale, bool sign, ReadOnlySpan<char> format, NumberFormatInfo numberFormatInfo, char[] digits, int startIndex)
 		{
-			int num;
-			char c = FormatProvider.Number.ParseFormatSpecifier(format, out num);
-			char* ptr;
-			if (digits == null || digits.Length == 0)
+			fixed (char[] array = digits)
 			{
-				ptr = null;
+				char* ptr;
+				if (digits == null || array.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array[0];
+				}
+				FormatProvider.Number.NumberBuffer numberBuffer = default(FormatProvider.Number.NumberBuffer);
+				numberBuffer.overrideDigits = ptr + startIndex;
+				numberBuffer.precision = precision;
+				numberBuffer.scale = scale;
+				numberBuffer.sign = sign;
+				int num;
+				char c = FormatProvider.Number.ParseFormatSpecifier(format, out num);
+				if (c != '\0')
+				{
+					FormatProvider.Number.NumberToString(ref sb, ref numberBuffer, c, num, numberFormatInfo, false);
+				}
+				else
+				{
+					FormatProvider.Number.NumberToStringFormat(ref sb, ref numberBuffer, format, numberFormatInfo);
+				}
 			}
-			else
-			{
-				ptr = &digits[0];
-			}
-			FormatProvider.Number.NumberBuffer numberBuffer = default(FormatProvider.Number.NumberBuffer);
-			numberBuffer.overrideDigits = ptr + startIndex;
-			numberBuffer.precision = precision;
-			numberBuffer.scale = scale;
-			numberBuffer.sign = sign;
-			if (c != '\0')
-			{
-				return FormatProvider.Number.NumberToString(numberBuffer, c, num, numberFormatInfo, false);
-			}
-			return FormatProvider.Number.NumberToStringFormat(numberBuffer, format, numberFormatInfo);
 		}
 
-		[SecurityCritical]
 		internal static bool TryStringToBigInteger(ReadOnlySpan<char> s, NumberStyles styles, NumberFormatInfo numberFormatInfo, StringBuilder receiver, out int precision, out int scale, out bool sign)
 		{
 			FormatProvider.Number.NumberBuffer numberBuffer = default(FormatProvider.Number.NumberBuffer);
@@ -62,35 +66,39 @@ namespace System.Globalization
 				return ch == ' ' || (ch >= '\t' && ch <= '\r');
 			}
 
-			private unsafe static char* MatchChars(char* p, string str)
+			private unsafe static char* MatchChars(char* p, char* pEnd, string str)
 			{
 				char* ptr = str;
 				if (ptr != null)
 				{
 					ptr += RuntimeHelpers.OffsetToStringData / 2;
 				}
-				return FormatProvider.Number.MatchChars(p, ptr);
+				return FormatProvider.Number.MatchChars(p, pEnd, ptr);
 			}
 
-			private unsafe static char* MatchChars(char* p, char* str)
+			private unsafe static char* MatchChars(char* p, char* pEnd, char* str)
 			{
 				if (*str == '\0')
 				{
 					return null;
 				}
-				while (*p == *str || (*str == '\u00a0' && *p == ' '))
+				do
 				{
+					char c = ((p < pEnd) ? (*p) : '\0');
+					if (c != *str && (*str != '\u00a0' || c != ' '))
+					{
+						goto IL_0034;
+					}
 					p++;
 					str++;
-					if (*str == '\0')
-					{
-						return p;
-					}
 				}
+				while (*str != '\0');
+				return p;
+				IL_0034:
 				return null;
 			}
 
-			private unsafe static bool ParseNumber(ref char* str, NumberStyles options, ref FormatProvider.Number.NumberBuffer number, StringBuilder sb, NumberFormatInfo numfmt, bool parseDecimal)
+			private unsafe static bool ParseNumber(ref char* str, char* strEnd, NumberStyles options, ref FormatProvider.Number.NumberBuffer number, StringBuilder sb, NumberFormatInfo numfmt, bool parseDecimal)
 			{
 				number.scale = 0;
 				number.sign = false;
@@ -114,14 +122,14 @@ namespace System.Globalization
 				bool flag2 = sb != null;
 				int num2 = (flag2 ? int.MaxValue : 32);
 				char* ptr = str;
-				char c = *ptr;
+				char c = ((ptr < strEnd) ? (*ptr) : '\0');
 				char* digits = number.digits;
 				for (;;)
 				{
 					if (!FormatProvider.Number.IsWhite(c) || (options & NumberStyles.AllowLeadingWhite) == NumberStyles.None || ((num & 1) != 0 && (num & 32) == 0 && numfmt.NumberNegativePattern != 2))
 					{
 						char* ptr2;
-						if ((options & NumberStyles.AllowLeadingSign) != NumberStyles.None && (num & 1) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.PositiveSign)) != null || ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.NegativeSign)) != null && (number.sign = true))))
+						if ((options & NumberStyles.AllowLeadingSign) != NumberStyles.None && (num & 1) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.PositiveSign)) != null || ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.NegativeSign)) != null && (number.sign = true))))
 						{
 							num |= 1;
 							ptr = ptr2 - 1;
@@ -133,7 +141,7 @@ namespace System.Globalization
 						}
 						else
 						{
-							if (text == null || (ptr2 = FormatProvider.Number.MatchChars(ptr, text)) == null)
+							if (text == null || (ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, text)) == null)
 							{
 								break;
 							}
@@ -142,7 +150,7 @@ namespace System.Globalization
 							ptr = ptr2 - 1;
 						}
 					}
-					c = *(++ptr);
+					c = ((++ptr < strEnd) ? (*ptr) : '\0');
 				}
 				int num3 = 0;
 				int num4 = 0;
@@ -180,20 +188,20 @@ namespace System.Globalization
 							number.scale--;
 						}
 					}
-					else if ((options & NumberStyles.AllowDecimalPoint) != NumberStyles.None && (num & 16) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, text2)) != null || (flag && (num & 32) == 0 && (ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.NumberDecimalSeparator)) != null)))
+					else if ((options & NumberStyles.AllowDecimalPoint) != NumberStyles.None && (num & 16) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, text2)) != null || (flag && (num & 32) == 0 && (ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.NumberDecimalSeparator)) != null)))
 					{
 						num |= 16;
 						ptr = ptr2 - 1;
 					}
 					else
 					{
-						if ((options & NumberStyles.AllowThousands) == NumberStyles.None || (num & 4) == 0 || (num & 16) != 0 || ((ptr2 = FormatProvider.Number.MatchChars(ptr, text3)) == null && (!flag || (num & 32) != 0 || (ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.NumberGroupSeparator)) == null)))
+						if ((options & NumberStyles.AllowThousands) == NumberStyles.None || (num & 4) == 0 || (num & 16) != 0 || ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, text3)) == null && (!flag || (num & 32) != 0 || (ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.NumberGroupSeparator)) == null)))
 						{
 							break;
 						}
 						ptr = ptr2 - 1;
 					}
-					c = *(++ptr);
+					c = ((++ptr < strEnd) ? (*ptr) : '\0');
 				}
 				bool flag3 = false;
 				number.precision = num4;
@@ -210,15 +218,15 @@ namespace System.Globalization
 					if ((c == 'E' || c == 'e') && (options & NumberStyles.AllowExponent) != NumberStyles.None)
 					{
 						char* ptr3 = ptr;
-						c = *(++ptr);
+						c = ((++ptr < strEnd) ? (*ptr) : '\0');
 						char* ptr2;
-						if ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.PositiveSign)) != null)
+						if ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.PositiveSign)) != null)
 						{
-							c = *(ptr = ptr2);
+							c = (((ptr = ptr2) < strEnd) ? (*ptr) : '\0');
 						}
-						else if ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.NegativeSign)) != null)
+						else if ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.NegativeSign)) != null)
 						{
-							c = *(ptr = ptr2);
+							c = (((ptr = ptr2) < strEnd) ? (*ptr) : '\0');
 							flag3 = true;
 						}
 						if (c >= '0' && c <= '9')
@@ -227,13 +235,13 @@ namespace System.Globalization
 							do
 							{
 								num5 = num5 * 10 + (int)(c - '0');
-								c = *(++ptr);
+								c = ((++ptr < strEnd) ? (*ptr) : '\0');
 								if (num5 > 1000)
 								{
 									num5 = 9999;
 									while (c >= '0' && c <= '9')
 									{
-										c = *(++ptr);
+										c = ((++ptr < strEnd) ? (*ptr) : '\0');
 									}
 								}
 							}
@@ -247,7 +255,7 @@ namespace System.Globalization
 						else
 						{
 							ptr = ptr3;
-							c = *ptr;
+							c = ((ptr < strEnd) ? (*ptr) : '\0');
 						}
 					}
 					for (;;)
@@ -255,7 +263,7 @@ namespace System.Globalization
 						if (!FormatProvider.Number.IsWhite(c) || (options & NumberStyles.AllowTrailingWhite) == NumberStyles.None)
 						{
 							char* ptr2;
-							if ((options & NumberStyles.AllowTrailingSign) != NumberStyles.None && (num & 1) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.PositiveSign)) != null || ((ptr2 = FormatProvider.Number.MatchChars(ptr, numfmt.NegativeSign)) != null && (number.sign = true))))
+							if ((options & NumberStyles.AllowTrailingSign) != NumberStyles.None && (num & 1) == 0 && ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.PositiveSign)) != null || ((ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, numfmt.NegativeSign)) != null && (number.sign = true))))
 							{
 								num |= 1;
 								ptr = ptr2 - 1;
@@ -266,7 +274,7 @@ namespace System.Globalization
 							}
 							else
 							{
-								if (text == null || (ptr2 = FormatProvider.Number.MatchChars(ptr, text)) == null)
+								if (text == null || (ptr2 = FormatProvider.Number.MatchChars(ptr, strEnd, text)) == null)
 								{
 									break;
 								}
@@ -274,7 +282,7 @@ namespace System.Globalization
 								ptr = ptr2 - 1;
 							}
 						}
-						c = *(++ptr);
+						c = ((++ptr < strEnd) ? (*ptr) : '\0');
 					}
 					if ((num & 2) == 0)
 					{
@@ -297,11 +305,11 @@ namespace System.Globalization
 				return false;
 			}
 
-			private static bool TrailingZeros(ReadOnlySpan<char> s, int index)
+			private unsafe static bool TrailingZeros(ReadOnlySpan<char> s, int index)
 			{
 				for (int i = index; i < s.Length; i++)
 				{
-					if (s[i] != '\0')
+					if (*s[i] != 0)
 					{
 						return false;
 					}
@@ -311,11 +319,11 @@ namespace System.Globalization
 
 			internal unsafe static bool TryStringToNumber(ReadOnlySpan<char> str, NumberStyles options, ref FormatProvider.Number.NumberBuffer number, StringBuilder sb, NumberFormatInfo numfmt, bool parseDecimal)
 			{
-				fixed (char* ptr = str.DangerousGetPinnableReference())
+				fixed (char* reference = MemoryMarshal.GetReference<char>(str))
 				{
+					char* ptr = reference;
 					char* ptr2 = ptr;
-					char* ptr3 = ptr2;
-					if (!FormatProvider.Number.ParseNumber(ref ptr3, options, ref number, sb, numfmt, parseDecimal) || ((long)(ptr3 - ptr2) < (long)str.Length && !FormatProvider.Number.TrailingZeros(str, (int)((long)(ptr3 - ptr2)))))
+					if (!FormatProvider.Number.ParseNumber(ref ptr2, ptr2 + str.Length, options, ref number, sb, numfmt, parseDecimal) || ((long)(ptr2 - ptr) < (long)str.Length && !FormatProvider.Number.TrailingZeros(str, (int)((long)(ptr2 - ptr)))))
 					{
 						return false;
 					}
@@ -334,55 +342,61 @@ namespace System.Globalization
 				}
 			}
 
-			internal unsafe static char ParseFormatSpecifier(string format, out int digits)
+			internal unsafe static char ParseFormatSpecifier(ReadOnlySpan<char> format, out int digits)
 			{
-				if (format != null)
+				char c = '\0';
+				if (format.Length > 0)
 				{
-					fixed (string text = format)
+					c = (char)(*format[0]);
+					if (c - 'A' <= '\u0019' || c - 'a' <= '\u0019')
 					{
-						char* ptr = text;
-						if (ptr != null)
+						if (format.Length == 1)
 						{
-							ptr += RuntimeHelpers.OffsetToStringData / 2;
-						}
-						int num = 0;
-						char c = ptr[num];
-						if (c != '\0')
-						{
-							if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-							{
-								num++;
-								int num2 = -1;
-								if (ptr[num] >= '0' && ptr[num] <= '9')
-								{
-									num2 = (int)(ptr[(IntPtr)(num++) * 2] - '0');
-									while (ptr[num] >= '0' && ptr[num] <= '9')
-									{
-										num2 = num2 * 10 + (int)ptr[(IntPtr)(num++) * 2] - 48;
-										if (num2 >= 10)
-										{
-											break;
-										}
-									}
-								}
-								if (ptr[num] == '\0')
-								{
-									digits = num2;
-									return c;
-								}
-							}
 							digits = -1;
-							return '\0';
+							return c;
+						}
+						if (format.Length == 2)
+						{
+							int num = (int)(*format[1] - 48);
+							if (num < 10)
+							{
+								digits = num;
+								return c;
+							}
+						}
+						else if (format.Length == 3)
+						{
+							int num2 = (int)(*format[1] - 48);
+							int num3 = (int)(*format[2] - 48);
+							if (num2 < 10 && num3 < 10)
+							{
+								digits = num2 * 10 + num3;
+								return c;
+							}
+						}
+						int num4 = 0;
+						int num5 = 1;
+						while (num5 < format.Length && *format[num5] - 48 < 10 && num4 < 10)
+						{
+							num4 = num4 * 10 + (int)(*format[num5++]) - 48;
+						}
+						if (num5 == format.Length || *format[num5] == 0)
+						{
+							digits = num4;
+							return c;
 						}
 					}
 				}
 				digits = -1;
+				if (format.Length != 0 && c != '\0')
+				{
+					return '\0';
+				}
 				return 'G';
 			}
 
-			internal unsafe static string NumberToString(FormatProvider.Number.NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
+			internal unsafe static void NumberToString(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
 			{
-				StringBuilder stringBuilder = new StringBuilder(105);
 				if (format <= 'P')
 				{
 					switch (format)
@@ -390,23 +404,23 @@ namespace System.Globalization
 					case 'C':
 						break;
 					case 'D':
-						goto IL_0212;
+						goto IL_01FB;
 					case 'E':
-						goto IL_0128;
+						goto IL_0119;
 					case 'F':
-						goto IL_00AB;
+						goto IL_00A1;
 					case 'G':
-						goto IL_0167;
+						goto IL_0154;
 					default:
 						if (format == 'N')
 						{
-							goto IL_00F8;
+							goto IL_00EC;
 						}
 						if (format != 'P')
 						{
-							goto IL_0212;
+							goto IL_01FB;
 						}
-						goto IL_01D9;
+						goto IL_01C3;
 					}
 				}
 				else
@@ -416,23 +430,23 @@ namespace System.Globalization
 					case 'c':
 						break;
 					case 'd':
-						goto IL_0212;
+						goto IL_01FB;
 					case 'e':
-						goto IL_0128;
+						goto IL_0119;
 					case 'f':
-						goto IL_00AB;
+						goto IL_00A1;
 					case 'g':
-						goto IL_0167;
+						goto IL_0154;
 					default:
 						if (format == 'n')
 						{
-							goto IL_00F8;
+							goto IL_00EC;
 						}
 						if (format != 'p')
 						{
-							goto IL_0212;
+							goto IL_01FB;
 						}
-						goto IL_01D9;
+						goto IL_01C3;
 					}
 				}
 				int num = ((nMaxDigits >= 0) ? nMaxDigits : info.CurrencyDecimalDigits);
@@ -441,9 +455,9 @@ namespace System.Globalization
 					nMaxDigits = info.CurrencyDecimalDigits;
 				}
 				FormatProvider.Number.RoundNumber(ref number, number.scale + nMaxDigits);
-				FormatProvider.Number.FormatCurrency(stringBuilder, number, num, nMaxDigits, info);
-				goto IL_021D;
-				IL_00AB:
+				FormatProvider.Number.FormatCurrency(ref sb, ref number, num, nMaxDigits, info);
+				return;
+				IL_00A1:
 				if (nMaxDigits < 0)
 				{
 					num = (nMaxDigits = info.NumberDecimalDigits);
@@ -455,11 +469,11 @@ namespace System.Globalization
 				FormatProvider.Number.RoundNumber(ref number, number.scale + nMaxDigits);
 				if (number.sign)
 				{
-					stringBuilder.Append(info.NegativeSign);
+					sb.Append(info.NegativeSign);
 				}
-				FormatProvider.Number.FormatFixed(stringBuilder, number, num, nMaxDigits, info, null, info.NumberDecimalSeparator, null);
-				goto IL_021D;
-				IL_00F8:
+				FormatProvider.Number.FormatFixed(ref sb, ref number, num, nMaxDigits, info, null, info.NumberDecimalSeparator, null);
+				return;
+				IL_00EC:
 				if (nMaxDigits < 0)
 				{
 					num = (nMaxDigits = info.NumberDecimalDigits);
@@ -469,9 +483,9 @@ namespace System.Globalization
 					num = nMaxDigits;
 				}
 				FormatProvider.Number.RoundNumber(ref number, number.scale + nMaxDigits);
-				FormatProvider.Number.FormatNumber(stringBuilder, number, num, nMaxDigits, info);
-				goto IL_021D;
-				IL_0128:
+				FormatProvider.Number.FormatNumber(ref sb, ref number, num, nMaxDigits, info);
+				return;
+				IL_0119:
 				if (nMaxDigits < 0)
 				{
 					num = (nMaxDigits = 6);
@@ -484,11 +498,11 @@ namespace System.Globalization
 				FormatProvider.Number.RoundNumber(ref number, nMaxDigits);
 				if (number.sign)
 				{
-					stringBuilder.Append(info.NegativeSign);
+					sb.Append(info.NegativeSign);
 				}
-				FormatProvider.Number.FormatScientific(stringBuilder, number, num, nMaxDigits, info, format);
-				goto IL_021D;
-				IL_0167:
+				FormatProvider.Number.FormatScientific(ref sb, ref number, num, nMaxDigits, info, format);
+				return;
+				IL_0154:
 				bool flag = true;
 				if (nMaxDigits < 1)
 				{
@@ -516,11 +530,11 @@ namespace System.Globalization
 				}
 				if (number.sign)
 				{
-					stringBuilder.Append(info.NegativeSign);
+					sb.Append(info.NegativeSign);
 				}
-				FormatProvider.Number.FormatGeneral(stringBuilder, number, num, nMaxDigits, info, format - '\u0002', !flag);
-				goto IL_021D;
-				IL_01D9:
+				FormatProvider.Number.FormatGeneral(ref sb, ref number, num, nMaxDigits, info, format - '\u0002', !flag);
+				return;
+				IL_01C3:
 				if (nMaxDigits < 0)
 				{
 					num = (nMaxDigits = info.PercentDecimalDigits);
@@ -531,15 +545,13 @@ namespace System.Globalization
 				}
 				number.scale += 2;
 				FormatProvider.Number.RoundNumber(ref number, number.scale + nMaxDigits);
-				FormatProvider.Number.FormatPercent(stringBuilder, number, num, nMaxDigits, info);
-				goto IL_021D;
-				IL_0212:
+				FormatProvider.Number.FormatPercent(ref sb, ref number, num, nMaxDigits, info);
+				return;
+				IL_01FB:
 				throw new FormatException("Format specifier was invalid.");
-				IL_021D:
-				return stringBuilder.ToString();
 			}
 
-			private static void FormatCurrency(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
+			private static void FormatCurrency(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
 			{
 				foreach (char c in number.sign ? FormatProvider.Number.s_negCurrencyFormats[info.CurrencyNegativePattern] : FormatProvider.Number.s_posCurrencyFormats[info.CurrencyPositivePattern])
 				{
@@ -563,7 +575,7 @@ namespace System.Globalization
 					}
 					else
 					{
-						FormatProvider.Number.FormatFixed(sb, number, nMinDigits, nMaxDigits, info, info.CurrencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
+						FormatProvider.Number.FormatFixed(ref sb, ref number, nMinDigits, nMaxDigits, info, info.CurrencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
 					}
 				}
 			}
@@ -578,7 +590,7 @@ namespace System.Globalization
 				return num;
 			}
 
-			private unsafe static void FormatFixed(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, int[] groupDigits, string sDecimal, string sGroup)
+			private unsafe static void FormatFixed(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, int[] groupDigits, string sDecimal, string sGroup)
 			{
 				int i = number.scale;
 				char* ptr = number.digits;
@@ -690,7 +702,7 @@ namespace System.Globalization
 				}
 			}
 
-			private static void FormatNumber(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
+			private static void FormatNumber(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
 			{
 				foreach (char c in number.sign ? FormatProvider.Number.s_negNumberFormats[info.NumberNegativePattern] : FormatProvider.Number.s_posNumberFormat)
 				{
@@ -707,12 +719,12 @@ namespace System.Globalization
 					}
 					else
 					{
-						FormatProvider.Number.FormatFixed(sb, number, nMinDigits, nMaxDigits, info, info.NumberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
+						FormatProvider.Number.FormatFixed(ref sb, ref number, nMinDigits, nMaxDigits, info, info.NumberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
 					}
 				}
 			}
 
-			private unsafe static void FormatScientific(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, char expChar)
+			private unsafe static void FormatScientific(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, char expChar)
 			{
 				char* digits = number.digits;
 				sb.Append((*digits != '\0') ? (*(digits++)) : '0');
@@ -725,10 +737,10 @@ namespace System.Globalization
 					sb.Append((*digits != '\0') ? (*(digits++)) : '0');
 				}
 				int num = ((*number.digits == '\0') ? 0 : (number.scale - 1));
-				FormatProvider.Number.FormatExponent(sb, info, num, expChar, 3, true);
+				FormatProvider.Number.FormatExponent(ref sb, info, num, expChar, 3, true);
 			}
 
-			private unsafe static void FormatExponent(StringBuilder sb, NumberFormatInfo info, int value, char expChar, int minDigits, bool positiveSign)
+			private unsafe static void FormatExponent(ref ValueStringBuilder sb, NumberFormatInfo info, int value, char expChar, int minDigits, bool positiveSign)
 			{
 				sb.Append(expChar);
 				if (value < 0)
@@ -750,7 +762,7 @@ namespace System.Globalization
 				}
 			}
 
-			private unsafe static void FormatGeneral(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, char expChar, bool bSuppressScientific)
+			private unsafe static void FormatGeneral(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, char expChar, bool bSuppressScientific)
 			{
 				int i = number.scale;
 				bool flag = false;
@@ -787,11 +799,11 @@ namespace System.Globalization
 				}
 				if (flag)
 				{
-					FormatProvider.Number.FormatExponent(sb, info, number.scale - 1, expChar, 2, true);
+					FormatProvider.Number.FormatExponent(ref sb, info, number.scale - 1, expChar, 2, true);
 				}
 			}
 
-			private static void FormatPercent(StringBuilder sb, FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
+			private static void FormatPercent(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
 			{
 				foreach (char c in number.sign ? FormatProvider.Number.s_negPercentFormats[info.PercentNegativePattern] : FormatProvider.Number.s_posPercentFormats[info.PercentPositivePattern])
 				{
@@ -815,7 +827,7 @@ namespace System.Globalization
 					}
 					else
 					{
-						FormatProvider.Number.FormatFixed(sb, number, nMinDigits, nMaxDigits, info, info.PercentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
+						FormatProvider.Number.FormatFixed(ref sb, ref number, nMinDigits, nMaxDigits, info, info.PercentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
 					}
 				}
 			}
@@ -861,73 +873,72 @@ namespace System.Globalization
 				digits[num] = '\0';
 			}
 
-			private unsafe static int FindSection(string format, int section)
+			private unsafe static int FindSection(ReadOnlySpan<char> format, int section)
 			{
 				if (section == 0)
 				{
 					return 0;
 				}
-				char* ptr = format;
-				if (ptr != null)
+				fixed (char* reference = MemoryMarshal.GetReference<char>(format))
 				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				int num = 0;
-				for (;;)
-				{
-					char c2;
-					char c = (c2 = ptr[(IntPtr)(num++) * 2]);
-					if (c2 <= '"')
+					char* ptr = reference;
+					int i = 0;
+					while (i < format.Length)
 					{
-						if (c2 == '\0')
+						char c2;
+						char c = (c2 = ptr[(IntPtr)(i++) * 2]);
+						if (c2 <= '"')
 						{
-							return 0;
-						}
-						if (c2 != '"')
-						{
-							continue;
-						}
-					}
-					else if (c2 != '\'')
-					{
-						if (c2 != ';')
-						{
-							if (c2 != '\\')
+							if (c2 == '\0')
+							{
+								return 0;
+							}
+							if (c2 != '"')
 							{
 								continue;
 							}
-							if (ptr[num] != '\0')
+						}
+						else if (c2 != '\'')
+						{
+							if (c2 != ';')
 							{
-								num++;
+								if (c2 != '\\')
+								{
+									continue;
+								}
+								if (i < format.Length && ptr[i] != '\0')
+								{
+									i++;
+									continue;
+								}
 								continue;
 							}
-							continue;
+							else
+							{
+								if (--section != 0)
+								{
+									continue;
+								}
+								if (i < format.Length && ptr[i] != '\0' && ptr[i] != ';')
+								{
+									return i;
+								}
+								return 0;
+							}
 						}
-						else
+						while (i < format.Length && ptr[i] != '\0')
 						{
-							if (--section == 0)
+							if (ptr[(IntPtr)(i++) * 2] == c)
 							{
 								break;
 							}
-							continue;
 						}
 					}
-					while (ptr[num] != '\0')
-					{
-						if (ptr[(IntPtr)(num++) * 2] == c)
-						{
-							break;
-						}
-					}
+					return 0;
 				}
-				if (ptr[num] != '\0' && ptr[num] != ';')
-				{
-					return num;
-				}
-				return 0;
 			}
 
-			internal unsafe static string NumberToStringFormat(FormatProvider.Number.NumberBuffer number, string format, NumberFormatInfo info)
+			internal unsafe static void NumberToStringFormat(ref ValueStringBuilder sb, ref FormatProvider.Number.NumberBuffer number, ReadOnlySpan<char> format, NumberFormatInfo info)
 			{
 				int num = 0;
 				char* digits = number.digits;
@@ -938,7 +949,7 @@ namespace System.Globalization
 				int num6;
 				bool flag;
 				bool flag2;
-				int num9;
+				int i;
 				for (;;)
 				{
 					num3 = 0;
@@ -949,16 +960,12 @@ namespace System.Globalization
 					int num7 = -1;
 					flag2 = false;
 					int num8 = 0;
-					num9 = num2;
-					fixed (string text = format)
+					i = num2;
+					fixed (char* ptr = MemoryMarshal.GetReference<char>(format))
 					{
-						char* ptr = text;
-						if (ptr != null)
-						{
-							ptr += RuntimeHelpers.OffsetToStringData / 2;
-						}
+						char* ptr2 = ptr;
 						char c;
-						while ((c = ptr[(IntPtr)(num9++) * 2]) != '\0' && c != ';')
+						while (i < format.Length && (c = ptr2[(IntPtr)(i++) * 2]) != '\0' && c != ';')
 						{
 							if (c <= 'E')
 							{
@@ -966,9 +973,9 @@ namespace System.Globalization
 								{
 								case '"':
 								case '\'':
-									while (ptr[num9] != '\0')
+									while (i < format.Length && ptr2[i] != '\0')
 									{
-										if (ptr[(IntPtr)(num9++) * 2] == c)
+										if (ptr2[(IntPtr)(i++) * 2] == c)
 										{
 											break;
 										}
@@ -1045,16 +1052,16 @@ namespace System.Globalization
 							}
 							else
 							{
-								if (ptr[num9] != '\0')
+								if (i < format.Length && ptr2[i] != '\0')
 								{
-									num9++;
+									i++;
 									continue;
 								}
 								continue;
 							}
-							if (ptr[num9] == '0' || ((ptr[num9] == '+' || ptr[num9] == '-') && ptr[num9 + 1] == '0'))
+							if ((i < format.Length && ptr2[i] == '0') || (i + 1 < format.Length && (ptr2[i] == '+' || ptr2[i] == '-') && ptr2[i + 1] == '0'))
 							{
-								while (ptr[(IntPtr)(++num9) * 2] == '0')
+								while (++i < format.Length && ptr2[i] == '0')
 								{
 								}
 								flag = true;
@@ -1081,99 +1088,96 @@ namespace System.Globalization
 						break;
 					}
 					number.scale += num8;
-					int num10 = (flag ? num3 : (number.scale + num3 - num4));
-					FormatProvider.Number.RoundNumber(ref number, num10);
+					int num9 = (flag ? num3 : (number.scale + num3 - num4));
+					FormatProvider.Number.RoundNumber(ref number, num9);
 					if (*digits != '\0')
 					{
-						goto IL_025B;
+						goto IL_029E;
 					}
-					num9 = FormatProvider.Number.FindSection(format, 2);
-					if (num9 == num2)
+					i = FormatProvider.Number.FindSection(format, 2);
+					if (i == num2)
 					{
-						goto IL_025B;
+						goto IL_029E;
 					}
-					num2 = num9;
+					num2 = i;
 				}
 				number.sign = false;
 				number.scale = 0;
-				IL_025B:
+				IL_029E:
 				num5 = ((num5 < num4) ? (num4 - num5) : 0);
 				num6 = ((num6 > num4) ? (num4 - num6) : 0);
-				int num11;
-				int i;
+				int num10;
+				int j;
 				if (flag)
 				{
-					num11 = num4;
-					i = 0;
+					num10 = num4;
+					j = 0;
 				}
 				else
 				{
-					num11 = ((number.scale > num4) ? number.scale : num4);
-					i = number.scale - num4;
+					num10 = ((number.scale > num4) ? number.scale : num4);
+					j = number.scale - num4;
 				}
-				num9 = num2;
-				int[] array = new int[4];
-				int num12 = -1;
+				i = num2;
+				Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)16], 4);
+				int num11 = -1;
 				if (flag2 && info.NumberGroupSeparator.Length > 0)
 				{
 					int[] numberGroupSizes = info.NumberGroupSizes;
+					int num12 = 0;
 					int num13 = 0;
-					int num14 = 0;
-					int num15 = numberGroupSizes.Length;
-					if (num15 != 0)
+					int num14 = numberGroupSizes.Length;
+					if (num14 != 0)
 					{
-						num14 = numberGroupSizes[num13];
+						num13 = numberGroupSizes[num12];
 					}
-					int num16 = num14;
-					int num17 = num11 + ((i < 0) ? i : 0);
-					int num18 = ((num5 > num17) ? num5 : num17);
-					while (num18 > num14 && num16 != 0)
+					int num15 = num13;
+					int num16 = num10 + ((j < 0) ? j : 0);
+					int num17 = ((num5 > num16) ? num5 : num16);
+					while (num17 > num13 && num15 != 0)
 					{
-						num12++;
-						if (num12 >= array.Length)
+						num11++;
+						if (num11 >= span.Length)
 						{
-							Array.Resize<int>(ref array, array.Length * 2);
+							int[] array = new int[span.Length * 2];
+							span.CopyTo(array);
+							span = array;
 						}
-						array[num12] = num14;
-						if (num13 < num15 - 1)
+						*span[num11] = num13;
+						if (num12 < num14 - 1)
 						{
-							num13++;
-							num16 = numberGroupSizes[num13];
+							num12++;
+							num15 = numberGroupSizes[num12];
 						}
-						num14 += num16;
+						num13 += num15;
 					}
 				}
-				StringBuilder stringBuilder = new StringBuilder(105);
 				if (number.sign && num2 == 0)
 				{
-					stringBuilder.Append(info.NegativeSign);
+					sb.Append(info.NegativeSign);
 				}
 				bool flag3 = false;
-				fixed (string text = format)
+				fixed (char* ptr = MemoryMarshal.GetReference<char>(format))
 				{
-					char* ptr2 = text;
-					if (ptr2 != null)
-					{
-						ptr2 += RuntimeHelpers.OffsetToStringData / 2;
-					}
-					char* ptr3 = digits;
+					char* ptr3 = ptr;
+					char* ptr4 = digits;
 					char c;
-					while ((c = ptr2[(IntPtr)(num9++) * 2]) != '\0' && c != ';')
+					while (i < format.Length && (c = ptr3[(IntPtr)(i++) * 2]) != '\0' && c != ';')
 					{
-						if (i > 0)
+						if (j > 0)
 						{
 							if (c == '#' || c == '.' || c == '0')
 							{
-								while (i > 0)
+								while (j > 0)
 								{
-									stringBuilder.Append((*ptr3 != '\0') ? (*(ptr3++)) : '0');
-									if (flag2 && num11 > 1 && num12 >= 0 && num11 == array[num12] + 1)
+									sb.Append((*ptr4 != '\0') ? (*(ptr4++)) : '0');
+									if (flag2 && num10 > 1 && num11 >= 0 && num10 == *span[num11] + 1)
 									{
-										stringBuilder.Append(info.NumberGroupSeparator);
-										num12--;
+										sb.Append(info.NumberGroupSeparator);
+										num11--;
 									}
-									num11--;
-									i--;
+									num10--;
+									j--;
 								}
 							}
 						}
@@ -1183,13 +1187,13 @@ namespace System.Globalization
 							{
 							case '"':
 							case '\'':
-								while (ptr2[num9] != '\0' && ptr2[num9] != c)
+								while (i < format.Length && ptr3[i] != '\0' && ptr3[i] != c)
 								{
-									stringBuilder.Append(ptr2[(IntPtr)(num9++) * 2]);
+									sb.Append(ptr3[(IntPtr)(i++) * 2]);
 								}
-								if (ptr2[num9] != '\0')
+								if (i < format.Length && ptr3[i] != '\0')
 								{
-									num9++;
+									i++;
 									continue;
 								}
 								continue;
@@ -1197,9 +1201,9 @@ namespace System.Globalization
 								break;
 							case '$':
 							case '&':
-								goto IL_06D4;
+								goto IL_0786;
 							case '%':
-								stringBuilder.Append(info.PercentSymbol);
+								sb.Append(info.PercentSymbol);
 								continue;
 							default:
 								switch (c)
@@ -1208,11 +1212,11 @@ namespace System.Globalization
 									continue;
 								case '-':
 								case '/':
-									goto IL_06D4;
+									goto IL_0786;
 								case '.':
-									if (num11 == 0 && !flag3 && (num6 < 0 || (num4 < num3 && *ptr3 != '\0')))
+									if (num10 == 0 && !flag3 && (num6 < 0 || (num4 < num3 && *ptr4 != '\0')))
 									{
-										stringBuilder.Append(info.NumberDecimalSeparator);
+										sb.Append(info.NumberDecimalSeparator);
 										flag3 = true;
 										continue;
 									}
@@ -1222,31 +1226,31 @@ namespace System.Globalization
 								default:
 									if (c != 'E')
 									{
-										goto IL_06D4;
+										goto IL_0786;
 									}
-									goto IL_05BC;
+									goto IL_0631;
 								}
 								break;
 							}
-							if (i < 0)
+							if (j < 0)
 							{
-								i++;
-								c = ((num11 <= num5) ? '0' : '\0');
+								j++;
+								c = ((num10 <= num5) ? '0' : '\0');
 							}
 							else
 							{
-								c = ((*ptr3 != '\0') ? (*(ptr3++)) : ((num11 > num6) ? '0' : '\0'));
+								c = ((*ptr4 != '\0') ? (*(ptr4++)) : ((num10 > num6) ? '0' : '\0'));
 							}
 							if (c != '\0')
 							{
-								stringBuilder.Append(c);
-								if (flag2 && num11 > 1 && num12 >= 0 && num11 == array[num12] + 1)
+								sb.Append(c);
+								if (flag2 && num10 > 1 && num11 >= 0 && num10 == *span[num11] + 1)
 								{
-									stringBuilder.Append(info.NumberGroupSeparator);
-									num12--;
+									sb.Append(info.NumberGroupSeparator);
+									num11--;
 								}
 							}
-							num11--;
+							num10--;
 							continue;
 						}
 						if (c != '\\')
@@ -1255,67 +1259,74 @@ namespace System.Globalization
 							{
 								if (c != '‰')
 								{
-									goto IL_06D4;
+									goto IL_0786;
 								}
-								stringBuilder.Append(info.PerMilleSymbol);
+								sb.Append(info.PerMilleSymbol);
 								continue;
 							}
 						}
 						else
 						{
-							if (ptr2[num9] != '\0')
+							if (i < format.Length && ptr3[i] != '\0')
 							{
-								stringBuilder.Append(ptr2[(IntPtr)(num9++) * 2]);
+								sb.Append(ptr3[(IntPtr)(i++) * 2]);
 								continue;
 							}
 							continue;
 						}
-						IL_05BC:
+						IL_0631:
 						bool flag4 = false;
-						int num19 = 0;
+						int num18 = 0;
 						if (flag)
 						{
-							if (ptr2[num9] == '0')
+							if (i < format.Length && ptr3[i] == '0')
 							{
-								num19++;
+								num18++;
 							}
-							else if (ptr2[num9] == '+' && ptr2[num9 + 1] == '0')
+							else if (i + 1 < format.Length && ptr3[i] == '+' && ptr3[i + 1] == '0')
 							{
 								flag4 = true;
 							}
-							else if (ptr2[num9] != '-' || ptr2[num9 + 1] != '0')
+							else if (i + 1 >= format.Length || ptr3[i] != '-' || ptr3[i + 1] != '0')
 							{
-								stringBuilder.Append(c);
+								sb.Append(c);
 								continue;
 							}
-							while (ptr2[(IntPtr)(++num9) * 2] == '0')
+							while (++i < format.Length && ptr3[i] == '0')
 							{
-								num19++;
+								num18++;
 							}
-							if (num19 > 10)
+							if (num18 > 10)
 							{
-								num19 = 10;
+								num18 = 10;
 							}
-							int num20 = ((*digits == '\0') ? 0 : (number.scale - num4));
-							FormatProvider.Number.FormatExponent(stringBuilder, info, num20, c, num19, flag4);
+							int num19 = ((*digits == '\0') ? 0 : (number.scale - num4));
+							FormatProvider.Number.FormatExponent(ref sb, info, num19, c, num18, flag4);
 							flag = false;
 							continue;
 						}
-						stringBuilder.Append(c);
-						if (ptr2[num9] == '+' || ptr2[num9] == '-')
+						sb.Append(c);
+						if (i < format.Length)
 						{
-							stringBuilder.Append(ptr2[(IntPtr)(num9++) * 2]);
-						}
-						while (ptr2[num9] == '0')
-						{
-							stringBuilder.Append(ptr2[(IntPtr)(num9++) * 2]);
+							if (ptr3[i] == '+' || ptr3[i] == '-')
+							{
+								sb.Append(ptr3[(IntPtr)(i++) * 2]);
+							}
+							while (i < format.Length)
+							{
+								if (ptr3[i] != '0')
+								{
+									break;
+								}
+								sb.Append(ptr3[(IntPtr)(i++) * 2]);
+							}
+							continue;
 						}
 						continue;
-						IL_06D4:
-						stringBuilder.Append(c);
+						IL_0786:
+						sb.Append(c);
 					}
 				}
-				return stringBuilder.ToString();
 			}
 
 			private const int NumberMaxDigits = 32;
@@ -1348,7 +1359,6 @@ namespace System.Globalization
 			{
 				public unsafe char* digits
 				{
-					[SecurityCritical]
 					get
 					{
 						return this.overrideDigits;
@@ -1361,7 +1371,6 @@ namespace System.Globalization
 
 				public bool sign;
 
-				[SecurityCritical]
 				public unsafe char* overrideDigits;
 			}
 		}

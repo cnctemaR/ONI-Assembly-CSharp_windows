@@ -16,7 +16,7 @@ namespace System.ComponentModel
 			}
 			if (destinationType == typeof(string) && value is ICollection)
 			{
-				return global::SR.GetString("(Collection)");
+				return SR.GetString("(Collection)");
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}

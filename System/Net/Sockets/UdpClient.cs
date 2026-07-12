@@ -18,7 +18,7 @@ namespace System.Net.Sockets
 			base..ctor();
 			if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
 			{
-				throw new ArgumentException(global::SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses.", new object[] { "UDP" }), "family");
+				throw new ArgumentException(SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses.", new object[] { "UDP" }), "family");
 			}
 			this.m_Family = family;
 			this.createClientSocket();
@@ -40,7 +40,7 @@ namespace System.Net.Sockets
 			}
 			if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
 			{
-				throw new ArgumentException(global::SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses."), "family");
+				throw new ArgumentException(SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses."), "family");
 			}
 			this.m_Family = family;
 			IPEndPoint ipendPoint;
@@ -363,11 +363,16 @@ namespace System.Net.Sockets
 
 		private void CheckForBroadcast(IPAddress ipAddress)
 		{
-			if (this.Client != null && !this.m_IsBroadcast && ipAddress.IsBroadcast)
+			if (this.Client != null && !this.m_IsBroadcast && UdpClient.IsBroadcast(ipAddress))
 			{
 				this.m_IsBroadcast = true;
 				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
 			}
+		}
+
+		private static bool IsBroadcast(IPAddress address)
+		{
+			return address.AddressFamily != AddressFamily.InterNetworkV6 && address.Equals(IPAddress.Broadcast);
 		}
 
 		public int Send(byte[] dgram, int bytes, IPEndPoint endPoint)
@@ -382,7 +387,7 @@ namespace System.Net.Sockets
 			}
 			if (this.m_Active && endPoint != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot send packets to an arbitrary host while connected."));
+				throw new InvalidOperationException(SR.GetString("Cannot send packets to an arbitrary host while connected."));
 			}
 			if (endPoint == null)
 			{
@@ -404,7 +409,7 @@ namespace System.Net.Sockets
 			}
 			if (this.m_Active && (hostname != null || port != 0))
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot send packets to an arbitrary host while connected."));
+				throw new InvalidOperationException(SR.GetString("Cannot send packets to an arbitrary host while connected."));
 			}
 			if (hostname == null || port == 0)
 			{
@@ -418,7 +423,7 @@ namespace System.Net.Sockets
 			}
 			if (hostAddresses.Length == 0 || num == hostAddresses.Length)
 			{
-				throw new ArgumentException(global::SR.GetString("None of the discovered or specified addresses match the socket address family."), "hostname");
+				throw new ArgumentException(SR.GetString("None of the discovered or specified addresses match the socket address family."), "hostname");
 			}
 			this.CheckForBroadcast(hostAddresses[num]);
 			IPEndPoint ipendPoint = new IPEndPoint(hostAddresses[num], port);
@@ -437,7 +442,7 @@ namespace System.Net.Sockets
 			}
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The operation is not allowed on non-connected sockets."));
+				throw new InvalidOperationException(SR.GetString("The operation is not allowed on non-connected sockets."));
 			}
 			return this.Client.Send(dgram, 0, bytes, SocketFlags.None);
 		}
@@ -459,7 +464,7 @@ namespace System.Net.Sockets
 			}
 			if (this.m_Active && endPoint != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot send packets to an arbitrary host while connected."));
+				throw new InvalidOperationException(SR.GetString("Cannot send packets to an arbitrary host while connected."));
 			}
 			if (endPoint == null)
 			{
@@ -474,7 +479,7 @@ namespace System.Net.Sockets
 		{
 			if (this.m_Active && (hostname != null || port != 0))
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot send packets to an arbitrary host while connected."));
+				throw new InvalidOperationException(SR.GetString("Cannot send packets to an arbitrary host while connected."));
 			}
 			IPEndPoint ipendPoint = null;
 			if (hostname != null && port != 0)
@@ -487,7 +492,7 @@ namespace System.Net.Sockets
 				}
 				if (hostAddresses.Length == 0 || num == hostAddresses.Length)
 				{
-					throw new ArgumentException(global::SR.GetString("None of the discovered or specified addresses match the socket address family."), "hostname");
+					throw new ArgumentException(SR.GetString("None of the discovered or specified addresses match the socket address family."), "hostname");
 				}
 				this.CheckForBroadcast(hostAddresses[num]);
 				ipendPoint = new IPEndPoint(hostAddresses[num], port);
@@ -597,7 +602,7 @@ namespace System.Net.Sockets
 			}
 			if (multicastAddr.AddressFamily != this.m_Family)
 			{
-				throw new ArgumentException(global::SR.GetString("Multicast family is not the same as the family of the '{0}' Client.", new object[] { "UDP" }), "multicastAddr");
+				throw new ArgumentException(SR.GetString("Multicast family is not the same as the family of the '{0}' Client.", new object[] { "UDP" }), "multicastAddr");
 			}
 			if (this.m_Family == AddressFamily.InterNetwork)
 			{
@@ -635,7 +640,7 @@ namespace System.Net.Sockets
 			}
 			if (ifindex < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified value cannot be negative."), "ifindex");
+				throw new ArgumentException(SR.GetString("The specified value cannot be negative."), "ifindex");
 			}
 			if (this.m_Family != AddressFamily.InterNetworkV6)
 			{
@@ -675,7 +680,7 @@ namespace System.Net.Sockets
 			}
 			if (multicastAddr.AddressFamily != this.m_Family)
 			{
-				throw new ArgumentException(global::SR.GetString("Multicast family is not the same as the family of the '{0}' Client.", new object[] { "UDP" }), "multicastAddr");
+				throw new ArgumentException(SR.GetString("Multicast family is not the same as the family of the '{0}' Client.", new object[] { "UDP" }), "multicastAddr");
 			}
 			if (this.m_Family == AddressFamily.InterNetwork)
 			{
@@ -699,7 +704,7 @@ namespace System.Net.Sockets
 			}
 			if (ifindex < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified value cannot be negative."), "ifindex");
+				throw new ArgumentException(SR.GetString("The specified value cannot be negative."), "ifindex");
 			}
 			if (this.m_Family != AddressFamily.InterNetworkV6)
 			{

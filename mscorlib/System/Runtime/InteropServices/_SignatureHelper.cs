@@ -4,9 +4,9 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("7D13DD37-5A04-393C-BBCA-A5FEA802893D")]
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
+	[Guid("7D13DD37-5A04-393C-BBCA-A5FEA802893D")]
 	[TypeLibImportClass(typeof(SignatureHelper))]
 	public interface _SignatureHelper
 	{

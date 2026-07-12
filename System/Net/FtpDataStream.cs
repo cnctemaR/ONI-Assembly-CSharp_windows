@@ -1,35 +1,118 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Remoting.Messaging;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 
 namespace System.Net
 {
-	internal class FtpDataStream : Stream, IDisposable
+	internal class FtpDataStream : Stream, ICloseEx
 	{
-		internal FtpDataStream(FtpWebRequest request, Stream stream, bool isRead)
+		internal FtpDataStream(NetworkStream networkStream, FtpWebRequest request, TriState writeOnly)
 		{
-			if (request == null)
+			if (NetEventSource.IsEnabled)
 			{
-				throw new ArgumentNullException("request");
+				NetEventSource.Info(this, null, ".ctor");
 			}
-			this.request = request;
-			this.networkStream = stream;
-			this.isRead = isRead;
+			this._readable = true;
+			this._writeable = true;
+			if (writeOnly == TriState.True)
+			{
+				this._readable = false;
+			}
+			else if (writeOnly == TriState.False)
+			{
+				this._writeable = false;
+			}
+			this._networkStream = networkStream;
+			this._request = request;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				if (disposing)
+				{
+					((ICloseEx)this).CloseEx(CloseExState.Normal);
+				}
+				else
+				{
+					((ICloseEx)this).CloseEx(CloseExState.Abort | CloseExState.Silent);
+				}
+			}
+			finally
+			{
+				base.Dispose(disposing);
+			}
+		}
+
+		void ICloseEx.CloseEx(CloseExState closeState)
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Info(this, FormattableStringFactory.Create("state = {0}", new object[] { closeState }), "CloseEx");
+			}
+			lock (this)
+			{
+				if (this._closing)
+				{
+					return;
+				}
+				this._closing = true;
+				this._writeable = false;
+				this._readable = false;
+			}
+			try
+			{
+				try
+				{
+					if ((closeState & CloseExState.Abort) == CloseExState.Normal)
+					{
+						this._networkStream.Close(-1);
+					}
+					else
+					{
+						this._networkStream.Close(0);
+					}
+				}
+				finally
+				{
+					this._request.DataStreamClosed(closeState);
+				}
+			}
+			catch (Exception ex)
+			{
+				bool flag2 = true;
+				WebException ex2 = ex as WebException;
+				if (ex2 != null)
+				{
+					FtpWebResponse ftpWebResponse = ex2.Response as FtpWebResponse;
+					if (ftpWebResponse != null && !this._isFullyRead && ftpWebResponse.StatusCode == FtpStatusCode.ConnectionClosed)
+					{
+						flag2 = false;
+					}
+				}
+				if (flag2 && (closeState & CloseExState.Silent) == CloseExState.Normal)
+				{
+					throw;
+				}
+			}
+		}
+
+		private void CheckError()
+		{
+			if (this._request.Aborted)
+			{
+				throw ExceptionHelper.RequestAbortedException;
+			}
 		}
 
 		public override bool CanRead
 		{
 			get
 			{
-				return this.isRead;
-			}
-		}
-
-		public override bool CanWrite
-		{
-			get
-			{
-				return !this.isRead;
+				return this._readable;
 			}
 		}
 
@@ -37,7 +120,15 @@ namespace System.Net
 		{
 			get
 			{
-				return false;
+				return this._networkStream.CanSeek;
+			}
+		}
+
+		public override bool CanWrite
+		{
+			get
+			{
+				return this._writeable;
 			}
 		}
 
@@ -45,7 +136,7 @@ namespace System.Net
 		{
 			get
 			{
-				throw new NotSupportedException();
+				return this._networkStream.Length;
 			}
 		}
 
@@ -53,228 +144,217 @@ namespace System.Net
 		{
 			get
 			{
-				throw new NotSupportedException();
+				return this._networkStream.Position;
 			}
 			set
 			{
-				throw new NotSupportedException();
+				this._networkStream.Position = value;
 			}
-		}
-
-		internal Stream NetworkStream
-		{
-			get
-			{
-				this.CheckDisposed();
-				return this.networkStream;
-			}
-		}
-
-		public override void Close()
-		{
-			this.Dispose(true);
-		}
-
-		public override void Flush()
-		{
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			throw new NotSupportedException();
-		}
-
-		public override void SetLength(long value)
-		{
-			throw new NotSupportedException();
-		}
-
-		private int ReadInternal(byte[] buffer, int offset, int size)
-		{
-			int num = 0;
-			this.request.CheckIfAborted();
+			this.CheckError();
+			long num;
 			try
 			{
-				num = this.networkStream.Read(buffer, offset, size);
+				num = this._networkStream.Seek(offset, origin);
 			}
-			catch (IOException)
+			catch
 			{
-				throw new ProtocolViolationException("Server commited a protocol violation");
-			}
-			this.totalRead += num;
-			if (num == 0)
-			{
-				this.networkStream = null;
-				this.request.CloseDataConnection();
-				this.request.SetTransferCompleted();
+				this.CheckError();
+				throw;
 			}
 			return num;
 		}
 
-		public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback cb, object state)
-		{
-			this.CheckDisposed();
-			if (!this.isRead)
-			{
-				throw new NotSupportedException();
-			}
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (offset < 0 || offset > buffer.Length)
-			{
-				throw new ArgumentOutOfRangeException("offset");
-			}
-			if (size < 0 || size > buffer.Length - offset)
-			{
-				throw new ArgumentOutOfRangeException("offset+size");
-			}
-			return new FtpDataStream.ReadDelegate(this.ReadInternal).BeginInvoke(buffer, offset, size, cb, state);
-		}
-
-		public override int EndRead(IAsyncResult asyncResult)
-		{
-			if (asyncResult == null)
-			{
-				throw new ArgumentNullException("asyncResult");
-			}
-			AsyncResult asyncResult2 = asyncResult as AsyncResult;
-			if (asyncResult2 == null)
-			{
-				throw new ArgumentException("Invalid asyncResult", "asyncResult");
-			}
-			FtpDataStream.ReadDelegate readDelegate = asyncResult2.AsyncDelegate as FtpDataStream.ReadDelegate;
-			if (readDelegate == null)
-			{
-				throw new ArgumentException("Invalid asyncResult", "asyncResult");
-			}
-			return readDelegate.EndInvoke(asyncResult);
-		}
-
 		public override int Read(byte[] buffer, int offset, int size)
 		{
-			this.request.CheckIfAborted();
-			IAsyncResult asyncResult = this.BeginRead(buffer, offset, size, null, null);
-			if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne(this.request.ReadWriteTimeout, false))
-			{
-				throw new WebException("Read timed out.", WebExceptionStatus.Timeout);
-			}
-			return this.EndRead(asyncResult);
-		}
-
-		private void WriteInternal(byte[] buffer, int offset, int size)
-		{
-			this.request.CheckIfAborted();
+			this.CheckError();
+			int num;
 			try
 			{
-				this.networkStream.Write(buffer, offset, size);
+				num = this._networkStream.Read(buffer, offset, size);
 			}
-			catch (IOException)
+			catch
 			{
-				throw new ProtocolViolationException();
+				this.CheckError();
+				throw;
 			}
-		}
-
-		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback cb, object state)
-		{
-			this.CheckDisposed();
-			if (this.isRead)
+			if (num == 0)
 			{
-				throw new NotSupportedException();
+				this._isFullyRead = true;
+				this.Close();
 			}
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (offset < 0 || offset > buffer.Length)
-			{
-				throw new ArgumentOutOfRangeException("offset");
-			}
-			if (size < 0 || size > buffer.Length - offset)
-			{
-				throw new ArgumentOutOfRangeException("offset+size");
-			}
-			return new FtpDataStream.WriteDelegate(this.WriteInternal).BeginInvoke(buffer, offset, size, cb, state);
-		}
-
-		public override void EndWrite(IAsyncResult asyncResult)
-		{
-			if (asyncResult == null)
-			{
-				throw new ArgumentNullException("asyncResult");
-			}
-			AsyncResult asyncResult2 = asyncResult as AsyncResult;
-			if (asyncResult2 == null)
-			{
-				throw new ArgumentException("Invalid asyncResult.", "asyncResult");
-			}
-			FtpDataStream.WriteDelegate writeDelegate = asyncResult2.AsyncDelegate as FtpDataStream.WriteDelegate;
-			if (writeDelegate == null)
-			{
-				throw new ArgumentException("Invalid asyncResult.", "asyncResult");
-			}
-			writeDelegate.EndInvoke(asyncResult);
+			return num;
 		}
 
 		public override void Write(byte[] buffer, int offset, int size)
 		{
-			this.request.CheckIfAborted();
-			IAsyncResult asyncResult = this.BeginWrite(buffer, offset, size, null, null);
-			if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne(this.request.ReadWriteTimeout, false))
+			this.CheckError();
+			try
 			{
-				throw new WebException("Read timed out.", WebExceptionStatus.Timeout);
+				this._networkStream.Write(buffer, offset, size);
 			}
-			this.EndWrite(asyncResult);
-		}
-
-		~FtpDataStream()
-		{
-			this.Dispose(false);
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (this.disposed)
+			catch
 			{
-				return;
-			}
-			this.disposed = true;
-			if (this.networkStream != null)
-			{
-				this.request.CloseDataConnection();
-				this.request.SetTransferCompleted();
-				this.request = null;
-				this.networkStream = null;
+				this.CheckError();
+				throw;
 			}
 		}
 
-		private void CheckDisposed()
+		private void AsyncReadCallback(IAsyncResult ar)
 		{
-			if (this.disposed)
+			LazyAsyncResult lazyAsyncResult = (LazyAsyncResult)ar.AsyncState;
+			try
 			{
-				throw new ObjectDisposedException(base.GetType().FullName);
+				try
+				{
+					int num = this._networkStream.EndRead(ar);
+					if (num == 0)
+					{
+						this._isFullyRead = true;
+						this.Close();
+					}
+					lazyAsyncResult.InvokeCallback(num);
+				}
+				catch (Exception ex)
+				{
+					if (!lazyAsyncResult.IsCompleted)
+					{
+						lazyAsyncResult.InvokeCallback(ex);
+					}
+				}
+			}
+			catch
+			{
 			}
 		}
 
-		private FtpWebRequest request;
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
+		{
+			this.CheckError();
+			LazyAsyncResult lazyAsyncResult = new LazyAsyncResult(this, state, callback);
+			try
+			{
+				this._networkStream.BeginRead(buffer, offset, size, new AsyncCallback(this.AsyncReadCallback), lazyAsyncResult);
+			}
+			catch
+			{
+				this.CheckError();
+				throw;
+			}
+			return lazyAsyncResult;
+		}
 
-		private Stream networkStream;
+		public override int EndRead(IAsyncResult ar)
+		{
+			int num;
+			try
+			{
+				object obj = ((LazyAsyncResult)ar).InternalWaitForCompletion();
+				Exception ex = obj as Exception;
+				if (ex != null)
+				{
+					ExceptionDispatchInfo.Throw(ex);
+				}
+				num = (int)obj;
+			}
+			finally
+			{
+				this.CheckError();
+			}
+			return num;
+		}
 
-		private bool disposed;
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
+		{
+			this.CheckError();
+			IAsyncResult asyncResult;
+			try
+			{
+				asyncResult = this._networkStream.BeginWrite(buffer, offset, size, callback, state);
+			}
+			catch
+			{
+				this.CheckError();
+				throw;
+			}
+			return asyncResult;
+		}
 
-		private bool isRead;
+		public override void EndWrite(IAsyncResult asyncResult)
+		{
+			try
+			{
+				this._networkStream.EndWrite(asyncResult);
+			}
+			finally
+			{
+				this.CheckError();
+			}
+		}
 
-		private int totalRead;
+		public override void Flush()
+		{
+			this._networkStream.Flush();
+		}
 
-		private delegate void WriteDelegate(byte[] buffer, int offset, int size);
+		public override void SetLength(long value)
+		{
+			this._networkStream.SetLength(value);
+		}
 
-		private delegate int ReadDelegate(byte[] buffer, int offset, int size);
+		public override bool CanTimeout
+		{
+			get
+			{
+				return this._networkStream.CanTimeout;
+			}
+		}
+
+		public override int ReadTimeout
+		{
+			get
+			{
+				return this._networkStream.ReadTimeout;
+			}
+			set
+			{
+				this._networkStream.ReadTimeout = value;
+			}
+		}
+
+		public override int WriteTimeout
+		{
+			get
+			{
+				return this._networkStream.WriteTimeout;
+			}
+			set
+			{
+				this._networkStream.WriteTimeout = value;
+			}
+		}
+
+		internal void SetSocketTimeoutOption(int timeout)
+		{
+			this._networkStream.ReadTimeout = timeout;
+			this._networkStream.WriteTimeout = timeout;
+		}
+
+		private FtpWebRequest _request;
+
+		private NetworkStream _networkStream;
+
+		private bool _writeable;
+
+		private bool _readable;
+
+		private bool _isFullyRead;
+
+		private bool _closing;
+
+		private const int DefaultCloseTimeout = -1;
 	}
 }

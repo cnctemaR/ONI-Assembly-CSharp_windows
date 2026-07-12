@@ -9,8 +9,8 @@ public class FoodRehydratorConfig : IBuildingConfig
 {
 	private static Effect ConstructRehydrationEffect()
 	{
-		Effect effect = new Effect("RehydratedFoodConsumed", "RehydratedFoodConsumed", ITEMS.DEHYDRATEDFOODPACKAGE.CONSUMED, 600f, false, false, true, null, -1f, 0f, null, "");
-		effect.Add(new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, -1f, ITEMS.DEHYDRATEDFOODPACKAGE.CONSUMED, false, false, true));
+		Effect effect = new Effect("RehydratedFoodConsumed", "RehydratedFoodConsumed", global::STRINGS.ITEMS.DEHYDRATEDFOODPACKAGE.CONSUMED, 600f, false, false, true, null, -1f, 0f, null, "");
+		effect.Add(new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, -1f, global::STRINGS.ITEMS.DEHYDRATEDFOODPACKAGE.CONSUMED, false, false, true));
 		return effect;
 	}
 

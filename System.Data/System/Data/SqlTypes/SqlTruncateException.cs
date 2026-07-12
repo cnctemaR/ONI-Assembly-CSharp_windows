@@ -22,6 +22,11 @@ namespace System.Data.SqlTypes
 			base.HResult = -2146232014;
 		}
 
+		private SqlTruncateException(SerializationInfo si, StreamingContext sc)
+			: base(SqlTruncateException.SqlTruncateExceptionSerialization(si, sc), sc)
+		{
+		}
+
 		private static SerializationInfo SqlTruncateExceptionSerialization(SerializationInfo si, StreamingContext sc)
 		{
 			if (si != null && 1 == si.MemberCount)

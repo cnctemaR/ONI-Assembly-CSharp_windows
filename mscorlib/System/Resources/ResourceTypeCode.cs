@@ -2,7 +2,6 @@
 
 namespace System.Resources
 {
-	[Serializable]
 	internal enum ResourceTypeCode
 	{
 		Null,

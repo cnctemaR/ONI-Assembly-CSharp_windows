@@ -64,12 +64,16 @@ namespace Mono.Security.Authenticode
 					throw new ArgumentNullException("Hash");
 				}
 				string text = value.ToUpper(CultureInfo.InvariantCulture);
-				if (text == "MD5" || text == "SHA1")
+				if (text == "MD5" || text == "SHA1" || text == "SHA256" || text == "SHA384" || text == "SHA512")
 				{
 					this.hash = text;
 					return;
 				}
-				throw new ArgumentException("Invalid Authenticode hash algorithm");
+				if (!(text == "SHA2"))
+				{
+					throw new ArgumentException("Invalid Authenticode hash algorithm");
+				}
+				this.hash = "SHA256";
 			}
 		}
 
@@ -237,7 +241,14 @@ namespace Mono.Security.Authenticode
 					num2 = 8 - num2;
 				}
 				byte[] array = BitConverterLE.GetBytes(num + num2);
-				fileStream.Seek((long)(base.PEOffset + 152), SeekOrigin.Begin);
+				if (base.PE64)
+				{
+					fileStream.Seek((long)(base.PEOffset + 168), SeekOrigin.Begin);
+				}
+				else
+				{
+					fileStream.Seek((long)(base.PEOffset + 152), SeekOrigin.Begin);
+				}
 				fileStream.Write(array, 0, 4);
 				int num3 = asn.Length + 8;
 				int num4 = num3 & 7;
@@ -246,7 +257,14 @@ namespace Mono.Security.Authenticode
 					num4 = 8 - num4;
 				}
 				array = BitConverterLE.GetBytes(num3 + num4);
-				fileStream.Seek((long)(base.PEOffset + 156), SeekOrigin.Begin);
+				if (base.PE64)
+				{
+					fileStream.Seek((long)(base.PEOffset + 168 + 4), SeekOrigin.Begin);
+				}
+				else
+				{
+					fileStream.Seek((long)(base.PEOffset + 156), SeekOrigin.Begin);
+				}
 				fileStream.Write(array, 0, 4);
 				fileStream.Seek((long)num, SeekOrigin.Begin);
 				if (num2 > 0)
@@ -255,7 +273,9 @@ namespace Mono.Security.Authenticode
 					fileStream.Write(array2, 0, array2.Length);
 				}
 				fileStream.Write(array, 0, array.Length);
-				array = BitConverterLE.GetBytes(131584);
+				array = BitConverterLE.GetBytes(512);
+				fileStream.Write(array, 0, array.Length);
+				array = BitConverterLE.GetBytes(2);
 				fileStream.Write(array, 0, array.Length);
 				fileStream.Write(asn, 0, asn.Length);
 				if (num4 > 0)

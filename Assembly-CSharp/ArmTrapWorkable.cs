@@ -27,14 +27,14 @@ public class ArmTrapWorkable : Workable
 		this.resetProgressOnStop = true;
 	}
 
-	public override void OnPendingCompleteWork(Worker worker)
+	public override void OnPendingCompleteWork(WorkerBase worker)
 	{
 		base.OnPendingCompleteWork(worker);
 		this.WorkInPstAnimation = true;
 		base.gameObject.Trigger(-2025798095, null);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.WorkInPstAnimation = false;

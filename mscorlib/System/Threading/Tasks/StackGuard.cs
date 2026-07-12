@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
 	internal class StackGuard
 	{
-		[SecuritySafeCritical]
 		internal bool TryBeginInliningScope()
 		{
-			if (this.m_inliningDepth < 20 || this.CheckForSufficientStack())
+			if (this.m_inliningDepth < 20 || RuntimeHelpers.TryEnsureSufficientExecutionStack())
 			{
 				this.m_inliningDepth++;
 				return true;
@@ -23,12 +22,6 @@ namespace System.Threading.Tasks
 			{
 				this.m_inliningDepth = 0;
 			}
-		}
-
-		[SecurityCritical]
-		private bool CheckForSufficientStack()
-		{
-			return true;
 		}
 
 		private int m_inliningDepth;

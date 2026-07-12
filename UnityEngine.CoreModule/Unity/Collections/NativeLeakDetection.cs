@@ -1,39 +1,25 @@
 ﻿using System;
-using UnityEngine;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Unity.Collections
 {
 	public static class NativeLeakDetection
 	{
-		[RuntimeInitializeOnLoadMethod]
-		private static void Initialize()
-		{
-			NativeLeakDetection.s_NativeLeakDetectionMode = 1;
-		}
-
 		public static NativeLeakDetectionMode Mode
 		{
 			get
 			{
-				bool flag = NativeLeakDetection.s_NativeLeakDetectionMode == 0;
-				if (flag)
-				{
-					NativeLeakDetection.Initialize();
-				}
-				return (NativeLeakDetectionMode)NativeLeakDetection.s_NativeLeakDetectionMode;
+				return UnsafeUtility.GetLeakDetectionMode();
 			}
 			set
 			{
-				bool flag = NativeLeakDetection.s_NativeLeakDetectionMode != (int)value;
+				bool flag = value < NativeLeakDetectionMode.Disabled || value > NativeLeakDetectionMode.EnabledWithStackTrace;
 				if (flag)
 				{
-					NativeLeakDetection.s_NativeLeakDetectionMode = (int)value;
+					throw new ArgumentException("NativeLeakDetectionMode out of range");
 				}
+				UnsafeUtility.SetLeakDetectionMode(value);
 			}
 		}
-
-		private static int s_NativeLeakDetectionMode;
-
-		private const string kNativeLeakDetectionModePrefsString = "Unity.Colletions.NativeLeakDetection.Mode";
 	}
 }

@@ -301,7 +301,8 @@ namespace System.Runtime.Remoting.Channels
 			{
 				if (!flag2)
 				{
-					throw new RemotingException(type + " is not a valid channel type");
+					Type type2 = type;
+					throw new RemotingException(((type2 != null) ? type2.ToString() : null) + " is not a valid channel type");
 				}
 				array = new Type[]
 				{
@@ -313,7 +314,8 @@ namespace System.Runtime.Remoting.Channels
 			ConstructorInfo constructor = type.GetConstructor(array);
 			if (constructor == null)
 			{
-				throw new RemotingException(type + " does not have a valid constructor");
+				Type type3 = type;
+				throw new RemotingException(((type3 != null) ? type3.ToString() : null) + " does not have a valid constructor");
 			}
 			IChannel channel2;
 			try
@@ -357,7 +359,9 @@ namespace System.Runtime.Remoting.Channels
 				{
 					innerException = ((TargetInvocationException)innerException).InnerException;
 				}
-				throw new RemotingException(string.Concat(new object[] { "An instance of provider '", type, "' could not be created: ", innerException.Message }));
+				string text = "An instance of provider '";
+				Type type2 = type;
+				throw new RemotingException(text + ((type2 != null) ? type2.ToString() : null) + "' could not be created: " + innerException.Message);
 			}
 			return obj;
 		}

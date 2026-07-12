@@ -9,40 +9,43 @@ namespace Mono.Net.Security
 {
 	internal abstract class MobileTlsContext : IDisposable
 	{
-		public MobileTlsContext(MobileAuthenticatedStream parent, bool serverMode, string targetHost, SslProtocols enabledProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool askForClientCert)
+		protected MobileTlsContext(MobileAuthenticatedStream parent, MonoSslAuthenticationOptions options)
 		{
-			this.parent = parent;
-			this.serverMode = serverMode;
-			this.targetHost = targetHost;
-			this.enabledProtocols = enabledProtocols;
-			this.serverCertificate = serverCertificate;
-			this.clientCertificates = clientCertificates;
-			this.askForClientCert = askForClientCert;
-			this.serverName = targetHost;
-			if (!string.IsNullOrEmpty(this.serverName))
+			this.Parent = parent;
+			this.Options = options;
+			this.IsServer = options.ServerMode;
+			this.EnabledProtocols = options.EnabledSslProtocols;
+			if (options.ServerMode)
 			{
-				int num = this.serverName.IndexOf(':');
-				if (num > 0)
+				this.LocalServerCertificate = options.ServerCertificate;
+				this.AskForClientCertificate = options.ClientCertificateRequired;
+			}
+			else
+			{
+				this.ClientCertificates = options.ClientCertificates;
+				this.TargetHost = options.TargetHost;
+				this.ServerName = options.TargetHost;
+				if (!string.IsNullOrEmpty(this.ServerName))
 				{
-					this.serverName = this.serverName.Substring(0, num);
+					int num = this.ServerName.IndexOf(':');
+					if (num > 0)
+					{
+						this.ServerName = this.ServerName.Substring(0, num);
+					}
 				}
 			}
-			this.certificateValidator = CertificateValidationHelper.GetInternalValidator(parent.Settings, parent.Provider);
+			this.certificateValidator = ChainValidationHelper.GetInternalValidator(parent.SslStream, parent.Provider, parent.Settings);
 		}
 
-		internal MobileAuthenticatedStream Parent
-		{
-			get
-			{
-				return this.parent;
-			}
-		}
+		internal MonoSslAuthenticationOptions Options { get; }
+
+		internal MobileAuthenticatedStream Parent { get; }
 
 		public MonoTlsSettings Settings
 		{
 			get
 			{
-				return this.parent.Settings;
+				return this.Parent.Settings;
 			}
 		}
 
@@ -50,7 +53,7 @@ namespace Mono.Net.Security
 		{
 			get
 			{
-				return this.parent.Provider;
+				return this.Parent.Provider;
 			}
 		}
 
@@ -63,79 +66,60 @@ namespace Mono.Net.Security
 
 		public abstract bool IsAuthenticated { get; }
 
-		public bool IsServer
+		public bool IsServer { get; }
+
+		internal string TargetHost { get; }
+
+		protected string ServerName { get; }
+
+		protected bool AskForClientCertificate { get; }
+
+		protected SslProtocols EnabledProtocols { get; }
+
+		protected X509CertificateCollection ClientCertificates { get; }
+
+		internal bool AllowRenegotiation
 		{
 			get
 			{
-				return this.serverMode;
+				return false;
 			}
 		}
 
-		protected string TargetHost
+		protected void GetProtocolVersions(out TlsProtocolCode? min, out TlsProtocolCode? max)
 		{
-			get
+			if ((this.EnabledProtocols & SslProtocols.Tls) != SslProtocols.None)
 			{
-				return this.targetHost;
+				min = new TlsProtocolCode?(TlsProtocolCode.Tls10);
 			}
-		}
-
-		protected string ServerName
-		{
-			get
+			else if ((this.EnabledProtocols & SslProtocols.Tls11) != SslProtocols.None)
 			{
-				return this.serverName;
+				min = new TlsProtocolCode?(TlsProtocolCode.Tls11);
 			}
-		}
-
-		protected bool AskForClientCertificate
-		{
-			get
+			else if ((this.EnabledProtocols & SslProtocols.Tls12) != SslProtocols.None)
 			{
-				return this.askForClientCert;
-			}
-		}
-
-		protected SslProtocols EnabledProtocols
-		{
-			get
-			{
-				return this.enabledProtocols;
-			}
-		}
-
-		protected X509CertificateCollection ClientCertificates
-		{
-			get
-			{
-				return this.clientCertificates;
-			}
-		}
-
-		protected void GetProtocolVersions(out TlsProtocolCode min, out TlsProtocolCode max)
-		{
-			if ((this.enabledProtocols & SslProtocols.Tls) != SslProtocols.None)
-			{
-				min = TlsProtocolCode.Tls10;
-			}
-			else if ((this.enabledProtocols & SslProtocols.Tls11) != SslProtocols.None)
-			{
-				min = TlsProtocolCode.Tls11;
+				min = new TlsProtocolCode?(TlsProtocolCode.Tls12);
 			}
 			else
 			{
-				min = TlsProtocolCode.Tls12;
+				min = null;
 			}
-			if ((this.enabledProtocols & SslProtocols.Tls12) != SslProtocols.None)
+			if ((this.EnabledProtocols & SslProtocols.Tls12) != SslProtocols.None)
 			{
-				max = TlsProtocolCode.Tls12;
+				max = new TlsProtocolCode?(TlsProtocolCode.Tls12);
 				return;
 			}
-			if ((this.enabledProtocols & SslProtocols.Tls11) != SslProtocols.None)
+			if ((this.EnabledProtocols & SslProtocols.Tls11) != SslProtocols.None)
 			{
-				max = TlsProtocolCode.Tls11;
+				max = new TlsProtocolCode?(TlsProtocolCode.Tls11);
 				return;
 			}
-			max = TlsProtocolCode.Tls10;
+			if ((this.EnabledProtocols & SslProtocols.Tls) != SslProtocols.None)
+			{
+				max = new TlsProtocolCode?(TlsProtocolCode.Tls10);
+				return;
+			}
+			max = null;
 		}
 
 		public abstract void StartHandshake();
@@ -146,19 +130,13 @@ namespace Mono.Net.Security
 
 		public abstract MonoTlsConnectionInfo ConnectionInfo { get; }
 
-		internal X509Certificate LocalServerCertificate
-		{
-			get
-			{
-				return this.serverCertificate;
-			}
-		}
+		internal X509Certificate LocalServerCertificate { get; private set; }
 
 		internal abstract bool IsRemoteCertificateAvailable { get; }
 
 		internal abstract X509Certificate LocalClientCertificate { get; }
 
-		public abstract X509Certificate RemoteCertificate { get; }
+		public abstract X509Certificate2 RemoteCertificate { get; }
 
 		public abstract TlsProtocols NegotiatedProtocol { get; }
 
@@ -172,35 +150,112 @@ namespace Mono.Net.Security
 
 		public abstract void Shutdown();
 
-		protected bool ValidateCertificate(X509Certificate leaf, X509Chain chain)
+		public abstract bool PendingRenegotiation();
+
+		protected bool ValidateCertificate(X509Certificate2 leaf, X509Chain chain)
 		{
 			ValidationResult validationResult = this.certificateValidator.ValidateCertificate(this.TargetHost, this.IsServer, leaf, chain);
 			return validationResult != null && validationResult.Trusted && !validationResult.UserDenied;
 		}
 
-		protected bool ValidateCertificate(X509CertificateCollection certificates)
+		protected bool ValidateCertificate(X509Certificate2Collection certificates)
 		{
 			ValidationResult validationResult = this.certificateValidator.ValidateCertificate(this.TargetHost, this.IsServer, certificates);
 			return validationResult != null && validationResult.Trusted && !validationResult.UserDenied;
 		}
 
-		protected X509Certificate SelectClientCertificate(X509Certificate serverCertificate, string[] acceptableIssuers)
+		protected X509Certificate SelectServerCertificate(string serverIdentity)
 		{
-			X509Certificate x509Certificate;
-			if (this.certificateValidator.SelectClientCertificate(this.TargetHost, this.ClientCertificates, serverCertificate, acceptableIssuers, out x509Certificate))
+			if (this.Options.ServerCertSelectionDelegate != null)
 			{
-				return x509Certificate;
+				this.LocalServerCertificate = this.Options.ServerCertSelectionDelegate(serverIdentity);
+				if (this.LocalServerCertificate == null)
+				{
+					throw new AuthenticationException("The server mode SSL must use a certificate with the associated private key.");
+				}
 			}
-			if (this.clientCertificates == null || this.clientCertificates.Count == 0)
+			else if (this.Settings.ClientCertificateSelectionCallback != null)
+			{
+				X509CertificateCollection x509CertificateCollection = new X509CertificateCollection();
+				x509CertificateCollection.Add(this.Options.ServerCertificate);
+				this.LocalServerCertificate = this.Settings.ClientCertificateSelectionCallback(string.Empty, x509CertificateCollection, null, Array.Empty<string>());
+			}
+			else
+			{
+				this.LocalServerCertificate = this.Options.ServerCertificate;
+			}
+			if (this.LocalServerCertificate == null)
+			{
+				throw new NotSupportedException("The server mode SSL must use a certificate with the associated private key.");
+			}
+			return this.LocalServerCertificate;
+		}
+
+		protected X509Certificate SelectClientCertificate(string[] acceptableIssuers)
+		{
+			if (this.Settings.DisallowUnauthenticatedCertificateRequest && !this.IsAuthenticated)
 			{
 				return null;
 			}
-			if (this.clientCertificates.Count == 1)
+			if (this.RemoteCertificate == null)
 			{
-				return this.clientCertificates[0];
+				throw new TlsException(AlertDescription.InternalError, "Cannot request client certificate before receiving one from the server.");
 			}
-			throw new NotImplementedException();
+			X509Certificate x509Certificate;
+			if (this.certificateValidator.SelectClientCertificate(this.TargetHost, this.ClientCertificates, this.IsAuthenticated ? this.RemoteCertificate : null, acceptableIssuers, out x509Certificate))
+			{
+				return x509Certificate;
+			}
+			if (this.ClientCertificates == null || this.ClientCertificates.Count == 0)
+			{
+				return null;
+			}
+			if (acceptableIssuers == null || acceptableIssuers.Length == 0)
+			{
+				return this.ClientCertificates[0];
+			}
+			for (int i = 0; i < this.ClientCertificates.Count; i++)
+			{
+				X509Certificate2 x509Certificate2 = this.ClientCertificates[i] as X509Certificate2;
+				if (x509Certificate2 != null)
+				{
+					X509Chain x509Chain = null;
+					try
+					{
+						x509Chain = new X509Chain();
+						x509Chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+						x509Chain.ChainPolicy.VerificationFlags = X509VerificationFlags.IgnoreInvalidName;
+						x509Chain.Build(x509Certificate2);
+						if (x509Chain.ChainElements.Count != 0)
+						{
+							for (int j = 0; j < x509Chain.ChainElements.Count; j++)
+							{
+								string issuer = x509Chain.ChainElements[j].Certificate.Issuer;
+								if (Array.IndexOf<string>(acceptableIssuers, issuer) != -1)
+								{
+									return x509Certificate2;
+								}
+							}
+						}
+					}
+					catch
+					{
+					}
+					finally
+					{
+						if (x509Chain != null)
+						{
+							x509Chain.Reset();
+						}
+					}
+				}
+			}
+			return null;
 		}
+
+		public abstract bool CanRenegotiate { get; }
+
+		public abstract void Renegotiate();
 
 		public void Dispose()
 		{
@@ -217,22 +272,6 @@ namespace Mono.Net.Security
 			this.Dispose(false);
 		}
 
-		private MobileAuthenticatedStream parent;
-
-		private bool serverMode;
-
-		private string targetHost;
-
-		private string serverName;
-
-		private SslProtocols enabledProtocols;
-
-		private X509Certificate serverCertificate;
-
-		private X509CertificateCollection clientCertificates;
-
-		private bool askForClientCert;
-
-		private ICertificateValidator2 certificateValidator;
+		private ChainValidationHelper certificateValidator;
 	}
 }

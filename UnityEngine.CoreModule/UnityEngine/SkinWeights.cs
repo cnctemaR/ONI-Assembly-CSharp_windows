@@ -4,7 +4,8 @@ namespace UnityEngine
 {
 	public enum SkinWeights
 	{
-		OneBone = 1,
+		None,
+		OneBone,
 		TwoBones,
 		FourBones = 4,
 		Unlimited = 255

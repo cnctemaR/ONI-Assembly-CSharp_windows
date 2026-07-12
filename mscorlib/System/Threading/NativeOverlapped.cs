@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Threading
 {
-	[ComVisible(true)]
 	public struct NativeOverlapped
 	{
 		public IntPtr InternalLow;

@@ -4,7 +4,6 @@ using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[Serializable]
 	public class WarningException : SystemException
 	{
@@ -31,47 +30,27 @@ namespace System.ComponentModel
 		public WarningException(string message, string helpUrl, string helpTopic)
 			: base(message)
 		{
-			this.helpUrl = helpUrl;
-			this.helpTopic = helpTopic;
+			this.HelpUrl = helpUrl;
+			this.HelpTopic = helpTopic;
 		}
 
 		protected WarningException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this.helpUrl = (string)info.GetValue("helpUrl", typeof(string));
-			this.helpTopic = (string)info.GetValue("helpTopic", typeof(string));
+			this.HelpUrl = (string)info.GetValue("helpUrl", typeof(string));
+			this.HelpTopic = (string)info.GetValue("helpTopic", typeof(string));
 		}
 
-		public string HelpUrl
-		{
-			get
-			{
-				return this.helpUrl;
-			}
-		}
+		public string HelpUrl { get; }
 
-		public string HelpTopic
-		{
-			get
-			{
-				return this.helpTopic;
-			}
-		}
+		public string HelpTopic { get; }
 
 		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("helpUrl", this.helpUrl);
-			info.AddValue("helpTopic", this.helpTopic);
 			base.GetObjectData(info, context);
+			info.AddValue("helpUrl", this.HelpUrl);
+			info.AddValue("helpTopic", this.HelpTopic);
 		}
-
-		private readonly string helpUrl;
-
-		private readonly string helpTopic;
 	}
 }

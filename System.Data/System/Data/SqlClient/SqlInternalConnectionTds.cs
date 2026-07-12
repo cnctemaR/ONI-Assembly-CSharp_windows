@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Globalization;
+using System.Security;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -32,7 +34,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		internal SqlInternalConnectionTds(DbConnectionPoolIdentity identity, SqlConnectionString connectionOptions, object providerInfo, bool redirectedUserInstance, SqlConnectionString userConnectionOptions = null, SessionData reconnectSessionData = null, bool applyTransientFaultHandling = false)
+		internal SqlInternalConnectionTds(DbConnectionPoolIdentity identity, SqlConnectionString connectionOptions, SqlCredential credential, object providerInfo, string newPassword, SecureString newSecurePassword, bool redirectedUserInstance, SqlConnectionString userConnectionOptions = null, SessionData reconnectSessionData = null, bool applyTransientFaultHandling = false, string accessToken = null)
 			: base(connectionOptions)
 		{
 			if (connectionOptions.ConnectRetryCount > 0)
@@ -49,6 +51,10 @@ namespace System.Data.SqlClient
 					this._originalLanguage = this._recoverySessionData._initialLanguage;
 				}
 			}
+			if (accessToken != null)
+			{
+				this._accessTokenInBytes = Encoding.Unicode.GetBytes(accessToken);
+			}
 			this._identity = identity;
 			this._poolGroupProviderInfo = (SqlConnectionPoolGroupProviderInfo)providerInfo;
 			this._fResetConnection = connectionOptions.ConnectionReset;
@@ -58,23 +64,24 @@ namespace System.Data.SqlClient
 				this._originalLanguage = connectionOptions.CurrentLanguage;
 			}
 			this._timeoutErrorInternal = new SqlConnectionTimeoutErrorInternal();
+			this._credential = credential;
 			this._parserLock.Wait(false);
 			this.ThreadHasParserLockForClose = true;
 			try
 			{
-				TimeoutTimer timeoutTimer = TimeoutTimer.StartSecondsTimeout(connectionOptions.ConnectTimeout);
+				this._timeout = TimeoutTimer.StartSecondsTimeout(connectionOptions.ConnectTimeout);
 				int num = (applyTransientFaultHandling ? (connectionOptions.ConnectRetryCount + 1) : 1);
 				int num2 = connectionOptions.ConnectRetryInterval * 1000;
 				for (int i = 0; i < num; i++)
 				{
 					try
 					{
-						this.OpenLoginEnlist(timeoutTimer, connectionOptions, redirectedUserInstance);
+						this.OpenLoginEnlist(this._timeout, connectionOptions, credential, newPassword, newSecurePassword, redirectedUserInstance);
 						break;
 					}
 					catch (SqlException ex)
 					{
-						if (i + 1 == num || !applyTransientFaultHandling || timeoutTimer.IsExpired || timeoutTimer.MillisecondsRemaining < (long)num2 || !this.IsTransientError(ex))
+						if (i + 1 == num || !applyTransientFaultHandling || this._timeout.IsExpired || this._timeout.MillisecondsRemaining < (long)num2 || !this.IsTransientError(ex))
 						{
 							throw ex;
 						}
@@ -574,6 +581,10 @@ namespace System.Data.SqlClient
 			this._parser.Run(RunBehavior.UntilDone, null, null, null, this._parser._physicalStateObj);
 			if (this._routingInfo == null)
 			{
+				if (this._federatedAuthenticationRequested && !this._federatedAuthenticationAcknowledged)
+				{
+					throw SQL.ParsingError(ParsingErrorState.FedAuthNotAcknowledged);
+				}
 				if (!this._sessionRecoveryAcknowledged)
 				{
 					this._currentSessionData = null;
@@ -611,7 +622,7 @@ namespace System.Data.SqlClient
 			this._parser._physicalStateObj.SniContext = SniContext.Snix_Login;
 		}
 
-		private void Login(ServerInfo server, TimeoutTimer timeout)
+		private void Login(ServerInfo server, TimeoutTimer timeout, string newPassword, SecureString newSecurePassword)
 		{
 			SqlLogin sqlLogin = new SqlLogin();
 			base.CurrentDatabase = server.ResolvedDatabaseName;
@@ -642,15 +653,32 @@ namespace System.Data.SqlClient
 			sqlLogin.useReplication = base.ConnectionOptions.Replication;
 			sqlLogin.useSSPI = base.ConnectionOptions.IntegratedSecurity;
 			sqlLogin.packetSize = this._currentPacketSize;
+			sqlLogin.newPassword = newPassword;
 			sqlLogin.readOnlyIntent = base.ConnectionOptions.ApplicationIntent == ApplicationIntent.ReadOnly;
+			sqlLogin.credential = this._credential;
+			if (newSecurePassword != null)
+			{
+				sqlLogin.newSecurePassword = newSecurePassword;
+			}
 			TdsEnums.FeatureExtension featureExtension = TdsEnums.FeatureExtension.None;
 			if (base.ConnectionOptions.ConnectRetryCount > 0)
 			{
 				featureExtension |= TdsEnums.FeatureExtension.SessionRecovery;
 				this._sessionRecoveryRequested = true;
 			}
+			if (this._accessTokenInBytes != null)
+			{
+				featureExtension |= TdsEnums.FeatureExtension.FedAuth;
+				this._fedAuthFeatureExtensionData = new FederatedAuthenticationFeatureExtensionData?(new FederatedAuthenticationFeatureExtensionData
+				{
+					libraryType = TdsEnums.FedAuthLibrary.SecurityToken,
+					fedAuthRequiredPreLoginResponse = this._fedAuthRequired,
+					accessToken = this._accessTokenInBytes
+				});
+				this._federatedAuthenticationRequested = true;
+			}
 			featureExtension |= TdsEnums.FeatureExtension.GlobalTransactions;
-			this._parser.TdsLogin(sqlLogin, featureExtension, this._recoverySessionData);
+			this._parser.TdsLogin(sqlLogin, featureExtension, this._recoverySessionData, this._fedAuthFeatureExtensionData);
 		}
 
 		private void LoginFailure()
@@ -661,7 +689,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		private void OpenLoginEnlist(TimeoutTimer timeout, SqlConnectionString connectionOptions, bool redirectedUserInstance)
+		private void OpenLoginEnlist(TimeoutTimer timeout, SqlConnectionString connectionOptions, SqlCredential credential, string newPassword, SecureString newSecurePassword, bool redirectedUserInstance)
 		{
 			ServerInfo serverInfo = new ServerInfo(connectionOptions);
 			bool flag;
@@ -684,12 +712,12 @@ namespace System.Data.SqlClient
 				if (flag2)
 				{
 					this._timeoutErrorInternal.SetFailoverScenario(true);
-					this.LoginWithFailover(flag, serverInfo, text, redirectedUserInstance, connectionOptions, timeout);
+					this.LoginWithFailover(flag, serverInfo, text, newPassword, newSecurePassword, redirectedUserInstance, connectionOptions, credential, timeout);
 				}
 				else
 				{
 					this._timeoutErrorInternal.SetFailoverScenario(false);
-					this.LoginNoFailover(serverInfo, redirectedUserInstance, connectionOptions, timeout);
+					this.LoginNoFailover(serverInfo, newPassword, newSecurePassword, redirectedUserInstance, connectionOptions, credential, timeout);
 				}
 				this._timeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.PostLogin);
 			}
@@ -709,7 +737,7 @@ namespace System.Data.SqlClient
 			return 18456 == exc.Number || 18488 == exc.Number || 1346 == exc.Number || exc._doNotReconnect;
 		}
 
-		private void LoginNoFailover(ServerInfo serverInfo, bool redirectedUserInstance, SqlConnectionString connectionOptions, TimeoutTimer timeout)
+		private void LoginNoFailover(ServerInfo serverInfo, string newPassword, SecureString newSecurePassword, bool redirectedUserInstance, SqlConnectionString connectionOptions, SqlCredential credential, TimeoutTimer timeout)
 		{
 			int num = 0;
 			ServerInfo serverInfo2 = serverInfo;
@@ -757,14 +785,14 @@ namespace System.Data.SqlClient
 				this._parser = new TdsParser(base.ConnectionOptions.MARS, base.ConnectionOptions.Asynchronous);
 				try
 				{
-					this.AttemptOneLogin(serverInfo, !connectionOptions.MultiSubnetFailover, connectionOptions.MultiSubnetFailover ? timeoutTimer : timeout, false);
+					this.AttemptOneLogin(serverInfo, newPassword, newSecurePassword, !connectionOptions.MultiSubnetFailover, connectionOptions.MultiSubnetFailover ? timeoutTimer : timeout, false);
 					if (connectionOptions.MultiSubnetFailover && this.ServerProvidedFailOverPartner != null)
 					{
 						throw SQL.MultiSubnetFailoverWithFailoverPartner(true, this);
 					}
 					if (this._routingInfo == null)
 					{
-						goto IL_0261;
+						goto IL_0271;
 					}
 					if (num > 0)
 					{
@@ -812,9 +840,9 @@ namespace System.Data.SqlClient
 			this._timeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.PreLoginBegin);
 			this._timeoutErrorInternal.SetInternalSourceType(SqlConnectionInternalSourceType.Failover);
 			this._timeoutErrorInternal.SetFailoverScenario(true);
-			this.LoginWithFailover(true, serverInfo, this.ServerProvidedFailOverPartner, redirectedUserInstance, connectionOptions, timeout);
+			this.LoginWithFailover(true, serverInfo, this.ServerProvidedFailOverPartner, newPassword, newSecurePassword, redirectedUserInstance, connectionOptions, credential, timeout);
 			return;
-			IL_0261:
+			IL_0271:
 			if (this.PoolGroupProviderInfo != null)
 			{
 				this.PoolGroupProviderInfo.FailoverCheck(this, false, connectionOptions, this.ServerProvidedFailOverPartner);
@@ -822,7 +850,7 @@ namespace System.Data.SqlClient
 			base.CurrentDataSource = serverInfo2.UserServerName;
 		}
 
-		private void LoginWithFailover(bool useFailoverHost, ServerInfo primaryServerInfo, string failoverHost, bool redirectedUserInstance, SqlConnectionString connectionOptions, TimeoutTimer timeout)
+		private void LoginWithFailover(bool useFailoverHost, ServerInfo primaryServerInfo, string failoverHost, string newPassword, SecureString newSecurePassword, bool redirectedUserInstance, SqlConnectionString connectionOptions, SqlCredential credential, TimeoutTimer timeout)
 		{
 			int num = 100;
 			ServerInfo serverInfo = new ServerInfo(connectionOptions, failoverHost);
@@ -876,7 +904,7 @@ namespace System.Data.SqlClient
 					{
 						try
 						{
-							this.AttemptOneLogin(serverInfo2, false, timeoutTimer, true);
+							this.AttemptOneLogin(serverInfo2, newPassword, newSecurePassword, false, timeoutTimer, true);
 							if (this._routingInfo != null)
 							{
 								throw SQL.ROR_UnexpectedRoutingInfo(this);
@@ -929,7 +957,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		private void AttemptOneLogin(ServerInfo serverInfo, bool ignoreSniOpenTimeout, TimeoutTimer timeout, bool withFailover = false)
+		private void AttemptOneLogin(ServerInfo serverInfo, string newPassword, SecureString newSecurePassword, bool ignoreSniOpenTimeout, TimeoutTimer timeout, bool withFailover = false)
 		{
 			this._routingInfo = null;
 			this._parser._physicalStateObj.SniContext = SniContext.Snix_Connect;
@@ -937,7 +965,7 @@ namespace System.Data.SqlClient
 			this._timeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.ConsumePreLoginHandshake);
 			this._timeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.LoginBegin);
 			this._parser._physicalStateObj.SniContext = SniContext.Snix_Login;
-			this.Login(serverInfo, timeout);
+			this.Login(serverInfo, timeout, newPassword, newSecurePassword);
 			this._timeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.ProcessConnectionAuth);
 			this._timeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.PostLogin);
 			this.CompleteLogin(!base.ConnectionOptions.Pooling);
@@ -1112,25 +1140,9 @@ namespace System.Data.SqlClient
 			{
 				return;
 			}
-			if (featureId != 1)
+			switch (featureId)
 			{
-				if (featureId != 5)
-				{
-					throw SQL.ParsingError();
-				}
-				if (data.Length < 1)
-				{
-					throw SQL.ParsingError();
-				}
-				base.IsGlobalTransaction = true;
-				if (1 == data[0])
-				{
-					base.IsGlobalTransactionsEnabledForServer = true;
-					return;
-				}
-				return;
-			}
-			else
+			case 1:
 			{
 				if (!this._sessionRecoveryRequested)
 				{
@@ -1175,6 +1187,35 @@ namespace System.Data.SqlClient
 				}
 				return;
 			}
+			case 2:
+				if (!this._federatedAuthenticationRequested)
+				{
+					throw SQL.ParsingErrorFeatureId(ParsingErrorState.UnrequestedFeatureAckReceived, featureId);
+				}
+				if (this._fedAuthFeatureExtensionData.Value.libraryType != TdsEnums.FedAuthLibrary.SecurityToken)
+				{
+					throw SQL.ParsingErrorLibraryType(ParsingErrorState.FedAuthFeatureAckUnknownLibraryType, (int)this._fedAuthFeatureExtensionData.Value.libraryType);
+				}
+				if (data.Length != 0)
+				{
+					throw SQL.ParsingError(ParsingErrorState.FedAuthFeatureAckContainsExtraData);
+				}
+				this._federatedAuthenticationAcknowledged = true;
+				return;
+			case 5:
+				if (data.Length < 1)
+				{
+					throw SQL.ParsingError();
+				}
+				base.IsGlobalTransaction = true;
+				if (1 == data[0])
+				{
+					base.IsGlobalTransactionsEnabledForServer = true;
+					return;
+				}
+				return;
+			}
+			throw SQL.ParsingError();
 		}
 
 		internal bool ThreadHasParserLockForClose
@@ -1208,6 +1249,10 @@ namespace System.Data.SqlClient
 
 		private SqlLoginAck _loginAck;
 
+		private SqlCredential _credential;
+
+		private FederatedAuthenticationFeatureExtensionData? _fedAuthFeatureExtensionData;
+
 		private bool _sessionRecoveryRequested;
 
 		internal bool _sessionRecoveryAcknowledged;
@@ -1215,6 +1260,14 @@ namespace System.Data.SqlClient
 		internal SessionData _currentSessionData;
 
 		private SessionData _recoverySessionData;
+
+		internal bool _fedAuthRequired;
+
+		internal bool _federatedAuthenticationRequested;
+
+		internal bool _federatedAuthenticationAcknowledged;
+
+		internal byte[] _accessTokenInBytes;
 
 		private static readonly HashSet<int> s_transientErrors = new HashSet<int> { 4060, 10928, 10929, 40197, 40501, 40613 };
 
@@ -1251,6 +1304,8 @@ namespace System.Data.SqlClient
 		private Guid _originalClientConnectionId = Guid.Empty;
 
 		private string _routingDestination;
+
+		private readonly TimeoutTimer _timeout;
 
 		internal class SyncAsyncLock
 		{

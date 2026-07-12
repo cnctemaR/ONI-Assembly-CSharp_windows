@@ -2,8 +2,6 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum LayoutKind
 	{
 		Sequential,

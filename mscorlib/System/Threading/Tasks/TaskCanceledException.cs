@@ -7,7 +7,7 @@ namespace System.Threading.Tasks
 	public class TaskCanceledException : OperationCanceledException
 	{
 		public TaskCanceledException()
-			: base(Environment.GetResourceString("A task was canceled."))
+			: base("A task was canceled.")
 		{
 		}
 
@@ -21,10 +21,15 @@ namespace System.Threading.Tasks
 		{
 		}
 
-		public TaskCanceledException(Task task)
-			: base(Environment.GetResourceString("A task was canceled."), (task != null) ? task.CancellationToken : default(CancellationToken))
+		public TaskCanceledException(string message, Exception innerException, CancellationToken token)
+			: base(message, innerException, token)
 		{
-			this.m_canceledTask = task;
+		}
+
+		public TaskCanceledException(Task task)
+			: base("A task was canceled.", (task != null) ? task.CancellationToken : default(CancellationToken))
+		{
+			this._canceledTask = task;
 		}
 
 		protected TaskCanceledException(SerializationInfo info, StreamingContext context)
@@ -36,11 +41,11 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_canceledTask;
+				return this._canceledTask;
 			}
 		}
 
 		[NonSerialized]
-		private Task m_canceledTask;
+		private readonly Task _canceledTask;
 	}
 }

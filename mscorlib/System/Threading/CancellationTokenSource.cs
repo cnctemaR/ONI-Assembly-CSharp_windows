@@ -1,24 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class CancellationTokenSource : IDisposable
 	{
-		private static void LinkedTokenCancelDelegate(object source)
-		{
-			(source as CancellationTokenSource).Cancel();
-		}
-
 		public bool IsCancellationRequested
 		{
 			get
 			{
-				return this.m_state >= 2;
+				return this._state >= 2;
 			}
 		}
 
@@ -26,7 +17,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_state == 3;
+				return this._state == 3;
 			}
 		}
 
@@ -34,7 +25,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_disposed;
+				return this._disposed;
 			}
 		}
 
@@ -42,11 +33,11 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_threadIDExecutingCallbacks;
+				return this._threadIDExecutingCallbacks;
 			}
 			set
 			{
-				this.m_threadIDExecutingCallbacks = value;
+				this._threadIDExecutingCallbacks = value;
 			}
 		}
 
@@ -63,7 +54,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_state != 0;
+				return this._state != 0;
 			}
 		}
 
@@ -72,20 +63,20 @@ namespace System.Threading
 			get
 			{
 				this.ThrowIfDisposed();
-				if (this.m_kernelEvent != null)
+				if (this._kernelEvent != null)
 				{
-					return this.m_kernelEvent;
+					return this._kernelEvent;
 				}
 				ManualResetEvent manualResetEvent = new ManualResetEvent(false);
-				if (Interlocked.CompareExchange<ManualResetEvent>(ref this.m_kernelEvent, manualResetEvent, null) != null)
+				if (Interlocked.CompareExchange<ManualResetEvent>(ref this._kernelEvent, manualResetEvent, null) != null)
 				{
-					((IDisposable)manualResetEvent).Dispose();
+					manualResetEvent.Dispose();
 				}
 				if (this.IsCancellationRequested)
 				{
-					this.m_kernelEvent.Set();
+					this._kernelEvent.Set();
 				}
-				return this.m_kernelEvent;
+				return this._kernelEvent;
 			}
 		}
 
@@ -93,18 +84,13 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_executingCallback;
+				return this._executingCallback;
 			}
 		}
 
 		public CancellationTokenSource()
 		{
-			this.m_state = 1;
-		}
-
-		private CancellationTokenSource(bool set)
-		{
-			this.m_state = (set ? 3 : 0);
+			this._state = 1;
 		}
 
 		public CancellationTokenSource(TimeSpan delay)
@@ -128,8 +114,8 @@ namespace System.Threading
 
 		private void InitializeWithTimer(int millisecondsDelay)
 		{
-			this.m_state = 1;
-			this.m_timer = new Timer(CancellationTokenSource.s_timerCallback, this, millisecondsDelay, -1);
+			this._state = 1;
+			this._timer = new Timer(CancellationTokenSource.s_timerCallback, this, millisecondsDelay, -1);
 		}
 
 		public void Cancel()
@@ -164,17 +150,17 @@ namespace System.Threading
 			{
 				return;
 			}
-			if (this.m_timer == null)
+			if (this._timer == null)
 			{
 				Timer timer = new Timer(CancellationTokenSource.s_timerCallback, this, -1, -1);
-				if (Interlocked.CompareExchange<Timer>(ref this.m_timer, timer, null) != null)
+				if (Interlocked.CompareExchange<Timer>(ref this._timer, timer, null) != null)
 				{
 					timer.Dispose();
 				}
 			}
 			try
 			{
-				this.m_timer.Change(millisecondsDelay, -1);
+				this._timer.Change(millisecondsDelay, -1);
 			}
 			catch (ObjectDisposedException)
 			{
@@ -208,39 +194,29 @@ namespace System.Threading
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (disposing && !this._disposed)
 			{
-				if (this.m_disposed)
+				Timer timer = this._timer;
+				if (timer != null)
 				{
-					return;
+					timer.Dispose();
 				}
-				if (this.m_timer != null)
+				this._registeredCallbacksLists = null;
+				if (this._kernelEvent != null)
 				{
-					this.m_timer.Dispose();
-				}
-				CancellationTokenRegistration[] linkingRegistrations = this.m_linkingRegistrations;
-				if (linkingRegistrations != null)
-				{
-					this.m_linkingRegistrations = null;
-					for (int i = 0; i < linkingRegistrations.Length; i++)
+					ManualResetEvent manualResetEvent = Interlocked.Exchange<ManualResetEvent>(ref this._kernelEvent, null);
+					if (manualResetEvent != null && this._state != 2)
 					{
-						linkingRegistrations[i].Dispose();
+						manualResetEvent.Dispose();
 					}
 				}
-				this.m_registeredCallbacksLists = null;
-				ManualResetEvent kernelEvent = this.m_kernelEvent;
-				if (kernelEvent != null)
-				{
-					this.m_kernelEvent = null;
-					kernelEvent.Close();
-				}
-				this.m_disposed = true;
+				this._disposed = true;
 			}
 		}
 
 		internal void ThrowIfDisposed()
 		{
-			if (this.m_disposed)
+			if (this._disposed)
 			{
 				CancellationTokenSource.ThrowObjectDisposedException();
 			}
@@ -248,37 +224,24 @@ namespace System.Threading
 
 		private static void ThrowObjectDisposedException()
 		{
-			throw new ObjectDisposedException(null, Environment.GetResourceString("The CancellationTokenSource has been disposed."));
-		}
-
-		internal static CancellationTokenSource InternalGetStaticSource(bool set)
-		{
-			if (!set)
-			{
-				return CancellationTokenSource._staticSource_NotCancelable;
-			}
-			return CancellationTokenSource._staticSource_Set;
+			throw new ObjectDisposedException(null, "The CancellationTokenSource has been disposed.");
 		}
 
 		internal CancellationTokenRegistration InternalRegister(Action<object> callback, object stateForCallback, SynchronizationContext targetSyncContext, ExecutionContext executionContext)
 		{
-			if (AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
-			{
-				this.ThrowIfDisposed();
-			}
 			if (!this.IsCancellationRequested)
 			{
-				if (this.m_disposed && !AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
+				if (this._disposed)
 				{
 					return default(CancellationTokenRegistration);
 				}
-				int num = Thread.CurrentThread.ManagedThreadId % CancellationTokenSource.s_nLists;
-				CancellationCallbackInfo cancellationCallbackInfo = new CancellationCallbackInfo(callback, stateForCallback, targetSyncContext, executionContext, this);
-				SparselyPopulatedArray<CancellationCallbackInfo>[] array = this.m_registeredCallbacksLists;
+				int num = Environment.CurrentManagedThreadId % CancellationTokenSource.s_nLists;
+				CancellationCallbackInfo cancellationCallbackInfo = ((targetSyncContext != null) ? new CancellationCallbackInfo.WithSyncContext(callback, stateForCallback, executionContext, this, targetSyncContext) : new CancellationCallbackInfo(callback, stateForCallback, executionContext, this));
+				SparselyPopulatedArray<CancellationCallbackInfo>[] array = this._registeredCallbacksLists;
 				if (array == null)
 				{
 					SparselyPopulatedArray<CancellationCallbackInfo>[] array2 = new SparselyPopulatedArray<CancellationCallbackInfo>[CancellationTokenSource.s_nLists];
-					array = Interlocked.CompareExchange<SparselyPopulatedArray<CancellationCallbackInfo>[]>(ref this.m_registeredCallbacksLists, array2, null);
+					array = Interlocked.CompareExchange<SparselyPopulatedArray<CancellationCallbackInfo>[]>(ref this._registeredCallbacksLists, array2, null);
 					if (array == null)
 					{
 						array = array2;
@@ -297,7 +260,7 @@ namespace System.Threading
 				{
 					return cancellationTokenRegistration;
 				}
-				if (!cancellationTokenRegistration.TryDeregister())
+				if (!cancellationTokenRegistration.Unregister())
 				{
 					return cancellationTokenRegistration;
 				}
@@ -308,32 +271,18 @@ namespace System.Threading
 
 		private void NotifyCancellation(bool throwOnFirstException)
 		{
-			if (this.IsCancellationRequested)
+			if (!this.IsCancellationRequested && Interlocked.CompareExchange(ref this._state, 2, 1) == 1)
 			{
-				return;
-			}
-			if (Interlocked.CompareExchange(ref this.m_state, 2, 1) == 1)
-			{
-				Timer timer = this.m_timer;
+				Timer timer = this._timer;
 				if (timer != null)
 				{
 					timer.Dispose();
 				}
-				this.ThreadIDExecutingCallbacks = Thread.CurrentThread.ManagedThreadId;
-				ManualResetEvent kernelEvent = this.m_kernelEvent;
+				this.ThreadIDExecutingCallbacks = Environment.CurrentManagedThreadId;
+				ManualResetEvent kernelEvent = this._kernelEvent;
 				if (kernelEvent != null)
 				{
-					try
-					{
-						kernelEvent.Set();
-					}
-					catch (ObjectDisposedException)
-					{
-						if (this.m_kernelEvent != null)
-						{
-							throw;
-						}
-					}
+					kernelEvent.Set();
 				}
 				this.ExecuteCallbackHandlers(throwOnFirstException);
 			}
@@ -341,11 +290,11 @@ namespace System.Threading
 
 		private void ExecuteCallbackHandlers(bool throwOnFirstException)
 		{
-			List<Exception> list = null;
-			SparselyPopulatedArray<CancellationCallbackInfo>[] registeredCallbacksLists = this.m_registeredCallbacksLists;
+			LowLevelListWithIList<Exception> lowLevelListWithIList = null;
+			SparselyPopulatedArray<CancellationCallbackInfo>[] registeredCallbacksLists = this._registeredCallbacksLists;
 			if (registeredCallbacksLists == null)
 			{
-				Interlocked.Exchange(ref this.m_state, 3);
+				Interlocked.Exchange(ref this._state, 3);
 				return;
 			}
 			try
@@ -359,16 +308,17 @@ namespace System.Threading
 						{
 							for (int j = sparselyPopulatedArrayFragment.Length - 1; j >= 0; j--)
 							{
-								this.m_executingCallback = sparselyPopulatedArrayFragment[j];
-								if (this.m_executingCallback != null)
+								this._executingCallback = sparselyPopulatedArrayFragment[j];
+								if (this._executingCallback != null)
 								{
 									CancellationCallbackCoreWorkArguments cancellationCallbackCoreWorkArguments = new CancellationCallbackCoreWorkArguments(sparselyPopulatedArrayFragment, j);
 									try
 									{
-										if (this.m_executingCallback.TargetSyncContext != null)
+										CancellationCallbackInfo.WithSyncContext withSyncContext = this._executingCallback as CancellationCallbackInfo.WithSyncContext;
+										if (withSyncContext != null)
 										{
-											this.m_executingCallback.TargetSyncContext.Send(new SendOrPostCallback(this.CancellationCallbackCoreWork_OnSyncContext), cancellationCallbackCoreWorkArguments);
-											this.ThreadIDExecutingCallbacks = Thread.CurrentThread.ManagedThreadId;
+											withSyncContext.TargetSyncContext.Send(new SendOrPostCallback(this.CancellationCallbackCoreWork_OnSyncContext), cancellationCallbackCoreWorkArguments);
+											this.ThreadIDExecutingCallbacks = Environment.CurrentManagedThreadId;
 										}
 										else
 										{
@@ -381,11 +331,11 @@ namespace System.Threading
 										{
 											throw;
 										}
-										if (list == null)
+										if (lowLevelListWithIList == null)
 										{
-											list = new List<Exception>();
+											lowLevelListWithIList = new LowLevelListWithIList<Exception>();
 										}
-										list.Add(ex);
+										lowLevelListWithIList.Add(ex);
 									}
 								}
 							}
@@ -395,13 +345,13 @@ namespace System.Threading
 			}
 			finally
 			{
-				this.m_state = 3;
-				this.m_executingCallback = null;
-				Thread.MemoryBarrier();
+				this._state = 3;
+				this._executingCallback = null;
+				Interlocked.MemoryBarrier();
 			}
-			if (list != null)
+			if (lowLevelListWithIList != null)
 			{
-				throw new AggregateException(list);
+				throw new AggregateException(lowLevelListWithIList);
 			}
 		}
 
@@ -412,37 +362,34 @@ namespace System.Threading
 
 		private void CancellationCallbackCoreWork(CancellationCallbackCoreWorkArguments args)
 		{
-			CancellationCallbackInfo cancellationCallbackInfo = args.m_currArrayFragment.SafeAtomicRemove(args.m_currArrayIndex, this.m_executingCallback);
-			if (cancellationCallbackInfo == this.m_executingCallback)
+			CancellationCallbackInfo cancellationCallbackInfo = args._currArrayFragment.SafeAtomicRemove(args._currArrayIndex, this._executingCallback);
+			if (cancellationCallbackInfo == this._executingCallback)
 			{
-				if (cancellationCallbackInfo.TargetExecutionContext != null)
-				{
-					cancellationCallbackInfo.CancellationTokenSource.ThreadIDExecutingCallbacks = Thread.CurrentThread.ManagedThreadId;
-				}
+				cancellationCallbackInfo.CancellationTokenSource.ThreadIDExecutingCallbacks = Environment.CurrentManagedThreadId;
 				cancellationCallbackInfo.ExecuteCallback();
 			}
 		}
 
 		public static CancellationTokenSource CreateLinkedTokenSource(CancellationToken token1, CancellationToken token2)
 		{
-			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-			bool canBeCanceled = token2.CanBeCanceled;
-			if (token1.CanBeCanceled)
+			if (!token1.CanBeCanceled)
 			{
-				cancellationTokenSource.m_linkingRegistrations = new CancellationTokenRegistration[canBeCanceled ? 2 : 1];
-				cancellationTokenSource.m_linkingRegistrations[0] = token1.InternalRegisterWithoutEC(CancellationTokenSource.s_LinkedTokenCancelDelegate, cancellationTokenSource);
+				return CancellationTokenSource.CreateLinkedTokenSource(token2);
 			}
-			if (canBeCanceled)
+			if (!token2.CanBeCanceled)
 			{
-				int num = 1;
-				if (cancellationTokenSource.m_linkingRegistrations == null)
-				{
-					cancellationTokenSource.m_linkingRegistrations = new CancellationTokenRegistration[1];
-					num = 0;
-				}
-				cancellationTokenSource.m_linkingRegistrations[num] = token2.InternalRegisterWithoutEC(CancellationTokenSource.s_LinkedTokenCancelDelegate, cancellationTokenSource);
+				return new CancellationTokenSource.Linked1CancellationTokenSource(token1);
 			}
-			return cancellationTokenSource;
+			return new CancellationTokenSource.Linked2CancellationTokenSource(token1, token2);
+		}
+
+		internal static CancellationTokenSource CreateLinkedTokenSource(CancellationToken token)
+		{
+			if (!token.CanBeCanceled)
+			{
+				return new CancellationTokenSource();
+			}
+			return new CancellationTokenSource.Linked1CancellationTokenSource(token);
 		}
 
 		public static CancellationTokenSource CreateLinkedTokenSource(params CancellationToken[] tokens)
@@ -451,20 +398,17 @@ namespace System.Threading
 			{
 				throw new ArgumentNullException("tokens");
 			}
-			if (tokens.Length == 0)
+			switch (tokens.Length)
 			{
-				throw new ArgumentException(Environment.GetResourceString("No tokens were supplied."));
+			case 0:
+				throw new ArgumentException("No tokens were supplied.");
+			case 1:
+				return CancellationTokenSource.CreateLinkedTokenSource(tokens[0]);
+			case 2:
+				return CancellationTokenSource.CreateLinkedTokenSource(tokens[0], tokens[1]);
+			default:
+				return new CancellationTokenSource.LinkedNCancellationTokenSource(tokens);
 			}
-			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-			cancellationTokenSource.m_linkingRegistrations = new CancellationTokenRegistration[tokens.Length];
-			for (int i = 0; i < tokens.Length; i++)
-			{
-				if (tokens[i].CanBeCanceled)
-				{
-					cancellationTokenSource.m_linkingRegistrations[i] = tokens[i].InternalRegisterWithoutEC(CancellationTokenSource.s_LinkedTokenCancelDelegate, cancellationTokenSource);
-				}
-			}
-			return cancellationTokenSource;
 		}
 
 		internal void WaitForCallbackToComplete(CancellationCallbackInfo callbackInfo)
@@ -476,38 +420,124 @@ namespace System.Threading
 			}
 		}
 
-		private static readonly CancellationTokenSource _staticSource_Set = new CancellationTokenSource(true);
+		internal static readonly CancellationTokenSource s_canceledSource = new CancellationTokenSource
+		{
+			_state = 3
+		};
 
-		private static readonly CancellationTokenSource _staticSource_NotCancelable = new CancellationTokenSource(false);
+		internal static readonly CancellationTokenSource s_neverCanceledSource = new CancellationTokenSource
+		{
+			_state = 0
+		};
 
 		private static readonly int s_nLists = ((PlatformHelper.ProcessorCount > 24) ? 24 : PlatformHelper.ProcessorCount);
 
-		private volatile ManualResetEvent m_kernelEvent;
+		private volatile ManualResetEvent _kernelEvent;
 
-		private volatile SparselyPopulatedArray<CancellationCallbackInfo>[] m_registeredCallbacksLists;
+		private volatile SparselyPopulatedArray<CancellationCallbackInfo>[] _registeredCallbacksLists;
 
-		private const int CANNOT_BE_CANCELED = 0;
+		private const int CannotBeCanceled = 0;
 
-		private const int NOT_CANCELED = 1;
+		private const int NotCanceledState = 1;
 
-		private const int NOTIFYING = 2;
+		private const int NotifyingState = 2;
 
-		private const int NOTIFYINGCOMPLETE = 3;
+		private const int NotifyingCompleteState = 3;
 
-		private volatile int m_state;
+		private volatile int _state;
 
-		private volatile int m_threadIDExecutingCallbacks = -1;
+		private volatile int _threadIDExecutingCallbacks = -1;
 
-		private bool m_disposed;
+		private bool _disposed;
 
-		private CancellationTokenRegistration[] m_linkingRegistrations;
+		private volatile CancellationCallbackInfo _executingCallback;
 
-		private static readonly Action<object> s_LinkedTokenCancelDelegate = new Action<object>(CancellationTokenSource.LinkedTokenCancelDelegate);
-
-		private volatile CancellationCallbackInfo m_executingCallback;
-
-		private volatile Timer m_timer;
+		private volatile Timer _timer;
 
 		private static readonly TimerCallback s_timerCallback = new TimerCallback(CancellationTokenSource.TimerCallbackLogic);
+
+		private sealed class Linked1CancellationTokenSource : CancellationTokenSource
+		{
+			internal Linked1CancellationTokenSource(CancellationToken token1)
+			{
+				this._reg1 = token1.InternalRegisterWithoutEC(CancellationTokenSource.LinkedNCancellationTokenSource.s_linkedTokenCancelDelegate, this);
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if (!disposing || this._disposed)
+				{
+					return;
+				}
+				this._reg1.Dispose();
+				base.Dispose(disposing);
+			}
+
+			private readonly CancellationTokenRegistration _reg1;
+		}
+
+		private sealed class Linked2CancellationTokenSource : CancellationTokenSource
+		{
+			internal Linked2CancellationTokenSource(CancellationToken token1, CancellationToken token2)
+			{
+				this._reg1 = token1.InternalRegisterWithoutEC(CancellationTokenSource.LinkedNCancellationTokenSource.s_linkedTokenCancelDelegate, this);
+				this._reg2 = token2.InternalRegisterWithoutEC(CancellationTokenSource.LinkedNCancellationTokenSource.s_linkedTokenCancelDelegate, this);
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if (!disposing || this._disposed)
+				{
+					return;
+				}
+				this._reg1.Dispose();
+				this._reg2.Dispose();
+				base.Dispose(disposing);
+			}
+
+			private readonly CancellationTokenRegistration _reg1;
+
+			private readonly CancellationTokenRegistration _reg2;
+		}
+
+		private sealed class LinkedNCancellationTokenSource : CancellationTokenSource
+		{
+			internal LinkedNCancellationTokenSource(params CancellationToken[] tokens)
+			{
+				this._linkingRegistrations = new CancellationTokenRegistration[tokens.Length];
+				for (int i = 0; i < tokens.Length; i++)
+				{
+					if (tokens[i].CanBeCanceled)
+					{
+						this._linkingRegistrations[i] = tokens[i].InternalRegisterWithoutEC(CancellationTokenSource.LinkedNCancellationTokenSource.s_linkedTokenCancelDelegate, this);
+					}
+				}
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if (!disposing || this._disposed)
+				{
+					return;
+				}
+				CancellationTokenRegistration[] linkingRegistrations = this._linkingRegistrations;
+				if (linkingRegistrations != null)
+				{
+					this._linkingRegistrations = null;
+					for (int i = 0; i < linkingRegistrations.Length; i++)
+					{
+						linkingRegistrations[i].Dispose();
+					}
+				}
+				base.Dispose(disposing);
+			}
+
+			internal static readonly Action<object> s_linkedTokenCancelDelegate = delegate(object s)
+			{
+				((CancellationTokenSource)s).NotifyCancellation(false);
+			};
+
+			private CancellationTokenRegistration[] _linkingRegistrations;
+		}
 	}
 }

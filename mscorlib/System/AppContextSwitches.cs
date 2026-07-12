@@ -14,6 +14,33 @@ namespace System
 			}
 		}
 
+		public static bool EnforceJapaneseEraYearRanges
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				return AppContextSwitches.GetCachedSwitchValue(AppContextDefaultValues.SwitchEnforceJapaneseEraYearRanges, ref AppContextSwitches._enforceJapaneseEraYearRanges);
+			}
+		}
+
+		public static bool FormatJapaneseFirstYearAsANumber
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				return AppContextSwitches.GetCachedSwitchValue(AppContextDefaultValues.SwitchFormatJapaneseFirstYearAsANumber, ref AppContextSwitches._formatJapaneseFirstYearAsANumber);
+			}
+		}
+
+		public static bool EnforceLegacyJapaneseDateParsing
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				return AppContextSwitches.GetCachedSwitchValue(AppContextDefaultValues.SwitchEnforceLegacyJapaneseDateParsing, ref AppContextSwitches._enforceLegacyJapaneseDateParsing);
+			}
+		}
+
 		public static bool ThrowExceptionIfDisposedCancellationTokenSource
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,6 +125,12 @@ namespace System
 		}
 
 		private static int _noAsyncCurrentCulture;
+
+		private static int _enforceJapaneseEraYearRanges;
+
+		private static int _formatJapaneseFirstYearAsANumber;
+
+		private static int _enforceLegacyJapaneseDateParsing;
 
 		private static int _throwExceptionIfDisposedCancellationTokenSource;
 

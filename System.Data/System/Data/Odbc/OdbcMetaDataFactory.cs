@@ -385,8 +385,12 @@ namespace System.Data.Odbc
 			{
 				odbcCommand = this.GetCommand(connection);
 				string[] array = new string[4];
-				this.FillOutRestrictions(4, restrictions, array, OdbcMetaDataCollectionNames.Columns);
-				odbcDataReader = odbcCommand.ExecuteReaderFromSQLMethod(array, ODBC32.SQL_API.SQLCOLUMNS);
+				int num = 4;
+				object[] array2 = array;
+				this.FillOutRestrictions(num, restrictions, array2, OdbcMetaDataCollectionNames.Columns);
+				OdbcCommand odbcCommand2 = odbcCommand;
+				array2 = array;
+				odbcDataReader = odbcCommand2.ExecuteReaderFromSQLMethod(array2, ODBC32.SQL_API.SQLCOLUMNS);
 				dataTable = this.DataTableFromDataReader(odbcDataReader, OdbcMetaDataCollectionNames.Columns);
 			}
 			finally
@@ -639,8 +643,12 @@ namespace System.Data.Odbc
 			{
 				odbcCommand = this.GetCommand(connection);
 				string[] array = new string[4];
-				this.FillOutRestrictions(4, restrictions, array, OdbcMetaDataCollectionNames.Columns);
-				odbcDataReader = odbcCommand.ExecuteReaderFromSQLMethod(array, ODBC32.SQL_API.SQLPROCEDURECOLUMNS);
+				int num = 4;
+				object[] array2 = array;
+				this.FillOutRestrictions(num, restrictions, array2, OdbcMetaDataCollectionNames.Columns);
+				OdbcCommand odbcCommand2 = odbcCommand;
+				array2 = array;
+				odbcDataReader = odbcCommand2.ExecuteReaderFromSQLMethod(array2, ODBC32.SQL_API.SQLPROCEDURECOLUMNS);
 				string text;
 				if (isColumns)
 				{
@@ -675,22 +683,26 @@ namespace System.Data.Odbc
 			{
 				odbcCommand = this.GetCommand(connection);
 				string[] array = new string[4];
-				this.FillOutRestrictions(4, restrictions, array, OdbcMetaDataCollectionNames.Procedures);
-				odbcDataReader = odbcCommand.ExecuteReaderFromSQLMethod(array, ODBC32.SQL_API.SQLPROCEDURES);
+				int num = 4;
+				object[] array2 = array;
+				this.FillOutRestrictions(num, restrictions, array2, OdbcMetaDataCollectionNames.Procedures);
+				OdbcCommand odbcCommand2 = odbcCommand;
+				array2 = array;
+				odbcDataReader = odbcCommand2.ExecuteReaderFromSQLMethod(array2, ODBC32.SQL_API.SQLPROCEDURES);
 				if (array[3] == null)
 				{
 					dataTable = this.DataTableFromDataReader(odbcDataReader, OdbcMetaDataCollectionNames.Procedures);
 				}
 				else
 				{
-					short num;
+					short num2;
 					if (restrictions[3] == "SQL_PT_UNKNOWN" || restrictions[3] == "0")
 					{
-						num = 0;
+						num2 = 0;
 					}
 					else if (restrictions[3] == "SQL_PT_PROCEDURE" || restrictions[3] == "1")
 					{
-						num = 1;
+						num2 = 1;
 					}
 					else
 					{
@@ -698,9 +710,9 @@ namespace System.Data.Odbc
 						{
 							throw ADP.InvalidRestrictionValue(OdbcMetaDataCollectionNames.Procedures, "PROCEDURE_TYPE", restrictions[3]);
 						}
-						num = 2;
+						num2 = 2;
 					}
-					dataTable = this.DataTableFromDataReaderProcedures(odbcDataReader, OdbcMetaDataCollectionNames.Procedures, num);
+					dataTable = this.DataTableFromDataReaderProcedures(odbcDataReader, OdbcMetaDataCollectionNames.Procedures, num2);
 				}
 			}
 			finally
@@ -769,9 +781,13 @@ namespace System.Data.Odbc
 					text = "VIEW";
 					text2 = OdbcMetaDataCollectionNames.Views;
 				}
-				this.FillOutRestrictions(3, restrictions, array, text2);
+				int num = 3;
+				object[] array2 = array;
+				this.FillOutRestrictions(num, restrictions, array2, text2);
 				array[3] = text;
-				odbcDataReader = odbcCommand.ExecuteReaderFromSQLMethod(array, ODBC32.SQL_API.SQLTABLES);
+				OdbcCommand odbcCommand2 = odbcCommand;
+				array2 = array;
+				odbcDataReader = odbcCommand2.ExecuteReaderFromSQLMethod(array2, ODBC32.SQL_API.SQLTABLES);
 				dataTable = this.DataTableFromDataReader(odbcDataReader, text2);
 			}
 			finally
@@ -867,7 +883,7 @@ namespace System.Data.Odbc
 
 		internal static readonly char[] KeywordSeparatorChar = new char[] { ',' };
 
-		private struct SchemaFunctionName
+		private readonly struct SchemaFunctionName
 		{
 			internal SchemaFunctionName(string schemaName, ODBC32.SQL_API odbcFunction)
 			{

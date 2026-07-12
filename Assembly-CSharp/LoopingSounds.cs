@@ -44,7 +44,7 @@ public class LoopingSounds : KMonoBehaviour
 			}
 			else
 			{
-				this.sound_pos = behaviour.GetComponent<Transform>().GetPosition();
+				this.sound_pos = behaviour.position;
 				this.sound_pos.z = 0f;
 			}
 			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, this.sound_pos, base.transform, !ignore_pause, true, enable_camera_scaled_position, this.vol, this.objectIsSelectedAndVisible);

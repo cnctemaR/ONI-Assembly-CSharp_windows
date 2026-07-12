@@ -31,7 +31,7 @@ namespace System.Net.Cache
 				this.m_MaxStale = ageOrFreshOrStale;
 				return;
 			}
-			throw new ArgumentException(global::SR.GetString("The specified value is not valid in the '{0}' enumeration.", new object[] { "HttpCacheAgeControl" }), "cacheAgeControl");
+			throw new ArgumentException(SR.GetString("The specified value is not valid in the '{0}' enumeration.", new object[] { "HttpCacheAgeControl" }), "cacheAgeControl");
 		}
 
 		public HttpRequestCachePolicy(HttpCacheAgeControl cacheAgeControl, TimeSpan maxAge, TimeSpan freshOrStale)
@@ -57,7 +57,7 @@ namespace System.Net.Cache
 				this.m_MaxStale = freshOrStale;
 				return;
 			}
-			throw new ArgumentException(global::SR.GetString("The specified value is not valid in the '{0}' enumeration.", new object[] { "HttpCacheAgeControl" }), "cacheAgeControl");
+			throw new ArgumentException(SR.GetString("The specified value is not valid in the '{0}' enumeration.", new object[] { "HttpCacheAgeControl" }), "cacheAgeControl");
 		}
 
 		public HttpRequestCachePolicy(DateTime cacheSyncDate)

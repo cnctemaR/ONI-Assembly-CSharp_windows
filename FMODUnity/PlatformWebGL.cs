@@ -10,7 +10,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformWebGL>("46fbfdf3fc43db0458918377fd40293e");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -18,14 +18,14 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.WebGLPlayer, this);
 		}
 
-		public override string GetPluginPath(string pluginName)
+		internal override string GetPluginPath(string pluginName)
 		{
-			return string.Format("{0}/{1}.bc", this.GetPluginBasePath(), pluginName);
+			return string.Format("{0}/{1}.a", this.GetPluginBasePath(), pluginName);
 		}
 	}
 }

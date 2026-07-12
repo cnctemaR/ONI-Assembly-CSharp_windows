@@ -248,9 +248,10 @@ namespace System.Net
 			}
 			if (this.ProcessInput(this.ms))
 			{
-				if (!this.context.HaveError)
+				if (!this.context.HaveError && !this.context.Request.FinishInitialization())
 				{
-					this.context.Request.FinishInitialization();
+					this.Close(true);
+					return;
 				}
 				if (this.context.HaveError)
 				{

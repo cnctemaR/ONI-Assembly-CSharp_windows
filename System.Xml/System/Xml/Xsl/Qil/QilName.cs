@@ -17,11 +17,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.local;
+				return this._local;
 			}
 			set
 			{
-				this.local = value;
+				this._local = value;
 			}
 		}
 
@@ -29,11 +29,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.uri;
+				return this._uri;
 			}
 			set
 			{
-				this.uri = value;
+				this._uri = value;
 			}
 		}
 
@@ -41,11 +41,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 			set
 			{
-				this.prefix = value;
+				this._prefix = value;
 			}
 		}
 
@@ -53,28 +53,28 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				if (this.prefix.Length == 0)
+				if (this._prefix.Length == 0)
 				{
-					return this.local;
+					return this._local;
 				}
-				return this.prefix + ":" + this.local;
+				return this._prefix + ":" + this._local;
 			}
 		}
 
 		public override int GetHashCode()
 		{
-			return this.local.GetHashCode();
+			return this._local.GetHashCode();
 		}
 
 		public override bool Equals(object other)
 		{
 			QilName qilName = other as QilName;
-			return !(qilName == null) && this.local == qilName.local && this.uri == qilName.uri;
+			return !(qilName == null) && this._local == qilName._local && this._uri == qilName._uri;
 		}
 
 		public static bool operator ==(QilName a, QilName b)
 		{
-			return a == b || (a != null && b != null && a.local == b.local && a.uri == b.uri);
+			return a == b || (a != null && b != null && a._local == b._local && a._uri == b._uri);
 		}
 
 		public static bool operator !=(QilName a, QilName b)
@@ -84,21 +84,21 @@ namespace System.Xml.Xsl.Qil
 
 		public override string ToString()
 		{
-			if (this.prefix.Length != 0)
+			if (this._prefix.Length != 0)
 			{
-				return string.Concat(new string[] { "{", this.uri, "}", this.prefix, ":", this.local });
+				return string.Concat(new string[] { "{", this._uri, "}", this._prefix, ":", this._local });
 			}
-			if (this.uri.Length == 0)
+			if (this._uri.Length == 0)
 			{
-				return this.local;
+				return this._local;
 			}
-			return "{" + this.uri + "}" + this.local;
+			return "{" + this._uri + "}" + this._local;
 		}
 
-		private string local;
+		private string _local;
 
-		private string uri;
+		private string _uri;
 
-		private string prefix;
+		private string _prefix;
 	}
 }

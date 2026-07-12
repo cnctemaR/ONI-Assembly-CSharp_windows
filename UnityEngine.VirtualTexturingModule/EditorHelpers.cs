@@ -5,8 +5,8 @@ using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.VirtualTexturing
 {
-	[NativeConditional("UNITY_EDITOR")]
 	[StaticAccessor("VirtualTexturing::Editor", StaticAccessorType.DoubleColon)]
+	[NativeConditional("UNITY_EDITOR")]
 	[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 	public static class EditorHelpers
 	{
@@ -19,7 +19,7 @@ namespace UnityEngine.Rendering.VirtualTexturing
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool ValidateTextureStack([NotNull("ArgumentNullException")] Texture[] textures, out string errorMessage);
+		public static extern bool ValidateTextureStack([Unmarshalled] [NotNull("ArgumentNullException")] Texture[] textures, out string errorMessage);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]

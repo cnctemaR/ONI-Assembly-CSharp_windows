@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	public struct SignatureToken
+	public readonly struct SignatureToken : IEquatable<SignatureToken>
 	{
 		internal SignatureToken(int val)
 		{
@@ -50,7 +50,7 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal int tokValue;
+		internal readonly int tokValue;
 
 		public static readonly SignatureToken Empty;
 	}

@@ -45,12 +45,14 @@ namespace System.Runtime.ExceptionServices
 			}
 		}
 
+		[StackTraceHidden]
 		public void Throw()
 		{
 			this.m_Exception.RestoreExceptionDispatchInfo(this);
 			throw this.m_Exception;
 		}
 
+		[StackTraceHidden]
 		public static void Throw(Exception source)
 		{
 			ExceptionDispatchInfo.Capture(source).Throw();

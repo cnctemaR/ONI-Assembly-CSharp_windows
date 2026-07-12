@@ -171,25 +171,25 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.smi.sm.working.Set(true, this.smi, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		this.smi.sm.working.Set(false, this.smi, false);
 		this.DepressurizeChore = null;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		return this.smi.GetPressurePercent() <= 0f;
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		this.ReleaseGasPressure(60f);
 		return true;

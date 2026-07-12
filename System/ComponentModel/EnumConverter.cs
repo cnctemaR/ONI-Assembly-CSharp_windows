@@ -74,7 +74,7 @@ namespace System.ComponentModel
 				}
 				catch (Exception ex)
 				{
-					throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
+					throw new FormatException(SR.GetString("{0} is not a valid value for {1}.", new object[]
 					{
 						(string)value,
 						this.type.Name
@@ -108,7 +108,7 @@ namespace System.ComponentModel
 				}
 				if (!this.type.IsDefined(typeof(FlagsAttribute), false) && !Enum.IsDefined(this.type, value))
 				{
-					throw new ArgumentException(global::SR.GetString("The value '{0}' is not a valid value for the enum '{1}'.", new object[]
+					throw new ArgumentException(SR.GetString("The value '{0}' is not a valid value for the enum '{1}'.", new object[]
 					{
 						value.ToString(),
 						this.type.Name

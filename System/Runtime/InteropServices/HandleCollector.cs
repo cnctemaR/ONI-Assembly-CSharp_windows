@@ -14,15 +14,15 @@ namespace System.Runtime.InteropServices
 		{
 			if (initialThreshold < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialThreshold", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialThreshold", SR.GetString("Non-negative number required."));
 			}
 			if (maximumThreshold < 0)
 			{
-				throw new ArgumentOutOfRangeException("maximumThreshold", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("maximumThreshold", SR.GetString("Non-negative number required."));
 			}
 			if (initialThreshold > maximumThreshold)
 			{
-				throw new ArgumentException(global::SR.GetString("maximumThreshold cannot be less than initialThreshold."));
+				throw new ArgumentException(SR.GetString("maximumThreshold cannot be less than initialThreshold."));
 			}
 			if (name != null)
 			{
@@ -76,7 +76,7 @@ namespace System.Runtime.InteropServices
 			Interlocked.Increment(ref this.handleCount);
 			if (this.handleCount < 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Handle collector count overflows or underflows."));
+				throw new InvalidOperationException(SR.GetString("Handle collector count overflows or underflows."));
 			}
 			if (this.handleCount > this.threshold)
 			{
@@ -106,7 +106,7 @@ namespace System.Runtime.InteropServices
 			Interlocked.Decrement(ref this.handleCount);
 			if (this.handleCount < 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Handle collector count overflows or underflows."));
+				throw new InvalidOperationException(SR.GetString("Handle collector count overflows or underflows."));
 			}
 			int num = this.handleCount + this.handleCount / 10;
 			if (num < this.threshold - this.threshold / 10)

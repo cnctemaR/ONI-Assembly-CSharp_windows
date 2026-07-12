@@ -20,5 +20,17 @@ namespace Database
 			this.OnMinionsChanged = OnMinionsChanged;
 			this.affectAll = affectAll;
 		}
+
+		public SkillPerk(string id_str, string description, Action<MinionResume> OnApply, Action<MinionResume> OnRemove, Action<MinionResume> OnMinionsChanged, string[] requiredDlcIds = null, bool affectAll = false)
+			: base(id_str, description)
+		{
+			this.OnApply = OnApply;
+			this.OnRemove = OnRemove;
+			this.OnMinionsChanged = OnMinionsChanged;
+			this.affectAll = affectAll;
+			this.requiredDlcIds = requiredDlcIds;
+		}
+
+		public string[] requiredDlcIds;
 	}
 }

@@ -18,10 +18,6 @@ namespace Klei.CustomSettings
 			this.required_content = required_content;
 			this.missing_content_default = missing_content_default;
 			this.hide_in_ui = hide_in_ui;
-			if (required_content == null)
-			{
-				this.required_content = DlcManager.AVAILABLE_VANILLA_ONLY;
-			}
 		}
 
 		public string id { get; private set; }
@@ -53,12 +49,12 @@ namespace Klei.CustomSettings
 
 		public bool ShowInUI()
 		{
-			return !this.deprecated && !this.hide_in_ui && (!this.debug_only || DebugHandler.enabled) && DlcManager.HasAllContentSubscribed(this.required_content);
+			return !this.deprecated && !this.hide_in_ui && (!this.debug_only || DebugHandler.enabled) && DlcManager.IsAllContentSubscribed(this.required_content);
 		}
 
 		public string GetDefaultLevelId()
 		{
-			if (!DlcManager.HasAllContentSubscribed(this.required_content) && !string.IsNullOrEmpty(this.missing_content_default))
+			if (!DlcManager.IsAllContentSubscribed(this.required_content) && !string.IsNullOrEmpty(this.missing_content_default))
 			{
 				return this.missing_content_default;
 			}
@@ -67,7 +63,7 @@ namespace Klei.CustomSettings
 
 		public string GetNoSweatDefaultLevelId()
 		{
-			if (!DlcManager.HasAllContentSubscribed(this.required_content) && !string.IsNullOrEmpty(this.missing_content_default))
+			if (!DlcManager.IsAllContentSubscribed(this.required_content) && !string.IsNullOrEmpty(this.missing_content_default))
 			{
 				return this.missing_content_default;
 			}

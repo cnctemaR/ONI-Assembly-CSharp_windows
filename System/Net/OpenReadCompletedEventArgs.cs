@@ -10,7 +10,7 @@ namespace System.Net
 		internal OpenReadCompletedEventArgs(Stream result, Exception exception, bool cancelled, object userToken)
 			: base(exception, cancelled, userToken)
 		{
-			this.m_Result = result;
+			this._result = result;
 		}
 
 		public Stream Result
@@ -18,7 +18,7 @@ namespace System.Net
 			get
 			{
 				base.RaiseExceptionIfNecessary();
-				return this.m_Result;
+				return this._result;
 			}
 		}
 
@@ -27,6 +27,6 @@ namespace System.Net
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private Stream m_Result;
+		private readonly Stream _result;
 	}
 }

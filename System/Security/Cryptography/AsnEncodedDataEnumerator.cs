@@ -6,21 +6,17 @@ namespace System.Security.Cryptography
 {
 	public sealed class AsnEncodedDataEnumerator : IEnumerator
 	{
-		internal AsnEncodedDataEnumerator(AsnEncodedDataCollection collection)
+		internal AsnEncodedDataEnumerator(AsnEncodedDataCollection asnEncodedDatas)
 		{
-			this._collection = collection;
-			this._position = -1;
+			this._asnEncodedDatas = asnEncodedDatas;
+			this._current = -1;
 		}
 
 		public AsnEncodedData Current
 		{
 			get
 			{
-				if (this._position < 0)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				return this._collection[this._position];
+				return this._asnEncodedDatas[this._current];
 			}
 		}
 
@@ -28,29 +24,23 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				if (this._position < 0)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				return this._collection[this._position];
+				return this._asnEncodedDatas[this._current];
 			}
 		}
 
 		public bool MoveNext()
 		{
-			int num = this._position + 1;
-			this._position = num;
-			if (num < this._collection.Count)
+			if (this._current >= this._asnEncodedDatas.Count - 1)
 			{
-				return true;
+				return false;
 			}
-			this._position = this._collection.Count - 1;
-			return false;
+			this._current++;
+			return true;
 		}
 
 		public void Reset()
 		{
-			this._position = -1;
+			this._current = -1;
 		}
 
 		internal AsnEncodedDataEnumerator()
@@ -58,8 +48,8 @@ namespace System.Security.Cryptography
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private AsnEncodedDataCollection _collection;
+		private readonly AsnEncodedDataCollection _asnEncodedDatas;
 
-		private int _position;
+		private int _current;
 	}
 }

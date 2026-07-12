@@ -3,10 +3,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[TypeLibImportClass(typeof(ConstructorBuilder))]
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Guid("ED3E4384-D7E2-3FA7-8FFD-8940D330519A")]
+	[TypeLibImportClass(typeof(ConstructorBuilder))]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface _ConstructorBuilder
 	{

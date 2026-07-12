@@ -7,7 +7,7 @@ namespace FMOD.Studio
 	{
 		public static RESULT create(out FMOD.Studio.System system)
 		{
-			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131591U);
+			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131619U);
 		}
 
 		public RESULT setAdvancedSettings(ADVANCEDSETTINGS settings)

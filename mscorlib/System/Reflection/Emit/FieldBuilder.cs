@@ -5,12 +5,32 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_FieldBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class FieldBuilder : FieldInfo, _FieldBuilder
 	{
+		void _FieldBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal FieldBuilder(TypeBuilder tb, string fieldName, Type type, FieldAttributes attributes, Type[] modReq, Type[] modOpt)
 		{
 			if (type == null)
@@ -24,7 +44,6 @@ namespace System.Reflection.Emit
 			this.modOpt = modOpt;
 			this.offset = -1;
 			this.typeb = tb;
-			this.table_idx = tb.get_next_table_index(this, 4, true);
 			((ModuleBuilder)tb.Module).RegisterToken(this, this.GetToken().Token);
 		}
 
@@ -92,6 +111,14 @@ namespace System.Reflection.Emit
 				return MonoCustomAttrs.GetCustomAttributes(this, attributeType, inherit);
 			}
 			throw this.CreateNotSupportedException();
+		}
+
+		public override int MetadataToken
+		{
+			get
+			{
+				return ((ModuleBuilder)this.typeb.Module).GetToken(this);
+			}
 		}
 
 		public FieldToken GetToken()
@@ -238,26 +265,6 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		void _FieldBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		internal FieldBuilder()
 		{
 			ThrowStub.ThrowNotSupportedException();
@@ -272,8 +279,6 @@ namespace System.Reflection.Emit
 		private object def_value;
 
 		private int offset;
-
-		private int table_idx;
 
 		internal TypeBuilder typeb;
 

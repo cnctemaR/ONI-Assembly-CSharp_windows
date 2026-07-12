@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace System.IO
 {
@@ -21,6 +21,6 @@ namespace System.IO
 
 		public object FilesLock = new object();
 
-		public Hashtable Files;
+		public Dictionary<string, FileData> Files;
 	}
 }

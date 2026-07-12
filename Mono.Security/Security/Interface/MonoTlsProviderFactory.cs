@@ -61,6 +61,6 @@ namespace Mono.Security.Interface
 			return (IMonoSslStream)NoReflectionHelper.GetMonoSslStream(context);
 		}
 
-		internal const int InternalVersion = 1;
+		internal const int InternalVersion = 4;
 	}
 }

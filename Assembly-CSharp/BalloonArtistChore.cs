@@ -19,13 +19,13 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 		base..ctor(Db.Get().ChoreTypes.JoyReaction, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime);
 		this.showAvailabilityInHoverText = false;
 		base.smi = new BalloonArtistChore.StatesInstance(this, target.gameObject);
-		base.AddPrecondition(this.HasBalloonStallCell, this);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
-		base.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
+		this.AddPrecondition(this.HasBalloonStallCell, this);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
+		this.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		return true;

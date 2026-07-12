@@ -13,6 +13,14 @@ public class Element : IComparable<Element>
 		return pressure / this.defaultValues.pressure;
 	}
 
+	public bool IsSlippery
+	{
+		get
+		{
+			return this.HasTag(GameTags.Slippery);
+		}
+	}
+
 	public bool IsUnstable
 	{
 		get

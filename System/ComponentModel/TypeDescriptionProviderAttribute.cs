@@ -11,7 +11,7 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("typeName");
 			}
-			this._typeName = typeName;
+			this.TypeName = typeName;
 		}
 
 		public TypeDescriptionProviderAttribute(Type type)
@@ -20,17 +20,9 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("type");
 			}
-			this._typeName = type.AssemblyQualifiedName;
+			this.TypeName = type.AssemblyQualifiedName;
 		}
 
-		public string TypeName
-		{
-			get
-			{
-				return this._typeName;
-			}
-		}
-
-		private string _typeName;
+		public string TypeName { get; }
 	}
 }

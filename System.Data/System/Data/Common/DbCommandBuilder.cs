@@ -70,8 +70,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DbDataAdapter DataAdapter
 		{
 			get

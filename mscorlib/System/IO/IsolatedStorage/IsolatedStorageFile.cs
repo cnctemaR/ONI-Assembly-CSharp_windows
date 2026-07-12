@@ -407,8 +407,8 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		[Obsolete]
 		[CLSCompliant(false)]
+		[Obsolete]
 		public override ulong CurrentSize
 		{
 			get
@@ -417,8 +417,8 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		[Obsolete]
 		[CLSCompliant(false)]
+		[Obsolete]
 		public override ulong MaximumSize
 		{
 			get
@@ -611,9 +611,13 @@ namespace System.IO.IsolatedStorage
 			{
 				File.Copy(text, text2, overwrite);
 			}
-			catch (IOException)
+			catch (IOException ex)
 			{
-				throw new IsolatedStorageException("Operation not allowed.");
+				throw new IsolatedStorageException("Operation not allowed.", ex);
+			}
+			catch (UnauthorizedAccessException ex2)
+			{
+				throw new IsolatedStorageException("Operation not allowed.", ex2);
 			}
 		}
 
@@ -788,7 +792,8 @@ namespace System.IO.IsolatedStorage
 			{
 				throw new SecurityException();
 			}
-			return this.GetNames(array);
+			FileSystemInfo[] array3 = array;
+			return this.GetNames(array3);
 		}
 
 		[ComVisible(false)]
@@ -827,13 +832,22 @@ namespace System.IO.IsolatedStorage
 			else
 			{
 				DirectoryInfo[] directories = this.directory.GetDirectories(directoryName);
-				if (directories.Length != 1 || !(directories[0].Name == directoryName) || directories[0].FullName.IndexOf(this.directory.FullName) < 0)
+				if (directories.Length != 1)
+				{
+					throw new SecurityException();
+				}
+				if (!directories[0].FullName.StartsWith(this.directory.FullName))
+				{
+					throw new SecurityException();
+				}
+				if (directories[0].FullName.Substring(this.directory.FullName.Length + 1) != directoryName)
 				{
 					throw new SecurityException();
 				}
 				array = directories[0].GetFiles(fileName);
 			}
-			return this.GetNames(array);
+			FileSystemInfo[] array2 = array;
+			return this.GetNames(array2);
 		}
 
 		[ComVisible(false)]
@@ -891,9 +905,13 @@ namespace System.IO.IsolatedStorage
 			{
 				Directory.Move(text, text2);
 			}
-			catch (IOException)
+			catch (IOException ex)
 			{
-				throw new IsolatedStorageException("Operation not allowed.");
+				throw new IsolatedStorageException("Operation not allowed.", ex);
+			}
+			catch (UnauthorizedAccessException ex2)
+			{
+				throw new IsolatedStorageException("Operation not allowed.", ex2);
 			}
 		}
 
@@ -935,9 +953,9 @@ namespace System.IO.IsolatedStorage
 			{
 				File.Move(text, text2);
 			}
-			catch (IOException)
+			catch (UnauthorizedAccessException ex)
 			{
-				throw new IsolatedStorageException("Operation not allowed.");
+				throw new IsolatedStorageException("Operation not allowed.", ex);
 			}
 		}
 

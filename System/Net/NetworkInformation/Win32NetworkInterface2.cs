@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
-	internal class Win32NetworkInterface2 : NetworkInterface
+	internal sealed class Win32NetworkInterface2 : NetworkInterface
 	{
 		[DllImport("iphlpapi.dll", SetLastError = true)]
 		private static extern int GetAdaptersInfo(IntPtr info, ref int size);

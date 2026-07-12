@@ -7,8 +7,8 @@ namespace System.Xml.Xsl.Qil
 		public QilBinary(QilNodeType nodeType, QilNode left, QilNode right)
 			: base(nodeType)
 		{
-			this.left = left;
-			this.right = right;
+			this._left = left;
+			this._right = right;
 		}
 
 		public override int Count
@@ -25,26 +25,26 @@ namespace System.Xml.Xsl.Qil
 			{
 				if (index == 0)
 				{
-					return this.left;
+					return this._left;
 				}
 				if (index != 1)
 				{
 					throw new IndexOutOfRangeException();
 				}
-				return this.right;
+				return this._right;
 			}
 			set
 			{
 				if (index == 0)
 				{
-					this.left = value;
+					this._left = value;
 					return;
 				}
 				if (index != 1)
 				{
 					throw new IndexOutOfRangeException();
 				}
-				this.right = value;
+				this._right = value;
 			}
 		}
 
@@ -52,11 +52,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.left;
+				return this._left;
 			}
 			set
 			{
-				this.left = value;
+				this._left = value;
 			}
 		}
 
@@ -64,16 +64,16 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.right;
+				return this._right;
 			}
 			set
 			{
-				this.right = value;
+				this._right = value;
 			}
 		}
 
-		private QilNode left;
+		private QilNode _left;
 
-		private QilNode right;
+		private QilNode _right;
 	}
 }

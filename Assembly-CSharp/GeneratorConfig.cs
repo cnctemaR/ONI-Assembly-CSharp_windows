@@ -19,7 +19,7 @@ public class GeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 600f;
-		buildingDef.GeneratorBaseCapacity = 20000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.RequiresPowerOutput = true;
@@ -34,6 +34,9 @@ public class GeneratorConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon.CreateTag(), 1f, 600f, SimHashes.CarbonDioxide, 0.02f, false, new CellOffset(1, 2), 383.15f);
 		energyGenerator.meterOffset = Meter.Offset.Behind;

@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32
 {
-	[ComVisible(true)]
 	public enum RegistryValueKind
 	{
-		Unknown,
-		String,
+		String = 1,
 		ExpandString,
 		Binary,
 		DWord,
 		MultiString = 7,
 		QWord = 11,
+		Unknown = 0,
 		None = -1
 	}
 }

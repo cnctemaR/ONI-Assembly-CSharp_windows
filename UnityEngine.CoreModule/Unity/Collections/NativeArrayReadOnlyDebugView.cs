@@ -13,7 +13,17 @@ namespace Unity.Collections
 		{
 			get
 			{
-				return this.m_Array.ToArray();
+				bool flag = !this.m_Array.IsCreated;
+				T[] array;
+				if (flag)
+				{
+					array = null;
+				}
+				else
+				{
+					array = this.m_Array.ToArray();
+				}
+				return array;
 			}
 		}
 

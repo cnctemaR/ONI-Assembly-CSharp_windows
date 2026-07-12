@@ -47,7 +47,12 @@ public class FaceGraph : KMonoBehaviour
 		bool flag = this.ShouldUseSidewaysSymbol(this.m_controller);
 		if (this.m_blinkMonitor == null)
 		{
+			Accessory accessory = this.m_accessorizer.GetAccessory(Db.Get().AccessorySlots.Eyes);
 			this.m_blinkMonitor = this.m_accessorizer.GetSMI<BlinkMonitor.Instance>();
+			if (this.m_blinkMonitor != null)
+			{
+				this.m_blinkMonitor.eye_anim = accessory.Name;
+			}
 		}
 		if (this.m_speechMonitor == null)
 		{

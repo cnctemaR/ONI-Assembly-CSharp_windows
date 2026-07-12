@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Security;
 
 namespace System.Diagnostics
@@ -65,9 +64,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int ShowDefaultAssertDialog(string conditionString, string message, string stackTrace, string windowTitle);
+		internal static int ShowDefaultAssertDialog(string conditionString, string message, string stackTrace, string windowTitle)
+		{
+			throw new NotImplementedException();
+		}
 
 		internal const int COR_E_FAILFAST = -2146232797;
 

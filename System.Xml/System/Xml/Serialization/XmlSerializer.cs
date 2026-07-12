@@ -523,7 +523,8 @@ namespace System.Xml.Serialization
 			{
 				array[i] = xmlReflectionImporter.ImportTypeMapping(types[i]);
 			}
-			return XmlSerializer.FromMappings(array);
+			XmlMapping[] array2 = array;
+			return XmlSerializer.FromMappings(array2);
 		}
 
 		[PermissionSet(SecurityAction.Demand, Name = "FullTrust")]

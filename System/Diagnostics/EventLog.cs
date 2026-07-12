@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[DefaultEvent("EntryWritten")]
 	[InstallerType(typeof(EventLogInstaller))]
 	[MonitoringDescription("Represents an event log")]
+	[DefaultEvent("EntryWritten")]
 	public class EventLog : Component, ISupportInitialize
 	{
 		public EventLog()
@@ -68,9 +68,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The entries in the log.")]
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The entries in the log.")]
 		public EventLogEntryCollection Entries
 		{
 			get
@@ -79,11 +79,11 @@ namespace System.Diagnostics
 			}
 		}
 
+		[ReadOnly(true)]
 		[DefaultValue("")]
 		[RecommendedAsConfigurable(true)]
 		[TypeConverter("System.Diagnostics.Design.LogConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[MonitoringDescription("Name of the log that is read and written.")]
-		[ReadOnly(true)]
 		public string Log
 		{
 			get
@@ -118,8 +118,8 @@ namespace System.Diagnostics
 		}
 
 		[RecommendedAsConfigurable(true)]
-		[ReadOnly(true)]
 		[DefaultValue(".")]
+		[ReadOnly(true)]
 		[MonitoringDescription("Name of the machine that this log get written to.")]
 		public string MachineName
 		{
@@ -142,10 +142,10 @@ namespace System.Diagnostics
 		}
 
 		[ReadOnly(true)]
-		[RecommendedAsConfigurable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[MonitoringDescription("The application name that writes the log.")]
 		[DefaultValue("")]
+		[MonitoringDescription("The application name that writes the log.")]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[RecommendedAsConfigurable(true)]
 		public string Source
 		{
 			get
@@ -171,9 +171,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue(null)]
 		[MonitoringDescription("An object that synchronizes event handler calls.")]
 		[Browsable(false)]
+		[DefaultValue(null)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
@@ -197,9 +197,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[ComVisible(false)]
 		[MonoTODO]
+		[Browsable(false)]
 		public int MinimumRetentionDays
 		{
 			get
@@ -208,10 +208,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[ComVisible(false)]
 		[MonoTODO]
+		[ComVisible(false)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public long MaximumKilobytes
 		{
 			get

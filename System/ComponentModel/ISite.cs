@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
 	public interface ISite : IServiceProvider
 	{
 		IComponent Component { get; }

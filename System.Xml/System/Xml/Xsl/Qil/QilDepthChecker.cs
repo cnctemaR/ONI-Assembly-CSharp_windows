@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.XmlConfiguration;
 
 namespace System.Xml.Xsl.Qil
 {
@@ -8,7 +7,7 @@ namespace System.Xml.Xsl.Qil
 	{
 		public static void Check(QilNode input)
 		{
-			if (XsltConfigSection.LimitXPathComplexity)
+			if (LocalAppContextSwitches.LimitXPathComplexity)
 			{
 				new QilDepthChecker().Check(input, 0);
 			}
@@ -22,11 +21,11 @@ namespace System.Xml.Xsl.Qil
 			}
 			if (input is QilReference)
 			{
-				if (this.visitedRef.ContainsKey(input))
+				if (this._visitedRef.ContainsKey(input))
 				{
 					return;
 				}
-				this.visitedRef[input] = true;
+				this._visitedRef[input] = true;
 			}
 			int num = depth + 1;
 			for (int i = 0; i < input.Count; i++)
@@ -41,6 +40,6 @@ namespace System.Xml.Xsl.Qil
 
 		private const int MAX_QIL_DEPTH = 800;
 
-		private Dictionary<QilNode, bool> visitedRef = new Dictionary<QilNode, bool>();
+		private Dictionary<QilNode, bool> _visitedRef = new Dictionary<QilNode, bool>();
 	}
 }

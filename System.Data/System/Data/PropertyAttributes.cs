@@ -3,8 +3,8 @@ using System.ComponentModel;
 
 namespace System.Data
 {
-	[Flags]
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Flags]
 	[Obsolete("PropertyAttributes has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202")]
 	public enum PropertyAttributes
 	{

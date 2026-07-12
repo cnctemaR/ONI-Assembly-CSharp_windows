@@ -140,7 +140,7 @@ namespace System.Data
 								object obj;
 								if (converter.CanConvertFrom(typeof(string)))
 								{
-									obj = converter.ConvertFromString(value);
+									obj = converter.ConvertFromInvariantString(value);
 								}
 								else if (propertyType == typeof(Type))
 								{
@@ -968,7 +968,7 @@ namespace System.Data
 				flag = true;
 				text = field.Substring(1);
 			}
-			string[] array = text.Split(new char[] { ':' });
+			string[] array = text.Split(':', StringSplitOptions.None);
 			text = array[array.Length - 1];
 			text = XmlConvert.DecodeName(text);
 			DataColumn dataColumn = table.Columns[text];
@@ -1238,7 +1238,7 @@ namespace System.Data
 					text2 = text + "_Text";
 					while (dataTable.Columns[text2] != null)
 					{
-						text2 += num++;
+						text2 += num++.ToString();
 					}
 				}
 				else
@@ -1575,7 +1575,7 @@ namespace System.Data
 				text = table.TableName + "_Text";
 				while (table.Columns[text] != null)
 				{
-					text += num++;
+					text += num++.ToString();
 				}
 			}
 			else
@@ -1683,7 +1683,7 @@ namespace System.Data
 				text = table.TableName + "_Text";
 				while (table.Columns[text] != null)
 				{
-					text += num++;
+					text += num++.ToString();
 				}
 			}
 			else
@@ -2286,7 +2286,7 @@ namespace System.Data
 		private string GetTableNamespace(XmlSchemaIdentityConstraint key)
 		{
 			string xpath = key.Selector.XPath;
-			string[] array = xpath.Split(new char[] { '/' });
+			string[] array = xpath.Split('/', StringSplitOptions.None);
 			string text = string.Empty;
 			string text2 = array[array.Length - 1];
 			if (text2 == null || text2.Length == 0)

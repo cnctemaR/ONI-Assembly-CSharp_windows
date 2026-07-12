@@ -36,6 +36,20 @@ public class CodexImage : CodexWidget<CodexImage>
 		}
 	}
 
+	public string elementIcon
+	{
+		get
+		{
+			return "";
+		}
+		set
+		{
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(value.ToTag(), "ui", false);
+			this.sprite = uisprite.first;
+			this.color = uisprite.second;
+		}
+	}
+
 	public CodexImage()
 	{
 		this.color = Color.white;

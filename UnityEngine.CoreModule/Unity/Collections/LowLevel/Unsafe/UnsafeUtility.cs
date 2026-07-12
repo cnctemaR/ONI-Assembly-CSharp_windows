@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Unity.Burst;
 using UnityEngine.Bindings;
 
 namespace Unity.Collections.LowLevel.Unsafe
@@ -71,6 +72,42 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return UnsafeUtility.IsBlittable(typeof(T));
 		}
 
+		[ThreadSafe(ThrowsException = false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int CheckForLeaks();
+
+		[ThreadSafe(ThrowsException = false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int ForgiveLeaks();
+
+		[ThreadSafe(ThrowsException = false)]
+		[BurstAuthorizedExternalMethod]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern NativeLeakDetectionMode GetLeakDetectionMode();
+
+		[ThreadSafe(ThrowsException = false)]
+		[BurstAuthorizedExternalMethod]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetLeakDetectionMode(NativeLeakDetectionMode value);
+
+		[ThreadSafe(ThrowsException = false)]
+		[BurstAuthorizedExternalMethod]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int LeakRecord(IntPtr handle, LeakCategory category, int callstacksToSkip);
+
+		[BurstAuthorizedExternalMethod]
+		[ThreadSafe(ThrowsException = false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int LeakErase(IntPtr handle, LeakCategory category);
+
+		[ThreadSafe(ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void* MallocTracked(long size, int alignment, Allocator allocator, int callstacksToSkip);
+
+		[ThreadSafe(ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void FreeTracked(void* memory, Allocator allocator);
+
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* Malloc(long size, int alignment, Allocator allocator);
@@ -128,6 +165,10 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsValidNativeContainerElementType(Type type);
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetScriptingTypeFlags(Type type);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -205,44 +246,17 @@ namespace Unity.Collections.LowLevel.Unsafe
 
 		public static bool IsUnmanaged<T>()
 		{
-			int num = UnsafeUtility.IsUnmanagedCache<T>.value;
-			bool flag = num == 1;
-			bool flag2;
-			if (flag)
-			{
-				flag2 = true;
-			}
-			else
-			{
-				bool flag3 = num == 0;
-				if (flag3)
-				{
-					num = (UnsafeUtility.IsUnmanagedCache<T>.value = (UnsafeUtility.IsUnmanaged(typeof(T)) ? 1 : (-1)));
-				}
-				flag2 = num == 1;
-			}
-			return flag2;
+			return (UnsafeUtility.TypeFlagsCache<T>.flags & 1) == 0;
+		}
+
+		public static bool IsNativeContainerType<T>()
+		{
+			return (UnsafeUtility.TypeFlagsCache<T>.flags & 2) != 0;
 		}
 
 		public static bool IsValidNativeContainerElementType<T>()
 		{
-			int num = UnsafeUtility.IsValidNativeContainerElementTypeCache<T>.value;
-			bool flag = num == -1;
-			bool flag2;
-			if (flag)
-			{
-				flag2 = false;
-			}
-			else
-			{
-				bool flag3 = num == 0;
-				if (flag3)
-				{
-					num = (UnsafeUtility.IsValidNativeContainerElementTypeCache<T>.value = (UnsafeUtility.IsValidNativeContainerElementType(typeof(T)) ? 1 : (-1)));
-				}
-				flag2 = num == 1;
-			}
-			return flag2;
+			return UnsafeUtility.TypeFlagsCache<T>.flags == 0;
 		}
 
 		public static int AlignOf<T>() where T : struct
@@ -250,7 +264,7 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return UnsafeUtility.SizeOf<UnsafeUtility.AlignOfHelper<T>>() - UnsafeUtility.SizeOf<T>();
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void CopyPtrToStructure<T>(void* ptr, out T output) where T : struct
 		{
 			UnsafeUtility.InternalCopyPtrToStructure<T>(ptr, out output);
@@ -261,7 +275,7 @@ namespace Unity.Collections.LowLevel.Unsafe
 			output = *(T*)ptr;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void CopyStructureToPtr<T>(ref T input, void* ptr) where T : struct
 		{
 			UnsafeUtility.InternalCopyStructureToPtr<T>(ref input, ptr);
@@ -272,31 +286,37 @@ namespace Unity.Collections.LowLevel.Unsafe
 			*(T*)ptr = input;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static T ReadArrayElement<T>(void* source, int index)
 		{
 			return *(T*)((byte*)source + (long)index * (long)sizeof(T));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static T ReadArrayElementWithStride<T>(void* source, int index, int stride)
 		{
 			return *(T*)((byte*)source + (long)index * (long)stride);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void WriteArrayElement<T>(void* destination, int index, T value)
 		{
 			*(T*)((byte*)destination + (long)index * (long)sizeof(T)) = value;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void WriteArrayElementWithStride<T>(void* destination, int index, int stride, T value)
 		{
 			*(T*)((byte*)destination + (long)index * (long)stride) = value;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void* AddressOf<T>(ref T output) where T : struct
 		{
 			return (void*)(&output);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int SizeOf<T>() where T : struct
 		{
 			return sizeof(T);
@@ -307,16 +327,19 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return ref from;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static ref T AsRef<T>(void* ptr) where T : struct
 		{
 			return ref *(T*)ptr;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static ref T ArrayElementAsRef<T>(void* ptr, int index) where T : struct
 		{
 			return ref *(T*)((byte*)ptr + (long)index * (long)sizeof(T));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int EnumToInt<T>(T enumValue) where T : struct, IConvertible
 		{
 			int num = 0;
@@ -324,24 +347,36 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return num;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void InternalEnumToInt<T>(ref T enumValue, ref int intValue)
 		{
 			intValue = enumValue;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool EnumEquals<T>(T lhs, T rhs) where T : struct, IConvertible
 		{
 			return lhs == rhs;
 		}
 
-		internal struct IsUnmanagedCache<T>
-		{
-			internal static int value;
-		}
+		private const int kIsManaged = 1;
 
-		internal struct IsValidNativeContainerElementTypeCache<T>
+		private const int kIsNativeContainer = 2;
+
+		internal struct TypeFlagsCache<T>
 		{
-			internal static int value;
+			static TypeFlagsCache()
+			{
+				UnsafeUtility.TypeFlagsCache<T>.Init(ref UnsafeUtility.TypeFlagsCache<T>.flags);
+			}
+
+			[BurstDiscard]
+			private static void Init(ref int flags)
+			{
+				flags = UnsafeUtility.GetScriptingTypeFlags(typeof(T));
+			}
+
+			internal static readonly int flags;
 		}
 
 		private struct AlignOfHelper<T> where T : struct

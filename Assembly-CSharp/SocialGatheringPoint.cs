@@ -23,6 +23,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 		this.tracker.choreCount = this.choreCount;
 		this.tracker.CreateChoreCB = new Func<int, Chore>(this.CreateChore);
 		base.smi.StartSM();
+		Components.SocialGatheringPoints.Add((int)Grid.WorldIdx[Grid.PosToCell(this)], this);
 	}
 
 	protected override void OnCleanUp()
@@ -43,6 +44,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 				}
 			}
 		}
+		Components.SocialGatheringPoints.Remove((int)Grid.WorldIdx[Grid.PosToCell(this)], this);
 		base.OnCleanUp();
 	}
 
@@ -59,7 +61,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 		WorkChore<SocialGatheringPointWorkable> workChore = new WorkChore<SocialGatheringPointWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, false);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
-		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, workable);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 		return workChore;
 	}
 

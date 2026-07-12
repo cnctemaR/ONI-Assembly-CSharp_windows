@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq
 {
@@ -218,6 +219,62 @@ namespace System.Linq
 			return c;
 		}
 
+		[global::System.Runtime.CompilerServices.PreserveDependency("DefaultIfEmpty`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Count`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Contains`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Concat`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Cast`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Average`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Aggregate`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Append`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Any`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("All`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Aggregate`3", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Aggregate`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("GroupJoin`4", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Average", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Distinct`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Intersect`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Sum", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SkipWhile`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Except`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Sum`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Take`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("TakeLast`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("TakeWhile`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("ThenBy`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("ThenByDescending`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Union`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Where`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Zip`3", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("GroupBy`4", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("GroupBy`3", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("GroupBy`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("FirstOrDefault`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("ElementAt`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("First`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SkipLast`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Skip`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("ElementAtOrDefault`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Single`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Join`4", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Last`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("LastOrDefault`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("LongCount`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SingleOrDefault`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Max`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Min`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Min`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Max`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("OrderBy`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("OrderByDescending`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Prepend`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Reverse`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("Select`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SequenceEqual`1", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SelectMany`3", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("SelectMany`2", "System.Linq.Enumerable")]
+		[global::System.Runtime.CompilerServices.PreserveDependency("OfType`1", "System.Linq.Enumerable")]
 		private static MethodInfo FindEnumerableMethod(string name, ReadOnlyCollection<Expression> args, params Type[] typeArgs)
 		{
 			if (EnumerableRewriter.s_seqMethods == null)

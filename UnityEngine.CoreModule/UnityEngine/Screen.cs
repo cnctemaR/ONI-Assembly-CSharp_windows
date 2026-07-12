@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
@@ -6,9 +7,10 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/WindowLayout.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class Screen
 	{
 		public static extern int width
@@ -169,22 +171,112 @@ namespace UnityEngine
 		}
 
 		[NativeName("RequestResolution")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetResolution(int width, int height, FullScreenMode fullscreenMode, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate);
+		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, RefreshRate preferredRefreshRate)
+		{
+			Screen.SetResolution_Injected(width, height, fullscreenMode, ref preferredRefreshRate);
+		}
+
+		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, [DefaultValue("0")] int preferredRefreshRate)
+		{
+			bool flag = preferredRefreshRate < 0;
+			if (flag)
+			{
+				preferredRefreshRate = 0;
+			}
+			Screen.SetResolution(width, height, fullscreenMode, new RefreshRate
+			{
+				numerator = (uint)preferredRefreshRate,
+				denominator = 1U
+			});
+		}
 
 		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode)
 		{
-			Screen.SetResolution(width, height, fullscreenMode, 0);
+			Screen.SetResolution(width, height, fullscreenMode, new RefreshRate
+			{
+				numerator = 0U,
+				denominator = 1U
+			});
 		}
 
-		public static void SetResolution(int width, int height, bool fullscreen, [UnityEngine.Internal.DefaultValue("0")] int preferredRefreshRate)
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("SetResolution(int, int, bool, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
+		public static void SetResolution(int width, int height, bool fullscreen, [DefaultValue("0")] int preferredRefreshRate)
 		{
-			Screen.SetResolution(width, height, fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed, preferredRefreshRate);
+			bool flag = preferredRefreshRate < 0;
+			if (flag)
+			{
+				preferredRefreshRate = 0;
+			}
+			Screen.SetResolution(width, height, fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed, new RefreshRate
+			{
+				numerator = (uint)preferredRefreshRate,
+				denominator = 1U
+			});
 		}
 
 		public static void SetResolution(int width, int height, bool fullscreen)
 		{
 			Screen.SetResolution(width, height, fullscreen, 0);
+		}
+
+		public static Vector2Int mainWindowPosition
+		{
+			get
+			{
+				return Screen.GetMainWindowPosition();
+			}
+		}
+
+		public static DisplayInfo mainWindowDisplayInfo
+		{
+			get
+			{
+				return Screen.GetMainWindowDisplayInfo();
+			}
+		}
+
+		public static void GetDisplayLayout(List<DisplayInfo> displayLayout)
+		{
+			bool flag = displayLayout == null;
+			if (flag)
+			{
+				throw new ArgumentNullException();
+			}
+			Screen.GetDisplayLayoutImpl(displayLayout);
+		}
+
+		public static AsyncOperation MoveMainWindowTo(in DisplayInfo display, Vector2Int position)
+		{
+			return Screen.MoveMainWindowImpl(in display, position);
+		}
+
+		[FreeFunction("GetMainWindowPosition")]
+		private static Vector2Int GetMainWindowPosition()
+		{
+			Vector2Int vector2Int;
+			Screen.GetMainWindowPosition_Injected(out vector2Int);
+			return vector2Int;
+		}
+
+		[FreeFunction("GetMainWindowDisplayInfo")]
+		private static DisplayInfo GetMainWindowDisplayInfo()
+		{
+			DisplayInfo displayInfo;
+			Screen.GetMainWindowDisplayInfo_Injected(out displayInfo);
+			return displayInfo;
+		}
+
+		[FreeFunction("GetDisplayLayout")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDisplayLayoutImpl(List<DisplayInfo> displayLayout);
+
+		[FreeFunction("MoveMainWindow")]
+		private static AsyncOperation MoveMainWindowImpl(in DisplayInfo display, Vector2Int position)
+		{
+			return Screen.MoveMainWindowImpl_Injected(in display, ref position);
 		}
 
 		public static extern Resolution[] resolutions
@@ -202,8 +294,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Cursor.lockState and Cursor.visible instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static bool lockCursor
 		{
 			get
@@ -230,5 +322,17 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_safeArea_Injected(out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetResolution_Injected(int width, int height, FullScreenMode fullscreenMode, ref RefreshRate preferredRefreshRate);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMainWindowPosition_Injected(out Vector2Int ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMainWindowDisplayInfo_Injected(out DisplayInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AsyncOperation MoveMainWindowImpl_Injected(in DisplayInfo display, ref Vector2Int position);
 	}
 }

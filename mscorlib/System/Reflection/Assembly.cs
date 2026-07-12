@@ -15,63 +15,32 @@ using Mono;
 
 namespace System.Reflection
 {
+	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_Assembly))]
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class Assembly : ICustomAttributeProvider, _Assembly, IEvidenceFactory, ISerializable
 	{
-		protected Assembly()
-		{
-			this.resolve_event_holder = new Assembly.ResolveEventHolder();
-		}
-
 		public virtual event ModuleResolveEventHandler ModuleResolve
 		{
 			[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 			add
 			{
-				this.resolve_event_holder.ModuleResolve += value;
+				throw new NotImplementedException();
 			}
 			[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 			remove
 			{
-				this.resolve_event_holder.ModuleResolve -= value;
+				throw new NotImplementedException();
 			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string get_code_base(bool escaped);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string get_fullname();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string get_location();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string InternalImageRuntimeVersion();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetAotId();
-
-		private string GetCodeBase(bool escaped)
-		{
-			string text = this.get_code_base(escaped);
-			if (SecurityManager.SecurityEnabled && string.Compare("FILE://", 0, text, 0, 7, true, CultureInfo.InvariantCulture) == 0)
-			{
-				string text2 = text.Substring(7);
-				new FileIOPermission(FileIOPermissionAccess.PathDiscovery, text2).Demand();
-			}
-			return text;
 		}
 
 		public virtual string CodeBase
 		{
 			get
 			{
-				return this.GetCodeBase(false);
+				throw new NotImplementedException();
 			}
 		}
 
@@ -80,7 +49,7 @@ namespace System.Reflection
 			[SecuritySafeCritical]
 			get
 			{
-				return this.GetCodeBase(true);
+				throw new NotImplementedException();
 			}
 		}
 
@@ -88,14 +57,16 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.ToString();
+				throw new NotImplementedException();
 			}
 		}
 
-		public virtual extern MethodInfo EntryPoint
+		public virtual MethodInfo EntryPoint
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		public virtual Evidence Evidence
@@ -103,30 +74,28 @@ namespace System.Reflection
 			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true)]
 			get
 			{
-				return this.UnprotectedGetEvidence();
+				throw new NotImplementedException();
 			}
 		}
 
-		internal Evidence UnprotectedGetEvidence()
+		internal virtual Evidence UnprotectedGetEvidence()
 		{
-			if (this._evidence == null)
-			{
-				lock (this)
-				{
-					this._evidence = Evidence.GetDefaultHostEvidence(this);
-				}
-			}
-			return this._evidence;
+			throw new NotImplementedException();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool get_global_assembly_cache();
+		internal virtual IntPtr MonoAssembly
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		internal bool FromByteArray
+		internal virtual bool FromByteArray
 		{
 			set
 			{
-				this.fromByteArray = value;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -134,16 +103,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				if (this.fromByteArray)
-				{
-					return string.Empty;
-				}
-				string location = this.get_location();
-				if (location != string.Empty && SecurityManager.SecurityEnabled)
-				{
-					new FileIOPermission(FileIOPermissionAccess.PathDiscovery, location).Demand();
-				}
-				return location;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -152,7 +112,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.InternalImageRuntimeVersion();
+				throw new NotImplementedException();
 			}
 		}
 
@@ -164,21 +124,18 @@ namespace System.Reflection
 
 		public virtual bool IsDefined(Type attributeType, bool inherit)
 		{
-			return MonoCustomAttrs.IsDefined(this, attributeType, inherit);
+			throw new NotImplementedException();
 		}
 
 		public virtual object[] GetCustomAttributes(bool inherit)
 		{
-			return MonoCustomAttrs.GetCustomAttributes(this, inherit);
+			throw new NotImplementedException();
 		}
 
 		public virtual object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return MonoCustomAttrs.GetCustomAttributes(this, attributeType, inherit);
+			throw new NotImplementedException();
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern object GetFilesInternal(string name, bool getResourceModules);
 
 		public virtual FileStream[] GetFiles()
 		{
@@ -187,106 +144,22 @@ namespace System.Reflection
 
 		public virtual FileStream[] GetFiles(bool getResourceModules)
 		{
-			string[] array = (string[])this.GetFilesInternal(null, getResourceModules);
-			if (array == null)
-			{
-				return EmptyArray<FileStream>.Value;
-			}
-			string location = this.Location;
-			FileStream[] array2;
-			if (location != string.Empty)
-			{
-				array2 = new FileStream[array.Length + 1];
-				array2[0] = new FileStream(location, FileMode.Open, FileAccess.Read);
-				for (int i = 0; i < array.Length; i++)
-				{
-					array2[i + 1] = new FileStream(array[i], FileMode.Open, FileAccess.Read);
-				}
-			}
-			else
-			{
-				array2 = new FileStream[array.Length];
-				for (int j = 0; j < array.Length; j++)
-				{
-					array2[j] = new FileStream(array[j], FileMode.Open, FileAccess.Read);
-				}
-			}
-			return array2;
+			throw new NotImplementedException();
 		}
 
 		public virtual FileStream GetFile(string name)
 		{
-			if (name == null)
-			{
-				throw new ArgumentNullException(null, "Name cannot be null.");
-			}
-			if (name.Length == 0)
-			{
-				throw new ArgumentException("Empty name is not valid");
-			}
-			string text = (string)this.GetFilesInternal(name, true);
-			if (text != null)
-			{
-				return new FileStream(text, FileMode.Open, FileAccess.Read);
-			}
-			return null;
+			throw new NotImplementedException();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern IntPtr GetManifestResourceInternal(string name, out int size, out Module module);
-
-		public unsafe virtual Stream GetManifestResourceStream(string name)
+		public virtual Stream GetManifestResourceStream(string name)
 		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			if (name.Length == 0)
-			{
-				throw new ArgumentException("String cannot have zero length.", "name");
-			}
-			ManifestResourceInfo manifestResourceInfo = this.GetManifestResourceInfo(name);
-			if (manifestResourceInfo == null)
-			{
-				Assembly assembly = AppDomain.CurrentDomain.DoResourceResolve(name, this);
-				if (assembly != null && assembly != this)
-				{
-					return assembly.GetManifestResourceStream(name);
-				}
-				return null;
-			}
-			else
-			{
-				if (manifestResourceInfo.ReferencedAssembly != null)
-				{
-					return manifestResourceInfo.ReferencedAssembly.GetManifestResourceStream(name);
-				}
-				if (manifestResourceInfo.FileName != null && manifestResourceInfo.ResourceLocation == (ResourceLocation)0)
-				{
-					if (this.fromByteArray)
-					{
-						throw new FileNotFoundException(manifestResourceInfo.FileName);
-					}
-					return new FileStream(Path.Combine(Path.GetDirectoryName(this.Location), manifestResourceInfo.FileName), FileMode.Open, FileAccess.Read);
-				}
-				else
-				{
-					int num;
-					Module module;
-					IntPtr manifestResourceInternal = this.GetManifestResourceInternal(name, out num, out module);
-					if (manifestResourceInternal == (IntPtr)0)
-					{
-						return null;
-					}
-					return new Assembly.UnmanagedMemoryStreamForModule((byte*)(void*)manifestResourceInternal, (long)num, module);
-				}
-			}
+			throw new NotImplementedException();
 		}
 
 		public virtual Stream GetManifestResourceStream(Type type, string name)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.GetManifestResourceStream(type, name, false, ref stackCrawlMark);
+			throw new NotImplementedException();
 		}
 
 		internal Stream GetManifestResourceStream(Type type, string name, bool skipSecurityCheck, ref StackCrawlMark stackMark)
@@ -353,7 +226,7 @@ namespace System.Reflection
 
 		public virtual Type[] GetExportedTypes()
 		{
-			return this.GetTypes(true);
+			throw new NotImplementedException();
 		}
 
 		public virtual Type GetType(string name, bool throwOnError)
@@ -384,12 +257,7 @@ namespace System.Reflection
 
 		public override string ToString()
 		{
-			if (this.assemblyName != null)
-			{
-				return this.assemblyName;
-			}
-			this.assemblyName = this.get_fullname();
-			return this.assemblyName;
+			return base.ToString();
 		}
 
 		public static string CreateQualifiedName(string assemblyName, string typeName)
@@ -409,15 +277,14 @@ namespace System.Reflection
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Assembly GetEntryAssembly();
 
-		internal Assembly GetSatelliteAssembly(CultureInfo culture, Version version, bool throwOnError)
+		internal Assembly GetSatelliteAssembly(CultureInfo culture, Version version, bool throwOnError, ref StackCrawlMark stackMark)
 		{
 			if (culture == null)
 			{
 				throw new ArgumentNullException("culture");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			string text = this.GetSimpleName() + ".resources";
-			return this.InternalGetSatelliteAssembly(text, culture, version, true, ref stackCrawlMark);
+			return this.InternalGetSatelliteAssembly(text, culture, version, true, ref stackMark);
 		}
 
 		internal RuntimeAssembly InternalGetSatelliteAssembly(string name, CultureInfo culture, Version version, bool throwOnFileNotFound, ref StackCrawlMark stackMark)
@@ -437,7 +304,7 @@ namespace System.Reflection
 			assemblyName.Name = name;
 			try
 			{
-				Assembly assembly = AppDomain.CurrentDomain.LoadSatellite(assemblyName, false);
+				Assembly assembly = AppDomain.CurrentDomain.LoadSatellite(assemblyName, false, ref stackMark);
 				if (assembly != null)
 				{
 					return (RuntimeAssembly)assembly;
@@ -454,7 +321,7 @@ namespace System.Reflection
 			RuntimeAssembly runtimeAssembly;
 			try
 			{
-				runtimeAssembly = (RuntimeAssembly)Assembly.LoadFrom(text);
+				runtimeAssembly = (RuntimeAssembly)Assembly.LoadFrom(text, false, ref stackMark);
 			}
 			catch
 			{
@@ -473,17 +340,24 @@ namespace System.Reflection
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Assembly LoadFrom(string assemblyFile, bool refonly);
+		private static extern Assembly LoadFrom(string assemblyFile, bool refOnly, ref StackCrawlMark stackMark);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Assembly LoadFile_internal(string assemblyFile, ref StackCrawlMark stackMark);
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly LoadFrom(string assemblyFile)
 		{
-			return Assembly.LoadFrom(assemblyFile, false);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return Assembly.LoadFrom(assemblyFile, false, ref stackCrawlMark);
 		}
 
 		[Obsolete]
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly LoadFrom(string assemblyFile, Evidence securityEvidence)
 		{
-			Assembly assembly = Assembly.LoadFrom(assemblyFile, false);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			Assembly assembly = Assembly.LoadFrom(assemblyFile, false, ref stackCrawlMark);
 			if (assembly != null && securityEvidence != null)
 			{
 				assembly.Evidence.Merge(securityEvidence);
@@ -504,12 +378,15 @@ namespace System.Reflection
 			throw new NotImplementedException();
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly UnsafeLoadFrom(string assemblyFile)
 		{
-			return Assembly.LoadFrom(assemblyFile);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return Assembly.LoadFrom(assemblyFile, false, ref stackCrawlMark);
 		}
 
 		[Obsolete]
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly LoadFile(string path, Evidence securityEvidence)
 		{
 			if (path == null)
@@ -520,7 +397,13 @@ namespace System.Reflection
 			{
 				throw new ArgumentException("Path can't be empty", "path");
 			}
-			return Assembly.LoadFrom(path, securityEvidence);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			Assembly assembly = Assembly.LoadFile_internal(path, ref stackCrawlMark);
+			if (assembly != null && securityEvidence != null)
+			{
+				throw new NotImplementedException();
+			}
+			return assembly;
 		}
 
 		public static Assembly LoadFile(string path)
@@ -577,18 +460,22 @@ namespace System.Reflection
 			return AppDomain.CurrentDomain.Load(rawAssembly, null, null, true);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly ReflectionOnlyLoad(string assemblyString)
 		{
-			return AppDomain.CurrentDomain.Load(assemblyString, null, true);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return AppDomain.CurrentDomain.Load(assemblyString, null, true, ref stackCrawlMark);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Assembly ReflectionOnlyLoadFrom(string assemblyFile)
 		{
 			if (assemblyFile == null)
 			{
 				throw new ArgumentNullException("assemblyFile");
 			}
-			return Assembly.LoadFrom(assemblyFile, true);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return Assembly.LoadFrom(assemblyFile, true, ref stackCrawlMark);
 		}
 
 		[Obsolete("This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202")]
@@ -684,11 +571,10 @@ namespace System.Reflection
 			return this.GetModules(false);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal virtual extern Module[] GetModulesInternal();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public virtual extern string[] GetManifestResourceNames();
+		internal virtual Module[] GetModulesInternal()
+		{
+			throw new NotImplementedException();
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Assembly GetExecutingAssembly();
@@ -698,6 +584,11 @@ namespace System.Reflection
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr InternalGetReferencedAssemblies(Assembly module);
+
+		public virtual string[] GetManifestResourceNames()
+		{
+			throw new NotImplementedException();
+		}
 
 		internal unsafe static AssemblyName[] GetReferencedAssemblies(Assembly module)
 		{
@@ -729,29 +620,13 @@ namespace System.Reflection
 			return array2;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetManifestResourceInfoInternal(string name, ManifestResourceInfo info);
-
 		public virtual ManifestResourceInfo GetManifestResourceInfo(string resourceName)
 		{
-			if (resourceName == null)
-			{
-				throw new ArgumentNullException("resourceName");
-			}
-			if (resourceName.Length == 0)
-			{
-				throw new ArgumentException("String cannot have zero length.");
-			}
-			ManifestResourceInfo manifestResourceInfo = new ManifestResourceInfo(null, null, (ResourceLocation)0);
-			if (this.GetManifestResourceInfoInternal(resourceName, manifestResourceInfo))
-			{
-				return manifestResourceInfo;
-			}
-			return null;
+			throw new NotImplementedException();
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("Currently it always returns zero")]
+		[ComVisible(false)]
 		public virtual long HostContext
 		{
 			get
@@ -762,17 +637,16 @@ namespace System.Reflection
 
 		internal virtual Module GetManifestModule()
 		{
-			return this.GetManifestModuleInternal();
+			throw new NotImplementedException();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Module GetManifestModuleInternal();
-
 		[ComVisible(false)]
-		public virtual extern bool ReflectionOnly
+		public virtual bool ReflectionOnly
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		public override int GetHashCode()
@@ -782,97 +656,22 @@ namespace System.Reflection
 
 		public override bool Equals(object o)
 		{
-			return this == o || (o != null && ((Assembly)o)._mono_assembly == this._mono_assembly);
+			return base.Equals(o);
 		}
 
-		internal void Resolve()
-		{
-			lock (this)
-			{
-				this.LoadAssemblyPermissions();
-				Evidence evidence = new Evidence(this.UnprotectedGetEvidence());
-				evidence.AddHost(new PermissionRequestEvidence(this._minimum, this._optional, this._refuse));
-				this._granted = SecurityManager.ResolvePolicy(evidence, this._minimum, this._optional, this._refuse, out this._denied);
-			}
-		}
-
-		internal PermissionSet GrantedPermissionSet
+		internal virtual PermissionSet GrantedPermissionSet
 		{
 			get
 			{
-				if (this._granted == null)
-				{
-					if (SecurityManager.ResolvingPolicyLevel != null)
-					{
-						if (SecurityManager.ResolvingPolicyLevel.IsFullTrustAssembly(this))
-						{
-							return DefaultPolicies.FullTrust;
-						}
-						return null;
-					}
-					else
-					{
-						this.Resolve();
-					}
-				}
-				return this._granted;
+				throw new NotImplementedException();
 			}
 		}
 
-		internal PermissionSet DeniedPermissionSet
+		internal virtual PermissionSet DeniedPermissionSet
 		{
 			get
 			{
-				if (this._granted == null)
-				{
-					if (SecurityManager.ResolvingPolicyLevel != null)
-					{
-						if (SecurityManager.ResolvingPolicyLevel.IsFullTrustAssembly(this))
-						{
-							return null;
-						}
-						return DefaultPolicies.FullTrust;
-					}
-					else
-					{
-						this.Resolve();
-					}
-				}
-				return this._denied;
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool LoadPermissions(Assembly a, ref IntPtr minimum, ref int minLength, ref IntPtr optional, ref int optLength, ref IntPtr refused, ref int refLength);
-
-		private void LoadAssemblyPermissions()
-		{
-			IntPtr zero = IntPtr.Zero;
-			IntPtr zero2 = IntPtr.Zero;
-			IntPtr zero3 = IntPtr.Zero;
-			int num = 0;
-			int num2 = 0;
-			int num3 = 0;
-			if (Assembly.LoadPermissions(this, ref zero, ref num, ref zero2, ref num2, ref zero3, ref num3))
-			{
-				if (num > 0)
-				{
-					byte[] array = new byte[num];
-					Marshal.Copy(zero, array, 0, num);
-					this._minimum = SecurityManager.Decode(array);
-				}
-				if (num2 > 0)
-				{
-					byte[] array2 = new byte[num2];
-					Marshal.Copy(zero2, array2, 0, num2);
-					this._optional = SecurityManager.Decode(array2);
-				}
-				if (num3 > 0)
-				{
-					byte[] array3 = new byte[num3];
-					Marshal.Copy(zero3, array3, 0, num3);
-					this._refuse = SecurityManager.Decode(array3);
-				}
+				throw new NotImplementedException();
 			}
 		}
 
@@ -880,7 +679,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.GrantedPermissionSet;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -899,7 +698,7 @@ namespace System.Reflection
 
 		public virtual IList<CustomAttributeData> GetCustomAttributesData()
 		{
-			return CustomAttributeData.GetCustomAttributes(this);
+			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
@@ -1018,49 +817,14 @@ namespace System.Reflection
 			}
 		}
 
-		internal IntPtr _mono_assembly;
-
-		private Assembly.ResolveEventHolder resolve_event_holder;
-
-		private Evidence _evidence;
-
-		internal PermissionSet _minimum;
-
-		internal PermissionSet _optional;
-
-		internal PermissionSet _refuse;
-
-		private PermissionSet _granted;
-
-		private PermissionSet _denied;
-
-		private bool fromByteArray;
-
-		private string assemblyName;
+		public virtual Type[] GetForwardedTypes()
+		{
+			throw new PlatformNotSupportedException();
+		}
 
 		internal class ResolveEventHolder
 		{
 			public event ModuleResolveEventHandler ModuleResolve;
-		}
-
-		internal class UnmanagedMemoryStreamForModule : UnmanagedMemoryStream
-		{
-			public unsafe UnmanagedMemoryStreamForModule(byte* pointer, long length, Module module)
-				: base(pointer, length)
-			{
-				this.module = module;
-			}
-
-			protected override void Dispose(bool disposing)
-			{
-				if (this._isOpen)
-				{
-					this.module = null;
-				}
-				base.Dispose(disposing);
-			}
-
-			private Module module;
 		}
 	}
 }

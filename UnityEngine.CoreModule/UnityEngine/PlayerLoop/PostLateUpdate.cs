@@ -124,6 +124,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		internal struct PlayerRenderUIEBatchModeOffscreen
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct FinishFrameRendering
 		{
 		}
@@ -214,6 +219,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct GraphicsWarmupPreloadedShaders
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct PlayerSendFramePostPresent
 		{
 		}
@@ -230,6 +240,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct TriggerEndOfFrameCallbacks
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct ObjectDispatcherPostLateUpdate
 		{
 		}
 	}

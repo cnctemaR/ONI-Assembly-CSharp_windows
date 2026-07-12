@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-	[ComVisible(true)]
 	public sealed class AssemblyTitleAttribute : Attribute
 	{
 		public AssemblyTitleAttribute(string title)
 		{
-			this.m_title = title;
+			this.Title = title;
 		}
 
-		public string Title
-		{
-			get
-			{
-				return this.m_title;
-			}
-		}
-
-		private string m_title;
+		public string Title { get; }
 	}
 }

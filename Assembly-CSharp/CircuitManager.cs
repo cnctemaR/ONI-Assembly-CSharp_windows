@@ -645,7 +645,7 @@ public class CircuitManager
 		{
 			ushort num10;
 			float num11;
-			keyValuePair.Deconstruct<ushort, float>(out num10, out num11);
+			keyValuePair.Deconstruct(out num10, out num11);
 			float num12 = num11;
 			num9 += num12;
 		}

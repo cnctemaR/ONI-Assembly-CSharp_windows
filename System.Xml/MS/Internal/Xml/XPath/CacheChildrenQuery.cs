@@ -9,26 +9,26 @@ namespace MS.Internal.Xml.XPath
 		public CacheChildrenQuery(Query qyInput, string name, string prefix, XPathNodeType type)
 			: base(qyInput, name, prefix, type)
 		{
-			this.elementStk = new ClonableStack<XPathNavigator>();
-			this.positionStk = new ClonableStack<int>();
-			this.needInput = true;
+			this._elementStk = new ClonableStack<XPathNavigator>();
+			this._positionStk = new ClonableStack<int>();
+			this._needInput = true;
 		}
 
 		private CacheChildrenQuery(CacheChildrenQuery other)
 			: base(other)
 		{
-			this.nextInput = Query.Clone(other.nextInput);
-			this.elementStk = other.elementStk.Clone();
-			this.positionStk = other.positionStk.Clone();
-			this.needInput = other.needInput;
+			this._nextInput = Query.Clone(other._nextInput);
+			this._elementStk = other._elementStk.Clone();
+			this._positionStk = other._positionStk.Clone();
+			this._needInput = other._needInput;
 		}
 
 		public override void Reset()
 		{
-			this.nextInput = null;
-			this.elementStk.Clear();
-			this.positionStk.Clear();
-			this.needInput = true;
+			this._nextInput = null;
+			this._elementStk.Clear();
+			this._positionStk.Clear();
+			this._needInput = true;
 			base.Reset();
 		}
 
@@ -36,9 +36,9 @@ namespace MS.Internal.Xml.XPath
 		{
 			for (;;)
 			{
-				if (this.needInput)
+				if (this._needInput)
 				{
-					if (this.elementStk.Count == 0)
+					if (this._elementStk.Count == 0)
 					{
 						this.currentNode = this.GetNextInput();
 						if (this.currentNode == null)
@@ -53,18 +53,18 @@ namespace MS.Internal.Xml.XPath
 					}
 					else
 					{
-						this.currentNode = this.elementStk.Pop();
-						this.position = this.positionStk.Pop();
+						this.currentNode = this._elementStk.Pop();
+						this.position = this._positionStk.Pop();
 						if (!this.DecideNextNode())
 						{
 							continue;
 						}
 					}
-					this.needInput = false;
+					this._needInput = false;
 				}
 				else if (!this.currentNode.MoveToNext() || !this.DecideNextNode())
 				{
-					this.needInput = true;
+					this._needInput = true;
 					continue;
 				}
 				if (this.matches(this.currentNode))
@@ -80,13 +80,13 @@ namespace MS.Internal.Xml.XPath
 
 		private bool DecideNextNode()
 		{
-			this.nextInput = this.GetNextInput();
-			if (this.nextInput != null && Query.CompareNodes(this.currentNode, this.nextInput) == XmlNodeOrder.After)
+			this._nextInput = this.GetNextInput();
+			if (this._nextInput != null && Query.CompareNodes(this.currentNode, this._nextInput) == XmlNodeOrder.After)
 			{
-				this.elementStk.Push(this.currentNode);
-				this.positionStk.Push(this.position);
-				this.currentNode = this.nextInput;
-				this.nextInput = null;
+				this._elementStk.Push(this.currentNode);
+				this._positionStk.Push(this.position);
+				this.currentNode = this._nextInput;
+				this._nextInput = null;
 				if (!this.currentNode.MoveToFirstChild())
 				{
 					return false;
@@ -99,10 +99,10 @@ namespace MS.Internal.Xml.XPath
 		private XPathNavigator GetNextInput()
 		{
 			XPathNavigator xpathNavigator;
-			if (this.nextInput != null)
+			if (this._nextInput != null)
 			{
-				xpathNavigator = this.nextInput;
-				this.nextInput = null;
+				xpathNavigator = this._nextInput;
+				this._nextInput = null;
 			}
 			else
 			{
@@ -120,12 +120,12 @@ namespace MS.Internal.Xml.XPath
 			return new CacheChildrenQuery(this);
 		}
 
-		private XPathNavigator nextInput;
+		private XPathNavigator _nextInput;
 
-		private ClonableStack<XPathNavigator> elementStk;
+		private ClonableStack<XPathNavigator> _elementStk;
 
-		private ClonableStack<int> positionStk;
+		private ClonableStack<int> _positionStk;
 
-		private bool needInput;
+		private bool _needInput;
 	}
 }

@@ -10,7 +10,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformMobileLow>("c88d16e5272a4e241b0ef0ac2e53b73d");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -18,13 +18,13 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.IPhonePlayer, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.Android, this);
 		}
 
-		public override float Priority
+		internal override float Priority
 		{
 			get
 			{
@@ -32,7 +32,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override bool MatchesCurrentEnvironment
+		internal override bool MatchesCurrentEnvironment
 		{
 			get
 			{

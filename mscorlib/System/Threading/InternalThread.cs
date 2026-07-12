@@ -23,11 +23,11 @@ namespace System.Threading
 
 		private IntPtr native_handle;
 
-		private IntPtr unused3;
+		private IntPtr name_chars;
 
-		private IntPtr name;
+		private int name_free;
 
-		private int name_len;
+		private int name_length;
 
 		private ThreadState state;
 
@@ -55,7 +55,7 @@ namespace System.Threading
 
 		private int interruption_requested;
 
-		private IntPtr synch_cs;
+		private IntPtr longlived;
 
 		internal bool threadpool_thread;
 
@@ -73,8 +73,6 @@ namespace System.Threading
 
 		private IntPtr manage_callback;
 
-		private IntPtr unused4;
-
 		private IntPtr flags;
 
 		private IntPtr thread_pinning_ref;
@@ -89,9 +87,13 @@ namespace System.Threading
 
 		private int self_suspended;
 
-		private IntPtr unused1;
+		private IntPtr thread_state;
 
-		private IntPtr unused2;
+		private IntPtr netcore0;
+
+		private IntPtr netcore1;
+
+		private IntPtr netcore2;
 
 		private IntPtr last;
 	}

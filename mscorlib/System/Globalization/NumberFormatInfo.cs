@@ -109,6 +109,11 @@ namespace System.Globalization
 		[SecuritySafeCritical]
 		internal NumberFormatInfo(CultureData cultureData)
 		{
+			if (GlobalizationMode.Invariant)
+			{
+				this.m_isInvariant = true;
+				return;
+			}
 			if (cultureData != null)
 			{
 				cultureData.GetNFIValues(this);

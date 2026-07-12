@@ -40,8 +40,8 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[TypeConverter(typeof(TypeConverter))]
 		[ConfigurationProperty("type")]
+		[TypeConverter(typeof(TypeConverter))]
 		public Type Type
 		{
 			get

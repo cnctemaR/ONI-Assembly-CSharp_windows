@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
@@ -123,12 +124,32 @@ namespace UnityEngine
 
 		public void Activate()
 		{
-			Display.ActivateDisplayImpl(this.nativeDisplay, 0, 0, 60);
+			Display.ActivateDisplayImpl(this.nativeDisplay, 0, 0, new RefreshRate
+			{
+				numerator = 60U,
+				denominator = 1U
+			});
 		}
 
-		public void Activate(int width, int height, int refreshRate)
+		public void Activate(int width, int height, RefreshRate refreshRate)
 		{
 			Display.ActivateDisplayImpl(this.nativeDisplay, width, height, refreshRate);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Activate(int, int, int) is deprecated. Use Activate(int, int, RefreshRate) instead.", false)]
+		public void Activate(int width, int height, int refreshRate)
+		{
+			bool flag = refreshRate < 0;
+			if (flag)
+			{
+				refreshRate = 0;
+			}
+			Display.ActivateDisplayImpl(this.nativeDisplay, width, height, new RefreshRate
+			{
+				numerator = (uint)refreshRate,
+				denominator = 1U
+			});
 		}
 
 		public void SetParams(int width, int height, int x, int y)
@@ -181,7 +202,7 @@ namespace UnityEngine
 		}
 
 		[RequiredByNativeCode]
-		private static void RecreateDisplayList(IntPtr[] nativeDisplay)
+		internal static void RecreateDisplayList(IntPtr[] nativeDisplay)
 		{
 			bool flag = nativeDisplay.Length == 0;
 			if (!flag)
@@ -196,7 +217,7 @@ namespace UnityEngine
 		}
 
 		[RequiredByNativeCode]
-		private static void FireDisplaysUpdated()
+		internal static void FireDisplaysUpdated()
 		{
 			bool flag = Display.onDisplaysUpdated != null;
 			if (flag)
@@ -225,8 +246,10 @@ namespace UnityEngine
 		private static extern void SetRenderingResolutionImpl(IntPtr nativeDisplay, int w, int h);
 
 		[FreeFunction("UnityDisplayManager_ActivateDisplay")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ActivateDisplayImpl(IntPtr nativeDisplay, int width, int height, int refreshRate);
+		private static void ActivateDisplayImpl(IntPtr nativeDisplay, int width, int height, RefreshRate refreshRate)
+		{
+			Display.ActivateDisplayImpl_Injected(nativeDisplay, width, height, ref refreshRate);
+		}
 
 		[FreeFunction("UnityDisplayManager_SetDisplayParam")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -253,6 +276,9 @@ namespace UnityEngine
 		{
 			Display.onDisplaysUpdated = null;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ActivateDisplayImpl_Injected(IntPtr nativeDisplay, int width, int height, ref RefreshRate refreshRate);
 
 		internal IntPtr nativeDisplay;
 

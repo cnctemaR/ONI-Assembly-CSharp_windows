@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 
 namespace System.Data.Common
 {
-	public abstract class DbCommand : Component, IDbCommand, IDisposable
+	public abstract class DbCommand : Component, IDbCommand, IDisposable, IAsyncDisposable
 	{
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue("")]
+		[RefreshProperties(RefreshProperties.All)]
 		public abstract string CommandText { get; set; }
 
 		public abstract int CommandTimeout { get; set; }
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue(CommandType.Text)]
+		[RefreshProperties(RefreshProperties.All)]
 		public abstract CommandType CommandType { get; set; }
 
 		[DefaultValue(null)]
@@ -50,10 +50,10 @@ namespace System.Data.Common
 
 		protected abstract DbTransaction DbTransaction { get; set; }
 
-		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[DesignOnly(true)]
 		[DefaultValue(true)]
+		[DesignOnly(true)]
+		[Browsable(false)]
 		public abstract bool DesignTimeVisible { get; set; }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -276,5 +276,30 @@ namespace System.Data.Common
 		public abstract object ExecuteScalar();
 
 		public abstract void Prepare();
+
+		public virtual Task PrepareAsync(CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			Task task;
+			try
+			{
+				this.Prepare();
+				task = Task.CompletedTask;
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException(ex);
+			}
+			return task;
+		}
+
+		public virtual ValueTask DisposeAsync()
+		{
+			base.Dispose();
+			return default(ValueTask);
+		}
 	}
 }

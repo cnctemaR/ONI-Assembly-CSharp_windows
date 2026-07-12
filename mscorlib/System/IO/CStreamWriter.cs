@@ -150,6 +150,12 @@ namespace System.IO
 			}
 		}
 
+		public override void WriteLine(string val)
+		{
+			this.Write(val);
+			this.Write(this.NewLine);
+		}
+
 		private TermInfoDriver driver;
 	}
 }

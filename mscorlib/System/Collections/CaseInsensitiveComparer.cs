@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class CaseInsensitiveComparer : IComparer
 	{
 		public CaseInsensitiveComparer()
 		{
-			this.m_compareInfo = CultureInfo.CurrentCulture.CompareInfo;
+			this._compareInfo = CultureInfo.CurrentCulture.CompareInfo;
 		}
 
 		public CaseInsensitiveComparer(CultureInfo culture)
@@ -19,7 +17,7 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("culture");
 			}
-			this.m_compareInfo = culture.CompareInfo;
+			this._compareInfo = culture.CompareInfo;
 		}
 
 		public static CaseInsensitiveComparer Default
@@ -34,11 +32,11 @@ namespace System.Collections
 		{
 			get
 			{
-				if (CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer == null)
+				if (CaseInsensitiveComparer.s_InvariantCaseInsensitiveComparer == null)
 				{
-					CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer = new CaseInsensitiveComparer(CultureInfo.InvariantCulture);
+					CaseInsensitiveComparer.s_InvariantCaseInsensitiveComparer = new CaseInsensitiveComparer(CultureInfo.InvariantCulture);
 				}
-				return CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer;
+				return CaseInsensitiveComparer.s_InvariantCaseInsensitiveComparer;
 			}
 		}
 
@@ -48,13 +46,13 @@ namespace System.Collections
 			string text2 = b as string;
 			if (text != null && text2 != null)
 			{
-				return this.m_compareInfo.Compare(text, text2, CompareOptions.IgnoreCase);
+				return this._compareInfo.Compare(text, text2, CompareOptions.IgnoreCase);
 			}
 			return Comparer.Default.Compare(a, b);
 		}
 
-		private CompareInfo m_compareInfo;
+		private CompareInfo _compareInfo;
 
-		private static volatile CaseInsensitiveComparer m_InvariantCaseInsensitiveComparer;
+		private static volatile CaseInsensitiveComparer s_InvariantCaseInsensitiveComparer;
 	}
 }

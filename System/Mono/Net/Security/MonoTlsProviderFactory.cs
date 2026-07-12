@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
-using Mono.Security.Interface;
+using System.Runtime.CompilerServices;
+using Mono.Btls;
 using Mono.Unity;
 
 namespace Mono.Net.Security
 {
 	internal static class MonoTlsProviderFactory
 	{
-		internal static MonoTlsProvider GetProviderInternal()
+		internal static MobileTlsProvider GetProviderInternal()
 		{
 			object obj = MonoTlsProviderFactory.locker;
-			MonoTlsProvider monoTlsProvider;
+			MobileTlsProvider mobileTlsProvider;
 			lock (obj)
 			{
 				MonoTlsProviderFactory.InitializeInternal();
-				monoTlsProvider = MonoTlsProviderFactory.defaultProvider;
+				mobileTlsProvider = MonoTlsProviderFactory.defaultProvider;
 			}
-			return monoTlsProvider;
+			return mobileTlsProvider;
 		}
 
 		internal static void InitializeInternal()
@@ -28,26 +28,26 @@ namespace Mono.Net.Security
 			{
 				if (!MonoTlsProviderFactory.initialized)
 				{
+					SystemDependencyProvider.Initialize();
 					MonoTlsProviderFactory.InitializeProviderRegistration();
-					MonoTlsProvider monoTlsProvider;
+					MobileTlsProvider mobileTlsProvider;
 					try
 					{
-						monoTlsProvider = MonoTlsProviderFactory.CreateDefaultProviderImpl();
+						mobileTlsProvider = MonoTlsProviderFactory.CreateDefaultProviderImpl();
 					}
 					catch (Exception ex)
 					{
 						throw new NotSupportedException("TLS Support not available.", ex);
 					}
-					if (monoTlsProvider == null)
+					if (mobileTlsProvider == null)
 					{
 						throw new NotSupportedException("TLS Support not available.");
 					}
-					if (!MonoTlsProviderFactory.providerCache.ContainsKey(monoTlsProvider.ID))
+					if (!MonoTlsProviderFactory.providerCache.ContainsKey(mobileTlsProvider.ID))
 					{
-						MonoTlsProviderFactory.providerCache.Add(monoTlsProvider.ID, monoTlsProvider);
+						MonoTlsProviderFactory.providerCache.Add(mobileTlsProvider.ID, mobileTlsProvider);
 					}
-					X509Helper2.Initialize();
-					MonoTlsProviderFactory.defaultProvider = monoTlsProvider;
+					MonoTlsProviderFactory.defaultProvider = mobileTlsProvider;
 					MonoTlsProviderFactory.initialized = true;
 				}
 			}
@@ -62,8 +62,8 @@ namespace Mono.Net.Security
 				{
 					throw new NotSupportedException("TLS Subsystem already initialized.");
 				}
+				SystemDependencyProvider.Initialize();
 				MonoTlsProviderFactory.defaultProvider = MonoTlsProviderFactory.LookupProvider(provider, true);
-				X509Helper2.Initialize();
 				MonoTlsProviderFactory.initialized = true;
 			}
 		}
@@ -97,26 +97,26 @@ namespace Mono.Net.Security
 			return type;
 		}
 
-		private static MonoTlsProvider LookupProvider(string name, bool throwOnError)
+		private static MobileTlsProvider LookupProvider(string name, bool throwOnError)
 		{
 			object obj = MonoTlsProviderFactory.locker;
-			MonoTlsProvider monoTlsProvider;
+			MobileTlsProvider mobileTlsProvider;
 			lock (obj)
 			{
 				MonoTlsProviderFactory.InitializeProviderRegistration();
 				Tuple<Guid, string> tuple;
-				MonoTlsProvider monoTlsProvider2;
+				MobileTlsProvider mobileTlsProvider2;
 				if (!MonoTlsProviderFactory.providerRegistration.TryGetValue(name, out tuple))
 				{
 					if (throwOnError)
 					{
 						throw new NotSupportedException(string.Format("No such TLS Provider: `{0}'.", name));
 					}
-					monoTlsProvider = null;
+					mobileTlsProvider = null;
 				}
-				else if (MonoTlsProviderFactory.providerCache.TryGetValue(tuple.Item1, out monoTlsProvider2))
+				else if (MonoTlsProviderFactory.providerCache.TryGetValue(tuple.Item1, out mobileTlsProvider2))
 				{
-					monoTlsProvider = monoTlsProvider2;
+					mobileTlsProvider = mobileTlsProvider2;
 				}
 				else
 				{
@@ -127,28 +127,28 @@ namespace Mono.Net.Security
 					}
 					try
 					{
-						monoTlsProvider2 = (MonoTlsProvider)Activator.CreateInstance(type, true);
+						mobileTlsProvider2 = (MobileTlsProvider)Activator.CreateInstance(type, true);
 					}
 					catch (Exception ex)
 					{
 						throw new NotSupportedException(string.Format("Unable to instantiate TLS Provider `{0}'.", type), ex);
 					}
-					if (monoTlsProvider2 == null)
+					if (mobileTlsProvider2 == null)
 					{
 						if (throwOnError)
 						{
 							throw new NotSupportedException(string.Format("No such TLS Provider: `{0}'.", name));
 						}
-						monoTlsProvider = null;
+						mobileTlsProvider = null;
 					}
 					else
 					{
-						MonoTlsProviderFactory.providerCache.Add(tuple.Item1, monoTlsProvider2);
-						monoTlsProvider = monoTlsProvider2;
+						MonoTlsProviderFactory.providerCache.Add(tuple.Item1, mobileTlsProvider2);
+						mobileTlsProvider = mobileTlsProvider2;
 					}
 				}
 			}
-			return monoTlsProvider;
+			return mobileTlsProvider;
 		}
 
 		[Conditional("MONO_TLS_DEBUG")]
@@ -177,55 +177,83 @@ namespace Mono.Net.Security
 				if (MonoTlsProviderFactory.providerRegistration == null)
 				{
 					MonoTlsProviderFactory.providerRegistration = new Dictionary<string, Tuple<Guid, string>>();
-					MonoTlsProviderFactory.providerCache = new Dictionary<Guid, MonoTlsProvider>();
+					MonoTlsProviderFactory.providerCache = new Dictionary<Guid, MobileTlsProvider>();
 					if (UnityTls.IsSupported)
 					{
-						Tuple<Guid, string> tuple = new Tuple<Guid, string>(MonoTlsProviderFactory.UnityTlsId, "Mono.Unity.UnityTlsProvider");
-						MonoTlsProviderFactory.providerRegistration.Add("default", tuple);
-						MonoTlsProviderFactory.providerRegistration.Add("unitytls", tuple);
+						MonoTlsProviderFactory.PopulateUnityProviders();
 					}
 					else
 					{
-						Tuple<Guid, string> tuple2 = new Tuple<Guid, string>(MonoTlsProviderFactory.AppleTlsId, "Mono.AppleTls.AppleTlsProvider");
-						Tuple<Guid, string> tuple3 = new Tuple<Guid, string>(MonoTlsProviderFactory.LegacyId, "Mono.Net.Security.LegacyTlsProvider");
-						MonoTlsProviderFactory.providerRegistration.Add("legacy", tuple3);
-						Tuple<Guid, string> tuple4 = null;
-						if (Platform.IsMacOS)
-						{
-							MonoTlsProviderFactory.providerRegistration.Add("default", tuple2);
-						}
-						else if (tuple4 != null)
-						{
-							MonoTlsProviderFactory.providerRegistration.Add("default", tuple4);
-						}
-						else
-						{
-							MonoTlsProviderFactory.providerRegistration.Add("default", tuple3);
-						}
-						MonoTlsProviderFactory.providerRegistration.Add("apple", tuple2);
+						MonoTlsProviderFactory.PopulateProviders();
 					}
 				}
 			}
 		}
 
-		private static MonoTlsProvider CreateDefaultProviderImpl()
+		private static void PopulateUnityProviders()
+		{
+			Tuple<Guid, string> tuple = new Tuple<Guid, string>(MonoTlsProviderFactory.UnityTlsId, "Mono.Unity.UnityTlsProvider");
+			MonoTlsProviderFactory.providerRegistration.Add("default", tuple);
+			MonoTlsProviderFactory.providerRegistration.Add("unitytls", tuple);
+		}
+
+		private static void PopulateProviders()
+		{
+			Tuple<Guid, string> tuple = null;
+			Tuple<Guid, string> tuple2 = null;
+			if (MonoTlsProviderFactory.IsBtlsSupported())
+			{
+				tuple2 = new Tuple<Guid, string>(MonoTlsProviderFactory.BtlsId, typeof(MonoBtlsProvider).FullName);
+				MonoTlsProviderFactory.providerRegistration.Add("btls", tuple2);
+			}
+			Tuple<Guid, string> tuple3 = tuple ?? tuple2;
+			if (tuple3 != null)
+			{
+				MonoTlsProviderFactory.providerRegistration.Add("default", tuple3);
+				MonoTlsProviderFactory.providerRegistration.Add("legacy", tuple3);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsBtlsSupported();
+
+		private static MobileTlsProvider CreateDefaultProviderImpl()
 		{
 			string text = Environment.GetEnvironmentVariable("MONO_TLS_PROVIDER");
 			if (string.IsNullOrEmpty(text))
 			{
 				text = "default";
 			}
-			return MonoTlsProviderFactory.LookupProvider(text, true);
+			if (!(text == "default") && !(text == "legacy"))
+			{
+				if (!(text == "btls"))
+				{
+					if (!(text == "unitytls"))
+					{
+						return MonoTlsProviderFactory.LookupProvider(text, true);
+					}
+					goto IL_006E;
+				}
+			}
+			else
+			{
+				if (UnityTls.IsSupported)
+				{
+					goto IL_006E;
+				}
+				if (!MonoTlsProviderFactory.IsBtlsSupported())
+				{
+					throw new NotSupportedException("TLS Support not available.");
+				}
+			}
+			return new MonoBtlsProvider();
+			IL_006E:
+			return new UnityTlsProvider();
 		}
 
-		internal static MonoTlsProvider GetProvider()
+		internal static MobileTlsProvider GetProvider()
 		{
-			MonoTlsProvider providerInternal = MonoTlsProviderFactory.GetProviderInternal();
-			if (providerInternal == null)
-			{
-				throw new NotSupportedException("No TLS Provider available.");
-			}
-			return providerInternal;
+			return MonoTlsProviderFactory.GetProviderInternal();
 		}
 
 		internal static bool IsProviderSupported(string name)
@@ -240,7 +268,7 @@ namespace Mono.Net.Security
 			return flag2;
 		}
 
-		internal static MonoTlsProvider GetProvider(string name)
+		internal static MobileTlsProvider GetProvider(string name)
 		{
 			return MonoTlsProviderFactory.LookupProvider(name, false);
 		}
@@ -273,11 +301,11 @@ namespace Mono.Net.Security
 
 		private static bool initialized;
 
-		private static MonoTlsProvider defaultProvider;
+		private static MobileTlsProvider defaultProvider;
 
 		private static Dictionary<string, Tuple<Guid, string>> providerRegistration;
 
-		private static Dictionary<Guid, MonoTlsProvider> providerCache;
+		private static Dictionary<Guid, MobileTlsProvider> providerCache;
 
 		private static bool enableDebug;
 
@@ -286,7 +314,5 @@ namespace Mono.Net.Security
 		internal static readonly Guid AppleTlsId = new Guid("981af8af-a3a3-419a-9f01-a518e3a17c1c");
 
 		internal static readonly Guid BtlsId = new Guid("432d18c9-9348-4b90-bfbf-9f2a10e1f15b");
-
-		internal static readonly Guid LegacyId = new Guid("809e77d5-56cc-4da8-b9f0-45e65ba9cceb");
 	}
 }

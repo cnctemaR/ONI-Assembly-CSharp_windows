@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CharConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -23,22 +21,22 @@ namespace System.ComponentModel
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (!(value is string))
+			string text = value as string;
+			if (text == null)
 			{
 				return base.ConvertFrom(context, culture, value);
 			}
-			string text = (string)value;
 			if (text.Length > 1)
 			{
 				text = text.Trim();
 			}
-			if (text == null || text.Length <= 0)
+			if (text.Length <= 0)
 			{
 				return '\0';
 			}
 			if (text.Length != 1)
 			{
-				throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[] { text, "Char" }));
+				throw new FormatException(SR.Format("{0} is not a valid value for {1}.", text, "Char"));
 			}
 			return text[0];
 		}

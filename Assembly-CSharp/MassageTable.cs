@@ -39,7 +39,7 @@ public class MassageTable : RelaxationPoint, IGameObjectEffectDescriptor, IActiv
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		Effects component = worker.GetComponent<Effects>();
@@ -78,7 +78,7 @@ public class MassageTable : RelaxationPoint, IGameObjectEffectDescriptor, IActiv
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
 		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.StressHeal, this, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
-		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, this);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		return workChore;
 	}

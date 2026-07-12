@@ -5,15 +5,15 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Video/BaseWebCamTexture.h")]
 	[NativeHeader("Runtime/Video/ScriptBindings/WebCamTexture.bindings.h")]
 	[NativeHeader("AudioScriptingClasses.h")]
+	[NativeHeader("Runtime/Video/BaseWebCamTexture.h")]
 	public sealed class WebCamTexture : Texture
 	{
 		public static extern WebCamDevice[] devices
 		{
-			[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
 			[NativeName("Internal_GetDevices")]
+			[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -117,6 +117,7 @@ namespace UnityEngine
 			get;
 		}
 
+		[FreeFunction("WebCamTextureBindings::Internal_GetPixel", HasExplicitThis = true)]
 		public Color GetPixel(int x, int y)
 		{
 			Color color;
@@ -129,7 +130,7 @@ namespace UnityEngine
 			return this.GetPixels(0, 0, this.width, this.height);
 		}
 
-		[FreeFunction("WebCamTextureBindings::Internal_GetPixels", HasExplicitThis = true)]
+		[FreeFunction("WebCamTextureBindings::Internal_GetPixels", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Color[] GetPixels(int x, int y, int blockWidth, int blockHeight);
 
@@ -139,9 +140,9 @@ namespace UnityEngine
 			return this.GetPixels32(null);
 		}
 
-		[FreeFunction("WebCamTextureBindings::Internal_GetPixels32", HasExplicitThis = true)]
+		[FreeFunction("WebCamTextureBindings::Internal_GetPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32([DefaultValue("null")] Color32[] colors);
+		public extern Color32[] GetPixels32([DefaultValue("null")] [Unmarshalled] Color32[] colors);
 
 		public Vector2? autoFocusPoint
 		{

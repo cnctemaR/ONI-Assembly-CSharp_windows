@@ -10,18 +10,38 @@ namespace System.Reflection.Emit
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class EventBuilder : _EventBuilder
 	{
+		void _EventBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal EventBuilder(TypeBuilder tb, string eventName, EventAttributes eventAttrs, Type eventType)
 		{
 			this.name = eventName;
 			this.attrs = eventAttrs;
 			this.type = eventType;
 			this.typeb = tb;
-			this.table_idx = this.get_next_table_index(this, 20, true);
+			this.table_idx = this.get_next_table_index(this, 20, 1);
 		}
 
-		internal int get_next_table_index(object obj, int table, bool inc)
+		internal int get_next_table_index(object obj, int table, int count)
 		{
-			return this.typeb.get_next_table_index(obj, table, inc);
+			return this.typeb.get_next_table_index(obj, table, count);
 		}
 
 		public void AddOtherMethod(MethodBuilder mdBuilder)
@@ -123,26 +143,6 @@ namespace System.Reflection.Emit
 			{
 				throw new InvalidOperationException("Type definition of the method is complete.");
 			}
-		}
-
-		void _EventBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal EventBuilder()

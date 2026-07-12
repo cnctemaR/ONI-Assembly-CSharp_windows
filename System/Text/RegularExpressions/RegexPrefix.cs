@@ -2,42 +2,18 @@
 
 namespace System.Text.RegularExpressions
 {
-	internal sealed class RegexPrefix
+	internal readonly struct RegexPrefix
 	{
 		internal RegexPrefix(string prefix, bool ci)
 		{
-			this._prefix = prefix;
-			this._caseInsensitive = ci;
+			this.Prefix = prefix;
+			this.CaseInsensitive = ci;
 		}
 
-		internal string Prefix
-		{
-			get
-			{
-				return this._prefix;
-			}
-		}
+		internal bool CaseInsensitive { get; }
 
-		internal bool CaseInsensitive
-		{
-			get
-			{
-				return this._caseInsensitive;
-			}
-		}
+		internal static RegexPrefix Empty { get; } = new RegexPrefix(string.Empty, false);
 
-		internal static RegexPrefix Empty
-		{
-			get
-			{
-				return RegexPrefix._empty;
-			}
-		}
-
-		internal string _prefix;
-
-		internal bool _caseInsensitive;
-
-		internal static RegexPrefix _empty = new RegexPrefix(string.Empty, false);
+		internal string Prefix { get; }
 	}
 }

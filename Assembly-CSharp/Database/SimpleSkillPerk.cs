@@ -8,5 +8,10 @@ namespace Database
 			: base(id, description, null, null, null, false)
 		{
 		}
+
+		public SimpleSkillPerk(string id, string description, string[] requiredDlcIds)
+			: base(id, description, null, null, null, requiredDlcIds, false)
+		{
+		}
 	}
 }

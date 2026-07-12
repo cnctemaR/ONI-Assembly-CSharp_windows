@@ -9,6 +9,7 @@ namespace UnityEngine.Tilemaps
 		LockColor = 1,
 		LockTransform = 2,
 		InstantiateGameObjectRuntimeOnly = 4,
+		KeepGameObjectRuntimeOnly = 8,
 		LockAll = 3
 	}
 }

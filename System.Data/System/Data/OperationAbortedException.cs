@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Unity;
 
 namespace System.Data
@@ -10,6 +11,11 @@ namespace System.Data
 			: base(message, innerException)
 		{
 			base.HResult = -2146232010;
+		}
+
+		private OperationAbortedException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
 		}
 
 		internal static OperationAbortedException Aborted(Exception inner)
@@ -28,7 +34,7 @@ namespace System.Data
 
 		internal OperationAbortedException()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 	}
 }

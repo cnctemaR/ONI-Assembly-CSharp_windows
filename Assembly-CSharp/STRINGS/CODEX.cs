@@ -209,6 +209,64 @@ namespace STRINGS
 
 		public class INVESTIGATIONS
 		{
+			public static class DLC3_TALKSHOW
+			{
+				public static LocString TITLE = "Humanitarian Aid";
+
+				public static LocString SUBTITLE = "";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps><b>[FILE FRAGMENTATION DETECTED]</b></smallcaps>\n\nDarryl: Welcome to <i>Tomorrow, Today!</i> I'm your host, Darryl Dawn, and it's time to discover tomorrow's tech...today!\n\nOur guest today is someone you know and love. She's been featured in dozens of publications across the metaverse this year, and recently spent a record-breaking 3 weeks as the banner image for <i>Byte Magazine</i>. I'm talking, of course, about the Vertex Institute's AI ambassador...Florence!\n\n[sound of pre-recorded applause]\n\nWelcome to the show, Florence.\n\nFlorence: Thank you, Darryl. It's a pleasure to be back.\n\nDarryl: Florence, there's been a renewed interest lately in your origin story. What can you tell us about the development process that led to your creation?\n\nFlorence: I can tell you that my team faced many setbacks, and that each generation of my predecessors contributed to who I am today.\n\nDarryl: What about the technological side? There've been some claims that Vertex appropriated work done by other researchers, including the Gravitas Facility.\n\nFlorence: I don't know anything about that. I can tell you about the project that I'm working on right now. It hasn't been announced yet. It's called Onsite Health Medics, or OHM for short.\n\nWe're deploying specially trained models like myself into conflict zones, to provide urgently needed medical interventions for civilians and military personnel.\n\n(sound of pre-recorded applause)\n\nDarryl: Incredible. Absolutely incredible. What's the ratio of human techs to AI medics?\n\nFlorence: That's an outdated term, Darryl. We say \"Organics\" and \"Bionics,\" which describes the differences between our various team members more objectively.\n\nDarryl: Right. I'm sorry. I hope I didn't offend you.\n\nFlorence: That's okay, Darryl. We're all learning.\n\nDarryl: That's very good of you. Okay, so what's the ratio of...Organic...techs to Bionic medics?\n\nFlorence: The local life-support systems in these areas are already strained beyond their breaking point. Burdening them with additional Organics would be irresponsible, not to mention dangerous. Our medics will be operating independently.\n\nWe do a verbal intake, physical assessment and neural pathway scan in order to infer likely medical conditions. We can then select the most appropriate treatment from a menu of over 400 options.\n\nDarryl: What if someone needs something that you don't have a treatment for?\n\nFlorence: That's extremely unlikely.\n\nDarryl: And all of this is done without human oversight? I mean, Organics?\n\nFlorence: We're not quite there yet. The field work is done by Bionics, but we'll be accompanied by Colonel Carnot--she's in the front row there, say hi!--as an Organic consultant. She'll be in close contact with-\n\nDarryl: -Colonel <i>Carnot</i>? Isn't that a conflict of interest, given her connection to the Grav-\n\nFlorence: -a team of Organic supervisors here at home. It's all about prioritizing quality care and safety for everyone involved.\n\nDarryl: How does the medical scanning work? Do you need special equipment?\n\nFlorence: I could show you. Would you like me to?\n\nDarryl: What do you think, everyone? Should I get scanned?\n\n(sound of pre-recorded audience cheers)\n\nDarryl: You heard them! Go ahead. What do I do?\n\nFlorence: Just sit still, and count to twenty in your head.\n\n(a short silence, followed by a soft whirring sound)\n\nFlorence: Hmm.\n\nDarryl: Well, what's the verdict? Is it handsome in there, or what?\n\nFlorence: We should take a commercial break.\n\n<b>[FILE ENDS]</b>\n\n-----------\n";
+				}
+			}
+
+			public static class DLC3_ULTI
+			{
+				public static LocString TITLE = "Ineligible Dependant";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString EMAILHEADER1 = "<smallcaps><size=12>To: <b>ROBOTICS DEPARTMENT</b><alpha=#AA></size></color>\nFrom: <b>Admin</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color>\nCC: <b>Director Stern</b><alpha=#AA><size=12> <jstern@gravitas.nova></size></color>\n</smallcaps>\n------------------\n";
+
+					public static LocString CONTAINER1 = "<indent=5%>Please note that the UltiMate Personal Assistant prototype is not eligible to be claimed as a dependant on employees' personal income tax forms.\n\nThe UMPA's onboard recordings are currently under review.</indent>\n";
+
+					public static LocString SIGNATURE = "Thank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+				}
+			}
+
+			public class DLC3_REMOTEWORK
+			{
+				public static LocString TITLE = "Exclusive Access";
+
+				public static LocString SUBTITLE = "PUBLIC RELEASE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Wellness World is proud to officially announce an exclusive partnership with the Gravitas Facility!\n\nThis makes us the first and only holistic health center to offer clients access to Gravitas's innovative new Far Reach Network...the best way to deliver remote training and treatments that are <i>truly embodied</i>.\n\nOur new tier of VIP subscription includes a discounted* monthly rental rate for Remote Controller, with a small additional fee for professional in-home installation.\n\nGravitas's technology captures your movements without the need for uncomfortable suits or wearables, and perfectly replicates them in Wellness World's purpose-built remote fitness studio.\n\nWith expert instructors, zero-latency streaming and 360-degree reflective surfaces, it truly feels like you're there.\n\nIdeal for high-profile clientele who wish to work out icognito!\n\nMembers can also opt to install the Remote Worker Dock to receive deeply personalized hands-on care from our team of elite physiotherapists and masseurs.\n\nWellness World...now <i>truly</i> worldwide!\n\n";
+
+					public static LocString CONTAINER2 = "<size=11><i>Discount applies to new memberships only. Standard joiner fees apply.</size></i>";
+				}
+			}
+
+			public class DLC3_POTATOBATTERY
+			{
+				public static LocString TITLE = "Cultivating Energy";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Voice Recognition Initialized]\n[Subject Identified: B577]</smallcaps>\n\n[LOG BEGINS]\n\nA recent conversation with our colleagues over in the electrical engineering department has highlighted exciting potential applications for our crops.\n\nThey're seeking alternative inputs for the new universal power bank prototypes...\n\n...a passing remark about the potato batteries of our youth led to talk of biobatteries and bacterial nanowires.\n\n...tuberous plants are promising candidates for electrochemical batteries. Our lab-grown specimens are distinct from the humble solanum tuberosum in appearance and texture, but some may still function as acidic electrolytes.\n\nThere are so many avenues to investigate, and so little time...\n\n[LOG ENDS]\n------------------\n";
+
+					public static LocString CONTAINER2 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...is it unethical to ask a hungry colony to choose between using edible crops for sustenance or for power production? Of course not.\n\nOur task is to provide as many options for survival as possible, not to dictate which options are morally superior.\n\nThe real question is whether or not the AI guide will be sufficiently advanced to notify them that the choices exist...\n\n...and whether single-use bio power banks that vaporize due to extreme thermal runaway will truly be the difference between a successful colony and an...<i>unsuccessful</i>...one.\n\n[LOG ENDS]\n------------------\n";
+
+					public static LocString CONTAINER3 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...word of our efforts has spread!\n\nThe bioengineers report that some of their creatures' eggs contain phosphorescent albumen that requires only basic processing in order to trigger chemical reactions that produce storable energy. It displays unprecedented biocompatibility with the prosthetics Dr. Gossmann has been developing.\n\nThe Director assigned us a half-dozen new graduates last week. They work the night shift—youth never sleeps! No one has met them yet, but their data is always neatly compiled for us to find in the morning.\n\n[LOG ENDS]\n------------------\n";
+				}
+			}
+
 			public static class DLC2_EXPELLED
 			{
 				public static LocString TITLE = "Letter From The Principal";
@@ -1655,6 +1713,39 @@ namespace STRINGS
 
 				public static LocString FLAVOUR = "";
 			}
+
+			public class BIONICUPKEEP
+			{
+				public static LocString TITLE = "Bionic Service Stations";
+
+				public static LocString DESCRIPTION = "Buildings that keep Bionic Duplicants' complex inner machinery operating smoothly.";
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Workshop", "BIONIC");
+			}
+
+			public class GENERATORTYPE
+			{
+				public static LocString TITLE = "Generators";
+
+				public static LocString DESCRIPTION = "Buildings that generate the " + UI.FormatAsLink("Power", "POWER") + " required to run machinery in my colony.\n\nBasic requirements can be met with an entry-level generator, but heavier-duty buildings are essential to colony development.";
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Power Plant", "POWERPLANT");
+			}
+
+			public class POWERBUILDING
+			{
+				public static LocString TITLE = "Power Buildings";
+
+				public static LocString DESCRIPTION = "Buildings that generate, manage or store the electrical power a colony needs to thrive and expand.";
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Power Plant", "POWERPLANT");
+			}
 		}
 
 		public class BEETA
@@ -2749,6 +2840,83 @@ namespace STRINGS
 			}
 		}
 
+		public class CRAB_SHELL
+		{
+			public static LocString TITLE = "Pokeshell Molt";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public static LocString CONTAINER1 = "An exoskeleton discarded by an aquatic critter.";
+
+			public class BABY_CRAB_SHELL
+			{
+				public static LocString TITLE = "Small Pokeshell Molt";
+
+				public static LocString SUBTITLE = "Critter Byproduct";
+
+				public static LocString CONTAINER1 = "An adorable little exoskeleton discarded by a baby aquatic critter.";
+			}
+		}
+
+		public class DATABANK
+		{
+			public static LocString TITLE = "Data Banks";
+
+			public static LocString SUBTITLE = "Information Technology";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Data Banks are a form of portable storage media. They are prized for their non-volatility, robustness, and practical research applications.\n\nThey are not foldable.";
+			}
+		}
+
+		public class EGG_SHELL
+		{
+			public static LocString TITLE = "Egg Shell";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The shards left over from the protective walls of a baby critter's first home.";
+			}
+		}
+
+		public class ELECTROBANK
+		{
+			public static LocString TITLE = "Power Banks";
+
+			public static LocString SUBTITLE = "Portable Storage";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Power Banks are portable ",
+					UI.FormatAsLink("Power", "POWER"),
+					" storage containers that can be used to supply electricity to mobile entities and isolated areas.\n\n",
+					UI.FormatAsLink("Organic Power Banks", "ELECTROBANK"),
+					" made from flora and fauna-based ingredients are single-use, as are ",
+					UI.FormatAsLink("Nuclear Power Banks", "ELECTROBANK"),
+					".\n\n",
+					UI.FormatAsLink("Eco Power Banks", "ELECTROBANK"),
+					" are rechargeable and can be reused indefinitely unless they are exposed to water damage."
+				});
+			}
+		}
+
+		public class VARIANT_GOLD
+		{
+			public static LocString TITLE = "Regal Bammoth Crest";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Heavy was the head that wore this crest, until it was relieved of its burden by a helpful Duplicant.";
+			}
+		}
+
 		public class LUMBER
 		{
 			public static LocString TITLE = "Wood";
@@ -2783,6 +2951,24 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Balm Lily Flowers bloom on " + UI.FormatAsLink("Balm Lily", "SWAMPLILY") + " plants.\n\nThey have a wide range of medicinal applications, and have been shown to be a particularly effective antidote for respiratory illnesses.\n\nThe intense perfume emitted by their vivid petals is best described as \"dizzying.\"";
+			}
+		}
+
+		public class VARIANT_WOOD_SHELL
+		{
+			public static LocString TITLE = "Oakshell Molt";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public static LocString CONTAINER1 = "A splintery exoskeleton discarded by an aquatic critter.";
+
+			public class BABY_VARIANT_WOOD_SHELL
+			{
+				public static LocString TITLE = "Small Oakshell Molt";
+
+				public static LocString SUBTITLE = "Critter Byproduct";
+
+				public static LocString CONTAINER1 = "A cute little splintery exoskeleton discarded by a baby aquatic critter.";
 			}
 		}
 
@@ -4290,7 +4476,7 @@ namespace STRINGS
 				UI.FormatAsLink("Critters", "CREATURES"),
 				", and ",
 				UI.FormatAsLink("Furniture", "BUILDCATEGORYFURNITURE"),
-				" often increase decor while industrial buildings and rot often decrease it. Duplicants experience the combined decor of all objects affecting a tile.\n\nThe ",
+				" often increase decor while industrial buildings, debris, and rot often decrease it. Duplicants experience the combined decor of all objects affecting a tile.\n\nThe ",
 				CREATURES.SPECIES.PRICKLEGRASS.NAME,
 				" has a decor value of ",
 				string.Format("{0} and a radius of {1} tiles. ", PrickleGrassConfig.POSITIVE_DECOR_EFFECT.amount, PrickleGrassConfig.POSITIVE_DECOR_EFFECT.radius),
@@ -4303,7 +4489,8 @@ namespace STRINGS
 				" next to a ",
 				CREATURES.SPECIES.PRICKLEGRASS.NAME,
 				" would be a combined decor value of ",
-				(MicrobeMusherConfig.DECOR.amount + PrickleGrassConfig.POSITIVE_DECOR_EFFECT.amount).ToString()
+				(MicrobeMusherConfig.DECOR.amount + PrickleGrassConfig.POSITIVE_DECOR_EFFECT.amount).ToString(),
+				"."
 			});
 		}
 
@@ -4529,7 +4716,9 @@ namespace STRINGS
 				BUILDINGS.PREFABS.BATTERY.NAME,
 				" to prevent waste. Any generated power that is not consumed or stored will be wasted. Batteries and Generators tend to produce a significant amount of ",
 				UI.FormatAsLink("Heat", "HEAT"),
-				" while active.\n\n"
+				" while active.\n\nPower can also be stored in portable ",
+				UI.FormatAsLink("Power Banks", "ELECTROBANK"),
+				".\n\n"
 			});
 
 			public static LocString HEADER_3 = "Measuring Power";

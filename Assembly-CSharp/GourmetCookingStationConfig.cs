@@ -96,7 +96,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		SalsaConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array, array2), array, array2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.SALSA.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.SALSA.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 300
@@ -113,7 +113,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		MushroomWrapConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.MUSHROOMWRAP.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.MUSHROOMWRAP.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 400
@@ -130,7 +130,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		SurfAndTurfConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.SURFANDTURF.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.SURFANDTURF.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 500
@@ -147,7 +147,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		SpiceBreadConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.SPICEBREAD.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.SPICEBREAD.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 600
@@ -164,7 +164,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		SpicyTofuConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array9, array10), array9, array10)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.SPICYTOFU.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.SPICYTOFU.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 800
@@ -181,7 +181,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		SpicyTofuConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array11, array12), array11, array12)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.CURRY.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.CURRY.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 800
@@ -199,7 +199,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		QuicheConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array13, array14), array13, array14)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.QUICHE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.QUICHE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 800
@@ -217,7 +217,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 		BurgerConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array15, array16), array15, array16)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.BURGER.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.BURGER.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "GourmetCookingStation" },
 			sortOrder = 900
@@ -237,7 +237,7 @@ public class GourmetCookingStationConfig : IBuildingConfig
 			BerryPieConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GourmetCookingStation", array17, array18), array17, array18)
 			{
 				time = FOOD.RECIPES.STANDARD_COOK_TIME,
-				description = ITEMS.FOOD.BERRYPIE.RECIPEDESC,
+				description = global::STRINGS.ITEMS.FOOD.BERRYPIE.RECIPEDESC,
 				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 				fabricators = new List<Tag> { "GourmetCookingStation" },
 				sortOrder = 900

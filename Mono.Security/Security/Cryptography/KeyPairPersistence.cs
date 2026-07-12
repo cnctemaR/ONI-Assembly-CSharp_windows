@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -178,55 +179,100 @@ namespace Mono.Security.Cryptography
 			}
 		}
 
-		internal static bool _CanSecure(string root)
+		internal unsafe static bool _CanSecure(char* root)
 		{
 			return true;
 		}
 
-		internal static bool _ProtectUser(string path)
+		internal unsafe static bool _ProtectUser(char* path)
 		{
 			return true;
 		}
 
-		internal static bool _ProtectMachine(string path)
+		internal unsafe static bool _ProtectMachine(char* path)
 		{
 			return true;
 		}
 
-		internal static bool _IsUserProtected(string path)
+		internal unsafe static bool _IsUserProtected(char* path)
 		{
 			return true;
 		}
 
-		internal static bool _IsMachineProtected(string path)
+		internal unsafe static bool _IsMachineProtected(char* path)
 		{
 			return true;
 		}
 
-		private static bool CanSecure(string path)
+		private unsafe static bool CanSecure(string path)
 		{
 			int platform = (int)Environment.OSVersion.Platform;
-			return platform == 4 || platform == 128 || platform == 6 || KeyPairPersistence._CanSecure(Path.GetPathRoot(path));
+			if (platform == 4 || platform == 128 || platform == 6)
+			{
+				return true;
+			}
+			char* ptr = path;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return KeyPairPersistence._CanSecure(ptr);
 		}
 
-		private static bool ProtectUser(string path)
+		private unsafe static bool ProtectUser(string path)
 		{
-			return !KeyPairPersistence.CanSecure(path) || KeyPairPersistence._ProtectUser(path);
+			if (KeyPairPersistence.CanSecure(path))
+			{
+				char* ptr = path;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return KeyPairPersistence._ProtectUser(ptr);
+			}
+			return true;
 		}
 
-		private static bool ProtectMachine(string path)
+		private unsafe static bool ProtectMachine(string path)
 		{
-			return !KeyPairPersistence.CanSecure(path) || KeyPairPersistence._ProtectMachine(path);
+			if (KeyPairPersistence.CanSecure(path))
+			{
+				char* ptr = path;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return KeyPairPersistence._ProtectMachine(ptr);
+			}
+			return true;
 		}
 
-		private static bool IsUserProtected(string path)
+		private unsafe static bool IsUserProtected(string path)
 		{
-			return !KeyPairPersistence.CanSecure(path) || KeyPairPersistence._IsUserProtected(path);
+			if (KeyPairPersistence.CanSecure(path))
+			{
+				char* ptr = path;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return KeyPairPersistence._IsUserProtected(ptr);
+			}
+			return true;
 		}
 
-		private static bool IsMachineProtected(string path)
+		private unsafe static bool IsMachineProtected(string path)
 		{
-			return !KeyPairPersistence.CanSecure(path) || KeyPairPersistence._IsMachineProtected(path);
+			if (KeyPairPersistence.CanSecure(path))
+			{
+				char* ptr = path;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return KeyPairPersistence._IsMachineProtected(ptr);
+			}
+			return true;
 		}
 
 		private bool CanChange

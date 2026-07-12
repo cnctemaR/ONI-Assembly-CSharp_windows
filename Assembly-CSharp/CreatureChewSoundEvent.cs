@@ -16,7 +16,7 @@ public class CreatureChewSoundEvent : SoundEvent
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
 		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
 		{
-			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			Vector3 vector = behaviour.position;
 			vector.z = 0f;
 			if (base.objectIsSelectedAndVisible)
 			{

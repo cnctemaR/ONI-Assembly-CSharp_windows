@@ -9,19 +9,19 @@ namespace System.Data.SqlTypes
 	{
 		public SqlFileStream(string path, byte[] transactionContext, FileAccess access)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		public SqlFileStream(string path, byte[] transactionContext, FileAccess access, FileOptions options, long allocationSize)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		public override bool CanRead
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(bool);
 			}
 		}
@@ -30,7 +30,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(bool);
 			}
 		}
@@ -39,7 +39,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(bool);
 			}
 		}
@@ -48,7 +48,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return 0L;
 			}
 		}
@@ -57,7 +57,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return null;
 			}
 		}
@@ -66,12 +66,12 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return 0L;
 			}
 			set
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -79,36 +79,36 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return null;
 			}
 		}
 
 		public override void Flush()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		public override int Read([In] [Out] byte[] buffer, int offset, int count)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 			return 0;
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 			return 0L;
 		}
 
 		public override void SetLength(long value)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 	}
 }

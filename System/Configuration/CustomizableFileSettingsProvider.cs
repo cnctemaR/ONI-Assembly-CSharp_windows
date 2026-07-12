@@ -285,7 +285,7 @@ namespace System.Configuration
 			}
 			if (CustomizableFileSettingsProvider.ForceVersion == "")
 			{
-				CustomizableFileSettingsProvider.ProductVersion = CustomizableFileSettingsProvider.GetProductVersion().Split(new char[] { '.' });
+				CustomizableFileSettingsProvider.ProductVersion = CustomizableFileSettingsProvider.GetProductVersion().Split('.', StringSplitOptions.None);
 			}
 			if (CustomizableFileSettingsProvider.userRoamingBasePath == "")
 			{
@@ -769,6 +769,11 @@ namespace System.Configuration
 
 		public void Reset(SettingsContext context)
 		{
+			if (this.values == null)
+			{
+				SettingsPropertyCollection settingsPropertyCollection = new SettingsPropertyCollection();
+				this.GetPropertyValues(context, settingsPropertyCollection);
+			}
 			if (this.values != null)
 			{
 				foreach (object obj in this.values)

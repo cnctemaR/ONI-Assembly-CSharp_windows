@@ -37,7 +37,7 @@ public class StorageTileConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
-		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_2;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.PENALTY_2;
 		simCellOccupier.notifyOnMelt = true;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(StorageTileConfig.StoredItemModifiers);

@@ -18,11 +18,18 @@ public class ForestTreeBranchConfig : IEntityConfig
 		string text3 = global::STRINGS.CREATURES.SPECIES.WOOD_TREE.DESC;
 		float num = 8f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("tree_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, new List<Tag>
+		KAnimFile anim = Assets.GetAnim("tree_kanim");
+		string text4 = "idle_empty";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.BuildingFront;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = tier;
+		List<Tag> list = new List<Tag>
 		{
 			GameTags.HideFromSpawnTool,
 			GameTags.PlantBranch
-		}, 298.15f);
+		};
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 298.15f);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, false, true, 12000f, 0f, 9800f, "ForestTreeBranchOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
 		gameObject.AddOrGet<TreeBud>();
 		gameObject.AddOrGet<StandardCropPlant>();

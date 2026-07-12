@@ -8,7 +8,7 @@ namespace System.Net.Mime
 	public class ContentType
 	{
 		public ContentType()
-			: this(ContentType.Default)
+			: this("application/octet-stream")
 		{
 		}
 
@@ -20,10 +20,10 @@ namespace System.Net.Mime
 			}
 			if (contentType == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "contentType" }), "contentType");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "contentType"), "contentType");
 			}
-			this.isChanged = true;
-			this.type = contentType;
+			this._isChanged = true;
+			this._type = contentType;
 			this.ParseValue();
 		}
 
@@ -65,7 +65,7 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.mediaType + "/" + this.subType;
+				return this._mediaType + "/" + this._subType;
 			}
 			set
 			{
@@ -75,21 +75,21 @@ namespace System.Net.Mime
 				}
 				if (value == string.Empty)
 				{
-					throw new ArgumentException(global::SR.GetString("This property cannot be set to an empty string."), "value");
+					throw new ArgumentException("This property cannot be set to an empty string.", "value");
 				}
 				int num = 0;
-				this.mediaType = MailBnfHelper.ReadToken(value, ref num, null);
-				if (this.mediaType.Length == 0 || num >= value.Length || value[num++] != '/')
+				this._mediaType = MailBnfHelper.ReadToken(value, ref num, null);
+				if (this._mediaType.Length == 0 || num >= value.Length || value[num++] != '/')
 				{
-					throw new FormatException(global::SR.GetString("The specified media type is invalid."));
+					throw new FormatException("The specified media type is invalid.");
 				}
-				this.subType = MailBnfHelper.ReadToken(value, ref num, null);
-				if (this.subType.Length == 0 || num < value.Length)
+				this._subType = MailBnfHelper.ReadToken(value, ref num, null);
+				if (this._subType.Length == 0 || num < value.Length)
 				{
-					throw new FormatException(global::SR.GetString("The specified media type is invalid."));
+					throw new FormatException("The specified media type is invalid.");
 				}
-				this.isChanged = true;
-				this.isPersisted = false;
+				this._isChanged = true;
+				this._isPersisted = false;
 			}
 		}
 
@@ -119,28 +119,24 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.parameters == null && this.type == null)
-				{
-					this.parameters = new TrackingStringDictionary();
-				}
-				return this.parameters;
+				return this._parameters;
 			}
 		}
 
 		internal void Set(string contentType, HeaderCollection headers)
 		{
-			this.type = contentType;
+			this._type = contentType;
 			this.ParseValue();
 			headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this.ToString());
-			this.isPersisted = true;
+			this._isPersisted = true;
 		}
 
 		internal void PersistIfNeeded(HeaderCollection headers, bool forcePersist)
 		{
-			if (this.IsChanged || !this.isPersisted || forcePersist)
+			if (this.IsChanged || !this._isPersisted || forcePersist)
 			{
 				headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this.ToString());
-				this.isPersisted = true;
+				this._isPersisted = true;
 			}
 		}
 
@@ -148,35 +144,35 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.isChanged || (this.parameters != null && this.parameters.IsChanged);
+				return this._isChanged || (this._parameters != null && this._parameters.IsChanged);
 			}
 		}
 
 		public override string ToString()
 		{
-			if (this.type == null || this.IsChanged)
+			if (this._type == null || this.IsChanged)
 			{
-				this.type = this.Encode(false);
-				this.isChanged = false;
-				this.parameters.IsChanged = false;
-				this.isPersisted = false;
+				this._type = this.Encode(false);
+				this._isChanged = false;
+				this._parameters.IsChanged = false;
+				this._isPersisted = false;
 			}
-			return this.type;
+			return this._type;
 		}
 
 		internal string Encode(bool allowUnicode)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.mediaType);
+			stringBuilder.Append(this._mediaType);
 			stringBuilder.Append('/');
-			stringBuilder.Append(this.subType);
+			stringBuilder.Append(this._subType);
 			foreach (object obj in this.Parameters.Keys)
 			{
 				string text = (string)obj;
 				stringBuilder.Append("; ");
 				ContentType.EncodeToBuffer(text, stringBuilder, allowUnicode);
 				stringBuilder.Append('=');
-				ContentType.EncodeToBuffer(this.parameters[text], stringBuilder, allowUnicode);
+				ContentType.EncodeToBuffer(this._parameters[text], stringBuilder, allowUnicode);
 			}
 			return stringBuilder.ToString();
 		}
@@ -186,7 +182,7 @@ namespace System.Net.Mime
 			Encoding encoding = MimeBasePart.DecodeEncoding(value);
 			if (encoding != null)
 			{
-				builder.Append("\"" + value + "\"");
+				builder.Append('"').Append(value).Append('"');
 				return;
 			}
 			if ((allowUnicode && !MailBnfHelper.HasCROrLF(value)) || MimeBasePart.IsAscii(value, false))
@@ -195,12 +191,12 @@ namespace System.Net.Mime
 				return;
 			}
 			encoding = Encoding.GetEncoding("utf-8");
-			builder.Append("\"" + MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding)) + "\"");
+			builder.Append('"').Append(MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding))).Append('"');
 		}
 
 		public override bool Equals(object rparam)
 		{
-			return rparam != null && string.Compare(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+			return rparam != null && string.Equals(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase);
 		}
 
 		public override int GetHashCode()
@@ -212,92 +208,83 @@ namespace System.Net.Mime
 		{
 			int num = 0;
 			Exception ex = null;
-			this.parameters = new TrackingStringDictionary();
 			try
 			{
-				this.mediaType = MailBnfHelper.ReadToken(this.type, ref num, null);
-				if (this.mediaType == null || this.mediaType.Length == 0 || num >= this.type.Length || this.type[num++] != '/')
+				this._mediaType = MailBnfHelper.ReadToken(this._type, ref num, null);
+				if (this._mediaType == null || this._mediaType.Length == 0 || num >= this._type.Length || this._type[num++] != '/')
 				{
-					ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+					ex = new FormatException("The specified content type is invalid.");
 				}
 				if (ex == null)
 				{
-					this.subType = MailBnfHelper.ReadToken(this.type, ref num, null);
-					if (this.subType == null || this.subType.Length == 0)
+					this._subType = MailBnfHelper.ReadToken(this._type, ref num, null);
+					if (this._subType == null || this._subType.Length == 0)
 					{
-						ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+						ex = new FormatException("The specified content type is invalid.");
 					}
 				}
 				if (ex == null)
 				{
-					while (MailBnfHelper.SkipCFWS(this.type, ref num))
+					while (MailBnfHelper.SkipCFWS(this._type, ref num))
 					{
-						if (this.type[num++] != ';')
+						if (this._type[num++] != ';')
 						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+							ex = new FormatException("The specified content type is invalid.");
 							break;
 						}
-						if (!MailBnfHelper.SkipCFWS(this.type, ref num))
+						if (!MailBnfHelper.SkipCFWS(this._type, ref num))
 						{
 							break;
 						}
-						string text = MailBnfHelper.ReadParameterAttribute(this.type, ref num, null);
+						string text = MailBnfHelper.ReadParameterAttribute(this._type, ref num, null);
 						if (text == null || text.Length == 0)
 						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+							ex = new FormatException("The specified content type is invalid.");
 							break;
 						}
-						if (num >= this.type.Length || this.type[num++] != '=')
+						if (num >= this._type.Length || this._type[num++] != '=')
 						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+							ex = new FormatException("The specified content type is invalid.");
 							break;
 						}
-						if (!MailBnfHelper.SkipCFWS(this.type, ref num))
+						if (!MailBnfHelper.SkipCFWS(this._type, ref num))
 						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+							ex = new FormatException("The specified content type is invalid.");
 							break;
 						}
-						string text2;
-						if (this.type[num] == '"')
-						{
-							text2 = MailBnfHelper.ReadQuotedString(this.type, ref num, null);
-						}
-						else
-						{
-							text2 = MailBnfHelper.ReadToken(this.type, ref num, null);
-						}
+						string text2 = ((this._type[num] == '"') ? MailBnfHelper.ReadQuotedString(this._type, ref num, null) : MailBnfHelper.ReadToken(this._type, ref num, null));
 						if (text2 == null)
 						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+							ex = new FormatException("The specified content type is invalid.");
 							break;
 						}
-						this.parameters.Add(text, text2);
+						this._parameters.Add(text, text2);
 					}
 				}
-				this.parameters.IsChanged = false;
+				this._parameters.IsChanged = false;
 			}
 			catch (FormatException)
 			{
-				throw new FormatException(global::SR.GetString("The specified content type is invalid."));
+				throw new FormatException("The specified content type is invalid.");
 			}
 			if (ex != null)
 			{
-				throw new FormatException(global::SR.GetString("The specified content type is invalid."));
+				throw new FormatException("The specified content type is invalid.");
 			}
 		}
 
-		private string mediaType;
+		private readonly TrackingStringDictionary _parameters = new TrackingStringDictionary();
 
-		private string subType;
+		private string _mediaType;
 
-		private bool isChanged;
+		private string _subType;
 
-		private string type;
+		private bool _isChanged;
 
-		private bool isPersisted;
+		private string _type;
 
-		private TrackingStringDictionary parameters;
+		private bool _isPersisted;
 
-		internal static readonly string Default = "application/octet-stream";
+		internal const string Default = "application/octet-stream";
 	}
 }

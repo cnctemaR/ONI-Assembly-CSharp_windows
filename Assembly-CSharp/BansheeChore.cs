@@ -113,10 +113,10 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 			default_state = this.findAudience;
 			base.Target(this.wailer);
 			this.wailPreEffect = new Effect("BansheeWailing", DUPLICANTS.MODIFIERS.BANSHEE_WAILING.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-			this.wailPreEffect.Add(new AttributeModifier("AirConsumptionRate", 7.5f, null, false, false, true));
+			this.wailPreEffect.Add(new AttributeModifier("AirConsumptionRate", DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * 75f, null, false, false, true));
 			Db.Get().effects.Add(this.wailPreEffect);
 			this.wailRecoverEffect = new Effect("BansheeWailingRecovery", DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-			this.wailRecoverEffect.Add(new AttributeModifier("AirConsumptionRate", 1f, null, false, false, true));
+			this.wailRecoverEffect.Add(new AttributeModifier("AirConsumptionRate", DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * 10f, null, false, false, true));
 			Db.Get().effects.Add(this.wailRecoverEffect);
 			this.findAudience.Enter("FindAudience", delegate(BansheeChore.StatesInstance smi)
 			{

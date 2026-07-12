@@ -68,7 +68,7 @@ namespace System.Security.Principal
 			WellKnownAccount wellKnownAccount = WellKnownAccount.LookupByType(sidType);
 			if (wellKnownAccount == null)
 			{
-				throw new ArgumentException("Unable to convert SID type: " + sidType);
+				throw new ArgumentException("Unable to convert SID type: " + sidType.ToString());
 			}
 			if (wellKnownAccount.IsAbsolute)
 			{
@@ -290,6 +290,10 @@ namespace System.Security.Principal
 					num++;
 					c = char.ToUpperInvariant(sddlForm[num]);
 				}
+				if (c == ':' && sddlForm[num - 1] == 'D')
+				{
+					num--;
+				}
 				text2 = sddlForm.Substring(pos, num - pos);
 				num2 = num - pos;
 			}
@@ -319,7 +323,7 @@ namespace System.Security.Principal
 				}
 				text = wellKnownAccount.Sid;
 			}
-			string[] array = text.ToUpperInvariant().Split(new char[] { '-' });
+			string[] array = text.ToUpperInvariant().Split('-', StringSplitOptions.None);
 			int num = array.Length - 3;
 			if (array.Length < 3 || array[0] != "S" || num > 15)
 			{

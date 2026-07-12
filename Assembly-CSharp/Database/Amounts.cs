@@ -1,5 +1,8 @@
 ﻿using System;
+using Klei;
 using Klei.AI;
+using TUNING;
+using UnityEngine;
 
 namespace Database
 {
@@ -50,7 +53,7 @@ namespace Database
 			this.Age.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.Irrigation = this.CreateAmount("Irrigation", 0f, 1f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES", null, null, null);
 			this.Irrigation.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
-			this.ImmuneLevel = this.CreateAmount("ImmuneLevel", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS", "ui_icon_immunelevel", "attribute_immunelevel", null);
+			this.ImmuneLevel = this.CreateAmount("ImmuneLevel", 0f, DUPLICANTSTATS.STANDARD.BaseStats.IMMUNE_LEVEL_MAX, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS", "ui_icon_immunelevel", "attribute_immunelevel", null);
 			this.ImmuneLevel.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Rot = this.CreateAmount("Rot", 0f, 0f, false, Units.Flat, 0f, true, "STRINGS.CREATURES", null, null, null);
 			this.Rot.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
@@ -64,35 +67,84 @@ namespace Database
 			this.ElementGrowth.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Beckoning = this.CreateAmount("Beckoning", 0f, 100f, true, Units.Flat, 100.5f, true, "STRINGS.CREATURES", "ui_icon_moo", null, null);
 			this.Beckoning.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.BionicOxygenTank = this.CreateAmount("BionicOxygenTank", 0f, BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG, true, Units.Flat, 60f, true, "STRINGS.DUPLICANTS", "ui_icon_breath", null, null);
+			this.BionicOxygenTank.SetDisplayer(new BionicOxygenTankDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.BionicOxygenTank.debugSetValue = delegate(AmountInstance instance, float val)
+			{
+				BionicOxygenTankMonitor.Instance smi = instance.gameObject.GetSMI<BionicOxygenTankMonitor.Instance>();
+				if (smi == null)
+				{
+					instance.SetValue(val);
+					return;
+				}
+				float availableOxygen = smi.AvailableOxygen;
+				if (val >= availableOxygen)
+				{
+					float num = val - availableOxygen;
+					smi.AddGas(SimHashes.Oxygen, num, 6282.4497f, byte.MaxValue, 0);
+					return;
+				}
+				float num2 = Mathf.Min(availableOxygen - val, availableOxygen);
+				float num3;
+				SimUtil.DiseaseInfo diseaseInfo;
+				float num4;
+				smi.storage.ConsumeAndGetDisease(GameTags.Breathable, num2, out num3, out diseaseInfo, out num4);
+			};
+			this.BionicInternalBattery = this.CreateAmount("BionicInternalBattery", 0f, 360000f, false, Units.Flat, 4000f, true, "STRINGS.DUPLICANTS", "ui_icon_battery", null, null);
+			this.BionicInternalBattery.SetDisplayer(new BionicBatteryDisplayer());
+			this.BionicInternalBattery.debugSetValue = delegate(AmountInstance instance, float val)
+			{
+				BionicBatteryMonitor.Instance smi2 = instance.gameObject.GetSMI<BionicBatteryMonitor.Instance>();
+				if (smi2 == null)
+				{
+					instance.SetValue(val);
+					return;
+				}
+				float currentCharge = smi2.CurrentCharge;
+				if (val >= currentCharge)
+				{
+					float num5 = val - currentCharge;
+					smi2.DebugAddCharge(num5);
+					return;
+				}
+				float num6 = currentCharge - val;
+				smi2.ConsumePower(num6);
+			};
+			this.BionicOil = this.CreateAmount("BionicOil", 0f, 200f, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_liquid", null, null);
+			this.BionicOil.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.BionicGunk = this.CreateAmount("BionicGunk", 0f, GunkMonitor.GUNK_CAPACITY, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_gunk", null, null);
+			this.BionicGunk.SetDisplayer(new BionicGunkDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.InternalBattery = this.CreateAmount("InternalBattery", 0f, 0f, true, Units.Flat, 4000f, true, "STRINGS.ROBOTS", "ui_icon_battery", null, null);
 			this.InternalBattery.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.InternalChemicalBattery = this.CreateAmount("InternalChemicalBattery", 0f, 0f, true, Units.Flat, 4000f, true, "STRINGS.ROBOTS", "ui_icon_battery", null, null);
 			this.InternalChemicalBattery.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.InternalBioBattery = this.CreateAmount("InternalBioBattery", 0f, 0f, true, Units.Flat, 4000f, true, "STRINGS.ROBOTS", "ui_icon_battery", null, null);
 			this.InternalBioBattery.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.InternalElectroBank = this.CreateAmount("InternalElectroBank", 0f, 0f, true, Units.Flat, 4000f, true, "STRINGS.ROBOTS", "ui_icon_battery", null, null);
+			this.InternalElectroBank.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
 		}
 
 		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, string string_root, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
 		{
 			string text = Strings.Get(string.Format("{1}.STATS.{0}.NAME", id.ToUpper(), string_root.ToUpper()));
 			string text2 = Strings.Get(string.Format("{1}.STATS.{0}.TOOLTIP", id.ToUpper(), string_root.ToUpper()));
-			Klei.AI.Attribute.Display display = (show_in_ui ? Klei.AI.Attribute.Display.Normal : Klei.AI.Attribute.Display.Never);
+			global::Klei.AI.Attribute.Display display = (show_in_ui ? global::Klei.AI.Attribute.Display.Normal : global::Klei.AI.Attribute.Display.Never);
 			string text3 = id + "Min";
 			StringEntry stringEntry;
 			string text4 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.NAME", text3.ToUpper(), string_root)), out stringEntry) ? stringEntry.String : ("Minimum" + text));
 			StringEntry stringEntry2;
 			string text5 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.DESC", text3.ToUpper(), string_root)), out stringEntry2) ? stringEntry2.String : ("Minimum" + text));
-			Klei.AI.Attribute attribute = new Klei.AI.Attribute(id + "Min", text4, "", text5, min, display, false, null, null, uiFullColourSprite);
+			global::Klei.AI.Attribute attribute = new global::Klei.AI.Attribute(id + "Min", text4, "", text5, min, display, false, null, null, uiFullColourSprite);
 			string text6 = id + "Max";
 			StringEntry stringEntry3;
 			string text7 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.NAME", text6.ToUpper(), string_root)), out stringEntry3) ? stringEntry3.String : ("Maximum" + text));
 			StringEntry stringEntry4;
 			string text8 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.DESC", text6.ToUpper(), string_root)), out stringEntry4) ? stringEntry4.String : ("Maximum" + text));
-			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", text7, "", text8, max, display, false, null, null, uiFullColourSprite);
+			global::Klei.AI.Attribute attribute2 = new global::Klei.AI.Attribute(id + "Max", text7, "", text8, max, display, false, null, null, uiFullColourSprite);
 			string text9 = id + "Delta";
 			string text10 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.NAME", text9.ToUpper(), string_root));
 			string text11 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.DESC", text9.ToUpper(), string_root));
-			Klei.AI.Attribute attribute3 = new Klei.AI.Attribute(text9, text10, "", text11, 0f, Klei.AI.Attribute.Display.Normal, false, null, null, uiFullColourSprite);
+			global::Klei.AI.Attribute attribute3 = new global::Klei.AI.Attribute(text9, text10, "", text11, 0f, global::Klei.AI.Attribute.Display.Normal, false, null, null, uiFullColourSprite);
 			Amount amount = new Amount(id, text, text2, attribute, attribute2, attribute3, show_max, units, delta_threshold, show_in_ui, uiSprite, thoughtSprite);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
@@ -118,6 +170,14 @@ namespace Database
 		public Amount Decor;
 
 		public Amount RadiationBalance;
+
+		public Amount BionicOxygenTank;
+
+		public Amount BionicOil;
+
+		public Amount BionicGunk;
+
+		public Amount BionicInternalBattery;
 
 		public Amount Temperature;
 
@@ -162,6 +222,8 @@ namespace Database
 		public Amount InternalChemicalBattery;
 
 		public Amount InternalBioBattery;
+
+		public Amount InternalElectroBank;
 
 		public Amount Rot;
 	}

@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class HighEnergyParticleSpawnerConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -35,6 +35,8 @@ public class HighEnergyParticleSpawnerConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 480f;
 		buildingDef.ExhaustKilowattsWhenActive = 1f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
+		buildingDef.DiseaseCellVisName = "RadiationSickness";
+		buildingDef.UtilityOutputOffset = CellOffset.none;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.RadiationIDs, "HighEnergyParticleSpawner");
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
 		return buildingDef;

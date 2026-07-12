@@ -22,12 +22,12 @@ namespace System.Data.Odbc
 					if (handleType - ODBC32.SQL_HANDLE.DBC <= 1)
 					{
 						parentHandle.DangerousAddRef(ref flag);
-						retCode = UnsafeNativeMethods.SQLAllocHandle(handleType, parentHandle, out this.handle);
+						retCode = global::Interop.Odbc.SQLAllocHandle(handleType, parentHandle, out this.handle);
 					}
 				}
 				else
 				{
-					retCode = UnsafeNativeMethods.SQLAllocHandle(handleType, IntPtr.Zero, out this.handle);
+					retCode = global::Interop.Odbc.SQLAllocHandle(handleType, IntPtr.Zero, out this.handle);
 				}
 			}
 			finally
@@ -114,7 +114,7 @@ namespace System.Data.Odbc
 				}
 				else
 				{
-					UnsafeNativeMethods.SQLFreeHandle(handleType, handle);
+					global::Interop.Odbc.SQLFreeHandle(handleType, handle);
 				}
 			}
 			OdbcHandle parentHandle = this._parentHandle;
@@ -130,7 +130,7 @@ namespace System.Data.Odbc
 		{
 			StringBuilder stringBuilder = new StringBuilder(6);
 			short num;
-			ODBC32.RetCode retCode = UnsafeNativeMethods.SQLGetDiagFieldW(this.HandleType, this, 1, 4, stringBuilder, checked((short)(2 * stringBuilder.Capacity)), out num);
+			ODBC32.RetCode retCode = global::Interop.Odbc.SQLGetDiagFieldW(this.HandleType, this, 1, 4, stringBuilder, checked((short)(2 * stringBuilder.Capacity)), out num);
 			ODBC.TraceODBC(3, "SQLGetDiagFieldW", retCode);
 			if (retCode == ODBC32.RetCode.SUCCESS || retCode == ODBC32.RetCode.SUCCESS_WITH_INFO)
 			{
@@ -146,7 +146,7 @@ namespace System.Data.Odbc
 		internal ODBC32.RetCode GetDiagnosticRecord(short record, out string sqlState, StringBuilder message, out int nativeError, out short cchActual)
 		{
 			StringBuilder stringBuilder = new StringBuilder(5);
-			ODBC32.RetCode retCode = UnsafeNativeMethods.SQLGetDiagRecW(this.HandleType, this, record, stringBuilder, out nativeError, message, checked((short)message.Capacity), out cchActual);
+			ODBC32.RetCode retCode = global::Interop.Odbc.SQLGetDiagRecW(this.HandleType, this, record, stringBuilder, out nativeError, message, checked((short)message.Capacity), out cchActual);
 			ODBC.TraceODBC(3, "SQLGetDiagRecW", retCode);
 			if (retCode == ODBC32.RetCode.SUCCESS || retCode == ODBC32.RetCode.SUCCESS_WITH_INFO)
 			{

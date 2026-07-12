@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using TUNING;
@@ -23,12 +24,22 @@ public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 		this.sodaFountain = base.GetComponent<SodaFountain>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
+	{
+		KAnimFile[] array = null;
+		if (this.workerTypeOverrideAnims.TryGetValue(worker.PrefabID(), out array))
+		{
+			this.overrideAnims = array;
+		}
+		return base.GetAnim(worker);
+	}
+
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.operational.SetActive(true, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage component = base.GetComponent<Storage>();
 		float num;
@@ -54,12 +65,12 @@ public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
@@ -74,6 +85,8 @@ public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 		}
 		return true;
 	}
+
+	public Dictionary<Tag, KAnimFile[]> workerTypeOverrideAnims = new Dictionary<Tag, KAnimFile[]>();
 
 	[MyCmpReq]
 	private Operational operational;

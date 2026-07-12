@@ -17,15 +17,45 @@ public class ResearchButtonImageToggleState : ImageToggleState
 	{
 		base.OnSpawn();
 		this.UpdateActiveResearch(null);
-		this.scrollIconCoroutine = base.StartCoroutine(this.ScrollIcon());
+		this.RestartCoroutine();
 	}
 
 	protected override void OnCleanUp()
 	{
-		base.StopCoroutine(this.scrollIconCoroutine);
-		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.RefreshProgressBar));
+		this.AbortCoroutine();
+		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.UpdateActiveResearch));
 		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.RefreshProgressBar));
 		base.OnCleanUp();
+	}
+
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		this.RestartCoroutine();
+	}
+
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		this.AbortCoroutine();
+	}
+
+	private void AbortCoroutine()
+	{
+		if (this.scrollIconCoroutine != null)
+		{
+			base.StopCoroutine(this.scrollIconCoroutine);
+		}
+		this.scrollIconCoroutine = null;
+	}
+
+	private void RestartCoroutine()
+	{
+		this.AbortCoroutine();
+		if (base.gameObject.activeInHierarchy)
+		{
+			this.scrollIconCoroutine = base.StartCoroutine(this.ScrollIcon());
+		}
 	}
 
 	private void UpdateActiveResearch(object o)

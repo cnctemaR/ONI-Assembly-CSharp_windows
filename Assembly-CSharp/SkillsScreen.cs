@@ -434,7 +434,7 @@ public class SkillsScreen : KModalScreen
 				for (int i = 0; i < skillsBySkillGroup.Count; i++)
 				{
 					Skill skill = skillsBySkillGroup[i];
-					if (!skill.deprecated)
+					if (!skill.deprecated && SaveLoader.Instance.IsDLCActiveForCurrentSave(skill.dlcId))
 					{
 						if (!this.skillWidgets.ContainsKey(skill.Id))
 						{

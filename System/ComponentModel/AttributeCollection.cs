@@ -1,25 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class AttributeCollection : ICollection, IEnumerable
 	{
 		public AttributeCollection(params Attribute[] attributes)
 		{
-			if (attributes == null)
+			this._attributes = attributes ?? Array.Empty<Attribute>();
+			for (int i = 0; i < this._attributes.Length; i++)
 			{
-				attributes = new Attribute[0];
-			}
-			this._attributes = attributes;
-			for (int i = 0; i < attributes.Length; i++)
-			{
-				if (attributes[i] == null)
+				if (this._attributes[i] == null)
 				{
 					throw new ArgumentNullException("attributes");
 				}
@@ -38,7 +30,7 @@ namespace System.ComponentModel
 			}
 			if (newAttributes == null)
 			{
-				newAttributes = new Attribute[0];
+				newAttributes = Array.Empty<Attribute>();
 			}
 			Attribute[] array = new Attribute[existing.Count + newAttributes.Length];
 			int count = existing.Count;
@@ -105,7 +97,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				object obj = AttributeCollection.internalSyncObject;
+				object obj = AttributeCollection.s_internalSyncObject;
 				Attribute defaultAttribute;
 				lock (obj)
 				{
@@ -155,8 +147,7 @@ namespace System.ComponentModel
 					for (int k = 0; k < num; k++)
 					{
 						Attribute attribute2 = this.Attributes[k];
-						Type type = attribute2.GetType();
-						if (attributeType.IsAssignableFrom(type))
+						if (attributeType.IsInstanceOfType(attribute2))
 						{
 							this._foundAttributeTypes[i].index = k;
 							return attribute2;
@@ -193,17 +184,17 @@ namespace System.ComponentModel
 
 		protected Attribute GetDefaultAttribute(Type attributeType)
 		{
-			object obj = AttributeCollection.internalSyncObject;
+			object obj = AttributeCollection.s_internalSyncObject;
 			Attribute attribute;
 			lock (obj)
 			{
-				if (AttributeCollection._defaultAttributes == null)
+				if (AttributeCollection.s_defaultAttributes == null)
 				{
-					AttributeCollection._defaultAttributes = new Hashtable();
+					AttributeCollection.s_defaultAttributes = new Hashtable();
 				}
-				if (AttributeCollection._defaultAttributes.ContainsKey(attributeType))
+				if (AttributeCollection.s_defaultAttributes.ContainsKey(attributeType))
 				{
-					attribute = (Attribute)AttributeCollection._defaultAttributes[attributeType];
+					attribute = (Attribute)AttributeCollection.s_defaultAttributes[attributeType];
 				}
 				else
 				{
@@ -216,17 +207,17 @@ namespace System.ComponentModel
 					}
 					else
 					{
-						ConstructorInfo constructor = reflectionType.UnderlyingSystemType.GetConstructor(new Type[0]);
+						ConstructorInfo constructor = reflectionType.UnderlyingSystemType.GetConstructor(Array.Empty<Type>());
 						if (constructor != null)
 						{
-							attribute2 = (Attribute)constructor.Invoke(new object[0]);
+							attribute2 = (Attribute)constructor.Invoke(Array.Empty<object>());
 							if (!attribute2.IsDefaultAttribute())
 							{
 								attribute2 = null;
 							}
 						}
 					}
-					AttributeCollection._defaultAttributes[attributeType] = attribute2;
+					AttributeCollection.s_defaultAttributes[attributeType] = attribute2;
 					attribute = attribute2;
 				}
 			}
@@ -262,14 +253,6 @@ namespace System.ComponentModel
 			return true;
 		}
 
-		int ICollection.Count
-		{
-			get
-			{
-				return this.Count;
-			}
-		}
-
 		bool ICollection.IsSynchronized
 		{
 			get
@@ -286,9 +269,12 @@ namespace System.ComponentModel
 			}
 		}
 
-		public void CopyTo(Array array, int index)
+		int ICollection.Count
 		{
-			Array.Copy(this.Attributes, 0, array, index, this.Attributes.Length);
+			get
+			{
+				return this.Count;
+			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -296,13 +282,18 @@ namespace System.ComponentModel
 			return this.GetEnumerator();
 		}
 
+		public void CopyTo(Array array, int index)
+		{
+			Array.Copy(this.Attributes, 0, array, index, this.Attributes.Length);
+		}
+
 		public static readonly AttributeCollection Empty = new AttributeCollection(null);
 
-		private static Hashtable _defaultAttributes;
+		private static Hashtable s_defaultAttributes;
 
-		private Attribute[] _attributes;
+		private readonly Attribute[] _attributes;
 
-		private static object internalSyncObject = new object();
+		private static readonly object s_internalSyncObject = new object();
 
 		private const int FOUND_TYPES_LIMIT = 5;
 

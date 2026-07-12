@@ -77,24 +77,40 @@ public class Spacecraft
 
 	private float GetPilotNavigationEfficiency()
 	{
-		List<MinionStorage.Info> storedMinionInfo = this.launchConditions.GetComponent<MinionStorage>().GetStoredMinionInfo();
-		if (storedMinionInfo.Count < 1)
-		{
-			return 1f;
-		}
-		StoredMinionIdentity component = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
-		string text = Db.Get().Attributes.SpaceNavigation.Id;
 		float num = 1f;
-		foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
+		if (!this.launchConditions.GetComponent<CommandModule>().robotPilotControlled)
 		{
-			foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
+			List<MinionStorage.Info> storedMinionInfo = this.launchConditions.GetComponent<MinionStorage>().GetStoredMinionInfo();
+			if (storedMinionInfo.Count < 1)
 			{
-				SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
-				if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)
-				{
-					num += skillAttributePerk.modifier.Value;
-				}
+				return 1f;
 			}
+			StoredMinionIdentity component = storedMinionInfo[0].serializedMinion.Get().GetComponent<StoredMinionIdentity>();
+			string text = Db.Get().Attributes.SpaceNavigation.Id;
+			using (Dictionary<string, bool>.Enumerator enumerator = component.MasteryBySkillID.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					KeyValuePair<string, bool> keyValuePair = enumerator.Current;
+					foreach (SkillPerk skillPerk in Db.Get().Skills.Get(keyValuePair.Key).perks)
+					{
+						if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+						{
+							SkillAttributePerk skillAttributePerk = skillPerk as SkillAttributePerk;
+							if (skillAttributePerk != null && skillAttributePerk.modifier.AttributeId == text)
+							{
+								num += skillAttributePerk.modifier.Value;
+							}
+						}
+					}
+				}
+				return num;
+			}
+		}
+		RoboPilotModule component2 = this.launchConditions.GetComponent<RoboPilotModule>();
+		if (component2 != null && component2.GetDataBanksStored() >= 1f)
+		{
+			num += component2.FlightEfficiencyModifier();
 		}
 		return num;
 	}

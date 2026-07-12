@@ -94,7 +94,10 @@ namespace System.Net
 					try
 					{
 						operation.ThrowIfDisposed(cancellationToken);
-						await this.socket.ConnectAsync(ipendPoint).ConfigureAwait(false);
+						await Task.Factory.FromAsync<IPEndPoint>((IPEndPoint targetEndPoint, AsyncCallback callback, object state) => ((Socket)state).BeginConnect(targetEndPoint, callback, state), delegate(IAsyncResult asyncResult)
+						{
+							((Socket)asyncResult.AsyncState).EndConnect(asyncResult);
+						}, ipendPoint, this.socket).ConfigureAwait(false);
 					}
 					catch (ObjectDisposedException)
 					{
@@ -108,14 +111,14 @@ namespace System.Net
 							socket2.Close();
 						}
 						connectException = WebConnection.GetException(WebExceptionStatus.ConnectFailure, ex2);
-						goto IL_01DA;
+						goto IL_0220;
 					}
 					if (this.socket != null)
 					{
 						return;
 					}
 				}
-				IL_01DA:;
+				IL_0220:;
 			}
 			IPAddress[] array = null;
 			if (connectException == null)
@@ -221,6 +224,7 @@ namespace System.Net
 			}
 			throw WebConnection.GetException(WebExceptionStatus.ProtocolError, null);
 			IL_0180:
+			this.networkStream.ReadTimeout = operation.Request.ReadWriteTimeout;
 			return new WebRequestStream(this, operation, this.networkStream, this.tunnel);
 		}
 
@@ -230,8 +234,8 @@ namespace System.Net
 			{
 				return new WebException(string.Format("Error: {0}", status), status);
 			}
-			WebException ex;
-			if ((ex = error as WebException) != null)
+			WebException ex = error as WebException;
+			if (ex != null)
 			{
 				return ex;
 			}
@@ -384,6 +388,17 @@ namespace System.Net
 					{
 					}
 					this.networkStream = null;
+				}
+				if (this.monoTlsStream != null)
+				{
+					try
+					{
+						this.monoTlsStream.Dispose();
+					}
+					catch
+					{
+					}
+					this.monoTlsStream = null;
 				}
 				if (this.socket != null)
 				{

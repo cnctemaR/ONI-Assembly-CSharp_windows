@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace UnityEngine.EventSystems
 {
-	internal static class RaycasterManager
+	public static class RaycasterManager
 	{
-		public static void AddRaycaster(BaseRaycaster baseRaycaster)
+		internal static void AddRaycaster(BaseRaycaster baseRaycaster)
 		{
 			if (RaycasterManager.s_Raycasters.Contains(baseRaycaster))
 			{
@@ -19,7 +19,7 @@ namespace UnityEngine.EventSystems
 			return RaycasterManager.s_Raycasters;
 		}
 
-		public static void RemoveRaycasters(BaseRaycaster baseRaycaster)
+		internal static void RemoveRaycasters(BaseRaycaster baseRaycaster)
 		{
 			if (!RaycasterManager.s_Raycasters.Contains(baseRaycaster))
 			{

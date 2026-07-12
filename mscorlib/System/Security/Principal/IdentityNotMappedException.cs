@@ -35,8 +35,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[MonoTODO("not implemented")]
 		[SecurityCritical]
+		[MonoTODO("not implemented")]
 		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 		}

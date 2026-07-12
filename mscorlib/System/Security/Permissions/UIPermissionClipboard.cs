@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum UIPermissionClipboard
 	{
-		NoClipboard,
-		OwnClipboard,
-		AllClipboard
+		AllClipboard = 2,
+		NoClipboard = 0,
+		OwnClipboard
 	}
 }

@@ -15,8 +15,8 @@ namespace UnityEngine.Diagnostics
 			}
 		}
 
-		[Obsolete("PlayerConnection.SendFile is no longer supported.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("PlayerConnection.SendFile is no longer supported.", true)]
 		public static void SendFile(string remoteFilePath, byte[] data)
 		{
 		}

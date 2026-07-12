@@ -1,39 +1,34 @@
 ﻿using System;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class UnhandledExceptionEventArgs : EventArgs
 	{
 		public UnhandledExceptionEventArgs(object exception, bool isTerminating)
 		{
-			this._Exception = exception;
-			this._IsTerminating = isTerminating;
+			this._exception = exception;
+			this._isTerminating = isTerminating;
 		}
 
 		public object ExceptionObject
 		{
-			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				return this._Exception;
+				return this._exception;
 			}
 		}
 
 		public bool IsTerminating
 		{
-			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				return this._IsTerminating;
+				return this._isTerminating;
 			}
 		}
 
-		private object _Exception;
+		private object _exception;
 
-		private bool _IsTerminating;
+		private bool _isTerminating;
 	}
 }

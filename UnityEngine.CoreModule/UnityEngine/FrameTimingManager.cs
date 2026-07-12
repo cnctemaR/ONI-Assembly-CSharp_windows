@@ -7,11 +7,15 @@ namespace UnityEngine
 	[StaticAccessor("GetUncheckedRealGfxDevice().GetFrameTimingManager()", StaticAccessorType.Dot)]
 	public static class FrameTimingManager
 	{
+		[StaticAccessor("FrameTimingManager", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsFeatureEnabled();
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CaptureFrameTimings();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern uint GetLatestTimings(uint numFrames, FrameTiming[] timings);
+		public static extern uint GetLatestTimings(uint numFrames, [Unmarshalled] FrameTiming[] timings);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetVSyncsPerSecond();

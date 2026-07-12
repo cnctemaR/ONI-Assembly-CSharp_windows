@@ -44,7 +44,7 @@ namespace System.Security.AccessControl
 				case AceType.SystemAlarmCallbackObject:
 					return AceQualifier.SystemAlarm;
 				default:
-					throw new ArgumentException("Unrecognised ACE type: " + base.AceType);
+					throw new ArgumentException("Unrecognised ACE type: " + base.AceType.ToString());
 				}
 			}
 		}

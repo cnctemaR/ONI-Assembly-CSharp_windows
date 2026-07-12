@@ -4,33 +4,29 @@ using System.Reflection;
 namespace System.Runtime.Serialization
 {
 	[Serializable]
-	internal class MemberHolder
+	internal sealed class MemberHolder
 	{
 		internal MemberHolder(Type type, StreamingContext ctx)
 		{
-			this.memberType = type;
-			this.context = ctx;
+			this._memberType = type;
+			this._context = ctx;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.memberType.GetHashCode();
+			return this._memberType.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is MemberHolder))
-			{
-				return false;
-			}
-			MemberHolder memberHolder = (MemberHolder)obj;
-			return memberHolder.memberType == this.memberType && memberHolder.context.State == this.context.State;
+			MemberHolder memberHolder = obj as MemberHolder;
+			return memberHolder != null && memberHolder._memberType == this._memberType && memberHolder._context.State == this._context.State;
 		}
 
-		internal MemberInfo[] members;
+		internal readonly MemberInfo[] _members;
 
-		internal Type memberType;
+		internal readonly Type _memberType;
 
-		internal StreamingContext context;
+		internal readonly StreamingContext _context;
 	}
 }

@@ -129,7 +129,7 @@ namespace Klei.AI
 
 			public Workable workable;
 
-			public Worker worker;
+			public WorkerBase worker;
 		}
 
 		public class States : GameplayEventStateMachine<BonusEvent.States, BonusEvent.StatesInstance, GameplayEventManager, BonusEvent>

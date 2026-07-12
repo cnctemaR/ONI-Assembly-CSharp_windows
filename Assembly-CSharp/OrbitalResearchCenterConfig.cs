@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class OrbitalResearchCenterConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -66,7 +66,7 @@ public class OrbitalResearchCenterConfig : IBuildingConfig
 		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("OrbitalResearchCenter", array, array2), array, array2)
 		{
 			time = 33f,
-			description = ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.RECIPE_DESC,
+			description = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.RECIPE_DESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
 			fabricators = new List<Tag> { "OrbitalResearchCenter" }
 		};

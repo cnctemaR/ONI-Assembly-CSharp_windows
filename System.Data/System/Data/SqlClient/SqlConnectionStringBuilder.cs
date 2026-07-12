@@ -1080,6 +1080,19 @@ namespace System.Data.SqlClient
 		public bool ConnectionReset { get; set; }
 
 		[MonoTODO("Not implemented in corefx: https://github.com/dotnet/corefx/issues/22474")]
+		public SqlAuthenticationMethod Authentication
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO("Not implemented in corefx: https://github.com/dotnet/corefx/issues/22474")]
 		public bool ContextConnection
 		{
 			get
@@ -1144,16 +1157,16 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		public SqlAuthenticationMethod Authentication
+		public string EnclaveAttestationUrl
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
-				return SqlAuthenticationMethod.NotSpecified;
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
 			}
 			set
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 

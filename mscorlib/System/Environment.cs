@@ -134,11 +134,11 @@ namespace System
 		{
 			get
 			{
-				return Directory.GetCurrentDirectory();
+				return Directory.InsecureGetCurrentDirectory();
 			}
 			set
 			{
-				Directory.SetCurrentDirectory(value);
+				Directory.InsecureSetCurrentDirectory(value);
 			}
 		}
 
@@ -535,7 +535,7 @@ namespace System
 						int num = text3.IndexOf('=');
 						if (num > 8 && text3.Substring(0, num) == key)
 						{
-							string text4 = text3.Substring(num + 1).Trim(new char[] { '"' });
+							string text4 = text3.Substring(num + 1).Trim('"');
 							bool flag = false;
 							if (text4.StartsWithOrdinalUnchecked("$HOME/"))
 							{
@@ -551,7 +551,7 @@ namespace System
 					}
 				}
 			}
-			catch (FileNotFoundException)
+			catch
 			{
 			}
 			return Path.Combine(home_dir, fallback);
@@ -836,24 +836,48 @@ namespace System
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void InternalSetEnvironmentVariable(string variable, string value);
+		internal unsafe static extern void InternalSetEnvironmentVariable(char* variable, int variable_length, char* value, int value_length);
+
+		internal unsafe static void InternalSetEnvironmentVariable(string variable, string value)
+		{
+			fixed (string text = variable)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				fixed (string text2 = value)
+				{
+					char* ptr2 = text2;
+					if (ptr2 != null)
+					{
+						ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					Environment.InternalSetEnvironmentVariable(ptr, (variable != null) ? variable.Length : 0, ptr2, (value != null) ? value.Length : 0);
+				}
+			}
+		}
 
 		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 		public static void FailFast(string message)
 		{
-			throw new NotImplementedException();
+			Environment.FailFast(message, null, null);
 		}
 
 		internal static void FailFast(string message, uint exitCode)
 		{
-			throw new NotImplementedException();
+			Environment.FailFast(message, null, null);
 		}
 
 		[SecurityCritical]
 		public static void FailFast(string message, Exception exception)
 		{
-			throw new ExecutionEngineException(message, exception);
+			Environment.FailFast(message, exception, null);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void FailFast(string message, Exception exception, string errorSource);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetIs64BitOperatingSystem();
@@ -913,7 +937,7 @@ namespace System
 		internal static extern string internalGetGacPath();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string[] GetLogicalDrivesInternal();
+		internal static extern string[] GetLogicalDrivesInternal();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string[] GetEnvironmentVariableNames();
@@ -986,7 +1010,7 @@ namespace System
 			}
 		}
 
-		private const int mono_corlib_version = 1051100001;
+		private const string mono_corlib_version = "1A5E0066-58DC-428A-B21C-0AD6CDAE2789";
 
 		private static string nl;
 

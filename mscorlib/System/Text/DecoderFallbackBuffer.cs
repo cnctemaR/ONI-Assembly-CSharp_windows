@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Security;
 
 namespace System.Text
 {
@@ -21,21 +20,18 @@ namespace System.Text
 			}
 		}
 
-		[SecurityCritical]
 		internal void InternalReset()
 		{
 			this.byteStart = null;
 			this.Reset();
 		}
 
-		[SecurityCritical]
 		internal unsafe void InternalInitialize(byte* byteStart, char* charEnd)
 		{
 			this.byteStart = byteStart;
 			this.charEnd = charEnd;
 		}
 
-		[SecurityCritical]
 		internal unsafe virtual bool InternalFallback(byte[] bytes, byte* pBytes, ref char* chars)
 		{
 			if (this.Fallback(bytes, (int)((long)(pBytes - this.byteStart) - (long)bytes.Length)))
@@ -51,7 +47,7 @@ namespace System.Text
 						{
 							if (flag)
 							{
-								throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+								throw new ArgumentException("String contains invalid Unicode code points.");
 							}
 							flag = true;
 						}
@@ -59,7 +55,7 @@ namespace System.Text
 						{
 							if (!flag)
 							{
-								throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+								throw new ArgumentException("String contains invalid Unicode code points.");
 							}
 							flag = false;
 						}
@@ -72,14 +68,13 @@ namespace System.Text
 				}
 				if (flag)
 				{
-					throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+					throw new ArgumentException("String contains invalid Unicode code points.");
 				}
 				chars = ptr;
 			}
 			return true;
 		}
 
-		[SecurityCritical]
 		internal unsafe virtual int InternalFallback(byte[] bytes, byte* pBytes)
 		{
 			if (!this.Fallback(bytes, (int)((long)(pBytes - this.byteStart) - (long)bytes.Length)))
@@ -97,7 +92,7 @@ namespace System.Text
 					{
 						if (flag)
 						{
-							throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+							throw new ArgumentException("String contains invalid Unicode code points.");
 						}
 						flag = true;
 					}
@@ -105,7 +100,7 @@ namespace System.Text
 					{
 						if (!flag)
 						{
-							throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+							throw new ArgumentException("String contains invalid Unicode code points.");
 						}
 						flag = false;
 					}
@@ -114,7 +109,7 @@ namespace System.Text
 			}
 			if (flag)
 			{
-				throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+				throw new ArgumentException("String contains invalid Unicode code points.");
 			}
 			return num;
 		}
@@ -127,22 +122,20 @@ namespace System.Text
 			{
 				if (stringBuilder.Length > 0)
 				{
-					stringBuilder.Append(" ");
+					stringBuilder.Append(' ');
 				}
-				stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, "\\x{0:X2}", bytesUnknown[num]));
+				stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "\\x{0:X2}", bytesUnknown[num]);
 				num++;
 			}
 			if (num == 20)
 			{
 				stringBuilder.Append(" ...");
 			}
-			throw new ArgumentException(Environment.GetResourceString("Recursive fallback not allowed for bytes {0}.", new object[] { stringBuilder.ToString() }), "bytesUnknown");
+			throw new ArgumentException(SR.Format("Recursive fallback not allowed for bytes {0}.", stringBuilder.ToString()), "bytesUnknown");
 		}
 
-		[SecurityCritical]
 		internal unsafe byte* byteStart;
 
-		[SecurityCritical]
 		internal unsafe char* charEnd;
 	}
 }

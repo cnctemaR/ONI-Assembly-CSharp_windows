@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class SafeHandle : CriticalFinalizerObject, IDisposable
 	{
@@ -71,8 +69,8 @@ namespace System.Runtime.InteropServices
 			this.Dispose(true);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -185,7 +183,7 @@ namespace System.Runtime.InteropServices
 						goto Block_6;
 					}
 					flag = (state & 2147483644) == 4 && (state & 1) == 0 && this._ownsHandle && !this.IsInvalid;
-					int num = (state & 2147483644) - 4;
+					int num = state - 4;
 					if ((state & 2147483644) == 4)
 					{
 						num |= 1;
@@ -196,14 +194,14 @@ namespace System.Runtime.InteropServices
 					}
 					if (Interlocked.CompareExchange(ref this._state, num, state) == state)
 					{
-						goto IL_00A0;
+						goto IL_009A;
 					}
 				}
 				flag = false;
-				goto IL_00A0;
+				goto IL_009A;
 				Block_6:
 				throw new ObjectDisposedException(null, "Safe handle has been closed");
-				IL_00A0:
+				IL_009A:
 				if (flag)
 				{
 					this.ReleaseHandle();

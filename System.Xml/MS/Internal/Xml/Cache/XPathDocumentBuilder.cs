@@ -10,36 +10,36 @@ namespace MS.Internal.Xml.Cache
 	{
 		public XPathDocumentBuilder(XPathDocument doc, IXmlLineInfo lineInfo, string baseUri, XPathDocument.LoadFlags flags)
 		{
-			this.nodePageFact.Init(256);
-			this.nmspPageFact.Init(16);
-			this.stkNmsp = new Stack<XPathNodeRef>();
+			this._nodePageFact.Init(256);
+			this._nmspPageFact.Init(16);
+			this._stkNmsp = new Stack<XPathNodeRef>();
 			this.Initialize(doc, lineInfo, baseUri, flags);
 		}
 
 		public void Initialize(XPathDocument doc, IXmlLineInfo lineInfo, string baseUri, XPathDocument.LoadFlags flags)
 		{
-			this.doc = doc;
-			this.nameTable = doc.NameTable;
-			this.atomizeNames = (flags & XPathDocument.LoadFlags.AtomizeNames) > XPathDocument.LoadFlags.None;
-			this.idxParent = (this.idxSibling = 0);
-			this.elemNameIndex = new XPathNodeRef[64];
-			this.textBldr.Initialize(lineInfo);
-			this.lineInfo = lineInfo;
-			this.lineNumBase = 0;
-			this.linePosBase = 0;
-			this.infoTable = new XPathNodeInfoTable();
+			this._doc = doc;
+			this._nameTable = doc.NameTable;
+			this._atomizeNames = (flags & XPathDocument.LoadFlags.AtomizeNames) > XPathDocument.LoadFlags.None;
+			this._idxParent = (this._idxSibling = 0);
+			this._elemNameIndex = new XPathNodeRef[64];
+			this._textBldr.Initialize(lineInfo);
+			this._lineInfo = lineInfo;
+			this._lineNumBase = 0;
+			this._linePosBase = 0;
+			this._infoTable = new XPathNodeInfoTable();
 			XPathNode[] array;
 			int num = this.NewNode(out array, XPathNodeType.Text, string.Empty, string.Empty, string.Empty, string.Empty);
-			this.doc.SetCollapsedTextNode(array, num);
-			this.idxNmsp = this.NewNamespaceNode(out this.pageNmsp, this.nameTable.Add("xml"), this.nameTable.Add("http://www.w3.org/XML/1998/namespace"), null, 0);
-			this.doc.SetXmlNamespaceNode(this.pageNmsp, this.idxNmsp);
+			this._doc.SetCollapsedTextNode(array, num);
+			this._idxNmsp = this.NewNamespaceNode(out this._pageNmsp, this._nameTable.Add("xml"), this._nameTable.Add("http://www.w3.org/XML/1998/namespace"), null, 0);
+			this._doc.SetXmlNamespaceNode(this._pageNmsp, this._idxNmsp);
 			if ((flags & XPathDocument.LoadFlags.Fragment) == XPathDocument.LoadFlags.None)
 			{
-				this.idxParent = this.NewNode(out this.pageParent, XPathNodeType.Root, string.Empty, string.Empty, string.Empty, baseUri);
-				this.doc.SetRootNode(this.pageParent, this.idxParent);
+				this._idxParent = this.NewNode(out this._pageParent, XPathNodeType.Root, string.Empty, string.Empty, string.Empty, baseUri);
+				this._doc.SetRootNode(this._pageParent, this._idxParent);
 				return;
 			}
-			this.doc.SetRootNode(this.nodePageFact.NextNodePage, this.nodePageFact.NextNodeIndex);
+			this._doc.SetRootNode(this._nodePageFact.NextNodePage, this._nodePageFact.NextNodeIndex);
 		}
 
 		public override void WriteDocType(string name, string pubid, string sysid, string subset)
@@ -53,21 +53,21 @@ namespace MS.Internal.Xml.Cache
 
 		public void WriteStartElement(string prefix, string localName, string ns, string baseUri)
 		{
-			if (this.atomizeNames)
+			if (this._atomizeNames)
 			{
-				prefix = this.nameTable.Add(prefix);
-				localName = this.nameTable.Add(localName);
-				ns = this.nameTable.Add(ns);
+				prefix = this._nameTable.Add(prefix);
+				localName = this._nameTable.Add(localName);
+				ns = this._nameTable.Add(ns);
 			}
 			this.AddSibling(XPathNodeType.Element, localName, ns, prefix, baseUri);
-			this.pageParent = this.pageSibling;
-			this.idxParent = this.idxSibling;
-			this.idxSibling = 0;
-			int num = this.pageParent[this.idxParent].LocalNameHashCode & 63;
-			this.elemNameIndex[num] = this.LinkSimilarElements(this.elemNameIndex[num].Page, this.elemNameIndex[num].Index, this.pageParent, this.idxParent);
-			if (this.elemIdMap != null)
+			this._pageParent = this._pageSibling;
+			this._idxParent = this._idxSibling;
+			this._idxSibling = 0;
+			int num = this._pageParent[this._idxParent].LocalNameHashCode & 63;
+			this._elemNameIndex[num] = this.LinkSimilarElements(this._elemNameIndex[num].Page, this._elemNameIndex[num].Index, this._pageParent, this._idxParent);
+			if (this._elemIdMap != null)
 			{
-				this.idAttrName = (XmlQualifiedName)this.elemIdMap[new XmlQualifiedName(localName, prefix)];
+				this._idAttrName = (XmlQualifiedName)this._elemIdMap[new XmlQualifiedName(localName, prefix)];
 			}
 		}
 
@@ -93,70 +93,70 @@ namespace MS.Internal.Xml.Cache
 
 		public void WriteEndElement(bool allowShortcutTag)
 		{
-			if (!this.pageParent[this.idxParent].HasContentChild)
+			if (!this._pageParent[this._idxParent].HasContentChild)
 			{
-				TextBlockType textType = this.textBldr.TextType;
+				TextBlockType textType = this._textBldr.TextType;
 				if (textType == TextBlockType.Text)
 				{
-					if (this.lineInfo != null)
+					if (this._lineInfo != null)
 					{
-						if (this.textBldr.LineNumber != this.pageParent[this.idxParent].LineNumber)
+						if (this._textBldr.LineNumber != this._pageParent[this._idxParent].LineNumber)
 						{
 							goto IL_00CD;
 						}
-						int num = this.textBldr.LinePosition - this.pageParent[this.idxParent].LinePosition;
+						int num = this._textBldr.LinePosition - this._pageParent[this._idxParent].LinePosition;
 						if (num < 0 || num > 255)
 						{
 							goto IL_00CD;
 						}
-						this.pageParent[this.idxParent].SetCollapsedLineInfoOffset(num);
+						this._pageParent[this._idxParent].SetCollapsedLineInfoOffset(num);
 					}
-					this.pageParent[this.idxParent].SetCollapsedValue(this.textBldr.ReadText());
+					this._pageParent[this._idxParent].SetCollapsedValue(this._textBldr.ReadText());
 					goto IL_012D;
 				}
 				if (textType - TextBlockType.SignificantWhitespace > 1)
 				{
-					this.pageParent[this.idxParent].SetEmptyValue(allowShortcutTag);
+					this._pageParent[this._idxParent].SetEmptyValue(allowShortcutTag);
 					goto IL_012D;
 				}
 				IL_00CD:
 				this.CachedTextNode();
-				this.pageParent[this.idxParent].SetValue(this.pageSibling[this.idxSibling].Value);
+				this._pageParent[this._idxParent].SetValue(this._pageSibling[this._idxSibling].Value);
 			}
-			else if (this.textBldr.HasText)
+			else if (this._textBldr.HasText)
 			{
 				this.CachedTextNode();
 			}
 			IL_012D:
-			if (this.pageParent[this.idxParent].HasNamespaceDecls)
+			if (this._pageParent[this._idxParent].HasNamespaceDecls)
 			{
-				this.doc.AddNamespace(this.pageParent, this.idxParent, this.pageNmsp, this.idxNmsp);
-				XPathNodeRef xpathNodeRef = this.stkNmsp.Pop();
-				this.pageNmsp = xpathNodeRef.Page;
-				this.idxNmsp = xpathNodeRef.Index;
+				this._doc.AddNamespace(this._pageParent, this._idxParent, this._pageNmsp, this._idxNmsp);
+				XPathNodeRef xpathNodeRef = this._stkNmsp.Pop();
+				this._pageNmsp = xpathNodeRef.Page;
+				this._idxNmsp = xpathNodeRef.Index;
 			}
-			this.pageSibling = this.pageParent;
-			this.idxSibling = this.idxParent;
-			this.idxParent = this.pageParent[this.idxParent].GetParent(out this.pageParent);
+			this._pageSibling = this._pageParent;
+			this._idxSibling = this._idxParent;
+			this._idxParent = this._pageParent[this._idxParent].GetParent(out this._pageParent);
 		}
 
 		public override void WriteStartAttribute(string prefix, string localName, string namespaceName)
 		{
-			if (this.atomizeNames)
+			if (this._atomizeNames)
 			{
-				prefix = this.nameTable.Add(prefix);
-				localName = this.nameTable.Add(localName);
-				namespaceName = this.nameTable.Add(namespaceName);
+				prefix = this._nameTable.Add(prefix);
+				localName = this._nameTable.Add(localName);
+				namespaceName = this._nameTable.Add(namespaceName);
 			}
 			this.AddSibling(XPathNodeType.Attribute, localName, namespaceName, prefix, string.Empty);
 		}
 
 		public override void WriteEndAttribute()
 		{
-			this.pageSibling[this.idxSibling].SetValue(this.textBldr.ReadText());
-			if (this.idAttrName != null && this.pageSibling[this.idxSibling].LocalName == this.idAttrName.Name && this.pageSibling[this.idxSibling].Prefix == this.idAttrName.Namespace)
+			this._pageSibling[this._idxSibling].SetValue(this._textBldr.ReadText());
+			if (this._idAttrName != null && this._pageSibling[this._idxSibling].LocalName == this._idAttrName.Name && this._pageSibling[this._idxSibling].Prefix == this._idAttrName.Namespace)
 			{
-				this.doc.AddIdElement(this.pageSibling[this.idxSibling].Value, this.pageParent, this.idxParent);
+				this._doc.AddIdElement(this._pageSibling[this._idxSibling].Value, this._pageParent, this._idxParent);
 			}
 		}
 
@@ -168,7 +168,7 @@ namespace MS.Internal.Xml.Cache
 		public override void WriteComment(string text)
 		{
 			this.AddSibling(XPathNodeType.Comment, string.Empty, string.Empty, string.Empty, string.Empty);
-			this.pageSibling[this.idxSibling].SetValue(text);
+			this._pageSibling[this._idxSibling].SetValue(text);
 		}
 
 		public override void WriteProcessingInstruction(string name, string text)
@@ -178,12 +178,12 @@ namespace MS.Internal.Xml.Cache
 
 		public void WriteProcessingInstruction(string name, string text, string baseUri)
 		{
-			if (this.atomizeNames)
+			if (this._atomizeNames)
 			{
-				name = this.nameTable.Add(name);
+				name = this._nameTable.Add(name);
 			}
 			this.AddSibling(XPathNodeType.ProcessingInstruction, name, string.Empty, string.Empty, baseUri);
-			this.pageSibling[this.idxSibling].SetValue(text);
+			this._pageSibling[this._idxSibling].SetValue(text);
 		}
 
 		public override void WriteWhitespace(string ws)
@@ -213,7 +213,7 @@ namespace MS.Internal.Xml.Cache
 
 		public void WriteString(string text, TextBlockType textType)
 		{
-			this.textBldr.WriteTextBlock(text, textType);
+			this._textBldr.WriteTextBlock(text, textType);
 		}
 
 		public override void WriteEntityRef(string name)
@@ -223,8 +223,7 @@ namespace MS.Internal.Xml.Cache
 
 		public override void WriteCharEntity(char ch)
 		{
-			char[] array = new char[] { ch };
-			this.WriteString(new string(array), TextBlockType.Text);
+			this.WriteString(new string(ch, 1), TextBlockType.Text);
 		}
 
 		public override void WriteSurrogateCharEntity(char lowChar, char highChar)
@@ -235,15 +234,15 @@ namespace MS.Internal.Xml.Cache
 
 		public override void Close()
 		{
-			if (this.textBldr.HasText)
+			if (this._textBldr.HasText)
 			{
 				this.CachedTextNode();
 			}
 			XPathNode[] array;
-			if (this.doc.GetRootNode(out array) == this.nodePageFact.NextNodeIndex && array == this.nodePageFact.NextNodePage)
+			if (this._doc.GetRootNode(out array) == this._nodePageFact.NextNodeIndex && array == this._nodePageFact.NextNodePage)
 			{
 				this.AddSibling(XPathNodeType.Text, string.Empty, string.Empty, string.Empty, string.Empty);
-				this.pageSibling[this.idxSibling].SetValue(string.Empty);
+				this._pageSibling[this._idxSibling].SetValue(string.Empty);
 			}
 		}
 
@@ -265,58 +264,58 @@ namespace MS.Internal.Xml.Cache
 
 		internal override void WriteNamespaceDeclaration(string prefix, string namespaceName)
 		{
-			if (this.atomizeNames)
+			if (this._atomizeNames)
 			{
-				prefix = this.nameTable.Add(prefix);
+				prefix = this._nameTable.Add(prefix);
 			}
-			namespaceName = this.nameTable.Add(namespaceName);
-			XPathNode[] array = this.pageNmsp;
-			int num = this.idxNmsp;
-			while (num != 0 && array[num].LocalName != prefix)
+			namespaceName = this._nameTable.Add(namespaceName);
+			XPathNode[] pageNmsp = this._pageNmsp;
+			int num = this._idxNmsp;
+			while (num != 0 && pageNmsp[num].LocalName != prefix)
 			{
-				num = array[num].GetSibling(out array);
+				num = pageNmsp[num].GetSibling(out pageNmsp);
 			}
-			XPathNode[] array2;
-			int num2 = this.NewNamespaceNode(out array2, prefix, namespaceName, this.pageParent, this.idxParent);
+			XPathNode[] array;
+			int num2 = this.NewNamespaceNode(out array, prefix, namespaceName, this._pageParent, this._idxParent);
 			if (num != 0)
 			{
-				XPathNode[] array3 = this.pageNmsp;
-				int sibling = this.idxNmsp;
-				XPathNode[] array4 = array2;
-				int num3 = num2;
-				while (sibling != num || array3 != array)
+				XPathNode[] pageNmsp2 = this._pageNmsp;
+				int num3 = this._idxNmsp;
+				XPathNode[] array2 = array;
+				int num4 = num2;
+				while (num3 != num || pageNmsp2 != pageNmsp)
 				{
-					XPathNode[] array5;
-					int num4 = array3[sibling].GetParent(out array5);
-					num4 = this.NewNamespaceNode(out array5, array3[sibling].LocalName, array3[sibling].Value, array5, num4);
-					array4[num3].SetSibling(this.infoTable, array5, num4);
-					array4 = array5;
-					num3 = num4;
-					sibling = array3[sibling].GetSibling(out array3);
+					XPathNode[] array3;
+					int num5 = pageNmsp2[num3].GetParent(out array3);
+					num5 = this.NewNamespaceNode(out array3, pageNmsp2[num3].LocalName, pageNmsp2[num3].Value, array3, num5);
+					array2[num4].SetSibling(this._infoTable, array3, num5);
+					array2 = array3;
+					num4 = num5;
+					num3 = pageNmsp2[num3].GetSibling(out pageNmsp2);
 				}
-				num = array[num].GetSibling(out array);
+				num = pageNmsp[num].GetSibling(out pageNmsp);
 				if (num != 0)
 				{
-					array4[num3].SetSibling(this.infoTable, array, num);
+					array2[num4].SetSibling(this._infoTable, pageNmsp, num);
 				}
 			}
-			else if (this.idxParent != 0)
+			else if (this._idxParent != 0)
 			{
-				array2[num2].SetSibling(this.infoTable, this.pageNmsp, this.idxNmsp);
+				array[num2].SetSibling(this._infoTable, this._pageNmsp, this._idxNmsp);
 			}
 			else
 			{
-				this.doc.SetRootNode(array2, num2);
+				this._doc.SetRootNode(array, num2);
 			}
-			if (this.idxParent != 0)
+			if (this._idxParent != 0)
 			{
-				if (!this.pageParent[this.idxParent].HasNamespaceDecls)
+				if (!this._pageParent[this._idxParent].HasNamespaceDecls)
 				{
-					this.stkNmsp.Push(new XPathNodeRef(this.pageNmsp, this.idxNmsp));
-					this.pageParent[this.idxParent].HasNamespaceDecls = true;
+					this._stkNmsp.Push(new XPathNodeRef(this._pageNmsp, this._idxNmsp));
+					this._pageParent[this._idxParent].HasNamespaceDecls = true;
 				}
-				this.pageNmsp = array2;
-				this.idxNmsp = num2;
+				this._pageNmsp = array;
+				this._idxNmsp = num2;
 			}
 		}
 
@@ -327,11 +326,11 @@ namespace MS.Internal.Xml.Cache
 				IDtdAttributeInfo dtdAttributeInfo = dtdAttributeListInfo.LookupIdAttribute();
 				if (dtdAttributeInfo != null)
 				{
-					if (this.elemIdMap == null)
+					if (this._elemIdMap == null)
 					{
-						this.elemIdMap = new Hashtable();
+						this._elemIdMap = new Hashtable();
 					}
-					this.elemIdMap.Add(new XmlQualifiedName(dtdAttributeListInfo.LocalName, dtdAttributeListInfo.Prefix), new XmlQualifiedName(dtdAttributeInfo.LocalName, dtdAttributeInfo.Prefix));
+					this._elemIdMap.Add(new XmlQualifiedName(dtdAttributeListInfo.LocalName, dtdAttributeListInfo.Prefix), new XmlQualifiedName(dtdAttributeInfo.LocalName, dtdAttributeInfo.Prefix));
 				}
 			}
 		}
@@ -340,7 +339,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			if (pagePrev != null)
 			{
-				pagePrev[idxPrev].SetSimilarElement(this.infoTable, pageNext, idxNext);
+				pagePrev[idxPrev].SetSimilarElement(this._infoTable, pageNext, idxNext);
 			}
 			return new XPathNodeRef(pageNext, idxNext);
 		}
@@ -349,11 +348,11 @@ namespace MS.Internal.Xml.Cache
 		{
 			XPathNode[] array;
 			int num;
-			this.nmspPageFact.AllocateSlot(out array, out num);
+			this._nmspPageFact.AllocateSlot(out array, out num);
 			int num2;
 			int num3;
 			this.ComputeLineInfo(false, out num2, out num3);
-			XPathNodeInfoAtom xpathNodeInfoAtom = this.infoTable.Create(prefix, string.Empty, string.Empty, string.Empty, pageElem, array, null, this.doc, this.lineNumBase, this.linePosBase);
+			XPathNodeInfoAtom xpathNodeInfoAtom = this._infoTable.Create(prefix, string.Empty, string.Empty, string.Empty, pageElem, array, null, this._doc, this._lineNumBase, this._linePosBase);
 			array[num].Create(xpathNodeInfoAtom, XPathNodeType.Namespace, idxElem);
 			array[num].SetValue(namespaceUri);
 			array[num].SetLineInfoOffsets(num2, num3);
@@ -365,12 +364,12 @@ namespace MS.Internal.Xml.Cache
 		{
 			XPathNode[] array;
 			int num;
-			this.nodePageFact.AllocateSlot(out array, out num);
+			this._nodePageFact.AllocateSlot(out array, out num);
 			int num2;
 			int num3;
 			this.ComputeLineInfo(XPathNavigator.IsText(xptyp), out num2, out num3);
-			XPathNodeInfoAtom xpathNodeInfoAtom = this.infoTable.Create(localName, namespaceUri, prefix, baseUri, this.pageParent, array, array, this.doc, this.lineNumBase, this.linePosBase);
-			array[num].Create(xpathNodeInfoAtom, xptyp, this.idxParent);
+			XPathNodeInfoAtom xpathNodeInfoAtom = this._infoTable.Create(localName, namespaceUri, prefix, baseUri, this._pageParent, array, array, this._doc, this._lineNumBase, this._linePosBase);
+			array[num].Create(xpathNodeInfoAtom, xptyp, this._idxParent);
 			array[num].SetLineInfoOffsets(num2, num3);
 			page = array;
 			return num;
@@ -378,7 +377,7 @@ namespace MS.Internal.Xml.Cache
 
 		private void ComputeLineInfo(bool isTextNode, out int lineNumOffset, out int linePosOffset)
 		{
-			if (this.lineInfo == null)
+			if (this._lineInfo == null)
 			{
 				lineNumOffset = 0;
 				linePosOffset = 0;
@@ -388,95 +387,95 @@ namespace MS.Internal.Xml.Cache
 			int num2;
 			if (isTextNode)
 			{
-				num = this.textBldr.LineNumber;
-				num2 = this.textBldr.LinePosition;
+				num = this._textBldr.LineNumber;
+				num2 = this._textBldr.LinePosition;
 			}
 			else
 			{
-				num = this.lineInfo.LineNumber;
-				num2 = this.lineInfo.LinePosition;
+				num = this._lineInfo.LineNumber;
+				num2 = this._lineInfo.LinePosition;
 			}
-			lineNumOffset = num - this.lineNumBase;
+			lineNumOffset = num - this._lineNumBase;
 			if (lineNumOffset < 0 || lineNumOffset > 16383)
 			{
-				this.lineNumBase = num;
+				this._lineNumBase = num;
 				lineNumOffset = 0;
 			}
-			linePosOffset = num2 - this.linePosBase;
+			linePosOffset = num2 - this._linePosBase;
 			if (linePosOffset < 0 || linePosOffset > 65535)
 			{
-				this.linePosBase = num2;
+				this._linePosBase = num2;
 				linePosOffset = 0;
 			}
 		}
 
 		private void AddSibling(XPathNodeType xptyp, string localName, string namespaceUri, string prefix, string baseUri)
 		{
-			if (this.textBldr.HasText)
+			if (this._textBldr.HasText)
 			{
 				this.CachedTextNode();
 			}
 			XPathNode[] array;
 			int num = this.NewNode(out array, xptyp, localName, namespaceUri, prefix, baseUri);
-			if (this.idxParent != 0)
+			if (this._idxParent != 0)
 			{
-				this.pageParent[this.idxParent].SetParentProperties(xptyp);
-				if (this.idxSibling != 0)
+				this._pageParent[this._idxParent].SetParentProperties(xptyp);
+				if (this._idxSibling != 0)
 				{
-					this.pageSibling[this.idxSibling].SetSibling(this.infoTable, array, num);
+					this._pageSibling[this._idxSibling].SetSibling(this._infoTable, array, num);
 				}
 			}
-			this.pageSibling = array;
-			this.idxSibling = num;
+			this._pageSibling = array;
+			this._idxSibling = num;
 		}
 
 		private void CachedTextNode()
 		{
-			TextBlockType textType = this.textBldr.TextType;
-			string text = this.textBldr.ReadText();
+			TextBlockType textType = this._textBldr.TextType;
+			string text = this._textBldr.ReadText();
 			this.AddSibling((XPathNodeType)textType, string.Empty, string.Empty, string.Empty, string.Empty);
-			this.pageSibling[this.idxSibling].SetValue(text);
+			this._pageSibling[this._idxSibling].SetValue(text);
 		}
 
-		private XPathDocumentBuilder.NodePageFactory nodePageFact;
+		private XPathDocumentBuilder.NodePageFactory _nodePageFact;
 
-		private XPathDocumentBuilder.NodePageFactory nmspPageFact;
+		private XPathDocumentBuilder.NodePageFactory _nmspPageFact;
 
-		private XPathDocumentBuilder.TextBlockBuilder textBldr;
+		private XPathDocumentBuilder.TextBlockBuilder _textBldr;
 
-		private Stack<XPathNodeRef> stkNmsp;
+		private Stack<XPathNodeRef> _stkNmsp;
 
-		private XPathNodeInfoTable infoTable;
+		private XPathNodeInfoTable _infoTable;
 
-		private XPathDocument doc;
+		private XPathDocument _doc;
 
-		private IXmlLineInfo lineInfo;
+		private IXmlLineInfo _lineInfo;
 
-		private XmlNameTable nameTable;
+		private XmlNameTable _nameTable;
 
-		private bool atomizeNames;
+		private bool _atomizeNames;
 
-		private XPathNode[] pageNmsp;
+		private XPathNode[] _pageNmsp;
 
-		private int idxNmsp;
+		private int _idxNmsp;
 
-		private XPathNode[] pageParent;
+		private XPathNode[] _pageParent;
 
-		private int idxParent;
+		private int _idxParent;
 
-		private XPathNode[] pageSibling;
+		private XPathNode[] _pageSibling;
 
-		private int idxSibling;
+		private int _idxSibling;
 
-		private int lineNumBase;
+		private int _lineNumBase;
 
-		private int linePosBase;
+		private int _linePosBase;
 
-		private XmlQualifiedName idAttrName;
+		private XmlQualifiedName _idAttrName;
 
-		private Hashtable elemIdMap;
+		private Hashtable _elemIdMap;
 
-		private XPathNodeRef[] elemNameIndex;
+		private XPathNodeRef[] _elemNameIndex;
 
 		private const int ElementIndexSize = 64;
 
@@ -484,17 +483,17 @@ namespace MS.Internal.Xml.Cache
 		{
 			public void Init(int initialPageSize)
 			{
-				this.pageSize = initialPageSize;
-				this.page = new XPathNode[this.pageSize];
-				this.pageInfo = new XPathNodePageInfo(null, 1);
-				this.page[0].Create(this.pageInfo);
+				this._pageSize = initialPageSize;
+				this._page = new XPathNode[this._pageSize];
+				this._pageInfo = new XPathNodePageInfo(null, 1);
+				this._page[0].Create(this._pageInfo);
 			}
 
 			public XPathNode[] NextNodePage
 			{
 				get
 				{
-					return this.page;
+					return this._page;
 				}
 			}
 
@@ -502,50 +501,50 @@ namespace MS.Internal.Xml.Cache
 			{
 				get
 				{
-					return this.pageInfo.NodeCount;
+					return this._pageInfo.NodeCount;
 				}
 			}
 
 			public void AllocateSlot(out XPathNode[] page, out int idx)
 			{
-				page = this.page;
-				idx = this.pageInfo.NodeCount;
-				XPathNodePageInfo xpathNodePageInfo = this.pageInfo;
-				int num = xpathNodePageInfo.NodeCount + 1;
-				xpathNodePageInfo.NodeCount = num;
-				if (num >= this.page.Length)
+				page = this._page;
+				idx = this._pageInfo.NodeCount;
+				XPathNodePageInfo pageInfo = this._pageInfo;
+				int num = pageInfo.NodeCount + 1;
+				pageInfo.NodeCount = num;
+				if (num >= this._page.Length)
 				{
-					if (this.pageSize < 65536)
+					if (this._pageSize < 65536)
 					{
-						this.pageSize *= 2;
+						this._pageSize *= 2;
 					}
-					this.page = new XPathNode[this.pageSize];
-					this.pageInfo.NextPage = this.page;
-					this.pageInfo = new XPathNodePageInfo(page, this.pageInfo.PageNumber + 1);
-					this.page[0].Create(this.pageInfo);
+					this._page = new XPathNode[this._pageSize];
+					this._pageInfo.NextPage = this._page;
+					this._pageInfo = new XPathNodePageInfo(page, this._pageInfo.PageNumber + 1);
+					this._page[0].Create(this._pageInfo);
 				}
 			}
 
-			private XPathNode[] page;
+			private XPathNode[] _page;
 
-			private XPathNodePageInfo pageInfo;
+			private XPathNodePageInfo _pageInfo;
 
-			private int pageSize;
+			private int _pageSize;
 		}
 
 		private struct TextBlockBuilder
 		{
 			public void Initialize(IXmlLineInfo lineInfo)
 			{
-				this.lineInfo = lineInfo;
-				this.textType = TextBlockType.None;
+				this._lineInfo = lineInfo;
+				this._textType = TextBlockType.None;
 			}
 
 			public TextBlockType TextType
 			{
 				get
 				{
-					return this.textType;
+					return this._textType;
 				}
 			}
 
@@ -553,7 +552,7 @@ namespace MS.Internal.Xml.Cache
 			{
 				get
 				{
-					return this.textType > TextBlockType.None;
+					return this._textType > TextBlockType.None;
 				}
 			}
 
@@ -561,7 +560,7 @@ namespace MS.Internal.Xml.Cache
 			{
 				get
 				{
-					return this.lineNum;
+					return this._lineNum;
 				}
 			}
 
@@ -569,7 +568,7 @@ namespace MS.Internal.Xml.Cache
 			{
 				get
 				{
-					return this.linePos;
+					return this._linePos;
 				}
 			}
 
@@ -577,23 +576,23 @@ namespace MS.Internal.Xml.Cache
 			{
 				if (text.Length != 0)
 				{
-					if (this.textType == TextBlockType.None)
+					if (this._textType == TextBlockType.None)
 					{
-						this.text = text;
-						this.textType = textType;
-						if (this.lineInfo != null)
+						this._text = text;
+						this._textType = textType;
+						if (this._lineInfo != null)
 						{
-							this.lineNum = this.lineInfo.LineNumber;
-							this.linePos = this.lineInfo.LinePosition;
+							this._lineNum = this._lineInfo.LineNumber;
+							this._linePos = this._lineInfo.LinePosition;
 							return;
 						}
 					}
 					else
 					{
-						this.text += text;
-						if (textType < this.textType)
+						this._text += text;
+						if (textType < this._textType)
 						{
-							this.textType = textType;
+							this._textType = textType;
 						}
 					}
 				}
@@ -601,23 +600,23 @@ namespace MS.Internal.Xml.Cache
 
 			public string ReadText()
 			{
-				if (this.textType == TextBlockType.None)
+				if (this._textType == TextBlockType.None)
 				{
 					return string.Empty;
 				}
-				this.textType = TextBlockType.None;
-				return this.text;
+				this._textType = TextBlockType.None;
+				return this._text;
 			}
 
-			private IXmlLineInfo lineInfo;
+			private IXmlLineInfo _lineInfo;
 
-			private TextBlockType textType;
+			private TextBlockType _textType;
 
-			private string text;
+			private string _text;
 
-			private int lineNum;
+			private int _lineNum;
 
-			private int linePos;
+			private int _linePos;
 		}
 	}
 }

@@ -82,13 +82,13 @@ public class Demolishable : Workable
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("DeconstructBar");
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDemolition, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.TriggerDestroy();
 	}

@@ -19,7 +19,7 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 800f;
-		buildingDef.GeneratorBaseCapacity = 1000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 8f;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
@@ -38,6 +38,9 @@ public class MethaneGeneratorConfig : IBuildingConfig
 	{
 		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Storage>().capacityKg = 50f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();

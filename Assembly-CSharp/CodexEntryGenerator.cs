@@ -36,7 +36,7 @@ public static class CodexEntryGenerator
 		foreach (KeyValuePair<string, string> keyValuePair in category.buildingAndSubcategoryData)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
-			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(buildingDef.RequiredDlcIds))
+			if (buildingDef.IsValidDLC())
 			{
 				CodexEntry codexEntry = CodexEntryGenerator.GenerateSingleBuildingEntry(buildingDef, text2);
 				if (buildingDef.ExtendCodexEntry != null)
@@ -67,7 +67,7 @@ public static class CodexEntryGenerator
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		foreach (Tag tag in RoomConstraints.ConstraintTags.AllTags)
 		{
-			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag) && (DlcManager.FeatureClusterSpaceEnabled() || !(tag == RoomConstraints.ConstraintTags.RocketInterior)))
+			if (!CodexEntryGenerator.HiddenRoomConstrainTags.Contains(tag) && (DlcManager.FeatureClusterSpaceEnabled() || !(tag == RoomConstraints.ConstraintTags.RocketInterior)) && (!(tag == RoomConstraints.ConstraintTags.BionicUpkeepType) || SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID")))
 			{
 				CodexEntry codexEntry = CodexEntryGenerator.GenerateEntryForSpecificBuildingRequirementClass(tag, text2);
 				dictionary.Add(codexEntry.id, codexEntry);
@@ -129,7 +129,7 @@ public static class CodexEntryGenerator
 		{
 			List<ICodexWidget> list6 = new List<ICodexWidget>();
 			List<ICodexWidget> list7 = new List<ICodexWidget>();
-			string[] array = stringEntry.String.Split(new char[] { '\n' });
+			string[] array = stringEntry.String.Split('\n', StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				ICodexWidget codexWidget4 = new CodexText(array[i], CodexTextStyle.Body, null);
@@ -150,7 +150,7 @@ public static class CodexEntryGenerator
 		{
 			List<ICodexWidget> list8 = new List<ICodexWidget>();
 			List<ICodexWidget> list9 = new List<ICodexWidget>();
-			string[] array2 = stringEntry2.String.Split(new char[] { '\n' });
+			string[] array2 = stringEntry2.String.Split('\n', StringSplitOptions.None);
 			for (int j = 0; j < array2.Length; j++)
 			{
 				ICodexWidget codexWidget5 = new CodexText(array2[j], CodexTextStyle.Body, null);
@@ -214,31 +214,34 @@ public static class CodexEntryGenerator
 			string text2 = HashCache.Get().Get(planInfo.category);
 			string text3 = CodexCache.FormatLinkID(CodexEntryGenerator.categoryPrefx + text2);
 			BuildingDef buildingDef = Assets.GetBuildingDef(text);
-			CodexEntry codexEntry = CodexEntryGenerator.GenerateSingleBuildingEntry(buildingDef, text3);
-			List<ICodexWidget> list = new List<ICodexWidget>();
-			list.Add(new CodexSpacer());
-			list.Add(new CodexText(UI.CLUSTERMAP.ROCKETS.MODULE_STATS.NAME_HEADER, CodexTextStyle.Subtitle, null));
-			list.Add(new CodexSpacer());
-			list.Add(new CodexText(UI.CLUSTERMAP.ROCKETS.SPEED.TOOLTIP, CodexTextStyle.Body, null));
-			RocketModuleCluster component = buildingDef.BuildingComplete.GetComponent<RocketModuleCluster>();
-			float burden = component.performanceStats.Burden;
-			float enginePower = component.performanceStats.EnginePower;
-			RocketEngineCluster component2 = buildingDef.BuildingComplete.GetComponent<RocketEngineCluster>();
-			if (component2 != null)
+			if (!(buildingDef == null))
 			{
-				list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.MAX_HEIGHT.NAME_MAX_SUPPORTED + component2.maxHeight.ToString(), CodexTextStyle.Body, null));
+				CodexEntry codexEntry = CodexEntryGenerator.GenerateSingleBuildingEntry(buildingDef, text3);
+				List<ICodexWidget> list = new List<ICodexWidget>();
+				list.Add(new CodexSpacer());
+				list.Add(new CodexText(UI.CLUSTERMAP.ROCKETS.MODULE_STATS.NAME_HEADER, CodexTextStyle.Subtitle, null));
+				list.Add(new CodexSpacer());
+				list.Add(new CodexText(UI.CLUSTERMAP.ROCKETS.SPEED.TOOLTIP, CodexTextStyle.Body, null));
+				RocketModuleCluster component = buildingDef.BuildingComplete.GetComponent<RocketModuleCluster>();
+				float burden = component.performanceStats.Burden;
+				float enginePower = component.performanceStats.EnginePower;
+				RocketEngineCluster component2 = buildingDef.BuildingComplete.GetComponent<RocketEngineCluster>();
+				if (component2 != null)
+				{
+					list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.MAX_HEIGHT.NAME_MAX_SUPPORTED + component2.maxHeight.ToString(), CodexTextStyle.Body, null));
+				}
+				list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.MAX_HEIGHT.NAME_RAW + buildingDef.HeightInCells.ToString(), CodexTextStyle.Body, null));
+				if (burden != 0f)
+				{
+					list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.BURDEN_MODULE.NAME + burden.ToString(), CodexTextStyle.Body, null));
+				}
+				if (enginePower != 0f)
+				{
+					list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.POWER_MODULE.NAME + enginePower.ToString(), CodexTextStyle.Body, null));
+				}
+				ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
+				codexEntry.AddContentContainer(contentContainer);
 			}
-			list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.MAX_HEIGHT.NAME_RAW + buildingDef.HeightInCells.ToString(), CodexTextStyle.Body, null));
-			if (burden != 0f)
-			{
-				list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.BURDEN_MODULE.NAME + burden.ToString(), CodexTextStyle.Body, null));
-			}
-			if (enginePower != 0f)
-			{
-				list.Add(new CodexText("    • " + UI.CLUSTERMAP.ROCKETS.POWER_MODULE.NAME + enginePower.ToString(), CodexTextStyle.Body, null));
-			}
-			ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
-			codexEntry.AddContentContainer(contentContainer);
 		}
 	}
 
@@ -303,6 +306,10 @@ public static class CodexEntryGenerator
 		};
 		action(Db.Get().RoomTypeCategories.Agricultural);
 		action(Db.Get().RoomTypeCategories.Bathroom);
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		{
+			action(Db.Get().RoomTypeCategories.Bionic);
+		}
 		action(Db.Get().RoomTypeCategories.Food);
 		action(Db.Get().RoomTypeCategories.Hospital);
 		action(Db.Get().RoomTypeCategories.Industrial);
@@ -396,7 +403,7 @@ public static class CodexEntryGenerator
 		{
 			string text2;
 			List<EdiblesManager.FoodInfo> list3;
-			keyValuePair.Deconstruct<string, List<EdiblesManager.FoodInfo>>(out text2, out list3);
+			keyValuePair.Deconstruct(out text2, out list3);
 			string text3 = text2;
 			List<EdiblesManager.FoodInfo> list4 = list3;
 			global::Klei.AI.Modifier modifier = Db.Get().effects.Get(text3);
@@ -429,8 +436,8 @@ public static class CodexEntryGenerator
 
 	private static CodexEntry GenerateTabelSaltEntry()
 	{
-		LocString name = ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.NAME;
-		LocString desc = ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.DESC;
+		LocString name = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.NAME;
+		LocString desc = global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.DESC;
 		Sprite sprite = Assets.GetSprite("ui_food_table_salt");
 		List<ContentContainer> list = new List<ContentContainer>();
 		CodexEntryGenerator.GenerateImageContainers(sprite, list);
@@ -510,7 +517,7 @@ public static class CodexEntryGenerator
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		foreach (Skill skill in Db.Get().Skills.resources)
 		{
-			if (!skill.deprecated)
+			if (!skill.deprecated && SaveLoader.Instance.IsDLCActiveForCurrentSave(skill.dlcId))
 			{
 				List<ContentContainer> list = new List<ContentContainer>();
 				Sprite sprite = Assets.GetSprite(skill.hat);
@@ -899,12 +906,12 @@ public static class CodexEntryGenerator
 		Dictionary<Tag, List<BuildingDef>> dictionary2 = new Dictionary<Tag, List<BuildingDef>>();
 		foreach (BuildingDef buildingDef in Assets.BuildingDefs)
 		{
-			if (!buildingDef.Deprecated && !buildingDef.DebugOnly && SaveLoader.Instance.IsDlcListActiveForCurrentSave(buildingDef.RequiredDlcIds) && (buildingDef.ShowInBuildMenu || buildingDef.BuildingComplete.HasTag(GameTags.RocketModule)))
+			if (!buildingDef.Deprecated && !buildingDef.DebugOnly && buildingDef.IsValidDLC() && (buildingDef.ShowInBuildMenu || buildingDef.BuildingComplete.HasTag(GameTags.RocketModule)))
 			{
 				string[] materialCategory = buildingDef.MaterialCategory;
 				for (int i = 0; i < materialCategory.Length; i++)
 				{
-					foreach (string text in materialCategory[i].Split(new char[] { '&' }))
+					foreach (string text in materialCategory[i].Split('&', StringSplitOptions.None))
 					{
 						Tag tag = new Tag(text);
 						if (!dictionary2.ContainsKey(tag))
@@ -1018,7 +1025,7 @@ public static class CodexEntryGenerator
 			}, ContentContainer.ContentLayout.Vertical)
 		}, Strings.Get("STRINGS.UI.CODEX.CATEGORYNAMES.MISCELLANEOUSTIPS"));
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 24; i++)
 		{
 			TutorialMessage tutorialMessage = (TutorialMessage)Tutorial.Instance.TutorialMessage((Tutorial.TutorialMessages)i, false);
 			if (tutorialMessage != null && DlcManager.IsDlcListValidForCurrentContent(tutorialMessage.DLCIDs))
@@ -1188,8 +1195,11 @@ public static class CodexEntryGenerator
 		list.Add(new CodexSpacer());
 		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			CodexText codexText3 = new CodexText(skillPerk.Name, CodexTextStyle.Body, null);
-			list.Add(codexText3);
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+			{
+				CodexText codexText3 = new CodexText(skillPerk.Name, CodexTextStyle.Body, null);
+				list.Add(codexText3);
+			}
 		}
 		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
 		list.Add(new CodexSpacer());
@@ -1741,6 +1751,8 @@ public static class CodexEntryGenerator
 		dictionary[ranchStationType] = "RanchStation";
 		Tag bedType = RoomConstraints.ConstraintTags.BedType;
 		dictionary[bedType] = "Bed";
+		Tag generatorType = RoomConstraints.ConstraintTags.GeneratorType;
+		dictionary[generatorType] = "Generator";
 		Tag lightSource = RoomConstraints.ConstraintTags.LightSource;
 		dictionary[lightSource] = "FloorLamp";
 		Tag rocketInterior = RoomConstraints.ConstraintTags.RocketInterior;
@@ -1773,11 +1785,12 @@ public static class CodexEntryGenerator
 		RoomConstraints.ConstraintTags.MessTable,
 		RoomConstraints.ConstraintTags.NatureReserve,
 		RoomConstraints.ConstraintTags.Park,
-		RoomConstraints.ConstraintTags.PowerStation,
 		RoomConstraints.ConstraintTags.SpiceStation,
 		RoomConstraints.ConstraintTags.DeStressingBuilding,
 		RoomConstraints.ConstraintTags.Decor20,
-		RoomConstraints.ConstraintTags.MachineShopType
+		RoomConstraints.ConstraintTags.MachineShopType,
+		RoomConstraints.ConstraintTags.LightDutyGeneratorType,
+		RoomConstraints.ConstraintTags.HeavyDutyGeneratorType
 	};
 
 	public static Dictionary<Tag, Tag> RoomConstrainTagIcons;

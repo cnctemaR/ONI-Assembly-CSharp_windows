@@ -23,8 +23,9 @@ namespace System.IO
 			return true;
 		}
 
-		public void StartDispatching(FileSystemWatcher fsw)
+		public void StartDispatching(object handle)
 		{
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
 			lock (this)
 			{
 				if (DefaultWatcher.watches == null)
@@ -41,33 +42,34 @@ namespace System.IO
 			Hashtable hashtable = DefaultWatcher.watches;
 			lock (hashtable)
 			{
-				DefaultWatcherData defaultWatcherData = (DefaultWatcherData)DefaultWatcher.watches[fsw];
+				DefaultWatcherData defaultWatcherData = (DefaultWatcherData)DefaultWatcher.watches[fileSystemWatcher];
 				if (defaultWatcherData == null)
 				{
 					defaultWatcherData = new DefaultWatcherData();
-					defaultWatcherData.Files = new Hashtable();
-					DefaultWatcher.watches[fsw] = defaultWatcherData;
+					defaultWatcherData.Files = new Dictionary<string, FileData>();
+					DefaultWatcher.watches[fileSystemWatcher] = defaultWatcherData;
 				}
-				defaultWatcherData.FSW = fsw;
-				defaultWatcherData.Directory = fsw.FullPath;
-				defaultWatcherData.NoWildcards = !fsw.Pattern.HasWildcard;
+				defaultWatcherData.FSW = fileSystemWatcher;
+				defaultWatcherData.Directory = fileSystemWatcher.FullPath;
+				defaultWatcherData.NoWildcards = !fileSystemWatcher.Pattern.HasWildcard;
 				if (defaultWatcherData.NoWildcards)
 				{
-					defaultWatcherData.FileMask = Path.Combine(defaultWatcherData.Directory, fsw.MangledFilter);
+					defaultWatcherData.FileMask = Path.Combine(defaultWatcherData.Directory, fileSystemWatcher.MangledFilter);
 				}
 				else
 				{
-					defaultWatcherData.FileMask = fsw.MangledFilter;
+					defaultWatcherData.FileMask = fileSystemWatcher.MangledFilter;
 				}
-				defaultWatcherData.IncludeSubdirs = fsw.IncludeSubdirectories;
+				defaultWatcherData.IncludeSubdirs = fileSystemWatcher.IncludeSubdirectories;
 				defaultWatcherData.Enabled = true;
 				defaultWatcherData.DisabledTime = DateTime.MaxValue;
 				this.UpdateDataAndDispatch(defaultWatcherData, false);
 			}
 		}
 
-		public void StopDispatching(FileSystemWatcher fsw)
+		public void StopDispatching(object handle)
 		{
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
 			lock (this)
 			{
 				if (DefaultWatcher.watches == null)
@@ -78,13 +80,21 @@ namespace System.IO
 			Hashtable hashtable = DefaultWatcher.watches;
 			lock (hashtable)
 			{
-				DefaultWatcherData defaultWatcherData = (DefaultWatcherData)DefaultWatcher.watches[fsw];
+				DefaultWatcherData defaultWatcherData = (DefaultWatcherData)DefaultWatcher.watches[fileSystemWatcher];
 				if (defaultWatcherData != null)
 				{
-					defaultWatcherData.Enabled = false;
-					defaultWatcherData.DisabledTime = DateTime.UtcNow;
+					object filesLock = defaultWatcherData.FilesLock;
+					lock (filesLock)
+					{
+						defaultWatcherData.Enabled = false;
+						defaultWatcherData.DisabledTime = DateTime.UtcNow;
+					}
 				}
 			}
+		}
+
+		public void Dispose(object handle)
+		{
 		}
 
 		private void Monitor()
@@ -193,82 +203,84 @@ namespace System.IO
 			object filesLock = data.FilesLock;
 			lock (filesLock)
 			{
-				this.IterateAndModifyFilesData(data, directory, dispatch, array);
+				if (data.Enabled)
+				{
+					this.IterateAndModifyFilesData(data, directory, dispatch, array);
+				}
 			}
 		}
 
 		private void IterateAndModifyFilesData(DefaultWatcherData data, string directory, bool dispatch, string[] files)
 		{
-			foreach (object obj in data.Files.Keys)
+			foreach (KeyValuePair<string, FileData> keyValuePair in data.Files)
 			{
-				string text = (string)obj;
-				FileData fileData = (FileData)data.Files[text];
-				if (fileData.Directory == directory)
+				FileData value = keyValuePair.Value;
+				if (value.Directory == directory)
 				{
-					fileData.NotExists = true;
+					value.NotExists = true;
 				}
 			}
-			foreach (string text2 in files)
+			foreach (string text in files)
 			{
-				FileData fileData2 = (FileData)data.Files[text2];
-				if (fileData2 == null)
+				FileData fileData;
+				if (!data.Files.TryGetValue(text, out fileData))
 				{
 					try
 					{
-						data.Files.Add(text2, DefaultWatcher.CreateFileData(directory, text2));
+						data.Files.Add(text, DefaultWatcher.CreateFileData(directory, text));
 					}
 					catch
 					{
-						data.Files.Remove(text2);
-						goto IL_00DD;
+						data.Files.Remove(text);
+						goto IL_00CA;
 					}
 					if (dispatch)
 					{
-						DefaultWatcher.DispatchEvents(data.FSW, FileAction.Added, text2);
+						DefaultWatcher.DispatchEvents(data.FSW, FileAction.Added, Path.GetRelativePath(data.Directory, text));
 					}
 				}
-				else if (fileData2.Directory == directory)
+				else if (fileData.Directory == directory)
 				{
-					fileData2.NotExists = false;
+					fileData.NotExists = false;
 				}
-				IL_00DD:;
+				IL_00CA:;
 			}
 			if (!dispatch)
 			{
 				return;
 			}
 			List<string> list = null;
-			foreach (object obj2 in data.Files.Keys)
+			foreach (KeyValuePair<string, FileData> keyValuePair2 in data.Files)
 			{
-				string text3 = (string)obj2;
-				if (((FileData)data.Files[text3]).NotExists)
+				string key = keyValuePair2.Key;
+				if (keyValuePair2.Value.NotExists)
 				{
 					if (list == null)
 					{
 						list = new List<string>();
 					}
-					list.Add(text3);
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text3);
+					list.Add(key);
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, Path.GetRelativePath(data.Directory, key));
 				}
 			}
 			if (list != null)
 			{
-				foreach (string text4 in list)
+				foreach (string text2 in list)
 				{
-					data.Files.Remove(text4);
+					data.Files.Remove(text2);
 				}
 				list = null;
 			}
-			foreach (object obj3 in data.Files.Keys)
+			foreach (KeyValuePair<string, FileData> keyValuePair3 in data.Files)
 			{
-				string text5 = (string)obj3;
-				FileData fileData3 = (FileData)data.Files[text5];
+				string key2 = keyValuePair3.Key;
+				FileData value2 = keyValuePair3.Value;
 				DateTime creationTime;
 				DateTime lastWriteTime;
 				try
 				{
-					creationTime = File.GetCreationTime(text5);
-					lastWriteTime = File.GetLastWriteTime(text5);
+					creationTime = File.GetCreationTime(key2);
+					lastWriteTime = File.GetLastWriteTime(key2);
 				}
 				catch
 				{
@@ -276,22 +288,22 @@ namespace System.IO
 					{
 						list = new List<string>();
 					}
-					list.Add(text5);
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text5);
+					list.Add(key2);
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, Path.GetRelativePath(data.Directory, key2));
 					continue;
 				}
-				if (creationTime != fileData3.CreationTime || lastWriteTime != fileData3.LastWriteTime)
+				if (creationTime != value2.CreationTime || lastWriteTime != value2.LastWriteTime)
 				{
-					fileData3.CreationTime = creationTime;
-					fileData3.LastWriteTime = lastWriteTime;
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Modified, text5);
+					value2.CreationTime = creationTime;
+					value2.LastWriteTime = lastWriteTime;
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Modified, Path.GetRelativePath(data.Directory, key2));
 				}
 			}
 			if (list != null)
 			{
-				foreach (string text6 in list)
+				foreach (string text3 in list)
 				{
-					data.Files.Remove(text6);
+					data.Files.Remove(text3);
 				}
 			}
 		}

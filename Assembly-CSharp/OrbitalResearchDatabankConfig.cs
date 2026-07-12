@@ -13,7 +13,7 @@ public class OrbitalResearchDatabankConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("OrbitalResearchDatabank", ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.NAME, ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.DESC, 1f, true, Assets.GetAnim("floppy_disc_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, 0, SimHashes.Creature, new List<Tag>
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("OrbitalResearchDatabank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ORBITAL_RESEARCH_DATABANK.DESC, 1f, true, Assets.GetAnim("floppy_disc_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, 0, SimHashes.Creature, new List<Tag>
 		{
 			GameTags.IndustrialIngredient,
 			GameTags.Experimental

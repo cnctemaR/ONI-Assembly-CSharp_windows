@@ -38,12 +38,19 @@ public class BuildingConfigManager : KMonoBehaviour
 
 	public void RegisterBuilding(IBuildingConfig config)
 	{
-		if (!DlcManager.IsDlcListValidForCurrentContent(config.GetDlcIds()))
+		string[] requiredDlcIds = config.GetRequiredDlcIds();
+		string[] forbiddenDlcIds = config.GetForbiddenDlcIds();
+		if (config.GetDlcIds() != null)
+		{
+			DlcManager.ConvertAvailableToRequireAndForbidden(config.GetDlcIds(), out requiredDlcIds, out forbiddenDlcIds);
+		}
+		if (!DlcManager.IsCorrectDlcSubscribed(requiredDlcIds, forbiddenDlcIds))
 		{
 			return;
 		}
 		BuildingDef buildingDef = config.CreateBuildingDef();
-		buildingDef.RequiredDlcIds = config.GetDlcIds();
+		buildingDef.RequiredDlcIds = requiredDlcIds;
+		buildingDef.ForbiddenDlcIds = forbiddenDlcIds;
 		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);

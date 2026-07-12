@@ -8,7 +8,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/ComplexFabricator")]
-public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
+public class ComplexFabricator : RemoteDockWorkTargetComponent, ISim200ms, ISim1000ms
 {
 	public ComplexFabricatorWorkable Workable
 	{
@@ -241,7 +241,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		this.UpdateChore();
 	}
 
-	public void Sim1000ms(float dt)
+	public virtual void Sim1000ms(float dt)
 	{
 		this.RefreshAndStartNextOrder();
 		if (this.materialNeedCache.Count > 0 && this.fetchListList.Count == 0)
@@ -256,6 +256,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 	}
 
+	protected virtual float ComputeWorkProgress(float dt, ComplexRecipe recipe)
+	{
+		return dt / recipe.time;
+	}
+
 	public void Sim200ms(float dt)
 	{
 		if (!this.operational.IsOperational)
@@ -265,8 +270,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		this.operational.SetActive(this.HasWorkingOrder && this.HasWorker, false);
 		if (!this.duplicantOperated && this.HasWorkingOrder)
 		{
-			ComplexRecipe complexRecipe = this.recipe_list[this.workingOrderIdx];
-			this.orderProgress += dt / complexRecipe.time;
+			this.orderProgress += this.ComputeWorkProgress(dt, this.recipe_list[this.workingOrderIdx]);
 			if (this.orderProgress >= 1f)
 			{
 				this.ShowProgressBar(false);
@@ -828,6 +832,18 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	{
 		global::Debug.Assert(this.chore == null, "chore should be null");
 		this.chore = this.workable.CreateWorkChore(this.choreType, this.orderProgress);
+	}
+
+	public override Chore RemoteDockChore
+	{
+		get
+		{
+			if (!this.duplicantOperated)
+			{
+				return null;
+			}
+			return this.chore;
+		}
 	}
 
 	private void CancelChore()

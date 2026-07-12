@@ -30,7 +30,15 @@ public class MassiveHeatSink : StateMachineComponent<MassiveHeatSink.StatesInsta
 		{
 			default_state = this.disabled;
 			this.disabled.EventTransition(GameHashes.OperationalChanged, this.idle, (MassiveHeatSink.StatesInstance smi) => smi.master.operational.IsOperational);
-			this.idle.EventTransition(GameHashes.OperationalChanged, this.disabled, (MassiveHeatSink.StatesInstance smi) => !smi.master.operational.IsOperational).ToggleStatusItem(BUILDING.STATUSITEMS.AWAITINGFUEL.NAME, BUILDING.STATUSITEMS.AWAITINGFUEL.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, default(HashedString), 129022, new Func<string, MassiveHeatSink.StatesInstance, string>(this.AwaitingFuelResolveString), null, null).EventTransition(GameHashes.OnStorageChange, this.active, (MassiveHeatSink.StatesInstance smi) => smi.master.elementConverter.HasEnoughMassToStartConverting(false));
+			GameStateMachine<MassiveHeatSink.States, MassiveHeatSink.StatesInstance, MassiveHeatSink, object>.State state = this.idle.EventTransition(GameHashes.OperationalChanged, this.disabled, (MassiveHeatSink.StatesInstance smi) => !smi.master.operational.IsOperational);
+			string text = BUILDING.STATUSITEMS.AWAITINGFUEL.NAME;
+			string text2 = BUILDING.STATUSITEMS.AWAITINGFUEL.TOOLTIP;
+			string text3 = "";
+			StatusItem.IconType iconType = StatusItem.IconType.Exclamation;
+			NotificationType notificationType = NotificationType.BadMinor;
+			bool flag = false;
+			Func<string, MassiveHeatSink.StatesInstance, string> func = new Func<string, MassiveHeatSink.StatesInstance, string>(this.AwaitingFuelResolveString);
+			state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, func, null, null).EventTransition(GameHashes.OnStorageChange, this.active, (MassiveHeatSink.StatesInstance smi) => smi.master.elementConverter.HasEnoughMassToStartConverting(false));
 			this.active.EventTransition(GameHashes.OperationalChanged, this.disabled, (MassiveHeatSink.StatesInstance smi) => !smi.master.operational.IsOperational).EventTransition(GameHashes.OnStorageChange, this.idle, (MassiveHeatSink.StatesInstance smi) => !smi.master.elementConverter.HasEnoughMassToStartConverting(false)).Enter(delegate(MassiveHeatSink.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);

@@ -176,8 +176,8 @@ namespace System.Xml.Xsl.Runtime
 
 		internal static XmlAtomicValue ConvertToType(XmlAtomicValue value, XmlQueryType destinationType)
 		{
-			XmlTypeCode xmlTypeCode = destinationType.TypeCode;
-			switch (xmlTypeCode)
+			XmlTypeCode typeCode = destinationType.TypeCode;
+			switch (typeCode)
 			{
 			case XmlTypeCode.String:
 				switch (value.XmlType.TypeCode)
@@ -191,12 +191,14 @@ namespace System.Xml.Xsl.Runtime
 				}
 				break;
 			case XmlTypeCode.Boolean:
-				xmlTypeCode = value.XmlType.TypeCode;
+			{
+				XmlTypeCode xmlTypeCode = value.XmlType.TypeCode;
 				if (xmlTypeCode - XmlTypeCode.String <= 1 || xmlTypeCode == XmlTypeCode.Double)
 				{
 					return new XmlAtomicValue(destinationType.SchemaType, XsltConvert.ToBoolean(value));
 				}
 				break;
+			}
 			case XmlTypeCode.Decimal:
 				if (value.XmlType.TypeCode == XmlTypeCode.Double)
 				{
@@ -207,7 +209,8 @@ namespace System.Xml.Xsl.Runtime
 			case XmlTypeCode.Duration:
 				break;
 			case XmlTypeCode.Double:
-				xmlTypeCode = value.XmlType.TypeCode;
+			{
+				XmlTypeCode xmlTypeCode = value.XmlType.TypeCode;
 				switch (xmlTypeCode)
 				{
 				case XmlTypeCode.String:
@@ -226,6 +229,7 @@ namespace System.Xml.Xsl.Runtime
 					break;
 				}
 				break;
+			}
 			case XmlTypeCode.DateTime:
 				if (value.XmlType.TypeCode == XmlTypeCode.String)
 				{
@@ -233,7 +237,7 @@ namespace System.Xml.Xsl.Runtime
 				}
 				break;
 			default:
-				if (xmlTypeCode - XmlTypeCode.Long <= 1)
+				if (typeCode - XmlTypeCode.Long <= 1)
 				{
 					if (value.XmlType.TypeCode == XmlTypeCode.Double)
 					{

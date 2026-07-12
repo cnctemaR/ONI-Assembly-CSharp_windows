@@ -1,31 +1,29 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public sealed class Version : ICloneable, IComparable, IComparable<Version>, IEquatable<Version>
+	public sealed class Version : ICloneable, IComparable, IComparable<Version>, IEquatable<Version>, ISpanFormattable
 	{
 		public Version(int major, int minor, int build, int revision)
 		{
 			if (major < 0)
 			{
-				throw new ArgumentOutOfRangeException("major", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("major", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (minor < 0)
 			{
-				throw new ArgumentOutOfRangeException("minor", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("minor", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (build < 0)
 			{
-				throw new ArgumentOutOfRangeException("build", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("build", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (revision < 0)
 			{
-				throw new ArgumentOutOfRangeException("revision", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("revision", "Version's parameters must be greater than or equal to zero.");
 			}
 			this._Major = major;
 			this._Minor = minor;
@@ -37,15 +35,15 @@ namespace System
 		{
 			if (major < 0)
 			{
-				throw new ArgumentOutOfRangeException("major", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("major", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (minor < 0)
 			{
-				throw new ArgumentOutOfRangeException("minor", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("minor", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (build < 0)
 			{
-				throw new ArgumentOutOfRangeException("build", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("build", "Version's parameters must be greater than or equal to zero.");
 			}
 			this._Major = major;
 			this._Minor = minor;
@@ -56,11 +54,11 @@ namespace System
 		{
 			if (major < 0)
 			{
-				throw new ArgumentOutOfRangeException("major", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("major", "Version's parameters must be greater than or equal to zero.");
 			}
 			if (minor < 0)
 			{
-				throw new ArgumentOutOfRangeException("minor", Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
+				throw new ArgumentOutOfRangeException("minor", "Version's parameters must be greater than or equal to zero.");
 			}
 			this._Major = major;
 			this._Minor = minor;
@@ -79,6 +77,19 @@ namespace System
 		{
 			this._Major = 0;
 			this._Minor = 0;
+		}
+
+		private Version(Version version)
+		{
+			this._Major = version._Major;
+			this._Minor = version._Minor;
+			this._Build = version._Build;
+			this._Revision = version._Revision;
+		}
+
+		public object Clone()
+		{
+			return new Version(this);
 		}
 
 		public int Major
@@ -129,17 +140,6 @@ namespace System
 			}
 		}
 
-		public object Clone()
-		{
-			return new Version
-			{
-				_Major = this._Major,
-				_Minor = this._Minor,
-				_Build = this._Build,
-				_Revision = this._Revision
-			};
-		}
-
 		public int CompareTo(object version)
 		{
 			if (version == null)
@@ -149,99 +149,73 @@ namespace System
 			Version version2 = version as Version;
 			if (version2 == null)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Version."));
+				throw new ArgumentException("Object must be of type Version.");
 			}
-			if (this._Major != version2._Major)
-			{
-				if (this._Major > version2._Major)
-				{
-					return 1;
-				}
-				return -1;
-			}
-			else if (this._Minor != version2._Minor)
-			{
-				if (this._Minor > version2._Minor)
-				{
-					return 1;
-				}
-				return -1;
-			}
-			else if (this._Build != version2._Build)
-			{
-				if (this._Build > version2._Build)
-				{
-					return 1;
-				}
-				return -1;
-			}
-			else
-			{
-				if (this._Revision == version2._Revision)
-				{
-					return 0;
-				}
-				if (this._Revision > version2._Revision)
-				{
-					return 1;
-				}
-				return -1;
-			}
+			return this.CompareTo(version2);
 		}
 
 		public int CompareTo(Version value)
 		{
+			if (value == this)
+			{
+				return 0;
+			}
 			if (value == null)
 			{
 				return 1;
 			}
-			if (this._Major != value._Major)
+			if (this._Major == value._Major)
 			{
-				if (this._Major > value._Major)
+				if (this._Minor == value._Minor)
 				{
+					if (this._Build == value._Build)
+					{
+						if (this._Revision == value._Revision)
+						{
+							return 0;
+						}
+						if (this._Revision <= value._Revision)
+						{
+							return -1;
+						}
+						return 1;
+					}
+					else
+					{
+						if (this._Build <= value._Build)
+						{
+							return -1;
+						}
+						return 1;
+					}
+				}
+				else
+				{
+					if (this._Minor <= value._Minor)
+					{
+						return -1;
+					}
 					return 1;
 				}
-				return -1;
-			}
-			else if (this._Minor != value._Minor)
-			{
-				if (this._Minor > value._Minor)
-				{
-					return 1;
-				}
-				return -1;
-			}
-			else if (this._Build != value._Build)
-			{
-				if (this._Build > value._Build)
-				{
-					return 1;
-				}
-				return -1;
 			}
 			else
 			{
-				if (this._Revision == value._Revision)
+				if (this._Major <= value._Major)
 				{
-					return 0;
+					return -1;
 				}
-				if (this._Revision > value._Revision)
-				{
-					return 1;
-				}
-				return -1;
+				return 1;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			Version version = obj as Version;
-			return !(version == null) && this._Major == version._Major && this._Minor == version._Minor && this._Build == version._Build && this._Revision == version._Revision;
+			return this.Equals(obj as Version);
 		}
 
 		public bool Equals(Version obj)
 		{
-			return !(obj == null) && this._Major == obj._Major && this._Minor == obj._Minor && this._Build == obj._Build && this._Revision == obj._Revision;
+			return obj == this || (obj != null && this._Major == obj._Major && this._Minor == obj._Minor && this._Build == obj._Build && this._Revision == obj._Revision);
 		}
 
 		public override int GetHashCode()
@@ -251,78 +225,113 @@ namespace System
 
 		public override string ToString()
 		{
-			if (this._Build == -1)
-			{
-				return this.ToString(2);
-			}
-			if (this._Revision == -1)
-			{
-				return this.ToString(3);
-			}
-			return this.ToString(4);
+			return this.ToString(this.DefaultFormatFieldCount);
 		}
 
 		public string ToString(int fieldCount)
 		{
-			switch (fieldCount)
+			if (fieldCount == 0)
 			{
-			case 0:
 				return string.Empty;
-			case 1:
-				return this._Major.ToString();
-			case 2:
-			{
-				StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-				Version.AppendPositiveNumber(this._Major, stringBuilder);
-				stringBuilder.Append('.');
-				Version.AppendPositiveNumber(this._Minor, stringBuilder);
-				return StringBuilderCache.GetStringAndRelease(stringBuilder);
 			}
-			default:
+			if (fieldCount != 1)
+			{
+				return StringBuilderCache.GetStringAndRelease(this.ToCachedStringBuilder(fieldCount));
+			}
+			return this._Major.ToString();
+		}
+
+		public bool TryFormat(Span<char> destination, out int charsWritten)
+		{
+			return this.TryFormat(destination, this.DefaultFormatFieldCount, out charsWritten);
+		}
+
+		public bool TryFormat(Span<char> destination, int fieldCount, out int charsWritten)
+		{
+			if (fieldCount == 0)
+			{
+				charsWritten = 0;
+				return true;
+			}
+			if (fieldCount == 1)
+			{
+				return this._Major.TryFormat(destination, out charsWritten, default(ReadOnlySpan<char>), null);
+			}
+			StringBuilder stringBuilder = this.ToCachedStringBuilder(fieldCount);
+			if (stringBuilder.Length <= destination.Length)
+			{
+				stringBuilder.CopyTo(0, destination, stringBuilder.Length);
+				StringBuilderCache.Release(stringBuilder);
+				charsWritten = stringBuilder.Length;
+				return true;
+			}
+			StringBuilderCache.Release(stringBuilder);
+			charsWritten = 0;
+			return false;
+		}
+
+		bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
+		{
+			return this.TryFormat(destination, out charsWritten);
+		}
+
+		private int DefaultFormatFieldCount
+		{
+			get
+			{
 				if (this._Build == -1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Argument must be between {0} and {1}.", new object[] { "0", "2" }), "fieldCount");
+					return 2;
 				}
-				if (fieldCount == 3)
+				if (this._Revision != -1)
 				{
-					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-					Version.AppendPositiveNumber(this._Major, stringBuilder);
-					stringBuilder.Append('.');
-					Version.AppendPositiveNumber(this._Minor, stringBuilder);
-					stringBuilder.Append('.');
-					Version.AppendPositiveNumber(this._Build, stringBuilder);
-					return StringBuilderCache.GetStringAndRelease(stringBuilder);
+					return 4;
 				}
-				if (this._Revision == -1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Argument must be between {0} and {1}.", new object[] { "0", "3" }), "fieldCount");
-				}
-				if (fieldCount == 4)
-				{
-					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-					Version.AppendPositiveNumber(this._Major, stringBuilder);
-					stringBuilder.Append('.');
-					Version.AppendPositiveNumber(this._Minor, stringBuilder);
-					stringBuilder.Append('.');
-					Version.AppendPositiveNumber(this._Build, stringBuilder);
-					stringBuilder.Append('.');
-					Version.AppendPositiveNumber(this._Revision, stringBuilder);
-					return StringBuilderCache.GetStringAndRelease(stringBuilder);
-				}
-				throw new ArgumentException(Environment.GetResourceString("Argument must be between {0} and {1}.", new object[] { "0", "4" }), "fieldCount");
+				return 3;
 			}
 		}
 
-		private static void AppendPositiveNumber(int num, StringBuilder sb)
+		private StringBuilder ToCachedStringBuilder(int fieldCount)
 		{
-			int length = sb.Length;
-			do
+			if (fieldCount == 2)
 			{
-				int num2 = num % 10;
-				num /= 10;
-				sb.Insert(length, (char)(48 + num2));
+				StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+				stringBuilder.Append(this._Major);
+				stringBuilder.Append('.');
+				stringBuilder.Append(this._Minor);
+				return stringBuilder;
 			}
-			while (num > 0);
+			if (this._Build == -1)
+			{
+				throw new ArgumentException(SR.Format("Argument must be between {0} and {1}.", "0", "2"), "fieldCount");
+			}
+			if (fieldCount == 3)
+			{
+				StringBuilder stringBuilder2 = StringBuilderCache.Acquire(16);
+				stringBuilder2.Append(this._Major);
+				stringBuilder2.Append('.');
+				stringBuilder2.Append(this._Minor);
+				stringBuilder2.Append('.');
+				stringBuilder2.Append(this._Build);
+				return stringBuilder2;
+			}
+			if (this._Revision == -1)
+			{
+				throw new ArgumentException(SR.Format("Argument must be between {0} and {1}.", "0", "3"), "fieldCount");
+			}
+			if (fieldCount == 4)
+			{
+				StringBuilder stringBuilder3 = StringBuilderCache.Acquire(16);
+				stringBuilder3.Append(this._Major);
+				stringBuilder3.Append('.');
+				stringBuilder3.Append(this._Minor);
+				stringBuilder3.Append('.');
+				stringBuilder3.Append(this._Build);
+				stringBuilder3.Append('.');
+				stringBuilder3.Append(this._Revision);
+				return stringBuilder3;
+			}
+			throw new ArgumentException(SR.Format("Argument must be between {0} and {1}.", "0", "4"), "fieldCount");
 		}
 
 		public static Version Parse(string input)
@@ -331,89 +340,118 @@ namespace System
 			{
 				throw new ArgumentNullException("input");
 			}
-			Version.VersionResult versionResult = default(Version.VersionResult);
-			versionResult.Init("input", true);
-			if (!Version.TryParseVersion(input, ref versionResult))
-			{
-				throw versionResult.GetVersionParseException();
-			}
-			return versionResult.m_parsedVersion;
+			return Version.ParseVersion(input.AsSpan(), true);
+		}
+
+		public static Version Parse(ReadOnlySpan<char> input)
+		{
+			return Version.ParseVersion(input, true);
 		}
 
 		public static bool TryParse(string input, out Version result)
 		{
-			Version.VersionResult versionResult = default(Version.VersionResult);
-			versionResult.Init("input", false);
-			bool flag = Version.TryParseVersion(input, ref versionResult);
-			result = versionResult.m_parsedVersion;
-			return flag;
+			if (input == null)
+			{
+				result = null;
+				return false;
+			}
+			Version version;
+			result = (version = Version.ParseVersion(input.AsSpan(), false));
+			return version != null;
 		}
 
-		private static bool TryParseVersion(string version, ref Version.VersionResult result)
+		public static bool TryParse(ReadOnlySpan<char> input, out Version result)
 		{
-			if (version == null)
+			Version version;
+			result = (version = Version.ParseVersion(input, false));
+			return version != null;
+		}
+
+		private static Version ParseVersion(ReadOnlySpan<char> input, bool throwOnFailure)
+		{
+			int num = input.IndexOf('.');
+			if (num < 0)
 			{
-				result.SetFailure(Version.ParseFailureKind.ArgumentNullException);
-				return false;
-			}
-			string[] array = version.Split(Version.SeparatorsArray);
-			int num = array.Length;
-			if (num < 2 || num > 4)
-			{
-				result.SetFailure(Version.ParseFailureKind.ArgumentException);
-				return false;
-			}
-			int num2;
-			if (!Version.TryParseComponent(array[0], "version", ref result, out num2))
-			{
-				return false;
-			}
-			int num3;
-			if (!Version.TryParseComponent(array[1], "version", ref result, out num3))
-			{
-				return false;
-			}
-			num -= 2;
-			if (num > 0)
-			{
-				int num4;
-				if (!Version.TryParseComponent(array[2], "build", ref result, out num4))
+				if (throwOnFailure)
 				{
-					return false;
+					throw new ArgumentException("Version string portion was too short or too long.", "input");
 				}
-				num--;
-				if (num > 0)
-				{
-					int num5;
-					if (!Version.TryParseComponent(array[3], "revision", ref result, out num5))
-					{
-						return false;
-					}
-					result.m_parsedVersion = new Version(num2, num3, num4, num5);
-				}
-				else
-				{
-					result.m_parsedVersion = new Version(num2, num3, num4);
-				}
+				return null;
 			}
 			else
 			{
-				result.m_parsedVersion = new Version(num2, num3);
+				int num2 = -1;
+				int num3 = input.Slice(num + 1).IndexOf('.');
+				if (num3 != -1)
+				{
+					num3 += num + 1;
+					num2 = input.Slice(num3 + 1).IndexOf('.');
+					if (num2 != -1)
+					{
+						num2 += num3 + 1;
+						if (input.Slice(num2 + 1).IndexOf('.') != -1)
+						{
+							if (throwOnFailure)
+							{
+								throw new ArgumentException("Version string portion was too short or too long.", "input");
+							}
+							return null;
+						}
+					}
+				}
+				int num4;
+				if (!Version.TryParseComponent(input.Slice(0, num), "input", throwOnFailure, out num4))
+				{
+					return null;
+				}
+				if (num3 != -1)
+				{
+					int num5;
+					if (!Version.TryParseComponent(input.Slice(num + 1, num3 - num - 1), "input", throwOnFailure, out num5))
+					{
+						return null;
+					}
+					if (num2 != -1)
+					{
+						int num6;
+						int num7;
+						if (!Version.TryParseComponent(input.Slice(num3 + 1, num2 - num3 - 1), "build", throwOnFailure, out num6) || !Version.TryParseComponent(input.Slice(num2 + 1), "revision", throwOnFailure, out num7))
+						{
+							return null;
+						}
+						return new Version(num4, num5, num6, num7);
+					}
+					else
+					{
+						int num6;
+						if (!Version.TryParseComponent(input.Slice(num3 + 1), "build", throwOnFailure, out num6))
+						{
+							return null;
+						}
+						return new Version(num4, num5, num6);
+					}
+				}
+				else
+				{
+					int num5;
+					if (!Version.TryParseComponent(input.Slice(num + 1), "input", throwOnFailure, out num5))
+					{
+						return null;
+					}
+					return new Version(num4, num5);
+				}
 			}
-			return true;
 		}
 
-		private static bool TryParseComponent(string component, string componentName, ref Version.VersionResult result, out int parsedComponent)
+		private static bool TryParseComponent(ReadOnlySpan<char> component, string componentName, bool throwOnFailure, out int parsedComponent)
 		{
-			if (!int.TryParse(component, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedComponent))
+			if (!throwOnFailure)
 			{
-				result.SetFailure(Version.ParseFailureKind.FormatException, component);
-				return false;
+				return int.TryParse(component, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedComponent) && parsedComponent >= 0;
 			}
-			if (parsedComponent < 0)
+			if ((parsedComponent = int.Parse(component, NumberStyles.Integer, CultureInfo.InvariantCulture)) < 0)
 			{
-				result.SetFailure(Version.ParseFailureKind.ArgumentOutOfRangeException, componentName);
-				return false;
+				throw new ArgumentOutOfRangeException(componentName, "Version's parameters must be greater than or equal to zero.");
 			}
 			return true;
 		}
@@ -460,87 +498,12 @@ namespace System
 			return v2 <= v1;
 		}
 
-		private int _Major;
+		private readonly int _Major;
 
-		private int _Minor;
+		private readonly int _Minor;
 
-		private int _Build = -1;
+		private readonly int _Build = -1;
 
-		private int _Revision = -1;
-
-		private static readonly char[] SeparatorsArray = new char[] { '.' };
-
-		private const int ZERO_CHAR_VALUE = 48;
-
-		internal enum ParseFailureKind
-		{
-			ArgumentNullException,
-			ArgumentException,
-			ArgumentOutOfRangeException,
-			FormatException
-		}
-
-		internal struct VersionResult
-		{
-			internal void Init(string argumentName, bool canThrow)
-			{
-				this.m_canThrow = canThrow;
-				this.m_argumentName = argumentName;
-			}
-
-			internal void SetFailure(Version.ParseFailureKind failure)
-			{
-				this.SetFailure(failure, string.Empty);
-			}
-
-			internal void SetFailure(Version.ParseFailureKind failure, string argument)
-			{
-				this.m_failure = failure;
-				this.m_exceptionArgument = argument;
-				if (this.m_canThrow)
-				{
-					throw this.GetVersionParseException();
-				}
-			}
-
-			internal Exception GetVersionParseException()
-			{
-				switch (this.m_failure)
-				{
-				case Version.ParseFailureKind.ArgumentNullException:
-					return new ArgumentNullException(this.m_argumentName);
-				case Version.ParseFailureKind.ArgumentException:
-					return new ArgumentException(Environment.GetResourceString("Version string portion was too short or too long."));
-				case Version.ParseFailureKind.ArgumentOutOfRangeException:
-					return new ArgumentOutOfRangeException(this.m_exceptionArgument, Environment.GetResourceString("Version's parameters must be greater than or equal to zero."));
-				case Version.ParseFailureKind.FormatException:
-					try
-					{
-						int.Parse(this.m_exceptionArgument, CultureInfo.InvariantCulture);
-					}
-					catch (FormatException ex)
-					{
-						return ex;
-					}
-					catch (OverflowException ex)
-					{
-						return ex;
-					}
-					return new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
-				default:
-					return new ArgumentException(Environment.GetResourceString("Version string portion was too short or too long."));
-				}
-			}
-
-			internal Version m_parsedVersion;
-
-			internal Version.ParseFailureKind m_failure;
-
-			internal string m_exceptionArgument;
-
-			internal string m_argumentName;
-
-			internal bool m_canThrow;
-		}
+		private readonly int _Revision = -1;
 	}
 }

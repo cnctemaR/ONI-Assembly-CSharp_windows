@@ -7,31 +7,31 @@ namespace MS.Internal.Xml.XPath
 	{
 		internal XPathSelectionIterator(XPathNavigator nav, Query query)
 		{
-			this.nav = nav.Clone();
-			this.query = query;
+			this._nav = nav.Clone();
+			this._query = query;
 		}
 
 		protected XPathSelectionIterator(XPathSelectionIterator it)
 		{
-			this.nav = it.nav.Clone();
-			this.query = (Query)it.query.Clone();
-			this.position = it.position;
+			this._nav = it._nav.Clone();
+			this._query = (Query)it._query.Clone();
+			this._position = it._position;
 		}
 
 		public override void Reset()
 		{
-			this.query.Reset();
+			this._query.Reset();
 		}
 
 		public override bool MoveNext()
 		{
-			XPathNavigator xpathNavigator = this.query.Advance();
+			XPathNavigator xpathNavigator = this._query.Advance();
 			if (xpathNavigator != null)
 			{
-				this.position++;
-				if (!this.nav.MoveTo(xpathNavigator))
+				this._position++;
+				if (!this._nav.MoveTo(xpathNavigator))
 				{
-					this.nav = xpathNavigator.Clone();
+					this._nav = xpathNavigator.Clone();
 				}
 				return true;
 			}
@@ -42,7 +42,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.query.Count;
+				return this._query.Count;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.nav;
+				return this._nav;
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.position;
+				return this._position;
 			}
 		}
 
@@ -67,10 +67,10 @@ namespace MS.Internal.Xml.XPath
 			return new XPathSelectionIterator(this);
 		}
 
-		private XPathNavigator nav;
+		private XPathNavigator _nav;
 
-		private Query query;
+		private Query _query;
 
-		private int position;
+		private int _position;
 	}
 }

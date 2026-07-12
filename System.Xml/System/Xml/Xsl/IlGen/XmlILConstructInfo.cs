@@ -276,7 +276,7 @@ namespace System.Xml.Xsl.IlGen
 			if (this.constrMeth != XmlILConstructMethod.Iterator)
 			{
 				text += this.constrMeth.ToString();
-				text = text + ", " + this.xstatesInitial;
+				text = text + ", " + this.xstatesInitial.ToString();
 				if (this.xstatesBeginLoop != PossibleXmlStates.None)
 				{
 					text = string.Concat(new string[]
@@ -288,7 +288,7 @@ namespace System.Xml.Xsl.IlGen
 						this.xstatesEndLoop.ToString()
 					});
 				}
-				text = text + " => " + this.xstatesFinal;
+				text = text + " => " + this.xstatesFinal.ToString();
 				if (!this.MightHaveAttributes)
 				{
 					text += ", NoAttrs";

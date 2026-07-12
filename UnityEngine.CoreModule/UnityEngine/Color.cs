@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -26,22 +27,30 @@ namespace UnityEngine
 			this.a = 1f;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = string.IsNullOrEmpty(format);
 			if (flag)
 			{
 				format = "F3";
+			}
+			bool flag2 = formatProvider == null;
+			if (flag2)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
 			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
@@ -136,6 +145,7 @@ namespace UnityEngine
 
 		public static Color red
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(1f, 0f, 0f, 1f);
@@ -144,6 +154,7 @@ namespace UnityEngine
 
 		public static Color green
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0f, 1f, 0f, 1f);
@@ -152,6 +163,7 @@ namespace UnityEngine
 
 		public static Color blue
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0f, 0f, 1f, 1f);
@@ -160,6 +172,7 @@ namespace UnityEngine
 
 		public static Color white
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(1f, 1f, 1f, 1f);
@@ -168,6 +181,7 @@ namespace UnityEngine
 
 		public static Color black
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0f, 0f, 0f, 1f);
@@ -176,6 +190,7 @@ namespace UnityEngine
 
 		public static Color yellow
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(1f, 0.92156863f, 0.015686275f, 1f);
@@ -184,6 +199,7 @@ namespace UnityEngine
 
 		public static Color cyan
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0f, 1f, 1f, 1f);
@@ -192,6 +208,7 @@ namespace UnityEngine
 
 		public static Color magenta
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(1f, 0f, 1f, 1f);
@@ -200,6 +217,7 @@ namespace UnityEngine
 
 		public static Color gray
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -208,6 +226,7 @@ namespace UnityEngine
 
 		public static Color grey
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -216,6 +235,7 @@ namespace UnityEngine
 
 		public static Color clear
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Color(0f, 0f, 0f, 0f);
@@ -224,6 +244,7 @@ namespace UnityEngine
 
 		public float grayscale
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return 0.299f * this.r + 0.587f * this.g + 0.114f * this.b;

@@ -18,10 +18,10 @@ namespace System.Xml.Schema
 			}
 		}
 
+		[XmlElement("sequence", typeof(XmlSchemaSequence))]
 		[XmlElement("all", typeof(XmlSchemaAll))]
 		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("group", typeof(XmlSchemaGroupRef))]
-		[XmlElement("sequence", typeof(XmlSchemaSequence))]
 		public XmlSchemaParticle Particle
 		{
 			get
@@ -34,8 +34,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("attribute", typeof(XmlSchemaAttribute))]
 		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroupRef))]
+		[XmlElement("attribute", typeof(XmlSchemaAttribute))]
 		public XmlSchemaObjectCollection Attributes
 		{
 			get

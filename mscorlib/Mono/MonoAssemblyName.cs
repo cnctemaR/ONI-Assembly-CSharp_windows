@@ -35,8 +35,8 @@ namespace Mono
 
 		internal ushort arch;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 17)]
 		public struct <public_key_token>e__FixedBuffer
 		{

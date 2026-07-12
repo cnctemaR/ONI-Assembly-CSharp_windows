@@ -81,7 +81,7 @@ public static class BaseDivergentConfig
 		hashSet.Add(SimHashes.Sulfur.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
 		};
 	}
 

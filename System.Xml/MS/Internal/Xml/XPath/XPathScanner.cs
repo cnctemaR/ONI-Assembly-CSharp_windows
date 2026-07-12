@@ -13,7 +13,7 @@ namespace MS.Internal.Xml.XPath
 			{
 				throw XPathException.Create("'{0}' is an invalid expression.", string.Empty);
 			}
-			this.xpathExpr = xpathExpr;
+			this._xpathExpr = xpathExpr;
 			this.NextChar();
 			this.NextLex();
 		}
@@ -22,29 +22,29 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.xpathExpr;
+				return this._xpathExpr;
 			}
 		}
 
-		private char CurerntChar
+		private char CurrentChar
 		{
 			get
 			{
-				return this.currentChar;
+				return this._currentChar;
 			}
 		}
 
 		private bool NextChar()
 		{
-			if (this.xpathExprIndex < this.xpathExpr.Length)
+			if (this._xpathExprIndex < this._xpathExpr.Length)
 			{
-				string text = this.xpathExpr;
-				int num = this.xpathExprIndex;
-				this.xpathExprIndex = num + 1;
-				this.currentChar = text[num];
+				string xpathExpr = this._xpathExpr;
+				int xpathExprIndex = this._xpathExprIndex;
+				this._xpathExprIndex = xpathExprIndex + 1;
+				this._currentChar = xpathExpr[xpathExprIndex];
 				return true;
 			}
-			this.currentChar = '\0';
+			this._currentChar = '\0';
 			return false;
 		}
 
@@ -52,7 +52,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.kind;
+				return this._kind;
 			}
 		}
 
@@ -60,7 +60,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.name;
+				return this._name;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.stringValue;
+				return this._stringValue;
 			}
 		}
 
@@ -84,7 +84,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.numberValue;
+				return this._numberValue;
 			}
 		}
 
@@ -92,13 +92,13 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.canBeFunction;
+				return this._canBeFunction;
 			}
 		}
 
 		private void SkipSpace()
 		{
-			while (this.xmlCharType.IsWhiteSpace(this.CurerntChar) && this.NextChar())
+			while (this._xmlCharType.IsWhiteSpace(this.CurrentChar) && this.NextChar())
 			{
 			}
 		}
@@ -106,30 +106,30 @@ namespace MS.Internal.Xml.XPath
 		public bool NextLex()
 		{
 			this.SkipSpace();
-			char curerntChar = this.CurerntChar;
-			if (curerntChar <= '@')
+			char currentChar = this.CurrentChar;
+			if (currentChar <= '@')
 			{
-				if (curerntChar == '\0')
+				if (currentChar == '\0')
 				{
-					this.kind = XPathScanner.LexKind.Eof;
+					this._kind = XPathScanner.LexKind.Eof;
 					return false;
 				}
-				switch (curerntChar)
+				switch (currentChar)
 				{
 				case '!':
-					this.kind = XPathScanner.LexKind.Bang;
+					this._kind = XPathScanner.LexKind.Bang;
 					this.NextChar();
-					if (this.CurerntChar == '=')
+					if (this.CurrentChar == '=')
 					{
-						this.kind = XPathScanner.LexKind.Ne;
+						this._kind = XPathScanner.LexKind.Ne;
 						this.NextChar();
 						return true;
 					}
 					return true;
 				case '"':
 				case '\'':
-					this.kind = XPathScanner.LexKind.String;
-					this.stringValue = this.ScanString();
+					this._kind = XPathScanner.LexKind.String;
+					this._stringValue = this.ScanString();
 					return true;
 				case '#':
 				case '$':
@@ -159,47 +159,47 @@ namespace MS.Internal.Xml.XPath
 				case '?':
 					goto IL_021D;
 				case '.':
-					this.kind = XPathScanner.LexKind.Dot;
+					this._kind = XPathScanner.LexKind.Dot;
 					this.NextChar();
-					if (this.CurerntChar == '.')
+					if (this.CurrentChar == '.')
 					{
-						this.kind = XPathScanner.LexKind.DotDot;
+						this._kind = XPathScanner.LexKind.DotDot;
 						this.NextChar();
 						return true;
 					}
-					if (XmlCharType.IsDigit(this.CurerntChar))
+					if (XmlCharType.IsDigit(this.CurrentChar))
 					{
-						this.kind = XPathScanner.LexKind.Number;
-						this.numberValue = this.ScanFraction();
+						this._kind = XPathScanner.LexKind.Number;
+						this._numberValue = this.ScanFraction();
 						return true;
 					}
 					return true;
 				case '/':
-					this.kind = XPathScanner.LexKind.Slash;
+					this._kind = XPathScanner.LexKind.Slash;
 					this.NextChar();
-					if (this.CurerntChar == '/')
+					if (this.CurrentChar == '/')
 					{
-						this.kind = XPathScanner.LexKind.SlashSlash;
+						this._kind = XPathScanner.LexKind.SlashSlash;
 						this.NextChar();
 						return true;
 					}
 					return true;
 				case '<':
-					this.kind = XPathScanner.LexKind.Lt;
+					this._kind = XPathScanner.LexKind.Lt;
 					this.NextChar();
-					if (this.CurerntChar == '=')
+					if (this.CurrentChar == '=')
 					{
-						this.kind = XPathScanner.LexKind.Le;
+						this._kind = XPathScanner.LexKind.Le;
 						this.NextChar();
 						return true;
 					}
 					return true;
 				case '>':
-					this.kind = XPathScanner.LexKind.Gt;
+					this._kind = XPathScanner.LexKind.Gt;
 					this.NextChar();
-					if (this.CurerntChar == '=')
+					if (this.CurrentChar == '=')
 					{
-						this.kind = XPathScanner.LexKind.Ge;
+						this._kind = XPathScanner.LexKind.Ge;
 						this.NextChar();
 						return true;
 					}
@@ -208,115 +208,115 @@ namespace MS.Internal.Xml.XPath
 					goto IL_021D;
 				}
 			}
-			else if (curerntChar != '[' && curerntChar != ']' && curerntChar != '|')
+			else if (currentChar != '[' && currentChar != ']' && currentChar != '|')
 			{
 				goto IL_021D;
 			}
-			this.kind = (XPathScanner.LexKind)Convert.ToInt32(this.CurerntChar, CultureInfo.InvariantCulture);
+			this._kind = (XPathScanner.LexKind)Convert.ToInt32(this.CurrentChar, CultureInfo.InvariantCulture);
 			this.NextChar();
 			return true;
 			IL_021D:
-			if (XmlCharType.IsDigit(this.CurerntChar))
+			if (XmlCharType.IsDigit(this.CurrentChar))
 			{
-				this.kind = XPathScanner.LexKind.Number;
-				this.numberValue = this.ScanNumber();
+				this._kind = XPathScanner.LexKind.Number;
+				this._numberValue = this.ScanNumber();
 			}
 			else
 			{
-				if (!this.xmlCharType.IsStartNCNameSingleChar(this.CurerntChar))
+				if (!this._xmlCharType.IsStartNCNameSingleChar(this.CurrentChar))
 				{
 					throw XPathException.Create("'{0}' has an invalid token.", this.SourceText);
 				}
-				this.kind = XPathScanner.LexKind.Name;
-				this.name = this.ScanName();
-				this.prefix = string.Empty;
-				if (this.CurerntChar == ':')
+				this._kind = XPathScanner.LexKind.Name;
+				this._name = this.ScanName();
+				this._prefix = string.Empty;
+				if (this.CurrentChar == ':')
 				{
 					this.NextChar();
-					if (this.CurerntChar == ':')
+					if (this.CurrentChar == ':')
 					{
 						this.NextChar();
-						this.kind = XPathScanner.LexKind.Axe;
+						this._kind = XPathScanner.LexKind.Axe;
 					}
 					else
 					{
-						this.prefix = this.name;
-						if (this.CurerntChar == '*')
+						this._prefix = this._name;
+						if (this.CurrentChar == '*')
 						{
 							this.NextChar();
-							this.name = "*";
+							this._name = "*";
 						}
 						else
 						{
-							if (!this.xmlCharType.IsStartNCNameSingleChar(this.CurerntChar))
+							if (!this._xmlCharType.IsStartNCNameSingleChar(this.CurrentChar))
 							{
 								throw XPathException.Create("'{0}' has an invalid qualified name.", this.SourceText);
 							}
-							this.name = this.ScanName();
+							this._name = this.ScanName();
 						}
 					}
 				}
 				else
 				{
 					this.SkipSpace();
-					if (this.CurerntChar == ':')
+					if (this.CurrentChar == ':')
 					{
 						this.NextChar();
-						if (this.CurerntChar != ':')
+						if (this.CurrentChar != ':')
 						{
 							throw XPathException.Create("'{0}' has an invalid qualified name.", this.SourceText);
 						}
 						this.NextChar();
-						this.kind = XPathScanner.LexKind.Axe;
+						this._kind = XPathScanner.LexKind.Axe;
 					}
 				}
 				this.SkipSpace();
-				this.canBeFunction = this.CurerntChar == '(';
+				this._canBeFunction = this.CurrentChar == '(';
 			}
 			return true;
 		}
 
 		private double ScanNumber()
 		{
-			int num = this.xpathExprIndex - 1;
+			int num = this._xpathExprIndex - 1;
 			int num2 = 0;
-			while (XmlCharType.IsDigit(this.CurerntChar))
+			while (XmlCharType.IsDigit(this.CurrentChar))
 			{
 				this.NextChar();
 				num2++;
 			}
-			if (this.CurerntChar == '.')
+			if (this.CurrentChar == '.')
 			{
 				this.NextChar();
 				num2++;
-				while (XmlCharType.IsDigit(this.CurerntChar))
+				while (XmlCharType.IsDigit(this.CurrentChar))
 				{
 					this.NextChar();
 					num2++;
 				}
 			}
-			return XmlConvert.ToXPathDouble(this.xpathExpr.Substring(num, num2));
+			return XmlConvert.ToXPathDouble(this._xpathExpr.Substring(num, num2));
 		}
 
 		private double ScanFraction()
 		{
-			int num = this.xpathExprIndex - 2;
+			int num = this._xpathExprIndex - 2;
 			int num2 = 1;
-			while (XmlCharType.IsDigit(this.CurerntChar))
+			while (XmlCharType.IsDigit(this.CurrentChar))
 			{
 				this.NextChar();
 				num2++;
 			}
-			return XmlConvert.ToXPathDouble(this.xpathExpr.Substring(num, num2));
+			return XmlConvert.ToXPathDouble(this._xpathExpr.Substring(num, num2));
 		}
 
 		private string ScanString()
 		{
-			char curerntChar = this.CurerntChar;
+			char currentChar = this.CurrentChar;
 			this.NextChar();
-			int num = this.xpathExprIndex - 1;
+			int num = this._xpathExprIndex - 1;
 			int num2 = 0;
-			while (this.CurerntChar != curerntChar)
+			while (this.CurrentChar != currentChar)
 			{
 				if (!this.NextChar())
 				{
@@ -325,40 +325,40 @@ namespace MS.Internal.Xml.XPath
 				num2++;
 			}
 			this.NextChar();
-			return this.xpathExpr.Substring(num, num2);
+			return this._xpathExpr.Substring(num, num2);
 		}
 
 		private string ScanName()
 		{
-			int num = this.xpathExprIndex - 1;
+			int num = this._xpathExprIndex - 1;
 			int num2 = 0;
-			while (this.xmlCharType.IsNCNameSingleChar(this.CurerntChar))
+			while (this._xmlCharType.IsNCNameSingleChar(this.CurrentChar))
 			{
 				this.NextChar();
 				num2++;
 			}
-			return this.xpathExpr.Substring(num, num2);
+			return this._xpathExpr.Substring(num, num2);
 		}
 
-		private string xpathExpr;
+		private string _xpathExpr;
 
-		private int xpathExprIndex;
+		private int _xpathExprIndex;
 
-		private XPathScanner.LexKind kind;
+		private XPathScanner.LexKind _kind;
 
-		private char currentChar;
+		private char _currentChar;
 
-		private string name;
+		private string _name;
 
-		private string prefix;
+		private string _prefix;
 
-		private string stringValue;
+		private string _stringValue;
 
-		private double numberValue = double.NaN;
+		private double _numberValue = double.NaN;
 
-		private bool canBeFunction;
+		private bool _canBeFunction;
 
-		private XmlCharType xmlCharType = XmlCharType.Instance;
+		private XmlCharType _xmlCharType = XmlCharType.Instance;
 
 		public enum LexKind
 		{

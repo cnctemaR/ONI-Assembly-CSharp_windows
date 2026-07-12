@@ -33,13 +33,13 @@ public class Disinfectable : Workable
 		this.shouldTransferDiseaseWithWorker = false;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.diseasePerSecond = (float)base.GetComponent<PrimaryElement>().DiseaseCount / 10f;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		base.OnWorkTick(worker, dt);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
@@ -47,7 +47,7 @@ public class Disinfectable : Workable
 		return false;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();

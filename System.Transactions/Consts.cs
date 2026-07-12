@@ -2,15 +2,15 @@
 
 internal static class Consts
 {
-	public const string MonoVersion = "5.11.0.0";
+	public const string MonoCorlibVersion = "1A5E0066-58DC-428A-B21C-0AD6CDAE2789";
+
+	public const string MonoVersion = "6.13.0.0";
 
 	public const string MonoCompany = "Mono development team";
 
 	public const string MonoProduct = "Mono Common Language Infrastructure";
 
 	public const string MonoCopyright = "(c) Various Mono authors";
-
-	public const int MonoCorlibVersion = 1051100001;
 
 	public const string FxVersion = "4.0.0.0";
 

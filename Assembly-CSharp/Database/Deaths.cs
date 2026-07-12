@@ -45,5 +45,7 @@ namespace Database
 		public Death HitByHighEnergyParticle;
 
 		public Death DeadBattery;
+
+		public Death DeadCyborgChargeExpired;
 	}
 }

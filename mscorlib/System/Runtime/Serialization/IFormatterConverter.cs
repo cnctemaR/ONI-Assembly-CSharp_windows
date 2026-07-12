@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
 	public interface IFormatterConverter
 	{

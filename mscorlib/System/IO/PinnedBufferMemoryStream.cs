@@ -1,39 +1,30 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace System.IO
 {
 	internal sealed class PinnedBufferMemoryStream : UnmanagedMemoryStream
 	{
-		[SecurityCritical]
-		private PinnedBufferMemoryStream()
-		{
-		}
-
-		[SecurityCritical]
 		internal unsafe PinnedBufferMemoryStream(byte[] array)
 		{
-			int num = array.Length;
-			if (num == 0)
-			{
-				array = new byte[1];
-				num = 0;
-			}
 			this._array = array;
-			this._pinningHandle = new GCHandle(array, GCHandleType.Pinned);
-			byte[] array2;
-			byte* ptr;
-			if ((array2 = this._array) == null || array2.Length == 0)
+			this._pinningHandle = GCHandle.Alloc(array, GCHandleType.Pinned);
+			int num = array.Length;
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(array))
 			{
-				ptr = null;
+				byte* ptr = reference;
+				base.Initialize(ptr, (long)num, (long)num, FileAccess.Read);
 			}
-			else
-			{
-				ptr = &array2[0];
-			}
-			base.Initialize(ptr, (long)num, (long)num, FileAccess.Read, true);
-			array2 = null;
+		}
+
+		public override int Read(Span<byte> buffer)
+		{
+			return base.ReadCore(buffer);
+		}
+
+		public override void Write(ReadOnlySpan<byte> buffer)
+		{
+			base.WriteCore(buffer);
 		}
 
 		~PinnedBufferMemoryStream()
@@ -41,13 +32,11 @@ namespace System.IO
 			this.Dispose(false);
 		}
 
-		[SecuritySafeCritical]
 		protected override void Dispose(bool disposing)
 		{
-			if (this._isOpen)
+			if (this._pinningHandle.IsAllocated)
 			{
 				this._pinningHandle.Free();
-				this._isOpen = false;
 			}
 			base.Dispose(disposing);
 		}

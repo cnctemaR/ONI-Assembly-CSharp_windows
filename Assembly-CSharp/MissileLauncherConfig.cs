@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class MissileLauncherConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "MissileLauncher";

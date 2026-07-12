@@ -189,7 +189,9 @@ namespace ProcGen
 
 		public static DlcMixingSettings GetCachedDlcMixingSettings(string name)
 		{
-			return SettingsCache.dlcMixingSettings[name];
+			DlcMixingSettings dlcMixingSettings;
+			SettingsCache.dlcMixingSettings.TryGetValue(name, out dlcMixingSettings);
+			return dlcMixingSettings;
 		}
 
 		public static WorldMixingSettings GetCachedWorldMixingSetting(string name)

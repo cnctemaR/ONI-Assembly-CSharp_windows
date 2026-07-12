@@ -3,14 +3,26 @@ using UnityEngine;
 
 public class TechItem : Resource
 {
+	[Obsolete("Use constructor with requiredDlcIds and forbiddenDlcIds")]
 	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, string parentTechId, string[] dlcIds, bool isPOIUnlock = false)
 		: base(id, parent, name)
 	{
 		this.description = description;
 		this.getUISprite = getUISprite;
 		this.parentTechId = parentTechId;
-		this.dlcIds = dlcIds;
 		this.isPOIUnlock = isPOIUnlock;
+		DlcManager.ConvertAvailableToRequireAndForbidden(dlcIds, out this.requiredDlcIds, out this.forbiddenDlcIds);
+	}
+
+	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, string parentTechId, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null, bool isPOIUnlock = false)
+		: base(id, parent, name)
+	{
+		this.description = description;
+		this.getUISprite = getUISprite;
+		this.parentTechId = parentTechId;
+		this.isPOIUnlock = isPOIUnlock;
+		this.requiredDlcIds = requiredDlcIds;
+		this.forbiddenDlcIds = forbiddenDlcIds;
 	}
 
 	public Tech ParentTech
@@ -59,7 +71,12 @@ public class TechItem : Resource
 
 	public string parentTechId;
 
+	public bool isPOIUnlock;
+
+	[Obsolete("Use required/forbidden instead")]
 	public string[] dlcIds;
 
-	public bool isPOIUnlock;
+	public string[] requiredDlcIds;
+
+	public string[] forbiddenDlcIds;
 }

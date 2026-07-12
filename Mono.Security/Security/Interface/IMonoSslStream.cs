@@ -12,47 +12,11 @@ namespace Mono.Security.Interface
 	{
 		SslStream SslStream { get; }
 
-		void AuthenticateAsClient(string targetHost);
-
-		void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation);
-
-		IAsyncResult BeginAuthenticateAsClient(string targetHost, AsyncCallback asyncCallback, object asyncState);
-
-		IAsyncResult BeginAuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState);
-
-		void EndAuthenticateAsClient(IAsyncResult asyncResult);
-
-		void AuthenticateAsServer(X509Certificate serverCertificate);
-
-		void AuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation);
-
-		IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, AsyncCallback asyncCallback, object asyncState);
-
-		IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState);
-
-		void EndAuthenticateAsServer(IAsyncResult asyncResult);
-
-		Task AuthenticateAsClientAsync(string targetHost);
-
 		Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation);
-
-		Task AuthenticateAsServerAsync(X509Certificate serverCertificate);
 
 		Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation);
 
-		int Read(byte[] buffer, int offset, int count);
-
-		void Write(byte[] buffer);
-
-		void Write(byte[] buffer, int offset, int count);
-
-		IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState);
-
-		int EndRead(IAsyncResult asyncResult);
-
-		IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState);
-
-		void EndWrite(IAsyncResult asyncResult);
+		Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
 		Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
@@ -113,5 +77,9 @@ namespace Mono.Security.Interface
 		MonoTlsProvider Provider { get; }
 
 		MonoTlsConnectionInfo GetConnectionInfo();
+
+		bool CanRenegotiate { get; }
+
+		Task RenegotiateAsync(CancellationToken cancellationToken);
 	}
 }

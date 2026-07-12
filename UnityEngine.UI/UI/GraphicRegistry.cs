@@ -35,7 +35,7 @@ namespace UnityEngine.UI
 			GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet);
 			if (indexedSet != null)
 			{
-				indexedSet.AddUnique(graphic);
+				indexedSet.AddUnique(graphic, true);
 				GraphicRegistry.RegisterRaycastGraphicForCanvas(c, graphic);
 				return;
 			}
@@ -55,7 +55,7 @@ namespace UnityEngine.UI
 			GraphicRegistry.instance.m_RaycastableGraphics.TryGetValue(c, out indexedSet);
 			if (indexedSet != null)
 			{
-				indexedSet.AddUnique(graphic);
+				indexedSet.AddUnique(graphic, true);
 				return;
 			}
 			indexedSet = new IndexedSet<Graphic>();
@@ -65,7 +65,7 @@ namespace UnityEngine.UI
 
 		public static void UnregisterGraphicForCanvas(Canvas c, Graphic graphic)
 		{
-			if (c == null)
+			if (c == null || graphic == null)
 			{
 				return;
 			}
@@ -73,7 +73,7 @@ namespace UnityEngine.UI
 			if (GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet))
 			{
 				indexedSet.Remove(graphic);
-				if (indexedSet.Count == 0)
+				if (indexedSet.Capacity == 0)
 				{
 					GraphicRegistry.instance.m_Graphics.Remove(c);
 				}
@@ -83,7 +83,7 @@ namespace UnityEngine.UI
 
 		public static void UnregisterRaycastGraphicForCanvas(Canvas c, Graphic graphic)
 		{
-			if (c == null || !graphic.raycastTarget)
+			if (c == null || graphic == null)
 			{
 				return;
 			}
@@ -92,6 +92,41 @@ namespace UnityEngine.UI
 			{
 				indexedSet.Remove(graphic);
 				if (indexedSet.Count == 0)
+				{
+					GraphicRegistry.instance.m_RaycastableGraphics.Remove(c);
+				}
+			}
+		}
+
+		public static void DisableGraphicForCanvas(Canvas c, Graphic graphic)
+		{
+			if (c == null)
+			{
+				return;
+			}
+			IndexedSet<Graphic> indexedSet;
+			if (GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet))
+			{
+				indexedSet.DisableItem(graphic);
+				if (indexedSet.Capacity == 0)
+				{
+					GraphicRegistry.instance.m_Graphics.Remove(c);
+				}
+				GraphicRegistry.DisableRaycastGraphicForCanvas(c, graphic);
+			}
+		}
+
+		public static void DisableRaycastGraphicForCanvas(Canvas c, Graphic graphic)
+		{
+			if (c == null || !graphic.raycastTarget)
+			{
+				return;
+			}
+			IndexedSet<Graphic> indexedSet;
+			if (GraphicRegistry.instance.m_RaycastableGraphics.TryGetValue(c, out indexedSet))
+			{
+				indexedSet.DisableItem(graphic);
+				if (indexedSet.Capacity == 0)
 				{
 					GraphicRegistry.instance.m_RaycastableGraphics.Remove(c);
 				}

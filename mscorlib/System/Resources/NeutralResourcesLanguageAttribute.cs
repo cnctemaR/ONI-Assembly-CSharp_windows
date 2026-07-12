@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	public sealed class NeutralResourcesLanguageAttribute : Attribute
 	{
@@ -13,8 +11,8 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("cultureName");
 			}
-			this._culture = cultureName;
-			this._fallbackLoc = UltimateResourceFallbackLocation.MainAssembly;
+			this.CultureName = cultureName;
+			this.Location = UltimateResourceFallbackLocation.MainAssembly;
 		}
 
 		public NeutralResourcesLanguageAttribute(string cultureName, UltimateResourceFallbackLocation location)
@@ -25,30 +23,14 @@ namespace System.Resources
 			}
 			if (!Enum.IsDefined(typeof(UltimateResourceFallbackLocation), location))
 			{
-				throw new ArgumentException(Environment.GetResourceString("The NeutralResourcesLanguageAttribute specifies an invalid or unrecognized ultimate resource fallback location: \"{0}\".", new object[] { location }));
+				throw new ArgumentException(SR.Format("The NeutralResourcesLanguageAttribute specifies an invalid or unrecognized ultimate resource fallback location: \"{0}\".", location));
 			}
-			this._culture = cultureName;
-			this._fallbackLoc = location;
+			this.CultureName = cultureName;
+			this.Location = location;
 		}
 
-		public string CultureName
-		{
-			get
-			{
-				return this._culture;
-			}
-		}
+		public string CultureName { get; }
 
-		public UltimateResourceFallbackLocation Location
-		{
-			get
-			{
-				return this._fallbackLoc;
-			}
-		}
-
-		private string _culture;
-
-		private UltimateResourceFallbackLocation _fallbackLoc;
+		public UltimateResourceFallbackLocation Location { get; }
 	}
 }

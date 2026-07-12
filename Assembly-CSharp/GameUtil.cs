@@ -507,16 +507,54 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(GameUtil.GetStandardFloat(calories) + text, timeSlice);
 	}
 
-	public static string GetFormattedPlantConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
+	public static string GetFormattedDirectPlantConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
 	{
-		GameObject prefab = Assets.GetPrefab(plantTag);
-		IPlantConsumptionInstructions plantConsumptionInstructions = prefab.GetComponent<IPlantConsumptionInstructions>();
-		plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : prefab.GetSMI<IPlantConsumptionInstructions>());
-		if (plantConsumptionInstructions == null)
+		IPlantConsumptionInstructions[] plantConsumptionInstructions = GameUtil.GetPlantConsumptionInstructions(Assets.GetPrefab(plantTag));
+		if (plantConsumptionInstructions == null || plantConsumptionInstructions.Length == 0)
 		{
 			return "Error";
 		}
-		return plantConsumptionInstructions.GetFormattedConsumptionPerCycle(consumer_caloriesLossPerCaloriesPerKG);
+		foreach (IPlantConsumptionInstructions plantConsumptionInstructions2 in plantConsumptionInstructions)
+		{
+			if (plantConsumptionInstructions2.GetDietFoodType() == Diet.Info.FoodType.EatPlantDirectly)
+			{
+				return plantConsumptionInstructions2.GetFormattedConsumptionPerCycle(consumer_caloriesLossPerCaloriesPerKG);
+			}
+		}
+		return "Error";
+	}
+
+	public static string GetFormattedPlantStorageConsumptionValuePerCycle(Tag plantTag, float consumer_caloriesLossPerCaloriesPerKG, bool perCycle = true)
+	{
+		IPlantConsumptionInstructions[] plantConsumptionInstructions = GameUtil.GetPlantConsumptionInstructions(Assets.GetPrefab(plantTag));
+		if (plantConsumptionInstructions == null || plantConsumptionInstructions.Length == 0)
+		{
+			return "Error";
+		}
+		foreach (IPlantConsumptionInstructions plantConsumptionInstructions2 in plantConsumptionInstructions)
+		{
+			if (plantConsumptionInstructions2.GetDietFoodType() == Diet.Info.FoodType.EatPlantStorage)
+			{
+				return plantConsumptionInstructions2.GetFormattedConsumptionPerCycle(consumer_caloriesLossPerCaloriesPerKG);
+			}
+		}
+		return "Error";
+	}
+
+	public static IPlantConsumptionInstructions[] GetPlantConsumptionInstructions(GameObject prefab)
+	{
+		IPlantConsumptionInstructions[] components = prefab.GetComponents<IPlantConsumptionInstructions>();
+		List<IPlantConsumptionInstructions> allSMI = prefab.GetAllSMI<IPlantConsumptionInstructions>();
+		List<IPlantConsumptionInstructions> list = new List<IPlantConsumptionInstructions>();
+		if (components != null)
+		{
+			list.AddRange(components);
+		}
+		if (allSMI != null)
+		{
+			list.AddRange(allSMI);
+		}
+		return list.ToArray();
 	}
 
 	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
@@ -710,23 +748,23 @@ public static class GameUtil
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.NO_LIGHT;
 		}
-		if (lux < 500)
+		if (lux < DUPLICANTSTATS.STANDARD.Light.LOW_LIGHT)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.VERY_LOW_LIGHT;
 		}
-		if (lux < 1000)
+		if (lux < DUPLICANTSTATS.STANDARD.Light.MEDIUM_LIGHT)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.LOW_LIGHT;
 		}
-		if (lux < 10000)
+		if (lux < DUPLICANTSTATS.STANDARD.Light.HIGH_LIGHT)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.MEDIUM_LIGHT;
 		}
-		if (lux < 50000)
+		if (lux < DUPLICANTSTATS.STANDARD.Light.VERY_HIGH_LIGHT)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.HIGH_LIGHT;
 		}
-		if (lux < 100000)
+		if (lux < DUPLICANTSTATS.STANDARD.Light.MAX_LIGHT)
 		{
 			return UI.OVERLAYS.LIGHTING.RANGES.VERY_HIGH_LIGHT;
 		}
@@ -1179,48 +1217,55 @@ public static class GameUtil
 		return GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid) != -1;
 	}
 
+	private static bool CellCheck(int cell, bool stop_at_solid, bool stop_at_liquid)
+	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return false;
+		}
+		Element element = Grid.Element[cell];
+		return (!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Value.Contains(cell);
+	}
+
 	public static int FloodFillFind<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
-		GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
+		if (GameUtil.CellCheck(start_cell, stop_at_solid, stop_at_liquid))
 		{
-			cell = start_cell,
-			depth = 0
-		});
+			GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = start_cell,
+				depth = 0
+			});
+		}
 		int num = -1;
 		while (GameUtil.FloodFillNext.Value.Count > 0)
 		{
 			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Value.Dequeue();
-			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell))
+			if (!GameUtil.FloodFillVisited.Value.Contains(floodFillInfo.cell))
 			{
-				Element element = Grid.Element[floodFillInfo.cell];
-				if ((!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Value.Contains(floodFillInfo.cell))
+				GameUtil.FloodFillVisited.Value.Add(floodFillInfo.cell);
+				if (fn(floodFillInfo.cell, arg))
 				{
-					GameUtil.FloodFillVisited.Value.Add(floodFillInfo.cell);
-					if (fn(floodFillInfo.cell, arg))
+					num = floodFillInfo.cell;
+					break;
+				}
+				if (floodFillInfo.depth < max_depth)
+				{
+					GameUtil.FloodFillNeighbors.Value[0] = Grid.CellLeft(floodFillInfo.cell);
+					GameUtil.FloodFillNeighbors.Value[1] = Grid.CellAbove(floodFillInfo.cell);
+					GameUtil.FloodFillNeighbors.Value[2] = Grid.CellRight(floodFillInfo.cell);
+					GameUtil.FloodFillNeighbors.Value[3] = Grid.CellBelow(floodFillInfo.cell);
+					foreach (int num2 in GameUtil.FloodFillNeighbors.Value)
 					{
-						num = floodFillInfo.cell;
-						break;
+						if (GameUtil.CellCheck(num2, stop_at_solid, stop_at_liquid))
+						{
+							GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
+							{
+								cell = num2,
+								depth = floodFillInfo.depth + 1
+							});
+						}
 					}
-					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellLeft(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
-					});
-					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellRight(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
-					});
-					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellAbove(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
-					});
-					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = Grid.CellBelow(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
-					});
 				}
 			}
 		}
@@ -2478,13 +2523,14 @@ public static class GameUtil
 		return text3 + text4;
 	}
 
-	public static float GetThermalComfort(int cell, float tolerance = -0.08368001f)
+	public static float GetThermalComfort(Tag duplicantType, int cell, float tolerance)
 	{
+		DUPLICANTSTATS statsFor = DUPLICANTSTATS.GetStatsFor(duplicantType);
 		float num = 0f;
 		Element element = ElementLoader.FindElementByHash(SimHashes.Creature);
 		if (Grid.Element[cell].thermalConductivity != 0f)
 		{
-			num = SimUtil.CalculateEnergyFlowCreatures(cell, 310.15f, element.specificHeatCapacity, element.thermalConductivity, 1f, 0.0045f);
+			num = SimUtil.CalculateEnergyFlowCreatures(cell, statsFor.Temperature.Internal.IDEAL, element.specificHeatCapacity, element.thermalConductivity, statsFor.Temperature.SURFACE_AREA, statsFor.Temperature.SKIN_THICKNESS + 0.0025f);
 		}
 		num -= tolerance;
 		return num * 1000f;
@@ -2948,6 +2994,8 @@ public static class GameUtil
 	public static ThreadLocal<Queue<GameUtil.FloodFillInfo>> FloodFillNext = new ThreadLocal<Queue<GameUtil.FloodFillInfo>>(() => new Queue<GameUtil.FloodFillInfo>());
 
 	public static ThreadLocal<HashSet<int>> FloodFillVisited = new ThreadLocal<HashSet<int>>(() => new HashSet<int>());
+
+	public static ThreadLocal<List<int>> FloodFillNeighbors = new ThreadLocal<List<int>>(() => new List<int>(4) { -1, -1, -1, -1 });
 
 	public static TagSet foodTags = new TagSet(new string[]
 	{

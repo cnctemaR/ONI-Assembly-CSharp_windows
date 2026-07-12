@@ -447,7 +447,7 @@ public class SteamUGCService : MonoBehaviour
 			this.description = item.m_rgchDescription;
 			this.fileId = item.m_nPublishedFileId;
 			this.lastUpdateTime = (ulong)item.m_rtimeUpdated;
-			this.tags = new List<string>(item.m_rgchTags.Split(new char[] { ',' }));
+			this.tags = new List<string>(item.m_rgchTags.Split(',', StringSplitOptions.None));
 			this.previewImage = previewImage;
 		}
 

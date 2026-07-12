@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Globalization;
 
@@ -10,20 +8,65 @@ namespace Microsoft.SqlServer.Server
 {
 	internal class SmiMetaData
 	{
+		internal static SmiMetaData DefaultChar
+		{
+			get
+			{
+				return new SmiMetaData(SmiMetaData.DefaultChar_NoCollation.SqlDbType, SmiMetaData.DefaultChar_NoCollation.MaxLength, SmiMetaData.DefaultChar_NoCollation.Precision, SmiMetaData.DefaultChar_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
+			}
+		}
+
+		internal static SmiMetaData DefaultNChar
+		{
+			get
+			{
+				return new SmiMetaData(SmiMetaData.DefaultNChar_NoCollation.SqlDbType, SmiMetaData.DefaultNChar_NoCollation.MaxLength, SmiMetaData.DefaultNChar_NoCollation.Precision, SmiMetaData.DefaultNChar_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
+			}
+		}
+
+		internal static SmiMetaData DefaultNText
+		{
+			get
+			{
+				return new SmiMetaData(SmiMetaData.DefaultNText_NoCollation.SqlDbType, SmiMetaData.DefaultNText_NoCollation.MaxLength, SmiMetaData.DefaultNText_NoCollation.Precision, SmiMetaData.DefaultNText_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
+			}
+		}
+
 		internal static SmiMetaData DefaultNVarChar
 		{
 			get
 			{
-				return new SmiMetaData(SmiMetaData.DefaultNVarChar_NoCollation.SqlDbType, SmiMetaData.DefaultNVarChar_NoCollation.MaxLength, SmiMetaData.DefaultNVarChar_NoCollation.Precision, SmiMetaData.DefaultNVarChar_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth);
+				return new SmiMetaData(SmiMetaData.DefaultNVarChar_NoCollation.SqlDbType, SmiMetaData.DefaultNVarChar_NoCollation.MaxLength, SmiMetaData.DefaultNVarChar_NoCollation.Precision, SmiMetaData.DefaultNVarChar_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
 			}
 		}
 
-		internal SmiMetaData(SqlDbType dbType, long maxLength, byte precision, byte scale, long localeId, SqlCompareOptions compareOptions)
-			: this(dbType, maxLength, precision, scale, localeId, compareOptions, false, null, null)
+		internal static SmiMetaData DefaultText
+		{
+			get
+			{
+				return new SmiMetaData(SmiMetaData.DefaultText_NoCollation.SqlDbType, SmiMetaData.DefaultText_NoCollation.MaxLength, SmiMetaData.DefaultText_NoCollation.Precision, SmiMetaData.DefaultText_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
+			}
+		}
+
+		internal static SmiMetaData DefaultVarChar
+		{
+			get
+			{
+				return new SmiMetaData(SmiMetaData.DefaultVarChar_NoCollation.SqlDbType, SmiMetaData.DefaultVarChar_NoCollation.MaxLength, SmiMetaData.DefaultVarChar_NoCollation.Precision, SmiMetaData.DefaultVarChar_NoCollation.Scale, (long)CultureInfo.CurrentCulture.LCID, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth, null);
+			}
+		}
+
+		internal SmiMetaData(SqlDbType dbType, long maxLength, byte precision, byte scale, long localeId, SqlCompareOptions compareOptions, Type userDefinedType)
+			: this(dbType, maxLength, precision, scale, localeId, compareOptions, userDefinedType, false, null, null)
 		{
 		}
 
-		internal SmiMetaData(SqlDbType dbType, long maxLength, byte precision, byte scale, long localeId, SqlCompareOptions compareOptions, bool isMultiValued, IList<SmiExtendedMetaData> fieldTypes, SmiMetaDataPropertyCollection extendedProperties)
+		internal SmiMetaData(SqlDbType dbType, long maxLength, byte precision, byte scale, long localeId, SqlCompareOptions compareOptions, Type userDefinedType, bool isMultiValued, IList<SmiExtendedMetaData> fieldTypes, SmiMetaDataPropertyCollection extendedProperties)
+			: this(dbType, maxLength, precision, scale, localeId, compareOptions, userDefinedType, null, isMultiValued, fieldTypes, extendedProperties)
+		{
+		}
+
+		internal SmiMetaData(SqlDbType dbType, long maxLength, byte precision, byte scale, long localeId, SqlCompareOptions compareOptions, Type userDefinedType, string udtAssemblyQualifiedName, bool isMultiValued, IList<SmiExtendedMetaData> fieldTypes, SmiMetaDataPropertyCollection extendedProperties)
 		{
 			this.SetDefaultsForType(dbType);
 			switch (dbType)
@@ -51,11 +94,21 @@ namespace Microsoft.SqlServer.Server
 				this._compareOptions = compareOptions;
 				break;
 			case SqlDbType.Udt:
-				throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+				this._clrType = userDefinedType;
+				if (null != userDefinedType)
+				{
+					this._maxLength = (long)SerializationHelperSql9.GetUdtMaxLength(userDefinedType);
+				}
+				else
+				{
+					this._maxLength = maxLength;
+				}
+				this._udtAssemblyQualifiedName = udtAssemblyQualifiedName;
+				break;
 			case SqlDbType.Structured:
 				if (fieldTypes != null)
 				{
-					this._fieldMetaData = new ReadOnlyCollection<SmiExtendedMetaData>(fieldTypes);
+					this._fieldMetaData = new List<SmiExtendedMetaData>(fieldTypes).AsReadOnly();
 				}
 				this._isMultiValued = isMultiValued;
 				this._maxLength = (long)this._fieldMetaData.Count;
@@ -78,6 +131,33 @@ namespace Microsoft.SqlServer.Server
 				extendedProperties.SetReadOnly();
 				this._extendedProperties = extendedProperties;
 			}
+		}
+
+		internal bool IsValidMaxLengthForCtorGivenType(SqlDbType dbType, long maxLength)
+		{
+			bool flag = true;
+			switch (dbType)
+			{
+			case SqlDbType.Binary:
+				flag = 0L < maxLength && 8000L >= maxLength;
+				break;
+			case SqlDbType.Char:
+				flag = 0L < maxLength && 8000L >= maxLength;
+				break;
+			case SqlDbType.NChar:
+				flag = 0L < maxLength && 4000L >= maxLength;
+				break;
+			case SqlDbType.NVarChar:
+				flag = -1L == maxLength || (0L < maxLength && 4000L >= maxLength);
+				break;
+			case SqlDbType.VarBinary:
+				flag = -1L == maxLength || (0L < maxLength && 8000L >= maxLength);
+				break;
+			case SqlDbType.VarChar:
+				flag = -1L == maxLength || (0L < maxLength && 8000L >= maxLength);
+				break;
+			}
+			return flag;
 		}
 
 		internal SqlCompareOptions CompareOptions
@@ -128,6 +208,64 @@ namespace Microsoft.SqlServer.Server
 			}
 		}
 
+		internal Type Type
+		{
+			get
+			{
+				if (null == this._clrType && SqlDbType.Udt == this._databaseType && this._udtAssemblyQualifiedName != null)
+				{
+					this._clrType = Type.GetType(this._udtAssemblyQualifiedName, true);
+				}
+				return this._clrType;
+			}
+		}
+
+		internal Type TypeWithoutThrowing
+		{
+			get
+			{
+				if (null == this._clrType && SqlDbType.Udt == this._databaseType && this._udtAssemblyQualifiedName != null)
+				{
+					this._clrType = Type.GetType(this._udtAssemblyQualifiedName, false);
+				}
+				return this._clrType;
+			}
+		}
+
+		internal string TypeName
+		{
+			get
+			{
+				string text;
+				if (SqlDbType.Udt == this._databaseType)
+				{
+					text = this.Type.FullName;
+				}
+				else
+				{
+					text = SmiMetaData.s_typeNameByDatabaseType[(int)this._databaseType];
+				}
+				return text;
+			}
+		}
+
+		internal string AssemblyQualifiedName
+		{
+			get
+			{
+				string text = null;
+				if (SqlDbType.Udt == this._databaseType)
+				{
+					if (this._udtAssemblyQualifiedName == null && this._clrType != null)
+					{
+						this._udtAssemblyQualifiedName = this._clrType.AssemblyQualifiedName;
+					}
+					text = this._udtAssemblyQualifiedName;
+				}
+				return text;
+			}
+		}
+
 		internal bool IsMultiValued
 		{
 			get
@@ -170,6 +308,7 @@ namespace Microsoft.SqlServer.Server
 			this._scale = scale;
 			this._compareOptions = compareOptions;
 			this._localeId = 0L;
+			this._clrType = null;
 			this._isMultiValued = false;
 			this._fieldMetaData = SmiMetaData.s_emptyFieldList;
 			this._extendedProperties = SmiMetaDataPropertyCollection.EmptyInstance;
@@ -184,6 +323,7 @@ namespace Microsoft.SqlServer.Server
 			this._scale = defaultForType.Scale;
 			this._localeId = defaultForType.LocaleId;
 			this._compareOptions = defaultForType.CompareOptions;
+			this._clrType = null;
 			this._isMultiValued = defaultForType._isMultiValued;
 			this._fieldMetaData = defaultForType._fieldMetaData;
 			this._extendedProperties = defaultForType._extendedProperties;
@@ -200,6 +340,10 @@ namespace Microsoft.SqlServer.Server
 		private long _localeId;
 
 		private SqlCompareOptions _compareOptions;
+
+		private Type _clrType;
+
+		private string _udtAssemblyQualifiedName;
 
 		private bool _isMultiValued;
 
@@ -233,7 +377,7 @@ namespace Microsoft.SqlServer.Server
 
 		internal const long MaxNameLength = 128L;
 
-		private static readonly IList<SmiExtendedMetaData> s_emptyFieldList = new SmiExtendedMetaData[0];
+		private static readonly IList<SmiExtendedMetaData> s_emptyFieldList = new List<SmiExtendedMetaData>().AsReadOnly();
 
 		private static byte[] s_maxLenFromPrecision = new byte[]
 		{
@@ -295,6 +439,8 @@ namespace Microsoft.SqlServer.Server
 
 		internal static readonly SmiMetaData DefaultXml = new SmiMetaData(SqlDbType.Xml, -1L, 0, 0, SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth);
 
+		internal static readonly SmiMetaData DefaultUdt_NoType = new SmiMetaData(SqlDbType.Udt, 0L, 0, 0, SqlCompareOptions.None);
+
 		internal static readonly SmiMetaData DefaultStructured = new SmiMetaData(SqlDbType.Structured, 0L, 0, 0, SqlCompareOptions.None);
 
 		internal static readonly SmiMetaData DefaultDate = new SmiMetaData(SqlDbType.Date, 3L, 10, 0, SqlCompareOptions.None);
@@ -336,12 +482,51 @@ namespace Microsoft.SqlServer.Server
 			SmiMetaData.DefaultNVarChar_NoCollation,
 			SmiMetaData.DefaultNVarChar_NoCollation,
 			SmiMetaData.DefaultNVarChar_NoCollation,
-			null,
+			SmiMetaData.DefaultUdt_NoType,
 			SmiMetaData.DefaultStructured,
 			SmiMetaData.DefaultDate,
 			SmiMetaData.DefaultTime,
 			SmiMetaData.DefaultDateTime2,
 			SmiMetaData.DefaultDateTimeOffset
+		};
+
+		private static string[] s_typeNameByDatabaseType = new string[]
+		{
+			"bigint",
+			"binary",
+			"bit",
+			"char",
+			"datetime",
+			"decimal",
+			"float",
+			"image",
+			"int",
+			"money",
+			"nchar",
+			"ntext",
+			"nvarchar",
+			"real",
+			"uniqueidentifier",
+			"smalldatetime",
+			"smallint",
+			"smallmoney",
+			"text",
+			"timestamp",
+			"tinyint",
+			"varbinary",
+			"varchar",
+			"sql_variant",
+			null,
+			"xml",
+			null,
+			null,
+			null,
+			string.Empty,
+			string.Empty,
+			"date",
+			"time",
+			"datetime2",
+			"datetimeoffset"
 		};
 	}
 }

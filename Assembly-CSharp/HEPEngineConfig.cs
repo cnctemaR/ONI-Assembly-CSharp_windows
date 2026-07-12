@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class HEPEngineConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -39,6 +39,8 @@ public class HEPEngineConfig : IBuildingConfig
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.UseHighEnergyParticleInputPort = true;
 		buildingDef.HighEnergyParticleInputOffset = new CellOffset(0, 3);
+		buildingDef.DiseaseCellVisName = "RadiationSickness";
+		buildingDef.UtilityOutputOffset = buildingDef.HighEnergyParticleInputOffset;
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("HEP_STORAGE", new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.HEPENGINE.LOGIC_PORT_STORAGE_INACTIVE, false, false) };
 		return buildingDef;
 	}

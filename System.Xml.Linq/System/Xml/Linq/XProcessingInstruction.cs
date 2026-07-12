@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -88,6 +90,19 @@ namespace System.Xml.Linq
 			writer.WriteProcessingInstruction(this.target, this.data);
 		}
 
+		public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			return writer.WriteProcessingInstructionAsync(this.target, this.data);
+		}
+
 		internal override XNode CloneNode()
 		{
 			return new XProcessingInstruction(this);
@@ -107,9 +122,9 @@ namespace System.Xml.Linq
 		private static void ValidateName(string name)
 		{
 			XmlConvert.VerifyNCName(name);
-			if (string.Compare(name, "xml", StringComparison.OrdinalIgnoreCase) == 0)
+			if (string.Equals(name, "xml", StringComparison.OrdinalIgnoreCase))
 			{
-				throw new ArgumentException(Res.GetString("Argument_InvalidPIName", new object[] { name }));
+				throw new ArgumentException(global::SR.Format("'{0}' is an invalid name for a processing instruction.", name));
 			}
 		}
 

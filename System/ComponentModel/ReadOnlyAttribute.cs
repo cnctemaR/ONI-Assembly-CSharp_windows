@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public ReadOnlyAttribute(bool isReadOnly)
 		{
-			this.isReadOnly = isReadOnly;
+			this.IsReadOnly = isReadOnly;
 		}
 
-		public bool IsReadOnly
-		{
-			get
-			{
-				return this.isReadOnly;
-			}
-		}
+		public bool IsReadOnly { get; }
 
 		public override bool Equals(object value)
 		{
@@ -25,7 +19,9 @@ namespace System.ComponentModel
 				return true;
 			}
 			ReadOnlyAttribute readOnlyAttribute = value as ReadOnlyAttribute;
-			return readOnlyAttribute != null && readOnlyAttribute.IsReadOnly == this.IsReadOnly;
+			bool? flag = ((readOnlyAttribute != null) ? new bool?(readOnlyAttribute.IsReadOnly) : null);
+			bool isReadOnly = this.IsReadOnly;
+			return (flag.GetValueOrDefault() == isReadOnly) & (flag != null);
 		}
 
 		public override int GetHashCode()
@@ -37,8 +33,6 @@ namespace System.ComponentModel
 		{
 			return this.IsReadOnly == ReadOnlyAttribute.Default.IsReadOnly;
 		}
-
-		private bool isReadOnly;
 
 		public static readonly ReadOnlyAttribute Yes = new ReadOnlyAttribute(true);
 

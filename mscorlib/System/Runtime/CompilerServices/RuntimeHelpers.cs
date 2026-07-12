@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.Serialization;
 using System.Security;
 
 namespace System.Runtime.CompilerServices
@@ -79,51 +80,39 @@ namespace System.Runtime.CompilerServices
 			return RuntimeHelpers.SufficientExecutionStack();
 		}
 
-		[MonoTODO("Currently a no-op")]
 		public static void ExecuteCodeWithGuaranteedCleanup(RuntimeHelpers.TryCode code, RuntimeHelpers.CleanupCode backoutCode, object userData)
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public static void PrepareConstrainedRegions()
 		{
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[MonoTODO("Currently a no-op")]
 		public static void PrepareConstrainedRegionsNoOP()
 		{
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[MonoTODO("Currently a no-op")]
 		public static void ProbeForSufficientStack()
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		[SecurityCritical]
 		public static void PrepareDelegate(Delegate d)
 		{
-			if (d == null)
-			{
-				throw new ArgumentNullException("d");
-			}
 		}
 
 		[SecurityCritical]
-		[MonoTODO("Currently a no-op")]
 		public static void PrepareContractedDelegate(Delegate d)
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		public static void PrepareMethod(RuntimeMethodHandle method)
 		{
 		}
 
-		[MonoTODO("Currently a no-op")]
 		public static void PrepareMethod(RuntimeMethodHandle method, RuntimeTypeHandle[] instantiation)
 		{
 		}
@@ -143,6 +132,24 @@ namespace System.Runtime.CompilerServices
 		public static bool IsReferenceOrContainsReferences<T>()
 		{
 			return !typeof(T).IsValueType || RuntimeTypeHandle.HasReferences(typeof(T) as RuntimeType);
+		}
+
+		public static object GetUninitializedObject(Type type)
+		{
+			return FormatterServices.GetUninitializedObject(type);
+		}
+
+		public static T[] GetSubArray<T>(T[] array, Range range)
+		{
+			Type elementType = array.GetType().GetElementType();
+			Span<T> span = array.AsSpan<T>(range);
+			if (elementType.IsValueType)
+			{
+				return span.ToArray();
+			}
+			T[] array2 = (T[])Array.CreateInstance(elementType, span.Length);
+			span.CopyTo(array2);
+			return array2;
 		}
 
 		public delegate void TryCode(object userData);

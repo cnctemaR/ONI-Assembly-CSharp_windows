@@ -43,9 +43,22 @@ public class BeanPlantConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Crop, "BeanPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.DESC, Assets.GetAnim("seed_beanplant_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 3, global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true, null);
-		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.BEAN);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
+		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Crop;
+		string text5 = "BeanPlantSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_beanplant_kanim");
+		string text8 = "object";
+		int num6 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		text4 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC;
+		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 3, text4, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true, null);
+		EntityTemplates.ExtendEntityToFood(gameObject4, FOOD.FOOD_TYPES.BEAN);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject4, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

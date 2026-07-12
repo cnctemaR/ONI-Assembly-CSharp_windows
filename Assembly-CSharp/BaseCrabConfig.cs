@@ -90,7 +90,7 @@ public static class BaseCrabConfig
 		hashSet.Add(RotPileConfig.ID.ToTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
 		};
 	}
 
@@ -102,7 +102,7 @@ public static class BaseCrabConfig
 		hashSet.Add(SimHashes.SlimeMold.CreateTag());
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
 		};
 	}
 

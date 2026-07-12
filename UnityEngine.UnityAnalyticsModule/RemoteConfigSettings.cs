@@ -9,9 +9,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
-	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
 	[ExcludeFromDocs]
+	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
+	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class RemoteConfigSettings : IDisposable
 	{

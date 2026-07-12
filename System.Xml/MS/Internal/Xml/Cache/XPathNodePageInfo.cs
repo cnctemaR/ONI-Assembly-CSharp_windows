@@ -6,16 +6,16 @@ namespace MS.Internal.Xml.Cache
 	{
 		public XPathNodePageInfo(XPathNode[] pagePrev, int pageNum)
 		{
-			this.pagePrev = pagePrev;
-			this.pageNum = pageNum;
-			this.nodeCount = 1;
+			this._pagePrev = pagePrev;
+			this._pageNum = pageNum;
+			this._nodeCount = 1;
 		}
 
 		public int PageNumber
 		{
 			get
 			{
-				return this.pageNum;
+				return this._pageNum;
 			}
 		}
 
@@ -23,11 +23,11 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.nodeCount;
+				return this._nodeCount;
 			}
 			set
 			{
-				this.nodeCount = value;
+				this._nodeCount = value;
 			}
 		}
 
@@ -35,7 +35,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pagePrev;
+				return this._pagePrev;
 			}
 		}
 
@@ -43,20 +43,20 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageNext;
+				return this._pageNext;
 			}
 			set
 			{
-				this.pageNext = value;
+				this._pageNext = value;
 			}
 		}
 
-		private int pageNum;
+		private int _pageNum;
 
-		private int nodeCount;
+		private int _nodeCount;
 
-		private XPathNode[] pagePrev;
+		private XPathNode[] _pagePrev;
 
-		private XPathNode[] pageNext;
+		private XPathNode[] _pageNext;
 	}
 }

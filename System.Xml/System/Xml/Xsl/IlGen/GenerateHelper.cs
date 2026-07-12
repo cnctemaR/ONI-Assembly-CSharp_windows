@@ -226,26 +226,26 @@ namespace System.Xml.Xsl.IlGen
 				if (opcodeBranch.Value == OpCodes.Beq.Value)
 				{
 					opcodeBranch = OpCodes.Brfalse;
-					goto IL_0086;
+					goto IL_007A;
 				}
 				if (opcodeBranch.Value == OpCodes.Beq_S.Value)
 				{
 					opcodeBranch = OpCodes.Brfalse_S;
-					goto IL_0086;
+					goto IL_007A;
 				}
 				if (opcodeBranch.Value == OpCodes.Bne_Un.Value)
 				{
 					opcodeBranch = OpCodes.Brtrue;
-					goto IL_0086;
+					goto IL_007A;
 				}
 				if (opcodeBranch.Value == OpCodes.Bne_Un_S.Value)
 				{
 					opcodeBranch = OpCodes.Brtrue_S;
-					goto IL_0086;
+					goto IL_007A;
 				}
 			}
 			this.LoadInteger(i4);
-			IL_0086:
+			IL_007A:
 			this.Emit(opcodeBranch, lblBranch);
 		}
 

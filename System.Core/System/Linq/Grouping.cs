@@ -5,8 +5,8 @@ using System.Diagnostics;
 
 namespace System.Linq
 {
-	[DebuggerTypeProxy(typeof(SystemLinq_GroupingDebugView<, >))]
 	[DebuggerDisplay("Key = {Key}")]
+	[DebuggerTypeProxy(typeof(SystemLinq_GroupingDebugView<, >))]
 	internal class Grouping<TKey, TElement> : IGrouping<TKey, TElement>, IEnumerable<TElement>, IEnumerable, IList<TElement>, ICollection<TElement>
 	{
 		internal Grouping()

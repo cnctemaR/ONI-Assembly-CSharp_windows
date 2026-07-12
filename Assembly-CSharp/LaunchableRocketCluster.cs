@@ -156,16 +156,19 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			{
 				craftInterface.Trigger(-1277991738, base.master.gameObject);
 				WorldContainer component = craftInterface.GetComponent<WorldContainer>();
-				List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
-				MinionMigrationEventArgs e = new MinionMigrationEventArgs
+				if (component != null)
 				{
-					prevWorldId = component.id,
-					targetWorldId = component.id
-				};
-				foreach (MinionIdentity minionIdentity in worldItems)
-				{
-					e.minionId = minionIdentity;
-					Game.Instance.Trigger(586301400, e);
+					List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
+					MinionMigrationEventArgs e = new MinionMigrationEventArgs
+					{
+						prevWorldId = component.id,
+						targetWorldId = component.id
+					};
+					foreach (MinionIdentity minionIdentity in worldItems)
+					{
+						e.minionId = minionIdentity;
+						Game.Instance.Trigger(586301400, e);
+					}
 				}
 			}
 			Game.Instance.Trigger(-1277991738, base.gameObject);
@@ -409,22 +412,29 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 				{
 					craftInterface.Trigger(-887025858, smi.gameObject);
 					WorldContainer component = craftInterface.GetComponent<WorldContainer>();
-					List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
-					MinionMigrationEventArgs e = new MinionMigrationEventArgs
+					if (component != null)
 					{
-						prevWorldId = component.id,
-						targetWorldId = component.id
-					};
-					foreach (MinionIdentity minionIdentity in worldItems)
-					{
-						e.minionId = minionIdentity;
-						Game.Instance.Trigger(586301400, e);
+						List<MinionIdentity> worldItems = Components.MinionIdentities.GetWorldItems(component.id, false);
+						MinionMigrationEventArgs e = new MinionMigrationEventArgs
+						{
+							prevWorldId = component.id,
+							targetWorldId = component.id
+						};
+						foreach (MinionIdentity minionIdentity in worldItems)
+						{
+							e.minionId = minionIdentity;
+							Game.Instance.Trigger(586301400, e);
+						}
 					}
 				}
 				Game.Instance.Trigger(-887025858, smi.gameObject);
 				if (craftInterface != null)
 				{
-					craftInterface.GetPassengerModule().RemovePassengersOnOtherWorlds();
+					PassengerRocketModule passengerModule = craftInterface.GetPassengerModule();
+					if (passengerModule != null)
+					{
+						passengerModule.RemovePassengersOnOtherWorlds();
+					}
 				}
 				smi.GoTo(this.grounded);
 			});

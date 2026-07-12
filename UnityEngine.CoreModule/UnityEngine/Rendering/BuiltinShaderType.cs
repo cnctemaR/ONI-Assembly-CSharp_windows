@@ -6,6 +6,7 @@ namespace UnityEngine.Rendering
 	{
 		DeferredShading,
 		DeferredReflections,
+		[Obsolete("LegacyDeferredLighting has been removed.", false)]
 		LegacyDeferredLighting,
 		ScreenSpaceShadows,
 		DepthNormals,

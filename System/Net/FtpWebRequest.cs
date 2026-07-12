@@ -1,175 +1,35 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Net.Cache;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
+using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
-using Mono.Net.Security;
-using Mono.Security.Interface;
 using Unity;
 
 namespace System.Net
 {
 	public sealed class FtpWebRequest : WebRequest
 	{
-		internal FtpWebRequest(Uri uri)
-		{
-			this.timeout = 100000;
-			this.rwTimeout = 300000;
-			this.binary = true;
-			this.usePassive = true;
-			this.method = "RETR";
-			this.locker = new object();
-			this.dataEncoding = Encoding.UTF8;
-			base..ctor();
-			this.requestUri = uri;
-			this.proxy = GlobalProxySelection.Select;
-		}
-
-		private static Exception GetMustImplement()
-		{
-			return new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public X509CertificateCollection ClientCertificates
+		internal FtpMethodInfo MethodInfo
 		{
 			get
 			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-			set
-			{
-				throw FtpWebRequest.GetMustImplement();
+				return this._methodInfo;
 			}
 		}
 
-		[MonoTODO]
-		public override string ConnectionGroupName
-		{
-			get
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-			set
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-		}
-
-		public override string ContentType
-		{
-			get
-			{
-				throw new NotSupportedException();
-			}
-			set
-			{
-				throw new NotSupportedException();
-			}
-		}
-
-		public override long ContentLength
-		{
-			get
-			{
-				return 0L;
-			}
-			set
-			{
-			}
-		}
-
-		public long ContentOffset
-		{
-			get
-			{
-				return this.offset;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				if (value < 0L)
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-				this.offset = value;
-			}
-		}
-
-		public override ICredentials Credentials
-		{
-			get
-			{
-				return this.credentials;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				if (value == null)
-				{
-					throw new ArgumentNullException();
-				}
-				if (!(value is NetworkCredential))
-				{
-					throw new ArgumentException();
-				}
-				this.credentials = value as NetworkCredential;
-			}
-		}
-
-		[MonoTODO]
 		public new static RequestCachePolicy DefaultCachePolicy
 		{
 			get
 			{
-				throw FtpWebRequest.GetMustImplement();
+				return WebRequest.DefaultCachePolicy;
 			}
 			set
 			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-		}
-
-		public bool EnableSsl
-		{
-			get
-			{
-				return this.enableSsl;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				this.enableSsl = value;
-			}
-		}
-
-		[MonoTODO]
-		public override WebHeaderCollection Headers
-		{
-			get
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-			set
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-		}
-
-		[MonoTODO("We don't support KeepAlive = true")]
-		public bool KeepAlive
-		{
-			get
-			{
-				return this.keepAlive;
-			}
-			set
-			{
-				this.CheckRequestStarted();
 			}
 		}
 
@@ -177,62 +37,26 @@ namespace System.Net
 		{
 			get
 			{
-				return this.method;
+				return this._methodInfo.Method;
 			}
 			set
 			{
-				this.CheckRequestStarted();
-				if (value == null)
+				if (string.IsNullOrEmpty(value))
 				{
-					throw new ArgumentNullException("Method string cannot be null");
+					throw new ArgumentException("FTP Method names cannot be null or empty.", "value");
 				}
-				if (value.Length == 0 || Array.BinarySearch<string>(FtpWebRequest.supportedCommands, value) < 0)
+				if (this.InUse)
 				{
-					throw new ArgumentException("Method not supported", "value");
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
-				this.method = value;
-			}
-		}
-
-		public override bool PreAuthenticate
-		{
-			get
-			{
-				throw new NotSupportedException();
-			}
-			set
-			{
-				throw new NotSupportedException();
-			}
-		}
-
-		public override IWebProxy Proxy
-		{
-			get
-			{
-				return this.proxy;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				this.proxy = value;
-			}
-		}
-
-		public int ReadWriteTimeout
-		{
-			get
-			{
-				return this.rwTimeout;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				if (value < -1)
+				try
 				{
-					throw new ArgumentOutOfRangeException();
+					this._methodInfo = FtpMethodInfo.GetMethodInfo(value);
 				}
-				this.rwTimeout = value;
+				catch (ArgumentException)
+				{
+					throw new ArgumentException("This method is not supported.", "value");
+				}
 			}
 		}
 
@@ -240,16 +64,43 @@ namespace System.Net
 		{
 			get
 			{
-				return this.renameTo;
+				return this._renameTo;
 			}
 			set
 			{
-				this.CheckRequestStarted();
-				if (value == null || value.Length == 0)
+				if (this.InUse)
 				{
-					throw new ArgumentException("RenameTo value can't be null or empty", "RenameTo");
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
-				this.renameTo = value;
+				if (string.IsNullOrEmpty(value))
+				{
+					throw new ArgumentException("The RenameTo filename cannot be null or empty.", "value");
+				}
+				this._renameTo = value;
+			}
+		}
+
+		public override ICredentials Credentials
+		{
+			get
+			{
+				return this._authInfo;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				if (value == CredentialCache.DefaultNetworkCredentials)
+				{
+					throw new ArgumentException("Default credentials are not supported on an FTP request.", "value");
+				}
+				this._authInfo = value;
 			}
 		}
 
@@ -257,54 +108,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.requestUri;
-			}
-		}
-
-		public ServicePoint ServicePoint
-		{
-			get
-			{
-				return this.GetServicePoint();
-			}
-		}
-
-		public bool UsePassive
-		{
-			get
-			{
-				return this.usePassive;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				this.usePassive = value;
-			}
-		}
-
-		[MonoTODO]
-		public override bool UseDefaultCredentials
-		{
-			get
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-			set
-			{
-				throw FtpWebRequest.GetMustImplement();
-			}
-		}
-
-		public bool UseBinary
-		{
-			get
-			{
-				return this.binary;
-			}
-			set
-			{
-				this.CheckRequestStarted();
-				this.binary = value;
+				return this._uri;
 			}
 		}
 
@@ -312,1109 +116,1394 @@ namespace System.Net
 		{
 			get
 			{
-				return this.timeout;
+				return this._timeout;
 			}
 			set
 			{
-				this.CheckRequestStarted();
-				if (value < -1)
+				if (this.InUse)
 				{
-					throw new ArgumentOutOfRangeException();
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
-				this.timeout = value;
+				if (value < 0 && value != -1)
+				{
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value >= 0.");
+				}
+				if (this._timeout != value)
+				{
+					this._timeout = value;
+					this._timerQueue = null;
+				}
 			}
 		}
 
-		private string DataType
+		internal int RemainingTimeout
 		{
 			get
 			{
-				if (!this.binary)
-				{
-					return "A";
-				}
-				return "I";
+				return this._remainingTimeout;
 			}
 		}
 
-		private FtpWebRequest.RequestState State
+		public int ReadWriteTimeout
 		{
 			get
 			{
-				object obj = this.locker;
-				FtpWebRequest.RequestState requestState;
-				lock (obj)
-				{
-					requestState = this.requestState;
-				}
-				return requestState;
+				return this._readWriteTimeout;
 			}
 			set
 			{
-				object obj = this.locker;
-				lock (obj)
+				if (this._getResponseStarted)
 				{
-					this.CheckIfAborted();
-					this.CheckFinalState();
-					this.requestState = value;
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				if (value <= 0 && value != -1)
+				{
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0.");
+				}
+				this._readWriteTimeout = value;
+			}
+		}
+
+		public long ContentOffset
+		{
+			get
+			{
+				return this._contentOffset;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				if (value < 0L)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
+				this._contentOffset = value;
+			}
+		}
+
+		public override long ContentLength
+		{
+			get
+			{
+				return this._contentLength;
+			}
+			set
+			{
+				this._contentLength = value;
+			}
+		}
+
+		public override IWebProxy Proxy
+		{
+			get
+			{
+				return null;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
 			}
 		}
 
-		public override void Abort()
+		public override string ConnectionGroupName
 		{
-			object obj = this.locker;
-			lock (obj)
+			get
 			{
-				if (this.State == FtpWebRequest.RequestState.TransferInProgress)
+				return this._connectionGroupName;
+			}
+			set
+			{
+				if (this.InUse)
 				{
-					this.SendCommand(false, "ABOR", Array.Empty<string>());
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
-				if (!this.InFinalState())
-				{
-					this.State = FtpWebRequest.RequestState.Aborted;
-					this.ftpResponse = new FtpWebResponse(this, this.requestUri, this.method, FtpStatusCode.FileActionAborted, "Aborted by request");
-				}
+				this._connectionGroupName = value;
 			}
 		}
 
-		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
+		public ServicePoint ServicePoint
 		{
-			if (this.asyncResult != null && !this.asyncResult.IsCompleted)
+			get
 			{
-				throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress");
-			}
-			this.CheckIfAborted();
-			this.asyncResult = new FtpAsyncResult(callback, state);
-			object obj = this.locker;
-			lock (obj)
-			{
-				if (this.InFinalState())
+				if (this._servicePoint == null)
 				{
-					this.asyncResult.SetCompleted(true, this.ftpResponse);
+					this._servicePoint = ServicePointManager.FindServicePoint(this._uri);
 				}
-				else
-				{
-					if (this.State == FtpWebRequest.RequestState.Before)
-					{
-						this.State = FtpWebRequest.RequestState.Scheduled;
-					}
-					new Thread(new ThreadStart(this.ProcessRequest))
-					{
-						IsBackground = true
-					}.Start();
-				}
+				return this._servicePoint;
 			}
-			return this.asyncResult;
 		}
 
-		public override WebResponse EndGetResponse(IAsyncResult asyncResult)
+		internal bool Aborted
 		{
-			if (asyncResult == null)
+			get
 			{
-				throw new ArgumentNullException("AsyncResult cannot be null!");
+				return this._aborted;
 			}
-			if (!(asyncResult is FtpAsyncResult) || asyncResult != this.asyncResult)
+		}
+
+		internal FtpWebRequest(Uri uri)
+		{
+			this._timeout = 100000;
+			this._passive = true;
+			this._binary = true;
+			this._timerQueue = FtpWebRequest.s_DefaultTimerQueue;
+			this._readWriteTimeout = 300000;
+			base..ctor();
+			if (NetEventSource.IsEnabled)
 			{
-				throw new ArgumentException("AsyncResult is from another request!");
+				NetEventSource.Info(this, uri, ".ctor");
 			}
-			FtpAsyncResult ftpAsyncResult = (FtpAsyncResult)asyncResult;
-			if (!ftpAsyncResult.WaitUntilComplete(this.timeout, false))
+			if (uri.Scheme != Uri.UriSchemeFtp)
 			{
-				this.Abort();
-				throw new WebException("Transfer timed out.", WebExceptionStatus.Timeout);
+				throw new ArgumentOutOfRangeException("uri");
 			}
-			this.CheckIfAborted();
-			asyncResult = null;
-			if (ftpAsyncResult.GotException)
+			this._timerCallback = new TimerThread.Callback(this.TimerCallback);
+			this._syncObject = new object();
+			NetworkCredential networkCredential = null;
+			this._uri = uri;
+			this._methodInfo = FtpMethodInfo.GetMethodInfo("RETR");
+			if (this._uri.UserInfo != null && this._uri.UserInfo.Length != 0)
 			{
-				throw ftpAsyncResult.Exception;
+				string userInfo = this._uri.UserInfo;
+				string text = userInfo;
+				string text2 = "";
+				int num = userInfo.IndexOf(':');
+				if (num != -1)
+				{
+					text = Uri.UnescapeDataString(userInfo.Substring(0, num));
+					num++;
+					text2 = Uri.UnescapeDataString(userInfo.Substring(num, userInfo.Length - num));
+				}
+				networkCredential = new NetworkCredential(text, text2);
 			}
-			return ftpAsyncResult.Response;
+			if (networkCredential == null)
+			{
+				networkCredential = FtpWebRequest.s_defaultFtpNetworkCredential;
+			}
+			this._authInfo = networkCredential;
 		}
 
 		public override WebResponse GetResponse()
 		{
-			IAsyncResult asyncResult = this.BeginGetResponse(null, null);
-			return this.EndGetResponse(asyncResult);
-		}
-
-		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
-		{
-			if (this.method != "STOR" && this.method != "STOU" && this.method != "APPE")
+			if (NetEventSource.IsEnabled)
 			{
-				throw new ProtocolViolationException();
-			}
-			object obj = this.locker;
-			lock (obj)
-			{
-				this.CheckIfAborted();
-				if (this.State != FtpWebRequest.RequestState.Before)
+				if (NetEventSource.IsEnabled)
 				{
-					throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress");
+					NetEventSource.Enter(this, null, "GetResponse");
 				}
-				this.State = FtpWebRequest.RequestState.Scheduled;
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Info(this, FormattableStringFactory.Create("Method: {0}", new object[] { this._methodInfo.Method }), "GetResponse");
+				}
 			}
-			this.asyncResult = new FtpAsyncResult(callback, state);
-			new Thread(new ThreadStart(this.ProcessRequest))
+			try
 			{
-				IsBackground = true
-			}.Start();
-			return this.asyncResult;
+				this.CheckError();
+				if (this._ftpWebResponse != null)
+				{
+					return this._ftpWebResponse;
+				}
+				if (this._getResponseStarted)
+				{
+					throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress.");
+				}
+				this._getResponseStarted = true;
+				this._startTime = DateTime.UtcNow;
+				this._remainingTimeout = this.Timeout;
+				if (this.Timeout != -1)
+				{
+					this._remainingTimeout = this.Timeout - (int)(DateTime.UtcNow - this._startTime).TotalMilliseconds;
+					if (this._remainingTimeout <= 0)
+					{
+						throw ExceptionHelper.TimeoutException;
+					}
+				}
+				FtpWebRequest.RequestStage requestStage = this.FinishRequestStage(FtpWebRequest.RequestStage.RequestStarted);
+				if (requestStage >= FtpWebRequest.RequestStage.RequestStarted)
+				{
+					if (requestStage < FtpWebRequest.RequestStage.ReadReady)
+					{
+						object syncObject = this._syncObject;
+						lock (syncObject)
+						{
+							if (this._requestStage < FtpWebRequest.RequestStage.ReadReady)
+							{
+								this._readAsyncResult = new LazyAsyncResult(null, null, null);
+							}
+						}
+						if (this._readAsyncResult != null)
+						{
+							this._readAsyncResult.InternalWaitForCompletion();
+						}
+						this.CheckError();
+					}
+				}
+				else
+				{
+					this.SubmitRequest(false);
+					if (this._methodInfo.IsUpload)
+					{
+						this.FinishRequestStage(FtpWebRequest.RequestStage.WriteReady);
+					}
+					else
+					{
+						this.FinishRequestStage(FtpWebRequest.RequestStage.ReadReady);
+					}
+					this.CheckError();
+					this.EnsureFtpWebResponse(null);
+				}
+			}
+			catch (Exception ex)
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "GetResponse");
+				}
+				if (this._exception == null)
+				{
+					if (NetEventSource.IsEnabled)
+					{
+						NetEventSource.Error(this, ex, "GetResponse");
+					}
+					this.SetException(ex);
+					this.FinishRequestStage(FtpWebRequest.RequestStage.CheckForError);
+				}
+				throw;
+			}
+			finally
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, this._ftpWebResponse, "GetResponse");
+				}
+			}
+			return this._ftpWebResponse;
 		}
 
-		public override Stream EndGetRequestStream(IAsyncResult asyncResult)
+		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
 		{
-			if (asyncResult == null)
+			if (NetEventSource.IsEnabled)
 			{
-				throw new ArgumentNullException("asyncResult");
+				NetEventSource.Enter(this, null, "BeginGetResponse");
+				NetEventSource.Info(this, FormattableStringFactory.Create("Method: {0}", new object[] { this._methodInfo.Method }), "BeginGetResponse");
 			}
-			if (!(asyncResult is FtpAsyncResult))
+			ContextAwareResult contextAwareResult;
+			try
 			{
-				throw new ArgumentException("asyncResult");
+				if (this._ftpWebResponse != null)
+				{
+					contextAwareResult = new ContextAwareResult(this, state, callback);
+					contextAwareResult.InvokeCallback(this._ftpWebResponse);
+					return contextAwareResult;
+				}
+				if (this._getResponseStarted)
+				{
+					throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress.");
+				}
+				this._getResponseStarted = true;
+				this.CheckError();
+				FtpWebRequest.RequestStage requestStage = this.FinishRequestStage(FtpWebRequest.RequestStage.RequestStarted);
+				contextAwareResult = new ContextAwareResult(true, true, this, state, callback);
+				this._readAsyncResult = contextAwareResult;
+				if (requestStage >= FtpWebRequest.RequestStage.RequestStarted)
+				{
+					contextAwareResult.StartPostingAsyncOp();
+					contextAwareResult.FinishPostingAsyncOp();
+					if (requestStage >= FtpWebRequest.RequestStage.ReadReady)
+					{
+						contextAwareResult = null;
+					}
+					else
+					{
+						object obj = this._syncObject;
+						lock (obj)
+						{
+							if (this._requestStage >= FtpWebRequest.RequestStage.ReadReady)
+							{
+								contextAwareResult = null;
+							}
+						}
+					}
+					if (contextAwareResult == null)
+					{
+						contextAwareResult = (ContextAwareResult)this._readAsyncResult;
+						if (!contextAwareResult.InternalPeekCompleted)
+						{
+							contextAwareResult.InvokeCallback();
+						}
+					}
+				}
+				else
+				{
+					object obj = contextAwareResult.StartPostingAsyncOp();
+					lock (obj)
+					{
+						this.SubmitRequest(true);
+						contextAwareResult.FinishPostingAsyncOp();
+					}
+					this.FinishRequestStage(FtpWebRequest.RequestStage.CheckForError);
+				}
 			}
-			if (this.State == FtpWebRequest.RequestState.Aborted)
+			catch (Exception ex)
 			{
-				throw new WebException("Request aborted", WebExceptionStatus.RequestCanceled);
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "BeginGetResponse");
+				}
+				throw;
 			}
-			if (asyncResult != this.asyncResult)
+			finally
 			{
-				throw new ArgumentException("AsyncResult is from another request!");
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "BeginGetResponse");
+				}
 			}
-			FtpAsyncResult ftpAsyncResult = (FtpAsyncResult)asyncResult;
-			if (!ftpAsyncResult.WaitUntilComplete(this.timeout, false))
+			return contextAwareResult;
+		}
+
+		public override WebResponse EndGetResponse(IAsyncResult asyncResult)
+		{
+			if (NetEventSource.IsEnabled)
 			{
-				this.Abort();
-				throw new WebException("Request timed out");
+				NetEventSource.Enter(this, null, "EndGetResponse");
 			}
-			if (ftpAsyncResult.GotException)
+			try
 			{
-				throw ftpAsyncResult.Exception;
+				if (asyncResult == null)
+				{
+					throw new ArgumentNullException("asyncResult");
+				}
+				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
+				if (lazyAsyncResult == null)
+				{
+					throw new ArgumentException("The IAsyncResult object was not returned from the corresponding asynchronous method on this class.", "asyncResult");
+				}
+				if (lazyAsyncResult.EndCalled)
+				{
+					throw new InvalidOperationException(SR.Format("{0} can only be called once for each asynchronous operation.", "EndGetResponse"));
+				}
+				lazyAsyncResult.InternalWaitForCompletion();
+				lazyAsyncResult.EndCalled = true;
+				this.CheckError();
 			}
-			return ftpAsyncResult.Stream;
+			catch (Exception ex)
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "EndGetResponse");
+				}
+				throw;
+			}
+			finally
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "EndGetResponse");
+				}
+			}
+			return this._ftpWebResponse;
 		}
 
 		public override Stream GetRequestStream()
 		{
-			IAsyncResult asyncResult = this.BeginGetRequestStream(null, null);
-			return this.EndGetRequestStream(asyncResult);
-		}
-
-		private ServicePoint GetServicePoint()
-		{
-			if (this.servicePoint == null)
+			if (NetEventSource.IsEnabled)
 			{
-				this.servicePoint = ServicePointManager.FindServicePoint(this.requestUri, this.proxy);
+				NetEventSource.Enter(this, null, "GetRequestStream");
+				NetEventSource.Info(this, FormattableStringFactory.Create("Method: {0}", new object[] { this._methodInfo.Method }), "GetRequestStream");
 			}
-			return this.servicePoint;
-		}
-
-		private void ResolveHost()
-		{
-			this.CheckIfAborted();
-			this.hostEntry = this.GetServicePoint().HostEntry;
-			if (this.hostEntry == null)
-			{
-				this.ftpResponse.UpdateStatus(new FtpStatus(FtpStatusCode.ActionAbortedLocalProcessingError, "Cannot resolve server name"));
-				throw new WebException("The remote server name could not be resolved: " + this.requestUri, null, WebExceptionStatus.NameResolutionFailure, this.ftpResponse);
-			}
-		}
-
-		private void ProcessRequest()
-		{
-			if (this.State == FtpWebRequest.RequestState.Scheduled)
-			{
-				this.ftpResponse = new FtpWebResponse(this, this.requestUri, this.method, this.keepAlive);
-				try
-				{
-					this.ProcessMethod();
-					this.asyncResult.SetCompleted(false, this.ftpResponse);
-					return;
-				}
-				catch (Exception ex)
-				{
-					if (!this.GetServicePoint().UsesProxy)
-					{
-						this.State = FtpWebRequest.RequestState.Error;
-					}
-					this.SetCompleteWithError(ex);
-					return;
-				}
-			}
-			if (this.InProgress())
-			{
-				FtpStatus responseStatus = this.GetResponseStatus();
-				this.ftpResponse.UpdateStatus(responseStatus);
-				if (this.ftpResponse.IsFinal())
-				{
-					this.State = FtpWebRequest.RequestState.Finished;
-				}
-			}
-			this.asyncResult.SetCompleted(false, this.ftpResponse);
-		}
-
-		private void SetType()
-		{
-			if (this.binary)
-			{
-				FtpStatus ftpStatus = this.SendCommand("TYPE", new string[] { this.DataType });
-				if (ftpStatus.StatusCode < FtpStatusCode.CommandOK || ftpStatus.StatusCode >= (FtpStatusCode)300)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-			}
-		}
-
-		private string GetRemoteFolderPath(Uri uri)
-		{
-			string text = Uri.UnescapeDataString(uri.LocalPath);
-			string text2;
-			if (this.initial_path == null || this.initial_path == "/")
-			{
-				text2 = text;
-			}
-			else
-			{
-				if (text[0] == '/')
-				{
-					text = text.Substring(1);
-				}
-				text2 = new Uri(new UriBuilder
-				{
-					Scheme = "ftp",
-					Host = "dummy-host",
-					Path = this.initial_path
-				}.Uri, text).LocalPath;
-			}
-			int num = text2.LastIndexOf('/');
-			if (num == -1)
-			{
-				return null;
-			}
-			return text2.Substring(0, num + 1);
-		}
-
-		private void CWDAndSetFileName(Uri uri)
-		{
-			string remoteFolderPath = this.GetRemoteFolderPath(uri);
-			if (remoteFolderPath != null)
-			{
-				FtpStatus ftpStatus = this.SendCommand("CWD", new string[] { remoteFolderPath });
-				if (ftpStatus.StatusCode < FtpStatusCode.CommandOK || ftpStatus.StatusCode >= (FtpStatusCode)300)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				int num = uri.LocalPath.LastIndexOf('/');
-				if (num >= 0)
-				{
-					this.file_name = Uri.UnescapeDataString(uri.LocalPath.Substring(num + 1));
-				}
-			}
-		}
-
-		private void ProcessMethod()
-		{
-			if (!this.GetServicePoint().UsesProxy)
-			{
-				this.State = FtpWebRequest.RequestState.Connecting;
-				this.ResolveHost();
-				this.OpenControlConnection();
-				this.CWDAndSetFileName(this.requestUri);
-				this.SetType();
-				string text = this.method;
-				uint num = global::<PrivateImplementationDetails>.ComputeStringHash(text);
-				if (num <= 1636987420U)
-				{
-					if (num <= 172932033U)
-					{
-						if (num != 61167622U)
-						{
-							if (num != 111500479U)
-							{
-								if (num != 172932033U)
-								{
-									goto IL_0248;
-								}
-								if (!(text == "LIST"))
-								{
-									goto IL_0248;
-								}
-							}
-							else
-							{
-								if (!(text == "STOR"))
-								{
-									goto IL_0248;
-								}
-								goto IL_0238;
-							}
-						}
-						else
-						{
-							if (!(text == "STOU"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0238;
-						}
-					}
-					else if (num != 540800083U)
-					{
-						if (num != 1414193175U)
-						{
-							if (num != 1636987420U)
-							{
-								goto IL_0248;
-							}
-							if (!(text == "SIZE"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-						else
-						{
-							if (!(text == "MKD"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-					}
-					else
-					{
-						if (!(text == "RENAME"))
-						{
-							goto IL_0248;
-						}
-						goto IL_0240;
-					}
-				}
-				else if (num <= 2586094756U)
-				{
-					if (num != 2190452587U)
-					{
-						if (num != 2192893693U)
-						{
-							if (num != 2586094756U)
-							{
-								goto IL_0248;
-							}
-							if (!(text == "PWD"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-						else
-						{
-							if (!(text == "DELE"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-					}
-					else
-					{
-						if (!(text == "APPE"))
-						{
-							goto IL_0248;
-						}
-						goto IL_0238;
-					}
-				}
-				else if (num != 3129138359U)
-				{
-					if (num != 3960558266U)
-					{
-						if (num != 4117911256U)
-						{
-							goto IL_0248;
-						}
-						if (!(text == "NLST"))
-						{
-							goto IL_0248;
-						}
-					}
-					else if (!(text == "RETR"))
-					{
-						goto IL_0248;
-					}
-				}
-				else
-				{
-					if (!(text == "MDTM"))
-					{
-						goto IL_0248;
-					}
-					goto IL_0240;
-				}
-				this.DownloadData();
-				goto IL_025E;
-				IL_0238:
-				this.UploadData();
-				goto IL_025E;
-				IL_0240:
-				this.ProcessSimpleMethod();
-				goto IL_025E;
-				IL_0248:
-				throw new Exception(string.Format("Support for command {0} not implemented yet", this.method));
-				IL_025E:
-				this.CheckIfAborted();
-				return;
-			}
-			if (this.method != "RETR")
-			{
-				throw new NotSupportedException("FTP+proxy only supports RETR");
-			}
-			HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(this.proxy.GetProxy(this.requestUri));
-			httpWebRequest.Address = this.requestUri;
-			this.requestState = FtpWebRequest.RequestState.Finished;
-			WebResponse response = httpWebRequest.GetResponse();
-			this.ftpResponse.Stream = new FtpDataStream(this, response.GetResponseStream(), true);
-			this.ftpResponse.StatusCode = FtpStatusCode.CommandOK;
-		}
-
-		private void CloseControlConnection()
-		{
-			if (this.controlStream != null)
-			{
-				this.SendCommand("QUIT", Array.Empty<string>());
-				this.controlStream.Close();
-				this.controlStream = null;
-			}
-		}
-
-		internal void CloseDataConnection()
-		{
-			if (this.origDataStream != null)
-			{
-				this.origDataStream.Close();
-				this.origDataStream = null;
-			}
-		}
-
-		private void CloseConnection()
-		{
-			this.CloseControlConnection();
-			this.CloseDataConnection();
-		}
-
-		private void ProcessSimpleMethod()
-		{
-			this.State = FtpWebRequest.RequestState.TransferInProgress;
-			if (this.method == "PWD")
-			{
-				this.method = "PWD";
-			}
-			if (this.method == "RENAME")
-			{
-				this.method = "RNFR";
-			}
-			FtpStatus ftpStatus = this.SendCommand(this.method, new string[] { this.file_name });
-			this.ftpResponse.Stream = Stream.Null;
-			string statusDescription = ftpStatus.StatusDescription;
-			string text = this.method;
-			if (!(text == "SIZE"))
-			{
-				if (!(text == "MDTM"))
-				{
-					if (!(text == "MKD"))
-					{
-						if (!(text == "CWD"))
-						{
-							if (!(text == "RNFR"))
-							{
-								if (text == "DELE")
-								{
-									if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-									{
-										throw this.CreateExceptionFromResponse(ftpStatus);
-									}
-								}
-							}
-							else
-							{
-								this.method = "RENAME";
-								if (ftpStatus.StatusCode != FtpStatusCode.FileCommandPending)
-								{
-									throw this.CreateExceptionFromResponse(ftpStatus);
-								}
-								ftpStatus = this.SendCommand("RNTO", new string[] { (this.renameTo != null) ? this.renameTo : string.Empty });
-								if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-								{
-									throw this.CreateExceptionFromResponse(ftpStatus);
-								}
-							}
-						}
-						else
-						{
-							this.method = "PWD";
-							if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-							{
-								throw this.CreateExceptionFromResponse(ftpStatus);
-							}
-							ftpStatus = this.SendCommand(this.method, Array.Empty<string>());
-							if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
-							{
-								throw this.CreateExceptionFromResponse(ftpStatus);
-							}
-						}
-					}
-					else if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
-					{
-						throw this.CreateExceptionFromResponse(ftpStatus);
-					}
-				}
-				else
-				{
-					if (ftpStatus.StatusCode != FtpStatusCode.FileStatus)
-					{
-						throw this.CreateExceptionFromResponse(ftpStatus);
-					}
-					this.ftpResponse.LastModified = DateTime.ParseExact(statusDescription.Substring(4), "yyyyMMddHHmmss", null);
-				}
-			}
-			else
-			{
-				if (ftpStatus.StatusCode != FtpStatusCode.FileStatus)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				int num = 4;
-				int num2 = 0;
-				while (num < statusDescription.Length && char.IsDigit(statusDescription[num]))
-				{
-					num++;
-					num2++;
-				}
-				if (num2 == 0)
-				{
-					throw new WebException("Bad format for server response in " + this.method);
-				}
-				long num3;
-				if (!long.TryParse(statusDescription.Substring(4, num2), out num3))
-				{
-					throw new WebException("Bad format for server response in " + this.method);
-				}
-				this.ftpResponse.contentLength = num3;
-			}
-			this.State = FtpWebRequest.RequestState.Finished;
-		}
-
-		private void UploadData()
-		{
-			this.State = FtpWebRequest.RequestState.OpeningData;
-			this.OpenDataConnection();
-			this.State = FtpWebRequest.RequestState.TransferInProgress;
-			this.requestStream = new FtpDataStream(this, this.dataStream, false);
-			this.asyncResult.Stream = this.requestStream;
-		}
-
-		private void DownloadData()
-		{
-			this.State = FtpWebRequest.RequestState.OpeningData;
-			this.OpenDataConnection();
-			this.State = FtpWebRequest.RequestState.TransferInProgress;
-			this.ftpResponse.Stream = new FtpDataStream(this, this.dataStream, true);
-		}
-
-		private void CheckRequestStarted()
-		{
-			if (this.State != FtpWebRequest.RequestState.Before)
-			{
-				throw new InvalidOperationException("There is a request currently in progress");
-			}
-		}
-
-		private void OpenControlConnection()
-		{
-			Exception ex = null;
-			Socket socket = null;
-			foreach (IPAddress ipaddress in this.hostEntry.AddressList)
-			{
-				socket = new Socket(ipaddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-				this.remoteEndPoint = new IPEndPoint(ipaddress, this.requestUri.Port);
-				if (!this.ServicePoint.CallEndPointDelegate(socket, this.remoteEndPoint))
-				{
-					socket.Close();
-					socket = null;
-				}
-				else
-				{
-					try
-					{
-						socket.Connect(this.remoteEndPoint);
-						this.localEndPoint = (IPEndPoint)socket.LocalEndPoint;
-						break;
-					}
-					catch (SocketException ex)
-					{
-						socket.Close();
-						socket = null;
-					}
-				}
-			}
-			if (socket == null)
-			{
-				throw new WebException("Unable to connect to remote server", ex, WebExceptionStatus.UnknownError, this.ftpResponse);
-			}
-			this.controlStream = new NetworkStream(socket);
-			this.controlReader = new StreamReader(this.controlStream, Encoding.ASCII);
-			this.State = FtpWebRequest.RequestState.Authenticating;
-			this.Authenticate();
-			FtpStatus ftpStatus = this.SendCommand("OPTS", new string[] { "utf8", "on" });
-			if (ftpStatus.StatusCode < FtpStatusCode.CommandOK || ftpStatus.StatusCode > (FtpStatusCode)300)
-			{
-				this.dataEncoding = Encoding.Default;
-			}
-			else
-			{
-				this.dataEncoding = Encoding.UTF8;
-			}
-			ftpStatus = this.SendCommand("PWD", Array.Empty<string>());
-			this.initial_path = FtpWebRequest.GetInitialPath(ftpStatus);
-		}
-
-		private static string GetInitialPath(FtpStatus status)
-		{
-			int statusCode = (int)status.StatusCode;
-			if (statusCode < 200 || statusCode > 300 || status.StatusDescription.Length <= 4)
-			{
-				throw new WebException("Error getting current directory: " + status.StatusDescription, null, WebExceptionStatus.UnknownError, null);
-			}
-			string text = status.StatusDescription.Substring(4);
-			if (text[0] == '"')
-			{
-				int num = text.IndexOf('"', 1);
-				if (num == -1)
-				{
-					throw new WebException("Error getting current directory: PWD -> " + status.StatusDescription, null, WebExceptionStatus.UnknownError, null);
-				}
-				text = text.Substring(1, num - 1);
-			}
-			if (!text.EndsWith("/"))
-			{
-				text += "/";
-			}
-			return text;
-		}
-
-		private Socket SetupPassiveConnection(string statusDescription, bool ipv6)
-		{
-			if (statusDescription.Length < 4)
-			{
-				throw new WebException("Cannot open passive data connection");
-			}
-			int num = (ipv6 ? this.GetPortV6(statusDescription) : this.GetPortV4(statusDescription));
-			if (num < 0 || num > 65535)
-			{
-				throw new WebException("Cannot open passive data connection");
-			}
-			IPEndPoint ipendPoint = new IPEndPoint(this.remoteEndPoint.Address, num);
-			Socket socket = new Socket(ipendPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 			try
 			{
-				socket.Connect(ipendPoint);
-			}
-			catch (SocketException)
-			{
-				socket.Close();
-				throw new WebException("Cannot open passive data connection");
-			}
-			return socket;
-		}
-
-		private int GetPortV4(string responseString)
-		{
-			string[] array = responseString.Split(new char[] { ' ', '(', ',', ')' });
-			if (array.Length <= 7)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			int num = array.Length - 1;
-			if (array[num] == "" || !char.IsNumber(array[num], 0))
-			{
-				num--;
-			}
-			return (int)Convert.ToByte(array[num--], NumberFormatInfo.InvariantInfo) | ((int)Convert.ToByte(array[num--], NumberFormatInfo.InvariantInfo) << 8);
-		}
-
-		private int GetPortV6(string responseString)
-		{
-			int num = responseString.LastIndexOf("(");
-			int num2 = responseString.LastIndexOf(")");
-			if (num == -1 || num2 <= num)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			string[] array = responseString.Substring(num + 1, num2 - num - 1).Split(new char[] { '|' });
-			if (array.Length < 4)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			return Convert.ToInt32(array[3], NumberFormatInfo.InvariantInfo);
-		}
-
-		private string FormatAddress(IPAddress address, int Port)
-		{
-			byte[] addressBytes = address.GetAddressBytes();
-			StringBuilder stringBuilder = new StringBuilder(32);
-			foreach (byte b in addressBytes)
-			{
-				stringBuilder.Append(b);
-				stringBuilder.Append(',');
-			}
-			stringBuilder.Append(Port / 256);
-			stringBuilder.Append(',');
-			stringBuilder.Append(Port % 256);
-			return stringBuilder.ToString();
-		}
-
-		private string FormatAddressV6(IPAddress address, int port)
-		{
-			StringBuilder stringBuilder = new StringBuilder(43);
-			string text = address.ToString();
-			stringBuilder.Append("|2|");
-			stringBuilder.Append(text);
-			stringBuilder.Append('|');
-			stringBuilder.Append(port.ToString(NumberFormatInfo.InvariantInfo));
-			stringBuilder.Append('|');
-			return stringBuilder.ToString();
-		}
-
-		private Exception CreateExceptionFromResponse(FtpStatus status)
-		{
-			FtpWebResponse ftpWebResponse = new FtpWebResponse(this, this.requestUri, this.method, status);
-			return new WebException("Server returned an error: " + status.StatusDescription, null, WebExceptionStatus.ProtocolError, ftpWebResponse);
-		}
-
-		internal void SetTransferCompleted()
-		{
-			if (this.InFinalState())
-			{
-				return;
-			}
-			this.State = FtpWebRequest.RequestState.Finished;
-			FtpStatus responseStatus = this.GetResponseStatus();
-			this.ftpResponse.UpdateStatus(responseStatus);
-			if (!this.keepAlive)
-			{
-				this.CloseConnection();
-			}
-		}
-
-		internal void OperationCompleted()
-		{
-			if (!this.keepAlive)
-			{
-				this.CloseConnection();
-			}
-		}
-
-		private void SetCompleteWithError(Exception exc)
-		{
-			if (this.asyncResult != null)
-			{
-				this.asyncResult.SetCompleted(false, exc);
-			}
-		}
-
-		private Socket InitDataConnection()
-		{
-			bool flag = this.remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6;
-			if (this.usePassive)
-			{
-				FtpStatus ftpStatus = this.SendCommand(flag ? "EPSV" : "PASV", Array.Empty<string>());
-				if (ftpStatus.StatusCode != (flag ? ((FtpStatusCode)229) : FtpStatusCode.EnteringPassive))
+				if (this._getRequestStreamStarted)
 				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
+					throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress.");
 				}
-				return this.SetupPassiveConnection(ftpStatus.StatusDescription, flag);
-			}
-			else
-			{
-				Socket socket = new Socket(this.remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-				try
+				this._getRequestStreamStarted = true;
+				if (!this._methodInfo.IsUpload)
 				{
-					socket.Bind(new IPEndPoint(this.localEndPoint.Address, 0));
-					socket.Listen(1);
+					throw new ProtocolViolationException("Cannot send a content-body with this verb-type.");
 				}
-				catch (SocketException ex)
+				this.CheckError();
+				this._startTime = DateTime.UtcNow;
+				this._remainingTimeout = this.Timeout;
+				if (this.Timeout != -1)
 				{
-					socket.Close();
-					throw new WebException("Couldn't open listening socket on client", ex);
-				}
-				IPEndPoint ipendPoint = (IPEndPoint)socket.LocalEndPoint;
-				string text = (flag ? this.FormatAddressV6(ipendPoint.Address, ipendPoint.Port) : this.FormatAddress(ipendPoint.Address, ipendPoint.Port));
-				FtpStatus ftpStatus = this.SendCommand(flag ? "EPRT" : "PORT", new string[] { text });
-				if (ftpStatus.StatusCode != FtpStatusCode.CommandOK)
-				{
-					socket.Close();
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				return socket;
-			}
-		}
-
-		private void OpenDataConnection()
-		{
-			Socket socket = this.InitDataConnection();
-			FtpStatus ftpStatus;
-			if (this.offset > 0L)
-			{
-				ftpStatus = this.SendCommand("REST", new string[] { this.offset.ToString() });
-				if (ftpStatus.StatusCode != FtpStatusCode.FileCommandPending)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-			}
-			if (this.method != "NLST" && this.method != "LIST" && this.method != "STOU")
-			{
-				ftpStatus = this.SendCommand(this.method, new string[] { this.file_name });
-			}
-			else
-			{
-				ftpStatus = this.SendCommand(this.method, Array.Empty<string>());
-			}
-			if (ftpStatus.StatusCode != FtpStatusCode.OpeningData && ftpStatus.StatusCode != FtpStatusCode.DataAlreadyOpen)
-			{
-				throw this.CreateExceptionFromResponse(ftpStatus);
-			}
-			if (this.usePassive)
-			{
-				this.origDataStream = new NetworkStream(socket, true);
-				this.dataStream = this.origDataStream;
-				if (this.EnableSsl)
-				{
-					this.ChangeToSSLSocket(ref this.dataStream);
-				}
-			}
-			else
-			{
-				Socket socket2 = null;
-				try
-				{
-					socket2 = socket.Accept();
-				}
-				catch (SocketException)
-				{
-					socket.Close();
-					if (socket2 != null)
+					this._remainingTimeout = this.Timeout - (int)(DateTime.UtcNow - this._startTime).TotalMilliseconds;
+					if (this._remainingTimeout <= 0)
 					{
-						socket2.Close();
+						throw ExceptionHelper.TimeoutException;
 					}
-					throw new ProtocolViolationException("Server commited a protocol violation.");
 				}
-				socket.Close();
-				this.origDataStream = new NetworkStream(socket2, true);
-				this.dataStream = this.origDataStream;
-				if (this.EnableSsl)
+				this.FinishRequestStage(FtpWebRequest.RequestStage.RequestStarted);
+				this.SubmitRequest(false);
+				this.FinishRequestStage(FtpWebRequest.RequestStage.WriteReady);
+				this.CheckError();
+				if (this._stream.CanTimeout)
 				{
-					this.ChangeToSSLSocket(ref this.dataStream);
+					this._stream.WriteTimeout = this.ReadWriteTimeout;
+					this._stream.ReadTimeout = this.ReadWriteTimeout;
 				}
 			}
-			this.ftpResponse.UpdateStatus(ftpStatus);
+			catch (Exception ex)
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "GetRequestStream");
+				}
+				throw;
+			}
+			finally
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "GetRequestStream");
+				}
+			}
+			return this._stream;
 		}
 
-		private void Authenticate()
+		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
 		{
-			string text = null;
-			string text2 = null;
-			string text3 = null;
-			if (this.credentials != null)
+			if (NetEventSource.IsEnabled)
 			{
-				text = this.credentials.UserName;
-				text2 = this.credentials.Password;
-				text3 = this.credentials.Domain;
+				NetEventSource.Enter(this, null, "BeginGetRequestStream");
+				NetEventSource.Info(this, FormattableStringFactory.Create("Method: {0}", new object[] { this._methodInfo.Method }), "BeginGetRequestStream");
 			}
-			if (text == null)
-			{
-				text = "anonymous";
-			}
-			if (text2 == null)
-			{
-				text2 = "@anonymous";
-			}
-			if (!string.IsNullOrEmpty(text3))
-			{
-				text = text3 + "\\" + text;
-			}
-			FtpStatus ftpStatus = this.GetResponseStatus();
-			this.ftpResponse.BannerMessage = ftpStatus.StatusDescription;
-			if (this.EnableSsl)
-			{
-				this.InitiateSecureConnection(ref this.controlStream);
-				this.controlReader = new StreamReader(this.controlStream, Encoding.ASCII);
-				ftpStatus = this.SendCommand("PBSZ", new string[] { "0" });
-				int num = (int)ftpStatus.StatusCode;
-				if (num < 200 || num >= 300)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				ftpStatus = this.SendCommand("PROT", new string[] { "P" });
-				num = (int)ftpStatus.StatusCode;
-				if (num < 200 || num >= 300)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				ftpStatus = new FtpStatus(FtpStatusCode.SendUserCommand, "");
-			}
-			if (ftpStatus.StatusCode != FtpStatusCode.SendUserCommand)
-			{
-				throw this.CreateExceptionFromResponse(ftpStatus);
-			}
-			ftpStatus = this.SendCommand("USER", new string[] { text });
-			FtpStatusCode statusCode = ftpStatus.StatusCode;
-			if (statusCode != FtpStatusCode.LoggedInProceed)
-			{
-				if (statusCode != FtpStatusCode.SendPasswordCommand)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-				ftpStatus = this.SendCommand("PASS", new string[] { text2 });
-				if (ftpStatus.StatusCode != FtpStatusCode.LoggedInProceed)
-				{
-					throw this.CreateExceptionFromResponse(ftpStatus);
-				}
-			}
-			this.ftpResponse.WelcomeMessage = ftpStatus.StatusDescription;
-			this.ftpResponse.UpdateStatus(ftpStatus);
-		}
-
-		private FtpStatus SendCommand(string command, params string[] parameters)
-		{
-			return this.SendCommand(true, command, parameters);
-		}
-
-		private FtpStatus SendCommand(bool waitResponse, string command, params string[] parameters)
-		{
-			string text = command;
-			if (parameters.Length != 0)
-			{
-				text = text + " " + string.Join(" ", parameters);
-			}
-			text += "\r\n";
-			byte[] bytes = this.dataEncoding.GetBytes(text);
+			ContextAwareResult contextAwareResult = null;
 			try
 			{
-				this.controlStream.Write(bytes, 0, bytes.Length);
+				if (this._getRequestStreamStarted)
+				{
+					throw new InvalidOperationException("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress.");
+				}
+				this._getRequestStreamStarted = true;
+				if (!this._methodInfo.IsUpload)
+				{
+					throw new ProtocolViolationException("Cannot send a content-body with this verb-type.");
+				}
+				this.CheckError();
+				this.FinishRequestStage(FtpWebRequest.RequestStage.RequestStarted);
+				contextAwareResult = new ContextAwareResult(true, true, this, state, callback);
+				object obj = contextAwareResult.StartPostingAsyncOp();
+				lock (obj)
+				{
+					this._writeAsyncResult = contextAwareResult;
+					this.SubmitRequest(true);
+					contextAwareResult.FinishPostingAsyncOp();
+					this.FinishRequestStage(FtpWebRequest.RequestStage.CheckForError);
+				}
 			}
-			catch (IOException)
+			catch (Exception ex)
 			{
-				return new FtpStatus(FtpStatusCode.ServiceNotAvailable, "Write failed");
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "BeginGetRequestStream");
+				}
+				throw;
 			}
-			if (!waitResponse)
+			finally
 			{
-				return null;
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "BeginGetRequestStream");
+				}
 			}
-			FtpStatus responseStatus = this.GetResponseStatus();
-			if (this.ftpResponse != null)
-			{
-				this.ftpResponse.UpdateStatus(responseStatus);
-			}
-			return responseStatus;
+			return contextAwareResult;
 		}
 
-		internal static FtpStatus ServiceNotAvailable()
+		public override Stream EndGetRequestStream(IAsyncResult asyncResult)
 		{
-			return new FtpStatus(FtpStatusCode.ServiceNotAvailable, global::Locale.GetText("Invalid response from server"));
-		}
-
-		internal FtpStatus GetResponseStatus()
-		{
-			string text = null;
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, null, "EndGetRequestStream");
+			}
+			Stream stream = null;
 			try
 			{
-				text = this.controlReader.ReadLine();
+				if (asyncResult == null)
+				{
+					throw new ArgumentNullException("asyncResult");
+				}
+				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
+				if (lazyAsyncResult == null)
+				{
+					throw new ArgumentException("The IAsyncResult object was not returned from the corresponding asynchronous method on this class.", "asyncResult");
+				}
+				if (lazyAsyncResult.EndCalled)
+				{
+					throw new InvalidOperationException(SR.Format("{0} can only be called once for each asynchronous operation.", "EndGetResponse"));
+				}
+				lazyAsyncResult.InternalWaitForCompletion();
+				lazyAsyncResult.EndCalled = true;
+				this.CheckError();
+				stream = this._stream;
+				lazyAsyncResult.EndCalled = true;
+				if (stream.CanTimeout)
+				{
+					stream.WriteTimeout = this.ReadWriteTimeout;
+					stream.ReadTimeout = this.ReadWriteTimeout;
+				}
 			}
-			catch (IOException)
+			catch (Exception ex)
 			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "EndGetRequestStream");
+				}
+				throw;
 			}
-			if (text == null || text.Length < 3)
+			finally
 			{
-				return FtpWebRequest.ServiceNotAvailable();
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "EndGetRequestStream");
+				}
 			}
-			int num;
-			if (!int.TryParse(text.Substring(0, 3), out num))
+			return stream;
+		}
+
+		private void SubmitRequest(bool isAsync)
+		{
+			try
 			{
-				return FtpWebRequest.ServiceNotAvailable();
-			}
-			if (text.Length > 3 && text[3] == '-')
-			{
-				string text2 = null;
-				string text3 = num.ToString() + " ";
+				this._async = isAsync;
 				for (;;)
 				{
-					text2 = null;
+					FtpControlStream ftpControlStream = this._connection;
+					if (ftpControlStream == null)
+					{
+						if (isAsync)
+						{
+							break;
+						}
+						ftpControlStream = this.CreateConnection();
+						this._connection = ftpControlStream;
+					}
+					if (!isAsync && this.Timeout != -1)
+					{
+						this._remainingTimeout = this.Timeout - (int)(DateTime.UtcNow - this._startTime).TotalMilliseconds;
+						if (this._remainingTimeout <= 0)
+						{
+							goto Block_6;
+						}
+					}
+					if (NetEventSource.IsEnabled)
+					{
+						NetEventSource.Info(this, "Request being submitted", "SubmitRequest");
+					}
+					ftpControlStream.SetSocketTimeoutOption(this.RemainingTimeout);
 					try
 					{
-						text2 = this.controlReader.ReadLine();
+						this.TimedSubmitRequestHelper(isAsync);
 					}
-					catch (IOException)
+					catch (Exception ex)
 					{
+						if (this.AttemptedRecovery(ex))
+						{
+							if (!isAsync && this.Timeout != -1)
+							{
+								this._remainingTimeout = this.Timeout - (int)(DateTime.UtcNow - this._startTime).TotalMilliseconds;
+								if (this._remainingTimeout <= 0)
+								{
+									throw;
+								}
+							}
+							continue;
+						}
+						throw;
 					}
-					if (text2 == null)
+					goto IL_00E9;
+				}
+				this.CreateConnectionAsync();
+				return;
+				Block_6:
+				throw ExceptionHelper.TimeoutException;
+				IL_00E9:;
+			}
+			catch (WebException ex2)
+			{
+				IOException ex3 = ex2.InnerException as IOException;
+				if (ex3 != null)
+				{
+					SocketException ex4 = ex3.InnerException as SocketException;
+					if (ex4 != null && ex4.SocketErrorCode == SocketError.TimedOut)
 					{
-						break;
-					}
-					text = text + Environment.NewLine + text2;
-					if (text2.StartsWith(text3, StringComparison.Ordinal))
-					{
-						goto IL_0097;
+						this.SetException(new WebException("The operation has timed out.", WebExceptionStatus.Timeout));
 					}
 				}
-				return FtpWebRequest.ServiceNotAvailable();
+				this.SetException(ex2);
 			}
-			IL_0097:
-			return new FtpStatus((FtpStatusCode)num, text);
-		}
-
-		private void InitiateSecureConnection(ref Stream stream)
-		{
-			FtpStatus ftpStatus = this.SendCommand("AUTH", new string[] { "TLS" });
-			if (ftpStatus.StatusCode != FtpStatusCode.ServerWantsSecureSession)
+			catch (Exception ex5)
 			{
-				throw this.CreateExceptionFromResponse(ftpStatus);
+				this.SetException(ex5);
 			}
-			this.ChangeToSSLSocket(ref stream);
 		}
 
-		internal bool ChangeToSSLSocket(ref Stream stream)
+		private Exception TranslateConnectException(Exception e)
 		{
-			MonoTlsProvider providerInternal = Mono.Net.Security.MonoTlsProviderFactory.GetProviderInternal();
-			MonoTlsSettings monoTlsSettings = MonoTlsSettings.CopyDefaultSettings();
-			monoTlsSettings.UseServicePointManagerCallback = new bool?(true);
-			IMonoSslStream monoSslStream = providerInternal.CreateSslStream(stream, true, monoTlsSettings);
-			monoSslStream.AuthenticateAsClient(this.requestUri.Host, null, SslProtocols.Default, false);
-			stream = monoSslStream.AuthenticatedStream;
+			SocketException ex = e as SocketException;
+			if (ex == null)
+			{
+				return e;
+			}
+			if (ex.SocketErrorCode == SocketError.HostNotFound)
+			{
+				return new WebException("The remote name could not be resolved", WebExceptionStatus.NameResolutionFailure);
+			}
+			return new WebException("Unable to connect to the remote server", WebExceptionStatus.ConnectFailure);
+		}
+
+		private async void CreateConnectionAsync()
+		{
+			string host = this._uri.Host;
+			int port = this._uri.Port;
+			TcpClient client = new TcpClient();
+			object obj;
+			try
+			{
+				await client.ConnectAsync(host, port).ConfigureAwait(false);
+				obj = new FtpControlStream(client);
+			}
+			catch (Exception ex)
+			{
+				obj = this.TranslateConnectException(ex);
+			}
+			this.AsyncRequestCallback(obj);
+		}
+
+		private FtpControlStream CreateConnection()
+		{
+			string host = this._uri.Host;
+			int port = this._uri.Port;
+			TcpClient tcpClient = new TcpClient();
+			try
+			{
+				tcpClient.Connect(host, port);
+			}
+			catch (Exception ex)
+			{
+				throw this.TranslateConnectException(ex);
+			}
+			return new FtpControlStream(tcpClient);
+		}
+
+		private Stream TimedSubmitRequestHelper(bool isAsync)
+		{
+			if (isAsync)
+			{
+				if (this._requestCompleteAsyncResult == null)
+				{
+					this._requestCompleteAsyncResult = new LazyAsyncResult(null, null, null);
+				}
+				return this._connection.SubmitRequest(this, true, true);
+			}
+			Stream stream = null;
+			bool flag = false;
+			TimerThread.Timer timer = this.TimerQueue.CreateTimer(this._timerCallback, null);
+			try
+			{
+				stream = this._connection.SubmitRequest(this, false, true);
+			}
+			catch (Exception ex)
+			{
+				if ((!(ex is SocketException) && !(ex is ObjectDisposedException)) || !timer.HasExpired)
+				{
+					timer.Cancel();
+					throw;
+				}
+				flag = true;
+			}
+			if (flag || !timer.Cancel())
+			{
+				this._timedOut = true;
+				throw ExceptionHelper.TimeoutException;
+			}
+			if (stream != null)
+			{
+				object syncObject = this._syncObject;
+				lock (syncObject)
+				{
+					if (this._aborted)
+					{
+						((ICloseEx)stream).CloseEx(CloseExState.Abort | CloseExState.Silent);
+						this.CheckError();
+						throw new InternalException();
+					}
+					this._stream = stream;
+				}
+			}
+			return stream;
+		}
+
+		private void TimerCallback(TimerThread.Timer timer, int timeNoticed, object context)
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Info(this, null, "TimerCallback");
+			}
+			FtpControlStream connection = this._connection;
+			if (connection != null)
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Info(this, "aborting connection", "TimerCallback");
+				}
+				connection.AbortConnect();
+			}
+		}
+
+		private TimerThread.Queue TimerQueue
+		{
+			get
+			{
+				if (this._timerQueue == null)
+				{
+					this._timerQueue = TimerThread.GetOrCreateQueue(this.RemainingTimeout);
+				}
+				return this._timerQueue;
+			}
+		}
+
+		private bool AttemptedRecovery(Exception e)
+		{
+			if (e is OutOfMemoryException || this._onceFailed || this._aborted || this._timedOut || this._connection == null || !this._connection.RecoverableFailure)
+			{
+				return false;
+			}
+			this._onceFailed = true;
+			object syncObject = this._syncObject;
+			lock (syncObject)
+			{
+				if (this._connection == null)
+				{
+					return false;
+				}
+				this._connection.CloseSocket();
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Info(this, FormattableStringFactory.Create("Releasing connection: {0}", new object[] { this._connection }), "AttemptedRecovery");
+				}
+				this._connection = null;
+			}
 			return true;
 		}
 
-		private bool InFinalState()
+		private void SetException(Exception exception)
 		{
-			return this.State == FtpWebRequest.RequestState.Aborted || this.State == FtpWebRequest.RequestState.Error || this.State == FtpWebRequest.RequestState.Finished;
-		}
-
-		private bool InProgress()
-		{
-			return this.State != FtpWebRequest.RequestState.Before && !this.InFinalState();
-		}
-
-		internal void CheckIfAborted()
-		{
-			if (this.State == FtpWebRequest.RequestState.Aborted)
+			if (NetEventSource.IsEnabled)
 			{
-				throw new WebException("Request aborted", WebExceptionStatus.RequestCanceled);
+				NetEventSource.Info(this, null, "SetException");
+			}
+			if (exception is OutOfMemoryException)
+			{
+				this._exception = exception;
+				throw exception;
+			}
+			FtpControlStream connection = this._connection;
+			if (this._exception == null)
+			{
+				if (exception is WebException)
+				{
+					this.EnsureFtpWebResponse(exception);
+					this._exception = new WebException(exception.Message, null, ((WebException)exception).Status, this._ftpWebResponse);
+				}
+				else if (exception is AuthenticationException || exception is SecurityException)
+				{
+					this._exception = exception;
+				}
+				else if (connection != null && connection.StatusCode != FtpStatusCode.Undefined)
+				{
+					this.EnsureFtpWebResponse(exception);
+					this._exception = new WebException(SR.Format("The remote server returned an error: {0}.", connection.StatusLine), exception, WebExceptionStatus.ProtocolError, this._ftpWebResponse);
+				}
+				else
+				{
+					this._exception = new WebException(exception.Message, exception);
+				}
+				if (connection != null && this._ftpWebResponse != null)
+				{
+					this._ftpWebResponse.UpdateStatus(connection.StatusCode, connection.StatusLine, connection.ExitMessage);
+				}
 			}
 		}
 
-		private void CheckFinalState()
+		private void CheckError()
 		{
-			if (this.InFinalState())
+			if (this._exception != null)
 			{
-				throw new InvalidOperationException("Cannot change final state");
+				ExceptionDispatchInfo.Throw(this._exception);
+			}
+		}
+
+		internal void RequestCallback(object obj)
+		{
+			if (this._async)
+			{
+				this.AsyncRequestCallback(obj);
+				return;
+			}
+			this.SyncRequestCallback(obj);
+		}
+
+		private void SyncRequestCallback(object obj)
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, obj, "SyncRequestCallback");
+			}
+			FtpWebRequest.RequestStage requestStage = FtpWebRequest.RequestStage.CheckForError;
+			try
+			{
+				bool flag = obj == null;
+				Exception ex = obj as Exception;
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Info(this, FormattableStringFactory.Create("exp:{0} completedRequest:{1}", new object[] { ex, flag }), "SyncRequestCallback");
+				}
+				if (ex != null)
+				{
+					this.SetException(ex);
+				}
+				else
+				{
+					if (!flag)
+					{
+						throw new InternalException();
+					}
+					FtpControlStream connection = this._connection;
+					if (connection != null)
+					{
+						this.EnsureFtpWebResponse(null);
+						this._ftpWebResponse.UpdateStatus(connection.StatusCode, connection.StatusLine, connection.ExitMessage);
+					}
+					requestStage = FtpWebRequest.RequestStage.ReleaseConnection;
+				}
+			}
+			catch (Exception ex2)
+			{
+				this.SetException(ex2);
+			}
+			finally
+			{
+				this.FinishRequestStage(requestStage);
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "SyncRequestCallback");
+				}
+				this.CheckError();
+			}
+		}
+
+		private void AsyncRequestCallback(object obj)
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, obj, "AsyncRequestCallback");
+			}
+			FtpWebRequest.RequestStage requestStage = FtpWebRequest.RequestStage.CheckForError;
+			try
+			{
+				FtpControlStream ftpControlStream = obj as FtpControlStream;
+				FtpDataStream ftpDataStream = obj as FtpDataStream;
+				Exception ex = obj as Exception;
+				bool flag = obj == null;
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Info(this, FormattableStringFactory.Create("stream:{0} conn:{1} exp:{2} completedRequest:{3}", new object[] { ftpDataStream, ftpControlStream, ex, flag }), "AsyncRequestCallback");
+				}
+				for (;;)
+				{
+					if (ex != null)
+					{
+						if (this.AttemptedRecovery(ex))
+						{
+							ftpControlStream = this.CreateConnection();
+							if (ftpControlStream == null)
+							{
+								break;
+							}
+							ex = null;
+						}
+						if (ex != null)
+						{
+							goto Block_9;
+						}
+					}
+					if (ftpControlStream != null)
+					{
+						object obj2 = this._syncObject;
+						lock (obj2)
+						{
+							if (this._aborted)
+							{
+								if (NetEventSource.IsEnabled)
+								{
+									NetEventSource.Info(this, FormattableStringFactory.Create("Releasing connect:{0}", new object[] { ftpControlStream }), "AsyncRequestCallback");
+								}
+								ftpControlStream.CloseSocket();
+								break;
+							}
+							this._connection = ftpControlStream;
+							if (NetEventSource.IsEnabled)
+							{
+								NetEventSource.Associate(this, this._connection, "AsyncRequestCallback");
+							}
+						}
+						try
+						{
+							ftpDataStream = (FtpDataStream)this.TimedSubmitRequestHelper(true);
+						}
+						catch (Exception ex)
+						{
+							continue;
+						}
+						break;
+					}
+					goto IL_012F;
+				}
+				return;
+				Block_9:
+				this.SetException(ex);
+				return;
+				IL_012F:
+				if (ftpDataStream != null)
+				{
+					object obj2 = this._syncObject;
+					lock (obj2)
+					{
+						if (this._aborted)
+						{
+							((ICloseEx)ftpDataStream).CloseEx(CloseExState.Abort | CloseExState.Silent);
+							goto IL_01CA;
+						}
+						this._stream = ftpDataStream;
+					}
+					ftpDataStream.SetSocketTimeoutOption(this.Timeout);
+					this.EnsureFtpWebResponse(null);
+					requestStage = (ftpDataStream.CanRead ? FtpWebRequest.RequestStage.ReadReady : FtpWebRequest.RequestStage.WriteReady);
+				}
+				else
+				{
+					if (!flag)
+					{
+						throw new InternalException();
+					}
+					ftpControlStream = this._connection;
+					if (ftpControlStream != null)
+					{
+						this.EnsureFtpWebResponse(null);
+						this._ftpWebResponse.UpdateStatus(ftpControlStream.StatusCode, ftpControlStream.StatusLine, ftpControlStream.ExitMessage);
+					}
+					requestStage = FtpWebRequest.RequestStage.ReleaseConnection;
+				}
+				IL_01CA:;
+			}
+			catch (Exception ex2)
+			{
+				this.SetException(ex2);
+			}
+			finally
+			{
+				this.FinishRequestStage(requestStage);
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "AsyncRequestCallback");
+				}
+			}
+		}
+
+		private FtpWebRequest.RequestStage FinishRequestStage(FtpWebRequest.RequestStage stage)
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Info(this, FormattableStringFactory.Create("state:{0}", new object[] { stage }), "FinishRequestStage");
+			}
+			if (this._exception != null)
+			{
+				stage = FtpWebRequest.RequestStage.ReleaseConnection;
+			}
+			object syncObject = this._syncObject;
+			FtpWebRequest.RequestStage requestStage;
+			LazyAsyncResult writeAsyncResult;
+			LazyAsyncResult readAsyncResult;
+			FtpControlStream connection;
+			lock (syncObject)
+			{
+				requestStage = this._requestStage;
+				if (stage == FtpWebRequest.RequestStage.CheckForError)
+				{
+					return requestStage;
+				}
+				if (requestStage == FtpWebRequest.RequestStage.ReleaseConnection && stage == FtpWebRequest.RequestStage.ReleaseConnection)
+				{
+					return FtpWebRequest.RequestStage.ReleaseConnection;
+				}
+				if (stage > requestStage)
+				{
+					this._requestStage = stage;
+				}
+				if (stage <= FtpWebRequest.RequestStage.RequestStarted)
+				{
+					return requestStage;
+				}
+				writeAsyncResult = this._writeAsyncResult;
+				readAsyncResult = this._readAsyncResult;
+				connection = this._connection;
+				if (stage == FtpWebRequest.RequestStage.ReleaseConnection)
+				{
+					if (this._exception == null && !this._aborted && requestStage != FtpWebRequest.RequestStage.ReadReady && this._methodInfo.IsDownload && !this._ftpWebResponse.IsFromCache)
+					{
+						return requestStage;
+					}
+					this._connection = null;
+				}
+			}
+			FtpWebRequest.RequestStage requestStage2;
+			try
+			{
+				if ((stage == FtpWebRequest.RequestStage.ReleaseConnection || requestStage == FtpWebRequest.RequestStage.ReleaseConnection) && connection != null)
+				{
+					try
+					{
+						if (this._exception != null)
+						{
+							connection.Abort(this._exception);
+						}
+					}
+					finally
+					{
+						if (NetEventSource.IsEnabled)
+						{
+							NetEventSource.Info(this, FormattableStringFactory.Create("Releasing connection: {0}", new object[] { connection }), "FinishRequestStage");
+						}
+						connection.CloseSocket();
+						if (this._async && this._requestCompleteAsyncResult != null)
+						{
+							this._requestCompleteAsyncResult.InvokeCallback();
+						}
+					}
+				}
+				requestStage2 = requestStage;
+			}
+			finally
+			{
+				try
+				{
+					if (stage >= FtpWebRequest.RequestStage.WriteReady)
+					{
+						if (this._methodInfo.IsUpload && !this._getRequestStreamStarted)
+						{
+							if (this._stream != null)
+							{
+								this._stream.Close();
+							}
+						}
+						else if (writeAsyncResult != null && !writeAsyncResult.InternalPeekCompleted)
+						{
+							writeAsyncResult.InvokeCallback();
+						}
+					}
+				}
+				finally
+				{
+					if (stage >= FtpWebRequest.RequestStage.ReadReady && readAsyncResult != null && !readAsyncResult.InternalPeekCompleted)
+					{
+						readAsyncResult.InvokeCallback();
+					}
+				}
+			}
+			return requestStage2;
+		}
+
+		public override void Abort()
+		{
+			if (this._aborted)
+			{
+				return;
+			}
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, null, "Abort");
+			}
+			try
+			{
+				object syncObject = this._syncObject;
+				Stream stream;
+				FtpControlStream connection;
+				lock (syncObject)
+				{
+					if (this._requestStage >= FtpWebRequest.RequestStage.ReleaseConnection)
+					{
+						return;
+					}
+					this._aborted = true;
+					stream = this._stream;
+					connection = this._connection;
+					this._exception = ExceptionHelper.RequestAbortedException;
+				}
+				if (stream != null)
+				{
+					if (!(stream is ICloseEx))
+					{
+						NetEventSource.Fail(this, "The _stream member is not CloseEx hence the risk of connection been orphaned.", "Abort");
+					}
+					((ICloseEx)stream).CloseEx(CloseExState.Abort | CloseExState.Silent);
+				}
+				if (connection != null)
+				{
+					connection.Abort(ExceptionHelper.RequestAbortedException);
+				}
+			}
+			catch (Exception ex)
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Error(this, ex, "Abort");
+				}
+				throw;
+			}
+			finally
+			{
+				if (NetEventSource.IsEnabled)
+				{
+					NetEventSource.Exit(this, null, "Abort");
+				}
+			}
+		}
+
+		public bool KeepAlive
+		{
+			get
+			{
+				return true;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+			}
+		}
+
+		public override RequestCachePolicy CachePolicy
+		{
+			get
+			{
+				return FtpWebRequest.DefaultCachePolicy;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+			}
+		}
+
+		public bool UseBinary
+		{
+			get
+			{
+				return this._binary;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				this._binary = value;
+			}
+		}
+
+		public bool UsePassive
+		{
+			get
+			{
+				return this._passive;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				this._passive = value;
+			}
+		}
+
+		public X509CertificateCollection ClientCertificates
+		{
+			get
+			{
+				return LazyInitializer.EnsureInitialized<X509CertificateCollection>(ref this._clientCertificates, ref this._syncObject, () => new X509CertificateCollection());
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				this._clientCertificates = value;
+			}
+		}
+
+		public bool EnableSsl
+		{
+			get
+			{
+				return this._enableSsl;
+			}
+			set
+			{
+				if (this.InUse)
+				{
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				this._enableSsl = value;
+			}
+		}
+
+		public override WebHeaderCollection Headers
+		{
+			get
+			{
+				if (this._ftpRequestHeaders == null)
+				{
+					this._ftpRequestHeaders = new WebHeaderCollection();
+				}
+				return this._ftpRequestHeaders;
+			}
+			set
+			{
+				this._ftpRequestHeaders = value;
+			}
+		}
+
+		public override string ContentType
+		{
+			get
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+			set
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+		}
+
+		public override bool UseDefaultCredentials
+		{
+			get
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+			set
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+		}
+
+		public override bool PreAuthenticate
+		{
+			get
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+			set
+			{
+				throw ExceptionHelper.PropertyNotSupportedException;
+			}
+		}
+
+		private bool InUse
+		{
+			get
+			{
+				return this._getRequestStreamStarted || this._getResponseStarted;
+			}
+		}
+
+		private void EnsureFtpWebResponse(Exception exception)
+		{
+			if (this._ftpWebResponse == null || (this._ftpWebResponse.GetResponseStream() is FtpWebResponse.EmptyStream && this._stream != null))
+			{
+				object syncObject = this._syncObject;
+				lock (syncObject)
+				{
+					if (this._ftpWebResponse == null || (this._ftpWebResponse.GetResponseStream() is FtpWebResponse.EmptyStream && this._stream != null))
+					{
+						Stream stream = this._stream;
+						if (this._methodInfo.IsUpload)
+						{
+							stream = null;
+						}
+						if (this._stream != null && this._stream.CanRead && this._stream.CanTimeout)
+						{
+							this._stream.ReadTimeout = this.ReadWriteTimeout;
+							this._stream.WriteTimeout = this.ReadWriteTimeout;
+						}
+						FtpControlStream connection = this._connection;
+						long num = ((connection != null) ? connection.ContentLength : (-1L));
+						if (stream == null && num < 0L)
+						{
+							num = 0L;
+						}
+						if (this._ftpWebResponse != null)
+						{
+							this._ftpWebResponse.SetResponseStream(stream);
+						}
+						else if (connection != null)
+						{
+							this._ftpWebResponse = new FtpWebResponse(stream, num, connection.ResponseUri, connection.StatusCode, connection.StatusLine, connection.LastModified, connection.BannerMessage, connection.WelcomeMessage, connection.ExitMessage);
+						}
+						else
+						{
+							this._ftpWebResponse = new FtpWebResponse(stream, -1L, this._uri, FtpStatusCode.Undefined, null, DateTime.Now, null, null, null);
+						}
+					}
+				}
+			}
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Info(this, FormattableStringFactory.Create("Returns {0} with stream {1}", new object[]
+				{
+					this._ftpWebResponse,
+					this._ftpWebResponse._responseStream
+				}), "EnsureFtpWebResponse");
+			}
+		}
+
+		internal void DataStreamClosed(CloseExState closeState)
+		{
+			if ((closeState & CloseExState.Abort) == CloseExState.Normal)
+			{
+				if (this._async)
+				{
+					this._requestCompleteAsyncResult.InternalWaitForCompletion();
+					this.CheckError();
+					return;
+				}
+				if (this._connection != null)
+				{
+					this._connection.CheckContinuePipeline();
+					return;
+				}
+			}
+			else
+			{
+				FtpControlStream connection = this._connection;
+				if (connection != null)
+				{
+					connection.Abort(ExceptionHelper.RequestAbortedException);
+				}
 			}
 		}
 
@@ -1423,109 +1512,87 @@ namespace System.Net
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private Uri requestUri;
+		private object _syncObject;
 
-		private string file_name;
+		private ICredentials _authInfo;
 
-		private ServicePoint servicePoint;
+		private readonly Uri _uri;
 
-		private Stream origDataStream;
+		private FtpMethodInfo _methodInfo;
 
-		private Stream dataStream;
+		private string _renameTo;
 
-		private Stream controlStream;
+		private bool _getRequestStreamStarted;
 
-		private StreamReader controlReader;
+		private bool _getResponseStarted;
 
-		private NetworkCredential credentials;
+		private DateTime _startTime;
 
-		private IPHostEntry hostEntry;
+		private int _timeout;
 
-		private IPEndPoint localEndPoint;
+		private int _remainingTimeout;
 
-		private IPEndPoint remoteEndPoint;
+		private long _contentLength;
 
-		private IWebProxy proxy;
+		private long _contentOffset;
 
-		private int timeout;
+		private X509CertificateCollection _clientCertificates;
 
-		private int rwTimeout;
+		private bool _passive;
 
-		private long offset;
+		private bool _binary;
 
-		private bool binary;
+		private string _connectionGroupName;
 
-		private bool enableSsl;
+		private ServicePoint _servicePoint;
 
-		private bool usePassive;
+		private bool _async;
 
-		private bool keepAlive;
+		private bool _aborted;
 
-		private string method;
+		private bool _timedOut;
 
-		private string renameTo;
+		private Exception _exception;
 
-		private object locker;
+		private TimerThread.Queue _timerQueue;
 
-		private FtpWebRequest.RequestState requestState;
+		private TimerThread.Callback _timerCallback;
 
-		private FtpAsyncResult asyncResult;
+		private bool _enableSsl;
 
-		private FtpWebResponse ftpResponse;
+		private FtpControlStream _connection;
 
-		private Stream requestStream;
+		private Stream _stream;
 
-		private string initial_path;
+		private FtpWebRequest.RequestStage _requestStage;
 
-		private const string ChangeDir = "CWD";
+		private bool _onceFailed;
 
-		private const string UserCommand = "USER";
+		private WebHeaderCollection _ftpRequestHeaders;
 
-		private const string PasswordCommand = "PASS";
+		private FtpWebResponse _ftpWebResponse;
 
-		private const string TypeCommand = "TYPE";
+		private int _readWriteTimeout;
 
-		private const string PassiveCommand = "PASV";
+		private ContextAwareResult _writeAsyncResult;
 
-		private const string ExtendedPassiveCommand = "EPSV";
+		private LazyAsyncResult _readAsyncResult;
 
-		private const string PortCommand = "PORT";
+		private LazyAsyncResult _requestCompleteAsyncResult;
 
-		private const string ExtendedPortCommand = "EPRT";
+		private static readonly NetworkCredential s_defaultFtpNetworkCredential = new NetworkCredential("anonymous", "anonymous@", string.Empty);
 
-		private const string AbortCommand = "ABOR";
+		private const int s_DefaultTimeout = 100000;
 
-		private const string AuthCommand = "AUTH";
+		private static readonly TimerThread.Queue s_DefaultTimerQueue = TimerThread.GetOrCreateQueue(100000);
 
-		private const string RestCommand = "REST";
-
-		private const string RenameFromCommand = "RNFR";
-
-		private const string RenameToCommand = "RNTO";
-
-		private const string QuitCommand = "QUIT";
-
-		private const string EOL = "\r\n";
-
-		private static readonly string[] supportedCommands = new string[]
+		private enum RequestStage
 		{
-			"APPE", "DELE", "LIST", "MDTM", "MKD", "NLST", "PWD", "RENAME", "RETR", "RMD",
-			"SIZE", "STOR", "STOU"
-		};
-
-		private Encoding dataEncoding;
-
-		private enum RequestState
-		{
-			Before,
-			Scheduled,
-			Connecting,
-			Authenticating,
-			OpeningData,
-			TransferInProgress,
-			Finished,
-			Aborted,
-			Error
+			CheckForError,
+			RequestStarted,
+			WriteReady,
+			ReadReady,
+			ReleaseConnection
 		}
 	}
 }

@@ -112,14 +112,14 @@ namespace System.IO.Compression
 			return this._deflateStream.Read(array, offset, count);
 		}
 
-		public override int Read(Span<byte> destination)
+		public override int Read(Span<byte> buffer)
 		{
 			if (base.GetType() != typeof(GZipStream))
 			{
-				return base.Read(destination);
+				return base.Read(buffer);
 			}
 			this.CheckDeflateStream();
-			return this._deflateStream.ReadCore(destination);
+			return this._deflateStream.ReadCore(buffer);
 		}
 
 		public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
@@ -138,15 +138,15 @@ namespace System.IO.Compression
 			this._deflateStream.Write(array, offset, count);
 		}
 
-		public override void Write(ReadOnlySpan<byte> source)
+		public override void Write(ReadOnlySpan<byte> buffer)
 		{
 			if (base.GetType() != typeof(GZipStream))
 			{
-				base.Write(source);
+				base.Write(buffer);
 				return;
 			}
 			this.CheckDeflateStream();
-			this._deflateStream.WriteCore(source);
+			this._deflateStream.WriteCore(buffer);
 		}
 
 		public override void CopyTo(Stream destination, int bufferSize)
@@ -190,14 +190,14 @@ namespace System.IO.Compression
 			return this._deflateStream.ReadAsync(array, offset, count, cancellationToken);
 		}
 
-		public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			if (base.GetType() != typeof(GZipStream))
 			{
-				return base.ReadAsync(destination, cancellationToken);
+				return base.ReadAsync(buffer, cancellationToken);
 			}
 			this.CheckDeflateStream();
-			return this._deflateStream.ReadAsyncMemory(destination, cancellationToken);
+			return this._deflateStream.ReadAsyncMemory(buffer, cancellationToken);
 		}
 
 		public override Task WriteAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
@@ -206,14 +206,14 @@ namespace System.IO.Compression
 			return this._deflateStream.WriteAsync(array, offset, count, cancellationToken);
 		}
 
-		public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
+		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			if (base.GetType() != typeof(GZipStream))
 			{
-				return base.WriteAsync(source, cancellationToken);
+				return base.WriteAsync(buffer, cancellationToken);
 			}
 			this.CheckDeflateStream();
-			return this._deflateStream.WriteAsyncMemory(source, cancellationToken);
+			return this._deflateStream.WriteAsyncMemory(buffer, cancellationToken);
 		}
 
 		public override Task FlushAsync(CancellationToken cancellationToken)
@@ -239,7 +239,7 @@ namespace System.IO.Compression
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void ThrowStreamClosedException()
 		{
-			throw new ObjectDisposedException(null, "Can not access a closed Stream.");
+			throw new ObjectDisposedException(null, "Cannot access a closed Stream.");
 		}
 
 		private DeflateStream _deflateStream;

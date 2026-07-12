@@ -114,7 +114,7 @@ namespace System.Xml.Linq
 				object[] array = this.annotations as object[];
 				if (array == null)
 				{
-					if (type.IsInstanceOfType(this.annotations))
+					if (XHelper.IsInstanceOfType(this.annotations, type))
 					{
 						return this.annotations;
 					}
@@ -127,7 +127,37 @@ namespace System.Xml.Linq
 						{
 							break;
 						}
-						if (type.IsInstanceOfType(obj))
+						if (XHelper.IsInstanceOfType(obj, type))
+						{
+							return obj;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		private object AnnotationForSealedType(Type type)
+		{
+			if (this.annotations != null)
+			{
+				object[] array = this.annotations as object[];
+				if (array == null)
+				{
+					if (this.annotations.GetType() == type)
+					{
+						return this.annotations;
+					}
+				}
+				else
+				{
+					foreach (object obj in array)
+					{
+						if (obj == null)
+						{
+							break;
+						}
+						if (obj.GetType() == type)
 						{
 							return obj;
 						}
@@ -178,7 +208,7 @@ namespace System.Xml.Linq
 				object[] a = this.annotations as object[];
 				if (a == null)
 				{
-					if (type.IsInstanceOfType(this.annotations))
+					if (XHelper.IsInstanceOfType(this.annotations, type))
 					{
 						yield return this.annotations;
 					}
@@ -193,7 +223,7 @@ namespace System.Xml.Linq
 						{
 							break;
 						}
-						if (type.IsInstanceOfType(obj))
+						if (XHelper.IsInstanceOfType(obj, type))
 						{
 							yield return obj;
 						}
@@ -252,7 +282,7 @@ namespace System.Xml.Linq
 				object[] array = this.annotations as object[];
 				if (array == null)
 				{
-					if (type.IsInstanceOfType(this.annotations))
+					if (XHelper.IsInstanceOfType(this.annotations, type))
 					{
 						this.annotations = null;
 						return;
@@ -269,7 +299,7 @@ namespace System.Xml.Linq
 						{
 							break;
 						}
-						if (!type.IsInstanceOfType(obj))
+						if (!XHelper.IsInstanceOfType(obj, type))
 						{
 							array[j++] = obj;
 						}
@@ -527,7 +557,7 @@ namespace System.Xml.Linq
 					{
 						break;
 					}
-					if (xobject.Annotations<XObjectChangeAnnotation>() != null)
+					if (xobject.Annotation<XObjectChangeAnnotation>() != null)
 					{
 						return false;
 					}
@@ -553,7 +583,7 @@ namespace System.Xml.Linq
 					{
 						break;
 					}
-					obj = xobject.Annotation(typeof(SaveOptions));
+					obj = xobject.AnnotationForSealedType(typeof(SaveOptions));
 					if (obj != null)
 					{
 						goto Block_3;

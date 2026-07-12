@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/CustomRenderTexture.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/CustomRenderTexture.h")]
 	public sealed class CustomRenderTexture : RenderTexture
 	{
 		[FreeFunction(Name = "CustomRenderTextureScripting::Create")]
@@ -78,7 +79,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::SetUpdateZonesInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetUpdateZonesInternal(CustomRenderTextureUpdateZone[] updateZones);
+		private extern void SetUpdateZonesInternal([Unmarshalled] CustomRenderTextureUpdateZone[] updateZones);
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::GetDoubleBufferRenderTexture", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -183,29 +184,38 @@ namespace UnityEngine
 			set;
 		}
 
-		public CustomRenderTexture(int width, int height, RenderTextureFormat format, RenderTextureReadWrite readWrite)
+		public CustomRenderTexture(int width, int height, RenderTextureFormat format, [DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite)
 			: this(width, height, RenderTexture.GetCompatibleFormat(format, readWrite))
 		{
 		}
 
+		[ExcludeFromDocs]
 		public CustomRenderTexture(int width, int height, RenderTextureFormat format)
-			: this(width, height, RenderTexture.GetCompatibleFormat(format, RenderTextureReadWrite.Default))
+			: this(width, height, format, RenderTextureReadWrite.Default)
 		{
 		}
 
+		[ExcludeFromDocs]
 		public CustomRenderTexture(int width, int height)
 			: this(width, height, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR))
 		{
 		}
 
-		public CustomRenderTexture(int width, int height, DefaultFormat defaultFormat)
-			: this(width, height, SystemInfo.GetGraphicsFormat(defaultFormat))
+		[ExcludeFromDocs]
+		public CustomRenderTexture(int width, int height, [DefaultValue("DefaultFormat.LDR")] DefaultFormat defaultFormat)
+			: this(width, height, RenderTexture.GetDefaultColorFormat(defaultFormat))
 		{
+			bool flag = defaultFormat == DefaultFormat.DepthStencil || defaultFormat == DefaultFormat.Shadow;
+			if (flag)
+			{
+				base.depthStencilFormat = SystemInfo.GetGraphicsFormat(defaultFormat);
+			}
 		}
 
+		[ExcludeFromDocs]
 		public CustomRenderTexture(int width, int height, GraphicsFormat format)
 		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Render);
+			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, FormatUsage.Render);
 			if (!flag)
 			{
 				CustomRenderTexture.Internal_CreateCustomRenderTexture(this);

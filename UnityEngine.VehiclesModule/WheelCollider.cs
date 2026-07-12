@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("PhysicsScriptingClasses.h")]
 	[NativeHeader("Modules/Vehicles/WheelCollider.h")]
+	[NativeHeader("PhysicsScriptingClasses.h")]
 	public class WheelCollider : Collider
 	{
 		public Vector3 center
@@ -150,6 +150,14 @@ namespace UnityEngine
 		}
 
 		public extern float sprungMass
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float rotationSpeed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;

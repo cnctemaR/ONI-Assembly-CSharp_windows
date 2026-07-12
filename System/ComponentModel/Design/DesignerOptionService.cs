@@ -33,7 +33,7 @@ namespace System.ComponentModel.Design
 			}
 			if (name.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("'{1}' is not a valid value for '{0}'.", new object[]
+				throw new ArgumentException(SR.GetString("'{1}' is not a valid value for '{0}'.", new object[]
 				{
 					name.Length.ToString(CultureInfo.CurrentCulture),
 					0.ToString(CultureInfo.CurrentCulture)
@@ -95,8 +95,8 @@ namespace System.ComponentModel.Design
 
 		private DesignerOptionService.DesignerOptionCollection _options;
 
-		[Editor("", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[TypeConverter(typeof(DesignerOptionService.DesignerOptionConverter))]
+		[Editor("", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public sealed class DesignerOptionCollection : IList, ICollection, IEnumerable
 		{
 			internal DesignerOptionCollection(DesignerOptionService service, DesignerOptionService.DesignerOptionCollection parent, string name, object value)
@@ -462,7 +462,7 @@ namespace System.ComponentModel.Design
 			{
 				if (destinationType == typeof(string))
 				{
-					return global::SR.GetString("(Collection)");
+					return SR.GetString("(Collection)");
 				}
 				return base.ConvertTo(cxt, culture, value, destinationType);
 			}

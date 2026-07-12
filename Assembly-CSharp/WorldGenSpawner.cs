@@ -112,6 +112,23 @@ public class WorldGenSpawner : KMonoBehaviour
 		return list;
 	}
 
+	public List<WorldGenSpawner.Spawnable> GeInfoOfUnspawnedWithType<T>(int worldID) where T : KMonoBehaviour
+	{
+		List<WorldGenSpawner.Spawnable> list = new List<WorldGenSpawner.Spawnable>();
+		List<WorldGenSpawner.Spawnable> list2 = this.spawnables;
+		Predicate<WorldGenSpawner.Spawnable> <>9__0;
+		Predicate<WorldGenSpawner.Spawnable> predicate;
+		if ((predicate = <>9__0) == null)
+		{
+			predicate = (<>9__0 = (WorldGenSpawner.Spawnable match) => !match.isSpawned && (int)Grid.WorldIdx[match.cell] == worldID && Assets.GetPrefab(match.spawnInfo.id) != null && Assets.GetPrefab(match.spawnInfo.id).GetComponent<T>() != null);
+		}
+		foreach (WorldGenSpawner.Spawnable spawnable in list2.FindAll(predicate))
+		{
+			list.Add(spawnable);
+		}
+		return list;
+	}
+
 	public List<Tag> GetSpawnersWithTag(Tag tag, int worldID, bool includeSpawned = false)
 	{
 		List<Tag> list = new List<Tag>();
@@ -125,6 +142,23 @@ public class WorldGenSpawner : KMonoBehaviour
 		foreach (WorldGenSpawner.Spawnable spawnable in list2.FindAll(predicate))
 		{
 			list.Add(spawnable.spawnInfo.id);
+		}
+		return list;
+	}
+
+	public List<WorldGenSpawner.Spawnable> GetSpawnablesWithTag(Tag tag, int worldID, bool includeSpawned = false)
+	{
+		List<WorldGenSpawner.Spawnable> list = new List<WorldGenSpawner.Spawnable>();
+		List<WorldGenSpawner.Spawnable> list2 = this.spawnables;
+		Predicate<WorldGenSpawner.Spawnable> <>9__0;
+		Predicate<WorldGenSpawner.Spawnable> predicate;
+		if ((predicate = <>9__0) == null)
+		{
+			predicate = (<>9__0 = (WorldGenSpawner.Spawnable match) => (includeSpawned || !match.isSpawned) && (int)Grid.WorldIdx[match.cell] == worldID && match.spawnInfo.id == tag);
+		}
+		foreach (WorldGenSpawner.Spawnable spawnable in list2.FindAll(predicate))
+		{
+			list.Add(spawnable);
 		}
 		return list;
 	}

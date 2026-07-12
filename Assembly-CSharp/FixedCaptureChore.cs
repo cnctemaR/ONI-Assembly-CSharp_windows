@@ -14,16 +14,16 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		};
 		this.IsCreatureAvailableForFixedCapture = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
-		base.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
-		base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures.Id);
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, capture_point.GetComponent<Building>());
+		this.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
+		this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures.Id);
+		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, capture_point.GetComponent<Building>());
 		Operational component = capture_point.GetComponent<Operational>();
-		base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
+		this.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		Deconstructable component2 = capture_point.GetComponent<Deconstructable>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
 		BuildingEnabledButton component3 = capture_point.GetComponent<BuildingEnabledButton>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
 		base.smi = new FixedCaptureChore.FixedCaptureChoreStates.Instance(capture_point);
 		base.SetPrioritizable(capture_point.GetComponent<Prioritizable>());
 	}

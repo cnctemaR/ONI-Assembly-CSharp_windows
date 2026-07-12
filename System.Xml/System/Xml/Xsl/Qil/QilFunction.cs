@@ -7,9 +7,9 @@ namespace System.Xml.Xsl.Qil
 		public QilFunction(QilNodeType nodeType, QilNode arguments, QilNode definition, QilNode sideEffects, XmlQueryType resultType)
 			: base(nodeType)
 		{
-			this.arguments = arguments;
-			this.definition = definition;
-			this.sideEffects = sideEffects;
+			this._arguments = arguments;
+			this._definition = definition;
+			this._sideEffects = sideEffects;
 			this.xmlType = resultType;
 		}
 
@@ -28,11 +28,11 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					return this.arguments;
+					return this._arguments;
 				case 1:
-					return this.definition;
+					return this._definition;
 				case 2:
-					return this.sideEffects;
+					return this._sideEffects;
 				default:
 					throw new IndexOutOfRangeException();
 				}
@@ -42,13 +42,13 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					this.arguments = value;
+					this._arguments = value;
 					return;
 				case 1:
-					this.definition = value;
+					this._definition = value;
 					return;
 				case 2:
-					this.sideEffects = value;
+					this._sideEffects = value;
 					return;
 				default:
 					throw new IndexOutOfRangeException();
@@ -60,11 +60,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (QilList)this.arguments;
+				return (QilList)this._arguments;
 			}
 			set
 			{
-				this.arguments = value;
+				this._arguments = value;
 			}
 		}
 
@@ -72,11 +72,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.definition;
+				return this._definition;
 			}
 			set
 			{
-				this.definition = value;
+				this._definition = value;
 			}
 		}
 
@@ -84,18 +84,18 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.sideEffects.NodeType == QilNodeType.True;
+				return this._sideEffects.NodeType == QilNodeType.True;
 			}
 			set
 			{
-				this.sideEffects.NodeType = (value ? QilNodeType.True : QilNodeType.False);
+				this._sideEffects.NodeType = (value ? QilNodeType.True : QilNodeType.False);
 			}
 		}
 
-		private QilNode arguments;
+		private QilNode _arguments;
 
-		private QilNode definition;
+		private QilNode _definition;
 
-		private QilNode sideEffects;
+		private QilNode _sideEffects;
 	}
 }

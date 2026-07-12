@@ -18,7 +18,14 @@ public class IceCavesForagePlantPlantedConfig : IEntityConfig
 		string text3 = global::STRINGS.CREATURES.SPECIES.ICECAVESFORAGEPLANTPLANTED.DESC;
 		float num = 100f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("frozenberries_kanim"), "idle", Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Hanging }, 253.15f);
+		KAnimFile anim = Assets.GetAnim("frozenberries_kanim");
+		string text4 = "idle";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.BuildingBack;
+		int num2 = 1;
+		int num3 = 2;
+		EffectorValues effectorValues = tier;
+		List<Tag> list = new List<Tag> { GameTags.Hanging };
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 253.15f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 2);
 		gameObject.AddOrGet<SimTemperatureTransfer>();
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };

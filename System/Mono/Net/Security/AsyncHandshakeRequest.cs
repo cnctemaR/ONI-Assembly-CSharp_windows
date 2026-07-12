@@ -11,7 +11,7 @@ namespace Mono.Net.Security
 
 		protected override AsyncOperationStatus Run(AsyncOperationStatus status)
 		{
-			return base.Parent.ProcessHandshake(status);
+			return base.Parent.ProcessHandshake(status, false);
 		}
 	}
 }

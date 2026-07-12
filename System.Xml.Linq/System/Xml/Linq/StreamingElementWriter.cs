@@ -8,28 +8,28 @@ namespace System.Xml.Linq
 	{
 		public StreamingElementWriter(XmlWriter w)
 		{
-			this.writer = w;
-			this.element = null;
-			this.attributes = new List<XAttribute>();
-			this.resolver = default(NamespaceResolver);
+			this._writer = w;
+			this._element = null;
+			this._attributes = new List<XAttribute>();
+			this._resolver = default(NamespaceResolver);
 		}
 
 		private void FlushElement()
 		{
-			if (this.element != null)
+			if (this._element != null)
 			{
 				this.PushElement();
-				XNamespace xnamespace = this.element.Name.Namespace;
-				this.writer.WriteStartElement(this.GetPrefixOfNamespace(xnamespace, true), this.element.Name.LocalName, xnamespace.NamespaceName);
-				foreach (XAttribute xattribute in this.attributes)
+				XNamespace xnamespace = this._element.Name.Namespace;
+				this._writer.WriteStartElement(this.GetPrefixOfNamespace(xnamespace, true), this._element.Name.LocalName, xnamespace.NamespaceName);
+				foreach (XAttribute xattribute in this._attributes)
 				{
 					xnamespace = xattribute.Name.Namespace;
 					string localName = xattribute.Name.LocalName;
 					string namespaceName = xnamespace.NamespaceName;
-					this.writer.WriteAttributeString(this.GetPrefixOfNamespace(xnamespace, false), localName, (namespaceName.Length == 0 && localName == "xmlns") ? "http://www.w3.org/2000/xmlns/" : namespaceName, xattribute.Value);
+					this._writer.WriteAttributeString(this.GetPrefixOfNamespace(xnamespace, false), localName, (namespaceName.Length == 0 && localName == "xmlns") ? "http://www.w3.org/2000/xmlns/" : namespaceName, xattribute.Value);
 				}
-				this.element = null;
-				this.attributes.Clear();
+				this._element = null;
+				this._attributes.Clear();
 			}
 		}
 
@@ -40,7 +40,7 @@ namespace System.Xml.Linq
 			{
 				return string.Empty;
 			}
-			string prefixOfNamespace = this.resolver.GetPrefixOfNamespace(ns, allowDefaultNamespace);
+			string prefixOfNamespace = this._resolver.GetPrefixOfNamespace(ns, allowDefaultNamespace);
 			if (prefixOfNamespace != null)
 			{
 				return prefixOfNamespace;
@@ -58,12 +58,12 @@ namespace System.Xml.Linq
 
 		private void PushElement()
 		{
-			this.resolver.PushScope();
-			foreach (XAttribute xattribute in this.attributes)
+			this._resolver.PushScope();
+			foreach (XAttribute xattribute in this._attributes)
 			{
 				if (xattribute.IsNamespaceDeclaration)
 				{
-					this.resolver.Add((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
+					this._resolver.Add((xattribute.Name.NamespaceName.Length == 0) ? string.Empty : xattribute.Name.LocalName, XNamespace.Get(xattribute.Value));
 				}
 			}
 		}
@@ -121,49 +121,41 @@ namespace System.Xml.Linq
 
 		private void WriteAttribute(XAttribute a)
 		{
-			if (this.element == null)
+			if (this._element == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_WriteAttribute"));
+				throw new InvalidOperationException("An attribute cannot be written after content.");
 			}
-			this.attributes.Add(a);
+			this._attributes.Add(a);
 		}
 
 		private void WriteNode(XNode n)
 		{
 			this.FlushElement();
-			n.WriteTo(this.writer);
+			n.WriteTo(this._writer);
 		}
 
 		internal void WriteStreamingElement(XStreamingElement e)
 		{
 			this.FlushElement();
-			this.element = e;
+			this._element = e;
 			this.Write(e.content);
-			bool flag = this.element == null;
 			this.FlushElement();
-			if (flag)
-			{
-				this.writer.WriteFullEndElement();
-			}
-			else
-			{
-				this.writer.WriteEndElement();
-			}
-			this.resolver.PopScope();
+			this._writer.WriteEndElement();
+			this._resolver.PopScope();
 		}
 
 		private void WriteString(string s)
 		{
 			this.FlushElement();
-			this.writer.WriteString(s);
+			this._writer.WriteString(s);
 		}
 
-		private XmlWriter writer;
+		private XmlWriter _writer;
 
-		private XStreamingElement element;
+		private XStreamingElement _element;
 
-		private List<XAttribute> attributes;
+		private List<XAttribute> _attributes;
 
-		private NamespaceResolver resolver;
+		private NamespaceResolver _resolver;
 	}
 }

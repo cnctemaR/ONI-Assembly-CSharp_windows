@@ -49,7 +49,7 @@ namespace System.Net.NetworkInformation
 					{
 						if (string.Compare(this.access, "None", StringComparison.OrdinalIgnoreCase) != 0)
 						{
-							throw new ArgumentException(global::SR.GetString("The parameter value '{0}={1}' is invalid.", new object[] { "Access", this.access }));
+							throw new ArgumentException(SR.GetString("The parameter value '{0}={1}' is invalid.", new object[] { "Access", this.access }));
 						}
 						networkInformationPermission.AddPermission(NetworkInformationAccess.None);
 					}

@@ -93,7 +93,7 @@ public class ResearchEntry : KMonoBehaviour
 		string text = "";
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
-			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
+			if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(techItem.requiredDlcIds, techItem.forbiddenDlcIds))
 			{
 				HierarchyReferences component2 = this.GetFreeIcon().GetComponent<HierarchyReferences>();
 				if (text != "")
@@ -104,16 +104,20 @@ public class ResearchEntry : KMonoBehaviour
 				component2.GetReference<KImage>("Icon").sprite = techItem.UISprite();
 				component2.GetReference<KImage>("Background");
 				KImage reference = component2.GetReference<KImage>("DLCOverlay");
-				bool flag = !DlcManager.IsValidForVanilla(techItem.dlcIds);
+				bool flag = techItem.requiredDlcIds != null;
 				reference.gameObject.SetActive(flag);
 				if (flag)
 				{
-					reference.color = DlcManager.GetDlcBannerColor(techItem.dlcIds[0]);
+					reference.color = DlcManager.GetDlcBannerColor(techItem.requiredDlcIds[techItem.requiredDlcIds.Length - 1]);
 				}
 				string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
-				if (!DlcManager.IsValidForVanilla(techItem.dlcIds))
+				if (flag)
 				{
-					text2 += string.Format(RESEARCH.MESSAGING.DLC.DLC_CONTENT, DlcManager.GetDlcTitle(techItem.dlcIds[0]));
+					text2 += "\n";
+					foreach (string text3 in techItem.requiredDlcIds)
+					{
+						text2 += string.Format(RESEARCH.MESSAGING.DLC.DLC_CONTENT, DlcManager.GetDlcTitle(text3));
+					}
 				}
 				component2.GetComponent<ToolTip>().toolTip = text2;
 			}

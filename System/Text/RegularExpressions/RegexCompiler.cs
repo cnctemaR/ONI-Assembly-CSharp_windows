@@ -22,36 +22,7 @@ namespace System.Text.RegularExpressions
 			return new RegexLWCGCompiler().FactoryInstanceFromCode(code, options);
 		}
 
-		internal static void CompileToAssembly(RegexCompilationInfo[] regexes, AssemblyName an, CustomAttributeBuilder[] attribs, string resourceFile)
-		{
-			RegexTypeCompiler regexTypeCompiler = new RegexTypeCompiler(an, attribs, resourceFile);
-			for (int i = 0; i < regexes.Length; i++)
-			{
-				if (regexes[i] == null)
-				{
-					throw new ArgumentNullException("regexes", global::SR.GetString("The array cannot contain null elements."));
-				}
-				string pattern = regexes[i].Pattern;
-				RegexOptions options = regexes[i].Options;
-				string text;
-				if (regexes[i].Namespace.Length == 0)
-				{
-					text = regexes[i].Name;
-				}
-				else
-				{
-					text = regexes[i].Namespace + "." + regexes[i].Name;
-				}
-				TimeSpan matchTimeout = regexes[i].MatchTimeout;
-				RegexTree regexTree = RegexParser.Parse(pattern, options);
-				RegexCode regexCode = RegexWriter.Write(regexTree);
-				Type type = regexTypeCompiler.FactoryTypeFromCode(regexCode, options, text);
-				regexTypeCompiler.GenerateRegexType(pattern, options, text, regexes[i].IsPublic, regexCode, regexTree, type, matchTimeout);
-			}
-			regexTypeCompiler.Save();
-		}
-
-		internal int AddBacktrackNote(int flags, Label l, int codepos)
+		private int AddBacktrackNote(int flags, Label l, int codepos)
 		{
 			if (this._notes == null || this._notecount >= this._notes.Length)
 			{
@@ -68,17 +39,17 @@ namespace System.Text.RegularExpressions
 			return notecount;
 		}
 
-		internal int AddTrack()
+		private int AddTrack()
 		{
 			return this.AddTrack(128);
 		}
 
-		internal int AddTrack(int flags)
+		private int AddTrack(int flags)
 		{
 			return this.AddBacktrackNote(flags, this.DefineLabel(), this._codepos);
 		}
 
-		internal int AddGoto(int destpos)
+		private int AddGoto(int destpos)
 		{
 			if (this._goto[destpos] == -1)
 			{
@@ -87,12 +58,12 @@ namespace System.Text.RegularExpressions
 			return this._goto[destpos];
 		}
 
-		internal int AddUniqueTrack(int i)
+		private int AddUniqueTrack(int i)
 		{
 			return this.AddUniqueTrack(i, 128);
 		}
 
-		internal int AddUniqueTrack(int i, int flags)
+		private int AddUniqueTrack(int i, int flags)
 		{
 			if (this._uniquenote[i] == -1)
 			{
@@ -101,42 +72,42 @@ namespace System.Text.RegularExpressions
 			return this._uniquenote[i];
 		}
 
-		internal Label DefineLabel()
+		private Label DefineLabel()
 		{
 			return this._ilg.DefineLabel();
 		}
 
-		internal void MarkLabel(Label l)
+		private void MarkLabel(Label l)
 		{
 			this._ilg.MarkLabel(l);
 		}
 
-		internal int Operand(int i)
+		private int Operand(int i)
 		{
 			return this._codes[this._codepos + i + 1];
 		}
 
-		internal bool IsRtl()
+		private bool IsRtl()
 		{
 			return (this._regexopcode & 64) != 0;
 		}
 
-		internal bool IsCi()
+		private bool IsCi()
 		{
 			return (this._regexopcode & 512) != 0;
 		}
 
-		internal int Code()
+		private int Code()
 		{
 			return this._regexopcode & 63;
 		}
 
-		internal void Ldstr(string str)
+		private void Ldstr(string str)
 		{
 			this._ilg.Emit(OpCodes.Ldstr, str);
 		}
 
-		internal void Ldc(int i)
+		private void Ldc(int i)
 		{
 			if (i <= 127 && i >= -128)
 			{
@@ -146,7 +117,7 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Ldc_I4, i);
 		}
 
-		internal void LdcI8(long i)
+		private void LdcI8(long i)
 		{
 			if (i <= 2147483647L && i >= -2147483648L)
 			{
@@ -157,27 +128,27 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Ldc_I8, i);
 		}
 
-		internal void Dup()
+		private void Dup()
 		{
 			this._ilg.Emit(OpCodes.Dup);
 		}
 
-		internal void Ret()
+		private void Ret()
 		{
 			this._ilg.Emit(OpCodes.Ret);
 		}
 
-		internal void Pop()
+		private void Pop()
 		{
 			this._ilg.Emit(OpCodes.Pop);
 		}
 
-		internal void Add()
+		private void Add()
 		{
 			this._ilg.Emit(OpCodes.Add);
 		}
 
-		internal void Add(bool negate)
+		private void Add(bool negate)
 		{
 			if (negate)
 			{
@@ -187,12 +158,12 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Add);
 		}
 
-		internal void Sub()
+		private void Sub()
 		{
 			this._ilg.Emit(OpCodes.Sub);
 		}
 
-		internal void Sub(bool negate)
+		private void Sub(bool negate)
 		{
 			if (negate)
 			{
@@ -202,163 +173,163 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Sub);
 		}
 
-		internal void Ldloc(LocalBuilder lt)
+		private void Ldloc(LocalBuilder lt)
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, lt);
 		}
 
-		internal void Stloc(LocalBuilder lt)
+		private void Stloc(LocalBuilder lt)
 		{
 			this._ilg.Emit(OpCodes.Stloc_S, lt);
 		}
 
-		internal void Ldthis()
+		private void Ldthis()
 		{
 			this._ilg.Emit(OpCodes.Ldarg_0);
 		}
 
-		internal void Ldthisfld(FieldInfo ft)
+		private void Ldthisfld(FieldInfo ft)
 		{
 			this.Ldthis();
 			this._ilg.Emit(OpCodes.Ldfld, ft);
 		}
 
-		internal void Mvfldloc(FieldInfo ft, LocalBuilder lt)
+		private void Mvfldloc(FieldInfo ft, LocalBuilder lt)
 		{
 			this.Ldthisfld(ft);
 			this.Stloc(lt);
 		}
 
-		internal void Mvlocfld(LocalBuilder lt, FieldInfo ft)
+		private void Mvlocfld(LocalBuilder lt, FieldInfo ft)
 		{
 			this.Ldthis();
 			this.Ldloc(lt);
 			this.Stfld(ft);
 		}
 
-		internal void Stfld(FieldInfo ft)
+		private void Stfld(FieldInfo ft)
 		{
 			this._ilg.Emit(OpCodes.Stfld, ft);
 		}
 
-		internal void Callvirt(MethodInfo mt)
+		private void Callvirt(MethodInfo mt)
 		{
 			this._ilg.Emit(OpCodes.Callvirt, mt);
 		}
 
-		internal void Call(MethodInfo mt)
+		private void Call(MethodInfo mt)
 		{
 			this._ilg.Emit(OpCodes.Call, mt);
 		}
 
-		internal void Newobj(ConstructorInfo ct)
+		private void Newobj(ConstructorInfo ct)
 		{
 			this._ilg.Emit(OpCodes.Newobj, ct);
 		}
 
-		internal void BrfalseFar(Label l)
+		private void BrfalseFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Brfalse, l);
 		}
 
-		internal void BrtrueFar(Label l)
+		private void BrtrueFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Brtrue, l);
 		}
 
-		internal void BrFar(Label l)
+		private void BrFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Br, l);
 		}
 
-		internal void BleFar(Label l)
+		private void BleFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Ble, l);
 		}
 
-		internal void BltFar(Label l)
+		private void BltFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Blt, l);
 		}
 
-		internal void BgeFar(Label l)
+		private void BgeFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bge, l);
 		}
 
-		internal void BgtFar(Label l)
+		private void BgtFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bgt, l);
 		}
 
-		internal void BneFar(Label l)
+		private void BneFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bne_Un, l);
 		}
 
-		internal void BeqFar(Label l)
+		private void BeqFar(Label l)
 		{
 			this._ilg.Emit(OpCodes.Beq, l);
 		}
 
-		internal void Brfalse(Label l)
+		private void Brfalse(Label l)
 		{
 			this._ilg.Emit(OpCodes.Brfalse_S, l);
 		}
 
-		internal void Br(Label l)
+		private void Br(Label l)
 		{
 			this._ilg.Emit(OpCodes.Br_S, l);
 		}
 
-		internal void Ble(Label l)
+		private void Ble(Label l)
 		{
 			this._ilg.Emit(OpCodes.Ble_S, l);
 		}
 
-		internal void Blt(Label l)
+		private void Blt(Label l)
 		{
 			this._ilg.Emit(OpCodes.Blt_S, l);
 		}
 
-		internal void Bge(Label l)
+		private void Bge(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bge_S, l);
 		}
 
-		internal void Bgt(Label l)
+		private void Bgt(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bgt_S, l);
 		}
 
-		internal void Bgtun(Label l)
+		private void Bgtun(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bgt_Un_S, l);
 		}
 
-		internal void Bne(Label l)
+		private void Bne(Label l)
 		{
 			this._ilg.Emit(OpCodes.Bne_Un_S, l);
 		}
 
-		internal void Beq(Label l)
+		private void Beq(Label l)
 		{
 			this._ilg.Emit(OpCodes.Beq_S, l);
 		}
 
-		internal void Ldlen()
+		private void Ldlen()
 		{
 			this._ilg.Emit(OpCodes.Ldlen);
 		}
 
-		internal void Rightchar()
+		private void Rightchar()
 		{
 			this.Ldloc(this._textV);
 			this.Ldloc(this._textposV);
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 		}
 
-		internal void Rightcharnext()
+		private void Rightcharnext()
 		{
 			this.Ldloc(this._textV);
 			this.Ldloc(this._textposV);
@@ -366,19 +337,19 @@ namespace System.Text.RegularExpressions
 			this.Ldc(1);
 			this.Add();
 			this.Stloc(this._textposV);
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 		}
 
-		internal void Leftchar()
+		private void Leftchar()
 		{
 			this.Ldloc(this._textV);
 			this.Ldloc(this._textposV);
 			this.Ldc(1);
 			this.Sub();
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 		}
 
-		internal void Leftcharnext()
+		private void Leftcharnext()
 		{
 			this.Ldloc(this._textV);
 			this.Ldloc(this._textposV);
@@ -386,45 +357,45 @@ namespace System.Text.RegularExpressions
 			this.Sub();
 			this.Dup();
 			this.Stloc(this._textposV);
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 		}
 
-		internal void Track()
+		private void Track()
 		{
 			this.ReadyPushTrack();
 			this.Ldc(this.AddTrack());
 			this.DoPush();
 		}
 
-		internal void Trackagain()
+		private void Trackagain()
 		{
 			this.ReadyPushTrack();
 			this.Ldc(this._backpos);
 			this.DoPush();
 		}
 
-		internal void PushTrack(LocalBuilder lt)
+		private void PushTrack(LocalBuilder lt)
 		{
 			this.ReadyPushTrack();
 			this.Ldloc(lt);
 			this.DoPush();
 		}
 
-		internal void TrackUnique(int i)
+		private void TrackUnique(int i)
 		{
 			this.ReadyPushTrack();
 			this.Ldc(this.AddUniqueTrack(i));
 			this.DoPush();
 		}
 
-		internal void TrackUnique2(int i)
+		private void TrackUnique2(int i)
 		{
 			this.ReadyPushTrack();
 			this.Ldc(this.AddUniqueTrack(i, 256));
 			this.DoPush();
 		}
 
-		internal void ReadyPushTrack()
+		private void ReadyPushTrack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackposV);
@@ -434,7 +405,7 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Stloc_S, this._trackposV);
 		}
 
-		internal void PopTrack()
+		private void PopTrack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackposV);
@@ -445,14 +416,14 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Ldelem_I4);
 		}
 
-		internal void TopTrack()
+		private void TopTrack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._trackposV);
 			this._ilg.Emit(OpCodes.Ldelem_I4);
 		}
 
-		internal void PushStack(LocalBuilder lt)
+		private void PushStack(LocalBuilder lt)
 		{
 			this.ReadyPushStack();
 			this._ilg.Emit(OpCodes.Ldloc_S, lt);
@@ -470,7 +441,7 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal void ReadyPushStack()
+		private void ReadyPushStack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackposV);
@@ -480,14 +451,14 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Stloc_S, this._stackposV);
 		}
 
-		internal void TopStack()
+		private void TopStack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackposV);
 			this._ilg.Emit(OpCodes.Ldelem_I4);
 		}
 
-		internal void PopStack()
+		private void PopStack()
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackV);
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackposV);
@@ -498,12 +469,12 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Ldelem_I4);
 		}
 
-		internal void PopDiscardStack()
+		private void PopDiscardStack()
 		{
 			this.PopDiscardStack(1);
 		}
 
-		internal void PopDiscardStack(int i)
+		private void PopDiscardStack(int i)
 		{
 			this._ilg.Emit(OpCodes.Ldloc_S, this._stackposV);
 			this.Ldc(i);
@@ -511,22 +482,22 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Stloc_S, this._stackposV);
 		}
 
-		internal void DoReplace()
+		private void DoReplace()
 		{
 			this._ilg.Emit(OpCodes.Stelem_I4);
 		}
 
-		internal void DoPush()
+		private void DoPush()
 		{
 			this._ilg.Emit(OpCodes.Stelem_I4);
 		}
 
-		internal void Back()
+		private void Back()
 		{
 			this._ilg.Emit(OpCodes.Br, this._backtrack);
 		}
 
-		internal void Goto(int i)
+		private void Goto(int i)
 		{
 			if (i < this._codepos)
 			{
@@ -547,35 +518,35 @@ namespace System.Text.RegularExpressions
 			this.BrFar(this._labels[i]);
 		}
 
-		internal int NextCodepos()
+		private int NextCodepos()
 		{
 			return this._codepos + RegexCode.OpcodeSize(this._codes[this._codepos]);
 		}
 
-		internal Label AdvanceLabel()
+		private Label AdvanceLabel()
 		{
 			return this._labels[this.NextCodepos()];
 		}
 
-		internal void Advance()
+		private void Advance()
 		{
 			this._ilg.Emit(OpCodes.Br, this.AdvanceLabel());
 		}
 
-		internal void CallToLower()
+		private void CallToLower()
 		{
 			if ((this._options & RegexOptions.CultureInvariant) != RegexOptions.None)
 			{
-				this.Call(RegexCompiler._getInvariantCulture);
+				this.Call(RegexCompiler.s_getInvariantCulture);
 			}
 			else
 			{
-				this.Call(RegexCompiler._getCurrentCulture);
+				this.Call(RegexCompiler.s_getCurrentCulture);
 			}
-			this.Call(RegexCompiler._chartolowerM);
+			this.Call(RegexCompiler.s_chartolowerM);
 		}
 
-		internal void GenerateForwardSection()
+		private void GenerateForwardSection()
 		{
 			this._labels = new Label[this._codes.Length];
 			this._goto = new int[this._codes.Length];
@@ -589,15 +560,15 @@ namespace System.Text.RegularExpressions
 			{
 				this._uniquenote[j] = -1;
 			}
-			this.Mvfldloc(RegexCompiler._textF, this._textV);
-			this.Mvfldloc(RegexCompiler._textstartF, this._textstartV);
-			this.Mvfldloc(RegexCompiler._textbegF, this._textbegV);
-			this.Mvfldloc(RegexCompiler._textendF, this._textendV);
-			this.Mvfldloc(RegexCompiler._textposF, this._textposV);
-			this.Mvfldloc(RegexCompiler._trackF, this._trackV);
-			this.Mvfldloc(RegexCompiler._trackposF, this._trackposV);
-			this.Mvfldloc(RegexCompiler._stackF, this._stackV);
-			this.Mvfldloc(RegexCompiler._stackposF, this._stackposV);
+			this.Mvfldloc(RegexCompiler.s_textF, this._textV);
+			this.Mvfldloc(RegexCompiler.s_textstartF, this._textstartV);
+			this.Mvfldloc(RegexCompiler.s_textbegF, this._textbegV);
+			this.Mvfldloc(RegexCompiler.s_textendF, this._textendV);
+			this.Mvfldloc(RegexCompiler.s_textposF, this._textposV);
+			this.Mvfldloc(RegexCompiler.s_trackF, this._trackV);
+			this.Mvfldloc(RegexCompiler.s_trackposF, this._trackposV);
+			this.Mvfldloc(RegexCompiler.s_stackF, this._stackV);
+			this.Mvfldloc(RegexCompiler.s_stackposF, this._stackposV);
 			this._backpos = -1;
 			for (int i = 0; i < this._codes.Length; i += RegexCode.OpcodeSize(this._codes[i]))
 			{
@@ -608,18 +579,18 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal void GenerateMiddleSection()
+		private void GenerateMiddleSection()
 		{
 			this.DefineLabel();
 			this.MarkLabel(this._backtrack);
-			this.Mvlocfld(this._trackposV, RegexCompiler._trackposF);
-			this.Mvlocfld(this._stackposV, RegexCompiler._stackposF);
+			this.Mvlocfld(this._trackposV, RegexCompiler.s_trackposF);
+			this.Mvlocfld(this._stackposV, RegexCompiler.s_stackposF);
 			this.Ldthis();
-			this.Callvirt(RegexCompiler._ensurestorageM);
-			this.Mvfldloc(RegexCompiler._trackposF, this._trackposV);
-			this.Mvfldloc(RegexCompiler._stackposF, this._stackposV);
-			this.Mvfldloc(RegexCompiler._trackF, this._trackV);
-			this.Mvfldloc(RegexCompiler._stackF, this._stackV);
+			this.Callvirt(RegexCompiler.s_ensurestorageM);
+			this.Mvfldloc(RegexCompiler.s_trackposF, this._trackposV);
+			this.Mvfldloc(RegexCompiler.s_stackposF, this._stackposV);
+			this.Mvfldloc(RegexCompiler.s_trackF, this._trackV);
+			this.Mvfldloc(RegexCompiler.s_stackF, this._stackV);
 			this.PopTrack();
 			Label[] array = new Label[this._notecount];
 			for (int i = 0; i < this._notecount; i++)
@@ -629,7 +600,7 @@ namespace System.Text.RegularExpressions
 			this._ilg.Emit(OpCodes.Switch, array);
 		}
 
-		internal void GenerateBacktrackSection()
+		private void GenerateBacktrackSection()
 		{
 			for (int i = 0; i < this._notecount; i++)
 			{
@@ -645,7 +616,7 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal void GenerateFindFirstChar()
+		protected void GenerateFindFirstChar()
 		{
 			this._textposV = this.DeclareInt();
 			this._textV = this.DeclareString();
@@ -653,17 +624,17 @@ namespace System.Text.RegularExpressions
 			this._temp2V = this.DeclareInt();
 			if ((this._anchors & 53) != 0)
 			{
-				if (!this._code._rightToLeft)
+				if (!this._code.RightToLeft)
 				{
 					if ((this._anchors & 1) != 0)
 					{
 						Label label = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textbegF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
 						this.Ble(label);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textendF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.Ldc(0);
 						this.Ret();
 						this.MarkLabel(label);
@@ -671,12 +642,12 @@ namespace System.Text.RegularExpressions
 					if ((this._anchors & 4) != 0)
 					{
 						Label label2 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textstartF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textstartF);
 						this.Ble(label2);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textendF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.Ldc(0);
 						this.Ret();
 						this.MarkLabel(label2);
@@ -684,27 +655,27 @@ namespace System.Text.RegularExpressions
 					if ((this._anchors & 16) != 0)
 					{
 						Label label3 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Ldc(1);
 						this.Sub();
 						this.Bge(label3);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Ldc(1);
 						this.Sub();
-						this.Stfld(RegexCompiler._textposF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.MarkLabel(label3);
 					}
 					if ((this._anchors & 32) != 0)
 					{
 						Label label4 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Bge(label4);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textendF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.MarkLabel(label4);
 					}
 				}
@@ -713,12 +684,12 @@ namespace System.Text.RegularExpressions
 					if ((this._anchors & 32) != 0)
 					{
 						Label label5 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Bge(label5);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textbegF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.Ldc(0);
 						this.Ret();
 						this.MarkLabel(label5);
@@ -727,23 +698,23 @@ namespace System.Text.RegularExpressions
 					{
 						Label label6 = this.DefineLabel();
 						Label label7 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Ldc(1);
 						this.Sub();
 						this.Blt(label6);
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textendF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textendF);
 						this.Beq(label7);
-						this.Ldthisfld(RegexCompiler._textF);
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Callvirt(RegexCompiler._getcharM);
+						this.Ldthisfld(RegexCompiler.s_textF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Callvirt(RegexCompiler.s_getcharM);
 						this.Ldc(10);
 						this.Beq(label7);
 						this.MarkLabel(label6);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textbegF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.Ldc(0);
 						this.Ret();
 						this.MarkLabel(label7);
@@ -751,12 +722,12 @@ namespace System.Text.RegularExpressions
 					if ((this._anchors & 4) != 0)
 					{
 						Label label8 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textstartF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textstartF);
 						this.Bge(label8);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textbegF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.Ldc(0);
 						this.Ret();
 						this.MarkLabel(label8);
@@ -764,12 +735,12 @@ namespace System.Text.RegularExpressions
 					if ((this._anchors & 1) != 0)
 					{
 						Label label9 = this.DefineLabel();
-						this.Ldthisfld(RegexCompiler._textposF);
-						this.Ldthisfld(RegexCompiler._textbegF);
+						this.Ldthisfld(RegexCompiler.s_textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
 						this.Ble(label9);
 						this.Ldthis();
-						this.Ldthisfld(RegexCompiler._textbegF);
-						this.Stfld(RegexCompiler._textposF);
+						this.Ldthisfld(RegexCompiler.s_textbegF);
+						this.Stfld(RegexCompiler.s_textposF);
 						this.MarkLabel(label9);
 					}
 				}
@@ -777,7 +748,7 @@ namespace System.Text.RegularExpressions
 				this.Ret();
 				return;
 			}
-			if (this._bmPrefix != null && this._bmPrefix._negativeUnicode == null)
+			if (this._bmPrefix != null && this._bmPrefix.NegativeUnicode == null)
 			{
 				LocalBuilder tempV = this._tempV;
 				LocalBuilder tempV2 = this._tempV;
@@ -790,48 +761,48 @@ namespace System.Text.RegularExpressions
 				Label label14 = this.DefineLabel();
 				int num;
 				int num2;
-				if (!this._code._rightToLeft)
+				if (!this._code.RightToLeft)
 				{
 					num = -1;
-					num2 = this._bmPrefix._pattern.Length - 1;
+					num2 = this._bmPrefix.Pattern.Length - 1;
 				}
 				else
 				{
-					num = this._bmPrefix._pattern.Length;
+					num = this._bmPrefix.Pattern.Length;
 					num2 = 0;
 				}
-				int num3 = (int)this._bmPrefix._pattern[num2];
-				this.Mvfldloc(RegexCompiler._textF, this._textV);
-				if (!this._code._rightToLeft)
+				int num3 = (int)this._bmPrefix.Pattern[num2];
+				this.Mvfldloc(RegexCompiler.s_textF, this._textV);
+				if (!this._code.RightToLeft)
 				{
-					this.Ldthisfld(RegexCompiler._textendF);
+					this.Ldthisfld(RegexCompiler.s_textendF);
 				}
 				else
 				{
-					this.Ldthisfld(RegexCompiler._textbegF);
+					this.Ldthisfld(RegexCompiler.s_textbegF);
 				}
 				this.Stloc(temp2V);
-				this.Ldthisfld(RegexCompiler._textposF);
-				if (!this._code._rightToLeft)
+				this.Ldthisfld(RegexCompiler.s_textposF);
+				if (!this._code.RightToLeft)
 				{
-					this.Ldc(this._bmPrefix._pattern.Length - 1);
+					this.Ldc(this._bmPrefix.Pattern.Length - 1);
 					this.Add();
 				}
 				else
 				{
-					this.Ldc(this._bmPrefix._pattern.Length);
+					this.Ldc(this._bmPrefix.Pattern.Length);
 					this.Sub();
 				}
 				this.Stloc(this._textposV);
 				this.Br(label13);
 				this.MarkLabel(label10);
-				if (!this._code._rightToLeft)
+				if (!this._code.RightToLeft)
 				{
-					this.Ldc(this._bmPrefix._pattern.Length);
+					this.Ldc(this._bmPrefix.Pattern.Length);
 				}
 				else
 				{
-					this.Ldc(-this._bmPrefix._pattern.Length);
+					this.Ldc(-this._bmPrefix.Pattern.Length);
 				}
 				this.MarkLabel(label11);
 				this.Ldloc(this._textposV);
@@ -840,7 +811,7 @@ namespace System.Text.RegularExpressions
 				this.MarkLabel(label13);
 				this.Ldloc(this._textposV);
 				this.Ldloc(temp2V);
-				if (!this._code._rightToLeft)
+				if (!this._code.RightToLeft)
 				{
 					this.BgeFar(label12);
 				}
@@ -849,7 +820,7 @@ namespace System.Text.RegularExpressions
 					this.BltFar(label12);
 				}
 				this.Rightchar();
-				if (this._bmPrefix._caseInsensitive)
+				if (this._bmPrefix.CaseInsensitive)
 				{
 					this.CallToLower();
 				}
@@ -858,88 +829,88 @@ namespace System.Text.RegularExpressions
 				this.Ldc(num3);
 				this.BeqFar(label14);
 				this.Ldloc(tempV);
-				this.Ldc(this._bmPrefix._lowASCII);
+				this.Ldc(this._bmPrefix.LowASCII);
 				this.Sub();
 				this.Dup();
 				this.Stloc(tempV);
-				this.Ldc(this._bmPrefix._highASCII - this._bmPrefix._lowASCII);
+				this.Ldc(this._bmPrefix.HighASCII - this._bmPrefix.LowASCII);
 				this.Bgtun(label10);
-				Label[] array = new Label[this._bmPrefix._highASCII - this._bmPrefix._lowASCII + 1];
-				for (int i = this._bmPrefix._lowASCII; i <= this._bmPrefix._highASCII; i++)
+				Label[] array = new Label[this._bmPrefix.HighASCII - this._bmPrefix.LowASCII + 1];
+				for (int i = this._bmPrefix.LowASCII; i <= this._bmPrefix.HighASCII; i++)
 				{
-					if (this._bmPrefix._negativeASCII[i] == num)
+					if (this._bmPrefix.NegativeASCII[i] == num)
 					{
-						array[i - this._bmPrefix._lowASCII] = label10;
+						array[i - this._bmPrefix.LowASCII] = label10;
 					}
 					else
 					{
-						array[i - this._bmPrefix._lowASCII] = this.DefineLabel();
+						array[i - this._bmPrefix.LowASCII] = this.DefineLabel();
 					}
 				}
 				this.Ldloc(tempV);
 				this._ilg.Emit(OpCodes.Switch, array);
-				for (int i = this._bmPrefix._lowASCII; i <= this._bmPrefix._highASCII; i++)
+				for (int i = this._bmPrefix.LowASCII; i <= this._bmPrefix.HighASCII; i++)
 				{
-					if (this._bmPrefix._negativeASCII[i] != num)
+					if (this._bmPrefix.NegativeASCII[i] != num)
 					{
-						this.MarkLabel(array[i - this._bmPrefix._lowASCII]);
-						this.Ldc(this._bmPrefix._negativeASCII[i]);
+						this.MarkLabel(array[i - this._bmPrefix.LowASCII]);
+						this.Ldc(this._bmPrefix.NegativeASCII[i]);
 						this.BrFar(label11);
 					}
 				}
 				this.MarkLabel(label14);
 				this.Ldloc(this._textposV);
 				this.Stloc(tempV2);
-				for (int i = this._bmPrefix._pattern.Length - 2; i >= 0; i--)
+				for (int i = this._bmPrefix.Pattern.Length - 2; i >= 0; i--)
 				{
 					Label label15 = this.DefineLabel();
 					int num4;
-					if (!this._code._rightToLeft)
+					if (!this._code.RightToLeft)
 					{
 						num4 = i;
 					}
 					else
 					{
-						num4 = this._bmPrefix._pattern.Length - 1 - i;
+						num4 = this._bmPrefix.Pattern.Length - 1 - i;
 					}
 					this.Ldloc(this._textV);
 					this.Ldloc(tempV2);
 					this.Ldc(1);
-					this.Sub(this._code._rightToLeft);
+					this.Sub(this._code.RightToLeft);
 					this.Dup();
 					this.Stloc(tempV2);
-					this.Callvirt(RegexCompiler._getcharM);
-					if (this._bmPrefix._caseInsensitive)
+					this.Callvirt(RegexCompiler.s_getcharM);
+					if (this._bmPrefix.CaseInsensitive)
 					{
 						this.CallToLower();
 					}
-					this.Ldc((int)this._bmPrefix._pattern[num4]);
+					this.Ldc((int)this._bmPrefix.Pattern[num4]);
 					this.Beq(label15);
-					this.Ldc(this._bmPrefix._positive[num4]);
+					this.Ldc(this._bmPrefix.Positive[num4]);
 					this.BrFar(label11);
 					this.MarkLabel(label15);
 				}
 				this.Ldthis();
 				this.Ldloc(tempV2);
-				if (this._code._rightToLeft)
+				if (this._code.RightToLeft)
 				{
 					this.Ldc(1);
 					this.Add();
 				}
-				this.Stfld(RegexCompiler._textposF);
+				this.Stfld(RegexCompiler.s_textposF);
 				this.Ldc(1);
 				this.Ret();
 				this.MarkLabel(label12);
 				this.Ldthis();
-				if (!this._code._rightToLeft)
+				if (!this._code.RightToLeft)
 				{
-					this.Ldthisfld(RegexCompiler._textendF);
+					this.Ldthisfld(RegexCompiler.s_textendF);
 				}
 				else
 				{
-					this.Ldthisfld(RegexCompiler._textbegF);
+					this.Ldthisfld(RegexCompiler.s_textbegF);
 				}
-				this.Stfld(RegexCompiler._textposF);
+				this.Stfld(RegexCompiler.s_textposF);
 				this.Ldc(0);
 				this.Ret();
 				return;
@@ -957,17 +928,17 @@ namespace System.Text.RegularExpressions
 			Label label18 = this.DefineLabel();
 			Label label19 = this.DefineLabel();
 			Label label20 = this.DefineLabel();
-			this.Mvfldloc(RegexCompiler._textposF, this._textposV);
-			this.Mvfldloc(RegexCompiler._textF, this._textV);
-			if (!this._code._rightToLeft)
+			this.Mvfldloc(RegexCompiler.s_textposF, this._textposV);
+			this.Mvfldloc(RegexCompiler.s_textF, this._textV);
+			if (!this._code.RightToLeft)
 			{
-				this.Ldthisfld(RegexCompiler._textendF);
+				this.Ldthisfld(RegexCompiler.s_textendF);
 				this.Ldloc(this._textposV);
 			}
 			else
 			{
 				this.Ldloc(this._textposV);
-				this.Ldthisfld(RegexCompiler._textbegF);
+				this.Ldthisfld(RegexCompiler.s_textbegF);
 			}
 			this.Sub();
 			this.Stloc(temp2V2);
@@ -979,7 +950,7 @@ namespace System.Text.RegularExpressions
 			this.Ldc(1);
 			this.Sub();
 			this.Stloc(temp2V2);
-			if (this._code._rightToLeft)
+			if (this._code.RightToLeft)
 			{
 				this.Leftcharnext();
 			}
@@ -987,25 +958,25 @@ namespace System.Text.RegularExpressions
 			{
 				this.Rightcharnext();
 			}
-			if (this._fcPrefix.CaseInsensitive)
+			if (this._fcPrefix.GetValueOrDefault().CaseInsensitive)
 			{
 				this.CallToLower();
 			}
-			if (!RegexCharClass.IsSingleton(this._fcPrefix.Prefix))
+			if (!RegexCharClass.IsSingleton(this._fcPrefix.GetValueOrDefault().Prefix))
 			{
-				this.Ldstr(this._fcPrefix.Prefix);
-				this.Call(RegexCompiler._charInSetM);
+				this.Ldstr(this._fcPrefix.GetValueOrDefault().Prefix);
+				this.Call(RegexCompiler.s_charInSetM);
 				this.BrtrueFar(label17);
 			}
 			else
 			{
-				this.Ldc((int)RegexCharClass.SingletonChar(this._fcPrefix.Prefix));
+				this.Ldc((int)RegexCharClass.SingletonChar(this._fcPrefix.GetValueOrDefault().Prefix));
 				this.Beq(label17);
 			}
 			this.MarkLabel(label20);
 			this.Ldloc(temp2V2);
 			this.Ldc(0);
-			if (!RegexCharClass.IsSingleton(this._fcPrefix.Prefix))
+			if (!RegexCharClass.IsSingleton(this._fcPrefix.GetValueOrDefault().Prefix))
 			{
 				this.BgtFar(label16);
 			}
@@ -1018,41 +989,41 @@ namespace System.Text.RegularExpressions
 			this.MarkLabel(label17);
 			this.Ldloc(this._textposV);
 			this.Ldc(1);
-			this.Sub(this._code._rightToLeft);
+			this.Sub(this._code.RightToLeft);
 			this.Stloc(this._textposV);
 			this.Ldc(1);
 			this.MarkLabel(label18);
-			this.Mvlocfld(this._textposV, RegexCompiler._textposF);
+			this.Mvlocfld(this._textposV, RegexCompiler.s_textposF);
 			this.Ret();
 			this.MarkLabel(label19);
 			this.Ldc(0);
 			this.Ret();
 		}
 
-		internal void GenerateInitTrackCount()
+		protected void GenerateInitTrackCount()
 		{
 			this.Ldthis();
 			this.Ldc(this._trackcount);
-			this.Stfld(RegexCompiler._trackcountF);
+			this.Stfld(RegexCompiler.s_trackcountF);
 			this.Ret();
 		}
 
-		internal LocalBuilder DeclareInt()
+		private LocalBuilder DeclareInt()
 		{
 			return this._ilg.DeclareLocal(typeof(int));
 		}
 
-		internal LocalBuilder DeclareIntArray()
+		private LocalBuilder DeclareIntArray()
 		{
 			return this._ilg.DeclareLocal(typeof(int[]));
 		}
 
-		internal LocalBuilder DeclareString()
+		private LocalBuilder DeclareString()
 		{
 			return this._ilg.DeclareLocal(typeof(string));
 		}
 
-		internal void GenerateGo()
+		protected void GenerateGo()
 		{
 			this._textposV = this.DeclareInt();
 			this._textV = this.DeclareString();
@@ -1075,10 +1046,10 @@ namespace System.Text.RegularExpressions
 			this.GenerateBacktrackSection();
 		}
 
-		internal void GenerateOneCode()
+		private void GenerateOneCode()
 		{
 			this.Ldthis();
-			this.Callvirt(RegexCompiler._checkTimeoutM);
+			this.Callvirt(RegexCompiler.s_checkTimeoutM);
 			int regexopcode = this._regexopcode;
 			if (regexopcode <= 285)
 			{
@@ -1147,7 +1118,7 @@ namespace System.Text.RegularExpressions
 						this.Ldloc(this._textposV);
 						this.Ldloc(this._textbegV);
 						this.Ldloc(this._textendV);
-						this.Callvirt(RegexCompiler._isboundaryM);
+						this.Callvirt(RegexCompiler.s_isboundaryM);
 						if (this.Code() == 16)
 						{
 							this.BrfalseFar(this._backtrack);
@@ -1162,7 +1133,7 @@ namespace System.Text.RegularExpressions
 						return;
 					case 19:
 						this.Ldloc(this._textposV);
-						this.Ldthisfld(RegexCompiler._textstartF);
+						this.Ldthisfld(RegexCompiler.s_textstartF);
 						this.BneFar(this._backtrack);
 						return;
 					case 20:
@@ -1333,7 +1304,7 @@ namespace System.Text.RegularExpressions
 						{
 							this.Ldthis();
 							this.Ldc(this.Operand(1));
-							this.Callvirt(RegexCompiler._ismatchedM);
+							this.Callvirt(RegexCompiler.s_ismatchedM);
 							this.BrfalseFar(this._backtrack);
 						}
 						this.PopStack();
@@ -1345,7 +1316,7 @@ namespace System.Text.RegularExpressions
 							this.Ldc(this.Operand(1));
 							this.Ldloc(this._tempV);
 							this.Ldloc(this._textposV);
-							this.Callvirt(RegexCompiler._transferM);
+							this.Callvirt(RegexCompiler.s_transferM);
 						}
 						else
 						{
@@ -1353,7 +1324,7 @@ namespace System.Text.RegularExpressions
 							this.Ldc(this.Operand(0));
 							this.Ldloc(this._tempV);
 							this.Ldloc(this._textposV);
-							this.Callvirt(RegexCompiler._captureM);
+							this.Callvirt(RegexCompiler.s_captureM);
 						}
 						this.PushTrack(this._tempV);
 						if (this.Operand(0) != -1 && this.Operand(1) != -1)
@@ -1373,14 +1344,14 @@ namespace System.Text.RegularExpressions
 						return;
 					case 34:
 						this.ReadyPushStack();
-						this.Ldthisfld(RegexCompiler._trackF);
+						this.Ldthisfld(RegexCompiler.s_trackF);
 						this.Ldlen();
 						this.Ldloc(this._trackposV);
 						this.Sub();
 						this.DoPush();
 						this.ReadyPushStack();
 						this.Ldthis();
-						this.Callvirt(RegexCompiler._crawlposM);
+						this.Callvirt(RegexCompiler.s_crawlposM);
 						this.DoPush();
 						this.TrackUnique(1);
 						return;
@@ -1389,21 +1360,21 @@ namespace System.Text.RegularExpressions
 						Label label10 = this.DefineLabel();
 						Label label11 = this.DefineLabel();
 						this.PopStack();
-						this.Ldthisfld(RegexCompiler._trackF);
+						this.Ldthisfld(RegexCompiler.s_trackF);
 						this.Ldlen();
 						this.PopStack();
 						this.Sub();
 						this.Stloc(this._trackposV);
 						this.Dup();
 						this.Ldthis();
-						this.Callvirt(RegexCompiler._crawlposM);
+						this.Callvirt(RegexCompiler.s_crawlposM);
 						this.Beq(label11);
 						this.MarkLabel(label10);
 						this.Ldthis();
-						this.Callvirt(RegexCompiler._uncaptureM);
+						this.Callvirt(RegexCompiler.s_uncaptureM);
 						this.Dup();
 						this.Ldthis();
-						this.Callvirt(RegexCompiler._crawlposM);
+						this.Callvirt(RegexCompiler.s_crawlposM);
 						this.Bne(label10);
 						this.MarkLabel(label11);
 						this.Pop();
@@ -1413,7 +1384,7 @@ namespace System.Text.RegularExpressions
 					case 36:
 						this.PopStack();
 						this.Stloc(this._tempV);
-						this.Ldthisfld(RegexCompiler._trackF);
+						this.Ldthisfld(RegexCompiler.s_trackF);
 						this.Ldlen();
 						this.PopStack();
 						this.Sub();
@@ -1424,7 +1395,7 @@ namespace System.Text.RegularExpressions
 					case 37:
 						this.Ldthis();
 						this.Ldc(this.Operand(0));
-						this.Callvirt(RegexCompiler._ismatchedM);
+						this.Callvirt(RegexCompiler.s_ismatchedM);
 						this.BrfalseFar(this._backtrack);
 						return;
 					case 38:
@@ -1454,7 +1425,7 @@ namespace System.Text.RegularExpressions
 					case 63:
 						goto IL_1AE4;
 					case 40:
-						this.Mvlocfld(this._textposV, RegexCompiler._textposF);
+						this.Mvlocfld(this._textposV, RegexCompiler.s_textposF);
 						this.Ret();
 						return;
 					case 41:
@@ -1463,7 +1434,7 @@ namespace System.Text.RegularExpressions
 						this.Ldloc(this._textposV);
 						this.Ldloc(this._textbegV);
 						this.Ldloc(this._textendV);
-						this.Callvirt(RegexCompiler._isECMABoundaryM);
+						this.Callvirt(RegexCompiler.s_isECMABoundaryM);
 						if (this.Code() == 41)
 						{
 							this.BrfalseFar(this._backtrack);
@@ -1589,11 +1560,11 @@ namespace System.Text.RegularExpressions
 							this.PopTrack();
 							this.DoPush();
 							this.Ldthis();
-							this.Callvirt(RegexCompiler._uncaptureM);
+							this.Callvirt(RegexCompiler.s_uncaptureM);
 							if (this.Operand(0) != -1 && this.Operand(1) != -1)
 							{
 								this.Ldthis();
-								this.Callvirt(RegexCompiler._uncaptureM);
+								this.Callvirt(RegexCompiler.s_uncaptureM);
 							}
 							this.Back();
 							return;
@@ -1614,14 +1585,14 @@ namespace System.Text.RegularExpressions
 							this.PopTrack();
 							this.Dup();
 							this.Ldthis();
-							this.Callvirt(RegexCompiler._crawlposM);
+							this.Callvirt(RegexCompiler.s_crawlposM);
 							this.Beq(label15);
 							this.MarkLabel(label14);
 							this.Ldthis();
-							this.Callvirt(RegexCompiler._uncaptureM);
+							this.Callvirt(RegexCompiler.s_uncaptureM);
 							this.Dup();
 							this.Ldthis();
-							this.Callvirt(RegexCompiler._crawlposM);
+							this.Callvirt(RegexCompiler.s_crawlposM);
 							this.Bne(label14);
 							this.MarkLabel(label15);
 							this.Pop();
@@ -1779,7 +1750,7 @@ namespace System.Text.RegularExpressions
 			if (this.Code() == 11)
 			{
 				this.Ldstr(this._strings[this.Operand(0)]);
-				this.Call(RegexCompiler._charInSetM);
+				this.Call(RegexCompiler.s_charInSetM);
 				this.BrfalseFar(this._backtrack);
 				return;
 			}
@@ -1807,7 +1778,7 @@ namespace System.Text.RegularExpressions
 					this.Ldc(i);
 					this.Add();
 				}
-				this.Callvirt(RegexCompiler._getcharM);
+				this.Callvirt(RegexCompiler.s_getcharM);
 				if (this.IsCi())
 				{
 					this.CallToLower();
@@ -1835,7 +1806,7 @@ namespace System.Text.RegularExpressions
 				this.Ldloc(this._textposV);
 				this.Ldc(text2.Length - j);
 				this.Sub();
-				this.Callvirt(RegexCompiler._getcharM);
+				this.Callvirt(RegexCompiler.s_getcharM);
 				if (this.IsCi())
 				{
 					this.CallToLower();
@@ -1854,7 +1825,7 @@ namespace System.Text.RegularExpressions
 			Label label16 = this.DefineLabel();
 			this.Ldthis();
 			this.Ldc(this.Operand(0));
-			this.Callvirt(RegexCompiler._ismatchedM);
+			this.Callvirt(RegexCompiler.s_ismatchedM);
 			if ((this._options & RegexOptions.ECMAScript) != RegexOptions.None)
 			{
 				this.Brfalse(this.AdvanceLabel());
@@ -1865,7 +1836,7 @@ namespace System.Text.RegularExpressions
 			}
 			this.Ldthis();
 			this.Ldc(this.Operand(0));
-			this.Callvirt(RegexCompiler._matchlengthM);
+			this.Callvirt(RegexCompiler.s_matchlengthM);
 			this.Dup();
 			this.Stloc(tempV7);
 			if (!this.IsRtl())
@@ -1882,7 +1853,7 @@ namespace System.Text.RegularExpressions
 			this.BgtFar(this._backtrack);
 			this.Ldthis();
 			this.Ldc(this.Operand(0));
-			this.Callvirt(RegexCompiler._matchindexM);
+			this.Callvirt(RegexCompiler.s_matchindexM);
 			if (!this.IsRtl())
 			{
 				this.Ldloc(tempV7);
@@ -1908,7 +1879,7 @@ namespace System.Text.RegularExpressions
 				this.Stloc(tempV7);
 			}
 			this.Sub(this.IsRtl());
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 			if (this.IsCi())
 			{
 				this.CallToLower();
@@ -1924,7 +1895,7 @@ namespace System.Text.RegularExpressions
 				this.Stloc(tempV7);
 			}
 			this.Sub(this.IsRtl());
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 			if (this.IsCi())
 			{
 				this.CallToLower();
@@ -1979,7 +1950,7 @@ namespace System.Text.RegularExpressions
 				this.Stloc(tempV8);
 				this.Sub();
 			}
-			this.Callvirt(RegexCompiler._getcharM);
+			this.Callvirt(RegexCompiler.s_getcharM);
 			if (this.IsCi())
 			{
 				this.CallToLower();
@@ -1987,7 +1958,7 @@ namespace System.Text.RegularExpressions
 			if (this.Code() == 2)
 			{
 				this.Ldstr(this._strings[this.Operand(0)]);
-				this.Call(RegexCompiler._charInSetM);
+				this.Call(RegexCompiler.s_charInSetM);
 				this.BrfalseFar(this._backtrack);
 			}
 			else
@@ -2075,7 +2046,7 @@ namespace System.Text.RegularExpressions
 				if (this.Code() == 5)
 				{
 					this.Ldstr(this._strings[this.Operand(0)]);
-					this.Call(RegexCompiler._charInSetM);
+					this.Call(RegexCompiler.s_charInSetM);
 					this.BrtrueFar(label18);
 				}
 				else
@@ -2195,7 +2166,7 @@ namespace System.Text.RegularExpressions
 			if (this.Code() == 8)
 			{
 				this.Ldstr(this._strings[this.Operand(0)]);
-				this.Call(RegexCompiler._charInSetM);
+				this.Call(RegexCompiler.s_charInSetM);
 				this.BrfalseFar(this._backtrack);
 			}
 			else
@@ -2223,150 +2194,150 @@ namespace System.Text.RegularExpressions
 			this.Advance();
 			return;
 			IL_1AE4:
-			throw new NotImplementedException(global::SR.GetString("Unimplemented state."));
+			throw new NotImplementedException("Unimplemented state.");
 		}
 
-		internal static FieldInfo _textbegF = RegexCompiler.RegexRunnerField("runtextbeg");
+		private static FieldInfo s_textbegF = RegexCompiler.RegexRunnerField("runtextbeg");
 
-		internal static FieldInfo _textendF = RegexCompiler.RegexRunnerField("runtextend");
+		private static FieldInfo s_textendF = RegexCompiler.RegexRunnerField("runtextend");
 
-		internal static FieldInfo _textstartF = RegexCompiler.RegexRunnerField("runtextstart");
+		private static FieldInfo s_textstartF = RegexCompiler.RegexRunnerField("runtextstart");
 
-		internal static FieldInfo _textposF = RegexCompiler.RegexRunnerField("runtextpos");
+		private static FieldInfo s_textposF = RegexCompiler.RegexRunnerField("runtextpos");
 
-		internal static FieldInfo _textF = RegexCompiler.RegexRunnerField("runtext");
+		private static FieldInfo s_textF = RegexCompiler.RegexRunnerField("runtext");
 
-		internal static FieldInfo _trackposF = RegexCompiler.RegexRunnerField("runtrackpos");
+		private static FieldInfo s_trackposF = RegexCompiler.RegexRunnerField("runtrackpos");
 
-		internal static FieldInfo _trackF = RegexCompiler.RegexRunnerField("runtrack");
+		private static FieldInfo s_trackF = RegexCompiler.RegexRunnerField("runtrack");
 
-		internal static FieldInfo _stackposF = RegexCompiler.RegexRunnerField("runstackpos");
+		private static FieldInfo s_stackposF = RegexCompiler.RegexRunnerField("runstackpos");
 
-		internal static FieldInfo _stackF = RegexCompiler.RegexRunnerField("runstack");
+		private static FieldInfo s_stackF = RegexCompiler.RegexRunnerField("runstack");
 
-		internal static FieldInfo _trackcountF = RegexCompiler.RegexRunnerField("runtrackcount");
+		private static FieldInfo s_trackcountF = RegexCompiler.RegexRunnerField("runtrackcount");
 
-		internal static MethodInfo _ensurestorageM = RegexCompiler.RegexRunnerMethod("EnsureStorage");
+		private static MethodInfo s_ensurestorageM = RegexCompiler.RegexRunnerMethod("EnsureStorage");
 
-		internal static MethodInfo _captureM = RegexCompiler.RegexRunnerMethod("Capture");
+		private static MethodInfo s_captureM = RegexCompiler.RegexRunnerMethod("Capture");
 
-		internal static MethodInfo _transferM = RegexCompiler.RegexRunnerMethod("TransferCapture");
+		private static MethodInfo s_transferM = RegexCompiler.RegexRunnerMethod("TransferCapture");
 
-		internal static MethodInfo _uncaptureM = RegexCompiler.RegexRunnerMethod("Uncapture");
+		private static MethodInfo s_uncaptureM = RegexCompiler.RegexRunnerMethod("Uncapture");
 
-		internal static MethodInfo _ismatchedM = RegexCompiler.RegexRunnerMethod("IsMatched");
+		private static MethodInfo s_ismatchedM = RegexCompiler.RegexRunnerMethod("IsMatched");
 
-		internal static MethodInfo _matchlengthM = RegexCompiler.RegexRunnerMethod("MatchLength");
+		private static MethodInfo s_matchlengthM = RegexCompiler.RegexRunnerMethod("MatchLength");
 
-		internal static MethodInfo _matchindexM = RegexCompiler.RegexRunnerMethod("MatchIndex");
+		private static MethodInfo s_matchindexM = RegexCompiler.RegexRunnerMethod("MatchIndex");
 
-		internal static MethodInfo _isboundaryM = RegexCompiler.RegexRunnerMethod("IsBoundary");
+		private static MethodInfo s_isboundaryM = RegexCompiler.RegexRunnerMethod("IsBoundary");
 
-		internal static MethodInfo _isECMABoundaryM = RegexCompiler.RegexRunnerMethod("IsECMABoundary");
+		private static MethodInfo s_isECMABoundaryM = RegexCompiler.RegexRunnerMethod("IsECMABoundary");
 
-		internal static MethodInfo _chartolowerM = typeof(char).GetMethod("ToLower", new Type[]
+		private static MethodInfo s_chartolowerM = typeof(char).GetMethod("ToLower", new Type[]
 		{
 			typeof(char),
 			typeof(CultureInfo)
 		});
 
-		internal static MethodInfo _getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) });
+		private static MethodInfo s_getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) });
 
-		internal static MethodInfo _crawlposM = RegexCompiler.RegexRunnerMethod("Crawlpos");
+		private static MethodInfo s_crawlposM = RegexCompiler.RegexRunnerMethod("Crawlpos");
 
-		internal static MethodInfo _charInSetM = RegexCompiler.RegexRunnerMethod("CharInClass");
+		private static MethodInfo s_charInSetM = RegexCompiler.RegexRunnerMethod("CharInClass");
 
-		internal static MethodInfo _getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture");
+		private static MethodInfo s_getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture");
 
-		internal static MethodInfo _getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture");
+		private static MethodInfo s_getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture");
 
-		internal static MethodInfo _checkTimeoutM = RegexCompiler.RegexRunnerMethod("CheckTimeout");
+		private static MethodInfo s_checkTimeoutM = RegexCompiler.RegexRunnerMethod("CheckTimeout");
 
-		internal ILGenerator _ilg;
+		protected ILGenerator _ilg;
 
-		internal LocalBuilder _textstartV;
+		private LocalBuilder _textstartV;
 
-		internal LocalBuilder _textbegV;
+		private LocalBuilder _textbegV;
 
-		internal LocalBuilder _textendV;
+		private LocalBuilder _textendV;
 
-		internal LocalBuilder _textposV;
+		private LocalBuilder _textposV;
 
-		internal LocalBuilder _textV;
+		private LocalBuilder _textV;
 
-		internal LocalBuilder _trackposV;
+		private LocalBuilder _trackposV;
 
-		internal LocalBuilder _trackV;
+		private LocalBuilder _trackV;
 
-		internal LocalBuilder _stackposV;
+		private LocalBuilder _stackposV;
 
-		internal LocalBuilder _stackV;
+		private LocalBuilder _stackV;
 
-		internal LocalBuilder _tempV;
+		private LocalBuilder _tempV;
 
-		internal LocalBuilder _temp2V;
+		private LocalBuilder _temp2V;
 
-		internal LocalBuilder _temp3V;
+		private LocalBuilder _temp3V;
 
-		internal RegexCode _code;
+		protected RegexCode _code;
 
-		internal int[] _codes;
+		protected int[] _codes;
 
-		internal string[] _strings;
+		protected string[] _strings;
 
-		internal RegexPrefix _fcPrefix;
+		protected RegexPrefix? _fcPrefix;
 
-		internal RegexBoyerMoore _bmPrefix;
+		protected RegexBoyerMoore _bmPrefix;
 
-		internal int _anchors;
+		protected int _anchors;
 
-		internal Label[] _labels;
+		private Label[] _labels;
 
-		internal RegexCompiler.BacktrackNote[] _notes;
+		private RegexCompiler.BacktrackNote[] _notes;
 
-		internal int _notecount;
+		private int _notecount;
 
-		internal int _trackcount;
+		protected int _trackcount;
 
-		internal Label _backtrack;
+		private Label _backtrack;
 
-		internal int _regexopcode;
+		private int _regexopcode;
 
-		internal int _codepos;
+		private int _codepos;
 
-		internal int _backpos;
+		private int _backpos;
 
-		internal RegexOptions _options;
+		protected RegexOptions _options;
 
-		internal int[] _uniquenote;
+		private int[] _uniquenote;
 
-		internal int[] _goto;
+		private int[] _goto;
 
-		internal const int stackpop = 0;
+		private const int Stackpop = 0;
 
-		internal const int stackpop2 = 1;
+		private const int Stackpop2 = 1;
 
-		internal const int stackpop3 = 2;
+		private const int Stackpop3 = 2;
 
-		internal const int capback = 3;
+		private const int Capback = 3;
 
-		internal const int capback2 = 4;
+		private const int Capback2 = 4;
 
-		internal const int branchmarkback2 = 5;
+		private const int Branchmarkback2 = 5;
 
-		internal const int lazybranchmarkback2 = 6;
+		private const int Lazybranchmarkback2 = 6;
 
-		internal const int branchcountback2 = 7;
+		private const int Branchcountback2 = 7;
 
-		internal const int lazybranchcountback2 = 8;
+		private const int Lazybranchcountback2 = 8;
 
-		internal const int forejumpback = 9;
+		private const int Forejumpback = 9;
 
-		internal const int uniquecount = 10;
+		private const int Uniquecount = 10;
 
-		internal sealed class BacktrackNote
+		private sealed class BacktrackNote
 		{
-			internal BacktrackNote(int flags, Label label, int codepos)
+			public BacktrackNote(int flags, Label label, int codepos)
 			{
 				this._codepos = codepos;
 				this._flags = flags;

@@ -1371,7 +1371,7 @@ namespace System.Data
 			internal RBTree<K>.NodeColor _nodeColor;
 		}
 
-		private struct NodePath
+		private readonly struct NodePath
 		{
 			internal NodePath(int nodeID, int mainTreeNodeID)
 			{

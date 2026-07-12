@@ -182,6 +182,16 @@ public static class MathUtil
 			return t >= this.min && t <= this.max;
 		}
 
+		public float LerpFactor(float t)
+		{
+			return (t - this.min) / (this.max - this.min);
+		}
+
+		public float LerpFactorClamped(float t)
+		{
+			return Mathf.Clamp(this.LerpFactor(t), 0f, 1f);
+		}
+
 		public override string ToString()
 		{
 			return string.Format("[{0}:{1}]", this.min, this.max);

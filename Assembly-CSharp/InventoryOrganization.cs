@@ -11,7 +11,7 @@ public static class InventoryOrganization
 		{
 			string text;
 			HashSet<string> hashSet;
-			keyValuePair.Deconstruct<string, HashSet<string>>(out text, out hashSet);
+			keyValuePair.Deconstruct(out text, out hashSet);
 			string text2 = text;
 			if (hashSet.Contains(permit.Id))
 			{
@@ -44,7 +44,7 @@ public static class InventoryOrganization
 		{
 			string text;
 			List<string> list;
-			keyValuePair.Deconstruct<string, List<string>>(out text, out list);
+			keyValuePair.Deconstruct(out text, out list);
 			string text2 = text;
 			List<string> list2 = list;
 			bool flag = true;
@@ -105,7 +105,7 @@ public static class InventoryOrganization
 		InventoryOrganization.AddSubcategory("BUILDINGS_BED_LUXURY", Def.GetUISprite("LuxuryBed", "ui", false).first, 300, new string[]
 		{
 			"LuxuryBed_boat", "LuxuryBed_bouncy", "LuxuryBed_grandprix", "LuxuryBed_rocket", "LuxuryBed_puft", "LuxuryBed_hand", "LuxuryBed_rubiks", "LuxuryBed_red_rose", "LuxuryBed_green_mush", "LuxuryBed_yellow_tartar",
-			"LuxuryBed_purple_brainfat"
+			"LuxuryBed_purple_brainfat", "permit_elegantbed_hatch", "permit_elegantbed_pipsqueak"
 		});
 		InventoryOrganization.AddSubcategory("BUILDINGS_FLOWER_VASE", Def.GetUISprite("FlowerVase", "ui", false).first, 400, new string[]
 		{

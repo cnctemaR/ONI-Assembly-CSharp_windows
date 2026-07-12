@@ -9,7 +9,6 @@ namespace System.Data
 		protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		public MissingPrimaryKeyException()

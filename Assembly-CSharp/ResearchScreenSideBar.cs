@@ -339,7 +339,7 @@ public class ResearchScreenSideBar : KScreen
 		global::System.Action <>9__0;
 		foreach (TechItem techItem in Db.Get().Techs.Get(techID).unlockedItems)
 		{
-			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
+			if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(techItem.requiredDlcIds, techItem.forbiddenDlcIds))
 			{
 				GameObject gameObject2 = Util.KInstantiateUI(this.techItemPrefab, reference.gameObject, true);
 				gameObject2.GetComponentsInChildren<Image>()[1].sprite = techItem.UISprite();

@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.Data
 {
-	[DefaultProperty("Table")]
 	[DefaultEvent("CollectionChanged")]
+	[DefaultProperty("Table")]
 	public abstract class DataRelationCollection : InternalDataCollectionBase
 	{
 		internal int ObjectID

@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum SecurityZone
 	{
-		MyComputer,
-		Intranet,
-		Trusted,
-		Internet,
-		Untrusted,
-		NoZone = -1
+		Internet = 3,
+		Intranet = 1,
+		MyComputer = 0,
+		NoZone = -1,
+		Trusted = 2,
+		Untrusted = 4
 	}
 }

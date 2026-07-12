@@ -10,11 +10,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GfxDevice/GfxBuffer.h")]
-	[NativeHeader("Runtime/Export/Graphics/GraphicsBuffer.bindings.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsBuffer.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Graphics/GraphicsBuffer.bindings.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsBuffer.h")]
 	public sealed class GraphicsBuffer : IDisposable
 	{
 		~GraphicsBuffer()
@@ -47,19 +45,36 @@ namespace UnityEngine
 
 		private static bool RequiresCompute(GraphicsBuffer.Target target)
 		{
-			int num = 3;
-			return (target & (GraphicsBuffer.Target)num) != target;
+			GraphicsBuffer.Target target2 = GraphicsBuffer.Target.Structured | GraphicsBuffer.Target.Raw | GraphicsBuffer.Target.Append | GraphicsBuffer.Target.Counter | GraphicsBuffer.Target.IndirectArguments;
+			return (target & target2) > (GraphicsBuffer.Target)0;
+		}
+
+		private static bool IsVertexIndexOrCopyOnly(GraphicsBuffer.Target target)
+		{
+			GraphicsBuffer.Target target2 = GraphicsBuffer.Target.Vertex | GraphicsBuffer.Target.Index | GraphicsBuffer.Target.CopySource | GraphicsBuffer.Target.CopyDestination;
+			return (target & target2) == target;
 		}
 
 		[FreeFunction("GraphicsBuffer_Bindings::InitBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr InitBuffer(GraphicsBuffer.Target target, int count, int stride);
+		private static extern IntPtr InitBuffer(GraphicsBuffer.Target target, GraphicsBuffer.UsageFlags usageFlags, int count, int stride);
 
 		[FreeFunction("GraphicsBuffer_Bindings::DestroyBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyBuffer(GraphicsBuffer buf);
 
 		public GraphicsBuffer(GraphicsBuffer.Target target, int count, int stride)
+		{
+			GraphicsBuffer.UsageFlags usageFlags = (((target & (GraphicsBuffer.Target.Vertex | GraphicsBuffer.Target.Index)) == target) ? GraphicsBuffer.UsageFlags.LockBufferForWrite : GraphicsBuffer.UsageFlags.None);
+			this.InternalInitialization(target, usageFlags, count, stride);
+		}
+
+		public GraphicsBuffer(GraphicsBuffer.Target target, GraphicsBuffer.UsageFlags usageFlags, int count, int stride)
+		{
+			this.InternalInitialization(target, usageFlags, count, stride);
+		}
+
+		private void InternalInitialization(GraphicsBuffer.Target target, GraphicsBuffer.UsageFlags usageFlags, int count, int stride)
 		{
 			bool flag = GraphicsBuffer.RequiresCompute(target) && !SystemInfo.supportsComputeShaders;
 			if (flag)
@@ -81,12 +96,24 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("Attempting to create an index buffer with an invalid stride: " + stride.ToString(), "stride");
 			}
-			bool flag5 = GraphicsBuffer.RequiresCompute(target) && stride % 4 != 0;
+			bool flag5 = !GraphicsBuffer.IsVertexIndexOrCopyOnly(target) && stride % 4 != 0;
 			if (flag5)
 			{
 				throw new ArgumentException("Stride must be a multiple of 4 unless the buffer is only used as a vertex buffer and/or index buffer ", "stride");
 			}
-			this.m_Ptr = GraphicsBuffer.InitBuffer(target, count, stride);
+			long num = (long)count * (long)stride;
+			long maxGraphicsBufferSize = SystemInfo.maxGraphicsBufferSize;
+			bool flag6 = num > maxGraphicsBufferSize;
+			if (flag6)
+			{
+				throw new ArgumentException(string.Format("The total size of the graphics buffer ({0} bytes) exceeds the maximum buffer size. Maximum supported buffer size: {1} bytes.", num, maxGraphicsBufferSize));
+			}
+			bool flag7 = (usageFlags & GraphicsBuffer.UsageFlags.LockBufferForWrite) != GraphicsBuffer.UsageFlags.None && (target & GraphicsBuffer.Target.CopyDestination) > (GraphicsBuffer.Target)0;
+			if (flag7)
+			{
+				throw new ArgumentException("Attempting to create a LockBufferForWrite capable buffer that can be copied into. LockBufferForWrite buffers are read-only on the GPU.");
+			}
+			this.m_Ptr = GraphicsBuffer.InitBuffer(target, usageFlags, count, stride);
 		}
 
 		public void Release()
@@ -94,9 +121,13 @@ namespace UnityEngine
 			this.Dispose();
 		}
 
+		[FreeFunction("GraphicsBuffer_Bindings::IsValidBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsValidBuffer(GraphicsBuffer buf);
+
 		public bool IsValid()
 		{
-			return this.m_Ptr != IntPtr.Zero;
+			return this.m_Ptr != IntPtr.Zero && GraphicsBuffer.IsValidBuffer(this);
 		}
 
 		public extern int count
@@ -109,6 +140,34 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public extern GraphicsBuffer.Target target
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[FreeFunction(Name = "GraphicsBuffer_Bindings::GetUsageFlags", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer.UsageFlags GetUsageFlags();
+
+		public GraphicsBuffer.UsageFlags usageFlags
+		{
+			get
+			{
+				return this.GetUsageFlags();
+			}
+		}
+
+		public GraphicsBufferHandle bufferHandle
+		{
+			get
+			{
+				GraphicsBufferHandle graphicsBufferHandle;
+				this.get_bufferHandle_Injected(out graphicsBufferHandle);
+				return graphicsBufferHandle;
+			}
 		}
 
 		[SecuritySafeCritical]
@@ -202,8 +261,8 @@ namespace UnityEngine
 			this.InternalSetNativeData((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, graphicsBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
 		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalSetNativeData", HasExplicitThis = true, ThrowsException = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetNativeData(IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
 
@@ -258,6 +317,53 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetNativeBufferPtr();
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe extern void* BeginBufferWrite(int offset = 0, int size = 0);
+
+		public unsafe NativeArray<T> LockBufferForWrite<T>(int bufferStartIndex, int count) where T : struct
+		{
+			bool flag = !this.IsValid();
+			if (flag)
+			{
+				throw new InvalidOperationException("LockBufferForWrite requires a valid GraphicsBuffer");
+			}
+			bool flag2 = (this.usageFlags & GraphicsBuffer.UsageFlags.LockBufferForWrite) == GraphicsBuffer.UsageFlags.None;
+			if (flag2)
+			{
+				throw new InvalidOperationException("GraphicsBuffer must be created with usage mode UsageFlage.LockBufferForWrite to use LockBufferForWrite");
+			}
+			int num = UnsafeUtility.SizeOf<T>();
+			bool flag3 = bufferStartIndex < 0 || count < 0 || (bufferStartIndex + count) * num > this.count * this.stride;
+			if (flag3)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (bufferStartIndex:{0} count:{1} elementSize:{2}, this.count:{3}, this.stride{4})", new object[] { bufferStartIndex, count, num, this.count, this.stride }));
+			}
+			void* ptr = this.BeginBufferWrite(bufferStartIndex * num, count * num);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, count, Allocator.Invalid);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EndBufferWrite(int bytesWritten = 0);
+
+		public void UnlockBufferAfterWrite<T>(int countWritten) where T : struct
+		{
+			bool flag = countWritten < 0;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (countWritten:{0})", countWritten));
+			}
+			int num = UnsafeUtility.SizeOf<T>();
+			this.EndBufferWrite(countWritten * num);
+		}
+
+		public string name
+		{
+			set
+			{
+				this.SetName(value);
+			}
+		}
+
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::SetName", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetName(string name);
@@ -301,6 +407,9 @@ namespace UnityEngine
 			GraphicsBuffer.CopyCountGG(src, dst, dstOffsetBytes);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_bufferHandle_Injected(out GraphicsBufferHandle ret);
+
 		internal IntPtr m_Ptr;
 
 		[Flags]
@@ -308,12 +417,49 @@ namespace UnityEngine
 		{
 			Vertex = 1,
 			Index = 2,
+			CopySource = 4,
+			CopyDestination = 8,
 			Structured = 16,
 			Raw = 32,
 			Append = 64,
 			Counter = 128,
 			IndirectArguments = 256,
 			Constant = 512
+		}
+
+		[Flags]
+		public enum UsageFlags
+		{
+			None = 0,
+			LockBufferForWrite = 1
+		}
+
+		public struct IndirectDrawArgs
+		{
+			public uint vertexCountPerInstance { readonly get; set; }
+
+			public uint instanceCount { readonly get; set; }
+
+			public uint startVertex { readonly get; set; }
+
+			public uint startInstance { readonly get; set; }
+
+			public const int size = 16;
+		}
+
+		public struct IndirectDrawIndexedArgs
+		{
+			public uint indexCountPerInstance { readonly get; set; }
+
+			public uint instanceCount { readonly get; set; }
+
+			public uint startIndex { readonly get; set; }
+
+			public uint baseVertexIndex { readonly get; set; }
+
+			public uint startInstance { readonly get; set; }
+
+			public const int size = 20;
 		}
 	}
 }

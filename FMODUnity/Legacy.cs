@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FMODUnity
 {
-	public static class Legacy
+	internal static class Legacy
 	{
 		public static void CopySetting<T, U>(List<T> list, Legacy.Platform fromPlatform, Legacy.Platform toPlatform) where T : Legacy.PlatformSetting<U>, new()
 		{
@@ -73,8 +73,6 @@ namespace FMODUnity
 				return "Switch";
 			case Legacy.Platform.WebGL:
 				return "WebGL";
-			case Legacy.Platform.Stadia:
-				return "Stadia";
 			}
 			return "Unknown";
 		}
@@ -107,8 +105,6 @@ namespace FMODUnity
 				return 2.3f;
 			case Legacy.Platform.Switch:
 				return 3.3f;
-			case Legacy.Platform.Stadia:
-				return 3.4f;
 			}
 			return 0f;
 		}
@@ -136,7 +132,6 @@ namespace FMODUnity
 			case Legacy.Platform.XboxOne:
 			case Legacy.Platform.PS4:
 			case Legacy.Platform.Switch:
-			case Legacy.Platform.Stadia:
 			case Legacy.Platform.Reserved_1:
 			case Legacy.Platform.Reserved_2:
 			case Legacy.Platform.Reserved_3:
@@ -175,7 +170,7 @@ namespace FMODUnity
 			UWP,
 			Switch,
 			WebGL,
-			Stadia,
+			Deprecated_4,
 			Reserved_1,
 			Reserved_2,
 			Reserved_3,

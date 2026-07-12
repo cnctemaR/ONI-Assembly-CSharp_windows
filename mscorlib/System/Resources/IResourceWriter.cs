@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[ComVisible(true)]
 	public interface IResourceWriter : IDisposable
 	{
 		void AddResource(string name, string value);

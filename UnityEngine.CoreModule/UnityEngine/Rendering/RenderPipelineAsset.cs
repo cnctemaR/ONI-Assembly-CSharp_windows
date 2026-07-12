@@ -30,6 +30,14 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public virtual string[] prefixedRenderingLayerMaskNames
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public virtual Material defaultMaterial
 		{
 			get
@@ -142,6 +150,14 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public virtual Material default2DMaskMaterial
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public virtual Shader defaultShader
 		{
 			get
@@ -163,6 +179,15 @@ namespace UnityEngine.Rendering
 			get
 			{
 				return null;
+			}
+		}
+
+		public virtual string renderPipelineShaderTag
+		{
+			get
+			{
+				Debug.LogWarning("The property renderPipelineShaderTag has not been overridden. At build time, any shader variants that use any RenderPipeline tag will be stripped.");
+				return string.Empty;
 			}
 		}
 

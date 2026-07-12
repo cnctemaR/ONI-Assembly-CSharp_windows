@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum OperandType
 	{
 		InlineBrTarget,
@@ -13,7 +10,7 @@ namespace System.Reflection.Emit
 		InlineI8,
 		InlineMethod,
 		InlineNone,
-		[Obsolete("This API has been deprecated.")]
+		[Obsolete("This API has been deprecated. http://go.microsoft.com/fwlink/?linkid=14202")]
 		InlinePhi,
 		InlineR,
 		InlineSig = 9,

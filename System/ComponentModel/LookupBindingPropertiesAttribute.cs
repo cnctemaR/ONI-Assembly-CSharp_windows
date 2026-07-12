@@ -7,70 +7,38 @@ namespace System.ComponentModel
 	{
 		public LookupBindingPropertiesAttribute()
 		{
-			this.dataSource = null;
-			this.displayMember = null;
-			this.valueMember = null;
-			this.lookupMember = null;
+			this.DataSource = null;
+			this.DisplayMember = null;
+			this.ValueMember = null;
+			this.LookupMember = null;
 		}
 
 		public LookupBindingPropertiesAttribute(string dataSource, string displayMember, string valueMember, string lookupMember)
 		{
-			this.dataSource = dataSource;
-			this.displayMember = displayMember;
-			this.valueMember = valueMember;
-			this.lookupMember = lookupMember;
+			this.DataSource = dataSource;
+			this.DisplayMember = displayMember;
+			this.ValueMember = valueMember;
+			this.LookupMember = lookupMember;
 		}
 
-		public string DataSource
-		{
-			get
-			{
-				return this.dataSource;
-			}
-		}
+		public string DataSource { get; }
 
-		public string DisplayMember
-		{
-			get
-			{
-				return this.displayMember;
-			}
-		}
+		public string DisplayMember { get; }
 
-		public string ValueMember
-		{
-			get
-			{
-				return this.valueMember;
-			}
-		}
+		public string ValueMember { get; }
 
-		public string LookupMember
-		{
-			get
-			{
-				return this.lookupMember;
-			}
-		}
+		public string LookupMember { get; }
 
 		public override bool Equals(object obj)
 		{
 			LookupBindingPropertiesAttribute lookupBindingPropertiesAttribute = obj as LookupBindingPropertiesAttribute;
-			return lookupBindingPropertiesAttribute != null && lookupBindingPropertiesAttribute.DataSource == this.dataSource && lookupBindingPropertiesAttribute.displayMember == this.displayMember && lookupBindingPropertiesAttribute.valueMember == this.valueMember && lookupBindingPropertiesAttribute.lookupMember == this.lookupMember;
+			return lookupBindingPropertiesAttribute != null && lookupBindingPropertiesAttribute.DataSource == this.DataSource && lookupBindingPropertiesAttribute.DisplayMember == this.DisplayMember && lookupBindingPropertiesAttribute.ValueMember == this.ValueMember && lookupBindingPropertiesAttribute.LookupMember == this.LookupMember;
 		}
 
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
 		}
-
-		private readonly string dataSource;
-
-		private readonly string displayMember;
-
-		private readonly string valueMember;
-
-		private readonly string lookupMember;
 
 		public static readonly LookupBindingPropertiesAttribute Default = new LookupBindingPropertiesAttribute();
 	}

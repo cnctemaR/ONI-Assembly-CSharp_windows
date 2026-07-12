@@ -22,6 +22,11 @@ namespace System.Data.SqlTypes
 			base.HResult = -2146232015;
 		}
 
+		private SqlNullValueException(SerializationInfo si, StreamingContext sc)
+			: base(SqlNullValueException.SqlNullValueExceptionSerialization(si, sc), sc)
+		{
+		}
+
 		private static SerializationInfo SqlNullValueExceptionSerialization(SerializationInfo si, StreamingContext sc)
 		{
 			if (si != null && 1 == si.MemberCount)

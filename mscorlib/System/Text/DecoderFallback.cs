@@ -6,35 +6,16 @@ namespace System.Text
 	[Serializable]
 	public abstract class DecoderFallback
 	{
-		private static object InternalSyncObject
-		{
-			get
-			{
-				if (DecoderFallback.s_InternalSyncObject == null)
-				{
-					object obj = new object();
-					Interlocked.CompareExchange<object>(ref DecoderFallback.s_InternalSyncObject, obj, null);
-				}
-				return DecoderFallback.s_InternalSyncObject;
-			}
-		}
-
 		public static DecoderFallback ReplacementFallback
 		{
 			get
 			{
-				if (DecoderFallback.replacementFallback == null)
+				DecoderFallback decoderFallback;
+				if ((decoderFallback = DecoderFallback.s_replacementFallback) == null)
 				{
-					object internalSyncObject = DecoderFallback.InternalSyncObject;
-					lock (internalSyncObject)
-					{
-						if (DecoderFallback.replacementFallback == null)
-						{
-							DecoderFallback.replacementFallback = new DecoderReplacementFallback();
-						}
-					}
+					decoderFallback = Interlocked.CompareExchange<DecoderFallback>(ref DecoderFallback.s_replacementFallback, new DecoderReplacementFallback(), null) ?? DecoderFallback.s_replacementFallback;
 				}
-				return DecoderFallback.replacementFallback;
+				return decoderFallback;
 			}
 		}
 
@@ -42,18 +23,12 @@ namespace System.Text
 		{
 			get
 			{
-				if (DecoderFallback.exceptionFallback == null)
+				DecoderFallback decoderFallback;
+				if ((decoderFallback = DecoderFallback.s_exceptionFallback) == null)
 				{
-					object internalSyncObject = DecoderFallback.InternalSyncObject;
-					lock (internalSyncObject)
-					{
-						if (DecoderFallback.exceptionFallback == null)
-						{
-							DecoderFallback.exceptionFallback = new DecoderExceptionFallback();
-						}
-					}
+					decoderFallback = Interlocked.CompareExchange<DecoderFallback>(ref DecoderFallback.s_exceptionFallback, new DecoderExceptionFallback(), null) ?? DecoderFallback.s_exceptionFallback;
 				}
-				return DecoderFallback.exceptionFallback;
+				return decoderFallback;
 			}
 		}
 
@@ -61,20 +36,8 @@ namespace System.Text
 
 		public abstract int MaxCharCount { get; }
 
-		internal bool IsMicrosoftBestFitFallback
-		{
-			get
-			{
-				return this.bIsMicrosoftBestFitFallback;
-			}
-		}
+		private static DecoderFallback s_replacementFallback;
 
-		internal bool bIsMicrosoftBestFitFallback;
-
-		private static volatile DecoderFallback replacementFallback;
-
-		private static volatile DecoderFallback exceptionFallback;
-
-		private static object s_InternalSyncObject;
+		private static DecoderFallback s_exceptionFallback;
 	}
 }

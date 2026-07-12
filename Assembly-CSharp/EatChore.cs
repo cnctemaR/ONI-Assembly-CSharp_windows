@@ -12,8 +12,8 @@ public class EatChore : Chore<EatChore.StatesInstance>
 	{
 		base.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(EatChore.EdibleIsNotNull, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(EatChore.EdibleIsNotNull, null);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -143,7 +143,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			if (component != null && component.Has(TableSaltConfig.ID.ToTag()))
 			{
 				component.ConsumeIgnoringDisease(TableSaltConfig.ID.ToTag(), TableSaltTuning.CONSUMABLE_RATE);
-				base.sm.eater.Get(base.smi).gameObject.GetComponent<Worker>().GetComponent<Effects>().Add("MessTableSalt", true);
+				base.sm.eater.Get(base.smi).gameObject.GetComponent<WorkerBase>().GetComponent<Effects>().Add("MessTableSalt", true);
 				base.sm.messstation.Get(base.smi).gameObject.Trigger(1356255274, null);
 			}
 		}
@@ -195,16 +195,16 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.rehydrate.approach.InitializeStates(this.eater, this.rehydrate.foodpackage, this.rehydrate.work, null, null, NavigationTactics.ReduceTravelDistance).OnTargetLost(this.ediblesource, null);
 			this.rehydrate.work.ToggleWork("Rehydrate", delegate(EatChore.StatesInstance smi)
 			{
-				Worker worker = this.eater.Get<Worker>(smi);
+				WorkerBase workerBase = this.eater.Get<WorkerBase>(smi);
 				DehydratedFoodPackage dehydratedFoodPackage = this.rehydrate.foodpackage.Get<DehydratedFoodPackage>(smi);
-				worker.StartWork(new DehydratedFoodPackage.RehydrateStartWorkItem(dehydratedFoodPackage, delegate(GameObject result)
+				workerBase.StartWork(new DehydratedFoodPackage.RehydrateStartWorkItem(dehydratedFoodPackage, delegate(GameObject result)
 				{
 					this.ediblechunk.Set(result, smi, false);
 				}));
 			}, delegate(EatChore.StatesInstance smi)
 			{
 				AccessabilityManager accessabilityManager3 = this.rehydrate.rehydrator.Get(smi);
-				return !(accessabilityManager3 == null) && accessabilityManager3.CanAccess(this.eater.Get<Worker>(smi).gameObject);
+				return !(accessabilityManager3 == null) && accessabilityManager3.CanAccess(this.eater.Get<WorkerBase>(smi).gameObject);
 			}, this.eatatmessstation, null);
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
 			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p != null && !p.GetComponent<Operational>().IsOperational);

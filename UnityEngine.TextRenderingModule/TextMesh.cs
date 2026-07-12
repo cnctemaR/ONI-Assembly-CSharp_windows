@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeHeader("Modules/TextRendering/Public/TextMesh.h")]
-	[RequireComponent(typeof(Transform), typeof(MeshRenderer))]
 	[NativeClass("TextRenderingPrivate::TextMesh")]
+	[RequireComponent(typeof(Transform), typeof(MeshRenderer))]
 	public sealed class TextMesh : Component
 	{
 		public extern string text

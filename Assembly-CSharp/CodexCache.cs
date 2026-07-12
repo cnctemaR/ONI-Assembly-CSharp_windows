@@ -32,7 +32,8 @@ public static class CodexCache
 				new global::Tuple<string, Type>("!CodexLabelWithLargeIcon", typeof(CodexLabelWithLargeIcon)),
 				new global::Tuple<string, Type>("!CodexContentLockedIndicator", typeof(CodexContentLockedIndicator)),
 				new global::Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer)),
-				new global::Tuple<string, Type>("!CodexVideo", typeof(CodexVideo))
+				new global::Tuple<string, Type>("!CodexVideo", typeof(CodexVideo)),
+				new global::Tuple<string, Type>("!CodexElementCategoryList", typeof(CodexElementCategoryList))
 			};
 		}
 		string text = CodexCache.FormatLinkID("LESSONS");
@@ -203,7 +204,7 @@ public static class CodexCache
 		CodexCache.baseEntryPath = Application.streamingAssetsPath + "/codex";
 		foreach (CodexEntry codexEntry in CodexCache.CollectEntries(""))
 		{
-			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(codexEntry.dlcIds))
+			if (codexEntry != null && codexEntry.id != null && codexEntry.contentContainers != null && SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(codexEntry.dlcIds, codexEntry.forbiddenDLCIds))
 			{
 				if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry.id)))
 				{
@@ -220,7 +221,7 @@ public static class CodexCache
 		{
 			foreach (CodexEntry codexEntry2 in CodexCache.CollectEntries(Path.GetFileNameWithoutExtension(directories[i])))
 			{
-				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(codexEntry2.dlcIds))
+				if (codexEntry2 != null && codexEntry2.id != null && codexEntry2.contentContainers != null && SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(codexEntry2.dlcIds, codexEntry2.forbiddenDLCIds))
 				{
 					if (CodexCache.entries.ContainsKey(CodexCache.FormatLinkID(codexEntry2.id)))
 					{
@@ -243,7 +244,7 @@ public static class CodexCache
 			while (enumerator.MoveNext())
 			{
 				SubEntry v = enumerator.Current;
-				if (v.parentEntryID != null && v.id != null && SaveLoader.Instance.IsDlcListActiveForCurrentSave(v.dlcIds))
+				if (v.parentEntryID != null && v.id != null && SaveLoader.Instance.IsAllDlcActiveForCurrentSave(v.dlcIds))
 				{
 					if (CodexCache.entries.ContainsKey(v.parentEntryID.ToUpper()))
 					{

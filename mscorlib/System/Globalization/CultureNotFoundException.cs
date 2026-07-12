@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System.Globalization
 {
-	[ComVisible(true)]
 	[Serializable]
-	public class CultureNotFoundException : ArgumentException, ISerializable
+	public class CultureNotFoundException : ArgumentException
 	{
 		public CultureNotFoundException()
 			: base(CultureNotFoundException.DefaultMessage)
@@ -29,56 +27,50 @@ namespace System.Globalization
 		{
 		}
 
-		public CultureNotFoundException(string paramName, int invalidCultureId, string message)
-			: base(message, paramName)
-		{
-			this.m_invalidCultureId = new int?(invalidCultureId);
-		}
-
-		public CultureNotFoundException(string message, int invalidCultureId, Exception innerException)
-			: base(message, innerException)
-		{
-			this.m_invalidCultureId = new int?(invalidCultureId);
-		}
-
 		public CultureNotFoundException(string paramName, string invalidCultureName, string message)
 			: base(message, paramName)
 		{
-			this.m_invalidCultureName = invalidCultureName;
+			this._invalidCultureName = invalidCultureName;
 		}
 
 		public CultureNotFoundException(string message, string invalidCultureName, Exception innerException)
 			: base(message, innerException)
 		{
-			this.m_invalidCultureName = invalidCultureName;
+			this._invalidCultureName = invalidCultureName;
+		}
+
+		public CultureNotFoundException(string message, int invalidCultureId, Exception innerException)
+			: base(message, innerException)
+		{
+			this._invalidCultureId = new int?(invalidCultureId);
+		}
+
+		public CultureNotFoundException(string paramName, int invalidCultureId, string message)
+			: base(message, paramName)
+		{
+			this._invalidCultureId = new int?(invalidCultureId);
 		}
 
 		protected CultureNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this.m_invalidCultureId = (int?)info.GetValue("InvalidCultureId", typeof(int?));
-			this.m_invalidCultureName = (string)info.GetValue("InvalidCultureName", typeof(string));
+			this._invalidCultureId = (int?)info.GetValue("InvalidCultureId", typeof(int?));
+			this._invalidCultureName = (string)info.GetValue("InvalidCultureName", typeof(string));
 		}
 
 		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
 			base.GetObjectData(info, context);
-			int? num = null;
-			num = this.m_invalidCultureId;
-			info.AddValue("InvalidCultureId", num, typeof(int?));
-			info.AddValue("InvalidCultureName", this.m_invalidCultureName, typeof(string));
+			info.AddValue("InvalidCultureId", this._invalidCultureId, typeof(int?));
+			info.AddValue("InvalidCultureName", this._invalidCultureName, typeof(string));
 		}
 
 		public virtual int? InvalidCultureId
 		{
 			get
 			{
-				return this.m_invalidCultureId;
+				return this._invalidCultureId;
 			}
 		}
 
@@ -86,7 +78,7 @@ namespace System.Globalization
 		{
 			get
 			{
-				return this.m_invalidCultureName;
+				return this._invalidCultureName;
 			}
 		}
 
@@ -94,7 +86,7 @@ namespace System.Globalization
 		{
 			get
 			{
-				return Environment.GetResourceString("Culture is not supported.");
+				return "Culture is not supported.";
 			}
 		}
 
@@ -102,11 +94,11 @@ namespace System.Globalization
 		{
 			get
 			{
-				if (this.InvalidCultureId != null)
+				if (this.InvalidCultureId == null)
 				{
-					return string.Format(CultureInfo.InvariantCulture, "{0} (0x{0:x4})", this.InvalidCultureId.Value);
+					return this.InvalidCultureName;
 				}
-				return this.InvalidCultureName;
+				return string.Format(CultureInfo.InvariantCulture, "{0} (0x{0:x4})", this.InvalidCultureId.Value);
 			}
 		}
 
@@ -115,21 +107,21 @@ namespace System.Globalization
 			get
 			{
 				string message = base.Message;
-				if (this.m_invalidCultureId == null && this.m_invalidCultureName == null)
+				if (this._invalidCultureId == null && this._invalidCultureName == null)
 				{
 					return message;
 				}
-				string resourceString = Environment.GetResourceString("{0} is an invalid culture identifier.", new object[] { this.FormatedInvalidCultureId });
+				string text = SR.Format("{0} is an invalid culture identifier.", this.FormatedInvalidCultureId);
 				if (message == null)
 				{
-					return resourceString;
+					return text;
 				}
-				return message + Environment.NewLine + resourceString;
+				return message + Environment.NewLine + text;
 			}
 		}
 
-		private string m_invalidCultureName;
+		private string _invalidCultureName;
 
-		private int? m_invalidCultureId;
+		private int? _invalidCultureId;
 	}
 }

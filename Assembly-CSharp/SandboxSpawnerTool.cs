@@ -29,9 +29,9 @@ public class SandboxSpawnerTool : InterfaceTool
 		}
 		string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
 		GameObject prefab = Assets.GetPrefab(stringSetting);
-		if (stringSetting == MinionConfig.ID)
+		if (prefab.HasTag(GameTags.BaseMinion))
 		{
-			this.SpawnMinion();
+			this.SpawnMinion(stringSetting);
 		}
 		else if (prefab.GetComponent<Building>() != null)
 		{
@@ -67,15 +67,17 @@ public class SandboxSpawnerTool : InterfaceTool
 		SandboxToolParameterMenu.instance.gameObject.SetActive(false);
 	}
 
-	private void SpawnMinion()
+	private void SpawnMinion(string prefabID)
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		GameObject prefab = Assets.GetPrefab(prefabID);
+		Tag tag = prefabID;
+		GameObject gameObject = Util.KInstantiate(prefab, null, null);
+		gameObject.name = prefab.name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, null, false).Apply(gameObject);
+		new MinionStartingStats(tag, false, null, null, false).Apply(gameObject);
 		gameObject.GetMyWorld().SetDupeVisited();
 	}
 

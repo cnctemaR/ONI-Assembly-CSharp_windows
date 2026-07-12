@@ -97,11 +97,6 @@ namespace UnityEngine.Timeline
 			this.m_EvaluateCallbacks.Add(new AnimationPreviewUpdateCallback(animOutput));
 		}
 
-		private static Playable CreatePlayableGraph(PlayableGraph graph, TrackAsset asset, GameObject go, IntervalTree<RuntimeElement> tree, Playable timelinePlayable)
-		{
-			return asset.CreatePlayableGraph(graph, go, tree, timelinePlayable);
-		}
-
 		private Playable CreateTrackPlayable(PlayableGraph graph, Playable timelinePlayable, TrackAsset track, GameObject go, bool createOutputs)
 		{
 			if (!track.IsCompilable())
@@ -119,14 +114,14 @@ namespace UnityEngine.Timeline
 			}
 			TrackAsset trackAsset = track.parent as TrackAsset;
 			Playable playable2 = ((trackAsset != null) ? this.CreateTrackPlayable(graph, timelinePlayable, trackAsset, go, createOutputs) : timelinePlayable);
-			Playable playable3 = TimelinePlayable.CreatePlayableGraph(graph, track, go, this.m_IntervalTree, timelinePlayable);
+			Playable playable3 = track.CreatePlayableGraph(graph, go, this.m_IntervalTree, timelinePlayable);
 			bool flag = false;
 			if (!playable3.IsValid<Playable>())
 			{
 				string name = track.name;
 				string text = "(";
 				Type type = track.GetType();
-				throw new InvalidOperationException(name + text + ((type != null) ? type.ToString() : null) + ") did not produce a valid playable. Use the compilable property to indicate whether the track is valid for processing");
+				throw new InvalidOperationException(name + text + ((type != null) ? type.ToString() : null) + ") did not produce a valid playable.");
 			}
 			if (playable2.IsValid<Playable>() && playable3.IsValid<Playable>())
 			{
@@ -161,20 +156,13 @@ namespace UnityEngine.Timeline
 			foreach (RuntimeElement runtimeElement in this.m_CurrentListOfActiveClips)
 			{
 				runtimeElement.intervalBit = this.m_ActiveBit;
-				if (frameData.timeLooped)
-				{
-					runtimeElement.Reset();
-				}
 			}
-			double duration = playable.GetDuration<Playable>();
+			double num = (double)new DiscreteTime(playable.GetDuration<Playable>());
 			foreach (RuntimeElement runtimeElement2 in this.m_ActiveClips)
 			{
 				if (runtimeElement2.intervalBit != this.m_ActiveBit)
 				{
-					double num = (double)DiscreteTime.FromTicks(runtimeElement2.intervalEnd);
-					double num2 = (frameData.timeLooped ? Math.Min(num, duration) : Math.Min(time, num));
-					runtimeElement2.EvaluateAt(num2, frameData);
-					runtimeElement2.enable = false;
+					runtimeElement2.DisableAt(time, num, frameData);
 				}
 			}
 			this.m_ActiveClips.Clear();

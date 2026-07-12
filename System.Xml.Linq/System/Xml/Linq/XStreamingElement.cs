@@ -76,20 +76,6 @@ namespace System.Xml.Linq
 			this.Add(content);
 		}
 
-		public void Save(string fileName)
-		{
-			this.Save(fileName, SaveOptions.None);
-		}
-
-		public void Save(string fileName, SaveOptions options)
-		{
-			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
-			using (XmlWriter xmlWriter = XmlWriter.Create(fileName, xmlWriterSettings))
-			{
-				this.Save(xmlWriter);
-			}
-		}
-
 		public void Save(Stream stream)
 		{
 			this.Save(stream, SaveOptions.None);
@@ -127,6 +113,20 @@ namespace System.Xml.Linq
 			writer.WriteStartDocument();
 			this.WriteTo(writer);
 			writer.WriteEndDocument();
+		}
+
+		public void Save(string fileName)
+		{
+			this.Save(fileName, SaveOptions.None);
+		}
+
+		public void Save(string fileName, SaveOptions options)
+		{
+			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
+			using (XmlWriter xmlWriter = XmlWriter.Create(fileName, xmlWriterSettings))
+			{
+				this.Save(xmlWriter);
+			}
 		}
 
 		public override string ToString()

@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
+	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
 	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
-	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
 	public class Graphics
 	{
-		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount")]
+		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetMaxDrawMeshInstanceCount();
 
@@ -53,8 +55,8 @@ namespace UnityEngine
 			}
 		}
 
-		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetMinOpenGLESVersion")]
+		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern OpenGLESVersion GetMinOpenGLESVersion();
 
@@ -144,6 +146,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ConvertTexture_Slice(Texture src, int srcElement, Texture dst, int dstElement);
 
+		[FreeFunction("GraphicsScripting::CopyBuffer", ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyBufferImpl([NotNull("ArgumentNullException")] GraphicsBuffer source, [NotNull("ArgumentNullException")] GraphicsBuffer dest);
+
 		[FreeFunction("GraphicsScripting::DrawMeshNow")]
 		private static void Internal_DrawMeshNow1([NotNull("NullExceptionObject")] Mesh mesh, int subsetIndex, Vector3 position, Quaternion rotation)
 		{
@@ -160,6 +166,54 @@ namespace UnityEngine
 		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_DrawTexture(ref Internal_DrawTextureArguments args);
+
+		[FreeFunction("GraphicsScripting::RenderMesh")]
+		private unsafe static void Internal_RenderMesh(RenderParams rparams, [NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, Matrix4x4 objectToWorld, Matrix4x4* prevObjectToWorld)
+		{
+			Graphics.Internal_RenderMesh_Injected(ref rparams, mesh, submeshIndex, ref objectToWorld, prevObjectToWorld);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderMeshInstanced")]
+		private static void Internal_RenderMeshInstanced(RenderParams rparams, [NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, IntPtr instanceData, RenderInstancedDataLayout layout, uint instanceCount)
+		{
+			Graphics.Internal_RenderMeshInstanced_Injected(ref rparams, mesh, submeshIndex, instanceData, ref layout, instanceCount);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderMeshIndirect")]
+		private static void Internal_RenderMeshIndirect(RenderParams rparams, [NotNull("NullExceptionObject")] Mesh mesh, [NotNull("NullExceptionObject")] GraphicsBuffer commandBuffer, int commandCount, int startCommand)
+		{
+			Graphics.Internal_RenderMeshIndirect_Injected(ref rparams, mesh, commandBuffer, commandCount, startCommand);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderMeshPrimitives")]
+		private static void Internal_RenderMeshPrimitives(RenderParams rparams, [NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, int instanceCount)
+		{
+			Graphics.Internal_RenderMeshPrimitives_Injected(ref rparams, mesh, submeshIndex, instanceCount);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderPrimitives")]
+		private static void Internal_RenderPrimitives(RenderParams rparams, MeshTopology topology, int vertexCount, int instanceCount)
+		{
+			Graphics.Internal_RenderPrimitives_Injected(ref rparams, topology, vertexCount, instanceCount);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderPrimitivesIndexed")]
+		private static void Internal_RenderPrimitivesIndexed(RenderParams rparams, MeshTopology topology, [NotNull("NullExceptionObject")] GraphicsBuffer indexBuffer, int indexCount, int startIndex, int instanceCount)
+		{
+			Graphics.Internal_RenderPrimitivesIndexed_Injected(ref rparams, topology, indexBuffer, indexCount, startIndex, instanceCount);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderPrimitivesIndirect")]
+		private static void Internal_RenderPrimitivesIndirect(RenderParams rparams, MeshTopology topology, [NotNull("NullExceptionObject")] GraphicsBuffer commandBuffer, int commandCount, int startCommand)
+		{
+			Graphics.Internal_RenderPrimitivesIndirect_Injected(ref rparams, topology, commandBuffer, commandCount, startCommand);
+		}
+
+		[FreeFunction("GraphicsScripting::RenderPrimitivesIndexedIndirect")]
+		private static void Internal_RenderPrimitivesIndexedIndirect(RenderParams rparams, MeshTopology topology, [NotNull("NullExceptionObject")] GraphicsBuffer indexBuffer, [NotNull("NullExceptionObject")] GraphicsBuffer commandBuffer, int commandCount, int startCommand)
+		{
+			Graphics.Internal_RenderPrimitivesIndexedIndirect_Injected(ref rparams, topology, indexBuffer, commandBuffer, commandCount, startCommand);
+		}
 
 		[FreeFunction("GraphicsScripting::DrawMesh")]
 		private static void Internal_DrawMesh(Mesh mesh, int submeshIndex, Matrix4x4 matrix, Material material, int layer, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
@@ -231,10 +285,22 @@ namespace UnityEngine
 			Graphics.Internal_DrawProceduralIndirect_Injected(material, ref bounds, topology, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
 		}
 
+		[FreeFunction("GraphicsScripting::DrawProceduralIndirect")]
+		private static void Internal_DrawProceduralIndirectGraphicsBuffer(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer)
+		{
+			Graphics.Internal_DrawProceduralIndirectGraphicsBuffer_Injected(material, ref bounds, topology, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
+		}
+
 		[FreeFunction("GraphicsScripting::DrawProceduralIndexedIndirect")]
 		private static void Internal_DrawProceduralIndexedIndirect(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer)
 		{
 			Graphics.Internal_DrawProceduralIndexedIndirect_Injected(material, ref bounds, topology, indexBuffer, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
+		}
+
+		[FreeFunction("GraphicsScripting::DrawProceduralIndexedIndirect")]
+		private static void Internal_DrawProceduralIndexedIndirectGraphicsBuffer(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer)
+		{
+			Graphics.Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(material, ref bounds, topology, indexBuffer, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
 		}
 
 		[FreeFunction("GraphicsScripting::BlitMaterial")]
@@ -521,6 +587,43 @@ namespace UnityEngine
 			}
 		}
 
+		internal static void ValidateCopyBuffer(GraphicsBuffer source, GraphicsBuffer dest)
+		{
+			bool flag = source == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("source");
+			}
+			bool flag2 = dest == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("dest");
+			}
+			long num = (long)source.count * (long)source.stride;
+			long num2 = (long)dest.count * (long)dest.stride;
+			bool flag3 = num != num2;
+			if (flag3)
+			{
+				throw new ArgumentException(string.Format("CopyBuffer source and destination buffers must be the same size, source was {0} bytes, dest was {1} bytes", num, num2));
+			}
+			bool flag4 = (source.target & GraphicsBuffer.Target.CopySource) == (GraphicsBuffer.Target)0;
+			if (flag4)
+			{
+				throw new ArgumentException("CopyBuffer source must have CopySource target", "source");
+			}
+			bool flag5 = (dest.target & GraphicsBuffer.Target.CopyDestination) == (GraphicsBuffer.Target)0;
+			if (flag5)
+			{
+				throw new ArgumentException("CopyBuffer destination must have CopyDestination target", "dest");
+			}
+		}
+
+		public static void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest)
+		{
+			Graphics.ValidateCopyBuffer(source, dest);
+			Graphics.CopyBufferImpl(source, dest);
+		}
+
 		private static void DrawTextureImpl(Rect screenRect, Texture texture, Rect sourceRect, int leftBorder, int rightBorder, int topBorder, int bottomBorder, Color color, Material mat, int pass)
 		{
 			Internal_DrawTextureArguments internal_DrawTextureArguments = default(Internal_DrawTextureArguments);
@@ -561,6 +664,192 @@ namespace UnityEngine
 		public static void DrawTexture(Rect screenRect, Texture texture, [DefaultValue("null")] Material mat, [DefaultValue("-1")] int pass)
 		{
 			Graphics.DrawTexture(screenRect, texture, 0, 0, 0, 0, mat, pass);
+		}
+
+		public unsafe static void RenderMesh(in RenderParams rparams, Mesh mesh, int submeshIndex, Matrix4x4 objectToWorld, [DefaultValue("null")] Matrix4x4? prevObjectToWorld = null)
+		{
+			bool flag = prevObjectToWorld != null;
+			if (flag)
+			{
+				Matrix4x4 value = prevObjectToWorld.Value;
+				Graphics.Internal_RenderMesh(rparams, mesh, submeshIndex, objectToWorld, &value);
+			}
+			else
+			{
+				Graphics.Internal_RenderMesh(rparams, mesh, submeshIndex, objectToWorld, null);
+			}
+		}
+
+		private static RenderInstancedDataLayout GetCachedRenderInstancedDataLayout(Type type)
+		{
+			int hashCode = type.GetHashCode();
+			RenderInstancedDataLayout renderInstancedDataLayout;
+			bool flag = !Graphics.s_RenderInstancedDataLayouts.TryGetValue(hashCode, out renderInstancedDataLayout);
+			if (flag)
+			{
+				renderInstancedDataLayout = new RenderInstancedDataLayout(type);
+				Graphics.s_RenderInstancedDataLayouts.Add(hashCode, renderInstancedDataLayout);
+			}
+			return renderInstancedDataLayout;
+		}
+
+		public unsafe static void RenderMeshInstanced<[IsUnmanaged] T>(in RenderParams rparams, Mesh mesh, int submeshIndex, T[] instanceData, [DefaultValue("-1")] int instanceCount = -1, [DefaultValue("0")] int startInstance = 0) where T : struct, ValueType
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !rparams.material.enableInstancing;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Material needs to enable instancing for use with RenderMeshInstanced.");
+			}
+			bool flag3 = instanceData == null;
+			if (flag3)
+			{
+				throw new ArgumentNullException("instanceData");
+			}
+			RenderInstancedDataLayout cachedRenderInstancedDataLayout = Graphics.GetCachedRenderInstancedDataLayout(typeof(T));
+			uint num = Math.Min((uint)instanceCount, (uint)Math.Max(0, instanceData.Length - startInstance));
+			fixed (T[] array = instanceData)
+			{
+				T* ptr;
+				if (instanceData == null || array.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array[0];
+				}
+				Graphics.Internal_RenderMeshInstanced(rparams, mesh, submeshIndex, (IntPtr)((void*)(ptr + (IntPtr)startInstance * (IntPtr)sizeof(T) / (IntPtr)sizeof(T))), cachedRenderInstancedDataLayout, num);
+			}
+		}
+
+		public unsafe static void RenderMeshInstanced<[IsUnmanaged] T>(in RenderParams rparams, Mesh mesh, int submeshIndex, List<T> instanceData, [DefaultValue("-1")] int instanceCount = -1, [DefaultValue("0")] int startInstance = 0) where T : struct, ValueType
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !rparams.material.enableInstancing;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Material needs to enable instancing for use with RenderMeshInstanced.");
+			}
+			bool flag3 = instanceData == null;
+			if (flag3)
+			{
+				throw new ArgumentNullException("instanceData");
+			}
+			RenderInstancedDataLayout cachedRenderInstancedDataLayout = Graphics.GetCachedRenderInstancedDataLayout(typeof(T));
+			uint num = Math.Min((uint)instanceCount, (uint)Math.Max(0, instanceData.Count - startInstance));
+			T[] array;
+			T* ptr;
+			if ((array = NoAllocHelpers.ExtractArrayFromListT<T>(instanceData)) == null || array.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array[0];
+			}
+			Graphics.Internal_RenderMeshInstanced(rparams, mesh, submeshIndex, (IntPtr)((void*)(ptr + (IntPtr)startInstance * (IntPtr)sizeof(T) / (IntPtr)sizeof(T))), cachedRenderInstancedDataLayout, num);
+			array = null;
+		}
+
+		public unsafe static void RenderMeshInstanced<[IsUnmanaged] T>(RenderParams rparams, Mesh mesh, int submeshIndex, NativeArray<T> instanceData, [DefaultValue("-1")] int instanceCount = -1, [DefaultValue("0")] int startInstance = 0) where T : struct, ValueType
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !rparams.material.enableInstancing;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Material needs to enable instancing for use with RenderMeshInstanced.");
+			}
+			RenderInstancedDataLayout cachedRenderInstancedDataLayout = Graphics.GetCachedRenderInstancedDataLayout(typeof(T));
+			uint num = Math.Min((uint)instanceCount, (uint)Math.Max(0, instanceData.Length - startInstance));
+			Graphics.Internal_RenderMeshInstanced(rparams, mesh, submeshIndex, (IntPtr)((void*)((byte*)instanceData.GetUnsafePtr<T>() + (IntPtr)startInstance * (IntPtr)sizeof(T))), cachedRenderInstancedDataLayout, num);
+		}
+
+		public static void RenderMeshIndirect(in RenderParams rparams, Mesh mesh, GraphicsBuffer commandBuffer, [DefaultValue("1")] int commandCount = 1, [DefaultValue("0")] int startCommand = 0)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			Graphics.Internal_RenderMeshIndirect(rparams, mesh, commandBuffer, commandCount, startCommand);
+		}
+
+		public static void RenderMeshPrimitives(in RenderParams rparams, Mesh mesh, int submeshIndex, [DefaultValue("1")] int instanceCount = 1)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			Graphics.Internal_RenderMeshPrimitives(rparams, mesh, submeshIndex, instanceCount);
+		}
+
+		public static void RenderPrimitives(in RenderParams rparams, MeshTopology topology, int vertexCount, [DefaultValue("1")] int instanceCount = 1)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			Graphics.Internal_RenderPrimitives(rparams, topology, vertexCount, instanceCount);
+		}
+
+		public static void RenderPrimitivesIndexed(in RenderParams rparams, MeshTopology topology, GraphicsBuffer indexBuffer, int indexCount, [DefaultValue("0")] int startIndex = 0, [DefaultValue("1")] int instanceCount = 1)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			Graphics.Internal_RenderPrimitivesIndexed(rparams, topology, indexBuffer, indexCount, startIndex, instanceCount);
+		}
+
+		public static void RenderPrimitivesIndirect(in RenderParams rparams, MeshTopology topology, GraphicsBuffer commandBuffer, [DefaultValue("1")] int commandCount = 1, [DefaultValue("0")] int startCommand = 0)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			Graphics.Internal_RenderPrimitivesIndirect(rparams, topology, commandBuffer, commandCount, startCommand);
+		}
+
+		public static void RenderPrimitivesIndexedIndirect(in RenderParams rparams, MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer commandBuffer, [DefaultValue("1")] int commandCount = 1, [DefaultValue("0")] int startCommand = 0)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			Graphics.Internal_RenderPrimitivesIndexedIndirect(rparams, topology, indexBuffer, commandBuffer, commandCount, startCommand);
 		}
 
 		public static void DrawMeshNow(Mesh mesh, Vector3 position, Quaternion rotation, int materialIndex)
@@ -723,28 +1012,33 @@ namespace UnityEngine
 			{
 				throw new InvalidOperationException("Instancing is not supported.");
 			}
-			bool flag2 = mesh == null;
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag3 = mesh == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("mesh");
 			}
-			bool flag3 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
-			if (flag3)
+			bool flag4 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("submeshIndex", "submeshIndex out of range.");
 			}
-			bool flag4 = material == null;
-			if (flag4)
+			bool flag5 = material == null;
+			if (flag5)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag5 = bufferWithArgs == null;
-			if (flag5)
+			bool flag6 = bufferWithArgs == null;
+			if (flag6)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
-			bool flag6 = lightProbeUsage == LightProbeUsage.UseProxyVolume && lightProbeProxyVolume == null;
-			if (flag6)
+			bool flag7 = lightProbeUsage == LightProbeUsage.UseProxyVolume && lightProbeProxyVolume == null;
+			if (flag7)
 			{
 				throw new ArgumentException("Argument lightProbeProxyVolume must not be null if lightProbeUsage is set to UseProxyVolume.", "lightProbeProxyVolume");
 			}
@@ -758,28 +1052,33 @@ namespace UnityEngine
 			{
 				throw new InvalidOperationException("Instancing is not supported.");
 			}
-			bool flag2 = mesh == null;
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag3 = mesh == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("mesh");
 			}
-			bool flag3 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
-			if (flag3)
+			bool flag4 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("submeshIndex", "submeshIndex out of range.");
 			}
-			bool flag4 = material == null;
-			if (flag4)
+			bool flag5 = material == null;
+			if (flag5)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag5 = bufferWithArgs == null;
-			if (flag5)
+			bool flag6 = bufferWithArgs == null;
+			if (flag6)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
-			bool flag6 = lightProbeUsage == LightProbeUsage.UseProxyVolume && lightProbeProxyVolume == null;
-			if (flag6)
+			bool flag7 = lightProbeUsage == LightProbeUsage.UseProxyVolume && lightProbeProxyVolume == null;
+			if (flag7)
 			{
 				throw new ArgumentException("Argument lightProbeProxyVolume must not be null if lightProbeUsage is set to UseProxyVolume.", "lightProbeProxyVolume");
 			}
@@ -803,8 +1102,13 @@ namespace UnityEngine
 
 		public static void DrawProceduralIndirectNow(MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset = 0)
 		{
-			bool flag = bufferWithArgs == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = bufferWithArgs == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -813,13 +1117,18 @@ namespace UnityEngine
 
 		public static void DrawProceduralIndirectNow(MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset = 0)
 		{
-			bool flag = indexBuffer == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("indexBuffer");
 			}
-			bool flag2 = bufferWithArgs == null;
-			if (flag2)
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -828,8 +1137,13 @@ namespace UnityEngine
 
 		public static void DrawProceduralIndirectNow(MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset = 0)
 		{
-			bool flag = bufferWithArgs == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = bufferWithArgs == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -838,13 +1152,18 @@ namespace UnityEngine
 
 		public static void DrawProceduralIndirectNow(MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset = 0)
 		{
-			bool flag = indexBuffer == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("indexBuffer");
 			}
-			bool flag2 = bufferWithArgs == null;
-			if (flag2)
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -868,27 +1187,72 @@ namespace UnityEngine
 
 		public static void DrawProceduralIndirect(Material material, Bounds bounds, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset = 0, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
 		{
-			bool flag = bufferWithArgs == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
 			{
-				throw new ArgumentNullException("bufferWithArgs");
-			}
-			Graphics.Internal_DrawProceduralIndirect(material, bounds, topology, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
-		}
-
-		public static void DrawProceduralIndirect(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset = 0, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
-		{
-			bool flag = indexBuffer == null;
-			if (flag)
-			{
-				throw new ArgumentNullException("indexBuffer");
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
 			}
 			bool flag2 = bufferWithArgs == null;
 			if (flag2)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
+			Graphics.Internal_DrawProceduralIndirect(material, bounds, topology, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
+		}
+
+		public static void DrawProceduralIndirect(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset = 0, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
+		{
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = bufferWithArgs == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
+			Graphics.Internal_DrawProceduralIndirectGraphicsBuffer(material, bounds, topology, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
+		}
+
+		public static void DrawProceduralIndirect(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset = 0, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
+		{
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("indexBuffer");
+			}
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
 			Graphics.Internal_DrawProceduralIndexedIndirect(material, bounds, topology, indexBuffer, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
+		}
+
+		public static void DrawProceduralIndirect(Material material, Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset = 0, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
+		{
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("indexBuffer");
+			}
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
+			Graphics.Internal_DrawProceduralIndexedIndirectGraphicsBuffer(material, bounds, topology, indexBuffer, bufferWithArgs, argsOffset, camera, properties, castShadows, receiveShadows, layer);
 		}
 
 		public static void Blit(Texture source, RenderTexture dest)
@@ -1300,6 +1664,30 @@ namespace UnityEngine
 		private static extern void Internal_DrawMeshNow2_Injected(Mesh mesh, int subsetIndex, ref Matrix4x4 matrix);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Internal_RenderMesh_Injected(ref RenderParams rparams, Mesh mesh, int submeshIndex, ref Matrix4x4 objectToWorld, Matrix4x4* prevObjectToWorld);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderMeshInstanced_Injected(ref RenderParams rparams, Mesh mesh, int submeshIndex, IntPtr instanceData, ref RenderInstancedDataLayout layout, uint instanceCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderMeshIndirect_Injected(ref RenderParams rparams, Mesh mesh, GraphicsBuffer commandBuffer, int commandCount, int startCommand);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderMeshPrimitives_Injected(ref RenderParams rparams, Mesh mesh, int submeshIndex, int instanceCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderPrimitives_Injected(ref RenderParams rparams, MeshTopology topology, int vertexCount, int instanceCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderPrimitivesIndexed_Injected(ref RenderParams rparams, MeshTopology topology, GraphicsBuffer indexBuffer, int indexCount, int startIndex, int instanceCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderPrimitivesIndirect_Injected(ref RenderParams rparams, MeshTopology topology, GraphicsBuffer commandBuffer, int commandCount, int startCommand);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_RenderPrimitivesIndexedIndirect_Injected(ref RenderParams rparams, MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer commandBuffer, int commandCount, int startCommand);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DrawMesh_Injected(Mesh mesh, int submeshIndex, ref Matrix4x4 matrix, Material material, int layer, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, Transform probeAnchor, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1321,7 +1709,13 @@ namespace UnityEngine
 		private static extern void Internal_DrawProceduralIndirect_Injected(Material material, ref Bounds bounds, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndirectGraphicsBuffer_Injected(Material material, ref Bounds bounds, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DrawProceduralIndexedIndirect_Injected(Material material, ref Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(Material material, ref Bounds bounds, MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Blit4_Injected(Texture source, RenderTexture dest, ref Vector2 scale, ref Vector2 offset);
@@ -1330,5 +1724,7 @@ namespace UnityEngine
 		private static extern void Blit5_Injected(Texture source, RenderTexture dest, ref Vector2 scale, ref Vector2 offset, int sourceDepthSlice, int destDepthSlice);
 
 		internal static readonly int kMaxDrawMeshInstanceCount = Graphics.Internal_GetMaxDrawMeshInstanceCount();
+
+		internal static Dictionary<int, RenderInstancedDataLayout> s_RenderInstancedDataLayouts = new Dictionary<int, RenderInstancedDataLayout>();
 	}
 }

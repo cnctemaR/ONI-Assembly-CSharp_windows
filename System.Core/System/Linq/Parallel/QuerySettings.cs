@@ -148,7 +148,9 @@ namespace System.Linq.Parallel
 			{
 				querySettings.MergeOptions = new ParallelMergeOptions?(ParallelMergeOptions.Default);
 			}
-			if (querySettings.MergeOptions == ParallelMergeOptions.Default)
+			ParallelMergeOptions? mergeOptions = querySettings.MergeOptions;
+			ParallelMergeOptions parallelMergeOptions = ParallelMergeOptions.Default;
+			if ((mergeOptions.GetValueOrDefault() == parallelMergeOptions) & (mergeOptions != null))
 			{
 				querySettings.MergeOptions = new ParallelMergeOptions?(ParallelMergeOptions.AutoBuffered);
 			}

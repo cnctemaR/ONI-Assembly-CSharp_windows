@@ -83,7 +83,7 @@ public class Carvable : Workable, IDigActionEntity
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.Carve();
 	}
@@ -126,7 +126,7 @@ public class Carvable : Workable, IDigActionEntity
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(this.pendingStatusItem, false);

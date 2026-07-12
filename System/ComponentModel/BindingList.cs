@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[Serializable]
 	public class BindingList<T> : Collection<T>, IBindingList, IList, ICollection, IEnumerable, ICancelAddNew, IRaiseItemChangedEvents
 	{
@@ -40,7 +38,7 @@ namespace System.ComponentModel
 			get
 			{
 				Type typeFromHandle = typeof(T);
-				return typeFromHandle.IsPrimitive || typeFromHandle.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, new Type[0], null) != null;
+				return typeFromHandle.IsPrimitive || typeFromHandle.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, Array.Empty<Type>(), null) != null;
 			}
 		}
 
@@ -49,7 +47,7 @@ namespace System.ComponentModel
 			add
 			{
 				bool flag = this.AllowNew;
-				this.onAddingNew = (AddingNewEventHandler)Delegate.Combine(this.onAddingNew, value);
+				this._onAddingNew = (AddingNewEventHandler)Delegate.Combine(this._onAddingNew, value);
 				if (flag != this.AllowNew)
 				{
 					this.FireListChanged(ListChangedType.Reset, -1);
@@ -58,7 +56,7 @@ namespace System.ComponentModel
 			remove
 			{
 				bool flag = this.AllowNew;
-				this.onAddingNew = (AddingNewEventHandler)Delegate.Remove(this.onAddingNew, value);
+				this._onAddingNew = (AddingNewEventHandler)Delegate.Remove(this._onAddingNew, value);
 				if (flag != this.AllowNew)
 				{
 					this.FireListChanged(ListChangedType.Reset, -1);
@@ -68,10 +66,12 @@ namespace System.ComponentModel
 
 		protected virtual void OnAddingNew(AddingNewEventArgs e)
 		{
-			if (this.onAddingNew != null)
+			AddingNewEventHandler onAddingNew = this._onAddingNew;
+			if (onAddingNew == null)
 			{
-				this.onAddingNew(this, e);
+				return;
 			}
+			onAddingNew(this, e);
 		}
 
 		private object FireAddingNew()
@@ -85,20 +85,22 @@ namespace System.ComponentModel
 		{
 			add
 			{
-				this.onListChanged = (ListChangedEventHandler)Delegate.Combine(this.onListChanged, value);
+				this._onListChanged = (ListChangedEventHandler)Delegate.Combine(this._onListChanged, value);
 			}
 			remove
 			{
-				this.onListChanged = (ListChangedEventHandler)Delegate.Remove(this.onListChanged, value);
+				this._onListChanged = (ListChangedEventHandler)Delegate.Remove(this._onListChanged, value);
 			}
 		}
 
 		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (this.onListChanged != null)
+			ListChangedEventHandler onListChanged = this._onListChanged;
+			if (onListChanged == null)
 			{
-				this.onListChanged(this, e);
+				return;
 			}
+			onListChanged(this, e);
 		}
 
 		public bool RaiseListChangedEvents
@@ -109,10 +111,7 @@ namespace System.ComponentModel
 			}
 			set
 			{
-				if (this.raiseListChangedEvents != value)
-				{
-					this.raiseListChangedEvents = value;
-				}
+				this.raiseListChangedEvents = value;
 			}
 		}
 
@@ -221,7 +220,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.onAddingNew != null && this.onAddingNew.GetInvocationList().Length != 0;
+				return this._onAddingNew != null && this._onAddingNew.GetInvocationList().Length != 0;
 			}
 		}
 
@@ -453,20 +452,20 @@ namespace System.ComponentModel
 			INotifyPropertyChanged notifyPropertyChanged = item as INotifyPropertyChanged;
 			if (notifyPropertyChanged != null)
 			{
-				if (this.propertyChangedEventHandler == null)
+				if (this._propertyChangedEventHandler == null)
 				{
-					this.propertyChangedEventHandler = new PropertyChangedEventHandler(this.Child_PropertyChanged);
+					this._propertyChangedEventHandler = new PropertyChangedEventHandler(this.Child_PropertyChanged);
 				}
-				notifyPropertyChanged.PropertyChanged += this.propertyChangedEventHandler;
+				notifyPropertyChanged.PropertyChanged += this._propertyChangedEventHandler;
 			}
 		}
 
 		private void UnhookPropertyChanged(T item)
 		{
 			INotifyPropertyChanged notifyPropertyChanged = item as INotifyPropertyChanged;
-			if (notifyPropertyChanged != null && this.propertyChangedEventHandler != null)
+			if (notifyPropertyChanged != null && this._propertyChangedEventHandler != null)
 			{
-				notifyPropertyChanged.PropertyChanged -= this.propertyChangedEventHandler;
+				notifyPropertyChanged.PropertyChanged -= this._propertyChangedEventHandler;
 			}
 		}
 
@@ -489,7 +488,7 @@ namespace System.ComponentModel
 					this.ResetBindings();
 					return;
 				}
-				int num = this.lastChangeIndex;
+				int num = this._lastChangeIndex;
 				if (num >= 0 && num < base.Count)
 				{
 					T t2 = base[num];
@@ -499,7 +498,7 @@ namespace System.ComponentModel
 					}
 				}
 				num = base.IndexOf(t);
-				this.lastChangeIndex = num;
+				this._lastChangeIndex = num;
 				IL_007B:
 				if (num == -1)
 				{
@@ -507,11 +506,11 @@ namespace System.ComponentModel
 					this.ResetBindings();
 					return;
 				}
-				if (this.itemTypeProperties == null)
+				if (this._itemTypeProperties == null)
 				{
-					this.itemTypeProperties = TypeDescriptor.GetProperties(typeof(T));
+					this._itemTypeProperties = TypeDescriptor.GetProperties(typeof(T));
 				}
-				PropertyDescriptor propertyDescriptor = this.itemTypeProperties.Find(e.PropertyName, true);
+				PropertyDescriptor propertyDescriptor = this._itemTypeProperties.Find(e.PropertyName, true);
 				ListChangedEventArgs e2 = new ListChangedEventArgs(ListChangedType.ItemChanged, num, propertyDescriptor);
 				this.OnListChanged(e2);
 			}
@@ -532,19 +531,19 @@ namespace System.ComponentModel
 		private bool raiseItemChangedEvents;
 
 		[NonSerialized]
-		private PropertyDescriptorCollection itemTypeProperties;
+		private PropertyDescriptorCollection _itemTypeProperties;
 
 		[NonSerialized]
-		private PropertyChangedEventHandler propertyChangedEventHandler;
+		private PropertyChangedEventHandler _propertyChangedEventHandler;
 
 		[NonSerialized]
-		private AddingNewEventHandler onAddingNew;
+		private AddingNewEventHandler _onAddingNew;
 
 		[NonSerialized]
-		private ListChangedEventHandler onListChanged;
+		private ListChangedEventHandler _onListChanged;
 
 		[NonSerialized]
-		private int lastChangeIndex = -1;
+		private int _lastChangeIndex = -1;
 
 		private bool allowNew = true;
 

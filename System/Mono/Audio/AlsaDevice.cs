@@ -95,7 +95,7 @@ namespace Mono.Audio
 			int num = AlsaDevice.snd_pcm_open(ref this.handle, name, 0, 0);
 			if (num < 0)
 			{
-				throw new Exception("no open " + num);
+				throw new Exception("no open " + num.ToString());
 			}
 		}
 

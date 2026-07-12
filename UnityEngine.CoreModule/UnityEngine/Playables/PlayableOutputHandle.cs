@@ -5,10 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct PlayableOutputHandle : IEquatable<PlayableOutputHandle>
 	{
 		public static PlayableOutputHandle Null

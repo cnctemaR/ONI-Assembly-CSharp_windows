@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/ManualGenerator")]
-public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
+public class ManualGenerator : RemoteWorkable, ISingleSliderControl, ISliderControl
 {
 	public string SliderTitleKey
 	{
@@ -65,6 +65,14 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		get
 		{
 			return this.operational.IsActive;
+		}
+	}
+
+	public override Chore RemoteDockChore
+	{
+		get
+		{
+			return this.chore;
 		}
 	}
 
@@ -185,13 +193,13 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.operational.SetActive(true, false);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		CircuitManager circuitManager = Game.Instance.circuitManager;
 		bool flag = false;
@@ -209,13 +217,13 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		return !flag;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		this.operational.SetActive(false, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 		if (this.chore != null)
@@ -225,7 +233,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		}
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

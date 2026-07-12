@@ -69,6 +69,21 @@ public class Assignables : KMonoBehaviour
 		return null;
 	}
 
+	public AssignableSlotInstance[] GetSlots(AssignableSlot slot)
+	{
+		global::Debug.Assert(this.slots.Count > 0, "GetSlot called with no slots configured");
+		if (slot == null)
+		{
+			return null;
+		}
+		List<AssignableSlotInstance> list = this.slots.FindAll((AssignableSlotInstance s) => s.slot == slot);
+		if (list != null && list.Count > 0)
+		{
+			return list.ToArray();
+		}
+		return null;
+	}
+
 	public Assignable AutoAssignSlot(AssignableSlot slot)
 	{
 		Assignable assignable = this.GetAssignable(slot);

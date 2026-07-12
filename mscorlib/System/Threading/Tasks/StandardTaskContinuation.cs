@@ -9,26 +9,27 @@ namespace System.Threading.Tasks
 			this.m_task = task;
 			this.m_options = options;
 			this.m_taskScheduler = scheduler;
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, this.m_task.Id, "Task.ContinueWith: " + ((Delegate)task.m_action).Method.Name, 0UL);
+				CausalityTraceLevel causalityTraceLevel = CausalityTraceLevel.Required;
+				Task task2 = this.m_task;
+				string text = "Task.ContinueWith: ";
+				Delegate action = task.m_action;
+				DebuggerSupport.TraceOperationCreation(causalityTraceLevel, task2, text + ((action != null) ? action.ToString() : null), 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(this.m_task);
-			}
+			DebuggerSupport.AddToActiveTasks(this.m_task);
 		}
 
 		internal override void Run(Task completedTask, bool bCanInlineContinuationTask)
 		{
 			TaskContinuationOptions options = this.m_options;
-			bool flag = (completedTask.IsRanToCompletion ? ((options & TaskContinuationOptions.NotOnRanToCompletion) == TaskContinuationOptions.None) : (completedTask.IsCanceled ? ((options & TaskContinuationOptions.NotOnCanceled) == TaskContinuationOptions.None) : ((options & TaskContinuationOptions.NotOnFaulted) == TaskContinuationOptions.None)));
+			bool flag = (completedTask.IsCompletedSuccessfully ? ((options & TaskContinuationOptions.NotOnRanToCompletion) == TaskContinuationOptions.None) : (completedTask.IsCanceled ? ((options & TaskContinuationOptions.NotOnCanceled) == TaskContinuationOptions.None) : ((options & TaskContinuationOptions.NotOnFaulted) == TaskContinuationOptions.None)));
 			Task task = this.m_task;
 			if (flag)
 			{
-				if (!task.IsCanceled && AsyncCausalityTracer.LoggingOn)
+				if (!task.IsCanceled && DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, task.Id, CausalityRelation.AssignDelegate);
+					DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, task, CausalityRelation.AssignDelegate);
 				}
 				task.m_taskScheduler = this.m_taskScheduler;
 				if (bCanInlineContinuationTask && (options & TaskContinuationOptions.ExecuteSynchronously) != TaskContinuationOptions.None)
@@ -55,7 +56,7 @@ namespace System.Threading.Tasks
 			{
 				return this.m_task.GetDelegateContinuationsForDebugger();
 			}
-			return new Delegate[] { this.m_task.m_action as Delegate };
+			return new Delegate[] { this.m_task.m_action };
 		}
 
 		internal readonly Task m_task;

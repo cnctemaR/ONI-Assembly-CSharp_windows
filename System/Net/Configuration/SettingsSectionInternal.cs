@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Net.Security;
 using System.Net.Sockets;
 
@@ -32,6 +33,17 @@ namespace System.Net.Configuration
 		{
 			get
 			{
+				try
+				{
+					SettingsSection settingsSection = (SettingsSection)ConfigurationManager.GetSection("system.net/settings");
+					if (settingsSection != null)
+					{
+						return settingsSection.Ipv6.Enabled;
+					}
+				}
+				catch
+				{
+				}
 				return true;
 			}
 		}

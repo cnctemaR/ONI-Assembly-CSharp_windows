@@ -41,6 +41,15 @@ namespace UnityEngine
 			}
 		}
 
+		public static void QueueDeleteGlobalRef(IntPtr globalref)
+		{
+			bool flag = globalref != IntPtr.Zero;
+			if (flag)
+			{
+				AndroidJNI.QueueDeleteGlobalRef(globalref);
+			}
+		}
+
 		public static void DeleteWeakGlobalRef(IntPtr globalref)
 		{
 			bool flag = globalref != IntPtr.Zero;
@@ -228,6 +237,11 @@ namespace UnityEngine
 		}
 
 		public static IntPtr NewObject(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.NewObject(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static IntPtr NewObject(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			IntPtr intPtr;
 			try
@@ -503,6 +517,11 @@ namespace UnityEngine
 
 		public static void CallStaticVoidMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			AndroidJNISafe.CallStaticVoidMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static void CallStaticVoidMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			try
 			{
 				AndroidJNI.CallStaticVoidMethod(clazz, methodID, args);
@@ -514,6 +533,11 @@ namespace UnityEngine
 		}
 
 		public static IntPtr CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallStaticObjectMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static IntPtr CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			IntPtr intPtr;
 			try
@@ -529,6 +553,11 @@ namespace UnityEngine
 
 		public static string CallStaticStringMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStaticStringMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static string CallStaticStringMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			string text;
 			try
 			{
@@ -542,6 +571,11 @@ namespace UnityEngine
 		}
 
 		public static char CallStaticCharMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallStaticCharMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static char CallStaticCharMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			char c;
 			try
@@ -557,6 +591,11 @@ namespace UnityEngine
 
 		public static double CallStaticDoubleMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStaticDoubleMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static double CallStaticDoubleMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			double num;
 			try
 			{
@@ -570,6 +609,11 @@ namespace UnityEngine
 		}
 
 		public static float CallStaticFloatMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallStaticFloatMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static float CallStaticFloatMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			float num;
 			try
@@ -585,6 +629,11 @@ namespace UnityEngine
 
 		public static long CallStaticLongMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStaticLongMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static long CallStaticLongMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			long num;
 			try
 			{
@@ -598,6 +647,11 @@ namespace UnityEngine
 		}
 
 		public static short CallStaticShortMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallStaticShortMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static short CallStaticShortMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			short num;
 			try
@@ -613,6 +667,11 @@ namespace UnityEngine
 
 		public static sbyte CallStaticSByteMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStaticSByteMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static sbyte CallStaticSByteMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			sbyte b;
 			try
 			{
@@ -627,6 +686,11 @@ namespace UnityEngine
 
 		public static bool CallStaticBooleanMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStaticBooleanMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static bool CallStaticBooleanMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
+		{
 			bool flag;
 			try
 			{
@@ -640,6 +704,11 @@ namespace UnityEngine
 		}
 
 		public static int CallStaticIntMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallStaticIntMethod(clazz, methodID, new Span<jvalue>(args));
+		}
+
+		public static int CallStaticIntMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
 			int num;
 			try
@@ -915,6 +984,11 @@ namespace UnityEngine
 
 		public static void CallVoidMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			AndroidJNISafe.CallVoidMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static void CallVoidMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			try
 			{
 				AndroidJNI.CallVoidMethod(obj, methodID, args);
@@ -926,6 +1000,11 @@ namespace UnityEngine
 		}
 
 		public static IntPtr CallObjectMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallObjectMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static IntPtr CallObjectMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
 			IntPtr intPtr;
 			try
@@ -941,6 +1020,11 @@ namespace UnityEngine
 
 		public static string CallStringMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallStringMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static string CallStringMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			string text;
 			try
 			{
@@ -954,6 +1038,11 @@ namespace UnityEngine
 		}
 
 		public static char CallCharMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallCharMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static char CallCharMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
 			char c;
 			try
@@ -969,6 +1058,11 @@ namespace UnityEngine
 
 		public static double CallDoubleMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallDoubleMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static double CallDoubleMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			double num;
 			try
 			{
@@ -982,6 +1076,11 @@ namespace UnityEngine
 		}
 
 		public static float CallFloatMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallFloatMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static float CallFloatMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
 			float num;
 			try
@@ -997,6 +1096,11 @@ namespace UnityEngine
 
 		public static long CallLongMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallLongMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static long CallLongMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			long num;
 			try
 			{
@@ -1010,6 +1114,11 @@ namespace UnityEngine
 		}
 
 		public static short CallShortMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallShortMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static short CallShortMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
 			short num;
 			try
@@ -1025,6 +1134,11 @@ namespace UnityEngine
 
 		public static sbyte CallSByteMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallSByteMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static sbyte CallSByteMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			sbyte b;
 			try
 			{
@@ -1039,6 +1153,11 @@ namespace UnityEngine
 
 		public static bool CallBooleanMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
+			return AndroidJNISafe.CallBooleanMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static bool CallBooleanMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
+		{
 			bool flag;
 			try
 			{
@@ -1052,6 +1171,11 @@ namespace UnityEngine
 		}
 
 		public static int CallIntMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			return AndroidJNISafe.CallIntMethod(obj, methodID, new Span<jvalue>(args));
+		}
+
+		public static int CallIntMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
 			int num;
 			try

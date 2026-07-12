@@ -2,7 +2,7 @@
 
 namespace System.Linq.Parallel
 {
-	internal struct Producer<TKey>
+	internal readonly struct Producer<TKey>
 	{
 		internal Producer(TKey maxKey, int producerIndex)
 		{

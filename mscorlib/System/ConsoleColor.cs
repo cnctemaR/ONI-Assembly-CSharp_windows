@@ -2,7 +2,6 @@
 
 namespace System
 {
-	[Serializable]
 	public enum ConsoleColor
 	{
 		Black,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -9,7 +8,7 @@ namespace System.Security.Cryptography
 	{
 		public DSASignatureDeformatter()
 		{
-			this._oid = CryptoConfig.MapNameToOID("SHA1", OidGroup.HashAlgorithm);
+			this._oid = CryptoConfig.MapNameToOID("SHA1");
 		}
 
 		public DSASignatureDeformatter(AsymmetricAlgorithm key)
@@ -33,7 +32,7 @@ namespace System.Security.Cryptography
 
 		public override void SetHashAlgorithm(string strName)
 		{
-			if (CryptoConfig.MapNameToOID(strName, OidGroup.HashAlgorithm) != this._oid)
+			if (CryptoConfig.MapNameToOID(strName) != this._oid)
 			{
 				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("This operation is not supported for this class."));
 			}

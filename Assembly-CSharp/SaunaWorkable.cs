@@ -24,14 +24,14 @@ public class SaunaWorkable : Workable, IWorkerPrioritizable
 		this.sauna = base.GetComponent<Sauna>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.operational.SetActive(true, false);
 		worker.GetComponent<Effects>().Add("SaunaRelaxing", false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(this.sauna.specificEffect))
@@ -46,7 +46,7 @@ public class SaunaWorkable : Workable, IWorkerPrioritizable
 		this.operational.SetActive(false, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 		worker.GetComponent<Effects>().Remove("SaunaRelaxing");
@@ -58,7 +58,7 @@ public class SaunaWorkable : Workable, IWorkerPrioritizable
 		component.AddLiquid(SimHashes.Water, this.sauna.steamPerUseKG, this.sauna.waterOutputTemp, diseaseInfo.idx, diseaseInfo.count, true, false);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();

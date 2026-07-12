@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-	[ComVisible(true)]
 	public sealed class AssemblyFileVersionAttribute : Attribute
 	{
 		public AssemblyFileVersionAttribute(string version)
@@ -13,17 +11,9 @@ namespace System.Reflection
 			{
 				throw new ArgumentNullException("version");
 			}
-			this._version = version;
+			this.Version = version;
 		}
 
-		public string Version
-		{
-			get
-			{
-				return this._version;
-			}
-		}
-
-		private string _version;
+		public string Version { get; }
 	}
 }

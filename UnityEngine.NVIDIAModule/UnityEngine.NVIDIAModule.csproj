@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EF3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.NVIDIA</RootNamespace>
+    <AssemblyName>UnityEngine.NVIDIAModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="DLSSCommandExecutionData.cs" />
+    <Compile Include="DLSSCommandInitializationData.cs" />
+    <Compile Include="DLSSContext.cs" />
+    <Compile Include="DLSSDebugFeatureInfos.cs" />
+    <Compile Include="DLSSFeatureFlags.cs" />
+    <Compile Include="DLSSQuality.cs" />
+    <Compile Include="DLSSTextureTable.cs" />
+    <Compile Include="GraphicsDevice.cs" />
+    <Compile Include="GraphicsDeviceDebugInfo.cs" />
+    <Compile Include="GraphicsDeviceDebugView.cs" />
+    <Compile Include="GraphicsDeviceFeature.cs" />
+    <Compile Include="InitDeviceCmdData.cs" />
+    <Compile Include="InitDeviceContext.cs" />
+    <Compile Include="NativeData.cs" />
+    <Compile Include="NativeStr.cs" />
+    <Compile Include="NVUnityPlugin.cs" />
+    <Compile Include="OptimalDLSSSettingsData.cs" />
+    <Compile Include="PluginEvent.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

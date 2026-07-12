@@ -46,7 +46,20 @@ public class BlueGrassConfig : IEntityConfig
 		gameObject.GetComponent<UprootedMonitor>();
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<BlueGrass>();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "BlueGrassSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BLUE_GRASS.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BLUE_GRASS.DESC, Assets.GetAnim("seed_bluegrass_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.BLUE_GRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds()), "BlueGrass_preview", Assets.GetAnim("bluegrass_kanim"), "place", 1, 1);
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text5 = "BlueGrassSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BLUE_GRASS.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.BLUE_GRASS.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_bluegrass_kanim");
+		string text8 = "object";
+		int num6 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		text4 = global::STRINGS.CREATURES.SPECIES.BLUE_GRASS.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 4, text4, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds), "BlueGrass_preview", Assets.GetAnim("bluegrass_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

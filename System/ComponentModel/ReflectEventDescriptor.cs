@@ -2,11 +2,9 @@
 using System.Collections;
 using System.ComponentModel.Design;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	internal sealed class ReflectEventDescriptor : EventDescriptor
 	{
 		public ReflectEventDescriptor(Type componentClass, string name, Type type, Attribute[] attributes)
@@ -14,38 +12,38 @@ namespace System.ComponentModel
 		{
 			if (componentClass == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
+				throw new ArgumentException(SR.Format("Null is not a valid value for {0}.", "componentClass"));
 			}
 			if (type == null || !typeof(Delegate).IsAssignableFrom(type))
 			{
-				throw new ArgumentException(global::SR.GetString("Invalid type for the {0} event.", new object[] { name }));
+				throw new ArgumentException(SR.Format("Invalid type for the {0} event.", name));
 			}
-			this.componentClass = componentClass;
-			this.type = type;
+			this._componentClass = componentClass;
+			this._type = type;
 		}
 
 		public ReflectEventDescriptor(Type componentClass, EventInfo eventInfo)
-			: base(eventInfo.Name, new Attribute[0])
+			: base(eventInfo.Name, Array.Empty<Attribute>())
 		{
 			if (componentClass == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
+				throw new ArgumentException(SR.Format("Null is not a valid value for {0}.", "componentClass"));
 			}
-			this.componentClass = componentClass;
-			this.realEvent = eventInfo;
+			this._componentClass = componentClass;
+			this._realEvent = eventInfo;
 		}
 
 		public ReflectEventDescriptor(Type componentType, EventDescriptor oldReflectEventDescriptor, Attribute[] attributes)
 			: base(oldReflectEventDescriptor, attributes)
 		{
-			this.componentClass = componentType;
-			this.type = oldReflectEventDescriptor.EventType;
+			this._componentClass = componentType;
+			this._type = oldReflectEventDescriptor.EventType;
 			ReflectEventDescriptor reflectEventDescriptor = oldReflectEventDescriptor as ReflectEventDescriptor;
 			if (reflectEventDescriptor != null)
 			{
-				this.addMethod = reflectEventDescriptor.addMethod;
-				this.removeMethod = reflectEventDescriptor.removeMethod;
-				this.filledMethods = true;
+				this._addMethod = reflectEventDescriptor._addMethod;
+				this._removeMethod = reflectEventDescriptor._removeMethod;
+				this._filledMethods = true;
 			}
 		}
 
@@ -53,7 +51,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.componentClass;
+				return this._componentClass;
 			}
 		}
 
@@ -62,7 +60,7 @@ namespace System.ComponentModel
 			get
 			{
 				this.FillMethods();
-				return this.type;
+				return this._type;
 			}
 		}
 
@@ -99,13 +97,14 @@ namespace System.ComponentModel
 						}
 						throw ex;
 					}
+					componentChangeService.OnComponentChanging(component, this);
 				}
 				bool flag = false;
 				if (site != null && site.DesignMode)
 				{
 					if (this.EventType != value.GetType())
 					{
-						throw new ArgumentException(global::SR.GetString("Invalid event handler for the {0} event.", new object[] { this.Name }));
+						throw new ArgumentException(SR.Format("Invalid event handler for the {0} event.", this.Name));
 					}
 					IDictionaryService dictionaryService = (IDictionaryService)site.GetService(typeof(IDictionaryService));
 					if (dictionaryService != null)
@@ -118,7 +117,9 @@ namespace System.ComponentModel
 				}
 				if (!flag)
 				{
-					SecurityUtils.MethodInfoInvoke(this.addMethod, component, new object[] { value });
+					MethodBase addMethod = this._addMethod;
+					object[] array = new Delegate[] { value };
+					addMethod.Invoke(component, array);
 				}
 				if (componentChangeService != null)
 				{
@@ -130,14 +131,14 @@ namespace System.ComponentModel
 		protected override void FillAttributes(IList attributes)
 		{
 			this.FillMethods();
-			if (this.realEvent != null)
+			if (this._realEvent != null)
 			{
-				this.FillEventInfoAttribute(this.realEvent, attributes);
+				this.FillEventInfoAttribute(this._realEvent, attributes);
 			}
 			else
 			{
-				this.FillSingleMethodAttribute(this.removeMethod, attributes);
-				this.FillSingleMethodAttribute(this.addMethod, attributes);
+				this.FillSingleMethodAttribute(this._removeMethod, attributes);
+				this.FillSingleMethodAttribute(this._addMethod, attributes);
 			}
 			base.FillAttributes(attributes);
 		}
@@ -181,22 +182,22 @@ namespace System.ComponentModel
 
 		private void FillMethods()
 		{
-			if (this.filledMethods)
+			if (this._filledMethods)
 			{
 				return;
 			}
-			if (this.realEvent != null)
+			if (this._realEvent != null)
 			{
-				this.addMethod = this.realEvent.GetAddMethod();
-				this.removeMethod = this.realEvent.GetRemoveMethod();
+				this._addMethod = this._realEvent.GetAddMethod();
+				this._removeMethod = this._realEvent.GetRemoveMethod();
 				EventInfo eventInfo = null;
-				if (this.addMethod == null || this.removeMethod == null)
+				if (this._addMethod == null || this._removeMethod == null)
 				{
-					Type baseType = this.componentClass.BaseType;
+					Type baseType = this._componentClass.BaseType;
 					while (baseType != null && baseType != typeof(object))
 					{
 						BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-						EventInfo @event = baseType.GetEvent(this.realEvent.Name, bindingFlags);
+						EventInfo @event = baseType.GetEvent(this._realEvent.Name, bindingFlags);
 						if (@event.GetAddMethod() != null)
 						{
 							eventInfo = @event;
@@ -206,32 +207,32 @@ namespace System.ComponentModel
 				}
 				if (eventInfo != null)
 				{
-					this.addMethod = eventInfo.GetAddMethod();
-					this.removeMethod = eventInfo.GetRemoveMethod();
-					this.type = eventInfo.EventHandlerType;
+					this._addMethod = eventInfo.GetAddMethod();
+					this._removeMethod = eventInfo.GetRemoveMethod();
+					this._type = eventInfo.EventHandlerType;
 				}
 				else
 				{
-					this.type = this.realEvent.EventHandlerType;
+					this._type = this._realEvent.EventHandlerType;
 				}
 			}
 			else
 			{
-				this.realEvent = this.componentClass.GetEvent(this.Name);
-				if (this.realEvent != null)
+				this._realEvent = this._componentClass.GetEvent(this.Name);
+				if (this._realEvent != null)
 				{
 					this.FillMethods();
 					return;
 				}
-				Type[] array = new Type[] { this.type };
-				this.addMethod = MemberDescriptor.FindMethod(this.componentClass, "AddOn" + this.Name, array, typeof(void));
-				this.removeMethod = MemberDescriptor.FindMethod(this.componentClass, "RemoveOn" + this.Name, array, typeof(void));
-				if (this.addMethod == null || this.removeMethod == null)
+				Type[] array = new Type[] { this._type };
+				this._addMethod = MemberDescriptor.FindMethod(this._componentClass, "AddOn" + this.Name, array, typeof(void));
+				this._removeMethod = MemberDescriptor.FindMethod(this._componentClass, "RemoveOn" + this.Name, array, typeof(void));
+				if (this._addMethod == null || this._removeMethod == null)
 				{
-					throw new ArgumentException(global::SR.GetString("Accessor methods for the {0} event are missing.", new object[] { this.Name }));
+					throw new ArgumentException(SR.Format("Accessor methods for the {0} event are missing.", this.Name));
 				}
 			}
-			this.filledMethods = true;
+			this._filledMethods = true;
 		}
 
 		private void FillSingleMethodAttribute(MethodInfo realMethodInfo, IList attributes)
@@ -296,6 +297,7 @@ namespace System.ComponentModel
 						}
 						throw ex;
 					}
+					componentChangeService.OnComponentChanging(component, this);
 				}
 				bool flag = false;
 				if (site != null && site.DesignMode)
@@ -311,7 +313,9 @@ namespace System.ComponentModel
 				}
 				if (!flag)
 				{
-					SecurityUtils.MethodInfoInvoke(this.removeMethod, component, new object[] { value });
+					MethodBase removeMethod = this._removeMethod;
+					object[] array = new Delegate[] { value };
+					removeMethod.Invoke(component, array);
 				}
 				if (componentChangeService != null)
 				{
@@ -320,16 +324,16 @@ namespace System.ComponentModel
 			}
 		}
 
-		private Type type;
+		private Type _type;
 
-		private readonly Type componentClass;
+		private readonly Type _componentClass;
 
-		private MethodInfo addMethod;
+		private MethodInfo _addMethod;
 
-		private MethodInfo removeMethod;
+		private MethodInfo _removeMethod;
 
-		private EventInfo realEvent;
+		private EventInfo _realEvent;
 
-		private bool filledMethods;
+		private bool _filledMethods;
 	}
 }

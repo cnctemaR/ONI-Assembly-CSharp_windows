@@ -981,6 +981,7 @@ public class TableScreen : ShowOptimizedKScreen
 		False,
 		Partial,
 		True,
-		ConditionalGroup
+		ConditionalGroup,
+		NotApplicable
 	}
 }

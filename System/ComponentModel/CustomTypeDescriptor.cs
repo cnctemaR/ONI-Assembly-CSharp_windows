@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class CustomTypeDescriptor : ICustomTypeDescriptor
 	{
 		protected CustomTypeDescriptor()
@@ -26,20 +24,22 @@ namespace System.ComponentModel
 
 		public virtual string GetClassName()
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetClassName();
+				return null;
 			}
-			return null;
+			return parent.GetClassName();
 		}
 
 		public virtual string GetComponentName()
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetComponentName();
+				return null;
 			}
-			return null;
+			return parent.GetComponentName();
 		}
 
 		public virtual TypeConverter GetConverter()
@@ -53,29 +53,32 @@ namespace System.ComponentModel
 
 		public virtual EventDescriptor GetDefaultEvent()
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetDefaultEvent();
+				return null;
 			}
-			return null;
+			return parent.GetDefaultEvent();
 		}
 
 		public virtual PropertyDescriptor GetDefaultProperty()
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetDefaultProperty();
+				return null;
 			}
-			return null;
+			return parent.GetDefaultProperty();
 		}
 
 		public virtual object GetEditor(Type editorBaseType)
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetEditor(editorBaseType);
+				return null;
 			}
-			return null;
+			return parent.GetEditor(editorBaseType);
 		}
 
 		public virtual EventDescriptorCollection GetEvents()
@@ -116,13 +119,14 @@ namespace System.ComponentModel
 
 		public virtual object GetPropertyOwner(PropertyDescriptor pd)
 		{
-			if (this._parent != null)
+			ICustomTypeDescriptor parent = this._parent;
+			if (parent == null)
 			{
-				return this._parent.GetPropertyOwner(pd);
+				return null;
 			}
-			return null;
+			return parent.GetPropertyOwner(pd);
 		}
 
-		private ICustomTypeDescriptor _parent;
+		private readonly ICustomTypeDescriptor _parent;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32
 {
@@ -8,16 +7,13 @@ namespace Microsoft.Win32
 	{
 		public static string GetMessage(int hr)
 		{
-			return "Error " + hr;
+			return "Error " + hr.ToString();
 		}
 
 		public static int MakeHRFromErrorCode(int errorCode)
 		{
 			return -2147024896 | errorCode;
 		}
-
-		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		internal static extern uint GetCurrentProcessId();
 
 		internal const string ADVAPI32 = "advapi32.dll";
 

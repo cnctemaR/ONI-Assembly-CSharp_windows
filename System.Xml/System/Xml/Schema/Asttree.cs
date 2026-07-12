@@ -11,15 +11,15 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.fAxisArray;
+				return this._fAxisArray;
 			}
 		}
 
 		public Asttree(string xPath, bool isField, XmlNamespaceManager nsmgr)
 		{
-			this.xpathexpr = xPath;
-			this.isField = isField;
-			this.nsmgr = nsmgr;
+			this._xpathexpr = xPath;
+			this._isField = isField;
+			this._nsmgr = nsmgr;
 			this.CompileXPath(xPath, isField, nsmgr);
 		}
 
@@ -49,14 +49,14 @@ namespace System.Xml.Schema
 			{
 				throw new XmlSchemaException("The XPath for selector or field cannot be empty.", string.Empty);
 			}
-			string[] array = xPath.Split(new char[] { '|' });
+			string[] array = xPath.Split('|', StringSplitOptions.None);
 			ArrayList arrayList = new ArrayList(array.Length);
-			this.fAxisArray = new ArrayList(array.Length);
+			this._fAxisArray = new ArrayList(array.Length);
 			try
 			{
 				for (int i = 0; i < array.Length; i++)
 				{
-					Axis axis = (Axis)XPathParser.ParseXPathExpresion(array[i]);
+					Axis axis = (Axis)XPathParser.ParseXPathExpression(array[i]);
 					arrayList.Add(axis);
 				}
 			}
@@ -84,15 +84,15 @@ namespace System.Xml.Schema
 					try
 					{
 						axis3 = (Axis)axis3.Input;
-						goto IL_012A;
+						goto IL_0122;
 					}
 					catch
 					{
 						throw new XmlSchemaException("'{0}' is an invalid XPath for selector or field.", xPath);
 					}
-					goto IL_00DF;
+					goto IL_00D7;
 				}
-				IL_012A:
+				IL_0122:
 				if (axis3 == null || (!Asttree.IsNameTest(axis3) && !Asttree.IsSelf(axis3)))
 				{
 					axis4.Input = null;
@@ -100,11 +100,11 @@ namespace System.Xml.Schema
 					{
 						if (Asttree.IsSelf(axis2) && axis2.Input != null)
 						{
-							this.fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree((Axis)axis2.Input), false));
+							this._fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree((Axis)axis2.Input), false));
 						}
 						else
 						{
-							this.fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree(axis2), false));
+							this._fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree(axis2), false));
 						}
 					}
 					else
@@ -127,17 +127,17 @@ namespace System.Xml.Schema
 						}
 						if (Asttree.IsSelf(axis2) && axis2.Input != null)
 						{
-							this.fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree((Axis)axis2.Input), true));
+							this._fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree((Axis)axis2.Input), true));
 						}
 						else
 						{
-							this.fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree(axis2), true));
+							this._fAxisArray.Add(new ForwardAxis(DoubleLinkAxis.ConvertTree(axis2), true));
 						}
 					}
 					j++;
 					continue;
 				}
-				IL_00DF:
+				IL_00D7:
 				if (Asttree.IsSelf(axis3) && axis2 != axis3)
 				{
 					axis4.Input = axis3.Input;
@@ -158,7 +158,7 @@ namespace System.Xml.Schema
 				{
 					throw new XmlSchemaException("'{0}' is an invalid XPath for selector or field.", xPath);
 				}
-				goto IL_012A;
+				goto IL_0122;
 			}
 		}
 
@@ -183,12 +183,12 @@ namespace System.Xml.Schema
 			}
 		}
 
-		private ArrayList fAxisArray;
+		private ArrayList _fAxisArray;
 
-		private string xpathexpr;
+		private string _xpathexpr;
 
-		private bool isField;
+		private bool _isField;
 
-		private XmlNamespaceManager nsmgr;
+		private XmlNamespaceManager _nsmgr;
 	}
 }

@@ -63,9 +63,9 @@ namespace System.Threading
 		{
 		}
 
+		[SecurityCritical]
 		[CLSCompliant(false)]
 		[PrePrepareMethod]
-		[SecurityCritical]
 		public virtual int Wait(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
 		{
 			if (waitHandles == null)
@@ -75,13 +75,22 @@ namespace System.Threading
 			return SynchronizationContext.WaitHelper(waitHandles, waitAll, millisecondsTimeout);
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[PrePrepareMethod]
 		[SecurityCritical]
-		protected static int WaitHelper(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
+		[CLSCompliant(false)]
+		[PrePrepareMethod]
+		protected unsafe static int WaitHelper(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
 		{
-			throw new NotImplementedException();
+			IntPtr* ptr;
+			if (waitHandles == null || waitHandles.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &waitHandles[0];
+			}
+			return WaitHandle.Wait_internal(ptr, waitHandles.Length, waitAll, millisecondsTimeout);
 		}
 
 		[SecurityCritical]
@@ -123,6 +132,14 @@ namespace System.Threading
 		private static int InvokeWaitMethodHelper(SynchronizationContext syncContext, IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
 		{
 			return syncContext.Wait(waitHandles, waitAll, millisecondsTimeout);
+		}
+
+		internal static SynchronizationContext CurrentExplicit
+		{
+			get
+			{
+				return SynchronizationContext.Current;
+			}
 		}
 
 		private SynchronizationContextProperties _props;

@@ -178,28 +178,25 @@ public class KleiInventoryScreen : KModalScreen
 			global::UnityEngine.Object.Destroy(keyValuePair.Value.gameObject);
 		}
 		this.categoryToggles.Clear();
-		using (Dictionary<string, List<string>>.Enumerator enumerator2 = InventoryOrganization.categoryIdToSubcategoryIdsMap.GetEnumerator())
+		foreach (KeyValuePair<string, List<string>> keyValuePair2 in InventoryOrganization.categoryIdToSubcategoryIdsMap)
 		{
-			while (enumerator2.MoveNext())
+			string text;
+			List<string> list;
+			keyValuePair2.Deconstruct(out text, out list);
+			string categoryId = text;
+			GameObject gameObject = Util.KInstantiateUI(this.categoryRowPrefab, this.categoryListContent.gameObject, true);
+			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+			component.GetReference<LocText>("Label").SetText(InventoryOrganization.GetCategoryName(categoryId));
+			component.GetReference<Image>("Icon").sprite = InventoryOrganization.categoryIdToIconMap[categoryId];
+			MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+			MultiToggle multiToggle = component2;
+			multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
+			component2.onClick = delegate
 			{
-				string text;
-				List<string> list;
-				enumerator2.Current.Deconstruct<string, List<string>>(out text, out list);
-				string categoryId = text;
-				GameObject gameObject = Util.KInstantiateUI(this.categoryRowPrefab, this.categoryListContent.gameObject, true);
-				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				component.GetReference<LocText>("Label").SetText(InventoryOrganization.GetCategoryName(categoryId));
-				component.GetReference<Image>("Icon").sprite = InventoryOrganization.categoryIdToIconMap[categoryId];
-				MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
-				MultiToggle multiToggle = component2;
-				multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
-				component2.onClick = delegate
-				{
-					this.SelectCategory(categoryId);
-				};
-				this.categoryToggles.Add(categoryId, component2);
-				this.SetCatogoryClickUISound(categoryId, component2);
-			}
+				this.SelectCategory(categoryId);
+			};
+			this.categoryToggles.Add(categoryId, component2);
+			this.SetCatogoryClickUISound(categoryId, component2);
 		}
 	}
 
@@ -350,7 +347,7 @@ public class KleiInventoryScreen : KModalScreen
 		{
 			PermitResource permitResource;
 			MultiToggle multiToggle;
-			keyValuePair.Deconstruct<PermitResource, MultiToggle>(out permitResource, out multiToggle);
+			keyValuePair.Deconstruct(out permitResource, out multiToggle);
 			PermitResource permitResource2 = permitResource;
 			MultiToggle multiToggle2 = multiToggle;
 			string permitSubcategory = InventoryOrganization.GetPermitSubcategory(permitResource2);
@@ -664,196 +661,190 @@ public class KleiInventoryScreen : KModalScreen
 				return "HUD";
 			}
 			string text = buildingDef.PrefabID;
-			if (text != null)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
+			if (num <= 2076384603U)
 			{
-				uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
-				if (num <= 2076384603U)
+				if (num <= 1633134164U)
 				{
-					if (num <= 1633134164U)
+					if (num <= 595816591U)
 					{
-						if (num <= 595816591U)
+						if (num != 228062815U)
 						{
-							if (num != 228062815U)
+							if (num != 595816591U)
 							{
-								if (num != 595816591U)
-								{
-									goto IL_039A;
-								}
-								if (!(text == "FlowerVase"))
-								{
-									goto IL_039A;
-								}
+								goto IL_038D;
 							}
-							else
+							if (!(text == "FlowerVase"))
 							{
-								if (!(text == "LuxuryBed"))
-								{
-									goto IL_039A;
-								}
-								string id = permit.Id;
-								if (id != null)
-								{
-									if (id == "LuxuryBed_boat")
-									{
-										return "elegantbed_boat";
-									}
-									if (id == "LuxuryBed_bouncy")
-									{
-										return "elegantbed_bouncy";
-									}
-								}
+								goto IL_038D;
+							}
+						}
+						else
+						{
+							if (!(text == "LuxuryBed"))
+							{
+								goto IL_038D;
+							}
+							string id = permit.Id;
+							if (id == "LuxuryBed_boat")
+							{
+								return "elegantbed_boat";
+							}
+							if (!(id == "LuxuryBed_bouncy"))
+							{
 								return "elegantbed";
 							}
-						}
-						else if (num != 1607642960U)
-						{
-							if (num != 1633134164U)
-							{
-								goto IL_039A;
-							}
-							if (!(text == "CeilingLight"))
-							{
-								goto IL_039A;
-							}
-							return "ceilingLight";
-						}
-						else
-						{
-							if (!(text == "FlushToilet"))
-							{
-								goto IL_039A;
-							}
-							return "flushtoilate";
+							return "elegantbed_bouncy";
 						}
 					}
-					else if (num <= 1943253450U)
+					else if (num != 1607642960U)
 					{
-						if (num != 1734850496U)
+						if (num != 1633134164U)
 						{
-							if (num != 1943253450U)
-							{
-								goto IL_039A;
-							}
-							if (!(text == "WaterCooler"))
-							{
-								goto IL_039A;
-							}
-							return "watercooler";
+							goto IL_038D;
 						}
-						else
+						if (!(text == "CeilingLight"))
 						{
-							if (!(text == "RockCrusher"))
-							{
-								goto IL_039A;
-							}
-							return "rockrefinery";
+							goto IL_038D;
 						}
-					}
-					else if (num != 2028863301U)
-					{
-						if (num != 2076384603U)
-						{
-							goto IL_039A;
-						}
-						if (!(text == "GasReservoir"))
-						{
-							goto IL_039A;
-						}
-						return "gasstorage";
-					}
-					else if (!(text == "FlowerVaseHanging"))
-					{
-						goto IL_039A;
-					}
-				}
-				else if (num <= 3048425356U)
-				{
-					if (num <= 2722382738U)
-					{
-						if (num != 2402859370U)
-						{
-							if (num != 2722382738U)
-							{
-								goto IL_039A;
-							}
-							if (!(text == "PlanterBox"))
-							{
-								goto IL_039A;
-							}
-							return "planterbox";
-						}
-						else
-						{
-							if (!(text == "StorageLocker"))
-							{
-								goto IL_039A;
-							}
-							return "storagelocker";
-						}
-					}
-					else if (num != 2899744071U)
-					{
-						if (num != 3048425356U)
-						{
-							goto IL_039A;
-						}
-						if (!(text == "Bed"))
-						{
-							goto IL_039A;
-						}
-						return "bed";
+						return "ceilingLight";
 					}
 					else
 					{
-						if (!(text == "ExteriorWall"))
+						if (!(text == "FlushToilet"))
 						{
-							goto IL_039A;
+							goto IL_038D;
 						}
-						return "wall";
+						return "flushtoilate";
 					}
 				}
-				else if (num <= 3534553076U)
+				else if (num <= 1943253450U)
 				{
-					if (num != 3132083755U)
+					if (num != 1734850496U)
 					{
-						if (num != 3534553076U)
+						if (num != 1943253450U)
 						{
-							goto IL_039A;
+							goto IL_038D;
 						}
-						if (!(text == "MassageTable"))
+						if (!(text == "WaterCooler"))
 						{
-							goto IL_039A;
+							goto IL_038D;
 						}
-						return "massagetable";
+						return "watercooler";
 					}
-					else if (!(text == "FlowerVaseWall"))
+					else
 					{
-						goto IL_039A;
+						if (!(text == "RockCrusher"))
+						{
+							goto IL_038D;
+						}
+						return "rockrefinery";
 					}
 				}
-				else if (num != 3903452895U)
+				else if (num != 2028863301U)
 				{
-					if (num != 3958671086U)
+					if (num != 2076384603U)
 					{
-						goto IL_039A;
+						goto IL_038D;
 					}
-					if (!(text == "FlowerVaseHangingFancy"))
+					if (!(text == "GasReservoir"))
 					{
-						goto IL_039A;
+						goto IL_038D;
 					}
+					return "gasstorage";
+				}
+				else if (!(text == "FlowerVaseHanging"))
+				{
+					goto IL_038D;
+				}
+			}
+			else if (num <= 3048425356U)
+			{
+				if (num <= 2722382738U)
+				{
+					if (num != 2402859370U)
+					{
+						if (num != 2722382738U)
+						{
+							goto IL_038D;
+						}
+						if (!(text == "PlanterBox"))
+						{
+							goto IL_038D;
+						}
+						return "planterbox";
+					}
+					else
+					{
+						if (!(text == "StorageLocker"))
+						{
+							goto IL_038D;
+						}
+						return "storagelocker";
+					}
+				}
+				else if (num != 2899744071U)
+				{
+					if (num != 3048425356U)
+					{
+						goto IL_038D;
+					}
+					if (!(text == "Bed"))
+					{
+						goto IL_038D;
+					}
+					return "bed";
 				}
 				else
 				{
-					if (!(text == "EggCracker"))
+					if (!(text == "ExteriorWall"))
 					{
-						goto IL_039A;
+						goto IL_038D;
 					}
-					return "eggcracker";
+					return "wall";
 				}
-				return "flowervase";
 			}
+			else if (num <= 3534553076U)
+			{
+				if (num != 3132083755U)
+				{
+					if (num != 3534553076U)
+					{
+						goto IL_038D;
+					}
+					if (!(text == "MassageTable"))
+					{
+						goto IL_038D;
+					}
+					return "massagetable";
+				}
+				else if (!(text == "FlowerVaseWall"))
+				{
+					goto IL_038D;
+				}
+			}
+			else if (num != 3903452895U)
+			{
+				if (num != 3958671086U)
+				{
+					goto IL_038D;
+				}
+				if (!(text == "FlowerVaseHangingFancy"))
+				{
+					goto IL_038D;
+				}
+			}
+			else
+			{
+				if (!(text == "EggCracker"))
+				{
+					goto IL_038D;
+				}
+				return "eggcracker";
+			}
+			return "flowervase";
 		}
-		IL_039A:
+		IL_038D:
 		if (permit.Category == PermitCategory.Artwork)
 		{
 			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);
@@ -865,20 +856,17 @@ public class KleiInventoryScreen : KModalScreen
 			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Sculpture>(buildingDef2))
 			{
 				string text = buildingDef2.PrefabID;
-				if (text != null)
+				if (text == "IceSculpture")
 				{
-					if (text == "IceSculpture")
-					{
-						return "icesculpture";
-					}
-					if (text == "WoodSculpture")
-					{
-						return "woodsculpture";
-					}
+					return "icesculpture";
 				}
-				return "sculpture";
+				if (!(text == "WoodSculpture"))
+				{
+					return "sculpture";
+				}
+				return "woodsculpture";
 			}
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|76_0<Painting>(buildingDef2))
 			{
 				return "painting";
 			}

@@ -5,6 +5,7 @@ using System.Linq;
 using Database;
 using Klei.AI;
 using ProcGen;
+using TUNING;
 using UnityEngine;
 
 public class EconomyDetails
@@ -65,11 +66,11 @@ public class EconomyDetails
 			this.CreateTransformation(effect);
 		}
 		EconomyDetails.Transformation transformation = new EconomyDetails.Transformation(TagManager.Create("Duplicant"), this.dupeTransformationType, 1f, false);
-		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -0.1f));
-		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 0.1f * Assets.GetPrefab(MinionConfig.ID).GetComponent<OxygenBreather>().O2toCO2conversion));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * Assets.GetPrefab(MinionConfig.ID).GetComponent<OxygenBreather>().O2toCO2conversion));
 		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, 0.875f));
-		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, -1.6666667f));
-		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), 0.16666667f));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, DUPLICANTSTATS.STANDARD.BaseStats.GUESSTIMATE_CALORIES_BURNED_PER_SECOND * 0.001f));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), DUPLICANTSTATS.STANDARD.BaseStats.BLADDER_INCREASE_PER_SECOND));
 		this.transformations.Add(transformation);
 		EconomyDetails.Transformation transformation2 = new EconomyDetails.Transformation(TagManager.Create("Electrolysis"), this.referenceTransformationType, 1f, false);
 		transformation2.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), 1.7777778f));
@@ -552,13 +553,13 @@ public class EconomyDetails
 			}
 			if (component14 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -0.16666667f));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -DUPLICANTSTATS.STANDARD.BaseStats.BLADDER_INCREASE_PER_SECOND));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.Dirt), -component14.solidWastePerUse.mass));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(component14.solidWastePerUse.elementID), component14.solidWastePerUse.mass));
 			}
 			if (component15 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -0.16666667f));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -DUPLICANTSTATS.STANDARD.BaseStats.BLADDER_INCREASE_PER_SECOND));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.Water), -component15.massConsumedPerUse));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.DirtyWater), component15.massEmittedPerUse));
 			}

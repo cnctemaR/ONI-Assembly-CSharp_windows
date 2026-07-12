@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Threading.Tasks
 {
 	internal sealed class TaskSchedulerAwaitTaskContinuation : AwaitTaskContinuation
 	{
-		[SecurityCritical]
-		internal TaskSchedulerAwaitTaskContinuation(TaskScheduler scheduler, Action action, bool flowExecutionContext, ref StackCrawlMark stackMark)
-			: base(action, flowExecutionContext, ref stackMark)
+		internal TaskSchedulerAwaitTaskContinuation(TaskScheduler scheduler, Action action, bool flowExecutionContext)
+			: base(action, flowExecutionContext)
 		{
 			this.m_scheduler = scheduler;
 		}
@@ -19,7 +17,7 @@ namespace System.Threading.Tasks
 				base.Run(ignored, canInlineContinuationTask);
 				return;
 			}
-			bool flag = canInlineContinuationTask && (TaskScheduler.InternalCurrent == this.m_scheduler || Thread.CurrentThread.IsThreadPoolThread);
+			bool flag = canInlineContinuationTask && (TaskScheduler.InternalCurrent == this.m_scheduler || ThreadPool.IsThreadPoolThread);
 			Task task = base.CreateTask(delegate(object state)
 			{
 				try

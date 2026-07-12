@@ -10,26 +10,33 @@ public static class BaseDreckoConfig
 	{
 		float num = 200f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, (warnLowTemp + warnHighTemp) / 2f);
+		KAnimFile anim = Assets.GetAnim(anim_file);
+		string text = "idle_loop";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = tier;
+		float num4 = (warnLowTemp + warnHighTemp) / 2f;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, null, num4);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		string text = "DreckoNavGrid";
+		string text2 = "DreckoNavGrid";
 		if (is_baby)
 		{
-			text = "DreckoBabyNavGrid";
+			text2 = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text, NavType.Floor, 32, 1f, "Meat", 2, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, trait_id, text2, NavType.Floor, 32, 1f, "Meat", 2, true, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
 		}
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Drecko"];
-		pickupable.sortOrder = num2;
+		int num5 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Drecko"];
+		pickupable.sortOrder = num5;
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<LoopingSounds>();

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class DesignerTransaction : IDisposable
 	{
 		protected DesignerTransaction()
@@ -14,51 +11,33 @@ namespace System.ComponentModel.Design
 
 		protected DesignerTransaction(string description)
 		{
-			this.desc = description;
+			this.Description = description;
 		}
 
-		public bool Canceled
-		{
-			get
-			{
-				return this.canceled;
-			}
-		}
+		public bool Canceled { get; private set; }
 
-		public bool Committed
-		{
-			get
-			{
-				return this.committed;
-			}
-		}
+		public bool Committed { get; private set; }
 
-		public string Description
-		{
-			get
-			{
-				return this.desc;
-			}
-		}
+		public string Description { get; }
 
 		public void Cancel()
 		{
-			if (!this.canceled && !this.committed)
+			if (!this.Canceled && !this.Committed)
 			{
-				this.canceled = true;
+				this.Canceled = true;
 				GC.SuppressFinalize(this);
-				this.suppressedFinalization = true;
+				this._suppressedFinalization = true;
 				this.OnCancel();
 			}
 		}
 
 		public void Commit()
 		{
-			if (!this.committed && !this.canceled)
+			if (!this.Committed && !this.Canceled)
 			{
-				this.committed = true;
+				this.Committed = true;
 				GC.SuppressFinalize(this);
-				this.suppressedFinalization = true;
+				this._suppressedFinalization = true;
 				this.OnCommit();
 			}
 		}
@@ -75,7 +54,7 @@ namespace System.ComponentModel.Design
 		void IDisposable.Dispose()
 		{
 			this.Dispose(true);
-			if (!this.suppressedFinalization)
+			if (!this._suppressedFinalization)
 			{
 				GC.SuppressFinalize(this);
 			}
@@ -86,12 +65,6 @@ namespace System.ComponentModel.Design
 			this.Cancel();
 		}
 
-		private bool committed;
-
-		private bool canceled;
-
-		private bool suppressedFinalization;
-
-		private string desc;
+		private bool _suppressedFinalization;
 	}
 }

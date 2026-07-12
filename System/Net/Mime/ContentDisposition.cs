@@ -9,19 +9,10 @@ namespace System.Net.Mime
 {
 	public class ContentDisposition
 	{
-		static ContentDisposition()
-		{
-			ContentDisposition.validators.Add("creation-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("modification-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("read-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("size", ContentDisposition.longParser);
-		}
-
 		public ContentDisposition()
 		{
-			this.isChanged = true;
-			this.dispositionType = "attachment";
-			this.disposition = this.dispositionType;
+			this._isChanged = true;
+			this._disposition = (this._dispositionType = "attachment");
 		}
 
 		public ContentDisposition(string disposition)
@@ -30,26 +21,26 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("disposition");
 			}
-			this.isChanged = true;
-			this.disposition = disposition;
+			this._isChanged = true;
+			this._disposition = disposition;
 			this.ParseValue();
 		}
 
 		internal DateTime GetDateParameter(string parameterName)
 		{
 			SmtpDateTime smtpDateTime = ((TrackingValidationObjectDictionary)this.Parameters).InternalGet(parameterName) as SmtpDateTime;
-			if (smtpDateTime == null)
+			if (smtpDateTime != null)
 			{
-				return DateTime.MinValue;
+				return smtpDateTime.Date;
 			}
-			return smtpDateTime.Date;
+			return DateTime.MinValue;
 		}
 
 		public string DispositionType
 		{
 			get
 			{
-				return this.dispositionType;
+				return this._dispositionType;
 			}
 			set
 			{
@@ -59,10 +50,10 @@ namespace System.Net.Mime
 				}
 				if (value == string.Empty)
 				{
-					throw new ArgumentException(global::SR.GetString("This property cannot be set to an empty string."), "value");
+					throw new ArgumentException("This property cannot be set to an empty string.", "value");
 				}
-				this.isChanged = true;
-				this.dispositionType = value;
+				this._isChanged = true;
+				this._dispositionType = value;
 			}
 		}
 
@@ -70,11 +61,12 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.parameters == null)
+				TrackingValidationObjectDictionary trackingValidationObjectDictionary;
+				if ((trackingValidationObjectDictionary = this._parameters) == null)
 				{
-					this.parameters = new TrackingValidationObjectDictionary(ContentDisposition.validators);
+					trackingValidationObjectDictionary = (this._parameters = new TrackingValidationObjectDictionary(ContentDisposition.s_validators));
 				}
-				return this.parameters;
+				return trackingValidationObjectDictionary;
 			}
 		}
 
@@ -125,17 +117,12 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.dispositionType == "inline";
+				return this._dispositionType == "inline";
 			}
 			set
 			{
-				this.isChanged = true;
-				if (value)
-				{
-					this.dispositionType = "inline";
-					return;
-				}
-				this.dispositionType = "attachment";
+				this._isChanged = true;
+				this._dispositionType = (value ? "inline" : "attachment");
 			}
 		}
 
@@ -157,11 +144,11 @@ namespace System.Net.Mime
 			get
 			{
 				object obj = ((TrackingValidationObjectDictionary)this.Parameters).InternalGet("size");
-				if (obj == null)
+				if (obj != null)
 				{
-					return -1L;
+					return (long)obj;
 				}
-				return (long)obj;
+				return -1L;
 			}
 			set
 			{
@@ -171,18 +158,18 @@ namespace System.Net.Mime
 
 		internal void Set(string contentDisposition, HeaderCollection headers)
 		{
-			this.disposition = contentDisposition;
+			this._disposition = contentDisposition;
 			this.ParseValue();
 			headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this.ToString());
-			this.isPersisted = true;
+			this._isPersisted = true;
 		}
 
 		internal void PersistIfNeeded(HeaderCollection headers, bool forcePersist)
 		{
-			if (this.IsChanged || !this.isPersisted || forcePersist)
+			if (this.IsChanged || !this._isPersisted || forcePersist)
 			{
 				headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this.ToString());
-				this.isPersisted = true;
+				this._isPersisted = true;
 			}
 		}
 
@@ -190,33 +177,33 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.isChanged || (this.parameters != null && this.parameters.IsChanged);
+				return this._isChanged || (this._parameters != null && this._parameters.IsChanged);
 			}
 		}
 
 		public override string ToString()
 		{
-			if (this.disposition == null || this.isChanged || (this.parameters != null && this.parameters.IsChanged))
+			if (this._disposition == null || this._isChanged || (this._parameters != null && this._parameters.IsChanged))
 			{
-				this.disposition = this.Encode(false);
-				this.isChanged = false;
-				this.parameters.IsChanged = false;
-				this.isPersisted = false;
+				this._disposition = this.Encode(false);
+				this._isChanged = false;
+				this._parameters.IsChanged = false;
+				this._isPersisted = false;
 			}
-			return this.disposition;
+			return this._disposition;
 		}
 
 		internal string Encode(bool allowUnicode)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.dispositionType);
+			stringBuilder.Append(this._dispositionType);
 			foreach (object obj in this.Parameters.Keys)
 			{
 				string text = (string)obj;
 				stringBuilder.Append("; ");
 				ContentDisposition.EncodeToBuffer(text, stringBuilder, allowUnicode);
 				stringBuilder.Append('=');
-				ContentDisposition.EncodeToBuffer(this.parameters[text], stringBuilder, allowUnicode);
+				ContentDisposition.EncodeToBuffer(this._parameters[text], stringBuilder, allowUnicode);
 			}
 			return stringBuilder.ToString();
 		}
@@ -226,7 +213,7 @@ namespace System.Net.Mime
 			Encoding encoding = MimeBasePart.DecodeEncoding(value);
 			if (encoding != null)
 			{
-				builder.Append("\"" + value + "\"");
+				builder.Append('"').Append(value).Append('"');
 				return;
 			}
 			if ((allowUnicode && !MailBnfHelper.HasCROrLF(value)) || MimeBasePart.IsAscii(value, false))
@@ -235,12 +222,12 @@ namespace System.Net.Mime
 				return;
 			}
 			encoding = Encoding.GetEncoding("utf-8");
-			builder.Append("\"" + MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding)) + "\"");
+			builder.Append('"').Append(MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding))).Append('"');
 		}
 
 		public override bool Equals(object rparam)
 		{
-			return rparam != null && string.Compare(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+			return rparam != null && string.Equals(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase);
 		}
 
 		public override int GetHashCode()
@@ -253,93 +240,103 @@ namespace System.Net.Mime
 			int num = 0;
 			try
 			{
-				this.dispositionType = MailBnfHelper.ReadToken(this.disposition, ref num, null);
-				if (string.IsNullOrEmpty(this.dispositionType))
+				this._dispositionType = MailBnfHelper.ReadToken(this._disposition, ref num, null);
+				if (string.IsNullOrEmpty(this._dispositionType))
 				{
-					throw new FormatException(global::SR.GetString("The mail header is malformed."));
+					throw new FormatException("The mail header is malformed.");
 				}
-				if (this.parameters == null)
+				if (this._parameters == null)
 				{
-					this.parameters = new TrackingValidationObjectDictionary(ContentDisposition.validators);
+					this._parameters = new TrackingValidationObjectDictionary(ContentDisposition.s_validators);
 				}
 				else
 				{
-					this.parameters.Clear();
+					this._parameters.Clear();
 				}
-				while (MailBnfHelper.SkipCFWS(this.disposition, ref num))
+				while (MailBnfHelper.SkipCFWS(this._disposition, ref num))
 				{
-					if (this.disposition[num++] != ';')
+					if (this._disposition[num++] != ';')
 					{
-						throw new FormatException(global::SR.GetString("An invalid character was found in the mail header: '{0}'.", new object[] { this.disposition[num - 1] }));
+						throw new FormatException(SR.Format("An invalid character was found in the mail header: '{0}'.", this._disposition[num - 1]));
 					}
-					if (!MailBnfHelper.SkipCFWS(this.disposition, ref num))
+					if (!MailBnfHelper.SkipCFWS(this._disposition, ref num))
 					{
 						break;
 					}
-					string text = MailBnfHelper.ReadParameterAttribute(this.disposition, ref num, null);
-					if (this.disposition[num++] != '=')
+					string text = MailBnfHelper.ReadParameterAttribute(this._disposition, ref num, null);
+					if (this._disposition[num++] != '=')
 					{
-						throw new FormatException(global::SR.GetString("The mail header is malformed."));
+						throw new FormatException("The mail header is malformed.");
 					}
-					if (!MailBnfHelper.SkipCFWS(this.disposition, ref num))
+					if (!MailBnfHelper.SkipCFWS(this._disposition, ref num))
 					{
-						throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
+						throw new FormatException("The specified content disposition is invalid.");
 					}
-					string text2;
-					if (this.disposition[num] == '"')
-					{
-						text2 = MailBnfHelper.ReadQuotedString(this.disposition, ref num, null);
-					}
-					else
-					{
-						text2 = MailBnfHelper.ReadToken(this.disposition, ref num, null);
-					}
+					string text2 = ((this._disposition[num] == '"') ? MailBnfHelper.ReadQuotedString(this._disposition, ref num, null) : MailBnfHelper.ReadToken(this._disposition, ref num, null));
 					if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(text2))
 					{
-						throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
+						throw new FormatException("The specified content disposition is invalid.");
 					}
 					this.Parameters.Add(text, text2);
 				}
 			}
 			catch (FormatException ex)
 			{
-				throw new FormatException(global::SR.GetString("The specified content disposition is invalid."), ex);
+				throw new FormatException("The specified content disposition is invalid.", ex);
 			}
-			this.parameters.IsChanged = false;
+			this._parameters.IsChanged = false;
 		}
 
-		private string dispositionType;
+		private const string CreationDateKey = "creation-date";
 
-		private TrackingValidationObjectDictionary parameters;
+		private const string ModificationDateKey = "modification-date";
 
-		private bool isChanged;
+		private const string ReadDateKey = "read-date";
 
-		private bool isPersisted;
+		private const string FileNameKey = "filename";
 
-		private string disposition;
+		private const string SizeKey = "size";
 
-		private const string creationDate = "creation-date";
+		private TrackingValidationObjectDictionary _parameters;
 
-		private const string readDate = "read-date";
+		private string _disposition;
 
-		private const string modificationDate = "modification-date";
+		private string _dispositionType;
 
-		private const string size = "size";
+		private bool _isChanged;
 
-		private const string fileName = "filename";
+		private bool _isPersisted;
 
-		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue dateParser = (object value) => new SmtpDateTime(value.ToString());
+		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue s_dateParser = (object v) => new SmtpDateTime(v.ToString());
 
-		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue longParser = delegate(object value)
+		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue s_longParser = delegate(object value)
 		{
 			long num;
 			if (!long.TryParse(value.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out num))
 			{
-				throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
+				throw new FormatException("The specified content disposition is invalid.");
 			}
 			return num;
 		};
 
-		private static readonly IDictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> validators = new Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue>();
+		private static readonly Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> s_validators = new Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue>
+		{
+			{
+				"creation-date",
+				ContentDisposition.s_dateParser
+			},
+			{
+				"modification-date",
+				ContentDisposition.s_dateParser
+			},
+			{
+				"read-date",
+				ContentDisposition.s_dateParser
+			},
+			{
+				"size",
+				ContentDisposition.s_longParser
+			}
+		};
 	}
 }

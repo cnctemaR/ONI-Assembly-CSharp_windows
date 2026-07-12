@@ -26,6 +26,18 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern object get_ephemeron_tombstone();
 
+		internal static void GetMemoryInfo(out uint highMemLoadThreshold, out ulong totalPhysicalMem, out uint lastRecordedMemLoad, out UIntPtr lastRecordedHeapSize, out UIntPtr lastRecordedFragmentation)
+		{
+			highMemLoadThreshold = 0U;
+			totalPhysicalMem = ulong.MaxValue;
+			lastRecordedMemLoad = 0U;
+			lastRecordedHeapSize = UIntPtr.Zero;
+			lastRecordedFragmentation = UIntPtr.Zero;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern long GetAllocatedBytesForCurrentThread();
+
 		[SecurityCritical]
 		public static void AddMemoryPressure(long bytesAllocated)
 		{
@@ -90,7 +102,7 @@ namespace System
 			}
 			if (mode < GCCollectionMode.Default || mode > GCCollectionMode.Optimized)
 			{
-				throw new ArgumentOutOfRangeException(Environment.GetResourceString("Enum value was out of legal range."));
+				throw new ArgumentOutOfRangeException("mode", Environment.GetResourceString("Enum value was out of legal range."));
 			}
 			int num = 0;
 			if (mode == GCCollectionMode.Optimized)
@@ -152,13 +164,12 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void WaitForPendingFinalizers();
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _SuppressFinalize(object o);
 
-		[SecuritySafeCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecuritySafeCritical]
 		public static void SuppressFinalize(object obj)
 		{
 			if (obj == null)
@@ -168,7 +179,6 @@ namespace System
 			GC._SuppressFinalize(obj);
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void _ReRegisterForFinalize(object o);
 

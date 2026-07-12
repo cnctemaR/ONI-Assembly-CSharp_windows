@@ -18,14 +18,14 @@ namespace MS.Internal.Xml.XPath
 			this.prefix = other.prefix;
 			this.name = other.name;
 			this.xsltContext = other.xsltContext;
-			this.queryIterator = (ResetableIterator)Query.Clone(other.queryIterator);
+			this._queryIterator = (ResetableIterator)Query.Clone(other._queryIterator);
 		}
 
 		public override void Reset()
 		{
-			if (this.queryIterator != null)
+			if (this._queryIterator != null)
 			{
-				this.queryIterator.Reset();
+				this._queryIterator.Reset();
 			}
 		}
 
@@ -33,27 +33,27 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				if (this.queryIterator == null)
+				if (this._queryIterator == null)
 				{
 					throw XPathException.Create("Expression must evaluate to a node-set.");
 				}
-				if (this.queryIterator.CurrentPosition == 0)
+				if (this._queryIterator.CurrentPosition == 0)
 				{
 					this.Advance();
 				}
-				return this.queryIterator.Current;
+				return this._queryIterator.Current;
 			}
 		}
 
 		public override XPathNavigator Advance()
 		{
-			if (this.queryIterator == null)
+			if (this._queryIterator == null)
 			{
 				throw XPathException.Create("Expression must evaluate to a node-set.");
 			}
-			if (this.queryIterator.MoveNext())
+			if (this._queryIterator.MoveNext())
 			{
-				return this.queryIterator.Current;
+				return this._queryIterator.Current;
 			}
 			return null;
 		}
@@ -62,9 +62,9 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				if (this.queryIterator != null)
+				if (this._queryIterator != null)
 				{
-					return this.queryIterator.CurrentPosition;
+					return this._queryIterator.CurrentPosition;
 				}
 				return 0;
 			}
@@ -94,19 +94,19 @@ namespace MS.Internal.Xml.XPath
 			}
 			if (value == null)
 			{
-				this.queryIterator = XPathEmptyIterator.Instance;
+				this._queryIterator = XPathEmptyIterator.Instance;
 				return this;
 			}
 			ResetableIterator resetableIterator = value as ResetableIterator;
 			if (resetableIterator != null)
 			{
-				this.queryIterator = (ResetableIterator)resetableIterator.Clone();
+				this._queryIterator = (ResetableIterator)resetableIterator.Clone();
 				return this;
 			}
 			XPathNodeIterator xpathNodeIterator = value as XPathNodeIterator;
 			if (xpathNodeIterator != null)
 			{
-				this.queryIterator = new XPathArrayIterator(xpathNodeIterator);
+				this._queryIterator = new XPathArrayIterator(xpathNodeIterator);
 				return this;
 			}
 			IXPathNavigable ixpathNavigable = value as IXPathNavigable;
@@ -161,9 +161,9 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				if (this.queryIterator != null)
+				if (this._queryIterator != null)
 				{
-					return this.queryIterator.Count;
+					return this._queryIterator.Count;
 				}
 				return 1;
 			}
@@ -183,6 +183,6 @@ namespace MS.Internal.Xml.XPath
 
 		protected XsltContext xsltContext;
 
-		private ResetableIterator queryIterator;
+		private ResetableIterator _queryIterator;
 	}
 }

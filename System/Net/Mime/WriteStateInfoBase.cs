@@ -6,10 +6,10 @@ namespace System.Net.Mime
 	{
 		internal WriteStateInfoBase()
 		{
-			this.buffer = new byte[1024];
-			this._header = new byte[0];
-			this._footer = new byte[0];
-			this._maxLineLength = EncodedStreamFactory.DefaultMaxLineLength;
+			this._header = Array.Empty<byte>();
+			this._footer = Array.Empty<byte>();
+			this._maxLineLength = 70;
+			this._buffer = new byte[1024];
 			this._currentLineLength = 0;
 			this._currentBufferUsed = 0;
 		}
@@ -21,7 +21,7 @@ namespace System.Net.Mime
 
 		internal WriteStateInfoBase(int bufferSize, byte[] header, byte[] footer, int maxLineLength, int mimeHeaderLength)
 		{
-			this.buffer = new byte[bufferSize];
+			this._buffer = new byte[bufferSize];
 			this._header = header;
 			this._footer = footer;
 			this._maxLineLength = maxLineLength;
@@ -57,7 +57,7 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.buffer;
+				return this._buffer;
 			}
 		}
 
@@ -87,25 +87,25 @@ namespace System.Net.Mime
 			if (num > this.Buffer.Length)
 			{
 				byte[] array = new byte[num];
-				this.buffer.CopyTo(array, 0);
-				this.buffer = array;
+				this._buffer.CopyTo(array, 0);
+				this._buffer = array;
 			}
 		}
 
 		internal void Append(byte aByte)
 		{
 			this.EnsureSpaceInBuffer(1);
-			byte[] array = this.Buffer;
+			byte[] buffer = this.Buffer;
 			int currentBufferUsed = this._currentBufferUsed;
 			this._currentBufferUsed = currentBufferUsed + 1;
-			array[currentBufferUsed] = aByte;
+			buffer[currentBufferUsed] = aByte;
 			this._currentLineLength++;
 		}
 
 		internal void Append(params byte[] bytes)
 		{
 			this.EnsureSpaceInBuffer(bytes.Length);
-			bytes.CopyTo(this.buffer, this.Length);
+			bytes.CopyTo(this._buffer, this.Length);
 			this._currentLineLength += bytes.Length;
 			this._currentBufferUsed += bytes.Length;
 		}
@@ -157,18 +157,18 @@ namespace System.Net.Mime
 			this._currentBufferUsed = 0;
 		}
 
-		protected byte[] _header;
+		protected readonly byte[] _header;
 
-		protected byte[] _footer;
+		protected readonly byte[] _footer;
 
-		protected int _maxLineLength;
+		protected readonly int _maxLineLength;
 
-		protected byte[] buffer;
+		protected byte[] _buffer;
 
 		protected int _currentLineLength;
 
 		protected int _currentBufferUsed;
 
-		protected const int defaultBufferSize = 1024;
+		protected const int DefaultBufferSize = 1024;
 	}
 }

@@ -20,7 +20,7 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 		this.lightEfficiencyBonus = true;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		if (this.Grinder.CurrentFood != null)
 		{
@@ -35,7 +35,7 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 		this.Grinder.UpdateFoodSymbol();
 	}
 
-	protected override void OnAbortWork(Worker worker)
+	protected override void OnAbortWork(WorkerBase worker)
 	{
 		if (this.Grinder.CurrentFood == null)
 		{
@@ -44,7 +44,7 @@ public class SpiceGrinderWorkable : Workable, IConfigurableConsumer
 		this.Grinder.UpdateFoodSymbol();
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (this.Grinder.CurrentFood == null)
 		{

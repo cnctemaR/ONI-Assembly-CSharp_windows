@@ -9,6 +9,6 @@ namespace System
 	{
 		public string full_name;
 
-		public MonoCMethod default_ctor;
+		public RuntimeConstructorInfo default_ctor;
 	}
 }

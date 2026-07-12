@@ -199,7 +199,7 @@ public readonly struct ClothingOutfitTarget : IEquatable<ClothingOutfitTarget>
 		{
 			string text;
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
-			keyValuePair.Deconstruct<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>(out text, out customTemplateOutfitEntry);
+			keyValuePair.Deconstruct(out text, out customTemplateOutfitEntry);
 			string text2 = text;
 			ClothingOutfitUtility.OutfitType outfitType;
 			if (Enum.TryParse<ClothingOutfitUtility.OutfitType>(customTemplateOutfitEntry.outfitType, true, out outfitType))

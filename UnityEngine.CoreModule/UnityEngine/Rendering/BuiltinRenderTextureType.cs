@@ -14,8 +14,11 @@ namespace UnityEngine.Rendering
 		Depth,
 		DepthNormals,
 		ResolvedDepth,
+		[Obsolete("Deferred Lighting has been removed, so PrepassNormalsSpec built-in render texture type is never used now.", false)]
 		PrepassNormalsSpec = 7,
+		[Obsolete("Deferred Lighting has been removed, so PrepassLight built-in render texture type is never used now.", false)]
 		PrepassLight,
+		[Obsolete("Deferred Lighting has been removed, so PrepassLightSpec built-in render texture type is never used now.", false)]
 		PrepassLightSpec,
 		GBuffer0,
 		GBuffer1,

@@ -56,7 +56,7 @@ public class Diet
 		Diet.Info[] array;
 		if (this.infos != null)
 		{
-			array = this.infos.Where<Diet.Info>((Diet.Info i) => i.eatsPlantsDirectly).ToArray<Diet.Info>();
+			array = this.infos.Where<Diet.Info>((Diet.Info i) => i.foodType == Diet.Info.FoodType.EatPlantDirectly || i.foodType == Diet.Info.FoodType.EatPlantStorage).ToArray<Diet.Info>();
 		}
 		else
 		{
@@ -66,7 +66,7 @@ public class Diet
 		Diet.Info[] array2;
 		if (this.infos != null)
 		{
-			array2 = this.infos.Where<Diet.Info>((Diet.Info i) => !i.eatsPlantsDirectly).ToArray<Diet.Info>();
+			array2 = this.infos.Where<Diet.Info>((Diet.Info i) => i.foodType == Diet.Info.FoodType.EatSolid).ToArray<Diet.Info>();
 		}
 		else
 		{
@@ -212,9 +212,11 @@ public class Diet
 
 		public bool produceSolidTile { get; private set; }
 
-		public bool eatsPlantsDirectly { get; private set; }
+		public Diet.Info.FoodType foodType { get; private set; }
 
-		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false, bool eats_plants_directly = false, bool emmit_disease_on_cell = false)
+		public string[] eatAnims { get; set; }
+
+		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false, Diet.Info.FoodType food_type = Diet.Info.FoodType.EatSolid, bool emmit_disease_on_cell = false, string[] eat_anims = null)
 		{
 			this.consumedTags = consumed_tags;
 			this.producedElement = produced_element;
@@ -231,7 +233,12 @@ public class Diet
 			this.diseasePerKgProduced = disease_per_kg_produced;
 			this.emmitDiseaseOnCell = emmit_disease_on_cell;
 			this.produceSolidTile = produce_solid_tile;
-			this.eatsPlantsDirectly = eats_plants_directly;
+			this.foodType = food_type;
+			if (eat_anims == null)
+			{
+				eat_anims = new string[] { "eat_pre", "eat_loop", "eat_pst" };
+			}
+			this.eatAnims = eat_anims;
 		}
 
 		public Info(Diet.Info info)
@@ -244,7 +251,8 @@ public class Diet
 			this.diseasePerKgProduced = info.diseasePerKgProduced;
 			this.emmitDiseaseOnCell = info.emmitDiseaseOnCell;
 			this.produceSolidTile = info.produceSolidTile;
-			this.eatsPlantsDirectly = info.eatsPlantsDirectly;
+			this.foodType = info.foodType;
+			this.eatAnims = info.eatAnims;
 		}
 
 		public bool IsMatch(Tag tag)
@@ -293,6 +301,13 @@ public class Diet
 		public float ConvertProducedMassToConsumptionMass(float produced_mass)
 		{
 			return produced_mass / this.producedConversionRate;
+		}
+
+		public enum FoodType
+		{
+			EatSolid,
+			EatPlantDirectly,
+			EatPlantStorage
 		}
 	}
 }

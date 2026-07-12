@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum UIPermissionWindow
 	{
-		NoWindows,
+		AllWindows = 3,
+		NoWindows = 0,
 		SafeSubWindows,
-		SafeTopLevelWindows,
-		AllWindows
+		SafeTopLevelWindows
 	}
 }

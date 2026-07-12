@@ -12,11 +12,11 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
-				return this.m_Sprite;
+				return Object.ForceLoadFromInstanceID(this.m_Sprite) as Sprite;
 			}
 			set
 			{
-				this.m_Sprite = value;
+				this.m_Sprite = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 
@@ -48,11 +48,11 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
-				return this.m_GameObject;
+				return Object.ForceLoadFromInstanceID(this.m_GameObject) as GameObject;
 			}
 			set
 			{
-				this.m_GameObject = value;
+				this.m_GameObject = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 
@@ -80,16 +80,29 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
-		private Sprite m_Sprite;
+		private static TileData CreateDefault()
+		{
+			return new TileData
+			{
+				color = Color.white,
+				transform = Matrix4x4.identity,
+				flags = TileFlags.None,
+				colliderType = Tile.ColliderType.None
+			};
+		}
+
+		private int m_Sprite;
 
 		private Color m_Color;
 
 		private Matrix4x4 m_Transform;
 
-		private GameObject m_GameObject;
+		private int m_GameObject;
 
 		private TileFlags m_Flags;
 
 		private Tile.ColliderType m_ColliderType;
+
+		internal static readonly TileData Default = TileData.CreateDefault();
 	}
 }

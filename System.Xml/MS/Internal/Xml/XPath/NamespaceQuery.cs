@@ -13,12 +13,12 @@ namespace MS.Internal.Xml.XPath
 		private NamespaceQuery(NamespaceQuery other)
 			: base(other)
 		{
-			this.onNamespace = other.onNamespace;
+			this._onNamespace = other._onNamespace;
 		}
 
 		public override void Reset()
 		{
-			this.onNamespace = false;
+			this._onNamespace = false;
 			base.Reset();
 		}
 
@@ -26,7 +26,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			for (;;)
 			{
-				if (!this.onNamespace)
+				if (!this._onNamespace)
 				{
 					this.currentNode = this.qyInput.Advance();
 					if (this.currentNode == null)
@@ -35,13 +35,13 @@ namespace MS.Internal.Xml.XPath
 					}
 					this.position = 0;
 					this.currentNode = this.currentNode.Clone();
-					this.onNamespace = this.currentNode.MoveToFirstNamespace();
+					this._onNamespace = this.currentNode.MoveToFirstNamespace();
 				}
 				else
 				{
-					this.onNamespace = this.currentNode.MoveToNextNamespace();
+					this._onNamespace = this.currentNode.MoveToNextNamespace();
 				}
-				if (this.onNamespace && this.matches(this.currentNode))
+				if (this._onNamespace && this.matches(this.currentNode))
 				{
 					goto Block_3;
 				}
@@ -62,6 +62,6 @@ namespace MS.Internal.Xml.XPath
 			return new NamespaceQuery(this);
 		}
 
-		private bool onNamespace;
+		private bool _onNamespace;
 	}
 }

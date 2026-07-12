@@ -35,7 +35,7 @@ public class PajamaDispenser : Workable, IDispenser
 		PajamaDispenser.pajamaPrefab = Assets.GetPrefab(new Tag("SleepClinicPajamas"));
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Vector3 targetPoint = this.GetTargetPoint();
 		targetPoint.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
@@ -43,7 +43,7 @@ public class PajamaDispenser : Workable, IDispenser
 		this.hasDispenseChore = false;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (this.Chore != null && this.Chore.smi.IsRunning())

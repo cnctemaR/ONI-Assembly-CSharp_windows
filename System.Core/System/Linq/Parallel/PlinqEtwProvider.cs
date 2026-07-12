@@ -23,8 +23,8 @@ namespace System.Linq.Parallel
 		{
 			if (base.IsEnabled(EventLevel.Informational, EventKeywords.All))
 			{
-				int num = Task.CurrentId ?? 0;
-				this.ParallelQueryBegin(PlinqEtwProvider.s_defaultSchedulerId, num, queryId);
+				int valueOrDefault = Task.CurrentId.GetValueOrDefault();
+				this.ParallelQueryBegin(PlinqEtwProvider.s_defaultSchedulerId, valueOrDefault, queryId);
 			}
 		}
 
@@ -39,8 +39,8 @@ namespace System.Linq.Parallel
 		{
 			if (base.IsEnabled(EventLevel.Informational, EventKeywords.All))
 			{
-				int num = Task.CurrentId ?? 0;
-				this.ParallelQueryEnd(PlinqEtwProvider.s_defaultSchedulerId, num, queryId);
+				int valueOrDefault = Task.CurrentId.GetValueOrDefault();
+				this.ParallelQueryEnd(PlinqEtwProvider.s_defaultSchedulerId, valueOrDefault, queryId);
 			}
 		}
 
@@ -55,8 +55,8 @@ namespace System.Linq.Parallel
 		{
 			if (base.IsEnabled(EventLevel.Verbose, EventKeywords.All))
 			{
-				int num = Task.CurrentId ?? 0;
-				this.ParallelQueryFork(PlinqEtwProvider.s_defaultSchedulerId, num, queryId);
+				int valueOrDefault = Task.CurrentId.GetValueOrDefault();
+				this.ParallelQueryFork(PlinqEtwProvider.s_defaultSchedulerId, valueOrDefault, queryId);
 			}
 		}
 
@@ -71,8 +71,8 @@ namespace System.Linq.Parallel
 		{
 			if (base.IsEnabled(EventLevel.Verbose, EventKeywords.All))
 			{
-				int num = Task.CurrentId ?? 0;
-				this.ParallelQueryJoin(PlinqEtwProvider.s_defaultSchedulerId, num, queryId);
+				int valueOrDefault = Task.CurrentId.GetValueOrDefault();
+				this.ParallelQueryJoin(PlinqEtwProvider.s_defaultSchedulerId, valueOrDefault, queryId);
 			}
 		}
 

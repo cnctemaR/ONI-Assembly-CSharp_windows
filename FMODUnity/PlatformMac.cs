@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace FMODUnity
@@ -11,7 +12,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformMac>("52eb9df5db46521439908db3a29a1bbb");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -19,17 +20,22 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.OSXPlayer, this);
 		}
 
-		public override string GetPluginPath(string pluginName)
+		internal override string GetPluginPath(string pluginName)
 		{
-			return string.Format("{0}/{1}.bundle", this.GetPluginBasePath(), pluginName);
+			string text = string.Format("{0}/{1}.bundle", this.GetPluginBasePath(), pluginName);
+			if (Directory.Exists(text))
+			{
+				return text;
+			}
+			return string.Format("{0}/{1}.dylib", this.GetPluginBasePath(), pluginName);
 		}
 
-		public override List<CodecChannelCount> DefaultCodecChannels
+		internal override List<CodecChannelCount> DefaultCodecChannels
 		{
 			get
 			{

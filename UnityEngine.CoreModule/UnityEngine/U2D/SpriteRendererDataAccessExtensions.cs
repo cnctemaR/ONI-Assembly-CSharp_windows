@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.U2D
 {
-	[NativeHeader("Runtime/Graphics/Mesh/SpriteRenderer.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/SpriteRenderer.h")]
 	public static class SpriteRendererDataAccessExtensions
 	{
 		internal static void SetDeformableBuffer(this SpriteRenderer spriteRenderer, NativeArray<byte> src)
@@ -15,7 +15,7 @@ namespace UnityEngine.U2D
 			bool flag = spriteRenderer.sprite == null;
 			if (flag)
 			{
-				throw new ArgumentException(string.Format("spriteRenderer does not have a valid sprite set.", new object[0]));
+				throw new ArgumentException(string.Format("spriteRenderer does not have a valid sprite set.", Array.Empty<object>()));
 			}
 			bool flag2 = src.Length != SpriteDataAccessExtensions.GetPrimaryVertexStreamSize(spriteRenderer.sprite);
 			if (flag2)

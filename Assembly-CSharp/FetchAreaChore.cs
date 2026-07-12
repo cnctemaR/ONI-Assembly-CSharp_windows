@@ -88,7 +88,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
 		for (int i = 0; i < pooledList.Count; i++)
 		{
-			(pooledList[i].obj as FetchChore).CollectChoresFromGlobalChoreProvider(context.consumerState, succeeded_contexts, failed_contexts, true);
+			(pooledList[i].obj as FetchChore).CollectChoresFromGlobalChoreProvider(context.consumerState, succeeded_contexts, null, failed_contexts, true);
 		}
 		pooledList.Recycle();
 	}
@@ -153,18 +153,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num7 = 9;
 			num5 -= 3;
 			num6 -= 3;
-			ListPool<ScenePartitionerEntry, FetchAreaChore>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, FetchAreaChore>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
-			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.storedPickupablesLayer, pooledList3);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
-			for (int i = 0; i < pooledList3.Count; i++)
+			IEnumerable<object> enumerable = GameScenePartitioner.Instance.AsyncSafeEnumerate(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer);
+			IEnumerable<object> enumerable2 = GameScenePartitioner.Instance.AsyncSafeEnumerate(num5, num6, num7, num7, GameScenePartitioner.Instance.storedPickupablesLayer);
+			foreach (object obj in enumerable.Concat<object>(enumerable2))
 			{
-				ScenePartitionerEntry scenePartitionerEntry = pooledList3[i];
 				if (num4 > num3)
 				{
 					break;
 				}
-				Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
+				Pickupable pickupable2 = obj as Pickupable;
 				KPrefabID kprefabID = pickupable2.KPrefabID;
 				if (!kprefabID.HasTag(GameTags.StoredPrivate) && !(kprefabID.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(kprefabID.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || kprefabID.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || kprefabID.HasTag(this.rootChore.requiredTag)) && !kprefabID.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2) && !kprefabID.HasTag(GameTags.MarkedForMove))
 				{
@@ -177,7 +175,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					}
 				}
 			}
-			pooledList3.Recycle();
 			num4 = Mathf.Min(num3, num4);
 			if (minTakeAmount > 0f)
 			{
@@ -675,7 +672,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupFetch();
 			});
-			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, NavigationTactics.ReduceTravelDistance).Target(this.fetchTarget).EventHandlerTransition(GameHashes.TagsChanged, this.fetching.fetchfail, (FetchAreaChore.StatesInstance smi, object obj) => smi.RootChore_ValidateRequiredTagOnTagChange && smi.RootChore_RequiredTag.IsValid && !this.fetchTarget.Get(smi).HasTag(smi.RootChore_RequiredTag))
+			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetFetchOffset), this.fetching.pickup, this.fetching.fetchfail, NavigationTactics.ReduceTravelDistance).Target(this.fetchTarget).EventHandlerTransition(GameHashes.TagsChanged, this.fetching.fetchfail, (FetchAreaChore.StatesInstance smi, object obj) => smi.RootChore_ValidateRequiredTagOnTagChange && smi.RootChore_RequiredTag.IsValid && !this.fetchTarget.Get(smi).HasTag(smi.RootChore_RequiredTag))
 				.Target(this.fetcher);
 			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail).Exit(delegate(FetchAreaChore.StatesInstance smi)
 			{
@@ -709,7 +706,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupDelivery();
 			});
-			this.delivering.movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null, NavigationTactics.ReduceTravelDistance).Enter(delegate(FetchAreaChore.StatesInstance smi)
+			this.delivering.movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetFetchOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance).Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				if (this.deliveryObject.Get(smi) != null && this.deliveryObject.Get(smi).GetComponent<MinionIdentity>() != null)
 				{
@@ -728,6 +725,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.DeliverComplete();
 			});
+		}
+
+		private CellOffset[] GetFetchOffset(FetchAreaChore.StatesInstance smi)
+		{
+			WorkerBase component = this.fetcher.Get(smi).GetComponent<WorkerBase>();
+			if (!(component != null))
+			{
+				return null;
+			}
+			return component.GetFetchCellOffsets();
 		}
 
 		public FetchAreaChore.States.FetchStates fetching;

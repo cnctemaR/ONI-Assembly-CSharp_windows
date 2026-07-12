@@ -25,7 +25,6 @@ namespace System.Data.SqlTypes
 		protected SqlTypeException(SerializationInfo si, StreamingContext sc)
 			: base(SqlTypeException.SqlTypeExceptionSerialization(si, sc), sc)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		private static SerializationInfo SqlTypeExceptionSerialization(SerializationInfo si, StreamingContext sc)

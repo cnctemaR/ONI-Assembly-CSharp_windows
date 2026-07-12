@@ -7,7 +7,7 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/Harvestable")]
 public class Harvestable : Workable
 {
-	public Worker completed_by { get; protected set; }
+	public WorkerBase completed_by { get; protected set; }
 
 	public bool CanBeHarvested
 	{
@@ -98,7 +98,7 @@ public class Harvestable : Workable
 		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.completed_by = worker;
 		this.Harvest();
@@ -141,7 +141,7 @@ public class Harvestable : Workable
 		Components.Harvestables.Remove(this);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);

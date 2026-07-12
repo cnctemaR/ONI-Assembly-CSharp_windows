@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(Optional = true)]
-	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
+	[RequiredByNativeCode(Optional = true)]
 	public class Collider2D : Behaviour
 	{
 		public extern float density
@@ -85,6 +85,26 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern uint GetShapeHash();
 
+		public int GetShapes(PhysicsShapeGroup2D physicsShapeGroup)
+		{
+			return this.GetShapes_Internal(ref physicsShapeGroup.m_GroupState, 0, this.shapeCount);
+		}
+
+		public int GetShapes(PhysicsShapeGroup2D physicsShapeGroup, int shapeIndex, [DefaultValue("1")] int shapeCount = 1)
+		{
+			int shapeCount2 = this.shapeCount;
+			bool flag = shapeIndex < 0 || shapeIndex >= shapeCount2 || shapeCount < 1 || shapeIndex + shapeCount > shapeCount2;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Cannot get shape range from {0} to {1} as Collider2D only has {2} shape(s).", shapeIndex, shapeIndex + shapeCount - 1, shapeCount2));
+			}
+			return this.GetShapes_Internal(ref physicsShapeGroup.m_GroupState, shapeIndex, shapeCount);
+		}
+
+		[NativeMethod("GetShapes_Binding")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetShapes_Internal(ref PhysicsShapeGroup2D.GroupState physicsShapeGroupState, int shapeIndex, int shapeCount);
+
 		public Bounds bounds
 		{
 			get
@@ -95,7 +115,7 @@ namespace UnityEngine
 			}
 		}
 
-		internal extern ColliderErrorState2D errorState
+		public extern ColliderErrorState2D errorState
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -116,6 +136,98 @@ namespace UnityEngine
 			[NativeMethod("SetMaterial")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public extern int layerOverridePriority
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public LayerMask excludeLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_excludeLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_excludeLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask includeLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_includeLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_includeLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask forceSendLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_forceSendLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_forceSendLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask forceReceiveLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_forceReceiveLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_forceReceiveLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask contactCaptureLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_contactCaptureLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_contactCaptureLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask callbackLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_callbackLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_callbackLayers_Injected(ref value);
+			}
 		}
 
 		public extern float friction
@@ -139,7 +251,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("IsTouching")]
-		private bool IsTouching_OtherColliderWithFilter([NotNull("ArgumentNullException")] [Writable] Collider2D collider, ContactFilter2D contactFilter)
+		private bool IsTouching_OtherColliderWithFilter([Writable] [NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter)
 		{
 			return this.IsTouching_OtherColliderWithFilter_Injected(collider, ref contactFilter);
 		}
@@ -268,7 +380,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastArray_Binding")]
-		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
+		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [Unmarshalled] [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.CastArray_Internal_Injected(ref direction, distance, ref contactFilter, ignoreSiblingColliders, results);
 		}
@@ -330,7 +442,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("RaycastArray_Binding")]
-		private int RaycastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
+		private int RaycastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] [Unmarshalled] RaycastHit2D[] results)
 		{
 			return this.RaycastArray_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}
@@ -359,6 +471,42 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_bounds_Injected(out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_excludeLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_excludeLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_includeLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_includeLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_forceSendLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_forceSendLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_forceReceiveLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_forceReceiveLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_contactCaptureLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_contactCaptureLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_callbackLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_callbackLayers_Injected(ref LayerMask value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool IsTouching_OtherColliderWithFilter_Injected([Writable] Collider2D collider, ref ContactFilter2D contactFilter);

@@ -39,6 +39,19 @@ namespace Klei.AI
 			};
 		}
 
+		public static global::System.Action CreateAttributeEffectTrait(string id, string name, string desc, string[] attributeIds, float[] deltas, bool positiveTrait = false)
+		{
+			return delegate
+			{
+				global::Debug.Assert(attributeIds.Length == deltas.Length, "CreateAttributeEffectTrait must have an equal number of attributeIds and deltas");
+				Trait trait = Db.Get().CreateTrait(id, name, desc, null, true, null, positiveTrait, true);
+				for (int i = 0; i < attributeIds.Length; i++)
+				{
+					trait.Add(new AttributeModifier(attributeIds[i], deltas[i], name, false, false, true));
+				}
+			};
+		}
+
 		public static global::System.Action CreateAttributeEffectTrait(string id, string name, string desc, string attributeId, float delta, bool positiveTrait = false, Action<GameObject> on_add = null, bool is_valid_starter_trait = true)
 		{
 			return delegate

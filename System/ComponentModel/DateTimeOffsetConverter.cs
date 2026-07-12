@@ -43,7 +43,7 @@ namespace System.ComponentModel
 				}
 				catch (FormatException ex)
 				{
-					throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
+					throw new FormatException(SR.GetString("{0} is not a valid value for {1}.", new object[]
 					{
 						(string)value,
 						"DateTimeOffset"

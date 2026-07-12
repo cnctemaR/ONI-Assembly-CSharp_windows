@@ -3,7 +3,7 @@ using System.Text;
 
 namespace System.Net.Mail
 {
-	internal class BufferBuilder
+	internal sealed class BufferBuilder
 	{
 		internal BufferBuilder()
 			: this(256)
@@ -12,26 +12,26 @@ namespace System.Net.Mail
 
 		internal BufferBuilder(int initialSize)
 		{
-			this.buffer = new byte[initialSize];
+			this._buffer = new byte[initialSize];
 		}
 
 		private void EnsureBuffer(int count)
 		{
-			if (count > this.buffer.Length - this.offset)
+			if (count > this._buffer.Length - this._offset)
 			{
-				byte[] array = new byte[(this.buffer.Length * 2 > this.buffer.Length + count) ? (this.buffer.Length * 2) : (this.buffer.Length + count)];
-				Buffer.BlockCopy(this.buffer, 0, array, 0, this.offset);
-				this.buffer = array;
+				byte[] array = new byte[(this._buffer.Length * 2 > this._buffer.Length + count) ? (this._buffer.Length * 2) : (this._buffer.Length + count)];
+				Buffer.BlockCopy(this._buffer, 0, array, 0, this._offset);
+				this._buffer = array;
 			}
 		}
 
 		internal void Append(byte value)
 		{
 			this.EnsureBuffer(1);
-			byte[] array = this.buffer;
-			int num = this.offset;
-			this.offset = num + 1;
-			array[num] = value;
+			byte[] buffer = this._buffer;
+			int offset = this._offset;
+			this._offset = offset + 1;
+			buffer[offset] = value;
 		}
 
 		internal void Append(byte[] value)
@@ -42,8 +42,8 @@ namespace System.Net.Mail
 		internal void Append(byte[] value, int offset, int count)
 		{
 			this.EnsureBuffer(count);
-			Buffer.BlockCopy(value, offset, this.buffer, this.offset, count);
-			this.offset += count;
+			Buffer.BlockCopy(value, offset, this._buffer, this._offset, count);
+			this._offset += count;
 		}
 
 		internal void Append(string value)
@@ -64,8 +64,10 @@ namespace System.Net.Mail
 		{
 			if (allowUnicode)
 			{
-				byte[] bytes = Encoding.UTF8.GetBytes(value.ToCharArray(), offset, count);
-				this.Append(bytes);
+				int byteCount = Encoding.UTF8.GetByteCount(value, offset, count);
+				this.EnsureBuffer(byteCount);
+				Encoding.UTF8.GetBytes(value, offset, count, this._buffer, this._offset);
+				this._offset += byteCount;
 				return;
 			}
 			this.Append(value, offset, count);
@@ -79,33 +81,33 @@ namespace System.Net.Mail
 				char c = value[offset + i];
 				if (c > 'ÿ')
 				{
-					throw new FormatException(global::SR.GetString("An invalid character was found in the mail header: '{0}'.", new object[] { c }));
+					throw new FormatException(SR.Format("An invalid character was found in the mail header: '{0}'.", c));
 				}
-				this.buffer[this.offset + i] = (byte)c;
+				this._buffer[this._offset + i] = (byte)c;
 			}
-			this.offset += count;
+			this._offset += count;
 		}
 
 		internal int Length
 		{
 			get
 			{
-				return this.offset;
+				return this._offset;
 			}
 		}
 
 		internal byte[] GetBuffer()
 		{
-			return this.buffer;
+			return this._buffer;
 		}
 
 		internal void Reset()
 		{
-			this.offset = 0;
+			this._offset = 0;
 		}
 
-		private byte[] buffer;
+		private byte[] _buffer;
 
-		private int offset;
+		private int _offset;
 	}
 }

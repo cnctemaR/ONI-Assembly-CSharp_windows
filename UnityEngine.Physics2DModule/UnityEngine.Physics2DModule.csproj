@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB57D}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EF6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.Physics2DModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -30,6 +30,7 @@
     <Compile Include="ConstantForce2D.cs" />
     <Compile Include="ContactFilter2D.cs" />
     <Compile Include="ContactPoint2D.cs" />
+    <Compile Include="CustomCollider2D.cs" />
     <Compile Include="DistanceJoint2D.cs" />
     <Compile Include="EdgeCollider2D.cs" />
     <Compile Include="Effector2D.cs" />
@@ -41,6 +42,7 @@
     <Compile Include="HingeJoint2D.cs" />
     <Compile Include="Joint2D.cs" />
     <Compile Include="JointAngleLimits2D.cs" />
+    <Compile Include="JointBreakAction2D.cs" />
     <Compile Include="JointLimitState2D.cs" />
     <Compile Include="JointMotor2D.cs" />
     <Compile Include="JointSuspension2D.cs" />
@@ -50,6 +52,9 @@
     <Compile Include="PhysicsMaterial2D.cs" />
     <Compile Include="PhysicsScene2D.cs" />
     <Compile Include="PhysicsSceneExtensions2D.cs" />
+    <Compile Include="PhysicsShape2D.cs" />
+    <Compile Include="PhysicsShapeGroup2D.cs" />
+    <Compile Include="PhysicsShapeType2D.cs" />
     <Compile Include="PhysicsUpdateBehaviour2D.cs" />
     <Compile Include="PlatformEffector2D.cs" />
     <Compile Include="PointEffector2D.cs" />
@@ -70,16 +75,18 @@
     <Compile Include="WheelJoint2D.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Core" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

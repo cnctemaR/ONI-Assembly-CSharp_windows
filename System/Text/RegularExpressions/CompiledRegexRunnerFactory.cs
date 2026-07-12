@@ -5,24 +5,24 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class CompiledRegexRunnerFactory : RegexRunnerFactory
 	{
-		internal CompiledRegexRunnerFactory(DynamicMethod go, DynamicMethod firstChar, DynamicMethod trackCount)
+		public CompiledRegexRunnerFactory(DynamicMethod go, DynamicMethod firstChar, DynamicMethod trackCount)
 		{
-			this.goMethod = go;
-			this.findFirstCharMethod = firstChar;
-			this.initTrackCountMethod = trackCount;
+			this._goMethod = go;
+			this._findFirstCharMethod = firstChar;
+			this._initTrackCountMethod = trackCount;
 		}
 
 		protected internal override RegexRunner CreateInstance()
 		{
 			CompiledRegexRunner compiledRegexRunner = new CompiledRegexRunner();
-			compiledRegexRunner.SetDelegates((NoParamDelegate)this.goMethod.CreateDelegate(typeof(NoParamDelegate)), (FindFirstCharDelegate)this.findFirstCharMethod.CreateDelegate(typeof(FindFirstCharDelegate)), (NoParamDelegate)this.initTrackCountMethod.CreateDelegate(typeof(NoParamDelegate)));
+			compiledRegexRunner.SetDelegates((Action<RegexRunner>)this._goMethod.CreateDelegate(typeof(Action<RegexRunner>)), (Func<RegexRunner, bool>)this._findFirstCharMethod.CreateDelegate(typeof(Func<RegexRunner, bool>)), (Action<RegexRunner>)this._initTrackCountMethod.CreateDelegate(typeof(Action<RegexRunner>)));
 			return compiledRegexRunner;
 		}
 
-		private DynamicMethod goMethod;
+		private readonly DynamicMethod _goMethod;
 
-		private DynamicMethod findFirstCharMethod;
+		private readonly DynamicMethod _findFirstCharMethod;
 
-		private DynamicMethod initTrackCountMethod;
+		private readonly DynamicMethod _initTrackCountMethod;
 	}
 }

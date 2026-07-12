@@ -118,12 +118,12 @@ namespace System.Runtime.Versioning
 			}
 			else
 			{
-				resourceScope = consumeAsScope & (ResourceScope.Private | ResourceScope.Assembly);
-				if (resourceScope != ResourceScope.None)
+				ResourceScope resourceScope2 = consumeAsScope & (ResourceScope.Private | ResourceScope.Assembly);
+				if (resourceScope2 != ResourceScope.None)
 				{
-					if (resourceScope != ResourceScope.Private)
+					if (resourceScope2 != ResourceScope.Private)
 					{
-						if (resourceScope != ResourceScope.Assembly)
+						if (resourceScope2 != ResourceScope.Assembly)
 						{
 							throw new ArgumentException(Environment.GetResourceString("Unknown value for the ResourceScope: {0}  Too many resource visibility bits may be set.", new object[] { consumeAsScope }), "consumeAsScope");
 						}

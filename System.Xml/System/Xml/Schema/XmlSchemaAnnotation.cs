@@ -18,8 +18,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("appinfo", typeof(XmlSchemaAppInfo))]
 		[XmlElement("documentation", typeof(XmlSchemaDocumentation))]
+		[XmlElement("appinfo", typeof(XmlSchemaAppInfo))]
 		public XmlSchemaObjectCollection Items
 		{
 			get

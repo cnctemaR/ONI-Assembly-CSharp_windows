@@ -13,7 +13,7 @@ namespace System.Data
 
 		internal DataRowBuilder()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		internal readonly DataTable _table;

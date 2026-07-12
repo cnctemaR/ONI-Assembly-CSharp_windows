@@ -2,7 +2,7 @@
 
 namespace UnityEngine
 {
-	internal enum ColliderErrorState2D
+	public enum ColliderErrorState2D
 	{
 		None,
 		NoShapes,

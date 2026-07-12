@@ -80,7 +80,7 @@ public class Tech : Resource
 
 	public bool RequiresResearchType(string type)
 	{
-		return this.costsByResearchTypeID.ContainsKey(type);
+		return this.costsByResearchTypeID.ContainsKey(type) && this.costsByResearchTypeID[type] > 0f;
 	}
 
 	public void SetNode(ResourceTreeNode node, string categoryID)

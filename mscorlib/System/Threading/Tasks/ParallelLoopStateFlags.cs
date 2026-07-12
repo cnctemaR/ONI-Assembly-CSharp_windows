@@ -8,7 +8,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_LoopStateFlags;
+				return this._loopStateFlags;
 			}
 		}
 
@@ -23,12 +23,12 @@ namespace System.Threading.Tasks
 			SpinWait spinWait = default(SpinWait);
 			for (;;)
 			{
-				oldState = this.m_LoopStateFlags;
+				oldState = this._loopStateFlags;
 				if ((oldState & illegalStates) != 0)
 				{
 					break;
 				}
-				if (Interlocked.CompareExchange(ref this.m_LoopStateFlags, oldState | newState, oldState) == oldState)
+				if (Interlocked.CompareExchange(ref this._loopStateFlags, oldState | newState, oldState) == oldState)
 				{
 					return true;
 				}
@@ -39,32 +39,32 @@ namespace System.Threading.Tasks
 
 		internal void SetExceptional()
 		{
-			this.AtomicLoopStateUpdate(ParallelLoopStateFlags.PLS_EXCEPTIONAL, ParallelLoopStateFlags.PLS_NONE);
+			this.AtomicLoopStateUpdate(1, 0);
 		}
 
 		internal void Stop()
 		{
-			if (!this.AtomicLoopStateUpdate(ParallelLoopStateFlags.PLS_STOPPED, ParallelLoopStateFlags.PLS_BROKEN))
+			if (!this.AtomicLoopStateUpdate(4, 2))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Stop was called after Break was called."));
+				throw new InvalidOperationException("Stop was called after Break was called.");
 			}
 		}
 
 		internal bool Cancel()
 		{
-			return this.AtomicLoopStateUpdate(ParallelLoopStateFlags.PLS_CANCELED, ParallelLoopStateFlags.PLS_NONE);
+			return this.AtomicLoopStateUpdate(8, 0);
 		}
 
-		internal static int PLS_NONE;
+		internal const int ParallelLoopStateNone = 0;
 
-		internal static int PLS_EXCEPTIONAL = 1;
+		internal const int ParallelLoopStateExceptional = 1;
 
-		internal static int PLS_BROKEN = 2;
+		internal const int ParallelLoopStateBroken = 2;
 
-		internal static int PLS_STOPPED = 4;
+		internal const int ParallelLoopStateStopped = 4;
 
-		internal static int PLS_CANCELED = 8;
+		internal const int ParallelLoopStateCanceled = 8;
 
-		private volatile int m_LoopStateFlags = ParallelLoopStateFlags.PLS_NONE;
+		private volatile int _loopStateFlags;
 	}
 }

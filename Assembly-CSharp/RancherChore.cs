@@ -18,17 +18,17 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		};
 		this.IsOpenForRanching = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
-		base.AddPrecondition(this.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
+		this.AddPrecondition(this.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
 		SkillPerkMissingComplainer component = base.GetComponent<SkillPerkMissingComplainer>();
-		base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, rancher_station.GetComponent<Building>());
+		this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
+		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, rancher_station.GetComponent<Building>());
 		Operational component2 = rancher_station.GetComponent<Operational>();
-		base.AddPrecondition(ChorePreconditions.instance.IsOperational, component2);
+		this.AddPrecondition(ChorePreconditions.instance.IsOperational, component2);
 		Deconstructable component3 = rancher_station.GetComponent<Deconstructable>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component3);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component3);
 		BuildingEnabledButton component4 = rancher_station.GetComponent<BuildingEnabledButton>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component4);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component4);
 		base.smi = new RancherChore.RancherChoreStates.Instance(rancher_station);
 		base.SetPrioritizable(rancher_station.GetComponent<Prioritizable>());
 	}
@@ -159,7 +159,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			return Db.Get().Attributes.Ranching;
 		}
 
-		protected override void OnStartWork(Worker worker)
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			if (this.ranch == null)
 			{
@@ -170,7 +170,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			this.critterAnimController.Queue(this.ranch.def.RanchedLoopAnim, KAnim.PlayMode.Loop, 1f, 0f);
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			if (this.ranch.def.OnRanchWorkTick != null)
 			{
@@ -179,7 +179,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			return base.OnWorkTick(worker, dt);
 		}
 
-		public override void OnPendingCompleteWork(Worker work)
+		public override void OnPendingCompleteWork(WorkerBase work)
 		{
 			RancherChore.RancherChoreStates.Instance smi = base.gameObject.GetSMI<RancherChore.RancherChoreStates.Instance>();
 			if (this.ranch == null || smi == null)
@@ -192,7 +192,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			}
 		}
 
-		protected override void OnAbortWork(Worker worker)
+		protected override void OnAbortWork(WorkerBase worker)
 		{
 			if (this.ranch == null || this.critterAnimController == null)
 			{

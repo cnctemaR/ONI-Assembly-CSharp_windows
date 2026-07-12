@@ -1245,31 +1245,40 @@ namespace System.Xml
 
 		internal static Exception CreateReadContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
 		{
-			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString("The {0} method is not supported on node type {1}. If you want to read typed content of an element, use the ReadElementContentAs method.", new string[]
+			string text = "The {0} method is not supported on node type {1}. If you want to read typed content of an element, use the ReadElementContentAs method.";
+			object[] array = new string[]
 			{
 				methodName,
 				nodeType.ToString()
-			}), lineInfo));
+			};
+			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString(text, array), lineInfo));
 		}
 
 		internal static Exception CreateReadElementContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
 		{
-			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString("The {0} method is not supported on node type {1}.", new string[]
+			string text = "The {0} method is not supported on node type {1}.";
+			object[] array = new string[]
 			{
 				methodName,
 				nodeType.ToString()
-			}), lineInfo));
+			};
+			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString(text, array), lineInfo));
 		}
 
 		private static string AddLineInfo(string message, IXmlLineInfo lineInfo)
 		{
 			if (lineInfo != null)
 			{
-				message = message + " " + Res.GetString("Line {0}, position {1}.", new string[]
+				string[] array = new string[]
 				{
 					lineInfo.LineNumber.ToString(CultureInfo.InvariantCulture),
 					lineInfo.LinePosition.ToString(CultureInfo.InvariantCulture)
-				});
+				};
+				string text = message;
+				string text2 = " ";
+				string text3 = "Line {0}, position {1}.";
+				object[] array2 = array;
+				message = text + text2 + Res.GetString(text3, array2);
 			}
 			return message;
 		}
@@ -2020,10 +2029,10 @@ namespace System.Xml
 				IL_01D5:;
 			}
 			while ((this.AttributeCount == 0) ? (await this.ReadAsync().ConfigureAwait(false)) : this.ReadAttributeValue());
-			goto IL_0255;
+			goto IL_0258;
 			IL_0082:
 			return this.Value;
-			IL_0255:
+			IL_0258:
 			return (sb == null) ? value : sb.ToString();
 		}
 

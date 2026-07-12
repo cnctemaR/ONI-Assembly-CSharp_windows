@@ -9,9 +9,9 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Scripting/Component.bindings.h")]
 	[NativeClass("Unity::Component")]
+	[RequiredByNativeCode]
 	public class Component : Object
 	{
 		public extern Transform transform
@@ -117,14 +117,25 @@ namespace UnityEngine
 		}
 
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public Component GetComponentInParent(Type t, bool includeInactive)
+		{
+			return this.gameObject.GetComponentInParent(t, includeInactive);
+		}
+
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public Component GetComponentInParent(Type t)
 		{
-			return this.gameObject.GetComponentInParent(t);
+			return this.gameObject.GetComponentInParent(t, false);
+		}
+
+		public T GetComponentInParent<T>([DefaultValue("false")] bool includeInactive)
+		{
+			return (T)((object)this.GetComponentInParent(typeof(T), includeInactive));
 		}
 
 		public T GetComponentInParent<T>()
 		{
-			return (T)((object)this.GetComponentInParent(typeof(T)));
+			return (T)((object)this.GetComponentInParent(typeof(T), false));
 		}
 
 		public Component[] GetComponentsInParent(Type t, [DefaultValue("false")] bool includeInactive)
@@ -188,6 +199,9 @@ namespace UnityEngine
 		{
 			return this.gameObject.GetComponents<T>();
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetComponentIndex();
 
 		public bool CompareTag(string tag)
 		{

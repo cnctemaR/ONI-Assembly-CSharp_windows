@@ -25,7 +25,7 @@ public class BuildingInternalConstructorWorkable : Workable
 		this.constructorInstance = this.GetSMI<BuildingInternalConstructor.Instance>();
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.constructorInstance.ConstructionComplete(false);
 	}

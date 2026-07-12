@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Networking
 {
+	[NativeHeader("UnityWebRequestScriptingClasses.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Modules/UnityWebRequest/Public/UnityWebRequestAsyncOperation.h")]
-	[NativeHeader("UnityWebRequestScriptingClasses.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class UnityWebRequestAsyncOperation : AsyncOperation
 	{

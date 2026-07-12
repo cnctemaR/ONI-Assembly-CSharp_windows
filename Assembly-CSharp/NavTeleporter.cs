@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 
 public class NavTeleporter : KMonoBehaviour
 {
@@ -102,7 +103,7 @@ public class NavTeleporter : KMonoBehaviour
 	private void SetLink()
 	{
 		int cell = this.target.GetCell();
-		Pathfinding.Instance.GetNavGrid(MinionConfig.MINION_NAV_GRID_NAME).teleportTransitions[this.lastRegisteredCell] = cell;
+		Pathfinding.Instance.GetNavGrid(DUPLICANTSTATS.STANDARD.BaseStats.NAV_GRID_NAME).teleportTransitions[this.lastRegisteredCell] = cell;
 		Pathfinding.Instance.AddDirtyNavGridCell(this.lastRegisteredCell);
 	}
 
@@ -119,7 +120,7 @@ public class NavTeleporter : KMonoBehaviour
 
 	private void BreakLink()
 	{
-		Pathfinding.Instance.GetNavGrid(MinionConfig.MINION_NAV_GRID_NAME).teleportTransitions.Remove(this.lastRegisteredCell);
+		Pathfinding.Instance.GetNavGrid(DUPLICANTSTATS.STANDARD.BaseStats.NAV_GRID_NAME).teleportTransitions.Remove(this.lastRegisteredCell);
 		Pathfinding.Instance.AddDirtyNavGridCell(this.lastRegisteredCell);
 	}
 

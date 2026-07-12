@@ -662,7 +662,8 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 0, NavAxis.NA, true, true, true, 1, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 1, NavAxis.NA, false, false, true, 1, "", new CellOffset[]
 			{
-				new CellOffset(2, 1)
+				new CellOffset(2, 1),
+				new CellOffset(0, 2)
 			}, new CellOffset[]
 			{
 				new CellOffset(1, 0),
@@ -672,7 +673,8 @@ public class GameNavGrids
 			{
 				new CellOffset(1, 0),
 				new CellOffset(2, 0),
-				new CellOffset(2, -1)
+				new CellOffset(2, -1),
+				new CellOffset(1, 1)
 			}, new CellOffset[]
 			{
 				new CellOffset(2, -2)

@@ -983,14 +983,6 @@ namespace System.Linq.Expressions
 			return global::SR.Format("Switch value of type '{0}' cannot be used for the comparison method parameter of type '{1}'", p0, p1);
 		}
 
-		internal static string PdbGeneratorNeedsExpressionCompiler
-		{
-			get
-			{
-				return "DebugInfoGenerator created by CreatePdbGenerator can only be used with LambdaExpression.CompileToMethod.";
-			}
-		}
-
 		internal static string NonStaticConstructorRequired
 		{
 			get

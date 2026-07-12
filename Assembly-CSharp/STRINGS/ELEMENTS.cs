@@ -472,11 +472,39 @@ namespace STRINGS
 			public static LocString DESC = "(DuPe) Ooze is a slurry of water, carbon, and dozens and dozens of trace elements.\n\nDuplicants are printed from pure Ooze.";
 		}
 
+		public class PHYTOOIL
+		{
+			public static LocString NAME = UI.FormatAsLink("Phyto Oil", "PHYTOOIL");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Phyto Oil is a thick, slippery ",
+				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+				" extracted from pureed ",
+				UI.FormatAsLink("Slime", "SLIME"),
+				"."
+			});
+		}
+
+		public class FROZENPHYTOOIL
+		{
+			public static LocString NAME = UI.FormatAsLink("Frozen Phyto Oil", "FROZENPHYTOOIL");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Frozen Phyto Oil is thick, slippery ",
+				UI.FormatAsLink("Slime", "SLIME"),
+				" puree extract frozen into a ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" state."
+			});
+		}
+
 		public class CRUDEOIL
 		{
 			public static LocString NAME = UI.FormatAsLink("Crude Oil", "CRUDEOIL");
 
-			public static LocString DESC = "Crude Oil is a raw potential " + UI.FormatAsLink("Power", "POWER") + " source composed of billions of dead, primordial organisms.";
+			public static LocString DESC = "Crude Oil is a raw potential " + UI.FormatAsLink("Power", "POWER") + " source composed of billions of dead, primordial organisms.\n\nIt is also a useful lubricant for certain types of machinery.";
 		}
 
 		public class PETROLEUM
@@ -721,6 +749,20 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Graphite", "GRAPHITE");
 
 			public static LocString DESC = "(C) Graphite is the most stable form of carbon.\n\nIt has high thermal conductivity and is useful as a <b>Construction Material</b>.";
+		}
+
+		public class LIQUIDGUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Liquid Gunk", "LIQUIDGUNK");
+
+			public static LocString DESC = "Liquid Gunk is the built-up grime and grit produced by Duplicants' bionic mechanisms.\n\nIt is unpleasantly viscous.";
+		}
+
+		public class GUNK
+		{
+			public static LocString NAME = UI.FormatAsLink("Gunk", "GUNK");
+
+			public static LocString DESC = "Gunk is the built-up grime and grit produced by Duplicants' bionic mechanisms that has been frozen into a a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
 		}
 
 		public class SOLIDNUCLEARWASTE

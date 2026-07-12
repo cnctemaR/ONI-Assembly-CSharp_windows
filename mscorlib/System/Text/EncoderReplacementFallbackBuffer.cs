@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Text
 {
@@ -7,65 +6,65 @@ namespace System.Text
 	{
 		public EncoderReplacementFallbackBuffer(EncoderReplacementFallback fallback)
 		{
-			this.strDefault = fallback.DefaultString + fallback.DefaultString;
+			this._strDefault = fallback.DefaultString + fallback.DefaultString;
 		}
 
 		public override bool Fallback(char charUnknown, int index)
 		{
-			if (this.fallbackCount >= 1)
+			if (this._fallbackCount >= 1)
 			{
-				if (char.IsHighSurrogate(charUnknown) && this.fallbackCount >= 0 && char.IsLowSurrogate(this.strDefault[this.fallbackIndex + 1]))
+				if (char.IsHighSurrogate(charUnknown) && this._fallbackCount >= 0 && char.IsLowSurrogate(this._strDefault[this._fallbackIndex + 1]))
 				{
-					base.ThrowLastCharRecursive(char.ConvertToUtf32(charUnknown, this.strDefault[this.fallbackIndex + 1]));
+					base.ThrowLastCharRecursive(char.ConvertToUtf32(charUnknown, this._strDefault[this._fallbackIndex + 1]));
 				}
 				base.ThrowLastCharRecursive((int)charUnknown);
 			}
-			this.fallbackCount = this.strDefault.Length / 2;
-			this.fallbackIndex = -1;
-			return this.fallbackCount != 0;
+			this._fallbackCount = this._strDefault.Length / 2;
+			this._fallbackIndex = -1;
+			return this._fallbackCount != 0;
 		}
 
 		public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
 		{
 			if (!char.IsHighSurrogate(charUnknownHigh))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
+				throw new ArgumentOutOfRangeException("charUnknownHigh", SR.Format("Valid values are between {0} and {1}, inclusive.", 55296, 56319));
 			}
 			if (!char.IsLowSurrogate(charUnknownLow))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
+				throw new ArgumentOutOfRangeException("charUnknownLow", SR.Format("Valid values are between {0} and {1}, inclusive.", 56320, 57343));
 			}
-			if (this.fallbackCount >= 1)
+			if (this._fallbackCount >= 1)
 			{
 				base.ThrowLastCharRecursive(char.ConvertToUtf32(charUnknownHigh, charUnknownLow));
 			}
-			this.fallbackCount = this.strDefault.Length;
-			this.fallbackIndex = -1;
-			return this.fallbackCount != 0;
+			this._fallbackCount = this._strDefault.Length;
+			this._fallbackIndex = -1;
+			return this._fallbackCount != 0;
 		}
 
 		public override char GetNextChar()
 		{
-			this.fallbackCount--;
-			this.fallbackIndex++;
-			if (this.fallbackCount < 0)
+			this._fallbackCount--;
+			this._fallbackIndex++;
+			if (this._fallbackCount < 0)
 			{
 				return '\0';
 			}
-			if (this.fallbackCount == 2147483647)
+			if (this._fallbackCount == 2147483647)
 			{
-				this.fallbackCount = -1;
+				this._fallbackCount = -1;
 				return '\0';
 			}
-			return this.strDefault[this.fallbackIndex];
+			return this._strDefault[this._fallbackIndex];
 		}
 
 		public override bool MovePrevious()
 		{
-			if (this.fallbackCount >= -1 && this.fallbackIndex >= 0)
+			if (this._fallbackCount >= -1 && this._fallbackIndex >= 0)
 			{
-				this.fallbackIndex--;
-				this.fallbackCount++;
+				this._fallbackIndex--;
+				this._fallbackCount++;
 				return true;
 			}
 			return false;
@@ -75,27 +74,26 @@ namespace System.Text
 		{
 			get
 			{
-				if (this.fallbackCount >= 0)
+				if (this._fallbackCount >= 0)
 				{
-					return this.fallbackCount;
+					return this._fallbackCount;
 				}
 				return 0;
 			}
 		}
 
-		[SecuritySafeCritical]
 		public override void Reset()
 		{
-			this.fallbackCount = -1;
-			this.fallbackIndex = 0;
+			this._fallbackCount = -1;
+			this._fallbackIndex = 0;
 			this.charStart = null;
 			this.bFallingBack = false;
 		}
 
-		private string strDefault;
+		private string _strDefault;
 
-		private int fallbackCount = -1;
+		private int _fallbackCount = -1;
 
-		private int fallbackIndex = -1;
+		private int _fallbackIndex = -1;
 	}
 }

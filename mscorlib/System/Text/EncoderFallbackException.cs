@@ -7,33 +7,28 @@ namespace System.Text
 	public sealed class EncoderFallbackException : ArgumentException
 	{
 		public EncoderFallbackException()
-			: base(Environment.GetResourceString("Value does not fall within the expected range."))
+			: base("Value does not fall within the expected range.")
 		{
-			base.SetErrorCode(-2147024809);
+			base.HResult = -2147024809;
 		}
 
 		public EncoderFallbackException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024809);
+			base.HResult = -2147024809;
 		}
 
 		public EncoderFallbackException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024809);
-		}
-
-		internal EncoderFallbackException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
+			base.HResult = -2147024809;
 		}
 
 		internal EncoderFallbackException(string message, char charUnknown, int index)
 			: base(message)
 		{
-			this.charUnknown = charUnknown;
-			this.index = index;
+			this._charUnknown = charUnknown;
+			this._index = index;
 		}
 
 		internal EncoderFallbackException(string message, char charUnknownHigh, char charUnknownLow, int index)
@@ -41,22 +36,27 @@ namespace System.Text
 		{
 			if (!char.IsHighSurrogate(charUnknownHigh))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
+				throw new ArgumentOutOfRangeException("charUnknownHigh", SR.Format("Valid values are between {0} and {1}, inclusive.", 55296, 56319));
 			}
 			if (!char.IsLowSurrogate(charUnknownLow))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
+				throw new ArgumentOutOfRangeException("CharUnknownLow", SR.Format("Valid values are between {0} and {1}, inclusive.", 56320, 57343));
 			}
-			this.charUnknownHigh = charUnknownHigh;
-			this.charUnknownLow = charUnknownLow;
-			this.index = index;
+			this._charUnknownHigh = charUnknownHigh;
+			this._charUnknownLow = charUnknownLow;
+			this._index = index;
+		}
+
+		private EncoderFallbackException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
+		{
 		}
 
 		public char CharUnknown
 		{
 			get
 			{
-				return this.charUnknown;
+				return this._charUnknown;
 			}
 		}
 
@@ -64,7 +64,7 @@ namespace System.Text
 		{
 			get
 			{
-				return this.charUnknownHigh;
+				return this._charUnknownHigh;
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace System.Text
 		{
 			get
 			{
-				return this.charUnknownLow;
+				return this._charUnknownLow;
 			}
 		}
 
@@ -80,21 +80,21 @@ namespace System.Text
 		{
 			get
 			{
-				return this.index;
+				return this._index;
 			}
 		}
 
 		public bool IsUnknownSurrogate()
 		{
-			return this.charUnknownHigh > '\0';
+			return this._charUnknownHigh > '\0';
 		}
 
-		private char charUnknown;
+		private char _charUnknown;
 
-		private char charUnknownHigh;
+		private char _charUnknownHigh;
 
-		private char charUnknownLow;
+		private char _charUnknownLow;
 
-		private int index;
+		private int _index;
 	}
 }

@@ -185,5 +185,12 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
 		}
+
+		public static class CERES_SPACEDOUT_SHATTERED_CLUSTER
+		{
+			public static LocString NAME = "Mini Cluster - Ceres Mantle";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world that was fractured by an experiment gone wrong.";
+		}
 	}
 }

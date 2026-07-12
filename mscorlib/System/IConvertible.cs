@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System
 {
 	[CLSCompliant(false)]
-	[ComVisible(true)]
 	public interface IConvertible
 	{
 		TypeCode GetTypeCode();

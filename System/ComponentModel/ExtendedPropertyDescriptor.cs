@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Collections;
-using System.Security.Permissions;
+using System.Collections.Generic;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	internal sealed class ExtendedPropertyDescriptor : PropertyDescriptor
 	{
 		public ExtendedPropertyDescriptor(ReflectPropertyDescriptor extenderInfo, Type receiverType, IExtenderProvider provider, Attribute[] attributes)
 			: base(extenderInfo, attributes)
 		{
-			ArrayList arrayList = new ArrayList(this.AttributeArray);
-			arrayList.Add(ExtenderProvidedPropertyAttribute.Create(extenderInfo, receiverType, provider));
+			List<Attribute> list = new List<Attribute>(this.AttributeArray);
+			list.Add(ExtenderProvidedPropertyAttribute.Create(extenderInfo, receiverType, provider));
 			if (extenderInfo.IsReadOnly)
 			{
-				arrayList.Add(ReadOnlyAttribute.Yes);
+				list.Add(ReadOnlyAttribute.Yes);
 			}
-			Attribute[] array = new Attribute[arrayList.Count];
-			arrayList.CopyTo(array, 0);
+			Attribute[] array = new Attribute[list.Count];
+			list.CopyTo(array, 0);
 			this.AttributeArray = array;
-			this.extenderInfo = extenderInfo;
-			this.provider = provider;
+			this._extenderInfo = extenderInfo;
+			this._provider = provider;
 		}
 
 		public ExtendedPropertyDescriptor(PropertyDescriptor extender, Attribute[] attributes)
@@ -28,20 +26,20 @@ namespace System.ComponentModel
 		{
 			ExtenderProvidedPropertyAttribute extenderProvidedPropertyAttribute = extender.Attributes[typeof(ExtenderProvidedPropertyAttribute)] as ExtenderProvidedPropertyAttribute;
 			ReflectPropertyDescriptor reflectPropertyDescriptor = extenderProvidedPropertyAttribute.ExtenderProperty as ReflectPropertyDescriptor;
-			this.extenderInfo = reflectPropertyDescriptor;
-			this.provider = extenderProvidedPropertyAttribute.Provider;
+			this._extenderInfo = reflectPropertyDescriptor;
+			this._provider = extenderProvidedPropertyAttribute.Provider;
 		}
 
 		public override bool CanResetValue(object comp)
 		{
-			return this.extenderInfo.ExtenderCanResetValue(this.provider, comp);
+			return this._extenderInfo.ExtenderCanResetValue(this._provider, comp);
 		}
 
 		public override Type ComponentType
 		{
 			get
 			{
-				return this.extenderInfo.ComponentType;
+				return this._extenderInfo.ComponentType;
 			}
 		}
 
@@ -57,7 +55,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.extenderInfo.ExtenderGetType(this.provider);
+				return this._extenderInfo.ExtenderGetType(this._provider);
 			}
 		}
 
@@ -69,14 +67,11 @@ namespace System.ComponentModel
 				DisplayNameAttribute displayNameAttribute = this.Attributes[typeof(DisplayNameAttribute)] as DisplayNameAttribute;
 				if (displayNameAttribute == null || displayNameAttribute.IsDefaultAttribute())
 				{
-					ISite site = MemberDescriptor.GetSite(this.provider);
-					if (site != null)
+					ISite site = MemberDescriptor.GetSite(this._provider);
+					string text2 = ((site != null) ? site.Name : null);
+					if (text2 != null && text2.Length > 0)
 					{
-						string name = site.Name;
-						if (name != null && name.Length > 0)
-						{
-							text = global::SR.GetString("{0} on {1}", new object[] { text, name });
-						}
+						text = string.Format("{0} on {1}", text, text2);
 					}
 				}
 				return text;
@@ -85,26 +80,26 @@ namespace System.ComponentModel
 
 		public override object GetValue(object comp)
 		{
-			return this.extenderInfo.ExtenderGetValue(this.provider, comp);
+			return this._extenderInfo.ExtenderGetValue(this._provider, comp);
 		}
 
 		public override void ResetValue(object comp)
 		{
-			this.extenderInfo.ExtenderResetValue(this.provider, comp, this);
+			this._extenderInfo.ExtenderResetValue(this._provider, comp, this);
 		}
 
 		public override void SetValue(object component, object value)
 		{
-			this.extenderInfo.ExtenderSetValue(this.provider, component, value, this);
+			this._extenderInfo.ExtenderSetValue(this._provider, component, value, this);
 		}
 
 		public override bool ShouldSerializeValue(object comp)
 		{
-			return this.extenderInfo.ExtenderShouldSerializeValue(this.provider, comp);
+			return this._extenderInfo.ExtenderShouldSerializeValue(this._provider, comp);
 		}
 
-		private readonly ReflectPropertyDescriptor extenderInfo;
+		private readonly ReflectPropertyDescriptor _extenderInfo;
 
-		private readonly IExtenderProvider provider;
+		private readonly IExtenderProvider _provider;
 	}
 }

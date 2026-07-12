@@ -37,6 +37,30 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public Matrix4x4 cullingMatrix
+		{
+			get
+			{
+				return this.m_CullingMatrix;
+			}
+			set
+			{
+				this.m_CullingMatrix = value;
+			}
+		}
+
+		public float cullingNearPlane
+		{
+			get
+			{
+				return this.m_CullingNearPlane;
+			}
+			set
+			{
+				this.m_CullingNearPlane = value;
+			}
+		}
+
 		public float shadowCascadeBlendCullingFactor
 		{
 			get
@@ -142,6 +166,8 @@ namespace UnityEngine.Rendering
 		private float m_ShadowCascadeBlendCullingFactor;
 
 		private float m_CullingNearPlane;
+
+		private Matrix4x4 m_CullingMatrix;
 
 		[CompilerGenerated]
 		[UnsafeValueType]

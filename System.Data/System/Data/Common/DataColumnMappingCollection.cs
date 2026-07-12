@@ -98,8 +98,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DataColumnMapping this[int index]
 		{
 			get
@@ -114,8 +114,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DataColumnMapping this[string sourceColumn]
 		{
 			get

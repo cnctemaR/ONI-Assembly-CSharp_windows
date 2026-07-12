@@ -86,10 +86,14 @@ namespace System.IO
 								KqueueMonitor.close(this.conn);
 							}
 							this.conn = -1;
+							goto IL_0078;
 						}
+						IL_006D:
+						this.thread.Interrupt();
+						IL_0078:
 						if (!this.thread.Join(2000))
 						{
-							this.thread.Abort();
+							goto IL_006D;
 						}
 						this.requestStop = false;
 						this.started = false;

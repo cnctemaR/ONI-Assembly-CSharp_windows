@@ -63,7 +63,27 @@ namespace System.Diagnostics
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetImpl(string category, string counter, string instance, string machine, out PerformanceCounterType ctype, out bool custom);
+		private unsafe static extern IntPtr GetImpl_icall(char* category, int category_length, char* counter, int counter_length, char* instance, int instance_length, out PerformanceCounterType ctype, out bool custom);
+
+		private unsafe static IntPtr GetImpl(string category, string counter, string instance, out PerformanceCounterType ctype, out bool custom)
+		{
+			char* ptr = category;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = counter;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr3 = instance;
+			if (ptr3 != null)
+			{
+				ptr3 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return PerformanceCounter.GetImpl_icall(ptr, (category != null) ? category.Length : 0, ptr2, (counter != null) ? counter.Length : 0, ptr3, (instance != null) ? instance.Length : 0, out ctype, out custom);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetSample(IntPtr impl, bool only_value, out CounterSample sample);
@@ -74,13 +94,21 @@ namespace System.Diagnostics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void FreeData(IntPtr impl);
 
+		private static bool IsValidMachine(string machine)
+		{
+			return machine == ".";
+		}
+
 		private void UpdateInfo()
 		{
 			if (this.impl != IntPtr.Zero)
 			{
 				this.Close();
 			}
-			this.impl = PerformanceCounter.GetImpl(this.categoryName, this.counterName, this.instanceName, this.machineName, out this.type, out this.is_custom);
+			if (PerformanceCounter.IsValidMachine(this.machineName))
+			{
+				this.impl = PerformanceCounter.GetImpl(this.categoryName, this.counterName, this.instanceName, out this.type, out this.is_custom);
+			}
 			if (!this.is_custom)
 			{
 				this.readOnly = true;
@@ -88,11 +116,11 @@ namespace System.Diagnostics
 			this.changed = false;
 		}
 
-		[SettingsBindable(true)]
 		[SRDescription("The category name for this performance counter.")]
-		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[DefaultValue("")]
 		[ReadOnly(true)]
+		[DefaultValue("")]
+		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[SettingsBindable(true)]
 		public string CategoryName
 		{
 			get
@@ -110,10 +138,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonoTODO]
-		[ReadOnly(true)]
 		[MonitoringDescription("A description describing the counter.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[ReadOnly(true)]
+		[MonoTODO]
 		public string CounterHelp
 		{
 			get
@@ -124,8 +152,8 @@ namespace System.Diagnostics
 
 		[TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[DefaultValue("")]
-		[SettingsBindable(true)]
 		[SRDescription("The name of this performance counter.")]
+		[SettingsBindable(true)]
 		[ReadOnly(true)]
 		public string CounterName
 		{
@@ -172,11 +200,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[SRDescription("The instance name for this performance counter.")]
-		[SettingsBindable(true)]
-		[ReadOnly(true)]
 		[DefaultValue("")]
+		[ReadOnly(true)]
+		[SettingsBindable(true)]
 		[TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[SRDescription("The instance name for this performance counter.")]
 		public string InstanceName
 		{
 			get
@@ -194,11 +222,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO("What's the machine name format?")]
-		[DefaultValue(".")]
-		[Browsable(false)]
-		[SettingsBindable(true)]
 		[SRDescription("The machine where this performance counter resides.")]
+		[SettingsBindable(true)]
+		[DefaultValue(".")]
+		[MonoTODO("What's the machine name format?")]
+		[Browsable(false)]
 		public string MachineName
 		{
 			get

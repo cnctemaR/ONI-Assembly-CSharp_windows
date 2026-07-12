@@ -6,11 +6,11 @@ namespace System.Runtime.CompilerServices
 	[Serializable]
 	public class StateMachineAttribute : Attribute
 	{
-		public Type StateMachineType { get; private set; }
-
 		public StateMachineAttribute(Type stateMachineType)
 		{
 			this.StateMachineType = stateMachineType;
 		}
+
+		public Type StateMachineType { get; }
 	}
 }

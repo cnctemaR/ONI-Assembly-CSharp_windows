@@ -6,8 +6,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaElement : XmlSchemaParticle
 	{
-		[XmlAttribute("abstract")]
 		[DefaultValue(false)]
+		[XmlAttribute("abstract")]
 		public bool IsAbstract
 		{
 			get
@@ -49,8 +49,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("final")]
 		[DefaultValue(XmlSchemaDerivationMethod.None)]
+		[XmlAttribute("final")]
 		public XmlSchemaDerivationMethod Final
 		{
 			get
@@ -63,8 +63,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("fixed")]
 		[DefaultValue(null)]
+		[XmlAttribute("fixed")]
 		public string FixedValue
 		{
 			get
@@ -77,8 +77,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("form")]
 		[DefaultValue(XmlSchemaForm.None)]
+		[XmlAttribute("form")]
 		public XmlSchemaForm Form
 		{
 			get
@@ -91,8 +91,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("name")]
 		[DefaultValue("")]
+		[XmlAttribute("name")]
 		public string Name
 		{
 			get
@@ -177,8 +177,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
 		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
+		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
 		public XmlSchemaType SchemaType
 		{
 			get

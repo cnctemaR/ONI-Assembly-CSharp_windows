@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Text
 {
@@ -22,7 +21,6 @@ namespace System.Text
 			}
 		}
 
-		[SecurityCritical]
 		internal void InternalReset()
 		{
 			this.charStart = null;
@@ -31,7 +29,6 @@ namespace System.Text
 			this.Reset();
 		}
 
-		[SecurityCritical]
 		internal unsafe void InternalInitialize(char* charStart, char* charEnd, EncoderNLS encoder, bool setEncoder)
 		{
 			this.charStart = charStart;
@@ -54,7 +51,6 @@ namespace System.Text
 			return nextChar;
 		}
 
-		[SecurityCritical]
 		internal unsafe virtual bool InternalFallback(char ch, ref char* chars)
 		{
 			int num = (chars - this.charStart) / 2 - 1;
@@ -67,7 +63,7 @@ namespace System.Text
 						if (this.setEncoder)
 						{
 							this.bUsedEncoder = true;
-							this.encoder.charLeftOver = ch;
+							this.encoder._charLeftOver = ch;
 						}
 						this.bFallingBack = false;
 						return false;
@@ -108,13 +104,11 @@ namespace System.Text
 
 		internal void ThrowLastCharRecursive(int charRecursive)
 		{
-			throw new ArgumentException(Environment.GetResourceString("Recursive fallback not allowed for character \\\\u{0:X4}.", new object[] { charRecursive }), "chars");
+			throw new ArgumentException(SR.Format("Recursive fallback not allowed for character \\\\u{0:X4}.", charRecursive), "chars");
 		}
 
-		[SecurityCritical]
 		internal unsafe char* charStart;
 
-		[SecurityCritical]
 		internal unsafe char* charEnd;
 
 		internal EncoderNLS encoder;

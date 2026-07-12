@@ -14,44 +14,44 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.value;
+				return this._value;
 			}
 			set
 			{
-				this.value = value;
+				this._value = value;
 			}
 		}
 
 		public static implicit operator string(QilLiteral literal)
 		{
-			return (string)literal.value;
+			return (string)literal._value;
 		}
 
 		public static implicit operator int(QilLiteral literal)
 		{
-			return (int)literal.value;
+			return (int)literal._value;
 		}
 
 		public static implicit operator long(QilLiteral literal)
 		{
-			return (long)literal.value;
+			return (long)literal._value;
 		}
 
 		public static implicit operator double(QilLiteral literal)
 		{
-			return (double)literal.value;
+			return (double)literal._value;
 		}
 
 		public static implicit operator decimal(QilLiteral literal)
 		{
-			return (decimal)literal.value;
+			return (decimal)literal._value;
 		}
 
 		public static implicit operator XmlQueryType(QilLiteral literal)
 		{
-			return (XmlQueryType)literal.value;
+			return (XmlQueryType)literal._value;
 		}
 
-		private object value;
+		private object _value;
 	}
 }

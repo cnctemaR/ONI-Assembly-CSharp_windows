@@ -111,7 +111,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				{
 					PermitCategory permitCategory3;
 					Option<PermitResource> option2;
-					keyValuePair.Deconstruct<PermitCategory, Option<PermitResource>>(out permitCategory3, out option2);
+					keyValuePair.Deconstruct(out permitCategory3, out option2);
 					PermitCategory permitCategory4 = permitCategory3;
 					Option<PermitResource> option3 = option2;
 					if (option3.HasValue)

@@ -32,6 +32,7 @@ public class DevToolManager
 		this.RegisterDevTool<DevToolSimDebug>("Debuggers/Sim Debug");
 		this.RegisterDevTool<DevToolStateMachineDebug>("Debuggers/State Machine");
 		this.RegisterDevTool<DevToolSaveGameInfo>("Debuggers/Save Game Info");
+		this.RegisterDevTool<DevToolPerformanceInfo>("Debuggers/Performance Info");
 		this.RegisterDevTool<DevToolPrintingPodDebug>("Debuggers/Printing Pod Debug");
 		this.RegisterDevTool<DevToolBigBaseMutations>("Debuggers/Big Base Mutation Utilities");
 		this.RegisterDevTool<DevToolNavGrid>("Debuggers/Nav Grid");

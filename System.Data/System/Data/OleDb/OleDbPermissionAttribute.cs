@@ -15,9 +15,9 @@ namespace System.Data.OleDb
 		{
 		}
 
-		[Obsolete("Provider property has been deprecated.  Use the Add method.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Provider property has been deprecated.  Use the Add method.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		public string Provider
 		{
 			get

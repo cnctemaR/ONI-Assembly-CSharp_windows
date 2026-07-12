@@ -4,10 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
-	[NativeHeader("Runtime/Graphics/LOD/LODGroupManager.h")]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroup.h")]
+	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/LOD/LODGroupManager.h")]
 	public class LODGroup : Component
 	{
 		public Vector3 localReferencePoint
@@ -37,6 +37,16 @@ namespace UnityEngine
 			[NativeMethod("GetLODCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public extern bool lastLODBillboard
+		{
+			[NativeMethod("GetLastLODIsBillboard")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeMethod("SetLastLODIsBillboard")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public extern LODFadeMode fadeMode
@@ -79,7 +89,7 @@ namespace UnityEngine
 
 		[FreeFunction("SetLODs_Binding", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetLODs(LOD[] lods);
+		public extern void SetLODs([Unmarshalled] LOD[] lods);
 
 		[FreeFunction("ForceLODLevel", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

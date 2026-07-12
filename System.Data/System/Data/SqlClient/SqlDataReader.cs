@@ -198,7 +198,10 @@ namespace System.Data.SqlClient
 						}
 						else if (SqlDbType.Udt == sqlMetaData.type)
 						{
-							throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+							this.Connection.CheckGetExtendedUDTInfo(sqlMetaData, true);
+							text = sqlMetaData.udtDatabaseName;
+							text2 = sqlMetaData.udtSchemaName;
+							text3 = sqlMetaData.udtTypeName;
 						}
 						int num = sqlMetaData.length;
 						if (num > 8000)
@@ -209,7 +212,7 @@ namespace System.Data.SqlClient
 						{
 							num /= 2;
 						}
-						array[i] = new SmiQueryMetaData(sqlMetaData.type, (long)num, sqlMetaData.precision, sqlMetaData.scale, (long)((collation != null) ? collation.LCID : this._defaultLCID), (collation != null) ? collation.SqlCompareOptions : SqlCompareOptions.None, false, null, null, sqlMetaData.column, text, text2, text3, sqlMetaData.isNullable, sqlMetaData.serverName, sqlMetaData.catalogName, sqlMetaData.schemaName, sqlMetaData.tableName, sqlMetaData.baseColumn, sqlMetaData.isKey, sqlMetaData.isIdentity, sqlMetaData.updatability == 0, sqlMetaData.isExpression, sqlMetaData.isDifferentName, sqlMetaData.isHidden);
+						array[i] = new SmiQueryMetaData(sqlMetaData.type, (long)num, sqlMetaData.precision, sqlMetaData.scale, (long)((collation != null) ? collation.LCID : this._defaultLCID), (collation != null) ? collation.SqlCompareOptions : SqlCompareOptions.None, sqlMetaData.udtType, false, null, null, sqlMetaData.column, text, text2, text3, sqlMetaData.isNullable, sqlMetaData.serverName, sqlMetaData.catalogName, sqlMetaData.schemaName, sqlMetaData.tableName, sqlMetaData.baseColumn, sqlMetaData.isKey, sqlMetaData.isIdentity, sqlMetaData.updatability == 0, sqlMetaData.isExpression, sqlMetaData.isDifferentName, sqlMetaData.isHidden);
 					}
 				}
 			}
@@ -884,7 +887,8 @@ namespace System.Data.SqlClient
 			{
 				if (metaData.type == SqlDbType.Udt)
 				{
-					type = MetaType.MetaMaxVarBinary.ClassType;
+					this.Connection.CheckGetExtendedUDTInfo(metaData, false);
+					type = metaData.udtType;
 				}
 				else
 				{
@@ -958,7 +962,8 @@ namespace System.Data.SqlClient
 			{
 				if (metaData.type == SqlDbType.Udt)
 				{
-					type = MetaType.MetaMaxVarBinary.SqlType;
+					this.Connection.CheckGetExtendedUDTInfo(metaData, false);
+					type = metaData.udtType;
 				}
 				else
 				{
@@ -1832,9 +1837,11 @@ namespace System.Data.SqlClient
 				{
 					return data.SqlValue;
 				}
-				if (this._connection != null)
+				SqlConnection connection = this._connection;
+				if (connection != null)
 				{
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					connection.CheckGetExtendedUDTInfo(metaData, true);
+					return connection.GetUdtValue(data.Value, metaData, false);
 				}
 				throw ADP.DataReaderClosed("GetSqlValueFromSqlBufferInternal");
 			}
@@ -1978,9 +1985,11 @@ namespace System.Data.SqlClient
 				{
 					return data.Value;
 				}
-				if (this._connection != null)
+				SqlConnection connection = this._connection;
+				if (connection != null)
 				{
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					connection.CheckGetExtendedUDTInfo(metaData, true);
+					return connection.GetUdtValue(data.Value, metaData, true);
 				}
 				throw ADP.DataReaderClosed("GetValueFromSqlBufferInternal");
 			}
@@ -3094,14 +3103,6 @@ namespace System.Data.SqlClient
 
 		internal Task<int> GetBytesAsync(int i, byte[] buffer, int index, int length, int timeout, CancellationToken cancellationToken, out int bytesRead)
 		{
-			SqlDataReader.<>c__DisplayClass188_0 CS$<>8__locals1 = new SqlDataReader.<>c__DisplayClass188_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.i = i;
-			CS$<>8__locals1.cancellationToken = cancellationToken;
-			CS$<>8__locals1.buffer = buffer;
-			CS$<>8__locals1.index = index;
-			CS$<>8__locals1.length = length;
-			CS$<>8__locals1.timeout = timeout;
 			bytesRead = 0;
 			if (this.IsClosed)
 			{
@@ -3111,7 +3112,7 @@ namespace System.Data.SqlClient
 			{
 				return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.AsyncOperationPending()));
 			}
-			if (CS$<>8__locals1.cancellationToken.CanBeCanceled && CS$<>8__locals1.cancellationToken.IsCancellationRequested)
+			if (cancellationToken.CanBeCanceled && cancellationToken.IsCancellationRequested)
 			{
 				return null;
 			}
@@ -3121,7 +3122,7 @@ namespace System.Data.SqlClient
 				Task<int> bytesAsyncReadDataStage;
 				try
 				{
-					bytesAsyncReadDataStage = this.GetBytesAsyncReadDataStage(CS$<>8__locals1.i, CS$<>8__locals1.buffer, CS$<>8__locals1.index, CS$<>8__locals1.length, CS$<>8__locals1.timeout, false, CS$<>8__locals1.cancellationToken, CancellationToken.None, out bytesRead);
+					bytesAsyncReadDataStage = this.GetBytesAsyncReadDataStage(i, buffer, index, length, timeout, false, cancellationToken, CancellationToken.None, out bytesRead);
 				}
 				catch
 				{
@@ -3140,34 +3141,34 @@ namespace System.Data.SqlClient
 			Func<Task, Task<int>> moreFunc = null;
 			CancellationToken timeoutToken = CancellationToken.None;
 			CancellationTokenSource cancellationTokenSource = null;
-			if (CS$<>8__locals1.timeout > 0)
+			if (timeout > 0)
 			{
 				cancellationTokenSource = new CancellationTokenSource();
-				cancellationTokenSource.CancelAfter(CS$<>8__locals1.timeout);
+				cancellationTokenSource.CancelAfter(timeout);
 				timeoutToken = cancellationTokenSource.Token;
 			}
 			moreFunc = delegate(Task t)
 			{
 				if (t != null)
 				{
-					CS$<>8__locals1.<>4__this.PrepareForAsyncContinuation();
+					this.PrepareForAsyncContinuation();
 				}
-				CS$<>8__locals1.<>4__this.SetTimeout(CS$<>8__locals1.<>4__this._defaultTimeoutMilliseconds);
-				if (!CS$<>8__locals1.<>4__this.TryReadColumnHeader(CS$<>8__locals1.i))
+				this.SetTimeout(this._defaultTimeoutMilliseconds);
+				if (!this.TryReadColumnHeader(i))
 				{
-					return CS$<>8__locals1.<>4__this.ContinueRetryable<int>(moreFunc);
+					return this.ContinueRetryable<int>(moreFunc);
 				}
-				if (CS$<>8__locals1.cancellationToken.IsCancellationRequested)
+				if (cancellationToken.IsCancellationRequested)
 				{
-					return Task.FromCanceled<int>(CS$<>8__locals1.cancellationToken);
+					return Task.FromCanceled<int>(cancellationToken);
 				}
 				if (timeoutToken.IsCancellationRequested)
 				{
 					return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.IO(SQLMessage.Timeout())));
 				}
-				CS$<>8__locals1.<>4__this.SwitchToAsyncWithoutSnapshot();
+				this.SwitchToAsyncWithoutSnapshot();
 				int num;
-				Task<int> bytesAsyncReadDataStage2 = CS$<>8__locals1.<>4__this.GetBytesAsyncReadDataStage(CS$<>8__locals1.i, CS$<>8__locals1.buffer, CS$<>8__locals1.index, CS$<>8__locals1.length, CS$<>8__locals1.timeout, true, CS$<>8__locals1.cancellationToken, timeoutToken, out num);
+				Task<int> bytesAsyncReadDataStage2 = this.GetBytesAsyncReadDataStage(i, buffer, index, length, timeout, true, cancellationToken, timeoutToken, out num);
 				if (bytesAsyncReadDataStage2 == null)
 				{
 					return Task.FromResult<int>(num);
@@ -3752,11 +3753,6 @@ namespace System.Data.SqlClient
 			this._stateObj._asyncReadWithoutSnapshot = true;
 		}
 
-		private Exception UdtNotSupportedException()
-		{
-			return SQL.UnsupportedFeatureAndToken(this._parser.Connection, SqlDbType.Udt.ToString());
-		}
-
 		public ReadOnlyCollection<DbColumn> GetColumnSchema()
 		{
 			SqlStatistics sqlStatistics = null;
@@ -3820,7 +3816,7 @@ namespace System.Data.SqlClient
 
 		internal SqlDataReader()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		internal SqlDataReader.SharedState _sharedState;

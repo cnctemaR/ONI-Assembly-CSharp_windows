@@ -117,6 +117,7 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.targetTexture = this.renderTexture;
 		this.videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 		this.videoPlayer.clip = clip;
+		this.videoPlayer.timeReference = VideoTimeReference.ExternalTime;
 		this.videoPlayer.Play();
 		if (this.audioHandle.isValid())
 		{
@@ -211,20 +212,7 @@ public class VideoScreen : KModalScreen
 		{
 			int num;
 			this.audioHandle.getTimelinePosition(out num);
-			double num2 = this.videoPlayer.time * 1000.0;
-			if ((double)num - num2 > 33.0)
-			{
-				VideoPlayer videoPlayer = this.videoPlayer;
-				long num3 = videoPlayer.frame;
-				videoPlayer.frame = num3 + 1L;
-				return;
-			}
-			if (num2 - (double)num > 33.0)
-			{
-				VideoPlayer videoPlayer2 = this.videoPlayer;
-				long num3 = videoPlayer2.frame;
-				videoPlayer2.frame = num3 - 1L;
-			}
+			this.videoPlayer.externalReferenceTime = (double)((float)num / 1000f);
 		}
 	}
 

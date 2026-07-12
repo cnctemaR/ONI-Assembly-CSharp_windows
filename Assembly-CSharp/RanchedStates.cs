@@ -49,21 +49,36 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 				smi.UpdateWaitingState();
 			})
 			.Exit(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.ClearLayerOverride));
-		this.ranch.Cheer.ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter("FaceRancher", delegate(RanchedStates.Instance smi)
+		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State cheer = this.ranch.Cheer;
+		string text = CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.NAME;
+		string text2 = CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		cheer.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory).Enter("FaceRancher", delegate(RanchedStates.Instance smi)
 		{
 			smi.GetComponent<Facing>().Face(smi.GetRanchStation().transform.GetPosition());
 		}).PlayAnim("excited_loop")
 			.OnAnimQueueComplete(this.ranch.Cheer.Pst)
 			.ScheduleGoTo((RanchedStates.Instance smi) => smi.cheerAnimLength, this.ranch.Move);
 		this.ranch.Cheer.Pst.ScheduleGoTo(0.2f, this.ranch.Move);
-		this.ranch.Move.DefaultState(this.ranch.Move.MoveToRanch).Enter("Speedup", delegate(RanchedStates.Instance smi)
+		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State state = this.ranch.Move.DefaultState(this.ranch.Move.MoveToRanch).Enter("Speedup", delegate(RanchedStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.OriginalSpeed * 1.25f;
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main)
-			.Exit("RestoreSpeed", delegate(RanchedStates.Instance smi)
-			{
-				smi.GetComponent<Navigator>().defaultSpeed = smi.OriginalSpeed;
-			});
+		});
+		string text4 = CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.NAME;
+		string text5 = CREATURES.STATUSITEMS.EXCITED_TO_GET_RANCHED.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory).Exit("RestoreSpeed", delegate(RanchedStates.Instance smi)
+		{
+			smi.GetComponent<Navigator>().defaultSpeed = smi.OriginalSpeed;
+		});
 		this.ranch.Move.MoveToRanch.EnterTransition(this.ranch.Wait.WaitInLine, GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.Not(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.Transition.ConditionCallback(RanchedStates.IsCrittersTurn))).MoveTo(new Func<RanchedStates.Instance, int>(RanchedStates.GetRanchNavTarget), this.ranch.Wait.WaitInLine, null, false).Target(this.ranchTarget)
 			.EventTransition(GameHashes.CreatureArrivedAtRanchStation, this.ranch.Wait.WaitInLine, (RanchedStates.Instance smi) => !RanchedStates.IsCrittersTurn(smi));
 		this.ranch.Wait.WaitInLine.EnterTransition(this.ranch.Ranching, new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.Transition.ConditionCallback(RanchedStates.IsCrittersTurn)).Enter(delegate(RanchedStates.Instance smi)
@@ -86,8 +101,24 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 				}
 				return Db.Get().CreatureStatusItems.GettingRanched;
 			}, null);
-		this.ranch.Wavegoodbye.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.ClearLayerOverride)).OnAnimQueueComplete(this.ranch.Runaway).ToggleStatusItem(CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME, CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.ranch.Runaway.MoveTo(new Func<RanchedStates.Instance, int>(RanchedStates.GetRunawayCell), null, null, false).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State state2 = this.ranch.Wavegoodbye.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.ClearLayerOverride)).OnAnimQueueComplete(this.ranch.Runaway);
+		string text7 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
+		string text8 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
+		string text9 = "";
+		StatusItem.IconType iconType3 = StatusItem.IconType.Info;
+		NotificationType notificationType3 = NotificationType.Neutral;
+		bool flag3 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text7, text8, text9, iconType3, notificationType3, flag3, default(HashedString), 129022, null, null, statusItemCategory);
+		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State state3 = this.ranch.Runaway.MoveTo(new Func<RanchedStates.Instance, int>(RanchedStates.GetRunawayCell), null, null, false);
+		string text10 = CREATURES.STATUSITEMS.IDLE.NAME;
+		string text11 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
+		string text12 = "";
+		StatusItem.IconType iconType4 = StatusItem.IconType.Info;
+		NotificationType notificationType4 = NotificationType.Neutral;
+		bool flag4 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state3.ToggleStatusItem(text10, text11, text12, iconType4, notificationType4, flag4, default(HashedString), 129022, null, null, statusItemCategory);
 	}
 
 	private static void ClearLayerOverride(RanchedStates.Instance smi)

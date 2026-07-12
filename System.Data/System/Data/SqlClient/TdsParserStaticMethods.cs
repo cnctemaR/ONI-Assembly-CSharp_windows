@@ -20,6 +20,17 @@ namespace System.Data.SqlClient
 			return array;
 		}
 
+		internal static byte[] ObfuscatePassword(byte[] password)
+		{
+			for (int i = 0; i < password.Length; i++)
+			{
+				byte b = password[i] & 15;
+				byte b2 = password[i] & 240;
+				password[i] = (byte)(((b2 >> 4) | ((int)b << 4)) ^ 165);
+			}
+			return password;
+		}
+
 		internal static int GetCurrentProcessIdForTdsLoginOnly()
 		{
 			if (TdsParserStaticMethods.s_currentProcessId == -1)

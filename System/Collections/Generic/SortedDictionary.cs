@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[Serializable]
 	public class SortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -89,7 +89,7 @@ namespace System.Collections.Generic
 				SortedSet<KeyValuePair<TKey, TValue>>.Node node = this._set.FindNode(new KeyValuePair<TKey, TValue>(key, default(TValue)));
 				if (node == null)
 				{
-					throw new KeyNotFoundException();
+					throw new KeyNotFoundException(SR.Format("The given key '{0}' was not present in the dictionary.", key.ToString()));
 				}
 				return node.Item.Value;
 			}
@@ -343,12 +343,12 @@ namespace System.Collections.Generic
 					}
 					catch (InvalidCastException)
 					{
-						throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+						throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
 					}
 				}
 				catch (InvalidCastException)
 				{
-					throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
+					throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
 				}
 			}
 		}
@@ -372,12 +372,12 @@ namespace System.Collections.Generic
 				}
 				catch (InvalidCastException)
 				{
-					throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+					throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
 				}
 			}
 			catch (InvalidCastException)
 			{
-				throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
+				throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
 			}
 		}
 
@@ -554,8 +554,8 @@ namespace System.Collections.Generic
 			internal const int DictEntry = 2;
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
 		{
@@ -754,8 +754,8 @@ namespace System.Collections.Generic
 			}
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, IEnumerable<TValue>, IEnumerable, ICollection, IReadOnlyCollection<TValue>
 		{

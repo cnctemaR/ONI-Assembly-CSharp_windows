@@ -1602,8 +1602,7 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			TypeKind kind = ((SpecialMapping)text.Mapping).TypeDesc.Kind;
-			if (kind == TypeKind.Node)
+			if (((SpecialMapping)text.Mapping).TypeDesc.Kind == TypeKind.Node)
 			{
 				MethodInfo method2 = source.Type.GetMethod("WriteTo", CodeGenerator.InstanceBindingFlags, null, new Type[] { typeof(XmlWriter) }, null);
 				MethodInfo method3 = typeof(XmlSerializationWriter).GetMethod("get_Writer", CodeGenerator.InstanceBindingFlags, null, CodeGenerator.EmptyTypeArray, null);

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Char : IComparable, IConvertible, IComparable<char>, IEquatable<char>
+	public readonly struct Char : IComparable, IComparable<char>, IEquatable<char>, IConvertible
 	{
 		private static bool IsLatin1(char ch)
 		{
@@ -20,7 +19,7 @@ namespace System
 
 		private static UnicodeCategory GetLatin1UnicodeCategory(char ch)
 		{
-			return (UnicodeCategory)char.categoryForLatin1[(int)ch];
+			return (UnicodeCategory)char.s_categoryForLatin1[(int)ch];
 		}
 
 		public override int GetHashCode()
@@ -33,6 +32,7 @@ namespace System
 			return obj is char && this == (char)obj;
 		}
 
+		[NonVersionable]
 		public bool Equals(char obj)
 		{
 			return this == obj;
@@ -46,7 +46,7 @@ namespace System
 			}
 			if (!(value is char))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Char."));
+				throw new ArgumentException("Object must be of type Char.");
 			}
 			return (int)(this - (char)value);
 		}
@@ -68,7 +68,7 @@ namespace System
 
 		public static string ToString(char c)
 		{
-			return new string(c, 1);
+			return string.CreateFromChar(c);
 		}
 
 		public static char Parse(string s)
@@ -79,7 +79,7 @@ namespace System
 			}
 			if (s.Length != 1)
 			{
-				throw new FormatException(Environment.GetResourceString("String must be exactly one character long."));
+				throw new FormatException("String must be exactly one character long.");
 			}
 			return s[0];
 		}
@@ -129,7 +129,7 @@ namespace System
 
 		private static bool IsWhiteSpaceLatin1(char c)
 		{
-			return c == ' ' || (c >= '\t' && c <= '\r') || c == '\u00a0' || c == '\u0085';
+			return c == ' ' || c - '\t' <= '\u0004' || c == '\u00a0' || c == '\u0085';
 		}
 
 		public static bool IsWhiteSpace(char c)
@@ -206,12 +206,12 @@ namespace System
 
 		public static char ToUpper(char c)
 		{
-			return char.ToUpper(c, CultureInfo.CurrentCulture);
+			return CultureInfo.CurrentCulture.TextInfo.ToUpper(c);
 		}
 
 		public static char ToUpperInvariant(char c)
 		{
-			return char.ToUpper(c, CultureInfo.InvariantCulture);
+			return CultureInfo.InvariantCulture.TextInfo.ToUpper(c);
 		}
 
 		public static char ToLower(char c, CultureInfo culture)
@@ -225,12 +225,12 @@ namespace System
 
 		public static char ToLower(char c)
 		{
-			return char.ToLower(c, CultureInfo.CurrentCulture);
+			return CultureInfo.CurrentCulture.TextInfo.ToLower(c);
 		}
 
 		public static char ToLowerInvariant(char c)
 		{
-			return char.ToLower(c, CultureInfo.InvariantCulture);
+			return CultureInfo.InvariantCulture.TextInfo.ToLower(c);
 		}
 
 		public TypeCode GetTypeCode()
@@ -240,7 +240,7 @@ namespace System
 
 		bool IConvertible.ToBoolean(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Boolean" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Char", "Boolean"));
 		}
 
 		char IConvertible.ToChar(IFormatProvider provider)
@@ -290,22 +290,22 @@ namespace System
 
 		float IConvertible.ToSingle(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Single" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Char", "Single"));
 		}
 
 		double IConvertible.ToDouble(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Double" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Char", "Double"));
 		}
 
 		decimal IConvertible.ToDecimal(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Decimal" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Char", "Decimal"));
 		}
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Char", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -558,9 +558,10 @@ namespace System
 			{
 				throw new ArgumentOutOfRangeException("index");
 			}
-			if (char.IsLatin1(s[index]))
+			char c = s[index];
+			if (char.IsLatin1(c))
 			{
-				return char.CheckSymbol(char.GetLatin1UnicodeCategory(s[index]));
+				return char.CheckSymbol(char.GetLatin1UnicodeCategory(c));
 			}
 			return char.CheckSymbol(CharUnicodeInfo.GetUnicodeCategory(s, index));
 		}
@@ -610,7 +611,7 @@ namespace System
 			{
 				return char.GetLatin1UnicodeCategory(c);
 			}
-			return CharUnicodeInfo.InternalGetUnicodeCategory((int)c);
+			return CharUnicodeInfo.GetUnicodeCategory((int)c);
 		}
 
 		public static UnicodeCategory GetUnicodeCategory(string s, int index)
@@ -702,33 +703,33 @@ namespace System
 			return highSurrogate >= '\ud800' && highSurrogate <= '\udbff' && lowSurrogate >= '\udc00' && lowSurrogate <= '\udfff';
 		}
 
-		public static string ConvertFromUtf32(int utf32)
+		public unsafe static string ConvertFromUtf32(int utf32)
 		{
 			if (utf32 < 0 || utf32 > 1114111 || (utf32 >= 55296 && utf32 <= 57343))
 			{
-				throw new ArgumentOutOfRangeException("utf32", Environment.GetResourceString("A valid UTF32 value is between 0x000000 and 0x10ffff, inclusive, and should not include surrogate codepoint values (0x00d800 ~ 0x00dfff)."));
+				throw new ArgumentOutOfRangeException("utf32", "A valid UTF32 value is between 0x000000 and 0x10ffff, inclusive, and should not include surrogate codepoint values (0x00d800 ~ 0x00dfff).");
 			}
 			if (utf32 < 65536)
 			{
 				return char.ToString((char)utf32);
 			}
 			utf32 -= 65536;
-			return new string(new char[]
-			{
-				(char)(utf32 / 1024 + 55296),
-				(char)(utf32 % 1024 + 56320)
-			});
+			uint num = 0U;
+			char* ptr = (char*)(&num);
+			*ptr = (char)(utf32 / 1024 + 55296);
+			ptr[1] = (char)(utf32 % 1024 + 56320);
+			return new string(ptr, 0, 2);
 		}
 
 		public static int ConvertToUtf32(char highSurrogate, char lowSurrogate)
 		{
 			if (!char.IsHighSurrogate(highSurrogate))
 			{
-				throw new ArgumentOutOfRangeException("highSurrogate", Environment.GetResourceString("A valid high surrogate character is between 0xd800 and 0xdbff, inclusive."));
+				throw new ArgumentOutOfRangeException("highSurrogate", "A valid high surrogate character is between 0xd800 and 0xdbff, inclusive.");
 			}
 			if (!char.IsLowSurrogate(lowSurrogate))
 			{
-				throw new ArgumentOutOfRangeException("lowSurrogate", Environment.GetResourceString("A valid low surrogate character is between 0xdc00 and 0xdfff, inclusive."));
+				throw new ArgumentOutOfRangeException("lowSurrogate", "A valid low surrogate character is between 0xdc00 and 0xdfff, inclusive.");
 			}
 			return (int)((highSurrogate - '\ud800') * 'Ѐ' + (lowSurrogate - '\udc00')) + 65536;
 		}
@@ -741,7 +742,7 @@ namespace System
 			}
 			if (index < 0 || index >= s.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int num = (int)(s[index] - '\ud800');
 			if (num < 0 || num > 2047)
@@ -750,27 +751,27 @@ namespace System
 			}
 			if (num > 1023)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Found a low surrogate char without a preceding high surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
+				throw new ArgumentException(SR.Format("Found a low surrogate char without a preceding high surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", index), "s");
 			}
 			if (index >= s.Length - 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
+				throw new ArgumentException(SR.Format("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", index), "s");
 			}
 			int num2 = (int)(s[index + 1] - '\udc00');
 			if (num2 >= 0 && num2 <= 1023)
 			{
 				return num * 1024 + num2 + 65536;
 			}
-			throw new ArgumentException(Environment.GetResourceString("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
+			throw new ArgumentException(SR.Format("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", index), "s");
 		}
 
-		internal char m_value;
+		private readonly char m_value;
 
 		public const char MaxValue = '\uffff';
 
 		public const char MinValue = '\0';
 
-		private static readonly byte[] categoryForLatin1 = new byte[]
+		private static readonly byte[] s_categoryForLatin1 = new byte[]
 		{
 			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
 			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,

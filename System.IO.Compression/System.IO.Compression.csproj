@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB556}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ECB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.IO.Compression</RootNamespace>
     <AssemblyName>System.IO.Compression</AssemblyName>
@@ -9,14 +9,24 @@
     <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
     <Compile Include="Consts.cs" />
+    <Compile Include="Interop.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeBrotliDecoderHandle.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeBrotliEncoderHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SR.cs" />
     <Compile Include="System\IO\Compression\BlockType.cs" />
+    <Compile Include="System\IO\Compression\BrotliDecoder.cs" />
+    <Compile Include="System\IO\Compression\BrotliEncoder.cs" />
+    <Compile Include="System\IO\Compression\BrotliEncoderOperation.cs" />
+    <Compile Include="System\IO\Compression\BrotliEncoderParameter.cs" />
+    <Compile Include="System\IO\Compression\BrotliStream.cs" />
+    <Compile Include="System\IO\Compression\BrotliUtils.cs" />
     <Compile Include="System\IO\Compression\CheckSumAndSizeWriteStream.cs" />
     <Compile Include="System\IO\Compression\CopyEncoder.cs" />
     <Compile Include="System\IO\Compression\Crc32Helper.cs" />
@@ -58,11 +68,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

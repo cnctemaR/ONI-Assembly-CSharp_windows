@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum RegistryPermissionAccess
 	{
+		AllAccess = 7,
+		Create = 4,
 		NoAccess = 0,
 		Read = 1,
-		Write = 2,
-		Create = 4,
-		AllAccess = 7
+		Write = 2
 	}
 }

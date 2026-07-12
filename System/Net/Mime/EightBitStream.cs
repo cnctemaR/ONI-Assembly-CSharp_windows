@@ -9,11 +9,12 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.writeState == null)
+				WriteStateInfoBase writeStateInfoBase;
+				if ((writeStateInfoBase = this._writeState) == null)
 				{
-					this.writeState = new WriteStateInfoBase();
+					writeStateInfoBase = (this._writeState = new WriteStateInfoBase());
 				}
-				return this.writeState;
+				return writeStateInfoBase;
 			}
 		}
 
@@ -25,7 +26,7 @@ namespace System.Net.Mime
 		internal EightBitStream(Stream stream, bool shouldEncodeLeadingDots)
 			: this(stream)
 		{
-			this.shouldEncodeLeadingDots = shouldEncodeLeadingDots;
+			this._shouldEncodeLeadingDots = shouldEncodeLeadingDots;
 		}
 
 		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -43,7 +44,7 @@ namespace System.Net.Mime
 				throw new ArgumentOutOfRangeException("count");
 			}
 			IAsyncResult asyncResult;
-			if (this.shouldEncodeLeadingDots)
+			if (this._shouldEncodeLeadingDots)
 			{
 				this.EncodeLines(buffer, offset, count);
 				asyncResult = base.BeginWrite(this.WriteState.Buffer, 0, this.WriteState.Length, callback, state);
@@ -75,7 +76,7 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentOutOfRangeException("count");
 			}
-			if (this.shouldEncodeLeadingDots)
+			if (this._shouldEncodeLeadingDots)
 			{
 				this.EncodeLines(buffer, offset, count);
 				base.Write(this.WriteState.Buffer, 0, this.WriteState.Length);
@@ -108,6 +109,11 @@ namespace System.Net.Mime
 			}
 		}
 
+		public Stream GetStream()
+		{
+			return this;
+		}
+
 		public int DecodeBytes(byte[] buffer, int offset, int count)
 		{
 			throw new NotImplementedException();
@@ -118,18 +124,13 @@ namespace System.Net.Mime
 			throw new NotImplementedException();
 		}
 
-		public Stream GetStream()
-		{
-			return this;
-		}
-
 		public string GetEncodedString()
 		{
 			throw new NotImplementedException();
 		}
 
-		private WriteStateInfoBase writeState;
+		private WriteStateInfoBase _writeState;
 
-		private bool shouldEncodeLeadingDots;
+		private bool _shouldEncodeLeadingDots;
 	}
 }

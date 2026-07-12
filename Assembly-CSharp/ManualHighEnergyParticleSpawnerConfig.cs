@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class ManualHighEnergyParticleSpawnerConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -33,6 +33,8 @@ public class ManualHighEnergyParticleSpawnerConfig : IBuildingConfig
 		buildingDef.HighEnergyParticleOutputOffset = new CellOffset(0, 2);
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.RadiationIDs, "ManualHighEnergyParticleSpawner");
+		buildingDef.DiseaseCellVisName = "RadiationSickness";
+		buildingDef.UtilityOutputOffset = CellOffset.none;
 		buildingDef.Deprecated = !Sim.IsRadiationEnabled();
 		return buildingDef;
 	}

@@ -44,7 +44,8 @@ namespace System.Globalization
 				{
 					JapaneseCalendar.japaneseEraInfo = new EraInfo[]
 					{
-						new EraInfo(4, 1989, 1, 8, 1988, 1, 8011, "平成", "平", "H"),
+						new EraInfo(5, 2019, 5, 1, 2018, 1, 7981, "令和", "令", "R"),
+						new EraInfo(4, 1989, 1, 8, 1988, 1, 31, "平成", "平", "H"),
 						new EraInfo(3, 1926, 12, 25, 1925, 1, 64, "昭和", "昭", "S"),
 						new EraInfo(2, 1912, 7, 30, 1911, 1, 15, "大正", "大", "T"),
 						new EraInfo(1, 1868, 1, 1, 1867, 1, 45, "明治", "明", "M")

@@ -10,9 +10,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Shaders/ComputeShader.bindings.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsBuffer.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Graphics/GraphicsBuffer.bindings.h")]
+	[NativeClass("GraphicsBuffer")]
 	public sealed class ComputeBuffer : IDisposable
 	{
 		~ComputeBuffer()
@@ -43,11 +44,11 @@ namespace UnityEngine
 			this.m_Ptr = IntPtr.Zero;
 		}
 
-		[FreeFunction("ComputeShader_Bindings::InitBuffer")]
+		[FreeFunction("GraphicsBuffer_Bindings::InitComputeBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr InitBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage);
 
-		[FreeFunction("ComputeShader_Bindings::DestroyBuffer")]
+		[FreeFunction("GraphicsBuffer_Bindings::DestroyComputeBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyBuffer(ComputeBuffer buf);
 
@@ -66,7 +67,7 @@ namespace UnityEngine
 		{
 		}
 
-		internal ComputeBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage, int stackDepth)
+		private ComputeBuffer(int count, int stride, ComputeBufferType type, ComputeBufferMode usage, int stackDepth)
 		{
 			bool flag = count <= 0;
 			if (flag)
@@ -78,6 +79,13 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("Attempting to create a compute buffer with a negative or null stride", "stride");
 			}
+			long num = (long)count * (long)stride;
+			long maxGraphicsBufferSize = SystemInfo.maxGraphicsBufferSize;
+			bool flag3 = num > maxGraphicsBufferSize;
+			if (flag3)
+			{
+				throw new ArgumentException(string.Format("The total size of the compute buffer ({0} bytes) exceeds the maximum buffer size. Maximum supported buffer size: {1} bytes.", num, maxGraphicsBufferSize));
+			}
 			this.m_Ptr = ComputeBuffer.InitBuffer(count, stride, type, usage);
 		}
 
@@ -86,9 +94,13 @@ namespace UnityEngine
 			this.Dispose();
 		}
 
+		[FreeFunction("GraphicsBuffer_Bindings::IsValidBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsValidBuffer(ComputeBuffer buf);
+
 		public bool IsValid()
 		{
-			return this.m_Ptr != IntPtr.Zero;
+			return this.m_Ptr != IntPtr.Zero && ComputeBuffer.IsValidBuffer(this);
 		}
 
 		public extern int count
@@ -200,13 +212,11 @@ namespace UnityEngine
 			this.InternalSetNativeData((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, computeBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
 		}
 
-		[SecurityCritical]
-		[FreeFunction(Name = "ComputeShader_Bindings::InternalSetNativeData", HasExplicitThis = true, ThrowsException = true)]
+		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalSetNativeData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetNativeData(IntPtr data, int nativeBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
 
-		[FreeFunction(Name = "ComputeShader_Bindings::InternalSetData", HasExplicitThis = true, ThrowsException = true)]
-		[SecurityCritical]
+		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalSetData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
 
@@ -247,8 +257,7 @@ namespace UnityEngine
 			this.InternalGetData(data, managedBufferStartIndex, computeBufferStartIndex, count, Marshal.SizeOf(data.GetType().GetElementType()));
 		}
 
-		[FreeFunction(Name = "ComputeShader_Bindings::InternalGetData", HasExplicitThis = true, ThrowsException = true)]
-		[SecurityCritical]
+		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalGetData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalGetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
 
@@ -257,14 +266,19 @@ namespace UnityEngine
 
 		public unsafe NativeArray<T> BeginWrite<T>(int computeBufferStartIndex, int count) where T : struct
 		{
-			bool flag = this.usage != ComputeBufferMode.SubUpdates;
+			bool flag = !this.IsValid();
 			if (flag)
+			{
+				throw new InvalidOperationException("BeginWrite requires a valid ComputeBuffer");
+			}
+			bool flag2 = this.usage != ComputeBufferMode.SubUpdates;
+			if (flag2)
 			{
 				throw new ArgumentException("ComputeBuffer must be created with usage mode ComputeBufferMode.SubUpdates to be able to be mapped with BeginWrite");
 			}
 			int num = UnsafeUtility.SizeOf<T>();
-			bool flag2 = computeBufferStartIndex < 0 || count < 0 || (computeBufferStartIndex + count) * num > this.count * this.stride;
-			if (flag2)
+			bool flag3 = computeBufferStartIndex < 0 || count < 0 || (computeBufferStartIndex + count) * num > this.count * this.stride;
+			if (flag3)
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (computeBufferStartIndex:{0} count:{1} elementSize:{2}, this.count:{3}, this.stride{4})", new object[] { computeBufferStartIndex, count, num, this.count, this.stride }));
 			}
@@ -294,7 +308,7 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction(Name = "ComputeShader_Bindings::SetName", HasExplicitThis = true)]
+		[FreeFunction(Name = "GraphicsBuffer_Bindings::SetName", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetName(string name);
 

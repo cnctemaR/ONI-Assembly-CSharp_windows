@@ -5,38 +5,17 @@ namespace System.Diagnostics.Tracing
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
 	public class EventDataAttribute : Attribute
 	{
-		public string Name { get; set; }
-
-		internal EventLevel Level
+		[MonoTODO]
+		public string Name
 		{
 			get
 			{
-				return this.level;
+				throw new NotImplementedException();
 			}
 			set
 			{
-				this.level = value;
+				throw new NotImplementedException();
 			}
 		}
-
-		internal EventOpcode Opcode
-		{
-			get
-			{
-				return this.opcode;
-			}
-			set
-			{
-				this.opcode = value;
-			}
-		}
-
-		internal EventKeywords Keywords { get; set; }
-
-		internal EventTags Tags { get; set; }
-
-		private EventLevel level = (EventLevel)(-1);
-
-		private EventOpcode opcode = (EventOpcode)(-1);
 	}
 }

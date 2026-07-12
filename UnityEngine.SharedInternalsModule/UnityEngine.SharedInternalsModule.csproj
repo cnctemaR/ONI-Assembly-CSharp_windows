@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EFC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SharedInternalsModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net20</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -22,6 +22,7 @@
     <Compile Include="Bindings\IBindingsHeaderProviderAttribute.cs" />
     <Compile Include="Bindings\IBindingsIsFreeFunctionProviderAttribute.cs" />
     <Compile Include="Bindings\IBindingsIsThreadSafeProviderAttribute.cs" />
+    <Compile Include="Bindings\IBindingsMarshalAsSpan.cs" />
     <Compile Include="Bindings\IBindingsNameProviderAttribute.cs" />
     <Compile Include="Bindings\IBindingsPreventExecution.cs" />
     <Compile Include="Bindings\IBindingsThrowsProviderAttribute.cs" />
@@ -41,6 +42,7 @@
     <Compile Include="Bindings\PreventExecutionInStateAttribute.cs" />
     <Compile Include="Bindings\PreventExecutionSeverity.cs" />
     <Compile Include="Bindings\PreventReadOnlyInstanceModificationAttribute.cs" />
+    <Compile Include="Bindings\SpanAttribute.cs" />
     <Compile Include="Bindings\StaticAccessorAttribute.cs" />
     <Compile Include="Bindings\StaticAccessorType.cs" />
     <Compile Include="Bindings\TargetType.cs" />
@@ -58,5 +60,11 @@
     <Compile Include="UnityEngineModuleAssembly.cs" />
     <Compile Include="UnityString.cs" />
     <Compile Include="WritableAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -1,86 +1,176 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks.Sources;
 
 namespace System.Threading.Tasks
 {
-	[AsyncMethodBuilder(typeof(AsyncValueTaskMethodBuilder<>))]
+	[AsyncMethodBuilder(typeof(AsyncValueTaskMethodBuilder))]
 	[StructLayout(LayoutKind.Auto)]
-	public struct ValueTask<TResult> : IEquatable<ValueTask<TResult>>
+	public readonly struct ValueTask : IEquatable<ValueTask>
 	{
-		public ValueTask(TResult result)
+		internal static Task CompletedTask
 		{
-			this._task = null;
-			this._result = result;
+			get
+			{
+				return Task.CompletedTask;
+			}
 		}
 
-		public ValueTask(Task<TResult> task)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ValueTask(Task task)
 		{
 			if (task == null)
 			{
-				throw new ArgumentNullException("task");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.task);
 			}
-			this._task = task;
-			this._result = default(TResult);
+			this._obj = task;
+			this._continueOnCapturedContext = true;
+			this._token = 0;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ValueTask(IValueTaskSource source, short token)
+		{
+			if (source == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+			}
+			this._obj = source;
+			this._token = token;
+			this._continueOnCapturedContext = true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private ValueTask(object obj, short token, bool continueOnCapturedContext)
+		{
+			this._obj = obj;
+			this._token = token;
+			this._continueOnCapturedContext = continueOnCapturedContext;
 		}
 
 		public override int GetHashCode()
 		{
-			if (this._task != null)
-			{
-				return this._task.GetHashCode();
-			}
-			if (this._result == null)
+			object obj = this._obj;
+			if (obj == null)
 			{
 				return 0;
 			}
-			TResult result = this._result;
-			return result.GetHashCode();
+			return obj.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is ValueTask<TResult> && this.Equals((ValueTask<TResult>)obj);
+			return obj is ValueTask && this.Equals((ValueTask)obj);
 		}
 
-		public bool Equals(ValueTask<TResult> other)
+		public bool Equals(ValueTask other)
 		{
-			if (this._task == null && other._task == null)
-			{
-				return EqualityComparer<TResult>.Default.Equals(this._result, other._result);
-			}
-			return this._task == other._task;
+			return this._obj == other._obj && this._token == other._token;
 		}
 
-		public static bool operator ==(ValueTask<TResult> left, ValueTask<TResult> right)
+		public static bool operator ==(ValueTask left, ValueTask right)
 		{
 			return left.Equals(right);
 		}
 
-		public static bool operator !=(ValueTask<TResult> left, ValueTask<TResult> right)
+		public static bool operator !=(ValueTask left, ValueTask right)
 		{
 			return !left.Equals(right);
 		}
 
-		public Task<TResult> AsTask()
+		public Task AsTask()
 		{
-			return this._task ?? Task.FromResult<TResult>(this._result);
+			object obj = this._obj;
+			Task task;
+			if (obj != null)
+			{
+				if ((task = obj as Task) == null)
+				{
+					return this.GetTaskForValueTaskSource(Unsafe.As<IValueTaskSource>(obj));
+				}
+			}
+			else
+			{
+				task = ValueTask.CompletedTask;
+			}
+			return task;
+		}
+
+		public ValueTask Preserve()
+		{
+			if (this._obj != null)
+			{
+				return new ValueTask(this.AsTask());
+			}
+			return this;
+		}
+
+		private Task GetTaskForValueTaskSource(IValueTaskSource t)
+		{
+			ValueTaskSourceStatus status = t.GetStatus(this._token);
+			if (status != ValueTaskSourceStatus.Pending)
+			{
+				try
+				{
+					t.GetResult(this._token);
+					return ValueTask.CompletedTask;
+				}
+				catch (Exception ex)
+				{
+					if (status != ValueTaskSourceStatus.Canceled)
+					{
+						return Task.FromException(ex);
+					}
+					OperationCanceledException ex2 = ex as OperationCanceledException;
+					if (ex2 != null)
+					{
+						Task<VoidTaskResult> task = new Task<VoidTaskResult>();
+						task.TrySetCanceled(ex2.CancellationToken, ex2);
+						return task;
+					}
+					return ValueTask.s_canceledTask;
+				}
+			}
+			return new ValueTask.ValueTaskSourceAsTask(t, this._token);
 		}
 
 		public bool IsCompleted
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return this._task == null || this._task.IsCompleted;
+				object obj = this._obj;
+				if (obj == null)
+				{
+					return true;
+				}
+				Task task = obj as Task;
+				if (task != null)
+				{
+					return task.IsCompleted;
+				}
+				return Unsafe.As<IValueTaskSource>(obj).GetStatus(this._token) > ValueTaskSourceStatus.Pending;
 			}
 		}
 
 		public bool IsCompletedSuccessfully
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return this._task == null || this._task.Status == TaskStatus.RanToCompletion;
+				object obj = this._obj;
+				if (obj == null)
+				{
+					return true;
+				}
+				Task task = obj as Task;
+				if (task != null)
+				{
+					return task.IsCompletedSuccessfully;
+				}
+				return Unsafe.As<IValueTaskSource>(obj).GetStatus(this._token) == ValueTaskSourceStatus.Succeeded;
 			}
 		}
 
@@ -88,7 +178,17 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this._task != null && this._task.IsFaulted;
+				object obj = this._obj;
+				if (obj == null)
+				{
+					return false;
+				}
+				Task task = obj as Task;
+				if (task != null)
+				{
+					return task.IsFaulted;
+				}
+				return Unsafe.As<IValueTaskSource>(obj).GetStatus(this._token) == ValueTaskSourceStatus.Faulted;
 			}
 		}
 
@@ -96,61 +196,108 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this._task != null && this._task.IsCanceled;
-			}
-		}
-
-		public TResult Result
-		{
-			get
-			{
-				if (this._task != null)
+				object obj = this._obj;
+				if (obj == null)
 				{
-					return this._task.GetAwaiter().GetResult();
+					return false;
 				}
-				return this._result;
-			}
-		}
-
-		public ValueTaskAwaiter<TResult> GetAwaiter()
-		{
-			return new ValueTaskAwaiter<TResult>(this);
-		}
-
-		public ConfiguredValueTaskAwaitable<TResult> ConfigureAwait(bool continueOnCapturedContext)
-		{
-			return new ConfiguredValueTaskAwaitable<TResult>(this, continueOnCapturedContext);
-		}
-
-		public override string ToString()
-		{
-			if (this._task != null)
-			{
-				if (this._task.Status != TaskStatus.RanToCompletion || this._task.Result == null)
+				Task task = obj as Task;
+				if (task != null)
 				{
-					return string.Empty;
+					return task.IsCanceled;
 				}
-				TResult tresult = this._task.Result;
-				return tresult.ToString();
-			}
-			else
-			{
-				if (this._result == null)
-				{
-					return string.Empty;
-				}
-				TResult tresult = this._result;
-				return tresult.ToString();
+				return Unsafe.As<IValueTaskSource>(obj).GetStatus(this._token) == ValueTaskSourceStatus.Canceled;
 			}
 		}
 
-		public static AsyncValueTaskMethodBuilder<TResult> CreateAsyncMethodBuilder()
+		[StackTraceHidden]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal void ThrowIfCompletedUnsuccessfully()
 		{
-			return AsyncValueTaskMethodBuilder<TResult>.Create();
+			object obj = this._obj;
+			if (obj != null)
+			{
+				Task task = obj as Task;
+				if (task != null)
+				{
+					TaskAwaiter.ValidateEnd(task);
+					return;
+				}
+				Unsafe.As<IValueTaskSource>(obj).GetResult(this._token);
+			}
 		}
 
-		internal readonly Task<TResult> _task;
+		public ValueTaskAwaiter GetAwaiter()
+		{
+			return new ValueTaskAwaiter(this);
+		}
 
-		internal readonly TResult _result;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ConfiguredValueTaskAwaitable ConfigureAwait(bool continueOnCapturedContext)
+		{
+			return new ConfiguredValueTaskAwaitable(new ValueTask(this._obj, this._token, continueOnCapturedContext));
+		}
+
+		private static readonly Task s_canceledTask = Task.FromCanceled(new CancellationToken(true));
+
+		internal readonly object _obj;
+
+		internal readonly short _token;
+
+		internal readonly bool _continueOnCapturedContext;
+
+		private sealed class ValueTaskSourceAsTask : Task<VoidTaskResult>
+		{
+			public ValueTaskSourceAsTask(IValueTaskSource source, short token)
+			{
+				this._token = token;
+				this._source = source;
+				source.OnCompleted(ValueTask.ValueTaskSourceAsTask.s_completionAction, this, token, ValueTaskSourceOnCompletedFlags.None);
+			}
+
+			private static readonly Action<object> s_completionAction = delegate(object state)
+			{
+				ValueTask.ValueTaskSourceAsTask valueTaskSourceAsTask = state as ValueTask.ValueTaskSourceAsTask;
+				if (valueTaskSourceAsTask != null)
+				{
+					IValueTaskSource source = valueTaskSourceAsTask._source;
+					if (source != null)
+					{
+						valueTaskSourceAsTask._source = null;
+						ValueTaskSourceStatus status = source.GetStatus(valueTaskSourceAsTask._token);
+						try
+						{
+							source.GetResult(valueTaskSourceAsTask._token);
+							valueTaskSourceAsTask.TrySetResult(default(VoidTaskResult));
+						}
+						catch (Exception ex)
+						{
+							if (status == ValueTaskSourceStatus.Canceled)
+							{
+								OperationCanceledException ex2 = ex as OperationCanceledException;
+								if (ex2 != null)
+								{
+									valueTaskSourceAsTask.TrySetCanceled(ex2.CancellationToken, ex2);
+								}
+								else
+								{
+									valueTaskSourceAsTask.TrySetCanceled(new CancellationToken(true));
+								}
+							}
+							else
+							{
+								valueTaskSourceAsTask.TrySetException(ex);
+							}
+						}
+						return;
+					}
+				}
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.state);
+			};
+
+			private IValueTaskSource _source;
+
+			private readonly short _token;
+		}
 	}
 }

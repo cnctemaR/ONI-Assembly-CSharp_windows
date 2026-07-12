@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Threading.Tasks
 {
@@ -11,14 +10,12 @@ namespace System.Threading.Tasks
 			this.m_completingTask = completingTask;
 		}
 
-		[SecurityCritical]
-		public void ExecuteWorkItem()
+		void IThreadPoolWorkItem.ExecuteWorkItem()
 		{
 			this.m_action.Invoke(this.m_completingTask);
 		}
 
-		[SecurityCritical]
-		public void MarkAborted(ThreadAbortException tae)
+		public void MarkAborted(ThreadAbortException e)
 		{
 		}
 

@@ -7,10 +7,18 @@ public class BuzzStates : GameStateMachine<BuzzStates, BuzzStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.idle;
-		this.root.Exit("StopNavigator", delegate(BuzzStates.Instance smi)
+		GameStateMachine<BuzzStates, BuzzStates.Instance, IStateMachineTarget, BuzzStates.Def>.State state = this.root.Exit("StopNavigator", delegate(BuzzStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().Stop(false, true);
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ToggleTag(GameTags.Idle);
+		});
+		string text = CREATURES.STATUSITEMS.IDLE.NAME;
+		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).ToggleTag(GameTags.Idle);
 		this.idle.Enter(new StateMachine<BuzzStates, BuzzStates.Instance, IStateMachineTarget, BuzzStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("DoBuzz", (BuzzStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(BuzzStates.Instance smi)
 		{
 			this.numMoves.Set(global::UnityEngine.Random.Range(4, 6), smi, false);

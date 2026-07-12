@@ -61,6 +61,11 @@ public class DirectlyEdiblePlant_Growth : KMonoBehaviour, IPlantConsumptionInstr
 		return null;
 	}
 
+	public Diet.Info.FoodType GetDietFoodType()
+	{
+		return Diet.Info.FoodType.EatPlantDirectly;
+	}
+
 	[MyCmpGet]
 	private Growing growing;
 }

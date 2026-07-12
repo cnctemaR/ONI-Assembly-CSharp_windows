@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security;
 
 namespace System.Threading.Tasks
 {
@@ -11,24 +10,21 @@ namespace System.Threading.Tasks
 			SynchronizationContext synchronizationContext = SynchronizationContext.Current;
 			if (synchronizationContext == null)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("The current SynchronizationContext may not be used as a TaskScheduler."));
+				throw new InvalidOperationException("The current SynchronizationContext may not be used as a TaskScheduler.");
 			}
 			this.m_synchronizationContext = synchronizationContext;
 		}
 
-		[SecurityCritical]
 		protected internal override void QueueTask(Task task)
 		{
 			this.m_synchronizationContext.Post(SynchronizationContextTaskScheduler.s_postCallback, task);
 		}
 
-		[SecurityCritical]
 		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
 		{
 			return SynchronizationContext.Current == this.m_synchronizationContext && base.TryExecuteTask(task);
 		}
 
-		[SecurityCritical]
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
 			return null;
@@ -42,13 +38,11 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		private static void PostCallback(object obj)
-		{
-			((Task)obj).ExecuteEntry(true);
-		}
-
 		private SynchronizationContext m_synchronizationContext;
 
-		private static SendOrPostCallback s_postCallback = new SendOrPostCallback(SynchronizationContextTaskScheduler.PostCallback);
+		private static readonly SendOrPostCallback s_postCallback = delegate(object s)
+		{
+			((Task)s).ExecuteEntry(true);
+		};
 	}
 }

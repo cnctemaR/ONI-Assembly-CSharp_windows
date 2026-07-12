@@ -11,7 +11,7 @@ namespace System.ComponentModel.Design.Serialization
 			{
 				throw new ArgumentNullException("providerType");
 			}
-			this._providerTypeName = providerType.AssemblyQualifiedName;
+			this.ProviderTypeName = providerType.AssemblyQualifiedName;
 		}
 
 		public DefaultSerializationProviderAttribute(string providerTypeName)
@@ -20,17 +20,9 @@ namespace System.ComponentModel.Design.Serialization
 			{
 				throw new ArgumentNullException("providerTypeName");
 			}
-			this._providerTypeName = providerTypeName;
+			this.ProviderTypeName = providerTypeName;
 		}
 
-		public string ProviderTypeName
-		{
-			get
-			{
-				return this._providerTypeName;
-			}
-		}
-
-		private string _providerTypeName;
+		public string ProviderTypeName { get; }
 	}
 }

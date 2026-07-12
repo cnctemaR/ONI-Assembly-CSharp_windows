@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FMOD;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FMODUnity
 {
@@ -21,7 +22,7 @@ namespace FMODUnity
 			}
 		}
 
-		public static void Initialize()
+		internal static void Initialize()
 		{
 			if (Settings.instance == null)
 			{
@@ -32,14 +33,19 @@ namespace FMODUnity
 					RuntimeUtils.DebugLog("[FMOD] Cannot find integration settings, creating default settings");
 					Settings.instance = ScriptableObject.CreateInstance<Settings>();
 					Settings.instance.name = "FMOD Studio Integration Settings";
-					Settings.instance.CurrentVersion = 131591;
-					Settings.instance.LastEventReferenceScanVersion = 131591;
+					Settings.instance.CurrentVersion = 131619;
+					Settings.instance.LastEventReferenceScanVersion = 131619;
 				}
 				Settings.isInitializing = false;
 			}
 		}
 
-		public static IEditorSettings EditorSettings
+		internal static bool IsInitialized()
+		{
+			return !(Settings.instance == null) && !Settings.isInitializing;
+		}
+
+		internal static IEditorSettings EditorSettings
 		{
 			get
 			{
@@ -75,7 +81,7 @@ namespace FMODUnity
 			}
 		}
 
-		public string TargetPath
+		internal string TargetPath
 		{
 			get
 			{
@@ -119,7 +125,7 @@ namespace FMODUnity
 			}
 		}
 
-		public Platform FindPlatform(string identifier)
+		internal Platform FindPlatform(string identifier)
 		{
 			foreach (Platform platform in this.Platforms)
 			{
@@ -131,25 +137,12 @@ namespace FMODUnity
 			return null;
 		}
 
-		public bool PlatformExists(string identifier)
+		internal bool PlatformExists(string identifier)
 		{
 			return this.FindPlatform(identifier) != null;
 		}
 
-		public void ForEachPlatform(Action<Platform> action)
-		{
-			foreach (Platform platform in this.Platforms)
-			{
-				action(platform);
-			}
-		}
-
-		public IEnumerable<Platform> EnumeratePlatforms()
-		{
-			return this.Platforms;
-		}
-
-		public void AddPlatform(Platform platform)
+		internal void AddPlatform(Platform platform)
 		{
 			if (this.PlatformExists(platform.Identifier))
 			{
@@ -158,18 +151,18 @@ namespace FMODUnity
 			this.Platforms.Add(platform);
 		}
 
-		public void RemovePlatform(string identifier)
+		internal void RemovePlatform(string identifier)
 		{
 			this.Platforms.RemoveAll((Platform p) => p.Identifier == identifier);
 		}
 
-		public void LinkPlatform(Platform platform)
+		internal void LinkPlatform(Platform platform)
 		{
 			this.LinkPlatformToParent(platform);
 			platform.DeclareRuntimePlatforms(this);
 		}
 
-		public void DeclareRuntimePlatform(RuntimePlatform runtimePlatform, Platform platform)
+		internal void DeclareRuntimePlatform(RuntimePlatform runtimePlatform, Platform platform)
 		{
 			List<Platform> list;
 			if (!this.PlatformForRuntimePlatform.TryGetValue(runtimePlatform, out list))
@@ -189,7 +182,7 @@ namespace FMODUnity
 			}
 		}
 
-		public Platform FindCurrentPlatform()
+		internal Platform FindCurrentPlatform()
 		{
 			List<Platform> list;
 			if (this.PlatformForRuntimePlatform.TryGetValue(Application.platform, out list))
@@ -205,11 +198,6 @@ namespace FMODUnity
 			return this.DefaultPlatform;
 		}
 
-		public SPEAKERMODE GetEditorSpeakerMode()
-		{
-			return this.PlayInEditorPlatform.SpeakerMode;
-		}
-
 		private Settings()
 		{
 			this.MasterBanks = new List<string>();
@@ -217,7 +205,6 @@ namespace FMODUnity
 			this.BanksToLoad = new List<string>();
 			this.RealChannelSettings = new List<Legacy.PlatformIntSetting>();
 			this.VirtualChannelSettings = new List<Legacy.PlatformIntSetting>();
-			this.LoggingSettings = new List<Legacy.PlatformBoolSetting>();
 			this.LiveUpdateSettings = new List<Legacy.PlatformBoolSetting>();
 			this.OverlaySettings = new List<Legacy.PlatformBoolSetting>();
 			this.SampleRateSettings = new List<Legacy.PlatformIntSetting>();
@@ -229,7 +216,7 @@ namespace FMODUnity
 			this.EnableMemoryTracking = false;
 		}
 
-		public void AddPlatformProperties(Platform platform)
+		internal void AddPlatformProperties(Platform platform)
 		{
 			platform.AffirmProperties();
 			this.LinkPlatformToParent(platform);
@@ -240,7 +227,7 @@ namespace FMODUnity
 			platform.Parent = newParent;
 		}
 
-		public static void AddPlatformTemplate<T>(string identifier) where T : Platform
+		internal static void AddPlatformTemplate<T>(string identifier) where T : Platform
 		{
 			Settings.PlatformTemplates.Add(new Settings.PlatformTemplate
 			{
@@ -257,7 +244,7 @@ namespace FMODUnity
 			return t;
 		}
 
-		public void OnEnable()
+		internal void OnEnable()
 		{
 			if (this.hasLoaded)
 			{
@@ -267,7 +254,7 @@ namespace FMODUnity
 			this.PopulatePlatformsFromAsset();
 			this.DefaultPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformDefault);
 			this.PlayInEditorPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformPlayInEditor);
-			this.ForEachPlatform(new Action<Platform>(this.LinkPlatform));
+			this.Platforms.ForEach(new Action<Platform>(this.LinkPlatform));
 		}
 
 		private void PopulatePlatformsFromAsset()
@@ -305,7 +292,7 @@ namespace FMODUnity
 			}
 		}
 
-		public const string SettingsAssetName = "FMODStudioSettings";
+		internal const string SettingsAssetName = "FMODStudioSettings";
 
 		private static Settings instance = null;
 
@@ -325,8 +312,9 @@ namespace FMODUnity
 		[SerializeField]
 		private string sourceBankPath;
 
+		[FormerlySerializedAs("SourceBankPathUnformatted")]
 		[SerializeField]
-		public string SourceBankPathUnformatted;
+		private string sourceBankPathUnformatted;
 
 		[SerializeField]
 		public int BankRefreshCooldown = 5;
@@ -334,9 +322,9 @@ namespace FMODUnity
 		[SerializeField]
 		public bool ShowBankRefreshWindow = true;
 
-		public const int BankRefreshPrompt = -1;
+		internal const int BankRefreshPrompt = -1;
 
-		public const int BankRefreshManual = -2;
+		internal const int BankRefreshManual = -2;
 
 		[SerializeField]
 		public bool AutomaticEventLoading;
@@ -366,31 +354,28 @@ namespace FMODUnity
 		public DEBUG_FLAGS LoggingLevel = DEBUG_FLAGS.WARNING;
 
 		[SerializeField]
-		public List<Legacy.PlatformIntSetting> SpeakerModeSettings;
+		internal List<Legacy.PlatformIntSetting> SpeakerModeSettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformIntSetting> SampleRateSettings;
+		internal List<Legacy.PlatformIntSetting> SampleRateSettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformBoolSetting> LiveUpdateSettings;
+		internal List<Legacy.PlatformBoolSetting> LiveUpdateSettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformBoolSetting> OverlaySettings;
+		internal List<Legacy.PlatformBoolSetting> OverlaySettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformBoolSetting> LoggingSettings;
+		internal List<Legacy.PlatformStringSetting> BankDirectorySettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformStringSetting> BankDirectorySettings;
+		internal List<Legacy.PlatformIntSetting> VirtualChannelSettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformIntSetting> VirtualChannelSettings;
+		internal List<Legacy.PlatformIntSetting> RealChannelSettings;
 
 		[SerializeField]
-		public List<Legacy.PlatformIntSetting> RealChannelSettings;
-
-		[SerializeField]
-		public List<string> Plugins = new List<string>();
+		internal List<string> Plugins = new List<string>();
 
 		[SerializeField]
 		public List<string> MasterBanks;
@@ -411,36 +396,39 @@ namespace FMODUnity
 		public bool AndroidUseOBB;
 
 		[SerializeField]
+		public bool AndroidPatchBuild;
+
+		[SerializeField]
 		public MeterChannelOrderingType MeterChannelOrdering;
 
 		[SerializeField]
 		public bool StopEventsOutsideMaxDistance;
 
 		[SerializeField]
-		public bool BoltUnitOptionsBuildPending;
+		internal bool BoltUnitOptionsBuildPending;
 
 		[SerializeField]
 		public bool EnableErrorCallback;
 
 		[SerializeField]
-		public Settings.SharedLibraryUpdateStages SharedLibraryUpdateStage;
+		internal Settings.SharedLibraryUpdateStages SharedLibraryUpdateStage;
 
 		[SerializeField]
-		public double SharedLibraryTimeSinceStart;
+		internal double SharedLibraryTimeSinceStart;
 
 		[SerializeField]
-		public int CurrentVersion;
+		internal int CurrentVersion;
 
 		[SerializeField]
 		public bool HideSetupWizard;
 
 		[SerializeField]
-		public int LastEventReferenceScanVersion;
+		internal int LastEventReferenceScanVersion;
 
 		[SerializeField]
 		public List<Platform> Platforms = new List<Platform>();
 
-		public Dictionary<RuntimePlatform, List<Platform>> PlatformForRuntimePlatform = new Dictionary<RuntimePlatform, List<Platform>>();
+		internal Dictionary<RuntimePlatform, List<Platform>> PlatformForRuntimePlatform = new Dictionary<RuntimePlatform, List<Platform>>();
 
 		[NonSerialized]
 		public Platform DefaultPlatform;
@@ -448,12 +436,12 @@ namespace FMODUnity
 		[NonSerialized]
 		public Platform PlayInEditorPlatform;
 
-		public static List<Settings.PlatformTemplate> PlatformTemplates = new List<Settings.PlatformTemplate>();
+		internal static List<Settings.PlatformTemplate> PlatformTemplates = new List<Settings.PlatformTemplate>();
 
 		[NonSerialized]
 		private bool hasLoaded;
 
-		public enum SharedLibraryUpdateStages
+		internal enum SharedLibraryUpdateStages
 		{
 			Start,
 			DisableExistingLibraries,
@@ -461,7 +449,7 @@ namespace FMODUnity
 			CopyNewLibraries
 		}
 
-		public struct PlatformTemplate
+		internal struct PlatformTemplate
 		{
 			public string Identifier;
 

@@ -40,8 +40,8 @@ namespace System.Runtime.Remoting.Channels
 			this._sinkStack = new ChanelSinkStackEntry(sink, state, this._sinkStack);
 		}
 
-		[MonoTODO]
 		[SecurityCritical]
+		[MonoTODO]
 		public void ServerCallback(IAsyncResult ar)
 		{
 			throw new NotImplementedException();
@@ -54,8 +54,8 @@ namespace System.Runtime.Remoting.Channels
 			throw new NotImplementedException();
 		}
 
-		[SecurityCritical]
 		[MonoTODO]
+		[SecurityCritical]
 		public void StoreAndDispatch(IServerChannelSink sink, object state)
 		{
 			throw new NotImplementedException();

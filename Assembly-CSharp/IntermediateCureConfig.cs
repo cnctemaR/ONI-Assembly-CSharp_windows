@@ -13,7 +13,7 @@ public class IntermediateCureConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("IntermediateCure", ITEMS.PILLS.INTERMEDIATECURE.NAME, ITEMS.PILLS.INTERMEDIATECURE.DESC, 1f, true, Assets.GetAnim("iv_slimelung_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("IntermediateCure", global::STRINGS.ITEMS.PILLS.INTERMEDIATECURE.NAME, global::STRINGS.ITEMS.PILLS.INTERMEDIATECURE.DESC, 1f, true, Assets.GetAnim("iv_slimelung_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.INTERMEDIATECURE);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -28,7 +28,7 @@ public class IntermediateCureConfig : IEntityConfig
 		IntermediateCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID(text, array, array2), array, array2)
 		{
 			time = 100f,
-			description = ITEMS.PILLS.INTERMEDIATECURE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.INTERMEDIATECURE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { text },
 			sortOrder = 10,

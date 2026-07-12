@@ -1,0 +1,115 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F05}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.TextCore.Text</RootNamespace>
+    <AssemblyName>UnityEngine.TextCoreTextEngineModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AtlasPopulationMode.cs" />
+    <Compile Include="Character.cs" />
+    <Compile Include="CharacterElement.cs" />
+    <Compile Include="CharacterSubstitution.cs" />
+    <Compile Include="CodePoint.cs" />
+    <Compile Include="ColorGradientMode.cs" />
+    <Compile Include="ColorUtilities.cs" />
+    <Compile Include="Extents.cs" />
+    <Compile Include="FastAction.2.cs" />
+    <Compile Include="FastAction.3.cs" />
+    <Compile Include="FastAction.4.cs" />
+    <Compile Include="FastAction.cs" />
+    <Compile Include="FontAsset.cs" />
+    <Compile Include="FontAssetCreationEditorSettings.cs" />
+    <Compile Include="FontAssetUtilities.cs" />
+    <Compile Include="FontFeatureTable.cs" />
+    <Compile Include="FontStyles.cs" />
+    <Compile Include="FontStyleStack.cs" />
+    <Compile Include="FontWeightPair.cs" />
+    <Compile Include="HighlightState.cs" />
+    <Compile Include="HorizontalAlignment.cs" />
+    <Compile Include="LineInfo.cs" />
+    <Compile Include="LinkInfo.cs" />
+    <Compile Include="MarkupAttribute.cs" />
+    <Compile Include="MarkupElement.cs" />
+    <Compile Include="MarkupTag.cs" />
+    <Compile Include="MaterialManager.cs" />
+    <Compile Include="MaterialReference.cs" />
+    <Compile Include="MaterialReferenceManager.cs" />
+    <Compile Include="MeshExtents.cs" />
+    <Compile Include="MeshInfo.cs" />
+    <Compile Include="Offset.cs" />
+    <Compile Include="PageInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RichTextTagAttribute.cs" />
+    <Compile Include="SpriteAsset.cs" />
+    <Compile Include="SpriteCharacter.cs" />
+    <Compile Include="SpriteGlyph.cs" />
+    <Compile Include="TagUnitType.cs" />
+    <Compile Include="TagValueType.cs" />
+    <Compile Include="TextAlignment.cs" />
+    <Compile Include="TextAsset.cs" />
+    <Compile Include="TextBackingContainer.cs" />
+    <Compile Include="TextColorGradient.cs" />
+    <Compile Include="TextElement.cs" />
+    <Compile Include="TextElementInfo.cs" />
+    <Compile Include="TextElementType.cs" />
+    <Compile Include="TextEventManager.cs" />
+    <Compile Include="TextFontWeight.cs" />
+    <Compile Include="TextGenerationSettings.cs" />
+    <Compile Include="TextGenerator.cs" />
+    <Compile Include="TextGeneratorUtilities.cs" />
+    <Compile Include="TextHandle.cs" />
+    <Compile Include="TextInfo.cs" />
+    <Compile Include="TextInputSource.cs" />
+    <Compile Include="TextOverflowMode.cs" />
+    <Compile Include="TextProcessingElement.cs" />
+    <Compile Include="TextProcessingElementType.cs" />
+    <Compile Include="TextProcessingStack.cs" />
+    <Compile Include="TextResourceManager.cs" />
+    <Compile Include="TextSettings.cs" />
+    <Compile Include="TextShaderUtilities.cs" />
+    <Compile Include="TextStyle.cs" />
+    <Compile Include="TextStyleSheet.cs" />
+    <Compile Include="TextureMapping.cs" />
+    <Compile Include="TextUtilities.cs" />
+    <Compile Include="TextVertex.cs" />
+    <Compile Include="TextWrappingMode.cs" />
+    <Compile Include="UnicodeLineBreakingRules.cs" />
+    <Compile Include="VertexSortingOrder.cs" />
+    <Compile Include="VerticalAlignment.cs" />
+    <Compile Include="WordInfo.cs" />
+    <Compile Include="WordWrapState.cs" />
+    <Compile Include="XmlTagAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextCoreFontEngineModule\UnityEngine.TextCoreFontEngineModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713F04}</Project>
+      <Name>UnityEngine.TextCoreFontEngineModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713F06}</Project>
+      <Name>UnityEngine.TextRenderingModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

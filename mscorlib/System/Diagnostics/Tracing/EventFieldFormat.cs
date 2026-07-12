@@ -4,12 +4,12 @@ namespace System.Diagnostics.Tracing
 {
 	public enum EventFieldFormat
 	{
-		Default,
+		Boolean = 3,
+		Default = 0,
+		Hexadecimal = 4,
+		HResult = 15,
+		Json = 12,
 		String = 2,
-		Boolean,
-		Hexadecimal,
-		Xml = 11,
-		Json,
-		HResult = 15
+		Xml = 11
 	}
 }

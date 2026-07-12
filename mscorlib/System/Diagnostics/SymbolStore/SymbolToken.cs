@@ -1,24 +1,32 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Diagnostics.SymbolStore
 {
-	[ComVisible(true)]
-	public struct SymbolToken
+	public readonly struct SymbolToken
 	{
 		public SymbolToken(int val)
 		{
-			this._val = val;
+			this._token = val;
+		}
+
+		public int GetToken()
+		{
+			return this._token;
+		}
+
+		public override int GetHashCode()
+		{
+			return this._token;
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is SymbolToken && ((SymbolToken)obj).GetToken() == this._val;
+			return obj is SymbolToken && this.Equals((SymbolToken)obj);
 		}
 
 		public bool Equals(SymbolToken obj)
 		{
-			return obj.GetToken() == this._val;
+			return obj._token == this._token;
 		}
 
 		public static bool operator ==(SymbolToken a, SymbolToken b)
@@ -28,19 +36,9 @@ namespace System.Diagnostics.SymbolStore
 
 		public static bool operator !=(SymbolToken a, SymbolToken b)
 		{
-			return !a.Equals(b);
+			return !(a == b);
 		}
 
-		public override int GetHashCode()
-		{
-			return this._val.GetHashCode();
-		}
-
-		public int GetToken()
-		{
-			return this._val;
-		}
-
-		private int _val;
+		private readonly int _token;
 	}
 }

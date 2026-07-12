@@ -13,8 +13,7 @@ public class DirectlyEdiblePlant_TreeBranches : KMonoBehaviour, IPlantConsumptio
 
 	public bool CanPlantBeEaten()
 	{
-		float num = 0.25f;
-		return this.GetMaxBranchMaturity() >= num;
+		return this.GetMaxBranchMaturity() >= this.MinimumEdibleMaturity;
 	}
 
 	public float ConsumePlant(float desiredUnitsToConsume)
@@ -22,27 +21,36 @@ public class DirectlyEdiblePlant_TreeBranches : KMonoBehaviour, IPlantConsumptio
 		float maxBranchMaturity = this.GetMaxBranchMaturity();
 		float num = Mathf.Min(desiredUnitsToConsume, maxBranchMaturity);
 		GameObject mostMatureBranch = this.GetMostMatureBranch();
-		if (mostMatureBranch)
+		if (!mostMatureBranch)
 		{
-			Growing component = mostMatureBranch.GetComponent<Growing>();
-			if (component)
-			{
-				Harvestable component2 = mostMatureBranch.GetComponent<Harvestable>();
-				if (component2 != null)
-				{
-					component2.Trigger(2127324410, true);
-				}
-				component.ConsumeMass(num);
-				return num;
-			}
+			return 0f;
 		}
-		return 0f;
+		Growing component = mostMatureBranch.GetComponent<Growing>();
+		if (component)
+		{
+			Harvestable component2 = mostMatureBranch.GetComponent<Harvestable>();
+			if (component2 != null)
+			{
+				component2.Trigger(2127324410, true);
+			}
+			component.ConsumeMass(num);
+			return num;
+		}
+		mostMatureBranch.GetAmounts().Get(Db.Get().Amounts.Maturity.Id).ApplyDelta(-desiredUnitsToConsume);
+		base.gameObject.Trigger(-1793167409, null);
+		mostMatureBranch.Trigger(-1793167409, null);
+		return desiredUnitsToConsume;
 	}
 
 	public float PlantProductGrowthPerCycle()
 	{
-		Crop crop = base.GetComponent<Crop>();
-		float num = CROPS.CROP_TYPES.Find((Crop.CropVal m) => m.cropId == crop.cropId).cropDuration / 600f;
+		Crop component = base.GetComponent<Crop>();
+		string cropID = component.cropId;
+		if (this.overrideCropID != null)
+		{
+			cropID = this.overrideCropID;
+		}
+		float num = CROPS.CROP_TYPES.Find((Crop.CropVal m) => m.cropId == cropID).cropDuration / 600f;
 		return 1f / num;
 	}
 
@@ -103,5 +111,14 @@ public class DirectlyEdiblePlant_TreeBranches : KMonoBehaviour, IPlantConsumptio
 		return null;
 	}
 
+	public Diet.Info.FoodType GetDietFoodType()
+	{
+		return Diet.Info.FoodType.EatPlantDirectly;
+	}
+
 	private PlantBranchGrower.Instance trunk;
+
+	public float MinimumEdibleMaturity = 0.25f;
+
+	public string overrideCropID;
 }

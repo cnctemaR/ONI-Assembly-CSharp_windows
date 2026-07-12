@@ -9,7 +9,6 @@ namespace System.Data
 		protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		public DeletedRowInaccessibleException()

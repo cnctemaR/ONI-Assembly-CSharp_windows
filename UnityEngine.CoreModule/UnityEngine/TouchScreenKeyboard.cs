@@ -5,9 +5,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
-	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
+	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
+	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
 	public class TouchScreenKeyboard
 	{
 		[FreeFunction("TouchScreenKeyboard_Destroy", IsThreadSafe = true)]
@@ -53,33 +53,37 @@ namespace UnityEngine
 				RuntimePlatform platform = Application.platform;
 				RuntimePlatform runtimePlatform = platform;
 				RuntimePlatform runtimePlatform2 = runtimePlatform;
-				if (runtimePlatform2 <= RuntimePlatform.Android)
+				if (runtimePlatform2 <= RuntimePlatform.MetroPlayerARM)
 				{
-					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android)
+					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 - RuntimePlatform.WebGLPlayer > 3)
 					{
-						goto IL_005C;
+						goto IL_0063;
 					}
 				}
-				else if (runtimePlatform2 - RuntimePlatform.MetroPlayerX86 > 2 && runtimePlatform2 != RuntimePlatform.PS4)
+				else if (runtimePlatform2 != RuntimePlatform.PS4)
 				{
 					switch (runtimePlatform2)
 					{
 					case RuntimePlatform.tvOS:
 					case RuntimePlatform.Switch:
 					case RuntimePlatform.Stadia:
-					case RuntimePlatform.GameCoreScarlett:
+					case RuntimePlatform.GameCoreXboxSeries:
 					case RuntimePlatform.GameCoreXboxOne:
 					case RuntimePlatform.PS5:
 						break;
 					case RuntimePlatform.Lumin:
 					case RuntimePlatform.CloudRendering:
-						goto IL_005C;
+						goto IL_0063;
 					default:
-						goto IL_005C;
+						if (runtimePlatform2 != RuntimePlatform.VisionOS)
+						{
+							goto IL_0063;
+						}
+						break;
 					}
 				}
 				return true;
-				IL_005C:
+				IL_0063:
 				return false;
 			}
 		}
@@ -347,27 +351,40 @@ namespace UnityEngine
 
 		public class Android
 		{
+			[Obsolete("TouchScreenKeyboard.Android.closeKeyboardOnOutsideTap is obsolete. Use TouchScreenKeyboard.Android.consumesOutsideTouches instead (UnityUpgradable) -> UnityEngine.TouchScreenKeyboard/Android.consumesOutsideTouches")]
 			public static bool closeKeyboardOnOutsideTap
 			{
 				get
 				{
-					return TouchScreenKeyboard.Android.TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap();
+					return TouchScreenKeyboard.Android.consumesOutsideTouches;
 				}
 				set
 				{
-					TouchScreenKeyboard.Android.TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap(value);
+					TouchScreenKeyboard.Android.consumesOutsideTouches = value;
 				}
 			}
 
-			[NativeConditional("PLATFORM_ANDROID")]
-			[FreeFunction("TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void TouchScreenKeyboard_SetAndroidCloseKeyboardOnOutsideTap(bool enable);
+			public static bool consumesOutsideTouches
+			{
+				get
+				{
+					return TouchScreenKeyboard.Android.TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches();
+				}
+				set
+				{
+					TouchScreenKeyboard.Android.TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches(value);
+				}
+			}
 
-			[FreeFunction("TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap")]
+			[FreeFunction("TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches")]
 			[NativeConditional("PLATFORM_ANDROID")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern bool TouchScreenKeyboard_GetAndroidCloseKeyboardOnOutsideTap();
+			private static extern void TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches(bool enable);
+
+			[FreeFunction("TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches")]
+			[NativeConditional("PLATFORM_ANDROID")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches();
 		}
 	}
 }

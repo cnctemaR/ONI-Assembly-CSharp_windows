@@ -8,7 +8,7 @@ namespace Unity.Collections
 	{
 		public void Dispose()
 		{
-			UnsafeUtility.Free(this.m_Buffer, this.m_AllocatorLabel);
+			UnsafeUtility.FreeTracked(this.m_Buffer, this.m_AllocatorLabel);
 		}
 
 		[NativeDisableUnsafePtrRestriction]

@@ -239,10 +239,10 @@ namespace UnityEngine.Rendering
 
 		[UnsafeValueType]
 		[CompilerGenerated]
-		[StructLayout(LayoutKind.Sequential, Size = 96)]
-		public struct <m_ShadowCullPlanes>e__FixedBuffer
+		[StructLayout(LayoutKind.Sequential, Size = 128)]
+		public struct <layerCullDistances>e__FixedBuffer
 		{
-			public byte FixedElementField;
+			public float FixedElementField;
 		}
 
 		[CompilerGenerated]
@@ -255,10 +255,10 @@ namespace UnityEngine.Rendering
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 128)]
-		public struct <layerCullDistances>e__FixedBuffer
+		[StructLayout(LayoutKind.Sequential, Size = 96)]
+		public struct <m_ShadowCullPlanes>e__FixedBuffer
 		{
-			public float FixedElementField;
+			public byte FixedElementField;
 		}
 	}
 }

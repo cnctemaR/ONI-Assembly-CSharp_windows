@@ -2,7 +2,6 @@
 
 namespace Microsoft.Win32
 {
-	[Serializable]
 	public enum RegistryView
 	{
 		Default,

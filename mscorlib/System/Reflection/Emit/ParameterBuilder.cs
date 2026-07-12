@@ -4,12 +4,32 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ParameterBuilder))]
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ParameterBuilder : _ParameterBuilder
 	{
+		void _ParameterBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal ParameterBuilder(MethodBase mb, int pos, ParameterAttributes attributes, string strParamName)
 		{
 			this.name = strParamName;
@@ -21,7 +41,7 @@ namespace System.Reflection.Emit
 				this.table_idx = 0;
 				return;
 			}
-			this.table_idx = mb.get_next_table_index(this, 8, true);
+			this.table_idx = mb.get_next_table_index(this, 8, 1);
 		}
 
 		public virtual int Attributes
@@ -81,15 +101,7 @@ namespace System.Reflection.Emit
 		{
 			if (this.position > 0)
 			{
-				Type parameterType = this.methodb.GetParameterType(this.position - 1);
-				if (defaultValue != null && parameterType != defaultValue.GetType() && (!parameterType.IsEnum || parameterType.UnderlyingSystemType != defaultValue.GetType()))
-				{
-					throw new ArgumentException("Constant does not match the defined type.");
-				}
-				if (parameterType.IsValueType && !parameterType.IsPrimitive && !parameterType.IsEnum && parameterType != typeof(DateTime))
-				{
-					throw new ArgumentException(parameterType + " is not a supported constant type.");
-				}
+				TypeBuilder.SetConstantValue(this.methodb.GetParameterType(this.position - 1), defaultValue, ref defaultValue);
 			}
 			this.def_value = defaultValue;
 			this.attrs |= ParameterAttributes.HasDefault;
@@ -148,26 +160,6 @@ namespace System.Reflection.Emit
 		{
 			this.marshal_info = unmanagedMarshal;
 			this.attrs |= ParameterAttributes.HasFieldMarshal;
-		}
-
-		void _ParameterBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal ParameterBuilder()

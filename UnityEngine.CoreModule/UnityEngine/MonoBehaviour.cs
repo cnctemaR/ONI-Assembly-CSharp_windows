@@ -1,18 +1,48 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
-	[ExtensionOfNativeClass]
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
+	[ExtensionOfNativeClass]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	public class MonoBehaviour : Behaviour
 	{
+		public CancellationToken destroyCancellationToken
+		{
+			get
+			{
+				bool flag = this == null;
+				if (flag)
+				{
+					throw new MissingReferenceException("DestroyCancellation token should be called atleast once before destroying the monobehaviour object");
+				}
+				bool flag2 = this.m_CancellationTokenSource == null;
+				if (flag2)
+				{
+					this.m_CancellationTokenSource = new CancellationTokenSource();
+					this.OnCancellationTokenCreated();
+				}
+				return this.m_CancellationTokenSource.Token;
+			}
+		}
+
+		[RequiredByNativeCode]
+		private void RaiseCancellation()
+		{
+			CancellationTokenSource cancellationTokenSource = this.m_CancellationTokenSource;
+			if (cancellationTokenSource != null)
+			{
+				cancellationTokenSource.Cancel();
+			}
+		}
+
 		public bool IsInvoking()
 		{
 			return MonoBehaviour.Internal_IsInvokingAll(this);
@@ -178,5 +208,10 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern string GetScriptClassName();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void OnCancellationTokenCreated();
+
+		private CancellationTokenSource m_CancellationTokenSource;
 	}
 }

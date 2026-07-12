@@ -12,7 +12,7 @@ public class PhonoboxSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 position = behaviour.position;
 		position.z = 0f;
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)

@@ -26,23 +26,39 @@ public class AssignableSideScreenRow : KMonoBehaviour
 				Ownables component = kmonoBehaviour.GetComponent<Ownables>();
 				if (component != null)
 				{
-					AssignableSlotInstance slot = component.GetSlot(this.sideScreen.targetAssignable.slot);
-					if (slot != null && slot.IsAssigned())
+					AssignableSlotInstance[] slots = component.GetSlots(this.sideScreen.targetAssignable.slot);
+					if (slots != null && slots.Length != 0)
 					{
-						this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-						this.assignmentText.text = slot.assignable.GetProperName();
-						flag = true;
+						AssignableSlotInstance assignableSlotInstance = slots.FindFirst<AssignableSlotInstance>((AssignableSlotInstance s) => !s.IsAssigned());
+						if (assignableSlotInstance == null)
+						{
+							assignableSlotInstance = slots[0];
+						}
+						if (assignableSlotInstance != null && assignableSlotInstance.IsAssigned())
+						{
+							this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+							this.assignmentText.text = assignableSlotInstance.assignable.GetProperName();
+							flag = true;
+						}
 					}
 				}
 				Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
 				if (component2 != null)
 				{
-					AssignableSlotInstance slot2 = component2.GetSlot(this.sideScreen.targetAssignable.slot);
-					if (slot2 != null && slot2.IsAssigned())
+					AssignableSlotInstance[] slots2 = component2.GetSlots(this.sideScreen.targetAssignable.slot);
+					if (slots2 != null && slots2.Length != 0)
 					{
-						this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-						this.assignmentText.text = slot2.assignable.GetProperName();
-						flag = true;
+						AssignableSlotInstance assignableSlotInstance2 = slots2.FindFirst<AssignableSlotInstance>((AssignableSlotInstance s) => !s.IsAssigned());
+						if (assignableSlotInstance2 == null)
+						{
+							assignableSlotInstance2 = slots2[0];
+						}
+						if (assignableSlotInstance2 != null && assignableSlotInstance2.IsAssigned())
+						{
+							this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+							this.assignmentText.text = assignableSlotInstance2.assignable.GetProperName();
+							flag = true;
+						}
 					}
 				}
 			}

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesigntimeLicenseContext : LicenseContext
 	{
 		public override LicenseUsageMode UsageMode

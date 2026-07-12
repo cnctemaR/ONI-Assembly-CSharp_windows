@@ -43,7 +43,7 @@ namespace System.Security.Authentication.ExtendedProtection
 		{
 			if (string.IsNullOrEmpty(serviceName))
 			{
-				throw new ArgumentException(global::SR.GetString("A service name must not be null or empty."));
+				throw new ArgumentException(SR.GetString("A service name must not be null or empty."));
 			}
 			serviceName = ServiceNameCollection.NormalizeServiceName(serviceName);
 			if (!ServiceNameCollection.Contains(serviceName, newServiceNames))

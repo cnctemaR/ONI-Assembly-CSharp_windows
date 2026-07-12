@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class SugarEngineConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -33,7 +33,7 @@ public class SugarEngineConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.InputConduitType = ConduitType.None;
 		buildingDef.GeneratorWattageRating = 60f;
-		buildingDef.GeneratorBaseCapacity = 2000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.RequiresPowerOutput = false;
 		buildingDef.CanMove = true;

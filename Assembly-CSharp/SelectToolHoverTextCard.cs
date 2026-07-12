@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class SelectToolHoverTextCard : HoverTextConfiguration
@@ -120,12 +121,12 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		{
 			if (!Grid.Solid[num] && flag3)
 			{
-				float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
-				float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.08368001f);
+				float thermalComfort = GameUtil.GetThermalComfort(GameTags.Minions.Models.Standard, num, 0f);
+				float thermalComfort2 = GameUtil.GetThermalComfort(GameTags.Minions.Models.Standard, num, -DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_BASE_GENERATION_KILOWATTS);
 				float num2 = 0f;
 				float num3 = 1f * thermalComfort;
 				text = text + " (" + GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic) + ")";
-				if (thermalComfort2 * 0.001f > -0.11157334f - num2 && thermalComfort2 * 0.001f < 0.11157334f + num2)
+				if (thermalComfort2 * 0.001f > -ExternalTemperatureMonitor.BASE_STRESS_TOLERANCE_COLD - num2 && thermalComfort2 * 0.001f < ExternalTemperatureMonitor.BASE_STRESS_TOLERANCE_WARM + num2)
 				{
 					text = string.Format(UI.OVERLAYS.HEATFLOW.NEUTRAL_DUPE, text);
 				}

@@ -7,13 +7,14 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[Il2CppEagerStaticClassConstruction]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeClass("Vector2f")]
 	public struct Vector2 : IEquatable<Vector2>, IFormattable
 	{
 		public float this[int index]
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				float num;
@@ -31,6 +32,7 @@ namespace UnityEngine
 				}
 				return num;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				if (index != 0)
@@ -48,33 +50,34 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector2(float x, float y)
 		{
 			this.x = x;
 			this.y = y;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Set(float newX, float newY)
 		{
 			this.x = newX;
 			this.y = newY;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
 		{
 			t = Mathf.Clamp01(t);
 			return new Vector2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 LerpUnclamped(Vector2 a, Vector2 b, float t)
 		{
 			return new Vector2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 MoveTowards(Vector2 current, Vector2 target, float maxDistanceDelta)
 		{
 			float num = target.x - current.x;
@@ -94,19 +97,20 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Scale(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x * b.x, a.y * b.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Scale(Vector2 scale)
 		{
 			this.x *= scale.x;
 			this.y *= scale.y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Normalize()
 		{
 			float magnitude = this.magnitude;
@@ -123,6 +127,7 @@ namespace UnityEngine
 
 		public Vector2 normalized
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				Vector2 vector = new Vector2(this.x, this.y);
@@ -131,22 +136,30 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = string.IsNullOrEmpty(format);
 			if (flag)
 			{
-				format = "F1";
+				format = "F2";
+			}
+			bool flag2 = formatProvider == null;
+			if (flag2)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
 			return UnityString.Format("({0}, {1})", new object[]
 			{
@@ -155,36 +168,39 @@ namespace UnityEngine
 			});
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
 			return this.x.GetHashCode() ^ (this.y.GetHashCode() << 2);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals(object other)
 		{
 			bool flag = !(other is Vector2);
 			return !flag && this.Equals((Vector2)other);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Vector2 other)
 		{
 			return this.x == other.x && this.y == other.y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Reflect(Vector2 inDirection, Vector2 inNormal)
 		{
 			float num = -2f * Vector2.Dot(inNormal, inDirection);
 			return new Vector2(num * inNormal.x + inDirection.x, num * inNormal.y + inDirection.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Perpendicular(Vector2 inDirection)
 		{
 			return new Vector2(-inDirection.y, inDirection.x);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Dot(Vector2 lhs, Vector2 rhs)
 		{
 			return lhs.x * rhs.x + lhs.y * rhs.y;
@@ -192,6 +208,7 @@ namespace UnityEngine
 
 		public float magnitude
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return (float)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
@@ -200,13 +217,14 @@ namespace UnityEngine
 
 		public float sqrMagnitude
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.x * this.x + this.y * this.y;
 			}
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Angle(Vector2 from, Vector2 to)
 		{
 			float num = (float)Math.Sqrt((double)(from.sqrMagnitude * to.sqrMagnitude));
@@ -224,6 +242,7 @@ namespace UnityEngine
 			return num2;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float SignedAngle(Vector2 from, Vector2 to)
 		{
 			float num = Vector2.Angle(from, to);
@@ -231,6 +250,7 @@ namespace UnityEngine
 			return num * num2;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Distance(Vector2 a, Vector2 b)
 		{
 			float num = a.x - b.x;
@@ -238,6 +258,7 @@ namespace UnityEngine
 			return (float)Math.Sqrt((double)(num * num + num2 * num2));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 ClampMagnitude(Vector2 vector, float maxLength)
 		{
 			float sqrMagnitude = vector.sqrMagnitude;
@@ -257,27 +278,32 @@ namespace UnityEngine
 			return vector2;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float SqrMagnitude(Vector2 a)
 		{
 			return a.x * a.x + a.y * a.y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public float SqrMagnitude()
 		{
 			return this.x * this.x + this.y * this.y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Min(Vector2 lhs, Vector2 rhs)
 		{
 			return new Vector2(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 Max(Vector2 lhs, Vector2 rhs)
 		{
 			return new Vector2(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
 		}
 
 		[ExcludeFromDocs]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, float maxSpeed)
 		{
 			float deltaTime = Time.deltaTime;
@@ -285,6 +311,7 @@ namespace UnityEngine
 		}
 
 		[ExcludeFromDocs]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime)
 		{
 			float deltaTime = Time.deltaTime;
@@ -334,55 +361,55 @@ namespace UnityEngine
 			return new Vector2(num12, num13);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator +(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x + b.x, a.y + b.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator -(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x - b.x, a.y - b.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator *(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x * b.x, a.y * b.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator /(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x / b.x, a.y / b.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator -(Vector2 a)
 		{
 			return new Vector2(-a.x, -a.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator *(Vector2 a, float d)
 		{
 			return new Vector2(a.x * d, a.y * d);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator *(float d, Vector2 a)
 		{
 			return new Vector2(a.x * d, a.y * d);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 operator /(Vector2 a, float d)
 		{
 			return new Vector2(a.x / d, a.y / d);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Vector2 lhs, Vector2 rhs)
 		{
 			float num = lhs.x - rhs.x;
@@ -390,19 +417,19 @@ namespace UnityEngine
 			return num * num + num2 * num2 < 9.9999994E-11f;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(Vector2 lhs, Vector2 rhs)
 		{
 			return !(lhs == rhs);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static implicit operator Vector2(Vector3 v)
 		{
 			return new Vector2(v.x, v.y);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static implicit operator Vector3(Vector2 v)
 		{
 			return new Vector3(v.x, v.y, 0f);
@@ -410,6 +437,7 @@ namespace UnityEngine
 
 		public static Vector2 zero
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.zeroVector;
@@ -418,6 +446,7 @@ namespace UnityEngine
 
 		public static Vector2 one
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.oneVector;
@@ -426,6 +455,7 @@ namespace UnityEngine
 
 		public static Vector2 up
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.upVector;
@@ -434,6 +464,7 @@ namespace UnityEngine
 
 		public static Vector2 down
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.downVector;
@@ -442,6 +473,7 @@ namespace UnityEngine
 
 		public static Vector2 left
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.leftVector;
@@ -450,6 +482,7 @@ namespace UnityEngine
 
 		public static Vector2 right
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.rightVector;
@@ -458,6 +491,7 @@ namespace UnityEngine
 
 		public static Vector2 positiveInfinity
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.positiveInfinityVector;
@@ -466,6 +500,7 @@ namespace UnityEngine
 
 		public static Vector2 negativeInfinity
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return Vector2.negativeInfinityVector;

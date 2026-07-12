@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class SleepChore : Chore<SleepChore.StatesInstance>
@@ -45,13 +46,13 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		base.smi.optional_StatusItemsDisplayedWhileAsleep = optional_StatusItemsDisplayedWhileAsleep;
 		if (isInterruptable)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+			this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		}
-		base.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
+		this.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
 		Operational component = bed.GetComponent<Operational>();
 		if (component != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
+			this.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		}
 	}
 
@@ -67,7 +68,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 	public static bool IsDarkAtCell(int cell)
 	{
-		return Grid.LightIntensity[cell] < 500;
+		return Grid.LightIntensity[cell] < DUPLICANTSTATS.STANDARD.Light.LOW_LIGHT;
 	}
 
 	public static readonly Chore.Precondition IsOkayTimeToSleep = new Chore.Precondition

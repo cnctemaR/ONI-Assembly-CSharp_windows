@@ -18,7 +18,7 @@ namespace UnityEngine.Timeline
 
 		internal TimelineClip(TrackAsset parent)
 		{
-			this.parentTrack = parent;
+			this.SetParentTrack_Internal(parent);
 		}
 
 		public bool hasPreExtrapolation
@@ -179,7 +179,7 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
-				return this.parentTrack;
+				return this.GetParentTrack();
 			}
 		}
 
@@ -187,7 +187,7 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
-				return this.parentTrack;
+				return this.GetParentTrack();
 			}
 		}
 
@@ -203,6 +203,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		[Obsolete("parentTrack is deprecated and will be removed in a future release. Use GetParentTrack() and TimelineClipExtensions::MoveToTrack() or TimelineClipExtensions::TryMoveToTrack() instead.", false)]
 		public TrackAsset parentTrack
 		{
 			get
@@ -211,19 +212,29 @@ namespace UnityEngine.Timeline
 			}
 			set
 			{
-				if (this.m_ParentTrack == value)
-				{
-					return;
-				}
-				if (this.m_ParentTrack != null)
-				{
-					this.m_ParentTrack.RemoveClip(this);
-				}
-				this.m_ParentTrack = value;
-				if (this.m_ParentTrack != null)
-				{
-					this.m_ParentTrack.AddClip(this);
-				}
+				this.SetParentTrack_Internal(value);
+			}
+		}
+
+		public TrackAsset GetParentTrack()
+		{
+			return this.m_ParentTrack;
+		}
+
+		internal void SetParentTrack_Internal(TrackAsset newParentTrack)
+		{
+			if (this.m_ParentTrack == newParentTrack)
+			{
+				return;
+			}
+			if (this.m_ParentTrack != null)
+			{
+				this.m_ParentTrack.RemoveClip(this);
+			}
+			this.m_ParentTrack = newParentTrack;
+			if (this.m_ParentTrack != null)
+			{
+				this.m_ParentTrack.AddClip(this);
 			}
 		}
 
@@ -231,15 +242,17 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
+				double num = (this.hasBlendOut ? (this.duration - this.m_BlendOutDuration) : this.duration);
 				if (!this.clipCaps.HasAny(ClipCaps.Blending))
 				{
 					return 0.0;
 				}
-				return Math.Min(Math.Max(this.m_EaseInDuration, 0.0), this.duration);
+				return Math.Min(Math.Max(this.m_EaseInDuration, 0.0), num);
 			}
 			set
 			{
-				this.m_EaseInDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration), this.duration)) : 0.0);
+				double num = (this.hasBlendOut ? (this.duration - this.m_BlendOutDuration) : this.duration);
+				this.m_EaseInDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration), num)) : 0.0);
 			}
 		}
 
@@ -247,15 +260,17 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
+				double num = (this.hasBlendIn ? (this.duration - this.m_BlendInDuration) : this.duration);
 				if (!this.clipCaps.HasAny(ClipCaps.Blending))
 				{
 					return 0.0;
 				}
-				return Math.Min(Math.Max(this.m_EaseOutDuration, 0.0), this.duration);
+				return Math.Min(Math.Max(this.m_EaseOutDuration, 0.0), num);
 			}
 			set
 			{
-				this.m_EaseOutDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration), this.duration)) : 0.0);
+				double num = (this.hasBlendIn ? (this.duration - this.m_BlendInDuration) : this.duration);
+				this.m_EaseOutDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration), num)) : 0.0);
 			}
 		}
 
@@ -713,7 +728,7 @@ namespace UnityEngine.Timeline
 			{
 				return;
 			}
-			this.m_AnimationCurves = TimelineCreateUtilities.CreateAnimationClipForTrack(string.IsNullOrEmpty(curvesClipName) ? TimelineClip.kDefaultCurvesName : curvesClipName, this.parentTrack, true);
+			this.m_AnimationCurves = TimelineCreateUtilities.CreateAnimationClipForTrack(string.IsNullOrEmpty(curvesClipName) ? TimelineClip.kDefaultCurvesName : curvesClipName, this.GetParentTrack(), true);
 		}
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
@@ -731,7 +746,14 @@ namespace UnityEngine.Timeline
 
 		public override string ToString()
 		{
-			return UnityString.Format("{0} ({1:F2}, {2:F2}):{3:F2} | {4}", new object[] { this.displayName, this.start, this.end, this.clipIn, this.parentTrack });
+			return UnityString.Format("{0} ({1:F2}, {2:F2}):{3:F2} | {4}", new object[]
+			{
+				this.displayName,
+				this.start,
+				this.end,
+				this.clipIn,
+				this.GetParentTrack()
+			});
 		}
 
 		public void ConformEaseValues()

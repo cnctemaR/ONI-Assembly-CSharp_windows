@@ -55,7 +55,20 @@ public class SpaceTreeConfig : IEntityConfig
 		growing.maxAge = 2400f;
 		gameObject.AddOrGet<HarvestDesignatable>();
 		gameObject.AddOrGet<LoopingSounds>();
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SpaceTreeSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SPACETREE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SPACETREE.DESC, Assets.GetAnim("seed_syrup_tree_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.SPACETREE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds());
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text5 = "SpaceTreeSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.SPACETREE.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.SPACETREE.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_syrup_tree_kanim");
+		string text8 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text9 = global::STRINGS.CREATURES.SPECIES.SPACETREE.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text5, text6, text7, anim, text8, num2, list, receptacleDirection, default(Tag), 1, text9, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -64,7 +77,7 @@ public class SpaceTreeConfig : IEntityConfig
 				massConsumptionRate = 0.16666667f
 			}
 		});
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "SpaceTree_preview", Assets.GetAnim("syrup_tree_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "SpaceTree_preview", Assets.GetAnim("syrup_tree_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		DirectlyEdiblePlant_StorageElement directlyEdiblePlant_StorageElement = gameObject.AddOrGet<DirectlyEdiblePlant_StorageElement>();
@@ -78,6 +91,9 @@ public class SpaceTreeConfig : IEntityConfig
 			new CellOffset(-1, 1),
 			new CellOffset(1, 1)
 		};
+		DirectlyEdiblePlant_TreeBranches directlyEdiblePlant_TreeBranches = gameObject.AddOrGet<DirectlyEdiblePlant_TreeBranches>();
+		directlyEdiblePlant_TreeBranches.overrideCropID = "SpaceTreeBranch";
+		directlyEdiblePlant_TreeBranches.MinimumEdibleMaturity = 1f;
 		Storage storage = gameObject.AddOrGet<Storage>();
 		storage.allowItemRemoval = false;
 		storage.showInUI = true;

@@ -22,7 +22,9 @@ namespace System.Configuration
 		{
 			if (this.initialized)
 			{
-				throw new SystemException("INTERNAL ERROR: this configuration section is being initialized twice: " + base.GetType());
+				string text = "INTERNAL ERROR: this configuration section is being initialized twice: ";
+				Type type = base.GetType();
+				throw new SystemException(text + ((type != null) ? type.ToString() : null));
 			}
 			this.initialized = true;
 			this.config = config;

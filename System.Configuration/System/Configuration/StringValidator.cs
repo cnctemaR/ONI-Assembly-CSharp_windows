@@ -40,11 +40,11 @@ namespace System.Configuration
 			string text = (string)value;
 			if (text == null || text.Length < this.minLength)
 			{
-				throw new ArgumentException("The string must be at least " + this.minLength + " characters long.");
+				throw new ArgumentException("The string must be at least " + this.minLength.ToString() + " characters long.");
 			}
 			if (text.Length > this.maxLength)
 			{
-				throw new ArgumentException("The string must be no more than " + this.maxLength + " characters long.");
+				throw new ArgumentException("The string must be no more than " + this.maxLength.ToString() + " characters long.");
 			}
 			if (this.invalidCharacters != null && text.IndexOfAny(this.invalidCharacters) != -1)
 			{

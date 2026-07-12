@@ -9,7 +9,15 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 	{
 		default_state = this.alive;
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
-		this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ToggleTag(GameTags.PreventEmittingDisease).Enter(delegate(SapTree.StatesInstance smi)
+		GameStateMachine<SapTree, SapTree.StatesInstance, IStateMachineTarget, SapTree.Def>.State state = this.dead;
+		string text = CREATURES.STATUSITEMS.DEAD.NAME;
+		string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory).ToggleTag(GameTags.PreventEmittingDisease).Enter(delegate(SapTree.StatesInstance smi)
 		{
 			GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 			smi.master.Trigger(1623392196, null);
@@ -20,8 +28,15 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 		{
 			smi.CheckForFood();
 		}, UpdateRate.SIM_1000ms, false);
-		this.alive.normal.idle.PlayAnim("idle", KAnim.PlayMode.Loop).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ParamTransition<bool>(this.hasNearbyEnemy, this.alive.normal.attacking_pre, GameStateMachine<SapTree, SapTree.StatesInstance, IStateMachineTarget, SapTree.Def>.IsTrue)
-			.ParamTransition<float>(this.storedSap, this.alive.normal.oozing, (SapTree.StatesInstance smi, float p) => p >= smi.def.stomachSize)
+		GameStateMachine<SapTree, SapTree.StatesInstance, IStateMachineTarget, SapTree.Def>.State state2 = this.alive.normal.idle.PlayAnim("idle", KAnim.PlayMode.Loop);
+		string text4 = CREATURES.STATUSITEMS.IDLE.NAME;
+		string text5 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory).ParamTransition<bool>(this.hasNearbyEnemy, this.alive.normal.attacking_pre, GameStateMachine<SapTree, SapTree.StatesInstance, IStateMachineTarget, SapTree.Def>.IsTrue).ParamTransition<float>(this.storedSap, this.alive.normal.oozing, (SapTree.StatesInstance smi, float p) => p >= smi.def.stomachSize)
 			.ParamTransition<GameObject>(this.foodItem, this.alive.normal.eating, GameStateMachine<SapTree, SapTree.StatesInstance, IStateMachineTarget, SapTree.Def>.IsNotNull);
 		this.alive.normal.eating.PlayAnim("eat_pre", KAnim.PlayMode.Once).QueueAnim("eat_loop", true, null).Update(delegate(SapTree.StatesInstance smi, float dt)
 		{

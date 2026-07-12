@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
 	public abstract class CriticalHandle : CriticalFinalizerObject, IDisposable
 	{
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -23,8 +21,8 @@ namespace System.Runtime.InteropServices
 			this.Dispose(false);
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[SecurityCritical]
 		private void Cleanup()
 		{
 			if (this.IsClosed)

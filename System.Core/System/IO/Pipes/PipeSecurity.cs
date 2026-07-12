@@ -1,22 +1,197 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
-using System.Security.Permissions;
 using System.Security.Principal;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 	public class PipeSecurity : NativeObjectSecurity
 	{
 		public PipeSecurity()
-			: base(false, ResourceType.FileObject)
+			: base(false, ResourceType.KernelObject)
 		{
 		}
 
-		internal PipeSecurity(SafeHandle handle, AccessControlSections includeSections)
-			: base(false, ResourceType.FileObject, handle, includeSections)
+		internal PipeSecurity(SafePipeHandle safeHandle, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, safeHandle, includeSections)
 		{
+		}
+
+		public void AddAccessRule(PipeAccessRule rule)
+		{
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			base.AddAccessRule(rule);
+		}
+
+		public void SetAccessRule(PipeAccessRule rule)
+		{
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			base.SetAccessRule(rule);
+		}
+
+		public void ResetAccessRule(PipeAccessRule rule)
+		{
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			base.ResetAccessRule(rule);
+		}
+
+		public bool RemoveAccessRule(PipeAccessRule rule)
+		{
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			AuthorizationRuleCollection accessRules = base.GetAccessRules(true, true, rule.IdentityReference.GetType());
+			for (int i = 0; i < accessRules.Count; i++)
+			{
+				PipeAccessRule pipeAccessRule = accessRules[i] as PipeAccessRule;
+				if (pipeAccessRule != null && pipeAccessRule.PipeAccessRights == rule.PipeAccessRights && pipeAccessRule.IdentityReference == rule.IdentityReference && pipeAccessRule.AccessControlType == rule.AccessControlType)
+				{
+					return base.RemoveAccessRule(rule);
+				}
+			}
+			if (rule.PipeAccessRights != PipeAccessRights.FullControl)
+			{
+				return base.RemoveAccessRule(new PipeAccessRule(rule.IdentityReference, PipeAccessRule.AccessMaskFromRights(rule.PipeAccessRights, AccessControlType.Deny), false, rule.AccessControlType));
+			}
+			return base.RemoveAccessRule(rule);
+		}
+
+		public void RemoveAccessRuleSpecific(PipeAccessRule rule)
+		{
+			if (rule == null)
+			{
+				throw new ArgumentNullException("rule");
+			}
+			AuthorizationRuleCollection accessRules = base.GetAccessRules(true, true, rule.IdentityReference.GetType());
+			for (int i = 0; i < accessRules.Count; i++)
+			{
+				PipeAccessRule pipeAccessRule = accessRules[i] as PipeAccessRule;
+				if (pipeAccessRule != null && pipeAccessRule.PipeAccessRights == rule.PipeAccessRights && pipeAccessRule.IdentityReference == rule.IdentityReference && pipeAccessRule.AccessControlType == rule.AccessControlType)
+				{
+					base.RemoveAccessRuleSpecific(rule);
+					return;
+				}
+			}
+			if (rule.PipeAccessRights != PipeAccessRights.FullControl)
+			{
+				base.RemoveAccessRuleSpecific(new PipeAccessRule(rule.IdentityReference, PipeAccessRule.AccessMaskFromRights(rule.PipeAccessRights, AccessControlType.Deny), false, rule.AccessControlType));
+				return;
+			}
+			base.RemoveAccessRuleSpecific(rule);
+		}
+
+		public void AddAuditRule(PipeAuditRule rule)
+		{
+			base.AddAuditRule(rule);
+		}
+
+		public void SetAuditRule(PipeAuditRule rule)
+		{
+			base.SetAuditRule(rule);
+		}
+
+		public bool RemoveAuditRule(PipeAuditRule rule)
+		{
+			return base.RemoveAuditRule(rule);
+		}
+
+		public void RemoveAuditRuleAll(PipeAuditRule rule)
+		{
+			base.RemoveAuditRuleAll(rule);
+		}
+
+		public void RemoveAuditRuleSpecific(PipeAuditRule rule)
+		{
+			base.RemoveAuditRuleSpecific(rule);
+		}
+
+		public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
+		{
+			if (inheritanceFlags != InheritanceFlags.None)
+			{
+				throw new ArgumentException("This flag may not be set on a pipe.", "inheritanceFlags");
+			}
+			if (propagationFlags != PropagationFlags.None)
+			{
+				throw new ArgumentException("This flag may not be set on a pipe.", "propagationFlags");
+			}
+			return new PipeAccessRule(identityReference, accessMask, isInherited, type);
+		}
+
+		public sealed override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
+		{
+			if (inheritanceFlags != InheritanceFlags.None)
+			{
+				throw new ArgumentException("This flag may not be set on a pipe.", "inheritanceFlags");
+			}
+			if (propagationFlags != PropagationFlags.None)
+			{
+				throw new ArgumentException("This flag may not be set on a pipe.", "propagationFlags");
+			}
+			return new PipeAuditRule(identityReference, accessMask, isInherited, flags);
+		}
+
+		private AccessControlSections GetAccessControlSectionsFromChanges()
+		{
+			AccessControlSections accessControlSections = AccessControlSections.None;
+			if (base.AccessRulesModified)
+			{
+				accessControlSections = AccessControlSections.Access;
+			}
+			if (base.AuditRulesModified)
+			{
+				accessControlSections |= AccessControlSections.Audit;
+			}
+			if (base.OwnerModified)
+			{
+				accessControlSections |= AccessControlSections.Owner;
+			}
+			if (base.GroupModified)
+			{
+				accessControlSections |= AccessControlSections.Group;
+			}
+			return accessControlSections;
+		}
+
+		protected internal void Persist(SafeHandle handle)
+		{
+			base.WriteLock();
+			try
+			{
+				AccessControlSections accessControlSectionsFromChanges = this.GetAccessControlSectionsFromChanges();
+				base.Persist(handle, accessControlSectionsFromChanges);
+				base.OwnerModified = (base.GroupModified = (base.AuditRulesModified = (base.AccessRulesModified = false)));
+			}
+			finally
+			{
+				base.WriteUnlock();
+			}
+		}
+
+		protected internal void Persist(string name)
+		{
+			base.WriteLock();
+			try
+			{
+				AccessControlSections accessControlSectionsFromChanges = this.GetAccessControlSectionsFromChanges();
+				base.Persist(name, accessControlSectionsFromChanges);
+				base.OwnerModified = (base.GroupModified = (base.AuditRulesModified = (base.AccessRulesModified = false)));
+			}
+			finally
+			{
+				base.WriteUnlock();
+			}
 		}
 
 		public override Type AccessRightType
@@ -41,94 +216,6 @@ namespace System.IO.Pipes
 			{
 				return typeof(PipeAuditRule);
 			}
-		}
-
-		public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-		{
-			return new PipeAccessRule(identityReference, (PipeAccessRights)accessMask, type);
-		}
-
-		public void AddAccessRule(PipeAccessRule rule)
-		{
-			base.AddAccessRule(rule);
-		}
-
-		public void AddAuditRule(PipeAuditRule rule)
-		{
-			base.AddAuditRule(rule);
-		}
-
-		public sealed override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-		{
-			return new PipeAuditRule(identityReference, (PipeAccessRights)accessMask, flags);
-		}
-
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
-		protected internal void Persist(SafeHandle handle)
-		{
-			base.WriteLock();
-			try
-			{
-				base.Persist(handle, base.AccessControlSectionsModified, null);
-			}
-			finally
-			{
-				base.WriteUnlock();
-			}
-		}
-
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
-		protected internal void Persist(string name)
-		{
-			base.WriteLock();
-			try
-			{
-				base.Persist(name, base.AccessControlSectionsModified, null);
-			}
-			finally
-			{
-				base.WriteUnlock();
-			}
-		}
-
-		public bool RemoveAccessRule(PipeAccessRule rule)
-		{
-			return base.RemoveAccessRule(rule);
-		}
-
-		public void RemoveAccessRuleSpecific(PipeAccessRule rule)
-		{
-			base.RemoveAccessRuleSpecific(rule);
-		}
-
-		public bool RemoveAuditRule(PipeAuditRule rule)
-		{
-			return base.RemoveAuditRule(rule);
-		}
-
-		public void RemoveAuditRuleAll(PipeAuditRule rule)
-		{
-			base.RemoveAuditRuleAll(rule);
-		}
-
-		public void RemoveAuditRuleSpecific(PipeAuditRule rule)
-		{
-			base.RemoveAuditRuleSpecific(rule);
-		}
-
-		public void ResetAccessRule(PipeAccessRule rule)
-		{
-			base.ResetAccessRule(rule);
-		}
-
-		public void SetAccessRule(PipeAccessRule rule)
-		{
-			base.SetAccessRule(rule);
-		}
-
-		public void SetAuditRule(PipeAuditRule rule)
-		{
-			base.SetAuditRule(rule);
 		}
 	}
 }

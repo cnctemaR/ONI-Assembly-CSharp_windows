@@ -305,12 +305,12 @@ namespace System.Threading.Tasks
 			{
 				get
 				{
-					List<T> list = new List<T>();
+					LowLevelList<T> lowLevelList = new LowLevelList<T>();
 					foreach (T t in this.m_queue)
 					{
-						list.Add(t);
+						lowLevelList.Add(t);
 					}
-					return list.ToArray();
+					return lowLevelList.ToArray();
 				}
 			}
 

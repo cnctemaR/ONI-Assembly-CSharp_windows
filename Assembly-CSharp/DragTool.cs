@@ -28,7 +28,10 @@ public class DragTool : InterfaceTool
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
-		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (KScreenManager.Instance != null)
+		{
+			KScreenManager.Instance.SetEventSystemEnabled(true);
+		}
 		if (KInputManager.currentControllerIsGamepad)
 		{
 			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);

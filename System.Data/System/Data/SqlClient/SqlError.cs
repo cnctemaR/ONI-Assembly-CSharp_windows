@@ -114,7 +114,7 @@ namespace System.Data.SqlClient
 
 		internal SqlError()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private string _source;

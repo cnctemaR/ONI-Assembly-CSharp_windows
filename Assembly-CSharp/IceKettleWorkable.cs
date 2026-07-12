@@ -17,7 +17,7 @@ public class IceKettleWorkable : Workable
 		this.resetProgressOnStop = true;
 		this.showProgressBar = false;
 		this.storage.onDestroyItemsDropped = new Action<List<GameObject>>(this.RestoreStoredItemsInteractions);
-		this.handler = base.Subscribe(-1697596308, new Action<object>(this.OnStroageChanged));
+		this.handler = base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 	}
 
 	protected override void OnSpawn()
@@ -25,49 +25,58 @@ public class IceKettleWorkable : Workable
 		this.AdjustStoredItemsPositionsAndWorkable();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
-		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
+		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.GetStartWorkInfo();
 		this.meter.gameObject.SetActive(true);
 		PrimaryElement component = pickupableStartWorkInfo.originalPickupable.GetComponent<PrimaryElement>();
 		this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), component.Element.substance.colour);
 		this.meter.SetSymbolTint(new KAnimHashedString("water1"), component.Element.substance.colour);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		float num = (this.workTime - base.WorkTimeRemaining) / this.workTime;
 		this.meter.SetPositionPercent(Mathf.Clamp01(num));
 		return base.OnWorkTick(worker, dt);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage component = worker.GetComponent<Storage>();
-		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
+		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.GetStartWorkInfo();
 		if (pickupableStartWorkInfo.amount > 0f)
 		{
 			this.storage.TransferMass(component, pickupableStartWorkInfo.originalPickupable.KPrefabID.PrefabID(), pickupableStartWorkInfo.amount, false, false, false);
 		}
-		base.OnCompleteWork(worker);
-		foreach (GameObject gameObject in component.items)
+		GameObject gameObject = component.FindFirst(pickupableStartWorkInfo.originalPickupable.KPrefabID.PrefabID());
+		if (gameObject != null)
 		{
-			if (gameObject.HasTag(GameTags.Liquid))
+			pickupableStartWorkInfo.setResultCb(gameObject);
+		}
+		else
+		{
+			pickupableStartWorkInfo.setResultCb(null);
+		}
+		base.OnCompleteWork(worker);
+		foreach (GameObject gameObject2 in component.items)
+		{
+			if (gameObject2.HasTag(GameTags.Liquid))
 			{
-				Pickupable component2 = gameObject.GetComponent<Pickupable>();
+				Pickupable component2 = gameObject2.GetComponent<Pickupable>();
 				this.RestorePickupableInteractions(component2);
 			}
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		this.meter.gameObject.SetActive(false);
 	}
 
-	private void OnStroageChanged(object obj)
+	private void OnStorageChanged(object obj)
 	{
 		this.AdjustStoredItemsPositionsAndWorkable();
 	}

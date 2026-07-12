@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
@@ -35,6 +36,19 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("BoxCollider2D.center has been deprecated. Use BoxCollider2D.offset instead (UnityUpgradable) -> offset", true)]
+		public Vector2 center
+		{
+			get
+			{
+				return Vector2.zero;
+			}
+			set
+			{
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

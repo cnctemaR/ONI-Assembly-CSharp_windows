@@ -24,7 +24,7 @@ namespace System.ComponentModel
 			{
 				if (name == null || name.Length == 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Invalid member name."));
+					throw new ArgumentException(SR.GetString("Invalid member name."));
 				}
 				this.name = name;
 				this.displayName = name;

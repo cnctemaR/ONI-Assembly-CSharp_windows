@@ -1710,46 +1710,50 @@ namespace System.Xml
 							case '\t':
 							case '\n':
 							case '\r':
-								goto IL_0119;
+								goto IL_011C;
 							case '\v':
 							case '\f':
-								goto IL_00A0;
+								goto IL_00A2;
 							default:
 								if (c != '&')
 								{
-									goto IL_00A0;
+									goto IL_00A2;
 								}
 								break;
 							}
 						}
 						else if (c != '<' && c != ']')
 						{
-							goto IL_00A0;
+							goto IL_00A2;
 						}
-						string text = Res.GetString("'{0}', hexadecimal value {1}, is an invalid character.", XmlException.BuildCharExceptionArgs(chars, i));
-						goto IL_012A;
-						IL_00A0:
+						string text = "'{0}', hexadecimal value {1}, is an invalid character.";
+						object[] array = XmlException.BuildCharExceptionArgs(chars, i);
+						string text2 = Res.GetString(text, array);
+						goto IL_012D;
+						IL_00A2:
 						if (XmlCharType.IsHighSurrogate((int)chars[i]))
 						{
 							if (i + 1 < chars.Length && XmlCharType.IsLowSurrogate((int)chars[i + 1]))
 							{
 								i++;
-								goto IL_0119;
+								goto IL_011C;
 							}
-							text = Res.GetString("The surrogate pair is invalid. Missing a low surrogate character.");
+							text2 = Res.GetString("The surrogate pair is invalid. Missing a low surrogate character.");
 						}
 						else
 						{
 							if (!XmlCharType.IsLowSurrogate((int)chars[i]))
 							{
-								goto IL_0119;
+								goto IL_011C;
 							}
-							text = Res.GetString("Invalid high surrogate character (0x{0}). A high surrogate character must have a value from range (0xD800 - 0xDBFF).", new object[] { ((uint)chars[i]).ToString("X", CultureInfo.InvariantCulture) });
+							text2 = Res.GetString("Invalid high surrogate character (0x{0}). A high surrogate character must have a value from range (0xD800 - 0xDBFF).", new object[] { ((uint)chars[i]).ToString("X", CultureInfo.InvariantCulture) });
 						}
-						IL_012A:
-						throw new ArgumentException(Res.GetString("XmlWriterSettings.{0} can contain only valid XML text content characters when XmlWriterSettings.CheckCharacters is true. {1}", new string[] { propertyName, text }));
+						IL_012D:
+						string text3 = "XmlWriterSettings.{0} can contain only valid XML text content characters when XmlWriterSettings.CheckCharacters is true. {1}";
+						array = new string[] { propertyName, text2 };
+						throw new ArgumentException(Res.GetString(text3, array));
 					}
-					IL_0119:;
+					IL_011C:;
 				}
 				return;
 			}

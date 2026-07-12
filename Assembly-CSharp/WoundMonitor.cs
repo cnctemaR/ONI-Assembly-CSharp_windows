@@ -56,7 +56,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			: base(master)
 		{
 			this.health = master.GetComponent<Health>();
-			this.worker = master.GetComponent<Worker>();
+			this.worker = master.GetComponent<WorkerBase>();
 		}
 
 		public void OnHealthChanged(object data)
@@ -253,6 +253,6 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 
 		public Health health;
 
-		private Worker worker;
+		private WorkerBase worker;
 	}
 }

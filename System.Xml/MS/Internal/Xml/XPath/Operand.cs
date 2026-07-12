@@ -7,20 +7,14 @@ namespace MS.Internal.Xml.XPath
 	{
 		public Operand(string val)
 		{
-			this.type = XPathResultType.String;
-			this.val = val;
+			this._type = XPathResultType.String;
+			this._val = val;
 		}
 
 		public Operand(double val)
 		{
-			this.type = XPathResultType.Number;
-			this.val = val;
-		}
-
-		public Operand(bool val)
-		{
-			this.type = XPathResultType.Boolean;
-			this.val = val;
+			this._type = XPathResultType.Number;
+			this._val = val;
 		}
 
 		public override AstNode.AstType Type
@@ -35,7 +29,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.type;
+				return this._type;
 			}
 		}
 
@@ -43,12 +37,12 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.val;
+				return this._val;
 			}
 		}
 
-		private XPathResultType type;
+		private XPathResultType _type;
 
-		private object val;
+		private object _val;
 	}
 }

@@ -16,7 +16,7 @@ public class ToggleGeothermalVentConnection : Toggleable
 		base.SetOffsets(new CellOffset[] { CellOffset.none });
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.buildingAnimController.Play(GeothermalVentConfig.TOGGLE_ANIMATION, KAnim.PlayMode.Once, 1f, 0f);
@@ -26,7 +26,7 @@ public class ToggleGeothermalVentConnection : Toggleable
 		}
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.workerFacing != null)
 		{

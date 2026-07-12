@@ -9,7 +9,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.subtree;
+				return this._subtree;
 			}
 		}
 
@@ -17,15 +17,15 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.stack.Count;
+				return this._stack.Count;
 			}
 		}
 
 		public AxisStack(ForwardAxis faxis, ActiveAxis parent)
 		{
-			this.subtree = faxis;
-			this.stack = new ArrayList();
-			this.parent = parent;
+			this._subtree = faxis;
+			this._stack = new ArrayList();
+			this._parent = parent;
 			if (!faxis.IsDss)
 			{
 				this.Push(1);
@@ -34,13 +34,13 @@ namespace System.Xml.Schema
 
 		internal void Push(int depth)
 		{
-			AxisElement axisElement = new AxisElement(this.subtree.RootNode, depth);
-			this.stack.Add(axisElement);
+			AxisElement axisElement = new AxisElement(this._subtree.RootNode, depth);
+			this._stack.Add(axisElement);
 		}
 
 		internal void Pop()
 		{
-			this.stack.RemoveAt(this.Length - 1);
+			this._stack.RemoveAt(this.Length - 1);
 		}
 
 		internal static bool Equal(string thisname, string thisURN, string name, string URN)
@@ -61,15 +61,15 @@ namespace System.Xml.Schema
 
 		internal void MoveToParent(string name, string URN, int depth)
 		{
-			if (this.subtree.IsSelfAxis)
+			if (this._subtree.IsSelfAxis)
 			{
 				return;
 			}
-			for (int i = 0; i < this.stack.Count; i++)
+			for (int i = 0; i < this._stack.Count; i++)
 			{
-				((AxisElement)this.stack[i]).MoveToParent(depth, this.subtree);
+				((AxisElement)this._stack[i]).MoveToParent(depth, this._subtree);
 			}
-			if (this.subtree.IsDss && AxisStack.Equal(this.subtree.RootNode.Name, this.subtree.RootNode.Urn, name, URN))
+			if (this._subtree.IsDss && AxisStack.Equal(this._subtree.RootNode.Name, this._subtree.RootNode.Urn, name, URN))
 			{
 				this.Pop();
 			}
@@ -78,13 +78,13 @@ namespace System.Xml.Schema
 		internal bool MoveToChild(string name, string URN, int depth)
 		{
 			bool flag = false;
-			if (this.subtree.IsDss && AxisStack.Equal(this.subtree.RootNode.Name, this.subtree.RootNode.Urn, name, URN))
+			if (this._subtree.IsDss && AxisStack.Equal(this._subtree.RootNode.Name, this._subtree.RootNode.Urn, name, URN))
 			{
 				this.Push(-1);
 			}
-			for (int i = 0; i < this.stack.Count; i++)
+			for (int i = 0; i < this._stack.Count; i++)
 			{
-				if (((AxisElement)this.stack[i]).MoveToChild(name, URN, depth, this.subtree))
+				if (((AxisElement)this._stack[i]).MoveToChild(name, URN, depth, this._subtree))
 				{
 					flag = true;
 				}
@@ -94,23 +94,23 @@ namespace System.Xml.Schema
 
 		internal bool MoveToAttribute(string name, string URN, int depth)
 		{
-			if (!this.subtree.IsAttribute)
+			if (!this._subtree.IsAttribute)
 			{
 				return false;
 			}
-			if (!AxisStack.Equal(this.subtree.TopNode.Name, this.subtree.TopNode.Urn, name, URN))
+			if (!AxisStack.Equal(this._subtree.TopNode.Name, this._subtree.TopNode.Urn, name, URN))
 			{
 				return false;
 			}
 			bool flag = false;
-			if (this.subtree.TopNode.Input == null)
+			if (this._subtree.TopNode.Input == null)
 			{
-				return this.subtree.IsDss || depth == 1;
+				return this._subtree.IsDss || depth == 1;
 			}
-			for (int i = 0; i < this.stack.Count; i++)
+			for (int i = 0; i < this._stack.Count; i++)
 			{
-				AxisElement axisElement = (AxisElement)this.stack[i];
-				if (axisElement.isMatch && axisElement.CurNode == this.subtree.TopNode.Input)
+				AxisElement axisElement = (AxisElement)this._stack[i];
+				if (axisElement.isMatch && axisElement.CurNode == this._subtree.TopNode.Input)
 				{
 					flag = true;
 				}
@@ -118,10 +118,10 @@ namespace System.Xml.Schema
 			return flag;
 		}
 
-		private ArrayList stack;
+		private ArrayList _stack;
 
-		private ForwardAxis subtree;
+		private ForwardAxis _subtree;
 
-		private ActiveAxis parent;
+		private ActiveAxis _parent;
 	}
 }

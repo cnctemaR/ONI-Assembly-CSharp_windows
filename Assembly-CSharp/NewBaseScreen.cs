@@ -129,14 +129,17 @@ public class NewBaseScreen : KScreen
 		Action<object> <>9__0;
 		for (int i = 0; i < this.m_minionStartingStats.Length; i++)
 		{
+			MinionStartingStats minionStartingStats = (MinionStartingStats)this.m_minionStartingStats[i];
 			int num3 = num + i % (baseRight - baseLeft) + 1;
 			int num4 = num2;
 			int num5 = Grid.XYToCell(num3, num4);
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
+			GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+			GameObject gameObject = Util.KInstantiate(prefab, null, null);
+			gameObject.name = prefab.name;
 			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
-			((MinionStartingStats)this.m_minionStartingStats[i]).Apply(gameObject);
+			minionStartingStats.Apply(gameObject);
 			GameScheduler instance = GameScheduler.Instance;
 			string text = "ANewHope";
 			float num6 = 3f + 0.5f * (float)i;
@@ -154,6 +157,13 @@ public class NewBaseScreen : KScreen
 				});
 			}
 			instance.Schedule(text, num6, action, gameObject, null);
+			if (minionStartingStats.personality.model == GameTags.Minions.Models.Bionic)
+			{
+				GameScheduler.Instance.Schedule("ExtraPowerBanks", 3f + 4.5f * (float)i, delegate(object m)
+				{
+					GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id).Trigger(1982288670, null);
+				}, gameObject, null);
+			}
 		}
 		ClusterManager.Instance.activeWorld.SetDupeVisited();
 	}

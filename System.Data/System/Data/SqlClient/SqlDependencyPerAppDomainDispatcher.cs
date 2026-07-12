@@ -13,7 +13,7 @@ namespace System.Data.SqlClient
 			this._dependencyIdToDependencyHash = new Dictionary<string, SqlDependency>();
 			this._notificationIdToDependenciesHash = new Dictionary<string, SqlDependencyPerAppDomainDispatcher.DependencyList>();
 			this._commandHashToNotificationId = new Dictionary<string, string>();
-			this._timeoutTimer = new Timer(new TimerCallback(SqlDependencyPerAppDomainDispatcher.TimeoutTimerCallback), null, -1, -1);
+			this._timeoutTimer = ADP.UnsafeCreateTimer(new TimerCallback(SqlDependencyPerAppDomainDispatcher.TimeoutTimerCallback), null, -1, -1);
 			this.SubscribeToAppDomainUnload();
 		}
 

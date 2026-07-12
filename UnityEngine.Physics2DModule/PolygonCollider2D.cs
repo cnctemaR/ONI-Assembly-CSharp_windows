@@ -9,6 +9,14 @@ namespace UnityEngine
 	[NativeHeader("Modules/Physics2D/Public/PolygonCollider2D.h")]
 	public sealed class PolygonCollider2D : Collider2D
 	{
+		public extern bool useDelaunayMesh
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern bool autoTiling
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

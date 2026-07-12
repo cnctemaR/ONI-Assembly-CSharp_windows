@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Policy;
+using Mono.Security;
 using Unity;
 
 namespace System
@@ -43,6 +44,9 @@ namespace System
 			this.domain_initializer_args = setup.domain_initializer_args;
 			this.disallow_appbase_probe = setup.disallow_appbase_probe;
 			this.configuration_bytes = setup.configuration_bytes;
+			this.manager_assembly = setup.manager_assembly;
+			this.manager_type = setup.manager_type;
+			this.partial_visible_assemblies = setup.partial_visible_assemblies;
 		}
 
 		public AppDomainSetup(ActivationArguments activationArguments)
@@ -61,9 +65,13 @@ namespace System
 			{
 				return null;
 			}
-			if (appBase.Length >= 8 && appBase.ToLower().StartsWith("file://"))
+			if (appBase == "")
 			{
-				appBase = appBase.Substring(7);
+				appBase = Path.DirectorySeparatorChar.ToString();
+			}
+			if (appBase.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+			{
+				appBase = new Uri(appBase).LocalPath;
 				if (Path.DirectorySeparatorChar != '/')
 				{
 					appBase = appBase.Replace('/', Path.DirectorySeparatorChar);
@@ -219,6 +227,48 @@ namespace System
 			set
 			{
 				this.loader_optimization = value;
+			}
+		}
+
+		public string AppDomainManagerAssembly
+		{
+			get
+			{
+				return this.manager_assembly;
+			}
+			set
+			{
+				this.manager_assembly = value;
+			}
+		}
+
+		public string AppDomainManagerType
+		{
+			get
+			{
+				return this.manager_type;
+			}
+			set
+			{
+				this.manager_type = value;
+			}
+		}
+
+		public string[] PartialTrustVisibleAssemblies
+		{
+			get
+			{
+				return this.partial_visible_assemblies;
+			}
+			set
+			{
+				if (value != null)
+				{
+					this.partial_visible_assemblies = (string[])value.Clone();
+					Array.Sort<string>(this.partial_visible_assemblies, StringComparer.OrdinalIgnoreCase);
+					return;
+				}
+				this.partial_visible_assemblies = null;
 			}
 		}
 
@@ -430,45 +480,6 @@ namespace System
 		{
 		}
 
-		public string AppDomainManagerAssembly
-		{
-			get
-			{
-				ThrowStub.ThrowNotSupportedException();
-				return null;
-			}
-			set
-			{
-				ThrowStub.ThrowNotSupportedException();
-			}
-		}
-
-		public string AppDomainManagerType
-		{
-			get
-			{
-				ThrowStub.ThrowNotSupportedException();
-				return null;
-			}
-			set
-			{
-				ThrowStub.ThrowNotSupportedException();
-			}
-		}
-
-		public string[] PartialTrustVisibleAssemblies
-		{
-			get
-			{
-				ThrowStub.ThrowNotSupportedException();
-				return null;
-			}
-			set
-			{
-				ThrowStub.ThrowNotSupportedException();
-			}
-		}
-
 		public bool SandboxInterop
 		{
 			get
@@ -532,5 +543,11 @@ namespace System
 		private byte[] configuration_bytes;
 
 		private byte[] serialized_non_primitives;
+
+		private string manager_assembly;
+
+		private string manager_type;
+
+		private string[] partial_visible_assemblies;
 	}
 }

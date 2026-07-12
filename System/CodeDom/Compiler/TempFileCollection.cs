@@ -49,7 +49,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (string.IsNullOrEmpty(fileExtension))
 			{
-				throw new ArgumentException(global::SR.Format("Argument {0} cannot be null or zero-length.", "fileExtension"), "fileExtension");
+				throw new ArgumentException(SR.Format("Argument {0} cannot be null or zero-length.", "fileExtension"), "fileExtension");
 			}
 			string text = this.BasePath + "." + fileExtension;
 			this.AddFile(text, keepFile);
@@ -60,11 +60,11 @@ namespace System.CodeDom.Compiler
 		{
 			if (string.IsNullOrEmpty(fileName))
 			{
-				throw new ArgumentException(global::SR.Format("Argument {0} cannot be null or zero-length.", "fileName"), "fileName");
+				throw new ArgumentException(SR.Format("Argument {0} cannot be null or zero-length.", "fileName"), "fileName");
 			}
 			if (this._files[fileName] != null)
 			{
-				throw new ArgumentException(global::SR.Format("The file name '{0}' was already in the collection.", fileName), "fileName");
+				throw new ArgumentException(SR.Format("The file name '{0}' was already in the collection.", fileName), "fileName");
 			}
 			this._files.Add(fileName, keepFile);
 		}

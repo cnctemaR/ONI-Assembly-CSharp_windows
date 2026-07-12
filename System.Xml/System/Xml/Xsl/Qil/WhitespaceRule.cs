@@ -16,20 +16,20 @@ namespace System.Xml.Xsl.Qil
 
 		protected void Init(string localName, string namespaceName, bool preserveSpace)
 		{
-			this.localName = localName;
-			this.namespaceName = namespaceName;
-			this.preserveSpace = preserveSpace;
+			this._localName = localName;
+			this._namespaceName = namespaceName;
+			this._preserveSpace = preserveSpace;
 		}
 
 		public string LocalName
 		{
 			get
 			{
-				return this.localName;
+				return this._localName;
 			}
 			set
 			{
-				this.localName = value;
+				this._localName = value;
 			}
 		}
 
@@ -37,11 +37,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.namespaceName;
+				return this._namespaceName;
 			}
 			set
 			{
-				this.namespaceName = value;
+				this._namespaceName = value;
 			}
 		}
 
@@ -49,28 +49,28 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.preserveSpace;
+				return this._preserveSpace;
 			}
 		}
 
 		public void GetObjectData(XmlQueryDataWriter writer)
 		{
-			writer.WriteStringQ(this.localName);
-			writer.WriteStringQ(this.namespaceName);
-			writer.Write(this.preserveSpace);
+			writer.WriteStringQ(this._localName);
+			writer.WriteStringQ(this._namespaceName);
+			writer.Write(this._preserveSpace);
 		}
 
 		public WhitespaceRule(XmlQueryDataReader reader)
 		{
-			this.localName = reader.ReadStringQ();
-			this.namespaceName = reader.ReadStringQ();
-			this.preserveSpace = reader.ReadBoolean();
+			this._localName = reader.ReadStringQ();
+			this._namespaceName = reader.ReadStringQ();
+			this._preserveSpace = reader.ReadBoolean();
 		}
 
-		private string localName;
+		private string _localName;
 
-		private string namespaceName;
+		private string _namespaceName;
 
-		private bool preserveSpace;
+		private bool _preserveSpace;
 	}
 }

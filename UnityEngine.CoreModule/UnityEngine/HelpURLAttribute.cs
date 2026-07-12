@@ -5,7 +5,7 @@ namespace UnityEngine
 {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	[UsedByNativeCode]
-	public sealed class HelpURLAttribute : Attribute
+	public class HelpURLAttribute : Attribute
 	{
 		public HelpURLAttribute(string url)
 		{

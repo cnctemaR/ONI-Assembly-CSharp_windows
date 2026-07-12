@@ -63,22 +63,32 @@ namespace System.Reflection.Emit
 
 		public override MethodInfo[] GetOtherMethods(bool nonPublic)
 		{
-			MethodInfo[] array = ((this.event_builder != null) ? this.event_builder.other_methods : this.event_info.GetOtherMethods(nonPublic));
-			if (array == null)
+			MethodInfo[] array;
+			if (this.event_builder == null)
+			{
+				array = this.event_info.GetOtherMethods(nonPublic);
+			}
+			else
+			{
+				MethodInfo[] array2 = this.event_builder.other_methods;
+				array = array2;
+			}
+			MethodInfo[] array3 = array;
+			if (array3 == null)
 			{
 				return new MethodInfo[0];
 			}
 			ArrayList arrayList = new ArrayList();
-			foreach (MethodInfo methodInfo in array)
+			foreach (MethodInfo methodInfo in array3)
 			{
 				if (nonPublic || methodInfo.IsPublic)
 				{
 					arrayList.Add(TypeBuilder.GetMethod(this.instantiation, methodInfo));
 				}
 			}
-			MethodInfo[] array3 = new MethodInfo[arrayList.Count];
-			arrayList.CopyTo(array3, 0);
-			return array3;
+			MethodInfo[] array4 = new MethodInfo[arrayList.Count];
+			arrayList.CopyTo(array4, 0);
+			return array4;
 		}
 
 		public override Type DeclaringType

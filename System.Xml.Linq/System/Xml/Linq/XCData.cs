@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -34,6 +36,19 @@ namespace System.Xml.Linq
 				throw new ArgumentNullException("writer");
 			}
 			writer.WriteCData(this.text);
+		}
+
+		public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			return writer.WriteCDataAsync(this.text);
 		}
 
 		internal override XNode CloneNode()

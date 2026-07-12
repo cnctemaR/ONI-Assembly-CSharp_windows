@@ -32,7 +32,7 @@ namespace System.Diagnostics
 				array3 = Encoding.Default.GetBytes(stringBuilder.ToString());
 				if (array3.Length > 65535)
 				{
-					throw new InvalidOperationException(global::SR.GetString("The environment block used to start a process cannot be longer than 65535 bytes.  Your environment block is {0} bytes long.  Remove some environment variables and try again.", new object[] { array3.Length }));
+					throw new InvalidOperationException(SR.GetString("The environment block used to start a process cannot be longer than 65535 bytes.  Your environment block is {0} bytes long.  Remove some environment variables and try again.", new object[] { array3.Length }));
 				}
 			}
 			return array3;

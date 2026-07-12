@@ -59,8 +59,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		[XmlAttribute("final")]
+		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		public XmlSchemaDerivationMethod Final
 		{
 			get

@@ -1,29 +1,25 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class InvalidFilterCriteriaException : ApplicationException
 	{
 		public InvalidFilterCriteriaException()
-			: base(Environment.GetResourceString("Specified filter criteria was invalid."))
+			: this("Specified filter criteria was invalid.")
 		{
-			base.SetErrorCode(-2146232831);
 		}
 
 		public InvalidFilterCriteriaException(string message)
-			: base(message)
+			: this(message, null)
 		{
-			base.SetErrorCode(-2146232831);
 		}
 
 		public InvalidFilterCriteriaException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146232831);
+			base.HResult = -2146232831;
 		}
 
 		protected InvalidFilterCriteriaException(SerializationInfo info, StreamingContext context)

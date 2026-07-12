@@ -97,6 +97,14 @@ namespace UnityEngine.Rendering
 			get;
 		}
 
+		public static extern LightProbeOutsideHullStrategy lightProbeOutsideHullStrategy
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasShaderDefine(GraphicsTier tier, BuiltinShaderDefine defineHash);
 
@@ -184,6 +192,49 @@ namespace UnityEngine.Rendering
 		[NativeName("GetCustomShaderScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Shader GetCustomShader(BuiltinShaderType type);
+
+		public static void RegisterRenderPipelineSettings<T>(RenderPipelineGlobalSettings settings) where T : RenderPipeline
+		{
+			GraphicsSettings.RegisterRenderPipeline(typeof(T).FullName, settings);
+		}
+
+		[NativeName("RegisterRenderPipelineSettings")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RegisterRenderPipeline(string renderpipelineName, Object settings);
+
+		public static void UnregisterRenderPipelineSettings<T>() where T : RenderPipeline
+		{
+			GraphicsSettings.UnregisterRenderPipeline(typeof(T).FullName);
+		}
+
+		[NativeName("UnregisterRenderPipelineSettings")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UnregisterRenderPipeline(string renderpipelineName);
+
+		public static RenderPipelineGlobalSettings GetSettingsForRenderPipeline<T>() where T : RenderPipeline
+		{
+			return GraphicsSettings.GetSettingsForRenderPipeline(typeof(T).FullName) as RenderPipelineGlobalSettings;
+		}
+
+		[NativeName("GetSettingsForRenderPipeline")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Object GetSettingsForRenderPipeline(string renderpipelineName);
+
+		public static extern bool cameraRelativeLightCulling
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern bool cameraRelativeShadowCulling
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_transparencySortAxis_Injected(out Vector3 ret);

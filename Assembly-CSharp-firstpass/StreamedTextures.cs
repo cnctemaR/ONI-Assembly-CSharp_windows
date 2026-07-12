@@ -98,6 +98,10 @@ public static class StreamedTextures
 		{
 			"DLC2_ID",
 			new string[] { "hires_dlc2_bundle" }
+		},
+		{
+			"DLC3_ID",
+			new string[] { "hires_dlc3_bundle" }
 		}
 	};
 

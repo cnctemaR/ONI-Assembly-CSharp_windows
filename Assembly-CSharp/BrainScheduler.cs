@@ -13,6 +13,11 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		}
 	}
 
+	public List<BrainScheduler.BrainGroup> debugGetBrainGroups()
+	{
+		return this.brainGroups;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.brainGroups.Add(new BrainScheduler.DupeBrainGroup());
@@ -93,7 +98,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		}
 		foreach (BrainScheduler.BrainGroup brainGroup in this.brainGroups)
 		{
-			brainGroup.RenderEveryTick(dt, this.isAsyncPathProbeEnabled);
+			brainGroup.RenderEveryTick(dt);
 		}
 	}
 
@@ -118,7 +123,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		public float frameTime = 5f;
 	}
 
-	private abstract class BrainGroup : ICPULoad
+	public abstract class BrainGroup : ICPULoad
 	{
 		public Tag tag { get; private set; }
 
@@ -154,9 +159,20 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			}
 		}
 
+		public int BrainCount
+		{
+			get
+			{
+				return this.brains.Count;
+			}
+		}
+
 		public void PrioritizeBrain(Brain brain)
 		{
-			this.priorityBrains.Enqueue(brain);
+			if (!this.priorityBrains.Contains(brain))
+			{
+				this.priorityBrains.Enqueue(brain);
+			}
 		}
 
 		public int probeSize { get; private set; }
@@ -165,6 +181,10 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 
 		public bool AdjustLoad(float currentFrameTime, float frameTimeDelta)
 		{
+			if (this.debugFreezeLoadAdustment)
+			{
+				return false;
+			}
 			bool flag = frameTimeDelta > 0f;
 			int num = 0;
 			int num2 = Math.Max(this.probeCount, Math.Min(this.brains.Count, CPUBudget.coreCount));
@@ -202,6 +222,12 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				global::Debug.LogWarning("AdjustLoad() failed");
 			}
 			return num != 0;
+		}
+
+		public void ResetLoad()
+		{
+			this.probeSize = this.InitialProbeSize();
+			this.probeCount = this.InitialProbeCount();
 		}
 
 		private void IncrementBrainIndex(ref int brainIndex)
@@ -260,19 +286,17 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			CPUBudget.End(this);
 		}
 
-		public void RenderEveryTick(float dt, bool isAsyncPathProbeEnabled)
+		public void RenderEveryTick(float dt)
 		{
-			if (isAsyncPathProbeEnabled)
-			{
-				this.AsyncPathProbe();
-			}
+			this.BeginBrainGroupUpdate();
 			int num = this.InitialProbeCount();
 			int num2 = 0;
 			while (num2 != this.brains.Count && num != 0)
 			{
 				this.ClampBrainIndex(ref this.nextUpdateBrain);
+				this.debugMaxPriorityBrainCountSeen = Mathf.Max(this.debugMaxPriorityBrainCountSeen, this.priorityBrains.Count);
 				Brain brain;
-				if (this.priorityBrains.Count > 0)
+				if (this.AllowPriorityBrains() && this.priorityBrains.Count > 0)
 				{
 					brain = this.priorityBrains.Dequeue();
 				}
@@ -288,6 +312,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				}
 				num2++;
 			}
+			this.EndBrainGroupUpdate();
 		}
 
 		public void AccumulatePathProbeIterations(Dictionary<string, int> pathProbeIterations)
@@ -316,13 +341,31 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 
 		public abstract float LoadBalanceThreshold();
 
-		private List<Brain> brains = new List<Brain>();
+		public abstract bool AllowPriorityBrains();
 
-		private Queue<Brain> priorityBrains = new Queue<Brain>();
+		public virtual void BeginBrainGroupUpdate()
+		{
+			if (Game.BrainScheduler.isAsyncPathProbeEnabled)
+			{
+				this.AsyncPathProbe();
+			}
+		}
+
+		public virtual void EndBrainGroupUpdate()
+		{
+		}
+
+		protected List<Brain> brains = new List<Brain>();
+
+		protected Queue<Brain> priorityBrains = new Queue<Brain>();
 
 		private string increaseLoadLabel;
 
 		private string decreaseLoadLabel;
+
+		public bool debugFreezeLoadAdustment;
+
+		public int debugMaxPriorityBrainCountSeen;
 
 		private WorkItemCollection<Navigator.PathProbeTask, object> pathProbeJob = new WorkItemCollection<Navigator.PathProbeTask, object>();
 
@@ -372,6 +415,19 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		{
 			return TuningData<BrainScheduler.DupeBrainGroup.Tuning>.Get().loadBalanceThreshold;
 		}
+
+		public override bool AllowPriorityBrains()
+		{
+			return this.usePriorityBrain;
+		}
+
+		public override void BeginBrainGroupUpdate()
+		{
+			base.BeginBrainGroupUpdate();
+			this.usePriorityBrain = !this.usePriorityBrain;
+		}
+
+		private bool usePriorityBrain = true;
 
 		public class Tuning : TuningData<BrainScheduler.DupeBrainGroup.Tuning>
 		{
@@ -431,6 +487,11 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		public override float LoadBalanceThreshold()
 		{
 			return TuningData<BrainScheduler.CreatureBrainGroup.Tuning>.Get().loadBalanceThreshold;
+		}
+
+		public override bool AllowPriorityBrains()
+		{
+			return true;
 		}
 
 		public class Tuning : TuningData<BrainScheduler.CreatureBrainGroup.Tuning>

@@ -5,6 +5,14 @@ namespace System.Net
 {
 	internal static class Logging
 	{
+		internal static bool On
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		internal static TraceSource Web
 		{
 			get
@@ -93,7 +101,5 @@ namespace System.Net
 		internal static void PrintError(TraceSource traceSource, string msg)
 		{
 		}
-
-		internal static readonly bool On;
 	}
 }

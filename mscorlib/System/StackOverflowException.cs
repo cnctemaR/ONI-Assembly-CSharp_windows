@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public sealed class StackOverflowException : SystemException
 	{
 		public StackOverflowException()
-			: base(Environment.GetResourceString("Operation caused a stack overflow."))
+			: base("Operation caused a stack overflow.")
 		{
-			base.SetErrorCode(-2147023895);
+			base.HResult = -2147023895;
 		}
 
 		public StackOverflowException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147023895);
+			base.HResult = -2147023895;
 		}
 
 		public StackOverflowException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147023895);
+			base.HResult = -2147023895;
 		}
 
 		internal StackOverflowException(SerializationInfo info, StreamingContext context)

@@ -1,103 +1,158 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using UnityEngine.Assertions;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
 	[UsedByNativeCode]
+	[NativeHeader("Editor/Src/Graphics/ShaderCompilerData.h")]
 	public struct ShaderKeywordSet
 	{
-		private void ComputeSliceAndMask(ShaderKeyword keyword, out uint slice, out uint mask)
+		[FreeFunction("keywords::IsKeywordEnabled")]
+		private static bool IsGlobalKeywordEnabled(ShaderKeywordSet state, uint index)
 		{
-			int index = keyword.index;
-			slice = (uint)(index / 32);
-			mask = 1U << index % 32;
+			return ShaderKeywordSet.IsGlobalKeywordEnabled_Injected(ref state, index);
 		}
 
-		public unsafe bool IsEnabled(ShaderKeyword keyword)
+		[FreeFunction("keywords::IsKeywordEnabled")]
+		private static bool IsKeywordEnabled(ShaderKeywordSet state, LocalKeywordSpace keywordSpace, uint index)
 		{
-			bool flag = !keyword.IsValid();
-			bool flag2;
+			return ShaderKeywordSet.IsKeywordEnabled_Injected(ref state, ref keywordSpace, index);
+		}
+
+		[FreeFunction("keywords::IsKeywordEnabled")]
+		private static bool IsKeywordNameEnabled(ShaderKeywordSet state, string name)
+		{
+			return ShaderKeywordSet.IsKeywordNameEnabled_Injected(ref state, name);
+		}
+
+		[FreeFunction("keywords::EnableKeyword")]
+		private static void EnableGlobalKeyword(ShaderKeywordSet state, uint index)
+		{
+			ShaderKeywordSet.EnableGlobalKeyword_Injected(ref state, index);
+		}
+
+		[FreeFunction("keywords::EnableKeyword")]
+		private static void EnableKeywordName(ShaderKeywordSet state, string name)
+		{
+			ShaderKeywordSet.EnableKeywordName_Injected(ref state, name);
+		}
+
+		[FreeFunction("keywords::DisableKeyword")]
+		private static void DisableGlobalKeyword(ShaderKeywordSet state, uint index)
+		{
+			ShaderKeywordSet.DisableGlobalKeyword_Injected(ref state, index);
+		}
+
+		[FreeFunction("keywords::DisableKeyword")]
+		private static void DisableKeywordName(ShaderKeywordSet state, string name)
+		{
+			ShaderKeywordSet.DisableKeywordName_Injected(ref state, name);
+		}
+
+		[FreeFunction("keywords::GetEnabledKeywords")]
+		private static ShaderKeyword[] GetEnabledKeywords(ShaderKeywordSet state)
+		{
+			return ShaderKeywordSet.GetEnabledKeywords_Injected(ref state);
+		}
+
+		private void CheckKeywordCompatible(ShaderKeyword keyword)
+		{
+			bool isLocal = keyword.m_IsLocal;
+			if (isLocal)
+			{
+				bool flag = this.m_Shader != IntPtr.Zero;
+				if (flag)
+				{
+					Assert.IsTrue(!keyword.m_IsCompute, "Trying to use a keyword that comes from a different shader.");
+				}
+				else
+				{
+					Assert.IsTrue(keyword.m_IsCompute, "Trying to use a keyword that comes from a different shader.");
+				}
+			}
+		}
+
+		public bool IsEnabled(ShaderKeyword keyword)
+		{
+			this.CheckKeywordCompatible(keyword);
+			return ShaderKeywordSet.IsKeywordNameEnabled(this, keyword.m_Name);
+		}
+
+		public bool IsEnabled(GlobalKeyword keyword)
+		{
+			return ShaderKeywordSet.IsGlobalKeywordEnabled(this, keyword.m_Index);
+		}
+
+		public bool IsEnabled(LocalKeyword keyword)
+		{
+			return ShaderKeywordSet.IsKeywordEnabled(this, keyword.m_SpaceInfo, keyword.m_Index);
+		}
+
+		public void Enable(ShaderKeyword keyword)
+		{
+			this.CheckKeywordCompatible(keyword);
+			bool flag = keyword.m_IsLocal || !keyword.IsValid();
 			if (flag)
 			{
-				flag2 = false;
+				ShaderKeywordSet.EnableKeywordName(this, keyword.m_Name);
 			}
 			else
 			{
-				uint num;
-				uint num2;
-				this.ComputeSliceAndMask(keyword, out num, out num2);
-				fixed (uint* ptr = &this.m_Bits.FixedElementField)
-				{
-					uint* ptr2 = ptr;
-					flag2 = (ptr2[(ulong)num * 4UL / 4UL] & num2) > 0U;
-				}
-			}
-			return flag2;
-		}
-
-		public unsafe void Enable(ShaderKeyword keyword)
-		{
-			bool flag = !keyword.IsValid();
-			if (!flag)
-			{
-				uint num;
-				uint num2;
-				this.ComputeSliceAndMask(keyword, out num, out num2);
-				fixed (uint* ptr = &this.m_Bits.FixedElementField)
-				{
-					uint* ptr2 = ptr;
-					ptr2[(ulong)num * 4UL / 4UL] |= num2;
-				}
+				ShaderKeywordSet.EnableGlobalKeyword(this, keyword.m_Index);
 			}
 		}
 
-		public unsafe void Disable(ShaderKeyword keyword)
+		public void Disable(ShaderKeyword keyword)
 		{
-			bool flag = !keyword.IsValid();
-			if (!flag)
+			bool flag = keyword.m_IsLocal || !keyword.IsValid();
+			if (flag)
 			{
-				uint num;
-				uint num2;
-				this.ComputeSliceAndMask(keyword, out num, out num2);
-				fixed (uint* ptr = &this.m_Bits.FixedElementField)
-				{
-					uint* ptr2 = ptr;
-					ptr2[(ulong)num * 4UL / 4UL] &= ~num2;
-				}
+				ShaderKeywordSet.DisableKeywordName(this, keyword.m_Name);
+			}
+			else
+			{
+				ShaderKeywordSet.DisableGlobalKeyword(this, keyword.m_Index);
 			}
 		}
 
 		public ShaderKeyword[] GetShaderKeywords()
 		{
-			ShaderKeyword[] array = new ShaderKeyword[448];
-			int num = 0;
-			for (int i = 0; i < 448; i++)
-			{
-				ShaderKeyword shaderKeyword = new ShaderKeyword(i);
-				bool flag = this.IsEnabled(shaderKeyword);
-				if (flag)
-				{
-					array[num] = shaderKeyword;
-					num++;
-				}
-			}
-			Array.Resize<ShaderKeyword>(ref array, num);
-			return array;
+			return ShaderKeywordSet.GetEnabledKeywords(this);
 		}
 
-		private const int k_SizeInBits = 32;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsGlobalKeywordEnabled_Injected(ref ShaderKeywordSet state, uint index);
 
-		[FixedBuffer(typeof(uint), 14)]
-		internal ShaderKeywordSet.<m_Bits>e__FixedBuffer m_Bits;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordEnabled_Injected(ref ShaderKeywordSet state, ref LocalKeywordSpace keywordSpace, uint index);
 
-		[UnsafeValueType]
-		[CompilerGenerated]
-		[StructLayout(LayoutKind.Sequential, Size = 56)]
-		public struct <m_Bits>e__FixedBuffer
-		{
-			public uint FixedElementField;
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordNameEnabled_Injected(ref ShaderKeywordSet state, string name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableGlobalKeyword_Injected(ref ShaderKeywordSet state, uint index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableKeywordName_Injected(ref ShaderKeywordSet state, string name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableGlobalKeyword_Injected(ref ShaderKeywordSet state, uint index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableKeywordName_Injected(ref ShaderKeywordSet state, string name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderKeyword[] GetEnabledKeywords_Injected(ref ShaderKeywordSet state);
+
+		private IntPtr m_KeywordState;
+
+		private IntPtr m_Shader;
+
+		private IntPtr m_ComputeShader;
+
+		private ulong m_StateIndex;
 	}
 }

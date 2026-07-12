@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	public struct OpCode
+	public readonly struct OpCode : IEquatable<OpCode>
 	{
 		internal OpCode(int p, int q)
 		{
@@ -125,20 +125,20 @@ namespace System.Reflection.Emit
 			return a.op1 != b.op1 || a.op2 != b.op2;
 		}
 
-		internal byte op1;
+		internal readonly byte op1;
 
-		internal byte op2;
+		internal readonly byte op2;
 
-		private byte push;
+		private readonly byte push;
 
-		private byte pop;
+		private readonly byte pop;
 
-		private byte size;
+		private readonly byte size;
 
-		private byte type;
+		private readonly byte type;
 
-		private byte args;
+		private readonly byte args;
 
-		private byte flow;
+		private readonly byte flow;
 	}
 }

@@ -63,7 +63,19 @@ public class ColdBreatherConfig : IEntityConfig
 			radiationEmitter.emitRads = 480f;
 			radiationEmitter.emissionOffset = new Vector3(0f, 0f, 0f);
 		}
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "ColdBreatherSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.COLDBREATHER.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.COLDBREATHER.DESC, Assets.GetAnim("seed_coldbreather_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 21, global::STRINGS.CREATURES.SPECIES.COLDBREATHER.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "ColdBreather_preview", Assets.GetAnim("coldbreather_kanim"), "place", 1, 2);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "ColdBreatherSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDBREATHER.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDBREATHER.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_coldbreather_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.COLDBREATHER.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 21, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "ColdBreather_preview", Assets.GetAnim("coldbreather_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("coldbreather_kanim", "ColdBreather_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("coldbreather_kanim", "ColdBreather_intake", NOISE_POLLUTION.CREATURES.TIER3);
 		gameObject.AddOrGet<EntityCellVisualizer>();

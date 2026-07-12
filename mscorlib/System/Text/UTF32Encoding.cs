@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Security;
+using System.Runtime.InteropServices;
 
 namespace System.Text
 {
@@ -20,10 +20,10 @@ namespace System.Text
 		public UTF32Encoding(bool bigEndian, bool byteOrderMark, bool throwOnInvalidCharacters)
 			: base(bigEndian ? 12001 : 12000)
 		{
-			this.bigEndian = bigEndian;
-			this.emitUTF32ByteOrderMark = byteOrderMark;
-			this.isThrowException = throwOnInvalidCharacters;
-			if (this.isThrowException)
+			this._bigEndian = bigEndian;
+			this._emitUTF32ByteOrderMark = byteOrderMark;
+			this._isThrowException = throwOnInvalidCharacters;
+			if (this._isThrowException)
 			{
 				this.SetDefaultFallbacks();
 			}
@@ -31,7 +31,7 @@ namespace System.Text
 
 		internal override void SetDefaultFallbacks()
 		{
-			if (this.isThrowException)
+			if (this._isThrowException)
 			{
 				this.encoderFallback = EncoderFallback.ExceptionFallback;
 				this.decoderFallback = DecoderFallback.ExceptionFallback;
@@ -41,22 +41,21 @@ namespace System.Text
 			this.decoderFallback = new DecoderReplacementFallback("\ufffd");
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetByteCount(char[] chars, int index, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (chars.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
-			if (chars.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -72,7 +71,6 @@ namespace System.Text
 			return this.GetByteCount(ptr + index, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetByteCount(string s)
 		{
 			if (s == null)
@@ -87,91 +85,74 @@ namespace System.Text
 			return this.GetByteCount(ptr, s.Length, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
 		public unsafe override int GetByteCount(char* chars, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetByteCount(chars, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (s == null || bytes == null)
 			{
-				throw new ArgumentNullException((s == null) ? "s" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((s == null) ? "s" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (s.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("s", Environment.GetResourceString("Index and count must refer to a location within the string."));
+				throw new ArgumentOutOfRangeException("s", "Index and count must refer to a location within the string.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr = s;
 			if (ptr != null)
 			{
 				ptr += RuntimeHelpers.OffsetToStringData / 2;
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (chars == null || bytes == null)
 			{
-				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (chars.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (chars.Length == 0)
+			if (charCount == 0)
 			{
 				return 0;
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr;
 			if (chars == null || chars.Length == 0)
 			{
@@ -181,50 +162,42 @@ namespace System.Text
 			{
 				ptr = &chars[0];
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
 		[CLSCompliant(false)]
-		[SecurityCritical]
 		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetBytes(chars, charCount, bytes, byteCount, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetCharCount(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -241,48 +214,42 @@ namespace System.Text
 		}
 
 		[CLSCompliant(false)]
-		[SecurityCritical]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetCharCount(bytes, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (byteIndex < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", "Non-negative number required.");
 			}
 			if (bytes.Length - byteIndex < byteCount)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
 			if (charIndex < 0 || charIndex > chars.Length)
 			{
-				throw new ArgumentOutOfRangeException("charIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("charIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (bytes.Length == 0)
+			if (byteCount == 0)
 			{
 				return 0;
 			}
 			int num = chars.Length - charIndex;
-			if (chars.Length == 0)
-			{
-				chars = new char[1];
-			}
 			byte* ptr;
 			if (bytes == null || bytes.Length == 0)
 			{
@@ -292,50 +259,42 @@ namespace System.Text
 			{
 				ptr = &bytes[0];
 			}
-			char[] array;
-			char* ptr2;
-			if ((array = chars) == null || array.Length == 0)
+			fixed (char* reference = MemoryMarshal.GetReference<char>(chars))
 			{
-				ptr2 = null;
+				char* ptr2 = reference;
+				return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetChars(bytes, byteCount, chars, charCount, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override string GetString(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return string.Empty;
 			}
@@ -351,7 +310,6 @@ namespace System.Text
 			return string.CreateStringFromEncoding(ptr + index, count, this);
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetByteCount(char* chars, int count, EncoderNLS encoder)
 		{
 			char* ptr = chars + count;
@@ -361,15 +319,11 @@ namespace System.Text
 			EncoderFallbackBuffer encoderFallbackBuffer;
 			if (encoder != null)
 			{
-				c = encoder.charLeftOver;
+				c = encoder._charLeftOver;
 				encoderFallbackBuffer = encoder.FallbackBuffer;
 				if (encoderFallbackBuffer.Remaining > 0)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", new object[]
-					{
-						this.EncodingName,
-						encoder.Fallback.GetType()
-					}));
+					throw new ArgumentException(SR.Format("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", this.EncodingName, encoder.Fallback.GetType()));
 				}
 			}
 			else
@@ -386,7 +340,9 @@ namespace System.Text
 					{
 						break;
 					}
-					encoderFallbackBuffer.InternalFallback(c, ref chars);
+					char* ptr3 = chars;
+					encoderFallbackBuffer.InternalFallback(c, ref ptr3);
+					chars = ptr3;
 					c = '\0';
 				}
 				else
@@ -406,7 +362,9 @@ namespace System.Text
 						else
 						{
 							chars--;
-							encoderFallbackBuffer.InternalFallback(c, ref chars);
+							char* ptr3 = chars;
+							encoderFallbackBuffer.InternalFallback(c, ref ptr3);
+							chars = ptr3;
 							c = '\0';
 						}
 					}
@@ -416,7 +374,9 @@ namespace System.Text
 					}
 					else if (char.IsLowSurrogate(c2))
 					{
-						encoderFallbackBuffer.InternalFallback(c2, ref chars);
+						char* ptr3 = chars;
+						encoderFallbackBuffer.InternalFallback(c2, ref ptr3);
+						chars = ptr3;
 					}
 					else
 					{
@@ -426,12 +386,11 @@ namespace System.Text
 			}
 			if (num < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("count", "Too many characters. The resulting number of bytes is larger than what can be returned as an int.");
 			}
 			return num;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
 		{
 			char* ptr = chars;
@@ -442,15 +401,11 @@ namespace System.Text
 			EncoderFallbackBuffer encoderFallbackBuffer;
 			if (encoder != null)
 			{
-				c = encoder.charLeftOver;
+				c = encoder._charLeftOver;
 				encoderFallbackBuffer = encoder.FallbackBuffer;
-				if (encoder.m_throwOnOverflow && encoderFallbackBuffer.Remaining > 0)
+				if (encoder._throwOnOverflow && encoderFallbackBuffer.Remaining > 0)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", new object[]
-					{
-						this.EncodingName,
-						encoder.Fallback.GetType()
-					}));
+					throw new ArgumentException(SR.Format("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", this.EncodingName, encoder.Fallback.GetType()));
 				}
 			}
 			else
@@ -461,6 +416,7 @@ namespace System.Text
 			for (;;)
 			{
 				char c2;
+				char* ptr5;
 				if ((c2 = encoderFallbackBuffer.InternalGetNextChar()) != '\0' || chars < ptr2)
 				{
 					if (c2 == '\0')
@@ -473,7 +429,9 @@ namespace System.Text
 						if (!char.IsLowSurrogate(c2))
 						{
 							chars--;
-							encoderFallbackBuffer.InternalFallback(c, ref chars);
+							ptr5 = chars;
+							encoderFallbackBuffer.InternalFallback(c, ref ptr5);
+							chars = ptr5;
 							c = '\0';
 							continue;
 						}
@@ -495,7 +453,7 @@ namespace System.Text
 						}
 						else
 						{
-							if (this.bigEndian)
+							if (this._bigEndian)
 							{
 								*(bytes++) = 0;
 								*(bytes++) = (byte)(surrogate >> 16);
@@ -519,7 +477,9 @@ namespace System.Text
 						}
 						if (char.IsLowSurrogate(c2))
 						{
-							encoderFallbackBuffer.InternalFallback(c2, ref chars);
+							ptr5 = chars;
+							encoderFallbackBuffer.InternalFallback(c2, ref ptr5);
+							chars = ptr5;
 							continue;
 						}
 						if (bytes + 3 >= ptr4)
@@ -536,7 +496,7 @@ namespace System.Text
 						}
 						else
 						{
-							if (this.bigEndian)
+							if (this._bigEndian)
 							{
 								*(bytes++) = 0;
 								*(bytes++) = 0;
@@ -556,18 +516,19 @@ namespace System.Text
 				{
 					break;
 				}
-				encoderFallbackBuffer.InternalFallback(c, ref chars);
+				ptr5 = chars;
+				encoderFallbackBuffer.InternalFallback(c, ref ptr5);
+				chars = ptr5;
 				c = '\0';
 			}
 			if (encoder != null)
 			{
-				encoder.charLeftOver = c;
-				encoder.m_charsUsed = (int)((long)(chars - ptr));
+				encoder._charLeftOver = c;
+				encoder._charsUsed = (int)((long)(chars - ptr));
 			}
 			return (int)((long)(bytes - ptr3));
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
 		{
 			UTF32Encoding.UTF32Decoder utf32Decoder = (UTF32Encoding.UTF32Decoder)baseDecoder;
@@ -590,7 +551,7 @@ namespace System.Text
 			decoderFallbackBuffer.InternalInitialize(ptr2, null);
 			while (bytes < ptr && num >= 0)
 			{
-				if (this.bigEndian)
+				if (this._bigEndian)
 				{
 					num2 <<= 8;
 					num2 += (uint)(*(bytes++));
@@ -607,7 +568,7 @@ namespace System.Text
 					if (num2 > 1114111U || (num2 >= 55296U && num2 <= 57343U))
 					{
 						byte[] array;
-						if (this.bigEndian)
+						if (this._bigEndian)
 						{
 							array = new byte[]
 							{
@@ -644,7 +605,7 @@ namespace System.Text
 			if (i > 0 && (utf32Decoder == null || utf32Decoder.MustFlush))
 			{
 				byte[] array2 = new byte[i];
-				if (this.bigEndian)
+				if (this._bigEndian)
 				{
 					while (i > 0)
 					{
@@ -664,12 +625,11 @@ namespace System.Text
 			}
 			if (num < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("count", "Too many characters. The resulting number of bytes is larger than what can be returned as an int.");
 			}
 			return num;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS baseDecoder)
 		{
 			UTF32Encoding.UTF32Decoder utf32Decoder = (UTF32Encoding.UTF32Decoder)baseDecoder;
@@ -693,7 +653,7 @@ namespace System.Text
 			decoderFallbackBuffer.InternalInitialize(bytes, chars + charCount);
 			while (bytes < ptr4)
 			{
-				if (this.bigEndian)
+				if (this._bigEndian)
 				{
 					num2 <<= 8;
 					num2 += (uint)(*(bytes++));
@@ -710,7 +670,7 @@ namespace System.Text
 					if (num2 > 1114111U || (num2 >= 55296U && num2 <= 57343U))
 					{
 						byte[] array;
-						if (this.bigEndian)
+						if (this._bigEndian)
 						{
 							array = new byte[]
 							{
@@ -730,7 +690,10 @@ namespace System.Text
 								(byte)(num2 >> 24)
 							};
 						}
-						if (!decoderFallbackBuffer.InternalFallback(array, bytes, ref chars))
+						char* ptr5 = chars;
+						bool flag = decoderFallbackBuffer.InternalFallback(array, bytes, ref ptr5);
+						chars = ptr5;
+						if (!flag)
 						{
 							bytes -= 4;
 							num2 = 0U;
@@ -770,7 +733,7 @@ namespace System.Text
 			{
 				byte[] array2 = new byte[num];
 				int i = num;
-				if (this.bigEndian)
+				if (this._bigEndian)
 				{
 					while (i > 0)
 					{
@@ -786,7 +749,10 @@ namespace System.Text
 						num2 <<= 8;
 					}
 				}
-				if (!decoderFallbackBuffer.InternalFallback(array2, bytes, ref chars))
+				char* ptr5 = chars;
+				bool flag2 = decoderFallbackBuffer.InternalFallback(array2, bytes, ref ptr5);
+				chars = ptr5;
+				if (!flag2)
 				{
 					decoderFallbackBuffer.InternalReset();
 					base.ThrowCharsOverflow(utf32Decoder, chars == ptr);
@@ -801,7 +767,7 @@ namespace System.Text
 			{
 				utf32Decoder.iChar = (int)num2;
 				utf32Decoder.readByteCount = num;
-				utf32Decoder.m_bytesUsed = (int)((long)(bytes - ptr3));
+				utf32Decoder._bytesUsed = (int)((long)(bytes - ptr3));
 			}
 			return (int)((long)(chars - ptr));
 		}
@@ -835,7 +801,7 @@ namespace System.Text
 		{
 			if (charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("charCount", "Non-negative number required.");
 			}
 			long num = (long)charCount + 1L;
 			if (base.EncoderFallback.MaxCharCount > 1)
@@ -845,7 +811,7 @@ namespace System.Text
 			num *= 4L;
 			if (num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("charCount", "Too many characters. The resulting number of bytes is larger than what can be returned as an int.");
 			}
 			return (int)num;
 		}
@@ -854,7 +820,7 @@ namespace System.Text
 		{
 			if (byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("byteCount", "Non-negative number required.");
 			}
 			int num = byteCount / 2 + 2;
 			if (base.DecoderFallback.MaxCharCount > 2)
@@ -864,18 +830,18 @@ namespace System.Text
 			}
 			if (num > 2147483647)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Too many bytes. The resulting number of chars is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("byteCount", "Too many bytes. The resulting number of chars is larger than what can be returned as an int.");
 			}
 			return num;
 		}
 
 		public override byte[] GetPreamble()
 		{
-			if (!this.emitUTF32ByteOrderMark)
+			if (!this._emitUTF32ByteOrderMark)
 			{
-				return EmptyArray<byte>.Value;
+				return Array.Empty<byte>();
 			}
-			if (this.bigEndian)
+			if (this._bigEndian)
 			{
 				return new byte[] { 0, 0, 254, byte.MaxValue };
 			}
@@ -885,25 +851,50 @@ namespace System.Text
 			return array;
 		}
 
+		public override ReadOnlySpan<byte> Preamble
+		{
+			get
+			{
+				return (base.GetType() != typeof(UTF32Encoding)) ? this.GetPreamble() : (this._emitUTF32ByteOrderMark ? (this._bigEndian ? UTF32Encoding.s_bigEndianPreamble : UTF32Encoding.s_littleEndianPreamble) : Array.Empty<byte>());
+			}
+		}
+
 		public override bool Equals(object value)
 		{
 			UTF32Encoding utf32Encoding = value as UTF32Encoding;
-			return utf32Encoding != null && (this.emitUTF32ByteOrderMark == utf32Encoding.emitUTF32ByteOrderMark && this.bigEndian == utf32Encoding.bigEndian && base.EncoderFallback.Equals(utf32Encoding.EncoderFallback)) && base.DecoderFallback.Equals(utf32Encoding.DecoderFallback);
+			return utf32Encoding != null && (this._emitUTF32ByteOrderMark == utf32Encoding._emitUTF32ByteOrderMark && this._bigEndian == utf32Encoding._bigEndian && base.EncoderFallback.Equals(utf32Encoding.EncoderFallback)) && base.DecoderFallback.Equals(utf32Encoding.DecoderFallback);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.EncoderFallback.GetHashCode() + base.DecoderFallback.GetHashCode() + this.CodePage + (this.emitUTF32ByteOrderMark ? 4 : 0) + (this.bigEndian ? 8 : 0);
+			return base.EncoderFallback.GetHashCode() + base.DecoderFallback.GetHashCode() + this.CodePage + (this._emitUTF32ByteOrderMark ? 4 : 0) + (this._bigEndian ? 8 : 0);
 		}
 
-		private bool emitUTF32ByteOrderMark;
+		// Note: this type is marked as 'beforefieldinit'.
+		static UTF32Encoding()
+		{
+			byte[] array = new byte[4];
+			array[0] = byte.MaxValue;
+			array[1] = 254;
+			UTF32Encoding.s_littleEndianPreamble = array;
+		}
 
-		private bool isThrowException;
+		internal static readonly UTF32Encoding s_default = new UTF32Encoding(false, true);
 
-		private bool bigEndian;
+		internal static readonly UTF32Encoding s_bigEndianDefault = new UTF32Encoding(true, true);
+
+		private static readonly byte[] s_bigEndianPreamble = new byte[] { 0, 0, 254, byte.MaxValue };
+
+		private static readonly byte[] s_littleEndianPreamble;
+
+		private bool _emitUTF32ByteOrderMark;
+
+		private bool _isThrowException;
+
+		private bool _bigEndian;
 
 		[Serializable]
-		internal class UTF32Decoder : DecoderNLS
+		private sealed class UTF32Decoder : DecoderNLS
 		{
 			public UTF32Decoder(UTF32Encoding encoding)
 				: base(encoding)
@@ -914,9 +905,9 @@ namespace System.Text
 			{
 				this.iChar = 0;
 				this.readByteCount = 0;
-				if (this.m_fallbackBuffer != null)
+				if (this._fallbackBuffer != null)
 				{
-					this.m_fallbackBuffer.Reset();
+					this._fallbackBuffer.Reset();
 				}
 			}
 

@@ -1,28 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections
 {
-	[FriendAccessAllowed]
 	internal static class HashHelpers
 	{
-		internal static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable
-		{
-			get
-			{
-				if (HashHelpers.s_SerializationInfoTable == null)
-				{
-					ConditionalWeakTable<object, SerializationInfo> conditionalWeakTable = new ConditionalWeakTable<object, SerializationInfo>();
-					Interlocked.CompareExchange<ConditionalWeakTable<object, SerializationInfo>>(ref HashHelpers.s_SerializationInfoTable, conditionalWeakTable, null);
-				}
-				return HashHelpers.s_SerializationInfoTable;
-			}
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static bool IsPrime(int candidate)
 		{
 			if ((candidate & 1) != 0)
@@ -40,12 +24,11 @@ namespace System.Collections
 			return candidate == 2;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static int GetPrime(int min)
 		{
 			if (min < 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Hashtable's capacity overflowed and went negative. Check load factor, capacity and the current size of the table."));
+				throw new ArgumentException("Hashtable's capacity overflowed and went negative. Check load factor, capacity and the current size of the table.");
 			}
 			for (int i = 0; i < HashHelpers.primes.Length; i++)
 			{
@@ -65,11 +48,6 @@ namespace System.Collections
 			return min;
 		}
 
-		public static int GetMinPrime()
-		{
-			return HashHelpers.primes[0];
-		}
-
 		public static int ExpandPrime(int oldSize)
 		{
 			int num = 2 * oldSize;
@@ -80,7 +58,21 @@ namespace System.Collections
 			return HashHelpers.GetPrime(num);
 		}
 
+		internal static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable
+		{
+			get
+			{
+				if (HashHelpers.s_serializationInfoTable == null)
+				{
+					Interlocked.CompareExchange<ConditionalWeakTable<object, SerializationInfo>>(ref HashHelpers.s_serializationInfoTable, new ConditionalWeakTable<object, SerializationInfo>(), null);
+				}
+				return HashHelpers.s_serializationInfoTable;
+			}
+		}
+
 		public const int HashCollisionThreshold = 100;
+
+		public const int HashPrime = 101;
 
 		public static readonly int[] primes = new int[]
 		{
@@ -94,8 +86,8 @@ namespace System.Collections
 			5999471, 7199369
 		};
 
-		private static ConditionalWeakTable<object, SerializationInfo> s_SerializationInfoTable;
-
 		public const int MaxPrimeArrayLength = 2146435069;
+
+		private static ConditionalWeakTable<object, SerializationInfo> s_serializationInfoTable;
 	}
 }

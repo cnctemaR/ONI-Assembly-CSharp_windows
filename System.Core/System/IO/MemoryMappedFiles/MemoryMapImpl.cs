@@ -6,10 +6,10 @@ namespace System.IO.MemoryMappedFiles
 	internal static class MemoryMapImpl
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenFileInternal(string path, FileMode mode, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, out int error);
+		private unsafe static extern IntPtr OpenFileInternal(char* path, int path_length, FileMode mode, char* mapName, int mapName_length, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, out int error);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenHandleInternal(IntPtr handle, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, out int error);
+		private unsafe static extern IntPtr OpenHandleInternal(IntPtr handle, char* mapName, int mapName_length, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options, out int error);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CloseMapping(IntPtr handle);
@@ -62,14 +62,43 @@ namespace System.IO.MemoryMappedFiles
 			case 11:
 				return new ArgumentOutOfRangeException("capacity", "The capacity cannot be greater than the size of the system's logical address space.");
 			default:
-				return new IOException("Failed with unknown error code " + error);
+				return new IOException("Failed with unknown error code " + error.ToString());
 			}
 		}
 
-		internal static IntPtr OpenFile(string path, FileMode mode, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options)
+		private static int StringLength(string a)
 		{
+			if (a == null)
+			{
+				return 0;
+			}
+			return a.Length;
+		}
+
+		private static void CheckString(string name, string value)
+		{
+			if (value != null && value.IndexOf('\0') >= 0)
+			{
+				throw new ArgumentException("String must not contain embedded NULs.", name);
+			}
+		}
+
+		internal unsafe static IntPtr OpenFile(string path, FileMode mode, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options)
+		{
+			MemoryMapImpl.CheckString("path", path);
+			MemoryMapImpl.CheckString("mapName", mapName);
+			char* ptr = path;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = mapName;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
 			int num = 0;
-			IntPtr intPtr = MemoryMapImpl.OpenFileInternal(path, mode, mapName, out capacity, access, options, out num);
+			IntPtr intPtr = MemoryMapImpl.OpenFileInternal(ptr, MemoryMapImpl.StringLength(path), mode, ptr2, MemoryMapImpl.StringLength(mapName), out capacity, access, options, out num);
 			if (num != 0)
 			{
 				throw MemoryMapImpl.CreateException(num, path);
@@ -77,10 +106,16 @@ namespace System.IO.MemoryMappedFiles
 			return intPtr;
 		}
 
-		internal static IntPtr OpenHandle(IntPtr handle, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options)
+		internal unsafe static IntPtr OpenHandle(IntPtr handle, string mapName, out long capacity, MemoryMappedFileAccess access, MemoryMappedFileOptions options)
 		{
+			MemoryMapImpl.CheckString("mapName", mapName);
+			char* ptr = mapName;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
 			int num = 0;
-			IntPtr intPtr = MemoryMapImpl.OpenHandleInternal(handle, mapName, out capacity, access, options, out num);
+			IntPtr intPtr = MemoryMapImpl.OpenHandleInternal(handle, ptr, MemoryMapImpl.StringLength(mapName), out capacity, access, options, out num);
 			if (num != 0)
 			{
 				throw MemoryMapImpl.CreateException(num, "<none>");

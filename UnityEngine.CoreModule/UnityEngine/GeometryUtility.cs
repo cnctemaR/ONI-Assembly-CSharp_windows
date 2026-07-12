@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[StaticAccessor("GeometryUtilityScripting", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class GeometryUtility
 	{
 		public static Plane[] CalculateFrustumPlanes(Camera camera)

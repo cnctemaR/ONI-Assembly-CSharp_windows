@@ -23,9 +23,20 @@ public abstract class IBuildingConfig
 	{
 	}
 
+	[Obsolete("Implement GetRequiredDlcIds and/or GetForbiddenDlcIds instead")]
 	public virtual string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
+		return null;
+	}
+
+	public virtual string[] GetRequiredDlcIds()
+	{
+		return null;
+	}
+
+	public virtual string[] GetForbiddenDlcIds()
+	{
+		return null;
 	}
 
 	public virtual bool ForbidFromLoading()

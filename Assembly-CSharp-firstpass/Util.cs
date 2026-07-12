@@ -585,6 +585,26 @@ public static class Util
 		return cmp.GetComponent<RectTransform>();
 	}
 
+	public static T FindFirst<T>(this T[] array, Func<T, bool> condition) where T : class
+	{
+		if (condition != null)
+		{
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (array[i] != null && condition(array[i]))
+				{
+					return array[i];
+				}
+			}
+			return default(T);
+		}
+		if (array != null && array.Length != 0)
+		{
+			return array[0];
+		}
+		return default(T);
+	}
+
 	public static T[] Append<T>(this T[] array, T item)
 	{
 		T[] array2 = new T[array.Length + 1];
@@ -604,6 +624,24 @@ public static class Util
 			array2[i] = array[i];
 		}
 		for (int j = 0; j < items.Length; j++)
+		{
+			array2[array.Length + j] = items[j];
+		}
+		return array2;
+	}
+
+	public static T[] Append<T>(this T[] array, List<T> items)
+	{
+		if (items == null)
+		{
+			return array;
+		}
+		T[] array2 = new T[array.Length + items.Count];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array2[i] = array[i];
+		}
+		for (int j = 0; j < items.Count; j++)
 		{
 			array2[array.Length + j] = items[j];
 		}

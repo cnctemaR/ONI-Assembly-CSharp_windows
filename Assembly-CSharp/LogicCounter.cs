@@ -151,7 +151,12 @@ public class LogicCounter : Switch, ISaveLoadable
 	{
 		this.resetRequested = false;
 		this.currentCount = 0;
-		this.SetCounterState();
+		this.SetState(false);
+		if (this.advancedMode)
+		{
+			this.pulsingActive = false;
+			this.pulseTicksRemaining = 0;
+		}
 		this.UpdateVisualState(true);
 		this.UpdateMeter();
 		this.UpdateLogicCircuit();

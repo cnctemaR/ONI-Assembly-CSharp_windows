@@ -6,10 +6,10 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 	public ReactEmoteChore(IStateMachineTarget target, ChoreType chore_type, EmoteReactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
 		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
-		base.AddPrecondition(ChorePreconditions.instance.IsMoving, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsOffLadder, null);
-		base.AddPrecondition(ChorePreconditions.instance.NotInTube, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsAwake, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoving, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsOffLadder, null);
+		this.AddPrecondition(ChorePreconditions.instance.NotInTube, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsAwake, null);
 		this.getStatusItem = get_status_item;
 		base.smi = new ReactEmoteChore.StatesInstance(this, target.gameObject, reactable, emote_kanim, emote_anims, play_mode);
 	}

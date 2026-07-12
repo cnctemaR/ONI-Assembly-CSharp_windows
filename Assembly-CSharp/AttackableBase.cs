@@ -24,8 +24,8 @@ public class AttackableBase : Workable, IApproachable
 	{
 		if (this.attributeConverter != null && base.worker != null)
 		{
-			AttributeConverterInstance converter = base.worker.GetComponent<AttributeConverters>().GetConverter(this.attributeConverter.Id);
-			return Mathf.Max(1f + converter.Evaluate(), 0.1f);
+			AttributeConverterInstance attributeConverter = base.worker.GetAttributeConverter(this.attributeConverter.Id);
+			return Mathf.Max(1f + attributeConverter.Evaluate(), 0.1f);
 		}
 		return 1f;
 	}
@@ -41,7 +41,7 @@ public class AttackableBase : Workable, IApproachable
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 	}
 
-	public override float GetEfficiencyMultiplier(Worker worker)
+	public override float GetEfficiencyMultiplier(WorkerBase worker)
 	{
 		return 1f;
 	}

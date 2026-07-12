@@ -8,6 +8,7 @@ namespace UnityEngine.Rendering
 		Vector,
 		Float,
 		Range,
-		Texture
+		Texture,
+		Int
 	}
 }

@@ -30,21 +30,33 @@ namespace System.Linq.Parallel
 						while (enumerator.MoveNext())
 						{
 							decimal? num3 = enumerator.Current;
-							if (num2 == null || num3 < num2)
+							if (num2 != null)
 							{
-								num2 = num3;
+								decimal? num4 = num3;
+								decimal? num5 = num2;
+								if (!((num4.GetValueOrDefault() < num5.GetValueOrDefault()) & ((num4 != null) & (num5 != null))))
+								{
+									continue;
+								}
 							}
+							num2 = num3;
 						}
 					}
 					else
 					{
 						while (enumerator.MoveNext())
 						{
-							decimal? num4 = enumerator.Current;
-							if (num2 == null || num4 > num2)
+							decimal? num6 = enumerator.Current;
+							if (num2 != null)
 							{
-								num2 = num4;
+								decimal? num5 = num6;
+								decimal? num4 = num2;
+								if (!((num5.GetValueOrDefault() > num4.GetValueOrDefault()) & ((num5 != null) & (num4 != null))))
+								{
+									continue;
+								}
 							}
+							num2 = num6;
 						}
 					}
 					num = num2;
@@ -85,25 +97,37 @@ namespace System.Linq.Parallel
 							{
 								CancellationState.ThrowIfCanceled(this._cancellationToken);
 							}
-							if (currentElement == null || num2 < currentElement)
+							if (currentElement != null)
 							{
-								currentElement = num2;
+								decimal? num3 = num2;
+								decimal? num4 = currentElement;
+								if (!((num3.GetValueOrDefault() < num4.GetValueOrDefault()) & ((num3 != null) & (num4 != null))))
+								{
+									continue;
+								}
 							}
+							currentElement = num2;
 						}
 					}
 					else
 					{
-						decimal? num3 = null;
-						while (source.MoveNext(ref num3, ref tkey))
+						decimal? num5 = null;
+						while (source.MoveNext(ref num5, ref tkey))
 						{
 							if ((num++ & 63) == 0)
 							{
 								CancellationState.ThrowIfCanceled(this._cancellationToken);
 							}
-							if (currentElement == null || num3 > currentElement)
+							if (currentElement != null)
 							{
-								currentElement = num3;
+								decimal? num4 = num5;
+								decimal? num3 = currentElement;
+								if (!((num4.GetValueOrDefault() > num3.GetValueOrDefault()) & ((num4 != null) & (num3 != null))))
+								{
+									continue;
+								}
 							}
+							currentElement = num5;
 						}
 					}
 					return true;

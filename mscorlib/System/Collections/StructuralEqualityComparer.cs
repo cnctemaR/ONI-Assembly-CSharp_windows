@@ -3,7 +3,7 @@
 namespace System.Collections
 {
 	[Serializable]
-	internal class StructuralEqualityComparer : IEqualityComparer
+	internal sealed class StructuralEqualityComparer : IEqualityComparer
 	{
 		public bool Equals(object x, object y)
 		{

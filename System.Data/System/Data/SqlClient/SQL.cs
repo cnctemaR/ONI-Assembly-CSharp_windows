@@ -44,6 +44,17 @@ namespace System.Data.SqlClient
 			return ADP.Argument(SR.GetString("User Instance and Failover are not compatible options.  Please choose only one of the two in the connection string."));
 		}
 
+		internal static Exception ParsingErrorLibraryType(ParsingErrorState state, int libraryType)
+		{
+			string text = "Internal connection fatal error. Error state: {0}, Authentication Library Type: {1}.";
+			object[] array = new object[2];
+			int num = 0;
+			int num2 = (int)state;
+			array[num] = num2.ToString(CultureInfo.InvariantCulture);
+			array[1] = libraryType;
+			return ADP.InvalidOperation(SR.GetString(text, array));
+		}
+
 		internal static Exception InvalidSQLServerVersionUnknown()
 		{
 			return ADP.DataAdapter(SR.GetString("Unsupported SQL Server version.  The .Net Framework SqlClient Data Provider can only be used with SQL Server versions 7.0 and later."));
@@ -62,6 +73,26 @@ namespace System.Data.SqlClient
 		internal static Exception InstanceFailure()
 		{
 			return ADP.InvalidOperation(SR.GetString("Instance failure."));
+		}
+
+		internal static Exception ChangePasswordArgumentMissing(string argumentName)
+		{
+			return ADP.ArgumentNull(SR.GetString("The '{0}' argument must not be null or empty.", new object[] { argumentName }));
+		}
+
+		internal static Exception ChangePasswordConflictsWithSSPI()
+		{
+			return ADP.Argument(SR.GetString("ChangePassword can only be used with SQL authentication, not with integrated security."));
+		}
+
+		internal static Exception ChangePasswordRequiresYukon()
+		{
+			return ADP.InvalidOperation(SR.GetString("ChangePassword requires SQL Server 9.0 or later."));
+		}
+
+		internal static Exception ChangePasswordUseOfUnallowedKey(string key)
+		{
+			return ADP.InvalidOperation(SR.GetString("The keyword '{0}' must not be specified in the connectionString argument to ChangePassword.", new object[] { key }));
 		}
 
 		internal static Exception GlobalTransactionsNotEnabled()
@@ -131,6 +162,11 @@ namespace System.Data.SqlClient
 		internal static Exception NonXmlResult()
 		{
 			return ADP.InvalidOperation(SR.GetString("Invalid command sent to ExecuteXmlReader.  The command must return an Xml result."));
+		}
+
+		internal static Exception InvalidUdt3PartNameFormat()
+		{
+			return ADP.Argument(SR.GetString("Invalid 3 part name format for UdtTypeName."));
 		}
 
 		internal static Exception InvalidParameterTypeNameFormat()
@@ -222,6 +258,38 @@ namespace System.Data.SqlClient
 			return ADP.InvalidOperation(SR.GetString("Internal connection fatal error."));
 		}
 
+		internal static Exception ParsingError(ParsingErrorState state)
+		{
+			string text = "Internal connection fatal error. Error state: {0}.";
+			object[] array = new object[1];
+			int num = 0;
+			int num2 = (int)state;
+			array[num] = num2.ToString(CultureInfo.InvariantCulture);
+			return ADP.InvalidOperation(SR.GetString(text, array));
+		}
+
+		internal static Exception ParsingErrorValue(ParsingErrorState state, int value)
+		{
+			string text = "Internal connection fatal error. Error state: {0}, Value: {1}.";
+			object[] array = new object[2];
+			int num = 0;
+			int num2 = (int)state;
+			array[num] = num2.ToString(CultureInfo.InvariantCulture);
+			array[1] = value;
+			return ADP.InvalidOperation(SR.GetString(text, array));
+		}
+
+		internal static Exception ParsingErrorFeatureId(ParsingErrorState state, int featureId)
+		{
+			string text = "Internal connection fatal error. Error state: {0}, Feature Id: {1}.";
+			object[] array = new object[2];
+			int num = 0;
+			int num2 = (int)state;
+			array[num] = num2.ToString(CultureInfo.InvariantCulture);
+			array[1] = featureId;
+			return ADP.InvalidOperation(SR.GetString(text, array));
+		}
+
 		internal static Exception MoneyOverflow(string moneyValue)
 		{
 			return ADP.Overflow(SR.GetString("SqlDbType.SmallMoney overflow.  Value '{0}' is out of range.  Must be between -214,748.3648 and 214,748.3647.", new object[] { moneyValue }));
@@ -272,6 +340,11 @@ namespace System.Data.SqlClient
 			return ADP.InvalidCast(SR.GetString("Invalid attempt to GetXmlReader on column '{0}'. The GetXmlReader function can only be used on columns of type Xml.", new object[] { columnName }));
 		}
 
+		internal static Exception UDTUnexpectedResult(string exceptionText)
+		{
+			return ADP.TypeLoad(SR.GetString("unexpected error encountered in SqlClient data provider. {0}", new object[] { exceptionText }));
+		}
+
 		internal static Exception SqlCommandHasExistingSqlNotificationRequest()
 		{
 			return ADP.InvalidOperation(SR.GetString("This SqlCommand object is already associated with another SqlDependency object."));
@@ -317,6 +390,21 @@ namespace System.Data.SqlClient
 			TransactionPromotionException ex = new TransactionPromotionException(SR.GetString("Failure while attempting to promote transaction."), inner);
 			ADP.TraceExceptionAsReturnValue(ex);
 			return ex;
+		}
+
+		internal static Exception UnexpectedUdtTypeNameForNonUdtParams()
+		{
+			return ADP.Argument(SR.GetString("UdtTypeName property must be set only for UDT parameters."));
+		}
+
+		internal static Exception MustSetUdtTypeNameForUdtParams()
+		{
+			return ADP.Argument(SR.GetString("UdtTypeName property must be set for UDT parameters."));
+		}
+
+		internal static Exception UDTInvalidSqlType(string typeName)
+		{
+			return ADP.Argument(SR.GetString("Specified type is not registered on the target server. {0}.", new object[] { typeName }));
 		}
 
 		internal static Exception InvalidSqlDbTypeForConstructor(SqlDbType type)

@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Flags]
 	[Obsolete("Use System.Runtime.InteropServices.ComTypes.IDLFLAG instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
+	[Flags]
 	[Serializable]
 	public enum IDLFLAG : short
 	{

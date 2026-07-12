@@ -200,7 +200,7 @@ namespace System.Data
 							ExpressionNode expressionNode3 = this.NodePeek();
 							if (expressionNode3 == null || expressionNode3.GetType() != typeof(NameNode))
 							{
-								goto IL_0420;
+								goto IL_041A;
 							}
 							NameNode nameNode = (NameNode)this.NodePop();
 							ExpressionNode expressionNode = new FunctionNode(this._table, nameNode._name);
@@ -269,7 +269,7 @@ namespace System.Data
 						continue;
 					}
 					case Tokens.UnaryOp:
-						goto IL_065A;
+						goto IL_0654;
 					case Tokens.BinaryOp:
 						if (this._prevOperand != 0)
 						{
@@ -284,14 +284,14 @@ namespace System.Data
 						if (this._op == 15)
 						{
 							this._op = 2;
-							goto IL_065A;
+							goto IL_0654;
 						}
 						if (this._op == 16)
 						{
 							this._op = 1;
-							goto IL_065A;
+							goto IL_0654;
 						}
-						goto IL_05FA;
+						goto IL_05F4;
 					case Tokens.Dot:
 					{
 						ExpressionNode expressionNode5 = this.NodePeek();
@@ -308,16 +308,16 @@ namespace System.Data
 						break;
 					}
 					case Tokens.EOS:
-						goto IL_0077;
+						goto IL_0079;
 					}
 					goto Block_1;
-					IL_065A:
+					IL_0654:
 					OperatorInfo[] ops6 = this._ops;
 					num2 = this._topOperator;
 					this._topOperator = num2 + 1;
 					ops6[num2] = new OperatorInfo(Nodes.Unop, this._op, Operators.Priority(this._op));
 				}
-				IL_0077:
+				IL_0079:
 				if (this._prevOperand == 0)
 				{
 					if (this._topNode != 0)
@@ -337,12 +337,12 @@ namespace System.Data
 					continue;
 				}
 				Block_1:
-				goto IL_0771;
+				goto IL_076B;
 				Block_5:
 				throw ExprException.MissingOperator(new string(this._text, this._start, this._pos - this._start));
 				Block_9:
 				throw ExprException.InWithoutParentheses();
-				IL_0420:
+				IL_041A:
 				throw ExprException.SyntaxError();
 				Block_18:
 				throw ExprException.TooManyRightParentheses();
@@ -352,11 +352,11 @@ namespace System.Data
 				throw ExprException.MissingOperandBefore(",");
 				Block_24:
 				throw ExprException.SyntaxError();
-				IL_05FA:
+				IL_05F4:
 				throw ExprException.MissingOperandBefore(Operators.ToString(this._op));
 				Block_28:
 				throw ExprException.MissingOperator(new string(this._text, this._start, this._pos - this._start));
-				IL_0771:
+				IL_076B:
 				throw ExprException.UnknownToken(new string(this._text, this._start, this._pos - this._start), this._start + 1);
 			}
 			this._expression = this._nodeStack[0];
@@ -1141,7 +1141,7 @@ namespace System.Data
 
 		internal ExpressionNode _expression;
 
-		private struct ReservedWords
+		private readonly struct ReservedWords
 		{
 			internal ReservedWords(string word, Tokens token, int op)
 			{

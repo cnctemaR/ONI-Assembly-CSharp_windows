@@ -20,6 +20,15 @@ namespace System
 	[StructLayout(LayoutKind.Sequential)]
 	internal class RuntimeType : global::System.Reflection.TypeInfo, ISerializable, ICloneable
 	{
+		internal static RuntimeType GetType(string typeName, bool throwOnError, bool ignoreCase, bool reflectionOnly, ref StackCrawlMark stackMark)
+		{
+			if (typeName == null)
+			{
+				throw new ArgumentNullException("typeName");
+			}
+			return RuntimeTypeHandle.GetTypeByName(typeName, throwOnError, ignoreCase, reflectionOnly, ref stackMark, false);
+		}
+
 		private static void ThrowIfTypeNeverValidGenericArgument(RuntimeType type)
 		{
 			if (type.IsPointer || type.IsByRef || type == typeof(void))
@@ -209,7 +218,7 @@ namespace System
 		{
 			bool flag = type.IsNestedPublic || type.IsPublic;
 			bool flag2 = false;
-			return RuntimeType.FilterApplyBase(type, bindingFlags, flag, type.IsNestedAssembly, flag2, name, prefixLookup) && (ns == null || type.Namespace.Equals(ns));
+			return RuntimeType.FilterApplyBase(type, bindingFlags, flag, type.IsNestedAssembly, flag2, name, prefixLookup) && (ns == null || !(ns != type.Namespace));
 		}
 
 		private static bool FilterApplyMethodInfo(RuntimeMethodInfo method, BindingFlags bindingFlags, CallingConventions callConv, Type[] argumentTypes)
@@ -286,7 +295,7 @@ namespace System
 				{
 					for (int i = 0; i < parametersNoCopy.Length; i++)
 					{
-						if (argumentTypes[i] != null && parametersNoCopy[i].ParameterType != argumentTypes[i])
+						if (argumentTypes[i] != null && !argumentTypes[i].MatchesParameterTypeExactly(parametersNoCopy[i]))
 						{
 							return false;
 						}
@@ -315,20 +324,37 @@ namespace System
 			return true;
 		}
 
-		private RuntimeType.ListBuilder<MethodInfo> GetMethodCandidates(string name, BindingFlags bindingAttr, CallingConventions callConv, Type[] types, bool allowPrefixLookup)
+		private RuntimeType.ListBuilder<MethodInfo> GetMethodCandidates(string name, BindingFlags bindingAttr, CallingConventions callConv, Type[] types, int genericParamCount, bool allowPrefixLookup)
 		{
 			bool flag;
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
-			RuntimeMethodInfo[] methodsByName = this.GetMethodsByName(name, bindingAttr, flag2, this);
+			RuntimeMethodInfo[] methodsByName = this.GetMethodsByName(name, bindingAttr, memberListType, this);
 			RuntimeType.ListBuilder<MethodInfo> listBuilder = new RuntimeType.ListBuilder<MethodInfo>(methodsByName.Length);
-			foreach (RuntimeMethodInfo runtimeMethodInfo in methodsByName)
+			int i = 0;
+			while (i < methodsByName.Length)
 			{
+				RuntimeMethodInfo runtimeMethodInfo = methodsByName[i];
+				if (genericParamCount == -1)
+				{
+					goto IL_005E;
+				}
+				bool isGenericMethod = runtimeMethodInfo.IsGenericMethod;
+				if ((genericParamCount != 0 || !isGenericMethod) && (genericParamCount <= 0 || isGenericMethod) && runtimeMethodInfo.GetGenericArguments().Length == genericParamCount)
+				{
+					goto IL_005E;
+				}
+				IL_0082:
+				i++;
+				continue;
+				IL_005E:
 				if (RuntimeType.FilterApplyMethodInfo(runtimeMethodInfo, bindingAttr, callConv, types) && (!flag || RuntimeType.FilterApplyPrefixLookup(runtimeMethodInfo, name, flag2)))
 				{
 					listBuilder.Add(runtimeMethodInfo);
+					goto IL_0082;
 				}
+				goto IL_0082;
 			}
 			return listBuilder;
 		}
@@ -339,7 +365,7 @@ namespace System
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
-			if (name != null && name != ConstructorInfo.ConstructorName && name != ConstructorInfo.TypeConstructorName)
+			if ((!flag && name != null && name.Length == 0) || (!string.IsNullOrEmpty(name) && name != ConstructorInfo.ConstructorName && name != ConstructorInfo.TypeConstructorName))
 			{
 				return new RuntimeType.ListBuilder<ConstructorInfo>(0);
 			}
@@ -361,7 +387,7 @@ namespace System
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
-			RuntimePropertyInfo[] propertiesByName = this.GetPropertiesByName(name, bindingAttr, flag2, this);
+			RuntimePropertyInfo[] propertiesByName = this.GetPropertiesByName(name, bindingAttr, memberListType, this);
 			bindingAttr ^= BindingFlags.DeclaredOnly;
 			RuntimeType.ListBuilder<PropertyInfo> listBuilder = new RuntimeType.ListBuilder<PropertyInfo>(propertiesByName.Length);
 			foreach (RuntimePropertyInfo runtimePropertyInfo in propertiesByName)
@@ -380,7 +406,7 @@ namespace System
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
-			RuntimeEventInfo[] events_internal = this.GetEvents_internal(name, bindingAttr, this);
+			RuntimeEventInfo[] events_internal = this.GetEvents_internal(name, bindingAttr, memberListType, this);
 			bindingAttr ^= BindingFlags.DeclaredOnly;
 			RuntimeType.ListBuilder<EventInfo> listBuilder = new RuntimeType.ListBuilder<EventInfo>(events_internal.Length);
 			foreach (RuntimeEventInfo runtimeEventInfo in events_internal)
@@ -399,7 +425,7 @@ namespace System
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
-			RuntimeFieldInfo[] fields_internal = this.GetFields_internal(name, bindingAttr, this);
+			RuntimeFieldInfo[] fields_internal = this.GetFields_internal(name, bindingAttr, memberListType, this);
 			bindingAttr ^= BindingFlags.DeclaredOnly;
 			RuntimeType.ListBuilder<FieldInfo> listBuilder = new RuntimeType.ListBuilder<FieldInfo>(fields_internal.Length);
 			foreach (RuntimeFieldInfo runtimeFieldInfo in fields_internal)
@@ -422,7 +448,7 @@ namespace System
 			bool flag2;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref text, allowPrefixLookup, out flag, out flag2, out memberListType);
-			RuntimeType[] nestedTypes_internal = this.GetNestedTypes_internal(text, bindingAttr);
+			RuntimeType[] nestedTypes_internal = this.GetNestedTypes_internal(text, bindingAttr, memberListType);
 			RuntimeType.ListBuilder<Type> listBuilder = new RuntimeType.ListBuilder<Type>(nestedTypes_internal.Length);
 			foreach (RuntimeType runtimeType in nestedTypes_internal)
 			{
@@ -436,7 +462,7 @@ namespace System
 
 		public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
 		{
-			return this.GetMethodCandidates(null, bindingAttr, CallingConventions.Any, null, false).ToArray();
+			return this.GetMethodCandidates(null, bindingAttr, CallingConventions.Any, null, -1, false).ToArray();
 		}
 
 		[ComVisible(true)]
@@ -467,7 +493,7 @@ namespace System
 
 		public override MemberInfo[] GetMembers(BindingFlags bindingAttr)
 		{
-			RuntimeType.ListBuilder<MethodInfo> methodCandidates = this.GetMethodCandidates(null, bindingAttr, CallingConventions.Any, null, false);
+			RuntimeType.ListBuilder<MethodInfo> methodCandidates = this.GetMethodCandidates(null, bindingAttr, CallingConventions.Any, null, -1, false);
 			RuntimeType.ListBuilder<ConstructorInfo> constructorCandidates = this.GetConstructorCandidates(null, bindingAttr, CallingConventions.Any, null, false);
 			RuntimeType.ListBuilder<PropertyInfo> propertyCandidates = this.GetPropertyCandidates(null, bindingAttr, null, false);
 			RuntimeType.ListBuilder<EventInfo> eventCandidates = this.GetEventCandidates(null, bindingAttr, false);
@@ -475,52 +501,25 @@ namespace System
 			RuntimeType.ListBuilder<Type> nestedTypeCandidates = this.GetNestedTypeCandidates(null, bindingAttr, false);
 			MemberInfo[] array = new MemberInfo[methodCandidates.Count + constructorCandidates.Count + propertyCandidates.Count + eventCandidates.Count + fieldCandidates.Count + nestedTypeCandidates.Count];
 			int num = 0;
-			methodCandidates.CopyTo(array, num);
+			object[] array2 = array;
+			methodCandidates.CopyTo(array2, num);
 			num += methodCandidates.Count;
-			constructorCandidates.CopyTo(array, num);
+			array2 = array;
+			constructorCandidates.CopyTo(array2, num);
 			num += constructorCandidates.Count;
-			propertyCandidates.CopyTo(array, num);
+			array2 = array;
+			propertyCandidates.CopyTo(array2, num);
 			num += propertyCandidates.Count;
-			eventCandidates.CopyTo(array, num);
+			array2 = array;
+			eventCandidates.CopyTo(array2, num);
 			num += eventCandidates.Count;
-			fieldCandidates.CopyTo(array, num);
+			array2 = array;
+			fieldCandidates.CopyTo(array2, num);
 			num += fieldCandidates.Count;
-			nestedTypeCandidates.CopyTo(array, num);
+			array2 = array;
+			nestedTypeCandidates.CopyTo(array2, num);
 			num += nestedTypeCandidates.Count;
 			return array;
-		}
-
-		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConv, Type[] types, ParameterModifier[] modifiers)
-		{
-			RuntimeType.ListBuilder<MethodInfo> methodCandidates = this.GetMethodCandidates(name, bindingAttr, callConv, types, false);
-			if (methodCandidates.Count == 0)
-			{
-				return null;
-			}
-			if (types == null || types.Length == 0)
-			{
-				MethodInfo methodInfo = methodCandidates[0];
-				if (methodCandidates.Count == 1)
-				{
-					return methodInfo;
-				}
-				if (types == null)
-				{
-					for (int i = 1; i < methodCandidates.Count; i++)
-					{
-						if (!global::System.DefaultBinder.CompareMethodSigAndName(methodCandidates[i], methodInfo))
-						{
-							throw new AmbiguousMatchException(Environment.GetResourceString("Ambiguous match found."));
-						}
-					}
-					return global::System.DefaultBinder.FindMostDerivedNewSlotMeth(methodCandidates.ToArray(), methodCandidates.Count) as MethodInfo;
-				}
-			}
-			if (binder == null)
-			{
-				binder = Type.DefaultBinder;
-			}
-			return binder.SelectMethod(bindingAttr, methodCandidates.ToArray(), types, modifiers) as MethodInfo;
 		}
 
 		protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
@@ -539,15 +538,19 @@ namespace System
 					return constructorInfo;
 				}
 			}
+			MethodBase[] array;
 			if ((bindingAttr & BindingFlags.ExactBinding) != BindingFlags.Default)
 			{
-				return global::System.DefaultBinder.ExactBinding(constructorCandidates.ToArray(), types, modifiers) as ConstructorInfo;
+				array = constructorCandidates.ToArray();
+				return global::System.DefaultBinder.ExactBinding(array, types, modifiers) as ConstructorInfo;
 			}
 			if (binder == null)
 			{
 				binder = Type.DefaultBinder;
 			}
-			return binder.SelectMethod(bindingAttr, constructorCandidates.ToArray(), types, modifiers) as ConstructorInfo;
+			Binder binder2 = binder;
+			array = constructorCandidates.ToArray();
+			return binder2.SelectMethod(bindingAttr, array, types, modifiers) as ConstructorInfo;
 		}
 
 		protected override PropertyInfo GetPropertyImpl(string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
@@ -597,7 +600,7 @@ namespace System
 			bool flag;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, out flag, out memberListType);
-			RuntimeEventInfo[] events_internal = this.GetEvents_internal(name, bindingAttr, this);
+			RuntimeEventInfo[] events_internal = this.GetEvents_internal(name, bindingAttr, memberListType, this);
 			EventInfo eventInfo = null;
 			bindingAttr ^= BindingFlags.DeclaredOnly;
 			foreach (RuntimeEventInfo runtimeEventInfo in events_internal)
@@ -623,7 +626,7 @@ namespace System
 			bool flag;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref name, out flag, out memberListType);
-			RuntimeFieldInfo[] fields_internal = this.GetFields_internal(name, bindingAttr, this);
+			RuntimeFieldInfo[] fields_internal = this.GetFields_internal(name, bindingAttr, memberListType, this);
 			FieldInfo fieldInfo = null;
 			bindingAttr ^= BindingFlags.DeclaredOnly;
 			bool flag2 = false;
@@ -718,7 +721,7 @@ namespace System
 			bool flag;
 			RuntimeType.MemberListType memberListType;
 			RuntimeType.FilterHelper(bindingAttr, ref text, out flag, out memberListType);
-			RuntimeType[] nestedTypes_internal = this.GetNestedTypes_internal(text, bindingAttr);
+			RuntimeType[] nestedTypes_internal = this.GetNestedTypes_internal(text, bindingAttr, memberListType);
 			RuntimeType runtimeType = null;
 			foreach (RuntimeType runtimeType2 in nestedTypes_internal)
 			{
@@ -749,7 +752,7 @@ namespace System
 			int num = 0;
 			if ((type & MemberTypes.Method) != (MemberTypes)0)
 			{
-				listBuilder = this.GetMethodCandidates(name, bindingAttr, CallingConventions.Any, null, true);
+				listBuilder = this.GetMethodCandidates(name, bindingAttr, CallingConventions.Any, null, -1, true);
 				if (type == MemberTypes.Method)
 				{
 					return listBuilder.ToArray();
@@ -801,21 +804,37 @@ namespace System
 				}
 				num += listBuilder6.Count;
 			}
-			MemberInfo[] array = ((type == (MemberTypes.Constructor | MemberTypes.Method)) ? new MethodBase[num] : new MemberInfo[num]);
+			MemberInfo[] array;
+			if (type != (MemberTypes.Constructor | MemberTypes.Method))
+			{
+				array = new MemberInfo[num];
+			}
+			else
+			{
+				MemberInfo[] array2 = new MethodBase[num];
+				array = array2;
+			}
+			MemberInfo[] array3 = array;
 			int num2 = 0;
-			listBuilder.CopyTo(array, num2);
+			object[] array4 = array3;
+			listBuilder.CopyTo(array4, num2);
 			num2 += listBuilder.Count;
-			listBuilder2.CopyTo(array, num2);
+			array4 = array3;
+			listBuilder2.CopyTo(array4, num2);
 			num2 += listBuilder2.Count;
-			listBuilder3.CopyTo(array, num2);
+			array4 = array3;
+			listBuilder3.CopyTo(array4, num2);
 			num2 += listBuilder3.Count;
-			listBuilder4.CopyTo(array, num2);
+			array4 = array3;
+			listBuilder4.CopyTo(array4, num2);
 			num2 += listBuilder4.Count;
-			listBuilder5.CopyTo(array, num2);
+			array4 = array3;
+			listBuilder5.CopyTo(array4, num2);
 			num2 += listBuilder5.Count;
-			listBuilder6.CopyTo(array, num2);
+			array4 = array3;
+			listBuilder6.CopyTo(array4, num2);
 			num2 += listBuilder6.Count;
-			return array;
+			return array3;
 		}
 
 		public override Module Module
@@ -864,30 +883,6 @@ namespace System
 			return RuntimeTypeHandle.IsInstanceOfType(this, o);
 		}
 
-		[ComVisible(true)]
-		public override bool IsSubclassOf(Type type)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			RuntimeType runtimeType = type as RuntimeType;
-			if (runtimeType == null)
-			{
-				return false;
-			}
-			RuntimeType runtimeType2 = this.GetBaseType();
-			while (runtimeType2 != null)
-			{
-				if (runtimeType2 == runtimeType)
-				{
-					return true;
-				}
-				runtimeType2 = runtimeType2.GetBaseType();
-			}
-			return runtimeType == RuntimeType.ObjectType && runtimeType != this;
-		}
-
 		public override bool IsAssignableFrom(global::System.Reflection.TypeInfo typeInfo)
 		{
 			return !(typeInfo == null) && this.IsAssignableFrom(typeInfo.AsType());
@@ -908,7 +903,7 @@ namespace System
 			{
 				return RuntimeTypeHandle.CanCastTo(runtimeType, this);
 			}
-			if (c is TypeBuilder)
+			if (RuntimeFeature.IsDynamicCodeSupported && c is TypeBuilder)
 			{
 				if (c.IsSubclassOf(this))
 				{
@@ -1134,7 +1129,7 @@ namespace System
 				throw new ArgumentException(Environment.GetResourceString("Type provided must be an Enum."), "enumType");
 			}
 			ulong[] array = Enum.InternalGetValues(this);
-			Array array2 = Array.UnsafeCreateInstance(this, new int[] { array.Length });
+			Array array2 = Array.CreateInstance(this, array.Length);
 			for (int i = 0; i < array.Length; i++)
 			{
 				object obj = Enum.ToObject(this, array[i]);
@@ -1173,7 +1168,8 @@ namespace System
 			}
 			if (runtimeType == RuntimeType.StringType)
 			{
-				return Array.IndexOf<object>(Enum.InternalGetNames(this), value) >= 0;
+				object[] array = Enum.InternalGetNames(this);
+				return Array.IndexOf<object>(array, value) >= 0;
 			}
 			if (Type.IsIntegerType(runtimeType))
 			{
@@ -1186,9 +1182,9 @@ namespace System
 						runtimeType2.ToString()
 					}));
 				}
-				ulong[] array = Enum.InternalGetValues(this);
+				ulong[] array2 = Enum.InternalGetValues(this);
 				ulong num = Enum.ToUInt64(value);
-				return Array.BinarySearch<ulong>(array, num) >= 0;
+				return Array.BinarySearch<ulong>(array2, num) >= 0;
 			}
 			else
 			{
@@ -1235,7 +1231,7 @@ namespace System
 			Type[] array = this.GetGenericArgumentsInternal(false);
 			if (array == null)
 			{
-				array = EmptyArray<Type>.Value;
+				array = Array.Empty<Type>();
 			}
 			return array;
 		}
@@ -1256,7 +1252,8 @@ namespace System
 			{
 				throw new ArgumentException(Environment.GetResourceString("The number of generic arguments provided doesn't equal the arity of the generic type definition."), "instantiation");
 			}
-			for (int i = 0; i < instantiation.Length; i++)
+			int i = 0;
+			while (i < instantiation.Length)
 			{
 				Type type = instantiation[i];
 				if (type == null)
@@ -1266,19 +1263,32 @@ namespace System
 				RuntimeType runtimeType = type as RuntimeType;
 				if (runtimeType == null)
 				{
+					if (type.IsSignatureType)
+					{
+						return Type.MakeGenericSignatureType(this, instantiation);
+					}
 					Type[] array2 = new Type[instantiation.Length];
 					for (int j = 0; j < instantiation.Length; j++)
 					{
 						array2[j] = instantiation[j];
 					}
 					instantiation = array2;
-					return TypeBuilderInstantiation.MakeGenericType(this, instantiation);
+					if (!RuntimeFeature.IsDynamicCodeSupported)
+					{
+						throw new PlatformNotSupportedException();
+					}
+					return RuntimeType.MakeTypeBuilderInstantiation(this, instantiation);
 				}
-				array[i] = runtimeType;
+				else
+				{
+					array[i] = runtimeType;
+					i++;
+				}
 			}
 			RuntimeType[] genericArgumentsInternal = this.GetGenericArgumentsInternal();
 			RuntimeType.SanityCheckGenericArguments(array, genericArgumentsInternal);
-			Type type2 = RuntimeType.MakeGenericType(this, array);
+			Type[] array3 = array;
+			Type type2 = RuntimeType.MakeGenericType(this, array3);
 			if (type2 == null)
 			{
 				throw new TypeLoadException();
@@ -1349,13 +1359,13 @@ namespace System
 			}
 			if (array == null)
 			{
-				array = EmptyArray<MemberInfo>.Value;
+				array = Array.Empty<MemberInfo>();
 			}
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		[DebuggerStepThrough]
+		[SecuritySafeCritical]
 		[DebuggerHidden]
 		public override object InvokeMember(string name, BindingFlags bindingFlags, Binder binder, object target, object[] providedArgs, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParams)
 		{
@@ -1660,13 +1670,16 @@ namespace System
 					}
 					if (providedArgs == null)
 					{
-						providedArgs = EmptyArray<object>.Value;
+						providedArgs = Array.Empty<object>();
 					}
 					object obj = null;
 					MethodBase methodBase = null;
 					try
 					{
-						methodBase = binder.BindToMethod(bindingFlags, array4, ref providedArgs, modifiers, culture, namedParams, out obj);
+						Binder binder2 = binder;
+						BindingFlags bindingFlags2 = bindingFlags;
+						MethodBase[] array7 = array4;
+						methodBase = binder2.BindToMethod(bindingFlags2, array7, ref providedArgs, modifiers, culture, namedParams, out obj);
 					}
 					catch (MissingMethodException)
 					{
@@ -1840,16 +1853,18 @@ namespace System
 					}
 					if (args == null)
 					{
-						args = EmptyArray<object>.Value;
+						args = Array.Empty<object>();
 					}
 					int num = args.Length;
 					if (binder == null)
 					{
 						binder = Type.DefaultBinder;
 					}
+					bool flag = (bindingAttr & BindingFlags.NonPublic) == BindingFlags.Default;
+					bool flag2 = (bindingAttr & BindingFlags.DoNotWrapExceptions) == BindingFlags.Default;
 					if (num == 0 && (bindingAttr & BindingFlags.Public) != BindingFlags.Default && (bindingAttr & BindingFlags.Instance) != BindingFlags.Default && (this.IsGenericCOMObjectImpl() || base.IsValueType))
 					{
-						obj = this.CreateInstanceDefaultCtor((bindingAttr & BindingFlags.NonPublic) == BindingFlags.Default, false, true, ref stackMark);
+						obj = this.CreateInstanceDefaultCtor(flag, false, true, flag2, ref stackMark);
 					}
 					else
 					{
@@ -1916,7 +1931,7 @@ namespace System
 							}
 							else
 							{
-								obj = Activator.CreateInstance(this, true);
+								obj = Activator.CreateInstance(this, true, flag2);
 							}
 						}
 						else
@@ -1962,16 +1977,16 @@ namespace System
 			return obj;
 		}
 
-		[DebuggerHidden]
-		[DebuggerStepThrough]
 		[SecuritySafeCritical]
-		internal object CreateInstanceDefaultCtor(bool publicOnly, bool skipCheckThis, bool fillCache, ref StackCrawlMark stackMark)
+		[DebuggerStepThrough]
+		[DebuggerHidden]
+		internal object CreateInstanceDefaultCtor(bool publicOnly, bool skipCheckThis, bool fillCache, bool wrapExceptions, ref StackCrawlMark stackMark)
 		{
 			if (base.GetType() == typeof(ReflectionOnlyType))
 			{
 				throw new InvalidOperationException(Environment.GetResourceString("The requested operation is invalid in the ReflectionOnly context."));
 			}
-			return this.CreateInstanceSlow(publicOnly, skipCheckThis, fillCache, ref stackMark);
+			return this.CreateInstanceSlow(publicOnly, wrapExceptions, skipCheckThis, fillCache);
 		}
 
 		internal RuntimeType(object obj)
@@ -1979,30 +1994,30 @@ namespace System
 			throw new NotImplementedException();
 		}
 
-		internal MonoCMethod GetDefaultConstructor()
+		internal RuntimeConstructorInfo GetDefaultConstructor()
 		{
-			MonoCMethod monoCMethod = null;
+			RuntimeConstructorInfo runtimeConstructorInfo = null;
 			if (this.type_info == null)
 			{
 				this.type_info = new MonoTypeInfo();
 			}
 			else
 			{
-				monoCMethod = this.type_info.default_ctor;
+				runtimeConstructorInfo = this.type_info.default_ctor;
 			}
-			if (monoCMethod == null)
+			if (runtimeConstructorInfo == null)
 			{
 				ConstructorInfo[] constructors = this.GetConstructors(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 				for (int i = 0; i < constructors.Length; i++)
 				{
 					if (constructors[i].GetParametersCount() == 0)
 					{
-						monoCMethod = (this.type_info.default_ctor = (MonoCMethod)constructors[i]);
+						runtimeConstructorInfo = (this.type_info.default_ctor = (RuntimeConstructorInfo)constructors[i]);
 						break;
 					}
 				}
 			}
-			return monoCMethod;
+			return runtimeConstructorInfo;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2060,23 +2075,23 @@ namespace System
 			return this.m_serializationCtor;
 		}
 
-		internal object CreateInstanceSlow(bool publicOnly, bool skipCheckThis, bool fillCache, ref StackCrawlMark stackMark)
+		internal object CreateInstanceSlow(bool publicOnly, bool wrapExceptions, bool skipCheckThis, bool fillCache)
 		{
 			if (!skipCheckThis)
 			{
 				this.CreateInstanceCheckThis();
 			}
-			return this.CreateInstanceMono(!publicOnly);
+			return this.CreateInstanceMono(!publicOnly, wrapExceptions);
 		}
 
-		private object CreateInstanceMono(bool nonPublic)
+		private object CreateInstanceMono(bool nonPublic, bool wrapExceptions)
 		{
-			MonoCMethod monoCMethod = this.GetDefaultConstructor();
-			if (!nonPublic && monoCMethod != null && !monoCMethod.IsPublic)
+			RuntimeConstructorInfo runtimeConstructorInfo = this.GetDefaultConstructor();
+			if (!nonPublic && runtimeConstructorInfo != null && !runtimeConstructorInfo.IsPublic)
 			{
-				monoCMethod = null;
+				runtimeConstructorInfo = null;
 			}
-			if (monoCMethod == null)
+			if (runtimeConstructorInfo == null)
 			{
 				Type rootElementType = base.GetRootElementType();
 				if (rootElementType == typeof(TypedReference) || rootElementType == typeof(RuntimeArgumentHandle))
@@ -2087,15 +2102,15 @@ namespace System
 				{
 					return RuntimeType.CreateInstanceInternal(this);
 				}
-				throw new MissingMethodException(Locale.GetText("Default constructor not found for type " + this.FullName));
+				throw new MissingMethodException("Default constructor not found for type " + this.FullName);
 			}
 			else
 			{
 				if (base.IsAbstract)
 				{
-					throw new MissingMethodException(Locale.GetText("Cannot create an abstract class '{0}'.", new object[] { this.FullName }));
+					throw new MissingMethodException("Cannot create an abstract class '{0}'.", this.FullName);
 				}
-				return monoCMethod.InternalInvoke(null, null);
+				return runtimeConstructorInfo.InternalInvoke(null, null, wrapExceptions);
 			}
 		}
 
@@ -2365,6 +2380,10 @@ namespace System
 
 		public override Type MakePointerType()
 		{
+			if (base.IsByRef)
+			{
+				throw new TypeLoadException(string.Format("Could not load type '{0}' from assembly '{1}", base.GetType(), this.AssemblyQualifiedName));
+			}
 			return RuntimeType.MakePointerType(this);
 		}
 
@@ -2416,29 +2435,29 @@ namespace System
 
 		internal static object CreateInstanceForAnotherGenericParameter(Type genericType, RuntimeType genericArgument)
 		{
-			return ((RuntimeType)RuntimeType.MakeGenericType(genericType, new Type[] { genericArgument })).GetDefaultConstructor().InternalInvoke(null, null);
+			return ((RuntimeType)RuntimeType.MakeGenericType(genericType, new Type[] { genericArgument })).GetDefaultConstructor().InternalInvoke(null, null, true);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Type MakeGenericType(Type gt, Type[] types);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern IntPtr GetMethodsByName_native(IntPtr namePtr, BindingFlags bindingAttr, bool ignoreCase);
+		internal extern IntPtr GetMethodsByName_native(IntPtr namePtr, BindingFlags bindingAttr, RuntimeType.MemberListType listType);
 
-		internal RuntimeMethodInfo[] GetMethodsByName(string name, BindingFlags bindingAttr, bool ignoreCase, RuntimeType reflectedType)
+		internal RuntimeMethodInfo[] GetMethodsByName(string name, BindingFlags bindingAttr, RuntimeType.MemberListType listType, RuntimeType reflectedType)
 		{
 			RuntimeTypeHandle runtimeTypeHandle = new RuntimeTypeHandle(reflectedType);
 			RuntimeMethodInfo[] array2;
 			using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(name))
 			{
-				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetMethodsByName_native(safeStringMarshal.Value, bindingAttr, ignoreCase)))
+				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetMethodsByName_native(safeStringMarshal.Value, bindingAttr, listType)))
 				{
 					int length = safeGPtrArrayHandle.Length;
 					RuntimeMethodInfo[] array = new RuntimeMethodInfo[length];
 					for (int i = 0; i < length; i++)
 					{
 						RuntimeMethodHandle runtimeMethodHandle = new RuntimeMethodHandle(safeGPtrArrayHandle[i]);
-						array[i] = (RuntimeMethodInfo)MethodBase.GetMethodFromHandleNoGenericCheck(runtimeMethodHandle, runtimeTypeHandle);
+						array[i] = (RuntimeMethodInfo)RuntimeMethodInfo.GetMethodFromHandleNoGenericCheck(runtimeMethodHandle, runtimeTypeHandle);
 					}
 					array2 = array;
 				}
@@ -2447,7 +2466,7 @@ namespace System
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetPropertiesByName_native(IntPtr name, BindingFlags bindingAttr, bool icase);
+		private extern IntPtr GetPropertiesByName_native(IntPtr name, BindingFlags bindingAttr, RuntimeType.MemberListType listType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetConstructors_native(BindingFlags bindingAttr);
@@ -2463,27 +2482,27 @@ namespace System
 				for (int i = 0; i < length; i++)
 				{
 					RuntimeMethodHandle runtimeMethodHandle = new RuntimeMethodHandle(safeGPtrArrayHandle[i]);
-					array[i] = (RuntimeConstructorInfo)MethodBase.GetMethodFromHandleNoGenericCheck(runtimeMethodHandle, runtimeTypeHandle);
+					array[i] = (RuntimeConstructorInfo)RuntimeMethodInfo.GetMethodFromHandleNoGenericCheck(runtimeMethodHandle, runtimeTypeHandle);
 				}
 				array2 = array;
 			}
 			return array2;
 		}
 
-		private RuntimePropertyInfo[] GetPropertiesByName(string name, BindingFlags bindingAttr, bool icase, RuntimeType reflectedType)
+		private RuntimePropertyInfo[] GetPropertiesByName(string name, BindingFlags bindingAttr, RuntimeType.MemberListType listType, RuntimeType reflectedType)
 		{
 			RuntimeTypeHandle runtimeTypeHandle = new RuntimeTypeHandle(reflectedType);
 			RuntimePropertyInfo[] array2;
 			using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(name))
 			{
-				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetPropertiesByName_native(safeStringMarshal.Value, bindingAttr, icase)))
+				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetPropertiesByName_native(safeStringMarshal.Value, bindingAttr, listType)))
 				{
 					int length = safeGPtrArrayHandle.Length;
 					RuntimePropertyInfo[] array = new RuntimePropertyInfo[length];
 					for (int i = 0; i < length; i++)
 					{
 						RuntimePropertyHandle runtimePropertyHandle = new RuntimePropertyHandle(safeGPtrArrayHandle[i]);
-						array[i] = (RuntimePropertyInfo)PropertyInfo.GetPropertyFromHandle(runtimePropertyHandle, runtimeTypeHandle);
+						array[i] = (RuntimePropertyInfo)RuntimePropertyInfo.GetPropertyFromHandle(runtimePropertyHandle, runtimeTypeHandle);
 					}
 					array2 = array;
 				}
@@ -2507,7 +2526,7 @@ namespace System
 			}
 			if (!ifaceType.IsInterface)
 			{
-				throw new ArgumentException(Locale.GetText("Argument must be an interface."), "ifaceType");
+				throw new ArgumentException("Argument must be an interface.", "ifaceType");
 			}
 			if (base.IsInterface)
 			{
@@ -2519,7 +2538,7 @@ namespace System
 			RuntimeType.GetInterfaceMapData(this, ifaceType, out interfaceMapping.TargetMethods, out interfaceMapping.InterfaceMethods);
 			if (interfaceMapping.TargetMethods == null)
 			{
-				throw new ArgumentException(Locale.GetText("Interface not found"), "ifaceType");
+				throw new ArgumentException("Interface not found", "ifaceType");
 			}
 			return interfaceMapping;
 		}
@@ -2527,16 +2546,16 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetInterfaceMapData(Type t, Type iface, out MethodInfo[] targets, out MethodInfo[] methods);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGUID(Type type, byte[] guid);
+
 		public override Guid GUID
 		{
 			get
 			{
-				object[] customAttributes = this.GetCustomAttributes(typeof(GuidAttribute), true);
-				if (customAttributes.Length == 0)
-				{
-					return Guid.Empty;
-				}
-				return new Guid(((GuidAttribute)customAttributes[0]).Value);
+				byte[] array = new byte[16];
+				RuntimeType.GetGUID(this, array);
+				return new Guid(array);
 			}
 		}
 
@@ -2563,9 +2582,10 @@ namespace System
 				{
 					if (RuntimeType.clsid_assemblybuilder == null)
 					{
-						AssemblyName assemblyName = new AssemblyName();
-						assemblyName.Name = "GetTypeFromCLSIDDummyAssembly";
-						RuntimeType.clsid_assemblybuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+						RuntimeType.clsid_assemblybuilder = new AssemblyBuilder(new AssemblyName
+						{
+							Name = "GetTypeFromCLSIDDummyAssembly"
+						}, null, AssemblyBuilderAccess.Run, true);
 					}
 					TypeBuilder typeBuilder = RuntimeType.clsid_assemblybuilder.DefineDynamicModule(clsid.ToString()).DefineType("System.__ComObject", TypeAttributes.Public, typeof(__ComObject));
 					Type[] array = new Type[] { typeof(string) };
@@ -2628,18 +2648,18 @@ namespace System
 		private extern int GetGenericParameterPosition();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetEvents_native(IntPtr name, BindingFlags bindingAttr);
+		private extern IntPtr GetEvents_native(IntPtr name, RuntimeType.MemberListType listType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetFields_native(IntPtr name, BindingFlags bindingAttr);
+		private extern IntPtr GetFields_native(IntPtr name, BindingFlags bindingAttr, RuntimeType.MemberListType listType);
 
-		private RuntimeFieldInfo[] GetFields_internal(string name, BindingFlags bindingAttr, RuntimeType reflectedType)
+		private RuntimeFieldInfo[] GetFields_internal(string name, BindingFlags bindingAttr, RuntimeType.MemberListType listType, RuntimeType reflectedType)
 		{
 			RuntimeTypeHandle runtimeTypeHandle = new RuntimeTypeHandle(reflectedType);
 			RuntimeFieldInfo[] array2;
 			using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(name))
 			{
-				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetFields_native(safeStringMarshal.Value, bindingAttr)))
+				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetFields_native(safeStringMarshal.Value, bindingAttr, listType)))
 				{
 					int length = safeGPtrArrayHandle.Length;
 					RuntimeFieldInfo[] array = new RuntimeFieldInfo[length];
@@ -2654,13 +2674,13 @@ namespace System
 			return array2;
 		}
 
-		private RuntimeEventInfo[] GetEvents_internal(string name, BindingFlags bindingAttr, RuntimeType reflectedType)
+		private RuntimeEventInfo[] GetEvents_internal(string name, BindingFlags bindingAttr, RuntimeType.MemberListType listType, RuntimeType reflectedType)
 		{
 			RuntimeTypeHandle runtimeTypeHandle = new RuntimeTypeHandle(reflectedType);
 			RuntimeEventInfo[] array2;
 			using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(name))
 			{
-				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetEvents_native(safeStringMarshal.Value, bindingAttr)))
+				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetEvents_native(safeStringMarshal.Value, listType)))
 				{
 					int length = safeGPtrArrayHandle.Length;
 					RuntimeEventInfo[] array = new RuntimeEventInfo[length];
@@ -2679,9 +2699,9 @@ namespace System
 		public override extern Type[] GetInterfaces();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetNestedTypes_native(IntPtr name, BindingFlags bindingAttr);
+		private extern IntPtr GetNestedTypes_native(IntPtr name, BindingFlags bindingAttr, RuntimeType.MemberListType listType);
 
-		private RuntimeType[] GetNestedTypes_internal(string displayName, BindingFlags bindingAttr)
+		private RuntimeType[] GetNestedTypes_internal(string displayName, BindingFlags bindingAttr, RuntimeType.MemberListType listType)
 		{
 			string text = null;
 			if (displayName != null)
@@ -2691,7 +2711,7 @@ namespace System
 			RuntimeType[] array2;
 			using (SafeStringMarshal safeStringMarshal = new SafeStringMarshal(text))
 			{
-				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetNestedTypes_native(safeStringMarshal.Value, bindingAttr)))
+				using (SafeGPtrArrayHandle safeGPtrArrayHandle = new SafeGPtrArrayHandle(this.GetNestedTypes_native(safeStringMarshal.Value, bindingAttr, listType)))
 				{
 					int length = safeGPtrArrayHandle.Length;
 					RuntimeType[] array = new RuntimeType[length];
@@ -2773,7 +2793,7 @@ namespace System
 		{
 			get
 			{
-				if (this.IsGenericType && this.ContainsGenericParameters && !this.IsGenericTypeDefinition)
+				if (this.ContainsGenericParameters && !base.GetRootElementType().IsGenericTypeDefinition)
 				{
 					return null;
 				}
@@ -2788,6 +2808,11 @@ namespace System
 				}
 				return text;
 			}
+		}
+
+		public sealed override bool HasSameMetadataDefinitionAs(MemberInfo other)
+		{
+			return base.HasSameMetadataDefinitionAsCore<RuntimeType>(other);
 		}
 
 		public override bool IsSZArray
@@ -2806,6 +2831,98 @@ namespace System
 			}
 		}
 
+		[ComVisible(true)]
+		public override bool IsSubclassOf(Type type)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			RuntimeType runtimeType = type as RuntimeType;
+			return !(runtimeType == null) && RuntimeTypeHandle.IsSubclassOf(this, runtimeType);
+		}
+
+		public override bool IsByRefLike
+		{
+			get
+			{
+				return RuntimeTypeHandle.IsByRefLike(this);
+			}
+		}
+
+		public override bool IsTypeDefinition
+		{
+			get
+			{
+				return RuntimeTypeHandle.IsTypeDefinition(this);
+			}
+		}
+
+		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConv, Type[] types, ParameterModifier[] modifiers)
+		{
+			return this.GetMethodImplCommon(name, -1, bindingAttr, binder, callConv, types, modifiers);
+		}
+
+		protected override MethodInfo GetMethodImpl(string name, int genericParameterCount, BindingFlags bindingAttr, Binder binder, CallingConventions callConv, Type[] types, ParameterModifier[] modifiers)
+		{
+			return this.GetMethodImplCommon(name, genericParameterCount, bindingAttr, binder, callConv, types, modifiers);
+		}
+
+		private MethodInfo GetMethodImplCommon(string name, int genericParameterCount, BindingFlags bindingAttr, Binder binder, CallingConventions callConv, Type[] types, ParameterModifier[] modifiers)
+		{
+			RuntimeType.ListBuilder<MethodInfo> methodCandidates = this.GetMethodCandidates(name, genericParameterCount, bindingAttr, callConv, types, false);
+			if (methodCandidates.Count == 0)
+			{
+				return null;
+			}
+			MethodBase[] array;
+			if (types == null || types.Length == 0)
+			{
+				MethodInfo methodInfo = methodCandidates[0];
+				if (methodCandidates.Count == 1)
+				{
+					return methodInfo;
+				}
+				if (types == null)
+				{
+					for (int i = 1; i < methodCandidates.Count; i++)
+					{
+						if (!global::System.DefaultBinder.CompareMethodSig(methodCandidates[i], methodInfo))
+						{
+							throw new AmbiguousMatchException("Ambiguous match found.");
+						}
+					}
+					array = methodCandidates.ToArray();
+					return global::System.DefaultBinder.FindMostDerivedNewSlotMeth(array, methodCandidates.Count) as MethodInfo;
+				}
+			}
+			if (binder == null)
+			{
+				binder = Type.DefaultBinder;
+			}
+			Binder binder2 = binder;
+			array = methodCandidates.ToArray();
+			return binder2.SelectMethod(bindingAttr, array, types, modifiers) as MethodInfo;
+		}
+
+		private RuntimeType.ListBuilder<MethodInfo> GetMethodCandidates(string name, int genericParameterCount, BindingFlags bindingAttr, CallingConventions callConv, Type[] types, bool allowPrefixLookup)
+		{
+			bool flag;
+			bool flag2;
+			RuntimeType.MemberListType memberListType;
+			RuntimeType.FilterHelper(bindingAttr, ref name, allowPrefixLookup, out flag, out flag2, out memberListType);
+			RuntimeMethodInfo[] methodsByName = this.GetMethodsByName(name, bindingAttr, memberListType, this);
+			RuntimeType.ListBuilder<MethodInfo> listBuilder = new RuntimeType.ListBuilder<MethodInfo>(methodsByName.Length);
+			foreach (RuntimeMethodInfo runtimeMethodInfo in methodsByName)
+			{
+				if ((genericParameterCount == -1 || genericParameterCount == runtimeMethodInfo.GenericParameterCount) && RuntimeType.FilterApplyMethodInfo(runtimeMethodInfo, bindingAttr, callConv, types) && (!flag || RuntimeType.FilterApplyPrefixLookup(runtimeMethodInfo, name, flag2)))
+				{
+					listBuilder.Add(runtimeMethodInfo);
+				}
+			}
+			return listBuilder;
+		}
+
 		internal static readonly RuntimeType ValueType = (RuntimeType)typeof(ValueType);
 
 		internal static readonly RuntimeType EnumType = (RuntimeType)typeof(Enum);
@@ -2817,6 +2934,8 @@ namespace System
 		private static readonly RuntimeType DelegateType = (RuntimeType)typeof(Delegate);
 
 		private static Type[] s_SICtorParamTypes;
+
+		internal static Func<Type, Type[], Type> MakeTypeBuilderInstantiation;
 
 		private const BindingFlags MemberBindingMask = (BindingFlags)255;
 
@@ -2848,6 +2967,8 @@ namespace System
 		private static Dictionary<Guid, Type> clsid_types;
 
 		private static AssemblyBuilder clsid_assemblybuilder;
+
+		private const int GenericParameterCountAny = -1;
 
 		internal enum MemberListType
 		{
@@ -2883,7 +3004,7 @@ namespace System
 			{
 				if (this._count == 0)
 				{
-					return EmptyArray<T>.Value;
+					return Array.Empty<T>();
 				}
 				if (this._count == 1)
 				{

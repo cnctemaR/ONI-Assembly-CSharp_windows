@@ -92,6 +92,10 @@ namespace UnityEngine.EventSystems
 
 		public int depth;
 
+		public int sortingGroupID;
+
+		public int sortingGroupOrder;
+
 		public int sortingLayer;
 
 		public int sortingOrder;

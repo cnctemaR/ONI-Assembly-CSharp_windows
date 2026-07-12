@@ -69,38 +69,59 @@ namespace Mono.Net.Security
 			}
 			catch (Exception ex)
 			{
-				asyncProtocolResult = new AsyncProtocolResult(this.Parent.SetException(MobileAuthenticatedStream.GetSSPIException(ex)));
+				asyncProtocolResult = new AsyncProtocolResult(this.Parent.SetException(ex));
 			}
 			return asyncProtocolResult;
 		}
 
 		private async Task ProcessOperation(CancellationToken cancellationToken)
 		{
-			AsyncOperationStatus newStatus;
-			for (AsyncOperationStatus status = AsyncOperationStatus.Initialize; status != AsyncOperationStatus.Complete; status = newStatus)
+			AsyncOperationStatus status = AsyncOperationStatus.Initialize;
+			while (status != AsyncOperationStatus.Complete)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 				int? num = await this.InnerRead(cancellationToken).ConfigureAwait(false);
 				if (num != null)
 				{
-					if (num == 0)
+					int? num2 = num;
+					int num3 = 0;
+					if ((num2.GetValueOrDefault() == num3) & (num2 != null))
 					{
 						status = AsyncOperationStatus.ReadDone;
 					}
-					else if (num < 0)
+					else
 					{
-						throw new IOException("Remote prematurely closed connection.");
+						num2 = num;
+						num3 = 0;
+						if ((num2.GetValueOrDefault() < num3) & (num2 != null))
+						{
+							throw new IOException("Remote prematurely closed connection.");
+						}
 					}
 				}
-				if (status > AsyncOperationStatus.ReadDone)
+				if (status <= AsyncOperationStatus.ReadDone)
 				{
-					throw new InvalidOperationException();
+					AsyncOperationStatus newStatus;
+					try
+					{
+						newStatus = this.Run(status);
+						goto IL_011C;
+					}
+					catch (Exception ex)
+					{
+						throw MobileAuthenticatedStream.GetSSPIException(ex);
+					}
+					goto IL_0116;
+					IL_011C:
+					if (Interlocked.Exchange(ref this.WriteRequested, 0) != 0)
+					{
+						await this.Parent.InnerWrite(this.RunSynchronously, cancellationToken).ConfigureAwait(false);
+					}
+					status = newStatus;
+					continue;
 				}
-				newStatus = this.Run(status);
-				if (Interlocked.Exchange(ref this.WriteRequested, 0) != 0)
-				{
-					await this.Parent.InnerWrite(this.RunSynchronously, cancellationToken).ConfigureAwait(false);
-				}
+				IL_0116:
+				throw new InvalidOperationException();
 			}
 		}
 

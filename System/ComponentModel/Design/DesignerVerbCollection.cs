@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerVerbCollection : CollectionBase
 	{
 		public DesignerVerbCollection()

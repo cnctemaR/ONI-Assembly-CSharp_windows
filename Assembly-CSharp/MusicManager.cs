@@ -560,31 +560,35 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			string simpleSoundEventName = Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent);
 			string musicKeySigniture = this.activePlaylist.songMap[simpleSoundEventName].musicKeySigniture;
 			float num;
-			if (musicKeySigniture != null)
+			if (!(musicKeySigniture == "Ab"))
 			{
-				if (musicKeySigniture == "Ab")
+				if (!(musicKeySigniture == "Bb"))
 				{
-					num = 0f;
-					goto IL_0092;
+					if (!(musicKeySigniture == "C"))
+					{
+						if (!(musicKeySigniture == "D"))
+						{
+							num = 2f;
+						}
+						else
+						{
+							num = 3f;
+						}
+					}
+					else
+					{
+						num = 2f;
+					}
 				}
-				if (musicKeySigniture == "Bb")
+				else
 				{
 					num = 1f;
-					goto IL_0092;
-				}
-				if (musicKeySigniture == "C")
-				{
-					num = 2f;
-					goto IL_0092;
-				}
-				if (musicKeySigniture == "D")
-				{
-					num = 3f;
-					goto IL_0092;
 				}
 			}
-			num = 2f;
-			IL_0092:
+			else
+			{
+				num = 0f;
+			}
 			RuntimeManager.StudioSystem.setParameterByName("MusicInKey", num, false);
 		}
 	}

@@ -132,7 +132,7 @@ namespace System.IO.Compression
 
 		private int _bitCount;
 
-		internal struct BufferState
+		internal readonly struct BufferState
 		{
 			internal BufferState(int pos, uint bitBuf, int bitCount)
 			{

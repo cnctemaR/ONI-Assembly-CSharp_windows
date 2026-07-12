@@ -59,7 +59,7 @@ public class CookingStationConfig : IBuildingConfig
 		PickledMealConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array, array2), array, array2)
 		{
 			time = FOOD.RECIPES.SMALL_COOK_TIME,
-			description = ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 21
@@ -75,7 +75,7 @@ public class CookingStationConfig : IBuildingConfig
 		FriedMushBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.FRIEDMUSHBAR.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.FRIEDMUSHBAR.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 1
@@ -91,7 +91,7 @@ public class CookingStationConfig : IBuildingConfig
 		FriedMushroomConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.FRIEDMUSHROOM.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.FRIEDMUSHROOM.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 20
@@ -108,7 +108,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedEggConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.PANCAKES.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.PANCAKES.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 20
@@ -124,7 +124,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedMeatConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array9, array10), array9, array10)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 21
@@ -140,7 +140,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedMeatConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array11, array12), array11, array12)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 22
@@ -156,7 +156,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedMeatConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array13, array14), array13, array14)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COOKEDMEAT.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 22
@@ -172,7 +172,7 @@ public class CookingStationConfig : IBuildingConfig
 		GrilledPrickleFruitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array15, array16), array15, array16)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.GRILLEDPRICKLEFRUIT.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.GRILLEDPRICKLEFRUIT.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 20
@@ -190,7 +190,7 @@ public class CookingStationConfig : IBuildingConfig
 			CookedEggConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array17, array18), array17, array18)
 			{
 				time = FOOD.RECIPES.STANDARD_COOK_TIME,
-				description = ITEMS.FOOD.SWAMPDELIGHTS.RECIPEDESC,
+				description = global::STRINGS.ITEMS.FOOD.SWAMPDELIGHTS.RECIPEDESC,
 				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 				fabricators = new List<Tag> { "CookingStation" },
 				sortOrder = 20
@@ -207,7 +207,7 @@ public class CookingStationConfig : IBuildingConfig
 		ColdWheatBreadConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array19, array20), array19, array20)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COLDWHEATBREAD.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COLDWHEATBREAD.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 50
@@ -223,7 +223,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedEggConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array21, array22), array21, array22)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COOKEDEGG.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COOKEDEGG.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 1
@@ -241,7 +241,7 @@ public class CookingStationConfig : IBuildingConfig
 			WormBasicFoodConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array23, array24), array23, array24)
 			{
 				time = FOOD.RECIPES.STANDARD_COOK_TIME,
-				description = ITEMS.FOOD.WORMBASICFOOD.RECIPEDESC,
+				description = global::STRINGS.ITEMS.FOOD.WORMBASICFOOD.RECIPEDESC,
 				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 				fabricators = new List<Tag> { "CookingStation" },
 				sortOrder = 20
@@ -261,7 +261,7 @@ public class CookingStationConfig : IBuildingConfig
 			WormSuperFoodConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array25, array26), array25, array26)
 			{
 				time = FOOD.RECIPES.STANDARD_COOK_TIME,
-				description = ITEMS.FOOD.WORMSUPERFOOD.RECIPEDESC,
+				description = global::STRINGS.ITEMS.FOOD.WORMSUPERFOOD.RECIPEDESC,
 				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 				fabricators = new List<Tag> { "CookingStation" },
 				sortOrder = 20
@@ -278,7 +278,7 @@ public class CookingStationConfig : IBuildingConfig
 		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28, DlcManager.AVAILABLE_DLC_2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.COOKEDPIKEAPPLE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.COOKEDPIKEAPPLE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "CookingStation" },
 			sortOrder = 18

@@ -30,7 +30,7 @@ namespace Microsoft.SqlServer.Server
 			SqlMetaData sqlMetaData = this.GetSqlMetaData(ordinal);
 			if (SqlDbType.Udt == sqlMetaData.SqlDbType)
 			{
-				return null;
+				return sqlMetaData.UdtTypeName;
 			}
 			return MetaType.GetMetaTypeFromSqlDbType(sqlMetaData.SqlDbType, false).TypeName;
 		}
@@ -346,7 +346,7 @@ namespace Microsoft.SqlServer.Server
 			for (int i = 0; i < num; i++)
 			{
 				SqlMetaData sqlMetaData = this.GetSqlMetaData(i);
-				array[i] = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(sqlMetaData.SqlDbType, false, values[i]);
+				array[i] = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(sqlMetaData.SqlDbType, false, values[i], sqlMetaData.Type);
 				if (ExtendedClrTypeCode.Invalid == array[i])
 				{
 					throw ADP.InvalidCast();
@@ -362,7 +362,8 @@ namespace Microsoft.SqlServer.Server
 		public virtual void SetValue(int ordinal, object value)
 		{
 			this.EnsureSubclassOverride();
-			ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(this.GetSqlMetaData(ordinal).SqlDbType, false, value);
+			SqlMetaData sqlMetaData = this.GetSqlMetaData(ordinal);
+			ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(sqlMetaData.SqlDbType, false, value, sqlMetaData.Type);
 			if (ExtendedClrTypeCode.Invalid == extendedClrTypeCode)
 			{
 				throw ADP.InvalidCast();
@@ -586,7 +587,8 @@ namespace Microsoft.SqlServer.Server
 				this._columnSmiMetaData[i] = MetaDataUtilsSmi.SqlMetaDataToSmiExtendedMetaData(this._columnMetaData[i]);
 			}
 			this._eventSink = new SmiEventSink_Default();
-			this._recordBuffer = new MemoryRecordBuffer(this._columnSmiMetaData);
+			SmiMetaData[] columnSmiMetaData = this._columnSmiMetaData;
+			this._recordBuffer = new MemoryRecordBuffer(columnSmiMetaData);
 			this._usesStringStorageForXml = true;
 			this._eventSink.ProcessMessagesAndThrow();
 		}
@@ -644,7 +646,7 @@ namespace Microsoft.SqlServer.Server
 			}
 		}
 
-		public IDataReader GetData(int i)
+		IDataReader IDataRecord.GetData(int ordinal)
 		{
 			throw ADP.NotSupported();
 		}
@@ -661,6 +663,6 @@ namespace Microsoft.SqlServer.Server
 
 		private bool _usesStringStorageForXml;
 
-		private static readonly SmiMetaData s_maxNVarCharForXml = new SmiMetaData(SqlDbType.NVarChar, -1L, SmiMetaData.DefaultNVarChar_NoCollation.Precision, SmiMetaData.DefaultNVarChar_NoCollation.Scale, SmiMetaData.DefaultNVarChar.LocaleId, SmiMetaData.DefaultNVarChar.CompareOptions);
+		private static readonly SmiMetaData s_maxNVarCharForXml = new SmiMetaData(SqlDbType.NVarChar, -1L, SmiMetaData.DefaultNVarChar_NoCollation.Precision, SmiMetaData.DefaultNVarChar_NoCollation.Scale, SmiMetaData.DefaultNVarChar.LocaleId, SmiMetaData.DefaultNVarChar.CompareOptions, null);
 	}
 }

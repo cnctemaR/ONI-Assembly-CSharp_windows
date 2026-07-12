@@ -54,6 +54,30 @@ namespace Mono.Net
 			{
 				return CFProxyType.SOCKS;
 			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeAutoConfigurationJavaScript, 0) == 0)
+			{
+				return CFProxyType.AutoConfigurationJavaScript;
+			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeAutoConfigurationURL, 0) == 0)
+			{
+				return CFProxyType.AutoConfigurationUrl;
+			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeFTP, 0) == 0)
+			{
+				return CFProxyType.FTP;
+			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeHTTP, 0) == 0)
+			{
+				return CFProxyType.HTTP;
+			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeHTTPS, 0) == 0)
+			{
+				return CFProxyType.HTTPS;
+			}
+			if (CFString.Compare(type, CFProxy.kCFProxyTypeSOCKS, 0) == 0)
+			{
+				return CFProxyType.SOCKS;
+			}
 			return CFProxyType.None;
 		}
 

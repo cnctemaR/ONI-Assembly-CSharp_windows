@@ -37,29 +37,35 @@ namespace Database
 				GameObject gameObject4 = (GameObject)data;
 				return str.Replace("{0}", gameObject4.GetProperName());
 			};
-			this.DustBinFull = new StatusItem("DustBinFull", "ROBOTS", "status_item_pending_clear", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
-			this.DustBinFull.resolveStringCallback = delegate(string str, object data)
+			this.DeadBatteryFlydo = new StatusItem("DeadBatteryFlydo", "ROBOTS", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
+			this.DeadBatteryFlydo.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject5 = (GameObject)data;
 				return str.Replace("{0}", gameObject5.GetProperName());
 			};
-			this.Working = new StatusItem("Working", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
-			this.Working.resolveStringCallback = delegate(string str, object data)
+			this.DustBinFull = new StatusItem("DustBinFull", "ROBOTS", "status_item_pending_clear", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.DustBinFull.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject6 = (GameObject)data;
 				return str.Replace("{0}", gameObject6.GetProperName());
 			};
-			this.MovingToChargeStation = new StatusItem("MovingToChargeStation", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
-			this.MovingToChargeStation.resolveStringCallback = delegate(string str, object data)
+			this.Working = new StatusItem("Working", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.Working.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject7 = (GameObject)data;
 				return str.Replace("{0}", gameObject7.GetProperName());
 			};
-			this.UnloadingStorage = new StatusItem("UnloadingStorage", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
-			this.UnloadingStorage.resolveStringCallback = delegate(string str, object data)
+			this.MovingToChargeStation = new StatusItem("MovingToChargeStation", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.MovingToChargeStation.resolveStringCallback = delegate(string str, object data)
 			{
 				GameObject gameObject8 = (GameObject)data;
 				return str.Replace("{0}", gameObject8.GetProperName());
+			};
+			this.UnloadingStorage = new StatusItem("UnloadingStorage", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.UnloadingStorage.resolveStringCallback = delegate(string str, object data)
+			{
+				GameObject gameObject9 = (GameObject)data;
+				return str.Replace("{0}", gameObject9.GetProperName());
 			};
 			this.ReactPositive = new StatusItem("ReactPositive", "ROBOTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
 			this.ReactPositive.resolveStringCallback = (string str, object data) => str;
@@ -72,6 +78,8 @@ namespace Database
 		public StatusItem LowBatteryNoCharge;
 
 		public StatusItem DeadBattery;
+
+		public StatusItem DeadBatteryFlydo;
 
 		public StatusItem CantReachStation;
 

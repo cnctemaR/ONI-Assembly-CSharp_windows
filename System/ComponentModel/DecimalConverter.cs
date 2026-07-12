@@ -2,11 +2,9 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class DecimalConverter : BaseNumberConverter
 	{
 		internal override bool AllowHex
@@ -57,11 +55,6 @@ namespace System.ComponentModel
 		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
 			return decimal.Parse(value, NumberStyles.Float, formatInfo);
-		}
-
-		internal override object FromString(string value, CultureInfo culture)
-		{
-			return decimal.Parse(value, culture);
 		}
 
 		internal override string ToString(object value, NumberFormatInfo formatInfo)

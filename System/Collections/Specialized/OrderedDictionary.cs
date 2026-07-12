@@ -31,10 +31,6 @@ namespace System.Collections.Specialized
 
 		private OrderedDictionary(OrderedDictionary dictionary)
 		{
-			if (dictionary == null)
-			{
-				throw new ArgumentNullException("dictionary");
-			}
 			this._readOnly = true;
 			this._objectsArray = dictionary._objectsArray;
 			this._objectsTable = dictionary._objectsTable;
@@ -133,7 +129,7 @@ namespace System.Collections.Specialized
 			{
 				if (this._readOnly)
 				{
-					throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+					throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 				}
 				if (index < 0 || index >= this.objectsArray.Count)
 				{
@@ -155,7 +151,7 @@ namespace System.Collections.Specialized
 			{
 				if (this._readOnly)
 				{
-					throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+					throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 				}
 				if (this.objectsTable.Contains(key))
 				{
@@ -179,7 +175,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 			}
 			this.objectsTable.Add(key, value);
 			this.objectsArray.Add(new DictionaryEntry(key, value));
@@ -189,7 +185,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 			}
 			this.objectsTable.Clear();
 			this.objectsArray.Clear();
@@ -234,7 +230,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 			}
 			if (index > this.Count || index < 0)
 			{
@@ -244,40 +240,11 @@ namespace System.Collections.Specialized
 			this.objectsArray.Insert(index, new DictionaryEntry(key, value));
 		}
 
-		protected virtual void OnDeserialization(object sender)
-		{
-			if (this._siInfo == null)
-			{
-				throw new SerializationException(global::SR.GetString("OnDeserialization method was called while the object was not being deserialized."));
-			}
-			this._comparer = (IEqualityComparer)this._siInfo.GetValue("KeyComparer", typeof(IEqualityComparer));
-			this._readOnly = this._siInfo.GetBoolean("ReadOnly");
-			this._initialCapacity = this._siInfo.GetInt32("InitialCapacity");
-			object[] array = (object[])this._siInfo.GetValue("ArrayList", typeof(object[]));
-			if (array != null)
-			{
-				foreach (object obj in array)
-				{
-					DictionaryEntry dictionaryEntry;
-					try
-					{
-						dictionaryEntry = (DictionaryEntry)obj;
-					}
-					catch
-					{
-						throw new SerializationException(global::SR.GetString("There was an error deserializing the OrderedDictionary.  The ArrayList does not contain DictionaryEntries."));
-					}
-					this.objectsArray.Add(dictionaryEntry);
-					this.objectsTable.Add(dictionaryEntry.Key, dictionaryEntry.Value);
-				}
-			}
-		}
-
 		public void RemoveAt(int index)
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 			}
 			if (index >= this.Count || index < 0)
 			{
@@ -292,7 +259,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("The OrderedDictionary is readonly and cannot be modified."));
+				throw new NotSupportedException("The OrderedDictionary is readonly and cannot be modified.");
 			}
 			if (key == null)
 			{
@@ -337,6 +304,35 @@ namespace System.Collections.Specialized
 			this.OnDeserialization(sender);
 		}
 
+		protected virtual void OnDeserialization(object sender)
+		{
+			if (this._siInfo == null)
+			{
+				throw new SerializationException("OnDeserialization method was called while the object was not being deserialized.");
+			}
+			this._comparer = (IEqualityComparer)this._siInfo.GetValue("KeyComparer", typeof(IEqualityComparer));
+			this._readOnly = this._siInfo.GetBoolean("ReadOnly");
+			this._initialCapacity = this._siInfo.GetInt32("InitialCapacity");
+			object[] array = (object[])this._siInfo.GetValue("ArrayList", typeof(object[]));
+			if (array != null)
+			{
+				foreach (object obj in array)
+				{
+					DictionaryEntry dictionaryEntry;
+					try
+					{
+						dictionaryEntry = (DictionaryEntry)obj;
+					}
+					catch
+					{
+						throw new SerializationException("There was an error deserializing the OrderedDictionary.  The ArrayList does not contain DictionaryEntries.");
+					}
+					this.objectsArray.Add(dictionaryEntry);
+					this.objectsTable.Add(dictionaryEntry.Key, dictionaryEntry.Value);
+				}
+			}
+		}
+
 		private ArrayList _objectsArray;
 
 		private Hashtable _objectsTable;
@@ -363,7 +359,7 @@ namespace System.Collections.Specialized
 		{
 			internal OrderedDictionaryEnumerator(ArrayList array, int objectReturnType)
 			{
-				this.arrayEnumerator = array.GetEnumerator();
+				this._arrayEnumerator = array.GetEnumerator();
 				this._objectReturnType = objectReturnType;
 			}
 
@@ -373,12 +369,12 @@ namespace System.Collections.Specialized
 				{
 					if (this._objectReturnType == 1)
 					{
-						DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 						return dictionaryEntry.Key;
 					}
 					if (this._objectReturnType == 2)
 					{
-						DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 						return dictionaryEntry.Value;
 					}
 					return this.Entry;
@@ -389,9 +385,9 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 					object key = dictionaryEntry.Key;
-					dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 					return new DictionaryEntry(key, dictionaryEntry.Value);
 				}
 			}
@@ -400,7 +396,7 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 					return dictionaryEntry.Key;
 				}
 			}
@@ -409,19 +405,19 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)this.arrayEnumerator.Current;
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)this._arrayEnumerator.Current;
 					return dictionaryEntry.Value;
 				}
 			}
 
 			public bool MoveNext()
 			{
-				return this.arrayEnumerator.MoveNext();
+				return this._arrayEnumerator.MoveNext();
 			}
 
 			public void Reset()
 			{
-				this.arrayEnumerator.Reset();
+				this._arrayEnumerator.Reset();
 			}
 
 			private int _objectReturnType;
@@ -432,7 +428,7 @@ namespace System.Collections.Specialized
 
 			internal const int DictionaryEntry = 3;
 
-			private IEnumerator arrayEnumerator;
+			private IEnumerator _arrayEnumerator;
 		}
 
 		private class OrderedDictionaryKeyValueCollection : ICollection, IEnumerable
@@ -440,7 +436,7 @@ namespace System.Collections.Specialized
 			public OrderedDictionaryKeyValueCollection(ArrayList array, bool isKeys)
 			{
 				this._objects = array;
-				this.isKeys = isKeys;
+				this._isKeys = isKeys;
 			}
 
 			void ICollection.CopyTo(Array array, int index)
@@ -451,11 +447,11 @@ namespace System.Collections.Specialized
 				}
 				if (index < 0)
 				{
-					throw new ArgumentOutOfRangeException("index");
+					throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
 				}
 				foreach (object obj in this._objects)
 				{
-					array.SetValue(this.isKeys ? ((DictionaryEntry)obj).Key : ((DictionaryEntry)obj).Value, index);
+					array.SetValue(this._isKeys ? ((DictionaryEntry)obj).Key : ((DictionaryEntry)obj).Value, index);
 					index++;
 				}
 			}
@@ -486,12 +482,12 @@ namespace System.Collections.Specialized
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return new OrderedDictionary.OrderedDictionaryEnumerator(this._objects, this.isKeys ? 1 : 2);
+				return new OrderedDictionary.OrderedDictionaryEnumerator(this._objects, this._isKeys ? 1 : 2);
 			}
 
 			private ArrayList _objects;
 
-			private bool isKeys;
+			private bool _isKeys;
 		}
 	}
 }

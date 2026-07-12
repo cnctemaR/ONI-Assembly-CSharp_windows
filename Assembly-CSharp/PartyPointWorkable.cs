@@ -49,7 +49,7 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 		};
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
 		int num = global::UnityEngine.Random.Range(0, this.workerOverrideAnims.Length);
 		this.overrideAnims = this.workerOverrideAnims[num];
@@ -65,12 +65,12 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 		return base.GetFacingTarget();
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		return false;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<KPrefabID>().AddTag(GameTags.AlwaysConverse, false);
@@ -78,7 +78,7 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 		worker.Subscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AlwaysConverse);
@@ -86,7 +86,7 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 		worker.Unsubscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(this.specificEffect))
@@ -129,7 +129,7 @@ public class PartyPointWorkable : Workable, IWorkerPrioritizable
 	{
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		if (!string.IsNullOrEmpty(this.specificEffect) && worker.GetComponent<Effects>().HasEffect(this.specificEffect))

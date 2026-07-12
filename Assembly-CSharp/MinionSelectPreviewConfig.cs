@@ -25,8 +25,9 @@ public class MinionSelectPreviewConfig : IEntityConfig
 		gameObject.AddOrGet<Effects>();
 		gameObject.AddOrGet<Traits>();
 		MinionModifiers minionModifiers = gameObject.AddOrGet<MinionModifiers>();
-		minionModifiers.initialTraits.Add(MinionConfig.MINION_BASE_TRAIT_ID);
-		MinionConfig.AddMinionAmounts(minionModifiers);
+		minionModifiers.initialTraits.Add(BaseMinionConfig.GetMinionBaseTraitIDForModel(MinionConfig.MODEL));
+		BaseMinionConfig.AddMinionAttributes(minionModifiers, MinionConfig.GetAttributes());
+		BaseMinionConfig.AddMinionAmounts(minionModifiers, MinionConfig.GetAmounts());
 		gameObject.AddOrGet<AttributeLevels>();
 		gameObject.AddOrGet<AttributeConverters>();
 		gameObject.AddOrGet<MinionIdentity>().addToIdentityList = false;
@@ -47,7 +48,7 @@ public class MinionSelectPreviewConfig : IEntityConfig
 			Assets.GetAnim("anim_cheer_kanim")
 		};
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
-		MinionConfig.ConfigureSymbols(gameObject, false);
+		BaseMinionConfig.ConfigureSymbols(gameObject, false);
 		return gameObject;
 	}
 

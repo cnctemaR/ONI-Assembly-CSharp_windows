@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Timers
 {
-	[DefaultEvent("Elapsed")]
 	[DefaultProperty("Interval")]
+	[DefaultEvent("Elapsed")]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Timer : Component, ISupportInitialize
 	{
@@ -26,14 +26,14 @@ namespace System.Timers
 		{
 			if (interval <= 0.0)
 			{
-				throw new ArgumentException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
+				throw new ArgumentException(SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
 			}
 			this.interval = (double)Timer.CalculateRoundedInterval(interval, true);
 		}
 
 		[TimersDescription("Indicates whether the timer will be restarted when it is enabled.")]
-		[DefaultValue(true)]
 		[Category("Behavior")]
+		[DefaultValue(true)]
 		public bool AutoReset
 		{
 			get
@@ -58,9 +58,9 @@ namespace System.Timers
 			}
 		}
 
-		[TimersDescription("Indicates whether the timer is enabled to fire events at a defined interval.")]
 		[DefaultValue(false)]
 		[Category("Behavior")]
+		[TimersDescription("Indicates whether the timer is enabled to fire events at a defined interval.")]
 		public bool Enabled
 		{
 			get
@@ -122,9 +122,9 @@ namespace System.Timers
 			}
 			if (argumentCheck)
 			{
-				throw new ArgumentException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
+				throw new ArgumentException(SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
 			}
-			throw new ArgumentOutOfRangeException(global::SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
+			throw new ArgumentOutOfRangeException(SR.GetString("Invalid value '{1}' for parameter '{0}'.", new object[] { "interval", interval }));
 		}
 
 		private void UpdateTimer()
@@ -133,10 +133,10 @@ namespace System.Timers
 			this.timer.Change(num, this.autoReset ? num : (-1));
 		}
 
-		[TimersDescription("The number of milliseconds between timer events.")]
-		[SettingsBindable(true)]
-		[DefaultValue(100.0)]
 		[Category("Behavior")]
+		[TimersDescription("The number of milliseconds between timer events.")]
+		[DefaultValue(100.0)]
+		[SettingsBindable(true)]
 		public double Interval
 		{
 			get
@@ -147,7 +147,7 @@ namespace System.Timers
 			{
 				if (value <= 0.0)
 				{
-					throw new ArgumentException(global::SR.GetString("'{0}' is not a valid value for 'Interval'. 'Interval' must be greater than {1}.", new object[] { value, 0 }));
+					throw new ArgumentException(SR.GetString("'{0}' is not a valid value for 'Interval'. 'Interval' must be greater than {1}.", new object[] { value, 0 }));
 				}
 				this.interval = value;
 				if (this.timer != null)
@@ -157,8 +157,8 @@ namespace System.Timers
 			}
 		}
 
-		[Category("Behavior")]
 		[TimersDescription("Occurs when the Interval has elapsed.")]
+		[Category("Behavior")]
 		public event ElapsedEventHandler Elapsed
 		{
 			add
@@ -187,9 +187,9 @@ namespace System.Timers
 			}
 		}
 
-		[TimersDescription("The object used to marshal the event handler calls issued when an interval has elapsed.")]
-		[DefaultValue(null)]
 		[Browsable(false)]
+		[DefaultValue(null)]
+		[TimersDescription("The object used to marshal the event handler calls issued when an interval has elapsed.")]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get

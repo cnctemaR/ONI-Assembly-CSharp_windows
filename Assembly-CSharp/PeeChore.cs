@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class PeeChore : Chore<PeeChore.StatesInstance>
@@ -30,18 +31,18 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		public void SpawnDirtyWater(float dt)
 		{
 			int num = Grid.PosToCell(base.sm.worker.Get<KMonoBehaviour>(base.smi));
-			byte index = Db.Get().Diseases.GetIndex("FoodPoisoning");
+			byte index = Db.Get().Diseases.GetIndex(DUPLICANTSTATS.STANDARD.Secretions.PEE_DISEASE);
 			float num2 = dt * -this.bladder.GetDelta() / this.bladder.GetMax();
 			if (num2 > 0f)
 			{
-				float num3 = 2f * num2;
+				float num3 = DUPLICANTSTATS.STANDARD.Secretions.PEE_PER_FLOOR_PEE * num2;
 				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
 				if (equippable != null)
 				{
-					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), false, true);
+					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, num3, this.bodyTemperature.value, index, Mathf.CeilToInt((float)DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE * num2), false, true);
 					return;
 				}
-				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, num3, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
+				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, num3, this.bodyTemperature.value, index, Mathf.CeilToInt((float)DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE * num2), true, -1);
 			}
 		}
 

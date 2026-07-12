@@ -5,7 +5,7 @@ namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct ParameterToken
+	public readonly struct ParameterToken : IEquatable<ParameterToken>
 	{
 		internal ParameterToken(int val)
 		{
@@ -51,7 +51,7 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal int tokValue;
+		internal readonly int tokValue;
 
 		public static readonly ParameterToken Empty;
 	}

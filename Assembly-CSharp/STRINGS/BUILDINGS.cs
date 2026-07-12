@@ -119,6 +119,31 @@ namespace STRINGS
 				});
 			}
 
+			public class GUNKEMPTIER
+			{
+				public static LocString NAME = UI.FormatAsLink("Gunk Extractor", "GUNKEMPTIER");
+
+				public static LocString DESC = "Bionic Duplicants are much more relaxed after a visit to the gunk extractor.";
+
+				public static LocString EFFECT = "Cleanses stale " + UI.FormatAsLink("Liquid Gunk", "LIQUIDGUNK") + " build-up from Duplicants' bionic parts.";
+			}
+
+			public class OILCHANGER
+			{
+				public static LocString NAME = UI.FormatAsLink("Lubrication Station", "OILCHANGER");
+
+				public static LocString DESC = "A fresh supply of oil keeps the ol' joints from getting too creaky.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses ",
+					UI.FormatAsLink("Phyto Oil", "PHYTOOIL"),
+					" or ",
+					UI.FormatAsLink("Crude Oil", "CRUDEOIL"),
+					" to keep Duplicants' bionic parts running smoothly."
+				});
+			}
+
 			public class OXYLITEREFINERY
 			{
 				public static LocString NAME = UI.FormatAsLink("Oxylite Refinery", "OXYLITEREFINERY");
@@ -391,6 +416,38 @@ namespace STRINGS
 				public static LocString EFFECT = "Empties " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " canisters back into the world.";
 			}
 
+			public class BOTTLEEMPTIERCONDUITLIQUID
+			{
+				public static LocString NAME = UI.FormatAsLink("Bottle Drainer", "BOTTLEEMPTIERCONDUITLIQUID");
+
+				public static LocString DESC = "A bottle drainer's Element Filter can be used to designate areas for specific liquid storage.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Drains bottled ",
+					UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID"),
+					" into ",
+					UI.FormatAsLink("Liquid Pipes", "LIQUIDCONDUIT"),
+					"."
+				});
+			}
+
+			public class BOTTLEEMPTIERCONDUITGAS
+			{
+				public static LocString NAME = UI.FormatAsLink("Canister Drainer", "BOTTLEEMPTIERCONDUITGAS");
+
+				public static LocString DESC = "A canister drainer's Element Filter can designate areas for specific gas storage.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Drains ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" canisters into ",
+					UI.FormatAsLink("Gas Pipes", "GASCONDUIT"),
+					"."
+				});
+			}
+
 			public class ARTIFACTCARGOBAY
 			{
 				public static LocString NAME = UI.FormatAsLink("Artifact Transport Module", "ARTIFACTCARGOBAY");
@@ -519,6 +576,31 @@ namespace STRINGS
 				public static LocString DESC = "A hatch for getting in and out of the rocket.";
 
 				public static LocString EFFECT = "Warning: Do not open mid-flight.";
+			}
+
+			public class ROBOPILOTMODULE
+			{
+				public static LocString NAME = UI.FormatAsLink("Robo-Pilot Module", "ROBOPILOTMODULE");
+
+				public static LocString DESC = "Robo-pilot modules do not require a Duplicant astronaut.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Enables rockets to travel swfitly without a ",
+					UI.FormatAsLink("Rocket Control Station", "ROCKETCONTROLSTATION"),
+					".\n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
+			}
+
+			public class ROBOPILOTCOMMANDMODULE
+			{
+				public static LocString NAME = UI.FormatAsLink("Robo-Pilot Capsule", "ROBOPILOTCOMMANDMODULE");
+
+				public static LocString DESC = "Robo-pilot modules do not require a Duplicant astronaut.";
+
+				public static LocString EFFECT = "Enables rockets to travel swiftly and safely without a " + UI.FormatAsLink("Command Capsule", "COMMANDMODULE") + ".\n\nA Robo-Pilot Capsule must be the last module installed at the top of a rocket.";
 			}
 
 			public class ROCKETCONTROLSTATION
@@ -2366,6 +2448,33 @@ namespace STRINGS
 				}
 			}
 
+			public class ELECTROBANKCHARGER
+			{
+				public static LocString NAME = UI.FormatAsLink("Power Bank Charger", "ELECTROBANKCHARGER");
+
+				public static LocString DESC = "Bionic Duplicants rely on a steady supply of power to function.";
+
+				public static LocString EFFECT = "Converts empty " + UI.FormatAsLink("Eco Power Banks", "ELECTROBANK") + " into fully charged units ready for reuse.";
+			}
+
+			public class SMALLELECTROBANKDISCHARGER
+			{
+				public static LocString NAME = UI.FormatAsLink("Wall Socket", "SMALLELECTROBANKDISCHARGER");
+
+				public static LocString DESC = "It can also be placed on the ceiling.";
+
+				public static LocString EFFECT = "Converts stored energy from " + UI.FormatAsLink("Eco Power Banks", "ELECTROBANK") + " into power for connected buildings.";
+			}
+
+			public class LARGEELECTROBANKDISCHARGER
+			{
+				public static LocString NAME = UI.FormatAsLink("Socket Station", "LARGEELECTROBANKDISCHARGER");
+
+				public static LocString DESC = "It's a real powerhouse.";
+
+				public static LocString EFFECT = "Efficiently converts stored energy from " + UI.FormatAsLink("Power Banks", "ELECTROBANK") + " into power for connected buildings.";
+			}
+
 			public class ELECTROLYZER
 			{
 				public static LocString NAME = UI.FormatAsLink("Electrolyzer", "ELECTROLYZER");
@@ -3211,6 +3320,15 @@ namespace STRINGS
 				public static LocString DESC = "Canisters allow Duplicants to manually deliver gases from place to place.";
 
 				public static LocString EFFECT = "Automatically stores piped " + UI.FormatAsLink("Gases", "ELEMENTS_GAS") + " into canisters for manual transport.";
+			}
+
+			public class LIQUIDBOTTLER
+			{
+				public static LocString NAME = UI.FormatAsLink("Bottle Filler", "LIQUIDBOTTLER");
+
+				public static LocString DESC = "Bottle fillers allow Duplicants to manually deliver liquids from place to place.";
+
+				public static LocString EFFECT = "Automatically stores piped " + UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID") + " into bottles for manual transport.";
 			}
 
 			public class GENERATOR
@@ -6000,6 +6118,53 @@ namespace STRINGS
 				public static LocString EFFECT = "Produces items and equipment for Duplicant use.\n\nDuplicants will not fabricate items unless recipes are queued.";
 			}
 
+			public class ADVANCEDCRAFTINGTABLE
+			{
+				public static LocString NAME = UI.FormatAsLink("Soldering Station", "ADVANCEDCRAFTINGTABLE");
+
+				public static LocString DESC = "Soldering stations allow Duplicants to build helpful Flydo retriever bots.";
+
+				public static LocString EFFECT = "Produces advanced electronics and bionic " + UI.FormatAsLink("Boosters", "BIONIC_UPGRADE") + ".\n\nDuplicants will not fabricate items unless recipes are queued.";
+
+				public static LocString BIONIC_COMPONENT_RECIPE_DESC = "Converts {0} to {1}";
+			}
+
+			public class DATAMINER
+			{
+				public static LocString NAME = UI.FormatAsLink("Data Miner", "DATAMINER");
+
+				public static LocString DESC = "Data banks can also be used to program robo-pilots and bionic boosters.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Mass-produces ",
+					UI.FormatAsLink("Data Banks", "ORBITAL_RESESARCH_DATABANK"),
+					" that can be processed into ",
+					UI.FormatAsLink("Data Analysis Research", "RESEARCH"),
+					" points.\n\nDuplicants will not fabricate items unless recipes are queued."
+				});
+
+				public static LocString RECIPE_DESCRIPTION = "Turns {0} into {1}.";
+			}
+
+			public class REMOTEWORKTERMINAL
+			{
+				public static LocString NAME = UI.FormatAsLink("Remote Controller", "REMOTEWORKTERMINAL");
+
+				public static LocString DESC = "Remote controllers cut down on colony commute times.";
+
+				public static LocString EFFECT = "Enables Duplicants to operate machinery remotely via a connected " + UI.FormatAsLink("Remote Worker Dock", "REMOTEWORKERDOCK") + ".";
+			}
+
+			public class REMOTEWORKERDOCK
+			{
+				public static LocString NAME = UI.FormatAsLink("Remote Worker Dock", "REMOTEWORKERDOCK");
+
+				public static LocString DESC = "It's a Duplicant's duplicate.";
+
+				public static LocString EFFECT = "Carries out machine operation instructions received from a connected " + UI.FormatAsLink("Remote Controller", "REMOTEWORKTERMINAL") + ".\n\nMust be placed within range of its target building.";
+			}
+
 			public class SUITFABRICATOR
 			{
 				public static LocString NAME = UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR");
@@ -7099,7 +7264,7 @@ namespace STRINGS
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Produces ",
-					UI.FormatAsLink("Microchip", "POWER_STATION_TOOLS"),
+					ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME,
 					" to increase the ",
 					UI.FormatAsLink("Power", "POWER"),
 					" output of generators.\n\nAssigned Duplicants must possess the ",
@@ -10062,6 +10227,8 @@ namespace STRINGS
 				public static LocString WHEAT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
 
 				public static LocString NUT_MILK_RECIPE_DESCRIPTION = "Converts {0} to {1}";
+
+				public static LocString PHYTO_OIL_RECIPE_DESCRIPTION = "Converts {0} to {1} and {2}";
 			}
 
 			public class FOODDEHYDRATOR

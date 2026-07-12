@@ -2,7 +2,6 @@
 
 namespace System.Runtime.ConstrainedExecution
 {
-	[Serializable]
 	public enum Cer
 	{
 		None,

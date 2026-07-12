@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
@@ -95,6 +96,19 @@ namespace System.Net.WebSockets
 			}
 		}
 
+		public RemoteCertificateValidationCallback RemoteCertificateValidationCallback
+		{
+			get
+			{
+				return this._remoteCertificateValidationCallback;
+			}
+			set
+			{
+				this.ThrowIfReadOnly();
+				this._remoteCertificateValidationCallback = value;
+			}
+		}
+
 		public CookieContainer Cookies
 		{
 			get
@@ -118,7 +132,7 @@ namespace System.Net.WebSockets
 				{
 					if (string.Equals(enumerator.Current, subProtocol, StringComparison.OrdinalIgnoreCase))
 					{
-						throw new ArgumentException(global::SR.Format("Duplicate protocols are not allowed: '{0}'.", subProtocol), "subProtocol");
+						throw new ArgumentException(SR.Format("Duplicate protocols are not allowed: '{0}'.", subProtocol), "subProtocol");
 					}
 				}
 			}
@@ -136,7 +150,7 @@ namespace System.Net.WebSockets
 				this.ThrowIfReadOnly();
 				if (value != Timeout.InfiniteTimeSpan && value < TimeSpan.Zero)
 				{
-					throw new ArgumentOutOfRangeException("value", value, global::SR.Format("The argument must be a value greater than {0}.", Timeout.InfiniteTimeSpan.ToString()));
+					throw new ArgumentOutOfRangeException("value", value, SR.Format("The argument must be a value greater than {0}.", Timeout.InfiniteTimeSpan.ToString()));
 				}
 				this._keepAliveInterval = value;
 			}
@@ -171,11 +185,11 @@ namespace System.Net.WebSockets
 			this.ThrowIfReadOnly();
 			if (receiveBufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("receiveBufferSize", receiveBufferSize, global::SR.Format("The argument must be a value greater than {0}.", 1));
+				throw new ArgumentOutOfRangeException("receiveBufferSize", receiveBufferSize, SR.Format("The argument must be a value greater than {0}.", 1));
 			}
 			if (sendBufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("sendBufferSize", sendBufferSize, global::SR.Format("The argument must be a value greater than {0}.", 1));
+				throw new ArgumentOutOfRangeException("sendBufferSize", sendBufferSize, SR.Format("The argument must be a value greater than {0}.", 1));
 			}
 			this._receiveBufferSize = receiveBufferSize;
 			this._sendBufferSize = sendBufferSize;
@@ -187,11 +201,11 @@ namespace System.Net.WebSockets
 			this.ThrowIfReadOnly();
 			if (receiveBufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("receiveBufferSize", receiveBufferSize, global::SR.Format("The argument must be a value greater than {0}.", 1));
+				throw new ArgumentOutOfRangeException("receiveBufferSize", receiveBufferSize, SR.Format("The argument must be a value greater than {0}.", 1));
 			}
 			if (sendBufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("sendBufferSize", sendBufferSize, global::SR.Format("The argument must be a value greater than {0}.", 1));
+				throw new ArgumentOutOfRangeException("sendBufferSize", sendBufferSize, SR.Format("The argument must be a value greater than {0}.", 1));
 			}
 			WebSocketValidate.ValidateArraySegment(buffer, "buffer");
 			if (buffer.Count == 0)
@@ -239,5 +253,7 @@ namespace System.Net.WebSockets
 		private int _sendBufferSize = 4096;
 
 		private ArraySegment<byte>? _buffer;
+
+		private RemoteCertificateValidationCallback _remoteCertificateValidationCallback;
 	}
 }

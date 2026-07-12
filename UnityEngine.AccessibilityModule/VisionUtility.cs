@@ -62,7 +62,7 @@ namespace UnityEngine.Accessibility
 			return VisionUtility.GetColorBlindSafePaletteInternal((void*)ptr, palette.Length, minimumLuminance, maximumLuminance, true);
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private unsafe static int GetColorBlindSafePaletteInternal(void* palette, int paletteLength, float minimumLuminance, float maximumLuminance, bool useColor32)
 		{
 			bool flag = palette == null;

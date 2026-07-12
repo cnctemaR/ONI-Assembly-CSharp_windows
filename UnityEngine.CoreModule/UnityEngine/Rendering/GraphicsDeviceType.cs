@@ -34,7 +34,7 @@ namespace UnityEngine.Rendering
 		XboxOneD3D12,
 		GameCoreXboxOne,
 		[Obsolete("GameCoreScarlett is deprecated, please use GameCoreXboxSeries (UnityUpgradable) -> GameCoreXboxSeries", false)]
-		GameCoreScarlett,
+		GameCoreScarlett = -1,
 		GameCoreXboxSeries = 25,
 		PlayStation5,
 		PlayStation5NGGC

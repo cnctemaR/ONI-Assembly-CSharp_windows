@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this._keyValue = new AsnEncodedData(keyValue);
 		}
 
-		internal PublicKey(Mono.Security.X509.X509Certificate certificate)
+		internal PublicKey(X509Certificate certificate)
 		{
 			bool flag = true;
 			if (certificate.KeyAlgorithm == "1.2.840.113549.1.1.1")
@@ -93,23 +93,16 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				if (this._key == null)
+				string value = this._oid.Value;
+				if (value == "1.2.840.113549.1.1.1")
 				{
-					string value = this._oid.Value;
-					if (!(value == "1.2.840.113549.1.1.1"))
-					{
-						if (!(value == "1.2.840.10040.4.1"))
-						{
-							throw new NotSupportedException(global::Locale.GetText("Cannot decode public key from unknown OID '{0}'.", new object[] { this._oid.Value }));
-						}
-						this._key = PublicKey.DecodeDSA(this._keyValue.RawData, this._params.RawData);
-					}
-					else
-					{
-						this._key = PublicKey.DecodeRSA(this._keyValue.RawData);
-					}
+					return PublicKey.DecodeRSA(this._keyValue.RawData);
 				}
-				return this._key;
+				if (!(value == "1.2.840.10040.4.1"))
+				{
+					throw new NotSupportedException(global::Locale.GetText("Cannot decode public key from unknown OID '{0}'.", new object[] { this._oid.Value }));
+				}
+				return PublicKey.DecodeDSA(this._keyValue.RawData, this._params.RawData);
 			}
 		}
 

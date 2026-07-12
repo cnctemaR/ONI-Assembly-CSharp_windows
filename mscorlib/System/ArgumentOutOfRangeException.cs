@@ -1,55 +1,54 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public class ArgumentOutOfRangeException : ArgumentException, ISerializable
+	public class ArgumentOutOfRangeException : ArgumentException
 	{
-		private static string RangeMessage
-		{
-			get
-			{
-				if (ArgumentOutOfRangeException._rangeMessage == null)
-				{
-					ArgumentOutOfRangeException._rangeMessage = Environment.GetResourceString("Specified argument was out of the range of valid values.");
-				}
-				return ArgumentOutOfRangeException._rangeMessage;
-			}
-		}
-
 		public ArgumentOutOfRangeException()
-			: base(ArgumentOutOfRangeException.RangeMessage)
+			: base("Specified argument was out of the range of valid values.")
 		{
-			base.SetErrorCode(-2146233086);
+			base.HResult = -2146233086;
 		}
 
 		public ArgumentOutOfRangeException(string paramName)
-			: base(ArgumentOutOfRangeException.RangeMessage, paramName)
+			: base("Specified argument was out of the range of valid values.", paramName)
 		{
-			base.SetErrorCode(-2146233086);
+			base.HResult = -2146233086;
 		}
 
 		public ArgumentOutOfRangeException(string paramName, string message)
 			: base(message, paramName)
 		{
-			base.SetErrorCode(-2146233086);
+			base.HResult = -2146233086;
 		}
 
 		public ArgumentOutOfRangeException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233086);
+			base.HResult = -2146233086;
 		}
 
 		public ArgumentOutOfRangeException(string paramName, object actualValue, string message)
 			: base(message, paramName)
 		{
-			this.m_actualValue = actualValue;
-			base.SetErrorCode(-2146233086);
+			this._actualValue = actualValue;
+			base.HResult = -2146233086;
+		}
+
+		protected ArgumentOutOfRangeException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			this._actualValue = info.GetValue("ActualValue", typeof(object));
+		}
+
+		[SecurityCritical]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("ActualValue", this._actualValue, typeof(object));
 		}
 
 		public override string Message
@@ -57,16 +56,16 @@ namespace System
 			get
 			{
 				string message = base.Message;
-				if (this.m_actualValue == null)
+				if (this._actualValue == null)
 				{
 					return message;
 				}
-				string resourceString = Environment.GetResourceString("Actual value was {0}.", new object[] { this.m_actualValue.ToString() });
+				string text = SR.Format("Actual value was {0}.", this._actualValue.ToString());
 				if (message == null)
 				{
-					return resourceString;
+					return text;
 				}
-				return message + Environment.NewLine + resourceString;
+				return message + Environment.NewLine + text;
 			}
 		}
 
@@ -74,29 +73,10 @@ namespace System
 		{
 			get
 			{
-				return this.m_actualValue;
+				return this._actualValue;
 			}
 		}
 
-		[SecurityCritical]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			base.GetObjectData(info, context);
-			info.AddValue("ActualValue", this.m_actualValue, typeof(object));
-		}
-
-		protected ArgumentOutOfRangeException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.m_actualValue = info.GetValue("ActualValue", typeof(object));
-		}
-
-		private static volatile string _rangeMessage;
-
-		private object m_actualValue;
+		private object _actualValue;
 	}
 }

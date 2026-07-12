@@ -19,6 +19,19 @@ namespace UnityEngine
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action lightProbesUpdated;
+
+		[RequiredByNativeCode]
+		private static void Internal_CallLightProbesUpdatedFunction()
+		{
+			bool flag = LightProbes.lightProbesUpdated != null;
+			if (flag)
+			{
+				LightProbes.lightProbesUpdated();
+			}
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action tetrahedralizationCompleted;
 
 		[RequiredByNativeCode]
@@ -130,10 +143,10 @@ namespace UnityEngine
 			LightProbes.CalculateInterpolatedLightAndOcclusionProbes_Internal(NoAllocHelpers.ExtractArrayFromListT<Vector3>(positions), positions.Count, NoAllocHelpers.ExtractArrayFromListT<SphericalHarmonicsL2>(lightProbes), NoAllocHelpers.ExtractArrayFromListT<Vector4>(occlusionProbes));
 		}
 
-		[NativeName("CalculateInterpolatedLightAndOcclusionProbes")]
 		[FreeFunction]
+		[NativeName("CalculateInterpolatedLightAndOcclusionProbes")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CalculateInterpolatedLightAndOcclusionProbes_Internal(Vector3[] positions, int positionsCount, SphericalHarmonicsL2[] lightProbes, Vector4[] occlusionProbes);
+		internal static extern void CalculateInterpolatedLightAndOcclusionProbes_Internal([Unmarshalled] Vector3[] positions, int positionsCount, [Unmarshalled] SphericalHarmonicsL2[] lightProbes, [Unmarshalled] Vector4[] occlusionProbes);
 
 		public extern Vector3[] positions
 		{
@@ -145,12 +158,12 @@ namespace UnityEngine
 
 		public extern SphericalHarmonicsL2[] bakedProbes
 		{
-			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetBakedCoefficients")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[NativeName("SetBakedCoefficients")]
 			[FreeFunction(HasExplicitThis = true)]
+			[NativeName("SetBakedCoefficients")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -171,8 +184,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeName("GetLightProbeCount")]
 		[FreeFunction]
+		[NativeName("GetLightProbeCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetCount();
 

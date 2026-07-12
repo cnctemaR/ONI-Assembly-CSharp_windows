@@ -335,7 +335,7 @@ namespace System.Net
 			}
 			if ((HttpListener)hashtable[prefix] != listener)
 			{
-				throw new HttpListenerException(400, "There's another listener for " + prefix);
+				throw new HttpListenerException(400, "There's another listener for " + ((prefix != null) ? prefix.ToString() : null));
 			}
 			return;
 		}

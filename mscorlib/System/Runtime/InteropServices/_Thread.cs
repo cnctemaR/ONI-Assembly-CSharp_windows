@@ -3,10 +3,10 @@ using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
-	[CLSCompliant(false)]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[TypeLibImportClass(typeof(Thread))]
 	[Guid("C281C7F1-4AA9-3517-961A-463CFED57E75")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	[ComVisible(true)]
 	public interface _Thread
 	{

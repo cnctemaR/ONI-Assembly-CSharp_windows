@@ -7,79 +7,43 @@ using Mono.Security.Interface;
 
 namespace Mono.Net.Security
 {
-	internal class ChainValidationHelper : ICertificateValidator2, ICertificateValidator
+	internal class ChainValidationHelper : ICertificateValidator
 	{
-		internal static ICertificateValidator GetInternalValidator(MonoTlsProvider provider, MonoTlsSettings settings)
+		internal static ChainValidationHelper GetInternalValidator(SslStream owner, MobileTlsProvider provider, MonoTlsSettings settings)
 		{
 			if (settings == null)
 			{
-				return new ChainValidationHelper(provider, null, false, null, null);
+				return new ChainValidationHelper(owner, provider, null, false, null);
 			}
 			if (settings.CertificateValidator != null)
 			{
-				return settings.CertificateValidator;
+				return (ChainValidationHelper)settings.CertificateValidator;
 			}
-			return new ChainValidationHelper(provider, settings, false, null, null);
+			return new ChainValidationHelper(owner, provider, settings, false, null);
 		}
 
 		internal static ICertificateValidator GetDefaultValidator(MonoTlsSettings settings)
 		{
-			MonoTlsProvider monoTlsProvider = MonoTlsProviderFactory.GetProvider();
+			MobileTlsProvider providerInternal = MonoTlsProviderFactory.GetProviderInternal();
 			if (settings == null)
 			{
-				return new ChainValidationHelper(monoTlsProvider, null, false, null, null);
+				return new ChainValidationHelper(null, providerInternal, null, false, null);
 			}
 			if (settings.CertificateValidator != null)
 			{
 				throw new NotSupportedException();
 			}
-			return new ChainValidationHelper(monoTlsProvider, settings, false, null, null);
+			return new ChainValidationHelper(null, providerInternal, settings, false, null);
 		}
 
-		internal static ChainValidationHelper CloneWithCallbackWrapper(MonoTlsProvider provider, ref MonoTlsSettings settings, ServerCertValidationCallbackWrapper wrapper)
+		internal static ChainValidationHelper Create(MobileTlsProvider provider, ref MonoTlsSettings settings, MonoTlsStream stream)
 		{
-			ChainValidationHelper chainValidationHelper = (ChainValidationHelper)settings.CertificateValidator;
-			if (chainValidationHelper == null)
-			{
-				chainValidationHelper = new ChainValidationHelper(provider, settings, true, null, wrapper);
-			}
-			else
-			{
-				chainValidationHelper = new ChainValidationHelper(chainValidationHelper, provider, settings, wrapper);
-			}
+			ChainValidationHelper chainValidationHelper = new ChainValidationHelper(null, provider, settings, true, stream);
 			settings = chainValidationHelper.settings;
 			return chainValidationHelper;
 		}
 
-		internal static bool InvokeCallback(ServerCertValidationCallback callback, object sender, X509Certificate certificate, X509Chain chain, MonoSslPolicyErrors sslPolicyErrors)
-		{
-			return callback.Invoke(sender, certificate, chain, (SslPolicyErrors)sslPolicyErrors);
-		}
-
-		private ChainValidationHelper(ChainValidationHelper other, MonoTlsProvider provider, MonoTlsSettings settings, ServerCertValidationCallbackWrapper callbackWrapper = null)
-		{
-			this.sender = other.sender;
-			this.certValidationCallback = other.certValidationCallback;
-			this.certSelectionCallback = other.certSelectionCallback;
-			this.tlsStream = other.tlsStream;
-			this.request = other.request;
-			if (settings == null)
-			{
-				settings = MonoTlsSettings.DefaultSettings;
-			}
-			this.provider = provider;
-			this.settings = settings.CloneWithValidator(this);
-			this.callbackWrapper = callbackWrapper;
-		}
-
-		internal static ChainValidationHelper Create(MonoTlsProvider provider, ref MonoTlsSettings settings, MonoTlsStream stream)
-		{
-			ChainValidationHelper chainValidationHelper = new ChainValidationHelper(provider, settings, true, stream, null);
-			settings = chainValidationHelper.settings;
-			return chainValidationHelper;
-		}
-
-		private ChainValidationHelper(MonoTlsProvider provider, MonoTlsSettings settings, bool cloneSettings, MonoTlsStream stream, ServerCertValidationCallbackWrapper callbackWrapper)
+		private ChainValidationHelper(SslStream owner, MobileTlsProvider provider, MonoTlsSettings settings, bool cloneSettings, MonoTlsStream stream)
 		{
 			if (settings == null)
 			{
@@ -91,27 +55,25 @@ namespace Mono.Net.Security
 			}
 			if (provider == null)
 			{
-				provider = MonoTlsProviderFactory.GetProvider();
+				provider = MonoTlsProviderFactory.GetProviderInternal();
 			}
 			this.provider = provider;
 			this.settings = settings;
 			this.tlsStream = stream;
-			this.callbackWrapper = callbackWrapper;
+			if (owner != null)
+			{
+				this.owner = new WeakReference<SslStream>(owner);
+			}
 			bool flag = false;
 			if (settings != null)
 			{
-				if (settings.RemoteCertificateValidationCallback != null)
-				{
-					RemoteCertificateValidationCallback remoteCertificateValidationCallback = CallbackHelpers.MonoToPublic(settings.RemoteCertificateValidationCallback);
-					this.certValidationCallback = new ServerCertValidationCallback(remoteCertificateValidationCallback);
-				}
+				this.certValidationCallback = ChainValidationHelper.GetValidationCallback(settings);
 				this.certSelectionCallback = CallbackHelpers.MonoToInternal(settings.ClientCertificateSelectionCallback);
 				flag = settings.UseServicePointManagerCallback ?? (stream != null);
 			}
 			if (stream != null)
 			{
 				this.request = stream.Request;
-				this.sender = this.request;
 				if (this.certValidationCallback == null)
 				{
 					this.certValidationCallback = this.request.ServerCertValidationCallback;
@@ -129,6 +91,40 @@ namespace Mono.Net.Security
 			{
 				this.certValidationCallback = ServicePointManager.ServerCertValidationCallback;
 			}
+		}
+
+		private static ServerCertValidationCallback GetValidationCallback(MonoTlsSettings settings)
+		{
+			if (settings.RemoteCertificateValidationCallback == null)
+			{
+				return null;
+			}
+			return new ServerCertValidationCallback(delegate(object s, X509Certificate c, X509Chain ch, SslPolicyErrors e)
+			{
+				string text = null;
+				SslStream sslStream = s as SslStream;
+				if (sslStream != null)
+				{
+					text = sslStream.InternalTargetHost;
+				}
+				else
+				{
+					HttpWebRequest httpWebRequest = s as HttpWebRequest;
+					if (httpWebRequest != null)
+					{
+						text = httpWebRequest.Host;
+						if (!string.IsNullOrEmpty(text))
+						{
+							int num = text.IndexOf(':');
+							if (num > 0)
+							{
+								text = text.Substring(0, num);
+							}
+						}
+					}
+				}
+				return settings.RemoteCertificateValidationCallback(text, c, ch, (MonoSslPolicyErrors)e);
+			});
 		}
 
 		private static X509Certificate DefaultSelectionCallback(string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
@@ -280,7 +276,6 @@ namespace Mono.Net.Security
 		{
 			bool flag = false;
 			bool flag2 = false;
-			bool flag3 = this.certValidationCallback != null || this.callbackWrapper != null;
 			if (this.tlsStream != null)
 			{
 				this.request.ServicePoint.UpdateServerCertificate(leaf);
@@ -288,16 +283,9 @@ namespace Mono.Net.Security
 			if (leaf == null)
 			{
 				errors |= SslPolicyErrors.RemoteCertificateNotAvailable;
-				if (flag3)
+				if (this.certValidationCallback != null)
 				{
-					if (this.callbackWrapper != null)
-					{
-						flag2 = this.callbackWrapper(this.certValidationCallback, leaf, null, (MonoSslPolicyErrors)errors);
-					}
-					else
-					{
-						flag2 = this.certValidationCallback.Invoke(this.sender, leaf, null, errors);
-					}
+					flag2 = this.InvokeCallback(leaf, null, errors);
 					flag = !flag2;
 				}
 				return new ValidationResult(flag2, flag, 0, new MonoSslPolicyErrors?((MonoSslPolicyErrors)errors));
@@ -312,14 +300,12 @@ namespace Mono.Net.Security
 			}
 			ICertificatePolicy legacyCertificatePolicy = ServicePointManager.GetLegacyCertificatePolicy();
 			int num2 = 0;
-			bool flag4 = SystemCertificateValidator.NeedsChain(this.settings);
-			if (!flag4 && flag3 && (this.settings == null || this.settings.CallbackNeedsCertificateChain))
+			bool flag3 = SystemCertificateValidator.NeedsChain(this.settings);
+			if (!flag3 && this.certValidationCallback != null && (this.settings == null || this.settings.CallbackNeedsCertificateChain))
 			{
-				flag4 = true;
+				flag3 = true;
 			}
-			MonoSslPolicyErrors monoSslPolicyErrors = (MonoSslPolicyErrors)errors;
-			flag2 = this.provider.ValidateCertificate(this, host, server, certs, flag4, ref chain, ref monoSslPolicyErrors, ref num2);
-			errors = (SslPolicyErrors)monoSslPolicyErrors;
+			flag2 = this.provider.ValidateCertificate(this, host, server, certs, flag3, ref chain, ref errors, ref num2);
 			if (num2 == 0 && errors != SslPolicyErrors.None)
 			{
 				num2 = -2146762485;
@@ -334,19 +320,27 @@ namespace Mono.Net.Security
 				flag2 = legacyCertificatePolicy.CheckValidationResult(servicePoint, leaf, this.request, num2);
 				flag = !flag2 && !(legacyCertificatePolicy is DefaultCertificatePolicy);
 			}
-			if (flag3)
+			if (this.certValidationCallback != null)
 			{
-				if (this.callbackWrapper != null)
-				{
-					flag2 = this.callbackWrapper(this.certValidationCallback, leaf, chain, (MonoSslPolicyErrors)errors);
-				}
-				else
-				{
-					flag2 = this.certValidationCallback.Invoke(this.sender, leaf, chain, errors);
-				}
+				flag2 = this.InvokeCallback(leaf, chain, errors);
 				flag = !flag2;
 			}
 			return new ValidationResult(flag2, flag, num2, new MonoSslPolicyErrors?((MonoSslPolicyErrors)errors));
+		}
+
+		private bool InvokeCallback(X509Certificate leaf, X509Chain chain, SslPolicyErrors errors)
+		{
+			object obj = null;
+			SslStream sslStream;
+			if (this.request != null)
+			{
+				obj = this.request;
+			}
+			else if (this.owner != null && this.owner.TryGetTarget(out sslStream))
+			{
+				obj = sslStream;
+			}
+			return this.certValidationCallback.Invoke(obj, leaf, chain, errors);
 		}
 
 		private bool InvokeSystemValidator(string targetHost, bool serverMode, X509CertificateCollection certificates, X509Chain chain, ref MonoSslPolicyErrors xerrors, ref int status11)
@@ -357,17 +351,15 @@ namespace Mono.Net.Security
 			return flag;
 		}
 
-		private readonly object sender;
+		private readonly WeakReference<SslStream> owner;
 
 		private readonly MonoTlsSettings settings;
 
-		private readonly MonoTlsProvider provider;
+		private readonly MobileTlsProvider provider;
 
 		private readonly ServerCertValidationCallback certValidationCallback;
 
 		private readonly LocalCertSelectionCallback certSelectionCallback;
-
-		private readonly ServerCertValidationCallbackWrapper callbackWrapper;
 
 		private readonly MonoTlsStream tlsStream;
 

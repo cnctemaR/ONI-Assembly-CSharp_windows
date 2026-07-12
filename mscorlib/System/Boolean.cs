@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Boolean : IComparable, IConvertible, IComparable<bool>, IEquatable<bool>
+	public readonly struct Boolean : IComparable, IConvertible, IComparable<bool>, IEquatable<bool>
 	{
 		public override int GetHashCode()
 		{
@@ -27,11 +26,19 @@ namespace System
 
 		public string ToString(IFormatProvider provider)
 		{
-			if (!this)
+			return this.ToString();
+		}
+
+		public bool TryFormat(Span<char> destination, out int charsWritten)
+		{
+			string text = (this ? "True" : "False");
+			if (text.AsSpan().TryCopyTo(destination))
 			{
-				return "False";
+				charsWritten = text.Length;
+				return true;
 			}
-			return "True";
+			charsWritten = 0;
+			return false;
 		}
 
 		public override bool Equals(object obj)
@@ -39,6 +46,7 @@ namespace System
 			return obj is bool && this == (bool)obj;
 		}
 
+		[NonVersionable]
 		public bool Equals(bool obj)
 		{
 			return this == obj;
@@ -52,7 +60,7 @@ namespace System
 			}
 			if (!(obj is bool))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Boolean."));
+				throw new ArgumentException("Object must be of type Boolean.");
 			}
 			if (this == (bool)obj)
 			{
@@ -84,64 +92,71 @@ namespace System
 			{
 				throw new ArgumentNullException("value");
 			}
-			bool flag = false;
+			return bool.Parse(value.AsSpan());
+		}
+
+		public static bool Parse(ReadOnlySpan<char> value)
+		{
+			bool flag;
 			if (!bool.TryParse(value, out flag))
 			{
-				throw new FormatException(Environment.GetResourceString("String was not recognized as a valid Boolean."));
+				throw new FormatException("String was not recognized as a valid Boolean.");
 			}
 			return flag;
 		}
 
 		public static bool TryParse(string value, out bool result)
 		{
-			result = false;
 			if (value == null)
 			{
+				result = false;
 				return false;
 			}
-			if ("True".Equals(value, StringComparison.OrdinalIgnoreCase))
+			return bool.TryParse(value.AsSpan(), out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> value, out bool result)
+		{
+			ReadOnlySpan<char> readOnlySpan = "True".AsSpan();
+			if (readOnlySpan.EqualsOrdinalIgnoreCase(value))
 			{
 				result = true;
 				return true;
 			}
-			if ("False".Equals(value, StringComparison.OrdinalIgnoreCase))
+			ReadOnlySpan<char> readOnlySpan2 = "False".AsSpan();
+			if (readOnlySpan2.EqualsOrdinalIgnoreCase(value))
 			{
 				result = false;
 				return true;
 			}
 			value = bool.TrimWhiteSpaceAndNull(value);
-			if ("True".Equals(value, StringComparison.OrdinalIgnoreCase))
+			if (readOnlySpan.EqualsOrdinalIgnoreCase(value))
 			{
 				result = true;
 				return true;
 			}
-			if ("False".Equals(value, StringComparison.OrdinalIgnoreCase))
+			if (readOnlySpan2.EqualsOrdinalIgnoreCase(value))
 			{
 				result = false;
 				return true;
 			}
+			result = false;
 			return false;
 		}
 
-		private static string TrimWhiteSpaceAndNull(string value)
+		private unsafe static ReadOnlySpan<char> TrimWhiteSpaceAndNull(ReadOnlySpan<char> value)
 		{
-			int i = 0;
-			int num = value.Length - 1;
-			char c = '\0';
-			while (i < value.Length)
+			int num = 0;
+			while (num < value.Length && (char.IsWhiteSpace((char)(*value[num])) || *value[num] == 0))
 			{
-				if (!char.IsWhiteSpace(value[i]) && value[i] != c)
-				{
-					IL_0052:
-					while (num >= i && (char.IsWhiteSpace(value[num]) || value[num] == c))
-					{
-						num--;
-					}
-					return value.Substring(i, num - i + 1);
-				}
-				i++;
+				num++;
 			}
-			goto IL_0052;
+			int num2 = value.Length - 1;
+			while (num2 >= num && (char.IsWhiteSpace((char)(*value[num2])) || *value[num2] == 0))
+			{
+				num2--;
+			}
+			return value.Slice(num, num2 - num + 1);
 		}
 
 		public TypeCode GetTypeCode()
@@ -156,7 +171,7 @@ namespace System
 
 		char IConvertible.ToChar(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Boolean", "Char" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Boolean", "Char"));
 		}
 
 		sbyte IConvertible.ToSByte(IFormatProvider provider)
@@ -216,7 +231,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Boolean", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Boolean", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -224,7 +239,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		private bool m_value;
+		private readonly bool m_value;
 
 		internal const int True = 1;
 

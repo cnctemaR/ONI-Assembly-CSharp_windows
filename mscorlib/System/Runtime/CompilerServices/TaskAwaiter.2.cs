@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 
 namespace System.Runtime.CompilerServices
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-	public struct TaskAwaiter<TResult> : ICriticalNotifyCompletion, INotifyCompletion
+	public readonly struct TaskAwaiter<TResult> : ICriticalNotifyCompletion, INotifyCompletion, ITaskAwaiter
 	{
 		internal TaskAwaiter(Task<TResult> task)
 		{
@@ -33,6 +32,7 @@ namespace System.Runtime.CompilerServices
 			TaskAwaiter.OnCompletedInternal(this.m_task, continuation, true, false);
 		}
 
+		[StackTraceHidden]
 		public TResult GetResult()
 		{
 			TaskAwaiter.ValidateEnd(this.m_task);

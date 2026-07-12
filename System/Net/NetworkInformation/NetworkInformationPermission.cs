@@ -70,7 +70,7 @@ namespace System.Net.NetworkInformation
 			NetworkInformationPermission networkInformationPermission = target as NetworkInformationPermission;
 			if (networkInformationPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			if (this.unrestricted || networkInformationPermission.IsUnrestricted())
 			{
@@ -88,7 +88,7 @@ namespace System.Net.NetworkInformation
 			NetworkInformationPermission networkInformationPermission = target as NetworkInformationPermission;
 			if (networkInformationPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			if (this.unrestricted && networkInformationPermission.IsUnrestricted())
 			{
@@ -106,7 +106,7 @@ namespace System.Net.NetworkInformation
 			NetworkInformationPermission networkInformationPermission = target as NetworkInformationPermission;
 			if (networkInformationPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			return (!this.unrestricted || networkInformationPermission.IsUnrestricted()) && (this.access & networkInformationPermission.access) == this.access;
 		}
@@ -120,16 +120,16 @@ namespace System.Net.NetworkInformation
 			}
 			if (!securityElement.Tag.Equals("IPermission"))
 			{
-				throw new ArgumentException(global::SR.GetString("Specified value does not contain 'IPermission' as its tag."), "securityElement");
+				throw new ArgumentException(SR.GetString("Specified value does not contain 'IPermission' as its tag."), "securityElement");
 			}
 			string text = securityElement.Attribute("class");
 			if (text == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Specified value does not contain a 'class' attribute."), "securityElement");
+				throw new ArgumentException(SR.GetString("Specified value does not contain a 'class' attribute."), "securityElement");
 			}
 			if (text.IndexOf(base.GetType().FullName) < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The value class attribute is not valid."), "securityElement");
+				throw new ArgumentException(SR.GetString("The value class attribute is not valid."), "securityElement");
 			}
 			string text2 = securityElement.Attribute("Unrestricted");
 			if (text2 != null && string.Compare(text2, "true", StringComparison.OrdinalIgnoreCase) == 0)

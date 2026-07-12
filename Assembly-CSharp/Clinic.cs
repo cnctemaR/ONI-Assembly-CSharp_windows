@@ -34,7 +34,7 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 		base.OnCleanUp();
 	}
 
-	private KAnimFile[] GetAppropriateOverrideAnims(Worker worker)
+	private KAnimFile[] GetAppropriateOverrideAnims(WorkerBase worker)
 	{
 		KAnimFile[] array = null;
 		if (!worker.GetSMI<WoundMonitor.Instance>().ShouldExitInfirmary())
@@ -48,19 +48,19 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 		return array;
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
 		this.overrideAnims = this.GetAppropriateOverrideAnims(worker);
 		return base.GetAnim(worker);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<Effects>().Add("Sleep", false);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		KAnimFile[] appropriateOverrideAnims = this.GetAppropriateOverrideAnims(worker);
 		if (appropriateOverrideAnims == null || appropriateOverrideAnims != this.overrideAnims)
@@ -71,13 +71,13 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 		return false;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		worker.GetComponent<Effects>().Remove("Sleep");
 		base.OnStopWork(worker);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.assignable.Unassign();
 		base.OnCompleteWork(worker);
@@ -89,7 +89,7 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 		}
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}
@@ -457,7 +457,7 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 			{
 				if (base.master.IsValidEffect(effect))
 				{
-					Worker worker = base.smi.master.worker;
+					WorkerBase worker = base.smi.master.worker;
 					if (worker != null)
 					{
 						Effects component = worker.GetComponent<Effects>();
@@ -474,7 +474,7 @@ public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderContro
 			{
 				if (base.master.IsValidEffect(effect))
 				{
-					Worker worker = base.smi.master.worker;
+					WorkerBase worker = base.smi.master.worker;
 					if (worker != null)
 					{
 						Effects component = worker.GetComponent<Effects>();

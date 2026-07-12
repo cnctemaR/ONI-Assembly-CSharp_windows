@@ -5,29 +5,21 @@ namespace System.Buffers
 {
 	public struct MemoryHandle : IDisposable
 	{
-		public unsafe MemoryHandle(IRetainable retainable, void* pinnedPointer = null, GCHandle handle = default(GCHandle))
+		[CLSCompliant(false)]
+		public unsafe MemoryHandle(void* pointer, GCHandle handle = default(GCHandle), IPinnable pinnable = null)
 		{
-			this._retainable = retainable;
-			this._pointer = pinnedPointer;
+			this._pointer = pointer;
 			this._handle = handle;
+			this._pinnable = pinnable;
 		}
 
-		public unsafe void* PinnedPointer
+		[CLSCompliant(false)]
+		public unsafe void* Pointer
 		{
 			get
 			{
 				return this._pointer;
 			}
-		}
-
-		internal unsafe void AddOffset(int offset)
-		{
-			if (this._pointer == null)
-			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.pointer);
-				return;
-			}
-			this._pointer = (void*)((byte*)this._pointer + offset);
 		}
 
 		public void Dispose()
@@ -36,18 +28,18 @@ namespace System.Buffers
 			{
 				this._handle.Free();
 			}
-			if (this._retainable != null)
+			if (this._pinnable != null)
 			{
-				this._retainable.Release();
-				this._retainable = null;
+				this._pinnable.Unpin();
+				this._pinnable = null;
 			}
 			this._pointer = null;
 		}
 
-		private IRetainable _retainable;
-
 		private unsafe void* _pointer;
 
 		private GCHandle _handle;
+
+		private IPinnable _pinnable;
 	}
 }

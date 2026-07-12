@@ -8,12 +8,28 @@ public class ConduitSleepStates : GameStateMachine<ConduitSleepStates, ConduitSl
 	{
 		default_state = this.connector.moveToSleepLocation;
 		this.root.EventTransition(GameHashes.NewDay, (ConduitSleepStates.Instance smi) => GameClock.Instance, this.behaviourcomplete, null).Exit(new StateMachine<ConduitSleepStates, ConduitSleepStates.Instance, IStateMachineTarget, ConduitSleepStates.Def>.State.Callback(ConduitSleepStates.CleanUp));
-		this.connector.moveToSleepLocation.ToggleStatusItem(CREATURES.STATUSITEMS.DROWSY.NAME, CREATURES.STATUSITEMS.DROWSY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).MoveTo(delegate(ConduitSleepStates.Instance smi)
+		GameStateMachine<ConduitSleepStates, ConduitSleepStates.Instance, IStateMachineTarget, ConduitSleepStates.Def>.State moveToSleepLocation = this.connector.moveToSleepLocation;
+		string text = CREATURES.STATUSITEMS.DROWSY.NAME;
+		string text2 = CREATURES.STATUSITEMS.DROWSY.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		moveToSleepLocation.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory).MoveTo(delegate(ConduitSleepStates.Instance smi)
 		{
 			ConduitSleepMonitor.Instance smi2 = smi.GetSMI<ConduitSleepMonitor.Instance>();
 			return smi2.sm.targetSleepCell.Get(smi2);
 		}, this.drowsy, this.behaviourcomplete, false);
-		this.drowsy.ToggleStatusItem(CREATURES.STATUSITEMS.DROWSY.NAME, CREATURES.STATUSITEMS.DROWSY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(ConduitSleepStates.Instance smi)
+		GameStateMachine<ConduitSleepStates, ConduitSleepStates.Instance, IStateMachineTarget, ConduitSleepStates.Def>.State state = this.drowsy;
+		string text4 = CREATURES.STATUSITEMS.DROWSY.NAME;
+		string text5 = CREATURES.STATUSITEMS.DROWSY.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory).Enter(delegate(ConduitSleepStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().SetCurrentNavType(NavType.Ceiling);
 		}).Enter(delegate(ConduitSleepStates.Instance smi)
@@ -26,7 +42,15 @@ public class ConduitSleepStates : GameStateMachine<ConduitSleepStates, ConduitSl
 			.DefaultState(this.drowsy.loop);
 		this.drowsy.loop.PlayAnim("drowsy_pre").QueueAnim("drowsy_loop", true, null).EventTransition(GameHashes.Nighttime, (ConduitSleepStates.Instance smi) => GameClock.Instance, this.drowsy.pst, (ConduitSleepStates.Instance smi) => GameClock.Instance.IsNighttime());
 		this.drowsy.pst.PlayAnim("drowsy_pst").OnAnimQueueComplete(this.connector.sleep);
-		this.connector.sleep.ToggleStatusItem(CREATURES.STATUSITEMS.SLEEPING.NAME, CREATURES.STATUSITEMS.SLEEPING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(ConduitSleepStates.Instance smi)
+		GameStateMachine<ConduitSleepStates, ConduitSleepStates.Instance, IStateMachineTarget, ConduitSleepStates.Def>.State sleep = this.connector.sleep;
+		string text7 = CREATURES.STATUSITEMS.SLEEPING.NAME;
+		string text8 = CREATURES.STATUSITEMS.SLEEPING.TOOLTIP;
+		string text9 = "";
+		StatusItem.IconType iconType3 = StatusItem.IconType.Info;
+		NotificationType notificationType3 = NotificationType.Neutral;
+		bool flag3 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		sleep.ToggleStatusItem(text7, text8, text9, iconType3, notificationType3, flag3, default(HashedString), 129022, null, null, statusItemCategory).Enter(delegate(ConduitSleepStates.Instance smi)
 		{
 			if (!smi.staterpillar.IsConnectorBuildingSpawned())
 			{

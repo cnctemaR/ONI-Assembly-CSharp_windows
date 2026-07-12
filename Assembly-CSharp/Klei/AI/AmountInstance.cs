@@ -72,9 +72,18 @@ namespace Klei.AI
 			{
 				this.OnDelta(delta);
 			}
+			if (this.OnValueChanged != null && previous_value != this.value)
+			{
+				float num = this.value - previous_value;
+				this.OnValueChanged(num);
+			}
 			if (this.OnMaxValueReached != null && previous_value < this.GetMax() && this.value >= this.GetMax())
 			{
 				this.OnMaxValueReached();
+			}
+			if (this.OnMinValueReached != null && previous_value > this.GetMin() && this.value <= this.GetMin())
+			{
+				this.OnMinValueReached();
 			}
 		}
 
@@ -149,7 +158,11 @@ namespace Klei.AI
 
 		public Action<float> OnDelta;
 
+		public Action<float> OnValueChanged;
+
 		public global::System.Action OnMaxValueReached;
+
+		public global::System.Action OnMinValueReached;
 
 		public bool hide;
 

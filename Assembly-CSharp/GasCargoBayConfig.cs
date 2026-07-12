@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class GasCargoBayConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetForbiddenDlcIds()
 	{
-		return DlcManager.AVAILABLE_VANILLA_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()

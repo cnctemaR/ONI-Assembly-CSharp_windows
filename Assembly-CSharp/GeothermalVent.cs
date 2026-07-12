@@ -279,8 +279,10 @@ public class GeothermalVent : StateMachineComponent<GeothermalVent.StatesInstanc
 		{
 			num4 = elementInfo2.mass;
 		}
-		if (num4 < 0.125f)
+		if (num4 < 0.01f)
 		{
+			elementInfo2.mass = 0f;
+			this.availableMaterial[num2] = elementInfo2;
 			return;
 		}
 		int num5 = (int)((float)elementInfo2.diseaseCount * num4 / elementInfo2.mass);

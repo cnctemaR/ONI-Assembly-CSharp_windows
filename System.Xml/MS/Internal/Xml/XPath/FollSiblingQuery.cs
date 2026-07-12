@@ -9,23 +9,23 @@ namespace MS.Internal.Xml.XPath
 		public FollSiblingQuery(Query qyInput, string name, string prefix, XPathNodeType type)
 			: base(qyInput, name, prefix, type)
 		{
-			this.elementStk = new ClonableStack<XPathNavigator>();
-			this.parentStk = new List<XPathNavigator>();
+			this._elementStk = new ClonableStack<XPathNavigator>();
+			this._parentStk = new List<XPathNavigator>();
 		}
 
 		private FollSiblingQuery(FollSiblingQuery other)
 			: base(other)
 		{
-			this.elementStk = other.elementStk.Clone();
-			this.parentStk = new List<XPathNavigator>(other.parentStk);
-			this.nextInput = Query.Clone(other.nextInput);
+			this._elementStk = other._elementStk.Clone();
+			this._parentStk = new List<XPathNavigator>(other._parentStk);
+			this._nextInput = Query.Clone(other._nextInput);
 		}
 
 		public override void Reset()
 		{
-			this.elementStk.Clear();
-			this.parentStk.Clear();
-			this.nextInput = null;
+			this._elementStk.Clear();
+			this._parentStk.Clear();
+			this._nextInput = null;
 			base.Reset();
 		}
 
@@ -33,14 +33,14 @@ namespace MS.Internal.Xml.XPath
 		{
 			XPathNavigator xpathNavigator = nav.Clone();
 			xpathNavigator.MoveToParent();
-			for (int i = 0; i < this.parentStk.Count; i++)
+			for (int i = 0; i < this._parentStk.Count; i++)
 			{
-				if (xpathNavigator.IsSamePosition(this.parentStk[i]))
+				if (xpathNavigator.IsSamePosition(this._parentStk[i]))
 				{
 					return true;
 				}
 			}
-			this.parentStk.Add(xpathNavigator);
+			this._parentStk.Add(xpathNavigator);
 			return false;
 		}
 
@@ -70,32 +70,32 @@ namespace MS.Internal.Xml.XPath
 			{
 				if (this.currentNode == null)
 				{
-					if (this.nextInput == null)
+					if (this._nextInput == null)
 					{
-						this.nextInput = this.FetchInput();
+						this._nextInput = this.FetchInput();
 					}
-					if (this.elementStk.Count == 0)
+					if (this._elementStk.Count == 0)
 					{
-						if (this.nextInput == null)
+						if (this._nextInput == null)
 						{
 							break;
 						}
-						this.currentNode = this.nextInput;
-						this.nextInput = this.FetchInput();
+						this.currentNode = this._nextInput;
+						this._nextInput = this.FetchInput();
 					}
 					else
 					{
-						this.currentNode = this.elementStk.Pop();
+						this.currentNode = this._elementStk.Pop();
 					}
 				}
-				while (this.currentNode.IsDescendant(this.nextInput))
+				while (this.currentNode.IsDescendant(this._nextInput))
 				{
-					this.elementStk.Push(this.currentNode);
-					this.currentNode = this.nextInput;
-					this.nextInput = this.qyInput.Advance();
-					if (this.nextInput != null)
+					this._elementStk.Push(this.currentNode);
+					this.currentNode = this._nextInput;
+					this._nextInput = this.qyInput.Advance();
+					if (this._nextInput != null)
 					{
-						this.nextInput = this.nextInput.Clone();
+						this._nextInput = this._nextInput.Clone();
 					}
 				}
 				while (this.currentNode.MoveToNext())
@@ -118,10 +118,10 @@ namespace MS.Internal.Xml.XPath
 			return new FollSiblingQuery(this);
 		}
 
-		private ClonableStack<XPathNavigator> elementStk;
+		private ClonableStack<XPathNavigator> _elementStk;
 
-		private List<XPathNavigator> parentStk;
+		private List<XPathNavigator> _parentStk;
 
-		private XPathNavigator nextInput;
+		private XPathNavigator _nextInput;
 	}
 }

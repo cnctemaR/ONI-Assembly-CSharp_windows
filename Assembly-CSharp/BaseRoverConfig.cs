@@ -53,7 +53,7 @@ public static class BaseRoverConfig
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
 		gridVisibility.radius = 30;
 		gridVisibility.innerRadius = 20f;
-		gameObject.AddOrGet<Worker>();
+		gameObject.AddOrGet<StandardWorker>();
 		gameObject.AddOrGet<Effects>();
 		gameObject.AddOrGet<Traits>();
 		gameObject.AddOrGet<AnimEventHandler>();
@@ -103,6 +103,7 @@ public static class BaseRoverConfig
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		gameObject.AddOrGet<Sensors>();
 		gameObject.AddOrGet<Pickupable>().SetWorkTime(5f);
+		gameObject.AddOrGet<Clearable>().isClearable = false;
 		gameObject.AddOrGet<SnapOn>();
 		component.SetSymbolVisiblity("snapto_pivot", false);
 		component.SetSymbolVisiblity("snapto_radar", false);

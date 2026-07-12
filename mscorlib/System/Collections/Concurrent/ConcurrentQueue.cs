@@ -27,7 +27,7 @@ namespace System.Collections.Concurrent
 				int count = collection2.Count;
 				if (count > num)
 				{
-					num = Math.Min(ConcurrentQueue<T>.RoundUpToPowerOf2(count), 1048576);
+					num = Math.Min(ConcurrentQueue<T>.Segment.RoundUpToPowerOf2(count), 1048576);
 				}
 			}
 			this._tail = (this._head = new ConcurrentQueue<T>.Segment(num));
@@ -303,15 +303,15 @@ namespace System.Collections.Concurrent
 				else
 				{
 					int num;
-					for (int j = headHead; j < head._slots.Length; j = num + 1)
+					for (int i = headHead; i < head._slots.Length; i = num + 1)
 					{
-						yield return this.GetItemWhenAvailable(head, j);
-						num = j;
+						yield return this.GetItemWhenAvailable(head, i);
+						num = i;
 					}
-					for (int k = 0; k < headTail; k = num + 1)
+					for (int i = 0; i < headTail; i = num + 1)
 					{
-						yield return this.GetItemWhenAvailable(head, k);
-						num = k;
+						yield return this.GetItemWhenAvailable(head, i);
+						num = i;
 					}
 				}
 			}
@@ -321,33 +321,22 @@ namespace System.Collections.Concurrent
 				ConcurrentQueue<T>.Segment s;
 				for (s = head._nextSegment; s != tail; s = s._nextSegment)
 				{
-					int sTail = s._headAndTail.Tail - s.FreezeOffset;
-					for (int l = 0; l < sTail; l = num + 1)
+					int i = s._headAndTail.Tail - s.FreezeOffset;
+					for (int j = 0; j < i; j = num + 1)
 					{
-						yield return this.GetItemWhenAvailable(s, l);
-						num = l;
+						yield return this.GetItemWhenAvailable(s, j);
+						num = j;
 					}
 				}
 				s = null;
 				tailTail -= tail.FreezeOffset;
-				for (int m = 0; m < tailTail; m = num + 1)
+				for (int i = 0; i < tailTail; i = num + 1)
 				{
-					yield return this.GetItemWhenAvailable(tail, m);
-					num = m;
+					yield return this.GetItemWhenAvailable(tail, i);
+					num = i;
 				}
 			}
 			yield break;
-		}
-
-		private static int RoundUpToPowerOf2(int i)
-		{
-			i--;
-			i |= i >> 1;
-			i |= i >> 2;
-			i |= i >> 4;
-			i |= i >> 8;
-			i |= i >> 16;
-			return i + 1;
 		}
 
 		public void Enqueue(T item)
@@ -469,7 +458,7 @@ namespace System.Collections.Concurrent
 		private volatile ConcurrentQueue<T>.Segment _head;
 
 		[DebuggerDisplay("Capacity = {Capacity}")]
-		private sealed class Segment
+		internal sealed class Segment
 		{
 			public Segment(int boundedLength)
 			{
@@ -479,6 +468,17 @@ namespace System.Collections.Concurrent
 				{
 					this._slots[i].SequenceNumber = i;
 				}
+			}
+
+			internal static int RoundUpToPowerOf2(int i)
+			{
+				i--;
+				i |= i >> 1;
+				i |= i >> 2;
+				i |= i >> 4;
+				i |= i >> 8;
+				i |= i >> 16;
+				return i + 1;
 			}
 
 			internal int Capacity

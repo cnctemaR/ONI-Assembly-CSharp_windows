@@ -78,7 +78,7 @@ public readonly struct MinionVoice
 		string text = localName;
 		if (localName.Contains(":"))
 		{
-			text = localName.Split(new char[] { ':' })[0];
+			text = localName.Split(':', StringSplitOptions.None)[0];
 		}
 		return StringFormatter.Combine("DupVoc_", this.voiceId, "_", text);
 	}

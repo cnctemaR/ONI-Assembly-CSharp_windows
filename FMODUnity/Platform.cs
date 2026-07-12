@@ -9,7 +9,7 @@ namespace FMODUnity
 {
 	public abstract class Platform : ScriptableObject
 	{
-		public string Identifier
+		internal string Identifier
 		{
 			get
 			{
@@ -21,11 +21,11 @@ namespace FMODUnity
 			}
 		}
 
-		public abstract string DisplayName { get; }
+		internal abstract string DisplayName { get; }
 
-		public abstract void DeclareRuntimePlatforms(Settings settings);
+		internal abstract void DeclareRuntimePlatforms(Settings settings);
 
-		public virtual float Priority
+		internal virtual float Priority
 		{
 			get
 			{
@@ -33,7 +33,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual bool MatchesCurrentEnvironment
+		internal virtual bool MatchesCurrentEnvironment
 		{
 			get
 			{
@@ -41,7 +41,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual bool IsIntrinsic
+		internal virtual bool IsIntrinsic
 		{
 			get
 			{
@@ -49,15 +49,15 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual void PreSystemCreate(Action<RESULT, string> reportResult)
+		internal virtual void PreSystemCreate(Action<RESULT, string> reportResult)
 		{
 		}
 
-		public virtual void PreInitialize(global::FMOD.Studio.System studioSystem)
+		internal virtual void PreInitialize(global::FMOD.Studio.System studioSystem)
 		{
 		}
 
-		public virtual string GetBankFolder()
+		internal virtual string GetBankFolder()
 		{
 			return Application.streamingAssetsPath;
 		}
@@ -67,18 +67,18 @@ namespace FMODUnity
 			return string.Format("{0}/Plugins", Application.dataPath);
 		}
 
-		public virtual string GetPluginPath(string pluginName)
+		internal virtual string GetPluginPath(string pluginName)
 		{
 			throw new NotImplementedException(string.Format("Plugins are not implemented on platform {0}", this.Identifier));
 		}
 
-		public virtual void LoadPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
+		internal virtual void LoadPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
 		{
 			this.LoadDynamicPlugins(coreSystem, reportResult);
 			this.LoadStaticPlugins(coreSystem, reportResult);
 		}
 
-		public virtual void LoadDynamicPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
+		internal virtual void LoadDynamicPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
 		{
 			List<string> plugins = this.Plugins;
 			if (plugins == null)
@@ -102,7 +102,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual void LoadStaticPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
+		internal virtual void LoadStaticPlugins(global::FMOD.System coreSystem, Action<RESULT, string> reportResult)
 		{
 			if (this.StaticPlugins.Count > 0)
 			{
@@ -110,7 +110,7 @@ namespace FMODUnity
 			}
 		}
 
-		public void AffirmProperties()
+		internal void AffirmProperties()
 		{
 			if (!this.active)
 			{
@@ -120,7 +120,7 @@ namespace FMODUnity
 			}
 		}
 
-		public void ClearProperties()
+		internal void ClearProperties()
 		{
 			if (this.active)
 			{
@@ -129,7 +129,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual void InitializeProperties()
+		internal virtual void InitializeProperties()
 		{
 			if (!this.IsIntrinsic)
 			{
@@ -137,7 +137,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual void EnsurePropertiesAreValid()
+		internal virtual void EnsurePropertiesAreValid()
 		{
 			if (!this.IsIntrinsic && string.IsNullOrEmpty(this.ParentIdentifier))
 			{
@@ -145,7 +145,7 @@ namespace FMODUnity
 			}
 		}
 
-		public string ParentIdentifier
+		internal string ParentIdentifier
 		{
 			get
 			{
@@ -157,7 +157,7 @@ namespace FMODUnity
 			}
 		}
 
-		public bool IsLiveUpdateEnabled
+		internal bool IsLiveUpdateEnabled
 		{
 			get
 			{
@@ -165,7 +165,7 @@ namespace FMODUnity
 			}
 		}
 
-		public bool IsOverlayEnabled
+		internal bool IsOverlayEnabled
 		{
 			get
 			{
@@ -173,7 +173,7 @@ namespace FMODUnity
 			}
 		}
 
-		public bool Active
+		internal bool Active
 		{
 			get
 			{
@@ -181,11 +181,11 @@ namespace FMODUnity
 			}
 		}
 
-		public bool HasAnyOverriddenProperties
+		internal bool HasAnyOverriddenProperties
 		{
 			get
 			{
-				return this.active && (this.Properties.LiveUpdate.HasValue || this.Properties.LiveUpdatePort.HasValue || this.Properties.Overlay.HasValue || this.Properties.Logging.HasValue || this.Properties.SampleRate.HasValue || this.Properties.BuildDirectory.HasValue || this.Properties.SpeakerMode.HasValue || this.Properties.VirtualChannelCount.HasValue || this.Properties.RealChannelCount.HasValue || this.Properties.DSPBufferLength.HasValue || this.Properties.DSPBufferCount.HasValue || this.Properties.Plugins.HasValue || this.Properties.StaticPlugins.HasValue);
+				return this.active && (this.Properties.LiveUpdate.HasValue || this.Properties.LiveUpdatePort.HasValue || this.Properties.Overlay.HasValue || this.Properties.OverlayPosition.HasValue || this.Properties.OverlayFontSize.HasValue || this.Properties.Logging.HasValue || this.Properties.SampleRate.HasValue || this.Properties.BuildDirectory.HasValue || this.Properties.SpeakerMode.HasValue || this.Properties.VirtualChannelCount.HasValue || this.Properties.RealChannelCount.HasValue || this.Properties.DSPBufferLength.HasValue || this.Properties.DSPBufferCount.HasValue || this.Properties.Plugins.HasValue || this.Properties.StaticPlugins.HasValue);
 			}
 		}
 
@@ -211,6 +211,27 @@ namespace FMODUnity
 			{
 				return Platform.PropertyAccessors.Overlay.Get(this);
 			}
+		}
+
+		public ScreenPosition OverlayRect
+		{
+			get
+			{
+				return Platform.PropertyAccessors.OverlayPosition.Get(this);
+			}
+		}
+
+		public int OverlayFontSize
+		{
+			get
+			{
+				return Platform.PropertyAccessors.OverlayFontSize.Get(this);
+			}
+		}
+
+		public void SetOverlayFontSize(int size)
+		{
+			Platform.PropertyAccessors.OverlayFontSize.Set(this, size);
 		}
 
 		public TriStateBool Logging
@@ -301,12 +322,12 @@ namespace FMODUnity
 			}
 		}
 
-		public bool InheritsFrom(Platform platform)
+		internal bool InheritsFrom(Platform platform)
 		{
 			return platform == this || (this.Parent != null && this.Parent.InheritsFrom(platform));
 		}
 
-		public OUTPUTTYPE GetOutputType()
+		internal OUTPUTTYPE GetOutputType()
 		{
 			if (Enum.IsDefined(typeof(OUTPUTTYPE), this.OutputTypeName))
 			{
@@ -315,7 +336,7 @@ namespace FMODUnity
 			return OUTPUTTYPE.AUTODETECT;
 		}
 
-		public virtual List<ThreadAffinityGroup> DefaultThreadAffinities
+		internal virtual List<ThreadAffinityGroup> DefaultThreadAffinities
 		{
 			get
 			{
@@ -335,7 +356,7 @@ namespace FMODUnity
 			}
 		}
 
-		public Platform.PropertyThreadAffinityList ThreadAffinitiesProperty
+		internal Platform.PropertyThreadAffinityList ThreadAffinitiesProperty
 		{
 			get
 			{
@@ -343,7 +364,7 @@ namespace FMODUnity
 			}
 		}
 
-		public virtual List<CodecChannelCount> DefaultCodecChannels
+		internal virtual List<CodecChannelCount> DefaultCodecChannels
 		{
 			get
 			{
@@ -351,7 +372,7 @@ namespace FMODUnity
 			}
 		}
 
-		public List<CodecChannelCount> CodecChannels
+		internal List<CodecChannelCount> CodecChannels
 		{
 			get
 			{
@@ -363,7 +384,7 @@ namespace FMODUnity
 			}
 		}
 
-		public Platform.PropertyCodecChannels CodecChannelsProperty
+		internal Platform.PropertyCodecChannels CodecChannelsProperty
 		{
 			get
 			{
@@ -371,11 +392,11 @@ namespace FMODUnity
 			}
 		}
 
-		public const float DefaultPriority = 0f;
+		internal const float DefaultPriority = 0f;
 
-		public const string RegisterStaticPluginsClassName = "StaticPluginManager";
+		internal const string RegisterStaticPluginsClassName = "StaticPluginManager";
 
-		public const string RegisterStaticPluginsFunctionName = "Register";
+		internal const string RegisterStaticPluginsFunctionName = "Register";
 
 		[SerializeField]
 		private string identifier;
@@ -391,7 +412,7 @@ namespace FMODUnity
 
 		[SerializeField]
 		[FormerlySerializedAs("outputType")]
-		public string OutputTypeName;
+		internal string OutputTypeName;
 
 		private static List<ThreadAffinityGroup> StaticThreadAffinities = new List<ThreadAffinityGroup>();
 
@@ -431,6 +452,11 @@ namespace FMODUnity
 		}
 
 		[Serializable]
+		public class PropertyScreenPosition : Platform.Property<ScreenPosition>
+		{
+		}
+
+		[Serializable]
 		public class PropertyInt : Platform.Property<int>
 		{
 		}
@@ -455,14 +481,14 @@ namespace FMODUnity
 		{
 		}
 
-		public interface PropertyOverrideControl
+		internal interface PropertyOverrideControl
 		{
 			bool HasValue(Platform platform);
 
 			void Clear(Platform platform);
 		}
 
-		public struct PropertyAccessor<T> : Platform.PropertyOverrideControl
+		internal struct PropertyAccessor<T> : Platform.PropertyOverrideControl
 		{
 			public PropertyAccessor(Func<Platform.PropertyStorage, Platform.Property<T>> getter, T defaultValue)
 			{
@@ -519,6 +545,10 @@ namespace FMODUnity
 
 			public Platform.PropertyBool Overlay = new Platform.PropertyBool();
 
+			public Platform.PropertyScreenPosition OverlayPosition = new Platform.PropertyScreenPosition();
+
+			public Platform.PropertyInt OverlayFontSize = new Platform.PropertyInt();
+
 			public Platform.PropertyBool Logging = new Platform.PropertyBool();
 
 			public Platform.PropertyInt SampleRate = new Platform.PropertyInt();
@@ -542,13 +572,17 @@ namespace FMODUnity
 			public Platform.PropertyCallbackHandler CallbackHandler = new Platform.PropertyCallbackHandler();
 		}
 
-		public static class PropertyAccessors
+		internal static class PropertyAccessors
 		{
 			public static readonly Platform.PropertyAccessor<TriStateBool> LiveUpdate = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.LiveUpdate, TriStateBool.Disabled);
 
 			public static readonly Platform.PropertyAccessor<int> LiveUpdatePort = new Platform.PropertyAccessor<int>((Platform.PropertyStorage properties) => properties.LiveUpdatePort, 9264);
 
 			public static readonly Platform.PropertyAccessor<TriStateBool> Overlay = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.Overlay, TriStateBool.Disabled);
+
+			public static readonly Platform.PropertyAccessor<ScreenPosition> OverlayPosition = new Platform.PropertyAccessor<ScreenPosition>((Platform.PropertyStorage properties) => properties.OverlayPosition, ScreenPosition.TopLeft);
+
+			public static readonly Platform.PropertyAccessor<int> OverlayFontSize = new Platform.PropertyAccessor<int>((Platform.PropertyStorage properties) => properties.OverlayFontSize, 14);
 
 			public static readonly Platform.PropertyAccessor<TriStateBool> Logging = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.Logging, TriStateBool.Disabled);
 
@@ -579,7 +613,7 @@ namespace FMODUnity
 		}
 
 		[Serializable]
-		public class PropertyCodecChannels : Platform.Property<List<CodecChannelCount>>
+		internal class PropertyCodecChannels : Platform.Property<List<CodecChannelCount>>
 		{
 		}
 	}

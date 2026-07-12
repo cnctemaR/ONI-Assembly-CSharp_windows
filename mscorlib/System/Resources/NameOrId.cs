@@ -44,7 +44,7 @@ namespace System.Resources
 			{
 				return "Name(" + this.name + ")";
 			}
-			return "Id(" + this.id + ")";
+			return "Id(" + this.id.ToString() + ")";
 		}
 
 		private string name;

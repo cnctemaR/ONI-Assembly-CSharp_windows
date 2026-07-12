@@ -110,18 +110,18 @@ namespace System.Globalization
 			else
 			{
 				int num = (int)(ch - 'א');
-				if (num < 0 || num >= HebrewNumber.HebrewValues.Length)
+				if (num < 0 || num >= HebrewNumber.s_hebrewValues.Length)
 				{
 					return HebrewNumberParsingState.NotHebrewDigit;
 				}
-				hebrewToken = HebrewNumber.HebrewValues[num].token;
+				hebrewToken = HebrewNumber.s_hebrewValues[num].token;
 				if (hebrewToken == HebrewNumber.HebrewToken.Invalid)
 				{
 					return HebrewNumberParsingState.NotHebrewDigit;
 				}
-				context.result += HebrewNumber.HebrewValues[num].value;
+				context.result += (int)HebrewNumber.s_hebrewValues[num].value;
 			}
-			context.state = HebrewNumber.NumberPasingState[(int)context.state][(int)hebrewToken];
+			context.state = HebrewNumber.s_numberPasingState[(int)(context.state * HebrewNumber.HS.X00 + (sbyte)hebrewToken)];
 			if (context.state == HebrewNumber.HS._err)
 			{
 				return HebrewNumberParsingState.InvalidHebrewNumber;
@@ -135,14 +135,14 @@ namespace System.Globalization
 
 		internal static bool IsDigit(char ch)
 		{
-			if (ch >= 'א' && ch <= HebrewNumber.maxHebrewNumberCh)
+			if (ch >= 'א' && ch <= HebrewNumber.s_maxHebrewNumberCh)
 			{
-				return HebrewNumber.HebrewValues[(int)(ch - 'א')].value >= 0;
+				return HebrewNumber.s_hebrewValues[(int)(ch - 'א')].value >= 0;
 			}
 			return ch == '\'' || ch == '"';
 		}
 
-		private static HebrewNumber.HebrewValue[] HebrewValues = new HebrewNumber.HebrewValue[]
+		private static readonly HebrewNumber.HebrewValue[] s_hebrewValues = new HebrewNumber.HebrewValue[]
 		{
 			new HebrewNumber.HebrewValue(HebrewNumber.HebrewToken.Digit1, 1),
 			new HebrewNumber.HebrewValue(HebrewNumber.HebrewToken.Digit1, 2),
@@ -175,234 +175,185 @@ namespace System.Globalization
 
 		private const int minHebrewNumberCh = 1488;
 
-		private static char maxHebrewNumberCh = (char)(1488 + HebrewNumber.HebrewValues.Length - 1);
+		private static char s_maxHebrewNumberCh = (char)(1488 + HebrewNumber.s_hebrewValues.Length - 1);
 
-		private static readonly HebrewNumber.HS[][] NumberPasingState = new HebrewNumber.HS[][]
+		private static readonly HebrewNumber.HS[] s_numberPasingState = new HebrewNumber.HS[]
 		{
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS.S400,
-				HebrewNumber.HS.X00,
-				HebrewNumber.HS.X00,
-				HebrewNumber.HS.X0,
-				HebrewNumber.HS.X,
-				HebrewNumber.HS.X,
-				HebrewNumber.HS.X,
-				HebrewNumber.HS.S9,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS.S400_400,
-				HebrewNumber.HS.S400_X00,
-				HebrewNumber.HS.S400_X00,
-				HebrewNumber.HS.S400_X0,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_S9,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.S400_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S400_400_100,
-				HebrewNumber.HS.S400_X0,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_S9,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S400_400_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S400_X00_X0,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_S9,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X0_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X0_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.X0_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S400_X0,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_S9,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.X00_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S400_X00_X0,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_S9,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.X00_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.S9_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.S9_DQ
-			},
-			new HebrewNumber.HS[]
-			{
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS.END,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err,
-				HebrewNumber.HS._err
-			}
+			HebrewNumber.HS.S400,
+			HebrewNumber.HS.X00,
+			HebrewNumber.HS.X00,
+			HebrewNumber.HS.X0,
+			HebrewNumber.HS.X,
+			HebrewNumber.HS.X,
+			HebrewNumber.HS.X,
+			HebrewNumber.HS.S9,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_400,
+			HebrewNumber.HS.S400_X00,
+			HebrewNumber.HS.S400_X00,
+			HebrewNumber.HS.S400_X0,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_S9,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.S400_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_400_100,
+			HebrewNumber.HS.S400_X0,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_S9,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_400_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_X00_X0,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_S9,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X0_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X0_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.X0_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_X0,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_S9,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.X00_DQ,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S400_X00_X0,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_S9,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.X00_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.S9_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.S9_DQ,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS.END,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err,
+			HebrewNumber.HS._err
 		};
 
-		private enum HebrewToken
+		private const int HebrewTokenCount = 10;
+
+		private enum HebrewToken : short
 		{
 			Invalid = -1,
 			Digit400,
@@ -417,9 +368,9 @@ namespace System.Globalization
 			DoubleQuote
 		}
 
-		private class HebrewValue
+		private struct HebrewValue
 		{
-			internal HebrewValue(HebrewNumber.HebrewToken token, int value)
+			internal HebrewValue(HebrewNumber.HebrewToken token, short value)
 			{
 				this.token = token;
 				this.value = value;
@@ -427,10 +378,10 @@ namespace System.Globalization
 
 			internal HebrewNumber.HebrewToken token;
 
-			internal int value;
+			internal short value;
 		}
 
-		internal enum HS
+		internal enum HS : sbyte
 		{
 			_err = -1,
 			Start,

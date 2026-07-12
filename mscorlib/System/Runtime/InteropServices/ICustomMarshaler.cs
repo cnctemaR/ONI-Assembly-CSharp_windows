@@ -2,7 +2,6 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	public interface ICustomMarshaler
 	{
 		object MarshalNativeToManaged(IntPtr pNativeData);

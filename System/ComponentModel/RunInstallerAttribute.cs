@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public RunInstallerAttribute(bool runInstaller)
 		{
-			this.runInstaller = runInstaller;
+			this.RunInstaller = runInstaller;
 		}
 
-		public bool RunInstaller
-		{
-			get
-			{
-				return this.runInstaller;
-			}
-		}
+		public bool RunInstaller { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -25,7 +19,7 @@ namespace System.ComponentModel
 				return true;
 			}
 			RunInstallerAttribute runInstallerAttribute = obj as RunInstallerAttribute;
-			return runInstallerAttribute != null && runInstallerAttribute.RunInstaller == this.runInstaller;
+			return runInstallerAttribute != null && runInstallerAttribute.RunInstaller == this.RunInstaller;
 		}
 
 		public override int GetHashCode()
@@ -37,8 +31,6 @@ namespace System.ComponentModel
 		{
 			return this.Equals(RunInstallerAttribute.Default);
 		}
-
-		private bool runInstaller;
 
 		public static readonly RunInstallerAttribute Yes = new RunInstallerAttribute(true);
 

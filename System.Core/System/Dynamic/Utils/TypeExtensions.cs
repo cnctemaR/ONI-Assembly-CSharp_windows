@@ -58,7 +58,7 @@ namespace System.Dynamic.Utils
 			{
 				parameters = method.GetParameters();
 				Type declaringType = method.DeclaringType;
-				if (declaringType != null && declaringType.CanCache())
+				if (declaringType != null && !declaringType.IsCollectible)
 				{
 					cacheDict[method] = parameters;
 				}

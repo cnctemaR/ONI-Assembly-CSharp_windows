@@ -53,13 +53,15 @@ public class DebugHandler : IInputHandler
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, DebugHandler.GetMousePos(), 1.5f, false, true);
 			return;
 		}
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		MinionStartingStats minionStartingStats = new MinionStartingStats(false, null, null, true);
+		GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+		GameObject gameObject = Util.KInstantiate(prefab, null, null);
+		gameObject.name = prefab.name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, null, true).Apply(gameObject);
+		minionStartingStats.Apply(gameObject);
 		if (addAtmoSuit)
 		{
 			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("Atmo_Suit"), vector, Grid.SceneLayer.Creatures, null, 0);
@@ -206,9 +208,7 @@ public class DebugHandler : IInputHandler
 			}
 			if (ManagementMenu.Instance != null)
 			{
-				ManagementMenu.Instance.CheckResearch(null);
-				ManagementMenu.Instance.CheckSkills(null);
-				ManagementMenu.Instance.CheckStarmap(null);
+				ManagementMenu.Instance.Refresh();
 			}
 			if (SelectTool.Instance.selected != null)
 			{
@@ -236,7 +236,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0CA5;
+					goto IL_0CAD;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -245,7 +245,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0CA5;
+					goto IL_0CAD;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -351,7 +351,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0CA5;
+						goto IL_0CAD;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -363,6 +363,11 @@ public class DebugHandler : IInputHandler
 					KSelectable selected = SelectTool.Instance.selected;
 					if (selected != null)
 					{
+						Navigator component = selected.GetComponent<Navigator>();
+						if (component != null)
+						{
+							component.Stop(false, true);
+						}
 						int mouseCell = DebugHandler.GetMouseCell();
 						if (!Grid.IsValidBuildingCell(mouseCell))
 						{
@@ -517,7 +522,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0CA5:
+		IL_0CAD:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

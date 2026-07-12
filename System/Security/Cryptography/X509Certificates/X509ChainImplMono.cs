@@ -74,6 +74,10 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
+		public override void AddStatus(X509ChainStatusFlags error)
+		{
+		}
+
 		[MonoTODO("Not totally RFC3280 compliant, but neither is MS implementation...")]
 		public override bool Build(X509Certificate2 certificate)
 		{
@@ -82,7 +86,7 @@ namespace System.Security.Cryptography.X509Certificates
 				throw new ArgumentException("certificate");
 			}
 			this.Reset();
-			global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags x509ChainStatusFlags;
+			X509ChainStatusFlags x509ChainStatusFlags;
 			try
 			{
 				x509ChainStatusFlags = this.BuildChainFrom(certificate);
@@ -92,7 +96,7 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				throw new ArgumentException("certificate", ex);
 			}
-			global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags x509ChainStatusFlags2 = global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+			X509ChainStatusFlags x509ChainStatusFlags2 = X509ChainStatusFlags.NoError;
 			ArrayList arrayList = new ArrayList();
 			foreach (X509ChainElement x509ChainElement in this.elements)
 			{
@@ -105,7 +109,7 @@ namespace System.Security.Cryptography.X509Certificates
 					}
 				}
 			}
-			if (x509ChainStatusFlags != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError)
+			if (x509ChainStatusFlags != X509ChainStatusFlags.NoError)
 			{
 				arrayList.Insert(0, new X509ChainStatus(x509ChainStatusFlags));
 			}
@@ -120,16 +124,16 @@ namespace System.Security.Cryptography.X509Certificates
 			while (i < chainElementStatus.Length)
 			{
 				X509ChainStatus x509ChainStatus2 = chainElementStatus[i];
-				global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags x509ChainStatusFlags3 = x509ChainStatus2.Status;
-				if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidNameConstraints)
+				X509ChainStatusFlags x509ChainStatusFlags3 = x509ChainStatus2.Status;
+				if (x509ChainStatusFlags3 <= X509ChainStatusFlags.InvalidNameConstraints)
 				{
-					if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.UntrustedRoot)
+					if (x509ChainStatusFlags3 <= X509ChainStatusFlags.UntrustedRoot)
 					{
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotTimeValid)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.NotTimeValid)
 						{
-							if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotTimeNested)
+							if (x509ChainStatusFlags3 != X509ChainStatusFlags.NotTimeNested)
 							{
-								if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.UntrustedRoot)
+								if (x509ChainStatusFlags3 != X509ChainStatusFlags.UntrustedRoot)
 								{
 									goto IL_02E4;
 								}
@@ -145,11 +149,11 @@ namespace System.Security.Cryptography.X509Certificates
 							flag &= (this.ChainPolicy.VerificationFlags & X509VerificationFlags.IgnoreNotTimeValid) > X509VerificationFlags.NoFlag;
 						}
 					}
-					else if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidPolicyConstraints)
+					else if (x509ChainStatusFlags3 <= X509ChainStatusFlags.InvalidPolicyConstraints)
 					{
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidExtension)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.InvalidExtension)
 						{
-							if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidPolicyConstraints)
+							if (x509ChainStatusFlags3 != X509ChainStatusFlags.InvalidPolicyConstraints)
 							{
 								goto IL_02E4;
 							}
@@ -160,9 +164,9 @@ namespace System.Security.Cryptography.X509Certificates
 							flag &= (this.ChainPolicy.VerificationFlags & X509VerificationFlags.IgnoreWrongUsage) > X509VerificationFlags.NoFlag;
 						}
 					}
-					else if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidBasicConstraints)
+					else if (x509ChainStatusFlags3 != X509ChainStatusFlags.InvalidBasicConstraints)
 					{
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidNameConstraints)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.InvalidNameConstraints)
 						{
 							goto IL_02E4;
 						}
@@ -173,11 +177,11 @@ namespace System.Security.Cryptography.X509Certificates
 						flag &= (this.ChainPolicy.VerificationFlags & X509VerificationFlags.IgnoreInvalidBasicConstraints) > X509VerificationFlags.NoFlag;
 					}
 				}
-				else if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.PartialChain)
+				else if (x509ChainStatusFlags3 <= X509ChainStatusFlags.PartialChain)
 				{
-					if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.HasNotPermittedNameConstraint)
+					if (x509ChainStatusFlags3 <= X509ChainStatusFlags.HasNotPermittedNameConstraint)
 					{
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.HasNotSupportedNameConstraint && x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.HasNotPermittedNameConstraint)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.HasNotSupportedNameConstraint && x509ChainStatusFlags3 != X509ChainStatusFlags.HasNotPermittedNameConstraint)
 						{
 							goto IL_02E4;
 						}
@@ -185,22 +189,22 @@ namespace System.Security.Cryptography.X509Certificates
 					}
 					else
 					{
-						if (x509ChainStatusFlags3 == global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.HasExcludedNameConstraint)
+						if (x509ChainStatusFlags3 == X509ChainStatusFlags.HasExcludedNameConstraint)
 						{
 							goto IL_028D;
 						}
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.PartialChain)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.PartialChain)
 						{
 							goto IL_02E4;
 						}
 						goto IL_0216;
 					}
 				}
-				else if (x509ChainStatusFlags3 <= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.CtlNotSignatureValid)
+				else if (x509ChainStatusFlags3 <= X509ChainStatusFlags.CtlNotSignatureValid)
 				{
-					if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.CtlNotTimeValid)
+					if (x509ChainStatusFlags3 != X509ChainStatusFlags.CtlNotTimeValid)
 					{
-						if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.CtlNotSignatureValid)
+						if (x509ChainStatusFlags3 != X509ChainStatusFlags.CtlNotSignatureValid)
 						{
 							goto IL_02E4;
 						}
@@ -210,9 +214,9 @@ namespace System.Security.Cryptography.X509Certificates
 						flag &= (this.ChainPolicy.VerificationFlags & X509VerificationFlags.IgnoreCtlNotTimeValid) > X509VerificationFlags.NoFlag;
 					}
 				}
-				else if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.CtlNotValidForUsage)
+				else if (x509ChainStatusFlags3 != X509ChainStatusFlags.CtlNotValidForUsage)
 				{
-					if (x509ChainStatusFlags3 != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoIssuanceChainPolicy)
+					if (x509ChainStatusFlags3 != X509ChainStatusFlags.NoIssuanceChainPolicy)
 					{
 						goto IL_02E4;
 					}
@@ -289,7 +293,7 @@ namespace System.Security.Cryptography.X509Certificates
 				if (this.roots == null)
 				{
 					X509Certificate2Collection x509Certificate2Collection = new X509Certificate2Collection();
-					global::System.Security.Cryptography.X509Certificates.X509Store lmrootStore = this.LMRootStore;
+					X509Store lmrootStore = this.LMRootStore;
 					if (this.location == StoreLocation.CurrentUser)
 					{
 						x509Certificate2Collection.AddRange(this.UserRootStore.Certificates);
@@ -308,7 +312,7 @@ namespace System.Security.Cryptography.X509Certificates
 				if (this.cas == null)
 				{
 					X509Certificate2Collection x509Certificate2Collection = new X509Certificate2Collection();
-					global::System.Security.Cryptography.X509Certificates.X509Store lmcastore = this.LMCAStore;
+					X509Store lmcastore = this.LMCAStore;
 					if (this.location == StoreLocation.CurrentUser)
 					{
 						x509Certificate2Collection.AddRange(this.UserCAStore.Certificates);
@@ -320,13 +324,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store LMRootStore
+		private X509Store LMRootStore
 		{
 			get
 			{
 				if (this.root_store == null)
 				{
-					this.root_store = new global::System.Security.Cryptography.X509Certificates.X509Store(StoreName.Root, StoreLocation.LocalMachine);
+					this.root_store = new X509Store(StoreName.Root, StoreLocation.LocalMachine);
 					try
 					{
 						this.root_store.Open(OpenFlags.OpenExistingOnly);
@@ -339,13 +343,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store UserRootStore
+		private X509Store UserRootStore
 		{
 			get
 			{
 				if (this.user_root_store == null)
 				{
-					this.user_root_store = new global::System.Security.Cryptography.X509Certificates.X509Store(StoreName.Root, StoreLocation.CurrentUser);
+					this.user_root_store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
 					try
 					{
 						this.user_root_store.Open(OpenFlags.OpenExistingOnly);
@@ -358,13 +362,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store LMCAStore
+		private X509Store LMCAStore
 		{
 			get
 			{
 				if (this.ca_store == null)
 				{
-					this.ca_store = new global::System.Security.Cryptography.X509Certificates.X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine);
+					this.ca_store = new X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine);
 					try
 					{
 						this.ca_store.Open(OpenFlags.OpenExistingOnly);
@@ -377,13 +381,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store UserCAStore
+		private X509Store UserCAStore
 		{
 			get
 			{
 				if (this.user_ca_store == null)
 				{
-					this.user_ca_store = new global::System.Security.Cryptography.X509Certificates.X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser);
+					this.user_ca_store = new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser);
 					try
 					{
 						this.user_ca_store.Open(OpenFlags.OpenExistingOnly);
@@ -410,7 +414,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags BuildChainFrom(X509Certificate2 certificate)
+		private X509ChainStatusFlags BuildChainFrom(X509Certificate2 certificate)
 		{
 			this.elements.Add(certificate);
 			while (!this.IsChainComplete(certificate))
@@ -418,37 +422,37 @@ namespace System.Security.Cryptography.X509Certificates
 				certificate = this.FindParent(certificate);
 				if (certificate == null)
 				{
-					return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.PartialChain;
+					return X509ChainStatusFlags.PartialChain;
 				}
 				if (this.elements.Contains(certificate))
 				{
-					return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.Cyclic;
+					return X509ChainStatusFlags.Cyclic;
 				}
 				this.elements.Add(certificate);
 			}
 			if (!this.Roots.Contains(certificate))
 			{
-				this.elements[this.elements.Count - 1].StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.UntrustedRoot;
+				this.elements[this.elements.Count - 1].StatusFlags |= X509ChainStatusFlags.UntrustedRoot;
 			}
-			return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+			return X509ChainStatusFlags.NoError;
 		}
 
 		private X509Certificate2 SelectBestFromCollection(X509Certificate2 child, X509Certificate2Collection c)
 		{
-			int num = c.Count;
-			if (num == 0)
+			int count = c.Count;
+			if (count == 0)
 			{
 				return null;
 			}
-			if (num == 1)
+			if (count == 1)
 			{
 				return c[0];
 			}
 			X509Certificate2Collection x509Certificate2Collection = c.Find(X509FindType.FindByTimeValid, this.ChainPolicy.VerificationTime, false);
-			num = x509Certificate2Collection.Count;
-			if (num != 0)
+			int count2 = x509Certificate2Collection.Count;
+			if (count2 != 0)
 			{
-				if (num == 1)
+				if (count2 == 1)
 				{
 					return x509Certificate2Collection[0];
 				}
@@ -513,11 +517,11 @@ namespace System.Security.Cryptography.X509Certificates
 			return certificate.Issuer == certificate.Subject;
 		}
 
-		private void ValidateChain(global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags flag)
+		private void ValidateChain(X509ChainStatusFlags flag)
 		{
 			int num = this.elements.Count - 1;
 			X509Certificate2 certificate = this.elements[num].Certificate;
-			if ((flag & global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.PartialChain) == global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError)
+			if ((flag & X509ChainStatusFlags.PartialChain) == X509ChainStatusFlags.NoError)
 			{
 				this.Process(num);
 				if (num == 0)
@@ -544,19 +548,20 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			X509ChainElement x509ChainElement = this.elements[n];
 			X509Certificate2 certificate = x509ChainElement.Certificate;
-			if (n != this.elements.Count - 1 && certificate.MonoCertificate.KeyAlgorithm == "1.2.840.10040.4.1" && certificate.MonoCertificate.KeyAlgorithmParameters == null)
+			X509Certificate monoCertificate = X509Helper2.GetMonoCertificate(certificate);
+			if (n != this.elements.Count - 1 && monoCertificate.KeyAlgorithm == "1.2.840.10040.4.1" && monoCertificate.KeyAlgorithmParameters == null)
 			{
-				X509Certificate2 certificate2 = this.elements[n + 1].Certificate;
-				certificate.MonoCertificate.KeyAlgorithmParameters = certificate2.MonoCertificate.KeyAlgorithmParameters;
+				X509Certificate monoCertificate2 = X509Helper2.GetMonoCertificate(this.elements[n + 1].Certificate);
+				monoCertificate.KeyAlgorithmParameters = monoCertificate2.KeyAlgorithmParameters;
 			}
 			bool flag = this.working_public_key == null;
 			if (!this.IsSignedWith(certificate, flag ? certificate.PublicKey.Key : this.working_public_key) && (flag || n != this.elements.Count - 1 || this.IsSelfIssued(certificate)))
 			{
-				x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotSignatureValid;
+				x509ChainElement.StatusFlags |= X509ChainStatusFlags.NotSignatureValid;
 			}
 			if (this.ChainPolicy.VerificationTime < certificate.NotBefore || this.ChainPolicy.VerificationTime > certificate.NotAfter)
 			{
-				x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotTimeValid;
+				x509ChainElement.StatusFlags |= X509ChainStatusFlags.NotTimeValid;
 			}
 			if (flag)
 			{
@@ -564,7 +569,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			if (!X500DistinguishedName.AreEqual(certificate.IssuerName, this.working_issuer_name))
 			{
-				x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidNameConstraints;
+				x509ChainElement.StatusFlags |= X509ChainStatusFlags.InvalidNameConstraints;
 			}
 			if (!this.IsSelfIssued(certificate))
 			{
@@ -582,12 +587,12 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				if (!x509BasicConstraintsExtension.CertificateAuthority)
 				{
-					x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidBasicConstraints;
+					x509ChainElement.StatusFlags |= X509ChainStatusFlags.InvalidBasicConstraints;
 				}
 			}
 			else if (certificate.Version >= 3)
 			{
-				x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidBasicConstraints;
+				x509ChainElement.StatusFlags |= X509ChainStatusFlags.InvalidBasicConstraints;
 			}
 			if (!this.IsSelfIssued(certificate))
 			{
@@ -597,7 +602,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				else if (this.bce_restriction != null)
 				{
-					this.bce_restriction.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidBasicConstraints;
+					this.bce_restriction.StatusFlags |= X509ChainStatusFlags.InvalidBasicConstraints;
 				}
 			}
 			if (x509BasicConstraintsExtension != null && x509BasicConstraintsExtension.HasPathLengthConstraint && x509BasicConstraintsExtension.PathLengthConstraint < this.max_path_length)
@@ -611,7 +616,7 @@ namespace System.Security.Cryptography.X509Certificates
 				X509KeyUsageFlags x509KeyUsageFlags = X509KeyUsageFlags.KeyCertSign;
 				if ((x509KeyUsageExtension.KeyUsages & x509KeyUsageFlags) != x509KeyUsageFlags)
 				{
-					x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotValidForUsage;
+					x509ChainElement.StatusFlags |= X509ChainStatusFlags.NotValidForUsage;
 				}
 			}
 			this.ProcessCertificateExtensions(x509ChainElement);
@@ -631,14 +636,14 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private void ProcessCertificateExtensions(X509ChainElement element)
 		{
-			foreach (global::System.Security.Cryptography.X509Certificates.X509Extension x509Extension in element.Certificate.Extensions)
+			foreach (X509Extension x509Extension in element.Certificate.Extensions)
 			{
 				if (x509Extension.Critical)
 				{
 					string value = x509Extension.Oid.Value;
 					if (!(value == "2.5.29.15") && !(value == "2.5.29.19"))
 					{
-						element.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.InvalidExtension;
+						element.StatusFlags |= X509ChainStatusFlags.InvalidExtension;
 					}
 				}
 			}
@@ -646,7 +651,7 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private bool IsSignedWith(X509Certificate2 signed, AsymmetricAlgorithm pubkey)
 		{
-			return pubkey != null && signed.MonoCertificate.VerifySignature(pubkey);
+			return pubkey != null && X509Helper2.GetMonoCertificate(signed).VerifySignature(pubkey);
 		}
 
 		private string GetSubjectKeyIdentifier(X509Certificate2 certificate)
@@ -661,15 +666,15 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private static string GetAuthorityKeyIdentifier(X509Certificate2 certificate)
 		{
-			return X509ChainImplMono.GetAuthorityKeyIdentifier(certificate.MonoCertificate.Extensions["2.5.29.35"]);
+			return X509ChainImplMono.GetAuthorityKeyIdentifier(X509Helper2.GetMonoCertificate(certificate).Extensions["2.5.29.35"]);
 		}
 
-		private static string GetAuthorityKeyIdentifier(Mono.Security.X509.X509Crl crl)
+		private static string GetAuthorityKeyIdentifier(X509Crl crl)
 		{
 			return X509ChainImplMono.GetAuthorityKeyIdentifier(crl.Extensions["2.5.29.35"]);
 		}
 
-		private static string GetAuthorityKeyIdentifier(Mono.Security.X509.X509Extension ext)
+		private static string GetAuthorityKeyIdentifier(X509Extension ext)
 		{
 			if (ext == null)
 			{
@@ -688,9 +693,9 @@ namespace System.Security.Cryptography.X509Certificates
 			return stringBuilder.ToString();
 		}
 
-		private void CheckRevocationOnChain(global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags flag)
+		private void CheckRevocationOnChain(X509ChainStatusFlags flag)
 		{
-			bool flag2 = (flag & global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.PartialChain) > global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+			bool flag2 = (flag & X509ChainStatusFlags.PartialChain) > X509ChainStatusFlags.NoError;
 			bool flag3;
 			switch (this.ChainPolicy.RevocationMode)
 			{
@@ -724,43 +729,43 @@ namespace System.Security.Cryptography.X509Certificates
 				X509ChainElement x509ChainElement = this.elements[i];
 				if (!flag4)
 				{
-					flag4 |= (x509ChainElement.StatusFlags & global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NotSignatureValid) > global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+					flag4 |= (x509ChainElement.StatusFlags & X509ChainStatusFlags.NotSignatureValid) > X509ChainStatusFlags.NoError;
 				}
 				if (flag4)
 				{
-					x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
-					x509ChainElement.StatusFlags |= global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.OfflineRevocation;
+					x509ChainElement.StatusFlags |= X509ChainStatusFlags.RevocationStatusUnknown;
+					x509ChainElement.StatusFlags |= X509ChainStatusFlags.OfflineRevocation;
 				}
 				else if (flag5 && !flag2 && !this.IsSelfIssued(x509ChainElement.Certificate))
 				{
 					x509ChainElement.StatusFlags |= this.CheckRevocation(x509ChainElement.Certificate, i + 1, flag3);
-					flag4 |= (x509ChainElement.StatusFlags & global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.Revoked) > global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+					flag4 |= (x509ChainElement.StatusFlags & X509ChainStatusFlags.Revoked) > X509ChainStatusFlags.NoError;
 				}
 			}
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags CheckRevocation(X509Certificate2 certificate, int ca, bool online)
+		private X509ChainStatusFlags CheckRevocation(X509Certificate2 certificate, int ca, bool online)
 		{
-			global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags x509ChainStatusFlags = global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
+			X509ChainStatusFlags x509ChainStatusFlags = X509ChainStatusFlags.RevocationStatusUnknown;
 			X509Certificate2 x509Certificate = this.elements[ca].Certificate;
 			while (this.IsSelfIssued(x509Certificate) && ca < this.elements.Count - 1)
 			{
 				x509ChainStatusFlags = this.CheckRevocation(certificate, x509Certificate, online);
-				if (x509ChainStatusFlags != global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown)
+				if (x509ChainStatusFlags != X509ChainStatusFlags.RevocationStatusUnknown)
 				{
 					break;
 				}
 				ca++;
 				x509Certificate = this.elements[ca].Certificate;
 			}
-			if (x509ChainStatusFlags == global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown)
+			if (x509ChainStatusFlags == X509ChainStatusFlags.RevocationStatusUnknown)
 			{
 				x509ChainStatusFlags = this.CheckRevocation(certificate, x509Certificate, online);
 			}
 			return x509ChainStatusFlags;
 		}
 
-		private global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags CheckRevocation(X509Certificate2 certificate, X509Certificate2 ca_cert, bool online)
+		private X509ChainStatusFlags CheckRevocation(X509Certificate2 certificate, X509Certificate2 ca_cert, bool online)
 		{
 			X509KeyUsageExtension x509KeyUsageExtension = ca_cert.Extensions["2.5.29.15"] as X509KeyUsageExtension;
 			if (x509KeyUsageExtension != null)
@@ -768,43 +773,44 @@ namespace System.Security.Cryptography.X509Certificates
 				X509KeyUsageFlags x509KeyUsageFlags = X509KeyUsageFlags.CrlSign;
 				if ((x509KeyUsageExtension.KeyUsages & x509KeyUsageFlags) != x509KeyUsageFlags)
 				{
-					return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
+					return X509ChainStatusFlags.RevocationStatusUnknown;
 				}
 			}
-			Mono.Security.X509.X509Crl x509Crl = this.FindCrl(ca_cert);
+			X509Crl x509Crl = this.FindCrl(ca_cert);
 			bool flag = x509Crl == null && online;
 			if (x509Crl == null)
 			{
-				return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
+				return X509ChainStatusFlags.RevocationStatusUnknown;
 			}
 			if (!x509Crl.VerifySignature(ca_cert.PublicKey.Key))
 			{
-				return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
+				return X509ChainStatusFlags.RevocationStatusUnknown;
 			}
-			Mono.Security.X509.X509Crl.X509CrlEntry crlEntry = x509Crl.GetCrlEntry(certificate.MonoCertificate);
+			X509Certificate monoCertificate = X509Helper2.GetMonoCertificate(certificate);
+			X509Crl.X509CrlEntry crlEntry = x509Crl.GetCrlEntry(monoCertificate);
 			if (crlEntry != null)
 			{
 				if (!this.ProcessCrlEntryExtensions(crlEntry))
 				{
-					return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.Revoked;
+					return X509ChainStatusFlags.Revoked;
 				}
 				if (crlEntry.RevocationDate <= this.ChainPolicy.VerificationTime)
 				{
-					return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.Revoked;
+					return X509ChainStatusFlags.Revoked;
 				}
 			}
 			if (x509Crl.NextUpdate < this.ChainPolicy.VerificationTime)
 			{
-				return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown | global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.OfflineRevocation;
+				return X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.OfflineRevocation;
 			}
 			if (!this.ProcessCrlExtensions(x509Crl))
 			{
-				return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown;
+				return X509ChainStatusFlags.RevocationStatusUnknown;
 			}
-			return global::System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.NoError;
+			return X509ChainStatusFlags.NoError;
 		}
 
-		private static Mono.Security.X509.X509Crl CheckCrls(string subject, string ski, Mono.Security.X509.X509Store store)
+		private static X509Crl CheckCrls(string subject, string ski, X509Store store)
 		{
 			if (store == null)
 			{
@@ -812,7 +818,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			foreach (object obj in store.Crls)
 			{
-				Mono.Security.X509.X509Crl x509Crl = (Mono.Security.X509.X509Crl)obj;
+				X509Crl x509Crl = (X509Crl)obj;
 				if (x509Crl.IssuerName == subject && (ski.Length == 0 || ski == X509ChainImplMono.GetAuthorityKeyIdentifier(x509Crl)))
 				{
 					return x509Crl;
@@ -821,11 +827,11 @@ namespace System.Security.Cryptography.X509Certificates
 			return null;
 		}
 
-		private Mono.Security.X509.X509Crl FindCrl(X509Certificate2 caCertificate)
+		private X509Crl FindCrl(X509Certificate2 caCertificate)
 		{
 			string text = caCertificate.SubjectName.Decode(X500DistinguishedNameFlags.None);
 			string subjectKeyIdentifier = this.GetSubjectKeyIdentifier(caCertificate);
-			Mono.Security.X509.X509Crl x509Crl = X509ChainImplMono.CheckCrls(text, subjectKeyIdentifier, this.LMCAStore.Store);
+			X509Crl x509Crl = X509ChainImplMono.CheckCrls(text, subjectKeyIdentifier, this.LMCAStore.Store);
 			if (x509Crl != null)
 			{
 				return x509Crl;
@@ -854,11 +860,11 @@ namespace System.Security.Cryptography.X509Certificates
 			return null;
 		}
 
-		private bool ProcessCrlExtensions(Mono.Security.X509.X509Crl crl)
+		private bool ProcessCrlExtensions(X509Crl crl)
 		{
 			foreach (object obj in crl.Extensions)
 			{
-				Mono.Security.X509.X509Extension x509Extension = (Mono.Security.X509.X509Extension)obj;
+				X509Extension x509Extension = (X509Extension)obj;
 				if (x509Extension.Critical)
 				{
 					string oid = x509Extension.Oid;
@@ -871,18 +877,14 @@ namespace System.Security.Cryptography.X509Certificates
 			return true;
 		}
 
-		private bool ProcessCrlEntryExtensions(Mono.Security.X509.X509Crl.X509CrlEntry entry)
+		private bool ProcessCrlEntryExtensions(X509Crl.X509CrlEntry entry)
 		{
 			foreach (object obj in entry.Extensions)
 			{
-				Mono.Security.X509.X509Extension x509Extension = (Mono.Security.X509.X509Extension)obj;
-				if (x509Extension.Critical)
+				X509Extension x509Extension = (X509Extension)obj;
+				if (x509Extension.Critical && !(x509Extension.Oid == "2.5.29.21"))
 				{
-					string oid = x509Extension.Oid;
-					if (!(oid == "2.5.29.21"))
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 			return true;
@@ -910,13 +912,13 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private X509Certificate2Collection cas;
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store root_store;
+		private X509Store root_store;
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store ca_store;
+		private X509Store ca_store;
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store user_root_store;
+		private X509Store user_root_store;
 
-		private global::System.Security.Cryptography.X509Certificates.X509Store user_ca_store;
+		private X509Store user_ca_store;
 
 		private X509Certificate2Collection collection;
 	}

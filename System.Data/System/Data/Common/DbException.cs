@@ -29,7 +29,6 @@ namespace System.Data.Common
 		protected DbException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			throw new PlatformNotSupportedException();
 		}
 	}
 }

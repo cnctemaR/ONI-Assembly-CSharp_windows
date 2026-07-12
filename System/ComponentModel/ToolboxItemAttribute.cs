@@ -15,38 +15,38 @@ namespace System.ComponentModel
 		{
 			if (defaultType)
 			{
-				this.toolboxItemTypeName = "System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+				this._toolboxItemTypeName = "System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 			}
 		}
 
 		public ToolboxItemAttribute(string toolboxItemTypeName)
 		{
 			toolboxItemTypeName.ToUpper(CultureInfo.InvariantCulture);
-			this.toolboxItemTypeName = toolboxItemTypeName;
+			this._toolboxItemTypeName = toolboxItemTypeName;
 		}
 
 		public ToolboxItemAttribute(Type toolboxItemType)
 		{
-			this.toolboxItemType = toolboxItemType;
-			this.toolboxItemTypeName = toolboxItemType.AssemblyQualifiedName;
+			this._toolboxItemType = toolboxItemType;
+			this._toolboxItemTypeName = toolboxItemType.AssemblyQualifiedName;
 		}
 
 		public Type ToolboxItemType
 		{
 			get
 			{
-				if (this.toolboxItemType == null && this.toolboxItemTypeName != null)
+				if (this._toolboxItemType == null && this._toolboxItemTypeName != null)
 				{
 					try
 					{
-						this.toolboxItemType = Type.GetType(this.toolboxItemTypeName, true);
+						this._toolboxItemType = Type.GetType(this._toolboxItemTypeName, true);
 					}
 					catch (Exception ex)
 					{
-						throw new ArgumentException(global::SR.GetString("Failed to create ToolboxItem of type: {0}", new object[] { this.toolboxItemTypeName }), ex);
+						throw new ArgumentException(SR.Format("Failed to create ToolboxItem of type: {0}", this._toolboxItemTypeName), ex);
 					}
 				}
-				return this.toolboxItemType;
+				return this._toolboxItemType;
 			}
 		}
 
@@ -54,11 +54,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.toolboxItemTypeName == null)
+				if (this._toolboxItemTypeName == null)
 				{
 					return string.Empty;
 				}
-				return this.toolboxItemTypeName;
+				return this._toolboxItemTypeName;
 			}
 		}
 
@@ -74,16 +74,16 @@ namespace System.ComponentModel
 
 		public override int GetHashCode()
 		{
-			if (this.toolboxItemTypeName != null)
+			if (this._toolboxItemTypeName != null)
 			{
-				return this.toolboxItemTypeName.GetHashCode();
+				return this._toolboxItemTypeName.GetHashCode();
 			}
 			return base.GetHashCode();
 		}
 
-		private Type toolboxItemType;
+		private Type _toolboxItemType;
 
-		private string toolboxItemTypeName;
+		private string _toolboxItemTypeName;
 
 		public static readonly ToolboxItemAttribute Default = new ToolboxItemAttribute("System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
 

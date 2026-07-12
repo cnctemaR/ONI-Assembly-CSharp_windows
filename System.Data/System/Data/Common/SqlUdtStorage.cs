@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Reflection;
@@ -26,30 +26,20 @@ namespace System.Data.Common
 
 		internal static object GetStaticNullForUdtType(Type type)
 		{
-			object obj;
-			if (!SqlUdtStorage.s_typeToNull.TryGetValue(type, out obj))
+			return SqlUdtStorage.s_typeToNull.GetOrAdd(type, delegate(Type t)
 			{
 				PropertyInfo property = type.GetProperty("Null", BindingFlags.Static | BindingFlags.Public);
 				if (property != null)
 				{
-					obj = property.GetValue(null, null);
+					return property.GetValue(null, null);
 				}
-				else
+				FieldInfo field = type.GetField("Null", BindingFlags.Static | BindingFlags.Public);
+				if (field != null)
 				{
-					FieldInfo field = type.GetField("Null", BindingFlags.Static | BindingFlags.Public);
-					if (!(field != null))
-					{
-						throw ExceptionBuilder.INullableUDTwithoutStaticNull(type.AssemblyQualifiedName);
-					}
-					obj = field.GetValue(null);
+					return field.GetValue(null);
 				}
-				Dictionary<Type, object> dictionary = SqlUdtStorage.s_typeToNull;
-				lock (dictionary)
-				{
-					SqlUdtStorage.s_typeToNull[type] = obj;
-				}
-			}
-			return obj;
+				throw ExceptionBuilder.INullableUDTwithoutStaticNull(type.AssemblyQualifiedName);
+			});
 		}
 
 		public override bool IsNull(int record)
@@ -225,6 +215,6 @@ namespace System.Data.Common
 
 		private readonly bool _implementsIComparable;
 
-		private static readonly Dictionary<Type, object> s_typeToNull = new Dictionary<Type, object>();
+		private static readonly ConcurrentDictionary<Type, object> s_typeToNull = new ConcurrentDictionary<Type, object>();
 	}
 }

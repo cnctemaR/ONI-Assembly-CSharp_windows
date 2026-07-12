@@ -36,103 +36,6 @@ namespace System.Data.ProviderBase
 			}
 		}
 
-		protected internal Transaction EnlistedTransaction
-		{
-			get
-			{
-				return this._enlistedTransaction;
-			}
-			set
-			{
-				Transaction enlistedTransaction = this._enlistedTransaction;
-				if ((null == enlistedTransaction && null != value) || (null != enlistedTransaction && !enlistedTransaction.Equals(value)))
-				{
-					Transaction transaction = null;
-					Transaction transaction2 = null;
-					try
-					{
-						if (null != value)
-						{
-							transaction = value.Clone();
-						}
-						lock (this)
-						{
-							transaction2 = Interlocked.Exchange<Transaction>(ref this._enlistedTransaction, transaction);
-							this._enlistedTransactionOriginal = value;
-							value = transaction;
-							transaction = null;
-						}
-					}
-					finally
-					{
-						if (null != transaction2 && transaction2 != this._enlistedTransaction)
-						{
-							transaction2.Dispose();
-						}
-						if (null != transaction && transaction != this._enlistedTransaction)
-						{
-							transaction.Dispose();
-						}
-					}
-					if (null != value)
-					{
-						this.TransactionOutcomeEnlist(value);
-					}
-				}
-			}
-		}
-
-		protected bool EnlistedTransactionDisposed
-		{
-			get
-			{
-				bool flag2;
-				try
-				{
-					Transaction enlistedTransactionOriginal = this._enlistedTransactionOriginal;
-					bool flag = enlistedTransactionOriginal != null && enlistedTransactionOriginal.TransactionInformation == null;
-					flag2 = flag;
-				}
-				catch (ObjectDisposedException)
-				{
-					flag2 = true;
-				}
-				return flag2;
-			}
-		}
-
-		internal bool IsTxRootWaitingForTxEnd
-		{
-			get
-			{
-				return this._isInStasis;
-			}
-		}
-
-		protected virtual bool UnbindOnTransactionCompletion
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		protected internal virtual bool IsNonPoolableTransactionRoot
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		internal virtual bool IsTransactionRoot
-		{
-			get
-			{
-				return false;
-			}
-		}
-
 		protected internal bool IsConnectionDoomed
 		{
 			get
@@ -173,14 +76,6 @@ namespace System.Data.ProviderBase
 			}
 		}
 
-		protected virtual bool ReadyToPrepareTransaction
-		{
-			get
-			{
-				return true;
-			}
-		}
-
 		protected internal DbReferenceCollection ReferenceCollection
 		{
 			get
@@ -215,13 +110,6 @@ namespace System.Data.ProviderBase
 			}
 		}
 
-		protected abstract void Activate(Transaction transaction);
-
-		internal void ActivateConnection(Transaction transaction)
-		{
-			this.Activate(transaction);
-		}
-
 		internal void AddWeakReference(object value, int tag)
 		{
 			if (this._referenceCollection == null)
@@ -240,45 +128,6 @@ namespace System.Data.ProviderBase
 		public virtual void ChangeDatabase(string value)
 		{
 			throw ADP.MethodNotImplemented("ChangeDatabase");
-		}
-
-		internal virtual void CloseConnection(DbConnection owningObject, DbConnectionFactory connectionFactory)
-		{
-			if (connectionFactory.SetInnerConnectionFrom(owningObject, DbConnectionOpenBusy.SingletonInstance, this))
-			{
-				lock (this)
-				{
-					object obj = this.ObtainAdditionalLocksForClose();
-					try
-					{
-						this.PrepareForCloseConnection();
-						DbConnectionPool pool = this.Pool;
-						this.DetachCurrentTransactionIfEnded();
-						if (pool != null)
-						{
-							pool.PutObject(this, owningObject);
-						}
-						else
-						{
-							this.Deactivate();
-							this._owningObject.Target = null;
-							if (this.IsTransactionRoot)
-							{
-								this.SetInStasis();
-							}
-							else
-							{
-								this.Dispose();
-							}
-						}
-					}
-					finally
-					{
-						this.ReleaseAdditionalLocksForClose(obj);
-						connectionFactory.SetInnerConnectionEvent(owningObject, DbConnectionClosedPreviouslyOpened.SingletonInstance);
-					}
-				}
-			}
 		}
 
 		internal virtual void PrepareForReplaceConnection()
@@ -314,40 +163,6 @@ namespace System.Data.ProviderBase
 			this.Deactivate();
 		}
 
-		internal virtual void DelegatedTransactionEnded()
-		{
-			if (1 != this._pooledCount)
-			{
-				if (-1 == this._pooledCount && !this._owningObject.IsAlive)
-				{
-					this.TerminateStasis(false);
-					this.Deactivate();
-					this.Dispose();
-				}
-				return;
-			}
-			this.TerminateStasis(true);
-			this.Deactivate();
-			DbConnectionPool pool = this.Pool;
-			if (pool == null)
-			{
-				throw ADP.InternalError(ADP.InternalErrorCode.PooledObjectWithoutPool);
-			}
-			pool.PutObjectFromTransactedPool(this);
-		}
-
-		public virtual void Dispose()
-		{
-			this._connectionPool = null;
-			this._connectionIsDoomed = true;
-			this._enlistedTransactionOriginal = null;
-			Transaction transaction = Interlocked.Exchange<Transaction>(ref this._enlistedTransaction, null);
-			if (transaction != null)
-			{
-				transaction.Dispose();
-			}
-		}
-
 		protected internal void DoNotPoolThisConnection()
 		{
 			this._cannotBePooled = true;
@@ -357,8 +172,6 @@ namespace System.Data.ProviderBase
 		{
 			this._connectionIsDoomed = true;
 		}
-
-		public abstract void EnlistTransaction(Transaction transaction);
 
 		protected internal virtual DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
 		{
@@ -485,6 +298,198 @@ namespace System.Data.ProviderBase
 			}
 		}
 
+		internal virtual bool IsConnectionAlive(bool throwOnException = false)
+		{
+			return true;
+		}
+
+		protected internal Transaction EnlistedTransaction
+		{
+			get
+			{
+				return this._enlistedTransaction;
+			}
+			set
+			{
+				Transaction enlistedTransaction = this._enlistedTransaction;
+				if ((null == enlistedTransaction && null != value) || (null != enlistedTransaction && !enlistedTransaction.Equals(value)))
+				{
+					Transaction transaction = null;
+					Transaction transaction2 = null;
+					try
+					{
+						if (null != value)
+						{
+							transaction = value.Clone();
+						}
+						lock (this)
+						{
+							transaction2 = Interlocked.Exchange<Transaction>(ref this._enlistedTransaction, transaction);
+							this._enlistedTransactionOriginal = value;
+							value = transaction;
+							transaction = null;
+						}
+					}
+					finally
+					{
+						if (null != transaction2 && transaction2 != this._enlistedTransaction)
+						{
+							transaction2.Dispose();
+						}
+						if (null != transaction && transaction != this._enlistedTransaction)
+						{
+							transaction.Dispose();
+						}
+					}
+					if (null != value)
+					{
+						this.TransactionOutcomeEnlist(value);
+					}
+				}
+			}
+		}
+
+		protected bool EnlistedTransactionDisposed
+		{
+			get
+			{
+				bool flag2;
+				try
+				{
+					Transaction enlistedTransactionOriginal = this._enlistedTransactionOriginal;
+					bool flag = enlistedTransactionOriginal != null && enlistedTransactionOriginal.TransactionInformation == null;
+					flag2 = flag;
+				}
+				catch (ObjectDisposedException)
+				{
+					flag2 = true;
+				}
+				return flag2;
+			}
+		}
+
+		internal bool IsTxRootWaitingForTxEnd
+		{
+			get
+			{
+				return this._isInStasis;
+			}
+		}
+
+		protected virtual bool UnbindOnTransactionCompletion
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		protected internal virtual bool IsNonPoolableTransactionRoot
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		internal virtual bool IsTransactionRoot
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		protected virtual bool ReadyToPrepareTransaction
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		protected abstract void Activate(Transaction transaction);
+
+		internal void ActivateConnection(Transaction transaction)
+		{
+			this.Activate(transaction);
+		}
+
+		internal virtual void CloseConnection(DbConnection owningObject, DbConnectionFactory connectionFactory)
+		{
+			if (connectionFactory.SetInnerConnectionFrom(owningObject, DbConnectionOpenBusy.SingletonInstance, this))
+			{
+				lock (this)
+				{
+					object obj = this.ObtainAdditionalLocksForClose();
+					try
+					{
+						this.PrepareForCloseConnection();
+						DbConnectionPool pool = this.Pool;
+						this.DetachCurrentTransactionIfEnded();
+						if (pool != null)
+						{
+							pool.PutObject(this, owningObject);
+						}
+						else
+						{
+							this.Deactivate();
+							this._owningObject.Target = null;
+							if (this.IsTransactionRoot)
+							{
+								this.SetInStasis();
+							}
+							else
+							{
+								this.Dispose();
+							}
+						}
+					}
+					finally
+					{
+						this.ReleaseAdditionalLocksForClose(obj);
+						connectionFactory.SetInnerConnectionEvent(owningObject, DbConnectionClosedPreviouslyOpened.SingletonInstance);
+					}
+				}
+			}
+		}
+
+		internal virtual void DelegatedTransactionEnded()
+		{
+			if (1 != this._pooledCount)
+			{
+				if (-1 == this._pooledCount && !this._owningObject.IsAlive)
+				{
+					this.TerminateStasis(false);
+					this.Deactivate();
+					this.Dispose();
+				}
+				return;
+			}
+			this.TerminateStasis(true);
+			this.Deactivate();
+			DbConnectionPool pool = this.Pool;
+			if (pool == null)
+			{
+				throw ADP.InternalError(ADP.InternalErrorCode.PooledObjectWithoutPool);
+			}
+			pool.PutObjectFromTransactedPool(this);
+		}
+
+		public virtual void Dispose()
+		{
+			this._connectionPool = null;
+			this._connectionIsDoomed = true;
+			this._enlistedTransactionOriginal = null;
+			Transaction transaction = Interlocked.Exchange<Transaction>(ref this._enlistedTransaction, null);
+			if (transaction != null)
+			{
+				transaction.Dispose();
+			}
+		}
+
+		public abstract void EnlistTransaction(Transaction transaction);
+
 		protected virtual void CleanupTransactionOnCompletion(Transaction transaction)
 		{
 		}
@@ -562,11 +567,6 @@ namespace System.Data.ProviderBase
 			this._isInStasis = false;
 		}
 
-		internal virtual bool IsConnectionAlive(bool throwOnException = false)
-		{
-			return true;
-		}
-
 		internal static readonly StateChangeEventArgs StateChangeClosed = new StateChangeEventArgs(ConnectionState.Open, ConnectionState.Closed);
 
 		internal static readonly StateChangeEventArgs StateChangeOpen = new StateChangeEventArgs(ConnectionState.Closed, ConnectionState.Open);
@@ -589,9 +589,9 @@ namespace System.Data.ProviderBase
 
 		private bool _cannotBePooled;
 
-		private bool _isInStasis;
-
 		private DateTime _createTime;
+
+		private bool _isInStasis;
 
 		private Transaction _enlistedTransaction;
 

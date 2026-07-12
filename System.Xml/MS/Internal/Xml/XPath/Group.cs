@@ -7,7 +7,7 @@ namespace MS.Internal.Xml.XPath
 	{
 		public Group(AstNode groupNode)
 		{
-			this.groupNode = groupNode;
+			this._groupNode = groupNode;
 		}
 
 		public override AstNode.AstType Type
@@ -30,10 +30,10 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.groupNode;
+				return this._groupNode;
 			}
 		}
 
-		private AstNode groupNode;
+		private AstNode _groupNode;
 	}
 }

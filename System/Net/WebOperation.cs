@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,17 +18,24 @@ namespace System.Net
 
 		public bool IsNtlmChallenge { get; }
 
+		internal string ME
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public WebOperation(HttpWebRequest request, BufferOffsetSize writeBuffer, bool isNtlmChallenge, CancellationToken cancellationToken)
 		{
 			this.Request = request;
 			this.WriteBuffer = writeBuffer;
 			this.IsNtlmChallenge = isNtlmChallenge;
-			this.cts = CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[] { cancellationToken });
-			this.requestTask = new TaskCompletionSource<WebRequestStream>();
-			this.requestWrittenTask = new TaskCompletionSource<WebRequestStream>();
-			this.completeResponseReadTask = new TaskCompletionSource<bool>();
-			this.responseTask = new TaskCompletionSource<WebResponseStream>();
-			this.finishedTask = new TaskCompletionSource<ValueTuple<bool, WebOperation>>();
+			this.cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			this.requestTask = new WebCompletionSource<WebRequestStream>(true);
+			this.requestWrittenTask = new WebCompletionSource<WebRequestStream>(true);
+			this.responseTask = new WebCompletionSource<WebResponseStream>(true);
+			this.finishedTask = new WebCompletionSource<ValueTuple<bool, WebOperation>>(true);
 		}
 
 		public bool Aborted
@@ -82,10 +90,11 @@ namespace System.Net
 
 		private void SetCanceled()
 		{
-			this.requestTask.TrySetCanceled();
-			this.requestWrittenTask.TrySetCanceled();
-			this.responseTask.TrySetCanceled();
-			this.completeResponseReadTask.TrySetCanceled();
+			OperationCanceledException ex = new OperationCanceledException();
+			this.requestTask.TrySetCanceled(ex);
+			this.requestWrittenTask.TrySetCanceled(ex);
+			this.responseTask.TrySetCanceled(ex);
+			this.Finish(false, ex);
 		}
 
 		private void SetError(Exception error)
@@ -93,14 +102,23 @@ namespace System.Net
 			this.requestTask.TrySetException(error);
 			this.requestWrittenTask.TrySetException(error);
 			this.responseTask.TrySetException(error);
-			this.completeResponseReadTask.TrySetException(error);
+			this.Finish(false, error);
 		}
 
 		private ValueTuple<ExceptionDispatchInfo, bool> SetDisposed(ref ExceptionDispatchInfo field)
 		{
-			ExceptionDispatchInfo exceptionDispatchInfo = ExceptionDispatchInfo.Capture(new WebException(global::SR.GetString("The request was canceled"), WebExceptionStatus.RequestCanceled));
+			ExceptionDispatchInfo exceptionDispatchInfo = ExceptionDispatchInfo.Capture(new WebException(SR.GetString("The request was canceled"), WebExceptionStatus.RequestCanceled));
 			ExceptionDispatchInfo exceptionDispatchInfo2 = Interlocked.CompareExchange<ExceptionDispatchInfo>(ref field, exceptionDispatchInfo, null);
 			return new ValueTuple<ExceptionDispatchInfo, bool>(exceptionDispatchInfo2 ?? exceptionDispatchInfo, exceptionDispatchInfo2 == null);
+		}
+
+		internal ExceptionDispatchInfo CheckDisposed(CancellationToken cancellationToken)
+		{
+			if (this.Aborted || cancellationToken.IsCancellationRequested)
+			{
+				return this.CheckThrowDisposed(false, ref this.disposedInfo);
+			}
+			return null;
 		}
 
 		internal void ThrowIfDisposed()
@@ -112,7 +130,7 @@ namespace System.Net
 		{
 			if (this.Aborted || cancellationToken.IsCancellationRequested)
 			{
-				this.ThrowDisposed(ref this.disposedInfo);
+				this.CheckThrowDisposed(true, ref this.disposedInfo);
 			}
 		}
 
@@ -125,11 +143,11 @@ namespace System.Net
 		{
 			if (this.Closed || cancellationToken.IsCancellationRequested)
 			{
-				this.ThrowDisposed(ref this.closedInfo);
+				this.CheckThrowDisposed(true, ref this.closedInfo);
 			}
 		}
 
-		private void ThrowDisposed(ref ExceptionDispatchInfo field)
+		private ExceptionDispatchInfo CheckThrowDisposed(bool throwIt, ref ExceptionDispatchInfo field)
 		{
 			ValueTuple<ExceptionDispatchInfo, bool> valueTuple = this.SetDisposed(ref field);
 			ExceptionDispatchInfo item = valueTuple.Item1;
@@ -141,7 +159,11 @@ namespace System.Net
 					cancellationTokenSource.Cancel();
 				}
 			}
-			item.Throw();
+			if (throwIt)
+			{
+				item.Throw();
+			}
+			return item;
 		}
 
 		internal void RegisterRequest(ServicePoint servicePoint, WebConnection connection)
@@ -174,7 +196,7 @@ namespace System.Net
 		{
 			lock (this)
 			{
-				if (this.requestSent != 1 || this.ServicePoint == null || this.finishedReading)
+				if (this.requestSent != 1 || this.ServicePoint == null || this.finished != 0)
 				{
 					throw new InvalidOperationException("Should never happen.");
 				}
@@ -185,14 +207,19 @@ namespace System.Net
 			}
 		}
 
-		public Task<WebRequestStream> GetRequestStream()
+		public async Task<Stream> GetRequestStream()
 		{
-			return this.requestTask.Task;
+			return await this.requestTask.WaitForCompletion().ConfigureAwait(false);
+		}
+
+		internal Task<WebRequestStream> GetRequestStreamInternal()
+		{
+			return this.requestTask.WaitForCompletion();
 		}
 
 		public Task WaitUntilRequestWritten()
 		{
-			return this.requestWrittenTask.Task;
+			return this.requestWrittenTask.WaitForCompletion();
 		}
 
 		public WebRequestStream WriteStream
@@ -206,32 +233,21 @@ namespace System.Net
 
 		public Task<WebResponseStream> GetResponseStream()
 		{
-			return this.responseTask.Task;
+			return this.responseTask.WaitForCompletion();
 		}
 
-		internal async Task<ValueTuple<bool, WebOperation>> WaitForCompletion(bool ignoreErrors)
+		internal WebCompletionSource<ValueTuple<bool, WebOperation>> Finished
 		{
-			ValueTuple<bool, WebOperation> valueTuple;
-			try
+			get
 			{
-				valueTuple = await this.finishedTask.Task.ConfigureAwait(false);
+				return this.finishedTask;
 			}
-			catch
-			{
-				if (!ignoreErrors)
-				{
-					throw;
-				}
-				valueTuple = new ValueTuple<bool, WebOperation>(false, null);
-			}
-			return valueTuple;
 		}
 
 		internal async void Run()
 		{
 			try
 			{
-				this.FinishReading();
 				this.ThrowIfClosedOrDisposed();
 				WebRequestStream webRequestStream = await this.Connection.InitConnection(this, this.cts.Token).ConfigureAwait(false);
 				WebRequestStream requestStream = webRequestStream;
@@ -239,11 +255,11 @@ namespace System.Net
 				this.writeStream = requestStream;
 				await requestStream.Initialize(this.cts.Token).ConfigureAwait(false);
 				this.ThrowIfClosedOrDisposed();
-				this.requestTask.TrySetResult(requestStream);
+				this.requestTask.TrySetCompleted(requestStream);
 				WebResponseStream stream = new WebResponseStream(requestStream);
 				this.responseStream = stream;
 				await stream.InitReadAsync(this.cts.Token).ConfigureAwait(false);
-				this.responseTask.TrySetResult(stream);
+				this.responseTask.TrySetCompleted(stream);
 				requestStream = null;
 				stream = null;
 			}
@@ -257,23 +273,26 @@ namespace System.Net
 			}
 		}
 
-		private async void FinishReading()
+		internal void CompleteRequestWritten(WebRequestStream stream, Exception error = null)
 		{
-			bool ok = false;
-			Exception error = null;
-			try
+			if (error != null)
 			{
-				bool flag = await this.completeResponseReadTask.Task.ConfigureAwait(false);
-				ok = flag;
+				this.SetError(error);
+				return;
 			}
-			catch (Exception error)
+			this.requestWrittenTask.TrySetCompleted(stream);
+		}
+
+		internal void Finish(bool ok, Exception error = null)
+		{
+			if (Interlocked.CompareExchange(ref this.finished, 1, 0) != 0)
 			{
+				return;
 			}
 			WebResponseStream webResponseStream;
 			WebOperation webOperation;
 			lock (this)
 			{
-				this.finishedReading = true;
 				webResponseStream = Interlocked.Exchange<WebResponseStream>(ref this.responseStream, null);
 				webOperation = Interlocked.Exchange<WebOperation>(ref this.priorityRequest, null);
 				this.Request.FinishedReading = true;
@@ -285,52 +304,28 @@ namespace System.Net
 					webOperation.SetError(error);
 				}
 				this.finishedTask.TrySetException(error);
-			}
-			else
-			{
-				bool flag2 = !this.Aborted && ok && webResponseStream != null && webResponseStream.KeepAlive;
-				if (webOperation != null && webOperation.Aborted)
-				{
-					webOperation = null;
-					flag2 = false;
-				}
-				this.finishedTask.TrySetResult(new ValueTuple<bool, WebOperation>(flag2, webOperation));
-			}
-		}
-
-		internal void CompleteRequestWritten(WebRequestStream stream, Exception error = null)
-		{
-			if (error != null)
-			{
-				this.SetError(error);
 				return;
 			}
-			this.requestWrittenTask.TrySetResult(stream);
-		}
-
-		internal void CompleteResponseRead(bool ok, Exception error = null)
-		{
-			if (error != null)
+			bool flag2 = !this.Aborted && ok && webResponseStream != null && webResponseStream.KeepAlive;
+			if (webOperation != null && webOperation.Aborted)
 			{
-				this.completeResponseReadTask.TrySetException(error);
-				return;
+				webOperation = null;
+				flag2 = false;
 			}
-			this.completeResponseReadTask.TrySetResult(ok);
+			this.finishedTask.TrySetCompleted(new ValueTuple<bool, WebOperation>(flag2, webOperation));
 		}
 
 		internal readonly int ID;
 
 		private CancellationTokenSource cts;
 
-		private TaskCompletionSource<WebRequestStream> requestTask;
+		private WebCompletionSource<WebRequestStream> requestTask;
 
-		private TaskCompletionSource<WebRequestStream> requestWrittenTask;
+		private WebCompletionSource<WebRequestStream> requestWrittenTask;
 
-		private TaskCompletionSource<WebResponseStream> responseTask;
+		private WebCompletionSource<WebResponseStream> responseTask;
 
-		private TaskCompletionSource<bool> completeResponseReadTask;
-
-		private TaskCompletionSource<ValueTuple<bool, WebOperation>> finishedTask;
+		private WebCompletionSource<ValueTuple<bool, WebOperation>> finishedTask;
 
 		private WebRequestStream writeStream;
 
@@ -342,8 +337,8 @@ namespace System.Net
 
 		private WebOperation priorityRequest;
 
-		private volatile bool finishedReading;
-
 		private int requestSent;
+
+		private int finished;
 	}
 }

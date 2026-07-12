@@ -65,7 +65,7 @@ namespace FMOD
 			case RESULT.ERR_INITIALIZED:
 				return "Cannot call this command after System::init.";
 			case RESULT.ERR_INTERNAL:
-				return "An error occurred that wasn't supposed to.  Contact support.";
+				return "An error occured in the FMOD system. Use the logging version of FMOD for more information.";
 			case RESULT.ERR_INVALID_FLOAT:
 				return "Value passed in was a NaN, Inf or denormalized float.";
 			case RESULT.ERR_INVALID_HANDLE:
@@ -119,7 +119,7 @@ namespace FMOD
 			case RESULT.ERR_PLUGIN_MISSING:
 				return "A requested output, dsp unit type or codec was not available.";
 			case RESULT.ERR_PLUGIN_RESOURCE:
-				return "A resource that the plugin requires cannot be found. (ie the DLS file for MIDI playback)";
+				return "A resource that the plugin requires cannot be allocated or found. (ie the DLS file for MIDI playback)";
 			case RESULT.ERR_PLUGIN_VERSION:
 				return "A plugin was built with an unsupported SDK version.";
 			case RESULT.ERR_RECORD:
@@ -141,7 +141,7 @@ namespace FMOD
 			case RESULT.ERR_TRUNCATED:
 				return "The retrieved string is too long to fit in the supplied buffer and has been truncated.";
 			case RESULT.ERR_UNIMPLEMENTED:
-				return "Something in FMOD hasn't been implemented when it should be! contact support!";
+				return "Something in FMOD hasn't been implemented when it should be. Contact support.";
 			case RESULT.ERR_UNINITIALIZED:
 				return "This command failed because System::init or System::setDriver was not called.";
 			case RESULT.ERR_UNSUPPORTED:

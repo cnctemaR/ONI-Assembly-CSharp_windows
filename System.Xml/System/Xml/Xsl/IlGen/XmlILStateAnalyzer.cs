@@ -149,8 +149,8 @@ namespace System.Xml.Xsl.IlGen
 				else
 				{
 					QilNode child = (nd as QilUnary).Child;
-					qilNodeType = child.NodeType;
-					if (qilNodeType - QilNodeType.For <= 2)
+					QilNodeType nodeType = child.NodeType;
+					if (nodeType - QilNodeType.For <= 2)
 					{
 						this.AnalyzeCopy(nd, xmlILConstructInfo);
 						goto IL_00FF;

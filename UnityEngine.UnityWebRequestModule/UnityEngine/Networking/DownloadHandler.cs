@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -25,7 +27,7 @@ namespace UnityEngine.Networking
 			this.Dispose();
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			bool flag = this.m_Ptr != IntPtr.Zero;
 			if (flag)
@@ -57,6 +59,14 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string GetErrorMsg();
 
+		public NativeArray<byte>.ReadOnly nativeData
+		{
+			get
+			{
+				return this.GetNativeData().AsReadOnly();
+			}
+		}
+
 		public byte[] data
 		{
 			get
@@ -73,19 +83,24 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		protected virtual byte[] GetData()
+		protected virtual NativeArray<byte> GetNativeData()
 		{
-			return null;
+			return default(NativeArray<byte>);
 		}
 
-		protected virtual string GetText()
+		protected virtual byte[] GetData()
 		{
-			byte[] data = this.GetData();
-			bool flag = data != null && data.Length != 0;
+			return DownloadHandler.InternalGetByteArray(this);
+		}
+
+		protected unsafe virtual string GetText()
+		{
+			NativeArray<byte> nativeData = this.GetNativeData();
+			bool flag = nativeData.IsCreated && nativeData.Length > 0;
 			string text;
 			if (flag)
 			{
-				text = this.GetTextEncoder().GetString(data, 0, data.Length);
+				text = new string((sbyte*)nativeData.GetUnsafeReadOnlyPtr<byte>(), 0, nativeData.Length, this.GetTextEncoder());
 			}
 			else
 			{
@@ -137,7 +152,7 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string GetContentType();
 
-		[UsedByNativeCode]
+		[RequiredByNativeCode]
 		protected virtual bool ReceiveData(byte[] data, int dataLength)
 		{
 			return true;
@@ -154,12 +169,12 @@ namespace UnityEngine.Networking
 		{
 		}
 
-		[UsedByNativeCode]
+		[RequiredByNativeCode]
 		protected virtual void CompleteContent()
 		{
 		}
 
-		[UsedByNativeCode]
+		[RequiredByNativeCode]
 		protected virtual float GetProgress()
 		{
 			return 0f;
@@ -185,10 +200,58 @@ namespace UnityEngine.Networking
 			return (T)((object)www.downloadHandler);
 		}
 
-		[NativeThrows]
 		[VisibleToOtherModules]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern byte[] InternalGetByteArray(DownloadHandler dh);
+		internal unsafe static extern byte* InternalGetByteArray(DownloadHandler dh, out int length);
+
+		internal static byte[] InternalGetByteArray(DownloadHandler dh)
+		{
+			NativeArray<byte> nativeData = dh.GetNativeData();
+			bool isCreated = nativeData.IsCreated;
+			byte[] array;
+			if (isCreated)
+			{
+				array = nativeData.ToArray();
+			}
+			else
+			{
+				array = null;
+			}
+			return array;
+		}
+
+		internal unsafe static NativeArray<byte> InternalGetNativeArray(DownloadHandler dh, ref NativeArray<byte> nativeArray)
+		{
+			int num;
+			byte* ptr = DownloadHandler.InternalGetByteArray(dh, out num);
+			bool isCreated = nativeArray.IsCreated;
+			if (isCreated)
+			{
+				bool flag = nativeArray.Length == num;
+				if (flag)
+				{
+					return nativeArray;
+				}
+				DownloadHandler.DisposeNativeArray(ref nativeArray);
+			}
+			DownloadHandler.CreateNativeArrayForNativeData(ref nativeArray, ptr, num);
+			return nativeArray;
+		}
+
+		internal static void DisposeNativeArray(ref NativeArray<byte> data)
+		{
+			bool flag = !data.IsCreated;
+			if (!flag)
+			{
+				data = default(NativeArray<byte>);
+			}
+		}
+
+		internal unsafe static void CreateNativeArrayForNativeData(ref NativeArray<byte> data, byte* bytes, int length)
+		{
+			data = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>((void*)bytes, length, Allocator.Persistent);
+		}
 
 		[VisibleToOtherModules]
 		[NonSerialized]

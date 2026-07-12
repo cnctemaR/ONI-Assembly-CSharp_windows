@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB557}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ECE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Numerics</AssemblyName>
@@ -16,30 +16,29 @@
   <ItemGroup>
     <Compile Include="Consts.cs" />
     <Compile Include="Globalization\FormatProvider.cs" />
-    <Compile Include="MathF.cs" />
     <Compile Include="Numerics\BigInteger.cs" />
     <Compile Include="Numerics\BigIntegerCalculator.cs" />
     <Compile Include="Numerics\BigNumber.cs" />
     <Compile Include="Numerics\Complex.cs" />
     <Compile Include="Numerics\DoubleUlong.cs" />
     <Compile Include="Numerics\Hashing\HashHelpers.cs" />
-    <Compile Include="Numerics\JitIntrinsicAttribute.cs" />
     <Compile Include="Numerics\Matrix3x2.cs" />
     <Compile Include="Numerics\Matrix4x4.cs" />
     <Compile Include="Numerics\NumericsHelpers.cs" />
     <Compile Include="Numerics\Plane.cs" />
     <Compile Include="Numerics\Quaternion.cs" />
-    <Compile Include="Numerics\Vector.cs" />
     <Compile Include="Numerics\Vector2.cs" />
     <Compile Include="Numerics\Vector3.cs" />
     <Compile Include="Numerics\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
+    <Compile Include="Runtime\CompilerServices\IntrinsicAttribute.cs" />
     <Compile Include="SR.cs" />
+    <Compile Include="Text\ValueStringBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Util;
@@ -229,6 +230,134 @@ namespace System.Security.Cryptography
 		internal static Exception HashAlgorithmNameNullOrEmpty()
 		{
 			return new ArgumentException(Environment.GetResourceString("The hash algorithm name cannot be null or empty."), "hashAlgorithm");
+		}
+
+		public static DSA Create(int keySizeInBits)
+		{
+			DSA dsa = DSA.Create();
+			DSA dsa2;
+			try
+			{
+				dsa.KeySize = keySizeInBits;
+				dsa2 = dsa;
+			}
+			catch
+			{
+				dsa.Dispose();
+				throw;
+			}
+			return dsa2;
+		}
+
+		public static DSA Create(DSAParameters parameters)
+		{
+			DSA dsa = DSA.Create();
+			DSA dsa2;
+			try
+			{
+				dsa.ImportParameters(parameters);
+				dsa2 = dsa;
+			}
+			catch
+			{
+				dsa.Dispose();
+				throw;
+			}
+			return dsa2;
+		}
+
+		public virtual bool TryCreateSignature(ReadOnlySpan<byte> hash, Span<byte> destination, out int bytesWritten)
+		{
+			byte[] array = this.CreateSignature(hash.ToArray());
+			if (array.Length <= destination.Length)
+			{
+				new ReadOnlySpan<byte>(array).CopyTo(destination);
+				bytesWritten = array.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		protected virtual bool TryHashData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
+		{
+			byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
+			bool flag;
+			try
+			{
+				data.CopyTo(array);
+				byte[] array2 = this.HashData(array, 0, data.Length, hashAlgorithm);
+				if (destination.Length >= array2.Length)
+				{
+					new ReadOnlySpan<byte>(array2).CopyTo(destination);
+					bytesWritten = array2.Length;
+					flag = true;
+				}
+				else
+				{
+					bytesWritten = 0;
+					flag = false;
+				}
+			}
+			finally
+			{
+				Array.Clear(array, 0, data.Length);
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
+			return flag;
+		}
+
+		public virtual bool TrySignData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
+		{
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			int num;
+			if (this.TryHashData(data, destination, hashAlgorithm, out num) && this.TryCreateSignature(destination.Slice(0, num), destination, out bytesWritten))
+			{
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		public virtual bool VerifyData(ReadOnlySpan<byte> data, ReadOnlySpan<byte> signature, HashAlgorithmName hashAlgorithm)
+		{
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			int num = 256;
+			checked
+			{
+				bool flag;
+				for (;;)
+				{
+					int num2 = 0;
+					byte[] array = ArrayPool<byte>.Shared.Rent(num);
+					try
+					{
+						if (this.TryHashData(data, array, hashAlgorithm, out num2))
+						{
+							flag = this.VerifySignature(new ReadOnlySpan<byte>(array, 0, num2), signature);
+							break;
+						}
+					}
+					finally
+					{
+						Array.Clear(array, 0, num2);
+						ArrayPool<byte>.Shared.Return(array, false);
+					}
+					num *= 2;
+				}
+				return flag;
+			}
+		}
+
+		public virtual bool VerifySignature(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature)
+		{
+			return this.VerifySignature(hash.ToArray(), signature.ToArray());
 		}
 	}
 }

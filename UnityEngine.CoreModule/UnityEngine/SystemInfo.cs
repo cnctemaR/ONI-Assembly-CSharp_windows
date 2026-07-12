@@ -6,12 +6,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	public sealed class SystemInfo
 	{
 		[NativeProperty]
@@ -239,6 +239,14 @@ namespace UnityEngine
 			}
 		}
 
+		public static FoveatedRenderingCaps foveatedRenderingCaps
+		{
+			get
+			{
+				return SystemInfo.GetFoveatedRenderingCaps();
+			}
+		}
+
 		public static bool hasHiddenSurfaceRemovalOnGPU
 		{
 			get
@@ -343,6 +351,14 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsCubemapArrayTextures();
+			}
+		}
+
+		public static bool supportsAnisotropicFilter
+		{
+			get
+			{
+				return SystemInfo.SupportsAnisotropicFilter();
 			}
 		}
 
@@ -517,6 +533,16 @@ namespace UnityEngine
 			return SystemInfo.SupportsBlendingOnRenderTextureFormatNative(format);
 		}
 
+		public static bool SupportsRandomWriteOnRenderTextureFormat(RenderTextureFormat format)
+		{
+			bool flag = !SystemInfo.IsValidEnumValue(format);
+			if (flag)
+			{
+				throw new ArgumentException("Failed SupportsRandomWriteOnRenderTextureFormat; format is not a valid RenderTextureFormat");
+			}
+			return SystemInfo.SupportsRandomWriteOnRenderTextureFormatNative(format);
+		}
+
 		public static bool SupportsTextureFormat(TextureFormat format)
 		{
 			bool flag = !SystemInfo.IsValidEnumValue(format);
@@ -558,11 +584,35 @@ namespace UnityEngine
 			}
 		}
 
+		public static int maxTexture3DSize
+		{
+			get
+			{
+				return SystemInfo.GetMaxTexture3DSize();
+			}
+		}
+
+		public static int maxTextureArraySlices
+		{
+			get
+			{
+				return SystemInfo.GetMaxTextureArraySlices();
+			}
+		}
+
 		public static int maxCubemapSize
 		{
 			get
 			{
 				return SystemInfo.GetMaxCubemapSize();
+			}
+		}
+
+		public static int maxAnisotropyLevel
+		{
+			get
+			{
+				return SystemInfo.GetMaxAnisotropyLevel();
 			}
 		}
 
@@ -654,6 +704,14 @@ namespace UnityEngine
 			}
 		}
 
+		public static int computeSubGroupSize
+		{
+			get
+			{
+				return SystemInfo.GetComputeSubGroupSize();
+			}
+		}
+
 		public static bool supportsAsyncCompute
 		{
 			get
@@ -707,6 +765,22 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.MinConstantBufferOffsetAlignment();
+			}
+		}
+
+		public static int maxConstantBufferSize
+		{
+			get
+			{
+				return SystemInfo.MaxConstantBufferSize();
+			}
+		}
+
+		public static long maxGraphicsBufferSize
+		{
+			get
+			{
+				return SystemInfo.MaxGraphicsBufferSize();
 			}
 		}
 
@@ -781,6 +855,30 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsStoreAndResolveAction();
+			}
+		}
+
+		public static bool supportsMultisampleResolveDepth
+		{
+			get
+			{
+				return SystemInfo.SupportsMultisampleResolveDepth();
+			}
+		}
+
+		public static bool supportsMultisampleResolveStencil
+		{
+			get
+			{
+				return SystemInfo.SupportsMultisampleResolveStencil();
+			}
+		}
+
+		public static bool supportsIndirectArgumentsBuffer
+		{
+			get
+			{
+				return SystemInfo.SupportsIndirectArgumentsBuffer();
 			}
 		}
 
@@ -905,6 +1003,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern RenderingThreadingMode GetRenderingThreadingMode();
 
+		[FreeFunction("ScriptingGraphicsCaps::GetFoveatedRenderingCaps")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern FoveatedRenderingCaps GetFoveatedRenderingCaps();
+
 		[FreeFunction("ScriptingGraphicsCaps::HasHiddenSurfaceRemovalOnGPU")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool HasHiddenSurfaceRemovalOnGPU();
@@ -944,6 +1046,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportsCubemapArrayTextures")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsCubemapArrayTextures();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsAnisotropicFilter")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsAnisotropicFilter();
 
 		[FreeFunction("ScriptingGraphicsCaps::GetCopyTextureSupport")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1045,6 +1151,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsBlendingOnRenderTextureFormatNative(RenderTextureFormat format);
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsRandomWriteOnRenderTextureFormat")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsRandomWriteOnRenderTextureFormatNative(RenderTextureFormat format);
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsTextureFormat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsTextureFormatNative(TextureFormat format);
@@ -1061,9 +1171,21 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetMaxTextureSize();
 
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxTexture3DSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxTexture3DSize();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxTextureArraySlices")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxTextureArraySlices();
+
 		[FreeFunction("ScriptingGraphicsCaps::GetMaxCubemapSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetMaxCubemapSize();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetMaxAnisotropyLevel")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaxAnisotropyLevel();
 
 		[FreeFunction("ScriptingGraphicsCaps::GetMaxRenderTextureSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1084,6 +1206,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::GetMaxComputeWorkGroupSizeZ")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetMaxComputeWorkGroupSizeZ();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetComputeSubGroupSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetComputeSubGroupSize();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsAsyncCompute")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1112,6 +1238,14 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::MinConstantBufferOffsetAlignment")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int MinConstantBufferOffsetAlignment();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxConstantBufferSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxConstantBufferSize();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxGraphicsBufferSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long MaxGraphicsBufferSize();
 
 		[FreeFunction("ScriptingGraphicsCaps::HasMipMaxLevel")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1158,6 +1292,18 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportsStoreAndResolveAction")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsStoreAndResolveAction();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampleResolveDepth")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultisampleResolveDepth();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampleResolveStencil")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultisampleResolveStencil();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsIndirectArgumentsBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsIndirectArgumentsBuffer();
 
 		[Obsolete("SystemInfo.supportsGPUFence has been deprecated, use SystemInfo.supportsGraphicsFence instead (UnityUpgradable) ->  supportsGraphicsFence", true)]
 		public static bool supportsGPUFence

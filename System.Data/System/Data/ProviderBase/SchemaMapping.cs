@@ -252,17 +252,13 @@ namespace System.Data.ProviderBase
 							{
 								text = sqlString.Value;
 							}
+							else if (this._xmlMap[i] == 1)
+							{
+								this._readerDataValues[i] = global::System.Data.SqlTypes.SqlXml.Null;
+							}
 							else
 							{
-								int num = this._xmlMap[i];
-								if (num == 1)
-								{
-									this._readerDataValues[i] = global::System.Data.SqlTypes.SqlXml.Null;
-								}
-								else
-								{
-									this._readerDataValues[i] = DBNull.Value;
-								}
+								this._readerDataValues[i] = DBNull.Value;
 							}
 						}
 						if (text != null)
@@ -1025,7 +1021,7 @@ namespace System.Data.ProviderBase
 				DataRelationCollection relations = this._dataSet.Relations;
 				while (-1 != relations.IndexOf(text))
 				{
-					text = columnName + num;
+					text = columnName + num.ToString();
 					num++;
 				}
 				dataRelation.RelationName = text;

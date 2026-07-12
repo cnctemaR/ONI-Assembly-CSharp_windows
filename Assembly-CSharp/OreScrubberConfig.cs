@@ -31,7 +31,7 @@ public class OreScrubberConfig : IBuildingConfig
 		OreScrubber oreScrubber = go.AddOrGet<OreScrubber>();
 		oreScrubber.massConsumedPerUse = 0.07f;
 		oreScrubber.consumedElement = SimHashes.ChlorineGas;
-		oreScrubber.diseaseRemovalCount = 480000;
+		oreScrubber.diseaseRemovalCount = OreScrubberConfig.DISEASE_REMOVAL_COUNT;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 1f;
@@ -56,7 +56,7 @@ public class OreScrubberConfig : IBuildingConfig
 
 	private const float MASS_PER_USE = 0.07f;
 
-	private const int DISEASE_REMOVAL_COUNT = 480000;
+	private static readonly int DISEASE_REMOVAL_COUNT = WashBasinConfig.DISEASE_REMOVAL_COUNT * 4;
 
 	private const SimHashes CONSUMED_ELEMENT = SimHashes.ChlorineGas;
 }

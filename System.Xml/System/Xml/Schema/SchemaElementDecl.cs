@@ -33,7 +33,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.Prefix;
+				return this.Prefix;
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.Name.Name;
+				return this.Name.Name;
 			}
 		}
 

@@ -75,7 +75,7 @@ public class Butcherable : Workable, ISaveLoadable
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.OnButcherComplete();
 	}

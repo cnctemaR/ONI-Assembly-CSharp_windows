@@ -226,7 +226,7 @@ namespace System.Globalization
 
 		internal void ScanDateWord(string pattern)
 		{
-			this.m_ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
+			this._ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
 			for (int i = 0; i < pattern.Length; i++)
 			{
 				char c = pattern[i];
@@ -239,10 +239,10 @@ namespace System.Globalization
 					}
 					if (c == '.')
 					{
-						if (this.m_ymdFlags == DateTimeFormatInfoScanner.FoundDatePattern.FoundYMDPatternFlag)
+						if (this._ymdFlags == DateTimeFormatInfoScanner.FoundDatePattern.FoundYMDPatternFlag)
 						{
 							this.AddIgnorableSymbols(".");
-							this.m_ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
+							this._ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
 						}
 						i++;
 						continue;
@@ -255,7 +255,7 @@ namespace System.Globalization
 						{
 							i = this.AddDateWords(pattern, i + 1, "MMMM");
 						}
-						this.m_ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundMonthPatternFlag;
+						this._ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundMonthPatternFlag;
 						continue;
 					}
 				}
@@ -272,7 +272,7 @@ namespace System.Globalization
 						{
 							int num;
 							i = DateTimeFormatInfoScanner.ScanRepeatChar(pattern, 'y', i, out num);
-							this.m_ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundYearPatternFlag;
+							this._ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundYearPatternFlag;
 							continue;
 						}
 					}
@@ -282,15 +282,15 @@ namespace System.Globalization
 						i = DateTimeFormatInfoScanner.ScanRepeatChar(pattern, 'd', i, out num);
 						if (num <= 2)
 						{
-							this.m_ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundDayPatternFlag;
+							this._ymdFlags |= DateTimeFormatInfoScanner.FoundDatePattern.FoundDayPatternFlag;
 							continue;
 						}
 						continue;
 					}
 				}
-				if (this.m_ymdFlags == DateTimeFormatInfoScanner.FoundDatePattern.FoundYMDPatternFlag && !char.IsWhiteSpace(c))
+				if (this._ymdFlags == DateTimeFormatInfoScanner.FoundDatePattern.FoundYMDPatternFlag && !char.IsWhiteSpace(c))
 				{
-					this.m_ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
+					this._ymdFlags = DateTimeFormatInfoScanner.FoundDatePattern.None;
 				}
 			}
 		}
@@ -470,7 +470,7 @@ namespace System.Globalization
 
 		private static volatile Dictionary<string, string> s_knownWords;
 
-		private DateTimeFormatInfoScanner.FoundDatePattern m_ymdFlags;
+		private DateTimeFormatInfoScanner.FoundDatePattern _ymdFlags;
 
 		private enum FoundDatePattern
 		{

@@ -2,7 +2,6 @@
 
 namespace System.Runtime.CompilerServices
 {
-	[FriendAccessAllowed]
 	internal static class JitHelpers
 	{
 		internal static T UnsafeCast<T>(object o) where T : class

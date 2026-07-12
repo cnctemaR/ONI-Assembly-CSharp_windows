@@ -4,19 +4,16 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Permissions;
-using System.Threading;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CultureInfoConverter : TypeConverter
 	{
 		private string DefaultCultureString
 		{
 			get
 			{
-				return global::SR.GetString("(Default)");
+				return "(Default)";
 			}
 		}
 
@@ -47,60 +44,53 @@ namespace System.ComponentModel
 				text = CultureInfoConverter.CultureInfoMapper.GetCultureInfoName((string)value);
 			}
 			CultureInfo cultureInfo = null;
-			CultureInfo currentUICulture = Thread.CurrentThread.CurrentUICulture;
+			string text2 = this.DefaultCultureString;
 			if (culture != null && culture.Equals(CultureInfo.InvariantCulture))
 			{
-				Thread.CurrentThread.CurrentUICulture = culture;
+				text2 = "(Default)";
 			}
-			try
+			if (text == null || text.Length == 0 || string.Compare(text, text2, StringComparison.Ordinal) == 0)
 			{
-				if (text == null || text.Length == 0 || string.Compare(text, this.DefaultCultureString, StringComparison.Ordinal) == 0)
-				{
-					cultureInfo = CultureInfo.InvariantCulture;
-				}
-				if (cultureInfo == null)
-				{
-					foreach (object obj in ((IEnumerable)this.GetStandardValues(context)))
-					{
-						CultureInfo cultureInfo2 = (CultureInfo)obj;
-						if (cultureInfo2 != null && string.Compare(this.GetCultureName(cultureInfo2), text, StringComparison.Ordinal) == 0)
-						{
-							cultureInfo = cultureInfo2;
-							break;
-						}
-					}
-				}
-				if (cultureInfo == null)
-				{
-					try
-					{
-						cultureInfo = new CultureInfo(text);
-					}
-					catch
-					{
-					}
-				}
-				if (cultureInfo == null)
-				{
-					text = text.ToLower(CultureInfo.CurrentCulture);
-					foreach (object obj2 in this.values)
-					{
-						CultureInfo cultureInfo3 = (CultureInfo)obj2;
-						if (cultureInfo3 != null && this.GetCultureName(cultureInfo3).ToLower(CultureInfo.CurrentCulture).StartsWith(text))
-						{
-							cultureInfo = cultureInfo3;
-							break;
-						}
-					}
-				}
-			}
-			finally
-			{
-				Thread.CurrentThread.CurrentUICulture = currentUICulture;
+				cultureInfo = CultureInfo.InvariantCulture;
 			}
 			if (cultureInfo == null)
 			{
-				throw new ArgumentException(global::SR.GetString("The {0} culture cannot be converted to a CultureInfo object on this computer.", new object[] { (string)value }));
+				foreach (object obj in this.GetStandardValues(context))
+				{
+					CultureInfo cultureInfo2 = (CultureInfo)obj;
+					if (cultureInfo2 != null && string.Compare(this.GetCultureName(cultureInfo2), text, StringComparison.Ordinal) == 0)
+					{
+						cultureInfo = cultureInfo2;
+						break;
+					}
+				}
+			}
+			if (cultureInfo == null)
+			{
+				try
+				{
+					cultureInfo = new CultureInfo(text);
+				}
+				catch
+				{
+				}
+			}
+			if (cultureInfo == null)
+			{
+				text = text.ToLower(CultureInfo.CurrentCulture);
+				foreach (object obj2 in this._values)
+				{
+					CultureInfo cultureInfo3 = (CultureInfo)obj2;
+					if (cultureInfo3 != null && this.GetCultureName(cultureInfo3).ToLower(CultureInfo.CurrentCulture).StartsWith(text))
+					{
+						cultureInfo = cultureInfo3;
+						break;
+					}
+				}
+			}
+			if (cultureInfo == null)
+			{
+				throw new ArgumentException(SR.Format("The {0} culture cannot be converted to a CultureInfo object on this computer.", (string)value));
 			}
 			return cultureInfo;
 		}
@@ -113,28 +103,21 @@ namespace System.ComponentModel
 			}
 			if (destinationType == typeof(string))
 			{
-				CultureInfo currentUICulture = Thread.CurrentThread.CurrentUICulture;
+				string text = this.DefaultCultureString;
 				if (culture != null && culture.Equals(CultureInfo.InvariantCulture))
 				{
-					Thread.CurrentThread.CurrentUICulture = culture;
+					text = "(Default)";
 				}
-				string text;
-				try
+				string text2;
+				if (value == null || value == CultureInfo.InvariantCulture)
 				{
-					if (value == null || value == CultureInfo.InvariantCulture)
-					{
-						text = this.DefaultCultureString;
-					}
-					else
-					{
-						text = this.GetCultureName((CultureInfo)value);
-					}
+					text2 = text;
 				}
-				finally
+				else
 				{
-					Thread.CurrentThread.CurrentUICulture = currentUICulture;
+					text2 = this.GetCultureName((CultureInfo)value);
 				}
-				return text;
+				return text2;
 			}
 			if (destinationType == typeof(InstanceDescriptor) && value is CultureInfo)
 			{
@@ -150,7 +133,7 @@ namespace System.ComponentModel
 
 		public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			if (this.values == null)
+			if (this._values == null)
 			{
 				CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures);
 				int num = Array.IndexOf<CultureInfo>(cultures, CultureInfo.InvariantCulture);
@@ -170,9 +153,9 @@ namespace System.ComponentModel
 				{
 					array[0] = CultureInfo.InvariantCulture;
 				}
-				this.values = new TypeConverter.StandardValuesCollection(array);
+				this._values = new TypeConverter.StandardValuesCollection(array);
 			}
-			return this.values;
+			return this._values;
 		}
 
 		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
@@ -185,13 +168,15 @@ namespace System.ComponentModel
 			return true;
 		}
 
-		private TypeConverter.StandardValuesCollection values;
+		private TypeConverter.StandardValuesCollection _values;
+
+		private const string DefaultInvariantCultureString = "(Default)";
 
 		private class CultureComparer : IComparer
 		{
 			public CultureComparer(CultureInfoConverter cultureConverter)
 			{
-				this.converter = cultureConverter;
+				this._converter = cultureConverter;
 			}
 
 			public int Compare(object item1, object item2)
@@ -210,33 +195,20 @@ namespace System.ComponentModel
 					{
 						return 1;
 					}
-					string cultureName = this.converter.GetCultureName((CultureInfo)item1);
-					string cultureName2 = this.converter.GetCultureName((CultureInfo)item2);
+					string cultureName = this._converter.GetCultureName((CultureInfo)item1);
+					string cultureName2 = this._converter.GetCultureName((CultureInfo)item2);
 					return CultureInfo.CurrentCulture.CompareInfo.Compare(cultureName, cultureName2, CompareOptions.StringSort);
 				}
 			}
 
-			private CultureInfoConverter converter;
+			private CultureInfoConverter _converter;
 		}
 
 		private static class CultureInfoMapper
 		{
-			public static string GetCultureInfoName(string cultureInfoDisplayName)
+			private static Dictionary<string, string> CreateMap()
 			{
-				if (CultureInfoConverter.CultureInfoMapper.cultureInfoNameMap == null)
-				{
-					CultureInfoConverter.CultureInfoMapper.InitializeCultureInfoMap();
-				}
-				if (CultureInfoConverter.CultureInfoMapper.cultureInfoNameMap.ContainsKey(cultureInfoDisplayName))
-				{
-					return CultureInfoConverter.CultureInfoMapper.cultureInfoNameMap[cultureInfoDisplayName];
-				}
-				return cultureInfoDisplayName;
-			}
-
-			private static void InitializeCultureInfoMap()
-			{
-				CultureInfoConverter.CultureInfoMapper.cultureInfoNameMap = new Dictionary<string, string>
+				return new Dictionary<string, string>(274)
 				{
 					{ "Afrikaans", "af" },
 					{ "Afrikaans (South Africa)", "af-ZA" },
@@ -286,7 +258,7 @@ namespace System.ComponentModel
 					{ "Chinese (People's Republic of China)", "zh-CN" },
 					{ "Chinese (Simplified)", "zh-CHS" },
 					{ "Chinese (Singapore)", "zh-SG" },
-					{ "Chinese (----)", "zh-TW" },
+					{ "Chinese (Taiwan)", "zh-TW" },
 					{ "Chinese (Traditional)", "zh-CHT" },
 					{ "Corsican (France)", "co-FR" },
 					{ "Croatian", "hr" },
@@ -363,7 +335,7 @@ namespace System.ComponentModel
 					{ "Indonesian (Indonesia)", "id-ID" },
 					{ "Inuktitut (Latin, Canada)", "iu-Latn-CA" },
 					{ "Inuktitut (Syllabics, Canada)", "iu-Cans-CA" },
-					{ "Invariant Language (Invariant ----)", "" },
+					{ "Invariant Language (Invariant Country)", "" },
 					{ "Irish (Ireland)", "ga-IE" },
 					{ "isiXhosa (South Africa)", "xh-ZA" },
 					{ "isiZulu (South Africa)", "zu-ZA" },
@@ -394,8 +366,8 @@ namespace System.ComponentModel
 					{ "Lithuanian (Lithuania)", "lt-LT" },
 					{ "Lower Sorbian (Germany)", "dsb-DE" },
 					{ "Luxembourgish (Luxembourg)", "lb-LU" },
-					{ "----n", "mk" },
-					{ "----n (Former Yugoslav Republic of ----)", "mk-MK" },
+					{ "Macedonian", "mk" },
+					{ "Macedonian (Former Yugoslav Republic of Macedonia)", "mk-MK" },
 					{ "Malay", "ms" },
 					{ "Malay (Brunei Darussalam)", "ms-BN" },
 					{ "Malay (Malaysia)", "ms-MY" },
@@ -411,7 +383,7 @@ namespace System.ComponentModel
 					{ "Mongolian (Traditional Mongolian, PRC)", "mn-Mong-CN" },
 					{ "Nepali (Nepal)", "ne-NP" },
 					{ "Norwegian", "no" },
-					{ "Norwegian, Bokm\ufffdl (Norway)", "nb-NO" },
+					{ "Norwegian, Bokmål (Norway)", "nb-NO" },
 					{ "Norwegian, Nynorsk (Norway)", "nn-NO" },
 					{ "Occitan (France)", "oc-FR" },
 					{ "Oriya (India)", "or-IN" },
@@ -515,7 +487,17 @@ namespace System.ComponentModel
 				};
 			}
 
-			private static volatile Dictionary<string, string> cultureInfoNameMap;
+			public static string GetCultureInfoName(string cultureInfoDisplayName)
+			{
+				string text;
+				if (!CultureInfoConverter.CultureInfoMapper.s_cultureInfoNameMap.TryGetValue(cultureInfoDisplayName, out text))
+				{
+					return cultureInfoDisplayName;
+				}
+				return text;
+			}
+
+			private static readonly Dictionary<string, string> s_cultureInfoNameMap = CultureInfoConverter.CultureInfoMapper.CreateMap();
 		}
 	}
 }

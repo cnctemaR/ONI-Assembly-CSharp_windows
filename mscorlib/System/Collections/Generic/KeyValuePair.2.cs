@@ -3,7 +3,7 @@
 namespace System.Collections.Generic
 {
 	[Serializable]
-	public struct KeyValuePair<TKey, TValue>
+	public readonly struct KeyValuePair<TKey, TValue>
 	{
 		public KeyValuePair(TKey key, TValue value)
 		{
@@ -38,8 +38,8 @@ namespace System.Collections.Generic
 			value = this.Value;
 		}
 
-		private TKey key;
+		private readonly TKey key;
 
-		private TValue value;
+		private readonly TValue value;
 	}
 }

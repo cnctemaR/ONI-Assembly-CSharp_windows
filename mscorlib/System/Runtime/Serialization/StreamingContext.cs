@@ -5,7 +5,7 @@ namespace System.Runtime.Serialization
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct StreamingContext
+	public readonly struct StreamingContext
 	{
 		public StreamingContext(StreamingContextStates state)
 		{
@@ -44,8 +44,8 @@ namespace System.Runtime.Serialization
 			}
 		}
 
-		internal object m_additionalContext;
+		internal readonly object m_additionalContext;
 
-		internal StreamingContextStates m_state;
+		internal readonly StreamingContextStates m_state;
 	}
 }

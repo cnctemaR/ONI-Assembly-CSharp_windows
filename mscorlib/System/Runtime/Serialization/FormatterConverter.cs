@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	public class FormatterConverter : IFormatterConverter
 	{
 		public object Convert(object value, Type type)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
 		}
@@ -20,7 +19,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ChangeType(value, typeCode, CultureInfo.InvariantCulture);
 		}
@@ -29,7 +28,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToBoolean(value, CultureInfo.InvariantCulture);
 		}
@@ -38,7 +37,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToChar(value, CultureInfo.InvariantCulture);
 		}
@@ -48,7 +47,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToSByte(value, CultureInfo.InvariantCulture);
 		}
@@ -57,7 +56,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToByte(value, CultureInfo.InvariantCulture);
 		}
@@ -66,7 +65,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToInt16(value, CultureInfo.InvariantCulture);
 		}
@@ -76,7 +75,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToUInt16(value, CultureInfo.InvariantCulture);
 		}
@@ -85,7 +84,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToInt32(value, CultureInfo.InvariantCulture);
 		}
@@ -95,7 +94,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToUInt32(value, CultureInfo.InvariantCulture);
 		}
@@ -104,7 +103,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToInt64(value, CultureInfo.InvariantCulture);
 		}
@@ -114,7 +113,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToUInt64(value, CultureInfo.InvariantCulture);
 		}
@@ -123,7 +122,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToSingle(value, CultureInfo.InvariantCulture);
 		}
@@ -132,7 +131,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
 		}
@@ -141,7 +140,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToDecimal(value, CultureInfo.InvariantCulture);
 		}
@@ -150,7 +149,7 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToDateTime(value, CultureInfo.InvariantCulture);
 		}
@@ -159,9 +158,15 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				FormatterConverter.ThrowValueNullException();
 			}
 			return global::System.Convert.ToString(value, CultureInfo.InvariantCulture);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowValueNullException()
+		{
+			throw new ArgumentNullException("value");
 		}
 	}
 }

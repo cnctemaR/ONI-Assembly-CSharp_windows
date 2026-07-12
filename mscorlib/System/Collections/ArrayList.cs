@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
-	[DebuggerTypeProxy(typeof(ArrayList.ArrayListDebugView))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(ArrayList.ArrayListDebugView))]
 	[Serializable]
 	public class ArrayList : IList, ICollection, IEnumerable, ICloneable
 	{
@@ -19,18 +15,18 @@ namespace System.Collections
 
 		public ArrayList()
 		{
-			this._items = ArrayList.emptyArray;
+			this._items = Array.Empty<object>();
 		}
 
 		public ArrayList(int capacity)
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("'{0}' must be non-negative.", new object[] { "capacity" }));
+				throw new ArgumentOutOfRangeException("capacity", SR.Format("'{0}' must be non-negative.", "capacity"));
 			}
 			if (capacity == 0)
 			{
-				this._items = ArrayList.emptyArray;
+				this._items = Array.Empty<object>();
 				return;
 			}
 			this._items = new object[capacity];
@@ -40,12 +36,12 @@ namespace System.Collections
 		{
 			if (c == null)
 			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+				throw new ArgumentNullException("c", "Collection cannot be null.");
 			}
 			int count = c.Count;
 			if (count == 0)
 			{
-				this._items = ArrayList.emptyArray;
+				this._items = Array.Empty<object>();
 				return;
 			}
 			this._items = new object[count];
@@ -62,7 +58,7 @@ namespace System.Collections
 			{
 				if (value < this._size)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 				}
 				if (value != this._items.Length)
 				{
@@ -131,7 +127,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index >= this._size)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				return this._items[index];
 			}
@@ -139,7 +135,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index >= this._size)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this._items[index] = value;
 				this._version++;
@@ -177,15 +173,15 @@ namespace System.Collections
 		{
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			return Array.BinarySearch(this._items, index, count, value, comparer);
 		}
@@ -251,7 +247,7 @@ namespace System.Collections
 		{
 			if (array != null && array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
 			Array.Copy(this._items, 0, array, arrayIndex, this._size);
 		}
@@ -260,11 +256,11 @@ namespace System.Collections
 		{
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (array != null && array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
 			Array.Copy(this._items, index, array, arrayIndex, count);
 		}
@@ -313,15 +309,15 @@ namespace System.Collections
 		{
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			return new ArrayList.ArrayListEnumerator(this, index, count);
 		}
@@ -335,7 +331,7 @@ namespace System.Collections
 		{
 			if (startIndex > this._size)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			return Array.IndexOf(this._items, value, startIndex, this._size - startIndex);
 		}
@@ -344,11 +340,11 @@ namespace System.Collections
 		{
 			if (startIndex > this._size)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count < 0 || startIndex > this._size - count)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 			}
 			return Array.IndexOf(this._items, value, startIndex, count);
 		}
@@ -357,7 +353,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index > this._size)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Insertion index was out of range. Must be non-negative and less than or equal to size."));
+				throw new ArgumentOutOfRangeException("index", "Insertion index was out of range. Must be non-negative and less than or equal to size.");
 			}
 			if (this._size == this._items.Length)
 			{
@@ -376,11 +372,11 @@ namespace System.Collections
 		{
 			if (c == null)
 			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+				throw new ArgumentNullException("c", "Collection cannot be null.");
 			}
 			if (index < 0 || index > this._size)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int count = c.Count;
 			if (count > 0)
@@ -407,7 +403,7 @@ namespace System.Collections
 		{
 			if (startIndex >= this._size)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			return this.LastIndexOf(value, startIndex, startIndex + 1);
 		}
@@ -416,7 +412,7 @@ namespace System.Collections
 		{
 			if (this.Count != 0 && (startIndex < 0 || count < 0))
 			{
-				throw new ArgumentOutOfRangeException((startIndex < 0) ? "startIndex" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((startIndex < 0) ? "startIndex" : "count", "Non-negative number required.");
 			}
 			if (this._size == 0)
 			{
@@ -424,7 +420,7 @@ namespace System.Collections
 			}
 			if (startIndex >= this._size || count > startIndex + 1)
 			{
-				throw new ArgumentOutOfRangeException((startIndex >= this._size) ? "startIndex" : "count", Environment.GetResourceString("Larger than collection size."));
+				throw new ArgumentOutOfRangeException((startIndex >= this._size) ? "startIndex" : "count", "Must be less than or equal to the size of the collection.");
 			}
 			return Array.LastIndexOf(this._items, value, startIndex, count);
 		}
@@ -460,7 +456,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this._size)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			this._size--;
 			if (index < this._size)
@@ -475,15 +471,15 @@ namespace System.Collections
 		{
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (count > 0)
 			{
@@ -505,7 +501,7 @@ namespace System.Collections
 		{
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			ArrayList arrayList = new ArrayList((count > 4) ? count : 4);
 			for (int i = 0; i < count; i++)
@@ -524,15 +520,15 @@ namespace System.Collections
 		{
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			Array.Reverse<object>(this._items, index, count);
 			this._version++;
@@ -542,12 +538,12 @@ namespace System.Collections
 		{
 			if (c == null)
 			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+				throw new ArgumentNullException("c", "Collection cannot be null.");
 			}
 			int count = c.Count;
 			if (index < 0 || index > this._size - count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count > 0)
 			{
@@ -560,11 +556,11 @@ namespace System.Collections
 		{
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			return new ArrayList.Range(this, index, count);
 		}
@@ -583,21 +579,20 @@ namespace System.Collections
 		{
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (this._size - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			Array.Sort(this._items, index, count, comparer);
 			this._version++;
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static IList Synchronized(IList list)
 		{
 			if (list == null)
@@ -607,7 +602,6 @@ namespace System.Collections
 			return new ArrayList.SyncIList(list);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static ArrayList Synchronized(ArrayList list)
 		{
 			if (list == null)
@@ -619,19 +613,22 @@ namespace System.Collections
 
 		public virtual object[] ToArray()
 		{
+			if (this._size == 0)
+			{
+				return Array.Empty<object>();
+			}
 			object[] array = new object[this._size];
 			Array.Copy(this._items, 0, array, 0, this._size);
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		public virtual Array ToArray(Type type)
 		{
 			if (type == null)
 			{
 				throw new ArgumentNullException("type");
 			}
-			Array array = Array.UnsafeCreateInstance(type, new int[] { this._size });
+			Array array = Array.CreateInstance(type, this._size);
 			Array.Copy(this._items, 0, array, 0, this._size);
 			return array;
 		}
@@ -652,7 +649,7 @@ namespace System.Collections
 
 		private const int _defaultCapacity = 4;
 
-		private static readonly object[] emptyArray = EmptyArray<object>.Value;
+		internal const int MaxArrayLength = 2146435071;
 
 		[Serializable]
 		private class IListWrapper : ArrayList
@@ -673,7 +670,7 @@ namespace System.Collections
 				{
 					if (value < this.Count)
 					{
-						throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+						throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 					}
 				}
 			}
@@ -747,11 +744,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				if (comparer == null)
 				{
@@ -783,7 +780,7 @@ namespace System.Collections
 			{
 				if (this._list.IsFixedSize)
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+					throw new NotSupportedException("Collection was of a fixed size.");
 				}
 				this._list.Clear();
 				this._version++;
@@ -812,23 +809,23 @@ namespace System.Collections
 				}
 				if (index < 0 || arrayIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "arrayIndex", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "arrayIndex", "Non-negative number required.");
 				}
 				if (count < 0)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 				}
 				if (array.Length - arrayIndex < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				for (int i = index; i < index + count; i++)
 				{
@@ -845,11 +842,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				return new ArrayList.IListWrapper.IListWrapperEnumWrapper(this, index, count);
 			}
@@ -868,11 +865,11 @@ namespace System.Collections
 			{
 				if (startIndex < 0 || startIndex > this.Count)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (count < 0 || startIndex > this.Count - count)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 				}
 				int num = startIndex + count;
 				if (value == null)
@@ -906,11 +903,11 @@ namespace System.Collections
 			{
 				if (c == null)
 				{
-					throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+					throw new ArgumentNullException("c", "Collection cannot be null.");
 				}
 				if (index < 0 || index > this.Count)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (c.Count > 0)
 				{
@@ -948,11 +945,11 @@ namespace System.Collections
 				}
 				if (startIndex < 0 || startIndex >= this._list.Count)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (count < 0 || count > startIndex + 1)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 				}
 				int num = startIndex - count + 1;
 				if (value == null)
@@ -995,11 +992,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				if (count > 0)
 				{
@@ -1016,11 +1013,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				int i = index;
 				int num = index + count - 1;
@@ -1037,11 +1034,11 @@ namespace System.Collections
 			{
 				if (c == null)
 				{
-					throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+					throw new ArgumentNullException("c", "Collection cannot be null.");
 				}
 				if (index < 0 || index > this._list.Count - c.Count)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (c.Count > 0)
 				{
@@ -1057,11 +1054,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				return new ArrayList.Range(this, index, count);
 			}
@@ -1070,11 +1067,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._list.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				object[] array = new object[count];
 				this.CopyTo(index, array, 0, count);
@@ -1088,19 +1085,22 @@ namespace System.Collections
 
 			public override object[] ToArray()
 			{
+				if (this.Count == 0)
+				{
+					return Array.Empty<object>();
+				}
 				object[] array = new object[this.Count];
 				this._list.CopyTo(array, 0);
 				return array;
 			}
 
-			[SecuritySafeCritical]
 			public override Array ToArray(Type type)
 			{
 				if (type == null)
 				{
 					throw new ArgumentNullException("type");
 				}
-				Array array = Array.UnsafeCreateInstance(type, new int[] { this._list.Count });
+				Array array = Array.CreateInstance(type, this._list.Count);
 				this._list.CopyTo(array, 0);
 				return array;
 			}
@@ -1114,10 +1114,6 @@ namespace System.Collections
 			[Serializable]
 			private sealed class IListWrapperEnumWrapper : IEnumerator, ICloneable
 			{
-				private IListWrapperEnumWrapper()
-				{
-				}
-
 				internal IListWrapperEnumWrapper(ArrayList.IListWrapper listWrapper, int startIndex, int count)
 				{
 					this._en = listWrapper.GetEnumerator();
@@ -1128,6 +1124,10 @@ namespace System.Collections
 					}
 					this._remaining = count;
 					this._firstCall = true;
+				}
+
+				private IListWrapperEnumWrapper()
+				{
 				}
 
 				public object Clone()
@@ -1170,11 +1170,11 @@ namespace System.Collections
 					{
 						if (this._firstCall)
 						{
-							throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+							throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 						}
 						if (this._remaining < 0)
 						{
-							throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+							throw new InvalidOperationException("Enumeration already finished.");
 						}
 						return this._en.Current;
 					}
@@ -1872,12 +1872,12 @@ namespace System.Collections
 
 			public virtual int Add(object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public virtual void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public virtual bool Contains(object obj)
@@ -1902,17 +1902,17 @@ namespace System.Collections
 
 			public virtual void Insert(int index, object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public virtual void Remove(object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public virtual void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			private IList _list;
@@ -1982,12 +1982,12 @@ namespace System.Collections
 
 			public override int Add(object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override void AddRange(ICollection c)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override int BinarySearch(int index, int count, object value, IComparer comparer)
@@ -2003,13 +2003,13 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+					throw new NotSupportedException("Collection was of a fixed size.");
 				}
 			}
 
 			public override void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override object Clone()
@@ -2062,12 +2062,12 @@ namespace System.Collections
 
 			public override void Insert(int index, object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override void InsertRange(int index, ICollection c)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override int LastIndexOf(object value)
@@ -2087,17 +2087,17 @@ namespace System.Collections
 
 			public override void Remove(object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override void RemoveRange(int index, int count)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			public override void SetRange(int index, ICollection c)
@@ -2110,11 +2110,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				return new ArrayList.Range(this, index, count);
 			}
@@ -2143,7 +2143,7 @@ namespace System.Collections
 
 			public override void TrimToSize()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
+				throw new NotSupportedException("Collection was of a fixed size.");
 			}
 
 			private ArrayList _list;
@@ -2197,7 +2197,7 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+					throw new NotSupportedException("Collection is read-only.");
 				}
 			}
 
@@ -2211,12 +2211,12 @@ namespace System.Collections
 
 			public virtual int Add(object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public virtual void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public virtual bool Contains(object obj)
@@ -2241,17 +2241,17 @@ namespace System.Collections
 
 			public virtual void Insert(int index, object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public virtual void Remove(object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public virtual void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			private IList _list;
@@ -2305,7 +2305,7 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+					throw new NotSupportedException("Collection is read-only.");
 				}
 			}
 
@@ -2319,12 +2319,12 @@ namespace System.Collections
 
 			public override int Add(object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void AddRange(ICollection c)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override int BinarySearch(int index, int count, object value, IComparer comparer)
@@ -2340,13 +2340,13 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+					throw new NotSupportedException("Collection is read-only.");
 				}
 			}
 
 			public override void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override object Clone()
@@ -2399,12 +2399,12 @@ namespace System.Collections
 
 			public override void Insert(int index, object obj)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void InsertRange(int index, ICollection c)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override int LastIndexOf(object value)
@@ -2424,45 +2424,45 @@ namespace System.Collections
 
 			public override void Remove(object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void RemoveRange(int index, int count)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void SetRange(int index, ICollection c)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override ArrayList GetRange(int index, int count)
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this.Count - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				return new ArrayList.Range(this, index, count);
 			}
 
 			public override void Reverse(int index, int count)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override void Sort(int index, int count, IComparer comparer)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public override object[] ToArray()
@@ -2477,7 +2477,7 @@ namespace System.Collections
 
 			public override void TrimToSize()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			private ArrayList _list;
@@ -2488,12 +2488,12 @@ namespace System.Collections
 		{
 			internal ArrayListEnumerator(ArrayList list, int index, int count)
 			{
-				this.list = list;
-				this.startIndex = index;
-				this.index = index - 1;
-				this.endIndex = this.index + count;
-				this.version = list._version;
-				this.currentElement = null;
+				this._list = list;
+				this._startIndex = index;
+				this._index = index - 1;
+				this._endIndex = this._index + count;
+				this._version = list._version;
+				this._currentElement = null;
 			}
 
 			public object Clone()
@@ -2503,19 +2503,19 @@ namespace System.Collections
 
 			public bool MoveNext()
 			{
-				if (this.version != this.list._version)
+				if (this._version != this._list._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				if (this.index < this.endIndex)
+				if (this._index < this._endIndex)
 				{
-					ArrayList arrayList = this.list;
-					int num = this.index + 1;
-					this.index = num;
-					this.currentElement = arrayList[num];
+					ArrayList list = this._list;
+					int num = this._index + 1;
+					this._index = num;
+					this._currentElement = list[num];
 					return true;
 				}
-				this.index = this.endIndex + 1;
+				this._index = this._endIndex + 1;
 				return false;
 			}
 
@@ -2523,38 +2523,38 @@ namespace System.Collections
 			{
 				get
 				{
-					if (this.index < this.startIndex)
+					if (this._index < this._startIndex)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 					}
-					if (this.index > this.endIndex)
+					if (this._index > this._endIndex)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+						throw new InvalidOperationException("Enumeration already finished.");
 					}
-					return this.currentElement;
+					return this._currentElement;
 				}
 			}
 
 			public void Reset()
 			{
-				if (this.version != this.list._version)
+				if (this._version != this._list._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				this.index = this.startIndex - 1;
+				this._index = this._startIndex - 1;
 			}
 
-			private ArrayList list;
+			private ArrayList _list;
 
-			private int index;
+			private int _index;
 
-			private int endIndex;
+			private int _endIndex;
 
-			private int version;
+			private int _version;
 
-			private object currentElement;
+			private object _currentElement;
 
-			private int startIndex;
+			private int _startIndex;
 		}
 
 		[Serializable]
@@ -2574,7 +2574,7 @@ namespace System.Collections
 			{
 				if (this._baseVersion != this._baseList._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("This range in the underlying list is invalid. A possible cause is that elements were removed."));
+					throw new InvalidOperationException("This range in the underlying list is invalid. A possible cause is that elements were removed.");
 				}
 			}
 
@@ -2614,11 +2614,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				int num = this._baseList.BinarySearch(this._baseIndex + index, count, value, comparer);
@@ -2639,7 +2639,7 @@ namespace System.Collections
 				{
 					if (value < this.Count)
 					{
-						throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+						throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 					}
 				}
 			}
@@ -2696,15 +2696,15 @@ namespace System.Collections
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 				}
 				if (index < 0)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 				}
 				if (array.Length - index < this._baseSize)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.CopyTo(this._baseIndex, array, index, this._baseSize);
@@ -2718,19 +2718,19 @@ namespace System.Collections
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 				}
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (array.Length - arrayIndex < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.CopyTo(this._baseIndex + index, array, arrayIndex, count);
@@ -2778,11 +2778,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				return this._baseList.GetEnumerator(this._baseIndex + index, count);
@@ -2792,11 +2792,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				return new ArrayList.Range(this, index, count);
@@ -2825,11 +2825,11 @@ namespace System.Collections
 			{
 				if (startIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("startIndex", "Non-negative number required.");
 				}
 				if (startIndex > this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this.InternalUpdateRange();
 				int num = this._baseList.IndexOf(value, this._baseIndex + startIndex, this._baseSize - startIndex);
@@ -2844,11 +2844,11 @@ namespace System.Collections
 			{
 				if (startIndex < 0 || startIndex > this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (count < 0 || startIndex > this._baseSize - count)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 				}
 				this.InternalUpdateRange();
 				int num = this._baseList.IndexOf(value, this._baseIndex + startIndex, count);
@@ -2863,7 +2863,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index > this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.Insert(this._baseIndex + index, value);
@@ -2875,7 +2875,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index > this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (c == null)
 				{
@@ -2916,11 +2916,11 @@ namespace System.Collections
 				}
 				if (startIndex >= this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (startIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("startIndex", "Non-negative number required.");
 				}
 				int num = this._baseList.LastIndexOf(value, this._baseIndex + startIndex, count);
 				if (num >= 0)
@@ -2934,7 +2934,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index >= this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.RemoveAt(this._baseIndex + index);
@@ -2946,11 +2946,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				if (count > 0)
@@ -2965,11 +2965,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.Reverse(this._baseIndex + index, count);
@@ -2981,7 +2981,7 @@ namespace System.Collections
 				this.InternalUpdateRange();
 				if (index < 0 || index >= this._baseSize)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this._baseList.SetRange(this._baseIndex + index, c);
 				if (c.Count > 0)
@@ -2994,11 +2994,11 @@ namespace System.Collections
 			{
 				if (index < 0 || count < 0)
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 				}
 				if (this._baseSize - index < count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 				}
 				this.InternalUpdateRange();
 				this._baseList.Sort(this._baseIndex + index, count, comparer);
@@ -3012,7 +3012,7 @@ namespace System.Collections
 					this.InternalUpdateRange();
 					if (index < 0 || index >= this._baseSize)
 					{
-						throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+						throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 					}
 					return this._baseList[this._baseIndex + index];
 				}
@@ -3021,7 +3021,7 @@ namespace System.Collections
 					this.InternalUpdateRange();
 					if (index < 0 || index >= this._baseSize)
 					{
-						throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+						throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 					}
 					this._baseList[this._baseIndex + index] = value;
 					this.InternalUpdateVersion();
@@ -3031,12 +3031,15 @@ namespace System.Collections
 			public override object[] ToArray()
 			{
 				this.InternalUpdateRange();
+				if (this._baseSize == 0)
+				{
+					return Array.Empty<object>();
+				}
 				object[] array = new object[this._baseSize];
 				Array.Copy(this._baseList._items, this._baseIndex, array, 0, this._baseSize);
 				return array;
 			}
 
-			[SecuritySafeCritical]
 			public override Array ToArray(Type type)
 			{
 				if (type == null)
@@ -3044,14 +3047,14 @@ namespace System.Collections
 					throw new ArgumentNullException("type");
 				}
 				this.InternalUpdateRange();
-				Array array = Array.UnsafeCreateInstance(type, new int[] { this._baseSize });
+				Array array = Array.CreateInstance(type, this._baseSize);
 				this._baseList.CopyTo(this._baseIndex, array, 0, this._baseSize);
 				return array;
 			}
 
 			public override void TrimToSize()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("The specified operation is not supported on Ranges."));
+				throw new NotSupportedException("The specified operation is not supported on Ranges.");
 			}
 
 			private ArrayList _baseList;
@@ -3068,11 +3071,11 @@ namespace System.Collections
 		{
 			internal ArrayListEnumeratorSimple(ArrayList list)
 			{
-				this.list = list;
-				this.index = -1;
-				this.version = list._version;
-				this.isArrayList = list.GetType() == typeof(ArrayList);
-				this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
+				this._list = list;
+				this._index = -1;
+				this._version = list._version;
+				this._isArrayList = list.GetType() == typeof(ArrayList);
+				this._currentElement = ArrayList.ArrayListEnumeratorSimple.s_dummyObject;
 			}
 
 			public object Clone()
@@ -3082,36 +3085,36 @@ namespace System.Collections
 
 			public bool MoveNext()
 			{
-				if (this.version != this.list._version)
+				if (this._version != this._list._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				if (this.isArrayList)
+				if (this._isArrayList)
 				{
-					if (this.index < this.list._size - 1)
+					if (this._index < this._list._size - 1)
 					{
-						object[] items = this.list._items;
-						int num = this.index + 1;
-						this.index = num;
-						this.currentElement = items[num];
+						object[] items = this._list._items;
+						int num = this._index + 1;
+						this._index = num;
+						this._currentElement = items[num];
 						return true;
 					}
-					this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
-					this.index = this.list._size;
+					this._currentElement = ArrayList.ArrayListEnumeratorSimple.s_dummyObject;
+					this._index = this._list._size;
 					return false;
 				}
 				else
 				{
-					if (this.index < this.list.Count - 1)
+					if (this._index < this._list.Count - 1)
 					{
-						ArrayList arrayList = this.list;
-						int num = this.index + 1;
-						this.index = num;
-						this.currentElement = arrayList[num];
+						ArrayList list = this._list;
+						int num = this._index + 1;
+						this._index = num;
+						this._currentElement = list[num];
 						return true;
 					}
-					this.index = this.list.Count;
-					this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
+					this._index = this._list.Count;
+					this._currentElement = ArrayList.ArrayListEnumeratorSimple.s_dummyObject;
 					return false;
 				}
 			}
@@ -3120,41 +3123,40 @@ namespace System.Collections
 			{
 				get
 				{
-					object obj = this.currentElement;
-					if (ArrayList.ArrayListEnumeratorSimple.dummyObject != obj)
+					object currentElement = this._currentElement;
+					if (ArrayList.ArrayListEnumeratorSimple.s_dummyObject != currentElement)
 					{
-						return obj;
+						return currentElement;
 					}
-					if (this.index == -1)
+					if (this._index == -1)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 					}
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					throw new InvalidOperationException("Enumeration already finished.");
 				}
 			}
 
 			public void Reset()
 			{
-				if (this.version != this.list._version)
+				if (this._version != this._list._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
-				this.index = -1;
+				this._currentElement = ArrayList.ArrayListEnumeratorSimple.s_dummyObject;
+				this._index = -1;
 			}
 
-			private ArrayList list;
+			private ArrayList _list;
 
-			private int index;
+			private int _index;
 
-			private int version;
+			private int _version;
 
-			private object currentElement;
+			private object _currentElement;
 
-			[NonSerialized]
-			private bool isArrayList;
+			private bool _isArrayList;
 
-			private static object dummyObject = new object();
+			private static object s_dummyObject = new object();
 		}
 
 		internal class ArrayListDebugView
@@ -3165,7 +3167,7 @@ namespace System.Collections
 				{
 					throw new ArgumentNullException("arrayList");
 				}
-				this.arrayList = arrayList;
+				this._arrayList = arrayList;
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -3173,11 +3175,11 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.arrayList.ToArray();
+					return this._arrayList.ToArray();
 				}
 			}
 
-			private ArrayList arrayList;
+			private ArrayList _arrayList;
 		}
 	}
 }

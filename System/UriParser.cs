@@ -45,11 +45,11 @@ namespace System
 		{
 			if (baseUri.UserDrivenParsing)
 			{
-				throw new InvalidOperationException(global::SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
+				throw new InvalidOperationException(SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
 			}
 			if (!baseUri.IsAbsoluteUri)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			string text = null;
 			bool flag = false;
@@ -74,7 +74,7 @@ namespace System
 		{
 			if ((components & UriComponents.SerializationInfoString) != (UriComponents)0 && components != UriComponents.SerializationInfoString)
 			{
-				throw new ArgumentOutOfRangeException("components", components, global::SR.GetString("UriComponents.SerializationInfoString must not be combined with other UriComponents."));
+				throw new ArgumentOutOfRangeException("components", components, SR.GetString("UriComponents.SerializationInfoString must not be combined with other UriComponents."));
 			}
 			if ((format & (UriFormat)(-4)) != (UriFormat)0)
 			{
@@ -82,11 +82,11 @@ namespace System
 			}
 			if (uri.UserDrivenParsing)
 			{
-				throw new InvalidOperationException(global::SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
+				throw new InvalidOperationException(SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
 			}
 			if (!uri.IsAbsoluteUri)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			return uri.GetComponentsHelper(components, format);
 		}
@@ -226,7 +226,7 @@ namespace System
 		{
 			if (syntax.SchemeName.Length != 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The URI parser instance passed into 'uriParser' parameter is already registered with the scheme name '{0}'.", new object[] { syntax.SchemeName }));
+				throw new InvalidOperationException(SR.GetString("The URI parser instance passed into 'uriParser' parameter is already registered with the scheme name '{0}'.", new object[] { syntax.SchemeName }));
 			}
 			Dictionary<string, UriParser> table = UriParser.m_Table;
 			lock (table)
@@ -236,7 +236,7 @@ namespace System
 				UriParser.m_Table.TryGetValue(lwrCaseSchemeName, out uriParser);
 				if (uriParser != null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("A URI scheme name '{0}' already has a registered custom parser.", new object[] { uriParser.SchemeName }));
+					throw new InvalidOperationException(SR.GetString("A URI scheme name '{0}' already has a registered custom parser.", new object[] { uriParser.SchemeName }));
 				}
 				UriParser.m_TempTable.TryGetValue(syntax.SchemeName, out uriParser);
 				if (uriParser != null)

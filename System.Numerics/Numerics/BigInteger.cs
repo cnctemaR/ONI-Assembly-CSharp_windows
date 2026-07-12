@@ -5,7 +5,7 @@ using System.Globalization;
 namespace System.Numerics
 {
 	[Serializable]
-	public struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
+	public readonly struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
 	{
 		public BigInteger(int value)
 		{
@@ -200,25 +200,38 @@ namespace System.Numerics
 			{
 				throw new ArgumentNullException("value");
 			}
-			this = new BigInteger(new ReadOnlySpan<byte>(value));
+			this = new BigInteger(new ReadOnlySpan<byte>(value), false, false);
 		}
 
-		public BigInteger(ReadOnlySpan<byte> value)
+		public unsafe BigInteger(ReadOnlySpan<byte> value, bool isUnsigned = false, bool isBigEndian = false)
 		{
 			int num = value.Length;
 			bool flag;
 			if (num > 0)
 			{
-				byte b = value[num - 1];
-				flag = (b & 128) > 0;
+				byte b = (isBigEndian ? (*value[0]) : (*value[num - 1]));
+				flag = (b & 128) != 0 && !isUnsigned;
 				if (b == 0)
 				{
-					num -= 2;
-					while (num >= 0 && value[num] == 0)
+					if (isBigEndian)
 					{
-						num--;
+						int num2 = 1;
+						while (num2 < num && *value[num2] == 0)
+						{
+							num2++;
+						}
+						value = value.Slice(num2);
+						num = value.Length;
 					}
-					num++;
+					else
+					{
+						num -= 2;
+						while (num >= 0 && *value[num] == 0)
+						{
+							num--;
+						}
+						num++;
+					}
 				}
 			}
 			else
@@ -234,9 +247,19 @@ namespace System.Numerics
 			if (num <= 4)
 			{
 				this._sign = (flag ? (-1) : 0);
-				for (int i = num - 1; i >= 0; i--)
+				if (isBigEndian)
 				{
-					this._sign = (this._sign << 8) | (int)value[i];
+					for (int i = 0; i < num; i++)
+					{
+						this._sign = (this._sign << 8) | (int)(*value[i]);
+					}
+				}
+				else
+				{
+					for (int j = num - 1; j >= 0; j--)
+					{
+						this._sign = (this._sign << 8) | (int)(*value[j]);
+					}
 				}
 				this._bits = null;
 				if (this._sign < 0 && !flag)
@@ -252,51 +275,80 @@ namespace System.Numerics
 			}
 			else
 			{
-				int num2 = num % 4;
-				int num3 = num / 4 + ((num2 == 0) ? 0 : 1);
-				uint[] array = new uint[num3];
-				int j = 3;
-				int k;
-				for (k = 0; k < num3 - ((num2 == 0) ? 0 : 1); k++)
+				int num3 = num % 4;
+				int num4 = num / 4 + ((num3 == 0) ? 0 : 1);
+				uint[] array = new uint[num4];
+				int num5 = num - 1;
+				int l;
+				if (isBigEndian)
 				{
-					for (int l = 0; l < 4; l++)
+					int k = num - 4;
+					for (l = 0; l < num4 - ((num3 == 0) ? 0 : 1); l++)
 					{
-						byte b2 = value[j];
-						array[k] = (array[k] << 8) | (uint)b2;
-						j--;
+						for (int m = 0; m < 4; m++)
+						{
+							byte b2 = *value[k];
+							array[l] = (array[l] << 8) | (uint)b2;
+							k++;
+						}
+						k -= 8;
 					}
-					j += 8;
 				}
-				if (num2 != 0)
+				else
+				{
+					int k = 3;
+					for (l = 0; l < num4 - ((num3 == 0) ? 0 : 1); l++)
+					{
+						for (int n = 0; n < 4; n++)
+						{
+							byte b3 = *value[k];
+							array[l] = (array[l] << 8) | (uint)b3;
+							k--;
+						}
+						k += 8;
+					}
+				}
+				if (num3 != 0)
 				{
 					if (flag)
 					{
-						array[num3 - 1] = uint.MaxValue;
+						array[num4 - 1] = uint.MaxValue;
 					}
-					for (j = num - 1; j >= num - num2; j--)
+					if (isBigEndian)
 					{
-						byte b3 = value[j];
-						array[k] = (array[k] << 8) | (uint)b3;
+						for (int k = 0; k < num3; k++)
+						{
+							byte b4 = *value[k];
+							array[l] = (array[l] << 8) | (uint)b4;
+						}
+					}
+					else
+					{
+						for (int k = num5; k >= num - num3; k--)
+						{
+							byte b5 = *value[k];
+							array[l] = (array[l] << 8) | (uint)b5;
+						}
 					}
 				}
 				if (flag)
 				{
 					NumericsHelpers.DangerousMakeTwosComplement(array);
-					int num4 = array.Length - 1;
-					while (num4 >= 0 && array[num4] == 0U)
+					int num6 = array.Length - 1;
+					while (num6 >= 0 && array[num6] == 0U)
 					{
-						num4--;
+						num6--;
 					}
-					num4++;
-					if (num4 == 1)
+					num6++;
+					if (num6 == 1)
 					{
-						uint num5 = array[0];
-						if (num5 == 1U)
+						uint num7 = array[0];
+						if (num7 == 1U)
 						{
 							this = BigInteger.s_bnMinusOneInt;
 							return;
 						}
-						if (num5 == 2147483648U)
+						if (num7 == 2147483648U)
 						{
 							this = BigInteger.s_bnMinInt;
 							return;
@@ -308,11 +360,11 @@ namespace System.Numerics
 							return;
 						}
 					}
-					if (num4 != array.Length)
+					if (num6 != array.Length)
 					{
 						this._sign = -1;
-						this._bits = new uint[num4];
-						Array.Copy(array, 0, this._bits, 0, num4);
+						this._bits = new uint[num6];
+						Array.Copy(array, 0, this._bits, 0, num6);
 						return;
 					}
 					this._sign = -1;
@@ -578,7 +630,12 @@ namespace System.Numerics
 			return BigNumber.ParseBigInteger(value, style, NumberFormatInfo.GetInstance(provider));
 		}
 
-		public static bool TryParse(ReadOnlySpan<char> value, out BigInteger result, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+		public static bool TryParse(ReadOnlySpan<char> value, out BigInteger result)
+		{
+			return BigNumber.TryParseBigInteger(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider provider, out BigInteger result)
 		{
 			return BigNumber.TryParseBigInteger(value, style, NumberFormatInfo.GetInstance(provider), out result);
 		}
@@ -1005,28 +1062,67 @@ namespace System.Numerics
 
 		public byte[] ToByteArray()
 		{
-			int num = 0;
-			return this.TryGetBytes(BigInteger.GetBytesMode.AllocateArray, default(Span<byte>), ref num);
+			return this.ToByteArray(false, false);
 		}
 
-		public bool TryWriteBytes(Span<byte> destination, out int bytesWritten)
+		public byte[] ToByteArray(bool isUnsigned = false, bool isBigEndian = false)
+		{
+			int num = 0;
+			return this.TryGetBytes(BigInteger.GetBytesMode.AllocateArray, default(Span<byte>), isUnsigned, isBigEndian, ref num);
+		}
+
+		public bool TryWriteBytes(Span<byte> destination, out int bytesWritten, bool isUnsigned = false, bool isBigEndian = false)
 		{
 			bytesWritten = 0;
-			return this.TryGetBytes(BigInteger.GetBytesMode.Span, destination, ref bytesWritten) != null;
+			if (this.TryGetBytes(BigInteger.GetBytesMode.Span, destination, isUnsigned, isBigEndian, ref bytesWritten) == null)
+			{
+				bytesWritten = 0;
+				return false;
+			}
+			return true;
 		}
 
-		public int GetByteCount()
+		internal bool TryWriteOrCountBytes(Span<byte> destination, out int bytesWritten, bool isUnsigned = false, bool isBigEndian = false)
+		{
+			bytesWritten = 0;
+			return this.TryGetBytes(BigInteger.GetBytesMode.Span, destination, isUnsigned, isBigEndian, ref bytesWritten) != null;
+		}
+
+		public int GetByteCount(bool isUnsigned = false)
 		{
 			int num = 0;
-			this.TryGetBytes(BigInteger.GetBytesMode.Count, default(Span<byte>), ref num);
+			this.TryGetBytes(BigInteger.GetBytesMode.Count, default(Span<byte>), isUnsigned, false, ref num);
 			return num;
 		}
 
-		private unsafe byte[] TryGetBytes(BigInteger.GetBytesMode mode, Span<byte> destination, ref int bytesWritten)
+		private unsafe byte[] TryGetBytes(BigInteger.GetBytesMode mode, Span<byte> destination, bool isUnsigned, bool isBigEndian, ref int bytesWritten)
 		{
 			int sign = this._sign;
-			if (sign != 0)
+			if (sign == 0)
 			{
+				if (mode == BigInteger.GetBytesMode.AllocateArray)
+				{
+					return new byte[1];
+				}
+				if (mode == BigInteger.GetBytesMode.Count)
+				{
+					bytesWritten = 1;
+					return null;
+				}
+				bytesWritten = 1;
+				if (destination.Length != 0)
+				{
+					*destination[0] = 0;
+					return BigInteger.s_success;
+				}
+				return null;
+			}
+			else
+			{
+				if (isUnsigned && sign < 0)
+				{
+					throw new OverflowException("Negative values do not have an unsigned representation.");
+				}
 				int num = 0;
 				uint[] bits = this._bits;
 				byte b;
@@ -1073,7 +1169,7 @@ namespace System.Numerics
 					b2 = (byte)num2;
 					num3 = 0;
 				}
-				bool flag = (b2 & 128) != (b & 128);
+				bool flag = (b2 & 128) != (b & 128) && !isUnsigned;
 				int num4 = num3 + 1 + (flag ? 1 : 0);
 				if (bits != null)
 				{
@@ -1087,72 +1183,65 @@ namespace System.Numerics
 						bytesWritten = num4;
 						return null;
 					}
+					bytesWritten = num4;
 					if (destination.Length < num4)
 					{
 						return null;
 					}
-					bytesWritten = num4;
 					array = BigInteger.s_success;
 				}
 				else
 				{
 					destination = (array = new byte[num4]);
 				}
-				int num5 = 0;
+				int num5 = (isBigEndian ? (num4 - 1) : 0);
+				int num6 = (isBigEndian ? (-1) : 1);
 				if (bits != null)
 				{
 					for (int i = 0; i < bits.Length - 1; i++)
 					{
-						uint num6 = bits[i];
+						uint num7 = bits[i];
 						if (sign == -1)
 						{
-							num6 = ~num6;
+							num7 = ~num7;
 							if (i <= num)
 							{
-								num6 += 1U;
+								num7 += 1U;
 							}
 						}
-						*destination[num5++] = (byte)num6;
-						*destination[num5++] = (byte)(num6 >> 8);
-						*destination[num5++] = (byte)(num6 >> 16);
-						*destination[num5++] = (byte)(num6 >> 24);
+						*destination[num5] = (byte)num7;
+						num5 += num6;
+						*destination[num5] = (byte)(num7 >> 8);
+						num5 += num6;
+						*destination[num5] = (byte)(num7 >> 16);
+						num5 += num6;
+						*destination[num5] = (byte)(num7 >> 24);
+						num5 += num6;
 					}
 				}
 				*destination[num5] = (byte)num2;
 				if (num3 != 0)
 				{
-					*destination[++num5] = (byte)(num2 >> 8);
+					num5 += num6;
+					*destination[num5] = (byte)(num2 >> 8);
 					if (num3 != 1)
 					{
-						*destination[++num5] = (byte)(num2 >> 16);
+						num5 += num6;
+						*destination[num5] = (byte)(num2 >> 16);
 						if (num3 != 2)
 						{
-							*destination[num5 + 1] = (byte)(num2 >> 24);
+							num5 += num6;
+							*destination[num5] = (byte)(num2 >> 24);
 						}
 					}
 				}
 				if (flag)
 				{
-					*destination[num4 - 1] = b;
+					num5 += num6;
+					*destination[num5] = b;
 				}
 				return array;
 			}
-			if (mode == BigInteger.GetBytesMode.AllocateArray)
-			{
-				return new byte[1];
-			}
-			if (mode == BigInteger.GetBytesMode.Count)
-			{
-				bytesWritten = 1;
-				return null;
-			}
-			if (destination.Length != 0)
-			{
-				*destination[0] = 0;
-				bytesWritten = 1;
-				return BigInteger.s_success;
-			}
-			return null;
 		}
 
 		private uint[] ToUInt32Array()
@@ -1212,6 +1301,11 @@ namespace System.Numerics
 		public string ToString(string format, IFormatProvider provider)
 		{
 			return BigNumber.FormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider));
+		}
+
+		public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			return BigNumber.TryFormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider), destination, out charsWritten);
 		}
 
 		private static BigInteger Add(uint[] leftBits, int leftSign, uint[] rightBits, int rightSign)

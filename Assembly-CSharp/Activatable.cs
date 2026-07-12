@@ -28,7 +28,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.activated = true;
 		if (this.onActivate != null)

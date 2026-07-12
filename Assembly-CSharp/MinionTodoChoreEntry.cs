@@ -38,7 +38,19 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		string text3 = ((context.chore.masterPriority.priority_class == PriorityScreen.PriorityClass.basic) ? context.chore.masterPriority.priority_value.ToString() : "");
 		Sprite sprite = ((context.chore.masterPriority.priority_class == PriorityScreen.PriorityClass.basic) ? this.prioritySprites[context.chore.masterPriority.priority_value - 1] : null);
 		ChoreGroup choreGroup = MinionTodoChoreEntry.BestPriorityGroup(context, consumer);
-		this.icon.sprite = ((choreGroup != null) ? Assets.GetSprite(choreGroup.sprite) : null);
+		if (choreGroup != null)
+		{
+			this.icon.sprite = Assets.GetSprite(choreGroup.sprite);
+		}
+		else
+		{
+			this.icon.sprite = null;
+			MinionIdentity component = consumer.GetComponent<MinionIdentity>();
+			if (component != null)
+			{
+				this.icon.sprite = Db.Get().Personalities.Get(component.personalityResourceId).GetMiniIcon();
+			}
+		}
 		this.label.SetText(choreName);
 		this.subLabel.SetText(text2);
 		this.priorityLabel.SetText(text3);

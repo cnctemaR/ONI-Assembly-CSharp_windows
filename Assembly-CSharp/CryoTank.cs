@@ -69,13 +69,15 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 
 	public void DropContents()
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		MinionStartingStats minionStartingStats = new MinionStartingStats(GameTags.Minions.Models.Standard, false, null, "AncientKnowledge", false);
+		GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+		GameObject gameObject = Util.KInstantiate(prefab, null, null);
+		gameObject.name = prefab.name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(base.transform.position), this.dropOffset), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, "AncientKnowledge", false).Apply(gameObject);
+		minionStartingStats.Apply(gameObject);
 		gameObject.GetComponent<MinionIdentity>().arrivalTime = (float)global::UnityEngine.Random.Range(-2000, -1000);
 		MinionResume component = gameObject.GetComponent<MinionResume>();
 		int num = 3;

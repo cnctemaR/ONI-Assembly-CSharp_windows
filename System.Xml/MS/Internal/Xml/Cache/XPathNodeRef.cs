@@ -4,33 +4,17 @@ namespace MS.Internal.Xml.Cache
 {
 	internal struct XPathNodeRef
 	{
-		public static XPathNodeRef Null
-		{
-			get
-			{
-				return default(XPathNodeRef);
-			}
-		}
-
 		public XPathNodeRef(XPathNode[] page, int idx)
 		{
-			this.page = page;
-			this.idx = idx;
-		}
-
-		public bool IsNull
-		{
-			get
-			{
-				return this.page == null;
-			}
+			this._page = page;
+			this._idx = idx;
 		}
 
 		public XPathNode[] Page
 		{
 			get
 			{
-				return this.page;
+				return this._page;
 			}
 		}
 
@@ -38,17 +22,17 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.idx;
+				return this._idx;
 			}
 		}
 
 		public override int GetHashCode()
 		{
-			return XPathNodeHelper.GetLocation(this.page, this.idx);
+			return XPathNodeHelper.GetLocation(this._page, this._idx);
 		}
 
-		private XPathNode[] page;
+		private XPathNode[] _page;
 
-		private int idx;
+		private int _idx;
 	}
 }

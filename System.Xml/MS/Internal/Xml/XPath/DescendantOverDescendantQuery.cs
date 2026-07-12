@@ -13,12 +13,12 @@ namespace MS.Internal.Xml.XPath
 		private DescendantOverDescendantQuery(DescendantOverDescendantQuery other)
 			: base(other)
 		{
-			this.level = other.level;
+			this._level = other._level;
 		}
 
 		public override void Reset()
 		{
-			this.level = 0;
+			this._level = 0;
 			base.Reset();
 		}
 
@@ -27,7 +27,7 @@ namespace MS.Internal.Xml.XPath
 			for (;;)
 			{
 				IL_0000:
-				if (this.level == 0)
+				if (this._level == 0)
 				{
 					this.currentNode = this.qyInput.Advance();
 					this.position = 0;
@@ -45,7 +45,7 @@ namespace MS.Internal.Xml.XPath
 						continue;
 					}
 				}
-				else if (!this.MoveUpUntillNext())
+				else if (!this.MoveUpUntilNext())
 				{
 					continue;
 				}
@@ -71,18 +71,18 @@ namespace MS.Internal.Xml.XPath
 		{
 			if (this.currentNode.MoveToFirstChild())
 			{
-				this.level++;
+				this._level++;
 				return true;
 			}
 			return false;
 		}
 
-		private bool MoveUpUntillNext()
+		private bool MoveUpUntilNext()
 		{
 			while (!this.currentNode.MoveToNext())
 			{
-				this.level--;
-				if (this.level == 0)
+				this._level--;
+				if (this._level == 0)
 				{
 					return false;
 				}
@@ -96,6 +96,6 @@ namespace MS.Internal.Xml.XPath
 			return new DescendantOverDescendantQuery(this);
 		}
 
-		private int level;
+		private int _level;
 	}
 }

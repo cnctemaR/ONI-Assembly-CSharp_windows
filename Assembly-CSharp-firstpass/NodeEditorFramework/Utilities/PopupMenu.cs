@@ -78,7 +78,7 @@ namespace NodeEditorFramework.Utilities
 			path = content.text;
 			if (path.Contains("/"))
 			{
-				string[] array = path.Split(new char[] { '/' });
+				string[] array = path.Split('/', StringSplitOptions.None);
 				string folderPath = array[0];
 				PopupMenu.MenuItem menuItem = this.menuItems.Find((PopupMenu.MenuItem item) => item.content != null && item.content.text == folderPath && item.group);
 				if (menuItem == null)

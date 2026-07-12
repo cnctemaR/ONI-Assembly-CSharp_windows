@@ -9,7 +9,7 @@ namespace System.Net
 {
 	internal class ServicePointScheduler
 	{
-		public ServicePoint ServicePoint { get; }
+		private ServicePoint ServicePoint { get; set; }
 
 		public int MaxIdleTime
 		{
@@ -66,11 +66,6 @@ namespace System.Net
 		}
 
 		[Conditional("MONO_WEB_DEBUG")]
-		private void Debug(string message, params object[] args)
-		{
-		}
-
-		[Conditional("MONO_WEB_DEBUG")]
 		private void Debug(string message)
 		{
 		}
@@ -95,79 +90,81 @@ namespace System.Net
 
 		public void Run()
 		{
-			ServicePoint servicePoint = this.ServicePoint;
-			lock (servicePoint)
+			if (Interlocked.CompareExchange(ref this.running, 1, 0) == 0)
 			{
-				if (Interlocked.CompareExchange(ref this.running, 1, 0) == 0)
-				{
-					this.StartScheduler();
-				}
-				this.schedulerEvent.Set();
+				Task.Run(() => this.RunScheduler());
 			}
+			this.schedulerEvent.Set();
 		}
 
-		private async void StartScheduler()
+		private async Task RunScheduler()
 		{
 			this.idleSince = DateTime.UtcNow + TimeSpan.FromDays(3650.0);
 			for (;;)
 			{
 				List<Task> taskList = new List<Task>();
+				bool finalCleanup = false;
 				ServicePoint servicePoint = this.ServicePoint;
 				ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation>[] operationArray;
 				ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task>[] idleArray;
+				Task<bool> schedulerTask;
 				lock (servicePoint)
 				{
 					this.Cleanup();
-					if (this.groups == null && this.defaultGroup.IsEmpty() && this.operations.Count == 0 && this.idleConnections.Count == 0)
-					{
-						this.running = 0;
-						this.idleSince = DateTime.UtcNow;
-						this.schedulerEvent.Reset();
-						break;
-					}
 					operationArray = new ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation>[this.operations.Count];
 					this.operations.CopyTo(operationArray, 0);
 					idleArray = new ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task>[this.idleConnections.Count];
 					this.idleConnections.CopyTo(idleArray, 0);
-					taskList.Add(this.schedulerEvent.WaitAsync(this.maxIdleTime));
-					foreach (ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation> valueTuple in operationArray)
+					schedulerTask = this.schedulerEvent.WaitAsync(this.maxIdleTime);
+					taskList.Add(schedulerTask);
+					if (this.groups == null && this.defaultGroup.IsEmpty() && this.operations.Count == 0 && this.idleConnections.Count == 0)
 					{
-						taskList.Add(valueTuple.Item2.WaitForCompletion(true));
+						this.idleSince = DateTime.UtcNow;
+						finalCleanup = true;
 					}
-					foreach (ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task> valueTuple2 in idleArray)
+					else
 					{
-						taskList.Add(valueTuple2.Item3);
+						foreach (ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation> valueTuple in operationArray)
+						{
+							taskList.Add(valueTuple.Item2.Finished.Task);
+						}
+						foreach (ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task> valueTuple2 in idleArray)
+						{
+							taskList.Add(valueTuple2.Item3);
+						}
 					}
 				}
 				Task task = await Task.WhenAny(taskList).ConfigureAwait(false);
 				servicePoint = this.ServicePoint;
 				lock (servicePoint)
 				{
-					if (task == taskList[0])
+					bool flag2 = false;
+					if (finalCleanup)
 					{
-						this.RunSchedulerIteration();
-						continue;
-					}
-					int num = -1;
-					for (int j = 0; j < operationArray.Length; j++)
-					{
-						if (task == taskList[j + 1])
+						if (!schedulerTask.Result)
 						{
-							num = j;
+							this.FinalCleanup();
 							break;
 						}
+						flag2 = true;
 					}
-					if (num >= 0)
+					else if (task == taskList[0])
 					{
-						ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation> valueTuple3 = operationArray[num];
-						this.operations.Remove(valueTuple3);
-						Task<ValueTuple<bool, WebOperation>> task2 = (Task<ValueTuple<bool, WebOperation>>)task;
-						if (this.OperationCompleted(valueTuple3.Item1, valueTuple3.Item2, task2))
-						{
-							this.RunSchedulerIteration();
-						}
-						continue;
+						flag2 = true;
 					}
+					foreach (ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation> valueTuple3 in operationArray)
+					{
+						if (valueTuple3.Item2.Finished.CurrentResult != null)
+						{
+							this.operations.Remove(valueTuple3);
+							flag2 |= this.OperationCompleted(valueTuple3.Item1, valueTuple3.Item2);
+						}
+					}
+					if (flag2)
+					{
+						this.RunSchedulerIteration();
+					}
+					int num = -1;
 					for (int k = 0; k < idleArray.Length; k++)
 					{
 						if (task == taskList[k + 1 + operationArray.Length])
@@ -186,6 +183,7 @@ namespace System.Net
 				operationArray = null;
 				idleArray = null;
 				taskList = null;
+				schedulerTask = null;
 			}
 		}
 
@@ -227,37 +225,48 @@ namespace System.Net
 			while (flag);
 		}
 
-		private bool OperationCompleted(ServicePointScheduler.ConnectionGroup group, WebOperation operation, Task<ValueTuple<bool, WebOperation>> task)
+		private bool OperationCompleted(ServicePointScheduler.ConnectionGroup group, WebOperation operation)
 		{
-			ValueTuple<bool, WebOperation> valueTuple = ((task.Status == TaskStatus.RanToCompletion) ? task.Result : new ValueTuple<bool, WebOperation>(false, null));
-			bool flag = valueTuple.Item1;
-			WebOperation item = valueTuple.Item2;
-			if (!flag || !operation.Connection.Continue(item))
+			WebCompletionSource<ValueTuple<bool, WebOperation>>.Result currentResult = operation.Finished.CurrentResult;
+			bool flag;
+			WebOperation webOperation;
+			if (!currentResult.Success)
+			{
+				flag = false;
+				webOperation = null;
+			}
+			else
+			{
+				ValueTuple<bool, WebOperation> argument = currentResult.Argument;
+				flag = argument.Item1;
+				webOperation = argument.Item2;
+			}
+			if (!flag || !operation.Connection.Continue(webOperation))
 			{
 				group.RemoveConnection(operation.Connection);
-				if (item == null)
+				if (webOperation == null)
 				{
 					return true;
 				}
 				flag = false;
 			}
-			if (item == null)
+			if (webOperation == null)
 			{
 				if (flag)
 				{
-					Task task2 = Task.Delay(this.MaxIdleTime);
-					this.idleConnections.AddLast(new ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task>(group, operation.Connection, task2));
+					Task task = Task.Delay(this.MaxIdleTime);
+					this.idleConnections.AddLast(new ValueTuple<ServicePointScheduler.ConnectionGroup, WebConnection, Task>(group, operation.Connection, task));
 				}
 				return true;
 			}
-			this.operations.AddLast(new ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation>(group, item));
+			this.operations.AddLast(new ValueTuple<ServicePointScheduler.ConnectionGroup, WebOperation>(group, webOperation));
 			if (flag)
 			{
 				this.RemoveIdleConnection(operation.Connection);
 				return false;
 			}
 			group.Cleanup();
-			group.CreateOrReuseConnection(item, true);
+			group.CreateOrReuseConnection(webOperation, true);
 			return false;
 		}
 
@@ -313,6 +322,17 @@ namespace System.Net
 			}
 		}
 
+		private void FinalCleanup()
+		{
+			this.groups = null;
+			this.operations = null;
+			this.idleConnections = null;
+			this.defaultGroup = null;
+			this.ServicePoint.FreeServicePoint();
+			ServicePointManager.RemoveServicePoint(this.ServicePoint);
+			this.ServicePoint = null;
+		}
+
 		public void SendRequest(WebOperation operation, string groupName)
 		{
 			ServicePoint servicePoint = this.ServicePoint;
@@ -325,32 +345,26 @@ namespace System.Net
 
 		public bool CloseConnectionGroup(string groupName)
 		{
-			ServicePoint servicePoint = this.ServicePoint;
-			bool flag2;
-			lock (servicePoint)
+			ServicePointScheduler.ConnectionGroup connectionGroup;
+			if (string.IsNullOrEmpty(groupName))
 			{
-				ServicePointScheduler.ConnectionGroup connectionGroup;
-				if (string.IsNullOrEmpty(groupName))
-				{
-					connectionGroup = this.defaultGroup;
-				}
-				else if (this.groups == null || !this.groups.TryGetValue(groupName, out connectionGroup))
-				{
-					return false;
-				}
-				if (connectionGroup != this.defaultGroup)
-				{
-					this.groups.Remove(groupName);
-					if (this.groups.Count == 0)
-					{
-						this.groups = null;
-					}
-				}
-				connectionGroup.Close();
-				this.Run();
-				flag2 = true;
+				connectionGroup = this.defaultGroup;
 			}
-			return flag2;
+			else if (this.groups == null || !this.groups.TryGetValue(groupName, out connectionGroup))
+			{
+				return false;
+			}
+			if (connectionGroup != this.defaultGroup)
+			{
+				this.groups.Remove(groupName);
+				if (this.groups.Count == 0)
+				{
+					this.groups = null;
+				}
+			}
+			connectionGroup.Close();
+			this.Run();
+			return true;
 		}
 
 		private ServicePointScheduler.ConnectionGroup GetConnectionGroup(string name)
@@ -394,6 +408,31 @@ namespace System.Net
 		{
 			this.RemoveIdleConnection(connection);
 			Interlocked.Decrement(ref this.currentConnections);
+		}
+
+		public static async Task<bool> WaitAsync(Task workerTask, int millisecondTimeout)
+		{
+			CancellationTokenSource cts = new CancellationTokenSource();
+			bool flag;
+			try
+			{
+				Task timeoutTask = Task.Delay(millisecondTimeout, cts.Token);
+				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter = Task.WhenAny(new Task[] { workerTask, timeoutTask }).ConfigureAwait(false).GetAwaiter();
+				if (!configuredTaskAwaiter.IsCompleted)
+				{
+					await configuredTaskAwaiter;
+					ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
+					configuredTaskAwaiter = configuredTaskAwaiter2;
+					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
+				}
+				flag = configuredTaskAwaiter.GetResult() != timeoutTask;
+			}
+			finally
+			{
+				cts.Cancel();
+				cts.Dispose();
+			}
+			return flag;
 		}
 
 		private int running;
@@ -576,22 +615,9 @@ namespace System.Net
 				return this.m_tcs.Task.Wait(millisecondTimeout);
 			}
 
-			public async Task<bool> WaitAsync(int millisecondTimeout)
+			public Task<bool> WaitAsync(int millisecondTimeout)
 			{
-				Task timeoutTask = Task.Delay(millisecondTimeout);
-				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter = Task.WhenAny(new Task[]
-				{
-					this.m_tcs.Task,
-					timeoutTask
-				}).ConfigureAwait(false).GetAwaiter();
-				if (!configuredTaskAwaiter.IsCompleted)
-				{
-					await configuredTaskAwaiter;
-					ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-					configuredTaskAwaiter = configuredTaskAwaiter2;
-					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
-				}
-				return configuredTaskAwaiter.GetResult() != timeoutTask;
+				return ServicePointScheduler.WaitAsync(this.m_tcs.Task, millisecondTimeout);
 			}
 
 			public void Set()

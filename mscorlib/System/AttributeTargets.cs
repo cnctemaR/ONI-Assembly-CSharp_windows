@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum AttributeTargets
 	{
 		Assembly = 1,

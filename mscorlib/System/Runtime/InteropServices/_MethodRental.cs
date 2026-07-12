@@ -3,10 +3,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("C2323C25-F57F-3880-8A4D-12EBEA7A5852")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[TypeLibImportClass(typeof(MethodRental))]
 	public interface _MethodRental
 	{

@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
-	internal struct Buffer<TElement>
+	internal readonly struct Buffer<TElement>
 	{
 		internal Buffer(IEnumerable<TElement> source)
 		{
-			IIListProvider<TElement> iilistProvider;
-			if ((iilistProvider = source as IIListProvider<TElement>) != null)
+			IIListProvider<TElement> iilistProvider = source as IIListProvider<TElement>;
+			if (iilistProvider != null)
 			{
 				TElement[] array = iilistProvider.ToArray();
 				this._items = array;
 				this._count = array.Length;
 				return;
 			}
-			this._items = EnumerableHelpers.ToArray<TElement>(source, out this._count);
+			this._items = global::System.Collections.Generic.EnumerableHelpers.ToArray<TElement>(source, out this._count);
 		}
 
 		internal readonly TElement[] _items;

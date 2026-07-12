@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.SceneManagement;
@@ -10,9 +12,9 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Export/Scripting/GameObject.bindings.h")]
 	[UsedByNativeCode]
-	[ExcludeFromPreset]
 	public sealed class GameObject : Object
 	{
 		[FreeFunction("GameObjectBindings::CreatePrimitive")]
@@ -27,8 +29,8 @@ namespace UnityEngine
 			return castHelper.t;
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponent(Type type);
 
@@ -41,13 +43,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Component GetComponentByName(string type);
 
+		[FreeFunction(Name = "Scripting::GetScriptingWrapperOfComponentOfGameObjectWithCase", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Component GetComponentByNameWithCase(string type, bool caseSensitive);
+
 		public Component GetComponent(string type)
 		{
 			return this.GetComponentByName(type);
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponentInChildren(Type type, bool includeInactive);
 
@@ -239,6 +245,37 @@ namespace UnityEngine
 			return this.AddComponent(typeof(T)) as T;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetComponentCount();
+
+		[NativeName("QueryComponentAtIndex<Unity::Component>")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Component QueryComponentAtIndex(int index);
+
+		public Component GetComponentAtIndex(int index)
+		{
+			bool flag = index < 0 || index >= this.GetComponentCount();
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException("index", "Valid range is 0 to GetComponentCount() - 1.");
+			}
+			return this.QueryComponentAtIndex(index);
+		}
+
+		public T GetComponentAtIndex<T>(int index) where T : Component
+		{
+			T t = (T)((object)this.GetComponentAtIndex(index));
+			bool flag = t == null;
+			if (flag)
+			{
+				throw new InvalidCastException();
+			}
+			return t;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetComponentIndex(Component component);
+
 		public extern Transform transform
 		{
 			[FreeFunction("GameObjectBindings::GetTransform", HasExplicitThis = true)]
@@ -283,8 +320,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
 		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
+		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetActiveRecursively(bool state);
 
@@ -411,6 +448,75 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern GameObject Find(string name);
 
+		[FreeFunction(Name = "GameObjectBindings::SetGameObjectsActiveByInstanceID")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGameObjectsActive(IntPtr instanceIds, int instanceCount, bool active);
+
+		public static void SetGameObjectsActive(NativeArray<int> instanceIDs, bool active)
+		{
+			bool flag = !instanceIDs.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "instanceIDs");
+			}
+			bool flag2 = instanceIDs.Length == 0;
+			if (!flag2)
+			{
+				GameObject.SetGameObjectsActive((IntPtr)instanceIDs.GetUnsafeReadOnlyPtr<int>(), instanceIDs.Length, active);
+			}
+		}
+
+		public unsafe static void SetGameObjectsActive(ReadOnlySpan<int> instanceIDs, bool active)
+		{
+			bool flag = instanceIDs.Length == 0;
+			if (!flag)
+			{
+				fixed (int* pinnableReference = instanceIDs.GetPinnableReference())
+				{
+					int* ptr = pinnableReference;
+					GameObject.SetGameObjectsActive((IntPtr)((void*)ptr), instanceIDs.Length, active);
+				}
+			}
+		}
+
+		[FreeFunction("GameObjectBindings::InstantiateGameObjectsByInstanceID")]
+		private static void InstantiateGameObjects(int sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, Scene destinationScene)
+		{
+			GameObject.InstantiateGameObjects_Injected(sourceInstanceID, newInstanceIDs, newTransformInstanceIDs, count, ref destinationScene);
+		}
+
+		public static void InstantiateGameObjects(int sourceInstanceID, int count, NativeArray<int> newInstanceIDs, NativeArray<int> newTransformInstanceIDs, Scene destinationScene = default(Scene))
+		{
+			bool flag = !newInstanceIDs.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "newInstanceIDs");
+			}
+			bool flag2 = !newTransformInstanceIDs.IsCreated;
+			if (flag2)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "newTransformInstanceIDs");
+			}
+			bool flag3 = count == 0;
+			if (!flag3)
+			{
+				bool flag4 = count != newInstanceIDs.Length || count != newTransformInstanceIDs.Length;
+				if (flag4)
+				{
+					throw new ArgumentException("Size mismatch! Both arrays must already be the size of count.");
+				}
+				GameObject.InstantiateGameObjects(sourceInstanceID, (IntPtr)newInstanceIDs.GetUnsafeReadOnlyPtr<int>(), (IntPtr)newTransformInstanceIDs.GetUnsafeReadOnlyPtr<int>(), newInstanceIDs.Length, destinationScene);
+			}
+		}
+
+		[FreeFunction(Name = "GameObjectBindings::GetSceneByInstanceID")]
+		public static Scene GetScene(int instanceID)
+		{
+			Scene scene;
+			GameObject.GetScene_Injected(instanceID, out scene);
+			return scene;
+		}
+
 		public Scene scene
 		{
 			[FreeFunction("GameObjectBindings::GetScene", HasExplicitThis = true)]
@@ -436,6 +542,12 @@ namespace UnityEngine
 				return this;
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InstantiateGameObjects_Injected(int sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, ref Scene destinationScene);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetScene_Injected(int instanceID, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_scene_Injected(out Scene ret);

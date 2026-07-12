@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
 	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
+	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
 	public static class RemoteSettings
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -55,8 +55,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Calling CallOnUpdate() is not necessary any more and should be removed. Use RemoteSettingsUpdated instead", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Calling CallOnUpdate() is not necessary any more and should be removed. Use RemoteSettingsUpdated instead", true)]
 		public static void CallOnUpdate()
 		{
 			throw new NotSupportedException("Calling CallOnUpdate() is not necessary any more and should be removed.");
@@ -75,7 +75,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetInt(string key, [UnityEngine.Internal.DefaultValue("0")] int defaultValue);
+		public static extern int GetInt(string key, [DefaultValue("0")] int defaultValue);
 
 		[ExcludeFromDocs]
 		public static long GetLong(string key)
@@ -84,7 +84,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern long GetLong(string key, [UnityEngine.Internal.DefaultValue("0")] long defaultValue);
+		public static extern long GetLong(string key, [DefaultValue("0")] long defaultValue);
 
 		[ExcludeFromDocs]
 		public static float GetFloat(string key)
@@ -93,7 +93,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float GetFloat(string key, [UnityEngine.Internal.DefaultValue("0.0F")] float defaultValue);
+		public static extern float GetFloat(string key, [DefaultValue("0.0F")] float defaultValue);
 
 		[ExcludeFromDocs]
 		public static string GetString(string key)
@@ -102,7 +102,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetString(string key, [UnityEngine.Internal.DefaultValue("\"\"")] string defaultValue);
+		public static extern string GetString(string key, [DefaultValue("\"\"")] string defaultValue);
 
 		[ExcludeFromDocs]
 		public static bool GetBool(string key)
@@ -111,7 +111,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetBool(string key, [UnityEngine.Internal.DefaultValue("false")] bool defaultValue);
+		public static extern bool GetBool(string key, [DefaultValue("false")] bool defaultValue);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasKey(string key);

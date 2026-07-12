@@ -22,10 +22,36 @@ namespace System.Data.SqlClient
 			this._clientConnectionId = conId;
 		}
 
+		private SqlException(SerializationInfo si, StreamingContext sc)
+		{
+			this._clientConnectionId = Guid.Empty;
+			base..ctor(si, sc);
+			base.HResult = -2146232060;
+			foreach (SerializationEntry serializationEntry in si)
+			{
+				if ("ClientConnectionId" == serializationEntry.Name)
+				{
+					this._clientConnectionId = (Guid)serializationEntry.Value;
+					return;
+				}
+			}
+		}
+
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo si, StreamingContext context)
 		{
 			base.GetObjectData(si, context);
+			si.AddValue("Errors", null);
+			si.AddValue("ClientConnectionId", this._clientConnectionId, typeof(Guid));
+			for (int i = 0; i < this.Errors.Count; i++)
+			{
+				string text = "SqlError " + (i + 1).ToString();
+				if (this.Data.Contains(text))
+				{
+					this.Data.Remove(text);
+				}
+				this.Data.Add(text, this.Errors[i].ToString());
+			}
 		}
 
 		public SqlErrorCollection Errors
@@ -52,6 +78,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return 0;
+				}
 				return this.Errors[0].Class;
 			}
 		}
@@ -60,6 +90,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return 0;
+				}
 				return this.Errors[0].LineNumber;
 			}
 		}
@@ -68,6 +102,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return 0;
+				}
 				return this.Errors[0].Number;
 			}
 		}
@@ -76,6 +114,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return null;
+				}
 				return this.Errors[0].Procedure;
 			}
 		}
@@ -84,6 +126,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return null;
+				}
 				return this.Errors[0].Server;
 			}
 		}
@@ -92,6 +138,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return 0;
+				}
 				return this.Errors[0].State;
 			}
 		}
@@ -100,6 +150,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this.Errors.Count <= 0)
+				{
+					return null;
+				}
 				return this.Errors[0].Source;
 			}
 		}
@@ -109,7 +163,7 @@ namespace System.Data.SqlClient
 			StringBuilder stringBuilder = new StringBuilder(base.ToString());
 			stringBuilder.AppendLine();
 			stringBuilder.AppendFormat(SQLMessage.ExClientConnectionId(), this._clientConnectionId);
-			if (this.Number != 0)
+			if (this.Errors.Count > 0 && this.Number != 0)
 			{
 				stringBuilder.AppendLine();
 				stringBuilder.AppendFormat(SQLMessage.ExErrorNumberStateClass(), this.Number, this.State, this.Class);
@@ -219,7 +273,7 @@ namespace System.Data.SqlClient
 
 		internal SqlException()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private const string OriginalClientConnectionIdKey = "OriginalClientConnectionId";

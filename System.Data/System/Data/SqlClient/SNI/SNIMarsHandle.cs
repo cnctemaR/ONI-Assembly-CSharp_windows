@@ -51,7 +51,7 @@ namespace System.Data.SqlClient.SNI
 			{
 				this.GetSMUXHeaderBytes(0, (byte)flags, ref array);
 			}
-			SNIPacket snipacket = new SNIPacket(null);
+			SNIPacket snipacket = new SNIPacket();
 			snipacket.SetData(array, 16);
 			this._connection.Send(snipacket);
 		}
@@ -91,9 +91,8 @@ namespace System.Data.SqlClient.SNI
 			uint sequenceNumber = this._sequenceNumber;
 			byte[] array = null;
 			this.GetSMUXHeaderBytes(packet.Length, 8, ref array);
-			SNIPacket snipacket = new SNIPacket(null);
+			SNIPacket snipacket = new SNIPacket(16 + packet.Length);
 			snipacket.Description = string.Format("({0}) SMUX packet {1}", (packet.Description == null) ? "" : packet.Description, sequenceNumber);
-			snipacket.Allocate(16 + packet.Length);
 			snipacket.AppendData(array, 16);
 			snipacket.AppendPacket(packet);
 			return snipacket;
@@ -179,7 +178,7 @@ namespace System.Data.SqlClient.SNI
 			return 0U;
 		}
 
-		public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
+		public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
 		{
 			lock (this)
 			{

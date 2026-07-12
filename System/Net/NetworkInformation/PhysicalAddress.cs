@@ -106,7 +106,7 @@ namespace System.Net.NetworkInformation
 			{
 				if (address.Length % 2 > 0)
 				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
+					throw new FormatException(SR.GetString("An invalid physical address was specified."));
 				}
 				array = new byte[address.Length / 2];
 			}
@@ -127,11 +127,11 @@ namespace System.Net.NetworkInformation
 				}
 				if (num3 != 45)
 				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
+					throw new FormatException(SR.GetString("An invalid physical address was specified."));
 				}
 				if (num != 2)
 				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
+					throw new FormatException(SR.GetString("An invalid physical address was specified."));
 				}
 				num = 0;
 				IL_0100:
@@ -140,7 +140,7 @@ namespace System.Net.NetworkInformation
 				IL_00C3:
 				if (flag && num >= 2)
 				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
+					throw new FormatException(SR.GetString("An invalid physical address was specified."));
 				}
 				if (num % 2 == 0)
 				{
@@ -157,7 +157,7 @@ namespace System.Net.NetworkInformation
 			}
 			if (num < 2)
 			{
-				throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
+				throw new FormatException(SR.GetString("An invalid physical address was specified."));
 			}
 			return new PhysicalAddress(array);
 		}

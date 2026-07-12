@@ -262,5 +262,13 @@ namespace System.Dynamic.Utils
 			}
 			return true;
 		}
+
+		public static void ValidateArgumentCount(this LambdaExpression lambda)
+		{
+			if (((IParameterProvider)lambda).ParameterCount >= 65535)
+			{
+				throw Error.InvalidProgram();
+			}
+		}
 	}
 }

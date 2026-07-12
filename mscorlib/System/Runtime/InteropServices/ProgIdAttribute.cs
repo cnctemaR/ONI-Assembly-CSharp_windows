@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ProgIdAttribute : Attribute
 	{
 		public ProgIdAttribute(string progId)

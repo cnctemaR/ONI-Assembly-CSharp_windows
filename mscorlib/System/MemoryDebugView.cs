@@ -20,14 +20,7 @@ namespace System
 		{
 			get
 			{
-				ArraySegment<T> arraySegment;
-				if (this._memory.DangerousTryGetArray(out arraySegment))
-				{
-					T[] array = new T[this._memory.Length];
-					Array.Copy(arraySegment.Array, arraySegment.Offset, array, 0, array.Length);
-					return array;
-				}
-				return SpanHelpers.PerTypeValues<T>.EmptyArray;
+				return this._memory.ToArray();
 			}
 		}
 

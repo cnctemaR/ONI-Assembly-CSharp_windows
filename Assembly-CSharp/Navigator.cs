@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using STRINGS;
 using UnityEngine;
@@ -510,13 +511,23 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.flags &= ~new_flags;
 	}
 
+	[Conditional("ENABLE_DETAILED_NAVIGATOR_PROFILE_INFO")]
+	public static void BeginDetailedSample(string region_name)
+	{
+	}
+
+	[Conditional("ENABLE_DETAILED_NAVIGATOR_PROFILE_INFO")]
+	public static void EndDetailedSample(string region_name)
+	{
+	}
+
 	public bool DebugDrawPath;
 
 	[MyCmpAdd]
 	public PathProber PathProber;
 
 	[MyCmpAdd]
-	private Facing facing;
+	public Facing facing;
 
 	public float defaultSpeed = 1f;
 
@@ -539,7 +550,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	private PathFinderAbilities abilities;
 
 	[MyCmpReq]
-	private KAnimControllerBase animController;
+	public KBatchedAnimController animController;
 
 	[NonSerialized]
 	public PathFinder.Path path;

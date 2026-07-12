@@ -37,7 +37,7 @@ public class MaterialSelector : KScreen
 
 	public static List<Tag> GetValidMaterials(Tag _materialTypeTag, bool omitDisabledElements = false)
 	{
-		string[] array = _materialTypeTag.ToString().Split(new char[] { '&' });
+		string[] array = _materialTypeTag.ToString().Split('&', StringSplitOptions.None);
 		List<Tag> list = new List<Tag>();
 		for (int i = 0; i < array.Length; i++)
 		{
@@ -355,7 +355,7 @@ public class MaterialSelector : KScreen
 			}
 		}
 		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
-		string[] array = this.activeIngredient.tag.ToString().Split(new char[] { '&' });
+		string[] array = this.activeIngredient.tag.ToString().Split('&', StringSplitOptions.None);
 		string text = array[0].ToTag().ProperName();
 		for (int i = 1; i < array.Length; i++)
 		{

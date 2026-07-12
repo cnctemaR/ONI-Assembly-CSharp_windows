@@ -20,7 +20,7 @@ public class DesalinatorWorkableEmpty : Workable
 		this.synchronizeAnims = false;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.timesCleaned++;
 		base.OnCompleteWork(worker);

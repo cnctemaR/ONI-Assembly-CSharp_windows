@@ -89,7 +89,7 @@ namespace YamlDotNet.Serialization
 
 			public override int GetHashCode()
 			{
-				return HashCode.CombineHashCodes(this.AttributeType.GetHashCode(), this.PropertyName.GetHashCode());
+				return YamlDotNet.Core.HashCode.CombineHashCodes(this.AttributeType.GetHashCode(), this.PropertyName.GetHashCode());
 			}
 
 			public readonly Type AttributeType;
@@ -113,7 +113,7 @@ namespace YamlDotNet.Serialization
 
 			public override int GetHashCode()
 			{
-				return HashCode.CombineHashCodes(this.RegisteredType.GetHashCode(), this.Attribute.GetHashCode());
+				return YamlDotNet.Core.HashCode.CombineHashCodes(this.RegisteredType.GetHashCode(), this.Attribute.GetHashCode());
 			}
 
 			public int Matches(Type matchType)

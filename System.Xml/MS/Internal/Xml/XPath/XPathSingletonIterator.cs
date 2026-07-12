@@ -7,7 +7,7 @@ namespace MS.Internal.Xml.XPath
 	{
 		public XPathSingletonIterator(XPathNavigator nav)
 		{
-			this.nav = nav;
+			this._nav = nav;
 		}
 
 		public XPathSingletonIterator(XPathNavigator nav, bool moved)
@@ -15,14 +15,14 @@ namespace MS.Internal.Xml.XPath
 		{
 			if (moved)
 			{
-				this.position = 1;
+				this._position = 1;
 			}
 		}
 
 		public XPathSingletonIterator(XPathSingletonIterator it)
 		{
-			this.nav = it.nav.Clone();
-			this.position = it.position;
+			this._nav = it._nav.Clone();
+			this._position = it._position;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -34,7 +34,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.nav;
+				return this._nav;
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.position;
+				return this._position;
 			}
 		}
 
@@ -56,9 +56,9 @@ namespace MS.Internal.Xml.XPath
 
 		public override bool MoveNext()
 		{
-			if (this.position == 0)
+			if (this._position == 0)
 			{
-				this.position = 1;
+				this._position = 1;
 				return true;
 			}
 			return false;
@@ -66,11 +66,11 @@ namespace MS.Internal.Xml.XPath
 
 		public override void Reset()
 		{
-			this.position = 0;
+			this._position = 0;
 		}
 
-		private XPathNavigator nav;
+		private XPathNavigator _nav;
 
-		private int position;
+		private int _position;
 	}
 }

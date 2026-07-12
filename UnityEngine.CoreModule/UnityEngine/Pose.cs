@@ -87,7 +87,7 @@ namespace UnityEngine
 
 		public bool Equals(Pose other)
 		{
-			return this.position == other.position && this.rotation == other.rotation;
+			return this.position.Equals(other.position) && this.rotation.Equals(other.rotation);
 		}
 
 		public override int GetHashCode()
@@ -97,7 +97,7 @@ namespace UnityEngine
 
 		public static bool operator ==(Pose a, Pose b)
 		{
-			return a.Equals(b);
+			return a.position == b.position && a.rotation.Equals(b.rotation);
 		}
 
 		public static bool operator !=(Pose a, Pose b)

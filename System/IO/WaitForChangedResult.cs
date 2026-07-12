@@ -4,60 +4,22 @@ namespace System.IO
 {
 	public struct WaitForChangedResult
 	{
-		public WatcherChangeTypes ChangeType
+		internal WaitForChangedResult(WatcherChangeTypes changeType, string name, string oldName, bool timedOut)
 		{
-			get
-			{
-				return this.changeType;
-			}
-			set
-			{
-				this.changeType = value;
-			}
+			this.ChangeType = changeType;
+			this.Name = name;
+			this.OldName = oldName;
+			this.TimedOut = timedOut;
 		}
 
-		public string Name
-		{
-			get
-			{
-				return this.name;
-			}
-			set
-			{
-				this.name = value;
-			}
-		}
+		public WatcherChangeTypes ChangeType { readonly get; set; }
 
-		public string OldName
-		{
-			get
-			{
-				return this.oldName;
-			}
-			set
-			{
-				this.oldName = value;
-			}
-		}
+		public string Name { readonly get; set; }
 
-		public bool TimedOut
-		{
-			get
-			{
-				return this.timedOut;
-			}
-			set
-			{
-				this.timedOut = value;
-			}
-		}
+		public string OldName { readonly get; set; }
 
-		private WatcherChangeTypes changeType;
+		public bool TimedOut { readonly get; set; }
 
-		private string name;
-
-		private string oldName;
-
-		private bool timedOut;
+		internal static readonly WaitForChangedResult TimedOutResult = new WaitForChangedResult((WatcherChangeTypes)0, null, null, true);
 	}
 }

@@ -185,41 +185,45 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		List<SpaceDestination> list5 = new List<SpaceDestination>();
 		foreach (string text2 in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
 		{
-			foreach (DlcMixingSettings.SpaceDestinationMix spaceDestinationMix in SettingsCache.GetCachedDlcMixingSettings(text2).spaceDesinations)
+			DlcMixingSettings cachedDlcMixingSettings = SettingsCache.GetCachedDlcMixingSettings(text2);
+			if (cachedDlcMixingSettings != null)
 			{
-				bool flag = false;
-				if (list2.Count > 0)
+				foreach (DlcMixingSettings.SpaceDestinationMix spaceDestinationMix in cachedDlcMixingSettings.spaceDesinations)
 				{
-					for (int l = 0; l < list2.Count; l++)
+					bool flag = false;
+					if (list2.Count > 0)
 					{
-						int num7 = list2[l];
-						if (num7 >= spaceDestinationMix.minTier && num7 <= spaceDestinationMix.maxTier)
+						for (int l = 0; l < list2.Count; l++)
 						{
-							SpaceDestination spaceDestination2 = new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), spaceDestinationMix.type, num7);
-							list5.Add(spaceDestination2);
-							list2.RemoveAt(l);
-							flag = true;
-							break;
+							int num7 = list2[l];
+							if (num7 >= spaceDestinationMix.minTier && num7 <= spaceDestinationMix.maxTier)
+							{
+								SpaceDestination spaceDestination2 = new SpaceDestination(SpacecraftManager.<GenerateRandomDestinations>g__GetNextID|12_0(ref CS$<>8__locals1), spaceDestinationMix.type, num7);
+								list5.Add(spaceDestination2);
+								list2.RemoveAt(l);
+								flag = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!flag)
-				{
-					for (int m = 0; m < list3.Count; m++)
+					if (!flag)
 					{
-						SpaceDestination spaceDestination3 = list3[m];
-						if (spaceDestination3.distance >= spaceDestinationMix.minTier && spaceDestination3.distance <= spaceDestinationMix.maxTier)
+						for (int m = 0; m < list3.Count; m++)
 						{
-							list3[m] = new SpaceDestination(spaceDestination3.id, spaceDestinationMix.type, spaceDestination3.distance);
-							flag = true;
-							break;
+							SpaceDestination spaceDestination3 = list3[m];
+							if (spaceDestination3.distance >= spaceDestinationMix.minTier && spaceDestination3.distance <= spaceDestinationMix.maxTier)
+							{
+								list3[m] = new SpaceDestination(spaceDestination3.id, spaceDestinationMix.type, spaceDestination3.distance);
+								flag = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!flag)
-				{
-					KCrashReporter.ReportDevNotification("Base game failed to mix a space destination", Environment.StackTrace, "", false, null);
-					global::UnityEngine.Debug.LogWarning("Mixing: Unable to place destination '" + spaceDestinationMix.type + "'");
+					if (!flag)
+					{
+						KCrashReporter.ReportDevNotification("Base game failed to mix a space destination", Environment.StackTrace, "", false, null);
+						global::UnityEngine.Debug.LogWarning("Mixing: Unable to place destination '" + spaceDestinationMix.type + "'");
+					}
 				}
 			}
 		}

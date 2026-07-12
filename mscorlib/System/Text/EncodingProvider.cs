@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-	[ComVisible(true)]
 	public abstract class EncodingProvider
 	{
 		public EncodingProvider()

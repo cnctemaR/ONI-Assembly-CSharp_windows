@@ -22,10 +22,14 @@ public class AcousticDisturbance
 				if (Vector2.SqrMagnitude(vector - vector2) <= (float)num2)
 				{
 					int num3 = Grid.PosToCell(vector2);
-					if (AcousticDisturbance.cellsInRange.Contains(num3) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
+					if (AcousticDisturbance.cellsInRange.Contains(num3))
 					{
-						minionIdentity.Trigger(-527751701, data);
-						minionIdentity.Trigger(1621815900, data);
+						StaminaMonitor.Instance smi = minionIdentity.GetSMI<StaminaMonitor.Instance>();
+						if (smi != null && smi.IsSleeping())
+						{
+							minionIdentity.Trigger(-527751701, data);
+							minionIdentity.Trigger(1621815900, data);
+						}
 					}
 				}
 			}

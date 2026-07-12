@@ -7,7 +7,7 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class RegexParser
 	{
-		internal static RegexTree Parse(string re, RegexOptions op)
+		public static RegexTree Parse(string re, RegexOptions op)
 		{
 			RegexParser regexParser = new RegexParser(((op & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 			regexParser._options = op;
@@ -27,7 +27,7 @@ namespace System.Text.RegularExpressions
 			return new RegexTree(regexNode, regexParser._caps, regexParser._capnumlist, regexParser._captop, regexParser._capnames, array, op);
 		}
 
-		internal static RegexReplacement ParseReplacement(string rep, Hashtable caps, int capsize, Hashtable capnames, RegexOptions op)
+		public static RegexReplacement ParseReplacement(string rep, Hashtable caps, int capsize, Hashtable capnames, RegexOptions op)
 		{
 			RegexParser regexParser = new RegexParser(((op & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 			regexParser._options = op;
@@ -37,13 +37,13 @@ namespace System.Text.RegularExpressions
 			return new RegexReplacement(rep, regexNode, caps);
 		}
 
-		internal static string Escape(string input)
+		public static string Escape(string input)
 		{
 			for (int i = 0; i < input.Length; i++)
 			{
 				if (RegexParser.IsMetachar(input[i]))
 				{
-					StringBuilder stringBuilder = new StringBuilder();
+					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 					char c = input[i];
 					stringBuilder.Append(input, 0, i);
 					do
@@ -79,19 +79,19 @@ namespace System.Text.RegularExpressions
 						stringBuilder.Append(input, num, i - num);
 					}
 					while (i < input.Length);
-					return stringBuilder.ToString();
+					return StringBuilderCache.GetStringAndRelease(stringBuilder);
 				}
 			}
 			return input;
 		}
 
-		internal static string Unescape(string input)
+		public static string Unescape(string input)
 		{
 			for (int i = 0; i < input.Length; i++)
 			{
 				if (input[i] == '\\')
 				{
-					StringBuilder stringBuilder = new StringBuilder();
+					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 					RegexParser regexParser = new RegexParser(CultureInfo.InvariantCulture);
 					regexParser.SetPattern(input);
 					stringBuilder.Append(input, 0, i);
@@ -112,7 +112,7 @@ namespace System.Text.RegularExpressions
 						stringBuilder.Append(input, num, i - num);
 					}
 					while (i < input.Length);
-					return stringBuilder.ToString();
+					return StringBuilderCache.GetStringAndRelease(stringBuilder);
 				}
 			}
 			return input;
@@ -125,7 +125,7 @@ namespace System.Text.RegularExpressions
 			this._caps = new Hashtable();
 		}
 
-		internal void SetPattern(string Re)
+		private void SetPattern(string Re)
 		{
 			if (Re == null)
 			{
@@ -135,7 +135,7 @@ namespace System.Text.RegularExpressions
 			this._currentPos = 0;
 		}
 
-		internal void Reset(RegexOptions topopts)
+		private void Reset(RegexOptions topopts)
 		{
 			this._currentPos = 0;
 			this._autocap = 1;
@@ -148,7 +148,7 @@ namespace System.Text.RegularExpressions
 			this._stack = null;
 		}
 
-		internal RegexNode ScanRegex()
+		private RegexNode ScanRegex()
 		{
 			bool flag = false;
 			this.StartGroup(new RegexNode(28, this._options, 0, -1));
@@ -219,7 +219,7 @@ namespace System.Text.RegularExpressions
 					case ' ':
 						continue;
 					case '!':
-						goto IL_0437;
+						goto IL_0414;
 					case '"':
 					case '#':
 					case '%':
@@ -227,7 +227,7 @@ namespace System.Text.RegularExpressions
 					case '\'':
 					case ',':
 					case '-':
-						goto IL_02B7;
+						goto IL_02A3;
 					case '$':
 						this.AddUnitType(this.UseOptionM() ? 15 : 20);
 						break;
@@ -247,7 +247,7 @@ namespace System.Text.RegularExpressions
 					case ')':
 						if (this.EmptyStack())
 						{
-							throw this.MakeException(global::SR.GetString("Too many )'s."));
+							throw this.MakeException("Too many )'s.");
 						}
 						this.AddGroup();
 						this.PopGroup();
@@ -259,7 +259,7 @@ namespace System.Text.RegularExpressions
 						break;
 					case '*':
 					case '+':
-						goto IL_0277;
+						goto IL_0271;
 					case '.':
 						if (this.UseOptionS())
 						{
@@ -273,9 +273,9 @@ namespace System.Text.RegularExpressions
 					default:
 						if (c != '?')
 						{
-							goto IL_02B7;
+							goto IL_02A3;
 						}
-						goto IL_0277;
+						goto IL_0271;
 					}
 				}
 				else
@@ -283,37 +283,37 @@ namespace System.Text.RegularExpressions
 					switch (c)
 					{
 					case '[':
-						this.AddUnitSet(this.ScanCharClass(this.UseOptionI()).ToStringClass());
+						this.AddUnitSet(this.ScanCharClass(this.UseOptionI(), false).ToStringClass());
 						break;
 					case '\\':
-						this.AddUnitNode(this.ScanBackslash());
+						this.AddUnitNode(this.ScanBackslash(false));
 						break;
 					case ']':
-						goto IL_02B7;
+						goto IL_02A3;
 					case '^':
 						this.AddUnitType(this.UseOptionM() ? 14 : 18);
 						break;
 					default:
 						if (c == '{')
 						{
-							goto IL_0277;
+							goto IL_0271;
 						}
 						if (c != '|')
 						{
-							goto IL_02B7;
+							goto IL_02A3;
 						}
 						this.AddAlternate();
 						continue;
 					}
 				}
-				IL_02C8:
+				IL_02AF:
 				this.ScanBlank();
 				if (this.CharsRight() == 0 || !(flag = this.IsTrueQuantifier()))
 				{
 					this.AddConcatenate();
 					continue;
 				}
-				c = this.MoveRightGetChar();
+				c = this.RightCharMoveRight();
 				while (this.Unit() != null)
 				{
 					int num4;
@@ -324,7 +324,7 @@ namespace System.Text.RegularExpressions
 						{
 							if (c != '+')
 							{
-								goto IL_03C6;
+								goto IL_03AD;
 							}
 							num4 = 1;
 							num5 = int.MaxValue;
@@ -339,7 +339,7 @@ namespace System.Text.RegularExpressions
 					{
 						if (c != '{')
 						{
-							goto IL_03C6;
+							goto IL_03AD;
 						}
 						num = this.Textpos();
 						num4 = (num5 = this.ScanDecimal());
@@ -355,7 +355,7 @@ namespace System.Text.RegularExpressions
 								num5 = this.ScanDecimal();
 							}
 						}
-						if (num == this.Textpos() || this.CharsRight() == 0 || this.MoveRightGetChar() != '}')
+						if (num == this.Textpos() || this.CharsRight() == 0 || this.RightCharMoveRight() != '}')
 						{
 							this.AddConcatenate();
 							this.Textto(num - 1);
@@ -380,34 +380,34 @@ namespace System.Text.RegularExpressions
 					}
 					if (num4 > num5)
 					{
-						throw this.MakeException(global::SR.GetString("Illegal {x,y} with x > y."));
+						throw this.MakeException("Illegal {x,y} with x > y.");
 					}
 					this.AddConcatenate(flag3, num4, num5);
 					continue;
-					IL_03C6:
-					throw this.MakeException(global::SR.GetString("Internal error in ScanRegex."));
+					IL_03AD:
+					throw this.MakeException("Internal error in ScanRegex.");
 				}
 				continue;
-				IL_0277:
+				IL_0271:
 				if (this.Unit() == null)
 				{
-					throw this.MakeException(flag2 ? global::SR.GetString("Nested quantifier {0}.", new object[] { c.ToString() }) : global::SR.GetString("Quantifier {x,y} following nothing."));
+					throw this.MakeException(flag2 ? SR.Format("Nested quantifier {0}.", c.ToString()) : "Quantifier {x,y} following nothing.");
 				}
 				this.MoveLeft();
-				goto IL_02C8;
-				IL_02B7:
-				throw this.MakeException(global::SR.GetString("Internal error in ScanRegex."));
+				goto IL_02AF;
+				IL_02A3:
+				throw this.MakeException("Internal error in ScanRegex.");
 			}
-			IL_0437:
+			IL_0414:
 			if (!this.EmptyStack())
 			{
-				throw this.MakeException(global::SR.GetString("Not enough )'s."));
+				throw this.MakeException("Not enough )'s.");
 			}
 			this.AddGroup();
 			return this.Unit();
 		}
 
-		internal RegexNode ScanReplacement()
+		private RegexNode ScanReplacement()
 		{
 			this._concatenation = new RegexNode(25, this._options);
 			for (;;)
@@ -426,7 +426,7 @@ namespace System.Text.RegularExpressions
 				this.AddConcatenate(num2, this.Textpos() - num2, true);
 				if (num > 0)
 				{
-					if (this.MoveRightGetChar() == '$')
+					if (this.RightCharMoveRight() == '$')
 					{
 						this.AddUnitNode(this.ScanDollar());
 					}
@@ -436,12 +436,7 @@ namespace System.Text.RegularExpressions
 			return this._concatenation;
 		}
 
-		internal RegexCharClass ScanCharClass(bool caseInsensitive)
-		{
-			return this.ScanCharClass(caseInsensitive, false);
-		}
-
-		internal RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly)
+		private RegexCharClass ScanCharClass(bool caseInsensitive, bool scanOnly)
 		{
 			char c = '\0';
 			bool flag = false;
@@ -459,7 +454,7 @@ namespace System.Text.RegularExpressions
 			while (this.CharsRight() > 0)
 			{
 				bool flag4 = false;
-				char c2 = this.MoveRightGetChar();
+				char c2 = this.RightCharMoveRight();
 				if (c2 == ']')
 				{
 					if (!flag2)
@@ -467,14 +462,14 @@ namespace System.Text.RegularExpressions
 						flag3 = true;
 						break;
 					}
-					goto IL_028B;
+					goto IL_0261;
 				}
 				else
 				{
 					if (c2 == '\\' && this.CharsRight() > 0)
 					{
 						char c3;
-						c2 = (c3 = this.MoveRightGetChar());
+						c2 = (c3 = this.RightCharMoveRight());
 						if (c3 <= 'S')
 						{
 							if (c3 <= 'D')
@@ -483,7 +478,7 @@ namespace System.Text.RegularExpressions
 								{
 									if (c3 != 'D')
 									{
-										goto IL_0224;
+										goto IL_01FA;
 									}
 								}
 								else
@@ -491,22 +486,22 @@ namespace System.Text.RegularExpressions
 									if (!scanOnly)
 									{
 										regexCharClass.AddRange(c2, c2);
-										goto IL_03AA;
+										goto IL_0371;
 									}
-									goto IL_03AA;
+									goto IL_0371;
 								}
 							}
 							else
 							{
 								if (c3 == 'P')
 								{
-									goto IL_01BC;
+									goto IL_019B;
 								}
 								if (c3 != 'S')
 								{
-									goto IL_0224;
+									goto IL_01FA;
 								}
-								goto IL_013A;
+								goto IL_012B;
 							}
 						}
 						else
@@ -517,120 +512,120 @@ namespace System.Text.RegularExpressions
 								{
 									if (c3 != 'd')
 									{
-										goto IL_0224;
+										goto IL_01FA;
 									}
-									goto IL_00F3;
+									goto IL_00ED;
 								}
 							}
 							else
 							{
 								if (c3 == 'p')
 								{
-									goto IL_01BC;
+									goto IL_019B;
 								}
 								if (c3 == 's')
 								{
-									goto IL_013A;
+									goto IL_012B;
 								}
 								if (c3 != 'w')
 								{
-									goto IL_0224;
+									goto IL_01FA;
 								}
 							}
 							if (scanOnly)
 							{
-								goto IL_03AA;
+								goto IL_0371;
 							}
 							if (flag)
 							{
-								throw this.MakeException(global::SR.GetString("Cannot include class \\{0} in character range.", new object[] { c2.ToString() }));
+								throw this.MakeException(SR.Format("Cannot include class \\{0} in character range.", c2.ToString()));
 							}
 							regexCharClass.AddWord(this.UseOptionE(), c2 == 'W');
-							goto IL_03AA;
+							goto IL_0371;
 						}
-						IL_00F3:
+						IL_00ED:
 						if (scanOnly)
 						{
-							goto IL_03AA;
+							goto IL_0371;
 						}
 						if (flag)
 						{
-							throw this.MakeException(global::SR.GetString("Cannot include class \\{0} in character range.", new object[] { c2.ToString() }));
+							throw this.MakeException(SR.Format("Cannot include class \\{0} in character range.", c2.ToString()));
 						}
 						regexCharClass.AddDigit(this.UseOptionE(), c2 == 'D', this._pattern);
-						goto IL_03AA;
-						IL_013A:
+						goto IL_0371;
+						IL_012B:
 						if (scanOnly)
 						{
-							goto IL_03AA;
+							goto IL_0371;
 						}
 						if (flag)
 						{
-							throw this.MakeException(global::SR.GetString("Cannot include class \\{0} in character range.", new object[] { c2.ToString() }));
+							throw this.MakeException(SR.Format("Cannot include class \\{0} in character range.", c2.ToString()));
 						}
 						regexCharClass.AddSpace(this.UseOptionE(), c2 == 'S');
-						goto IL_03AA;
-						IL_01BC:
+						goto IL_0371;
+						IL_019B:
 						if (scanOnly)
 						{
 							this.ParseProperty();
-							goto IL_03AA;
+							goto IL_0371;
 						}
 						if (flag)
 						{
-							throw this.MakeException(global::SR.GetString("Cannot include class \\{0} in character range.", new object[] { c2.ToString() }));
+							throw this.MakeException(SR.Format("Cannot include class \\{0} in character range.", c2.ToString()));
 						}
 						regexCharClass.AddCategoryFromName(this.ParseProperty(), c2 != 'p', caseInsensitive, this._pattern);
-						goto IL_03AA;
-						IL_0224:
+						goto IL_0371;
+						IL_01FA:
 						this.MoveLeft();
 						c2 = this.ScanCharEscape();
 						flag4 = true;
-						goto IL_028B;
+						goto IL_0261;
 					}
 					if (c2 != '[' || this.CharsRight() <= 0 || this.RightChar() != ':' || flag)
 					{
-						goto IL_028B;
+						goto IL_0261;
 					}
 					int num = this.Textpos();
 					this.MoveRight();
 					this.ScanCapname();
-					if (this.CharsRight() < 2 || this.MoveRightGetChar() != ':' || this.MoveRightGetChar() != ']')
+					if (this.CharsRight() < 2 || this.RightCharMoveRight() != ':' || this.RightCharMoveRight() != ']')
 					{
 						this.Textto(num);
-						goto IL_028B;
+						goto IL_0261;
 					}
-					goto IL_028B;
+					goto IL_0261;
 				}
-				IL_03AA:
+				IL_0371:
 				flag2 = false;
 				continue;
-				IL_028B:
+				IL_0261:
 				if (flag)
 				{
 					flag = false;
 					if (scanOnly)
 					{
-						goto IL_03AA;
+						goto IL_0371;
 					}
 					if (c2 == '[' && !flag4 && !flag2)
 					{
 						regexCharClass.AddChar(c);
-						regexCharClass.AddSubtraction(this.ScanCharClass(caseInsensitive, false));
+						regexCharClass.AddSubtraction(this.ScanCharClass(caseInsensitive, scanOnly));
 						if (this.CharsRight() > 0 && this.RightChar() != ']')
 						{
-							throw this.MakeException(global::SR.GetString("A subtraction must be the last element in a character class."));
+							throw this.MakeException("A subtraction must be the last element in a character class.");
 						}
-						goto IL_03AA;
+						goto IL_0371;
 					}
 					else
 					{
 						if (c > c2)
 						{
-							throw this.MakeException(global::SR.GetString("[x-y] range in reverse order."));
+							throw this.MakeException("[x-y] range in reverse order.");
 						}
 						regexCharClass.AddRange(c, c2);
-						goto IL_03AA;
+						goto IL_0371;
 					}
 				}
 				else
@@ -640,38 +635,38 @@ namespace System.Text.RegularExpressions
 						c = c2;
 						flag = true;
 						this.MoveRight();
-						goto IL_03AA;
+						goto IL_0371;
 					}
 					if (this.CharsRight() >= 1 && c2 == '-' && !flag4 && this.RightChar() == '[' && !flag2)
 					{
 						if (scanOnly)
 						{
 							this.MoveRight(1);
-							this.ScanCharClass(caseInsensitive, true);
-							goto IL_03AA;
+							this.ScanCharClass(caseInsensitive, scanOnly);
+							goto IL_0371;
 						}
 						this.MoveRight(1);
-						regexCharClass.AddSubtraction(this.ScanCharClass(caseInsensitive, false));
+						regexCharClass.AddSubtraction(this.ScanCharClass(caseInsensitive, scanOnly));
 						if (this.CharsRight() > 0 && this.RightChar() != ']')
 						{
-							throw this.MakeException(global::SR.GetString("A subtraction must be the last element in a character class."));
+							throw this.MakeException("A subtraction must be the last element in a character class.");
 						}
-						goto IL_03AA;
+						goto IL_0371;
 					}
 					else
 					{
 						if (!scanOnly)
 						{
 							regexCharClass.AddRange(c2, c2);
-							goto IL_03AA;
+							goto IL_0371;
 						}
-						goto IL_03AA;
+						goto IL_0371;
 					}
 				}
 			}
 			if (!flag3)
 			{
-				throw this.MakeException(global::SR.GetString("Unterminated [] set."));
+				throw this.MakeException("Unterminated [] set.");
 			}
 			if (!scanOnly && caseInsensitive)
 			{
@@ -680,7 +675,7 @@ namespace System.Text.RegularExpressions
 			return regexCharClass;
 		}
 
-		internal RegexNode ScanGroupOpen()
+		private RegexNode ScanGroupOpen()
 		{
 			char c = '>';
 			if (this.CharsRight() != 0 && this.RightChar() == '?' && (this.RightChar() != '?' || this.CharsRight() <= 1 || this.RightChar(1) != ')'))
@@ -688,7 +683,7 @@ namespace System.Text.RegularExpressions
 				this.MoveRight();
 				if (this.CharsRight() != 0)
 				{
-					char c2 = this.MoveRightGetChar();
+					char c2 = this.RightCharMoveRight();
 					int num;
 					char c3;
 					if (c2 <= '\'')
@@ -697,11 +692,11 @@ namespace System.Text.RegularExpressions
 						{
 							this._options &= ~RegexOptions.RightToLeft;
 							num = 31;
-							goto IL_0551;
+							goto IL_04FA;
 						}
 						if (c2 != '\'')
 						{
-							goto IL_0527;
+							goto IL_04C1;
 						}
 						c = '\'';
 					}
@@ -711,20 +706,20 @@ namespace System.Text.RegularExpressions
 						{
 						case ':':
 							num = 29;
-							goto IL_0551;
+							goto IL_04FA;
 						case ';':
-							goto IL_0527;
+							goto IL_04C1;
 						case '<':
 							break;
 						case '=':
 							this._options &= ~RegexOptions.RightToLeft;
 							num = 30;
-							goto IL_0551;
+							goto IL_04FA;
 						case '>':
 							num = 32;
-							goto IL_0551;
+							goto IL_04FA;
 						default:
-							goto IL_0527;
+							goto IL_04C1;
 						}
 					}
 					else
@@ -736,20 +731,20 @@ namespace System.Text.RegularExpressions
 							if (c3 >= '0' && c3 <= '9')
 							{
 								int num3 = this.ScanDecimal();
-								if (this.CharsRight() <= 0 || this.MoveRightGetChar() != ')')
+								if (this.CharsRight() <= 0 || this.RightCharMoveRight() != ')')
 								{
-									throw this.MakeException(global::SR.GetString("(?({0}) ) malformed.", new object[] { num3.ToString(CultureInfo.CurrentCulture) }));
+									throw this.MakeException(SR.Format("(?({0}) ) malformed.", num3.ToString(CultureInfo.CurrentCulture)));
 								}
 								if (this.IsCaptureSlot(num3))
 								{
 									return new RegexNode(33, this._options, num3);
 								}
-								throw this.MakeException(global::SR.GetString("(?({0}) ) reference to undefined group.", new object[] { num3.ToString(CultureInfo.CurrentCulture) }));
+								throw this.MakeException(SR.Format("(?({0}) ) reference to undefined group.", num3.ToString(CultureInfo.CurrentCulture)));
 							}
 							else if (RegexCharClass.IsWordChar(c3))
 							{
 								string text = this.ScanCapname();
-								if (this.IsCaptureName(text) && this.CharsRight() > 0 && this.MoveRightGetChar() == ')')
+								if (this.IsCaptureName(text) && this.CharsRight() > 0 && this.RightCharMoveRight() == ')')
 								{
 									return new RegexNode(33, this._options, this.CaptureSlotFromName(text));
 								}
@@ -761,39 +756,40 @@ namespace System.Text.RegularExpressions
 						int num4 = this.CharsRight();
 						if (num4 < 3 || this.RightChar(1) != '?')
 						{
-							goto IL_0551;
+							goto IL_04FA;
 						}
 						char c4 = this.RightChar(2);
 						if (c4 == '#')
 						{
-							throw this.MakeException(global::SR.GetString("Alternation conditions cannot be comments."));
+							throw this.MakeException("Alternation conditions cannot be comments.");
 						}
 						if (c4 == '\'')
 						{
-							throw this.MakeException(global::SR.GetString("Alternation conditions do not capture and cannot be named."));
+							throw this.MakeException("Alternation conditions do not capture and cannot be named.");
 						}
 						if (num4 >= 4 && c4 == '<' && this.RightChar(3) != '!' && this.RightChar(3) != '=')
 						{
-							throw this.MakeException(global::SR.GetString("Alternation conditions do not capture and cannot be named."));
+							throw this.MakeException("Alternation conditions do not capture and cannot be named.");
 						}
-						goto IL_0551;
+						goto IL_04FA;
 					}
 					if (this.CharsRight() == 0)
 					{
-						goto IL_055E;
+						goto IL_0507;
 					}
-					c3 = (c2 = this.MoveRightGetChar());
-					if (c2 != '!')
+					char c5;
+					c3 = (c5 = this.RightCharMoveRight());
+					if (c5 != '!')
 					{
-						if (c2 == '=')
+						if (c5 == '=')
 						{
 							if (c != '\'')
 							{
 								this._options |= RegexOptions.RightToLeft;
 								num = 30;
-								goto IL_0551;
+								goto IL_04FA;
 							}
-							goto IL_055E;
+							goto IL_0507;
 						}
 						else
 						{
@@ -810,11 +806,11 @@ namespace System.Text.RegularExpressions
 								}
 								if (this.CharsRight() > 0 && this.RightChar() != c && this.RightChar() != '-')
 								{
-									throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+									throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 								}
 								if (num5 == 0)
 								{
-									throw this.MakeException(global::SR.GetString("Capture number cannot be zero."));
+									throw this.MakeException("Capture number cannot be zero.");
 								}
 							}
 							else if (RegexCharClass.IsWordChar(c3))
@@ -826,18 +822,18 @@ namespace System.Text.RegularExpressions
 								}
 								if (this.CharsRight() > 0 && this.RightChar() != c && this.RightChar() != '-')
 								{
-									throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+									throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 								}
 							}
 							else
 							{
 								if (c3 != '-')
 								{
-									throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+									throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 								}
 								flag = true;
 							}
-							if ((num5 != -1 || flag) && this.CharsRight() > 0 && this.RightChar() == '-')
+							if ((num5 != -1 || flag) && this.CharsRight() > 1 && this.RightChar() == '-')
 							{
 								this.MoveRight();
 								c3 = this.RightChar();
@@ -846,36 +842,36 @@ namespace System.Text.RegularExpressions
 									num6 = this.ScanDecimal();
 									if (!this.IsCaptureSlot(num6))
 									{
-										throw this.MakeException(global::SR.GetString("Reference to undefined group number {0}.", new object[] { num6 }));
+										throw this.MakeException(SR.Format("Reference to undefined group number {0}.", num6));
 									}
 									if (this.CharsRight() > 0 && this.RightChar() != c)
 									{
-										throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+										throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 									}
 								}
 								else
 								{
 									if (!RegexCharClass.IsWordChar(c3))
 									{
-										throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+										throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 									}
 									string text3 = this.ScanCapname();
 									if (!this.IsCaptureName(text3))
 									{
-										throw this.MakeException(global::SR.GetString("Reference to undefined group name {0}.", new object[] { text3 }));
+										throw this.MakeException(SR.Format("Reference to undefined group name {0}.", text3));
 									}
 									num6 = this.CaptureSlotFromName(text3);
 									if (this.CharsRight() > 0 && this.RightChar() != c)
 									{
-										throw this.MakeException(global::SR.GetString("Invalid group name: Group names must begin with a word character."));
+										throw this.MakeException("Invalid group name: Group names must begin with a word character.");
 									}
 								}
 							}
-							if ((num5 != -1 || num6 != -1) && this.CharsRight() > 0 && this.MoveRightGetChar() == c)
+							if ((num5 != -1 || num6 != -1) && this.CharsRight() > 0 && this.RightCharMoveRight() == c)
 							{
 								return new RegexNode(28, this._options, num5, num6);
 							}
-							goto IL_055E;
+							goto IL_0507;
 						}
 					}
 					else
@@ -884,31 +880,34 @@ namespace System.Text.RegularExpressions
 						{
 							this._options |= RegexOptions.RightToLeft;
 							num = 31;
-							goto IL_0551;
+							goto IL_04FA;
 						}
-						goto IL_055E;
+						goto IL_0507;
 					}
-					IL_0527:
+					IL_04C1:
 					this.MoveLeft();
 					num = 29;
-					this.ScanOptions();
+					if (this._group.NType != 34)
+					{
+						this.ScanOptions();
+					}
 					if (this.CharsRight() == 0)
 					{
-						goto IL_055E;
+						goto IL_0507;
 					}
-					if ((c3 = this.MoveRightGetChar()) == ')')
+					if ((c3 = this.RightCharMoveRight()) == ')')
 					{
 						return null;
 					}
 					if (c3 != ':')
 					{
-						goto IL_055E;
+						goto IL_0507;
 					}
-					IL_0551:
+					IL_04FA:
 					return new RegexNode(num, this._options);
 				}
-				IL_055E:
-				throw this.MakeException(global::SR.GetString("Unrecognized grouping construct."));
+				IL_0507:
+				throw this.MakeException("Unrecognized grouping construct.");
 			}
 			if (this.UseOptionN() || this._ignoreNextParen)
 			{
@@ -922,7 +921,7 @@ namespace System.Text.RegularExpressions
 			return new RegexNode(num7, options, autocap, -1);
 		}
 
-		internal void ScanBlank()
+		private void ScanBlank()
 		{
 			if (this.UseOptionX())
 			{
@@ -967,7 +966,7 @@ namespace System.Text.RegularExpressions
 						this.MoveRight();
 					}
 				}
-				throw this.MakeException(global::SR.GetString("Unterminated (?#...) comment."));
+				throw this.MakeException("Unterminated (?#...) comment.");
 			}
 			while (this.CharsRight() >= 3 && this.RightChar(2) == '#' && this.RightChar(1) == '?' && this.RightChar() == '(')
 			{
@@ -977,17 +976,17 @@ namespace System.Text.RegularExpressions
 				}
 				if (this.CharsRight() == 0)
 				{
-					throw this.MakeException(global::SR.GetString("Unterminated (?#...) comment."));
+					throw this.MakeException("Unterminated (?#...) comment.");
 				}
 				this.MoveRight();
 			}
 		}
 
-		internal RegexNode ScanBackslash()
+		private RegexNode ScanBackslash(bool scanOnly)
 		{
 			if (this.CharsRight() == 0)
 			{
-				throw this.MakeException(global::SR.GetString("Illegal \\ at end of pattern."));
+				throw this.MakeException("Illegal \\ at end of pattern.");
 			}
 			char c2;
 			char c = (c2 = this.RightChar());
@@ -1004,9 +1003,13 @@ namespace System.Text.RegularExpressions
 					case 'C':
 					case 'E':
 					case 'F':
-						goto IL_0251;
+						goto IL_0274;
 					case 'D':
 						this.MoveRight();
+						if (scanOnly)
+						{
+							return null;
+						}
 						if (this.UseOptionE())
 						{
 							return new RegexNode(11, this._options, "\u0001\u0002\00:");
@@ -1015,9 +1018,9 @@ namespace System.Text.RegularExpressions
 					default:
 						if (c2 != 'P')
 						{
-							goto IL_0251;
+							goto IL_0274;
 						}
-						goto IL_01FD;
+						goto IL_021B;
 					}
 				}
 				else if (c2 != 'S')
@@ -1026,12 +1029,16 @@ namespace System.Text.RegularExpressions
 					{
 						if (c2 != 'Z')
 						{
-							goto IL_0251;
+							goto IL_0274;
 						}
 					}
 					else
 					{
 						this.MoveRight();
+						if (scanOnly)
+						{
+							return null;
+						}
 						if (this.UseOptionE())
 						{
 							return new RegexNode(11, this._options, "\u0001\n\00:A[_`a{İı");
@@ -1042,6 +1049,10 @@ namespace System.Text.RegularExpressions
 				else
 				{
 					this.MoveRight();
+					if (scanOnly)
+					{
+						return null;
+					}
 					if (this.UseOptionE())
 					{
 						return new RegexNode(11, this._options, "\u0001\u0004\0\t\u000e !");
@@ -1057,13 +1068,17 @@ namespace System.Text.RegularExpressions
 					{
 						if (c2 != 'p')
 						{
-							goto IL_0251;
+							goto IL_0274;
 						}
-						goto IL_01FD;
+						goto IL_021B;
 					}
 					else
 					{
 						this.MoveRight();
+						if (scanOnly)
+						{
+							return null;
+						}
 						if (this.UseOptionE())
 						{
 							return new RegexNode(11, this._options, "\0\u0002\00:");
@@ -1078,12 +1093,16 @@ namespace System.Text.RegularExpressions
 				{
 					if (c2 != 'z')
 					{
-						goto IL_0251;
+						goto IL_0274;
 					}
 				}
 				else
 				{
 					this.MoveRight();
+					if (scanOnly)
+					{
+						return null;
+					}
 					if (this.UseOptionE())
 					{
 						return new RegexNode(11, this._options, "\0\n\00:A[_`a{İı");
@@ -1094,6 +1113,10 @@ namespace System.Text.RegularExpressions
 			else
 			{
 				this.MoveRight();
+				if (scanOnly)
+				{
+					return null;
+				}
 				if (this.UseOptionE())
 				{
 					return new RegexNode(11, this._options, "\0\u0004\0\t\u000e !");
@@ -1101,9 +1124,17 @@ namespace System.Text.RegularExpressions
 				return new RegexNode(11, this._options, RegexCharClass.SpaceClass);
 			}
 			this.MoveRight();
+			if (scanOnly)
+			{
+				return null;
+			}
 			return new RegexNode(this.TypeFromCode(c), this._options);
-			IL_01FD:
+			IL_021B:
 			this.MoveRight();
+			if (scanOnly)
+			{
+				return null;
+			}
 			RegexCharClass regexCharClass = new RegexCharClass();
 			regexCharClass.AddCategoryFromName(this.ParseProperty(), c != 'p', this.UseOptionI(), this._pattern);
 			if (this.UseOptionI())
@@ -1111,15 +1142,15 @@ namespace System.Text.RegularExpressions
 				regexCharClass.AddLowercase(this._culture);
 			}
 			return new RegexNode(11, this._options, regexCharClass.ToStringClass());
-			IL_0251:
-			return this.ScanBasicBackslash();
+			IL_0274:
+			return this.ScanBasicBackslash(scanOnly);
 		}
 
-		internal RegexNode ScanBasicBackslash()
+		private RegexNode ScanBasicBackslash(bool scanOnly)
 		{
 			if (this.CharsRight() == 0)
 			{
-				throw this.MakeException(global::SR.GetString("Illegal \\ at end of pattern."));
+				throw this.MakeException("Illegal \\ at end of pattern.");
 			}
 			bool flag = false;
 			char c = '\0';
@@ -1130,7 +1161,7 @@ namespace System.Text.RegularExpressions
 				if (this.CharsRight() >= 2)
 				{
 					this.MoveRight();
-					c2 = this.MoveRightGetChar();
+					c2 = this.RightCharMoveRight();
 					if (c2 == '<' || c2 == '\'')
 					{
 						flag = true;
@@ -1139,7 +1170,7 @@ namespace System.Text.RegularExpressions
 				}
 				if (!flag || this.CharsRight() <= 0)
 				{
-					throw this.MakeException(global::SR.GetString("Malformed \\k<...> named back reference."));
+					throw this.MakeException("Malformed \\k<...> named back reference.");
 				}
 				c2 = this.RightChar();
 			}
@@ -1153,13 +1184,17 @@ namespace System.Text.RegularExpressions
 			if (flag && c2 >= '0' && c2 <= '9')
 			{
 				int num2 = this.ScanDecimal();
-				if (this.CharsRight() > 0 && this.MoveRightGetChar() == c)
+				if (this.CharsRight() > 0 && this.RightCharMoveRight() == c)
 				{
+					if (scanOnly)
+					{
+						return null;
+					}
 					if (this.IsCaptureSlot(num2))
 					{
 						return new RegexNode(13, this._options, num2);
 					}
-					throw this.MakeException(global::SR.GetString("Reference to undefined group number {0}.", new object[] { num2.ToString(CultureInfo.CurrentCulture) }));
+					throw this.MakeException(SR.Format("Reference to undefined group number {0}.", num2.ToString(CultureInfo.CurrentCulture)));
 				}
 			}
 			else if (!flag && c2 >= '1' && c2 <= '9')
@@ -1184,44 +1219,60 @@ namespace System.Text.RegularExpressions
 					}
 					if (num3 >= 0)
 					{
-						return new RegexNode(13, this._options, num3);
+						if (!scanOnly)
+						{
+							return new RegexNode(13, this._options, num3);
+						}
+						return null;
 					}
 				}
 				else
 				{
 					int num5 = this.ScanDecimal();
+					if (scanOnly)
+					{
+						return null;
+					}
 					if (this.IsCaptureSlot(num5))
 					{
 						return new RegexNode(13, this._options, num5);
 					}
 					if (num5 <= 9)
 					{
-						throw this.MakeException(global::SR.GetString("Reference to undefined group number {0}.", new object[] { num5.ToString(CultureInfo.CurrentCulture) }));
+						throw this.MakeException(SR.Format("Reference to undefined group number {0}.", num5.ToString(CultureInfo.CurrentCulture)));
 					}
 				}
 			}
 			else if (flag && RegexCharClass.IsWordChar(c2))
 			{
 				string text = this.ScanCapname();
-				if (this.CharsRight() > 0 && this.MoveRightGetChar() == c)
+				if (this.CharsRight() > 0 && this.RightCharMoveRight() == c)
 				{
+					if (scanOnly)
+					{
+						return null;
+					}
 					if (this.IsCaptureName(text))
 					{
 						return new RegexNode(13, this._options, this.CaptureSlotFromName(text));
 					}
-					throw this.MakeException(global::SR.GetString("Reference to undefined group name {0}.", new object[] { text }));
+					throw this.MakeException(SR.Format("Reference to undefined group name {0}.", text));
 				}
 			}
 			this.Textto(num);
 			c2 = this.ScanCharEscape();
 			if (this.UseOptionI())
 			{
-				c2 = char.ToLower(c2, this._culture);
+				c2 = this._culture.TextInfo.ToLower(c2);
 			}
-			return new RegexNode(9, this._options, c2);
+			if (!scanOnly)
+			{
+				return new RegexNode(9, this._options, c2);
+			}
+			return null;
 		}
 
-		internal RegexNode ScanDollar()
+		private RegexNode ScanDollar()
 		{
 			if (this.CharsRight() == 0)
 			{
@@ -1258,7 +1309,7 @@ namespace System.Text.RegularExpressions
 						int num5 = (int)(c - '0');
 						if (num4 > 214748364 || (num4 == 214748364 && num5 > 7))
 						{
-							throw this.MakeException(global::SR.GetString("Capture group numbers must be less than or equal to Int32.MaxValue."));
+							throw this.MakeException("Capture group numbers must be less than or equal to Int32.MaxValue.");
 						}
 						num4 = num4 * 10 + num5;
 						this.MoveRight();
@@ -1277,7 +1328,7 @@ namespace System.Text.RegularExpressions
 				else
 				{
 					int num6 = this.ScanDecimal();
-					if ((!flag || (this.CharsRight() > 0 && this.MoveRightGetChar() == '}')) && this.IsCaptureSlot(num6))
+					if ((!flag || (this.CharsRight() > 0 && this.RightCharMoveRight() == '}')) && this.IsCaptureSlot(num6))
 					{
 						return new RegexNode(13, this._options, num6);
 					}
@@ -1286,7 +1337,7 @@ namespace System.Text.RegularExpressions
 			else if (flag && RegexCharClass.IsWordChar(c))
 			{
 				string text = this.ScanCapname();
-				if (this.CharsRight() > 0 && this.MoveRightGetChar() == '}' && this.IsCaptureName(text))
+				if (this.CharsRight() > 0 && this.RightCharMoveRight() == '}' && this.IsCaptureName(text))
 				{
 					return new RegexNode(13, this._options, this.CaptureSlotFromName(text));
 				}
@@ -1338,12 +1389,12 @@ namespace System.Text.RegularExpressions
 			return new RegexNode(9, this._options, '$');
 		}
 
-		internal string ScanCapname()
+		private string ScanCapname()
 		{
 			int num = this.Textpos();
 			while (this.CharsRight() > 0)
 			{
-				if (!RegexCharClass.IsWordChar(this.MoveRightGetChar()))
+				if (!RegexCharClass.IsWordChar(this.RightCharMoveRight()))
 				{
 					this.MoveLeft();
 					break;
@@ -1352,7 +1403,7 @@ namespace System.Text.RegularExpressions
 			return this._pattern.Substring(num, this.Textpos() - num);
 		}
 
-		internal char ScanOctal()
+		private char ScanOctal()
 		{
 			int num = 3;
 			if (num > this.CharsRight())
@@ -1376,7 +1427,7 @@ namespace System.Text.RegularExpressions
 			return (char)num2;
 		}
 
-		internal int ScanDecimal()
+		private int ScanDecimal()
 		{
 			int num = 0;
 			int num2;
@@ -1385,7 +1436,7 @@ namespace System.Text.RegularExpressions
 				this.MoveRight();
 				if (num > 214748364 || (num == 214748364 && num2 > 7))
 				{
-					throw this.MakeException(global::SR.GetString("Capture group numbers must be less than or equal to Int32.MaxValue."));
+					throw this.MakeException("Capture group numbers must be less than or equal to Int32.MaxValue.");
 				}
 				num *= 10;
 				num += num2;
@@ -1393,13 +1444,13 @@ namespace System.Text.RegularExpressions
 			return num;
 		}
 
-		internal char ScanHex(int c)
+		private char ScanHex(int c)
 		{
 			int num = 0;
 			if (this.CharsRight() >= c)
 			{
 				int num2;
-				while (c > 0 && (num2 = RegexParser.HexDigit(this.MoveRightGetChar())) >= 0)
+				while (c > 0 && (num2 = RegexParser.HexDigit(this.RightCharMoveRight())) >= 0)
 				{
 					num *= 16;
 					num += num2;
@@ -1408,12 +1459,12 @@ namespace System.Text.RegularExpressions
 			}
 			if (c > 0)
 			{
-				throw this.MakeException(global::SR.GetString("Insufficient hexadecimal digits."));
+				throw this.MakeException("Insufficient hexadecimal digits.");
 			}
 			return (char)num;
 		}
 
-		internal static int HexDigit(char ch)
+		private static int HexDigit(char ch)
 		{
 			int num;
 			if ((num = (int)(ch - '0')) <= 9)
@@ -1431,13 +1482,13 @@ namespace System.Text.RegularExpressions
 			return -1;
 		}
 
-		internal char ScanControl()
+		private char ScanControl()
 		{
 			if (this.CharsRight() <= 0)
 			{
-				throw this.MakeException(global::SR.GetString("Missing control character."));
+				throw this.MakeException("Missing control character.");
 			}
-			char c = this.MoveRightGetChar();
+			char c = this.RightCharMoveRight();
 			if (c >= 'a' && c <= 'z')
 			{
 				c -= ' ';
@@ -1446,15 +1497,15 @@ namespace System.Text.RegularExpressions
 			{
 				return c;
 			}
-			throw this.MakeException(global::SR.GetString("Unrecognized control character."));
+			throw this.MakeException("Unrecognized control character.");
 		}
 
-		internal bool IsOnlyTopOption(RegexOptions option)
+		private bool IsOnlyTopOption(RegexOptions option)
 		{
-			return option == RegexOptions.RightToLeft || option == RegexOptions.Compiled || option == RegexOptions.CultureInvariant || option == RegexOptions.ECMAScript;
+			return option == RegexOptions.RightToLeft || option == RegexOptions.CultureInvariant || option == RegexOptions.ECMAScript;
 		}
 
-		internal void ScanOptions()
+		private void ScanOptions()
 		{
 			bool flag = false;
 			while (this.CharsRight() > 0)
@@ -1488,9 +1539,9 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal char ScanCharEscape()
+		private char ScanCharEscape()
 		{
-			char c = this.MoveRightGetChar();
+			char c = this.RightCharMoveRight();
 			if (c >= '0' && c <= '7')
 			{
 				this.MoveLeft();
@@ -1530,26 +1581,26 @@ namespace System.Text.RegularExpressions
 			}
 			if (!this.UseOptionE() && RegexCharClass.IsWordChar(c))
 			{
-				throw this.MakeException(global::SR.GetString("Unrecognized escape sequence \\{0}.", new object[] { c.ToString() }));
+				throw this.MakeException(SR.Format("Unrecognized escape sequence \\{0}.", c.ToString()));
 			}
 			return c;
 		}
 
-		internal string ParseProperty()
+		private string ParseProperty()
 		{
 			if (this.CharsRight() < 3)
 			{
-				throw this.MakeException(global::SR.GetString("Incomplete \\p{X} character escape."));
+				throw this.MakeException("Incomplete \\p{X} character escape.");
 			}
-			char c = this.MoveRightGetChar();
+			char c = this.RightCharMoveRight();
 			if (c != '{')
 			{
-				throw this.MakeException(global::SR.GetString("Malformed \\p{X} character escape."));
+				throw this.MakeException("Malformed \\p{X} character escape.");
 			}
 			int num = this.Textpos();
 			while (this.CharsRight() > 0)
 			{
-				c = this.MoveRightGetChar();
+				c = this.RightCharMoveRight();
 				if (!RegexCharClass.IsWordChar(c) && c != '-')
 				{
 					this.MoveLeft();
@@ -1557,14 +1608,14 @@ namespace System.Text.RegularExpressions
 				}
 			}
 			string text = this._pattern.Substring(num, this.Textpos() - num);
-			if (this.CharsRight() == 0 || this.MoveRightGetChar() != '}')
+			if (this.CharsRight() == 0 || this.RightCharMoveRight() != '}')
 			{
-				throw this.MakeException(global::SR.GetString("Incomplete \\p{X} character escape."));
+				throw this.MakeException("Incomplete \\p{X} character escape.");
 			}
 			return text;
 		}
 
-		internal int TypeFromCode(char ch)
+		private int TypeFromCode(char ch)
 		{
 			if (ch <= 'G')
 			{
@@ -1613,29 +1664,25 @@ namespace System.Text.RegularExpressions
 			return 22;
 		}
 
-		internal static RegexOptions OptionFromCode(char ch)
+		private static RegexOptions OptionFromCode(char ch)
 		{
 			if (ch >= 'A' && ch <= 'Z')
 			{
 				ch += ' ';
 			}
-			if (ch <= 'e')
+			if (ch <= 'i')
 			{
-				if (ch == 'c')
-				{
-					return RegexOptions.Compiled;
-				}
 				if (ch == 'e')
 				{
 					return RegexOptions.ECMAScript;
 				}
-			}
-			else
-			{
 				if (ch == 'i')
 				{
 					return RegexOptions.IgnoreCase;
 				}
+			}
+			else
+			{
 				switch (ch)
 				{
 				case 'm':
@@ -1661,14 +1708,14 @@ namespace System.Text.RegularExpressions
 			return RegexOptions.None;
 		}
 
-		internal void CountCaptures()
+		private void CountCaptures()
 		{
 			this.NoteCaptureSlot(0, 0);
 			this._autocap = 1;
 			while (this.CharsRight() > 0)
 			{
 				int num = this.Textpos();
-				char c = this.MoveRightGetChar();
+				char c = this.RightCharMoveRight();
 				if (c <= '(')
 				{
 					if (c != '#')
@@ -1742,7 +1789,7 @@ namespace System.Text.RegularExpressions
 					{
 						if (c == '\\' && this.CharsRight() > 0)
 						{
-							this.MoveRight();
+							this.ScanBackslash(true);
 						}
 					}
 					else
@@ -1758,7 +1805,7 @@ namespace System.Text.RegularExpressions
 			this.AssignNameSlots();
 		}
 
-		internal void NoteCaptureSlot(int i, int pos)
+		private void NoteCaptureSlot(int i, int pos)
 		{
 			if (!this._caps.ContainsKey(i))
 			{
@@ -1776,7 +1823,7 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal void NoteCaptureName(string name, int pos)
+		private void NoteCaptureName(string name, int pos)
 		{
 			if (this._capnames == null)
 			{
@@ -1790,14 +1837,14 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal void NoteCaptures(Hashtable caps, int capsize, Hashtable capnames)
+		private void NoteCaptures(Hashtable caps, int capsize, Hashtable capnames)
 		{
 			this._caps = caps;
 			this._capsize = capsize;
 			this._capnames = capnames;
 		}
 
-		internal void AssignNameSlots()
+		private void AssignNameSlots()
 		{
 			if (this._capnames != null)
 			{
@@ -1861,12 +1908,12 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal int CaptureSlotFromName(string capname)
+		private int CaptureSlotFromName(string capname)
 		{
 			return (int)this._capnames[capname];
 		}
 
-		internal bool IsCaptureSlot(int i)
+		private bool IsCaptureSlot(int i)
 		{
 			if (this._caps != null)
 			{
@@ -1875,57 +1922,57 @@ namespace System.Text.RegularExpressions
 			return i >= 0 && i < this._capsize;
 		}
 
-		internal bool IsCaptureName(string capname)
+		private bool IsCaptureName(string capname)
 		{
 			return this._capnames != null && this._capnames.ContainsKey(capname);
 		}
 
-		internal bool UseOptionN()
+		private bool UseOptionN()
 		{
 			return (this._options & RegexOptions.ExplicitCapture) > RegexOptions.None;
 		}
 
-		internal bool UseOptionI()
+		private bool UseOptionI()
 		{
 			return (this._options & RegexOptions.IgnoreCase) > RegexOptions.None;
 		}
 
-		internal bool UseOptionM()
+		private bool UseOptionM()
 		{
 			return (this._options & RegexOptions.Multiline) > RegexOptions.None;
 		}
 
-		internal bool UseOptionS()
+		private bool UseOptionS()
 		{
 			return (this._options & RegexOptions.Singleline) > RegexOptions.None;
 		}
 
-		internal bool UseOptionX()
+		private bool UseOptionX()
 		{
 			return (this._options & RegexOptions.IgnorePatternWhitespace) > RegexOptions.None;
 		}
 
-		internal bool UseOptionE()
+		private bool UseOptionE()
 		{
 			return (this._options & RegexOptions.ECMAScript) > RegexOptions.None;
 		}
 
-		internal static bool IsSpecial(char ch)
+		private static bool IsSpecial(char ch)
 		{
-			return ch <= '|' && RegexParser._category[(int)ch] >= 4;
+			return ch <= '|' && RegexParser.s_category[(int)ch] >= 4;
 		}
 
-		internal static bool IsStopperX(char ch)
+		private static bool IsStopperX(char ch)
 		{
-			return ch <= '|' && RegexParser._category[(int)ch] >= 2;
+			return ch <= '|' && RegexParser.s_category[(int)ch] >= 2;
 		}
 
-		internal static bool IsQuantifier(char ch)
+		private static bool IsQuantifier(char ch)
 		{
-			return ch <= '{' && RegexParser._category[(int)ch] >= 5;
+			return ch <= '{' && RegexParser.s_category[(int)ch] >= 5;
 		}
 
-		internal bool IsTrueQuantifier()
+		private bool IsTrueQuantifier()
 		{
 			int num = this.CharsRight();
 			if (num == 0)
@@ -1936,7 +1983,7 @@ namespace System.Text.RegularExpressions
 			char c = this.CharAt(num2);
 			if (c != '{')
 			{
-				return c <= '{' && RegexParser._category[(int)c] >= 5;
+				return c <= '{' && RegexParser.s_category[(int)c] >= 5;
 			}
 			int num3 = num2;
 			while (--num > 0 && (c = this.CharAt(++num3)) >= '0' && c <= '9')
@@ -1960,17 +2007,17 @@ namespace System.Text.RegularExpressions
 			return num > 0 && c == '}';
 		}
 
-		internal static bool IsSpace(char ch)
+		private static bool IsSpace(char ch)
 		{
-			return ch <= ' ' && RegexParser._category[(int)ch] == 2;
+			return ch <= ' ' && RegexParser.s_category[(int)ch] == 2;
 		}
 
-		internal static bool IsMetachar(char ch)
+		private static bool IsMetachar(char ch)
 		{
-			return ch <= '|' && RegexParser._category[(int)ch] >= 1;
+			return ch <= '|' && RegexParser.s_category[(int)ch] >= 1;
 		}
 
-		internal void AddConcatenate(int pos, int cch, bool isReplacement)
+		private void AddConcatenate(int pos, int cch, bool isReplacement)
 		{
 			if (cch == 0)
 			{
@@ -1982,12 +2029,12 @@ namespace System.Text.RegularExpressions
 				string text = this._pattern.Substring(pos, cch);
 				if (this.UseOptionI() && !isReplacement)
 				{
-					StringBuilder stringBuilder = new StringBuilder(text.Length);
+					StringBuilder stringBuilder = StringBuilderCache.Acquire(text.Length);
 					for (int i = 0; i < text.Length; i++)
 					{
-						stringBuilder.Append(char.ToLower(text[i], this._culture));
+						stringBuilder.Append(this._culture.TextInfo.ToLower(text[i]));
 					}
-					text = stringBuilder.ToString();
+					text = StringBuilderCache.GetStringAndRelease(stringBuilder);
 				}
 				regexNode = new RegexNode(12, this._options, text);
 			}
@@ -1996,51 +2043,51 @@ namespace System.Text.RegularExpressions
 				char c = this._pattern[pos];
 				if (this.UseOptionI() && !isReplacement)
 				{
-					c = char.ToLower(c, this._culture);
+					c = this._culture.TextInfo.ToLower(c);
 				}
 				regexNode = new RegexNode(9, this._options, c);
 			}
 			this._concatenation.AddChild(regexNode);
 		}
 
-		internal void PushGroup()
+		private void PushGroup()
 		{
-			this._group._next = this._stack;
-			this._alternation._next = this._group;
-			this._concatenation._next = this._alternation;
+			this._group.Next = this._stack;
+			this._alternation.Next = this._group;
+			this._concatenation.Next = this._alternation;
 			this._stack = this._concatenation;
 		}
 
-		internal void PopGroup()
+		private void PopGroup()
 		{
 			this._concatenation = this._stack;
-			this._alternation = this._concatenation._next;
-			this._group = this._alternation._next;
-			this._stack = this._group._next;
+			this._alternation = this._concatenation.Next;
+			this._group = this._alternation.Next;
+			this._stack = this._group.Next;
 			if (this._group.Type() == 34 && this._group.ChildCount() == 0)
 			{
 				if (this._unit == null)
 				{
-					throw this.MakeException(global::SR.GetString("Illegal conditional (?(...)) expression."));
+					throw this.MakeException("Illegal conditional (?(...)) expression.");
 				}
 				this._group.AddChild(this._unit);
 				this._unit = null;
 			}
 		}
 
-		internal bool EmptyStack()
+		private bool EmptyStack()
 		{
 			return this._stack == null;
 		}
 
-		internal void StartGroup(RegexNode openGroup)
+		private void StartGroup(RegexNode openGroup)
 		{
 			this._group = openGroup;
 			this._alternation = new RegexNode(24, this._options);
 			this._concatenation = new RegexNode(25, this._options);
 		}
 
-		internal void AddAlternate()
+		private void AddAlternate()
 		{
 			if (this._group.Type() == 34 || this._group.Type() == 33)
 			{
@@ -2053,64 +2100,64 @@ namespace System.Text.RegularExpressions
 			this._concatenation = new RegexNode(25, this._options);
 		}
 
-		internal void AddConcatenate()
+		private void AddConcatenate()
 		{
 			this._concatenation.AddChild(this._unit);
 			this._unit = null;
 		}
 
-		internal void AddConcatenate(bool lazy, int min, int max)
+		private void AddConcatenate(bool lazy, int min, int max)
 		{
 			this._concatenation.AddChild(this._unit.MakeQuantifier(lazy, min, max));
 			this._unit = null;
 		}
 
-		internal RegexNode Unit()
+		private RegexNode Unit()
 		{
 			return this._unit;
 		}
 
-		internal void AddUnitOne(char ch)
+		private void AddUnitOne(char ch)
 		{
 			if (this.UseOptionI())
 			{
-				ch = char.ToLower(ch, this._culture);
+				ch = this._culture.TextInfo.ToLower(ch);
 			}
 			this._unit = new RegexNode(9, this._options, ch);
 		}
 
-		internal void AddUnitNotone(char ch)
+		private void AddUnitNotone(char ch)
 		{
 			if (this.UseOptionI())
 			{
-				ch = char.ToLower(ch, this._culture);
+				ch = this._culture.TextInfo.ToLower(ch);
 			}
 			this._unit = new RegexNode(10, this._options, ch);
 		}
 
-		internal void AddUnitSet(string cc)
+		private void AddUnitSet(string cc)
 		{
 			this._unit = new RegexNode(11, this._options, cc);
 		}
 
-		internal void AddUnitNode(RegexNode node)
+		private void AddUnitNode(RegexNode node)
 		{
 			this._unit = node;
 		}
 
-		internal void AddUnitType(int type)
+		private void AddUnitType(int type)
 		{
 			this._unit = new RegexNode(type, this._options);
 		}
 
-		internal void AddGroup()
+		private void AddGroup()
 		{
 			if (this._group.Type() == 34 || this._group.Type() == 33)
 			{
 				this._group.AddChild(this._concatenation.ReverseLeft());
 				if ((this._group.Type() == 33 && this._group.ChildCount() > 2) || this._group.ChildCount() > 3)
 				{
-					throw this.MakeException(global::SR.GetString("Too many | in (?()|)."));
+					throw this.MakeException("Too many | in (?()|).");
 				}
 			}
 			else
@@ -2121,43 +2168,43 @@ namespace System.Text.RegularExpressions
 			this._unit = this._group;
 		}
 
-		internal void PushOptions()
+		private void PushOptions()
 		{
 			this._optionsStack.Add(this._options);
 		}
 
-		internal void PopOptions()
+		private void PopOptions()
 		{
 			this._options = this._optionsStack[this._optionsStack.Count - 1];
 			this._optionsStack.RemoveAt(this._optionsStack.Count - 1);
 		}
 
-		internal bool EmptyOptionsStack()
+		private bool EmptyOptionsStack()
 		{
 			return this._optionsStack.Count == 0;
 		}
 
-		internal void PopKeepOptions()
+		private void PopKeepOptions()
 		{
 			this._optionsStack.RemoveAt(this._optionsStack.Count - 1);
 		}
 
-		internal ArgumentException MakeException(string message)
+		private ArgumentException MakeException(string message)
 		{
-			return new ArgumentException(global::SR.GetString("parsing \"{0}\" - {1}", new object[] { this._pattern, message }));
+			return new ArgumentException(SR.Format("parsing \"{0}\" - {1}", this._pattern, message));
 		}
 
-		internal int Textpos()
+		private int Textpos()
 		{
 			return this._currentPos;
 		}
 
-		internal void Textto(int pos)
+		private void Textto(int pos)
 		{
 			this._currentPos = pos;
 		}
 
-		internal char MoveRightGetChar()
+		private char RightCharMoveRight()
 		{
 			string pattern = this._pattern;
 			int currentPos = this._currentPos;
@@ -2165,22 +2212,22 @@ namespace System.Text.RegularExpressions
 			return pattern[currentPos];
 		}
 
-		internal void MoveRight()
+		private void MoveRight()
 		{
 			this.MoveRight(1);
 		}
 
-		internal void MoveRight(int i)
+		private void MoveRight(int i)
 		{
 			this._currentPos += i;
 		}
 
-		internal void MoveLeft()
+		private void MoveLeft()
 		{
 			this._currentPos--;
 		}
 
-		internal char CharAt(int i)
+		private char CharAt(int i)
 		{
 			return this._pattern[i];
 		}
@@ -2190,69 +2237,69 @@ namespace System.Text.RegularExpressions
 			return this._pattern[this._currentPos];
 		}
 
-		internal char RightChar(int i)
+		private char RightChar(int i)
 		{
 			return this._pattern[this._currentPos + i];
 		}
 
-		internal int CharsRight()
+		private int CharsRight()
 		{
 			return this._pattern.Length - this._currentPos;
 		}
 
-		internal RegexNode _stack;
+		private const int MaxValueDiv10 = 214748364;
 
-		internal RegexNode _group;
+		private const int MaxValueMod10 = 7;
 
-		internal RegexNode _alternation;
+		private RegexNode _stack;
 
-		internal RegexNode _concatenation;
+		private RegexNode _group;
 
-		internal RegexNode _unit;
+		private RegexNode _alternation;
 
-		internal string _pattern;
+		private RegexNode _concatenation;
 
-		internal int _currentPos;
+		private RegexNode _unit;
 
-		internal CultureInfo _culture;
+		private string _pattern;
 
-		internal int _autocap;
+		private int _currentPos;
 
-		internal int _capcount;
+		private CultureInfo _culture;
 
-		internal int _captop;
+		private int _autocap;
 
-		internal int _capsize;
+		private int _capcount;
 
-		internal Hashtable _caps;
+		private int _captop;
 
-		internal Hashtable _capnames;
+		private int _capsize;
 
-		internal int[] _capnumlist;
+		private Hashtable _caps;
 
-		internal List<string> _capnamelist;
+		private Hashtable _capnames;
 
-		internal RegexOptions _options;
+		private int[] _capnumlist;
 
-		internal List<RegexOptions> _optionsStack;
+		private List<string> _capnamelist;
 
-		internal bool _ignoreNextParen;
+		private RegexOptions _options;
 
-		internal const int MaxValueDiv10 = 214748364;
+		private List<RegexOptions> _optionsStack;
 
-		internal const int MaxValueMod10 = 7;
+		private bool _ignoreNextParen;
 
-		internal const byte Q = 5;
+		private const byte Q = 5;
 
-		internal const byte S = 4;
+		private const byte S = 4;
 
-		internal const byte Z = 3;
+		private const byte Z = 3;
 
-		internal const byte X = 2;
+		private const byte X = 2;
 
-		internal const byte E = 1;
+		private const byte E = 1;
 
-		internal static readonly byte[] _category = new byte[]
+		private static readonly byte[] s_category = new byte[]
 		{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
 			2, 0, 2, 2, 0, 0, 0, 0, 0, 0,

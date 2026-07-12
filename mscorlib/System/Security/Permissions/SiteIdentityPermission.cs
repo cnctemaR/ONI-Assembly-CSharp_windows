@@ -158,7 +158,7 @@ namespace System.Security.Permissions
 				{
 					return false;
 				}
-				if (num == 42 && s.Length > 1 && (s[i + 1] != '.' || i > 0))
+				if (num == 42 && s.Length > 1 && (i > 0 || s[i + 1] != '.'))
 				{
 					return false;
 				}

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using Klei.CustomSettings;
-using KSerialization;
 using STRINGS;
 using UnityEngine;
 
@@ -12,7 +10,6 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.breakBlocks = new List<bool>(24);
 		Attributes attributes = base.gameObject.GetAttributes();
 		this.expectationAttribute = attributes.Add(Db.Get().Attributes.QualityOfLifeExpectation);
 		base.Name = DUPLICANTS.NEEDS.QUALITYOFLIFE.NAME;
@@ -31,20 +28,6 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 			statusItem = Db.Get().DuplicantStatusItems.PoorQualityOfLife
 		};
 		this.qolAttribute = Db.Get().Attributes.QualityOfLife.Lookup(base.gameObject);
-	}
-
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		while (this.breakBlocks.Count < 24)
-		{
-			this.breakBlocks.Add(false);
-		}
-		while (this.breakBlocks.Count > 24)
-		{
-			this.breakBlocks.RemoveAt(this.breakBlocks.Count - 1);
-		}
-		base.Subscribe<QualityOfLifeNeed>(1714332666, QualityOfLifeNeed.OnScheduleBlocksTickDelegate);
 	}
 
 	public void Sim4000ms(float dt)
@@ -94,65 +77,7 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		base.SetModifier(this.stressNeutral);
 	}
 
-	private void OnScheduleBlocksTick(object data)
-	{
-		Schedule schedule = (Schedule)data;
-		ScheduleBlock block = schedule.GetBlock(Schedule.GetLastBlockIdx());
-		ScheduleBlock block2 = schedule.GetBlock(Schedule.GetBlockIdx());
-		bool flag = block.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
-		bool flag2 = block2.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
-		this.breakBlocks[Schedule.GetLastBlockIdx()] = flag;
-		if (flag && !flag2)
-		{
-			int num = 0;
-			using (List<bool>.Enumerator enumerator = this.breakBlocks.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current)
-					{
-						num++;
-					}
-				}
-			}
-			this.ApplyBreakBonus(num);
-		}
-	}
-
-	private void ApplyBreakBonus(int numBlocks)
-	{
-		string breakBonus = QualityOfLifeNeed.GetBreakBonus(numBlocks);
-		if (breakBonus != null)
-		{
-			base.GetComponent<Effects>().Add(breakBonus, true);
-		}
-	}
-
-	public static string GetBreakBonus(int numBlocks)
-	{
-		int num = numBlocks - 1;
-		if (num >= QualityOfLifeNeed.breakLengthEffects.Count)
-		{
-			return QualityOfLifeNeed.breakLengthEffects[QualityOfLifeNeed.breakLengthEffects.Count - 1];
-		}
-		if (num >= 0)
-		{
-			return QualityOfLifeNeed.breakLengthEffects[num];
-		}
-		return null;
-	}
-
 	private AttributeInstance qolAttribute;
 
 	public bool skipUpdate;
-
-	[Serialize]
-	private List<bool> breakBlocks;
-
-	private static readonly EventSystem.IntraObjectHandler<QualityOfLifeNeed> OnScheduleBlocksTickDelegate = new EventSystem.IntraObjectHandler<QualityOfLifeNeed>(delegate(QualityOfLifeNeed component, object data)
-	{
-		component.OnScheduleBlocksTick(data);
-	});
-
-	private static List<string> breakLengthEffects = new List<string> { "Break1", "Break2", "Break3", "Break4", "Break5" };
 }

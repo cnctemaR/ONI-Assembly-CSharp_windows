@@ -4,8 +4,8 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("F1C3BF78-C3E4-11D3-88E7-00902754C43A")]
 	[ComVisible(true)]
+	[Guid("F1C3BF78-C3E4-11D3-88E7-00902754C43A")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface ITypeLibConverter
 	{

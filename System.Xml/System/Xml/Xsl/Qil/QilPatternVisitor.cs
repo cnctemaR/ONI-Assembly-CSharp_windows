@@ -15,11 +15,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.patterns;
+				return this._patterns;
 			}
 			set
 			{
-				this.patterns = value;
+				this._patterns = value;
 			}
 		}
 
@@ -27,11 +27,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.threshold;
+				return this._threshold;
 			}
 			set
 			{
-				this.threshold = value;
+				this._threshold = value;
 			}
 		}
 
@@ -39,7 +39,7 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.replacementCnt;
+				return this._replacementCnt;
 			}
 		}
 
@@ -47,7 +47,7 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.lastReplacement;
+				return this._lastReplacement;
 			}
 		}
 
@@ -63,8 +63,8 @@ namespace System.Xml.Xsl.Qil
 		{
 			if (this.Matching)
 			{
-				this.replacementCnt++;
-				this.lastReplacement = pattern;
+				this._replacementCnt++;
+				this._lastReplacement = pattern;
 				return true;
 			}
 			return false;
@@ -646,24 +646,24 @@ namespace System.Xml.Xsl.Qil
 			return this.NoReplace(n);
 		}
 
-		private QilPatternVisitor.QilPatterns patterns;
+		private QilPatternVisitor.QilPatterns _patterns;
 
-		private int replacementCnt;
+		private int _replacementCnt;
 
-		private int lastReplacement;
+		private int _lastReplacement;
 
-		private int threshold = int.MaxValue;
+		private int _threshold = int.MaxValue;
 
 		internal sealed class QilPatterns
 		{
 			private QilPatterns(QilPatternVisitor.QilPatterns toCopy)
 			{
-				this.bits = new BitArray(toCopy.bits);
+				this._bits = new BitArray(toCopy._bits);
 			}
 
 			public QilPatterns(int szBits, bool allSet)
 			{
-				this.bits = new BitArray(szBits, allSet);
+				this._bits = new BitArray(szBits, allSet);
 			}
 
 			public QilPatternVisitor.QilPatterns Clone()
@@ -673,20 +673,20 @@ namespace System.Xml.Xsl.Qil
 
 			public void ClearAll()
 			{
-				this.bits.SetAll(false);
+				this._bits.SetAll(false);
 			}
 
 			public void Add(int i)
 			{
-				this.bits.Set(i, true);
+				this._bits.Set(i, true);
 			}
 
 			public bool IsSet(int i)
 			{
-				return this.bits[i];
+				return this._bits[i];
 			}
 
-			private BitArray bits;
+			private BitArray _bits;
 		}
 	}
 }

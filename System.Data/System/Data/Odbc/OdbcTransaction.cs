@@ -157,7 +157,7 @@ namespace System.Data.Odbc
 
 		internal OdbcTransaction()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private OdbcConnection _connection;

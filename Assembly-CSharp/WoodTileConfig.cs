@@ -45,16 +45,16 @@ public class WoodTileConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.strengthMultiplier = 1.5f;
-		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_2;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.BONUS_2;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = WoodTileConfig.BlockTileConnectorID;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 	}
 
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

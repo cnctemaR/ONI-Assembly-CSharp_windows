@@ -19,7 +19,7 @@ public class StorageTileSwitchItemWorkable : Workable
 		base.SetWorkTime(3f);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (worker != null)
 		{

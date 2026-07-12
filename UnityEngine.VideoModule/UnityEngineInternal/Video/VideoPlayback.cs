@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[NativeHeader("Modules/Video/Public/Base/MediaComponent.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Video/Public/Base/MediaComponent.h")]
 	internal class VideoPlayback
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -98,6 +98,9 @@ namespace UnityEngineInternal.Video
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern uint GetAudioSampleRate(ushort trackIdx);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern string GetAudioLanguageCode(ushort trackIdx);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAudioTarget(ushort trackIdx, bool enabled, bool softwareOutput, AudioSource audioSource);

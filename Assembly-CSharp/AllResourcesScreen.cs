@@ -363,7 +363,7 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 							break;
 						case GameUtil.MeasureUnit.kcal:
 						{
-							float num = RationTracker.Get().CountRations(null, ClusterManager.Instance.activeWorld.worldInventory, true);
+							float num = WorldResourceAmountTracker<RationTracker>.Get().CountAmount(null, ClusterManager.Instance.activeWorld.worldInventory, true);
 							if (keyValuePair.Value.CheckAvailableAmountChanged(amount, true))
 							{
 								keyValuePair.Value.availableLabel.SetText(GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
@@ -428,7 +428,7 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 							break;
 						case GameUtil.MeasureUnit.kcal:
 						{
-							float num2 = RationTracker.Get().CountRationsByFoodType(keyValuePair2.Key.Name, ClusterManager.Instance.activeWorld.worldInventory, true);
+							float num2 = WorldResourceAmountTracker<RationTracker>.Get().CountAmountForItemWithID(keyValuePair2.Key.Name, ClusterManager.Instance.activeWorld.worldInventory, true);
 							if (keyValuePair2.Value.CheckAvailableAmountChanged(num2, true))
 							{
 								keyValuePair2.Value.availableLabel.SetText(GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true));

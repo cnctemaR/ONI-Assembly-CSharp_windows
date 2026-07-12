@@ -17,7 +17,7 @@ public class MarkovNameGenerator
 		this._minLength = minLength;
 		foreach (string text in sampleNames)
 		{
-			string[] array = text.Split(new char[] { ',' });
+			string[] array = text.Split(',', StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				string text2 = array[i].Trim().ToUpper();
@@ -68,7 +68,7 @@ public class MarkovNameGenerator
 				}
 				if (text.Contains(" "))
 				{
-					string[] array = text.Split(new char[] { ' ' });
+					string[] array = text.Split(' ', StringSplitOptions.None);
 					text = "";
 					for (int i = 0; i < array.Length; i++)
 					{

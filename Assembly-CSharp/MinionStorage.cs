@@ -38,6 +38,7 @@ public class MinionStorage : KMonoBehaviour
 		dest_id.storedName = src_id.name;
 		dest_id.nameStringKey = src_id.nameStringKey;
 		dest_id.personalityResourceId = src_id.personalityResourceId;
+		dest_id.model = src_id.model;
 		dest_id.gender = src_id.gender;
 		dest_id.genderStringKey = src_id.genderStringKey;
 		dest_id.arrivalTime = src_id.arrivalTime;
@@ -102,6 +103,7 @@ public class MinionStorage : KMonoBehaviour
 	{
 		dest_id.SetName(src_id.storedName);
 		dest_id.nameStringKey = src_id.nameStringKey;
+		dest_id.model = src_id.model;
 		dest_id.personalityResourceId = src_id.personalityResourceId;
 		dest_id.gender = src_id.gender;
 		dest_id.genderStringKey = src_id.genderStringKey;
@@ -246,8 +248,8 @@ public class MinionStorage : KMonoBehaviour
 
 	public static GameObject DeserializeMinion(GameObject sourceMinion, Vector3 pos)
 	{
-		GameObject gameObject = Util.KInstantiate(SaveLoader.Instance.saveManager.GetPrefab(MinionConfig.ID), pos);
 		StoredMinionIdentity component = sourceMinion.GetComponent<StoredMinionIdentity>();
+		GameObject gameObject = Util.KInstantiate(SaveLoader.Instance.saveManager.GetPrefab(BaseMinionConfig.GetMinionIDForModel(component.model)), pos);
 		MinionIdentity component2 = gameObject.GetComponent<MinionIdentity>();
 		MinionStorage.RedirectInstanceTracker(sourceMinion, gameObject);
 		gameObject.SetActive(true);

@@ -7,7 +7,15 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.loop;
-		this.loop.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter("EnableGravity", delegate(DeathStates.Instance smi)
+		GameStateMachine<DeathStates, DeathStates.Instance, IStateMachineTarget, DeathStates.Def>.State state = this.loop;
+		string text = CREATURES.STATUSITEMS.DEAD.NAME;
+		string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).Enter("EnableGravity", delegate(DeathStates.Instance smi)
 		{
 			smi.EnableGravityIfNecessary();
 		}).Enter("Play Death Animations", delegate(DeathStates.Instance smi)

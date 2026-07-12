@@ -321,7 +321,7 @@ public class GeothermalController : StateMachineComponent<GeothermalController.S
 			this.faceTargetWhenWorking = true;
 		}
 
-		protected override void OnCompleteWork(Worker worker)
+		protected override void OnCompleteWork(WorkerBase worker)
 		{
 			base.OnCompleteWork(worker);
 			if (this.storage != null)

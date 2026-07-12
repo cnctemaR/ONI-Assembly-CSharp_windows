@@ -45,6 +45,7 @@ namespace UnityEngine
 		Vietnamese,
 		ChineseSimplified,
 		ChineseTraditional,
+		Hindi,
 		Unknown,
 		Hungarian = 18
 	}

@@ -7,22 +7,51 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using Unity;
 
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_TypeBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TypeBuilder : TypeInfo, _TypeBuilder
 	{
+		void _TypeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		protected override TypeAttributes GetAttributeFlagsImpl()
 		{
 			return this.attrs;
 		}
 
+		private TypeBuilder()
+		{
+			if (RuntimeType.MakeTypeBuilderInstantiation == null)
+			{
+				RuntimeType.MakeTypeBuilderInstantiation = new Func<Type, Type[], Type>(TypeBuilderInstantiation.MakeGenericType);
+			}
+		}
+
+		[PreserveDependency("DoTypeBuilderResolve", "System.AppDomain")]
 		internal TypeBuilder(ModuleBuilder mb, TypeAttributes attr, int table_idx)
+			: this()
 		{
 			this.parent = null;
 			this.attrs = attr;
@@ -35,6 +64,7 @@ namespace System.Reflection.Emit
 		}
 
 		internal TypeBuilder(ModuleBuilder mb, string name, TypeAttributes attr, Type parent, Type[] interfaces, PackingSize packing_size, int type_size, Type nesting_type)
+			: this()
 		{
 			this.parent = TypeBuilder.ResolveUserType(parent);
 			this.attrs = attr;
@@ -67,7 +97,7 @@ namespace System.Reflection.Emit
 			{
 				this.parent = typeof(object);
 			}
-			this.table_idx = mb.get_next_table_index(this, 2, true);
+			this.table_idx = mb.get_next_table_index(this, 2, 1);
 			this.fullname = this.GetFullName();
 		}
 
@@ -738,7 +768,7 @@ namespace System.Reflection.Emit
 							TypeBuilder typeBuilder = (TypeBuilder)fieldType;
 							if (!typeBuilder.is_created)
 							{
-								AppDomain.CurrentDomain.DoTypeResolve(typeBuilder);
+								AppDomain.CurrentDomain.DoTypeBuilderResolve(typeBuilder);
 								bool is_created = typeBuilder.is_created;
 							}
 						}
@@ -752,11 +782,27 @@ namespace System.Reflection.Emit
 			this.createTypeCalled = true;
 			if (this.parent != null && this.parent.IsSealed)
 			{
-				throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because the parent type is sealed." }));
+				string[] array2 = new string[5];
+				array2[0] = "Could not load type '";
+				array2[1] = this.FullName;
+				array2[2] = "' from assembly '";
+				int num = 3;
+				Assembly assembly = this.Assembly;
+				array2[num] = ((assembly != null) ? assembly.ToString() : null);
+				array2[4] = "' because the parent type is sealed.";
+				throw new TypeLoadException(string.Concat(array2));
 			}
 			if (this.parent == this.pmodule.assemblyb.corlib_enum_type && this.methods != null)
 			{
-				throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because it is an enum with methods." }));
+				string[] array3 = new string[5];
+				array3[0] = "Could not load type '";
+				array3[1] = this.FullName;
+				array3[2] = "' from assembly '";
+				int num2 = 3;
+				Assembly assembly2 = this.Assembly;
+				array3[num2] = ((assembly2 != null) ? assembly2.ToString() : null);
+				array3[4] = "' because it is an enum with methods.";
+				throw new TypeLoadException(string.Concat(array3));
 			}
 			if (this.interfaces != null)
 			{
@@ -764,7 +810,17 @@ namespace System.Reflection.Emit
 				{
 					if (type.IsNestedPrivate && type.Assembly != this.Assembly)
 					{
-						throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because it is implements the inaccessible interface '", type.FullName, "'." }));
+						string[] array5 = new string[7];
+						array5[0] = "Could not load type '";
+						array5[1] = this.FullName;
+						array5[2] = "' from assembly '";
+						int num3 = 3;
+						Assembly assembly3 = this.Assembly;
+						array5[num3] = ((assembly3 != null) ? assembly3.ToString() : null);
+						array5[4] = "' because it is implements the inaccessible interface '";
+						array5[5] = type.FullName;
+						array5[6] = "'.";
+						throw new TypeLoadException(string.Concat(array5));
 					}
 				}
 			}
@@ -776,7 +832,9 @@ namespace System.Reflection.Emit
 					MethodBuilder methodBuilder = this.methods[j];
 					if (flag && methodBuilder.IsAbstract)
 					{
-						throw new InvalidOperationException("Type is concrete but has abstract method " + methodBuilder);
+						string text = "Type is concrete but has abstract method ";
+						MethodBuilder methodBuilder2 = methodBuilder;
+						throw new InvalidOperationException(text + ((methodBuilder2 != null) ? methodBuilder2.ToString() : null));
 					}
 					methodBuilder.check_override();
 					methodBuilder.fixup();
@@ -784,10 +842,10 @@ namespace System.Reflection.Emit
 			}
 			if (this.ctors != null)
 			{
-				ConstructorBuilder[] array3 = this.ctors;
-				for (int i = 0; i < array3.Length; i++)
+				ConstructorBuilder[] array6 = this.ctors;
+				for (int i = 0; i < array6.Length; i++)
 				{
-					array3[i].fixup();
+					array6[i].fixup();
 				}
 			}
 			this.ResolveUserTypes();
@@ -1192,7 +1250,8 @@ namespace System.Reflection.Emit
 			}
 			else
 			{
-				array2 = this.methods;
+				MethodInfo[] array3 = this.methods;
+				array2 = array3;
 			}
 			if (array2 == null)
 			{
@@ -1674,7 +1733,7 @@ namespace System.Reflection.Emit
 				throw new ArgumentException("Data size must be > 0 and < 0x3f0000");
 			}
 			this.check_not_created();
-			string text = "$ArrayType$" + size;
+			string text = "$ArrayType$" + size.ToString();
 			TypeIdentifier typeIdentifier = TypeIdentifiers.WithoutEscape(text);
 			Type type = this.pmodule.GetRegisteredType(this.fullname.NestedName(typeIdentifier));
 			if (type == null)
@@ -1719,9 +1778,9 @@ namespace System.Reflection.Emit
 			this.parent = TypeBuilder.ResolveUserType(this.parent);
 		}
 
-		internal int get_next_table_index(object obj, int table, bool inc)
+		internal int get_next_table_index(object obj, int table, int count)
 		{
-			return this.pmodule.get_next_table_index(obj, table, inc);
+			return this.pmodule.get_next_table_index(obj, table, count);
 		}
 
 		[ComVisible(true)]
@@ -2010,7 +2069,9 @@ namespace System.Reflection.Emit
 		{
 			if (!TypeBuilder.IsValidGetMethodType(type))
 			{
-				throw new ArgumentException("type is not TypeBuilder but " + type.GetType(), "type");
+				string text = "type is not TypeBuilder but ";
+				Type type2 = type.GetType();
+				throw new ArgumentException(text + ((type2 != null) ? type2.ToString() : null), "type");
 			}
 			if (type is TypeBuilder && type.ContainsGenericParameters)
 			{
@@ -2066,26 +2127,6 @@ namespace System.Reflection.Emit
 			return field2;
 		}
 
-		void _TypeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		internal override bool IsUserType
 		{
 			get
@@ -2107,9 +2148,94 @@ namespace System.Reflection.Emit
 			return base.IsAssignableFrom(typeInfo);
 		}
 
-		internal TypeBuilder()
+		internal static bool SetConstantValue(Type destType, object value, ref object destValue)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			if (value != null)
+			{
+				Type type = value.GetType();
+				if (destType.IsByRef)
+				{
+					destType = destType.GetElementType();
+				}
+				destType = Nullable.GetUnderlyingType(destType) ?? destType;
+				if (destType.IsEnum)
+				{
+					EnumBuilder enumBuilder;
+					Type type2;
+					TypeBuilder typeBuilder;
+					if ((enumBuilder = destType as EnumBuilder) != null)
+					{
+						type2 = enumBuilder.GetEnumUnderlyingType();
+						if ((!enumBuilder.GetTypeBuilder().is_created || !(type == enumBuilder.GetTypeBuilder().created)) && !(type == type2))
+						{
+							TypeBuilder.throw_argument_ConstantDoesntMatch();
+						}
+					}
+					else if ((typeBuilder = destType as TypeBuilder) != null)
+					{
+						type2 = typeBuilder.underlying_type;
+						if (type2 == null || (type != typeBuilder.UnderlyingSystemType && type != type2))
+						{
+							TypeBuilder.throw_argument_ConstantDoesntMatch();
+						}
+					}
+					else
+					{
+						type2 = Enum.GetUnderlyingType(destType);
+						if (type != destType && type != type2)
+						{
+							TypeBuilder.throw_argument_ConstantDoesntMatch();
+						}
+					}
+					type = type2;
+				}
+				else if (!destType.IsAssignableFrom(type))
+				{
+					TypeBuilder.throw_argument_ConstantDoesntMatch();
+				}
+				switch (Type.GetTypeCode(type))
+				{
+				case TypeCode.Boolean:
+				case TypeCode.Char:
+				case TypeCode.SByte:
+				case TypeCode.Byte:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:
+				case TypeCode.Int32:
+				case TypeCode.UInt32:
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+				case TypeCode.Single:
+				case TypeCode.Double:
+					destValue = value;
+					return true;
+				case TypeCode.DateTime:
+				{
+					long ticks = ((DateTime)value).Ticks;
+					destValue = ticks;
+					return true;
+				}
+				case TypeCode.String:
+					destValue = value;
+					return true;
+				}
+				throw new ArgumentException(type.ToString() + " is not a supported constant type.");
+			}
+			destValue = null;
+			return true;
+		}
+
+		private static void throw_argument_ConstantDoesntMatch()
+		{
+			throw new ArgumentException("Constant does not match the defined type.");
+		}
+
+		public override bool IsTypeDefinition
+		{
+			get
+			{
+				return true;
+			}
 		}
 
 		private string tname;

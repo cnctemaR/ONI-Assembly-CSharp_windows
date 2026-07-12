@@ -54,10 +54,23 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		public void FindLure()
 		{
-			LureableMonitor.Instance.LureIterator lureIterator = new LureableMonitor.Instance.LureIterator(this.navigator, base.def.lures);
-			GameScenePartitioner.Instance.Iterate<LureableMonitor.Instance.LureIterator>(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure, ref lureIterator);
-			lureIterator.Cleanup();
-			base.sm.targetLure.Set(lureIterator.result, this, false);
+			int num = -1;
+			GameObject gameObject = null;
+			foreach (object obj in GameScenePartitioner.Instance.AsyncSafeEnumerate(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure))
+			{
+				Lure.Instance instance = obj as Lure.Instance;
+				if (instance == null || !instance.IsActive() || !instance.HasAnyLure(base.def.lures))
+				{
+					return;
+				}
+				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.LurePoints);
+				if (navigationCost != -1 && (num == -1 || navigationCost < num))
+				{
+					num = navigationCost;
+					gameObject = instance.gameObject;
+				}
+			}
+			base.sm.targetLure.Set(gameObject, this, false);
 		}
 
 		public bool HasLure()
@@ -72,43 +85,5 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		[MyCmpReq]
 		private Navigator navigator;
-
-		private struct LureIterator : GameScenePartitioner.Iterator
-		{
-			public int cost { readonly get; private set; }
-
-			public GameObject result { readonly get; private set; }
-
-			public LureIterator(Navigator navigator, Tag[] lures)
-			{
-				this.navigator = navigator;
-				this.lures = lures;
-				this.cost = -1;
-				this.result = null;
-			}
-
-			public void Iterate(object target_obj)
-			{
-				Lure.Instance instance = target_obj as Lure.Instance;
-				if (instance == null || !instance.IsActive() || !instance.HasAnyLure(this.lures))
-				{
-					return;
-				}
-				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.LurePoints);
-				if (navigationCost != -1 && (this.cost == -1 || navigationCost < this.cost))
-				{
-					this.cost = navigationCost;
-					this.result = instance.gameObject;
-				}
-			}
-
-			public void Cleanup()
-			{
-			}
-
-			private Navigator navigator;
-
-			private Tag[] lures;
-		}
 	}
 }

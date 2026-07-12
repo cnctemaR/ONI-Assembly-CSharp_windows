@@ -37,11 +37,11 @@ public class EffectImmunityProviderStation<StateMachineInstanceType> : GameState
 			return this.DefaultAnims();
 		}
 
-		public string GetAnimFileName()
+		public string GetAnimFileName(GameObject entity)
 		{
 			if (this.overrideFileName != null)
 			{
-				return this.overrideFileName;
+				return this.overrideFileName(entity);
 			}
 			return this.DefaultAnimFileName();
 		}
@@ -50,7 +50,7 @@ public class EffectImmunityProviderStation<StateMachineInstanceType> : GameState
 
 		public Func<GameObject, bool> specialRequirements;
 
-		public string overrideFileName;
+		public Func<GameObject, string> overrideFileName;
 
 		public string[] overrideAnims;
 
@@ -59,12 +59,9 @@ public class EffectImmunityProviderStation<StateMachineInstanceType> : GameState
 
 	public abstract class BaseInstance : GameStateMachine<EffectImmunityProviderStation<StateMachineInstanceType>, StateMachineInstanceType, IStateMachineTarget, EffectImmunityProviderStation<StateMachineInstanceType>.Def>.GameInstance
 	{
-		public string AnimFileName
+		public string GetAnimFileName(GameObject entity)
 		{
-			get
-			{
-				return base.def.GetAnimFileName();
-			}
+			return base.def.GetAnimFileName(entity);
 		}
 
 		public string PreAnimName

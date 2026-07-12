@@ -4,16 +4,14 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Net.Cache;
-using System.Runtime.InteropServices;
+using System.Net.Http;
 using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
 {
-	[ComVisible(true)]
 	public class WebClient : Component
 	{
 		public WebClient()
@@ -24,88 +22,230 @@ namespace System.Net
 			}
 		}
 
-		private void InitWebClientAsync()
+		public event DownloadStringCompletedEventHandler DownloadStringCompleted;
+
+		public event DownloadDataCompletedEventHandler DownloadDataCompleted;
+
+		public event AsyncCompletedEventHandler DownloadFileCompleted;
+
+		public event UploadStringCompletedEventHandler UploadStringCompleted;
+
+		public event UploadDataCompletedEventHandler UploadDataCompleted;
+
+		public event UploadFileCompletedEventHandler UploadFileCompleted;
+
+		public event UploadValuesCompletedEventHandler UploadValuesCompleted;
+
+		public event OpenReadCompletedEventHandler OpenReadCompleted;
+
+		public event OpenWriteCompletedEventHandler OpenWriteCompleted;
+
+		public event DownloadProgressChangedEventHandler DownloadProgressChanged;
+
+		public event UploadProgressChangedEventHandler UploadProgressChanged;
+
+		protected virtual void OnDownloadStringCompleted(DownloadStringCompletedEventArgs e)
 		{
-			if (!this.m_InitWebClientAsync)
+			DownloadStringCompletedEventHandler downloadStringCompleted = this.DownloadStringCompleted;
+			if (downloadStringCompleted == null)
 			{
-				this.openReadOperationCompleted = new SendOrPostCallback(this.OpenReadOperationCompleted);
-				this.openWriteOperationCompleted = new SendOrPostCallback(this.OpenWriteOperationCompleted);
-				this.downloadStringOperationCompleted = new SendOrPostCallback(this.DownloadStringOperationCompleted);
-				this.downloadDataOperationCompleted = new SendOrPostCallback(this.DownloadDataOperationCompleted);
-				this.downloadFileOperationCompleted = new SendOrPostCallback(this.DownloadFileOperationCompleted);
-				this.uploadStringOperationCompleted = new SendOrPostCallback(this.UploadStringOperationCompleted);
-				this.uploadDataOperationCompleted = new SendOrPostCallback(this.UploadDataOperationCompleted);
-				this.uploadFileOperationCompleted = new SendOrPostCallback(this.UploadFileOperationCompleted);
-				this.uploadValuesOperationCompleted = new SendOrPostCallback(this.UploadValuesOperationCompleted);
-				this.reportDownloadProgressChanged = new SendOrPostCallback(this.ReportDownloadProgressChanged);
-				this.reportUploadProgressChanged = new SendOrPostCallback(this.ReportUploadProgressChanged);
-				this.m_Progress = new WebClient.ProgressData();
-				this.m_InitWebClientAsync = true;
+				return;
 			}
+			downloadStringCompleted(this, e);
 		}
 
-		private void ClearWebClientState()
+		protected virtual void OnDownloadDataCompleted(DownloadDataCompletedEventArgs e)
 		{
-			if (this.AnotherCallInProgress(Interlocked.Increment(ref this.m_CallNesting)))
+			DownloadDataCompletedEventHandler downloadDataCompleted = this.DownloadDataCompleted;
+			if (downloadDataCompleted == null)
 			{
-				this.CompleteWebClientState();
-				throw new NotSupportedException(global::SR.GetString("WebClient does not support concurrent I/O operations."));
+				return;
 			}
-			this.m_ContentLength = -1L;
-			this.m_WebResponse = null;
-			this.m_WebRequest = null;
-			this.m_Method = null;
-			this.m_Cancelled = false;
-			if (this.m_Progress != null)
-			{
-				this.m_Progress.Reset();
-			}
+			downloadDataCompleted(this, e);
 		}
 
-		private void CompleteWebClientState()
+		protected virtual void OnDownloadFileCompleted(AsyncCompletedEventArgs e)
 		{
-			Interlocked.Decrement(ref this.m_CallNesting);
+			AsyncCompletedEventHandler downloadFileCompleted = this.DownloadFileCompleted;
+			if (downloadFileCompleted == null)
+			{
+				return;
+			}
+			downloadFileCompleted(this, e);
 		}
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public bool AllowReadStreamBuffering { get; set; }
-
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public bool AllowWriteStreamBuffering { get; set; }
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		public event WriteStreamClosedEventHandler WriteStreamClosed
+		protected virtual void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
 		{
-			add
+			DownloadProgressChangedEventHandler downloadProgressChanged = this.DownloadProgressChanged;
+			if (downloadProgressChanged == null)
 			{
+				return;
 			}
-			remove
-			{
-			}
+			downloadProgressChanged(this, e);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		protected virtual void OnWriteStreamClosed(WriteStreamClosedEventArgs e)
+		protected virtual void OnUploadStringCompleted(UploadStringCompletedEventArgs e)
 		{
+			UploadStringCompletedEventHandler uploadStringCompleted = this.UploadStringCompleted;
+			if (uploadStringCompleted == null)
+			{
+				return;
+			}
+			uploadStringCompleted(this, e);
+		}
+
+		protected virtual void OnUploadDataCompleted(UploadDataCompletedEventArgs e)
+		{
+			UploadDataCompletedEventHandler uploadDataCompleted = this.UploadDataCompleted;
+			if (uploadDataCompleted == null)
+			{
+				return;
+			}
+			uploadDataCompleted(this, e);
+		}
+
+		protected virtual void OnUploadFileCompleted(UploadFileCompletedEventArgs e)
+		{
+			UploadFileCompletedEventHandler uploadFileCompleted = this.UploadFileCompleted;
+			if (uploadFileCompleted == null)
+			{
+				return;
+			}
+			uploadFileCompleted(this, e);
+		}
+
+		protected virtual void OnUploadValuesCompleted(UploadValuesCompletedEventArgs e)
+		{
+			UploadValuesCompletedEventHandler uploadValuesCompleted = this.UploadValuesCompleted;
+			if (uploadValuesCompleted == null)
+			{
+				return;
+			}
+			uploadValuesCompleted(this, e);
+		}
+
+		protected virtual void OnUploadProgressChanged(UploadProgressChangedEventArgs e)
+		{
+			UploadProgressChangedEventHandler uploadProgressChanged = this.UploadProgressChanged;
+			if (uploadProgressChanged == null)
+			{
+				return;
+			}
+			uploadProgressChanged(this, e);
+		}
+
+		protected virtual void OnOpenReadCompleted(OpenReadCompletedEventArgs e)
+		{
+			OpenReadCompletedEventHandler openReadCompleted = this.OpenReadCompleted;
+			if (openReadCompleted == null)
+			{
+				return;
+			}
+			openReadCompleted(this, e);
+		}
+
+		protected virtual void OnOpenWriteCompleted(OpenWriteCompletedEventArgs e)
+		{
+			OpenWriteCompletedEventHandler openWriteCompleted = this.OpenWriteCompleted;
+			if (openWriteCompleted == null)
+			{
+				return;
+			}
+			openWriteCompleted(this, e);
+		}
+
+		private void StartOperation()
+		{
+			if (Interlocked.Increment(ref this._callNesting) > 1)
+			{
+				this.EndOperation();
+				throw new NotSupportedException("WebClient does not support concurrent I/O operations.");
+			}
+			this._contentLength = -1L;
+			this._webResponse = null;
+			this._webRequest = null;
+			this._method = null;
+			this._canceled = false;
+			WebClient.ProgressData progress = this._progress;
+			if (progress == null)
+			{
+				return;
+			}
+			progress.Reset();
+		}
+
+		private AsyncOperation StartAsyncOperation(object userToken)
+		{
+			if (!this._initWebClientAsync)
+			{
+				this._openReadOperationCompleted = delegate(object arg)
+				{
+					this.OnOpenReadCompleted((OpenReadCompletedEventArgs)arg);
+				};
+				this._openWriteOperationCompleted = delegate(object arg)
+				{
+					this.OnOpenWriteCompleted((OpenWriteCompletedEventArgs)arg);
+				};
+				this._downloadStringOperationCompleted = delegate(object arg)
+				{
+					this.OnDownloadStringCompleted((DownloadStringCompletedEventArgs)arg);
+				};
+				this._downloadDataOperationCompleted = delegate(object arg)
+				{
+					this.OnDownloadDataCompleted((DownloadDataCompletedEventArgs)arg);
+				};
+				this._downloadFileOperationCompleted = delegate(object arg)
+				{
+					this.OnDownloadFileCompleted((AsyncCompletedEventArgs)arg);
+				};
+				this._uploadStringOperationCompleted = delegate(object arg)
+				{
+					this.OnUploadStringCompleted((UploadStringCompletedEventArgs)arg);
+				};
+				this._uploadDataOperationCompleted = delegate(object arg)
+				{
+					this.OnUploadDataCompleted((UploadDataCompletedEventArgs)arg);
+				};
+				this._uploadFileOperationCompleted = delegate(object arg)
+				{
+					this.OnUploadFileCompleted((UploadFileCompletedEventArgs)arg);
+				};
+				this._uploadValuesOperationCompleted = delegate(object arg)
+				{
+					this.OnUploadValuesCompleted((UploadValuesCompletedEventArgs)arg);
+				};
+				this._reportDownloadProgressChanged = delegate(object arg)
+				{
+					this.OnDownloadProgressChanged((DownloadProgressChangedEventArgs)arg);
+				};
+				this._reportUploadProgressChanged = delegate(object arg)
+				{
+					this.OnUploadProgressChanged((UploadProgressChangedEventArgs)arg);
+				};
+				this._progress = new WebClient.ProgressData();
+				this._initWebClientAsync = true;
+			}
+			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
+			this.StartOperation();
+			this._asyncOp = asyncOperation;
+			return asyncOperation;
+		}
+
+		private void EndOperation()
+		{
+			Interlocked.Decrement(ref this._callNesting);
 		}
 
 		public Encoding Encoding
 		{
 			get
 			{
-				return this.m_Encoding;
+				return this._encoding;
 			}
 			set
 			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("Encoding");
-				}
-				this.m_Encoding = value;
+				WebClient.ThrowIfNull(value, "Encoding");
+				this._encoding = value;
 			}
 		}
 
@@ -113,26 +253,26 @@ namespace System.Net
 		{
 			get
 			{
-				if (!(this.m_baseAddress == null))
+				if (!(this._baseAddress != null))
 				{
-					return this.m_baseAddress.ToString();
+					return string.Empty;
 				}
-				return string.Empty;
+				return this._baseAddress.ToString();
 			}
 			set
 			{
-				if (value == null || value.Length == 0)
+				if (string.IsNullOrEmpty(value))
 				{
-					this.m_baseAddress = null;
+					this._baseAddress = null;
 					return;
 				}
 				try
 				{
-					this.m_baseAddress = new Uri(value);
+					this._baseAddress = new Uri(value);
 				}
 				catch (UriFormatException ex)
 				{
-					throw new ArgumentException(global::SR.GetString("The specified value is not a valid base address."), "value", ex);
+					throw new ArgumentException("The specified value is not a valid base address.", "value", ex);
 				}
 			}
 		}
@@ -141,11 +281,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_credentials;
+				return this._credentials;
 			}
 			set
 			{
-				this.m_credentials = value;
+				this._credentials = value;
 			}
 		}
 
@@ -153,11 +293,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_credentials is SystemNetworkCredential;
+				return this._credentials == CredentialCache.DefaultCredentials;
 			}
 			set
 			{
-				this.m_credentials = (value ? CredentialCache.DefaultCredentials : null);
+				this._credentials = (value ? CredentialCache.DefaultCredentials : null);
 			}
 		}
 
@@ -165,15 +305,16 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.m_headers == null)
+				WebHeaderCollection webHeaderCollection;
+				if ((webHeaderCollection = this._headers) == null)
 				{
-					this.m_headers = new WebHeaderCollection(WebHeaderCollectionType.WebRequest);
+					webHeaderCollection = (this._headers = new WebHeaderCollection());
 				}
-				return this.m_headers;
+				return webHeaderCollection;
 			}
 			set
 			{
-				this.m_headers = value;
+				this._headers = value;
 			}
 		}
 
@@ -181,15 +322,16 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.m_requestParameters == null)
+				NameValueCollection nameValueCollection;
+				if ((nameValueCollection = this._requestParameters) == null)
 				{
-					this.m_requestParameters = new NameValueCollection();
+					nameValueCollection = (this._requestParameters = new NameValueCollection());
 				}
-				return this.m_requestParameters;
+				return nameValueCollection;
 			}
 			set
 			{
-				this.m_requestParameters = value;
+				this._requestParameters = value;
 			}
 		}
 
@@ -197,11 +339,12 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.m_WebResponse != null)
+				WebResponse webResponse = this._webResponse;
+				if (webResponse == null)
 				{
-					return this.m_WebResponse.Headers;
+					return null;
 				}
-				return null;
+				return webResponse.Headers;
 			}
 		}
 
@@ -209,36 +352,26 @@ namespace System.Net
 		{
 			get
 			{
-				if (!this.m_ProxySet)
+				if (!this._proxySet)
 				{
-					return WebRequest.InternalDefaultWebProxy;
+					return WebRequest.DefaultWebProxy;
 				}
-				return this.m_Proxy;
+				return this._proxy;
 			}
 			set
 			{
-				this.m_Proxy = value;
-				this.m_ProxySet = true;
+				this._proxy = value;
+				this._proxySet = true;
 			}
 		}
 
-		public RequestCachePolicy CachePolicy
-		{
-			get
-			{
-				return this.m_CachePolicy;
-			}
-			set
-			{
-				this.m_CachePolicy = value;
-			}
-		}
+		public RequestCachePolicy CachePolicy { get; set; }
 
 		public bool IsBusy
 		{
 			get
 			{
-				return this.m_AsyncOp != null;
+				return this._asyncOp != null;
 			}
 		}
 
@@ -250,21 +383,21 @@ namespace System.Net
 			{
 				webRequest.Credentials = this.Credentials;
 			}
-			if (this.m_Method != null)
+			if (this._method != null)
 			{
-				webRequest.Method = this.m_Method;
+				webRequest.Method = this._method;
 			}
-			if (this.m_ContentLength != -1L)
+			if (this._contentLength != -1L)
 			{
-				webRequest.ContentLength = this.m_ContentLength;
+				webRequest.ContentLength = this._contentLength;
 			}
-			if (this.m_ProxySet)
+			if (this._proxySet)
 			{
-				webRequest.Proxy = this.m_Proxy;
+				webRequest.Proxy = this._proxy;
 			}
-			if (this.m_CachePolicy != null)
+			if (this.CachePolicy != null)
 			{
-				webRequest.CachePolicy = this.m_CachePolicy;
+				webRequest.CachePolicy = this.CachePolicy;
 			}
 			return webRequest;
 		}
@@ -272,118 +405,96 @@ namespace System.Net
 		protected virtual WebResponse GetWebResponse(WebRequest request)
 		{
 			WebResponse response = request.GetResponse();
-			this.m_WebResponse = response;
+			this._webResponse = response;
 			return response;
 		}
 
 		protected virtual WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
 		{
 			WebResponse webResponse = request.EndGetResponse(result);
-			this.m_WebResponse = webResponse;
+			this._webResponse = webResponse;
 			return webResponse;
+		}
+
+		private async Task<WebResponse> GetWebResponseTaskAsync(WebRequest request)
+		{
+			BeginEndAwaitableAdapter beginEndAwaitableAdapter = new BeginEndAwaitableAdapter();
+			request.BeginGetResponse(BeginEndAwaitableAdapter.Callback, beginEndAwaitableAdapter);
+			IAsyncResult asyncResult = await beginEndAwaitableAdapter;
+			return this.GetWebResponse(request, asyncResult);
 		}
 
 		public byte[] DownloadData(string address)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.DownloadData(this.GetUri(address));
 		}
 
 		public byte[] DownloadData(Uri address)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			this.ClearWebClientState();
-			byte[] array2;
+			WebClient.ThrowIfNull(address, "address");
+			this.StartOperation();
+			byte[] array;
 			try
 			{
 				WebRequest webRequest;
-				byte[] array = this.DownloadDataInternal(address, out webRequest);
-				bool on2 = Logging.On;
-				array2 = array;
+				array = this.DownloadDataInternal(address, out webRequest);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return array2;
+			return array;
 		}
 
 		private byte[] DownloadDataInternal(Uri address, out WebRequest request)
 		{
-			bool on = Logging.On;
 			request = null;
 			byte[] array;
 			try
 			{
-				request = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				array = this.DownloadBits(request, null, null, null);
+				request = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				array = this.DownloadBits(request, new ChunkedMemoryStream());
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(request);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(request);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			return array;
 		}
 
 		public void DownloadFile(string address, string fileName)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			this.DownloadFile(this.GetUri(address), fileName);
 		}
 
 		public void DownloadFile(Uri address, string fileName)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (fileName == null)
-			{
-				throw new ArgumentNullException("fileName");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(fileName, "fileName");
 			WebRequest webRequest = null;
 			FileStream fileStream = null;
 			bool flag = false;
-			this.ClearWebClientState();
+			this.StartOperation();
 			try
 			{
 				fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-				webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.DownloadBits(webRequest, fileStream, null, null);
+				webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				this.DownloadBits(webRequest, fileStream);
 				flag = true;
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(webRequest);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(webRequest);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			finally
 			{
@@ -394,65 +505,45 @@ namespace System.Net
 					{
 						File.Delete(fileName);
 					}
-					fileStream = null;
 				}
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			bool on2 = Logging.On;
 		}
 
 		public Stream OpenRead(string address)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.OpenRead(this.GetUri(address));
 		}
 
 		public Stream OpenRead(Uri address)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
+			WebClient.ThrowIfNull(address, "address");
 			WebRequest webRequest = null;
-			this.ClearWebClientState();
-			Stream stream;
+			this.StartOperation();
+			Stream responseStream;
 			try
 			{
-				webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				Stream responseStream = (this.m_WebResponse = this.GetWebResponse(webRequest)).GetResponseStream();
-				bool on2 = Logging.On;
-				stream = responseStream;
+				webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				responseStream = (this._webResponse = this.GetWebResponse(webRequest)).GetResponseStream();
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(webRequest);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(webRequest);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return stream;
+			return responseStream;
 		}
 
 		public Stream OpenWrite(string address)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.OpenWrite(this.GetUri(address), null);
 		}
 
@@ -463,61 +554,43 @@ namespace System.Net
 
 		public Stream OpenWrite(string address, string method)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.OpenWrite(this.GetUri(address), method);
 		}
 
 		public Stream OpenWrite(Uri address, string method)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
+			WebClient.ThrowIfNull(address, "address");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
 			WebRequest webRequest = null;
-			this.ClearWebClientState();
-			Stream stream2;
+			this.StartOperation();
+			Stream stream;
 			try
 			{
-				this.m_Method = method;
-				webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				Stream stream = new WebClient.WebClientWriteStream(webRequest.GetRequestStream(), webRequest, this);
-				bool on2 = Logging.On;
-				stream2 = stream;
+				this._method = method;
+				webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				stream = new WebClient.WebClientWriteStream(webRequest.GetRequestStream(), webRequest, this);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(webRequest);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(webRequest);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return stream2;
+			return stream;
 		}
 
 		public byte[] UploadData(string address, byte[] data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadData(this.GetUri(address), null, data);
 		}
 
@@ -528,42 +601,29 @@ namespace System.Net
 
 		public byte[] UploadData(string address, string method, byte[] data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadData(this.GetUri(address), method, data);
 		}
 
 		public byte[] UploadData(Uri address, string method, byte[] data)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.ClearWebClientState();
-			byte[] array2;
+			this.StartOperation();
+			byte[] array;
 			try
 			{
 				WebRequest webRequest;
-				byte[] array = this.UploadDataInternal(address, method, data, out webRequest);
-				bool on2 = Logging.On;
-				array2 = array;
+				array = this.UploadDataInternal(address, method, data, out webRequest);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return array2;
+			return array;
 		}
 
 		private byte[] UploadDataInternal(Uri address, string method, byte[] data, out WebRequest request)
@@ -572,24 +632,19 @@ namespace System.Net
 			byte[] array;
 			try
 			{
-				this.m_Method = method;
-				this.m_ContentLength = (long)data.Length;
-				request = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.UploadBits(request, null, data, 0, null, null, null, null, null);
-				array = this.DownloadBits(request, null, null, null);
+				this._method = method;
+				this._contentLength = (long)data.Length;
+				request = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				array = this.UploadBits(request, null, data, 0, null, null);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(request);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(request);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			return array;
 		}
@@ -597,31 +652,25 @@ namespace System.Net
 		private void OpenFileInternal(bool needsHeaderAndBoundary, string fileName, ref FileStream fs, ref byte[] buffer, ref byte[] formHeaderBytes, ref byte[] boundaryBytes)
 		{
 			fileName = Path.GetFullPath(fileName);
-			if (this.m_headers == null)
-			{
-				this.m_headers = new WebHeaderCollection(WebHeaderCollectionType.WebRequest);
-			}
-			string text = this.m_headers["Content-Type"];
-			if (text != null)
-			{
-				if (text.ToLower(CultureInfo.InvariantCulture).StartsWith("multipart/"))
-				{
-					throw new WebException(global::SR.GetString("The Content-Type header cannot be set to a multipart type for this request."));
-				}
-			}
-			else
+			WebHeaderCollection headers = this.Headers;
+			string text = headers["Content-Type"];
+			if (text == null)
 			{
 				text = "application/octet-stream";
 			}
+			else if (text.StartsWith("multipart/", StringComparison.OrdinalIgnoreCase))
+			{
+				throw new WebException("The Content-Type header cannot be set to a multipart type for this request.");
+			}
 			fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
 			int num = 8192;
-			this.m_ContentLength = -1L;
-			if (this.m_Method.ToUpper(CultureInfo.InvariantCulture) == "POST")
+			this._contentLength = -1L;
+			if (string.Equals(this._method, "POST", StringComparison.Ordinal))
 			{
 				if (needsHeaderAndBoundary)
 				{
 					string text2 = "---------------------" + DateTime.Now.Ticks.ToString("x", NumberFormatInfo.InvariantInfo);
-					this.m_headers["Content-Type"] = "multipart/form-data; boundary=" + text2;
+					headers["Content-Type"] = "multipart/form-data; boundary=" + text2;
 					string text3 = string.Concat(new string[]
 					{
 						"--",
@@ -637,23 +686,23 @@ namespace System.Net
 				}
 				else
 				{
-					formHeaderBytes = new byte[0];
-					boundaryBytes = new byte[0];
+					formHeaderBytes = Array.Empty<byte>();
+					boundaryBytes = Array.Empty<byte>();
 				}
 				if (fs.CanSeek)
 				{
-					this.m_ContentLength = fs.Length + (long)formHeaderBytes.Length + (long)boundaryBytes.Length;
+					this._contentLength = fs.Length + (long)formHeaderBytes.Length + (long)boundaryBytes.Length;
 					num = (int)Math.Min(8192L, fs.Length);
 				}
 			}
 			else
 			{
-				this.m_headers["Content-Type"] = text;
+				headers["Content-Type"] = text;
 				formHeaderBytes = null;
 				boundaryBytes = null;
 				if (fs.CanSeek)
 				{
-					this.m_ContentLength = fs.Length;
+					this._contentLength = fs.Length;
 					num = (int)Math.Min(8192L, fs.Length);
 				}
 			}
@@ -662,10 +711,6 @@ namespace System.Net
 
 		public byte[] UploadFile(string address, string fileName)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadFile(this.GetUri(address), fileName);
 		}
 
@@ -681,96 +726,78 @@ namespace System.Net
 
 		public byte[] UploadFile(Uri address, string method, string fileName)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (fileName == null)
-			{
-				throw new ArgumentNullException("fileName");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(fileName, "fileName");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
 			FileStream fileStream = null;
 			WebRequest webRequest = null;
-			this.ClearWebClientState();
-			byte[] array5;
+			this.StartOperation();
+			byte[] array4;
 			try
 			{
-				this.m_Method = method;
+				this._method = method;
 				byte[] array = null;
 				byte[] array2 = null;
 				byte[] array3 = null;
 				Uri uri = this.GetUri(address);
 				bool flag = uri.Scheme != Uri.UriSchemeFile;
 				this.OpenFileInternal(flag, fileName, ref fileStream, ref array3, ref array, ref array2);
-				webRequest = (this.m_WebRequest = this.GetWebRequest(uri));
-				this.UploadBits(webRequest, fileStream, array3, 0, array, array2, null, null, null);
-				byte[] array4 = this.DownloadBits(webRequest, null, null, null);
-				bool on2 = Logging.On;
-				array5 = array4;
+				webRequest = (this._webRequest = this.GetWebRequest(uri));
+				array4 = this.UploadBits(webRequest, fileStream, array3, 0, array, array2);
 			}
 			catch (Exception ex)
 			{
 				if (fileStream != null)
 				{
 					fileStream.Close();
-					fileStream = null;
 				}
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				if (ex is OutOfMemoryException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
 				WebClient.AbortRequest(webRequest);
-				throw ex;
+				if (ex is WebException || ex is SecurityException)
+				{
+					throw;
+				}
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return array5;
+			return array4;
 		}
 
-		private byte[] UploadValuesInternal(NameValueCollection data)
+		private byte[] GetValuesToUpload(NameValueCollection data)
 		{
-			if (this.m_headers == null)
+			WebHeaderCollection headers = this.Headers;
+			string text = headers["Content-Type"];
+			if (text != null && !string.Equals(text, "application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
 			{
-				this.m_headers = new WebHeaderCollection(WebHeaderCollectionType.WebRequest);
+				throw new WebException("The Content-Type header cannot be changed from its default value for this request.");
 			}
-			string text = this.m_headers["Content-Type"];
-			if (text != null && string.Compare(text, "application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase) != 0)
-			{
-				throw new WebException(global::SR.GetString("The Content-Type header cannot be changed from its default value for this request."));
-			}
-			this.m_headers["Content-Type"] = "application/x-www-form-urlencoded";
+			headers["Content-Type"] = "application/x-www-form-urlencoded";
 			string text2 = string.Empty;
 			StringBuilder stringBuilder = new StringBuilder();
 			foreach (string text3 in data.AllKeys)
 			{
 				stringBuilder.Append(text2);
 				stringBuilder.Append(WebClient.UrlEncode(text3));
-				stringBuilder.Append("=");
+				stringBuilder.Append('=');
 				stringBuilder.Append(WebClient.UrlEncode(data[text3]));
 				text2 = "&";
 			}
 			byte[] bytes = Encoding.ASCII.GetBytes(stringBuilder.ToString());
-			this.m_ContentLength = (long)bytes.Length;
+			this._contentLength = (long)bytes.Length;
 			return bytes;
 		}
 
 		public byte[] UploadValues(string address, NameValueCollection data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadValues(this.GetUri(address), null, data);
 		}
 
@@ -781,67 +808,45 @@ namespace System.Net
 
 		public byte[] UploadValues(string address, string method, NameValueCollection data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadValues(this.GetUri(address), method, data);
 		}
 
 		public byte[] UploadValues(Uri address, string method, NameValueCollection data)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
 			WebRequest webRequest = null;
-			this.ClearWebClientState();
-			byte[] array3;
+			this.StartOperation();
+			byte[] array;
 			try
 			{
-				byte[] array = this.UploadValuesInternal(data);
-				this.m_Method = method;
-				webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.UploadBits(webRequest, null, array, 0, null, null, null, null, null);
-				byte[] array2 = this.DownloadBits(webRequest, null, null, null);
-				bool on2 = Logging.On;
-				array3 = array2;
+				byte[] valuesToUpload = this.GetValuesToUpload(data);
+				this._method = method;
+				webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				array = this.UploadBits(webRequest, null, valuesToUpload, 0, null, null);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebClient.AbortRequest(webRequest);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				WebClient.AbortRequest(webRequest);
-				throw ex;
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return array3;
+			return array;
 		}
 
 		public string UploadString(string address, string data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadString(this.GetUri(address), null, data);
 		}
 
@@ -852,77 +857,54 @@ namespace System.Net
 
 		public string UploadString(string address, string method, string data)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.UploadString(this.GetUri(address), method, data);
 		}
 
 		public string UploadString(Uri address, string method, string data)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.ClearWebClientState();
-			string text;
+			this.StartOperation();
+			string stringUsingEncoding;
 			try
 			{
 				byte[] bytes = this.Encoding.GetBytes(data);
 				WebRequest webRequest;
 				byte[] array = this.UploadDataInternal(address, method, bytes, out webRequest);
-				string stringUsingEncoding = this.GetStringUsingEncoding(webRequest, array);
-				bool on2 = Logging.On;
-				text = stringUsingEncoding;
+				stringUsingEncoding = this.GetStringUsingEncoding(webRequest, array);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return text;
+			return stringUsingEncoding;
 		}
 
 		public string DownloadString(string address)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
 			return this.DownloadString(this.GetUri(address));
 		}
 
 		public string DownloadString(Uri address)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			this.ClearWebClientState();
-			string text;
+			WebClient.ThrowIfNull(address, "address");
+			this.StartOperation();
+			string stringUsingEncoding;
 			try
 			{
 				WebRequest webRequest;
 				byte[] array = this.DownloadDataInternal(address, out webRequest);
-				string stringUsingEncoding = this.GetStringUsingEncoding(webRequest, array);
-				bool on2 = Logging.On;
-				text = stringUsingEncoding;
+				stringUsingEncoding = this.GetStringUsingEncoding(webRequest, array);
 			}
 			finally
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 			}
-			return text;
+			return stringUsingEncoding;
 		}
 
 		private static void AbortRequest(WebRequest request)
@@ -934,100 +916,101 @@ namespace System.Net
 					request.Abort();
 				}
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is OutOfMemoryException || ex is StackOverflowException || ex is ThreadAbortException)
-				{
-					throw;
-				}
 			}
 		}
 
 		private void CopyHeadersTo(WebRequest request)
 		{
-			if (this.m_headers != null && request is HttpWebRequest)
+			if (this._headers == null)
 			{
-				string text = this.m_headers["Accept"];
-				string text2 = this.m_headers["Connection"];
-				string text3 = this.m_headers["Content-Type"];
-				string text4 = this.m_headers["Expect"];
-				string text5 = this.m_headers["Referer"];
-				string text6 = this.m_headers["User-Agent"];
-				string text7 = this.m_headers["Host"];
-				this.m_headers.RemoveInternal("Accept");
-				this.m_headers.RemoveInternal("Connection");
-				this.m_headers.RemoveInternal("Content-Type");
-				this.m_headers.RemoveInternal("Expect");
-				this.m_headers.RemoveInternal("Referer");
-				this.m_headers.RemoveInternal("User-Agent");
-				this.m_headers.RemoveInternal("Host");
-				request.Headers = this.m_headers;
-				if (text != null && text.Length > 0)
-				{
-					((HttpWebRequest)request).Accept = text;
-				}
-				if (text2 != null && text2.Length > 0)
-				{
-					((HttpWebRequest)request).Connection = text2;
-				}
-				if (text3 != null && text3.Length > 0)
-				{
-					((HttpWebRequest)request).ContentType = text3;
-				}
-				if (text4 != null && text4.Length > 0)
-				{
-					((HttpWebRequest)request).Expect = text4;
-				}
-				if (text5 != null && text5.Length > 0)
-				{
-					((HttpWebRequest)request).Referer = text5;
-				}
-				if (text6 != null && text6.Length > 0)
-				{
-					((HttpWebRequest)request).UserAgent = text6;
-				}
-				if (!string.IsNullOrEmpty(text7))
-				{
-					((HttpWebRequest)request).Host = text7;
-				}
+				return;
+			}
+			HttpWebRequest httpWebRequest = request as HttpWebRequest;
+			if (httpWebRequest == null)
+			{
+				return;
+			}
+			string text = this._headers["Accept"];
+			string text2 = this._headers["Connection"];
+			string text3 = this._headers["Content-Type"];
+			string text4 = this._headers["Expect"];
+			string text5 = this._headers["Referer"];
+			string text6 = this._headers["User-Agent"];
+			string text7 = this._headers["Host"];
+			this._headers.Remove("Accept");
+			this._headers.Remove("Connection");
+			this._headers.Remove("Content-Type");
+			this._headers.Remove("Expect");
+			this._headers.Remove("Referer");
+			this._headers.Remove("User-Agent");
+			this._headers.Remove("Host");
+			request.Headers = this._headers;
+			if (!string.IsNullOrEmpty(text))
+			{
+				httpWebRequest.Accept = text;
+			}
+			if (!string.IsNullOrEmpty(text2))
+			{
+				httpWebRequest.Connection = text2;
+			}
+			if (!string.IsNullOrEmpty(text3))
+			{
+				httpWebRequest.ContentType = text3;
+			}
+			if (!string.IsNullOrEmpty(text4))
+			{
+				httpWebRequest.Expect = text4;
+			}
+			if (!string.IsNullOrEmpty(text5))
+			{
+				httpWebRequest.Referer = text5;
+			}
+			if (!string.IsNullOrEmpty(text6))
+			{
+				httpWebRequest.UserAgent = text6;
+			}
+			if (!string.IsNullOrEmpty(text7))
+			{
+				httpWebRequest.Host = text7;
 			}
 		}
 
-		private Uri GetUri(string path)
+		private Uri GetUri(string address)
 		{
+			WebClient.ThrowIfNull(address, "address");
 			Uri uri;
-			if (this.m_baseAddress != null)
+			if (this._baseAddress != null)
 			{
-				if (!Uri.TryCreate(this.m_baseAddress, path, out uri))
+				if (!Uri.TryCreate(this._baseAddress, address, out uri))
 				{
-					return new Uri(Path.GetFullPath(path));
+					return new Uri(Path.GetFullPath(address));
 				}
 			}
-			else if (!Uri.TryCreate(path, UriKind.Absolute, out uri))
+			else if (!Uri.TryCreate(address, UriKind.Absolute, out uri))
 			{
-				return new Uri(Path.GetFullPath(path));
+				return new Uri(Path.GetFullPath(address));
 			}
 			return this.GetUri(uri);
 		}
 
 		private Uri GetUri(Uri address)
 		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
+			WebClient.ThrowIfNull(address, "address");
 			Uri uri = address;
-			if (!address.IsAbsoluteUri && this.m_baseAddress != null && !Uri.TryCreate(this.m_baseAddress, address, out uri))
+			if (!address.IsAbsoluteUri && this._baseAddress != null && !Uri.TryCreate(this._baseAddress, address, out uri))
 			{
 				return address;
 			}
-			if ((uri.Query == null || uri.Query == string.Empty) && this.m_requestParameters != null)
+			if (string.IsNullOrEmpty(uri.Query) && this._requestParameters != null)
 			{
 				StringBuilder stringBuilder = new StringBuilder();
 				string text = string.Empty;
-				for (int i = 0; i < this.m_requestParameters.Count; i++)
+				for (int i = 0; i < this._requestParameters.Count; i++)
 				{
-					stringBuilder.Append(text + this.m_requestParameters.AllKeys[i] + "=" + this.m_requestParameters[i]);
+					stringBuilder.Append(text).Append(this._requestParameters.AllKeys[i]).Append('=')
+						.Append(this._requestParameters[i]);
 					text = "&";
 				}
 				uri = new UriBuilder(uri)
@@ -1038,213 +1021,273 @@ namespace System.Net
 			return uri;
 		}
 
-		private static void DownloadBitsResponseCallback(IAsyncResult result)
+		private byte[] DownloadBits(WebRequest request, Stream writeStream)
 		{
-			WebClient.DownloadBitsState downloadBitsState = (WebClient.DownloadBitsState)result.AsyncState;
-			WebRequest request = downloadBitsState.Request;
-			Exception ex = null;
+			byte[] array2;
 			try
 			{
-				WebResponse webResponse = downloadBitsState.WebClient.GetWebResponse(request, result);
-				downloadBitsState.WebClient.m_WebResponse = webResponse;
-				downloadBitsState.SetResponse(webResponse);
-			}
-			catch (Exception ex2)
-			{
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
+				WebResponse webResponse = (this._webResponse = this.GetWebResponse(request));
+				long contentLength = webResponse.ContentLength;
+				byte[] array = new byte[(contentLength == -1L || contentLength > 65536L) ? 65536L : contentLength];
+				if (writeStream is ChunkedMemoryStream)
 				{
-					throw;
+					if (contentLength > 2147483647L)
+					{
+						throw new WebException("The message length limit was exceeded", WebExceptionStatus.MessageLengthLimitExceeded);
+					}
+					writeStream.SetLength((long)array.Length);
 				}
-				ex = ex2;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
+				using (Stream responseStream = webResponse.GetResponseStream())
 				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
+					if (responseStream != null)
+					{
+						int num;
+						while ((num = responseStream.Read(array, 0, array.Length)) != 0)
+						{
+							writeStream.Write(array, 0, num);
+						}
+					}
+				}
+				ChunkedMemoryStream chunkedMemoryStream = writeStream as ChunkedMemoryStream;
+				array2 = ((chunkedMemoryStream != null) ? chunkedMemoryStream.ToArray() : null);
+			}
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
+			{
+				if (writeStream != null)
+				{
+					writeStream.Close();
 				}
 				WebClient.AbortRequest(request);
-				if (downloadBitsState != null && downloadBitsState.WriteStream != null)
-				{
-					downloadBitsState.WriteStream.Close();
-				}
-			}
-			finally
-			{
-				if (ex != null)
-				{
-					downloadBitsState.CompletionDelegate(null, ex, downloadBitsState.AsyncOp);
-				}
-			}
-		}
-
-		private static void DownloadBitsReadCallback(IAsyncResult result)
-		{
-			WebClient.DownloadBitsReadCallbackState((WebClient.DownloadBitsState)result.AsyncState, result);
-		}
-
-		private static void DownloadBitsReadCallbackState(WebClient.DownloadBitsState state, IAsyncResult result)
-		{
-			Stream readStream = state.ReadStream;
-			Exception ex = null;
-			bool flag = false;
-			try
-			{
-				int num = 0;
-				if (readStream != null && readStream != Stream.Null)
-				{
-					num = readStream.EndRead(result);
-				}
-				flag = state.RetrieveBytes(ref num);
-			}
-			catch (Exception ex2)
-			{
-				flag = true;
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				ex = ex2;
-				state.InnerBuffer = null;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
-				}
-				WebClient.AbortRequest(state.Request);
-				if (state != null && state.WriteStream != null)
-				{
-					state.WriteStream.Close();
-				}
+				throw new WebException("An exception occurred during a WebClient request.", ex);
 			}
-			finally
+			return array2;
+		}
+
+		private async void DownloadBitsAsync(WebRequest request, Stream writeStream, AsyncOperation asyncOp, Action<byte[], Exception, AsyncOperation> completionDelegate)
+		{
+			Exception exception = null;
+			try
 			{
-				if (flag)
+				WebResponse webResponse = await this.GetWebResponseTaskAsync(request).ConfigureAwait(false);
+				WebResponse webResponse2 = webResponse;
+				this._webResponse = webResponse2;
+				WebResponse webResponse3 = webResponse2;
+				long contentLength = webResponse3.ContentLength;
+				byte[] copyBuffer = new byte[(contentLength == -1L || contentLength > 65536L) ? 65536L : contentLength];
+				if (writeStream is ChunkedMemoryStream)
 				{
-					if (ex == null)
+					if (contentLength > 2147483647L)
 					{
-						state.Close();
+						throw new WebException("The message length limit was exceeded", WebExceptionStatus.MessageLengthLimitExceeded);
 					}
-					state.CompletionDelegate(state.InnerBuffer, ex, state.AsyncOp);
+					writeStream.SetLength((long)copyBuffer.Length);
 				}
-			}
-		}
-
-		private byte[] DownloadBits(WebRequest request, Stream writeStream, CompletionDelegate completionDelegate, AsyncOperation asyncOp)
-		{
-			WebClient.DownloadBitsState downloadBitsState = new WebClient.DownloadBitsState(request, writeStream, completionDelegate, asyncOp, this.m_Progress, this);
-			if (downloadBitsState.Async)
-			{
-				request.BeginGetResponse(new AsyncCallback(WebClient.DownloadBitsResponseCallback), downloadBitsState);
-				return null;
-			}
-			WebResponse webResponse = (this.m_WebResponse = this.GetWebResponse(request));
-			int num = downloadBitsState.SetResponse(webResponse);
-			bool flag;
-			do
-			{
-				flag = downloadBitsState.RetrieveBytes(ref num);
-			}
-			while (!flag);
-			downloadBitsState.Close();
-			return downloadBitsState.InnerBuffer;
-		}
-
-		private static void UploadBitsRequestCallback(IAsyncResult result)
-		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)result.AsyncState;
-			WebRequest request = uploadBitsState.Request;
-			Exception ex = null;
-			try
-			{
-				Stream stream = request.EndGetRequestStream(result);
-				uploadBitsState.SetRequestStream(stream);
-			}
-			catch (Exception ex2)
-			{
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
+				if (contentLength >= 0L)
 				{
-					throw;
+					this._progress.TotalBytesToReceive = contentLength;
 				}
-				ex = ex2;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
+				using (writeStream)
 				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
+					using (Stream readStream = webResponse3.GetResponseStream())
+					{
+						if (readStream != null)
+						{
+							for (;;)
+							{
+								int num = await readStream.ReadAsync(new Memory<byte>(copyBuffer), default(CancellationToken)).ConfigureAwait(false);
+								if (num == 0)
+								{
+									break;
+								}
+								this._progress.BytesReceived += (long)num;
+								if (this._progress.BytesReceived != this._progress.TotalBytesToReceive)
+								{
+									this.PostProgressChanged(asyncOp, this._progress);
+								}
+								await writeStream.WriteAsync(new ReadOnlyMemory<byte>(copyBuffer, 0, num), default(CancellationToken)).ConfigureAwait(false);
+							}
+						}
+						if (this._progress.TotalBytesToReceive < 0L)
+						{
+							this._progress.TotalBytesToReceive = this._progress.BytesReceived;
+						}
+						this.PostProgressChanged(asyncOp, this._progress);
+					}
+					Stream readStream = null;
 				}
+				Stream stream = null;
+				ChunkedMemoryStream chunkedMemoryStream = writeStream as ChunkedMemoryStream;
+				completionDelegate((chunkedMemoryStream != null) ? chunkedMemoryStream.ToArray() : null, null, asyncOp);
+				copyBuffer = null;
+			}
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
+			{
+				exception = WebClient.GetExceptionToPropagate(ex);
 				WebClient.AbortRequest(request);
-				if (uploadBitsState != null && uploadBitsState.ReadStream != null)
+				if (writeStream != null)
 				{
-					uploadBitsState.ReadStream.Close();
+					writeStream.Close();
 				}
 			}
 			finally
 			{
-				if (ex != null)
+				if (exception != null)
 				{
-					uploadBitsState.UploadCompletionDelegate(null, ex, uploadBitsState);
+					completionDelegate(null, exception, asyncOp);
 				}
 			}
 		}
 
-		private static void UploadBitsWriteCallback(IAsyncResult result)
+		private byte[] UploadBits(WebRequest request, Stream readStream, byte[] buffer, int chunkSize, byte[] header, byte[] footer)
 		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)result.AsyncState;
-			Stream writeStream = uploadBitsState.WriteStream;
-			Exception ex = null;
-			bool flag = false;
+			byte[] array;
 			try
 			{
-				writeStream.EndWrite(result);
-				flag = uploadBitsState.WriteBytes();
+				if (request.RequestUri.Scheme == Uri.UriSchemeFile)
+				{
+					footer = (header = null);
+				}
+				using (Stream requestStream = request.GetRequestStream())
+				{
+					if (header != null)
+					{
+						requestStream.Write(header, 0, header.Length);
+					}
+					if (readStream != null)
+					{
+						try
+						{
+							for (;;)
+							{
+								int num = readStream.Read(buffer, 0, buffer.Length);
+								if (num <= 0)
+								{
+									break;
+								}
+								requestStream.Write(buffer, 0, num);
+							}
+							goto IL_008F;
+						}
+						finally
+						{
+							if (readStream != null)
+							{
+								((IDisposable)readStream).Dispose();
+							}
+						}
+					}
+					int num2;
+					for (int i = 0; i < buffer.Length; i += num2)
+					{
+						num2 = buffer.Length - i;
+						if (chunkSize != 0 && num2 > chunkSize)
+						{
+							num2 = chunkSize;
+						}
+						requestStream.Write(buffer, i, num2);
+					}
+					IL_008F:
+					if (footer != null)
+					{
+						requestStream.Write(footer, 0, footer.Length);
+					}
+				}
+				array = this.DownloadBits(request, new ChunkedMemoryStream());
 			}
-			catch (Exception ex2)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				flag = true;
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
+				WebClient.AbortRequest(request);
+				if (ex is WebException || ex is SecurityException)
 				{
 					throw;
 				}
-				ex = ex2;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
+				throw new WebException("An exception occurred during a WebClient request.", ex);
+			}
+			return array;
+		}
+
+		private async void UploadBitsAsync(WebRequest request, Stream readStream, byte[] buffer, int chunkSize, byte[] header, byte[] footer, AsyncOperation asyncOp, Action<byte[], Exception, AsyncOperation> completionDelegate)
+		{
+			this._progress.HasUploadPhase = true;
+			Exception exception = null;
+			try
+			{
+				if (request.RequestUri.Scheme == Uri.UriSchemeFile)
 				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
+					header = (footer = null);
 				}
-				WebClient.AbortRequest(uploadBitsState.Request);
-				if (uploadBitsState != null && uploadBitsState.ReadStream != null)
+				Stream stream = await request.GetRequestStreamAsync().ConfigureAwait(false);
+				using (Stream writeStream = stream)
 				{
-					uploadBitsState.ReadStream.Close();
+					if (header != null)
+					{
+						await writeStream.WriteAsync(new ReadOnlyMemory<byte>(header), default(CancellationToken)).ConfigureAwait(false);
+						this._progress.BytesSent += (long)header.Length;
+						this.PostProgressChanged(asyncOp, this._progress);
+					}
+					if (readStream != null)
+					{
+						using (readStream)
+						{
+							for (;;)
+							{
+								int bytesRead = await readStream.ReadAsync(new Memory<byte>(buffer), default(CancellationToken)).ConfigureAwait(false);
+								if (bytesRead <= 0)
+								{
+									break;
+								}
+								await writeStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), default(CancellationToken)).ConfigureAwait(false);
+								this._progress.BytesSent += (long)bytesRead;
+								this.PostProgressChanged(asyncOp, this._progress);
+							}
+						}
+						Stream stream2 = null;
+					}
+					else
+					{
+						int bytesRead = 0;
+						while (bytesRead < buffer.Length)
+						{
+							int toWrite = buffer.Length - bytesRead;
+							if (chunkSize != 0 && toWrite > chunkSize)
+							{
+								toWrite = chunkSize;
+							}
+							await writeStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, bytesRead, toWrite), default(CancellationToken)).ConfigureAwait(false);
+							bytesRead += toWrite;
+							this._progress.BytesSent += (long)toWrite;
+							this.PostProgressChanged(asyncOp, this._progress);
+						}
+					}
+					if (footer != null)
+					{
+						await writeStream.WriteAsync(new ReadOnlyMemory<byte>(footer), default(CancellationToken)).ConfigureAwait(false);
+						this._progress.BytesSent += (long)footer.Length;
+						this.PostProgressChanged(asyncOp, this._progress);
+					}
 				}
+				Stream writeStream = null;
+				this.DownloadBitsAsync(request, new ChunkedMemoryStream(), asyncOp, completionDelegate);
+			}
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
+			{
+				exception = WebClient.GetExceptionToPropagate(ex);
+				WebClient.AbortRequest(request);
 			}
 			finally
 			{
-				if (flag)
+				if (exception != null)
 				{
-					if (ex == null)
-					{
-						uploadBitsState.Close();
-					}
-					uploadBitsState.UploadCompletionDelegate(null, ex, uploadBitsState);
+					completionDelegate(null, exception, asyncOp);
 				}
 			}
 		}
 
-		private void UploadBits(WebRequest request, Stream readStream, byte[] buffer, int chunkSize, byte[] header, byte[] footer, CompletionDelegate uploadCompletionDelegate, CompletionDelegate downloadCompletionDelegate, AsyncOperation asyncOp)
-		{
-			if (request.RequestUri.Scheme == Uri.UriSchemeFile)
-			{
-				footer = (header = null);
-			}
-			WebClient.UploadBitsState uploadBitsState = new WebClient.UploadBitsState(request, readStream, buffer, chunkSize, header, footer, uploadCompletionDelegate, downloadCompletionDelegate, asyncOp, this.m_Progress, this);
-			if (uploadBitsState.Async)
-			{
-				request.BeginGetRequestStream(new AsyncCallback(WebClient.UploadBitsRequestCallback), uploadBitsState);
-				return;
-			}
-			Stream requestStream = request.GetRequestStream();
-			uploadBitsState.SetRequestStream(requestStream);
-			while (!uploadBitsState.WriteBytes())
-			{
-			}
-			uploadBitsState.Close();
-		}
-
-		private bool ByteArrayHasPrefix(byte[] prefix, byte[] byteArray)
+		private static bool ByteArrayHasPrefix(byte[] prefix, byte[] byteArray)
 		{
 			if (prefix == null || byteArray == null || prefix.Length > byteArray.Length)
 			{
@@ -1269,18 +1312,14 @@ namespace System.Net
 			{
 				text = request.ContentType;
 			}
-			catch (NotImplementedException)
-			{
-				text = null;
-			}
-			catch (NotSupportedException)
+			catch (Exception ex) when (ex is NotImplementedException || ex is NotSupportedException)
 			{
 				text = null;
 			}
 			if (text != null)
 			{
 				text = text.ToLower(CultureInfo.InvariantCulture);
-				string[] array = text.Split(new char[] { ';', '=', ' ' });
+				string[] array = text.Split(WebClient.s_parseContentTypeSeparators);
 				bool flag = false;
 				foreach (string text2 in array)
 				{
@@ -1303,17 +1342,11 @@ namespace System.Net
 			}
 			if (encoding == null)
 			{
-				Encoding[] array3 = new Encoding[]
-				{
-					Encoding.UTF8,
-					Encoding.UTF32,
-					Encoding.Unicode,
-					Encoding.BigEndianUnicode
-				};
+				Encoding[] array3 = WebClient.s_knownEncodings;
 				for (int j = 0; j < array3.Length; j++)
 				{
 					byte[] preamble = array3[j].GetPreamble();
-					if (this.ByteArrayHasPrefix(preamble, data))
+					if (WebClient.ByteArrayHasPrefix(preamble, data))
 					{
 						encoding = array3[j];
 						num = preamble.Length;
@@ -1328,34 +1361,18 @@ namespace System.Net
 			if (num == -1)
 			{
 				byte[] preamble2 = encoding.GetPreamble();
-				if (this.ByteArrayHasPrefix(preamble2, data))
-				{
-					num = preamble2.Length;
-				}
-				else
-				{
-					num = 0;
-				}
+				num = (WebClient.ByteArrayHasPrefix(preamble2, data) ? preamble2.Length : 0);
 			}
 			return encoding.GetString(data, num, data.Length - num);
 		}
 
 		private string MapToDefaultMethod(Uri address)
 		{
-			Uri uri;
-			if (!address.IsAbsoluteUri && this.m_baseAddress != null)
+			if (!string.Equals(((!address.IsAbsoluteUri && this._baseAddress != null) ? new Uri(this._baseAddress, address) : address).Scheme, Uri.UriSchemeFtp, StringComparison.Ordinal))
 			{
-				uri = new Uri(this.m_baseAddress, address);
+				return "POST";
 			}
-			else
-			{
-				uri = address;
-			}
-			if (uri.Scheme.ToLower(CultureInfo.InvariantCulture) == "ftp")
-			{
-				return "STOR";
-			}
-			return "POST";
+			return "STOR";
 		}
 
 		private static string UrlEncode(string str)
@@ -1364,26 +1381,8 @@ namespace System.Net
 			{
 				return null;
 			}
-			return WebClient.UrlEncode(str, Encoding.UTF8);
-		}
-
-		private static string UrlEncode(string str, Encoding e)
-		{
-			if (str == null)
-			{
-				return null;
-			}
-			return Encoding.ASCII.GetString(WebClient.UrlEncodeToBytes(str, e));
-		}
-
-		private static byte[] UrlEncodeToBytes(string str, Encoding e)
-		{
-			if (str == null)
-			{
-				return null;
-			}
-			byte[] bytes = e.GetBytes(str);
-			return WebClient.UrlEncodeBytesToBytesInternal(bytes, 0, bytes.Length, false);
+			byte[] bytes = Encoding.UTF8.GetBytes(str);
+			return Encoding.ASCII.GetString(WebClient.UrlEncodeBytesToBytesInternal(bytes, 0, bytes.Length, false));
 		}
 
 		private static byte[] UrlEncodeBytesToBytesInternal(byte[] bytes, int offset, int count, bool alwaysCreateReturnValue)
@@ -1473,204 +1472,88 @@ namespace System.Net
 
 		private void InvokeOperationCompleted(AsyncOperation asyncOp, SendOrPostCallback callback, AsyncCompletedEventArgs eventArgs)
 		{
-			if (Interlocked.CompareExchange<AsyncOperation>(ref this.m_AsyncOp, null, asyncOp) == asyncOp)
+			if (Interlocked.CompareExchange<AsyncOperation>(ref this._asyncOp, null, asyncOp) == asyncOp)
 			{
-				this.CompleteWebClientState();
+				this.EndOperation();
 				asyncOp.PostOperationCompleted(callback, eventArgs);
 			}
 		}
 
-		private bool AnotherCallInProgress(int callNesting)
-		{
-			return callNesting > 1;
-		}
-
-		public event OpenReadCompletedEventHandler OpenReadCompleted;
-
-		protected virtual void OnOpenReadCompleted(OpenReadCompletedEventArgs e)
-		{
-			if (this.OpenReadCompleted != null)
-			{
-				this.OpenReadCompleted(this, e);
-			}
-		}
-
-		private void OpenReadOperationCompleted(object arg)
-		{
-			this.OnOpenReadCompleted((OpenReadCompletedEventArgs)arg);
-		}
-
-		private void OpenReadAsyncCallback(IAsyncResult result)
-		{
-			Tuple<WebRequest, AsyncOperation> tuple = (Tuple<WebRequest, AsyncOperation>)result.AsyncState;
-			WebRequest item = tuple.Item1;
-			AsyncOperation item2 = tuple.Item2;
-			Stream stream = null;
-			Exception ex = null;
-			try
-			{
-				stream = (this.m_WebResponse = this.GetWebResponse(item, result)).GetResponseStream();
-			}
-			catch (Exception ex2)
-			{
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
-				{
-					throw;
-				}
-				ex = ex2;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
-				}
-			}
-			OpenReadCompletedEventArgs e = new OpenReadCompletedEventArgs(stream, ex, this.m_Cancelled, item2.UserSuppliedState);
-			this.InvokeOperationCompleted(item2, this.openReadOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void OpenReadAsync(Uri address)
 		{
 			this.OpenReadAsync(address, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void OpenReadAsync(Uri address, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			WebClient.ThrowIfNull(address, "address");
+			AsyncOperation asyncOp = this.StartAsyncOperation(userToken);
 			try
 			{
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				webRequest.BeginGetResponse(new AsyncCallback(this.OpenReadAsyncCallback), new Tuple<WebRequest, AsyncOperation>(webRequest, asyncOperation));
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebRequest request = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				request.BeginGetResponse(delegate(IAsyncResult iar)
 				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				OpenReadCompletedEventArgs e = new OpenReadCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.openReadOperationCompleted, e);
+					Stream stream = null;
+					Exception ex2 = null;
+					try
+					{
+						stream = (this._webResponse = this.GetWebResponse(request, iar)).GetResponseStream();
+					}
+					catch (Exception ex3) when (!(ex3 is OutOfMemoryException))
+					{
+						ex2 = WebClient.GetExceptionToPropagate(ex3);
+					}
+					this.InvokeOperationCompleted(asyncOp, this._openReadOperationCompleted, new OpenReadCompletedEventArgs(stream, ex2, this._canceled, asyncOp.UserSuppliedState));
+				}, null);
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event OpenWriteCompletedEventHandler OpenWriteCompleted;
-
-		protected virtual void OnOpenWriteCompleted(OpenWriteCompletedEventArgs e)
-		{
-			if (this.OpenWriteCompleted != null)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				this.OpenWriteCompleted(this, e);
+				this.InvokeOperationCompleted(asyncOp, this._openReadOperationCompleted, new OpenReadCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOp.UserSuppliedState));
 			}
 		}
 
-		private void OpenWriteOperationCompleted(object arg)
-		{
-			this.OnOpenWriteCompleted((OpenWriteCompletedEventArgs)arg);
-		}
-
-		private void OpenWriteAsyncCallback(IAsyncResult result)
-		{
-			Tuple<WebRequest, AsyncOperation> tuple = (Tuple<WebRequest, AsyncOperation>)result.AsyncState;
-			WebRequest item = tuple.Item1;
-			AsyncOperation item2 = tuple.Item2;
-			WebClient.WebClientWriteStream webClientWriteStream = null;
-			Exception ex = null;
-			try
-			{
-				webClientWriteStream = new WebClient.WebClientWriteStream(item.EndGetRequestStream(result), item, this);
-			}
-			catch (Exception ex2)
-			{
-				if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
-				{
-					throw;
-				}
-				ex = ex2;
-				if (!(ex2 is WebException) && !(ex2 is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
-				}
-			}
-			OpenWriteCompletedEventArgs e = new OpenWriteCompletedEventArgs(webClientWriteStream, ex, this.m_Cancelled, item2.UserSuppliedState);
-			this.InvokeOperationCompleted(item2, this.openWriteOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void OpenWriteAsync(Uri address)
 		{
 			this.OpenWriteAsync(address, null, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void OpenWriteAsync(Uri address, string method)
 		{
 			this.OpenWriteAsync(address, method, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void OpenWriteAsync(Uri address, string method, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
+			WebClient.ThrowIfNull(address, "address");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			AsyncOperation asyncOp = this.StartAsyncOperation(userToken);
 			try
 			{
-				this.m_Method = method;
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				webRequest.BeginGetRequestStream(new AsyncCallback(this.OpenWriteAsyncCallback), new Tuple<WebRequest, AsyncOperation>(webRequest, asyncOperation));
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				this._method = method;
+				WebRequest request = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				request.BeginGetRequestStream(delegate(IAsyncResult iar)
 				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				OpenWriteCompletedEventArgs e = new OpenWriteCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.openWriteOperationCompleted, e);
+					WebClient.WebClientWriteStream webClientWriteStream = null;
+					Exception ex2 = null;
+					try
+					{
+						webClientWriteStream = new WebClient.WebClientWriteStream(request.EndGetRequestStream(iar), request, this);
+					}
+					catch (Exception ex3) when (!(ex3 is OutOfMemoryException))
+					{
+						ex2 = WebClient.GetExceptionToPropagate(ex3);
+					}
+					this.InvokeOperationCompleted(asyncOp, this._openWriteOperationCompleted, new OpenWriteCompletedEventArgs(webClientWriteStream, ex2, this._canceled, asyncOp.UserSuppliedState));
+				}, null);
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event DownloadStringCompletedEventHandler DownloadStringCompleted;
-
-		protected virtual void OnDownloadStringCompleted(DownloadStringCompletedEventArgs e)
-		{
-			if (this.DownloadStringCompleted != null)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				this.DownloadStringCompleted(this, e);
+				OpenWriteCompletedEventArgs e = new OpenWriteCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOp.UserSuppliedState);
+				this.InvokeOperationCompleted(asyncOp, this._openWriteOperationCompleted, e);
 			}
-		}
-
-		private void DownloadStringOperationCompleted(object arg)
-		{
-			this.OnDownloadStringCompleted((DownloadStringCompletedEventArgs)arg);
 		}
 
 		private void DownloadStringAsyncCallback(byte[] returnBytes, Exception exception, object state)
@@ -1681,618 +1564,296 @@ namespace System.Net
 			{
 				if (returnBytes != null)
 				{
-					text = this.GetStringUsingEncoding(this.m_WebRequest, returnBytes);
+					text = this.GetStringUsingEncoding(this._webRequest, returnBytes);
 				}
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				exception = ex;
+				exception = WebClient.GetExceptionToPropagate(ex);
 			}
-			DownloadStringCompletedEventArgs e = new DownloadStringCompletedEventArgs(text, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.downloadStringOperationCompleted, e);
+			DownloadStringCompletedEventArgs e = new DownloadStringCompletedEventArgs(text, exception, this._canceled, asyncOperation.UserSuppliedState);
+			this.InvokeOperationCompleted(asyncOperation, this._downloadStringOperationCompleted, e);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadStringAsync(Uri address)
 		{
 			this.DownloadStringAsync(address, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadStringAsync(Uri address, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			WebClient.ThrowIfNull(address, "address");
+			AsyncOperation asyncOperation = this.StartAsyncOperation(userToken);
 			try
 			{
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.DownloadBits(webRequest, null, new CompletionDelegate(this.DownloadStringAsyncCallback), asyncOperation);
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				this.DownloadBitsAsync(webRequest, new ChunkedMemoryStream(), asyncOperation, new Action<byte[], Exception, AsyncOperation>(this.DownloadStringAsyncCallback));
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				this.DownloadStringAsyncCallback(null, ex, asyncOperation);
+				this.DownloadStringAsyncCallback(null, WebClient.GetExceptionToPropagate(ex), asyncOperation);
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event DownloadDataCompletedEventHandler DownloadDataCompleted;
-
-		protected virtual void OnDownloadDataCompleted(DownloadDataCompletedEventArgs e)
-		{
-			if (this.DownloadDataCompleted != null)
-			{
-				this.DownloadDataCompleted(this, e);
-			}
-		}
-
-		private void DownloadDataOperationCompleted(object arg)
-		{
-			this.OnDownloadDataCompleted((DownloadDataCompletedEventArgs)arg);
 		}
 
 		private void DownloadDataAsyncCallback(byte[] returnBytes, Exception exception, object state)
 		{
 			AsyncOperation asyncOperation = (AsyncOperation)state;
-			DownloadDataCompletedEventArgs e = new DownloadDataCompletedEventArgs(returnBytes, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.downloadDataOperationCompleted, e);
+			DownloadDataCompletedEventArgs e = new DownloadDataCompletedEventArgs(returnBytes, exception, this._canceled, asyncOperation.UserSuppliedState);
+			this.InvokeOperationCompleted(asyncOperation, this._downloadDataOperationCompleted, e);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadDataAsync(Uri address)
 		{
 			this.DownloadDataAsync(address, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadDataAsync(Uri address, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			WebClient.ThrowIfNull(address, "address");
+			AsyncOperation asyncOperation = this.StartAsyncOperation(userToken);
 			try
 			{
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.DownloadBits(webRequest, null, new CompletionDelegate(this.DownloadDataAsyncCallback), asyncOperation);
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				this.DownloadBitsAsync(webRequest, new ChunkedMemoryStream(), asyncOperation, new Action<byte[], Exception, AsyncOperation>(this.DownloadDataAsyncCallback));
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				this.DownloadDataAsyncCallback(null, ex, asyncOperation);
+				this.DownloadDataAsyncCallback(null, WebClient.GetExceptionToPropagate(ex), asyncOperation);
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event AsyncCompletedEventHandler DownloadFileCompleted;
-
-		protected virtual void OnDownloadFileCompleted(AsyncCompletedEventArgs e)
-		{
-			if (this.DownloadFileCompleted != null)
-			{
-				this.DownloadFileCompleted(this, e);
-			}
-		}
-
-		private void DownloadFileOperationCompleted(object arg)
-		{
-			this.OnDownloadFileCompleted((AsyncCompletedEventArgs)arg);
 		}
 
 		private void DownloadFileAsyncCallback(byte[] returnBytes, Exception exception, object state)
 		{
 			AsyncOperation asyncOperation = (AsyncOperation)state;
-			AsyncCompletedEventArgs e = new AsyncCompletedEventArgs(exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.downloadFileOperationCompleted, e);
+			AsyncCompletedEventArgs e = new AsyncCompletedEventArgs(exception, this._canceled, asyncOperation.UserSuppliedState);
+			this.InvokeOperationCompleted(asyncOperation, this._downloadFileOperationCompleted, e);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadFileAsync(Uri address, string fileName)
 		{
 			this.DownloadFileAsync(address, fileName, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void DownloadFileAsync(Uri address, string fileName, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (fileName == null)
-			{
-				throw new ArgumentNullException("fileName");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(fileName, "fileName");
 			FileStream fileStream = null;
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			AsyncOperation asyncOperation = this.StartAsyncOperation(userToken);
 			try
 			{
 				fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.DownloadBits(webRequest, fileStream, new CompletionDelegate(this.DownloadFileAsyncCallback), asyncOperation);
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				this.DownloadBitsAsync(webRequest, fileStream, asyncOperation, new Action<byte[], Exception, AsyncOperation>(this.DownloadFileAsyncCallback));
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
 				if (fileStream != null)
 				{
 					fileStream.Close();
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				this.DownloadFileAsyncCallback(null, ex, asyncOperation);
-			}
-			bool on2 = Logging.On;
-		}
-
-		public event UploadStringCompletedEventHandler UploadStringCompleted;
-
-		protected virtual void OnUploadStringCompleted(UploadStringCompletedEventArgs e)
-		{
-			if (this.UploadStringCompleted != null)
-			{
-				this.UploadStringCompleted(this, e);
+				this.DownloadFileAsyncCallback(null, WebClient.GetExceptionToPropagate(ex), asyncOperation);
 			}
 		}
 
-		private void UploadStringOperationCompleted(object arg)
-		{
-			this.OnUploadStringCompleted((UploadStringCompletedEventArgs)arg);
-		}
-
-		private void StartDownloadAsync(WebClient.UploadBitsState state)
-		{
-			try
-			{
-				this.DownloadBits(state.Request, null, state.DownloadCompletionDelegate, state.AsyncOp);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				state.DownloadCompletionDelegate(null, ex, state.AsyncOp);
-			}
-		}
-
-		private void UploadStringAsyncWriteCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)state;
-			if (exception != null)
-			{
-				UploadStringCompletedEventArgs e = new UploadStringCompletedEventArgs(null, exception, this.m_Cancelled, uploadBitsState.AsyncOp.UserSuppliedState);
-				this.InvokeOperationCompleted(uploadBitsState.AsyncOp, this.uploadStringOperationCompleted, e);
-				return;
-			}
-			this.StartDownloadAsync(uploadBitsState);
-		}
-
-		private void UploadStringAsyncReadCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			AsyncOperation asyncOperation = (AsyncOperation)state;
-			string text = null;
-			try
-			{
-				if (returnBytes != null)
-				{
-					text = this.GetStringUsingEncoding(this.m_WebRequest, returnBytes);
-				}
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				exception = ex;
-			}
-			UploadStringCompletedEventArgs e = new UploadStringCompletedEventArgs(text, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.uploadStringOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadStringAsync(Uri address, string data)
 		{
 			this.UploadStringAsync(address, null, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadStringAsync(Uri address, string method, string data)
 		{
 			this.UploadStringAsync(address, method, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadStringAsync(Uri address, string method, string data, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
+			AsyncOperation asyncOperation = this.StartAsyncOperation(userToken);
 			try
 			{
 				byte[] bytes = this.Encoding.GetBytes(data);
-				this.m_Method = method;
-				this.m_ContentLength = (long)bytes.Length;
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
-				this.UploadBits(webRequest, null, bytes, 0, null, null, new CompletionDelegate(this.UploadStringAsyncWriteCallback), new CompletionDelegate(this.UploadStringAsyncReadCallback), asyncOperation);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				this._method = method;
+				this._contentLength = (long)bytes.Length;
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				this.UploadBitsAsync(webRequest, null, bytes, 0, null, null, asyncOperation, delegate(byte[] bytesResult, Exception error, AsyncOperation uploadAsyncOp)
 				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				UploadStringCompletedEventArgs e = new UploadStringCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.uploadStringOperationCompleted, e);
+					string text = null;
+					if (error == null && bytesResult != null)
+					{
+						try
+						{
+							text = this.GetStringUsingEncoding(this._webRequest, bytesResult);
+						}
+						catch (Exception ex2) when (!(ex2 is OutOfMemoryException))
+						{
+							error = WebClient.GetExceptionToPropagate(ex2);
+						}
+					}
+					this.InvokeOperationCompleted(uploadAsyncOp, this._uploadStringOperationCompleted, new UploadStringCompletedEventArgs(text, error, this._canceled, uploadAsyncOp.UserSuppliedState));
+				});
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event UploadDataCompletedEventHandler UploadDataCompleted;
-
-		protected virtual void OnUploadDataCompleted(UploadDataCompletedEventArgs e)
-		{
-			if (this.UploadDataCompleted != null)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				this.UploadDataCompleted(this, e);
+				UploadStringCompletedEventArgs e = new UploadStringCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOperation.UserSuppliedState);
+				this.InvokeOperationCompleted(asyncOperation, this._uploadStringOperationCompleted, e);
 			}
 		}
 
-		private void UploadDataOperationCompleted(object arg)
-		{
-			this.OnUploadDataCompleted((UploadDataCompletedEventArgs)arg);
-		}
-
-		private void UploadDataAsyncWriteCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)state;
-			if (exception != null)
-			{
-				UploadDataCompletedEventArgs e = new UploadDataCompletedEventArgs(returnBytes, exception, this.m_Cancelled, uploadBitsState.AsyncOp.UserSuppliedState);
-				this.InvokeOperationCompleted(uploadBitsState.AsyncOp, this.uploadDataOperationCompleted, e);
-				return;
-			}
-			this.StartDownloadAsync(uploadBitsState);
-		}
-
-		private void UploadDataAsyncReadCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			AsyncOperation asyncOperation = (AsyncOperation)state;
-			UploadDataCompletedEventArgs e = new UploadDataCompletedEventArgs(returnBytes, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.uploadDataOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadDataAsync(Uri address, byte[] data)
 		{
 			this.UploadDataAsync(address, null, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadDataAsync(Uri address, string method, byte[] data)
 		{
 			this.UploadDataAsync(address, method, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadDataAsync(Uri address, string method, byte[] data, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
-			int num = 0;
+			AsyncOperation asyncOp = this.StartAsyncOperation(userToken);
 			try
 			{
-				this.m_Method = method;
-				this.m_ContentLength = (long)data.Length;
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
+				this._method = method;
+				this._contentLength = (long)data.Length;
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				int num = 0;
 				if (this.UploadProgressChanged != null)
 				{
 					num = (int)Math.Min(8192L, (long)data.Length);
 				}
-				this.UploadBits(webRequest, null, data, num, null, null, new CompletionDelegate(this.UploadDataAsyncWriteCallback), new CompletionDelegate(this.UploadDataAsyncReadCallback), asyncOperation);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				this.UploadBitsAsync(webRequest, null, data, num, null, null, asyncOp, delegate(byte[] result, Exception error, AsyncOperation uploadAsyncOp)
 				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				UploadDataCompletedEventArgs e = new UploadDataCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.uploadDataOperationCompleted, e);
+					this.InvokeOperationCompleted(asyncOp, this._uploadDataOperationCompleted, new UploadDataCompletedEventArgs(result, error, this._canceled, uploadAsyncOp.UserSuppliedState));
+				});
 			}
-			bool on2 = Logging.On;
-		}
-
-		public event UploadFileCompletedEventHandler UploadFileCompleted;
-
-		protected virtual void OnUploadFileCompleted(UploadFileCompletedEventArgs e)
-		{
-			if (this.UploadFileCompleted != null)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				this.UploadFileCompleted(this, e);
+				UploadDataCompletedEventArgs e = new UploadDataCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOp.UserSuppliedState);
+				this.InvokeOperationCompleted(asyncOp, this._uploadDataOperationCompleted, e);
 			}
 		}
 
-		private void UploadFileOperationCompleted(object arg)
-		{
-			this.OnUploadFileCompleted((UploadFileCompletedEventArgs)arg);
-		}
-
-		private void UploadFileAsyncWriteCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)state;
-			if (exception != null)
-			{
-				UploadFileCompletedEventArgs e = new UploadFileCompletedEventArgs(returnBytes, exception, this.m_Cancelled, uploadBitsState.AsyncOp.UserSuppliedState);
-				this.InvokeOperationCompleted(uploadBitsState.AsyncOp, this.uploadFileOperationCompleted, e);
-				return;
-			}
-			this.StartDownloadAsync(uploadBitsState);
-		}
-
-		private void UploadFileAsyncReadCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			AsyncOperation asyncOperation = (AsyncOperation)state;
-			UploadFileCompletedEventArgs e = new UploadFileCompletedEventArgs(returnBytes, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.uploadFileOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadFileAsync(Uri address, string fileName)
 		{
 			this.UploadFileAsync(address, null, fileName, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadFileAsync(Uri address, string method, string fileName)
 		{
 			this.UploadFileAsync(address, method, fileName, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadFileAsync(Uri address, string method, string fileName, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (fileName == null)
-			{
-				throw new ArgumentNullException("fileName");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(fileName, "fileName");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
 			FileStream fileStream = null;
+			AsyncOperation asyncOp = this.StartAsyncOperation(userToken);
 			try
 			{
-				this.m_Method = method;
+				this._method = method;
 				byte[] array = null;
 				byte[] array2 = null;
 				byte[] array3 = null;
 				Uri uri = this.GetUri(address);
 				bool flag = uri.Scheme != Uri.UriSchemeFile;
 				this.OpenFileInternal(flag, fileName, ref fileStream, ref array3, ref array, ref array2);
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(uri));
-				this.UploadBits(webRequest, fileStream, array3, 0, array, array2, new CompletionDelegate(this.UploadFileAsyncWriteCallback), new CompletionDelegate(this.UploadFileAsyncReadCallback), asyncOperation);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(uri));
+				this.UploadBitsAsync(webRequest, fileStream, array3, 0, array, array2, asyncOp, delegate(byte[] result, Exception error, AsyncOperation uploadAsyncOp)
 				{
-					throw;
-				}
+					this.InvokeOperationCompleted(asyncOp, this._uploadFileOperationCompleted, new UploadFileCompletedEventArgs(result, error, this._canceled, uploadAsyncOp.UserSuppliedState));
+				});
+			}
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
+			{
 				if (fileStream != null)
 				{
 					fileStream.Close();
 				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				UploadFileCompletedEventArgs e = new UploadFileCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.uploadFileOperationCompleted, e);
-			}
-			bool on2 = Logging.On;
-		}
-
-		public event UploadValuesCompletedEventHandler UploadValuesCompleted;
-
-		protected virtual void OnUploadValuesCompleted(UploadValuesCompletedEventArgs e)
-		{
-			if (this.UploadValuesCompleted != null)
-			{
-				this.UploadValuesCompleted(this, e);
+				UploadFileCompletedEventArgs e = new UploadFileCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOp.UserSuppliedState);
+				this.InvokeOperationCompleted(asyncOp, this._uploadFileOperationCompleted, e);
 			}
 		}
 
-		private void UploadValuesOperationCompleted(object arg)
-		{
-			this.OnUploadValuesCompleted((UploadValuesCompletedEventArgs)arg);
-		}
-
-		private void UploadValuesAsyncWriteCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			WebClient.UploadBitsState uploadBitsState = (WebClient.UploadBitsState)state;
-			if (exception != null)
-			{
-				UploadValuesCompletedEventArgs e = new UploadValuesCompletedEventArgs(returnBytes, exception, this.m_Cancelled, uploadBitsState.AsyncOp.UserSuppliedState);
-				this.InvokeOperationCompleted(uploadBitsState.AsyncOp, this.uploadValuesOperationCompleted, e);
-				return;
-			}
-			this.StartDownloadAsync(uploadBitsState);
-		}
-
-		private void UploadValuesAsyncReadCallback(byte[] returnBytes, Exception exception, object state)
-		{
-			AsyncOperation asyncOperation = (AsyncOperation)state;
-			UploadValuesCompletedEventArgs e = new UploadValuesCompletedEventArgs(returnBytes, exception, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.uploadValuesOperationCompleted, e);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadValuesAsync(Uri address, NameValueCollection data)
 		{
 			this.UploadValuesAsync(address, null, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadValuesAsync(Uri address, string method, NameValueCollection data)
 		{
 			this.UploadValuesAsync(address, method, data, null);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public void UploadValuesAsync(Uri address, string method, NameValueCollection data, object userToken)
 		{
-			bool on = Logging.On;
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
+			WebClient.ThrowIfNull(address, "address");
+			WebClient.ThrowIfNull(data, "data");
 			if (method == null)
 			{
 				method = this.MapToDefaultMethod(address);
 			}
-			this.InitWebClientAsync();
-			this.ClearWebClientState();
-			AsyncOperation asyncOperation = AsyncOperationManager.CreateOperation(userToken);
-			this.m_AsyncOp = asyncOperation;
-			int num = 0;
+			AsyncOperation asyncOp = this.StartAsyncOperation(userToken);
 			try
 			{
-				byte[] array = this.UploadValuesInternal(data);
-				this.m_Method = method;
-				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
+				byte[] valuesToUpload = this.GetValuesToUpload(data);
+				this._method = method;
+				WebRequest webRequest = (this._webRequest = this.GetWebRequest(this.GetUri(address)));
+				int num = 0;
 				if (this.UploadProgressChanged != null)
 				{
-					num = (int)Math.Min(8192L, (long)array.Length);
+					num = (int)Math.Min(8192L, (long)valuesToUpload.Length);
 				}
-				this.UploadBits(webRequest, null, array, num, null, null, new CompletionDelegate(this.UploadValuesAsyncWriteCallback), new CompletionDelegate(this.UploadValuesAsyncReadCallback), asyncOperation);
+				this.UploadBitsAsync(webRequest, null, valuesToUpload, num, null, null, asyncOp, delegate(byte[] result, Exception error, AsyncOperation uploadAsyncOp)
+				{
+					this.InvokeOperationCompleted(asyncOp, this._uploadValuesOperationCompleted, new UploadValuesCompletedEventArgs(result, error, this._canceled, uploadAsyncOp.UserSuppliedState));
+				});
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				if (!(ex is WebException) && !(ex is SecurityException))
-				{
-					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex);
-				}
-				UploadValuesCompletedEventArgs e = new UploadValuesCompletedEventArgs(null, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-				this.InvokeOperationCompleted(asyncOperation, this.uploadValuesOperationCompleted, e);
+				UploadValuesCompletedEventArgs e = new UploadValuesCompletedEventArgs(null, WebClient.GetExceptionToPropagate(ex), this._canceled, asyncOp.UserSuppliedState);
+				this.InvokeOperationCompleted(asyncOp, this._uploadValuesOperationCompleted, e);
 			}
-			bool on2 = Logging.On;
+		}
+
+		private static Exception GetExceptionToPropagate(Exception e)
+		{
+			if (!(e is WebException) && !(e is SecurityException))
+			{
+				return new WebException("An exception occurred during a WebClient request.", e);
+			}
+			return e;
 		}
 
 		public void CancelAsync()
 		{
-			WebRequest webRequest = this.m_WebRequest;
-			this.m_Cancelled = true;
+			WebRequest webRequest = this._webRequest;
+			this._canceled = true;
 			WebClient.AbortRequest(webRequest);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> DownloadStringTaskAsync(string address)
 		{
 			return this.DownloadStringTaskAsync(this.GetUri(address));
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> DownloadStringTaskAsync(Uri address)
 		{
 			TaskCompletionSource<string> tcs = new TaskCompletionSource<string>(address);
@@ -2317,15 +1878,11 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenReadTaskAsync(string address)
 		{
 			return this.OpenReadTaskAsync(this.GetUri(address));
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenReadTaskAsync(Uri address)
 		{
 			TaskCompletionSource<Stream> tcs = new TaskCompletionSource<Stream>(address);
@@ -2350,29 +1907,21 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenWriteTaskAsync(string address)
 		{
 			return this.OpenWriteTaskAsync(this.GetUri(address), null);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenWriteTaskAsync(Uri address)
 		{
 			return this.OpenWriteTaskAsync(address, null);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenWriteTaskAsync(string address, string method)
 		{
 			return this.OpenWriteTaskAsync(this.GetUri(address), method);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<Stream> OpenWriteTaskAsync(Uri address, string method)
 		{
 			TaskCompletionSource<Stream> tcs = new TaskCompletionSource<Stream>(address);
@@ -2397,29 +1946,21 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> UploadStringTaskAsync(string address, string data)
 		{
 			return this.UploadStringTaskAsync(address, null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> UploadStringTaskAsync(Uri address, string data)
 		{
 			return this.UploadStringTaskAsync(address, null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> UploadStringTaskAsync(string address, string method, string data)
 		{
 			return this.UploadStringTaskAsync(this.GetUri(address), method, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<string> UploadStringTaskAsync(Uri address, string method, string data)
 		{
 			TaskCompletionSource<string> tcs = new TaskCompletionSource<string>(address);
@@ -2444,15 +1985,11 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> DownloadDataTaskAsync(string address)
 		{
 			return this.DownloadDataTaskAsync(this.GetUri(address));
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> DownloadDataTaskAsync(Uri address)
 		{
 			TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>(address);
@@ -2477,15 +2014,11 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task DownloadFileTaskAsync(string address, string fileName)
 		{
 			return this.DownloadFileTaskAsync(this.GetUri(address), fileName);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task DownloadFileTaskAsync(Uri address, string fileName)
 		{
 			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>(address);
@@ -2510,29 +2043,21 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadDataTaskAsync(string address, byte[] data)
 		{
 			return this.UploadDataTaskAsync(this.GetUri(address), null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadDataTaskAsync(Uri address, byte[] data)
 		{
 			return this.UploadDataTaskAsync(address, null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadDataTaskAsync(string address, string method, byte[] data)
 		{
 			return this.UploadDataTaskAsync(this.GetUri(address), method, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadDataTaskAsync(Uri address, string method, byte[] data)
 		{
 			TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>(address);
@@ -2557,29 +2082,21 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadFileTaskAsync(string address, string fileName)
 		{
 			return this.UploadFileTaskAsync(this.GetUri(address), null, fileName);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadFileTaskAsync(Uri address, string fileName)
 		{
 			return this.UploadFileTaskAsync(address, null, fileName);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadFileTaskAsync(string address, string method, string fileName)
 		{
 			return this.UploadFileTaskAsync(this.GetUri(address), method, fileName);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadFileTaskAsync(Uri address, string method, string fileName)
 		{
 			TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>(address);
@@ -2604,29 +2121,21 @@ namespace System.Net
 			return tcs.Task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadValuesTaskAsync(string address, NameValueCollection data)
 		{
 			return this.UploadValuesTaskAsync(this.GetUri(address), null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadValuesTaskAsync(string address, string method, NameValueCollection data)
 		{
 			return this.UploadValuesTaskAsync(this.GetUri(address), method, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadValuesTaskAsync(Uri address, NameValueCollection data)
 		{
 			return this.UploadValuesTaskAsync(address, null, data);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<byte[]> UploadValuesTaskAsync(Uri address, string method, NameValueCollection data)
 		{
 			TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>(address);
@@ -2677,57 +2186,59 @@ namespace System.Net
 			}
 		}
 
-		public event DownloadProgressChangedEventHandler DownloadProgressChanged;
-
-		public event UploadProgressChangedEventHandler UploadProgressChanged;
-
-		protected virtual void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
-		{
-			if (this.DownloadProgressChanged != null)
-			{
-				this.DownloadProgressChanged(this, e);
-			}
-		}
-
-		protected virtual void OnUploadProgressChanged(UploadProgressChangedEventArgs e)
-		{
-			if (this.UploadProgressChanged != null)
-			{
-				this.UploadProgressChanged(this, e);
-			}
-		}
-
-		private void ReportDownloadProgressChanged(object arg)
-		{
-			this.OnDownloadProgressChanged((DownloadProgressChangedEventArgs)arg);
-		}
-
-		private void ReportUploadProgressChanged(object arg)
-		{
-			this.OnUploadProgressChanged((UploadProgressChangedEventArgs)arg);
-		}
-
 		private void PostProgressChanged(AsyncOperation asyncOp, WebClient.ProgressData progress)
 		{
-			if (asyncOp != null && progress.BytesSent + progress.BytesReceived > 0L)
+			if (asyncOp != null && (progress.BytesSent > 0L || progress.BytesReceived > 0L))
 			{
-				int num;
 				if (progress.HasUploadPhase)
 				{
-					if (progress.TotalBytesToReceive < 0L && progress.BytesReceived == 0L)
+					if (this.UploadProgressChanged != null)
 					{
-						num = ((progress.TotalBytesToSend < 0L) ? 0 : ((progress.TotalBytesToSend == 0L) ? 50 : ((int)(50L * progress.BytesSent / progress.TotalBytesToSend))));
+						int num = ((progress.TotalBytesToReceive < 0L && progress.BytesReceived == 0L) ? ((progress.TotalBytesToSend < 0L) ? 0 : ((progress.TotalBytesToSend == 0L) ? 50 : ((int)(50L * progress.BytesSent / progress.TotalBytesToSend)))) : ((progress.TotalBytesToSend < 0L) ? 50 : ((progress.TotalBytesToReceive == 0L) ? 100 : ((int)(50L * progress.BytesReceived / progress.TotalBytesToReceive + 50L)))));
+						asyncOp.Post(this._reportUploadProgressChanged, new UploadProgressChangedEventArgs(num, asyncOp.UserSuppliedState, progress.BytesSent, progress.TotalBytesToSend, progress.BytesReceived, progress.TotalBytesToReceive));
+						return;
 					}
-					else
-					{
-						num = ((progress.TotalBytesToSend < 0L) ? 50 : ((progress.TotalBytesToReceive == 0L) ? 100 : ((int)(50L * progress.BytesReceived / progress.TotalBytesToReceive + 50L))));
-					}
-					asyncOp.Post(this.reportUploadProgressChanged, new UploadProgressChangedEventArgs(num, asyncOp.UserSuppliedState, progress.BytesSent, progress.TotalBytesToSend, progress.BytesReceived, progress.TotalBytesToReceive));
-					return;
 				}
-				num = ((progress.TotalBytesToReceive < 0L) ? 0 : ((progress.TotalBytesToReceive == 0L) ? 100 : ((int)(100L * progress.BytesReceived / progress.TotalBytesToReceive))));
-				asyncOp.Post(this.reportDownloadProgressChanged, new DownloadProgressChangedEventArgs(num, asyncOp.UserSuppliedState, progress.BytesReceived, progress.TotalBytesToReceive));
+				else if (this.DownloadProgressChanged != null)
+				{
+					int num = ((progress.TotalBytesToReceive < 0L) ? 0 : ((progress.TotalBytesToReceive == 0L) ? 100 : ((int)(100L * progress.BytesReceived / progress.TotalBytesToReceive))));
+					asyncOp.Post(this._reportDownloadProgressChanged, new DownloadProgressChangedEventArgs(num, asyncOp.UserSuppliedState, progress.BytesReceived, progress.TotalBytesToReceive));
+				}
 			}
+		}
+
+		private static void ThrowIfNull(object argument, string parameterName)
+		{
+			if (argument == null)
+			{
+				throw new ArgumentNullException(parameterName);
+			}
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		public bool AllowReadStreamBuffering { get; set; }
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		public bool AllowWriteStreamBuffering { get; set; }
+
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public event WriteStreamClosedEventHandler WriteStreamClosed
+		{
+			add
+			{
+			}
+			remove
+			{
+			}
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		protected virtual void OnWriteStreamClosed(WriteStreamClosedEventArgs e)
+		{
 		}
 
 		private const int DefaultCopyBufferLength = 8192;
@@ -2740,63 +2251,71 @@ namespace System.Net
 
 		private const string UploadValuesContentType = "application/x-www-form-urlencoded";
 
-		private Uri m_baseAddress;
+		private Uri _baseAddress;
 
-		private ICredentials m_credentials;
+		private ICredentials _credentials;
 
-		private WebHeaderCollection m_headers;
+		private WebHeaderCollection _headers;
 
-		private NameValueCollection m_requestParameters;
+		private NameValueCollection _requestParameters;
 
-		private WebResponse m_WebResponse;
+		private WebResponse _webResponse;
 
-		private WebRequest m_WebRequest;
+		private WebRequest _webRequest;
 
-		private Encoding m_Encoding = Encoding.Default;
+		private Encoding _encoding = Encoding.Default;
 
-		private string m_Method;
+		private string _method;
 
-		private long m_ContentLength = -1L;
+		private long _contentLength = -1L;
 
-		private bool m_InitWebClientAsync;
+		private bool _initWebClientAsync;
 
-		private bool m_Cancelled;
+		private bool _canceled;
 
-		private WebClient.ProgressData m_Progress;
+		private WebClient.ProgressData _progress;
 
-		private IWebProxy m_Proxy;
+		private IWebProxy _proxy;
 
-		private bool m_ProxySet;
+		private bool _proxySet;
 
-		private RequestCachePolicy m_CachePolicy;
+		private int _callNesting;
 
-		private int m_CallNesting;
+		private AsyncOperation _asyncOp;
 
-		private AsyncOperation m_AsyncOp;
+		private SendOrPostCallback _downloadDataOperationCompleted;
 
-		private SendOrPostCallback openReadOperationCompleted;
+		private SendOrPostCallback _openReadOperationCompleted;
 
-		private SendOrPostCallback openWriteOperationCompleted;
+		private SendOrPostCallback _openWriteOperationCompleted;
 
-		private SendOrPostCallback downloadStringOperationCompleted;
+		private SendOrPostCallback _downloadStringOperationCompleted;
 
-		private SendOrPostCallback downloadDataOperationCompleted;
+		private SendOrPostCallback _downloadFileOperationCompleted;
 
-		private SendOrPostCallback downloadFileOperationCompleted;
+		private SendOrPostCallback _uploadStringOperationCompleted;
 
-		private SendOrPostCallback uploadStringOperationCompleted;
+		private SendOrPostCallback _uploadDataOperationCompleted;
 
-		private SendOrPostCallback uploadDataOperationCompleted;
+		private SendOrPostCallback _uploadFileOperationCompleted;
 
-		private SendOrPostCallback uploadFileOperationCompleted;
+		private SendOrPostCallback _uploadValuesOperationCompleted;
 
-		private SendOrPostCallback uploadValuesOperationCompleted;
+		private SendOrPostCallback _reportDownloadProgressChanged;
 
-		private SendOrPostCallback reportDownloadProgressChanged;
+		private SendOrPostCallback _reportUploadProgressChanged;
 
-		private SendOrPostCallback reportUploadProgressChanged;
+		private static readonly char[] s_parseContentTypeSeparators = new char[] { ';', '=', ' ' };
 
-		private class ProgressData
+		private static readonly Encoding[] s_knownEncodings = new Encoding[]
+		{
+			Encoding.UTF8,
+			Encoding.UTF32,
+			Encoding.Unicode,
+			Encoding.BigEndianUnicode
+		};
+
+		private sealed class ProgressData
 		{
 			internal void Reset()
 			{
@@ -2818,439 +2337,13 @@ namespace System.Net
 			internal bool HasUploadPhase;
 		}
 
-		private class DownloadBitsState
-		{
-			internal DownloadBitsState(WebRequest request, Stream writeStream, CompletionDelegate completionDelegate, AsyncOperation asyncOp, WebClient.ProgressData progress, WebClient webClient)
-			{
-				this.WriteStream = writeStream;
-				this.Request = request;
-				this.AsyncOp = asyncOp;
-				this.CompletionDelegate = completionDelegate;
-				this.WebClient = webClient;
-				this.Progress = progress;
-			}
-
-			internal bool Async
-			{
-				get
-				{
-					return this.AsyncOp != null;
-				}
-			}
-
-			internal int SetResponse(WebResponse response)
-			{
-				this.ContentLength = response.ContentLength;
-				if (this.ContentLength == -1L || this.ContentLength > 65536L)
-				{
-					this.Length = 65536L;
-				}
-				else
-				{
-					this.Length = this.ContentLength;
-				}
-				if (this.WriteStream == null)
-				{
-					if (this.ContentLength > 2147483647L)
-					{
-						throw new WebException(global::SR.GetString("The message length limit was exceeded"), WebExceptionStatus.MessageLengthLimitExceeded);
-					}
-					this.SgBuffers = new ScatterGatherBuffers(this.Length);
-				}
-				this.InnerBuffer = new byte[(int)this.Length];
-				this.ReadStream = response.GetResponseStream();
-				if (this.Async && response.ContentLength >= 0L)
-				{
-					this.Progress.TotalBytesToReceive = response.ContentLength;
-				}
-				if (this.Async)
-				{
-					if (this.ReadStream == null || this.ReadStream == Stream.Null)
-					{
-						WebClient.DownloadBitsReadCallbackState(this, null);
-					}
-					else
-					{
-						this.ReadStream.BeginRead(this.InnerBuffer, 0, (int)this.Length, new AsyncCallback(WebClient.DownloadBitsReadCallback), this);
-					}
-					return -1;
-				}
-				if (this.ReadStream == null || this.ReadStream == Stream.Null)
-				{
-					return 0;
-				}
-				return this.ReadStream.Read(this.InnerBuffer, 0, (int)this.Length);
-			}
-
-			internal bool RetrieveBytes(ref int bytesRetrieved)
-			{
-				if (bytesRetrieved > 0)
-				{
-					if (this.WriteStream != null)
-					{
-						this.WriteStream.Write(this.InnerBuffer, 0, bytesRetrieved);
-					}
-					else
-					{
-						this.SgBuffers.Write(this.InnerBuffer, 0, bytesRetrieved);
-					}
-					if (this.Async)
-					{
-						this.Progress.BytesReceived += (long)bytesRetrieved;
-					}
-					if (this.ContentLength != 0L)
-					{
-						if (this.Async)
-						{
-							this.WebClient.PostProgressChanged(this.AsyncOp, this.Progress);
-							this.ReadStream.BeginRead(this.InnerBuffer, 0, (int)this.Length, new AsyncCallback(WebClient.DownloadBitsReadCallback), this);
-						}
-						else
-						{
-							bytesRetrieved = this.ReadStream.Read(this.InnerBuffer, 0, (int)this.Length);
-						}
-						return false;
-					}
-				}
-				if (this.Async)
-				{
-					if (this.Progress.TotalBytesToReceive < 0L)
-					{
-						this.Progress.TotalBytesToReceive = this.Progress.BytesReceived;
-					}
-					this.WebClient.PostProgressChanged(this.AsyncOp, this.Progress);
-				}
-				if (this.ReadStream != null)
-				{
-					this.ReadStream.Close();
-				}
-				if (this.WriteStream != null)
-				{
-					this.WriteStream.Close();
-				}
-				else if (this.WriteStream == null)
-				{
-					byte[] array = new byte[this.SgBuffers.Length];
-					if (this.SgBuffers.Length > 0)
-					{
-						BufferOffsetSize[] buffers = this.SgBuffers.GetBuffers();
-						int num = 0;
-						foreach (BufferOffsetSize bufferOffsetSize in buffers)
-						{
-							Buffer.BlockCopy(bufferOffsetSize.Buffer, 0, array, num, bufferOffsetSize.Size);
-							num += bufferOffsetSize.Size;
-						}
-					}
-					this.InnerBuffer = array;
-				}
-				return true;
-			}
-
-			internal void Close()
-			{
-				if (this.WriteStream != null)
-				{
-					this.WriteStream.Close();
-				}
-				if (this.ReadStream != null)
-				{
-					this.ReadStream.Close();
-				}
-			}
-
-			internal WebClient WebClient;
-
-			internal Stream WriteStream;
-
-			internal byte[] InnerBuffer;
-
-			internal AsyncOperation AsyncOp;
-
-			internal WebRequest Request;
-
-			internal CompletionDelegate CompletionDelegate;
-
-			internal Stream ReadStream;
-
-			internal ScatterGatherBuffers SgBuffers;
-
-			internal long ContentLength;
-
-			internal long Length;
-
-			private const int Offset = 0;
-
-			internal WebClient.ProgressData Progress;
-		}
-
-		private class UploadBitsState
-		{
-			internal UploadBitsState(WebRequest request, Stream readStream, byte[] buffer, int chunkSize, byte[] header, byte[] footer, CompletionDelegate uploadCompletionDelegate, CompletionDelegate downloadCompletionDelegate, AsyncOperation asyncOp, WebClient.ProgressData progress, WebClient webClient)
-			{
-				this.InnerBuffer = buffer;
-				this.m_ChunkSize = chunkSize;
-				this.m_BufferWritePosition = 0;
-				this.Header = header;
-				this.Footer = footer;
-				this.ReadStream = readStream;
-				this.Request = request;
-				this.AsyncOp = asyncOp;
-				this.UploadCompletionDelegate = uploadCompletionDelegate;
-				this.DownloadCompletionDelegate = downloadCompletionDelegate;
-				if (this.AsyncOp != null)
-				{
-					this.Progress = progress;
-					this.Progress.HasUploadPhase = true;
-					this.Progress.TotalBytesToSend = ((request.ContentLength < 0L) ? (-1L) : request.ContentLength);
-				}
-				this.WebClient = webClient;
-			}
-
-			internal bool FileUpload
-			{
-				get
-				{
-					return this.ReadStream != null;
-				}
-			}
-
-			internal bool Async
-			{
-				get
-				{
-					return this.AsyncOp != null;
-				}
-			}
-
-			internal void SetRequestStream(Stream writeStream)
-			{
-				this.WriteStream = writeStream;
-				byte[] array;
-				if (this.Header != null)
-				{
-					array = this.Header;
-					this.Header = null;
-				}
-				else
-				{
-					array = new byte[0];
-				}
-				if (this.Async)
-				{
-					this.Progress.BytesSent += (long)array.Length;
-					this.WriteStream.BeginWrite(array, 0, array.Length, new AsyncCallback(WebClient.UploadBitsWriteCallback), this);
-					return;
-				}
-				this.WriteStream.Write(array, 0, array.Length);
-			}
-
-			internal bool WriteBytes()
-			{
-				int num = 0;
-				if (this.Async)
-				{
-					this.WebClient.PostProgressChanged(this.AsyncOp, this.Progress);
-				}
-				int num3;
-				byte[] array;
-				if (this.FileUpload)
-				{
-					int num2 = 0;
-					if (this.InnerBuffer != null)
-					{
-						num2 = this.ReadStream.Read(this.InnerBuffer, 0, this.InnerBuffer.Length);
-						if (num2 <= 0)
-						{
-							this.ReadStream.Close();
-							this.InnerBuffer = null;
-						}
-					}
-					if (this.InnerBuffer != null)
-					{
-						num3 = num2;
-						array = this.InnerBuffer;
-					}
-					else
-					{
-						if (this.Footer == null)
-						{
-							return true;
-						}
-						num3 = this.Footer.Length;
-						array = this.Footer;
-						this.Footer = null;
-					}
-				}
-				else
-				{
-					if (this.InnerBuffer == null)
-					{
-						return true;
-					}
-					array = this.InnerBuffer;
-					if (this.m_ChunkSize != 0)
-					{
-						num = this.m_BufferWritePosition;
-						this.m_BufferWritePosition += this.m_ChunkSize;
-						num3 = this.m_ChunkSize;
-						if (this.m_BufferWritePosition >= this.InnerBuffer.Length)
-						{
-							num3 = this.InnerBuffer.Length - num;
-							this.InnerBuffer = null;
-						}
-					}
-					else
-					{
-						num3 = this.InnerBuffer.Length;
-						this.InnerBuffer = null;
-					}
-				}
-				if (this.Async)
-				{
-					this.Progress.BytesSent += (long)num3;
-					this.WriteStream.BeginWrite(array, num, num3, new AsyncCallback(WebClient.UploadBitsWriteCallback), this);
-				}
-				else
-				{
-					this.WriteStream.Write(array, 0, num3);
-				}
-				return false;
-			}
-
-			internal void Close()
-			{
-				if (this.WriteStream != null)
-				{
-					this.WriteStream.Close();
-				}
-				if (this.ReadStream != null)
-				{
-					this.ReadStream.Close();
-				}
-			}
-
-			private int m_ChunkSize;
-
-			private int m_BufferWritePosition;
-
-			internal WebClient WebClient;
-
-			internal Stream WriteStream;
-
-			internal byte[] InnerBuffer;
-
-			internal byte[] Header;
-
-			internal byte[] Footer;
-
-			internal AsyncOperation AsyncOp;
-
-			internal WebRequest Request;
-
-			internal CompletionDelegate UploadCompletionDelegate;
-
-			internal CompletionDelegate DownloadCompletionDelegate;
-
-			internal Stream ReadStream;
-
-			internal WebClient.ProgressData Progress;
-		}
-
-		private class WebClientWriteStream : Stream
+		private sealed class WebClientWriteStream : DelegatingStream
 		{
 			public WebClientWriteStream(Stream stream, WebRequest request, WebClient webClient)
+				: base(stream)
 			{
-				this.m_request = request;
-				this.m_stream = stream;
-				this.m_WebClient = webClient;
-			}
-
-			public override bool CanRead
-			{
-				get
-				{
-					return this.m_stream.CanRead;
-				}
-			}
-
-			public override bool CanSeek
-			{
-				get
-				{
-					return this.m_stream.CanSeek;
-				}
-			}
-
-			public override bool CanWrite
-			{
-				get
-				{
-					return this.m_stream.CanWrite;
-				}
-			}
-
-			public override bool CanTimeout
-			{
-				get
-				{
-					return this.m_stream.CanTimeout;
-				}
-			}
-
-			public override int ReadTimeout
-			{
-				get
-				{
-					return this.m_stream.ReadTimeout;
-				}
-				set
-				{
-					this.m_stream.ReadTimeout = value;
-				}
-			}
-
-			public override int WriteTimeout
-			{
-				get
-				{
-					return this.m_stream.WriteTimeout;
-				}
-				set
-				{
-					this.m_stream.WriteTimeout = value;
-				}
-			}
-
-			public override long Length
-			{
-				get
-				{
-					return this.m_stream.Length;
-				}
-			}
-
-			public override long Position
-			{
-				get
-				{
-					return this.m_stream.Position;
-				}
-				set
-				{
-					this.m_stream.Position = value;
-				}
-			}
-
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-			public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
-			{
-				return this.m_stream.BeginRead(buffer, offset, size, callback, state);
-			}
-
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-			public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
-			{
-				return this.m_stream.BeginWrite(buffer, offset, size, callback, state);
+				this._request = request;
+				this._webClient = webClient;
 			}
 
 			protected override void Dispose(bool disposing)
@@ -3259,8 +2352,7 @@ namespace System.Net
 				{
 					if (disposing)
 					{
-						this.m_stream.Close();
-						this.m_WebClient.GetWebResponse(this.m_request).Close();
+						this._webClient.GetWebResponse(this._request).Dispose();
 					}
 				}
 				finally
@@ -3269,46 +2361,9 @@ namespace System.Net
 				}
 			}
 
-			public override int EndRead(IAsyncResult result)
-			{
-				return this.m_stream.EndRead(result);
-			}
+			private readonly WebRequest _request;
 
-			public override void EndWrite(IAsyncResult result)
-			{
-				this.m_stream.EndWrite(result);
-			}
-
-			public override void Flush()
-			{
-				this.m_stream.Flush();
-			}
-
-			public override int Read(byte[] buffer, int offset, int count)
-			{
-				return this.m_stream.Read(buffer, offset, count);
-			}
-
-			public override long Seek(long offset, SeekOrigin origin)
-			{
-				return this.m_stream.Seek(offset, origin);
-			}
-
-			public override void SetLength(long value)
-			{
-				this.m_stream.SetLength(value);
-			}
-
-			public override void Write(byte[] buffer, int offset, int count)
-			{
-				this.m_stream.Write(buffer, offset, count);
-			}
-
-			private WebRequest m_request;
-
-			private Stream m_stream;
-
-			private WebClient m_WebClient;
+			private readonly WebClient _webClient;
 		}
 	}
 }

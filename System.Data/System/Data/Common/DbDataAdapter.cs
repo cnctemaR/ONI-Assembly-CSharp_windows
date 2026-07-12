@@ -25,8 +25,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DbCommand DeleteCommand
 		{
 			get

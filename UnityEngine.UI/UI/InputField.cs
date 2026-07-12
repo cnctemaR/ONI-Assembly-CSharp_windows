@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Input Field", 31)]
+	[AddComponentMenu("UI/Legacy/Input Field", 103)]
 	public class InputField : Selectable, IUpdateSelectedHandler, IEventSystemHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, ISubmitHandler, ICanvasElement, ILayoutElement
 	{
 		private BaseInput input
@@ -285,15 +285,27 @@ namespace UnityEngine.UI
 			}
 		}
 
-		public InputField.SubmitEvent onEndEdit
+		public InputField.EndEditEvent onEndEdit
 		{
 			get
 			{
-				return this.m_OnEndEdit;
+				return this.m_OnDidEndEdit;
 			}
 			set
 			{
-				SetPropertyUtility.SetClass<InputField.SubmitEvent>(ref this.m_OnEndEdit, value);
+				SetPropertyUtility.SetClass<InputField.EndEditEvent>(ref this.m_OnDidEndEdit, value);
+			}
+		}
+
+		public InputField.SubmitEvent onSubmit
+		{
+			get
+			{
+				return this.m_OnSubmit;
+			}
+			set
+			{
+				SetPropertyUtility.SetClass<InputField.SubmitEvent>(ref this.m_OnSubmit, value);
 			}
 		}
 
@@ -610,7 +622,7 @@ namespace UnityEngine.UI
 				this.m_TextComponent.UnregisterDirtyVerticesCallback(new UnityAction(this.UpdateLabel));
 				this.m_TextComponent.UnregisterDirtyMaterialCallback(new UnityAction(this.UpdateCaretMaterial));
 			}
-			CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+			CanvasUpdateRegistry.DisableCanvasElementForRebuild(this);
 			if (this.m_CachedInputRenderer != null)
 			{
 				this.m_CachedInputRenderer.Clear();
@@ -621,6 +633,12 @@ namespace UnityEngine.UI
 			}
 			this.m_Mesh = null;
 			base.OnDisable();
+		}
+
+		protected override void OnDestroy()
+		{
+			CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+			base.OnDestroy();
 		}
 
 		private IEnumerator CaretBlink()
@@ -739,11 +757,23 @@ namespace UnityEngine.UI
 
 		private bool TouchScreenKeyboardShouldBeUsed()
 		{
-			if (Application.platform == RuntimePlatform.Android)
+			RuntimePlatform platform = Application.platform;
+			if (platform != RuntimePlatform.Android)
 			{
+				if (platform != RuntimePlatform.WebGLPlayer)
+				{
+					return TouchScreenKeyboard.isSupported;
+				}
 				return !TouchScreenKeyboard.isInPlaceEditingAllowed;
 			}
-			return TouchScreenKeyboard.isSupported;
+			else
+			{
+				if (InputField.s_IsQuestDevice)
+				{
+					return TouchScreenKeyboard.isSupported;
+				}
+				return !TouchScreenKeyboard.isInPlaceEditingAllowed;
+			}
 		}
 
 		private bool InPlaceEditing()
@@ -753,7 +783,22 @@ namespace UnityEngine.UI
 
 		private bool InPlaceEditingChanged()
 		{
-			return this.m_TouchKeyboardAllowsInPlaceEditing != TouchScreenKeyboard.isInPlaceEditingAllowed;
+			return !InputField.s_IsQuestDevice && this.m_TouchKeyboardAllowsInPlaceEditing != TouchScreenKeyboard.isInPlaceEditingAllowed;
+		}
+
+		private RangeInt GetInternalSelection()
+		{
+			int num = Mathf.Min(this.caretSelectPositionInternal, this.caretPositionInternal);
+			int num2 = Mathf.Abs(this.caretSelectPositionInternal - this.caretPositionInternal);
+			return new RangeInt(num, num2);
+		}
+
+		private void UpdateKeyboardCaret()
+		{
+			if (this.m_HideMobileInput && this.m_Keyboard != null && this.m_Keyboard.canSetSelection && (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.tvOS))
+			{
+				this.m_Keyboard.selection = this.GetInternalSelection();
+			}
 		}
 
 		private void UpdateCaretFromKeyboard()
@@ -820,6 +865,10 @@ namespace UnityEngine.UI
 					{
 						this.m_WasCanceled = true;
 					}
+					else if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Done)
+					{
+						this.SendOnSubmit();
+					}
 				}
 				this.OnDeselect(null);
 				return;
@@ -850,7 +899,8 @@ namespace UnityEngine.UI
 						}
 						if (this.lineType == InputField.LineType.MultiLineSubmit && c == '\n')
 						{
-							this.m_Keyboard.text = this.m_Text;
+							this.UpdateLabel();
+							this.SendOnSubmit();
 							this.OnDeselect(null);
 							return;
 						}
@@ -878,13 +928,11 @@ namespace UnityEngine.UI
 					this.SendOnValueChangedAndUpdateLabel();
 				}
 			}
-			else if (this.m_HideMobileInput && this.m_Keyboard.canSetSelection)
+			else if (this.m_HideMobileInput && this.m_Keyboard != null && this.m_Keyboard.canSetSelection && Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.tvOS)
 			{
-				int num = Mathf.Min(this.caretSelectPositionInternal, this.caretPositionInternal);
-				int num2 = Mathf.Abs(this.caretSelectPositionInternal - this.caretPositionInternal);
-				this.m_Keyboard.selection = new RangeInt(num, num2);
+				this.m_Keyboard.selection = this.GetInternalSelection();
 			}
-			else if (this.m_Keyboard.canGetSelection && !this.m_HideMobileInput)
+			else if (this.m_Keyboard != null && this.m_Keyboard.canGetSelection)
 			{
 				this.UpdateCaretFromKeyboard();
 			}
@@ -893,6 +941,10 @@ namespace UnityEngine.UI
 				if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
 				{
 					this.m_WasCanceled = true;
+				}
+				else if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Done)
+				{
+					this.SendOnSubmit();
 				}
 				this.OnDeselect(null);
 			}
@@ -1025,6 +1077,7 @@ namespace UnityEngine.UI
 			{
 				this.m_DragCoroutine = base.StartCoroutine(this.MouseDragOutsideRect(eventData));
 			}
+			this.UpdateKeyboardCaret();
 			eventData.Use();
 		}
 
@@ -1105,6 +1158,7 @@ namespace UnityEngine.UI
 				this.caretSelectPositionInternal = (this.caretPositionInternal = this.GetCharacterIndexFromPosition(vector) + this.m_DrawStart);
 			}
 			this.UpdateLabel();
+			this.UpdateKeyboardCaret();
 			eventData.Use();
 		}
 
@@ -1284,7 +1338,7 @@ namespace UnityEngine.UI
 
 		private bool IsValidChar(char c)
 		{
-			return c != '\u007f' && (c == '\t' || c == '\n' || this.m_TextComponent.font.HasCharacter(c));
+			return c != '\0' && c != '\u007f' && (c == '\t' || c == '\n' || this.m_TextComponent.font.HasCharacter(c));
 		}
 
 		public void ProcessEvent(Event e)
@@ -1304,21 +1358,26 @@ namespace UnityEngine.UI
 				if (this.m_ProcessingEvent.rawType == EventType.KeyDown)
 				{
 					flag = true;
+					if (this.m_IsCompositionActive && this.compositionString.Length == 0 && this.m_ProcessingEvent.character == '\0' && this.m_ProcessingEvent.modifiers == EventModifiers.None)
+					{
+						continue;
+					}
 					if (this.KeyPressed(this.m_ProcessingEvent) == InputField.EditState.Finish)
 					{
+						if (!this.m_WasCanceled)
+						{
+							this.SendOnSubmit();
+						}
 						this.DeactivateInputField();
-						break;
+						continue;
 					}
+					this.UpdateLabel();
 				}
 				EventType type = this.m_ProcessingEvent.type;
-				if (type - EventType.ValidateCommand <= 1)
+				if (type - EventType.ValidateCommand <= 1 && this.m_ProcessingEvent.commandName == "SelectAll")
 				{
-					string commandName = this.m_ProcessingEvent.commandName;
-					if (commandName != null && commandName == "SelectAll")
-					{
-						this.SelectAll();
-						flag = true;
-					}
+					this.SelectAll();
+					flag = true;
 				}
 			}
 			if (flag)
@@ -1589,7 +1648,7 @@ namespace UnityEngine.UI
 				this.SendOnValueChangedAndUpdateLabel();
 				return;
 			}
-			if (this.caretPositionInternal > 0)
+			if (this.caretPositionInternal > 0 && this.caretPositionInternal - 1 < this.text.Length)
 			{
 				this.m_Text = this.text.Remove(this.caretPositionInternal - 1, 1);
 				this.caretSelectPositionInternal = --this.caretPositionInternal;
@@ -1639,12 +1698,21 @@ namespace UnityEngine.UI
 			}
 		}
 
-		protected void SendOnSubmit()
+		protected void SendOnEndEdit()
 		{
-			UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
+			UISystemProfilerApi.AddMarker("InputField.onEndEdit", this);
 			if (this.onEndEdit != null)
 			{
 				this.onEndEdit.Invoke(this.m_Text);
+			}
+		}
+
+		protected void SendOnSubmit()
+		{
+			UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
+			if (this.onSubmit != null)
+			{
+				this.onSubmit.Invoke(this.m_Text);
 			}
 		}
 
@@ -1721,10 +1789,12 @@ namespace UnityEngine.UI
 				string text;
 				if (EventSystem.current != null && base.gameObject == EventSystem.current.currentSelectedGameObject && this.compositionString.Length > 0)
 				{
+					this.m_IsCompositionActive = true;
 					text = this.text.Substring(0, this.m_CaretPosition) + this.compositionString + this.text.Substring(this.m_CaretPosition);
 				}
 				else
 				{
+					this.m_IsCompositionActive = false;
 					text = this.text;
 				}
 				string text2;
@@ -1746,6 +1816,7 @@ namespace UnityEngine.UI
 					this.m_DrawStart = 0;
 					this.m_DrawEnd = this.m_Text.Length;
 				}
+				this.textComponent.SetLayoutDirty();
 				if (!flag)
 				{
 					Vector2 size = this.m_TextComponent.rectTransform.rect.size;
@@ -2166,11 +2237,11 @@ namespace UnityEngine.UI
 			{
 				if (char.IsLetter(ch))
 				{
-					if (char.IsLower(ch) && (pos == 0 || text[pos - 1] == ' '))
+					if (char.IsLower(ch) && (pos == 0 || text[pos - 1] == ' ' || text[pos - 1] == '-'))
 					{
 						return char.ToUpper(ch);
 					}
-					if (char.IsUpper(ch) && pos > 0 && text[pos - 1] != ' ' && text[pos - 1] != '\'')
+					if (char.IsUpper(ch) && pos > 0 && text[pos - 1] != ' ' && text[pos - 1] != '\'' && text[pos - 1] != '-')
 					{
 						return char.ToLower(ch);
 					}
@@ -2178,11 +2249,11 @@ namespace UnityEngine.UI
 				}
 				else
 				{
-					if (ch == '\'' && !text.Contains("'") && (pos <= 0 || (text[pos - 1] != ' ' && text[pos - 1] != '\'')) && (pos >= text.Length || (text[pos] != ' ' && text[pos] != '\'')))
+					if (ch == '\'' && !text.Contains("'") && (pos <= 0 || (text[pos - 1] != ' ' && text[pos - 1] != '\'' && text[pos - 1] != '-')) && (pos >= text.Length || (text[pos] != ' ' && text[pos] != '\'' && text[pos] != '-')))
 					{
 						return ch;
 					}
-					if (ch == ' ' && pos != 0 && (pos <= 0 || (text[pos - 1] != ' ' && text[pos - 1] != '\'')) && (pos >= text.Length || (text[pos] != ' ' && text[pos] != '\'')))
+					if ((ch == ' ' || ch == '-') && pos != 0 && (pos <= 0 || (text[pos - 1] != ' ' && text[pos - 1] != '\'' && text[pos - 1] != '-')) && (pos >= text.Length || (text[pos] != ' ' && text[pos] != '\'' && text[pos - 1] != '-')))
 					{
 						return ch;
 					}
@@ -2247,7 +2318,7 @@ namespace UnityEngine.UI
 			{
 				EventSystem.current.SetSelectedGameObject(base.gameObject);
 			}
-			this.m_TouchKeyboardAllowsInPlaceEditing = TouchScreenKeyboard.isInPlaceEditingAllowed;
+			this.m_TouchKeyboardAllowsInPlaceEditing = !InputField.s_IsQuestDevice && TouchScreenKeyboard.isInPlaceEditingAllowed;
 			if (this.TouchScreenKeyboardShouldBeUsed())
 			{
 				if (this.input != null && this.input.touchSupported)
@@ -2311,7 +2382,7 @@ namespace UnityEngine.UI
 				{
 					this.text = this.m_OriginalText;
 				}
-				this.SendOnSubmit();
+				this.SendOnEndEdit();
 				if (this.m_Keyboard != null)
 				{
 					this.m_Keyboard.active = false;
@@ -2467,7 +2538,7 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return 0f;
+				return 5f;
 			}
 		}
 
@@ -2538,6 +2609,8 @@ namespace UnityEngine.UI
 
 		private static readonly char[] kSeparators = new char[] { ' ', '.', ',', '\t', '\r', '\n' };
 
+		private static bool s_IsQuestDevice = false;
+
 		[SerializeField]
 		[FormerlySerializedAs("text")]
 		protected Text m_TextComponent;
@@ -2578,8 +2651,12 @@ namespace UnityEngine.UI
 		[FormerlySerializedAs("onSubmit")]
 		[FormerlySerializedAs("m_OnSubmit")]
 		[FormerlySerializedAs("m_EndEdit")]
+		[FormerlySerializedAs("m_OnEndEdit")]
 		[SerializeField]
-		private InputField.SubmitEvent m_OnEndEdit = new InputField.SubmitEvent();
+		private InputField.SubmitEvent m_OnSubmit = new InputField.SubmitEvent();
+
+		[SerializeField]
+		private InputField.EndEditEvent m_OnDidEndEdit = new InputField.EndEditEvent();
 
 		[FormerlySerializedAs("onValueChange")]
 		[FormerlySerializedAs("m_OnValueChange")]
@@ -2601,6 +2678,7 @@ namespace UnityEngine.UI
 		private Color m_SelectionColor = new Color(0.65882355f, 0.80784315f, 1f, 0.7529412f);
 
 		[SerializeField]
+		[Multiline]
 		[FormerlySerializedAs("mValue")]
 		protected string m_Text = string.Empty;
 
@@ -2669,7 +2747,11 @@ namespace UnityEngine.UI
 
 		private bool m_TouchKeyboardAllowsInPlaceEditing;
 
+		private bool m_IsCompositionActive;
+
 		private const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
+
+		private const string kOculusQuestDeviceModel = "Oculus Quest";
 
 		private Event m_ProcessingEvent = new Event();
 
@@ -2717,6 +2799,11 @@ namespace UnityEngine.UI
 
 		[Serializable]
 		public class SubmitEvent : UnityEvent<string>
+		{
+		}
+
+		[Serializable]
+		public class EndEditEvent : UnityEvent<string>
 		{
 		}
 

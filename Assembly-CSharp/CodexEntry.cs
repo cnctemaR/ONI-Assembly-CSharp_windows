@@ -7,7 +7,6 @@ public class CodexEntry
 {
 	public CodexEntry()
 	{
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public CodexEntry(string category, List<ContentContainer> contentContainers, string name)
@@ -19,7 +18,6 @@ public class CodexEntry
 		{
 			this.sortString = UI.StripLinkFormatting(name);
 		}
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public CodexEntry(string category, string titleKey, List<ContentContainer> contentContainers)
@@ -31,7 +29,6 @@ public class CodexEntry
 		{
 			this.sortString = UI.StripLinkFormatting(this.title);
 		}
-		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public List<ContentContainer> contentContainers
@@ -174,25 +171,11 @@ public class CodexEntry
 		set
 		{
 			this._dlcIds = value;
-			string text = "[ ";
-			for (int i = 0; i < value.Length; i++)
-			{
-				text += ((value[i] == "") ? "\"\" (VANILLA_ID)" : ("\"" + value[i] + "\""));
-				if (i != value.Length - 1)
-				{
-					text += ", ";
-				}
-			}
-			text += " ]";
 		}
 	}
 
 	public string[] GetDlcIds()
 	{
-		if (this._dlcIds == null)
-		{
-			this._dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
-		}
 		return this._dlcIds;
 	}
 

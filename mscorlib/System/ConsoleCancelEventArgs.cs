@@ -9,20 +9,9 @@ namespace System
 		internal ConsoleCancelEventArgs(ConsoleSpecialKey type)
 		{
 			this._type = type;
-			this._cancel = false;
 		}
 
-		public bool Cancel
-		{
-			get
-			{
-				return this._cancel;
-			}
-			set
-			{
-				this._cancel = value;
-			}
-		}
+		public bool Cancel { get; set; }
 
 		public ConsoleSpecialKey SpecialKey
 		{
@@ -37,8 +26,6 @@ namespace System
 			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private ConsoleSpecialKey _type;
-
-		private bool _cancel;
+		private readonly ConsoleSpecialKey _type;
 	}
 }

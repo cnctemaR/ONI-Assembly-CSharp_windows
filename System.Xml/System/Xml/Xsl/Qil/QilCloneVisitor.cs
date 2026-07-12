@@ -11,8 +11,8 @@ namespace System.Xml.Xsl.Qil
 
 		public QilCloneVisitor(QilFactory fac, SubstitutionList subs)
 		{
-			this.fac = fac;
-			this.subs = subs;
+			this._fac = fac;
+			this._subs = subs;
 		}
 
 		public QilNode Clone(QilNode node)
@@ -34,7 +34,7 @@ namespace System.Xml.Xsl.Qil
 			}
 			if (qilNode == null)
 			{
-				qilNode = oldNode.ShallowClone(this.fac);
+				qilNode = oldNode.ShallowClone(this._fac);
 			}
 			return base.Visit(qilNode);
 		}
@@ -68,21 +68,21 @@ namespace System.Xml.Xsl.Qil
 
 		protected override void BeginScope(QilNode node)
 		{
-			this.subs.AddSubstitutionPair(node, node.ShallowClone(this.fac));
+			this._subs.AddSubstitutionPair(node, node.ShallowClone(this._fac));
 		}
 
 		protected override void EndScope(QilNode node)
 		{
-			this.subs.RemoveLastSubstitutionPair();
+			this._subs.RemoveLastSubstitutionPair();
 		}
 
 		protected QilNode FindClonedReference(QilNode node)
 		{
-			return this.subs.FindReplacement(node);
+			return this._subs.FindReplacement(node);
 		}
 
-		private QilFactory fac;
+		private QilFactory _fac;
 
-		private SubstitutionList subs;
+		private SubstitutionList _subs;
 	}
 }

@@ -141,8 +141,8 @@ namespace UnityEngine.Audio
 			AudioClipPlayable.SetSpatialBlendInternal(ref this.m_Handle, value);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("IsPlaying() has been deprecated. Use IsChannelPlaying() instead (UnityUpgradable) -> IsChannelPlaying()", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool IsPlaying()
 		{
 			return this.IsChannelPlaying();
@@ -190,11 +190,18 @@ namespace UnityEngine.Audio
 			bool flag = duration > 0.0;
 			if (flag)
 			{
+				double num = startDelay + duration;
+				bool flag2 = num >= this.m_Handle.GetDuration();
+				if (flag2)
+				{
+					this.m_Handle.SetDone(true);
+				}
 				this.m_Handle.SetDuration(duration + startTime);
 				AudioClipPlayable.SetPauseDelayInternal(ref this.m_Handle, startDelay + duration);
 			}
 			else
 			{
+				this.m_Handle.SetDone(true);
 				this.m_Handle.SetDuration(double.MaxValue);
 				AudioClipPlayable.SetPauseDelayInternal(ref this.m_Handle, 0.0);
 			}

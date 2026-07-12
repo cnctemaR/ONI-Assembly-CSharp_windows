@@ -11,12 +11,14 @@ public class WorkingToiletTracker : WorldTracker
 	public override void UpdateData()
 	{
 		int num = 0;
-		List<IUsable> worldItems = Components.Toilets.GetWorldItems(base.WorldID, false);
-		for (int i = 0; i < worldItems.Count; i++)
+		using (IEnumerator<IUsable> enumerator = Components.Toilets.WorldItemsEnumerate(base.WorldID, true).GetEnumerator())
 		{
-			if (worldItems[i].IsUsable())
+			while (enumerator.MoveNext())
 			{
-				num++;
+				if (enumerator.Current.IsUsable())
+				{
+					num++;
+				}
 			}
 		}
 		base.AddPoint((float)num);

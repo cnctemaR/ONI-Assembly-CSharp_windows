@@ -38,8 +38,8 @@ namespace System.Security
 		{
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		[SecurityPermission(SecurityAction.Assert, ControlPrincipal = true)]
+		[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 		public static void Run(SecurityContext securityContext, ContextCallback callback, object state)
 		{
 			callback(state);

@@ -716,7 +716,7 @@ namespace System.Data
 
 		internal ConstraintCollection()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataTable _table;

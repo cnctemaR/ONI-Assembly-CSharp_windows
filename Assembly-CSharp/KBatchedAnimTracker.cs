@@ -136,7 +136,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 				this.myAnim.SetDirty();
 			}
 		}
-		if (this.myAnim != null && flag != this.myAnim.enabled)
+		if (this.myAnim != null && flag != this.myAnim.enabled && this.synchronizeEnabledState)
 		{
 			this.myAnim.enabled = flag;
 		}
@@ -196,6 +196,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 	private Matrix2x3 previousMatrix;
 
 	private Vector3 previousPosition;
+
+	public bool synchronizeEnabledState = true;
 
 	[SerializeField]
 	private KBatchedAnimController myAnim;

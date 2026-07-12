@@ -5,151 +5,188 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	public struct ShaderKeyword
 	{
+		[FreeFunction("ShaderScripting::GetGlobalKeywordCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern uint GetGlobalKeywordCount();
+
 		[FreeFunction("ShaderScripting::GetGlobalKeywordIndex")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetGlobalKeywordIndex(string keyword);
+		internal static extern uint GetGlobalKeywordIndex(string keyword);
+
+		[FreeFunction("ShaderScripting::GetKeywordCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern uint GetKeywordCount(Shader shader);
 
 		[FreeFunction("ShaderScripting::GetKeywordIndex")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetKeywordIndex(Shader shader, string keyword);
+		internal static extern uint GetKeywordIndex(Shader shader, string keyword);
+
+		[FreeFunction("ShaderScripting::GetKeywordCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern uint GetComputeShaderKeywordCount(ComputeShader shader);
 
 		[FreeFunction("ShaderScripting::GetKeywordIndex")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetComputeShaderKeywordIndex(ComputeShader shader, string keyword);
+		internal static extern uint GetComputeShaderKeywordIndex(ComputeShader shader, string keyword);
 
-		[FreeFunction("ShaderScripting::GetGlobalKeywordName")]
-		public static string GetGlobalKeywordName(ShaderKeyword index)
+		[FreeFunction("ShaderScripting::CreateGlobalKeyword")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CreateGlobalKeyword(string keyword);
+
+		[FreeFunction("ShaderScripting::GetKeywordType")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ShaderKeywordType GetGlobalShaderKeywordType(uint keyword);
+
+		public string name
 		{
-			return ShaderKeyword.GetGlobalKeywordName_Injected(ref index);
+			get
+			{
+				return this.m_Name;
+			}
 		}
 
-		[FreeFunction("ShaderScripting::GetGlobalKeywordType")]
 		public static ShaderKeywordType GetGlobalKeywordType(ShaderKeyword index)
 		{
-			return ShaderKeyword.GetGlobalKeywordType_Injected(ref index);
-		}
-
-		[FreeFunction("ShaderScripting::IsKeywordLocal")]
-		public static bool IsKeywordLocal(ShaderKeyword index)
-		{
-			return ShaderKeyword.IsKeywordLocal_Injected(ref index);
-		}
-
-		[FreeFunction("ShaderScripting::GetKeywordName")]
-		public static string GetKeywordName(Shader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetKeywordName_Injected(shader, ref index);
-		}
-
-		[FreeFunction("ShaderScripting::GetKeywordType")]
-		public static ShaderKeywordType GetKeywordType(Shader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetKeywordType_Injected(shader, ref index);
-		}
-
-		[FreeFunction("ShaderScripting::GetKeywordName")]
-		internal static string GetComputeShaderKeywordName(ComputeShader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetComputeShaderKeywordName_Injected(shader, ref index);
-		}
-
-		[FreeFunction("ShaderScripting::GetKeywordType")]
-		internal static ShaderKeywordType GetComputeShaderKeywordType(ComputeShader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetComputeShaderKeywordType_Injected(shader, ref index);
-		}
-
-		public static string GetKeywordName(ComputeShader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetComputeShaderKeywordName(shader, index);
-		}
-
-		public static ShaderKeywordType GetKeywordType(ComputeShader shader, ShaderKeyword index)
-		{
-			return ShaderKeyword.GetComputeShaderKeywordType(shader, index);
-		}
-
-		internal ShaderKeyword(int keywordIndex)
-		{
-			this.m_KeywordIndex = keywordIndex;
+			bool flag = index.IsValid();
+			ShaderKeywordType shaderKeywordType;
+			if (flag)
+			{
+				shaderKeywordType = ShaderKeyword.GetGlobalShaderKeywordType(index.m_Index);
+			}
+			else
+			{
+				shaderKeywordType = ShaderKeywordType.UserDefined;
+			}
+			return shaderKeywordType;
 		}
 
 		public ShaderKeyword(string keywordName)
 		{
-			this.m_KeywordIndex = ShaderKeyword.GetGlobalKeywordIndex(keywordName);
+			this.m_Name = keywordName;
+			this.m_Index = ShaderKeyword.GetGlobalKeywordIndex(keywordName);
+			bool flag = this.m_Index >= ShaderKeyword.GetGlobalKeywordCount();
+			if (flag)
+			{
+				ShaderKeyword.CreateGlobalKeyword(keywordName);
+				this.m_Index = ShaderKeyword.GetGlobalKeywordIndex(keywordName);
+			}
+			this.m_IsValid = true;
+			this.m_IsLocal = false;
+			this.m_IsCompute = false;
 		}
 
 		public ShaderKeyword(Shader shader, string keywordName)
 		{
-			this.m_KeywordIndex = ShaderKeyword.GetKeywordIndex(shader, keywordName);
+			this.m_Name = keywordName;
+			this.m_Index = ShaderKeyword.GetKeywordIndex(shader, keywordName);
+			this.m_IsValid = this.m_Index < ShaderKeyword.GetKeywordCount(shader);
+			this.m_IsLocal = true;
+			this.m_IsCompute = false;
 		}
 
 		public ShaderKeyword(ComputeShader shader, string keywordName)
 		{
-			this.m_KeywordIndex = ShaderKeyword.GetComputeShaderKeywordIndex(shader, keywordName);
+			this.m_Name = keywordName;
+			this.m_Index = ShaderKeyword.GetComputeShaderKeywordIndex(shader, keywordName);
+			this.m_IsValid = this.m_Index < ShaderKeyword.GetComputeShaderKeywordCount(shader);
+			this.m_IsLocal = true;
+			this.m_IsCompute = true;
+		}
+
+		public static bool IsKeywordLocal(ShaderKeyword keyword)
+		{
+			return keyword.m_IsLocal;
 		}
 
 		public bool IsValid()
 		{
-			return this.m_KeywordIndex >= 0 && this.m_KeywordIndex < 448 && this.m_KeywordIndex != -1;
+			return this.m_IsValid;
+		}
+
+		public bool IsValid(ComputeShader shader)
+		{
+			return this.m_IsValid;
+		}
+
+		public bool IsValid(Shader shader)
+		{
+			return this.m_IsValid;
 		}
 
 		public int index
 		{
 			get
 			{
-				return this.m_KeywordIndex;
+				return (int)this.m_Index;
 			}
 		}
 
-		[Obsolete("GetKeywordType is deprecated. Use ShaderKeyword.GetGlobalKeywordType instead.")]
+		public override string ToString()
+		{
+			return this.m_Name;
+		}
+
+		[Obsolete("GetKeywordType is deprecated. Only global keywords can have a type. This method always returns ShaderKeywordType.UserDefined.")]
+		public static ShaderKeywordType GetKeywordType(Shader shader, ShaderKeyword index)
+		{
+			return ShaderKeywordType.UserDefined;
+		}
+
+		[Obsolete("GetKeywordType is deprecated. Only global keywords can have a type. This method always returns ShaderKeywordType.UserDefined.")]
+		public static ShaderKeywordType GetKeywordType(ComputeShader shader, ShaderKeyword index)
+		{
+			return ShaderKeywordType.UserDefined;
+		}
+
+		[Obsolete("GetGlobalKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		public static string GetGlobalKeywordName(ShaderKeyword index)
+		{
+			return index.m_Name;
+		}
+
+		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		public static string GetKeywordName(Shader shader, ShaderKeyword index)
+		{
+			return index.m_Name;
+		}
+
+		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		public static string GetKeywordName(ComputeShader shader, ShaderKeyword index)
+		{
+			return index.m_Name;
+		}
+
+		[Obsolete("GetKeywordType is deprecated. Use ShaderKeyword.name instead.")]
 		public ShaderKeywordType GetKeywordType()
 		{
 			return ShaderKeyword.GetGlobalKeywordType(this);
 		}
 
-		[Obsolete("GetKeywordName is deprecated. Use ShaderKeyword.GetGlobalKeywordName instead.")]
+		[Obsolete("GetKeywordName is deprecated. Use ShaderKeyword.name instead.")]
 		public string GetKeywordName()
 		{
 			return ShaderKeyword.GetGlobalKeywordName(this);
 		}
 
-		[Obsolete("GetName() has been deprecated. Use ShaderKeyword.GetGlobalKeywordName instead.")]
+		[Obsolete("GetName() has been deprecated. Use ShaderKeyword.name instead.")]
 		public string GetName()
 		{
 			return this.GetKeywordName();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetGlobalKeywordName_Injected(ref ShaderKeyword index);
+		internal string m_Name;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderKeywordType GetGlobalKeywordType_Injected(ref ShaderKeyword index);
+		internal uint m_Index;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsKeywordLocal_Injected(ref ShaderKeyword index);
+		internal bool m_IsLocal;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetKeywordName_Injected(Shader shader, ref ShaderKeyword index);
+		internal bool m_IsCompute;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderKeywordType GetKeywordType_Injected(Shader shader, ref ShaderKeyword index);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetComputeShaderKeywordName_Injected(ComputeShader shader, ref ShaderKeyword index);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderKeywordType GetComputeShaderKeywordType_Injected(ComputeShader shader, ref ShaderKeyword index);
-
-		internal const int k_MaxShaderKeywords = 448;
-
-		private const int k_InvalidKeyword = -1;
-
-		internal int m_KeywordIndex;
+		internal bool m_IsValid;
 	}
 }

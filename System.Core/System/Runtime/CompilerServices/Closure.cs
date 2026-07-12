@@ -4,8 +4,8 @@ using System.Diagnostics;
 
 namespace System.Runtime.CompilerServices
 {
-	[DebuggerStepThrough]
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[DebuggerStepThrough]
 	public sealed class Closure
 	{
 		public Closure(object[] constants, object[] locals)

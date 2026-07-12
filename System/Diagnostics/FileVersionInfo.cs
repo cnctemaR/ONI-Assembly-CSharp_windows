@@ -257,7 +257,20 @@ namespace System.Diagnostics
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVersionInfo_internal(string fileName);
+		private unsafe extern void GetVersionInfo_icall(char* fileName, int fileName_length);
+
+		private unsafe void GetVersionInfo_internal(string fileName)
+		{
+			fixed (string text = fileName)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				this.GetVersionInfo_icall(ptr, (fileName != null) ? fileName.Length : 0);
+			}
+		}
 
 		public static FileVersionInfo GetVersionInfo(string fileName)
 		{

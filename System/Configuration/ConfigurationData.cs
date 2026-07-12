@@ -142,7 +142,9 @@ namespace System.Configuration
 			object obj = Activator.CreateInstance(type, true);
 			if (obj == null)
 			{
-				throw new ConfigurationException("Cannot get instance for " + type);
+				string text = "Cannot get instance for ";
+				Type type2 = type;
+				throw new ConfigurationException(text + ((type2 != null) ? type2.ToString() : null));
 			}
 			return obj;
 		}
@@ -176,7 +178,7 @@ namespace System.Configuration
 			{
 				return configXmlDocument;
 			}
-			string[] array = sectionName.Split(new char[] { '/' });
+			string[] array = sectionName.Split('/', StringSplitOptions.None);
 			string text = this.pending[array[0]] as string;
 			if (text == null)
 			{

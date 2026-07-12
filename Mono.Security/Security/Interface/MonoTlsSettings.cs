@@ -80,6 +80,10 @@ namespace Mono.Security.Interface
 
 		internal bool SendCloseNotify { get; set; }
 
+		public string[] ClientCertificateIssuers { get; set; }
+
+		public bool DisallowUnauthenticatedCertificateRequest { get; set; }
+
 		public TlsProtocols? EnabledProtocols { get; set; }
 
 		[CLSCompliant(false)]
@@ -152,6 +156,8 @@ namespace Mono.Security.Interface
 			this.EnabledCiphers = other.EnabledCiphers;
 			this.CertificateValidationTime = other.CertificateValidationTime;
 			this.SendCloseNotify = other.SendCloseNotify;
+			this.ClientCertificateIssuers = other.ClientCertificateIssuers;
+			this.DisallowUnauthenticatedCertificateRequest = other.DisallowUnauthenticatedCertificateRequest;
 			if (other.TrustAnchors != null)
 			{
 				this.TrustAnchors = new X509CertificateCollection(other.TrustAnchors);

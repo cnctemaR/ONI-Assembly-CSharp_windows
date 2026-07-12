@@ -30,7 +30,7 @@ namespace System.Net.WebSockets
 				}
 				text = string.Join<WebSocketState>(", ", validStates);
 			}
-			throw new WebSocketException(WebSocketError.InvalidState, global::SR.Format("The WebSocket is in an invalid state ('{0}') for this operation. Valid states are: '{1}'", currentState, text));
+			throw new WebSocketException(WebSocketError.InvalidState, SR.Format("The WebSocket is in an invalid state ('{0}') for this operation. Valid states are: '{1}'", currentState, text));
 		}
 
 		internal static void ValidateSubprotocol(string subProtocol)
@@ -55,7 +55,7 @@ namespace System.Net.WebSockets
 			}
 			if (text != null)
 			{
-				throw new ArgumentException(global::SR.Format("The WebSocket protocol '{0}' is invalid because it contains the invalid character '{1}'.", subProtocol, text), "subProtocol");
+				throw new ArgumentException(SR.Format("The WebSocket protocol '{0}' is invalid because it contains the invalid character '{1}'.", subProtocol, text), "subProtocol");
 			}
 		}
 
@@ -63,11 +63,11 @@ namespace System.Net.WebSockets
 		{
 			if (closeStatus == WebSocketCloseStatus.Empty && !string.IsNullOrEmpty(statusDescription))
 			{
-				throw new ArgumentException(global::SR.Format("The close status description '{0}' is invalid. When using close status code '{1}' the description must be null.", statusDescription, WebSocketCloseStatus.Empty), "statusDescription");
+				throw new ArgumentException(SR.Format("The close status description '{0}' is invalid. When using close status code '{1}' the description must be null.", statusDescription, WebSocketCloseStatus.Empty), "statusDescription");
 			}
 			if ((closeStatus >= (WebSocketCloseStatus)0 && closeStatus <= (WebSocketCloseStatus)999) || closeStatus == (WebSocketCloseStatus)1006 || closeStatus == (WebSocketCloseStatus)1015)
 			{
-				throw new ArgumentException(global::SR.Format("The close status code '{0}' is reserved for system use only and cannot be specified when calling this method.", (int)closeStatus), "closeStatus");
+				throw new ArgumentException(SR.Format("The close status code '{0}' is reserved for system use only and cannot be specified when calling this method.", (int)closeStatus), "closeStatus");
 			}
 			int num = 0;
 			if (!string.IsNullOrEmpty(statusDescription))
@@ -76,7 +76,7 @@ namespace System.Net.WebSockets
 			}
 			if (num > 123)
 			{
-				throw new ArgumentException(global::SR.Format("The close status description '{0}' is too long. The UTF8-representation of the status description must not be longer than {1} bytes.", statusDescription, 123), "statusDescription");
+				throw new ArgumentException(SR.Format("The close status description '{0}' is too long. The UTF8-representation of the status description must not be longer than {1} bytes.", statusDescription, 123), "statusDescription");
 			}
 		}
 

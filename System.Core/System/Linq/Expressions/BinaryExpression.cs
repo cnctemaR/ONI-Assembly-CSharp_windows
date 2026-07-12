@@ -155,17 +155,17 @@ namespace System.Linq.Expressions
 		private Expression ReduceIndex()
 		{
 			IndexExpression indexExpression = (IndexExpression)this.Left;
-			ArrayBuilder<ParameterExpression> arrayBuilder = new ArrayBuilder<ParameterExpression>(indexExpression.ArgumentCount + 2);
-			ArrayBuilder<Expression> arrayBuilder2 = new ArrayBuilder<Expression>(indexExpression.ArgumentCount + 3);
+			global::System.Collections.Generic.ArrayBuilder<ParameterExpression> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<ParameterExpression>(indexExpression.ArgumentCount + 2);
+			global::System.Collections.Generic.ArrayBuilder<Expression> arrayBuilder2 = new global::System.Collections.Generic.ArrayBuilder<Expression>(indexExpression.ArgumentCount + 3);
 			ParameterExpression parameterExpression = Expression.Variable(indexExpression.Object.Type, "tempObj");
 			arrayBuilder.UncheckedAdd(parameterExpression);
 			arrayBuilder2.UncheckedAdd(Expression.Assign(parameterExpression, indexExpression.Object));
 			int argumentCount = indexExpression.ArgumentCount;
-			ArrayBuilder<Expression> arrayBuilder3 = new ArrayBuilder<Expression>(argumentCount);
+			global::System.Collections.Generic.ArrayBuilder<Expression> arrayBuilder3 = new global::System.Collections.Generic.ArrayBuilder<Expression>(argumentCount);
 			for (int i = 0; i < argumentCount; i++)
 			{
 				Expression argument = indexExpression.GetArgument(i);
-				ParameterExpression parameterExpression2 = Expression.Variable(argument.Type, "tempArg" + i);
+				ParameterExpression parameterExpression2 = Expression.Variable(argument.Type, "tempArg" + i.ToString());
 				arrayBuilder.UncheckedAdd(parameterExpression2);
 				arrayBuilder3.UncheckedAdd(parameterExpression2);
 				arrayBuilder2.UncheckedAdd(Expression.Assign(parameterExpression2, argument));

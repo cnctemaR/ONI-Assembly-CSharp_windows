@@ -18,8 +18,8 @@ namespace System.CodeDom.Compiler
 			Executor.ExecWaitWithCapture(cmd, Environment.CurrentDirectory, tempFiles, ref text, ref text2);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 		[SecurityPermission(SecurityAction.Assert, ControlPrincipal = true)]
+		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 		public static int ExecWaitWithCapture(IntPtr userToken, string cmd, string currentDir, TempFileCollection tempFiles, ref string outputName, ref string errorName)
 		{
 			int num;

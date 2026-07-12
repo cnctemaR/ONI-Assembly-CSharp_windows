@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -7,7 +8,7 @@ namespace UnityEngine.UI
 	{
 		public static void Notify2DMaskStateChanged(Component mask)
 		{
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			mask.GetComponentsInChildren<Component>(list);
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -20,12 +21,12 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		public static void NotifyStencilStateChanged(Component mask)
 		{
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			mask.GetComponentsInChildren<Component>(list);
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -38,12 +39,12 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		public static Transform FindRootSortOverrideCanvas(Transform start)
 		{
-			List<Canvas> list = ListPool<Canvas>.Get();
+			List<Canvas> list = CollectionPool<List<Canvas>, Canvas>.Get();
 			start.GetComponentsInParent<Canvas>(false, list);
 			Canvas canvas = null;
 			for (int i = 0; i < list.Count; i++)
@@ -54,7 +55,7 @@ namespace UnityEngine.UI
 					break;
 				}
 			}
-			ListPool<Canvas>.Release(list);
+			CollectionPool<List<Canvas>, Canvas>.Release(list);
 			if (!(canvas != null))
 			{
 				return null;
@@ -70,7 +71,7 @@ namespace UnityEngine.UI
 				return num;
 			}
 			Transform transform2 = transform.parent;
-			List<Mask> list = ListPool<Mask>.Get();
+			List<Mask> list = CollectionPool<List<Mask>, Mask>.Get();
 			while (transform2 != null)
 			{
 				transform2.GetComponents<Mask>(list);
@@ -88,7 +89,7 @@ namespace UnityEngine.UI
 				}
 				transform2 = transform2.parent;
 			}
-			ListPool<Mask>.Release(list);
+			CollectionPool<List<Mask>, Mask>.Release(list);
 			return num;
 		}
 
@@ -115,8 +116,8 @@ namespace UnityEngine.UI
 
 		public static RectMask2D GetRectMaskForClippable(IClippable clippable)
 		{
-			List<RectMask2D> list = ListPool<RectMask2D>.Get();
-			List<Canvas> list2 = ListPool<Canvas>.Get();
+			List<RectMask2D> list = CollectionPool<List<RectMask2D>, RectMask2D>.Get();
+			List<Canvas> list2 = CollectionPool<List<Canvas>, Canvas>.Get();
 			RectMask2D rectMask2D = null;
 			clippable.gameObject.GetComponentsInParent<RectMask2D>(false, list);
 			if (list.Count > 0)
@@ -147,16 +148,16 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<RectMask2D>.Release(list);
-			ListPool<Canvas>.Release(list2);
+			CollectionPool<List<RectMask2D>, RectMask2D>.Release(list);
+			CollectionPool<List<Canvas>, Canvas>.Release(list2);
 			return rectMask2D;
 		}
 
 		public static void GetRectMasksForClip(RectMask2D clipper, List<RectMask2D> masks)
 		{
 			masks.Clear();
-			List<Canvas> list = ListPool<Canvas>.Get();
-			List<RectMask2D> list2 = ListPool<RectMask2D>.Get();
+			List<Canvas> list = CollectionPool<List<Canvas>, Canvas>.Get();
+			List<RectMask2D> list2 = CollectionPool<List<RectMask2D>, RectMask2D>.Get();
 			clipper.transform.GetComponentsInParent<RectMask2D>(false, list2);
 			if (list2.Count > 0)
 			{
@@ -181,8 +182,8 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<RectMask2D>.Release(list2);
-			ListPool<Canvas>.Release(list);
+			CollectionPool<List<RectMask2D>, RectMask2D>.Release(list2);
+			CollectionPool<List<Canvas>, Canvas>.Release(list);
 		}
 	}
 }

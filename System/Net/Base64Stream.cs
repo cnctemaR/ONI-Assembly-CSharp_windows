@@ -5,45 +5,32 @@ using System.Text;
 
 namespace System.Net
 {
-	internal class Base64Stream : DelegatedStream, IEncodableStream
+	internal sealed class Base64Stream : DelegatedStream, IEncodableStream
 	{
 		internal Base64Stream(Stream stream, Base64WriteStateInfo writeStateInfo)
 			: base(stream)
 		{
-			this.writeState = new Base64WriteStateInfo();
-			this.lineLength = writeStateInfo.MaxLineLength;
-		}
-
-		internal Base64Stream(Stream stream, int lineLength)
-			: base(stream)
-		{
-			this.lineLength = lineLength;
-			this.writeState = new Base64WriteStateInfo();
+			this._writeState = new Base64WriteStateInfo();
+			this._lineLength = writeStateInfo.MaxLineLength;
 		}
 
 		internal Base64Stream(Base64WriteStateInfo writeStateInfo)
+			: base(new MemoryStream())
 		{
-			this.lineLength = writeStateInfo.MaxLineLength;
-			this.writeState = writeStateInfo;
-		}
-
-		public override bool CanWrite
-		{
-			get
-			{
-				return base.CanWrite;
-			}
+			this._lineLength = writeStateInfo.MaxLineLength;
+			this._writeState = writeStateInfo;
 		}
 
 		private Base64Stream.ReadStateInfo ReadState
 		{
 			get
 			{
-				if (this.readState == null)
+				Base64Stream.ReadStateInfo readStateInfo;
+				if ((readStateInfo = this._readState) == null)
 				{
-					this.readState = new Base64Stream.ReadStateInfo();
+					readStateInfo = (this._readState = new Base64Stream.ReadStateInfo());
 				}
-				return this.readState;
+				return readStateInfo;
 			}
 		}
 
@@ -51,7 +38,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.writeState;
+				return this._writeState;
 			}
 		}
 
@@ -95,7 +82,7 @@ namespace System.Net
 
 		public override void Close()
 		{
-			if (this.writeState != null && this.WriteState.Length > 0)
+			if (this._writeState != null && this.WriteState.Length > 0)
 			{
 				int padding = this.WriteState.Padding;
 				if (padding != 1)
@@ -104,9 +91,9 @@ namespace System.Net
 					{
 						this.WriteState.Append(new byte[]
 						{
-							Base64Stream.base64EncodeMap[(int)this.WriteState.LastBits],
-							Base64Stream.base64EncodeMap[64],
-							Base64Stream.base64EncodeMap[64]
+							Base64Stream.s_base64EncodeMap[(int)this.WriteState.LastBits],
+							Base64Stream.s_base64EncodeMap[64],
+							Base64Stream.s_base64EncodeMap[64]
 						});
 					}
 				}
@@ -114,8 +101,8 @@ namespace System.Net
 				{
 					this.WriteState.Append(new byte[]
 					{
-						Base64Stream.base64EncodeMap[(int)this.WriteState.LastBits],
-						Base64Stream.base64EncodeMap[64]
+						Base64Stream.s_base64EncodeMap[(int)this.WriteState.LastBits],
+						Base64Stream.s_base64EncodeMap[64]
 					});
 				}
 				this.WriteState.Padding = 0;
@@ -126,73 +113,69 @@ namespace System.Net
 
 		public unsafe int DecodeBytes(byte[] buffer, int offset, int count)
 		{
-			fixed (byte[] array = buffer)
+			byte* ptr;
+			if (buffer == null || buffer.Length == 0)
 			{
-				byte* ptr;
-				if (buffer == null || array.Length == 0)
+				ptr = null;
+			}
+			else
+			{
+				ptr = &buffer[0];
+			}
+			byte* ptr2 = ptr + offset;
+			byte* ptr3 = ptr2;
+			byte* ptr4 = ptr2;
+			byte* ptr5 = ptr2 + count;
+			while (ptr3 < ptr5)
+			{
+				if (*ptr3 == 13 || *ptr3 == 10 || *ptr3 == 61 || *ptr3 == 32 || *ptr3 == 9)
 				{
-					ptr = null;
+					ptr3++;
 				}
 				else
 				{
-					ptr = &array[0];
-				}
-				byte* ptr2 = ptr + offset;
-				byte* ptr3 = ptr2;
-				byte* ptr4 = ptr2;
-				byte* ptr5 = ptr2 + count;
-				while (ptr3 < ptr5)
-				{
-					if (*ptr3 == 13 || *ptr3 == 10 || *ptr3 == 61 || *ptr3 == 32 || *ptr3 == 9)
+					byte b = Base64Stream.s_base64DecodeMap[(int)(*ptr3)];
+					if (b == 255)
 					{
-						ptr3++;
+						throw new FormatException("An invalid character was found in the Base-64 stream.");
 					}
-					else
+					switch (this.ReadState.Pos)
 					{
-						byte b = Base64Stream.base64DecodeMap[(int)(*ptr3)];
-						if (b == 255)
-						{
-							throw new FormatException(global::SR.GetString("An invalid character was found in the Base-64 stream."));
-						}
-						switch (this.ReadState.Pos)
-						{
-						case 0:
-						{
-							this.ReadState.Val = (byte)(b << 2);
-							Base64Stream.ReadStateInfo readStateInfo = this.ReadState;
-							byte b2 = readStateInfo.Pos;
-							readStateInfo.Pos = b2 + 1;
-							break;
-						}
-						case 1:
-						{
-							*(ptr4++) = (byte)((int)this.ReadState.Val + (b >> 4));
-							this.ReadState.Val = (byte)(b << 4);
-							Base64Stream.ReadStateInfo readStateInfo2 = this.ReadState;
-							byte b2 = readStateInfo2.Pos;
-							readStateInfo2.Pos = b2 + 1;
-							break;
-						}
-						case 2:
-						{
-							*(ptr4++) = (byte)((int)this.ReadState.Val + (b >> 2));
-							this.ReadState.Val = (byte)(b << 6);
-							Base64Stream.ReadStateInfo readStateInfo3 = this.ReadState;
-							byte b2 = readStateInfo3.Pos;
-							readStateInfo3.Pos = b2 + 1;
-							break;
-						}
-						case 3:
-							*(ptr4++) = this.ReadState.Val + b;
-							this.ReadState.Pos = 0;
-							break;
-						}
-						ptr3++;
+					case 0:
+					{
+						this.ReadState.Val = (byte)(b << 2);
+						Base64Stream.ReadStateInfo readState = this.ReadState;
+						byte b2 = readState.Pos;
+						readState.Pos = b2 + 1;
+						break;
 					}
+					case 1:
+					{
+						*(ptr4++) = (byte)((int)this.ReadState.Val + (b >> 4));
+						this.ReadState.Val = (byte)(b << 4);
+						Base64Stream.ReadStateInfo readState2 = this.ReadState;
+						byte b2 = readState2.Pos;
+						readState2.Pos = b2 + 1;
+						break;
+					}
+					case 2:
+					{
+						*(ptr4++) = (byte)((int)this.ReadState.Val + (b >> 2));
+						this.ReadState.Val = (byte)(b << 6);
+						Base64Stream.ReadStateInfo readState3 = this.ReadState;
+						byte b2 = readState3.Pos;
+						readState3.Pos = b2 + 1;
+						break;
+					}
+					case 3:
+						*(ptr4++) = this.ReadState.Val + b;
+						this.ReadState.Pos = 0;
+						break;
+					}
+					ptr3++;
 				}
-				count = (int)((long)(ptr4 - ptr2));
 			}
-			return count;
+			return (int)((long)(ptr4 - ptr2));
 		}
 
 		public int EncodeBytes(byte[] buffer, int offset, int count)
@@ -202,22 +185,23 @@ namespace System.Net
 
 		internal int EncodeBytes(byte[] buffer, int offset, int count, bool dontDeferFinalBytes, bool shouldAppendSpaceToCRLF)
 		{
-			int i = offset;
 			this.WriteState.AppendHeader();
+			int i = offset;
 			int num = this.WriteState.Padding;
 			if (num != 1)
 			{
 				if (num == 2)
 				{
-					this.WriteState.Append(Base64Stream.base64EncodeMap[(int)this.WriteState.LastBits | ((buffer[i] & 240) >> 4)]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)this.WriteState.LastBits | ((buffer[i] & 240) >> 4)]);
 					if (count == 1)
 					{
 						this.WriteState.LastBits = (byte)((buffer[i] & 15) << 2);
 						this.WriteState.Padding = 1;
+						i++;
 						return i - offset;
 					}
-					this.WriteState.Append(Base64Stream.base64EncodeMap[((int)(buffer[i] & 15) << 2) | ((buffer[i + 1] & 192) >> 6)]);
-					this.WriteState.Append(Base64Stream.base64EncodeMap[(int)(buffer[i + 1] & 63)]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[((int)(buffer[i] & 15) << 2) | ((buffer[i + 1] & 192) >> 6)]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)(buffer[i + 1] & 63)]);
 					i += 2;
 					count -= 2;
 					this.WriteState.Padding = 0;
@@ -225,8 +209,8 @@ namespace System.Net
 			}
 			else
 			{
-				this.WriteState.Append(Base64Stream.base64EncodeMap[(int)this.WriteState.LastBits | ((buffer[i] & 192) >> 6)]);
-				this.WriteState.Append(Base64Stream.base64EncodeMap[(int)(buffer[i] & 63)]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)this.WriteState.LastBits | ((buffer[i] & 192) >> 6)]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)(buffer[i] & 63)]);
 				i++;
 				count--;
 				this.WriteState.Padding = 0;
@@ -234,18 +218,18 @@ namespace System.Net
 			int num2 = i + (count - count % 3);
 			while (i < num2)
 			{
-				if (this.lineLength != -1 && this.WriteState.CurrentLineLength + 4 + this.writeState.FooterLength > this.lineLength)
+				if (this._lineLength != -1 && this.WriteState.CurrentLineLength + 4 + this._writeState.FooterLength > this._lineLength)
 				{
 					this.WriteState.AppendCRLF(shouldAppendSpaceToCRLF);
 				}
-				this.WriteState.Append(Base64Stream.base64EncodeMap[(buffer[i] & 252) >> 2]);
-				this.WriteState.Append(Base64Stream.base64EncodeMap[((int)(buffer[i] & 3) << 4) | ((buffer[i + 1] & 240) >> 4)]);
-				this.WriteState.Append(Base64Stream.base64EncodeMap[((int)(buffer[i + 1] & 15) << 2) | ((buffer[i + 2] & 192) >> 6)]);
-				this.WriteState.Append(Base64Stream.base64EncodeMap[(int)(buffer[i + 2] & 63)]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[(buffer[i] & 252) >> 2]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[((int)(buffer[i] & 3) << 4) | ((buffer[i + 1] & 240) >> 4)]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[((int)(buffer[i + 1] & 15) << 2) | ((buffer[i + 2] & 192) >> 6)]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)(buffer[i + 2] & 63)]);
 				i += 3;
 			}
 			i = num2;
-			if (count % 3 != 0 && this.lineLength != -1 && this.WriteState.CurrentLineLength + 4 + this.writeState.FooterLength >= this.lineLength)
+			if (count % 3 != 0 && this._lineLength != -1 && this.WriteState.CurrentLineLength + 4 + this._writeState.FooterLength >= this._lineLength)
 			{
 				this.WriteState.AppendCRLF(shouldAppendSpaceToCRLF);
 			}
@@ -254,12 +238,12 @@ namespace System.Net
 			{
 				if (num == 2)
 				{
-					this.WriteState.Append(Base64Stream.base64EncodeMap[(buffer[i] & 252) >> 2]);
-					this.WriteState.Append(Base64Stream.base64EncodeMap[((int)(buffer[i] & 3) << 4) | ((buffer[i + 1] & 240) >> 4)]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[(buffer[i] & 252) >> 2]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[((int)(buffer[i] & 3) << 4) | ((buffer[i + 1] & 240) >> 4)]);
 					if (dontDeferFinalBytes)
 					{
-						this.WriteState.Append(Base64Stream.base64EncodeMap[(int)(buffer[i + 1] & 15) << 2]);
-						this.WriteState.Append(Base64Stream.base64EncodeMap[64]);
+						this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)(buffer[i + 1] & 15) << 2]);
+						this.WriteState.Append(Base64Stream.s_base64EncodeMap[64]);
 						this.WriteState.Padding = 0;
 					}
 					else
@@ -272,12 +256,12 @@ namespace System.Net
 			}
 			else
 			{
-				this.WriteState.Append(Base64Stream.base64EncodeMap[(buffer[i] & 252) >> 2]);
+				this.WriteState.Append(Base64Stream.s_base64EncodeMap[(buffer[i] & 252) >> 2]);
 				if (dontDeferFinalBytes)
 				{
-					this.WriteState.Append(Base64Stream.base64EncodeMap[(int)((byte)((buffer[i] & 3) << 4))]);
-					this.WriteState.Append(Base64Stream.base64EncodeMap[64]);
-					this.WriteState.Append(Base64Stream.base64EncodeMap[64]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[(int)((byte)((buffer[i] & 3) << 4))]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[64]);
+					this.WriteState.Append(Base64Stream.s_base64EncodeMap[64]);
 					this.WriteState.Padding = 0;
 				}
 				else
@@ -321,7 +305,7 @@ namespace System.Net
 
 		public override void Flush()
 		{
-			if (this.writeState != null && this.WriteState.Length > 0)
+			if (this._writeState != null && this.WriteState.Length > 0)
 			{
 				this.FlushInternal();
 			}
@@ -390,7 +374,7 @@ namespace System.Net
 			}
 		}
 
-		private static byte[] base64DecodeMap = new byte[]
+		private static readonly byte[] s_base64DecodeMap = new byte[]
 		{
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
@@ -420,7 +404,7 @@ namespace System.Net
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue
 		};
 
-		private static byte[] base64EncodeMap = new byte[]
+		private static readonly byte[] s_base64EncodeMap = new byte[]
 		{
 			65, 66, 67, 68, 69, 70, 71, 72, 73, 74,
 			75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
@@ -431,37 +415,37 @@ namespace System.Net
 			56, 57, 43, 47, 61
 		};
 
-		private int lineLength;
+		private readonly int _lineLength;
 
-		private Base64Stream.ReadStateInfo readState;
+		private readonly Base64WriteStateInfo _writeState;
 
-		private Base64WriteStateInfo writeState;
+		private Base64Stream.ReadStateInfo _readState;
 
-		private const int sizeOfBase64EncodedChar = 4;
+		private const int SizeOfBase64EncodedChar = 4;
 
-		private const byte invalidBase64Value = 255;
+		private const byte InvalidBase64Value = 255;
 
-		private class ReadAsyncResult : LazyAsyncResult
+		private sealed class ReadAsyncResult : LazyAsyncResult
 		{
 			internal ReadAsyncResult(Base64Stream parent, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 				: base(null, state, callback)
 			{
-				this.parent = parent;
-				this.buffer = buffer;
-				this.offset = offset;
-				this.count = count;
+				this._parent = parent;
+				this._buffer = buffer;
+				this._offset = offset;
+				this._count = count;
 			}
 
 			private bool CompleteRead(IAsyncResult result)
 			{
-				this.read = this.parent.BaseStream.EndRead(result);
-				if (this.read == 0)
+				this._read = this._parent.BaseStream.EndRead(result);
+				if (this._read == 0)
 				{
 					base.InvokeCallback();
 					return true;
 				}
-				this.read = this.parent.DecodeBytes(this.buffer, this.offset, this.read);
-				if (this.read > 0)
+				this._read = this._parent.DecodeBytes(this._buffer, this._offset, this._read);
+				if (this._read > 0)
 				{
 					base.InvokeCallback();
 					return true;
@@ -474,7 +458,7 @@ namespace System.Net
 				IAsyncResult asyncResult;
 				do
 				{
-					asyncResult = this.parent.BaseStream.BeginRead(this.buffer, this.offset, this.count, Base64Stream.ReadAsyncResult.onRead, this);
+					asyncResult = this._parent.BaseStream.BeginRead(this._buffer, this._offset, this._count, Base64Stream.ReadAsyncResult.s_onRead, this);
 				}
 				while (asyncResult.CompletedSynchronously && !this.CompleteRead(asyncResult));
 			}
@@ -506,43 +490,43 @@ namespace System.Net
 			{
 				Base64Stream.ReadAsyncResult readAsyncResult = (Base64Stream.ReadAsyncResult)result;
 				readAsyncResult.InternalWaitForCompletion();
-				return readAsyncResult.read;
+				return readAsyncResult._read;
 			}
 
-			private Base64Stream parent;
+			private readonly Base64Stream _parent;
 
-			private byte[] buffer;
+			private readonly byte[] _buffer;
 
-			private int offset;
+			private readonly int _offset;
 
-			private int count;
+			private readonly int _count;
 
-			private int read;
+			private int _read;
 
-			private static AsyncCallback onRead = new AsyncCallback(Base64Stream.ReadAsyncResult.OnRead);
+			private static readonly AsyncCallback s_onRead = new AsyncCallback(Base64Stream.ReadAsyncResult.OnRead);
 		}
 
-		private class WriteAsyncResult : LazyAsyncResult
+		private sealed class WriteAsyncResult : LazyAsyncResult
 		{
 			internal WriteAsyncResult(Base64Stream parent, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 				: base(null, state, callback)
 			{
-				this.parent = parent;
-				this.buffer = buffer;
-				this.offset = offset;
-				this.count = count;
+				this._parent = parent;
+				this._buffer = buffer;
+				this._offset = offset;
+				this._count = count;
 			}
 
 			internal void Write()
 			{
 				for (;;)
 				{
-					this.written += this.parent.EncodeBytes(this.buffer, this.offset + this.written, this.count - this.written, false, false);
-					if (this.written >= this.count)
+					this._written += this._parent.EncodeBytes(this._buffer, this._offset + this._written, this._count - this._written, false, false);
+					if (this._written >= this._count)
 					{
 						break;
 					}
-					IAsyncResult asyncResult = this.parent.BaseStream.BeginWrite(this.parent.WriteState.Buffer, 0, this.parent.WriteState.Length, Base64Stream.WriteAsyncResult.onWrite, this);
+					IAsyncResult asyncResult = this._parent.BaseStream.BeginWrite(this._parent.WriteState.Buffer, 0, this._parent.WriteState.Length, Base64Stream.WriteAsyncResult.s_onWrite, this);
 					if (!asyncResult.CompletedSynchronously)
 					{
 						return;
@@ -554,8 +538,8 @@ namespace System.Net
 
 			private void CompleteWrite(IAsyncResult result)
 			{
-				this.parent.BaseStream.EndWrite(result);
-				this.parent.WriteState.Reset();
+				this._parent.BaseStream.EndWrite(result);
+				this._parent.WriteState.Reset();
 			}
 
 			private static void OnWrite(IAsyncResult result)
@@ -584,48 +568,24 @@ namespace System.Net
 				((Base64Stream.WriteAsyncResult)result).InternalWaitForCompletion();
 			}
 
-			private Base64Stream parent;
+			private static readonly AsyncCallback s_onWrite = new AsyncCallback(Base64Stream.WriteAsyncResult.OnWrite);
 
-			private byte[] buffer;
+			private readonly Base64Stream _parent;
 
-			private int offset;
+			private readonly byte[] _buffer;
 
-			private int count;
+			private readonly int _offset;
 
-			private static AsyncCallback onWrite = new AsyncCallback(Base64Stream.WriteAsyncResult.OnWrite);
+			private readonly int _count;
 
-			private int written;
+			private int _written;
 		}
 
-		private class ReadStateInfo
+		private sealed class ReadStateInfo
 		{
-			internal byte Val
-			{
-				get
-				{
-					return this.val;
-				}
-				set
-				{
-					this.val = value;
-				}
-			}
+			internal byte Val { get; set; }
 
-			internal byte Pos
-			{
-				get
-				{
-					return this.pos;
-				}
-				set
-				{
-					this.pos = value;
-				}
-			}
-
-			private byte val;
-
-			private byte pos;
+			internal byte Pos { get; set; }
 		}
 	}
 }

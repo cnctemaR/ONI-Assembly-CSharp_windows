@@ -92,6 +92,11 @@ namespace UnityEngine.Timeline
 		public override void EvaluateAt(double localTime, FrameData frameData)
 		{
 			this.enable = true;
+			if (frameData.timeLooped)
+			{
+				this.SetTime(this.clip.clipIn);
+				this.SetTime(this.clip.clipIn);
+			}
 			float num;
 			if (this.clip.IsPreExtrapolatedTime(localTime))
 			{
@@ -117,9 +122,19 @@ namespace UnityEngine.Timeline
 			this.SetDuration(this.clip.extrapolatedDuration);
 		}
 
-		public override void Reset()
+		public override void DisableAt(double localTime, double rootDuration, FrameData frameData)
 		{
-			this.SetTime(this.m_Clip.clipIn);
+			double num = Math.Min(localTime, (double)DiscreteTime.FromTicks(this.intervalEnd));
+			if (frameData.timeLooped)
+			{
+				num = Math.Min(num, rootDuration);
+			}
+			double num2 = this.clip.ToLocalTime(num);
+			if (num2 > -DiscreteTime.tickValue / 2.0)
+			{
+				this.SetTime(num2);
+			}
+			this.enable = false;
 		}
 
 		private TimelineClip m_Clip;

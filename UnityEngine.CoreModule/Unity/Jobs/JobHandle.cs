@@ -7,11 +7,11 @@ using UnityEngine.Bindings;
 namespace Unity.Jobs
 {
 	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
-	public struct JobHandle
+	public struct JobHandle : IEquatable<JobHandle>
 	{
 		public void Complete()
 		{
-			bool flag = this.jobGroup == IntPtr.Zero;
+			bool flag = this.jobGroup == 0UL;
 			if (!flag)
 			{
 				JobHandle.ScheduleBatchedJobsAndComplete(ref this);
@@ -61,19 +61,19 @@ namespace Unity.Jobs
 			}
 		}
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod("ScheduleBatchedScriptingJobs", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ScheduleBatchedJobs();
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod("ScheduleBatchedScriptingJobsAndComplete", IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScheduleBatchedJobsAndComplete(ref JobHandle job);
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod("ScheduleBatchedScriptingJobsAndIsCompleted", IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ScheduleBatchedJobsAndIsCompleted(ref JobHandle job);
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod("ScheduleBatchedScriptingJobsAndCompleteAll", IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void ScheduleBatchedJobsAndCompleteAll(void* jobs, int count);
 
@@ -97,7 +97,7 @@ namespace Unity.Jobs
 			return JobHandle.CombineDependenciesInternalPtr(jobs.GetUnsafeReadOnlyPtr<JobHandle>(), jobs.Length);
 		}
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod(IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		private static JobHandle CombineDependenciesInternal2(ref JobHandle job0, ref JobHandle job1)
 		{
 			JobHandle jobHandle;
@@ -105,7 +105,7 @@ namespace Unity.Jobs
 			return jobHandle;
 		}
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod(IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		private static JobHandle CombineDependenciesInternal3(ref JobHandle job0, ref JobHandle job1, ref JobHandle job2)
 		{
 			JobHandle jobHandle;
@@ -113,7 +113,7 @@ namespace Unity.Jobs
 			return jobHandle;
 		}
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod(IsFreeFunction = true, IsThreadSafe = true, ThrowsException = true)]
 		internal unsafe static JobHandle CombineDependenciesInternalPtr(void* jobs, int count)
 		{
 			JobHandle jobHandle;
@@ -121,10 +121,15 @@ namespace Unity.Jobs
 			return jobHandle;
 		}
 
-		[NativeMethod(IsFreeFunction = true)]
+		[NativeMethod(IsFreeFunction = true, IsThreadSafe = true)]
 		public static bool CheckFenceIsDependencyOrDidSyncFence(JobHandle jobHandle, JobHandle dependsOn)
 		{
 			return JobHandle.CheckFenceIsDependencyOrDidSyncFence_Injected(ref jobHandle, ref dependsOn);
+		}
+
+		public bool Equals(JobHandle other)
+		{
+			return this.jobGroup == other.jobGroup;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -139,8 +144,7 @@ namespace Unity.Jobs
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CheckFenceIsDependencyOrDidSyncFence_Injected(ref JobHandle jobHandle, ref JobHandle dependsOn);
 
-		[NativeDisableUnsafePtrRestriction]
-		internal IntPtr jobGroup;
+		internal ulong jobGroup;
 
 		internal int version;
 	}

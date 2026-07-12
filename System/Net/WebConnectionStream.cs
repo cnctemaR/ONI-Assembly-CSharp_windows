@@ -7,12 +7,11 @@ namespace System.Net
 {
 	internal abstract class WebConnectionStream : Stream
 	{
-		protected WebConnectionStream(WebConnection cnc, WebOperation operation, Stream stream)
+		protected WebConnectionStream(WebConnection cnc, WebOperation operation)
 		{
 			this.Connection = cnc;
 			this.Operation = operation;
 			this.Request = operation.Request;
-			this.InnerStream = stream;
 			this.read_timeout = this.Request.ReadWriteTimeout;
 			this.write_timeout = this.read_timeout;
 		}
@@ -30,8 +29,6 @@ namespace System.Net
 				return this.Connection.ServicePoint;
 			}
 		}
-
-		internal Stream InnerStream { get; }
 
 		public override bool CanTimeout
 		{
@@ -87,13 +84,14 @@ namespace System.Net
 			return e;
 		}
 
-		public override int Read(byte[] buffer, int offset, int size)
+		protected abstract bool TryReadFromBufferedContent(byte[] buffer, int offset, int count, out int result);
+
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			if (!this.CanRead)
 			{
 				throw new NotSupportedException("The stream does not support reading.");
 			}
-			this.Operation.ThrowIfClosedOrDisposed();
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
@@ -103,14 +101,20 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
+			int num2;
+			if (this.TryReadFromBufferedContent(buffer, offset, count, out num2))
+			{
+				return num2;
+			}
+			this.Operation.ThrowIfClosedOrDisposed();
 			int result;
 			try
 			{
-				result = this.ReadAsync(buffer, offset, size, CancellationToken.None).Result;
+				result = this.ReadAsync(buffer, offset, count, CancellationToken.None).Result;
 			}
 			catch (Exception ex)
 			{
@@ -119,7 +123,7 @@ namespace System.Net
 			return result;
 		}
 
-		public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback cb, object state)
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback cb, object state)
 		{
 			if (!this.CanRead)
 			{
@@ -135,11 +139,11 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
-			return TaskToApm.Begin(this.ReadAsync(buffer, offset, size, CancellationToken.None), cb, state);
+			return TaskToApm.Begin(this.ReadAsync(buffer, offset, count, CancellationToken.None), cb, state);
 		}
 
 		public override int EndRead(IAsyncResult r)
@@ -160,13 +164,8 @@ namespace System.Net
 			return num;
 		}
 
-		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback cb, object state)
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback cb, object state)
 		{
-			if (!this.CanWrite)
-			{
-				throw new NotSupportedException("The stream does not support writing.");
-			}
-			this.Operation.ThrowIfClosedOrDisposed();
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
@@ -176,11 +175,16 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
-			return TaskToApm.Begin(this.WriteAsync(buffer, offset, size, CancellationToken.None), cb, state);
+			if (!this.CanWrite)
+			{
+				throw new NotSupportedException("The stream does not support writing.");
+			}
+			this.Operation.ThrowIfClosedOrDisposed();
+			return TaskToApm.Begin(this.WriteAsync(buffer, offset, count, CancellationToken.None), cb, state);
 		}
 
 		public override void EndWrite(IAsyncResult r)
@@ -199,13 +203,8 @@ namespace System.Net
 			}
 		}
 
-		public override void Write(byte[] buffer, int offset, int size)
+		public override void Write(byte[] buffer, int offset, int count)
 		{
-			if (!this.CanWrite)
-			{
-				throw new NotSupportedException("The stream does not support writing.");
-			}
-			this.Operation.ThrowIfClosedOrDisposed();
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
@@ -215,13 +214,18 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
+			if (!this.CanWrite)
+			{
+				throw new NotSupportedException("The stream does not support writing.");
+			}
+			this.Operation.ThrowIfClosedOrDisposed();
 			try
 			{
-				base.WriteAsync(buffer, offset, size).Wait();
+				base.WriteAsync(buffer, offset, count).Wait();
 			}
 			catch (Exception ex)
 			{
@@ -231,6 +235,15 @@ namespace System.Net
 
 		public override void Flush()
 		{
+		}
+
+		public override Task FlushAsync(CancellationToken cancellationToken)
+		{
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return Task.CompletedTask;
+			}
+			return Task.FromCancellation(cancellationToken);
 		}
 
 		internal void InternalClose()
@@ -247,12 +260,12 @@ namespace System.Net
 
 		public override long Seek(long a, SeekOrigin b)
 		{
-			throw new NotSupportedException();
+			throw new NotSupportedException("This stream does not support seek operations.");
 		}
 
 		public override void SetLength(long a)
 		{
-			throw new NotSupportedException();
+			throw new NotSupportedException("This stream does not support seek operations.");
 		}
 
 		public override bool CanSeek
@@ -263,15 +276,23 @@ namespace System.Net
 			}
 		}
 
+		public override long Length
+		{
+			get
+			{
+				throw new NotSupportedException("This stream does not support seek operations.");
+			}
+		}
+
 		public override long Position
 		{
 			get
 			{
-				throw new NotSupportedException();
+				throw new NotSupportedException("This stream does not support seek operations.");
 			}
 			set
 			{
-				throw new NotSupportedException();
+				throw new NotSupportedException("This stream does not support seek operations.");
 			}
 		}
 

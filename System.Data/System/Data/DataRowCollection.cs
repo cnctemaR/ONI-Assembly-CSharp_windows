@@ -192,7 +192,7 @@ namespace System.Data
 
 		internal DataRowCollection()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataTable _table;

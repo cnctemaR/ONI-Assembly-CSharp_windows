@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	public interface IDictionary : ICollection, IEnumerable
 	{
 		object this[object key] { get; set; }

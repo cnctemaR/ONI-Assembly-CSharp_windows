@@ -279,13 +279,23 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 			}, null, null);
 		}
 
-		protected override void OnStartWork(Worker worker)
+		public override Workable.AnimInfo GetAnim(WorkerBase worker)
+		{
+			KAnimFile[] array = null;
+			if (this.workerTypeOverrideAnims.TryGetValue(worker.PrefabID(), out array))
+			{
+				this.overrideAnims = array;
+			}
+			return base.GetAnim(worker);
+		}
+
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			base.OnStartWork(worker);
 			this.diseaseRemoved = 0;
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			base.OnWorkTick(worker, dt);
 			HandSanitizer component = base.GetComponent<HandSanitizer>();
@@ -329,7 +339,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 			return false;
 		}
 
-		protected override void OnCompleteWork(Worker worker)
+		protected override void OnCompleteWork(WorkerBase worker)
 		{
 			base.OnCompleteWork(worker);
 			if (this.removeIrritation && !worker.HasTag(GameTags.HasSuitTank))
@@ -341,6 +351,8 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 				}
 			}
 		}
+
+		public Dictionary<Tag, KAnimFile[]> workerTypeOverrideAnims = new Dictionary<Tag, KAnimFile[]>();
 
 		public bool removeIrritation;
 

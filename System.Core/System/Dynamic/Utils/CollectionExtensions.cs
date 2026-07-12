@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace System.Dynamic.Utils
@@ -61,7 +62,7 @@ namespace System.Dynamic.Utils
 			{
 				return readOnlyCollectionBuilder.ToReadOnlyCollection();
 			}
-			T[] array = EnumerableHelpers.ToArray<T>(enumerable);
+			T[] array = enumerable.ToArray<T>();
 			if (array.Length != 0)
 			{
 				return new TrueReadOnlyCollection<T>(array);

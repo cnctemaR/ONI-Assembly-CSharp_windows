@@ -221,8 +221,7 @@ namespace System.Net
 				{
 					if (cookieToken == CookieToken.Attribute)
 					{
-						CookieToken token = this.m_tokenizer.Token;
-						if (token == CookieToken.Port && !flag3)
+						if (this.m_tokenizer.Token == CookieToken.Port && !flag3)
 						{
 							flag3 = true;
 							cookie.Port = string.Empty;

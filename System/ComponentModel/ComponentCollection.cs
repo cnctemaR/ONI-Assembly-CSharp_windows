@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class ComponentCollection : ReadOnlyCollectionBase
 	{
 		public ComponentCollection(IComponent[] components)

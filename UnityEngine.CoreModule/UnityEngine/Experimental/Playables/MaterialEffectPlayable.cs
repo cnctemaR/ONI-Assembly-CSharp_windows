@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Experimental.Playables
 {
 	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
 	public struct MaterialEffectPlayable : IPlayable, IEquatable<MaterialEffectPlayable>
 	{

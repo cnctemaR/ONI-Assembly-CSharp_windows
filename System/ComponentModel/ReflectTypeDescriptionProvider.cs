@@ -28,6 +28,31 @@ namespace System.ComponentModel
 
 		private static Hashtable IntrinsicTypeConverters
 		{
+			[PreserveDependency(".ctor()", "System.ComponentModel.BooleanConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.ByteConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.UInt16Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.UInt32Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.TypeConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.CultureInfoConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.DateTimeConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.DateTimeOffsetConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.DecimalConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.TimeSpanConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.GuidConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.ArrayConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.CollectionConverter")]
+			[PreserveDependency(".ctor(System.Type)", "System.ComponentModel.EnumConverter")]
+			[PreserveDependency(".ctor(System.Type)", "System.ComponentModel.ReferenceConverter")]
+			[PreserveDependency(".ctor(System.Type)", "System.ComponentModel.NullableConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.UInt16Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.Int64Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.Int16Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.Int32Converter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.StringConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.DoubleConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.CharConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.SByteConverter")]
+			[PreserveDependency(".ctor()", "System.ComponentModel.SingleConverter")]
 			get
 			{
 				if (ReflectTypeDescriptionProvider._intrinsicTypeConverters == null)

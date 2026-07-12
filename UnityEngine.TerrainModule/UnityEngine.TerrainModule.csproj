@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB588}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F02}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine.TerrainModule</RootNamespace>
+    <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TerrainModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -14,41 +14,48 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="DetailInstanceTransform.cs" />
+    <Compile Include="DetailPrototype.cs" />
+    <Compile Include="DetailRenderMode.cs" />
+    <Compile Include="DetailScatterMode.cs" />
+    <Compile Include="PatchExtents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
-    <Compile Include="UnityEngine\DetailPrototype.cs" />
-    <Compile Include="UnityEngine\DetailRenderMode.cs" />
-    <Compile Include="UnityEngine\Experimental\TerrainAPI\BrushTransform.cs" />
-    <Compile Include="UnityEngine\Experimental\TerrainAPI\PaintContext.cs" />
-    <Compile Include="UnityEngine\Experimental\TerrainAPI\TerrainCallbacks.cs" />
-    <Compile Include="UnityEngine\Experimental\TerrainAPI\TerrainPaintUtility.cs" />
-    <Compile Include="UnityEngine\Experimental\TerrainAPI\TerrainUtility.cs" />
-    <Compile Include="UnityEngine\PatchExtents.cs" />
-    <Compile Include="UnityEngine\SpeedTreeWindAsset.cs" />
-    <Compile Include="UnityEngine\SplatPrototype.cs" />
-    <Compile Include="UnityEngine\Terrain.cs" />
-    <Compile Include="UnityEngine\TerrainChangedFlags.cs" />
-    <Compile Include="UnityEngine\TerrainData.cs" />
-    <Compile Include="UnityEngine\TerrainExtensions.cs" />
-    <Compile Include="UnityEngine\TerrainHeightmapSyncControl.cs" />
-    <Compile Include="UnityEngine\TerrainLayer.cs" />
-    <Compile Include="UnityEngine\TerrainRenderFlags.cs" />
-    <Compile Include="UnityEngine\Tree.cs" />
-    <Compile Include="UnityEngine\TreeInstance.cs" />
-    <Compile Include="UnityEngine\TreePrototype.cs" />
+    <Compile Include="SpeedTreeWindAsset.cs" />
+    <Compile Include="SplatPrototype.cs" />
+    <Compile Include="Terrain.cs" />
+    <Compile Include="TerrainCallbacks.cs" />
+    <Compile Include="TerrainChangedFlags.cs" />
+    <Compile Include="TerrainData.cs" />
+    <Compile Include="TerrainExtensions.cs" />
+    <Compile Include="TerrainHeightmapSyncControl.cs" />
+    <Compile Include="TerrainLayer.cs" />
+    <Compile Include="TerrainRenderFlags.cs" />
+    <Compile Include="TerrainTools\BrushTransform.cs" />
+    <Compile Include="TerrainTools\PaintContext.cs" />
+    <Compile Include="TerrainTools\TerrainBuiltinPaintMaterialPasses.cs" />
+    <Compile Include="TerrainTools\TerrainPaintUtility.cs" />
+    <Compile Include="TerrainUtils\TerrainMap.cs" />
+    <Compile Include="TerrainUtils\TerrainMapStatusCode.cs" />
+    <Compile Include="TerrainUtils\TerrainTileCoord.cs" />
+    <Compile Include="TerrainUtils\TerrainUtility.cs" />
+    <Compile Include="Tree.cs" />
+    <Compile Include="TreeInstance.cs" />
+    <Compile Include="TreeMotionVectorModeOverride.cs" />
+    <Compile Include="TreePrototype.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Core" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

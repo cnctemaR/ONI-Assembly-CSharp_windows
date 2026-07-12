@@ -1,25 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace System.Text
 {
-	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class StringBuilder : ISerializable
 	{
 		public StringBuilder()
-			: this(16)
 		{
+			this.m_MaxCapacity = int.MaxValue;
+			this.m_ChunkChars = new char[16];
 		}
 
 		public StringBuilder(int capacity)
-			: this(string.Empty, capacity)
+			: this(capacity, int.MaxValue)
 		{
 		}
 
@@ -33,20 +33,19 @@ namespace System.Text
 		{
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder(string value, int startIndex, int length, int capacity)
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("'{0}' must be greater than zero.", new object[] { "capacity" }));
+				throw new ArgumentOutOfRangeException("capacity", SR.Format("'{0}' must be greater than zero.", "capacity"));
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("'{0}' must be non-negative.", new object[] { "length" }));
+				throw new ArgumentOutOfRangeException("length", SR.Format("'{0}' must be non-negative.", "length"));
 			}
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
 			}
 			if (value == null)
 			{
@@ -54,17 +53,14 @@ namespace System.Text
 			}
 			if (startIndex > value.Length - length)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index and length must refer to a location within the string."));
+				throw new ArgumentOutOfRangeException("length", "Index and length must refer to a location within the string.");
 			}
 			this.m_MaxCapacity = int.MaxValue;
 			if (capacity == 0)
 			{
 				capacity = 16;
 			}
-			if (capacity < length)
-			{
-				capacity = length;
-			}
+			capacity = Math.Max(capacity, length);
 			this.m_ChunkChars = new char[capacity];
 			this.m_ChunkLength = length;
 			fixed (string text = value)
@@ -82,15 +78,15 @@ namespace System.Text
 		{
 			if (capacity > maxCapacity)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Capacity exceeds maximum capacity."));
+				throw new ArgumentOutOfRangeException("capacity", "Capacity exceeds maximum capacity.");
 			}
 			if (maxCapacity < 1)
 			{
-				throw new ArgumentOutOfRangeException("maxCapacity", Environment.GetResourceString("MaxCapacity must be one or greater."));
+				throw new ArgumentOutOfRangeException("maxCapacity", "MaxCapacity must be one or greater.");
 			}
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("'{0}' must be greater than zero.", new object[] { "capacity" }));
+				throw new ArgumentOutOfRangeException("capacity", SR.Format("'{0}' must be greater than zero.", "capacity"));
 			}
 			if (capacity == 0)
 			{
@@ -100,7 +96,6 @@ namespace System.Text
 			this.m_ChunkChars = new char[capacity];
 		}
 
-		[SecurityCritical]
 		private StringBuilder(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
@@ -141,23 +136,15 @@ namespace System.Text
 			}
 			if (num2 < 1 || text.Length > num2)
 			{
-				throw new SerializationException(Environment.GetResourceString("The serialized MaxCapacity property of StringBuilder must be positive and greater than or equal to the String length."));
+				throw new SerializationException("The serialized MaxCapacity property of StringBuilder must be positive and greater than or equal to the String length.");
 			}
 			if (!flag)
 			{
-				num = 16;
-				if (num < text.Length)
-				{
-					num = text.Length;
-				}
-				if (num > num2)
-				{
-					num = num2;
-				}
+				num = Math.Min(Math.Max(16, text.Length), num2);
 			}
 			if (num < 0 || num < text.Length || num > num2)
 			{
-				throw new SerializationException(Environment.GetResourceString("The serialized Capacity property of StringBuilder must be positive, less than or equal to MaxCapacity and greater than or equal to the String length."));
+				throw new SerializationException("The serialized Capacity property of StringBuilder must be positive, less than or equal to MaxCapacity and greater than or equal to the String length.");
 			}
 			this.m_MaxCapacity = num2;
 			this.m_ChunkChars = new char[num];
@@ -166,7 +153,6 @@ namespace System.Text
 			this.m_ChunkPrevious = null;
 		}
 
-		[SecurityCritical]
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
@@ -179,8 +165,8 @@ namespace System.Text
 			info.AddValue("m_currentThread", 0);
 		}
 
-		[Conditional("_DEBUG")]
-		private void VerifyClassInvariant()
+		[Conditional("DEBUG")]
+		private void AssertInvariants()
 		{
 			StringBuilder stringBuilder = this;
 			int maxCapacity = this.m_MaxCapacity;
@@ -205,20 +191,20 @@ namespace System.Text
 			{
 				if (value < 0)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Capacity must be positive."));
+					throw new ArgumentOutOfRangeException("value", "Capacity must be positive.");
 				}
 				if (value > this.MaxCapacity)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Capacity exceeds maximum capacity."));
+					throw new ArgumentOutOfRangeException("value", "Capacity exceeds maximum capacity.");
 				}
 				if (value < this.Length)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 				}
 				if (this.Capacity != value)
 				{
 					char[] array = new char[value - this.m_ChunkOffset];
-					Array.Copy(this.m_ChunkChars, array, this.m_ChunkLength);
+					Array.Copy(this.m_ChunkChars, 0, array, 0, this.m_ChunkLength);
 					this.m_ChunkChars = array;
 				}
 			}
@@ -236,7 +222,7 @@ namespace System.Text
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Capacity must be positive."));
+				throw new ArgumentOutOfRangeException("capacity", "Capacity must be positive.");
 			}
 			if (this.Capacity < capacity)
 			{
@@ -245,7 +231,6 @@ namespace System.Text
 			return this.Capacity;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override string ToString()
 		{
 			if (this.Length == 0)
@@ -268,101 +253,53 @@ namespace System.Text
 						char[] chunkChars = stringBuilder.m_ChunkChars;
 						int chunkOffset = stringBuilder.m_ChunkOffset;
 						int chunkLength = stringBuilder.m_ChunkLength;
-						if ((ulong)(chunkLength + chunkOffset) > (ulong)((long)text.Length) || chunkLength > chunkChars.Length)
+						if (chunkLength + chunkOffset > text.Length || chunkLength > chunkChars.Length)
 						{
 							break;
 						}
-						char[] array;
-						char* ptr2;
-						if ((array = chunkChars) == null || array.Length == 0)
+						fixed (char* ptr2 = &chunkChars[0])
 						{
-							ptr2 = null;
+							char* ptr3 = ptr2;
+							string.wstrcpy(ptr + chunkOffset, ptr3, chunkLength);
 						}
-						else
-						{
-							ptr2 = &array[0];
-						}
-						string.wstrcpy(ptr + chunkOffset, ptr2, chunkLength);
-						array = null;
 					}
 					stringBuilder = stringBuilder.m_ChunkPrevious;
 					if (stringBuilder == null)
 					{
-						goto Block_7;
+						return text;
 					}
 				}
-				throw new ArgumentOutOfRangeException("chunkLength", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				Block_7:;
+				throw new ArgumentOutOfRangeException("chunkLength", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			return text;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe string ToString(int startIndex, int length)
 		{
 			int length2 = this.Length;
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
 			}
 			if (startIndex > length2)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("startIndex cannot be larger than length of string."));
+				throw new ArgumentOutOfRangeException("startIndex", "startIndex cannot be larger than length of string.");
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
 			}
 			if (startIndex > length2 - length)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index and length must refer to a location within the string."));
+				throw new ArgumentOutOfRangeException("length", "Index and length must refer to a location within the string.");
 			}
-			StringBuilder stringBuilder = this;
-			int num = startIndex + length;
-			string text = string.FastAllocateString(length);
-			int i = length;
-			fixed (string text2 = text)
+			string text2;
+			string text = (text2 = string.FastAllocateString(length));
+			char* ptr = text2;
+			if (ptr != null)
 			{
-				char* ptr = text2;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				while (i > 0)
-				{
-					int num2 = num - stringBuilder.m_ChunkOffset;
-					if (num2 >= 0)
-					{
-						if (num2 > stringBuilder.m_ChunkLength)
-						{
-							num2 = stringBuilder.m_ChunkLength;
-						}
-						int num3 = i;
-						int num4 = num3;
-						int num5 = num2 - num3;
-						if (num5 < 0)
-						{
-							num4 += num5;
-							num5 = 0;
-						}
-						i -= num4;
-						if (num4 > 0)
-						{
-							char[] chunkChars = stringBuilder.m_ChunkChars;
-							if ((ulong)(num4 + i) > (ulong)((long)length) || num4 + num5 > chunkChars.Length)
-							{
-								throw new ArgumentOutOfRangeException("chunkCount", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-							}
-							fixed (char* ptr2 = &chunkChars[num5])
-							{
-								char* ptr3 = ptr2;
-								string.wstrcpy(ptr + i, ptr3, num4);
-							}
-						}
-					}
-					stringBuilder = stringBuilder.m_ChunkPrevious;
-				}
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
 			}
+			this.CopyTo(startIndex, new Span<char>((void*)ptr, length), length);
 			return text;
 		}
 
@@ -382,13 +319,12 @@ namespace System.Text
 			{
 				if (value < 0)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Length cannot be less than zero."));
+					throw new ArgumentOutOfRangeException("value", "Length cannot be less than zero.");
 				}
 				if (value > this.MaxCapacity)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 				}
-				int capacity = this.Capacity;
 				if (value == 0 && this.m_ChunkPrevious == null)
 				{
 					this.m_ChunkLength = 0;
@@ -404,9 +340,17 @@ namespace System.Text
 				StringBuilder stringBuilder = this.FindChunkForIndex(value);
 				if (stringBuilder != this)
 				{
-					char[] array = new char[capacity - stringBuilder.m_ChunkOffset];
-					Array.Copy(stringBuilder.m_ChunkChars, array, stringBuilder.m_ChunkLength);
-					this.m_ChunkChars = array;
+					int num2 = Math.Min(this.Capacity, Math.Max(this.Length * 6 / 5, this.m_ChunkChars.Length)) - stringBuilder.m_ChunkOffset;
+					if (num2 > stringBuilder.m_ChunkChars.Length)
+					{
+						char[] array = new char[num2];
+						Array.Copy(stringBuilder.m_ChunkChars, 0, array, 0, stringBuilder.m_ChunkLength);
+						this.m_ChunkChars = array;
+					}
+					else
+					{
+						this.m_ChunkChars = stringBuilder.m_ChunkChars;
+					}
 					this.m_ChunkPrevious = stringBuilder.m_ChunkPrevious;
 					this.m_ChunkOffset = stringBuilder.m_ChunkOffset;
 				}
@@ -461,12 +405,12 @@ namespace System.Text
 				}
 				if (num >= stringBuilder.m_ChunkLength)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				stringBuilder.m_ChunkChars[num] = value;
 				return;
 				Block_3:
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 		}
 
@@ -474,45 +418,45 @@ namespace System.Text
 		{
 			if (repeatCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("repeatCount", Environment.GetResourceString("Count cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("repeatCount", "Count cannot be less than zero.");
 			}
 			if (repeatCount == 0)
 			{
 				return this;
 			}
-			int num = this.m_ChunkLength;
+			int num = this.Length + repeatCount;
+			if (num > this.m_MaxCapacity || num < repeatCount)
+			{
+				throw new ArgumentOutOfRangeException("repeatCount", "The length cannot be greater than the capacity.");
+			}
+			int num2 = this.m_ChunkLength;
 			while (repeatCount > 0)
 			{
-				if (num < this.m_ChunkChars.Length)
+				if (num2 < this.m_ChunkChars.Length)
 				{
-					this.m_ChunkChars[num++] = value;
+					this.m_ChunkChars[num2++] = value;
 					repeatCount--;
 				}
 				else
 				{
-					this.m_ChunkLength = num;
+					this.m_ChunkLength = num2;
 					this.ExpandByABlock(repeatCount);
-					num = 0;
+					num2 = 0;
 				}
 			}
-			this.m_ChunkLength = num;
+			this.m_ChunkLength = num2;
 			return this;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Append(char[] value, int startIndex, int charCount)
 		{
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("startIndex", "Value must be positive.");
 			}
 			if (charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Value must be positive."));
-			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8 && charCount == 0)
-			{
-				return this;
+				throw new ArgumentOutOfRangeException("charCount", "Value must be positive.");
 			}
 			if (value == null)
 			{
@@ -526,7 +470,7 @@ namespace System.Text
 			{
 				if (charCount > value.Length - startIndex)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("charCount", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (charCount == 0)
 				{
@@ -536,12 +480,11 @@ namespace System.Text
 				{
 					char* ptr2 = ptr;
 					this.Append(ptr2, charCount);
+					return this;
 				}
-				return this;
 			}
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Append(string value)
 		{
 			if (value != null)
@@ -588,7 +531,6 @@ namespace System.Text
 			return this;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe void AppendHelper(string value)
 		{
 			fixed (string text = value)
@@ -602,20 +544,15 @@ namespace System.Text
 			}
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Append(string value, int startIndex, int count)
 		{
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Value must be positive."));
-			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8 && count == 0)
-			{
-				return this;
+				throw new ArgumentOutOfRangeException("count", "Value must be positive.");
 			}
 			if (value == null)
 			{
@@ -633,74 +570,136 @@ namespace System.Text
 				}
 				if (startIndex > value.Length - count)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
-				fixed (string text = value)
+				char* ptr = value;
+				if (ptr != null)
 				{
-					char* ptr = text;
-					if (ptr != null)
-					{
-						ptr += RuntimeHelpers.OffsetToStringData / 2;
-					}
-					this.Append(ptr + startIndex, count);
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
 				}
+				this.Append(ptr + startIndex, count);
 				return this;
 			}
 		}
 
-		[ComVisible(false)]
+		public StringBuilder Append(StringBuilder value)
+		{
+			if (value != null && value.Length != 0)
+			{
+				return this.AppendCore(value, 0, value.Length);
+			}
+			return this;
+		}
+
+		public StringBuilder Append(StringBuilder value, int startIndex, int count)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Value must be positive.");
+			}
+			if (value == null)
+			{
+				if (startIndex == 0 && count == 0)
+				{
+					return this;
+				}
+				throw new ArgumentNullException("value");
+			}
+			else
+			{
+				if (count == 0)
+				{
+					return this;
+				}
+				if (count > value.Length - startIndex)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				return this.AppendCore(value, startIndex, count);
+			}
+		}
+
+		private StringBuilder AppendCore(StringBuilder value, int startIndex, int count)
+		{
+			if (value == this)
+			{
+				return this.Append(value.ToString(startIndex, count));
+			}
+			if (this.Length + count > this.m_MaxCapacity)
+			{
+				throw new ArgumentOutOfRangeException("Capacity", "Capacity exceeds maximum capacity.");
+			}
+			while (count > 0)
+			{
+				int num = Math.Min(this.m_ChunkChars.Length - this.m_ChunkLength, count);
+				if (num == 0)
+				{
+					this.ExpandByABlock(count);
+					num = Math.Min(this.m_ChunkChars.Length - this.m_ChunkLength, count);
+				}
+				value.CopyTo(startIndex, new Span<char>(this.m_ChunkChars, this.m_ChunkLength, num), num);
+				this.m_ChunkLength += num;
+				startIndex += num;
+				count -= num;
+			}
+			return this;
+		}
+
 		public StringBuilder AppendLine()
 		{
 			return this.Append(Environment.NewLine);
 		}
 
-		[ComVisible(false)]
 		public StringBuilder AppendLine(string value)
 		{
 			this.Append(value);
 			return this.Append(Environment.NewLine);
 		}
 
-		[ComVisible(false)]
-		[SecuritySafeCritical]
 		public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
 		{
 			if (destination == null)
 			{
 				throw new ArgumentNullException("destination");
 			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Argument count must not be negative."));
-			}
 			if (destinationIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("destinationIndex", Environment.GetResourceString("'{0}' must be non-negative.", new object[] { "destinationIndex" }));
+				throw new ArgumentOutOfRangeException("destinationIndex", SR.Format("'{0}' must be non-negative.", "destinationIndex"));
 			}
 			if (destinationIndex > destination.Length - count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Either offset did not refer to a position in the string, or there is an insufficient length of destination character array."));
+				throw new ArgumentException("Either offset did not refer to a position in the string, or there is an insufficient length of destination character array.");
+			}
+			this.CopyTo(sourceIndex, new Span<char>(destination).Slice(destinationIndex), count);
+		}
+
+		public void CopyTo(int sourceIndex, Span<char> destination, int count)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Argument count must not be negative.");
 			}
 			if (sourceIndex > this.Length)
 			{
-				throw new ArgumentOutOfRangeException("sourceIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("sourceIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (sourceIndex > this.Length - count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Source string was not long enough. Check sourceIndex and count."));
+				throw new ArgumentException("Source string was not long enough. Check sourceIndex and count.");
 			}
 			StringBuilder stringBuilder = this;
 			int num = sourceIndex + count;
-			int num2 = destinationIndex + count;
+			int num2 = count;
 			while (count > 0)
 			{
 				int num3 = num - stringBuilder.m_ChunkOffset;
 				if (num3 >= 0)
 				{
-					if (num3 > stringBuilder.m_ChunkLength)
-					{
-						num3 = stringBuilder.m_ChunkLength;
-					}
+					num3 = Math.Min(num3, stringBuilder.m_ChunkLength);
 					int num4 = count;
 					int num5 = num3 - count;
 					if (num5 < 0)
@@ -716,19 +715,18 @@ namespace System.Text
 			}
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Insert(int index, string value, int count)
 		{
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			int length = this.Length;
 			if (index > length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (value == null || value.Length == 0 || count == 0)
+			if (string.IsNullOrEmpty(value) || count == 0)
 			{
 				return this;
 			}
@@ -740,18 +738,15 @@ namespace System.Text
 			StringBuilder stringBuilder;
 			int num2;
 			this.MakeRoom(index, (int)num, out stringBuilder, out num2, false);
-			fixed (string text = value)
+			char* ptr = value;
+			if (ptr != null)
 			{
-				char* ptr = text;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				while (count > 0)
-				{
-					this.ReplaceInPlaceAtChunk(ref stringBuilder, ref num2, ptr, value.Length);
-					count--;
-				}
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			while (count > 0)
+			{
+				this.ReplaceInPlaceAtChunk(ref stringBuilder, ref num2, ptr, value.Length);
+				count--;
 			}
 			return this;
 		}
@@ -760,15 +755,15 @@ namespace System.Text
 		{
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
 			}
 			if (startIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
 			}
 			if (length > this.Length - startIndex)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (this.Length == length && startIndex == 0)
 			{
@@ -789,17 +784,6 @@ namespace System.Text
 			return this.Append(value.ToString());
 		}
 
-		[CLSCompliant(false)]
-		public StringBuilder Append(sbyte value)
-		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
-		}
-
-		public StringBuilder Append(byte value)
-		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
-		}
-
 		public StringBuilder Append(char value)
 		{
 			if (this.m_ChunkLength < this.m_ChunkChars.Length)
@@ -816,64 +800,79 @@ namespace System.Text
 			return this;
 		}
 
+		[CLSCompliant(false)]
+		public StringBuilder Append(sbyte value)
+		{
+			return this.AppendSpanFormattable<sbyte>(value);
+		}
+
+		public StringBuilder Append(byte value)
+		{
+			return this.AppendSpanFormattable<byte>(value);
+		}
+
 		public StringBuilder Append(short value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<short>(value);
 		}
 
 		public StringBuilder Append(int value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<int>(value);
 		}
 
 		public StringBuilder Append(long value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<long>(value);
 		}
 
 		public StringBuilder Append(float value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<float>(value);
 		}
 
 		public StringBuilder Append(double value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<double>(value);
 		}
 
 		public StringBuilder Append(decimal value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<decimal>(value);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Append(ushort value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<ushort>(value);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Append(uint value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<uint>(value);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Append(ulong value)
 		{
-			return this.Append(value.ToString(CultureInfo.CurrentCulture));
+			return this.AppendSpanFormattable<ulong>(value);
+		}
+
+		private StringBuilder AppendSpanFormattable<T>(T value) where T : IFormattable
+		{
+			return this.Append(value.ToString(null, CultureInfo.CurrentCulture));
 		}
 
 		public StringBuilder Append(object value)
 		{
-			if (value == null)
+			if (value != null)
 			{
-				return this;
+				return this.Append(value.ToString());
 			}
-			return this.Append(value.ToString());
+			return this;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Append(char[] value)
 		{
 			if (value != null && value.Length != 0)
@@ -887,12 +886,136 @@ namespace System.Text
 			return this;
 		}
 
-		[SecuritySafeCritical]
+		public unsafe StringBuilder Append(ReadOnlySpan<char> value)
+		{
+			if (value.Length > 0)
+			{
+				fixed (char* reference = MemoryMarshal.GetReference<char>(value))
+				{
+					char* ptr = reference;
+					this.Append(ptr, value.Length);
+				}
+			}
+			return this;
+		}
+
+		public unsafe StringBuilder AppendJoin(string separator, params object[] values)
+		{
+			separator = separator ?? string.Empty;
+			fixed (string text = separator)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return this.AppendJoinCore<object>(ptr, separator.Length, values);
+			}
+		}
+
+		public unsafe StringBuilder AppendJoin<T>(string separator, IEnumerable<T> values)
+		{
+			separator = separator ?? string.Empty;
+			fixed (string text = separator)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return this.AppendJoinCore<T>(ptr, separator.Length, values);
+			}
+		}
+
+		public unsafe StringBuilder AppendJoin(string separator, params string[] values)
+		{
+			separator = separator ?? string.Empty;
+			fixed (string text = separator)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				return this.AppendJoinCore<string>(ptr, separator.Length, values);
+			}
+		}
+
+		public unsafe StringBuilder AppendJoin(char separator, params object[] values)
+		{
+			return this.AppendJoinCore<object>(&separator, 1, values);
+		}
+
+		public unsafe StringBuilder AppendJoin<T>(char separator, IEnumerable<T> values)
+		{
+			return this.AppendJoinCore<T>(&separator, 1, values);
+		}
+
+		public unsafe StringBuilder AppendJoin(char separator, params string[] values)
+		{
+			return this.AppendJoinCore<string>(&separator, 1, values);
+		}
+
+		private unsafe StringBuilder AppendJoinCore<T>(char* separator, int separatorLength, IEnumerable<T> values)
+		{
+			if (values == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.values);
+			}
+			using (IEnumerator<T> enumerator = values.GetEnumerator())
+			{
+				if (!enumerator.MoveNext())
+				{
+					return this;
+				}
+				T t = enumerator.Current;
+				if (t != null)
+				{
+					this.Append(t.ToString());
+				}
+				while (enumerator.MoveNext())
+				{
+					this.Append(separator, separatorLength);
+					t = enumerator.Current;
+					if (t != null)
+					{
+						this.Append(t.ToString());
+					}
+				}
+			}
+			return this;
+		}
+
+		private unsafe StringBuilder AppendJoinCore<T>(char* separator, int separatorLength, T[] values)
+		{
+			if (values == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.values);
+			}
+			if (values.Length == 0)
+			{
+				return this;
+			}
+			if (values[0] != null)
+			{
+				this.Append(values[0].ToString());
+			}
+			for (int i = 1; i < values.Length; i++)
+			{
+				this.Append(separator, separatorLength);
+				if (values[i] != null)
+				{
+					this.Append(values[i].ToString());
+				}
+			}
+			return this;
+		}
+
 		public unsafe StringBuilder Insert(int index, string value)
 		{
 			if (index > this.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (value != null)
 			{
@@ -917,20 +1040,19 @@ namespace System.Text
 		[CLSCompliant(false)]
 		public StringBuilder Insert(int index, sbyte value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, byte value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, short value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Insert(int index, char value)
 		{
 			this.Insert(index, &value, 1);
@@ -941,7 +1063,7 @@ namespace System.Text
 		{
 			if (index > this.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (value != null)
 			{
@@ -950,13 +1072,12 @@ namespace System.Text
 			return this;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe StringBuilder Insert(int index, char[] value, int startIndex, int charCount)
 		{
 			int length = this.Length;
 			if (index > length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (value == null)
 			{
@@ -964,21 +1085,21 @@ namespace System.Text
 				{
 					return this;
 				}
-				throw new ArgumentNullException(Environment.GetResourceString("String reference not set to an instance of a String."));
+				throw new ArgumentNullException("value", "String reference not set to an instance of a String.");
 			}
 			else
 			{
 				if (startIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+					throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
 				}
 				if (charCount < 0)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Value must be positive."));
+					throw new ArgumentOutOfRangeException("charCount", "Value must be positive.");
 				}
 				if (startIndex > value.Length - charCount)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (charCount > 0)
 				{
@@ -994,54 +1115,71 @@ namespace System.Text
 
 		public StringBuilder Insert(int index, int value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, long value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, float value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, double value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, decimal value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Insert(int index, ushort value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Insert(int index, uint value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		[CLSCompliant(false)]
 		public StringBuilder Insert(int index, ulong value)
 		{
-			return this.Insert(index, value.ToString(CultureInfo.CurrentCulture), 1);
+			return this.Insert(index, value.ToString(), 1);
 		}
 
 		public StringBuilder Insert(int index, object value)
 		{
-			if (value == null)
+			if (value != null)
 			{
-				return this;
+				return this.Insert(index, value.ToString(), 1);
 			}
-			return this.Insert(index, value.ToString(), 1);
+			return this;
+		}
+
+		public unsafe StringBuilder Insert(int index, ReadOnlySpan<char> value)
+		{
+			if (index > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (value.Length > 0)
+			{
+				fixed (char* reference = MemoryMarshal.GetReference<char>(value))
+				{
+					char* ptr = reference;
+					this.Insert(index, ptr, value.Length);
+				}
+			}
+			return this;
 		}
 
 		public StringBuilder AppendFormat(string format, object arg0)
@@ -1094,7 +1232,7 @@ namespace System.Text
 
 		private static void FormatError()
 		{
-			throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+			throw new FormatException("Input string was not in a correct format.");
 		}
 
 		internal StringBuilder AppendFormatHelper(IFormatProvider provider, string format, ParamsArray args)
@@ -1106,6 +1244,7 @@ namespace System.Text
 			int num = 0;
 			int length = format.Length;
 			char c = '\0';
+			StringBuilder stringBuilder = null;
 			ICustomFormatter customFormatter = null;
 			if (provider != null)
 			{
@@ -1133,14 +1272,14 @@ namespace System.Text
 						if (num >= length || format[num] != '{')
 						{
 							num--;
-							goto IL_008D;
+							goto IL_0091;
 						}
 						num++;
 					}
 					this.Append(c);
 					continue;
 				}
-				IL_008D:
+				IL_0091:
 				if (num == length)
 				{
 					return this;
@@ -1219,10 +1358,12 @@ namespace System.Text
 					num++;
 				}
 				object obj = args[num2];
-				StringBuilder stringBuilder = null;
+				string text = null;
+				ReadOnlySpan<char> readOnlySpan = default(ReadOnlySpan<char>);
 				if (c == ':')
 				{
 					num++;
+					int num4 = num;
 					for (;;)
 					{
 						if (num == length)
@@ -1231,80 +1372,112 @@ namespace System.Text
 						}
 						c = format[num];
 						num++;
-						if (c == '{')
+						if (c == '}' || c == '{')
 						{
-							if (num < length && format[num] == '{')
+							if (c == '{')
 							{
-								num++;
+								if (num < length && format[num] == '{')
+								{
+									num++;
+								}
+								else
+								{
+									StringBuilder.FormatError();
+								}
 							}
 							else
 							{
-								StringBuilder.FormatError();
+								if (num >= length || format[num] != '}')
+								{
+									break;
+								}
+								num++;
 							}
-						}
-						else if (c == '}')
-						{
-							if (num >= length || format[num] != '}')
+							if (stringBuilder == null)
 							{
-								break;
+								stringBuilder = new StringBuilder();
 							}
-							num++;
+							stringBuilder.Append(format, num4, num - num4 - 1);
+							num4 = num;
 						}
-						if (stringBuilder == null)
-						{
-							stringBuilder = new StringBuilder();
-						}
-						stringBuilder.Append(c);
 					}
 					num--;
+					if (stringBuilder == null || stringBuilder.Length == 0)
+					{
+						if (num4 != num)
+						{
+							readOnlySpan = format.AsSpan(num4, num - num4);
+						}
+					}
+					else
+					{
+						stringBuilder.Append(format, num4, num - num4);
+						readOnlySpan = (text = stringBuilder.ToString());
+						stringBuilder.Clear();
+					}
 				}
 				if (c != '}')
 				{
 					StringBuilder.FormatError();
 				}
 				num++;
-				string text = null;
 				string text2 = null;
 				if (customFormatter != null)
 				{
-					if (stringBuilder != null)
+					if (readOnlySpan.Length != 0 && text == null)
 					{
-						text = stringBuilder.ToString();
+						text = new string(readOnlySpan);
 					}
 					text2 = customFormatter.Format(text, obj, provider);
 				}
 				if (text2 == null)
 				{
-					IFormattable formattable = obj as IFormattable;
-					if (formattable != null)
+					ISpanFormattable spanFormattable = obj as ISpanFormattable;
+					int num5;
+					if (spanFormattable != null && (flag || num3 == 0) && spanFormattable.TryFormat(this.RemainingCurrentChunk, out num5, readOnlySpan, provider))
 					{
-						if (text == null && stringBuilder != null)
+						this.m_ChunkLength += num5;
+						int num6 = num3 - num5;
+						if (flag && num6 > 0)
 						{
-							text = stringBuilder.ToString();
+							this.Append(' ', num6);
+							continue;
 						}
-						text2 = formattable.ToString(text, provider);
+						continue;
 					}
-					else if (obj != null)
+					else
 					{
-						text2 = obj.ToString();
+						IFormattable formattable = obj as IFormattable;
+						if (formattable != null)
+						{
+							if (readOnlySpan.Length != 0 && text == null)
+							{
+								text = new string(readOnlySpan);
+							}
+							text2 = formattable.ToString(text, provider);
+						}
+						else if (obj != null)
+						{
+							text2 = obj.ToString();
+						}
 					}
 				}
 				if (text2 == null)
 				{
 					text2 = string.Empty;
 				}
-				int num4 = num3 - text2.Length;
-				if (!flag && num4 > 0)
+				int num7 = num3 - text2.Length;
+				if (!flag && num7 > 0)
 				{
-					this.Append(' ', num4);
+					this.Append(' ', num7);
 				}
 				this.Append(text2);
-				if (flag && num4 > 0)
+				if (flag && num7 > 0)
 				{
-					this.Append(' ', num4);
+					this.Append(' ', num7);
 				}
 			}
-			throw new FormatException(Environment.GetResourceString("Index (zero based) must be greater than or equal to zero and less than the size of the argument list."));
+			throw new FormatException("Index (zero based) must be greater than or equal to zero and less than the size of the argument list.");
 		}
 
 		public StringBuilder Replace(string oldValue, string newValue)
@@ -1375,16 +1548,41 @@ namespace System.Text
 			return j < 0;
 		}
 
+		public bool Equals(ReadOnlySpan<char> span)
+		{
+			if (span.Length != this.Length)
+			{
+				return false;
+			}
+			StringBuilder stringBuilder = this;
+			int num = 0;
+			for (;;)
+			{
+				int chunkLength = stringBuilder.m_ChunkLength;
+				num += chunkLength;
+				if (!new ReadOnlySpan<char>(stringBuilder.m_ChunkChars, 0, chunkLength).EqualsOrdinal(span.Slice(span.Length - num, chunkLength)))
+				{
+					break;
+				}
+				stringBuilder = stringBuilder.m_ChunkPrevious;
+				if (stringBuilder == null)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public StringBuilder Replace(string oldValue, string newValue, int startIndex, int count)
 		{
 			int length = this.Length;
 			if (startIndex > length)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count < 0 || startIndex > length - count)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("count", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (oldValue == null)
 			{
@@ -1392,12 +1590,11 @@ namespace System.Text
 			}
 			if (oldValue.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Empty name is not legal."), "oldValue");
+				throw new ArgumentException("Empty name is not legal.", "oldValue");
 			}
-			if (newValue == null)
-			{
-				newValue = "";
-			}
+			newValue = newValue ?? string.Empty;
+			int length2 = newValue.Length;
+			int length3 = oldValue.Length;
 			int[] array = null;
 			int num = 0;
 			StringBuilder stringBuilder = this.FindChunkForIndex(startIndex);
@@ -1412,9 +1609,7 @@ namespace System.Text
 					}
 					else if (num >= array.Length)
 					{
-						int[] array2 = new int[array.Length * 3 / 2 + 4];
-						Array.Copy(array, array2, array.Length);
-						array = array2;
+						Array.Resize<int>(ref array, array.Length * 3 / 2 + 4);
 					}
 					array[num++] = num2;
 					num2 += oldValue.Length;
@@ -1448,11 +1643,11 @@ namespace System.Text
 			int length = this.Length;
 			if (startIndex > length)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count < 0 || startIndex > length - count)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("count", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int num = startIndex + count;
 			StringBuilder stringBuilder = this;
@@ -1483,41 +1678,44 @@ namespace System.Text
 		}
 
 		[CLSCompliant(false)]
-		[SecurityCritical]
 		public unsafe StringBuilder Append(char* value, int valueCount)
 		{
 			if (valueCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("valueCount", Environment.GetResourceString("Count cannot be less than zero."));
+				throw new ArgumentOutOfRangeException("valueCount", "Count cannot be less than zero.");
 			}
-			int num = valueCount + this.m_ChunkLength;
-			if (num <= this.m_ChunkChars.Length)
+			int num = this.Length + valueCount;
+			if (num > this.m_MaxCapacity || num < valueCount)
+			{
+				throw new ArgumentOutOfRangeException("valueCount", "The length cannot be greater than the capacity.");
+			}
+			int num2 = valueCount + this.m_ChunkLength;
+			if (num2 <= this.m_ChunkChars.Length)
 			{
 				StringBuilder.ThreadSafeCopy(value, this.m_ChunkChars, this.m_ChunkLength, valueCount);
-				this.m_ChunkLength = num;
+				this.m_ChunkLength = num2;
 			}
 			else
 			{
-				int num2 = this.m_ChunkChars.Length - this.m_ChunkLength;
-				if (num2 > 0)
+				int num3 = this.m_ChunkChars.Length - this.m_ChunkLength;
+				if (num3 > 0)
 				{
-					StringBuilder.ThreadSafeCopy(value, this.m_ChunkChars, this.m_ChunkLength, num2);
+					StringBuilder.ThreadSafeCopy(value, this.m_ChunkChars, this.m_ChunkLength, num3);
 					this.m_ChunkLength = this.m_ChunkChars.Length;
 				}
-				int num3 = valueCount - num2;
-				this.ExpandByABlock(num3);
-				StringBuilder.ThreadSafeCopy(value + num2, this.m_ChunkChars, 0, num3);
-				this.m_ChunkLength = num3;
+				int num4 = valueCount - num3;
+				this.ExpandByABlock(num4);
+				StringBuilder.ThreadSafeCopy(value + num3, this.m_ChunkChars, 0, num4);
+				this.m_ChunkLength = num4;
 			}
 			return this;
 		}
 
-		[SecurityCritical]
 		private unsafe void Insert(int index, char* value, int valueCount)
 		{
 			if (index > this.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (valueCount > 0)
 			{
@@ -1528,7 +1726,6 @@ namespace System.Text
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe void ReplaceAllInChunk(int[] replacements, int replacementsCount, StringBuilder sourceChunk, int removeCount, string value)
 		{
 			if (replacementsCount <= 0)
@@ -1607,7 +1804,6 @@ namespace System.Text
 			return true;
 		}
 
-		[SecurityCritical]
 		private unsafe void ReplaceInPlaceAtChunk(ref StringBuilder chunk, ref int indexInChunk, char* value, int count)
 		{
 			if (count != 0)
@@ -1632,7 +1828,6 @@ namespace System.Text
 			}
 		}
 
-		[SecurityCritical]
 		private unsafe static void ThreadSafeCopy(char* sourcePtr, char[] destination, int destinationIndex, int count)
 		{
 			if (count <= 0)
@@ -1647,25 +1842,30 @@ namespace System.Text
 				}
 				return;
 			}
-			throw new ArgumentOutOfRangeException("destinationIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+			throw new ArgumentOutOfRangeException("destinationIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 		}
 
-		[SecurityCritical]
-		private unsafe static void ThreadSafeCopy(char[] source, int sourceIndex, char[] destination, int destinationIndex, int count)
+		private unsafe static void ThreadSafeCopy(char[] source, int sourceIndex, Span<char> destination, int destinationIndex, int count)
 		{
-			if (count <= 0)
+			if (count > 0)
 			{
-				return;
-			}
-			if (sourceIndex <= source.Length && sourceIndex + count <= source.Length)
-			{
+				if (sourceIndex > source.Length || count > source.Length - sourceIndex)
+				{
+					throw new ArgumentOutOfRangeException("sourceIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				if (destinationIndex > destination.Length || count > destination.Length - destinationIndex)
+				{
+					throw new ArgumentOutOfRangeException("destinationIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
 				fixed (char* ptr = &source[sourceIndex])
 				{
-					StringBuilder.ThreadSafeCopy(ptr, destination, destinationIndex, count);
+					char* ptr2 = ptr;
+					fixed (char* reference = MemoryMarshal.GetReference<char>(destination))
+					{
+						string.wstrcpy(reference + destinationIndex, ptr2, count);
+					}
 				}
-				return;
 			}
-			throw new ArgumentOutOfRangeException("sourceIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
 		}
 
 		private StringBuilder FindChunkForIndex(int index)
@@ -1688,20 +1888,29 @@ namespace System.Text
 			return stringBuilder;
 		}
 
+		private Span<char> RemainingCurrentChunk
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				return new Span<char>(this.m_ChunkChars, this.m_ChunkLength, this.m_ChunkChars.Length - this.m_ChunkLength);
+			}
+		}
+
 		private StringBuilder Next(StringBuilder chunk)
 		{
-			if (chunk == this)
+			if (chunk != this)
 			{
-				return null;
+				return this.FindChunkForIndex(chunk.m_ChunkOffset + chunk.m_ChunkLength);
 			}
-			return this.FindChunkForIndex(chunk.m_ChunkOffset + chunk.m_ChunkLength);
+			return null;
 		}
 
 		private void ExpandByABlock(int minBlockCharCount)
 		{
-			if (minBlockCharCount + this.Length < minBlockCharCount || minBlockCharCount + this.Length > this.m_MaxCapacity)
+			if (minBlockCharCount + this.Length > this.m_MaxCapacity || minBlockCharCount + this.Length < minBlockCharCount)
 			{
-				throw new ArgumentOutOfRangeException("requiredLength", Environment.GetResourceString("capacity was less than the current size."));
+				throw new ArgumentOutOfRangeException("requiredLength", "capacity was less than the current size.");
 			}
 			int num = Math.Max(minBlockCharCount, Math.Min(this.Length, 8000));
 			this.m_ChunkPrevious = new StringBuilder(this);
@@ -1724,12 +1933,11 @@ namespace System.Text
 			this.m_MaxCapacity = from.m_MaxCapacity;
 		}
 
-		[SecuritySafeCritical]
-		private unsafe void MakeRoom(int index, int count, out StringBuilder chunk, out int indexInChunk, bool doneMoveFollowingChars)
+		private unsafe void MakeRoom(int index, int count, out StringBuilder chunk, out int indexInChunk, bool doNotMoveFollowingChars)
 		{
-			if (count + this.Length < count || count + this.Length > this.m_MaxCapacity)
+			if (count + this.Length > this.m_MaxCapacity || count + this.Length < count)
 			{
-				throw new ArgumentOutOfRangeException("requiredLength", Environment.GetResourceString("capacity was less than the current size."));
+				throw new ArgumentOutOfRangeException("requiredLength", "capacity was less than the current size.");
 			}
 			chunk = this;
 			while (chunk.m_ChunkOffset > index)
@@ -1738,7 +1946,7 @@ namespace System.Text
 				chunk = chunk.m_ChunkPrevious;
 			}
 			indexInChunk = index - chunk.m_ChunkOffset;
-			if (!doneMoveFollowingChars && chunk.m_ChunkLength <= 32 && chunk.m_ChunkChars.Length - chunk.m_ChunkLength >= count)
+			if (!doNotMoveFollowingChars && chunk.m_ChunkLength <= 32 && chunk.m_ChunkChars.Length - chunk.m_ChunkLength >= count)
 			{
 				int i = chunk.m_ChunkLength;
 				while (i > indexInChunk)
@@ -1754,24 +1962,17 @@ namespace System.Text
 			int num = Math.Min(count, indexInChunk);
 			if (num > 0)
 			{
-				char[] array;
-				char* ptr;
-				if ((array = chunk.m_ChunkChars) == null || array.Length == 0)
+				fixed (char* ptr = &chunk.m_ChunkChars[0])
 				{
-					ptr = null;
+					char* ptr2 = ptr;
+					StringBuilder.ThreadSafeCopy(ptr2, stringBuilder.m_ChunkChars, 0, num);
+					int num2 = indexInChunk - num;
+					if (num2 >= 0)
+					{
+						StringBuilder.ThreadSafeCopy(ptr2 + num, chunk.m_ChunkChars, 0, num2);
+						indexInChunk = num2;
+					}
 				}
-				else
-				{
-					ptr = &array[0];
-				}
-				StringBuilder.ThreadSafeCopy(ptr, stringBuilder.m_ChunkChars, 0, num);
-				int num2 = indexInChunk - num;
-				if (num2 >= 0)
-				{
-					StringBuilder.ThreadSafeCopy(ptr + num, chunk.m_ChunkChars, 0, num2);
-					indexInChunk = num2;
-				}
-				array = null;
 			}
 			chunk.m_ChunkPrevious = stringBuilder;
 			chunk.m_ChunkOffset += count;
@@ -1793,7 +1994,6 @@ namespace System.Text
 			}
 		}
 
-		[SecuritySafeCritical]
 		private void Remove(int startIndex, int count, out StringBuilder chunk, out int indexInChunk)
 		{
 			int num = startIndex + count;
@@ -1863,5 +2063,9 @@ namespace System.Text
 		private const string ThreadIDField = "m_currentThread";
 
 		internal const int MaxChunkSize = 8000;
+
+		private const int IndexLimit = 1000000;
+
+		private const int WidthLimit = 1000000;
 	}
 }

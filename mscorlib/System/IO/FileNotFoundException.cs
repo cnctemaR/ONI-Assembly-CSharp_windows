@@ -1,45 +1,42 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class FileNotFoundException : IOException
 	{
 		public FileNotFoundException()
-			: base(Environment.GetResourceString("Unable to find the specified file."))
+			: base("Unable to find the specified file.")
 		{
-			base.SetErrorCode(-2147024894);
+			base.HResult = -2147024894;
 		}
 
 		public FileNotFoundException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024894);
+			base.HResult = -2147024894;
 		}
 
 		public FileNotFoundException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024894);
+			base.HResult = -2147024894;
 		}
 
 		public FileNotFoundException(string message, string fileName)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024894);
-			this._fileName = fileName;
+			base.HResult = -2147024894;
+			this.FileName = fileName;
 		}
 
 		public FileNotFoundException(string message, string fileName, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024894);
-			this._fileName = fileName;
+			base.HResult = -2147024894;
+			this.FileName = fileName;
 		}
 
 		public override string Message
@@ -55,32 +52,28 @@ namespace System.IO
 		{
 			if (this._message == null)
 			{
-				if (this._fileName == null && base.HResult == -2146233088)
+				if (this.FileName == null && base.HResult == -2146233088)
 				{
-					this._message = Environment.GetResourceString("Unable to find the specified file.");
+					this._message = "Unable to find the specified file.";
 					return;
 				}
-				if (this._fileName != null)
+				if (this.FileName != null)
 				{
-					this._message = FileLoadException.FormatFileLoadExceptionMessage(this._fileName, base.HResult);
+					this._message = FileLoadException.FormatFileLoadExceptionMessage(this.FileName, base.HResult);
 				}
 			}
 		}
 
-		public string FileName
-		{
-			get
-			{
-				return this._fileName;
-			}
-		}
+		public string FileName { get; }
+
+		public string FusionLog { get; }
 
 		public override string ToString()
 		{
-			string text = base.GetType().FullName + ": " + this.Message;
-			if (this._fileName != null && this._fileName.Length != 0)
+			string text = base.GetType().ToString() + ": " + this.Message;
+			if (this.FileName != null && this.FileName.Length != 0)
 			{
-				text = text + Environment.NewLine + Environment.GetResourceString("File name: '{0}'", new object[] { this._fileName });
+				text = text + Environment.NewLine + SR.Format("File name: '{0}'", this.FileName);
 			}
 			if (base.InnerException != null)
 			{
@@ -90,21 +83,15 @@ namespace System.IO
 			{
 				text = text + Environment.NewLine + this.StackTrace;
 			}
-			try
+			if (this.FusionLog != null)
 			{
-				if (this.FusionLog != null)
+				if (text == null)
 				{
-					if (text == null)
-					{
-						text = " ";
-					}
-					text += Environment.NewLine;
-					text += Environment.NewLine;
-					text += this.FusionLog;
+					text = " ";
 				}
-			}
-			catch (SecurityException)
-			{
+				text += Environment.NewLine;
+				text += Environment.NewLine;
+				text += this.FusionLog;
 			}
 			return text;
 		}
@@ -112,52 +99,16 @@ namespace System.IO
 		protected FileNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this._fileName = info.GetString("FileNotFound_FileName");
-			try
-			{
-				this._fusionLog = info.GetString("FileNotFound_FusionLog");
-			}
-			catch
-			{
-				this._fusionLog = null;
-			}
-		}
-
-		private FileNotFoundException(string fileName, string fusionLog, int hResult)
-			: base(null)
-		{
-			base.SetErrorCode(hResult);
-			this._fileName = fileName;
-			this._fusionLog = fusionLog;
-			this.SetMessageField();
-		}
-
-		public string FusionLog
-		{
-			[SecuritySafeCritical]
-			[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlEvidence | SecurityPermissionFlag.ControlPolicy)]
-			get
-			{
-				return this._fusionLog;
-			}
+			this.FileName = info.GetString("FileNotFound_FileName");
+			this.FusionLog = info.GetString("FileNotFound_FusionLog");
 		}
 
 		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
-			info.AddValue("FileNotFound_FileName", this._fileName, typeof(string));
-			try
-			{
-				info.AddValue("FileNotFound_FusionLog", this.FusionLog, typeof(string));
-			}
-			catch (SecurityException)
-			{
-			}
+			info.AddValue("FileNotFound_FileName", this.FileName, typeof(string));
+			info.AddValue("FileNotFound_FusionLog", this.FusionLog, typeof(string));
 		}
-
-		private string _fileName;
-
-		private string _fusionLog;
 	}
 }

@@ -31,6 +31,15 @@ namespace UnityEngine.CrashReportHandler
 		}
 
 		[NativeThrows]
+		internal static extern string installationIdentifier
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetUserMetadata(string key);
 

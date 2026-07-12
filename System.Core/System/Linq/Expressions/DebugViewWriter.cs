@@ -452,8 +452,7 @@ namespace System.Linq.Expressions
 			this.Out("$");
 			if (string.IsNullOrEmpty(node.Name))
 			{
-				int paramId = this.GetParamId(node);
-				this.Out("var" + paramId);
+				this.Out("var" + this.GetParamId(node).ToString());
 			}
 			else
 			{
@@ -1225,7 +1224,7 @@ namespace System.Linq.Expressions
 		{
 			if (string.IsNullOrEmpty(target.Name))
 			{
-				return "#Label" + this.GetLabelTargetId(target);
+				return "#Label" + this.GetLabelTargetId(target).ToString();
 			}
 			return DebugViewWriter.GetDisplayName(target.Name);
 		}
@@ -1245,7 +1244,7 @@ namespace System.Linq.Expressions
 		{
 			if (string.IsNullOrEmpty(lambda.Name))
 			{
-				return "#Lambda" + this.GetLambdaId(lambda);
+				return "#Lambda" + this.GetLambdaId(lambda).ToString();
 			}
 			return DebugViewWriter.GetDisplayName(lambda.Name);
 		}

@@ -4,87 +4,87 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[TypeLibImportClass(typeof(MethodInfo))]
-	[Guid("FFCC1B5D-ECB8-38DD-9B01-3DC8ABC2AA5F")]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("FFCC1B5D-ECB8-38DD-9B01-3DC8ABC2AA5F")]
+	[ComVisible(true)]
 	public interface _MethodInfo
 	{
-		bool Equals(object other);
-
-		MethodInfo GetBaseDefinition();
-
-		object[] GetCustomAttributes(bool inherit);
-
-		object[] GetCustomAttributes(Type attributeType, bool inherit);
-
-		int GetHashCode();
-
-		MethodImplAttributes GetMethodImplementationFlags();
-
-		ParameterInfo[] GetParameters();
-
-		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);
+		void GetTypeInfoCount(out uint pcTInfo);
 
 		void GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo);
 
-		void GetTypeInfoCount(out uint pcTInfo);
+		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);
 
 		void Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr);
 
+		string ToString();
+
+		bool Equals(object other);
+
+		int GetHashCode();
+
 		Type GetType();
 
-		object Invoke(object obj, object[] parameters);
+		MemberTypes MemberType { get; }
 
-		object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
+		string Name { get; }
+
+		Type DeclaringType { get; }
+
+		Type ReflectedType { get; }
+
+		object[] GetCustomAttributes(Type attributeType, bool inherit);
+
+		object[] GetCustomAttributes(bool inherit);
 
 		bool IsDefined(Type attributeType, bool inherit);
 
-		string ToString();
+		ParameterInfo[] GetParameters();
+
+		MethodImplAttributes GetMethodImplementationFlags();
+
+		RuntimeMethodHandle MethodHandle { get; }
 
 		MethodAttributes Attributes { get; }
 
 		CallingConventions CallingConvention { get; }
 
-		Type DeclaringType { get; }
+		object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
 
-		bool IsAbstract { get; }
+		bool IsPublic { get; }
 
-		bool IsAssembly { get; }
-
-		bool IsConstructor { get; }
+		bool IsPrivate { get; }
 
 		bool IsFamily { get; }
+
+		bool IsAssembly { get; }
 
 		bool IsFamilyAndAssembly { get; }
 
 		bool IsFamilyOrAssembly { get; }
 
-		bool IsFinal { get; }
-
-		bool IsHideBySig { get; }
-
-		bool IsPrivate { get; }
-
-		bool IsPublic { get; }
-
-		bool IsSpecialName { get; }
-
 		bool IsStatic { get; }
+
+		bool IsFinal { get; }
 
 		bool IsVirtual { get; }
 
-		MemberTypes MemberType { get; }
+		bool IsHideBySig { get; }
 
-		RuntimeMethodHandle MethodHandle { get; }
+		bool IsAbstract { get; }
 
-		string Name { get; }
+		bool IsSpecialName { get; }
 
-		Type ReflectedType { get; }
+		bool IsConstructor { get; }
+
+		object Invoke(object obj, object[] parameters);
 
 		Type ReturnType { get; }
 
 		ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
+
+		MethodInfo GetBaseDefinition();
 	}
 }

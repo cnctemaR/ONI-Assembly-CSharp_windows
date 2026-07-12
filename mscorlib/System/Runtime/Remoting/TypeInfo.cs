@@ -11,7 +11,13 @@ namespace System.Runtime.Remoting
 			{
 				this.serverType = typeof(MarshalByRefObject).AssemblyQualifiedName;
 				this.serverHierarchy = new string[0];
-				this.interfacesImplemented = new string[] { type.AssemblyQualifiedName };
+				Type[] interfaces = type.GetInterfaces();
+				this.interfacesImplemented = new string[interfaces.Length + 1];
+				for (int i = 0; i < interfaces.Length; i++)
+				{
+					this.interfacesImplemented[i] = interfaces[i].AssemblyQualifiedName;
+				}
+				this.interfacesImplemented[interfaces.Length] = type.AssemblyQualifiedName;
 				return;
 			}
 			this.serverType = type.AssemblyQualifiedName;
@@ -24,16 +30,16 @@ namespace System.Runtime.Remoting
 			}
 			this.serverHierarchy = new string[num];
 			type2 = type.BaseType;
-			for (int i = 0; i < num; i++)
+			for (int j = 0; j < num; j++)
 			{
-				this.serverHierarchy[i] = type2.AssemblyQualifiedName;
+				this.serverHierarchy[j] = type2.AssemblyQualifiedName;
 				type2 = type2.BaseType;
 			}
-			Type[] interfaces = type.GetInterfaces();
-			this.interfacesImplemented = new string[interfaces.Length];
-			for (int j = 0; j < interfaces.Length; j++)
+			Type[] interfaces2 = type.GetInterfaces();
+			this.interfacesImplemented = new string[interfaces2.Length];
+			for (int k = 0; k < interfaces2.Length; k++)
 			{
-				this.interfacesImplemented[j] = interfaces[j].AssemblyQualifiedName;
+				this.interfacesImplemented[k] = interfaces2[k].AssemblyQualifiedName;
 			}
 		}
 

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering.VirtualTexturing
 {
-	[StaticAccessor("VirtualTexturing::Debugging", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
+	[StaticAccessor("VirtualTexturing::Debugging", StaticAccessorType.DoubleColon)]
 	public static class Debugging
 	{
 		[NativeThrows]
@@ -48,8 +48,15 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			set;
 		}
 
-		[UsedByNativeCode]
+		[NativeThrows]
+		public static extern int mipPreloadedTextureCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[NativeHeader("Modules/VirtualTexturing/Public/VirtualTexturingDebugHandle.h")]
+		[UsedByNativeCode]
 		public struct Handle
 		{
 			public long handle;

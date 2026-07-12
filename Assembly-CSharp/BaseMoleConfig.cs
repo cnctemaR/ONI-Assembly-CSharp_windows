@@ -62,7 +62,7 @@ public static class BaseMoleConfig
 		List<Diet.Info> list = new List<Diet.Info>();
 		foreach (Tag tag in elementTags)
 		{
-			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true, false, false));
+			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true, Diet.Info.FoodType.EatSolid, false, null));
 		}
 		return list;
 	}

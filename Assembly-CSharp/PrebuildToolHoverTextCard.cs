@@ -18,7 +18,7 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 		if (!this.errorMessage.IsNullOrWhiteSpace())
 		{
 			bool flag = true;
-			foreach (string text in this.errorMessage.Split(new char[] { '\n' }))
+			foreach (string text in this.errorMessage.Split('\n', StringSplitOptions.None))
 			{
 				if (!flag)
 				{

@@ -9,23 +9,23 @@ namespace System.Collections.ObjectModel
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				throw new ArgumentNullException("array");
 			}
 			if (array.Rank != 1)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
 			if (array.GetLowerBound(0) != 0)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_NonZeroLowerBound);
+				throw new ArgumentException("The lower bound of target array must be zero.");
 			}
 			if (index < 0)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.arrayIndex, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (array.Length - index < collection.Count)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
 			}
 			ICollection collection2 = collection as ICollection;
 			if (collection2 != null)
@@ -39,16 +39,10 @@ namespace System.Collections.ObjectModel
 				collection.CopyTo(array2, index);
 				return;
 			}
-			Type elementType = array.GetType().GetElementType();
-			Type typeFromHandle = typeof(T);
-			if (!elementType.IsAssignableFrom(typeFromHandle) && !typeFromHandle.IsAssignableFrom(elementType))
-			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
-			}
 			object[] array3 = array as object[];
 			if (array3 == null)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
 			}
 			try
 			{
@@ -59,7 +53,7 @@ namespace System.Collections.ObjectModel
 			}
 			catch (ArrayTypeMismatchException)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
 			}
 		}
 	}

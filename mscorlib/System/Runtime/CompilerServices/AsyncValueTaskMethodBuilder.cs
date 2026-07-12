@@ -6,16 +6,14 @@ using System.Threading.Tasks;
 namespace System.Runtime.CompilerServices
 {
 	[StructLayout(LayoutKind.Auto)]
-	public struct AsyncValueTaskMethodBuilder<TResult>
+	public struct AsyncValueTaskMethodBuilder
 	{
-		public static AsyncValueTaskMethodBuilder<TResult> Create()
+		public static AsyncValueTaskMethodBuilder Create()
 		{
-			return new AsyncValueTaskMethodBuilder<TResult>
-			{
-				_methodBuilder = AsyncTaskMethodBuilder<TResult>.Create()
-			};
+			return default(AsyncValueTaskMethodBuilder);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
 		{
 			this._methodBuilder.Start<TStateMachine>(ref stateMachine);
@@ -26,14 +24,13 @@ namespace System.Runtime.CompilerServices
 			this._methodBuilder.SetStateMachine(stateMachine);
 		}
 
-		public void SetResult(TResult result)
+		public void SetResult()
 		{
 			if (this._useBuilder)
 			{
-				this._methodBuilder.SetResult(result);
+				this._methodBuilder.SetResult();
 				return;
 			}
-			this._result = result;
 			this._haveResult = true;
 		}
 
@@ -42,16 +39,16 @@ namespace System.Runtime.CompilerServices
 			this._methodBuilder.SetException(exception);
 		}
 
-		public ValueTask<TResult> Task
+		public ValueTask Task
 		{
 			get
 			{
 				if (this._haveResult)
 				{
-					return new ValueTask<TResult>(this._result);
+					return default(ValueTask);
 				}
 				this._useBuilder = true;
-				return new ValueTask<TResult>(this._methodBuilder.Task);
+				return new ValueTask(this._methodBuilder.Task);
 			}
 		}
 
@@ -68,9 +65,7 @@ namespace System.Runtime.CompilerServices
 			this._methodBuilder.AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref awaiter, ref stateMachine);
 		}
 
-		private AsyncTaskMethodBuilder<TResult> _methodBuilder;
-
-		private TResult _result;
+		private AsyncTaskMethodBuilder _methodBuilder;
 
 		private bool _haveResult;
 

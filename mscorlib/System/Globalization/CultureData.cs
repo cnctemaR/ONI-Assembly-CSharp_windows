@@ -177,7 +177,14 @@ namespace System.Globalization
 					{
 						if (!(text == "zh"))
 						{
-							this.waCalendars = new int[] { this.calendarId };
+							if (!(text == "he"))
+							{
+								this.waCalendars = new int[] { this.calendarId };
+							}
+							else
+							{
+								this.waCalendars = new int[] { this.calendarId, 8 };
+							}
 						}
 						else
 						{
@@ -191,6 +198,16 @@ namespace System.Globalization
 				}
 				return this.waCalendars;
 			}
+		}
+
+		internal CalendarId[] GetCalendarIds()
+		{
+			CalendarId[] array = new CalendarId[this.CalendarIds.Length];
+			for (int i = 0; i < this.CalendarIds.Length; i++)
+			{
+				array[i] = (CalendarId)this.CalendarIds[i];
+			}
+			return array;
 		}
 
 		internal bool IsInvariantCulture
@@ -371,6 +388,10 @@ namespace System.Globalization
 
 		internal string DateSeparator(int calendarId)
 		{
+			if (calendarId == 3 && !AppContextSwitches.EnforceLegacyJapaneseDateParsing)
+			{
+				return "/";
+			}
 			return CultureData.GetDateSeparator(this.ShortDates(calendarId)[0]);
 		}
 
@@ -418,8 +439,8 @@ namespace System.Globalization
 					if (c == '\\' && i + 1 < format.Length)
 					{
 						i++;
-						c = format[i];
-						if (c != '\'' && c != '\\')
+						char c2 = format[i];
+						if (c2 != '\'' && c2 != '\\')
 						{
 							i--;
 						}
@@ -490,11 +511,61 @@ namespace System.Globalization
 			return false;
 		}
 
-		internal void GetNFIValues(NumberFormatInfo nfi)
+		private unsafe static int strlen(byte* s)
+		{
+			int num = 0;
+			while (s[num] != 0)
+			{
+				num++;
+			}
+			return num;
+		}
+
+		private unsafe static string idx2string(byte* data, int idx)
+		{
+			return Encoding.UTF8.GetString(data + idx, CultureData.strlen(data + idx));
+		}
+
+		private int[] create_group_sizes_array(int gs0, int gs1)
+		{
+			if (gs0 == -1)
+			{
+				return new int[0];
+			}
+			if (gs1 != -1)
+			{
+				return new int[] { gs0, gs1 };
+			}
+			return new int[] { gs0 };
+		}
+
+		internal unsafe void GetNFIValues(NumberFormatInfo nfi)
 		{
 			if (!this.IsInvariantCulture)
 			{
-				CultureData.fill_number_data(nfi, this.numberIndex);
+				CultureData.NumberFormatEntryManaged numberFormatEntryManaged = default(CultureData.NumberFormatEntryManaged);
+				byte* ptr = CultureData.fill_number_data(this.numberIndex, ref numberFormatEntryManaged);
+				nfi.currencyGroupSizes = this.create_group_sizes_array(numberFormatEntryManaged.currency_group_sizes0, numberFormatEntryManaged.currency_group_sizes1);
+				nfi.numberGroupSizes = this.create_group_sizes_array(numberFormatEntryManaged.number_group_sizes0, numberFormatEntryManaged.number_group_sizes1);
+				nfi.NaNSymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.nan_symbol);
+				nfi.currencyDecimalDigits = numberFormatEntryManaged.currency_decimal_digits;
+				nfi.currencyDecimalSeparator = CultureData.idx2string(ptr, numberFormatEntryManaged.currency_decimal_separator);
+				nfi.currencyGroupSeparator = CultureData.idx2string(ptr, numberFormatEntryManaged.currency_group_separator);
+				nfi.currencyNegativePattern = numberFormatEntryManaged.currency_negative_pattern;
+				nfi.currencyPositivePattern = numberFormatEntryManaged.currency_positive_pattern;
+				nfi.currencySymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.currency_symbol);
+				nfi.negativeInfinitySymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.negative_infinity_symbol);
+				nfi.negativeSign = CultureData.idx2string(ptr, numberFormatEntryManaged.negative_sign);
+				nfi.numberDecimalDigits = numberFormatEntryManaged.number_decimal_digits;
+				nfi.numberDecimalSeparator = CultureData.idx2string(ptr, numberFormatEntryManaged.number_decimal_separator);
+				nfi.numberGroupSeparator = CultureData.idx2string(ptr, numberFormatEntryManaged.number_group_separator);
+				nfi.numberNegativePattern = numberFormatEntryManaged.number_negative_pattern;
+				nfi.perMilleSymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.per_mille_symbol);
+				nfi.percentNegativePattern = numberFormatEntryManaged.percent_negative_pattern;
+				nfi.percentPositivePattern = numberFormatEntryManaged.percent_positive_pattern;
+				nfi.percentSymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.percent_symbol);
+				nfi.positiveInfinitySymbol = CultureData.idx2string(ptr, numberFormatEntryManaged.positive_infinity_symbol);
+				nfi.positiveSign = CultureData.idx2string(ptr, numberFormatEntryManaged.positive_sign);
 			}
 			nfi.percentDecimalDigits = nfi.numberDecimalDigits;
 			nfi.percentDecimalSeparator = nfi.numberDecimalSeparator;
@@ -503,7 +574,7 @@ namespace System.Globalization
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void fill_number_data(NumberFormatInfo nfi, int numberIndex);
+		private unsafe static extern byte* fill_number_data(int index, ref CultureData.NumberFormatEntryManaged nfe);
 
 		private string sAM1159;
 
@@ -546,5 +617,54 @@ namespace System.Globalization
 		private string sListSeparator;
 
 		private static CultureData s_Invariant;
+
+		internal struct NumberFormatEntryManaged
+		{
+			internal int currency_decimal_digits;
+
+			internal int currency_decimal_separator;
+
+			internal int currency_group_separator;
+
+			internal int currency_group_sizes0;
+
+			internal int currency_group_sizes1;
+
+			internal int currency_negative_pattern;
+
+			internal int currency_positive_pattern;
+
+			internal int currency_symbol;
+
+			internal int nan_symbol;
+
+			internal int negative_infinity_symbol;
+
+			internal int negative_sign;
+
+			internal int number_decimal_digits;
+
+			internal int number_decimal_separator;
+
+			internal int number_group_separator;
+
+			internal int number_group_sizes0;
+
+			internal int number_group_sizes1;
+
+			internal int number_negative_pattern;
+
+			internal int per_mille_symbol;
+
+			internal int percent_negative_pattern;
+
+			internal int percent_positive_pattern;
+
+			internal int percent_symbol;
+
+			internal int positive_infinity_symbol;
+
+			internal int positive_sign;
+		}
 	}
 }

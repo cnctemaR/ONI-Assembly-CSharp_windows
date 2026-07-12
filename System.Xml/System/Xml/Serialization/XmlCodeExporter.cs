@@ -121,7 +121,8 @@ namespace System.Xml.Serialization
 				}
 				else if (mapping is ArrayMapping)
 				{
-					this.EnsureTypesExported(((ArrayMapping)mapping).Elements, ns);
+					Accessor[] elements = ((ArrayMapping)mapping).Elements;
+					this.EnsureTypesExported(elements, ns);
 				}
 				if (codeTypeDeclaration != null)
 				{
@@ -630,7 +631,8 @@ namespace System.Xml.Serialization
 			{
 				if (mapping.Members[l].Xmlns == null)
 				{
-					this.EnsureTypesExported(mapping.Members[l].Elements, mapping.Namespace);
+					Accessor[] elements = mapping.Members[l].Elements;
+					this.EnsureTypesExported(elements, mapping.Namespace);
 					this.EnsureTypesExported(mapping.Members[l].Attribute, mapping.Namespace);
 					this.EnsureTypesExported(mapping.Members[l].Text, mapping.Namespace);
 				}

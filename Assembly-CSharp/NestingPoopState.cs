@@ -14,11 +14,18 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 		{
 			smi.SetLastPoopCell();
 		}).GoTo(this.pooping);
-		this.pooping.Enter(delegate(NestingPoopState.Instance smi)
+		GameStateMachine<NestingPoopState, NestingPoopState.Instance, IStateMachineTarget, NestingPoopState.Def>.State state = this.pooping.Enter(delegate(NestingPoopState.Instance smi)
 		{
 			smi.master.GetComponent<Facing>().SetFacing(Grid.PosToCell(smi.master.gameObject) > smi.targetPoopCell);
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).PlayAnim("poop")
-			.OnAnimQueueComplete(this.behaviourcomplete);
+		});
+		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
+		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).PlayAnim("poop").OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.Enter(delegate(NestingPoopState.Instance smi)
 		{
 			smi.SetLastPoopCell();

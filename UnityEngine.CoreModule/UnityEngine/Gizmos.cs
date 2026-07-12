@@ -5,14 +5,45 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
 	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
 	public sealed class Gizmos
 	{
 		[NativeThrows]
 		public static void DrawLine(Vector3 from, Vector3 to)
 		{
 			Gizmos.DrawLine_Injected(ref from, ref to);
+		}
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern void DrawLineStrip([Span("count", true)] Vector3* points, int count, bool looped);
+
+		public unsafe static void DrawLineStrip(ReadOnlySpan<Vector3> points, bool looped)
+		{
+			fixed (Vector3* pinnableReference = points.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				Gizmos.DrawLineStrip(ptr, points.Length, looped);
+			}
+		}
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern void DrawLineList([Span("count", true)] Vector3* points, int count);
+
+		public unsafe static void DrawLineList(ReadOnlySpan<Vector3> points)
+		{
+			bool flag = (points.Length & 1) != 0;
+			if (flag)
+			{
+				throw new UnityException("You cannot draw a line list from an odd number of points, with two points per line the number of points must be even");
+			}
+			fixed (Vector3* pinnableReference = points.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				Gizmos.DrawLineList(ptr, points.Length);
+			}
 		}
 
 		[NativeThrows]

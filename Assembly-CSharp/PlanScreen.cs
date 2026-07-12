@@ -189,12 +189,12 @@ public class PlanScreen : KIconToggleMenu
 
 	private void OnClickCopyBuilding()
 	{
-		if (!this.LastSelectedBuilding.IsNullOrDestroyed() && this.LastSelectedBuilding.gameObject.activeInHierarchy)
+		if (!this.LastSelectedBuilding.IsNullOrDestroyed() && this.LastSelectedBuilding.gameObject.activeInHierarchy && (!this.lastSelectedBuilding.Def.DebugOnly || DebugHandler.InstantBuildMode))
 		{
 			PlanScreen.Instance.CopyBuildingOrder(this.LastSelectedBuilding);
 			return;
 		}
-		if (this.lastSelectedBuildingDef != null)
+		if (this.lastSelectedBuildingDef != null && (!this.lastSelectedBuildingDef.DebugOnly || DebugHandler.InstantBuildMode))
 		{
 			PlanScreen.Instance.CopyBuildingOrder(this.lastSelectedBuildingDef, this.LastSelectedBuildingFacade);
 		}
@@ -577,23 +577,24 @@ public class PlanScreen : KIconToggleMenu
 			return PlanScreen.RequirementsState.Invalid;
 		}
 		PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Complete;
+		KPrefabID component = def.BuildingComplete.GetComponent<KPrefabID>();
 		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && !this.IsDefResearched(def))
 		{
 			requirementsState = PlanScreen.RequirementsState.Tech;
 		}
-		else if (def.BuildingComplete.HasTag(GameTags.Telepad) && ClusterUtil.ActiveWorldHasPrinter())
+		else if (component.HasTag(GameTags.Telepad) && ClusterUtil.ActiveWorldHasPrinter())
 		{
 			requirementsState = PlanScreen.RequirementsState.TelepadBuilt;
 		}
-		else if (def.BuildingComplete.HasTag(GameTags.RocketInteriorBuilding) && !ClusterUtil.ActiveWorldIsRocketInterior())
+		else if (component.HasTag(GameTags.RocketInteriorBuilding) && !ClusterUtil.ActiveWorldIsRocketInterior())
 		{
 			requirementsState = PlanScreen.RequirementsState.RocketInteriorOnly;
 		}
-		else if (def.BuildingComplete.HasTag(GameTags.NotRocketInteriorBuilding) && ClusterUtil.ActiveWorldIsRocketInterior())
+		else if (component.HasTag(GameTags.NotRocketInteriorBuilding) && ClusterUtil.ActiveWorldIsRocketInterior())
 		{
 			requirementsState = PlanScreen.RequirementsState.RocketInteriorForbidden;
 		}
-		else if (def.BuildingComplete.HasTag(GameTags.UniquePerWorld) && BuildingInventory.Instance.BuildingCountForWorld_BAD_PERF(def.Tag, ClusterManager.Instance.activeWorldId) > 0)
+		else if (component.HasTag(GameTags.UniquePerWorld) && BuildingInventory.Instance.BuildingCountForWorld_BAD_PERF(def.Tag, ClusterManager.Instance.activeWorldId) > 0)
 		{
 			requirementsState = PlanScreen.RequirementsState.UniquePerWorld;
 		}
@@ -1579,7 +1580,7 @@ public class PlanScreen : KIconToggleMenu
 		{
 			this.toggleInfo = toggle_info;
 			this.planCategory = plan_category;
-			building_defs.RemoveAll((BuildingDef def) => !SaveLoader.Instance.IsDlcListActiveForCurrentSave(def.RequiredDlcIds));
+			building_defs.RemoveAll((BuildingDef def) => !def.IsValidDLC());
 			this.buildingDefs = building_defs;
 			this.hideIfNotResearched = hideIfNotResearched;
 			this.pendingResearchAttentions = new List<Tag>();

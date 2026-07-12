@@ -38,7 +38,7 @@ public class FullMinionUIPortrait : IEntityConfig
 			Assets.GetAnim("anim_cheer_kanim")
 		};
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
-		MinionConfig.ConfigureSymbols(gameObject, true);
+		BaseMinionConfig.ConfigureSymbols(gameObject, true);
 		return gameObject;
 	}
 

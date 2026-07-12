@@ -9,21 +9,12 @@ namespace System.CodeDom.Compiler
 	{
 		static CompilerCollection()
 		{
-			CompilerInfo compilerInfo = new CompilerInfo(null, "Microsoft.CSharp.CSharpCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { ".cs" }, new string[] { "c#", "cs", "csharp" });
+			CompilerInfo compilerInfo = new CompilerInfo(null, "Microsoft.CSharp.CSharpCodeProvider, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { "c#", "cs", "csharp" }, new string[] { ".cs" });
 			compilerInfo.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
 			CompilerCollection.AddCompilerInfo(compilerInfo);
-			CompilerInfo compilerInfo2 = new CompilerInfo(null, "Microsoft.VisualBasic.VBCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { ".vb" }, new string[] { "vb", "vbs", "visualbasic", "vbscript" });
+			CompilerInfo compilerInfo2 = new CompilerInfo(null, "Microsoft.VisualBasic.VBCodeProvider, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { "vb", "vbs", "visualbasic", "vbscript" }, new string[] { ".vb" });
 			compilerInfo2.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
 			CompilerCollection.AddCompilerInfo(compilerInfo2);
-			CompilerInfo compilerInfo3 = new CompilerInfo(null, "Microsoft.JScript.JScriptCodeProvider, Microsoft.JScript, Version=8.0.1100.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".js" }, new string[] { "js", "jscript", "javascript" });
-			compilerInfo3.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo3);
-			CompilerInfo compilerInfo4 = new CompilerInfo(null, "Microsoft.VJSharp.VJSharpCodeProvider, VJSharpCodeProvider, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".jsl", ".java" }, new string[] { "vj#", "vjs", "vjsharp" });
-			compilerInfo4.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo4);
-			CompilerInfo compilerInfo5 = new CompilerInfo(null, "Microsoft.VisualC.CppCodeProvider, CppCodeProvider, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".h" }, new string[] { "c++", "mc", "cpp" });
-			compilerInfo5.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo5);
 		}
 
 		private static void AddCompilerInfo(CompilerInfo ci)
@@ -207,7 +198,7 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		private static readonly string defaultCompilerVersion = "3.5";
+		private static readonly string defaultCompilerVersion = "4.0";
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
@@ -215,6 +206,6 @@ namespace System.CodeDom.Compiler
 
 		private static Dictionary<string, CompilerInfo> compiler_languages = new Dictionary<string, CompilerInfo>(16, StringComparer.OrdinalIgnoreCase);
 
-		private static Dictionary<string, CompilerInfo> compiler_extensions = new Dictionary<string, CompilerInfo>(6, StringComparer.OrdinalIgnoreCase);
+		private static Dictionary<string, CompilerInfo> compiler_extensions = new Dictionary<string, CompilerInfo>(4, StringComparer.OrdinalIgnoreCase);
 	}
 }

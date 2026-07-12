@@ -47,13 +47,12 @@ public class TrappedDuplicantDiagnostic : ColonyDiagnostic
 						flag2 = flag2 && !component.CanReach(worldItems2[0].GetComponent<IApproachable>());
 					}
 				}
-				List<Sleepable> worldItems3 = Components.Sleepables.GetWorldItems(component.GetMyWorld().id, false);
-				for (int i = 0; i < worldItems3.Count; i++)
+				foreach (Sleepable sleepable in Components.NormalBeds.WorldItemsEnumerate(component.GetMyWorldId(), true))
 				{
-					Assignable component2 = worldItems3[i].GetComponent<Assignable>();
-					if (component2 != null && component2.IsAssignedTo(minionIdentity))
+					Assignable assignable = sleepable.assignable;
+					if (assignable != null && assignable.IsAssignedTo(minionIdentity))
 					{
-						flag2 = flag2 && !component.CanReach(worldItems3[i].GetComponent<IApproachable>());
+						flag2 = flag2 && !component.CanReach(sleepable.approachable);
 					}
 				}
 				if (flag2)

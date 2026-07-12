@@ -620,7 +620,7 @@ namespace System.Xml
 					{
 						if (token != DtdParser.Token.EMPTY)
 						{
-							goto IL_017E;
+							goto IL_0181;
 						}
 						schemaElementDecl.ContentValidator = ContentValidator.Empty;
 					}
@@ -632,12 +632,12 @@ namespace System.Xml
 				else
 				{
 					int num = this.currentEntityId;
-					token = this.GetToken(false);
-					if (token != DtdParser.Token.None)
+					DtdParser.Token token2 = this.GetToken(false);
+					if (token2 != DtdParser.Token.None)
 					{
-						if (token != DtdParser.Token.PCDATA)
+						if (token2 != DtdParser.Token.PCDATA)
 						{
-							goto IL_017E;
+							goto IL_0181;
 						}
 						ParticleContentValidator particleContentValidator = new ParticleContentValidator(XmlSchemaContentType.Mixed);
 						particleContentValidator.Start();
@@ -660,7 +660,7 @@ namespace System.Xml
 				}
 				return;
 			}
-			IL_017E:
+			IL_0181:
 			this.OnUnexpectedError();
 		}
 
@@ -838,12 +838,12 @@ namespace System.Xml
 			{
 				if (token != DtdParser.Token.Percent)
 				{
-					goto IL_01D9;
+					goto IL_01D6;
 				}
 				flag = true;
 				if (this.GetToken(true) != DtdParser.Token.Name)
 				{
-					goto IL_01D9;
+					goto IL_01D6;
 				}
 			}
 			XmlQualifiedName nameQualified = this.GetNameQualified(false);
@@ -868,7 +868,7 @@ namespace System.Xml
 			{
 				if (token2 != DtdParser.Token.Literal)
 				{
-					goto IL_01D9;
+					goto IL_01D6;
 				}
 				schemaEntity.Text = this.GetValue();
 				schemaEntity.Line = this.literalLineInfo.lineNo;
@@ -894,7 +894,7 @@ namespace System.Xml
 					}
 					if (this.GetToken(true) != DtdParser.Token.Name)
 					{
-						goto IL_01D9;
+						goto IL_01D6;
 					}
 					schemaEntity.NData = this.GetNameQualified(false);
 					string name = schemaEntity.NData.Name;
@@ -909,7 +909,7 @@ namespace System.Xml
 				schemaEntity.ParsingInProgress = false;
 				return;
 			}
-			IL_01D9:
+			IL_01D6:
 			this.OnUnexpectedError();
 		}
 
@@ -1400,10 +1400,10 @@ namespace System.Xml
 				}
 				else
 				{
-					c = this.chars[this.curPos + 1];
-					if (c != '!')
+					char c2 = this.chars[this.curPos + 1];
+					if (c2 != '!')
 					{
-						if (c == '?')
+						if (c2 == '?')
 						{
 							goto IL_041B;
 						}
@@ -1414,12 +1414,12 @@ namespace System.Xml
 					}
 					else
 					{
-						c = this.chars[this.curPos + 2];
-						if (c <= 'A')
+						char c3 = this.chars[this.curPos + 2];
+						if (c3 <= 'A')
 						{
-							if (c != '-')
+							if (c3 != '-')
 							{
-								if (c == 'A')
+								if (c3 == 'A')
 								{
 									if (this.charsUsed - this.curPos >= 9)
 									{
@@ -1442,11 +1442,11 @@ namespace System.Xml
 								goto IL_0513;
 							}
 						}
-						else if (c != 'E')
+						else if (c3 != 'E')
 						{
-							if (c != 'N')
+							if (c3 != 'N')
 							{
-								if (c == '[')
+								if (c3 == '[')
 								{
 									goto IL_038A;
 								}
@@ -1851,8 +1851,7 @@ namespace System.Xml
 
 		private DtdParser.Token ScanAttlist1()
 		{
-			char c = this.chars[this.curPos];
-			if (c == '>')
+			if (this.chars[this.curPos] == '>')
 			{
 				this.curPos++;
 				this.scanningFunction = DtdParser.ScanningFunction.SubsetContent;
@@ -1897,12 +1896,12 @@ namespace System.Xml
 						}
 						if (this.charsUsed - this.curPos >= 8 || this.readerAdapter.IsEof)
 						{
-							c = this.chars[this.curPos + 1];
-							if (c == 'M')
+							char c2 = this.chars[this.curPos + 1];
+							if (c2 == 'M')
 							{
 								goto IL_0390;
 							}
-							if (c == 'O')
+							if (c2 == 'O')
 							{
 								goto Block_24;
 							}
@@ -1921,12 +1920,12 @@ namespace System.Xml
 					{
 						this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
 					}
-					c = this.chars[this.curPos + 5];
-					if (c == 'I')
+					char c2 = this.chars[this.curPos + 5];
+					if (c2 == 'I')
 					{
 						goto IL_017C;
 					}
-					if (c == 'Y')
+					if (c2 == 'Y')
 					{
 						goto IL_01C3;
 					}
@@ -2082,14 +2081,14 @@ namespace System.Xml
 				}
 				else if (this.charsUsed - this.curPos >= 6)
 				{
-					c = this.chars[this.curPos + 1];
-					if (c == 'F')
+					char c2 = this.chars[this.curPos + 1];
+					if (c2 == 'F')
 					{
 						goto IL_01E1;
 					}
-					if (c != 'I')
+					if (c2 != 'I')
 					{
-						if (c == 'R')
+						if (c2 == 'R')
 						{
 							if (this.charsUsed - this.curPos >= 9)
 							{
@@ -3604,8 +3603,7 @@ namespace System.Xml
 
 		private async Task ParseAttlistTypeAsync(SchemaAttDef attrDef, SchemaElementDecl elementDecl, bool ignoreErrors)
 		{
-			DtdParser.Token token2 = await this.GetTokenAsync(true).ConfigureAwait(false);
-			DtdParser.Token token = token2;
+			DtdParser.Token token = await this.GetTokenAsync(true).ConfigureAwait(false);
 			if (token != DtdParser.Token.CDATA)
 			{
 				elementDecl.HasNonCDataAttribute = true;
@@ -3615,10 +3613,9 @@ namespace System.Xml
 			{
 				attrDef.TokenizedType = (XmlTokenizedType)token;
 				attrDef.SchemaType = XmlSchemaType.GetBuiltInSimpleType(attrDef.Datatype.TypeCode);
-				token2 = token;
-				if (token2 != DtdParser.Token.ID)
+				if (token != DtdParser.Token.ID)
 				{
-					if (token2 == DtdParser.Token.NOTATION)
+					if (token == DtdParser.Token.NOTATION)
 					{
 						if (this.validate)
 						{
@@ -3644,7 +3641,7 @@ namespace System.Xml
 						}
 						if (configuredTaskAwaiter.GetResult() != DtdParser.Token.LeftParen)
 						{
-							goto IL_0683;
+							goto IL_0667;
 						}
 						configuredTaskAwaiter = this.GetTokenAsync(false).ConfigureAwait(false).GetAwaiter();
 						if (!configuredTaskAwaiter.IsCompleted)
@@ -3655,7 +3652,7 @@ namespace System.Xml
 						}
 						if (configuredTaskAwaiter.GetResult() != DtdParser.Token.Name)
 						{
-							goto IL_0683;
+							goto IL_0667;
 						}
 						do
 						{
@@ -3669,10 +3666,10 @@ namespace System.Xml
 								this.SendValidationEvent(XmlSeverityType.Error, new XmlSchemaException("'{0}' is a duplicate notation value.", nameString, this.BaseUriStr, this.LineNo, this.LinePos));
 							}
 							attrDef.AddValue(nameString);
-							token2 = await this.GetTokenAsync(false).ConfigureAwait(false);
+							DtdParser.Token token2 = await this.GetTokenAsync(false).ConfigureAwait(false);
 							if (token2 == DtdParser.Token.RightParen)
 							{
-								goto IL_046B;
+								goto IL_0451;
 							}
 							if (token2 != DtdParser.Token.Or)
 							{
@@ -3687,8 +3684,8 @@ namespace System.Xml
 							}
 						}
 						while (configuredTaskAwaiter.GetResult() == DtdParser.Token.Name);
-						goto IL_0683;
-						IL_046B:;
+						goto IL_0667;
+						IL_0451:;
 					}
 				}
 				else
@@ -3721,14 +3718,14 @@ namespace System.Xml
 					attrDef.AddValue(this.GetNameString());
 					for (;;)
 					{
-						token2 = await this.GetTokenAsync(false).ConfigureAwait(false);
+						DtdParser.Token token2 = await this.GetTokenAsync(false).ConfigureAwait(false);
 						if (token2 == DtdParser.Token.RightParen)
 						{
 							break;
 						}
 						if (token2 != DtdParser.Token.Or)
 						{
-							goto IL_0683;
+							goto IL_0667;
 						}
 						configuredTaskAwaiter = this.GetTokenAsync(false).ConfigureAwait(false).GetAwaiter();
 						if (!configuredTaskAwaiter.IsCompleted)
@@ -3739,7 +3736,7 @@ namespace System.Xml
 						}
 						if (configuredTaskAwaiter.GetResult() != DtdParser.Token.Nmtoken)
 						{
-							goto IL_0683;
+							goto IL_0667;
 						}
 						string nmtokenString = this.GetNmtokenString();
 						if (this.validate && !this.v1Compat && attrDef.Values != null && attrDef.Values.Contains(nmtokenString) && !ignoreErrors)
@@ -3751,7 +3748,7 @@ namespace System.Xml
 					return;
 				}
 			}
-			IL_0683:
+			IL_0667:
 			this.OnUnexpectedError();
 		}
 
@@ -3878,12 +3875,12 @@ namespace System.Xml
 					}
 					else
 					{
-						ParticleContentValidator pcv2 = null;
-						pcv2 = new ParticleContentValidator(XmlSchemaContentType.ElementOnly);
-						pcv2.Start();
-						pcv2.OpenGroup();
-						await this.ParseElementOnlyContentAsync(pcv2, startParenEntityId).ConfigureAwait(false);
-						elementDecl.ContentValidator = pcv2.Finish(true);
+						ParticleContentValidator pcv = null;
+						pcv = new ParticleContentValidator(XmlSchemaContentType.ElementOnly);
+						pcv.Start();
+						pcv.OpenGroup();
+						await this.ParseElementOnlyContentAsync(pcv, startParenEntityId).ConfigureAwait(false);
+						elementDecl.ContentValidator = pcv.Finish(true);
 					}
 				}
 				configuredTaskAwaiter = this.GetTokenAsync(false).ConfigureAwait(false).GetAwaiter();
@@ -4735,7 +4732,7 @@ namespace System.Xml
 					{
 						if (this.charsUsed - this.curPos < 2 && !this.readerAdapter.IsEof)
 						{
-							goto IL_055E;
+							goto IL_0568;
 						}
 						if (this.chars[this.curPos + 1] != ']')
 						{
@@ -4743,7 +4740,7 @@ namespace System.Xml
 						}
 						if (this.charsUsed - this.curPos < 3 && !this.readerAdapter.IsEof)
 						{
-							goto IL_055E;
+							goto IL_0568;
 						}
 						if (this.chars[this.curPos + 1] == ']' && this.chars[this.curPos + 2] == '>')
 						{
@@ -4757,12 +4754,12 @@ namespace System.Xml
 				}
 				else
 				{
-					c = this.chars[this.curPos + 1];
-					if (c != '!')
+					char c2 = this.chars[this.curPos + 1];
+					if (c2 != '!')
 					{
-						if (c == '?')
+						if (c2 == '?')
 						{
-							goto IL_0452;
+							goto IL_045C;
 						}
 						if (this.charsUsed - this.curPos >= 2)
 						{
@@ -4771,18 +4768,18 @@ namespace System.Xml
 					}
 					else
 					{
-						c = this.chars[this.curPos + 2];
-						if (c <= 'A')
+						char c3 = this.chars[this.curPos + 2];
+						if (c3 <= 'A')
 						{
-							if (c != '-')
+							if (c3 != '-')
 							{
-								if (c == 'A')
+								if (c3 == 'A')
 								{
 									if (this.charsUsed - this.curPos >= 9)
 									{
 										goto Block_22;
 									}
-									goto IL_055E;
+									goto IL_0568;
 								}
 							}
 							else
@@ -4794,18 +4791,18 @@ namespace System.Xml
 								if (this.charsUsed - this.curPos >= 4)
 								{
 									this.Throw(this.curPos, "Expected DTD markup was not found.");
-									goto IL_055E;
+									goto IL_0568;
 								}
-								goto IL_055E;
+								goto IL_0568;
 							}
 						}
-						else if (c != 'E')
+						else if (c3 != 'E')
 						{
-							if (c != 'N')
+							if (c3 != 'N')
 							{
-								if (c == '[')
+								if (c3 == '[')
 								{
-									goto IL_03B7;
+									goto IL_03C1;
 								}
 							}
 							else
@@ -4814,7 +4811,7 @@ namespace System.Xml
 								{
 									goto Block_28;
 								}
-								goto IL_055E;
+								goto IL_0568;
 							}
 						}
 						else if (this.chars[this.curPos + 3] == 'L')
@@ -4823,7 +4820,7 @@ namespace System.Xml
 							{
 								break;
 							}
-							goto IL_055E;
+							goto IL_0568;
 						}
 						else if (this.chars[this.curPos + 3] == 'N')
 						{
@@ -4831,7 +4828,7 @@ namespace System.Xml
 							{
 								goto Block_17;
 							}
-							goto IL_055E;
+							goto IL_0568;
 						}
 						else
 						{
@@ -4839,7 +4836,7 @@ namespace System.Xml
 							{
 								goto Block_21;
 							}
-							goto IL_055E;
+							goto IL_0568;
 						}
 						if (this.charsUsed - this.curPos >= 3)
 						{
@@ -4847,7 +4844,7 @@ namespace System.Xml
 						}
 					}
 				}
-				IL_055E:
+				IL_0568:
 				ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadDataAsync().ConfigureAwait(false).GetAwaiter();
 				if (!configuredTaskAwaiter.IsCompleted)
 				{
@@ -4898,14 +4895,14 @@ namespace System.Xml
 			this.scanningFunction = DtdParser.ScanningFunction.Name;
 			this.nextScaningFunction = DtdParser.ScanningFunction.Notation1;
 			return DtdParser.Token.NotationDecl;
-			IL_03B7:
+			IL_03C1:
 			this.curPos += 3;
 			this.scanningFunction = DtdParser.ScanningFunction.CondSection1;
 			return DtdParser.Token.CondSectionStart;
 			Block_35:
 			this.curPos += 4;
 			return DtdParser.Token.Comment;
-			IL_0452:
+			IL_045C:
 			this.curPos += 2;
 			return DtdParser.Token.PI;
 			Block_38:
@@ -5126,9 +5123,8 @@ namespace System.Xml
 
 		private async Task<DtdParser.Token> ScanAttlist1Async()
 		{
-			char c = this.chars[this.curPos];
 			DtdParser.Token token;
-			if (c == '>')
+			if (this.chars[this.curPos] == '>')
 			{
 				this.curPos++;
 				this.scanningFunction = DtdParser.ScanningFunction.SubsetContent;
@@ -5160,7 +5156,7 @@ namespace System.Xml
 					}
 					if (c != 'C')
 					{
-						goto IL_0494;
+						goto IL_049A;
 					}
 					if (this.charsUsed - this.curPos >= 5)
 					{
@@ -5173,16 +5169,16 @@ namespace System.Xml
 					{
 						if (c != 'N')
 						{
-							goto IL_0494;
+							goto IL_049A;
 						}
 						if (this.charsUsed - this.curPos >= 8 || this.readerAdapter.IsEof)
 						{
-							c = this.chars[this.curPos + 1];
-							if (c == 'M')
+							char c2 = this.chars[this.curPos + 1];
+							if (c2 == 'M')
 							{
-								goto IL_03CC;
+								goto IL_03D2;
 							}
-							if (c == 'O')
+							if (c2 == 'O')
 							{
 								goto Block_24;
 							}
@@ -5201,18 +5197,18 @@ namespace System.Xml
 					{
 						this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
 					}
-					c = this.chars[this.curPos + 5];
-					if (c == 'I')
+					char c2 = this.chars[this.curPos + 5];
+					if (c2 == 'I')
 					{
-						goto IL_019A;
+						goto IL_019D;
 					}
-					if (c == 'Y')
+					if (c2 == 'Y')
 					{
-						goto IL_01E6;
+						goto IL_01E9;
 					}
 					this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
 				}
-				IL_04A5:
+				IL_04AB:
 				ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadDataAsync().ConfigureAwait(false).GetAwaiter();
 				if (!configuredTaskAwaiter.IsCompleted)
 				{
@@ -5227,9 +5223,9 @@ namespace System.Xml
 					continue;
 				}
 				continue;
-				IL_0494:
+				IL_049A:
 				this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
-				goto IL_04A5;
+				goto IL_04AB;
 			}
 			this.curPos++;
 			this.scanningFunction = DtdParser.ScanningFunction.Nmtoken;
@@ -5243,14 +5239,14 @@ namespace System.Xml
 			this.curPos += 5;
 			this.scanningFunction = DtdParser.ScanningFunction.Attlist6;
 			return DtdParser.Token.CDATA;
-			IL_019A:
+			IL_019D:
 			if (this.chars[this.curPos + 6] != 'E' || this.chars[this.curPos + 7] != 'S')
 			{
 				this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
 			}
 			this.curPos += 8;
 			return DtdParser.Token.ENTITIES;
-			IL_01E6:
+			IL_01E9:
 			this.curPos += 6;
 			return DtdParser.Token.ENTITY;
 			Block_17:
@@ -5283,7 +5279,7 @@ namespace System.Xml
 			this.curPos += 8;
 			this.scanningFunction = DtdParser.ScanningFunction.Attlist3;
 			return DtdParser.Token.NOTATION;
-			IL_03CC:
+			IL_03D2:
 			if (this.chars[this.curPos + 2] != 'T' || this.chars[this.curPos + 3] != 'O' || this.chars[this.curPos + 4] != 'K' || this.chars[this.curPos + 5] != 'E' || this.chars[this.curPos + 6] != 'N')
 			{
 				this.Throw(this.curPos, "'{0}' is an invalid attribute type.");
@@ -5322,14 +5318,14 @@ namespace System.Xml
 				}
 				else if (this.charsUsed - this.curPos >= 6)
 				{
-					c = this.chars[this.curPos + 1];
-					if (c == 'F')
+					char c2 = this.chars[this.curPos + 1];
+					if (c2 == 'F')
 					{
-						goto IL_026D;
+						goto IL_0271;
 					}
-					if (c != 'I')
+					if (c2 != 'I')
 					{
-						if (c == 'R')
+						if (c2 == 'R')
 						{
 							if (this.charsUsed - this.curPos >= 9)
 							{
@@ -5378,7 +5374,7 @@ namespace System.Xml
 			this.curPos += 8;
 			this.scanningFunction = DtdParser.ScanningFunction.Attlist1;
 			return DtdParser.Token.IMPLIED;
-			IL_026D:
+			IL_0271:
 			if (this.chars[this.curPos + 2] != 'I' || this.chars[this.curPos + 3] != 'X' || this.chars[this.curPos + 4] != 'E' || this.chars[this.curPos + 5] != 'D')
 			{
 				this.Throw(this.curPos, "Expecting an attribute type.");
@@ -6253,22 +6249,22 @@ namespace System.Xml
 			{
 				this.Throw(this.curPos - entityName.Name.Length - 1, "A parameter entity reference is not allowed in internal markup.");
 			}
-			SchemaEntity entity = this.VerifyEntityReference(entityName, paramEntity, true, inAttribute);
+			SchemaEntity schemaEntity = this.VerifyEntityReference(entityName, paramEntity, true, inAttribute);
 			bool flag;
-			if (entity == null)
+			if (schemaEntity == null)
 			{
 				flag = false;
 			}
 			else
 			{
-				if (entity.ParsingInProgress)
+				if (schemaEntity.ParsingInProgress)
 				{
 					this.Throw(this.curPos - entityName.Name.Length - 1, paramEntity ? "Parameter entity '{0}' references itself." : "General entity '{0}' references itself.", entityName.Name);
 				}
 				int num;
-				if (entity.IsExternal)
+				if (schemaEntity.IsExternal)
 				{
-					object obj = await this.readerAdapter.PushEntityAsync(entity).ConfigureAwait(false);
+					object obj = await this.readerAdapter.PushEntityAsync(schemaEntity).ConfigureAwait(false);
 					num = obj.Item1;
 					if (!obj.Item2)
 					{
@@ -6278,11 +6274,11 @@ namespace System.Xml
 				}
 				else
 				{
-					if (entity.Text.Length == 0)
+					if (schemaEntity.Text.Length == 0)
 					{
 						return false;
 					}
-					object obj2 = await this.readerAdapter.PushEntityAsync(entity).ConfigureAwait(false);
+					object obj2 = await this.readerAdapter.PushEntityAsync(schemaEntity).ConfigureAwait(false);
 					num = obj2.Item1;
 					if (!obj2.Item2)
 					{

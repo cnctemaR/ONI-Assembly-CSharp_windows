@@ -47,6 +47,18 @@ namespace System.Security.Cryptography.X509Certificates
 			this._location = storeLocation;
 		}
 
+		public X509Store(StoreName storeName, StoreLocation storeLocation, OpenFlags openFlags)
+			: this(storeName, storeLocation)
+		{
+			this._flags = openFlags;
+		}
+
+		public X509Store(string storeName, StoreLocation storeLocation, OpenFlags openFlags)
+			: this(storeName, storeLocation)
+		{
+			this._flags = openFlags;
+		}
+
 		[MonoTODO("Mono's stores are fully managed. All handles are invalid.")]
 		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 		public X509Store(IntPtr storeHandle)
@@ -100,19 +112,19 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private Mono.Security.X509.X509Stores Factory
+		private X509Stores Factory
 		{
 			get
 			{
 				if (this._location == StoreLocation.CurrentUser)
 				{
-					return Mono.Security.X509.X509StoreManager.CurrentUser;
+					return X509StoreManager.CurrentUser;
 				}
-				return Mono.Security.X509.X509StoreManager.LocalMachine;
+				return X509StoreManager.LocalMachine;
 			}
 		}
 
-		private bool IsOpen
+		public bool IsOpen
 		{
 			get
 			{
@@ -128,7 +140,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		internal Mono.Security.X509.X509Store Store
+		internal X509Store Store
 		{
 			get
 			{
@@ -163,7 +175,7 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				try
 				{
-					this.store.Import(new Mono.Security.X509.X509Certificate(certificate.RawData));
+					this.store.Import(new X509Certificate(certificate.RawData));
 				}
 				finally
 				{
@@ -197,7 +209,7 @@ namespace System.Security.Cryptography.X509Certificates
 				{
 					try
 					{
-						this.store.Import(new Mono.Security.X509.X509Certificate(x509Certificate.RawData));
+						this.store.Import(new X509Certificate(x509Certificate.RawData));
 					}
 					finally
 					{
@@ -227,9 +239,8 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				throw new CryptographicException(global::Locale.GetText("Invalid store name (null or empty)."));
 			}
-			string name = this._name;
 			string text;
-			if (name == "Root")
+			if (this._name == "Root")
 			{
 				text = "Trust";
 			}
@@ -244,10 +255,10 @@ namespace System.Security.Cryptography.X509Certificates
 				throw new CryptographicException(global::Locale.GetText("Store {0} doesn't exists.", new object[] { this._name }));
 			}
 			this._flags = flags;
-			foreach (Mono.Security.X509.X509Certificate x509Certificate in this.store.Certificates)
+			foreach (X509Certificate x509Certificate in this.store.Certificates)
 			{
 				X509Certificate2 x509Certificate2 = new X509Certificate2(x509Certificate.RawData);
-				x509Certificate2.PrivateKey = x509Certificate.RSA;
+				x509Certificate2.Impl.PrivateKey = x509Certificate.RSA;
 				this.Certificates.Add(x509Certificate2);
 			}
 		}
@@ -272,7 +283,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				this.store.Remove(new Mono.Security.X509.X509Certificate(certificate.RawData));
+				this.store.Remove(new X509Certificate(certificate.RawData));
 			}
 			finally
 			{
@@ -315,7 +326,7 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				foreach (X509Certificate2 x509Certificate2 in certificates)
 				{
-					this.store.Remove(new Mono.Security.X509.X509Certificate(x509Certificate2.RawData));
+					this.store.Remove(new X509Certificate(x509Certificate2.RawData));
 				}
 			}
 			finally
@@ -348,6 +359,6 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private OpenFlags _flags;
 
-		private Mono.Security.X509.X509Store store;
+		private X509Store store;
 	}
 }

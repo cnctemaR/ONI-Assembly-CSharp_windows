@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class RadiationLightConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -29,6 +29,8 @@ public class RadiationLightConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Radiation.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.DiseaseCellVisName = "RadiationSickness";
+		buildingDef.UtilityOutputOffset = CellOffset.none;
 		return buildingDef;
 	}
 

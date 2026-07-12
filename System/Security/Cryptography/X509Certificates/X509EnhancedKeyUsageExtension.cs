@@ -148,8 +148,7 @@ namespace System.Security.Cryptography.X509Certificates
 				for (int i = 0; i < this._enhKeyUsage.Count; i++)
 				{
 					Oid oid = this._enhKeyUsage[i];
-					string value = oid.Value;
-					if (value == "1.3.6.1.5.5.7.3.1")
+					if (oid.Value == "1.3.6.1.5.5.7.3.1")
 					{
 						stringBuilder.Append("Server Authentication (");
 					}

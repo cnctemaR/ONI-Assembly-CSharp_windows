@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class EventDescriptor : MemberDescriptor
 	{
 		protected EventDescriptor(string name, Attribute[] attrs)

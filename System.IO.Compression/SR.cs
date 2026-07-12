@@ -42,9 +42,19 @@ internal static class SR
 		return string.Format(CultureInfo.InvariantCulture, resourceFormat, p1, p2);
 	}
 
+	internal static string Format(CultureInfo ci, string resourceFormat, object p1, object p2)
+	{
+		return string.Format(ci, resourceFormat, p1, p2);
+	}
+
 	internal static string Format(string resourceFormat, object p1, object p2, object p3)
 	{
 		return string.Format(CultureInfo.InvariantCulture, resourceFormat, p1, p2, p3);
+	}
+
+	internal static string GetResourceString(string str)
+	{
+		return str;
 	}
 
 	public const string ArgumentOutOfRange_Enum = "Enum value was out of legal range.";
@@ -88,14 +98,6 @@ internal static class SR
 	public const string ZLibErrorVersionMismatch = "The version of the underlying compression routine does not match expected version.";
 
 	public const string ZLibErrorUnexpected = "The underlying compression routine returned an unexpected error code.";
-
-	public const string CorruptedGZipHeader = "The magic number in GZip header is not correct. Make sure you are passing in a GZip stream.";
-
-	public const string UnknownCompressionMode = "The compression mode specified in GZip header is unknown.";
-
-	public const string InvalidCRC = "The CRC in GZip footer does not match the CRC calculated from the decompressed data.";
-
-	public const string InvalidStreamSize = "The stream size in GZip footer does not match the real stream size.";
 
 	public const string ArgumentNeedNonNegative = "The argument must be non-negative.";
 
@@ -183,7 +185,35 @@ internal static class SR
 
 	public const string Zip64EOCDNotWhereExpected = "Zip 64 End of Central Directory Record not where indicated.";
 
-	public const string Argument_InvalidPathChars = "Illegal characters in path.";
+	public const string Argument_InvalidPathChars = "Illegal characters in path '{0}'.";
 
-	public const string FileNameContainsInvalidCharacters = "An entry in the ZipArchive has a path that contains invalid characters.";
+	public const string Stream_FalseCanRead = "Stream does not support reading.";
+
+	public const string Stream_FalseCanWrite = "Stream does not support writing.";
+
+	public const string BrotliEncoder_Create = "Failed to create BrotliEncoder instance";
+
+	public const string BrotliEncoder_Disposed = "Can not access a closed Encoder.";
+
+	public const string BrotliEncoder_Quality = "Provided BrotliEncoder Quality of {0} is not between the minimum value of {1} and the maximum value of {2}";
+
+	public const string BrotliEncoder_Window = "Provided BrotliEncoder Window of {0} is not between the minimum value of {1} and the maximum value of {2}";
+
+	public const string BrotliEncoder_InvalidSetParameter = "The BrotliEncoder {0} can not be changed at current encoder state.";
+
+	public const string BrotliDecoder_Create = "Failed to create BrotliDecoder instance";
+
+	public const string BrotliDecoder_Error = "Decoder threw unexpected error: {0}";
+
+	public const string BrotliDecoder_Disposed = "Can not access a closed Decoder.";
+
+	public const string BrotliStream_Compress_UnsupportedOperation = "Can not perform Read operations on a BrotliStream constructed with CompressionMode.Compress.";
+
+	public const string BrotliStream_Compress_InvalidData = "Encoder ran into invalid data.";
+
+	public const string BrotliStream_Decompress_UnsupportedOperation = "Can not perform Write operations on a BrotliStream constructed with CompressionMode.Decompress.";
+
+	public const string BrotliStream_Decompress_InvalidData = "Decoder ran into invalid data.";
+
+	public const string BrotliStream_Decompress_InvalidStream = "BrotliStream.BaseStream returned more bytes than requested in Read.";
 }

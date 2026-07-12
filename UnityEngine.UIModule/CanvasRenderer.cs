@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeClass("UI::CanvasRenderer")]
 	[NativeHeader("Modules/UI/CanvasRenderer.h")]
+	[NativeClass("UI::CanvasRenderer")]
 	public sealed class CanvasRenderer : Component
 	{
 		public extern bool hasPopInstruction
@@ -133,6 +133,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetMesh(Mesh mesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern Mesh GetMesh();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Clear();

@@ -309,7 +309,7 @@ namespace Microsoft.SqlServer.Server
 				case SqlRecordBuffer.StorageType.String:
 					return this._metadata ?? SmiMetaData.DefaultNVarChar;
 				case SqlRecordBuffer.StorageType.SqlDecimal:
-					return new SmiMetaData(SqlDbType.Decimal, 17L, ((SqlDecimal)this._object).Precision, ((SqlDecimal)this._object).Scale, 0L, SqlCompareOptions.None);
+					return new SmiMetaData(SqlDbType.Decimal, 17L, ((SqlDecimal)this._object).Precision, ((SqlDecimal)this._object).Scale, 0L, SqlCompareOptions.None, null);
 				case SqlRecordBuffer.StorageType.TimeSpan:
 					return SmiMetaData.DefaultTime;
 				default:

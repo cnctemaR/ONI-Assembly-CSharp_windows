@@ -9,7 +9,6 @@ namespace System.Data
 		protected ReadOnlyException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		public ReadOnlyException()

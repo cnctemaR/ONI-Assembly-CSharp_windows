@@ -250,8 +250,8 @@ namespace System
 			}
 		}
 
-		[SecurityCritical]
 		[Obsolete("AppDomain.AppendPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
+		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void AppendPrivatePath(string path)
 		{
@@ -274,8 +274,8 @@ namespace System
 			setupInformationNoCopy.PrivateBinPath = text + path;
 		}
 
-		[SecurityCritical]
 		[Obsolete("AppDomain.ClearPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
+		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void ClearPrivatePath()
 		{
@@ -482,8 +482,8 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, null, null, null, null, null, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, Evidence evidence)
 		{
 			return this.DefineDynamicAssembly(name, access, null, evidence, null, null, null, false);
@@ -495,15 +495,15 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, dir, null, null, null, null, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, evidence, null, null, null, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, null, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
@@ -516,8 +516,8 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, null, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
-		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		[SecuritySafeCritical]
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
@@ -530,8 +530,8 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, dir, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Declarative security for assembly level is no longer enforced")]
+		[SecuritySafeCritical]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions, bool isSynchronized)
 		{
 			if (name == null)
@@ -660,7 +660,7 @@ namespace System
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Assembly LoadAssembly(string assemblyRef, Evidence securityEvidence, bool refOnly);
+		internal extern Assembly LoadAssembly(string assemblyRef, Evidence securityEvidence, bool refOnly, ref StackCrawlMark stackMark);
 
 		[SecuritySafeCritical]
 		public Assembly Load(AssemblyName assemblyRef)
@@ -668,13 +668,13 @@ namespace System
 			return this.Load(assemblyRef, null);
 		}
 
-		internal Assembly LoadSatellite(AssemblyName assemblyRef, bool throwOnError)
+		internal Assembly LoadSatellite(AssemblyName assemblyRef, bool throwOnError, ref StackCrawlMark stackMark)
 		{
 			if (assemblyRef == null)
 			{
 				throw new ArgumentNullException("assemblyRef");
 			}
-			Assembly assembly = this.LoadAssembly(assemblyRef.FullName, null, false);
+			Assembly assembly = this.LoadAssembly(assemblyRef.FullName, null, false, ref stackMark);
 			if (assembly == null && throwOnError)
 			{
 				throw new FileNotFoundException(null, assemblyRef.Name);
@@ -684,6 +684,7 @@ namespace System
 
 		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Assembly Load(AssemblyName assemblyRef, Evidence assemblySecurity)
 		{
 			if (assemblyRef == null)
@@ -700,7 +701,8 @@ namespace System
 			}
 			else
 			{
-				Assembly assembly = this.LoadAssembly(assemblyRef.FullName, assemblySecurity, false);
+				StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+				Assembly assembly = this.LoadAssembly(assemblyRef.FullName, assemblySecurity, false, ref stackCrawlMark);
 				if (assembly != null)
 				{
 					return assembly;
@@ -710,7 +712,7 @@ namespace System
 					throw new FileNotFoundException(null, assemblyRef.Name);
 				}
 				string text = assemblyRef.CodeBase;
-				if (text.ToLower(CultureInfo.InvariantCulture).StartsWith("file://"))
+				if (text.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
 				{
 					text = new Uri(text).LocalPath;
 				}
@@ -756,19 +758,23 @@ namespace System
 		}
 
 		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Assembly Load(string assemblyString)
 		{
-			return this.Load(assemblyString, null, false);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return this.Load(assemblyString, null, false, ref stackCrawlMark);
 		}
 
-		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		[SecuritySafeCritical]
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Assembly Load(string assemblyString, Evidence assemblySecurity)
 		{
-			return this.Load(assemblyString, assemblySecurity, false);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return this.Load(assemblyString, assemblySecurity, false, ref stackCrawlMark);
 		}
 
-		internal Assembly Load(string assemblyString, Evidence assemblySecurity, bool refonly)
+		internal Assembly Load(string assemblyString, Evidence assemblySecurity, bool refonly, ref StackCrawlMark stackMark)
 		{
 			if (assemblyString == null)
 			{
@@ -778,7 +784,7 @@ namespace System
 			{
 				throw new ArgumentException("assemblyString cannot have zero length");
 			}
-			Assembly assembly = this.LoadAssembly(assemblyString, assemblySecurity, refonly);
+			Assembly assembly = this.LoadAssembly(assemblyString, assemblySecurity, refonly, ref stackMark);
 			if (assembly == null)
 			{
 				throw new FileNotFoundException(null, assemblyString);
@@ -801,8 +807,8 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Assembly LoadAssemblyRaw(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence, bool refonly);
 
-		[SecuritySafeCritical]
 		[Obsolete("Use an overload that does not take an Evidence parameter")]
+		[SecuritySafeCritical]
 		[SecurityPermission(SecurityAction.Demand, ControlEvidence = true)]
 		public Assembly Load(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence)
 		{
@@ -820,8 +826,8 @@ namespace System
 			return assembly;
 		}
 
-		[SecurityCritical]
 		[Obsolete("AppDomain policy levels are obsolete")]
+		[SecurityCritical]
 		[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 		public void SetAppDomainPolicy(PolicyLevel domainPolicy)
 		{
@@ -841,8 +847,8 @@ namespace System
 			this._granted = policyStatement.PermissionSet;
 		}
 
-		[SecurityCritical]
 		[Obsolete("Use AppDomainSetup.SetCachePath")]
+		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetCachePath(string path)
 		{
@@ -933,7 +939,7 @@ namespace System
 				flag = true;
 				AppDomain.InternalSetDomain(domain);
 				Exception ex;
-				object obj2 = ((MonoMethod)method).InternalInvoke(obj, args, out ex);
+				object obj2 = ((RuntimeMethodInfo)method).InternalInvoke(obj, args, out ex);
 				if (ex != null)
 				{
 					throw ex;
@@ -962,7 +968,7 @@ namespace System
 				flag = true;
 				AppDomain.InternalSetDomainByID(domain_id);
 				Exception ex;
-				object obj2 = ((MonoMethod)method).InternalInvoke(obj, args, out ex);
+				object obj2 = ((RuntimeMethodInfo)method).InternalInvoke(obj, args, out ex);
 				if (ex != null)
 				{
 					throw ex;
@@ -1259,38 +1265,38 @@ namespace System
 			return assembly2;
 		}
 
-		internal Assembly DoTypeResolve(object name_or_tb)
+		internal Assembly DoTypeBuilderResolve(TypeBuilder tb)
 		{
 			if (this.TypeResolve == null)
 			{
 				return null;
 			}
-			string text;
-			if (name_or_tb is TypeBuilder)
+			return this.DoTypeResolve(tb.FullName);
+		}
+
+		internal Assembly DoTypeResolve(string name)
+		{
+			if (this.TypeResolve == null)
 			{
-				text = ((TypeBuilder)name_or_tb).FullName;
-			}
-			else
-			{
-				text = (string)name_or_tb;
+				return null;
 			}
 			Dictionary<string, object> dictionary = AppDomain.type_resolve_in_progress;
 			if (dictionary == null)
 			{
 				dictionary = (AppDomain.type_resolve_in_progress = new Dictionary<string, object>());
 			}
-			if (dictionary.ContainsKey(text))
+			if (dictionary.ContainsKey(name))
 			{
 				return null;
 			}
-			dictionary[text] = null;
+			dictionary[name] = null;
 			Assembly assembly2;
 			try
 			{
 				Delegate[] invocationList = this.TypeResolve.GetInvocationList();
 				for (int i = 0; i < invocationList.Length; i++)
 				{
-					Assembly assembly = ((ResolveEventHandler)invocationList[i])(this, new ResolveEventArgs(text));
+					Assembly assembly = ((ResolveEventHandler)invocationList[i])(this, new ResolveEventArgs(name));
 					if (assembly != null)
 					{
 						return assembly;
@@ -1300,7 +1306,7 @@ namespace System
 			}
 			finally
 			{
-				dictionary.Remove(text);
+				dictionary.Remove(name);
 			}
 			return assembly2;
 		}

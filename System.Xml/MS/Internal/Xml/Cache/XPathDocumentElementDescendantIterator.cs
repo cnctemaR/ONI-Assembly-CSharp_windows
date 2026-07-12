@@ -12,23 +12,23 @@ namespace MS.Internal.Xml.Cache
 			{
 				throw new ArgumentNullException("namespaceURI");
 			}
-			this.localName = root.NameTable.Get(name);
-			this.namespaceUri = namespaceURI;
-			this.matchSelf = matchSelf;
+			this._localName = root.NameTable.Get(name);
+			this._namespaceUri = namespaceURI;
+			this._matchSelf = matchSelf;
 			if (root.NodeType != XPathNodeType.Root)
 			{
-				this.end = new XPathDocumentNavigator(root);
-				this.end.MoveToNonDescendant();
+				this._end = new XPathDocumentNavigator(root);
+				this._end.MoveToNonDescendant();
 			}
 		}
 
 		public XPathDocumentElementDescendantIterator(XPathDocumentElementDescendantIterator iter)
 			: base(iter)
 		{
-			this.end = iter.end;
-			this.localName = iter.localName;
-			this.namespaceUri = iter.namespaceUri;
-			this.matchSelf = iter.matchSelf;
+			this._end = iter._end;
+			this._localName = iter._localName;
+			this._namespaceUri = iter._namespaceUri;
+			this._matchSelf = iter._matchSelf;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -38,16 +38,16 @@ namespace MS.Internal.Xml.Cache
 
 		public override bool MoveNext()
 		{
-			if (this.matchSelf)
+			if (this._matchSelf)
 			{
-				this.matchSelf = false;
-				if (this.ctxt.IsElementMatch(this.localName, this.namespaceUri))
+				this._matchSelf = false;
+				if (this.ctxt.IsElementMatch(this._localName, this._namespaceUri))
 				{
 					this.pos++;
 					return true;
 				}
 			}
-			if (!this.ctxt.MoveToFollowing(this.localName, this.namespaceUri, this.end))
+			if (!this.ctxt.MoveToFollowing(this._localName, this._namespaceUri, this._end))
 			{
 				return false;
 			}
@@ -55,12 +55,12 @@ namespace MS.Internal.Xml.Cache
 			return true;
 		}
 
-		private XPathDocumentNavigator end;
+		private XPathDocumentNavigator _end;
 
-		private string localName;
+		private string _localName;
 
-		private string namespaceUri;
+		private string _namespaceUri;
 
-		private bool matchSelf;
+		private bool _matchSelf;
 	}
 }

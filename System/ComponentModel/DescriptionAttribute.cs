@@ -12,7 +12,7 @@ namespace System.ComponentModel
 
 		public DescriptionAttribute(string description)
 		{
-			this.description = description;
+			this.DescriptionValue = description;
 		}
 
 		public virtual string Description
@@ -23,17 +23,7 @@ namespace System.ComponentModel
 			}
 		}
 
-		protected string DescriptionValue
-		{
-			get
-			{
-				return this.description;
-			}
-			set
-			{
-				this.description = value;
-			}
-		}
+		protected string DescriptionValue { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -56,7 +46,5 @@ namespace System.ComponentModel
 		}
 
 		public static readonly DescriptionAttribute Default = new DescriptionAttribute();
-
-		private string description;
 	}
 }

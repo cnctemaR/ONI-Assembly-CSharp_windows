@@ -102,11 +102,32 @@ namespace System.Data
 			{
 				return false;
 			}
+			object[] array;
 			if (this._filterValues != null)
 			{
-				return this.CompareArray(this._childKey.ColumnsReference, relatedView._childKey.ColumnsReference) && this.CompareArray(this._filterValues, relatedView._filterValues);
+				array = this._childKey.ColumnsReference;
+				object[] array2 = array;
+				array = relatedView._childKey.ColumnsReference;
+				return this.CompareArray(array2, array) && this.CompareArray(this._filterValues, relatedView._filterValues);
 			}
-			return relatedView._filterValues == null && (this.CompareArray(this._childKey.ColumnsReference, relatedView._childKey.ColumnsReference) && this.CompareArray(this._parentKey.Value.ColumnsReference, this._parentKey.Value.ColumnsReference)) && this._parentRowView.Equals(relatedView._parentRowView);
+			if (relatedView._filterValues != null)
+			{
+				return false;
+			}
+			array = this._childKey.ColumnsReference;
+			object[] array3 = array;
+			array = relatedView._childKey.ColumnsReference;
+			if (this.CompareArray(array3, array))
+			{
+				array = this._parentKey.Value.ColumnsReference;
+				object[] array4 = array;
+				array = this._parentKey.Value.ColumnsReference;
+				if (this.CompareArray(array4, array))
+				{
+					return this._parentRowView.Equals(relatedView._parentRowView);
+				}
+			}
+			return false;
 		}
 
 		private bool CompareArray(object[] value1, object[] value2)

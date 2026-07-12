@@ -434,14 +434,22 @@ namespace System.Runtime.Remoting.Messaging
 				this._methodBase = RemotingServices.GetMethodBaseFromName(type, this._methodName, this._methodSignature);
 				if (this._methodBase == null)
 				{
-					throw new RemotingException(string.Concat(new object[] { "Method ", this._methodName, " not found in ", type }));
+					string text2 = "Method ";
+					string methodName = this._methodName;
+					string text3 = " not found in ";
+					Type type2 = type;
+					throw new RemotingException(text2 + methodName + text3 + ((type2 != null) ? type2.ToString() : null));
 				}
 				if (type != serverTypeForUri && type.IsInterface && !serverTypeForUri.IsInterface)
 				{
 					this._methodBase = RemotingServices.GetVirtualMethod(serverTypeForUri, this._methodBase);
 					if (this._methodBase == null)
 					{
-						throw new RemotingException(string.Concat(new object[] { "Method ", this._methodName, " not found in ", serverTypeForUri }));
+						string text4 = "Method ";
+						string methodName2 = this._methodName;
+						string text5 = " not found in ";
+						Type type3 = serverTypeForUri;
+						throw new RemotingException(text4 + methodName2 + text5 + ((type3 != null) ? type3.ToString() : null));
 					}
 				}
 			}

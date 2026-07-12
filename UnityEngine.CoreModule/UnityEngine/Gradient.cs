@@ -49,6 +49,7 @@ namespace UnityEngine
 			get;
 			[FreeFunction("Gradient_Bindings::SetColorKeys", IsThreadSafe = true, HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[param: Unmarshalled]
 			set;
 		}
 
@@ -59,10 +60,21 @@ namespace UnityEngine
 			get;
 			[FreeFunction("Gradient_Bindings::SetAlphaKeys", IsThreadSafe = true, HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[param: Unmarshalled]
 			set;
 		}
 
+		[NativeProperty(IsThreadSafe = true)]
 		public extern GradientMode mode
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeProperty(IsThreadSafe = true)]
+		public extern ColorSpace colorSpace
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -72,7 +84,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "Gradient_Bindings::SetKeys", IsThreadSafe = true, HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys);
+		public extern void SetKeys([Unmarshalled] GradientColorKey[] colorKeys, [Unmarshalled] GradientAlphaKey[] alphaKeys);
 
 		public override bool Equals(object o)
 		{

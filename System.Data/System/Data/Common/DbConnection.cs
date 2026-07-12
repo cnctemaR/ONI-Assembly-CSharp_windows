@@ -6,12 +6,12 @@ using System.Transactions;
 
 namespace System.Data.Common
 {
-	public abstract class DbConnection : Component, IDbConnection, IDisposable
+	public abstract class DbConnection : Component, IDbConnection, IDisposable, IAsyncDisposable
 	{
-		[RecommendedAsConfigurable(true)]
-		[SettingsBindable(true)]
 		[DefaultValue("")]
+		[SettingsBindable(true)]
 		[RefreshProperties(RefreshProperties.All)]
+		[RecommendedAsConfigurable(true)]
 		public abstract string ConnectionString { get; set; }
 
 		public virtual int ConnectionTimeout
@@ -31,6 +31,14 @@ namespace System.Data.Common
 			get
 			{
 				return null;
+			}
+		}
+
+		internal DbProviderFactory ProviderFactory
+		{
+			get
+			{
+				return this.DbProviderFactory;
 			}
 		}
 
@@ -140,12 +148,72 @@ namespace System.Data.Common
 			return task;
 		}
 
-		internal DbProviderFactory ProviderFactory
+		protected virtual ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
 		{
-			get
+			if (cancellationToken.IsCancellationRequested)
 			{
-				return this.DbProviderFactory;
+				return new ValueTask<DbTransaction>(Task.FromCanceled<DbTransaction>(cancellationToken));
 			}
+			ValueTask<DbTransaction> valueTask;
+			try
+			{
+				valueTask = new ValueTask<DbTransaction>(this.BeginDbTransaction(isolationLevel));
+			}
+			catch (Exception ex)
+			{
+				valueTask = new ValueTask<DbTransaction>(Task.FromException<DbTransaction>(ex));
+			}
+			return valueTask;
+		}
+
+		public ValueTask<DbTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return this.BeginDbTransactionAsync(IsolationLevel.Unspecified, cancellationToken);
+		}
+
+		public ValueTask<DbTransaction> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return this.BeginDbTransactionAsync(isolationLevel, cancellationToken);
+		}
+
+		public virtual Task CloseAsync()
+		{
+			Task task;
+			try
+			{
+				this.Close();
+				task = Task.CompletedTask;
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException(ex);
+			}
+			return task;
+		}
+
+		public virtual ValueTask DisposeAsync()
+		{
+			base.Dispose();
+			return default(ValueTask);
+		}
+
+		public virtual Task ChangeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			Task task;
+			try
+			{
+				this.ChangeDatabase(databaseName);
+				task = Task.CompletedTask;
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException(ex);
+			}
+			return task;
 		}
 
 		internal bool _suppressStateChangeForReconnection;

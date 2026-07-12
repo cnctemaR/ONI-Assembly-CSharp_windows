@@ -32,6 +32,8 @@ public class NavGrid
 
 	public NavGrid(string id, NavGrid.Transition[] transitions, NavGrid.NavTypeData[] nav_type_data, CellOffset[] bounding_offsets, NavTableValidator[] validators, int update_range_x, int update_range_y, int max_links_per_cell)
 	{
+		this.DirtyBitFlags = new byte[(Grid.CellCount + 7) / 8];
+		this.DirtyCells = new List<int>();
 		this.id = id;
 		this.Validators = validators;
 		this.navTypeData = nav_type_data;
@@ -123,26 +125,33 @@ public class NavGrid
 
 	public void UpdateGraph()
 	{
-		foreach (int num in this.DirtyCells)
+		int count = this.DirtyCells.Count;
+		for (int i = 0; i < count; i++)
 		{
-			for (int i = -this.updateRangeY; i <= this.updateRangeY; i++)
+			int num;
+			int num2;
+			Grid.CellToXY(this.DirtyCells[i], out num, out num2);
+			int num3 = Grid.ClampX(num - this.updateRangeX);
+			int num4 = Grid.ClampY(num2 - this.updateRangeY);
+			int num5 = Grid.ClampX(num + this.updateRangeX);
+			int num6 = Grid.ClampY(num2 + this.updateRangeY);
+			for (int j = num4; j <= num6; j++)
 			{
-				for (int j = -this.updateRangeX; j <= this.updateRangeX; j++)
+				for (int k = num3; k <= num5; k++)
 				{
-					int num2 = Grid.OffsetCell(num, j, i);
-					if (Grid.IsValidCell(num2))
-					{
-						this.ExpandedDirtyCells.Add(num2);
-					}
+					this.AddDirtyCell(Grid.XYToCell(k, j));
 				}
 			}
 		}
-		this.UpdateGraph(this.ExpandedDirtyCells);
-		this.DirtyCells = new HashSet<int>();
-		this.ExpandedDirtyCells = new HashSet<int>();
+		this.UpdateGraph(this.DirtyCells);
+		foreach (int num7 in this.DirtyCells)
+		{
+			this.DirtyBitFlags[num7 / 8] = 0;
+		}
+		this.DirtyCells.Clear();
 	}
 
-	public void UpdateGraph(HashSet<int> dirty_nav_cells)
+	public void UpdateGraph(IEnumerable<int> dirty_nav_cells)
 	{
 		NavGridUpdater.UpdateNavGrid(this.NavTable, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, this.teleportTransitions, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
@@ -251,7 +260,13 @@ public class NavGrid
 
 	public void AddDirtyCell(int cell)
 	{
-		this.DirtyCells.Add(cell);
+		if (Grid.IsValidCell(cell) && ((int)this.DirtyBitFlags[cell / 8] & (1 << cell % 8)) == 0)
+		{
+			this.DirtyCells.Add(cell);
+			byte[] dirtyBitFlags = this.DirtyBitFlags;
+			int num = cell / 8;
+			dirtyBitFlags[num] |= (byte)(1 << cell % 8);
+		}
 	}
 
 	public void Clear()
@@ -307,9 +322,9 @@ public class NavGrid
 
 	public NavGrid.Link[] Links;
 
-	private HashSet<int> DirtyCells = new HashSet<int>();
+	private byte[] DirtyBitFlags;
 
-	private HashSet<int> ExpandedDirtyCells = new HashSet<int>();
+	private List<int> DirtyCells;
 
 	private NavTableValidator[] Validators = new NavTableValidator[0];
 
@@ -321,7 +336,7 @@ public class NavGrid
 
 	public PathFinder.PotentialScratchPad potentialScratchPad;
 
-	public Action<HashSet<int>> OnNavGridUpdateComplete;
+	public Action<IEnumerable<int>> OnNavGridUpdateComplete;
 
 	public NavType[] ValidNavTypes;
 

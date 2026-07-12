@@ -40,7 +40,7 @@ public class Constructable : Workable, ISaveLoadable
 		return this.building.Def.PrefabID;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		float num = 0f;
 		float num2 = 0f;
@@ -144,7 +144,7 @@ public class Constructable : Workable, ISaveLoadable
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
 	}
 
-	private void FinishConstruction(UtilityConnections connections, Worker workerForGameplayEvent)
+	private void FinishConstruction(UtilityConnections connections, WorkerBase workerForGameplayEvent)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
@@ -747,6 +747,6 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		public ObjectLayer TileLayer;
 
-		public Worker Worker;
+		public WorkerBase Worker;
 	}
 }

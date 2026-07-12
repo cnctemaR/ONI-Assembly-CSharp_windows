@@ -70,5 +70,11 @@ namespace UnityEngine
 		public static extern bool IsValid(int id);
 
 		private int m_Id;
+
+		public static SortingLayer.LayerCallback onLayerAdded;
+
+		public static SortingLayer.LayerCallback onLayerRemoved;
+
+		public delegate void LayerCallback(SortingLayer layer);
 	}
 }

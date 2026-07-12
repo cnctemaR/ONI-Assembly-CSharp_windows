@@ -161,7 +161,8 @@ public class KSplitCompactedVector<Header, Payload> : KCompactedVectorBase, ICol
 		{
 			this.headerBegin = headerEnumerator;
 			this.payloadBegin = payloadEnumerator;
-			this.Reset();
+			this.headerCurrent = this.headerBegin;
+			this.payloadCurrent = this.payloadBegin;
 		}
 
 		public bool MoveNext()

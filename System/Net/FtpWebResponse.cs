@@ -4,46 +4,81 @@ using Unity;
 
 namespace System.Net
 {
-	public class FtpWebResponse : WebResponse
+	public class FtpWebResponse : WebResponse, IDisposable
 	{
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, bool keepAlive)
+		internal FtpWebResponse(Stream responseStream, long contentLength, Uri responseUri, FtpStatusCode statusCode, string statusLine, DateTime lastModified, string bannerMessage, string welcomeMessage, string exitMessage)
 		{
-			this.lastModified = DateTime.MinValue;
-			this.bannerMessage = string.Empty;
-			this.welcomeMessage = string.Empty;
-			this.exitMessage = string.Empty;
-			this.contentLength = -1L;
-			base..ctor();
-			this.request = request;
-			this.uri = uri;
-			this.method = method;
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, contentLength, statusLine);
+			}
+			this._responseStream = responseStream;
+			if (responseStream == null && contentLength < 0L)
+			{
+				contentLength = 0L;
+			}
+			this._contentLength = contentLength;
+			this._responseUri = responseUri;
+			this._statusCode = statusCode;
+			this._statusLine = statusLine;
+			this._lastModified = lastModified;
+			this._bannerMessage = bannerMessage;
+			this._welcomeMessage = welcomeMessage;
+			this._exitMessage = exitMessage;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatusCode statusCode, string statusDescription)
+		internal void UpdateStatus(FtpStatusCode statusCode, string statusLine, string exitMessage)
 		{
-			this.lastModified = DateTime.MinValue;
-			this.bannerMessage = string.Empty;
-			this.welcomeMessage = string.Empty;
-			this.exitMessage = string.Empty;
-			this.contentLength = -1L;
-			base..ctor();
-			this.request = request;
-			this.uri = uri;
-			this.method = method;
-			this.statusCode = statusCode;
-			this.statusDescription = statusDescription;
+			this._statusCode = statusCode;
+			this._statusLine = statusLine;
+			this._exitMessage = exitMessage;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatus status)
-			: this(request, uri, method, status.StatusCode, status.StatusDescription)
+		public override Stream GetResponseStream()
 		{
+			Stream stream;
+			if (this._responseStream != null)
+			{
+				stream = this._responseStream;
+			}
+			else
+			{
+				stream = (this._responseStream = new FtpWebResponse.EmptyStream());
+			}
+			return stream;
+		}
+
+		internal void SetResponseStream(Stream stream)
+		{
+			if (stream == null || stream == Stream.Null || stream is FtpWebResponse.EmptyStream)
+			{
+				return;
+			}
+			this._responseStream = stream;
+		}
+
+		public override void Close()
+		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, null, "Close");
+			}
+			Stream responseStream = this._responseStream;
+			if (responseStream != null)
+			{
+				responseStream.Close();
+			}
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Exit(this, null, "Close");
+			}
 		}
 
 		public override long ContentLength
 		{
 			get
 			{
-				return this.contentLength;
+				return this._contentLength;
 			}
 		}
 
@@ -51,75 +86,17 @@ namespace System.Net
 		{
 			get
 			{
-				return new WebHeaderCollection();
-			}
-		}
-
-		public override Uri ResponseUri
-		{
-			get
-			{
-				return this.uri;
-			}
-		}
-
-		public DateTime LastModified
-		{
-			get
-			{
-				return this.lastModified;
-			}
-			internal set
-			{
-				this.lastModified = value;
-			}
-		}
-
-		public string BannerMessage
-		{
-			get
-			{
-				return this.bannerMessage;
-			}
-			internal set
-			{
-				this.bannerMessage = value;
-			}
-		}
-
-		public string WelcomeMessage
-		{
-			get
-			{
-				return this.welcomeMessage;
-			}
-			internal set
-			{
-				this.welcomeMessage = value;
-			}
-		}
-
-		public string ExitMessage
-		{
-			get
-			{
-				return this.exitMessage;
-			}
-			internal set
-			{
-				this.exitMessage = value;
-			}
-		}
-
-		public FtpStatusCode StatusCode
-		{
-			get
-			{
-				return this.statusCode;
-			}
-			internal set
-			{
-				this.statusCode = value;
+				if (this._ftpRequestHeaders == null)
+				{
+					lock (this)
+					{
+						if (this._ftpRequestHeaders == null)
+						{
+							this._ftpRequestHeaders = new WebHeaderCollection();
+						}
+					}
+				}
+				return this._ftpRequestHeaders;
 			}
 		}
 
@@ -131,78 +108,60 @@ namespace System.Net
 			}
 		}
 
+		public override Uri ResponseUri
+		{
+			get
+			{
+				return this._responseUri;
+			}
+		}
+
+		public FtpStatusCode StatusCode
+		{
+			get
+			{
+				return this._statusCode;
+			}
+		}
+
 		public string StatusDescription
 		{
 			get
 			{
-				return this.statusDescription;
-			}
-			internal set
-			{
-				this.statusDescription = value;
+				return this._statusLine;
 			}
 		}
 
-		public override void Close()
-		{
-			if (this.disposed)
-			{
-				return;
-			}
-			this.disposed = true;
-			if (this.stream != null)
-			{
-				this.stream.Close();
-				if (this.stream == Stream.Null)
-				{
-					this.request.OperationCompleted();
-				}
-			}
-			this.stream = null;
-		}
-
-		public override Stream GetResponseStream()
-		{
-			if (this.stream == null)
-			{
-				return Stream.Null;
-			}
-			if (this.method != "RETR" && this.method != "NLST")
-			{
-				this.CheckDisposed();
-			}
-			return this.stream;
-		}
-
-		internal Stream Stream
+		public DateTime LastModified
 		{
 			get
 			{
-				return this.stream;
+				return this._lastModified;
 			}
-			set
+		}
+
+		public string BannerMessage
+		{
+			get
 			{
-				this.stream = value;
+				return this._bannerMessage;
 			}
 		}
 
-		internal void UpdateStatus(FtpStatus status)
+		public string WelcomeMessage
 		{
-			this.statusCode = status.StatusCode;
-			this.statusDescription = status.StatusDescription;
-		}
-
-		private void CheckDisposed()
-		{
-			if (this.disposed)
+			get
 			{
-				throw new ObjectDisposedException(base.GetType().FullName);
+				return this._welcomeMessage;
 			}
 		}
 
-		internal bool IsFinal()
+		public string ExitMessage
 		{
-			return this.statusCode >= FtpStatusCode.CommandOK;
+			get
+			{
+				return this._exitMessage;
+			}
 		}
 
 		internal FtpWebResponse()
@@ -210,28 +169,32 @@ namespace System.Net
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private Stream stream;
+		internal Stream _responseStream;
 
-		private Uri uri;
+		private long _contentLength;
 
-		private FtpStatusCode statusCode;
+		private Uri _responseUri;
 
-		private DateTime lastModified;
+		private FtpStatusCode _statusCode;
 
-		private string bannerMessage;
+		private string _statusLine;
 
-		private string welcomeMessage;
+		private WebHeaderCollection _ftpRequestHeaders;
 
-		private string exitMessage;
+		private DateTime _lastModified;
 
-		private string statusDescription;
+		private string _bannerMessage;
 
-		private string method;
+		private string _welcomeMessage;
 
-		private bool disposed;
+		private string _exitMessage;
 
-		private FtpWebRequest request;
-
-		internal long contentLength;
+		internal sealed class EmptyStream : MemoryStream
+		{
+			internal EmptyStream()
+				: base(Array.Empty<byte>(), false)
+			{
+			}
+		}
 	}
 }

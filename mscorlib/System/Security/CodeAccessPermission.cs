@@ -5,8 +5,8 @@ using System.Security.Permissions;
 
 namespace System.Security
 {
-	[ComVisible(true)]
 	[MonoTODO("CAS support is experimental (and unsupported).")]
+	[ComVisible(true)]
 	[SecurityPermission(SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
 	[Serializable]
 	public abstract class CodeAccessPermission : IPermission, ISecurityEncodable, IStackWalk
@@ -31,8 +31,8 @@ namespace System.Security
 		}
 
 		[Obsolete("Deny is obsolete and will be removed in a future release of the .NET Framework. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-		[SecuritySafeCritical]
 		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
+		[SecuritySafeCritical]
 		public void Deny()
 		{
 			new PermissionSet(this).Deny();
@@ -81,8 +81,8 @@ namespace System.Security
 			return null;
 		}
 
-		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
 		[SecuritySafeCritical]
+		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
 		public void PermitOnly()
 		{
 			new PermissionSet(this).PermitOnly();

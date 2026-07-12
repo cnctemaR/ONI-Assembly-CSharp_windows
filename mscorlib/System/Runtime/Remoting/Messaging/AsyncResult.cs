@@ -14,28 +14,6 @@ namespace System.Runtime.Remoting.Messaging
 		{
 		}
 
-		internal AsyncResult(WaitCallback cb, object state, bool capture_context)
-		{
-			this.orig_cb = cb;
-			if (capture_context)
-			{
-				StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMe;
-				this.current = ExecutionContext.Capture(ref stackCrawlMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx | ExecutionContext.CaptureOptions.OptimizeDefaultCase);
-				cb = delegate
-				{
-					ExecutionContext.Run(this.current, AsyncResult.ccb, this, true);
-				};
-			}
-			this.async_state = state;
-			this.async_delegate = cb;
-		}
-
-		private static void WaitCallback_Context(object state)
-		{
-			AsyncResult asyncResult = (AsyncResult)state;
-			asyncResult.orig_cb(asyncResult.async_state);
-		}
-
 		public virtual object AsyncState
 		{
 			get
@@ -214,7 +192,5 @@ namespace System.Runtime.Remoting.Messaging
 		private IMessage reply_message;
 
 		private WaitCallback orig_cb;
-
-		internal static ContextCallback ccb = new ContextCallback(AsyncResult.WaitCallback_Context);
 	}
 }

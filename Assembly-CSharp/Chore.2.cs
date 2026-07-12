@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where StateMachineInstanceType : StateMachine.Instance
+public class Chore<StateMachineInstanceType> : StandardChoreBase, IStateMachineTarget where StateMachineInstanceType : StateMachine.Instance
 {
 	public StateMachineInstanceType smi { get; protected set; }
 
@@ -32,14 +32,14 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 
 	public ComponentType GetComponent<ComponentType>()
 	{
-		return base.target.GetComponent<ComponentType>();
+		return this.target.GetComponent<ComponentType>();
 	}
 
 	public override GameObject gameObject
 	{
 		get
 		{
-			return base.target.gameObject;
+			return this.target.gameObject;
 		}
 	}
 
@@ -47,7 +47,7 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	{
 		get
 		{
-			return base.target.gameObject.transform;
+			return this.target.gameObject.transform;
 		}
 	}
 
@@ -63,7 +63,7 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	{
 		get
 		{
-			return base.target.isNull;
+			return this.target.isNull;
 		}
 	}
 
@@ -81,9 +81,9 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 
 	public override string ResolveString(string str)
 	{
-		if (!base.target.isNull)
+		if (!this.target.isNull)
 		{
-			str = str.Replace("{Target}", base.target.gameObject.GetProperName());
+			str = str.Replace("{Target}", this.target.gameObject.GetProperName());
 		}
 		return base.ResolveString(str);
 	}
@@ -91,9 +91,9 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 	public override void Cleanup()
 	{
 		base.Cleanup();
-		if (base.target != null)
+		if (this.target != null)
 		{
-			base.target.Unsubscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+			this.target.Unsubscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
 		}
 		if (this.onCleanup != null)
 		{
@@ -103,7 +103,7 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 
 	private void OnTargetDestroyed(object data)
 	{
-		base.Cancel("Target Destroyed");
+		this.Cancel("Target Destroyed");
 	}
 
 	public override bool CanPreempt(Chore.Precondition.Context context)

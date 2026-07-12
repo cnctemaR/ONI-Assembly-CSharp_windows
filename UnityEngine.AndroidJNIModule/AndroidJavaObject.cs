@@ -41,6 +41,26 @@ namespace UnityEngine
 			this._AndroidJavaObject(className, args);
 		}
 
+		public AndroidJavaObject(IntPtr jobject)
+			: this()
+		{
+			bool flag = jobject == IntPtr.Zero;
+			if (flag)
+			{
+				throw new Exception("JNI: Init'd AndroidJavaObject with null ptr!");
+			}
+			IntPtr objectClass = AndroidJNISafe.GetObjectClass(jobject);
+			this.m_jobject = new GlobalJavaObjectRef(jobject);
+			this.m_jclass = new GlobalJavaObjectRef(objectClass);
+			AndroidJNISafe.DeleteLocalRef(objectClass);
+		}
+
+		public AndroidJavaObject(IntPtr clazz, IntPtr constructorID, params object[] args)
+		{
+			this.m_jclass = new GlobalJavaObjectRef(clazz);
+			this._AndroidJavaObject(constructorID, args);
+		}
+
 		public void Dispose()
 		{
 			this.Dispose(true);
@@ -52,9 +72,19 @@ namespace UnityEngine
 			this._Call(methodName, new object[] { args });
 		}
 
+		public void Call<T>(IntPtr methodID, T[] args)
+		{
+			this._Call(methodID, new object[] { args });
+		}
+
 		public void Call(string methodName, params object[] args)
 		{
 			this._Call(methodName, args);
+		}
+
+		public void Call(IntPtr methodID, params object[] args)
+		{
+			this._Call(methodID, args);
 		}
 
 		public void CallStatic<T>(string methodName, T[] args)
@@ -62,9 +92,19 @@ namespace UnityEngine
 			this._CallStatic(methodName, new object[] { args });
 		}
 
+		public void CallStatic<T>(IntPtr methodID, T[] args)
+		{
+			this._CallStatic(methodID, new object[] { args });
+		}
+
 		public void CallStatic(string methodName, params object[] args)
 		{
 			this._CallStatic(methodName, args);
+		}
+
+		public void CallStatic(IntPtr methodID, params object[] args)
+		{
+			this._CallStatic(methodID, args);
 		}
 
 		public FieldType Get<FieldType>(string fieldName)
@@ -72,9 +112,19 @@ namespace UnityEngine
 			return this._Get<FieldType>(fieldName);
 		}
 
+		public FieldType Get<FieldType>(IntPtr fieldID)
+		{
+			return this._Get<FieldType>(fieldID);
+		}
+
 		public void Set<FieldType>(string fieldName, FieldType val)
 		{
 			this._Set<FieldType>(fieldName, val);
+		}
+
+		public void Set<FieldType>(IntPtr fieldID, FieldType val)
+		{
+			this._Set<FieldType>(fieldID, val);
 		}
 
 		public FieldType GetStatic<FieldType>(string fieldName)
@@ -82,9 +132,19 @@ namespace UnityEngine
 			return this._GetStatic<FieldType>(fieldName);
 		}
 
+		public FieldType GetStatic<FieldType>(IntPtr fieldID)
+		{
+			return this._GetStatic<FieldType>(fieldID);
+		}
+
 		public void SetStatic<FieldType>(string fieldName, FieldType val)
 		{
 			this._SetStatic<FieldType>(fieldName, val);
+		}
+
+		public void SetStatic<FieldType>(IntPtr fieldID, FieldType val)
+		{
+			this._SetStatic<FieldType>(fieldID, val);
 		}
 
 		public IntPtr GetRawObject()
@@ -97,9 +157,38 @@ namespace UnityEngine
 			return this._GetRawClass();
 		}
 
+		public AndroidJavaObject CloneReference()
+		{
+			bool flag = this.m_jclass == null;
+			if (flag)
+			{
+				throw new Exception("Cannot clone a disposed reference");
+			}
+			bool flag2 = this.m_jobject != null;
+			AndroidJavaObject androidJavaObject;
+			if (flag2)
+			{
+				androidJavaObject = new AndroidJavaObject
+				{
+					m_jobject = new GlobalJavaObjectRef(this.m_jobject),
+					m_jclass = new GlobalJavaObjectRef(this.m_jclass)
+				};
+			}
+			else
+			{
+				androidJavaObject = new AndroidJavaClass(this.m_jclass);
+			}
+			return androidJavaObject;
+		}
+
 		public ReturnType Call<ReturnType, T>(string methodName, T[] args)
 		{
 			return this._Call<ReturnType>(methodName, new object[] { args });
+		}
+
+		public ReturnType Call<ReturnType, T>(IntPtr methodID, T[] args)
+		{
+			return this._Call<ReturnType>(methodID, new object[] { args });
 		}
 
 		public ReturnType Call<ReturnType>(string methodName, params object[] args)
@@ -107,14 +196,29 @@ namespace UnityEngine
 			return this._Call<ReturnType>(methodName, args);
 		}
 
+		public ReturnType Call<ReturnType>(IntPtr methodID, params object[] args)
+		{
+			return this._Call<ReturnType>(methodID, args);
+		}
+
 		public ReturnType CallStatic<ReturnType, T>(string methodName, T[] args)
 		{
 			return this._CallStatic<ReturnType>(methodName, new object[] { args });
 		}
 
+		public ReturnType CallStatic<ReturnType, T>(IntPtr methodID, T[] args)
+		{
+			return this._CallStatic<ReturnType>(methodID, new object[] { args });
+		}
+
 		public ReturnType CallStatic<ReturnType>(string methodName, params object[] args)
 		{
 			return this._CallStatic<ReturnType>(methodName, args);
+		}
+
+		public ReturnType CallStatic<ReturnType>(IntPtr methodID, params object[] args)
+		{
+			return this._CallStatic<ReturnType>(methodID, args);
 		}
 
 		protected void DebugPrint(string msg)
@@ -154,40 +258,41 @@ namespace UnityEngine
 		private void _AndroidJavaObject(string className, params object[] args)
 		{
 			this.DebugPrint("Creating AndroidJavaObject from " + className);
-			bool flag = args == null;
-			if (flag)
-			{
-				args = new object[1];
-			}
 			IntPtr intPtr = AndroidJNISafe.FindClass(className.Replace('.', '/'));
 			this.m_jclass = new GlobalJavaObjectRef(intPtr);
 			AndroidJNISafe.DeleteLocalRef(intPtr);
-			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
-			try
-			{
-				IntPtr constructorID = AndroidJNIHelper.GetConstructorID(this.m_jclass, args);
-				IntPtr intPtr2 = AndroidJNISafe.NewObject(this.m_jclass, constructorID, array);
-				this.m_jobject = new GlobalJavaObjectRef(intPtr2);
-				AndroidJNISafe.DeleteLocalRef(intPtr2);
-			}
-			finally
-			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, array);
-			}
+			IntPtr constructorID = AndroidJNIHelper.GetConstructorID(this.m_jclass, args);
+			this._AndroidJavaObject(constructorID, args);
 		}
 
-		internal AndroidJavaObject(IntPtr jobject)
-			: this()
+		private unsafe void _AndroidJavaObject(IntPtr constructorID, params object[] args)
 		{
-			bool flag = jobject == IntPtr.Zero;
-			if (flag)
+			checked
 			{
-				throw new Exception("JNI: Init'd AndroidJavaObject with null ptr!");
+				Span<jvalue> span;
+				if (args == null || args.Length == 0)
+				{
+					span = default(Span<jvalue>);
+				}
+				else
+				{
+					int num = args.Length;
+					Span<jvalue> span2 = new Span<jvalue>(stackalloc byte[unchecked((UIntPtr)num) * (UIntPtr)sizeof(jvalue)], num);
+					span = span2;
+				}
+				Span<jvalue> span3 = span;
+				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				try
+				{
+					IntPtr intPtr = AndroidJNISafe.NewObject(this.m_jclass, constructorID, span3);
+					this.m_jobject = new GlobalJavaObjectRef(intPtr);
+					AndroidJNISafe.DeleteLocalRef(intPtr);
+				}
+				finally
+				{
+					AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+				}
 			}
-			IntPtr objectClass = AndroidJNISafe.GetObjectClass(jobject);
-			this.m_jobject = new GlobalJavaObjectRef(jobject);
-			this.m_jclass = new GlobalJavaObjectRef(objectClass);
-			AndroidJNISafe.DeleteLocalRef(objectClass);
 		}
 
 		internal AndroidJavaObject()
@@ -217,99 +322,130 @@ namespace UnityEngine
 
 		protected void _Call(string methodName, params object[] args)
 		{
-			bool flag = args == null;
-			if (flag)
-			{
-				args = new object[1];
-			}
 			IntPtr methodID = AndroidJNIHelper.GetMethodID(this.m_jclass, methodName, args, false);
-			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
-			try
+			this._Call(methodID, args);
+		}
+
+		protected unsafe void _Call(IntPtr methodID, params object[] args)
+		{
+			checked
 			{
-				AndroidJNISafe.CallVoidMethod(this.m_jobject, methodID, array);
-			}
-			finally
-			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, array);
+				Span<jvalue> span;
+				if (args == null || args.Length == 0)
+				{
+					span = default(Span<jvalue>);
+				}
+				else
+				{
+					int num = args.Length;
+					Span<jvalue> span2 = new Span<jvalue>(stackalloc byte[unchecked((UIntPtr)num) * (UIntPtr)sizeof(jvalue)], num);
+					span = span2;
+				}
+				Span<jvalue> span3 = span;
+				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				try
+				{
+					AndroidJNISafe.CallVoidMethod(this.m_jobject, methodID, span3);
+				}
+				finally
+				{
+					AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+				}
 			}
 		}
 
 		protected ReturnType _Call<ReturnType>(string methodName, params object[] args)
 		{
-			bool flag = args == null;
-			if (flag)
-			{
-				args = new object[1];
-			}
 			IntPtr methodID = AndroidJNIHelper.GetMethodID<ReturnType>(this.m_jclass, methodName, args, false);
-			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
+			return this._Call<ReturnType>(methodID, args);
+		}
+
+		protected unsafe ReturnType _Call<ReturnType>(IntPtr methodID, params object[] args)
+		{
+			Span<jvalue> span3;
+			checked
+			{
+				Span<jvalue> span;
+				if (args == null || args.Length == 0)
+				{
+					span = default(Span<jvalue>);
+				}
+				else
+				{
+					int num = args.Length;
+					Span<jvalue> span2 = new Span<jvalue>(stackalloc byte[unchecked((UIntPtr)num) * (UIntPtr)sizeof(jvalue)], num);
+					span = span2;
+				}
+				span3 = span;
+				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+			}
 			ReturnType returnType;
 			try
 			{
-				bool flag2 = AndroidReflection.IsPrimitive(typeof(ReturnType));
-				if (flag2)
+				bool flag = AndroidReflection.IsPrimitive(typeof(ReturnType));
+				if (flag)
 				{
-					bool flag3 = typeof(ReturnType) == typeof(int);
-					if (flag3)
+					bool flag2 = typeof(ReturnType) == typeof(int);
+					if (flag2)
 					{
-						returnType = (ReturnType)((object)AndroidJNISafe.CallIntMethod(this.m_jobject, methodID, array));
+						returnType = (ReturnType)((object)AndroidJNISafe.CallIntMethod(this.m_jobject, methodID, span3));
 					}
 					else
 					{
-						bool flag4 = typeof(ReturnType) == typeof(bool);
-						if (flag4)
+						bool flag3 = typeof(ReturnType) == typeof(bool);
+						if (flag3)
 						{
-							returnType = (ReturnType)((object)AndroidJNISafe.CallBooleanMethod(this.m_jobject, methodID, array));
+							returnType = (ReturnType)((object)AndroidJNISafe.CallBooleanMethod(this.m_jobject, methodID, span3));
 						}
 						else
 						{
-							bool flag5 = typeof(ReturnType) == typeof(byte);
-							if (flag5)
+							bool flag4 = typeof(ReturnType) == typeof(byte);
+							if (flag4)
 							{
 								Debug.LogWarning("Return type <Byte> for Java method call is obsolete, use return type <SByte> instead");
-								returnType = (ReturnType)((object)((byte)AndroidJNISafe.CallSByteMethod(this.m_jobject, methodID, array)));
+								returnType = (ReturnType)((object)((byte)AndroidJNISafe.CallSByteMethod(this.m_jobject, methodID, span3)));
 							}
 							else
 							{
-								bool flag6 = typeof(ReturnType) == typeof(sbyte);
-								if (flag6)
+								bool flag5 = typeof(ReturnType) == typeof(sbyte);
+								if (flag5)
 								{
-									returnType = (ReturnType)((object)AndroidJNISafe.CallSByteMethod(this.m_jobject, methodID, array));
+									returnType = (ReturnType)((object)AndroidJNISafe.CallSByteMethod(this.m_jobject, methodID, span3));
 								}
 								else
 								{
-									bool flag7 = typeof(ReturnType) == typeof(short);
-									if (flag7)
+									bool flag6 = typeof(ReturnType) == typeof(short);
+									if (flag6)
 									{
-										returnType = (ReturnType)((object)AndroidJNISafe.CallShortMethod(this.m_jobject, methodID, array));
+										returnType = (ReturnType)((object)AndroidJNISafe.CallShortMethod(this.m_jobject, methodID, span3));
 									}
 									else
 									{
-										bool flag8 = typeof(ReturnType) == typeof(long);
-										if (flag8)
+										bool flag7 = typeof(ReturnType) == typeof(long);
+										if (flag7)
 										{
-											returnType = (ReturnType)((object)AndroidJNISafe.CallLongMethod(this.m_jobject, methodID, array));
+											returnType = (ReturnType)((object)AndroidJNISafe.CallLongMethod(this.m_jobject, methodID, span3));
 										}
 										else
 										{
-											bool flag9 = typeof(ReturnType) == typeof(float);
-											if (flag9)
+											bool flag8 = typeof(ReturnType) == typeof(float);
+											if (flag8)
 											{
-												returnType = (ReturnType)((object)AndroidJNISafe.CallFloatMethod(this.m_jobject, methodID, array));
+												returnType = (ReturnType)((object)AndroidJNISafe.CallFloatMethod(this.m_jobject, methodID, span3));
 											}
 											else
 											{
-												bool flag10 = typeof(ReturnType) == typeof(double);
-												if (flag10)
+												bool flag9 = typeof(ReturnType) == typeof(double);
+												if (flag9)
 												{
-													returnType = (ReturnType)((object)AndroidJNISafe.CallDoubleMethod(this.m_jobject, methodID, array));
+													returnType = (ReturnType)((object)AndroidJNISafe.CallDoubleMethod(this.m_jobject, methodID, span3));
 												}
 												else
 												{
-													bool flag11 = typeof(ReturnType) == typeof(char);
-													if (flag11)
+													bool flag10 = typeof(ReturnType) == typeof(char);
+													if (flag10)
 													{
-														returnType = (ReturnType)((object)AndroidJNISafe.CallCharMethod(this.m_jobject, methodID, array));
+														returnType = (ReturnType)((object)AndroidJNISafe.CallCharMethod(this.m_jobject, methodID, span3));
 													}
 													else
 													{
@@ -326,37 +462,37 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool flag12 = typeof(ReturnType) == typeof(string);
-					if (flag12)
+					bool flag11 = typeof(ReturnType) == typeof(string);
+					if (flag11)
 					{
-						returnType = (ReturnType)((object)AndroidJNISafe.CallStringMethod(this.m_jobject, methodID, array));
+						returnType = (ReturnType)((object)AndroidJNISafe.CallStringMethod(this.m_jobject, methodID, span3));
 					}
 					else
 					{
-						bool flag13 = typeof(ReturnType) == typeof(AndroidJavaClass);
-						if (flag13)
+						bool flag12 = typeof(ReturnType) == typeof(AndroidJavaClass);
+						if (flag12)
 						{
-							IntPtr intPtr = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, array);
+							IntPtr intPtr = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
 							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaClassDeleteLocalRef(intPtr))));
 						}
 						else
 						{
-							bool flag14 = typeof(ReturnType) == typeof(AndroidJavaObject);
-							if (flag14)
+							bool flag13 = typeof(ReturnType) == typeof(AndroidJavaObject);
+							if (flag13)
 							{
-								IntPtr intPtr2 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, array);
+								IntPtr intPtr2 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
 								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaObjectDeleteLocalRef(intPtr2))));
 							}
 							else
 							{
-								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
-								if (!flag15)
+								bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
+								if (!flag14)
 								{
 									string text = "JNI: Unknown return type '";
 									Type typeFromHandle = typeof(ReturnType);
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
-								IntPtr intPtr3 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, array);
+								IntPtr intPtr3 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
 								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
 							}
 						}
@@ -365,7 +501,7 @@ namespace UnityEngine
 			}
 			finally
 			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, array);
+				AndroidJNIHelper.DeleteJNIArgArray(args, span3);
 			}
 			return returnType;
 		}
@@ -373,6 +509,11 @@ namespace UnityEngine
 		protected FieldType _Get<FieldType>(string fieldName)
 		{
 			IntPtr fieldID = AndroidJNIHelper.GetFieldID<FieldType>(this.m_jclass, fieldName, false);
+			return this._Get<FieldType>(fieldID);
+		}
+
+		protected FieldType _Get<FieldType>(IntPtr fieldID)
+		{
 			bool flag = AndroidReflection.IsPrimitive(typeof(FieldType));
 			FieldType fieldType;
 			if (flag)
@@ -496,6 +637,11 @@ namespace UnityEngine
 		protected void _Set<FieldType>(string fieldName, FieldType val)
 		{
 			IntPtr fieldID = AndroidJNIHelper.GetFieldID<FieldType>(this.m_jclass, fieldName, false);
+			this._Set<FieldType>(fieldID, val);
+		}
+
+		protected void _Set<FieldType>(IntPtr fieldID, FieldType val)
+		{
 			bool flag = AndroidReflection.IsPrimitive(typeof(FieldType));
 			if (flag)
 			{
@@ -593,15 +739,23 @@ namespace UnityEngine
 						}
 						else
 						{
-							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
-							if (!flag14)
+							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), typeof(FieldType));
+							if (flag14)
 							{
-								string text = "JNI: Unknown field type '";
-								Type typeFromHandle = typeof(FieldType);
-								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
+								AndroidJNISafe.SetObjectField(this.m_jobject, fieldID, (val == null) ? IntPtr.Zero : ((AndroidJavaProxy)((object)val)).GetRawProxy());
 							}
-							IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
-							AndroidJNISafe.SetObjectField(this.m_jclass, fieldID, intPtr);
+							else
+							{
+								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
+								if (!flag15)
+								{
+									string text = "JNI: Unknown field type '";
+									Type typeFromHandle = typeof(FieldType);
+									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
+								}
+								IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
+								AndroidJNISafe.SetObjectField(this.m_jobject, fieldID, intPtr);
+							}
 						}
 					}
 				}
@@ -610,99 +764,130 @@ namespace UnityEngine
 
 		protected void _CallStatic(string methodName, params object[] args)
 		{
-			bool flag = args == null;
-			if (flag)
-			{
-				args = new object[1];
-			}
 			IntPtr methodID = AndroidJNIHelper.GetMethodID(this.m_jclass, methodName, args, true);
-			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
-			try
+			this._CallStatic(methodID, args);
+		}
+
+		protected unsafe void _CallStatic(IntPtr methodID, params object[] args)
+		{
+			checked
 			{
-				AndroidJNISafe.CallStaticVoidMethod(this.m_jclass, methodID, array);
-			}
-			finally
-			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, array);
+				Span<jvalue> span;
+				if (args == null || args.Length == 0)
+				{
+					span = default(Span<jvalue>);
+				}
+				else
+				{
+					int num = args.Length;
+					Span<jvalue> span2 = new Span<jvalue>(stackalloc byte[unchecked((UIntPtr)num) * (UIntPtr)sizeof(jvalue)], num);
+					span = span2;
+				}
+				Span<jvalue> span3 = span;
+				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				try
+				{
+					AndroidJNISafe.CallStaticVoidMethod(this.m_jclass, methodID, span3);
+				}
+				finally
+				{
+					AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+				}
 			}
 		}
 
 		protected ReturnType _CallStatic<ReturnType>(string methodName, params object[] args)
 		{
-			bool flag = args == null;
-			if (flag)
-			{
-				args = new object[1];
-			}
 			IntPtr methodID = AndroidJNIHelper.GetMethodID<ReturnType>(this.m_jclass, methodName, args, true);
-			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
+			return this._CallStatic<ReturnType>(methodID, args);
+		}
+
+		protected unsafe ReturnType _CallStatic<ReturnType>(IntPtr methodID, params object[] args)
+		{
+			Span<jvalue> span3;
+			checked
+			{
+				Span<jvalue> span;
+				if (args == null || args.Length == 0)
+				{
+					span = default(Span<jvalue>);
+				}
+				else
+				{
+					int num = args.Length;
+					Span<jvalue> span2 = new Span<jvalue>(stackalloc byte[unchecked((UIntPtr)num) * (UIntPtr)sizeof(jvalue)], num);
+					span = span2;
+				}
+				span3 = span;
+				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+			}
 			ReturnType returnType;
 			try
 			{
-				bool flag2 = AndroidReflection.IsPrimitive(typeof(ReturnType));
-				if (flag2)
+				bool flag = AndroidReflection.IsPrimitive(typeof(ReturnType));
+				if (flag)
 				{
-					bool flag3 = typeof(ReturnType) == typeof(int);
-					if (flag3)
+					bool flag2 = typeof(ReturnType) == typeof(int);
+					if (flag2)
 					{
-						returnType = (ReturnType)((object)AndroidJNISafe.CallStaticIntMethod(this.m_jclass, methodID, array));
+						returnType = (ReturnType)((object)AndroidJNISafe.CallStaticIntMethod(this.m_jclass, methodID, span3));
 					}
 					else
 					{
-						bool flag4 = typeof(ReturnType) == typeof(bool);
-						if (flag4)
+						bool flag3 = typeof(ReturnType) == typeof(bool);
+						if (flag3)
 						{
-							returnType = (ReturnType)((object)AndroidJNISafe.CallStaticBooleanMethod(this.m_jclass, methodID, array));
+							returnType = (ReturnType)((object)AndroidJNISafe.CallStaticBooleanMethod(this.m_jclass, methodID, span3));
 						}
 						else
 						{
-							bool flag5 = typeof(ReturnType) == typeof(byte);
-							if (flag5)
+							bool flag4 = typeof(ReturnType) == typeof(byte);
+							if (flag4)
 							{
 								Debug.LogWarning("Return type <Byte> for Java method call is obsolete, use return type <SByte> instead");
-								returnType = (ReturnType)((object)((byte)AndroidJNISafe.CallStaticSByteMethod(this.m_jclass, methodID, array)));
+								returnType = (ReturnType)((object)((byte)AndroidJNISafe.CallStaticSByteMethod(this.m_jclass, methodID, span3)));
 							}
 							else
 							{
-								bool flag6 = typeof(ReturnType) == typeof(sbyte);
-								if (flag6)
+								bool flag5 = typeof(ReturnType) == typeof(sbyte);
+								if (flag5)
 								{
-									returnType = (ReturnType)((object)AndroidJNISafe.CallStaticSByteMethod(this.m_jclass, methodID, array));
+									returnType = (ReturnType)((object)AndroidJNISafe.CallStaticSByteMethod(this.m_jclass, methodID, span3));
 								}
 								else
 								{
-									bool flag7 = typeof(ReturnType) == typeof(short);
-									if (flag7)
+									bool flag6 = typeof(ReturnType) == typeof(short);
+									if (flag6)
 									{
-										returnType = (ReturnType)((object)AndroidJNISafe.CallStaticShortMethod(this.m_jclass, methodID, array));
+										returnType = (ReturnType)((object)AndroidJNISafe.CallStaticShortMethod(this.m_jclass, methodID, span3));
 									}
 									else
 									{
-										bool flag8 = typeof(ReturnType) == typeof(long);
-										if (flag8)
+										bool flag7 = typeof(ReturnType) == typeof(long);
+										if (flag7)
 										{
-											returnType = (ReturnType)((object)AndroidJNISafe.CallStaticLongMethod(this.m_jclass, methodID, array));
+											returnType = (ReturnType)((object)AndroidJNISafe.CallStaticLongMethod(this.m_jclass, methodID, span3));
 										}
 										else
 										{
-											bool flag9 = typeof(ReturnType) == typeof(float);
-											if (flag9)
+											bool flag8 = typeof(ReturnType) == typeof(float);
+											if (flag8)
 											{
-												returnType = (ReturnType)((object)AndroidJNISafe.CallStaticFloatMethod(this.m_jclass, methodID, array));
+												returnType = (ReturnType)((object)AndroidJNISafe.CallStaticFloatMethod(this.m_jclass, methodID, span3));
 											}
 											else
 											{
-												bool flag10 = typeof(ReturnType) == typeof(double);
-												if (flag10)
+												bool flag9 = typeof(ReturnType) == typeof(double);
+												if (flag9)
 												{
-													returnType = (ReturnType)((object)AndroidJNISafe.CallStaticDoubleMethod(this.m_jclass, methodID, array));
+													returnType = (ReturnType)((object)AndroidJNISafe.CallStaticDoubleMethod(this.m_jclass, methodID, span3));
 												}
 												else
 												{
-													bool flag11 = typeof(ReturnType) == typeof(char);
-													if (flag11)
+													bool flag10 = typeof(ReturnType) == typeof(char);
+													if (flag10)
 													{
-														returnType = (ReturnType)((object)AndroidJNISafe.CallStaticCharMethod(this.m_jclass, methodID, array));
+														returnType = (ReturnType)((object)AndroidJNISafe.CallStaticCharMethod(this.m_jclass, methodID, span3));
 													}
 													else
 													{
@@ -719,37 +904,37 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool flag12 = typeof(ReturnType) == typeof(string);
-					if (flag12)
+					bool flag11 = typeof(ReturnType) == typeof(string);
+					if (flag11)
 					{
-						returnType = (ReturnType)((object)AndroidJNISafe.CallStaticStringMethod(this.m_jclass, methodID, array));
+						returnType = (ReturnType)((object)AndroidJNISafe.CallStaticStringMethod(this.m_jclass, methodID, span3));
 					}
 					else
 					{
-						bool flag13 = typeof(ReturnType) == typeof(AndroidJavaClass);
-						if (flag13)
+						bool flag12 = typeof(ReturnType) == typeof(AndroidJavaClass);
+						if (flag12)
 						{
-							IntPtr intPtr = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, array);
+							IntPtr intPtr = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
 							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaClassDeleteLocalRef(intPtr))));
 						}
 						else
 						{
-							bool flag14 = typeof(ReturnType) == typeof(AndroidJavaObject);
-							if (flag14)
+							bool flag13 = typeof(ReturnType) == typeof(AndroidJavaObject);
+							if (flag13)
 							{
-								IntPtr intPtr2 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, array);
+								IntPtr intPtr2 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
 								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaObjectDeleteLocalRef(intPtr2))));
 							}
 							else
 							{
-								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
-								if (!flag15)
+								bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
+								if (!flag14)
 								{
 									string text = "JNI: Unknown return type '";
 									Type typeFromHandle = typeof(ReturnType);
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
-								IntPtr intPtr3 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, array);
+								IntPtr intPtr3 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
 								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
 							}
 						}
@@ -758,7 +943,7 @@ namespace UnityEngine
 			}
 			finally
 			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, array);
+				AndroidJNIHelper.DeleteJNIArgArray(args, span3);
 			}
 			return returnType;
 		}
@@ -766,6 +951,11 @@ namespace UnityEngine
 		protected FieldType _GetStatic<FieldType>(string fieldName)
 		{
 			IntPtr fieldID = AndroidJNIHelper.GetFieldID<FieldType>(this.m_jclass, fieldName, true);
+			return this._GetStatic<FieldType>(fieldID);
+		}
+
+		protected FieldType _GetStatic<FieldType>(IntPtr fieldID)
+		{
 			bool flag = AndroidReflection.IsPrimitive(typeof(FieldType));
 			FieldType fieldType;
 			if (flag)
@@ -889,6 +1079,11 @@ namespace UnityEngine
 		protected void _SetStatic<FieldType>(string fieldName, FieldType val)
 		{
 			IntPtr fieldID = AndroidJNIHelper.GetFieldID<FieldType>(this.m_jclass, fieldName, true);
+			this._SetStatic<FieldType>(fieldID, val);
+		}
+
+		protected void _SetStatic<FieldType>(IntPtr fieldID, FieldType val)
+		{
 			bool flag = AndroidReflection.IsPrimitive(typeof(FieldType));
 			if (flag)
 			{
@@ -986,15 +1181,23 @@ namespace UnityEngine
 						}
 						else
 						{
-							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
-							if (!flag14)
+							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), typeof(FieldType));
+							if (flag14)
 							{
-								string text = "JNI: Unknown field type '";
-								Type typeFromHandle = typeof(FieldType);
-								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
+								AndroidJNISafe.SetStaticObjectField(this.m_jclass, fieldID, (val == null) ? IntPtr.Zero : ((AndroidJavaProxy)((object)val)).GetRawProxy());
 							}
-							IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
-							AndroidJNISafe.SetStaticObjectField(this.m_jclass, fieldID, intPtr);
+							else
+							{
+								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
+								if (!flag15)
+								{
+									string text = "JNI: Unknown field type '";
+									Type typeFromHandle = typeof(FieldType);
+									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
+								}
+								IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
+								AndroidJNISafe.SetStaticObjectField(this.m_jclass, fieldID, intPtr);
+							}
 						}
 					}
 				}
@@ -1053,7 +1256,7 @@ namespace UnityEngine
 
 		protected IntPtr _GetRawObject()
 		{
-			return this.m_jobject;
+			return (this.m_jobject == null) ? IntPtr.Zero : this.m_jobject;
 		}
 
 		protected IntPtr _GetRawClass()
@@ -1061,7 +1264,7 @@ namespace UnityEngine
 			return this.m_jclass;
 		}
 
-		private static bool enableDebugPrints = false;
+		private static bool enableDebugPrints;
 
 		internal GlobalJavaObjectRef m_jobject;
 

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Slider", 33)]
+	[AddComponentMenu("UI/Slider", 34)]
 	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	public class Slider : Selectable, IDragHandler, IEventSystemHandler, IInitializePotentialDragHandler, ICanvasElement
@@ -230,6 +230,7 @@ namespace UnityEngine.UI
 				UISystemProfilerApi.AddMarker("Slider.value", this);
 				this.onValueChanged.Invoke(this.m_Value);
 			}
+			base.OnDidApplyAnimationProperties();
 		}
 
 		private void UpdateCachedReferences()

@@ -16,8 +16,11 @@ public class SealConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -SquirrelTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		List<Diet.Info> list = BaseSealConfig.BasicDiet(SimHashes.Ethanol.CreateTag(), 2500f, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f);
-		gameObject = BaseSealConfig.SetupDiet(gameObject, list, 2500f, SealConfig.MIN_POOP_SIZE_IN_KG);
+		gameObject = BaseSealConfig.SetupDiet(gameObject, new List<Diet.Info>
+		{
+			new Diet.Info(new HashSet<Tag> { "SpaceTree" }, SimHashes.Ethanol.CreateTag(), 2500f, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f, false, Diet.Info.FoodType.EatPlantStorage, false, null),
+			new Diet.Info(new HashSet<Tag> { SimHashes.Sucrose.CreateTag() }, SimHashes.Ethanol.CreateTag(), 3246.7532f, 1.2987013f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, new string[] { "eat_ore_pre", "eat_ore_loop", "eat_ore_pst" })
+		}, 2500f, SealConfig.MIN_POOP_SIZE_IN_KG);
 		gameObject.AddOrGetDef<CreaturePoopLoot.Def>().Loot = new CreaturePoopLoot.LootData[]
 		{
 			new CreaturePoopLoot.LootData

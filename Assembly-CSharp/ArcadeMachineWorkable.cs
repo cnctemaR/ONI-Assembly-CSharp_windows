@@ -16,19 +16,19 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 		base.SetWorkTime(15f);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<Effects>().Add("ArcadePlaying", false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		worker.GetComponent<Effects>().Remove("ArcadePlaying");
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.trackingEffect))
@@ -41,7 +41,7 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 		}
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();

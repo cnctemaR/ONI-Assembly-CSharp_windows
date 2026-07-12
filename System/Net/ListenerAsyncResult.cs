@@ -76,13 +76,7 @@ namespace System.Net
 				if ((authenticationSchemes == AuthenticationSchemes.Basic || context.Listener.AuthenticationSchemes == AuthenticationSchemes.Negotiate) && context.Request.Headers["Authorization"] == null)
 				{
 					context.Response.StatusCode = 401;
-					context.Response.Headers["WWW-Authenticate"] = string.Concat(new object[]
-					{
-						authenticationSchemes,
-						" realm=\"",
-						context.Listener.Realm,
-						"\""
-					});
+					context.Response.Headers["WWW-Authenticate"] = authenticationSchemes.ToString() + " realm=\"" + context.Listener.Realm + "\"";
 					context.Response.OutputStream.Close();
 					IAsyncResult asyncResult = context.Listener.BeginGetContext(this.cb, this.state);
 					this.forward = (ListenerAsyncResult)asyncResult;

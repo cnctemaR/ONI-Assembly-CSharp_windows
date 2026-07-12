@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using TUNING;
 
 public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance>
 {
@@ -43,9 +44,9 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 	private const float BODY_TEMPERATURE_AFFECT_EXTERNAL_FEEL_THRESHOLD = 0.5f;
 
-	public const float BASE_STRESS_TOLERANCE_COLD = 0.11157334f;
+	public static readonly float BASE_STRESS_TOLERANCE_COLD = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_WARMING_KILOWATTS * 0.2f;
 
-	public const float BASE_STRESS_TOLERANCE_WARM = 0.11157334f;
+	public static readonly float BASE_STRESS_TOLERANCE_WARM = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_COOLING_KILOWATTS * 0.2f;
 
 	private const float START_GAME_AVERAGING_DELAY = 6f;
 
@@ -94,7 +95,14 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 		public bool IsTooCold()
 		{
-			return !this.effects.HasEffect("WarmTouch") && !this.effects.HasImmunityTo(this.coldAirEffect) && (!(this.traits != null) || !this.traits.IsEffectIgnored(this.coldAirEffect)) && !WarmthProvider.IsWarmCell(Grid.PosToCell(this)) && this.temperatureTransferer.LastTemperatureRecordIsReliable && base.smi.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage < ExternalTemperatureMonitor.GetExternalColdThreshold(base.smi.attributes);
+			for (int i = 0; i < this.immunityToColdEffects.Length; i++)
+			{
+				if (this.effects.HasEffect(this.immunityToColdEffects[i]))
+				{
+					return false;
+				}
+			}
+			return !this.effects.HasImmunityTo(this.coldAirEffect) && (!(this.traits != null) || !this.traits.IsEffectIgnored(this.coldAirEffect)) && !WarmthProvider.IsWarmCell(Grid.PosToCell(this)) && this.temperatureTransferer.LastTemperatureRecordIsReliable && base.smi.temperatureTransferer.average_kilowatts_exchanged.GetUnweightedAverage < ExternalTemperatureMonitor.GetExternalColdThreshold(base.smi.attributes);
 		}
 
 		public float HotThreshold = 306.15f;
@@ -116,5 +124,11 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		private Effect warmAirEffect = Db.Get().effects.Get("WarmAir");
 
 		private Effect coldAirEffect = Db.Get().effects.Get("ColdAir");
+
+		private Effect[] immunityToColdEffects = new Effect[]
+		{
+			Db.Get().effects.Get("WarmTouch"),
+			Db.Get().effects.Get("WarmTouchFood")
+		};
 	}
 }

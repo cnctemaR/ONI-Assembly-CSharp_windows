@@ -208,11 +208,13 @@ namespace System.Xml.Schema
 		{
 			if (this.currentState != ValidatorState.None && this.currentState != ValidatorState.Finish)
 			{
-				throw new InvalidOperationException(Res.GetString("The transition from the '{0}' method to the '{1}' method is not allowed.", new string[]
+				string text = "The transition from the '{0}' method to the '{1}' method is not allowed.";
+				object[] array = new string[]
 				{
 					XmlSchemaValidator.MethodNames[(int)this.currentState],
 					XmlSchemaValidator.MethodNames[1]
-				}));
+				};
+				throw new InvalidOperationException(Res.GetString(text, array));
 			}
 			this.currentState = ValidatorState.Start;
 			this.Reset();
@@ -222,11 +224,13 @@ namespace System.Xml.Schema
 		{
 			if (this.currentState != ValidatorState.None && this.currentState != ValidatorState.Finish)
 			{
-				throw new InvalidOperationException(Res.GetString("The transition from the '{0}' method to the '{1}' method is not allowed.", new string[]
+				string text = "The transition from the '{0}' method to the '{1}' method is not allowed.";
+				object[] array = new string[]
 				{
 					XmlSchemaValidator.MethodNames[(int)this.currentState],
 					XmlSchemaValidator.MethodNames[1]
-				}));
+				};
+				throw new InvalidOperationException(Res.GetString(text, array));
 			}
 			if (partialValidationType == null)
 			{
@@ -1836,19 +1840,24 @@ namespace System.Xml.Schema
 				this.currentState = toState;
 				return;
 			}
+			object[] array;
 			if (this.currentState == ValidatorState.None)
 			{
-				throw new InvalidOperationException(Res.GetString("It is invalid to call the '{0}' method in the current state of the validator. The '{1}' method must be called before proceeding with validation.", new string[]
+				string text = "It is invalid to call the '{0}' method in the current state of the validator. The '{1}' method must be called before proceeding with validation.";
+				array = new string[]
 				{
 					methodName,
 					XmlSchemaValidator.MethodNames[1]
-				}));
+				};
+				throw new InvalidOperationException(Res.GetString(text, array));
 			}
-			throw new InvalidOperationException(Res.GetString("The transition from the '{0}' method to the '{1}' method is not allowed.", new string[]
+			string text2 = "The transition from the '{0}' method to the '{1}' method is not allowed.";
+			array = new string[]
 			{
 				XmlSchemaValidator.MethodNames[(int)this.currentState],
 				methodName
-			}));
+			};
+			throw new InvalidOperationException(Res.GetString(text2, array));
 		}
 
 		private void ClearPSVI()
@@ -2300,7 +2309,9 @@ namespace System.Xml.Schema
 		{
 			if (getParticles)
 			{
-				string @string = Res.GetString("{0}as well as", new string[] { " " });
+				string text = "{0}as well as";
+				object[] array = new string[] { " " };
+				string @string = Res.GetString(text, array);
 				XmlSchemaParticle xmlSchemaParticle = null;
 				ArrayList arrayList = new ArrayList();
 				StringBuilder stringBuilder = new StringBuilder();

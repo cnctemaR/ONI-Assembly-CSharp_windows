@@ -109,6 +109,9 @@ public class TableRow : KMonoBehaviour
 						{
 							GameObject gameObject2 = Util.KInstantiateUI(this.scrollerPrefab, base.gameObject, true);
 							ScrollRect scroll_rect = gameObject2.GetComponent<ScrollRect>();
+							this.scrollbar = gameObject2.GetComponentInChildren<Scrollbar>();
+							scroll_rect.horizontalScrollbar = this.scrollbar;
+							scroll_rect.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 							scroll_rect.onValueChanged.AddListener(delegate
 							{
 								if (screen.CheckScrollersDirty())
@@ -235,7 +238,7 @@ public class TableRow : KMonoBehaviour
 	private GameObject scrollerPrefab;
 
 	[SerializeField]
-	private GameObject scrollbarPrefab;
+	private Scrollbar scrollbar;
 
 	public enum RowType
 	{

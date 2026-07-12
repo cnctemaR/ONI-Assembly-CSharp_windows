@@ -18,10 +18,10 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("sequence", typeof(XmlSchemaSequence))]
-		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("group", typeof(XmlSchemaGroupRef))]
 		[XmlElement("all", typeof(XmlSchemaAll))]
+		[XmlElement("sequence", typeof(XmlSchemaSequence))]
+		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		public XmlSchemaParticle Particle
 		{
 			get

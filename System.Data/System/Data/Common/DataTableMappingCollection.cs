@@ -115,8 +115,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DataTableMapping this[string sourceTable]
 		{
 			get

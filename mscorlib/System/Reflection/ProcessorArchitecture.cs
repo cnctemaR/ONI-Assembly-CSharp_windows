@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum ProcessorArchitecture
 	{
 		None,

@@ -19,10 +19,14 @@ namespace UnityEngine.SceneManagement
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetNameInternal(int sceneHandle);
+		private static extern void SetPathAndGUIDInternal(int sceneHandle, string path, string guid);
 
 		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetNameInternal(int sceneHandle);
+
 		[NativeThrows]
+		[StaticAccessor("SceneBindings", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetNameInternal(int sceneHandle, string name);
 
@@ -233,6 +237,11 @@ namespace UnityEngine.SceneManagement
 				flag2 = this.handle == scene.handle;
 			}
 			return flag2;
+		}
+
+		internal void SetPathAndGuid(string path, string guid)
+		{
+			Scene.SetPathAndGUIDInternal(this.m_Handle, path, guid);
 		}
 
 		[HideInInspector]

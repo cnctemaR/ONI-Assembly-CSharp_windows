@@ -87,7 +87,7 @@ public static class BasePuftConfig
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
 		};
 		return BasePuftConfig.SetupDiet(prefab, array, caloriesPerKg, minPoopSizeInKg);
 	}

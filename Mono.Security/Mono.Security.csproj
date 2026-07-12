@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB54E}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Security</AssemblyName>
@@ -48,7 +48,6 @@
     <Compile Include="Security\Cryptography\MD2Managed.cs" />
     <Compile Include="Security\Cryptography\MD4.cs" />
     <Compile Include="Security\Cryptography\MD4Managed.cs" />
-    <Compile Include="Security\Cryptography\MD5SHA1.cs" />
     <Compile Include="Security\Cryptography\PKCS1.cs" />
     <Compile Include="Security\Cryptography\PKCS8.cs" />
     <Compile Include="Security\Cryptography\RC4.cs" />
@@ -66,11 +65,14 @@
     <Compile Include="Security\Interface\ExchangeAlgorithmType.cs" />
     <Compile Include="Security\Interface\HashAlgorithmType.cs" />
     <Compile Include="Security\Interface\ICertificateValidator.cs" />
-    <Compile Include="Security\Interface\ICertificateValidator2.cs" />
+    <Compile Include="Security\Interface\IMonoAuthenticationOptions.cs" />
+    <Compile Include="Security\Interface\IMonoSslClientAuthenticationOptions.cs" />
+    <Compile Include="Security\Interface\IMonoSslServerAuthenticationOptions.cs" />
     <Compile Include="Security\Interface\IMonoSslStream.cs" />
     <Compile Include="Security\Interface\MonoEncryptionPolicy.cs" />
     <Compile Include="Security\Interface\MonoLocalCertificateSelectionCallback.cs" />
     <Compile Include="Security\Interface\MonoRemoteCertificateValidationCallback.cs" />
+    <Compile Include="Security\Interface\MonoServerCertificateSelectionCallback.cs" />
     <Compile Include="Security\Interface\MonoSslPolicyErrors.cs" />
     <Compile Include="Security\Interface\MonoTlsConnectionInfo.cs" />
     <Compile Include="Security\Interface\MonoTlsProvider.cs" />
@@ -90,71 +92,6 @@
     <Compile Include="Security\Protocol\Ntlm\Type1Message.cs" />
     <Compile Include="Security\Protocol\Ntlm\Type2Message.cs" />
     <Compile Include="Security\Protocol\Ntlm\Type3Message.cs" />
-    <Compile Include="Security\Protocol\Tls\Alert.cs" />
-    <Compile Include="Security\Protocol\Tls\AlertDescription.cs" />
-    <Compile Include="Security\Protocol\Tls\AlertLevel.cs" />
-    <Compile Include="Security\Protocol\Tls\CertificateSelectionCallback.cs" />
-    <Compile Include="Security\Protocol\Tls\CertificateValidationCallback.cs" />
-    <Compile Include="Security\Protocol\Tls\CertificateValidationCallback2.cs" />
-    <Compile Include="Security\Protocol\Tls\CipherAlgorithmType.cs" />
-    <Compile Include="Security\Protocol\Tls\CipherSuite.cs" />
-    <Compile Include="Security\Protocol\Tls\CipherSuiteCollection.cs" />
-    <Compile Include="Security\Protocol\Tls\CipherSuiteFactory.cs" />
-    <Compile Include="Security\Protocol\Tls\ClientContext.cs" />
-    <Compile Include="Security\Protocol\Tls\ClientRecordProtocol.cs" />
-    <Compile Include="Security\Protocol\Tls\ClientSessionCache.cs" />
-    <Compile Include="Security\Protocol\Tls\ClientSessionInfo.cs" />
-    <Compile Include="Security\Protocol\Tls\ContentType.cs" />
-    <Compile Include="Security\Protocol\Tls\Context.cs" />
-    <Compile Include="Security\Protocol\Tls\DebugHelper.cs" />
-    <Compile Include="Security\Protocol\Tls\ExchangeAlgorithmType.cs" />
-    <Compile Include="Security\Protocol\Tls\HandshakeState.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\ClientCertificateType.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsClientCertificate.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsClientCertificateVerify.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsClientFinished.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsClientHello.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsClientKeyExchange.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerCertificate.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerCertificateRequest.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerFinished.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerHello.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerHelloDone.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Client\TlsServerKeyExchange.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\HandshakeMessage.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\HandshakeType.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsClientCertificate.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsClientCertificateVerify.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsClientFinished.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsClientHello.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsClientKeyExchange.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerCertificate.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerCertificateRequest.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerFinished.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerHello.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerHelloDone.cs" />
-    <Compile Include="Security\Protocol\Tls\Handshake\Server\TlsServerKeyExchange.cs" />
-    <Compile Include="Security\Protocol\Tls\HashAlgorithmType.cs" />
-    <Compile Include="Security\Protocol\Tls\HttpsClientStream.cs" />
-    <Compile Include="Security\Protocol\Tls\PrivateKeySelectionCallback.cs" />
-    <Compile Include="Security\Protocol\Tls\RecordProtocol.cs" />
-    <Compile Include="Security\Protocol\Tls\RSASslSignatureDeformatter.cs" />
-    <Compile Include="Security\Protocol\Tls\RSASslSignatureFormatter.cs" />
-    <Compile Include="Security\Protocol\Tls\SecurityCompressionType.cs" />
-    <Compile Include="Security\Protocol\Tls\SecurityParameters.cs" />
-    <Compile Include="Security\Protocol\Tls\SecurityProtocolType.cs" />
-    <Compile Include="Security\Protocol\Tls\ServerContext.cs" />
-    <Compile Include="Security\Protocol\Tls\ServerRecordProtocol.cs" />
-    <Compile Include="Security\Protocol\Tls\SslCipherSuite.cs" />
-    <Compile Include="Security\Protocol\Tls\SslClientStream.cs" />
-    <Compile Include="Security\Protocol\Tls\SslHandshakeHash.cs" />
-    <Compile Include="Security\Protocol\Tls\SslServerStream.cs" />
-    <Compile Include="Security\Protocol\Tls\SslStreamBase.cs" />
-    <Compile Include="Security\Protocol\Tls\TlsCipherSuite.cs" />
-    <Compile Include="Security\Protocol\Tls\TlsClientSettings.cs" />
-    <Compile Include="Security\Protocol\Tls\TlsException.cs" />
-    <Compile Include="Security\Protocol\Tls\TlsServerSettings.cs" />
-    <Compile Include="Security\Protocol\Tls\TlsStream.cs" />
     <Compile Include="Security\StrongName.cs" />
     <Compile Include="Security\X509\Extensions\AuthorityKeyIdentifierExtension.cs" />
     <Compile Include="Security\X509\Extensions\BasicConstraintsExtension.cs" />
@@ -192,11 +129,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

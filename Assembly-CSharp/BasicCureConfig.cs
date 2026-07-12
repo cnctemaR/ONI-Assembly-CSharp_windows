@@ -13,7 +13,7 @@ public class BasicCureConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicCure", ITEMS.PILLS.BASICCURE.NAME, ITEMS.PILLS.BASICCURE.DESC, 1f, true, Assets.GetAnim("pill_foodpoisoning_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicCure", global::STRINGS.ITEMS.PILLS.BASICCURE.NAME, global::STRINGS.ITEMS.PILLS.BASICCURE.DESC, 1f, true, Assets.GetAnim("pill_foodpoisoning_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.BASICCURE);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -27,7 +27,7 @@ public class BasicCureConfig : IEntityConfig
 		BasicCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 50f,
-			description = ITEMS.PILLS.BASICCURE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.BASICCURE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Apothecary" },
 			sortOrder = 10

@@ -9,8 +9,8 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	public class Behaviour : Component
 	{
-		[RequiredByNativeCode]
 		[NativeProperty]
+		[RequiredByNativeCode]
 		public extern bool enabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

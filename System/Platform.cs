@@ -16,29 +16,44 @@ namespace System
 				return;
 			}
 			IntPtr intPtr = Marshal.AllocHGlobal(8192);
-			try
+			if (Platform.uname(intPtr) == 0)
 			{
-				if (Platform.uname(intPtr) == 0)
+				string text = Marshal.PtrToStringAnsi(intPtr);
+				if (!(text == "Darwin"))
 				{
-					string text = Marshal.PtrToStringAnsi(intPtr);
-					if (!(text == "Darwin"))
+					if (!(text == "FreeBSD"))
 					{
-						if (text == "FreeBSD")
+						if (!(text == "AIX"))
 						{
-							Platform.isFreeBSD = true;
+							if (!(text == "OS400"))
+							{
+								if (text == "OpenBSD")
+								{
+									Platform.isOpenBSD = true;
+								}
+							}
+							else
+							{
+								Platform.isIBMi = true;
+							}
+						}
+						else
+						{
+							Platform.isAix = true;
 						}
 					}
 					else
 					{
-						Platform.isMacOS = true;
+						Platform.isFreeBSD = true;
 					}
 				}
+				else
+				{
+					Platform.isMacOS = true;
+				}
 			}
-			finally
-			{
-				Marshal.FreeHGlobal(intPtr);
-				Platform.checkedOS = true;
-			}
+			Marshal.FreeHGlobal(intPtr);
+			Platform.checkedOS = true;
 		}
 
 		public static bool IsMacOS
@@ -72,10 +87,52 @@ namespace System
 			}
 		}
 
+		public static bool IsOpenBSD
+		{
+			get
+			{
+				if (!Platform.checkedOS)
+				{
+					Platform.CheckOS();
+				}
+				return Platform.isOpenBSD;
+			}
+		}
+
+		public static bool IsIBMi
+		{
+			get
+			{
+				if (!Platform.checkedOS)
+				{
+					Platform.CheckOS();
+				}
+				return Platform.isIBMi;
+			}
+		}
+
+		public static bool IsAix
+		{
+			get
+			{
+				if (!Platform.checkedOS)
+				{
+					Platform.CheckOS();
+				}
+				return Platform.isAix;
+			}
+		}
+
 		private static bool checkedOS;
 
 		private static bool isMacOS;
 
+		private static bool isAix;
+
+		private static bool isIBMi;
+
 		private static bool isFreeBSD;
+
+		private static bool isOpenBSD;
 	}
 }

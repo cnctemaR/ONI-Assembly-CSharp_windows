@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ComVisible(false)]
-	public struct ExceptionHandler : IEquatable<ExceptionHandler>
+	public readonly struct ExceptionHandler : IEquatable<ExceptionHandler>
 	{
 		public int ExceptionTypeToken
 		{

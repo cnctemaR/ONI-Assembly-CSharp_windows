@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
+	[ComVisible(true)]
 	public sealed class DebuggerVisualizerAttribute : Attribute
 	{
 		public DebuggerVisualizerAttribute(string visualizerTypeName)

@@ -2,46 +2,46 @@
 
 namespace System
 {
-	internal struct ParamsArray
+	internal readonly struct ParamsArray
 	{
 		public ParamsArray(object arg0)
 		{
-			this.arg0 = arg0;
-			this.arg1 = null;
-			this.arg2 = null;
-			this.args = ParamsArray.oneArgArray;
+			this._arg0 = arg0;
+			this._arg1 = null;
+			this._arg2 = null;
+			this._args = ParamsArray.s_oneArgArray;
 		}
 
 		public ParamsArray(object arg0, object arg1)
 		{
-			this.arg0 = arg0;
-			this.arg1 = arg1;
-			this.arg2 = null;
-			this.args = ParamsArray.twoArgArray;
+			this._arg0 = arg0;
+			this._arg1 = arg1;
+			this._arg2 = null;
+			this._args = ParamsArray.s_twoArgArray;
 		}
 
 		public ParamsArray(object arg0, object arg1, object arg2)
 		{
-			this.arg0 = arg0;
-			this.arg1 = arg1;
-			this.arg2 = arg2;
-			this.args = ParamsArray.threeArgArray;
+			this._arg0 = arg0;
+			this._arg1 = arg1;
+			this._arg2 = arg2;
+			this._args = ParamsArray.s_threeArgArray;
 		}
 
 		public ParamsArray(object[] args)
 		{
 			int num = args.Length;
-			this.arg0 = ((num > 0) ? args[0] : null);
-			this.arg1 = ((num > 1) ? args[1] : null);
-			this.arg2 = ((num > 2) ? args[2] : null);
-			this.args = args;
+			this._arg0 = ((num > 0) ? args[0] : null);
+			this._arg1 = ((num > 1) ? args[1] : null);
+			this._arg2 = ((num > 2) ? args[2] : null);
+			this._args = args;
 		}
 
 		public int Length
 		{
 			get
 			{
-				return this.args.Length;
+				return this._args.Length;
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace System
 				{
 					return this.GetAtSlow(index);
 				}
-				return this.arg0;
+				return this._arg0;
 			}
 		}
 
@@ -61,27 +61,27 @@ namespace System
 		{
 			if (index == 1)
 			{
-				return this.arg1;
+				return this._arg1;
 			}
 			if (index == 2)
 			{
-				return this.arg2;
+				return this._arg2;
 			}
-			return this.args[index];
+			return this._args[index];
 		}
 
-		private static readonly object[] oneArgArray = new object[1];
+		private static readonly object[] s_oneArgArray = new object[1];
 
-		private static readonly object[] twoArgArray = new object[2];
+		private static readonly object[] s_twoArgArray = new object[2];
 
-		private static readonly object[] threeArgArray = new object[3];
+		private static readonly object[] s_threeArgArray = new object[3];
 
-		private readonly object arg0;
+		private readonly object _arg0;
 
-		private readonly object arg1;
+		private readonly object _arg1;
 
-		private readonly object arg2;
+		private readonly object _arg2;
 
-		private readonly object[] args;
+		private readonly object[] _args;
 	}
 }

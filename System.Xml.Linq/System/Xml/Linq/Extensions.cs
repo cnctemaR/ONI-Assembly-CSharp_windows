@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Xml.Linq
 {
@@ -78,6 +77,11 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("source");
 			}
+			return Extensions.NodesIterator<T>(source);
+		}
+
+		private static IEnumerable<XNode> NodesIterator<T>(IEnumerable<T> source) where T : XContainer
+		{
 			foreach (T t in source)
 			{
 				XContainer root = t;
@@ -188,7 +192,29 @@ namespace System.Xml.Linq
 
 		public static IEnumerable<T> InDocumentOrder<T>(this IEnumerable<T> source) where T : XNode
 		{
-			return source.OrderBy<T, XNode>((T n) => n, XNode.DocumentOrderComparer);
+			if (source == null)
+			{
+				throw new ArgumentNullException("source");
+			}
+			return Extensions.DocumentOrderIterator<T>(source);
+		}
+
+		private static IEnumerable<T> DocumentOrderIterator<T>(IEnumerable<T> source) where T : XNode
+		{
+			int count;
+			T[] items = EnumerableHelpers.ToArray<T>(source, out count);
+			if (count > 0)
+			{
+				XNode[] array = items;
+				Array.Sort<XNode>(array, 0, count, XNode.DocumentOrderComparer);
+				int num;
+				for (int i = 0; i != count; i = num)
+				{
+					yield return items[i];
+					num = i + 1;
+				}
+			}
+			yield break;
 		}
 
 		public static void Remove(this IEnumerable<XAttribute> source)
@@ -197,8 +223,11 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("source");
 			}
-			foreach (XAttribute xattribute in new List<XAttribute>(source))
+			int num;
+			XAttribute[] array = EnumerableHelpers.ToArray<XAttribute>(source, out num);
+			for (int i = 0; i < num; i++)
 			{
+				XAttribute xattribute = array[i];
 				if (xattribute != null)
 				{
 					xattribute.Remove();
@@ -212,8 +241,11 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("source");
 			}
-			foreach (T t in new List<T>(source))
+			int num;
+			T[] array = EnumerableHelpers.ToArray<T>(source, out num);
+			for (int i = 0; i < num; i++)
 			{
+				T t = array[i];
 				if (t != null)
 				{
 					t.Remove();

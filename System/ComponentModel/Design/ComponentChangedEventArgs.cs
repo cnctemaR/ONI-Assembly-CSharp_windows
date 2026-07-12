@@ -1,60 +1,23 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	public sealed class ComponentChangedEventArgs : EventArgs
 	{
-		public object Component
-		{
-			get
-			{
-				return this.component;
-			}
-		}
+		public object Component { get; }
 
-		public MemberDescriptor Member
-		{
-			get
-			{
-				return this.member;
-			}
-		}
+		public MemberDescriptor Member { get; }
 
-		public object NewValue
-		{
-			get
-			{
-				return this.newValue;
-			}
-		}
+		public object NewValue { get; }
 
-		public object OldValue
-		{
-			get
-			{
-				return this.oldValue;
-			}
-		}
+		public object OldValue { get; }
 
 		public ComponentChangedEventArgs(object component, MemberDescriptor member, object oldValue, object newValue)
 		{
-			this.component = component;
-			this.member = member;
-			this.oldValue = oldValue;
-			this.newValue = newValue;
+			this.Component = component;
+			this.Member = member;
+			this.OldValue = oldValue;
+			this.NewValue = newValue;
 		}
-
-		private object component;
-
-		private MemberDescriptor member;
-
-		private object oldValue;
-
-		private object newValue;
 	}
 }

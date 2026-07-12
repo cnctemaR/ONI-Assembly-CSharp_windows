@@ -10,9 +10,9 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling
 {
-	[DebuggerDisplay("Count = {Count}")]
-	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerRecorder.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerRecorder.bindings.h")]
+	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(ProfilerRecorderDebugView))]
 	public struct ProfilerRecorder : IDisposable
 	{
@@ -232,6 +232,18 @@ namespace Unity.Profiling
 			return array;
 		}
 
+		internal void FilterToCurrentThread()
+		{
+			this.CheckInitializedAndThrow();
+			ProfilerRecorder.Control(this, ProfilerRecorder.ControlOptions.SetFilterToCurrentThread);
+		}
+
+		internal void CollectFromAllThreads()
+		{
+			this.CheckInitializedAndThrow();
+			ProfilerRecorder.Control(this, ProfilerRecorder.ControlOptions.SetToCollectFromAllThreads);
+		}
+
 		[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 		private static ProfilerRecorder Create(ProfilerRecorderHandle statHandle, int maxSampleCount, ProfilerRecorderOptions options)
 		{
@@ -408,12 +420,16 @@ namespace Unity.Profiling
 
 		internal ulong handle;
 
+		internal const ProfilerRecorderOptions SharedRecorder = (ProfilerRecorderOptions)128;
+
 		internal enum ControlOptions
 		{
 			Start,
 			Stop,
 			Reset,
-			Release = 4
+			Release = 4,
+			SetFilterToCurrentThread,
+			SetToCollectFromAllThreads
 		}
 
 		internal enum CountOptions

@@ -8,8 +8,8 @@ namespace System.ComponentModel
 	{
 		public PropertyTabAttribute()
 		{
-			this.tabScopes = new PropertyTabScope[0];
-			this.tabClassNames = new string[0];
+			this.TabScopes = Array.Empty<PropertyTabScope>();
+			this._tabClassNames = Array.Empty<string>();
 		}
 
 		public PropertyTabAttribute(Type tabClass)
@@ -24,61 +24,61 @@ namespace System.ComponentModel
 
 		public PropertyTabAttribute(Type tabClass, PropertyTabScope tabScope)
 		{
-			this.tabClasses = new Type[] { tabClass };
+			this._tabClasses = new Type[] { tabClass };
 			if (tabScope < PropertyTabScope.Document)
 			{
-				throw new ArgumentException(global::SR.GetString("Scope must be PropertyTabScope.Document or PropertyTabScope.Component"), "tabScope");
+				throw new ArgumentException(SR.Format("Scope must be PropertyTabScope.Document or PropertyTabScope.Component", Array.Empty<object>()), "tabScope");
 			}
-			this.tabScopes = new PropertyTabScope[] { tabScope };
+			this.TabScopes = new PropertyTabScope[] { tabScope };
 		}
 
 		public PropertyTabAttribute(string tabClassName, PropertyTabScope tabScope)
 		{
-			this.tabClassNames = new string[] { tabClassName };
+			this._tabClassNames = new string[] { tabClassName };
 			if (tabScope < PropertyTabScope.Document)
 			{
-				throw new ArgumentException(global::SR.GetString("Scope must be PropertyTabScope.Document or PropertyTabScope.Component"), "tabScope");
+				throw new ArgumentException(SR.Format("Scope must be PropertyTabScope.Document or PropertyTabScope.Component", Array.Empty<object>()), "tabScope");
 			}
-			this.tabScopes = new PropertyTabScope[] { tabScope };
+			this.TabScopes = new PropertyTabScope[] { tabScope };
 		}
 
 		public Type[] TabClasses
 		{
 			get
 			{
-				if (this.tabClasses == null && this.tabClassNames != null)
+				if (this._tabClasses == null && this._tabClassNames != null)
 				{
-					this.tabClasses = new Type[this.tabClassNames.Length];
-					for (int i = 0; i < this.tabClassNames.Length; i++)
+					this._tabClasses = new Type[this._tabClassNames.Length];
+					for (int i = 0; i < this._tabClassNames.Length; i++)
 					{
-						int num = this.tabClassNames[i].IndexOf(',');
+						int num = this._tabClassNames[i].IndexOf(',');
 						string text = null;
 						string text2;
 						if (num != -1)
 						{
-							text2 = this.tabClassNames[i].Substring(0, num).Trim();
-							text = this.tabClassNames[i].Substring(num + 1).Trim();
+							text2 = this._tabClassNames[i].Substring(0, num).Trim();
+							text = this._tabClassNames[i].Substring(num + 1).Trim();
 						}
 						else
 						{
-							text2 = this.tabClassNames[i];
+							text2 = this._tabClassNames[i];
 						}
-						this.tabClasses[i] = Type.GetType(text2, false);
-						if (this.tabClasses[i] == null)
+						this._tabClasses[i] = Type.GetType(text2, false);
+						if (this._tabClasses[i] == null)
 						{
 							if (text == null)
 							{
-								throw new TypeLoadException(global::SR.GetString("Couldn't find type {0}", new object[] { text2 }));
+								throw new TypeLoadException(SR.Format("Couldn't find type {0}", text2));
 							}
 							Assembly assembly = Assembly.Load(text);
 							if (assembly != null)
 							{
-								this.tabClasses[i] = assembly.GetType(text2, true);
+								this._tabClasses[i] = assembly.GetType(text2, true);
 							}
 						}
 					}
 				}
-				return this.tabClasses;
+				return this._tabClasses;
 			}
 		}
 
@@ -86,21 +86,12 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.tabClassNames != null)
-				{
-					return (string[])this.tabClassNames.Clone();
-				}
-				return null;
+				string[] tabClassNames = this._tabClassNames;
+				return (string[])((tabClassNames != null) ? tabClassNames.Clone() : null);
 			}
 		}
 
-		public PropertyTabScope[] TabScopes
-		{
-			get
-			{
-				return this.tabScopes;
-			}
-		}
+		public PropertyTabScope[] TabScopes { get; private set; }
 
 		public override bool Equals(object other)
 		{
@@ -148,22 +139,22 @@ namespace System.ComponentModel
 			{
 				if (tabScopes != null && tabClasses.Length != tabScopes.Length)
 				{
-					throw new ArgumentException(global::SR.GetString("tabClasses must have the same number of items as tabScopes"));
+					throw new ArgumentException("tabClasses must have the same number of items as tabScopes");
 				}
-				this.tabClasses = (Type[])tabClasses.Clone();
+				this._tabClasses = (Type[])tabClasses.Clone();
 			}
 			else if (tabClassNames != null)
 			{
-				if (tabScopes != null && tabClasses.Length != tabScopes.Length)
+				if (tabScopes != null && tabClassNames.Length != tabScopes.Length)
 				{
-					throw new ArgumentException(global::SR.GetString("tabClasses must have the same number of items as tabScopes"));
+					throw new ArgumentException("tabClasses must have the same number of items as tabScopes");
 				}
-				this.tabClassNames = (string[])tabClassNames.Clone();
-				this.tabClasses = null;
+				this._tabClassNames = (string[])tabClassNames.Clone();
+				this._tabClasses = null;
 			}
-			else if (this.tabClasses == null && this.tabClassNames == null)
+			else if (this._tabClasses == null && this._tabClassNames == null)
 			{
-				throw new ArgumentException(global::SR.GetString("An array of tab type names or tab types must be specified"));
+				throw new ArgumentException("An array of tab type names or tab types must be specified");
 			}
 			if (tabScopes != null)
 			{
@@ -171,23 +162,21 @@ namespace System.ComponentModel
 				{
 					if (tabScopes[i] < PropertyTabScope.Document)
 					{
-						throw new ArgumentException(global::SR.GetString("Scope must be PropertyTabScope.Document or PropertyTabScope.Component"));
+						throw new ArgumentException("Scope must be PropertyTabScope.Document or PropertyTabScope.Component");
 					}
 				}
-				this.tabScopes = (PropertyTabScope[])tabScopes.Clone();
+				this.TabScopes = (PropertyTabScope[])tabScopes.Clone();
 				return;
 			}
-			this.tabScopes = new PropertyTabScope[tabClasses.Length];
+			this.TabScopes = new PropertyTabScope[tabClasses.Length];
 			for (int j = 0; j < this.TabScopes.Length; j++)
 			{
-				this.tabScopes[j] = PropertyTabScope.Component;
+				this.TabScopes[j] = PropertyTabScope.Component;
 			}
 		}
 
-		private PropertyTabScope[] tabScopes;
+		private Type[] _tabClasses;
 
-		private Type[] tabClasses;
-
-		private string[] tabClassNames;
+		private string[] _tabClassNames;
 	}
 }

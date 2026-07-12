@@ -75,6 +75,7 @@ namespace System.Threading
 					}
 				}
 			}
+			ThreadPool.NotifyWorkItemQueued();
 			this.EnsureThreadRequested();
 		}
 
@@ -128,7 +129,7 @@ namespace System.Threading
 			try
 			{
 				ThreadPoolWorkQueueThreadLocals threadPoolWorkQueueThreadLocals = workQueue.EnsureCurrentThreadHasQueue();
-				while ((long)(Environment.TickCount - tickCount) < (long)((ulong)ThreadPoolGlobals.tpQuantum))
+				while ((long)(Environment.TickCount - tickCount) < 30L)
 				{
 					try
 					{

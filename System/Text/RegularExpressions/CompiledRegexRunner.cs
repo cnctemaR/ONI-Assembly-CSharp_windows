@@ -4,36 +4,32 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class CompiledRegexRunner : RegexRunner
 	{
-		internal CompiledRegexRunner()
+		public void SetDelegates(Action<RegexRunner> go, Func<RegexRunner, bool> firstChar, Action<RegexRunner> trackCount)
 		{
-		}
-
-		internal void SetDelegates(NoParamDelegate go, FindFirstCharDelegate firstChar, NoParamDelegate trackCount)
-		{
-			this.goMethod = go;
-			this.findFirstCharMethod = firstChar;
-			this.initTrackCountMethod = trackCount;
+			this._goMethod = go;
+			this._findFirstCharMethod = firstChar;
+			this._initTrackCountMethod = trackCount;
 		}
 
 		protected override void Go()
 		{
-			this.goMethod(this);
+			this._goMethod(this);
 		}
 
 		protected override bool FindFirstChar()
 		{
-			return this.findFirstCharMethod(this);
+			return this._findFirstCharMethod(this);
 		}
 
 		protected override void InitTrackCount()
 		{
-			this.initTrackCountMethod(this);
+			this._initTrackCountMethod(this);
 		}
 
-		private NoParamDelegate goMethod;
+		private Action<RegexRunner> _goMethod;
 
-		private FindFirstCharDelegate findFirstCharMethod;
+		private Func<RegexRunner, bool> _findFirstCharMethod;
 
-		private NoParamDelegate initTrackCountMethod;
+		private Action<RegexRunner> _initTrackCountMethod;
 	}
 }

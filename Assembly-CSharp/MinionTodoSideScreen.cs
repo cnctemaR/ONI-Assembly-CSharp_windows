@@ -132,7 +132,7 @@ public class MinionTodoSideScreen : SideScreenContent
 		Schedule schedule = component.GetSchedule();
 		if (schedule != null)
 		{
-			text = schedule.GetBlock(Schedule.GetBlockIdx()).name;
+			text = schedule.GetCurrentScheduleBlock().name;
 		}
 		this.currentScheduleBlockLabel.SetText(string.Format(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CURRENT_SCHEDULE_BLOCK, text));
 		this.choreTargets.Clear();

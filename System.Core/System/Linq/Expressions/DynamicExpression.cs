@@ -116,7 +116,7 @@ namespace System.Linq.Expressions
 			{
 				return dynamicExpressionVisitor.VisitDynamic(this);
 			}
-			return base.Accept(visitor);
+			return visitor.VisitDynamic(this);
 		}
 
 		[ExcludeFromCodeCoverage]

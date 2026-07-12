@@ -302,7 +302,7 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 				SelectTool.Instance.SelectAndFocus(vector, kselectable);
 			}));
 			this.defaultIndicatorSizeDelta = Vector2.zero;
-			this.Update();
+			this.Update(true);
 			SimAndRenderScheduler.instance.Add(this, true);
 		}
 
@@ -313,13 +313,17 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 
 		public void Sim4000ms(float dt)
 		{
-			this.Update();
+			this.Update(false);
 		}
 
 		public GameObject gameObject { get; private set; }
 
-		public void Update()
+		public void Update(bool force = false)
 		{
+			if (!force && ClusterManager.Instance.activeWorldId != this.worldID)
+			{
+				return;
+			}
 			Color color = Color.white;
 			global::Debug.Assert(this.diagnostic.LatestResult.opinion > ColonyDiagnostic.DiagnosticResult.Opinion.Unset, string.Format("{0} criteria returned no opinion. Make sure the DiagnosticResult parameters are used or an opinion result is otherwise set in all of its criteria", this.diagnostic));
 			this.currentDisplayedResult = this.diagnostic.LatestResult.opinion;

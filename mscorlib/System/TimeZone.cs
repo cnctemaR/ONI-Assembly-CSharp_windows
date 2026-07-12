@@ -1,68 +1,81 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System
 {
-	[ComVisible(true)]
+	[Obsolete("System.TimeZone has been deprecated.  Please investigate the use of System.TimeZoneInfo instead.")]
 	[Serializable]
 	public abstract class TimeZone
 	{
+		private static object InternalSyncObject
+		{
+			get
+			{
+				if (TimeZone.s_InternalSyncObject == null)
+				{
+					object obj = new object();
+					Interlocked.CompareExchange<object>(ref TimeZone.s_InternalSyncObject, obj, null);
+				}
+				return TimeZone.s_InternalSyncObject;
+			}
+		}
+
 		public static TimeZone CurrentTimeZone
 		{
 			get
 			{
-				long ticks = DateTime.UtcNow.Ticks;
 				TimeZone timeZone = TimeZone.currentTimeZone;
-				object obj = TimeZone.tz_lock;
-				lock (obj)
+				if (timeZone == null)
 				{
-					if (timeZone == null || Math.Abs(ticks - TimeZone.timezone_check) > 600000000L)
+					object internalSyncObject = TimeZone.InternalSyncObject;
+					lock (internalSyncObject)
 					{
-						timeZone = new CurrentSystemTimeZone();
-						TimeZone.timezone_check = ticks;
-						TimeZone.currentTimeZone = timeZone;
+						if (TimeZone.currentTimeZone == null)
+						{
+							TimeZone.currentTimeZone = new CurrentSystemTimeZone();
+						}
+						timeZone = TimeZone.currentTimeZone;
 					}
 				}
 				return timeZone;
 			}
 		}
 
-		public abstract string DaylightName { get; }
+		internal static void ResetTimeZone()
+		{
+			if (TimeZone.currentTimeZone != null)
+			{
+				object internalSyncObject = TimeZone.InternalSyncObject;
+				lock (internalSyncObject)
+				{
+					TimeZone.currentTimeZone = null;
+				}
+			}
+		}
 
 		public abstract string StandardName { get; }
 
-		public abstract DaylightTime GetDaylightChanges(int year);
+		public abstract string DaylightName { get; }
 
 		public abstract TimeSpan GetUtcOffset(DateTime time);
 
-		public virtual bool IsDaylightSavingTime(DateTime time)
+		public virtual DateTime ToUniversalTime(DateTime time)
 		{
-			return TimeZone.IsDaylightSavingTime(time, this.GetDaylightChanges(time.Year));
-		}
-
-		public static bool IsDaylightSavingTime(DateTime time, DaylightTime daylightTimes)
-		{
-			if (daylightTimes == null)
+			if (time.Kind == DateTimeKind.Utc)
 			{
-				throw new ArgumentNullException("daylightTimes");
+				return time;
 			}
-			if (daylightTimes.Start.Ticks == daylightTimes.End.Ticks)
+			long num = time.Ticks - this.GetUtcOffset(time).Ticks;
+			if (num > 3155378975999999999L)
 			{
-				return false;
+				return new DateTime(3155378975999999999L, DateTimeKind.Utc);
 			}
-			if (daylightTimes.Start.Ticks < daylightTimes.End.Ticks)
+			if (num < 0L)
 			{
-				if (daylightTimes.Start.Ticks < time.Ticks && daylightTimes.End.Ticks > time.Ticks)
-				{
-					return true;
-				}
+				return new DateTime(0L, DateTimeKind.Utc);
 			}
-			else if (time.Year == daylightTimes.Start.Year && time.Year == daylightTimes.End.Year && (time.Ticks < daylightTimes.End.Ticks || time.Ticks > daylightTimes.Start.Ticks))
-			{
-				return true;
-			}
-			return false;
+			return new DateTime(num, DateTimeKind.Utc);
 		}
 
 		public virtual DateTime ToLocalTime(DateTime time)
@@ -71,40 +84,68 @@ namespace System
 			{
 				return time;
 			}
-			TimeSpan utcOffset = this.GetUtcOffset(new DateTime(time.Ticks));
-			if (utcOffset.Ticks > 0L)
-			{
-				if (DateTime.MaxValue - utcOffset < time)
-				{
-					return DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Local);
-				}
-			}
-			else if (utcOffset.Ticks < 0L && time.Ticks + utcOffset.Ticks < DateTime.MinValue.Ticks)
-			{
-				return DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Local);
-			}
-			return DateTime.SpecifyKind(time.Add(utcOffset), DateTimeKind.Local);
+			bool flag = false;
+			long utcOffsetFromUniversalTime = ((CurrentSystemTimeZone)TimeZone.CurrentTimeZone).GetUtcOffsetFromUniversalTime(time, ref flag);
+			return new DateTime(time.Ticks + utcOffsetFromUniversalTime, DateTimeKind.Local, flag);
 		}
 
-		public virtual DateTime ToUniversalTime(DateTime time)
+		public abstract DaylightTime GetDaylightChanges(int year);
+
+		public virtual bool IsDaylightSavingTime(DateTime time)
 		{
+			return TimeZone.IsDaylightSavingTime(time, this.GetDaylightChanges(time.Year));
+		}
+
+		public static bool IsDaylightSavingTime(DateTime time, DaylightTime daylightTimes)
+		{
+			return TimeZone.CalculateUtcOffset(time, daylightTimes) != TimeSpan.Zero;
+		}
+
+		internal static TimeSpan CalculateUtcOffset(DateTime time, DaylightTime daylightTimes)
+		{
+			if (daylightTimes == null)
+			{
+				return TimeSpan.Zero;
+			}
 			if (time.Kind == DateTimeKind.Utc)
 			{
-				return time;
+				return TimeSpan.Zero;
 			}
-			TimeSpan utcOffset = this.GetUtcOffset(time);
-			if (utcOffset.Ticks < 0L)
+			DateTime dateTime = daylightTimes.Start + daylightTimes.Delta;
+			DateTime end = daylightTimes.End;
+			DateTime dateTime2;
+			DateTime dateTime3;
+			if (daylightTimes.Delta.Ticks > 0L)
 			{
-				if (DateTime.MaxValue + utcOffset < time)
+				dateTime2 = end - daylightTimes.Delta;
+				dateTime3 = end;
+			}
+			else
+			{
+				dateTime2 = dateTime;
+				dateTime3 = dateTime - daylightTimes.Delta;
+			}
+			bool flag = false;
+			if (dateTime > end)
+			{
+				if (time >= dateTime || time < end)
 				{
-					return DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc);
+					flag = true;
 				}
 			}
-			else if (utcOffset.Ticks > 0L && DateTime.MinValue + utcOffset > time)
+			else if (time >= dateTime && time < end)
 			{
-				return DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+				flag = true;
 			}
-			return DateTime.SpecifyKind(new DateTime(time.Ticks - utcOffset.Ticks), DateTimeKind.Utc);
+			if (flag && time >= dateTime2 && time < dateTime3)
+			{
+				flag = time.IsAmbiguousDaylightSavingTime();
+			}
+			if (flag)
+			{
+				return daylightTimes.Delta;
+			}
+			return TimeSpan.Zero;
 		}
 
 		internal static void ClearCachedData()
@@ -112,12 +153,8 @@ namespace System
 			TimeZone.currentTimeZone = null;
 		}
 
-		private static TimeZone currentTimeZone;
+		private static volatile TimeZone currentTimeZone;
 
-		[NonSerialized]
-		private static object tz_lock = new object();
-
-		[NonSerialized]
-		private static long timezone_check;
+		private static object s_InternalSyncObject;
 	}
 }

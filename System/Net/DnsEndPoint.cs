@@ -18,7 +18,7 @@ namespace System.Net
 			}
 			if (string.IsNullOrEmpty(host))
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
 			}
 			if (port < 0 || port > 65535)
 			{
@@ -26,7 +26,7 @@ namespace System.Net
 			}
 			if (addressFamily != AddressFamily.InterNetwork && addressFamily != AddressFamily.InterNetworkV6 && addressFamily != AddressFamily.Unspecified)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified value is not valid."), "addressFamily");
+				throw new ArgumentException(SR.GetString("The specified value is not valid."), "addressFamily");
 			}
 			this.m_Host = host;
 			this.m_Port = port;
@@ -46,7 +46,14 @@ namespace System.Net
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { this.m_Family, "/", this.m_Host, ":", this.m_Port });
+			return string.Concat(new string[]
+			{
+				this.m_Family.ToString(),
+				"/",
+				this.m_Host,
+				":",
+				this.m_Port.ToString()
+			});
 		}
 
 		public string Host

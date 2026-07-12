@@ -11,15 +11,15 @@ namespace UnityEngine.Windows.Speech
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		protected static extern IntPtr CreateFromKeywords(object self, string[] keywords, ConfidenceLevel minimumConfidence);
+		protected static extern IntPtr CreateFromKeywords(object self, [Unmarshalled] string[] keywords, ConfidenceLevel minimumConfidence);
 
-		[NativeThrows]
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Start_Internal(IntPtr recognizer);
 

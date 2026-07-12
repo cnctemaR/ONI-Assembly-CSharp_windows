@@ -23,7 +23,7 @@ public class GammaRayOven : ComplexFabricator, IGameObjectEffectDescriptor
 		this.workable.SkillExperienceSkillGroup = Db.Get().SkillGroups.Cooking.Id;
 		this.workable.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		ComplexFabricatorWorkable workable = this.workable;
-		workable.OnWorkTickActions = (Action<Worker, float>)Delegate.Combine(workable.OnWorkTickActions, new Action<Worker, float>(delegate(Worker worker, float dt)
+		workable.OnWorkTickActions = (Action<WorkerBase, float>)Delegate.Combine(workable.OnWorkTickActions, new Action<WorkerBase, float>(delegate(WorkerBase worker, float dt)
 		{
 			global::Debug.Assert(worker != null, "How did we get a null worker?");
 			if (this.diseaseCountKillRate > 0)

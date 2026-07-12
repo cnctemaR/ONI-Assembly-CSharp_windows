@@ -6,14 +6,6 @@ namespace System.Text.RegularExpressions
 	[Serializable]
 	public class Match : Group
 	{
-		public static Match Empty
-		{
-			get
-			{
-				return Match._empty;
-			}
-		}
-
 		internal Match(Regex regex, int capcount, string text, int begpos, int len, int startpos)
 			: base(text, new int[2], 0, "0")
 		{
@@ -27,10 +19,12 @@ namespace System.Text.RegularExpressions
 			this._balancing = false;
 		}
 
+		public static Match Empty { get; } = new Match(null, 1, string.Empty, 0, 0, 0);
+
 		internal virtual void Reset(Regex regex, string text, int textbeg, int textend, int textstart)
 		{
 			this._regex = regex;
-			this._text = text;
+			base.Text = text;
 			this._textbeg = textbeg;
 			this._textend = textend;
 			this._textstart = textstart;
@@ -59,7 +53,7 @@ namespace System.Text.RegularExpressions
 			{
 				return this;
 			}
-			return this._regex.Run(false, this._length, this._text, this._textbeg, this._textend - this._textbeg, this._textpos);
+			return this._regex.Run(false, base.Length, base.Text, this._textbeg, this._textend - this._textbeg, this._textpos);
 		}
 
 		public virtual string Result(string replacement)
@@ -70,18 +64,12 @@ namespace System.Text.RegularExpressions
 			}
 			if (this._regex == null)
 			{
-				throw new NotSupportedException(global::SR.GetString("Result cannot be called on a failed Match."));
+				throw new NotSupportedException("Result cannot be called on a failed Match.");
 			}
-			RegexReplacement regexReplacement = (RegexReplacement)this._regex.replref.Get();
-			if (regexReplacement == null || !regexReplacement.Pattern.Equals(replacement))
-			{
-				regexReplacement = RegexParser.ParseReplacement(replacement, this._regex.caps, this._regex.capsize, this._regex.capnames, this._regex.roptions);
-				this._regex.replref.Cache(regexReplacement);
-			}
-			return regexReplacement.Replacement(this);
+			return RegexReplacement.GetOrCreate(this._regex._replref, replacement, this._regex.caps, this._regex.capsize, this._regex.capnames, this._regex.roptions).Replacement(this);
 		}
 
-		internal virtual string GroupToStringImpl(int groupnum)
+		internal virtual ReadOnlySpan<char> GroupToStringImpl(int groupnum)
 		{
 			int num = this._matchcount[groupnum];
 			if (num == 0)
@@ -89,10 +77,10 @@ namespace System.Text.RegularExpressions
 				return string.Empty;
 			}
 			int[] array = this._matches[groupnum];
-			return this._text.Substring(array[(num - 1) * 2], array[num * 2 - 1]);
+			return base.Text.AsSpan(array[(num - 1) * 2], array[num * 2 - 1]);
 		}
 
-		internal string LastGroupToStringImpl()
+		internal ReadOnlySpan<char> LastGroupToStringImpl()
 		{
 			return this.GroupToStringImpl(this._matchcount.Length - 1);
 		}
@@ -183,8 +171,8 @@ namespace System.Text.RegularExpressions
 		internal virtual void Tidy(int textpos)
 		{
 			int[] array = this._matches[0];
-			this._index = array[0];
-			this._length = array[1];
+			base.Index = array[0];
+			base.Length = array[1];
 			this._textpos = textpos;
 			this._capcount = this._matchcount[0];
 			if (this._balancing)
@@ -225,8 +213,6 @@ namespace System.Text.RegularExpressions
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
-
-		internal static Match _empty = new Match(null, 1, string.Empty, 0, 0, 0);
 
 		internal GroupCollection _groupcoll;
 

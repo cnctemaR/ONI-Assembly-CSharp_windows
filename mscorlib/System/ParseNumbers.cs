@@ -1,469 +1,555 @@
 ﻿using System;
-using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace System
 {
 	internal static class ParseNumbers
 	{
-		public static int StringToInt(string value, int fromBase, int flags)
+		public static long StringToLong(ReadOnlySpan<char> s, int radix, int flags)
 		{
-			return ParseNumbers.StringToInt(value, fromBase, flags, null);
+			int num = 0;
+			return ParseNumbers.StringToLong(s, radix, flags, ref num);
 		}
 
-		public unsafe static int StringToInt(string value, int fromBase, int flags, int* parsePos)
+		public unsafe static long StringToLong(ReadOnlySpan<char> s, int radix, int flags, ref int currPos)
 		{
-			if ((flags & 12288) == 0)
+			int num = currPos;
+			int num2 = ((-1 == radix) ? 10 : radix);
+			if (num2 != 2 && num2 != 10 && num2 != 8 && num2 != 16)
 			{
-				throw new NotImplementedException(flags.ToString());
+				throw new ArgumentException("Invalid Base.", "radix");
 			}
-			if (value == null)
+			int length = s.Length;
+			if (num < 0 || num >= length)
 			{
-				return 0;
+				throw new ArgumentOutOfRangeException("Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			int num = 0;
-			uint num2 = 0U;
-			int length = value.Length;
-			bool flag = false;
-			if (length == 0)
+			if ((flags & 4096) == 0 && (flags & 8192) == 0)
 			{
-				throw new ArgumentOutOfRangeException("Empty string");
+				ParseNumbers.EatWhiteSpace(s, ref num);
+				if (num == length)
+				{
+					throw new FormatException("Input string was either empty or contained only whitespace.");
+				}
 			}
-			int i = ((parsePos == null) ? 0 : (*parsePos));
-			if (value[i] == '-')
+			int num3 = 1;
+			if (*s[num] == 45)
 			{
-				if (fromBase != 10)
+				if (num2 != 10)
 				{
 					throw new ArgumentException("String cannot contain a minus sign if the base is not 10.");
 				}
 				if ((flags & 512) != 0)
 				{
-					throw new OverflowException("Negative number");
+					throw new OverflowException("The string was being parsed as an unsigned number and could not have a negative sign.");
 				}
-				flag = true;
-				i++;
+				num3 = -1;
+				num++;
 			}
-			else if (value[i] == '+')
+			else if (*s[num] == 43)
 			{
-				i++;
+				num++;
 			}
-			if (fromBase == 16 && i + 1 < length && value[i] == '0' && (value[i + 1] == 'x' || value[i + 1] == 'X'))
+			if ((radix == -1 || radix == 16) && num + 1 < length && *s[num] == 48 && (*s[num + 1] == 120 || *s[num + 1] == 88))
 			{
-				i += 2;
+				num2 = 16;
+				num += 2;
 			}
-			uint num3;
-			if ((flags & 1024) != 0)
+			int num4 = num;
+			long num5 = ParseNumbers.GrabLongs(num2, s, ref num, (flags & 512) != 0);
+			if (num == num4)
 			{
-				num3 = 255U;
+				throw new FormatException("Could not find any recognizable digits.");
 			}
-			else if ((flags & 2048) != 0)
+			if ((flags & 4096) != 0 && num < length)
 			{
-				num3 = 65535U;
+				throw new FormatException("Additional non-parsable characters are at the end of the string.");
 			}
-			else
+			currPos = num;
+			if (num5 == -9223372036854775808L && num3 == 1 && num2 == 10 && (flags & 512) == 0)
 			{
-				num3 = uint.MaxValue;
+				throw new OverflowException("Value was either too large or too small for an Int64.");
 			}
-			while (i < length)
+			if (num2 == 10)
 			{
-				char c = value[i];
-				int num4;
-				if (char.IsNumber(c))
-				{
-					num4 = (int)(c - '0');
-				}
-				else if (char.IsLetter(c))
-				{
-					num4 = (int)(char.ToLowerInvariant(c) - 'a' + '\n');
-				}
-				else
-				{
-					if (i == 0)
-					{
-						throw new FormatException("Could not find any parsable digits.");
-					}
-					if ((flags & 4096) != 0)
-					{
-						throw new FormatException("Additional unparsable characters are at the end of the string.");
-					}
-					break;
-				}
-				if (num4 >= fromBase)
-				{
-					if (num > 0)
-					{
-						throw new FormatException("Additional unparsable characters are at the end of the string.");
-					}
-					throw new FormatException("Could not find any parsable digits.");
-				}
-				else
-				{
-					long num5 = (long)fromBase * (long)((ulong)num2) + (long)num4;
-					if (num5 > (long)((ulong)num3))
-					{
-						throw new OverflowException();
-					}
-					num2 = (uint)num5;
-					num++;
-					i++;
-				}
+				num5 *= (long)num3;
 			}
-			if (num == 0)
-			{
-				throw new FormatException("Could not find any parsable digits.");
-			}
-			if (parsePos != null)
-			{
-				*parsePos = i;
-			}
-			if (!flag)
-			{
-				return (int)num2;
-			}
-			return (int)(-(int)num2);
+			return num5;
 		}
 
-		public static string LongToString(long value, int toBase, int width, char paddingChar, int flags)
+		public static int StringToInt(ReadOnlySpan<char> s, int radix, int flags)
 		{
-			if (value == 0L)
-			{
-				return "0";
-			}
-			if (toBase == 10)
-			{
-				return value.ToString();
-			}
-			byte[] bytes = BitConverter.GetBytes(value);
-			if (toBase == 2)
-			{
-				return ParseNumbers.ConvertToBase2(bytes).ToString();
-			}
-			if (toBase == 8)
-			{
-				return ParseNumbers.ConvertToBase8(bytes).ToString();
-			}
-			if (toBase != 16)
-			{
-				throw new NotImplementedException();
-			}
-			return ParseNumbers.ConvertToBase16(bytes).ToString();
-		}
-
-		public static long StringToLong(string value, int fromBase, int flags)
-		{
-			return ParseNumbers.StringToLong(value, fromBase, flags, null);
-		}
-
-		public unsafe static long StringToLong(string value, int fromBase, int flags, int* parsePos)
-		{
-			if ((flags & 12288) == 0)
-			{
-				throw new NotImplementedException(flags.ToString());
-			}
-			if (value == null)
-			{
-				return 0L;
-			}
 			int num = 0;
-			ulong num2 = (ulong)((long)fromBase);
-			ulong num3 = 0UL;
-			int length = value.Length;
-			bool flag = false;
-			bool flag2 = (flags & 512) != 0;
-			if (length == 0)
+			return ParseNumbers.StringToInt(s, radix, flags, ref num);
+		}
+
+		public unsafe static int StringToInt(ReadOnlySpan<char> s, int radix, int flags, ref int currPos)
+		{
+			int num = currPos;
+			int num2 = ((-1 == radix) ? 10 : radix);
+			if (num2 != 2 && num2 != 10 && num2 != 8 && num2 != 16)
 			{
-				throw new ArgumentOutOfRangeException("Empty string");
+				throw new ArgumentException("Invalid Base.", "radix");
 			}
-			int i = ((parsePos == null) ? 0 : (*parsePos));
-			if (value[i] == '-')
+			int length = s.Length;
+			if (num < 0 || num >= length)
 			{
-				if (fromBase != 10)
+				throw new ArgumentOutOfRangeException("Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if ((flags & 4096) == 0 && (flags & 8192) == 0)
+			{
+				ParseNumbers.EatWhiteSpace(s, ref num);
+				if (num == length)
+				{
+					throw new FormatException("Input string was either empty or contained only whitespace.");
+				}
+			}
+			int num3 = 1;
+			if (*s[num] == 45)
+			{
+				if (num2 != 10)
 				{
 					throw new ArgumentException("String cannot contain a minus sign if the base is not 10.");
 				}
-				if (flag2)
+				if ((flags & 512) != 0)
 				{
-					throw new OverflowException("Negative number");
+					throw new OverflowException("The string was being parsed as an unsigned number and could not have a negative sign.");
 				}
+				num3 = -1;
+				num++;
+			}
+			else if (*s[num] == 43)
+			{
+				num++;
+			}
+			if ((radix == -1 || radix == 16) && num + 1 < length && *s[num] == 48 && (*s[num + 1] == 120 || *s[num + 1] == 88))
+			{
+				num2 = 16;
+				num += 2;
+			}
+			int num4 = num;
+			int num5 = ParseNumbers.GrabInts(num2, s, ref num, (flags & 512) != 0);
+			if (num == num4)
+			{
+				throw new FormatException("Could not find any recognizable digits.");
+			}
+			if ((flags & 4096) != 0 && num < length)
+			{
+				throw new FormatException("Additional non-parsable characters are at the end of the string.");
+			}
+			currPos = num;
+			if ((flags & 1024) != 0)
+			{
+				if (num5 > 255)
+				{
+					throw new OverflowException("Value was either too large or too small for a signed byte.");
+				}
+			}
+			else if ((flags & 2048) != 0)
+			{
+				if (num5 > 65535)
+				{
+					throw new OverflowException("Value was either too large or too small for an Int16.");
+				}
+			}
+			else if (num5 == -2147483648 && num3 == 1 && num2 == 10 && (flags & 512) == 0)
+			{
+				throw new OverflowException("Value was either too large or too small for an Int32.");
+			}
+			if (num2 == 10)
+			{
+				num5 *= num3;
+			}
+			return num5;
+		}
+
+		public unsafe static string IntToString(int n, int radix, int width, char paddingChar, int flags)
+		{
+			Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)132], 66);
+			if (radix < 2 || radix > 36)
+			{
+				throw new ArgumentException("Invalid Base.", "radix");
+			}
+			bool flag = false;
+			uint num;
+			if (n < 0)
+			{
 				flag = true;
-				i++;
+				num = (uint)((10 == radix) ? (-(uint)n) : n);
 			}
-			else if (value[i] == '+')
+			else
 			{
-				i++;
+				num = (uint)n;
 			}
-			if (fromBase == 16 && i + 1 < length && value[i] == '0' && (value[i + 1] == 'x' || value[i + 1] == 'X'))
+			if ((flags & 64) != 0)
 			{
-				i += 2;
+				num &= 255U;
 			}
-			while (i < length)
+			else if ((flags & 128) != 0)
 			{
-				char c = value[i];
-				ulong num4;
-				if (char.IsNumber(c))
+				num &= 65535U;
+			}
+			int num2;
+			if (num == 0U)
+			{
+				*span[0] = '0';
+				num2 = 1;
+			}
+			else
+			{
+				num2 = 0;
+				for (int i = 0; i < span.Length; i++)
 				{
-					num4 = (ulong)((long)(c - '0'));
+					uint num3 = num / (uint)radix;
+					uint num4 = num - num3 * (uint)radix;
+					num = num3;
+					*span[i] = ((num4 < 10U) ? ((char)(num4 + 48U)) : ((char)(num4 + 97U - 10U)));
+					if (num == 0U)
+					{
+						num2 = i + 1;
+						break;
+					}
 				}
-				else if (char.IsLetter(c))
+			}
+			if (radix != 10 && (flags & 32) != 0)
+			{
+				if (16 == radix)
 				{
-					num4 = (ulong)((long)(char.ToLowerInvariant(c) - 'a' + '\n'));
+					*span[num2++] = 'x';
+					*span[num2++] = '0';
+				}
+				else if (8 == radix)
+				{
+					*span[num2++] = '0';
+				}
+			}
+			if (10 == radix)
+			{
+				if (flag)
+				{
+					*span[num2++] = '-';
+				}
+				else if ((flags & 16) != 0)
+				{
+					*span[num2++] = '+';
+				}
+				else if ((flags & 8) != 0)
+				{
+					*span[num2++] = ' ';
+				}
+			}
+			string text = string.FastAllocateString(Math.Max(width, num2));
+			fixed (string text2 = text)
+			{
+				char* ptr = text2;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				char* ptr2 = ptr;
+				int num5 = text.Length - num2;
+				if ((flags & 1) != 0)
+				{
+					for (int j = 0; j < num5; j++)
+					{
+						*(ptr2++) = paddingChar;
+					}
+					for (int k = 0; k < num2; k++)
+					{
+						*(ptr2++) = *span[num2 - k - 1];
+					}
 				}
 				else
 				{
-					if (i == 0)
+					for (int l = 0; l < num2; l++)
 					{
-						throw new FormatException("Could not find any parsable digits.");
+						*(ptr2++) = *span[num2 - l - 1];
 					}
-					if ((flags & 4096) != 0)
+					for (int m = 0; m < num5; m++)
 					{
-						throw new FormatException("Additional unparsable characters are at the end of the string.");
+						*(ptr2++) = paddingChar;
 					}
-					break;
 				}
-				if (num4 >= num2)
+			}
+			return text;
+		}
+
+		public unsafe static string LongToString(long n, int radix, int width, char paddingChar, int flags)
+		{
+			Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)134], 67);
+			if (radix < 2 || radix > 36)
+			{
+				throw new ArgumentException("Invalid Base.", "radix");
+			}
+			bool flag = false;
+			ulong num;
+			if (n < 0L)
+			{
+				flag = true;
+				num = (ulong)((10 == radix) ? (-(ulong)n) : n);
+			}
+			else
+			{
+				num = (ulong)n;
+			}
+			if ((flags & 64) != 0)
+			{
+				num &= 255UL;
+			}
+			else if ((flags & 128) != 0)
+			{
+				num &= 65535UL;
+			}
+			else if ((flags & 256) != 0)
+			{
+				num &= (ulong)(-1);
+			}
+			int num2;
+			if (num == 0UL)
+			{
+				*span[0] = '0';
+				num2 = 1;
+			}
+			else
+			{
+				num2 = 0;
+				for (int i = 0; i < span.Length; i++)
 				{
-					if (num > 0)
+					ulong num3 = num / (ulong)((long)radix);
+					int num4 = (int)(num - num3 * (ulong)((long)radix));
+					num = num3;
+					*span[i] = ((num4 < 10) ? ((char)(num4 + 48)) : ((char)(num4 + 97 - 10)));
+					if (num == 0UL)
 					{
-						throw new FormatException("Additional unparsable characters are at the end of the string.");
+						num2 = i + 1;
+						break;
 					}
-					throw new FormatException("Could not find any parsable digits.");
+				}
+			}
+			if (radix != 10 && (flags & 32) != 0)
+			{
+				if (16 == radix)
+				{
+					*span[num2++] = 'x';
+					*span[num2++] = '0';
+				}
+				else if (8 == radix)
+				{
+					*span[num2++] = '0';
+				}
+				else if ((flags & 16384) != 0)
+				{
+					*span[num2++] = '#';
+					*span[num2++] = (char)(radix % 10 + 48);
+					*span[num2++] = (char)(radix / 10 + 48);
+				}
+			}
+			if (10 == radix)
+			{
+				if (flag)
+				{
+					*span[num2++] = '-';
+				}
+				else if ((flags & 16) != 0)
+				{
+					*span[num2++] = '+';
+				}
+				else if ((flags & 8) != 0)
+				{
+					*span[num2++] = ' ';
+				}
+			}
+			string text = string.FastAllocateString(Math.Max(width, num2));
+			fixed (string text2 = text)
+			{
+				char* ptr = text2;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				char* ptr2 = ptr;
+				int num5 = text.Length - num2;
+				if ((flags & 1) != 0)
+				{
+					for (int j = 0; j < num5; j++)
+					{
+						*(ptr2++) = paddingChar;
+					}
+					for (int k = 0; k < num2; k++)
+					{
+						*(ptr2++) = *span[num2 - k - 1];
+					}
 				}
 				else
 				{
-					if (num3 <= 72057594037927935UL)
+					for (int l = 0; l < num2; l++)
 					{
-						num3 = num3 * num2 + num4;
+						*(ptr2++) = *span[num2 - l - 1];
 					}
-					else
+					for (int m = 0; m < num5; m++)
 					{
-						ulong num5 = (num3 >> 32) * num2;
-						ulong num6 = (num3 & (ulong)(-1)) * num2 + num4;
-						if ((num6 >> 32) + num5 > (ulong)(-1))
-						{
-							throw new OverflowException();
-						}
-						num3 = (num5 << 32) + num6;
+						*(ptr2++) = paddingChar;
 					}
-					num++;
+				}
+			}
+			return text;
+		}
+
+		private unsafe static void EatWhiteSpace(ReadOnlySpan<char> s, ref int i)
+		{
+			int num = i;
+			while (num < s.Length && char.IsWhiteSpace((char)(*s[num])))
+			{
+				num++;
+			}
+			i = num;
+		}
+
+		private unsafe static long GrabLongs(int radix, ReadOnlySpan<char> s, ref int i, bool isUnsigned)
+		{
+			ulong num = 0UL;
+			if (radix == 10 && !isUnsigned)
+			{
+				ulong num2 = 922337203685477580UL;
+				int num3;
+				while (i < s.Length && ParseNumbers.IsDigit((char)(*s[i]), radix, out num3))
+				{
+					if (num > num2 || num < 0UL)
+					{
+						ParseNumbers.ThrowOverflowInt64Exception();
+					}
+					num = num * (ulong)((long)radix) + (ulong)((long)num3);
+					i++;
+				}
+				if (num < 0UL && num != 9223372036854775808UL)
+				{
+					ParseNumbers.ThrowOverflowInt64Exception();
+				}
+			}
+			else
+			{
+				ulong num2 = ((radix == 10) ? 1844674407370955161UL : ((radix == 16) ? 1152921504606846975UL : ((radix == 8) ? 2305843009213693951UL : 9223372036854775807UL)));
+				int num4;
+				while (i < s.Length && ParseNumbers.IsDigit((char)(*s[i]), radix, out num4))
+				{
+					if (num > num2)
+					{
+						ParseNumbers.ThrowOverflowUInt64Exception();
+					}
+					ulong num5 = num * (ulong)((long)radix) + (ulong)((long)num4);
+					if (num5 < num)
+					{
+						ParseNumbers.ThrowOverflowUInt64Exception();
+					}
+					num = num5;
 					i++;
 				}
 			}
-			if (num == 0)
+			return (long)num;
+		}
+
+		private unsafe static int GrabInts(int radix, ReadOnlySpan<char> s, ref int i, bool isUnsigned)
+		{
+			uint num = 0U;
+			if (radix == 10 && !isUnsigned)
 			{
-				throw new FormatException("Could not find any parsable digits.");
-			}
-			if (parsePos != null)
-			{
-				*parsePos = i;
-			}
-			if (flag2)
-			{
-				return (long)num3;
-			}
-			if (!flag)
-			{
-				if (fromBase == 10 && num3 > 9223372036854775807UL)
+				uint num2 = 214748364U;
+				int num3;
+				while (i < s.Length && ParseNumbers.IsDigit((char)(*s[i]), radix, out num3))
 				{
-					throw new OverflowException();
+					if (num > num2 || num < 0U)
+					{
+						ParseNumbers.ThrowOverflowInt32Exception();
+					}
+					num = num * (uint)radix + (uint)num3;
+					i++;
 				}
-				return (long)num3;
+				if (num < 0U && num != 2147483648U)
+				{
+					ParseNumbers.ThrowOverflowInt32Exception();
+				}
 			}
 			else
 			{
-				if (num3 <= 9223372036854775807UL)
+				uint num2 = ((radix == 10) ? 429496729U : ((radix == 16) ? 268435455U : ((radix == 8) ? 536870911U : 2147483647U)));
+				int num4;
+				while (i < s.Length && ParseNumbers.IsDigit((char)(*s[i]), radix, out num4))
 				{
-					return (long)(-(long)num3);
+					if (num > num2)
+					{
+						throw new OverflowException("Value was either too large or too small for a UInt32.");
+					}
+					uint num5 = num * (uint)radix + (uint)num4;
+					if (num5 < num)
+					{
+						ParseNumbers.ThrowOverflowUInt32Exception();
+					}
+					num = num5;
+					i++;
 				}
-				if (num3 > 9223372036854775808UL)
-				{
-					throw new OverflowException();
-				}
-				return (long)(9223372036854775808UL + (9223372036854775808UL - num3));
 			}
+			return (int)num;
 		}
 
-		public static string IntToString(int value, int toBase, int width, char paddingChar, int flags)
+		private static void ThrowOverflowInt32Exception()
 		{
-			StringBuilder stringBuilder;
-			if (value == 0)
+			throw new OverflowException("Value was either too large or too small for an Int32.");
+		}
+
+		private static void ThrowOverflowInt64Exception()
+		{
+			throw new OverflowException("Value was either too large or too small for an Int64.");
+		}
+
+		private static void ThrowOverflowUInt32Exception()
+		{
+			throw new OverflowException("Value was either too large or too small for a UInt32.");
+		}
+
+		private static void ThrowOverflowUInt64Exception()
+		{
+			throw new OverflowException("Value was either too large or too small for a UInt64.");
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static bool IsDigit(char c, int radix, out int result)
+		{
+			int num;
+			if (c - '0' <= '\t')
 			{
-				if (width <= 0)
-				{
-					return "0";
-				}
-				stringBuilder = new StringBuilder("0", width);
+				num = (result = (int)(c - '0'));
 			}
-			else if (toBase == 10)
+			else if (c - 'A' <= '\u0019')
 			{
-				stringBuilder = new StringBuilder(value.ToString());
+				num = (result = (int)(c - 'A' + '\n'));
 			}
 			else
 			{
-				byte[] array;
-				if ((flags & 64) != 0)
+				if (c - 'a' > '\u0019')
 				{
-					array = BitConverter.GetBytes((short)((byte)value));
+					result = -1;
+					return false;
 				}
-				else if ((flags & 128) != 0)
-				{
-					array = BitConverter.GetBytes((short)value);
-				}
-				else
-				{
-					array = BitConverter.GetBytes(value);
-				}
-				if (toBase != 2)
-				{
-					if (toBase != 8)
-					{
-						if (toBase != 16)
-						{
-							throw new NotImplementedException();
-						}
-						stringBuilder = ParseNumbers.ConvertToBase16(array);
-					}
-					else
-					{
-						stringBuilder = ParseNumbers.ConvertToBase8(array);
-					}
-				}
-				else
-				{
-					stringBuilder = ParseNumbers.ConvertToBase2(array);
-				}
+				num = (result = (int)(c - 'a' + '\n'));
 			}
-			for (int i = width - stringBuilder.Length; i > 0; i--)
-			{
-				stringBuilder.Insert(0, paddingChar);
-			}
-			return stringBuilder.ToString();
+			return num < radix;
 		}
 
-		private static void EndianSwap(ref byte[] value)
-		{
-			byte[] array = new byte[value.Length];
-			for (int i = 0; i < value.Length; i++)
-			{
-				array[i] = value[value.Length - 1 - i];
-			}
-			value = array;
-		}
+		internal const int LeftAlign = 1;
 
-		private static StringBuilder ConvertToBase2(byte[] value)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				ParseNumbers.EndianSwap(ref value);
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = value.Length - 1; i >= 0; i--)
-			{
-				byte b = value[i];
-				for (int j = 0; j < 8; j++)
-				{
-					if ((b & 128) == 128)
-					{
-						stringBuilder.Append('1');
-					}
-					else if (stringBuilder.Length > 0)
-					{
-						stringBuilder.Append('0');
-					}
-					b = (byte)(b << 1);
-				}
-			}
-			return stringBuilder;
-		}
+		internal const int RightAlign = 4;
 
-		private static StringBuilder ConvertToBase8(byte[] value)
-		{
-			int num = value.Length;
-			switch (num)
-			{
-			case 1:
-			{
-				ulong num2 = (ulong)value[0];
-				goto IL_0057;
-			}
-			case 2:
-			{
-				ulong num2 = (ulong)BitConverter.ToUInt16(value, 0);
-				goto IL_0057;
-			}
-			case 3:
-				break;
-			case 4:
-			{
-				ulong num2 = (ulong)BitConverter.ToUInt32(value, 0);
-				goto IL_0057;
-			}
-			default:
-				if (num == 8)
-				{
-					ulong num2 = BitConverter.ToUInt64(value, 0);
-					goto IL_0057;
-				}
-				break;
-			}
-			throw new ArgumentException("value");
-			IL_0057:
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 21; i >= 0; i--)
-			{
-				ulong num2;
-				char c = (char)((num2 >> i * 3) & 7UL);
-				if (c != '\0' || stringBuilder.Length > 0)
-				{
-					c += '0';
-					stringBuilder.Append(c);
-				}
-			}
-			return stringBuilder;
-		}
+		internal const int PrefixSpace = 8;
 
-		private static StringBuilder ConvertToBase16(byte[] value)
-		{
-			if (!BitConverter.IsLittleEndian)
-			{
-				ParseNumbers.EndianSwap(ref value);
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = value.Length - 1; i >= 0; i--)
-			{
-				char c = (char)((value[i] >> 4) & 15);
-				if (c != '\0' || stringBuilder.Length > 0)
-				{
-					if (c < '\n')
-					{
-						c += '0';
-					}
-					else
-					{
-						c -= '\n';
-						c += 'a';
-					}
-					stringBuilder.Append(c);
-				}
-				char c2 = (char)(value[i] & 15);
-				if (c2 != '\0' || stringBuilder.Length > 0)
-				{
-					if (c2 < '\n')
-					{
-						c2 += '0';
-					}
-					else
-					{
-						c2 -= '\n';
-						c2 += 'a';
-					}
-					stringBuilder.Append(c2);
-				}
-			}
-			return stringBuilder;
-		}
+		internal const int PrintSign = 16;
+
+		internal const int PrintBase = 32;
 
 		internal const int PrintAsI1 = 64;
 
 		internal const int PrintAsI2 = 128;
+
+		internal const int PrintAsI4 = 256;
 
 		internal const int TreatAsUnsigned = 512;
 
@@ -475,8 +561,10 @@ namespace System
 
 		internal const int NoSpace = 8192;
 
-		private const ulong base16MaxOverflowFreeValue = 72057594037927935UL;
+		internal const int PrintRadixBase = 16384;
 
-		private const ulong longMinValue = 9223372036854775808UL;
+		private const int MinRadix = 2;
+
+		private const int MaxRadix = 36;
 	}
 }

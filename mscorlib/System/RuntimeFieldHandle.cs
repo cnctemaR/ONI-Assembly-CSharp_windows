@@ -23,11 +23,11 @@ namespace System
 			{
 				throw new ArgumentNullException("info");
 			}
-			MonoField monoField = (MonoField)info.GetValue("FieldObj", typeof(MonoField));
-			this.value = monoField.FieldHandle.Value;
+			RuntimeFieldInfo runtimeFieldInfo = (RuntimeFieldInfo)info.GetValue("FieldObj", typeof(RuntimeFieldInfo));
+			this.value = runtimeFieldInfo.FieldHandle.Value;
 			if (this.value == IntPtr.Zero)
 			{
-				throw new SerializationException(Locale.GetText("Insufficient state."));
+				throw new SerializationException("Insufficient state.");
 			}
 		}
 
@@ -37,6 +37,11 @@ namespace System
 			{
 				return this.value;
 			}
+		}
+
+		internal bool IsNullHandle()
+		{
+			return this.value == IntPtr.Zero;
 		}
 
 		[SecurityCritical]
@@ -50,7 +55,7 @@ namespace System
 			{
 				throw new SerializationException("Object fields may not be properly initialized");
 			}
-			info.AddValue("FieldObj", (MonoField)FieldInfo.GetFieldFromHandle(this), typeof(MonoField));
+			info.AddValue("FieldObj", (RuntimeFieldInfo)FieldInfo.GetFieldFromHandle(this), typeof(RuntimeFieldInfo));
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -83,18 +88,16 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetValueInternal(FieldInfo fi, object obj, object value);
 
-		internal static void SetValue(RtFieldInfo field, object obj, object value, RuntimeType fieldType, FieldAttributes fieldAttr, RuntimeType declaringType, ref bool domainInitialized)
+		internal static void SetValue(RuntimeFieldInfo field, object obj, object value, RuntimeType fieldType, FieldAttributes fieldAttr, RuntimeType declaringType, ref bool domainInitialized)
 		{
 			RuntimeFieldHandle.SetValueInternal(field, obj, value);
 		}
 
-		internal unsafe static object GetValueDirect(RtFieldInfo field, RuntimeType fieldType, void* pTypedRef, RuntimeType contextType)
-		{
-			throw new NotImplementedException("GetValueDirect");
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe static extern object GetValueDirect(RuntimeFieldInfo field, RuntimeType fieldType, void* pTypedRef, RuntimeType contextType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern void SetValueDirect(RtFieldInfo field, RuntimeType fieldType, void* pTypedRef, object value, RuntimeType contextType);
+		internal unsafe static extern void SetValueDirect(RuntimeFieldInfo field, RuntimeType fieldType, void* pTypedRef, object value, RuntimeType contextType);
 
 		private IntPtr value;
 	}

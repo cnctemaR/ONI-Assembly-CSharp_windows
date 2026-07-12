@@ -40,16 +40,16 @@ namespace System.Configuration
 			{
 				if (num < this.minValue || num > this.maxValue)
 				{
-					throw new ArgumentException(string.Concat(new object[] { "The value must be in the range ", this.minValue, " - ", this.maxValue }));
+					throw new ArgumentException("The value must be in the range " + this.minValue.ToString() + " - " + this.maxValue.ToString());
 				}
 			}
 			else if (num >= this.minValue && num <= this.maxValue)
 			{
-				throw new ArgumentException(string.Concat(new object[] { "The value must not be in the range ", this.minValue, " - ", this.maxValue }));
+				throw new ArgumentException("The value must not be in the range " + this.minValue.ToString() + " - " + this.maxValue.ToString());
 			}
 			if (this.resolution != 0 && num % this.resolution != 0)
 			{
-				throw new ArgumentException("The value must have a resolution of " + this.resolution);
+				throw new ArgumentException("The value must have a resolution of " + this.resolution.ToString());
 			}
 		}
 

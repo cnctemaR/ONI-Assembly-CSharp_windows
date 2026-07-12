@@ -2,19 +2,18 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace System
 {
 	[Serializable]
 	[StructLayout(LayoutKind.Auto)]
-	public struct DateTimeOffset : IComparable, IFormattable, ISerializable, IDeserializationCallback, IComparable<DateTimeOffset>, IEquatable<DateTimeOffset>
+	public readonly struct DateTimeOffset : IComparable, IFormattable, IComparable<DateTimeOffset>, IEquatable<DateTimeOffset>, ISerializable, IDeserializationCallback, ISpanFormattable
 	{
 		public DateTimeOffset(long ticks, TimeSpan offset)
 		{
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(offset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(offset);
 			DateTime dateTime = new DateTime(ticks);
-			this.m_dateTime = DateTimeOffset.ValidateDate(dateTime, offset);
+			this._dateTime = DateTimeOffset.ValidateDate(dateTime, offset);
 		}
 
 		public DateTimeOffset(DateTime dateTime)
@@ -28,8 +27,8 @@ namespace System
 			{
 				localUtcOffset = new TimeSpan(0L);
 			}
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(localUtcOffset);
-			this.m_dateTime = DateTimeOffset.ValidateDate(dateTime, localUtcOffset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(localUtcOffset);
+			this._dateTime = DateTimeOffset.ValidateDate(dateTime, localUtcOffset);
 		}
 
 		public DateTimeOffset(DateTime dateTime, TimeSpan offset)
@@ -38,33 +37,33 @@ namespace System
 			{
 				if (offset != TimeZoneInfo.GetLocalUtcOffset(dateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime))
 				{
-					throw new ArgumentException(Environment.GetResourceString("The UTC Offset of the local dateTime parameter does not match the offset argument."), "offset");
+					throw new ArgumentException("The UTC Offset of the local dateTime parameter does not match the offset argument.", "offset");
 				}
 			}
 			else if (dateTime.Kind == DateTimeKind.Utc && offset != TimeSpan.Zero)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The UTC Offset for Utc DateTime instances must be 0."), "offset");
+				throw new ArgumentException("The UTC Offset for Utc DateTime instances must be 0.", "offset");
 			}
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(offset);
-			this.m_dateTime = DateTimeOffset.ValidateDate(dateTime, offset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(offset);
+			this._dateTime = DateTimeOffset.ValidateDate(dateTime, offset);
 		}
 
 		public DateTimeOffset(int year, int month, int day, int hour, int minute, int second, TimeSpan offset)
 		{
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(offset);
-			this.m_dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second), offset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(offset);
+			this._dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second), offset);
 		}
 
 		public DateTimeOffset(int year, int month, int day, int hour, int minute, int second, int millisecond, TimeSpan offset)
 		{
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(offset);
-			this.m_dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second, millisecond), offset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(offset);
+			this._dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second, millisecond), offset);
 		}
 
 		public DateTimeOffset(int year, int month, int day, int hour, int minute, int second, int millisecond, Calendar calendar, TimeSpan offset)
 		{
-			this.m_offsetMinutes = DateTimeOffset.ValidateOffset(offset);
-			this.m_dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second, millisecond, calendar), offset);
+			this._offsetMinutes = DateTimeOffset.ValidateOffset(offset);
+			this._dateTime = DateTimeOffset.ValidateDate(new DateTime(year, month, day, hour, minute, second, millisecond, calendar), offset);
 		}
 
 		public static DateTimeOffset Now
@@ -95,7 +94,7 @@ namespace System
 		{
 			get
 			{
-				return DateTime.SpecifyKind(this.m_dateTime, DateTimeKind.Utc);
+				return DateTime.SpecifyKind(this._dateTime, DateTimeKind.Utc);
 			}
 		}
 
@@ -109,14 +108,14 @@ namespace System
 
 		public DateTimeOffset ToOffset(TimeSpan offset)
 		{
-			return new DateTimeOffset((this.m_dateTime + offset).Ticks, offset);
+			return new DateTimeOffset((this._dateTime + offset).Ticks, offset);
 		}
 
 		private DateTime ClockDateTime
 		{
 			get
 			{
-				return new DateTime((this.m_dateTime + this.Offset).Ticks, DateTimeKind.Unspecified);
+				return new DateTime((this._dateTime + this.Offset).Ticks, DateTimeKind.Unspecified);
 			}
 		}
 
@@ -188,7 +187,7 @@ namespace System
 		{
 			get
 			{
-				return new TimeSpan(0, (int)this.m_offsetMinutes, 0);
+				return new TimeSpan(0, (int)this._offsetMinutes, 0);
 			}
 		}
 
@@ -290,7 +289,7 @@ namespace System
 			}
 			if (!(obj is DateTimeOffset))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type DateTimeOffset."));
+				throw new ArgumentException("Object must be of type DateTimeOffset.");
 			}
 			DateTime utcDateTime = ((DateTimeOffset)obj).UtcDateTime;
 			DateTime utcDateTime2 = this.UtcDateTime;
@@ -349,7 +348,7 @@ namespace System
 		{
 			if (seconds < -62135596800L || seconds > 253402300799L)
 			{
-				throw new ArgumentOutOfRangeException("seconds", string.Format(Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), -62135596800L, 253402300799L));
+				throw new ArgumentOutOfRangeException("seconds", SR.Format("Valid values are between {0} and {1}, inclusive.", -62135596800L, 253402300799L));
 			}
 			return new DateTimeOffset(seconds * 10000000L + 621355968000000000L, TimeSpan.Zero);
 		}
@@ -358,7 +357,7 @@ namespace System
 		{
 			if (milliseconds < -62135596800000L || milliseconds > 253402300799999L)
 			{
-				throw new ArgumentOutOfRangeException("milliseconds", string.Format(Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), -62135596800000L, 253402300799999L));
+				throw new ArgumentOutOfRangeException("milliseconds", SR.Format("Valid values are between {0} and {1}, inclusive.", -62135596800000L, 253402300799999L));
 			}
 			return new DateTimeOffset(milliseconds * 10000L + 621355968000000000L, TimeSpan.Zero);
 		}
@@ -367,24 +366,23 @@ namespace System
 		{
 			try
 			{
-				this.m_offsetMinutes = DateTimeOffset.ValidateOffset(this.Offset);
-				this.m_dateTime = DateTimeOffset.ValidateDate(this.ClockDateTime, this.Offset);
+				DateTimeOffset.ValidateOffset(this.Offset);
+				DateTimeOffset.ValidateDate(this.ClockDateTime, this.Offset);
 			}
 			catch (ArgumentException ex)
 			{
-				throw new SerializationException(Environment.GetResourceString("An error occurred while deserializing the object.  The serialized data is corrupt."), ex);
+				throw new SerializationException("An error occurred while deserializing the object.  The serialized data is corrupt.", ex);
 			}
 		}
 
-		[SecurityCritical]
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
 			{
 				throw new ArgumentNullException("info");
 			}
-			info.AddValue("DateTime", this.m_dateTime);
-			info.AddValue("OffsetMinutes", this.m_offsetMinutes);
+			info.AddValue("DateTime", this._dateTime);
+			info.AddValue("OffsetMinutes", this._offsetMinutes);
 		}
 
 		private DateTimeOffset(SerializationInfo info, StreamingContext context)
@@ -393,8 +391,8 @@ namespace System
 			{
 				throw new ArgumentNullException("info");
 			}
-			this.m_dateTime = (DateTime)info.GetValue("DateTime", typeof(DateTime));
-			this.m_offsetMinutes = (short)info.GetValue("OffsetMinutes", typeof(short));
+			this._dateTime = (DateTime)info.GetValue("DateTime", typeof(DateTime));
+			this._offsetMinutes = (short)info.GetValue("OffsetMinutes", typeof(short));
 		}
 
 		public override int GetHashCode()
@@ -404,16 +402,35 @@ namespace System
 
 		public static DateTimeOffset Parse(string input)
 		{
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
 			TimeSpan timeSpan;
 			return new DateTimeOffset(DateTimeParse.Parse(input, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None, out timeSpan).Ticks, timeSpan);
 		}
 
 		public static DateTimeOffset Parse(string input, IFormatProvider formatProvider)
 		{
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
 			return DateTimeOffset.Parse(input, formatProvider, DateTimeStyles.None);
 		}
 
 		public static DateTimeOffset Parse(string input, IFormatProvider formatProvider, DateTimeStyles styles)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
+			TimeSpan timeSpan;
+			return new DateTimeOffset(DateTimeParse.Parse(input, DateTimeFormatInfo.GetInstance(formatProvider), styles, out timeSpan).Ticks, timeSpan);
+		}
+
+		public static DateTimeOffset Parse(ReadOnlySpan<char> input, IFormatProvider formatProvider = null, DateTimeStyles styles = DateTimeStyles.None)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			TimeSpan timeSpan;
@@ -422,10 +439,33 @@ namespace System
 
 		public static DateTimeOffset ParseExact(string input, string format, IFormatProvider formatProvider)
 		{
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
+			if (format == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.format);
+			}
 			return DateTimeOffset.ParseExact(input, format, formatProvider, DateTimeStyles.None);
 		}
 
 		public static DateTimeOffset ParseExact(string input, string format, IFormatProvider formatProvider, DateTimeStyles styles)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
+			if (format == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.format);
+			}
+			TimeSpan timeSpan;
+			return new DateTimeOffset(DateTimeParse.ParseExact(input, format, DateTimeFormatInfo.GetInstance(formatProvider), styles, out timeSpan).Ticks, timeSpan);
+		}
+
+		public static DateTimeOffset ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, DateTimeStyles styles = DateTimeStyles.None)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			TimeSpan timeSpan;
@@ -433,6 +473,17 @@ namespace System
 		}
 
 		public static DateTimeOffset ParseExact(string input, string[] formats, IFormatProvider formatProvider, DateTimeStyles styles)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
+			}
+			TimeSpan timeSpan;
+			return new DateTimeOffset(DateTimeParse.ParseExactMultiple(input, formats, DateTimeFormatInfo.GetInstance(formatProvider), styles, out timeSpan).Ticks, timeSpan);
+		}
+
+		public static DateTimeOffset ParseExact(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, DateTimeStyles styles = DateTimeStyles.None)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			TimeSpan timeSpan;
@@ -476,22 +527,27 @@ namespace System
 
 		public override string ToString()
 		{
-			return DateTimeFormat.Format(this.ClockDateTime, null, DateTimeFormatInfo.CurrentInfo, this.Offset);
+			return DateTimeFormat.Format(this.ClockDateTime, null, null, this.Offset);
 		}
 
 		public string ToString(string format)
 		{
-			return DateTimeFormat.Format(this.ClockDateTime, format, DateTimeFormatInfo.CurrentInfo, this.Offset);
+			return DateTimeFormat.Format(this.ClockDateTime, format, null, this.Offset);
 		}
 
 		public string ToString(IFormatProvider formatProvider)
 		{
-			return DateTimeFormat.Format(this.ClockDateTime, null, DateTimeFormatInfo.GetInstance(formatProvider), this.Offset);
+			return DateTimeFormat.Format(this.ClockDateTime, null, formatProvider, this.Offset);
 		}
 
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			return DateTimeFormat.Format(this.ClockDateTime, format, DateTimeFormatInfo.GetInstance(formatProvider), this.Offset);
+			return DateTimeFormat.Format(this.ClockDateTime, format, formatProvider, this.Offset);
+		}
+
+		public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider formatProvider = null)
+		{
+			return DateTimeFormat.TryFormat(this.ClockDateTime, destination, out charsWritten, format, formatProvider, this.Offset);
 		}
 
 		public DateTimeOffset ToUniversalTime()
@@ -508,7 +564,31 @@ namespace System
 			return flag;
 		}
 
+		public static bool TryParse(ReadOnlySpan<char> input, out DateTimeOffset result)
+		{
+			DateTime dateTime;
+			TimeSpan timeSpan;
+			bool flag = DateTimeParse.TryParse(input, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None, out dateTime, out timeSpan);
+			result = new DateTimeOffset(dateTime.Ticks, timeSpan);
+			return flag;
+		}
+
 		public static bool TryParse(string input, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null)
+			{
+				result = default(DateTimeOffset);
+				return false;
+			}
+			DateTime dateTime;
+			TimeSpan timeSpan;
+			bool flag = DateTimeParse.TryParse(input, DateTimeFormatInfo.GetInstance(formatProvider), styles, out dateTime, out timeSpan);
+			result = new DateTimeOffset(dateTime.Ticks, timeSpan);
+			return flag;
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> input, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			DateTime dateTime;
@@ -521,6 +601,21 @@ namespace System
 		public static bool TryParseExact(string input, string format, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null || format == null)
+			{
+				result = default(DateTimeOffset);
+				return false;
+			}
+			DateTime dateTime;
+			TimeSpan timeSpan;
+			bool flag = DateTimeParse.TryParseExact(input, format, DateTimeFormatInfo.GetInstance(formatProvider), styles, out dateTime, out timeSpan);
+			result = new DateTimeOffset(dateTime.Ticks, timeSpan);
+			return flag;
+		}
+
+		public static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			DateTime dateTime;
 			TimeSpan timeSpan;
 			bool flag = DateTimeParse.TryParseExact(input, format, DateTimeFormatInfo.GetInstance(formatProvider), styles, out dateTime, out timeSpan);
@@ -529,6 +624,21 @@ namespace System
 		}
 
 		public static bool TryParseExact(string input, string[] formats, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
+		{
+			styles = DateTimeOffset.ValidateStyles(styles, "styles");
+			if (input == null)
+			{
+				result = default(DateTimeOffset);
+				return false;
+			}
+			DateTime dateTime;
+			TimeSpan timeSpan;
+			bool flag = DateTimeParse.TryParseExactMultiple(input, formats, DateTimeFormatInfo.GetInstance(formatProvider), styles, out dateTime, out timeSpan);
+			result = new DateTimeOffset(dateTime.Ticks, timeSpan);
+			return flag;
+		}
+
+		public static bool TryParseExact(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, DateTimeStyles styles, out DateTimeOffset result)
 		{
 			styles = DateTimeOffset.ValidateStyles(styles, "styles");
 			DateTime dateTime;
@@ -543,11 +653,11 @@ namespace System
 			long ticks = offset.Ticks;
 			if (ticks % 600000000L != 0L)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset must be specified in whole minutes."), "offset");
+				throw new ArgumentException("Offset must be specified in whole minutes.", "offset");
 			}
 			if (ticks < -504000000000L || ticks > 504000000000L)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Offset must be within plus or minus 14 hours."));
+				throw new ArgumentOutOfRangeException("offset", "Offset must be within plus or minus 14 hours.");
 			}
 			return (short)(offset.Ticks / 600000000L);
 		}
@@ -557,7 +667,7 @@ namespace System
 			long num = dateTime.Ticks - offset.Ticks;
 			if (num < 0L || num > 3155378975999999999L)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("The UTC time represented when the offset is applied must be between year 0 and 10,000."));
+				throw new ArgumentOutOfRangeException("offset", "The UTC time represented when the offset is applied must be between year 0 and 10,000.");
 			}
 			return new DateTime(num, DateTimeKind.Unspecified);
 		}
@@ -566,15 +676,15 @@ namespace System
 		{
 			if ((style & ~(DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite | DateTimeStyles.AllowInnerWhite | DateTimeStyles.NoCurrentDateDefault | DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal | DateTimeStyles.AssumeUniversal | DateTimeStyles.RoundtripKind)) != DateTimeStyles.None)
 			{
-				throw new ArgumentException(Environment.GetResourceString("An undefined DateTimeStyles value is being used."), parameterName);
+				throw new ArgumentException("An undefined DateTimeStyles value is being used.", parameterName);
 			}
 			if ((style & DateTimeStyles.AssumeLocal) != DateTimeStyles.None && (style & DateTimeStyles.AssumeUniversal) != DateTimeStyles.None)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The DateTimeStyles values AssumeLocal and AssumeUniversal cannot be used together."), parameterName);
+				throw new ArgumentException("The DateTimeStyles values AssumeLocal and AssumeUniversal cannot be used together.", parameterName);
 			}
 			if ((style & DateTimeStyles.NoCurrentDateDefault) != DateTimeStyles.None)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The DateTimeStyles value 'NoCurrentDateDefault' is not allowed when parsing DateTimeOffset."), parameterName);
+				throw new ArgumentException("The DateTimeStyles value 'NoCurrentDateDefault' is not allowed when parsing DateTimeOffset.", parameterName);
 			}
 			style &= ~DateTimeStyles.RoundtripKind;
 			style &= ~DateTimeStyles.AssumeLocal;
@@ -635,18 +745,22 @@ namespace System
 
 		internal const long MinOffset = -504000000000L;
 
-		private const long UnixEpochTicks = 621355968000000000L;
-
 		private const long UnixEpochSeconds = 62135596800L;
 
 		private const long UnixEpochMilliseconds = 62135596800000L;
+
+		internal const long UnixMinSeconds = -62135596800L;
+
+		internal const long UnixMaxSeconds = 253402300799L;
 
 		public static readonly DateTimeOffset MinValue = new DateTimeOffset(0L, TimeSpan.Zero);
 
 		public static readonly DateTimeOffset MaxValue = new DateTimeOffset(3155378975999999999L, TimeSpan.Zero);
 
-		private DateTime m_dateTime;
+		public static readonly DateTimeOffset UnixEpoch = new DateTimeOffset(621355968000000000L, TimeSpan.Zero);
 
-		private short m_offsetMinutes;
+		private readonly DateTime _dateTime;
+
+		private readonly short _offsetMinutes;
 	}
 }

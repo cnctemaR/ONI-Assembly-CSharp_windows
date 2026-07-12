@@ -6,10 +6,10 @@ namespace System.Xml.Schema
 	public class XmlSchemaChoice : XmlSchemaGroupBase
 	{
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
-		[XmlElement("element", typeof(XmlSchemaElement))]
-		[XmlElement("group", typeof(XmlSchemaGroupRef))]
-		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("any", typeof(XmlSchemaAny))]
+		[XmlElement("group", typeof(XmlSchemaGroupRef))]
+		[XmlElement("element", typeof(XmlSchemaElement))]
+		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		public override XmlSchemaObjectCollection Items
 		{
 			get

@@ -2,13 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Security;
 
 namespace System.Resources
 {
 	internal sealed class RuntimeResourceSet : ResourceSet, IEnumerable
 	{
-		[SecurityCritical]
 		internal RuntimeResourceSet(string fileName)
 			: base(false)
 		{
@@ -18,7 +16,6 @@ namespace System.Resources
 			this.Reader = this._defaultReader;
 		}
 
-		[SecurityCritical]
 		internal RuntimeResourceSet(Stream stream)
 			: base(false)
 		{
@@ -70,7 +67,7 @@ namespace System.Resources
 			IResourceReader reader = this.Reader;
 			if (reader == null || this._resCache == null)
 			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
+				throw new ObjectDisposedException(null, "Cannot access a closed resource set.");
 			}
 			return reader.GetEnumerator();
 		}
@@ -103,7 +100,7 @@ namespace System.Resources
 			}
 			if (this.Reader == null || this._resCache == null)
 			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
+				throw new ObjectDisposedException(null, "Cannot access a closed resource set.");
 			}
 			object obj = null;
 			IResourceReader reader = this.Reader;
@@ -112,7 +109,7 @@ namespace System.Resources
 			{
 				if (this.Reader == null)
 				{
-					throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
+					throw new ObjectDisposedException(null, "Cannot access a closed resource set.");
 				}
 				ResourceLocator resourceLocator;
 				if (this._defaultReader != null)

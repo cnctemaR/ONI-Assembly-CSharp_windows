@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/TextRendering/TextGenerator.h")]
+	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TextGenerator : IDisposable
 	{

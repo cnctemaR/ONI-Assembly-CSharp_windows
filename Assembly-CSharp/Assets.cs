@@ -167,6 +167,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Hashtable hashtable = new Hashtable();
 		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
 		ElementLoader.Load(ref hashtable, dictionary);
+		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.StartingMetalOre));
+		GameTags.StartingMetalOres = new Tag[list.Count];
+		for (int i = 0; i < list.Count; i++)
+		{
+			GameTags.StartingMetalOres[i] = list[i].tag;
+		}
+		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.StartingRefinedMetalOre));
+		GameTags.StartingRefinedMetalOres = new Tag[list2.Count];
+		for (int j = 0; j < list2.Count; j++)
+		{
+			GameTags.StartingRefinedMetalOres[j] = list2[j].tag;
+		}
 	}
 
 	public static string GetSimpleSoundEventName(EventReference event_ref)

@@ -476,15 +476,20 @@ public class ResearchScreen : KModalScreen
 		}
 		if (show)
 		{
+			CameraController.Instance.DisableUserCameraControl = true;
 			if (DetailsScreen.Instance != null)
 			{
 				DetailsScreen.Instance.gameObject.SetActive(false);
 			}
 		}
-		else if (SelectTool.Instance.selected != null && !DetailsScreen.Instance.gameObject.activeSelf)
+		else
 		{
-			DetailsScreen.Instance.gameObject.SetActive(true);
-			DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
+			CameraController.Instance.DisableUserCameraControl = false;
+			if (SelectTool.Instance.selected != null && !DetailsScreen.Instance.gameObject.activeSelf)
+			{
+				DetailsScreen.Instance.gameObject.SetActive(true);
+				DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
+			}
 		}
 		this.UpdateProgressBars();
 		this.UpdatePointDisplay();
@@ -561,7 +566,7 @@ public class ResearchScreen : KModalScreen
 				this.dragLastPosition = KInputManager.GetMousePos();
 				return;
 			}
-			if (KInputManager.GetMousePos().x > this.sideBar.rectTransform().sizeDelta.x)
+			if (KInputManager.GetMousePos().x > this.sideBar.rectTransform().sizeDelta.x && CameraController.IsMouseOverGameWindow)
 			{
 				if (e.TryConsume(global::Action.ZoomIn))
 				{
@@ -619,7 +624,7 @@ public class ResearchScreen : KModalScreen
 				flag = tech.category.ToUpper().Contains(filterString);
 				foreach (TechItem techItem in tech.unlockedItems)
 				{
-					if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(techItem.dlcIds))
+					if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(techItem.requiredDlcIds, techItem.forbiddenDlcIds))
 					{
 						if (UI.StripLinkFormatting(techItem.Name).ToLower().ToUpper()
 							.Contains(filterString))

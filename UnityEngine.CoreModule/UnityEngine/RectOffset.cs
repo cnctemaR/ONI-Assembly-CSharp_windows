@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/IMGUI/GUIStyle.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/IMGUI/GUIStyle.h")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class RectOffset : IFormattable
@@ -50,18 +50,26 @@ namespace UnityEngine
 			this.bottom = bottom;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
+			bool flag = formatProvider == null;
+			if (flag)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
+			}
 			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[]
 			{
 				this.left.ToString(format, formatProvider),

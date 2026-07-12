@@ -29,6 +29,12 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 			{
 				smi.GoToOverjoyed();
 			}
+		}).EventHandler(GameHashes.PowerSaveFinished, delegate(JoyBehaviourMonitor.Instance smi)
+		{
+			if (smi.ShouldBeOverjoyed())
+			{
+				smi.GoToOverjoyed();
+			}
 		});
 		this.overjoyed.Transition(this.neutral, (JoyBehaviourMonitor.Instance smi) => GameClock.Instance.GetTime() >= smi.transitionTime, UpdateRate.SIM_200ms).ToggleExpression((JoyBehaviourMonitor.Instance smi) => smi.happyExpression).ToggleAnims((JoyBehaviourMonitor.Instance smi) => smi.happyLocoAnim)
 			.ToggleAnims((JoyBehaviourMonitor.Instance smi) => smi.happyLocoWalkAnim)

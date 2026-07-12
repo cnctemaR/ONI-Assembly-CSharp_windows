@@ -32,7 +32,7 @@ public class UIMinion : KMonoBehaviour, UIMinionOrMannequin.ITarget
 			this.animController.gameObject.SetActive(true);
 			this.animController.animScale = 0.38f;
 			this.animController.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
-			MinionConfig.ConfigureSymbols(this.animController.gameObject, true);
+			BaseMinionConfig.ConfigureSymbols(this.animController.gameObject, true);
 			this.spawn = this.animController.gameObject;
 		}
 	}

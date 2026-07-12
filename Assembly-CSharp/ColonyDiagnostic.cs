@@ -98,6 +98,10 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	{
 		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, "", null);
 		bool flag = false;
+		if (!ClusterManager.Instance.GetWorld(this.worldID).IsDiscovered)
+		{
+			return diagnosticResult;
+		}
 		this.aggregatedUniqueClickThroughObjects.Clear();
 		foreach (KeyValuePair<string, DiagnosticCriterion> keyValuePair in this.criteria)
 		{

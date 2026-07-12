@@ -5,10 +5,30 @@ namespace System.Diagnostics.Tracing
 	[AttributeUsage(AttributeTargets.Property)]
 	public class EventFieldAttribute : Attribute
 	{
-		public EventFieldTags Tags { get; set; }
+		[MonoTODO]
+		public EventFieldFormat Format
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		internal string Name { get; set; }
-
-		public EventFieldFormat Format { get; set; }
+		[MonoTODO]
+		public EventFieldTags Tags
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
 	}
 }

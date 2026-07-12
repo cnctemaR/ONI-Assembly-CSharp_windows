@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Net.Configuration;
 using System.Net.Mime;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -408,14 +409,14 @@ namespace System.Net.Mail
 
 		private void ParseExtensions(string extens)
 		{
-			foreach (string text in extens.Split(new char[] { '\n' }))
+			foreach (string text in extens.Split('\n', StringSplitOptions.None))
 			{
 				if (text.Length >= 4)
 				{
 					string text2 = text.Substring(4);
 					if (text2.StartsWith("AUTH ", StringComparison.Ordinal))
 					{
-						string[] array2 = text2.Split(new char[] { ' ' });
+						string[] array2 = text2.Split(' ', StringSplitOptions.None);
 						for (int j = 1; j < array2.Length; j++)
 						{
 							string text3 = array2[j].Trim();
@@ -523,7 +524,7 @@ namespace System.Net.Mail
 			{
 				throw new SmtpException("Only absolute directories are allowed for pickup directory.");
 			}
-			string text = Path.Combine(this.pickupDirectoryLocation, Guid.NewGuid() + ".eml");
+			string text = Path.Combine(this.pickupDirectoryLocation, Guid.NewGuid().ToString() + ".eml");
 			try
 			{
 				this.writer = new StreamWriter(text);
@@ -1223,13 +1224,13 @@ namespace System.Net.Mail
 			{
 				throw new SmtpException(SmtpStatusCode.GeneralFailure, "Server does not support secure connections.");
 			}
-			MonoTlsProvider providerInternal = Mono.Net.Security.MonoTlsProviderFactory.GetProviderInternal();
+			MobileTlsProvider providerInternal = Mono.Net.Security.MonoTlsProviderFactory.GetProviderInternal();
 			MonoTlsSettings monoTlsSettings = MonoTlsSettings.CopyDefaultSettings();
 			monoTlsSettings.UseServicePointManagerCallback = new bool?(true);
-			IMonoSslStream monoSslStream = providerInternal.CreateSslStream(this.stream, false, monoTlsSettings);
+			SslStream sslStream = new SslStream(this.stream, false, providerInternal, monoTlsSettings);
 			this.CheckCancellation();
-			monoSslStream.AuthenticateAsClient(this.Host, this.ClientCertificates, SslProtocols.Default, false);
-			this.stream = monoSslStream.AuthenticatedStream;
+			sslStream.AuthenticateAsClient(this.Host, this.ClientCertificates, (SslProtocols)ServicePointManager.SecurityProtocol, false);
+			this.stream = sslStream;
 		}
 
 		private void Authenticate()
@@ -1384,7 +1385,7 @@ namespace System.Net.Mail
 				SmtpClient.SmtpResponse smtpResponse = default(SmtpClient.SmtpResponse);
 				if (line.Length < 4)
 				{
-					throw new SmtpException("Response is to short " + line.Length + ".");
+					throw new SmtpException("Response is to short " + line.Length.ToString() + ".");
 				}
 				if (line[3] != ' ' && line[3] != '-')
 				{

@@ -4,10 +4,14 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.EnterpriseServices;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.SqlServer.Server;
 using Unity;
 
 namespace System.Data.SqlClient
@@ -21,6 +25,26 @@ namespace System.Data.SqlClient
 			this.CacheConnectionStringProperties();
 		}
 
+		public SqlConnection(string connectionString, SqlCredential credential)
+			: this()
+		{
+			this.ConnectionString = connectionString;
+			if (credential != null)
+			{
+				SqlConnectionString sqlConnectionString = (SqlConnectionString)this.ConnectionOptions;
+				if (this.UsesClearUserIdOrPassword(sqlConnectionString))
+				{
+					throw ADP.InvalidMixedArgumentOfSecureAndClearCredential();
+				}
+				if (this.UsesIntegratedSecurity(sqlConnectionString))
+				{
+					throw ADP.InvalidMixedArgumentOfSecureCredentialAndIntegratedSecurity();
+				}
+				this.Credential = credential;
+			}
+			this.CacheConnectionStringProperties();
+		}
+
 		private SqlConnection(SqlConnection connection)
 		{
 			this._reconnectLock = new object();
@@ -29,6 +53,13 @@ namespace System.Data.SqlClient
 			GC.SuppressFinalize(this);
 			this.CopyFrom(connection);
 			this._connectionString = connection._connectionString;
+			if (connection._credential != null)
+			{
+				SecureString secureString = connection._credential.Password.Copy();
+				secureString.MakeReadOnly();
+				this._credential = new SqlCredential(connection._credential.UserId, secureString);
+			}
+			this._accessToken = connection._accessToken;
 			this.CacheConnectionStringProperties();
 		}
 
@@ -82,6 +113,21 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		private bool UsesIntegratedSecurity(SqlConnectionString opt)
+		{
+			return opt != null && opt.IntegratedSecurity;
+		}
+
+		private bool UsesClearUserIdOrPassword(SqlConnectionString opt)
+		{
+			bool flag = false;
+			if (opt != null)
+			{
+				flag = !string.IsNullOrEmpty(opt.UserID) || !string.IsNullOrEmpty(opt.Password);
+			}
+			return flag;
+		}
+
 		internal SqlConnectionString.TransactionBindingEnum TransactionBinding
 		{
 			get
@@ -95,6 +141,14 @@ namespace System.Data.SqlClient
 			get
 			{
 				return ((SqlConnectionString)this.ConnectionOptions).TypeSystemVersion;
+			}
+		}
+
+		internal Version TypeSystemAssemblyVersion
+		{
+			get
+			{
+				return ((SqlConnectionString)this.ConnectionOptions).TypeSystemAssemblyVersion;
 			}
 		}
 
@@ -114,7 +168,19 @@ namespace System.Data.SqlClient
 			}
 			set
 			{
-				this.ConnectionString_Set(new SqlConnectionPoolKey(value));
+				if (this._credential != null || this._accessToken != null)
+				{
+					SqlConnectionString sqlConnectionString = new SqlConnectionString(value);
+					if (this._credential != null)
+					{
+						this.CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(sqlConnectionString);
+					}
+					else
+					{
+						this.CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(sqlConnectionString);
+					}
+				}
+				this.ConnectionString_Set(new SqlConnectionPoolKey(value, this._credential, this._accessToken));
 				this._connectionString = value;
 				this.CacheConnectionStringProperties();
 			}
@@ -130,6 +196,33 @@ namespace System.Data.SqlClient
 					return 15;
 				}
 				return sqlConnectionString.ConnectTimeout;
+			}
+		}
+
+		public string AccessToken
+		{
+			get
+			{
+				string accessToken = this._accessToken;
+				SqlConnectionString sqlConnectionString = (SqlConnectionString)this.UserConnectionOptions;
+				if (!this.InnerConnection.ShouldHidePassword || sqlConnectionString == null || sqlConnectionString.PersistSecurityInfo)
+				{
+					return this._accessToken;
+				}
+				return null;
+			}
+			set
+			{
+				if (!this.InnerConnection.AllowSetConnectionString)
+				{
+					throw ADP.OpenConnectionPropertySet("AccessToken", this.InnerConnection.State);
+				}
+				if (value != null)
+				{
+					this.CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken((SqlConnectionString)this.ConnectionOptions);
+				}
+				this.ConnectionString_Set(new SqlConnectionPoolKey(this._connectionString, this._credential, value));
+				this._accessToken = value;
 			}
 		}
 
@@ -242,11 +335,66 @@ namespace System.Data.SqlClient
 			get
 			{
 				SqlConnectionString sqlConnectionString = (SqlConnectionString)this.ConnectionOptions;
-				if (sqlConnectionString == null)
+				return ((sqlConnectionString != null) ? sqlConnectionString.WorkstationId : null) ?? Environment.MachineName;
+			}
+		}
+
+		public SqlCredential Credential
+		{
+			get
+			{
+				SqlCredential sqlCredential = this._credential;
+				SqlConnectionString sqlConnectionString = (SqlConnectionString)this.UserConnectionOptions;
+				if (this.InnerConnection.ShouldHidePassword && sqlConnectionString != null && !sqlConnectionString.PersistSecurityInfo)
 				{
-					return string.Empty;
+					sqlCredential = null;
 				}
-				return sqlConnectionString.WorkstationId;
+				return sqlCredential;
+			}
+			set
+			{
+				if (!this.InnerConnection.AllowSetConnectionString)
+				{
+					throw ADP.OpenConnectionPropertySet("Credential", this.InnerConnection.State);
+				}
+				if (value != null)
+				{
+					this.CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential((SqlConnectionString)this.ConnectionOptions);
+					if (this._accessToken != null)
+					{
+						throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
+					}
+				}
+				this._credential = value;
+				this.ConnectionString_Set(new SqlConnectionPoolKey(this._connectionString, this._credential, this._accessToken));
+			}
+		}
+
+		private void CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(SqlConnectionString connectionOptions)
+		{
+			if (this.UsesClearUserIdOrPassword(connectionOptions))
+			{
+				throw ADP.InvalidMixedUsageOfSecureAndClearCredential();
+			}
+			if (this.UsesIntegratedSecurity(connectionOptions))
+			{
+				throw ADP.InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity();
+			}
+		}
+
+		private void CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(SqlConnectionString connectionOptions)
+		{
+			if (this.UsesClearUserIdOrPassword(connectionOptions))
+			{
+				throw ADP.InvalidMixedUsageOfAccessTokenAndUserIDPassword();
+			}
+			if (this.UsesIntegratedSecurity(connectionOptions))
+			{
+				throw ADP.InvalidMixedUsageOfAccessTokenAndIntegratedSecurity();
+			}
+			if (this._credential != null)
+			{
+				throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
 			}
 		}
 
@@ -438,6 +586,8 @@ namespace System.Data.SqlClient
 
 		private void DisposeMe(bool disposing)
 		{
+			this._credential = null;
+			this._accessToken = null;
 			if (!disposing)
 			{
 				SqlInternalConnectionTds sqlInternalConnectionTds = this.InnerConnection as SqlInternalConnectionTds;
@@ -931,6 +1081,88 @@ namespace System.Data.SqlClient
 			notified = false;
 		}
 
+		public static void ChangePassword(string connectionString, string newPassword)
+		{
+			if (string.IsNullOrEmpty(connectionString))
+			{
+				throw SQL.ChangePasswordArgumentMissing("newPassword");
+			}
+			if (string.IsNullOrEmpty(newPassword))
+			{
+				throw SQL.ChangePasswordArgumentMissing("newPassword");
+			}
+			if (128 < newPassword.Length)
+			{
+				throw ADP.InvalidArgumentLength("newPassword", 128);
+			}
+			SqlConnectionString sqlConnectionString = SqlConnectionFactory.FindSqlConnectionOptions(new SqlConnectionPoolKey(connectionString, null, null));
+			if (sqlConnectionString.IntegratedSecurity)
+			{
+				throw SQL.ChangePasswordConflictsWithSSPI();
+			}
+			if (!string.IsNullOrEmpty(sqlConnectionString.AttachDBFilename))
+			{
+				throw SQL.ChangePasswordUseOfUnallowedKey("attachdbfilename");
+			}
+			SqlConnection.ChangePassword(connectionString, sqlConnectionString, null, newPassword, null);
+		}
+
+		public static void ChangePassword(string connectionString, SqlCredential credential, SecureString newSecurePassword)
+		{
+			if (string.IsNullOrEmpty(connectionString))
+			{
+				throw SQL.ChangePasswordArgumentMissing("connectionString");
+			}
+			if (credential == null)
+			{
+				throw SQL.ChangePasswordArgumentMissing("credential");
+			}
+			if (newSecurePassword == null || newSecurePassword.Length == 0)
+			{
+				throw SQL.ChangePasswordArgumentMissing("newSecurePassword");
+			}
+			if (!newSecurePassword.IsReadOnly())
+			{
+				throw ADP.MustBeReadOnly("newSecurePassword");
+			}
+			if (128 < newSecurePassword.Length)
+			{
+				throw ADP.InvalidArgumentLength("newSecurePassword", 128);
+			}
+			SqlConnectionString sqlConnectionString = SqlConnectionFactory.FindSqlConnectionOptions(new SqlConnectionPoolKey(connectionString, null, null));
+			if (!string.IsNullOrEmpty(sqlConnectionString.UserID) || !string.IsNullOrEmpty(sqlConnectionString.Password))
+			{
+				throw ADP.InvalidMixedArgumentOfSecureAndClearCredential();
+			}
+			if (sqlConnectionString.IntegratedSecurity)
+			{
+				throw SQL.ChangePasswordConflictsWithSSPI();
+			}
+			if (!string.IsNullOrEmpty(sqlConnectionString.AttachDBFilename))
+			{
+				throw SQL.ChangePasswordUseOfUnallowedKey("attachdbfilename");
+			}
+			SqlConnection.ChangePassword(connectionString, sqlConnectionString, credential, null, newSecurePassword);
+		}
+
+		private static void ChangePassword(string connectionString, SqlConnectionString connectionOptions, SqlCredential credential, string newPassword, SecureString newSecurePassword)
+		{
+			SqlInternalConnectionTds sqlInternalConnectionTds = null;
+			try
+			{
+				sqlInternalConnectionTds = new SqlInternalConnectionTds(null, connectionOptions, credential, null, newPassword, newSecurePassword, false, null, null, false, null);
+			}
+			finally
+			{
+				if (sqlInternalConnectionTds != null)
+				{
+					sqlInternalConnectionTds.Dispose();
+				}
+			}
+			SqlConnectionPoolKey sqlConnectionPoolKey = new SqlConnectionPoolKey(connectionString, null, null);
+			SqlConnectionFactory.SingletonInstance.ClearPool(sqlConnectionPoolKey);
+		}
+
 		internal void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask, object value, int tag)
 		{
 			outerTask = outerTask.ContinueWith<Task<T>>(delegate(Task<T> task)
@@ -987,6 +1219,101 @@ namespace System.Data.SqlClient
 				return;
 			}
 			this._innerConnection = DbConnectionClosedPreviouslyOpened.SingletonInstance;
+		}
+
+		private Assembly ResolveTypeAssembly(AssemblyName asmRef, bool throwOnError)
+		{
+			if (string.Compare(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase) == 0)
+			{
+				asmRef.Version = this.TypeSystemAssemblyVersion;
+			}
+			Assembly assembly;
+			try
+			{
+				assembly = Assembly.Load(asmRef);
+			}
+			catch (Exception ex)
+			{
+				if (throwOnError || !ADP.IsCatchableExceptionType(ex))
+				{
+					throw;
+				}
+				assembly = null;
+			}
+			return assembly;
+		}
+
+		internal void CheckGetExtendedUDTInfo(SqlMetaDataPriv metaData, bool fThrow)
+		{
+			if (metaData.udtType == null)
+			{
+				metaData.udtType = Type.GetType(metaData.udtAssemblyQualifiedName, (AssemblyName asmRef) => this.ResolveTypeAssembly(asmRef, fThrow), null, fThrow);
+				if (fThrow && metaData.udtType == null)
+				{
+					throw SQL.UDTUnexpectedResult(metaData.udtAssemblyQualifiedName);
+				}
+			}
+		}
+
+		internal object GetUdtValue(object value, SqlMetaDataPriv metaData, bool returnDBNull)
+		{
+			if (returnDBNull && ADP.IsNull(value))
+			{
+				return DBNull.Value;
+			}
+			if (ADP.IsNull(value))
+			{
+				return metaData.udtType.InvokeMember("Null", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty, null, null, new object[0], CultureInfo.InvariantCulture);
+			}
+			return SerializationHelperSql9.Deserialize(new MemoryStream((byte[])value), metaData.udtType);
+		}
+
+		internal byte[] GetBytes(object o)
+		{
+			Format format = Format.Native;
+			int num;
+			return this.GetBytes(o, out format, out num);
+		}
+
+		internal byte[] GetBytes(object o, out Format format, out int maxSize)
+		{
+			SqlUdtInfo infoFromType = this.GetInfoFromType(o.GetType());
+			maxSize = infoFromType.MaxByteSize;
+			format = infoFromType.SerializationFormat;
+			if (maxSize < -1 || maxSize >= 65535)
+			{
+				Type type = o.GetType();
+				throw new InvalidOperationException(((type != null) ? type.ToString() : null) + ": invalid Size");
+			}
+			byte[] array;
+			using (MemoryStream memoryStream = new MemoryStream((maxSize < 0) ? 0 : maxSize))
+			{
+				SerializationHelperSql9.Serialize(memoryStream, o);
+				array = memoryStream.ToArray();
+			}
+			return array;
+		}
+
+		private SqlUdtInfo GetInfoFromType(Type t)
+		{
+			Type type = t;
+			SqlUdtInfo sqlUdtInfo;
+			for (;;)
+			{
+				sqlUdtInfo = SqlUdtInfo.TryGetFromType(t);
+				if (sqlUdtInfo != null)
+				{
+					break;
+				}
+				t = t.BaseType;
+				if (!(t != null))
+				{
+					goto Block_2;
+				}
+			}
+			return sqlUdtInfo;
+			Block_2:
+			throw SQL.UDTInvalidSqlType(type.AssemblyQualifiedName);
 		}
 
 		public SqlConnection()
@@ -1212,21 +1539,6 @@ namespace System.Data.SqlClient
 			this._innerConnection = to;
 		}
 
-		public SqlConnection(string connectionString, SqlCredential credential)
-		{
-			this._reconnectLock = new object();
-			this._originalConnectionId = Guid.Empty;
-			base..ctor();
-			this.ConnectionString = connectionString;
-			this.Credentials = credential;
-		}
-
-		[MonoTODO]
-		public static void ChangePassword(string connectionString, string newPassword)
-		{
-			throw new NotImplementedException();
-		}
-
 		[MonoTODO]
 		public SqlCredential Credentials
 		{
@@ -1246,29 +1558,16 @@ namespace System.Data.SqlClient
 			throw new NotImplementedException();
 		}
 
-		public string AccessToken
-		{
-			get
-			{
-				ThrowStub.ThrowNotSupportedException();
-				return null;
-			}
-			set
-			{
-				ThrowStub.ThrowNotSupportedException();
-			}
-		}
-
 		public static TimeSpan ColumnEncryptionKeyCacheTtl
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(TimeSpan);
 			}
 			set
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -1276,12 +1575,12 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(bool);
 			}
 			set
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -1289,32 +1588,14 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return 0;
 			}
 		}
 
-		public SqlCredential Credential
-		{
-			get
-			{
-				ThrowStub.ThrowNotSupportedException();
-				return null;
-			}
-			set
-			{
-				ThrowStub.ThrowNotSupportedException();
-			}
-		}
-
-		public static void ChangePassword(string connectionString, SqlCredential credential, SecureString newSecurePassword)
-		{
-			ThrowStub.ThrowNotSupportedException();
-		}
-
 		public static void RegisterColumnEncryptionKeyStoreProviders(IDictionary<string, SqlColumnEncryptionKeyStoreProvider> customProviders)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private bool _AsyncCommandInProgress;
@@ -1327,9 +1608,13 @@ namespace System.Data.SqlClient
 
 		private Tuple<TaskCompletionSource<DbConnectionInternal>, Task> _currentCompletion;
 
+		private SqlCredential _credential;
+
 		private string _connectionString;
 
 		private int _connectRetryCount;
+
+		private string _accessToken;
 
 		private object _reconnectLock;
 

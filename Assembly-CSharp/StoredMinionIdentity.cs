@@ -45,6 +45,10 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 			this.forbiddenTagSet = new HashSet<Tag>(this.forbiddenTags);
 			this.forbiddenTags = null;
 		}
+		if (!this.model.IsValid)
+		{
+			this.model = MinionConfig.MODEL;
+		}
 		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
 		{
 			this.bodyData = Accessorizer.UpdateAccessorySlots(this.nameStringKey, ref this.accessories);
@@ -108,8 +112,18 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	protected override void OnSpawn()
 	{
-		MinionConfig.AddMinionAmounts(this.minionModifiers);
-		MinionConfig.AddMinionTraits(DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, this.minionModifiers);
+		string[] array = MinionConfig.GetAttributes();
+		string[] array2 = MinionConfig.GetAmounts();
+		AttributeModifier[] array3 = MinionConfig.GetTraits();
+		if (this.model == BionicMinionConfig.MODEL)
+		{
+			array = BionicMinionConfig.GetAttributes();
+			array2 = BionicMinionConfig.GetAmounts();
+			array3 = BionicMinionConfig.GetTraits();
+		}
+		BaseMinionConfig.AddMinionAttributes(this.minionModifiers, array);
+		BaseMinionConfig.AddMinionAmounts(this.minionModifiers, array2);
+		BaseMinionConfig.AddMinionTraits(BaseMinionConfig.GetMinionNameForModel(this.model), BaseMinionConfig.GetMinionBaseTraitIDForModel(this.model), this.minionModifiers, array3);
 		this.ValidateProxy();
 		this.CleanupLimboMinions();
 	}
@@ -354,6 +368,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	[Serialize]
 	public string storedName;
+
+	[Serialize]
+	public Tag model;
 
 	[Serialize]
 	public string gender;

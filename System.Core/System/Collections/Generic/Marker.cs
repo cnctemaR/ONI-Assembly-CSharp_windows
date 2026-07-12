@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace System.Collections.Generic
 {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	internal struct Marker
+	internal readonly struct Marker
 	{
 		public Marker(int count, int index)
 		{

@@ -1,49 +1,70 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Double : IComparable, IFormattable, IConvertible, IComparable<double>, IEquatable<double>
+	public readonly struct Double : IComparable, IConvertible, IFormattable, IComparable<double>, IEquatable<double>, ISpanFormattable
 	{
-		[SecuritySafeCritical]
-		public unsafe static bool IsInfinity(double d)
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsFinite(double d)
 		{
-			return (*(long*)(&d) & long.MaxValue) == 9218868437227405312L;
+			return (BitConverter.DoubleToInt64Bits(d) & long.MaxValue) < 9218868437227405312L;
 		}
 
-		public static bool IsPositiveInfinity(double d)
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsInfinity(double d)
 		{
-			return d == double.PositiveInfinity;
+			return (BitConverter.DoubleToInt64Bits(d) & long.MaxValue) == 9218868437227405312L;
 		}
 
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsNaN(double d)
+		{
+			return (BitConverter.DoubleToInt64Bits(d) & long.MaxValue) > 9218868437227405312L;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsNegative(double d)
+		{
+			return (BitConverter.DoubleToInt64Bits(d) & long.MinValue) == long.MinValue;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsNegativeInfinity(double d)
 		{
 			return d == double.NegativeInfinity;
 		}
 
-		[SecuritySafeCritical]
-		internal unsafe static bool IsNegative(double d)
+		[NonVersionable]
+		public static bool IsNormal(double d)
 		{
-			return (*(long*)(&d) & long.MinValue) == long.MinValue;
+			long num = BitConverter.DoubleToInt64Bits(d);
+			num &= long.MaxValue;
+			return num < 9218868437227405312L && num != 0L && (num & 9218868437227405312L) != 0L;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[SecuritySafeCritical]
-		public unsafe static bool IsNaN(double d)
-		{
-			return (*(long*)(&d) & long.MaxValue) > 9218868437227405312L;
-		}
-
+		[NonVersionable]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsFinite(double d)
+		public static bool IsPositiveInfinity(double d)
 		{
-			return (BitConverter.DoubleToInt64Bits(d) & long.MaxValue) < 9218868437227405312L;
+			return d == double.PositiveInfinity;
+		}
+
+		[NonVersionable]
+		public static bool IsSubnormal(double d)
+		{
+			long num = BitConverter.DoubleToInt64Bits(d);
+			num &= long.MaxValue;
+			return num < 9218868437227405312L && num != 0L && (num & 9218868437227405312L) == 0L;
 		}
 
 		public int CompareTo(object value)
@@ -54,7 +75,7 @@ namespace System
 			}
 			if (!(value is double))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Double."));
+				throw new ArgumentException("Object must be of type Double.");
 			}
 			double num = (double)value;
 			if (this < num)
@@ -115,31 +136,37 @@ namespace System
 			return num == this || (double.IsNaN(num) && double.IsNaN(this));
 		}
 
+		[NonVersionable]
 		public static bool operator ==(double left, double right)
 		{
 			return left == right;
 		}
 
+		[NonVersionable]
 		public static bool operator !=(double left, double right)
 		{
 			return left != right;
 		}
 
+		[NonVersionable]
 		public static bool operator <(double left, double right)
 		{
 			return left < right;
 		}
 
+		[NonVersionable]
 		public static bool operator >(double left, double right)
 		{
 			return left > right;
 		}
 
+		[NonVersionable]
 		public static bool operator <=(double left, double right)
 		{
 			return left <= right;
 		}
 
+		[NonVersionable]
 		public static bool operator >=(double left, double right)
 		{
 			return left >= right;
@@ -150,25 +177,22 @@ namespace System
 			return obj == this || (double.IsNaN(obj) && double.IsNaN(this));
 		}
 
-		[SecuritySafeCritical]
-		public unsafe override int GetHashCode()
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int GetHashCode()
 		{
-			double num = this;
-			if (num == 0.0)
+			long num = BitConverter.DoubleToInt64Bits(this);
+			if (((num - 1L) & 9223372036854775807L) >= 9218868437227405312L)
 			{
-				return 0;
+				num &= 9218868437227405312L;
 			}
-			long num2 = *(long*)(&num);
-			return (int)num2 ^ (int)(num2 >> 32);
+			return (int)num ^ (int)(num >> 32);
 		}
 
-		[SecuritySafeCritical]
 		public override string ToString()
 		{
 			return Number.FormatDouble(this, null, NumberFormatInfo.CurrentInfo);
 		}
 
-		[SecuritySafeCritical]
 		public string ToString(string format)
 		{
 			return Number.FormatDouble(this, format, NumberFormatInfo.CurrentInfo);
@@ -186,34 +210,66 @@ namespace System
 			return Number.FormatDouble(this, format, NumberFormatInfo.GetInstance(provider));
 		}
 
+		public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			return Number.TryFormatDouble(this, format, NumberFormatInfo.GetInstance(provider), destination, out charsWritten);
+		}
+
 		public static double Parse(string s)
 		{
-			return double.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseDouble(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static double Parse(string s, NumberStyles style)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return double.Parse(s, style, NumberFormatInfo.CurrentInfo);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseDouble(s, style, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static double Parse(string s, IFormatProvider provider)
 		{
-			return double.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.GetInstance(provider));
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseDouble(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static double Parse(string s, NumberStyles style, IFormatProvider provider)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return double.Parse(s, style, NumberFormatInfo.GetInstance(provider));
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseDouble(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
-		private static double Parse(string s, NumberStyles style, NumberFormatInfo info)
+		public static double Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, IFormatProvider provider = null)
 		{
-			return Number.ParseDouble(s, style, info);
+			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+			return Number.ParseDouble(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static bool TryParse(string s, out double result)
+		{
+			if (s == null)
+			{
+				result = 0.0;
+				return false;
+			}
+			return double.TryParse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, out double result)
 		{
 			return double.TryParse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo, out result);
 		}
@@ -221,30 +277,36 @@ namespace System
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out double result)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return double.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
-		}
-
-		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out double result)
-		{
 			if (s == null)
 			{
 				result = 0.0;
 				return false;
 			}
+			return double.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out double result)
+		{
+			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+			return double.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out double result)
+		{
 			if (!Number.TryParseDouble(s, style, info, out result))
 			{
-				string text = s.Trim();
-				if (text.Equals(info.PositiveInfinitySymbol))
+				ReadOnlySpan<char> readOnlySpan = s.Trim();
+				if (readOnlySpan.EqualsOrdinal(info.PositiveInfinitySymbol))
 				{
 					result = double.PositiveInfinity;
 				}
-				else if (text.Equals(info.NegativeInfinitySymbol))
+				else if (readOnlySpan.EqualsOrdinal(info.NegativeInfinitySymbol))
 				{
 					result = double.NegativeInfinity;
 				}
 				else
 				{
-					if (!text.Equals(info.NaNSymbol))
+					if (!readOnlySpan.EqualsOrdinal(info.NaNSymbol))
 					{
 						return false;
 					}
@@ -266,7 +328,7 @@ namespace System
 
 		char IConvertible.ToChar(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Double", "Char" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Double", "Char"));
 		}
 
 		sbyte IConvertible.ToSByte(IFormatProvider provider)
@@ -326,7 +388,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Double", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Double", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -334,7 +396,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		internal double m_value;
+		private readonly double m_value;
 
 		public const double MinValue = -1.7976931348623157E+308;
 
@@ -348,6 +410,6 @@ namespace System
 
 		public const double NaN = double.NaN;
 
-		internal static double NegativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
+		internal const double NegativeZero = -0.0;
 	}
 }

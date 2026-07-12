@@ -204,7 +204,7 @@ namespace System.Runtime.Remoting.Contexts
 
 		public override string ToString()
 		{
-			return "ContextID: " + this.context_id;
+			return "ContextID: " + this.context_id.ToString();
 		}
 
 		internal IMessageSink GetServerContextSinkChain()

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.IO.LowLevel.Unsafe
 {
-	[NativeAsStruct]
 	[NativeConditional("ENABLE_PROFILER")]
+	[NativeAsStruct]
 	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncReadManagerMetricsFilters

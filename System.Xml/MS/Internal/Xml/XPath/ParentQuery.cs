@@ -24,7 +24,7 @@ namespace MS.Internal.Xml.XPath
 				xpathNavigator = xpathNavigator.Clone();
 				if (xpathNavigator.MoveToParent() && this.matches(xpathNavigator))
 				{
-					base.Insert(this.outputBuffer, xpathNavigator);
+					Query.Insert(this.outputBuffer, xpathNavigator);
 				}
 			}
 			return this;

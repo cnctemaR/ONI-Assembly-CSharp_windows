@@ -11,6 +11,7 @@ namespace UnityEngine.U2D
 		ChannelTexCoord0,
 		ChannelNormal,
 		ChannelTangent,
+		ChannelColor,
 		DataCount
 	}
 }

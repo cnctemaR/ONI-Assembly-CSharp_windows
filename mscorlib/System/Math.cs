@@ -1,186 +1,327 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Security;
+using System.Runtime.Versioning;
 
 namespace System
 {
 	public static class Math
 	{
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Acos(double d);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static short Abs(short value)
+		{
+			if (value < 0)
+			{
+				value = -value;
+				if (value < 0)
+				{
+					Math.ThrowAbsOverflow();
+				}
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Asin(double d);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Abs(int value)
+		{
+			if (value < 0)
+			{
+				value = -value;
+				if (value < 0)
+				{
+					Math.ThrowAbsOverflow();
+				}
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Atan(double d);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static long Abs(long value)
+		{
+			if (value < 0L)
+			{
+				value = -value;
+				if (value < 0L)
+				{
+					Math.ThrowAbsOverflow();
+				}
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Atan2(double y, double x);
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static sbyte Abs(sbyte value)
+		{
+			if (value < 0)
+			{
+				value = -value;
+				if (value < 0)
+				{
+					Math.ThrowAbsOverflow();
+				}
+			}
+			return value;
+		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Abs(decimal value)
+		{
+			return decimal.Abs(ref value);
+		}
+
+		[StackTraceHidden]
+		private static void ThrowAbsOverflow()
+		{
+			throw new OverflowException("Negating the minimum value of a twos complement number is invalid.");
+		}
+
+		public static long BigMul(int a, int b)
+		{
+			return (long)a * (long)b;
+		}
+
+		public static int DivRem(int a, int b, out int result)
+		{
+			int num = a / b;
+			result = a - num * b;
+			return num;
+		}
+
+		public static long DivRem(long a, long b, out long result)
+		{
+			long num = a / b;
+			result = a - num * b;
+			return num;
+		}
+
+		internal static uint DivRem(uint a, uint b, out uint result)
+		{
+			uint num = a / b;
+			result = a - num * b;
+			return num;
+		}
+
+		internal static ulong DivRem(ulong a, ulong b, out ulong result)
+		{
+			ulong num = a / b;
+			result = a - num * b;
+			return num;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static decimal Ceiling(decimal d)
 		{
 			return decimal.Ceiling(d);
 		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Ceiling(double a);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Cos(double d);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Cosh(double value);
-
-		public static decimal Floor(decimal d)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static byte Clamp(byte value, byte min, byte max)
 		{
-			return decimal.Floor(d);
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Floor(double d);
-
-		[SecuritySafeCritical]
-		private unsafe static double InternalRound(double value, int digits, MidpointRounding mode)
-		{
-			if (Math.Abs(value) < Math.doubleRoundLimit)
+			if (min > max)
 			{
-				double num = Math.roundPower10Double[digits];
-				value *= num;
-				if (mode == MidpointRounding.AwayFromZero)
-				{
-					double num2 = Math.SplitFractionDouble(&value);
-					if (Math.Abs(num2) >= 0.5)
-					{
-						value += (double)Math.Sign(num2);
-					}
-				}
-				else
-				{
-					value = Math.Round(value);
-				}
-				value /= num;
+				Math.ThrowMinMaxException<byte>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
 			}
 			return value;
 		}
 
-		[SecuritySafeCritical]
-		private unsafe static double InternalTruncate(double d)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Clamp(decimal value, decimal min, decimal max)
 		{
-			Math.SplitFractionDouble(&d);
-			return d;
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Sin(double a);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Tan(double a);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Sinh(double value);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Tanh(double value);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Round(double a);
-
-		public static double Round(double value, int digits)
-		{
-			if (digits < 0 || digits > 15)
+			if (min > max)
 			{
-				throw new ArgumentOutOfRangeException("digits", Environment.GetResourceString("Rounding digits must be between 0 and 15, inclusive."));
+				Math.ThrowMinMaxException<decimal>(min, max);
 			}
-			return Math.InternalRound(value, digits, MidpointRounding.ToEven);
-		}
-
-		public static double Round(double value, MidpointRounding mode)
-		{
-			return Math.Round(value, 0, mode);
-		}
-
-		public static double Round(double value, int digits, MidpointRounding mode)
-		{
-			if (digits < 0 || digits > 15)
+			if (value < min)
 			{
-				throw new ArgumentOutOfRangeException("digits", Environment.GetResourceString("Rounding digits must be between 0 and 15, inclusive."));
+				return min;
 			}
-			if (mode < MidpointRounding.ToEven || mode > MidpointRounding.AwayFromZero)
+			if (value > max)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The value '{0}' is not valid for this usage of the type {1}.", new object[] { mode, "MidpointRounding" }), "mode");
+				return max;
 			}
-			return Math.InternalRound(value, digits, mode);
+			return value;
 		}
 
-		public static decimal Round(decimal d)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double Clamp(double value, double min, double max)
 		{
-			return decimal.Round(d, 0);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<double>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		public static decimal Round(decimal d, int decimals)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static short Clamp(short value, short min, short max)
 		{
-			return decimal.Round(d, decimals);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<short>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		public static decimal Round(decimal d, MidpointRounding mode)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Clamp(int value, int min, int max)
 		{
-			return decimal.Round(d, 0, mode);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<int>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		public static decimal Round(decimal d, int decimals, MidpointRounding mode)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static long Clamp(long value, long min, long max)
 		{
-			return decimal.Round(d, decimals, mode);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<long>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern double SplitFractionDouble(double* value);
-
-		public static decimal Truncate(decimal d)
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static sbyte Clamp(sbyte value, sbyte min, sbyte max)
 		{
-			return decimal.Truncate(d);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<sbyte>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		public static double Truncate(double d)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float Clamp(float value, float min, float max)
 		{
-			return Math.InternalTruncate(d);
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<float>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
 		}
 
-		[SecuritySafeCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Sqrt(double d);
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ushort Clamp(ushort value, ushort min, ushort max)
+		{
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<ushort>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Log(double d);
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint Clamp(uint value, uint min, uint max)
+		{
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<uint>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Log10(double d);
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong Clamp(ulong value, ulong min, ulong max)
+		{
+			if (min > max)
+			{
+				Math.ThrowMinMaxException<ulong>(min, max);
+			}
+			if (value < min)
+			{
+				return min;
+			}
+			if (value > max)
+			{
+				return max;
+			}
+			return value;
+		}
 
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Exp(double d);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Pow(double x, double y);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Floor(decimal d)
+		{
+			return decimal.Floor(d);
+		}
 
 		public static double IEEERemainder(double x, double y)
 		{
@@ -199,7 +340,7 @@ namespace System
 			}
 			if (num == 0.0 && double.IsNegative(x))
 			{
-				return double.NegativeZero;
+				return -0.0;
 			}
 			double num2 = num - Math.Abs(y) * (double)Math.Sign(x);
 			if (Math.Abs(num2) == Math.Abs(num))
@@ -219,328 +360,6 @@ namespace System
 				}
 				return num;
 			}
-		}
-
-		[CLSCompliant(false)]
-		public static sbyte Abs(sbyte value)
-		{
-			if (value >= 0)
-			{
-				return value;
-			}
-			return Math.AbsHelper(value);
-		}
-
-		private static sbyte AbsHelper(sbyte value)
-		{
-			if (value == -128)
-			{
-				throw new OverflowException(Environment.GetResourceString("Negating the minimum value of a twos complement number is invalid."));
-			}
-			return -value;
-		}
-
-		public static short Abs(short value)
-		{
-			if (value >= 0)
-			{
-				return value;
-			}
-			return Math.AbsHelper(value);
-		}
-
-		private static short AbsHelper(short value)
-		{
-			if (value == -32768)
-			{
-				throw new OverflowException(Environment.GetResourceString("Negating the minimum value of a twos complement number is invalid."));
-			}
-			return -value;
-		}
-
-		public static int Abs(int value)
-		{
-			if (value >= 0)
-			{
-				return value;
-			}
-			return Math.AbsHelper(value);
-		}
-
-		private static int AbsHelper(int value)
-		{
-			if (value == -2147483648)
-			{
-				throw new OverflowException(Environment.GetResourceString("Negating the minimum value of a twos complement number is invalid."));
-			}
-			return -value;
-		}
-
-		public static long Abs(long value)
-		{
-			if (value >= 0L)
-			{
-				return value;
-			}
-			return Math.AbsHelper(value);
-		}
-
-		private static long AbsHelper(long value)
-		{
-			if (value == -9223372036854775808L)
-			{
-				throw new OverflowException(Environment.GetResourceString("Negating the minimum value of a twos complement number is invalid."));
-			}
-			return -value;
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float Abs(float value);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern double Abs(double value);
-
-		public static decimal Abs(decimal value)
-		{
-			return decimal.Abs(value);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[CLSCompliant(false)]
-		public static sbyte Max(sbyte val1, sbyte val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static byte Max(byte val1, byte val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static short Max(short val1, short val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static ushort Max(ushort val1, ushort val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static int Max(int val1, int val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static uint Max(uint val1, uint val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static long Max(long val1, long val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static ulong Max(ulong val1, ulong val2)
-		{
-			if (val1 < val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static float Max(float val1, float val2)
-		{
-			if (val1 > val2)
-			{
-				return val1;
-			}
-			if (float.IsNaN(val1))
-			{
-				return val1;
-			}
-			return val2;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static double Max(double val1, double val2)
-		{
-			if (val1 > val2)
-			{
-				return val1;
-			}
-			if (double.IsNaN(val1))
-			{
-				return val1;
-			}
-			return val2;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static decimal Max(decimal val1, decimal val2)
-		{
-			return decimal.Max(val1, val2);
-		}
-
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static sbyte Min(sbyte val1, sbyte val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static byte Min(byte val1, byte val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static short Min(short val1, short val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static ushort Min(ushort val1, ushort val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static int Min(int val1, int val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[CLSCompliant(false)]
-		public static uint Min(uint val1, uint val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static long Min(long val1, long val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[CLSCompliant(false)]
-		public static ulong Min(ulong val1, ulong val2)
-		{
-			if (val1 > val2)
-			{
-				return val2;
-			}
-			return val1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static float Min(float val1, float val2)
-		{
-			if (val1 < val2)
-			{
-				return val1;
-			}
-			if (float.IsNaN(val1))
-			{
-				return val1;
-			}
-			return val2;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static double Min(double val1, double val2)
-		{
-			if (val1 < val2)
-			{
-				return val1;
-			}
-			if (double.IsNaN(val1))
-			{
-				return val1;
-			}
-			return val2;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static decimal Min(decimal val1, decimal val2)
-		{
-			return decimal.Min(val1, val2);
 		}
 
 		public static double Log(double a, double newBase)
@@ -564,74 +383,312 @@ namespace System
 			return Math.Log(a) / Math.Log(newBase);
 		}
 
+		[NonVersionable]
+		public static byte Max(byte val1, byte val2)
+		{
+			if (val1 < val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static decimal Max(decimal val1, decimal val2)
+		{
+			return *decimal.Max(ref val1, ref val2);
+		}
+
+		public static double Max(double val1, double val2)
+		{
+			if (val1 > val2)
+			{
+				return val1;
+			}
+			if (double.IsNaN(val1))
+			{
+				return val1;
+			}
+			return val2;
+		}
+
+		[NonVersionable]
+		public static short Max(short val1, short val2)
+		{
+			if (val1 < val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		public static int Max(int val1, int val2)
+		{
+			if (val1 < val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		public static long Max(long val1, long val2)
+		{
+			if (val1 < val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
 		[CLSCompliant(false)]
-		public static int Sign(sbyte value)
+		[NonVersionable]
+		public static sbyte Max(sbyte val1, sbyte val2)
 		{
-			if (value < 0)
+			if (val1 < val2)
 			{
-				return -1;
+				return val2;
 			}
-			if (value > 0)
-			{
-				return 1;
-			}
-			return 0;
+			return val1;
 		}
 
-		public static int Sign(short value)
+		public static float Max(float val1, float val2)
 		{
-			if (value < 0)
+			if (val1 > val2)
 			{
-				return -1;
+				return val1;
 			}
-			if (value > 0)
+			if (float.IsNaN(val1))
 			{
-				return 1;
+				return val1;
 			}
-			return 0;
+			return val2;
 		}
 
-		public static int Sign(int value)
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static ushort Max(ushort val1, ushort val2)
 		{
-			if (value < 0)
+			if (val1 < val2)
 			{
-				return -1;
+				return val2;
 			}
-			if (value > 0)
-			{
-				return 1;
-			}
-			return 0;
+			return val1;
 		}
 
-		public static int Sign(long value)
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static uint Max(uint val1, uint val2)
 		{
-			if (value < 0L)
+			if (val1 < val2)
 			{
-				return -1;
+				return val2;
 			}
-			if (value > 0L)
-			{
-				return 1;
-			}
-			return 0;
+			return val1;
 		}
 
-		public static int Sign(float value)
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static ulong Max(ulong val1, ulong val2)
 		{
-			if (value < 0f)
+			if (val1 < val2)
 			{
-				return -1;
+				return val2;
 			}
-			if (value > 0f)
+			return val1;
+		}
+
+		[NonVersionable]
+		public static byte Min(byte val1, byte val2)
+		{
+			if (val1 > val2)
 			{
-				return 1;
+				return val2;
 			}
-			if (value == 0f)
+			return val1;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static decimal Min(decimal val1, decimal val2)
+		{
+			return *decimal.Min(ref val1, ref val2);
+		}
+
+		public static double Min(double val1, double val2)
+		{
+			if (val1 < val2)
 			{
-				return 0;
+				return val1;
 			}
-			throw new ArithmeticException(Environment.GetResourceString("Function does not accept floating point Not-a-Number values."));
+			if (double.IsNaN(val1))
+			{
+				return val1;
+			}
+			return val2;
+		}
+
+		[NonVersionable]
+		public static short Min(short val1, short val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		public static int Min(int val1, int val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		public static long Min(long val1, long val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static sbyte Min(sbyte val1, sbyte val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		public static float Min(float val1, float val2)
+		{
+			if (val1 < val2)
+			{
+				return val1;
+			}
+			if (float.IsNaN(val1))
+			{
+				return val1;
+			}
+			return val2;
+		}
+
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static ushort Min(ushort val1, ushort val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[CLSCompliant(false)]
+		[NonVersionable]
+		public static uint Min(uint val1, uint val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[NonVersionable]
+		[CLSCompliant(false)]
+		public static ulong Min(ulong val1, ulong val2)
+		{
+			if (val1 > val2)
+			{
+				return val2;
+			}
+			return val1;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Round(decimal d)
+		{
+			return decimal.Round(d, 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Round(decimal d, int decimals)
+		{
+			return decimal.Round(d, decimals);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Round(decimal d, MidpointRounding mode)
+		{
+			return decimal.Round(d, 0, mode);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Round(decimal d, int decimals, MidpointRounding mode)
+		{
+			return decimal.Round(d, decimals, mode);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Round(double a);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double Round(double value, int digits)
+		{
+			return Math.Round(value, digits, MidpointRounding.ToEven);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double Round(double value, MidpointRounding mode)
+		{
+			return Math.Round(value, 0, mode);
+		}
+
+		public unsafe static double Round(double value, int digits, MidpointRounding mode)
+		{
+			if (digits < 0 || digits > 15)
+			{
+				throw new ArgumentOutOfRangeException("digits", "Rounding digits must be between 0 and 15, inclusive.");
+			}
+			if (mode < MidpointRounding.ToEven || mode > MidpointRounding.AwayFromZero)
+			{
+				throw new ArgumentException(SR.Format("The value '{0}' is not valid for this usage of the type {1}.", mode, "MidpointRounding"), "mode");
+			}
+			if (Math.Abs(value) < Math.doubleRoundLimit)
+			{
+				double num = Math.roundPower10Double[digits];
+				value *= num;
+				if (mode == MidpointRounding.AwayFromZero)
+				{
+					double num2 = Math.ModF(value, &value);
+					if (Math.Abs(num2) >= 0.5)
+					{
+						value += (double)Math.Sign(num2);
+					}
+				}
+				else
+				{
+					value = Math.Round(value);
+				}
+				value /= num;
+			}
+			return value;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Sign(decimal value)
+		{
+			return decimal.Sign(ref value);
 		}
 
 		public static int Sign(double value)
@@ -648,51 +705,164 @@ namespace System
 			{
 				return 0;
 			}
-			throw new ArithmeticException(Environment.GetResourceString("Function does not accept floating point Not-a-Number values."));
+			throw new ArithmeticException("Function does not accept floating point Not-a-Number values.");
 		}
 
-		public static int Sign(decimal value)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Sign(short value)
 		{
-			if (value < 0m)
+			return Math.Sign((int)value);
+		}
+
+		public static int Sign(int value)
+		{
+			return (value >> 31) | (int)((uint)(-(uint)value) >> 31);
+		}
+
+		public static int Sign(long value)
+		{
+			return (int)((value >> 63) | (long)((ulong)(-(ulong)value) >> 63));
+		}
+
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Sign(sbyte value)
+		{
+			return Math.Sign((int)value);
+		}
+
+		public static int Sign(float value)
+		{
+			if (value < 0f)
 			{
 				return -1;
 			}
-			if (value > 0m)
+			if (value > 0f)
 			{
 				return 1;
 			}
-			return 0;
+			if (value == 0f)
+			{
+				return 0;
+			}
+			throw new ArithmeticException("Function does not accept floating point Not-a-Number values.");
 		}
 
-		public static long BigMul(int a, int b)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static decimal Truncate(decimal d)
 		{
-			return (long)a * (long)b;
+			return decimal.Truncate(d);
 		}
 
-		public static int DivRem(int a, int b, out int result)
+		public unsafe static double Truncate(double d)
 		{
-			result = a % b;
-			return a / b;
+			Math.ModF(d, &d);
+			return d;
 		}
 
-		public static long DivRem(long a, long b, out long result)
+		private static double copysign(double x, double y)
 		{
-			result = a % b;
-			return a / b;
+			long num = BitConverter.DoubleToInt64Bits(x);
+			long num2 = BitConverter.DoubleToInt64Bits(y);
+			if ((num ^ num2) >> 63 != 0L)
+			{
+				return BitConverter.Int64BitsToDouble(num ^ long.MinValue);
+			}
+			return x;
 		}
 
-		private static double doubleRoundLimit = 10000000000000000.0;
+		private static void ThrowMinMaxException<T>(T min, T max)
+		{
+			throw new ArgumentException(SR.Format("'{0}' cannot be greater than {1}.", min, max));
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Abs(double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float Abs(float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Acos(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Acosh(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Asin(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Asinh(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Atan(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Atan2(double y, double x);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Atanh(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Cbrt(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Ceiling(double a);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Cos(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Cosh(double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Exp(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Floor(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Log(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Log10(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Pow(double x, double y);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Sin(double a);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Sinh(double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Sqrt(double d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Tan(double a);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Tanh(double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern double FMod(double x, double y);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern double ModF(double x, double* intptr);
+
+		public const double E = 2.718281828459045;
+
+		public const double PI = 3.141592653589793;
 
 		private const int maxRoundingDigits = 15;
+
+		private static double doubleRoundLimit = 10000000000000000.0;
 
 		private static double[] roundPower10Double = new double[]
 		{
 			1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0,
 			10000000000.0, 100000000000.0, 1000000000000.0, 10000000000000.0, 100000000000000.0, 1000000000000000.0
 		};
-
-		public const double PI = 3.141592653589793;
-
-		public const double E = 2.718281828459045;
 	}
 }

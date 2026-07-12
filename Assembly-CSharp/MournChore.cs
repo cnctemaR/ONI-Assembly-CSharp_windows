@@ -25,9 +25,9 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new MournChore.StatesInstance(this);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(ChorePreconditions.instance.NoDeadBodies, null);
-		base.AddPrecondition(MournChore.HasValidMournLocation, master);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.NoDeadBodies, null);
+		this.AddPrecondition(MournChore.HasValidMournLocation, master);
 	}
 
 	public static Grave FindGraveToMournAt()

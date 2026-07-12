@@ -1,40 +1,73 @@
 ﻿using System;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
 {
-	internal class WebCompletionSource
+	internal class WebCompletionSource<T>
 	{
-		public WebCompletionSource()
+		public WebCompletionSource(bool runAsync = true)
 		{
-			this.completion = new TaskCompletionSource<WebCompletionSource.Result>();
+			this.completion = new TaskCompletionSource<WebCompletionSource<T>.Result>(runAsync ? TaskCreationOptions.RunContinuationsAsynchronously : TaskCreationOptions.None);
+		}
+
+		internal WebCompletionSource<T>.Result CurrentResult
+		{
+			get
+			{
+				return this.currentResult;
+			}
+		}
+
+		internal WebCompletionSource<T>.Status CurrentStatus
+		{
+			get
+			{
+				WebCompletionSource<T>.Result result = this.currentResult;
+				if (result == null)
+				{
+					return WebCompletionSource<T>.Status.Running;
+				}
+				return result.Status;
+			}
+		}
+
+		internal Task Task
+		{
+			get
+			{
+				return this.completion.Task;
+			}
+		}
+
+		public bool TrySetCompleted(T argument)
+		{
+			WebCompletionSource<T>.Result result = new WebCompletionSource<T>.Result(argument);
+			return Interlocked.CompareExchange<WebCompletionSource<T>.Result>(ref this.currentResult, result, null) == null && this.completion.TrySetResult(result);
 		}
 
 		public bool TrySetCompleted()
 		{
-			return this.completion.TrySetResult(new WebCompletionSource.Result(WebCompletionSource.State.Completed, null));
+			WebCompletionSource<T>.Result result = new WebCompletionSource<T>.Result(WebCompletionSource<T>.Status.Completed, null);
+			return Interlocked.CompareExchange<WebCompletionSource<T>.Result>(ref this.currentResult, result, null) == null && this.completion.TrySetResult(result);
 		}
 
 		public bool TrySetCanceled()
 		{
-			OperationCanceledException ex = new OperationCanceledException();
-			WebCompletionSource.Result result = new WebCompletionSource.Result(WebCompletionSource.State.Canceled, ExceptionDispatchInfo.Capture(ex));
-			return this.completion.TrySetResult(result);
+			return this.TrySetCanceled(new OperationCanceledException());
+		}
+
+		public bool TrySetCanceled(OperationCanceledException error)
+		{
+			WebCompletionSource<T>.Result result = new WebCompletionSource<T>.Result(WebCompletionSource<T>.Status.Canceled, ExceptionDispatchInfo.Capture(error));
+			return Interlocked.CompareExchange<WebCompletionSource<T>.Result>(ref this.currentResult, result, null) == null && this.completion.TrySetResult(result);
 		}
 
 		public bool TrySetException(Exception error)
 		{
-			WebCompletionSource.Result result = new WebCompletionSource.Result(WebCompletionSource.State.Faulted, ExceptionDispatchInfo.Capture(error));
-			return this.completion.TrySetResult(result);
-		}
-
-		public bool IsCompleted
-		{
-			get
-			{
-				return this.completion.Task.IsCompleted;
-			}
+			WebCompletionSource<T>.Result result = new WebCompletionSource<T>.Result(WebCompletionSource<T>.Status.Faulted, ExceptionDispatchInfo.Capture(error));
+			return Interlocked.CompareExchange<WebCompletionSource<T>.Result>(ref this.currentResult, result, null) == null && this.completion.TrySetResult(result);
 		}
 
 		public void ThrowOnError()
@@ -51,28 +84,22 @@ namespace System.Net
 			error.Throw();
 		}
 
-		public async Task<bool> WaitForCompletion(bool throwOnError)
+		public async Task<T> WaitForCompletion()
 		{
-			WebCompletionSource.Result result = await this.completion.Task.ConfigureAwait(false);
-			bool flag;
-			if (result.State == WebCompletionSource.State.Completed)
+			WebCompletionSource<T>.Result result = await this.completion.Task.ConfigureAwait(false);
+			if (result.Status == WebCompletionSource<T>.Status.Completed)
 			{
-				flag = true;
+				return result.Argument;
 			}
-			else
-			{
-				if (throwOnError)
-				{
-					result.Error.Throw();
-				}
-				flag = false;
-			}
-			return flag;
+			result.Error.Throw();
+			throw new InvalidOperationException("Should never happen.");
 		}
 
-		private TaskCompletionSource<WebCompletionSource.Result> completion;
+		private TaskCompletionSource<WebCompletionSource<T>.Result> completion;
 
-		private enum State
+		private WebCompletionSource<T>.Result currentResult;
+
+		internal enum Status
 		{
 			Running,
 			Completed,
@@ -80,15 +107,31 @@ namespace System.Net
 			Faulted
 		}
 
-		private class Result
+		internal class Result
 		{
-			public WebCompletionSource.State State { get; }
+			public WebCompletionSource<T>.Status Status { get; }
+
+			public bool Success
+			{
+				get
+				{
+					return this.Status == WebCompletionSource<T>.Status.Completed;
+				}
+			}
 
 			public ExceptionDispatchInfo Error { get; }
 
-			public Result(WebCompletionSource.State state, ExceptionDispatchInfo error)
+			public T Argument { get; }
+
+			public Result(T argument)
 			{
-				this.State = state;
+				this.Status = WebCompletionSource<T>.Status.Completed;
+				this.Argument = argument;
+			}
+
+			public Result(WebCompletionSource<T>.Status state, ExceptionDispatchInfo error)
+			{
+				this.Status = state;
 				this.Error = error;
 			}
 		}

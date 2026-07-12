@@ -325,7 +325,9 @@ public class LonelyMinionHouse : StoryTraitStateMachine<LonelyMinionHouse, Lonel
 			}
 			global::UnityEngine.Object.Destroy(this.lonelyMinion.gameObject);
 			this.lonelyMinion = null;
-			MinionIdentity minionIdentity = Util.KInstantiate<MinionIdentity>(Assets.GetPrefab(MinionConfig.ID), null, null);
+			GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+			MinionIdentity minionIdentity = Util.KInstantiate<MinionIdentity>(prefab, null, null);
+			minionIdentity.name = prefab.name;
 			Immigration.Instance.ApplyDefaultPersonalPriorities(minionIdentity.gameObject);
 			minionIdentity.gameObject.SetActive(true);
 			minionStartingStats.Apply(minionIdentity.gameObject);

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, ClimbableTreeMonitor.Instance, IStateMachineTarget, ClimbableTreeMonitor.Def>
@@ -51,16 +53,15 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 		private void FindClimbableTree()
 		{
 			this.climbTarget = null;
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			ListPool<KMonoBehaviour, ClimbableTreeMonitor>.PooledList pooledList2 = ListPool<KMonoBehaviour, ClimbableTreeMonitor>.Allocate();
+			ListPool<KMonoBehaviour, ClimbableTreeMonitor>.PooledList pooledList = ListPool<KMonoBehaviour, ClimbableTreeMonitor>.Allocate();
 			Vector3 position = base.master.transform.GetPosition();
 			Extents extents = new Extents(Grid.PosToCell(position), 10);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.plants, pooledList);
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.completeBuildings, pooledList);
 			Navigator component = base.GetComponent<Navigator>();
-			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+			IEnumerable<object> enumerable = GameScenePartitioner.Instance.AsyncSafeEnumerate(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.plants);
+			IEnumerable<object> enumerable2 = GameScenePartitioner.Instance.AsyncSafeEnumerate(extents.x, extents.y, extents.width, extents.height, GameScenePartitioner.Instance.completeBuildings);
+			foreach (object obj in enumerable.Concat<object>(enumerable2))
 			{
-				KMonoBehaviour kmonoBehaviour = scenePartitionerEntry.obj as KMonoBehaviour;
+				KMonoBehaviour kmonoBehaviour = obj as KMonoBehaviour;
 				if (!kmonoBehaviour.HasTag(GameTags.Creatures.ReservedByCreature))
 				{
 					int num = Grid.PosToCell(kmonoBehaviour);
@@ -87,18 +88,17 @@ public class ClimbableTreeMonitor : GameStateMachine<ClimbableTreeMonitor, Climb
 								continue;
 							}
 						}
-						pooledList2.Add(kmonoBehaviour);
+						pooledList.Add(kmonoBehaviour);
 					}
 				}
 			}
-			if (pooledList2.Count > 0)
+			if (pooledList.Count > 0)
 			{
-				int num2 = global::UnityEngine.Random.Range(0, pooledList2.Count);
-				KMonoBehaviour kmonoBehaviour2 = pooledList2[num2];
+				int num2 = global::UnityEngine.Random.Range(0, pooledList.Count);
+				KMonoBehaviour kmonoBehaviour2 = pooledList[num2];
 				this.climbTarget = kmonoBehaviour2.gameObject;
 			}
 			pooledList.Recycle();
-			pooledList2.Recycle();
 		}
 
 		public void OnClimbComplete()

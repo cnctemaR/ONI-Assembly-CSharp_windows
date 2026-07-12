@@ -18,17 +18,32 @@ namespace System.Dynamic
 		public DynamicMetaObject(Expression expression, BindingRestrictions restrictions, object value)
 			: this(expression, restrictions)
 		{
-			this.Value = value;
-			this.HasValue = true;
+			this._value = value;
 		}
 
 		public Expression Expression { get; }
 
 		public BindingRestrictions Restrictions { get; }
 
-		public object Value { get; }
+		public object Value
+		{
+			get
+			{
+				if (!this.HasValue)
+				{
+					return null;
+				}
+				return this._value;
+			}
+		}
 
-		public bool HasValue { get; }
+		public bool HasValue
+		{
+			get
+			{
+				return this._value != DynamicMetaObject.s_noValueSentinel;
+			}
+		}
 
 		public Type RuntimeType
 		{
@@ -168,5 +183,9 @@ namespace System.Dynamic
 		}
 
 		public static readonly DynamicMetaObject[] EmptyMetaObjects = Array.Empty<DynamicMetaObject>();
+
+		private static readonly object s_noValueSentinel = new object();
+
+		private readonly object _value = DynamicMetaObject.s_noValueSentinel;
 	}
 }

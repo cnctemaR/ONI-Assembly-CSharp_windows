@@ -22,10 +22,11 @@ namespace Database
 			this.ResetSkillsStation = base.Add(new OwnableSlot("ResetSkillsStation", "ResetSkillsStation"));
 			this.WarpPortal = base.Add(new OwnableSlot("WarpPortal", MISC.TAGS.WARP_PORTAL));
 			this.WarpPortal.showInUI = false;
+			this.BionicUpgrade = base.Add(new OwnableSlot("BionicUpgrade", MISC.TAGS.BIONIC_UPGRADE));
 			this.Toy = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.TOYS.SLOT, MISC.TAGS.TOY, false));
 			this.Suit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true));
 			this.Tool = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false));
-			this.Outfit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.CLOTHING.SLOT, MISC.TAGS.CLOTHES, true));
+			this.Outfit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.CLOTHING.SLOT, UI.StripLinkFormatting(MISC.TAGS.CLOTHES), true));
 		}
 
 		public AssignableSlot Bed;
@@ -57,5 +58,7 @@ namespace Database
 		public AssignableSlot Tool;
 
 		public AssignableSlot Outfit;
+
+		public AssignableSlot BionicUpgrade;
 	}
 }

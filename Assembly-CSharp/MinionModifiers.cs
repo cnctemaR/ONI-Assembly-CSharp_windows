@@ -44,7 +44,11 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 			base.Subscribe<MinionModifiers>(-485480405, MinionModifiers.OnDetachFollowCamDelegate);
 			base.Subscribe<MinionModifiers>(-1988963660, MinionModifiers.OnBeginChoreDelegate);
 			AmountInstance amountInstance = this.GetAmounts().Get("Calories");
-			amountInstance.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
+			if (amountInstance != null)
+			{
+				AmountInstance amountInstance2 = amountInstance;
+				amountInstance2.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance2.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
+			}
 			Vector3 position = base.transform.GetPosition();
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 			base.transform.SetPosition(position);

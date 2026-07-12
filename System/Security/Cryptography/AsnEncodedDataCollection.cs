@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System.Security.Cryptography
 {
@@ -7,13 +8,41 @@ namespace System.Security.Cryptography
 	{
 		public AsnEncodedDataCollection()
 		{
-			this._list = new ArrayList();
+			this._list = new List<AsnEncodedData>();
 		}
 
 		public AsnEncodedDataCollection(AsnEncodedData asnEncodedData)
+			: this()
 		{
-			this._list = new ArrayList();
 			this._list.Add(asnEncodedData);
+		}
+
+		public int Add(AsnEncodedData asnEncodedData)
+		{
+			if (asnEncodedData == null)
+			{
+				throw new ArgumentNullException("asnEncodedData");
+			}
+			int count = this._list.Count;
+			this._list.Add(asnEncodedData);
+			return count;
+		}
+
+		public void Remove(AsnEncodedData asnEncodedData)
+		{
+			if (asnEncodedData == null)
+			{
+				throw new ArgumentNullException("asnEncodedData");
+			}
+			this._list.Remove(asnEncodedData);
+		}
+
+		public AsnEncodedData this[int index]
+		{
+			get
+			{
+				return this._list[index];
+			}
 		}
 
 		public int Count
@@ -24,45 +53,6 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		public bool IsSynchronized
-		{
-			get
-			{
-				return this._list.IsSynchronized;
-			}
-		}
-
-		public AsnEncodedData this[int index]
-		{
-			get
-			{
-				return (AsnEncodedData)this._list[index];
-			}
-		}
-
-		public object SyncRoot
-		{
-			get
-			{
-				return this._list.SyncRoot;
-			}
-		}
-
-		public int Add(AsnEncodedData asnEncodedData)
-		{
-			return this._list.Add(asnEncodedData);
-		}
-
-		public void CopyTo(AsnEncodedData[] array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
 		public AsnEncodedDataEnumerator GetEnumerator()
 		{
 			return new AsnEncodedDataEnumerator(this);
@@ -70,14 +60,63 @@ namespace System.Security.Cryptography
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return new AsnEncodedDataEnumerator(this);
+			return this.GetEnumerator();
 		}
 
-		public void Remove(AsnEncodedData asnEncodedData)
+		void ICollection.CopyTo(Array array, int index)
 		{
-			this._list.Remove(asnEncodedData);
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
+			}
+			if (index < 0 || index >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (this.Count > array.Length - index)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			for (int i = 0; i < this.Count; i++)
+			{
+				array.SetValue(this[i], index);
+				index++;
+			}
 		}
 
-		private ArrayList _list;
+		public void CopyTo(AsnEncodedData[] array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || index >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			this._list.CopyTo(array, index);
+		}
+
+		public bool IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public object SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		private readonly List<AsnEncodedData> _list;
 	}
 }

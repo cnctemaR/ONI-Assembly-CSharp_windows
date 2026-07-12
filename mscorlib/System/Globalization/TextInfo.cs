@@ -87,12 +87,6 @@ namespace System.Globalization
 		}
 
 		[SecuritySafeCritical]
-		internal static int CompareOrdinalIgnoreCase(string str1, string str2)
-		{
-			return TextInfo.InternalCompareStringOrdinalIgnoreCase(str1, 0, str2, 0, str1.Length, str2.Length);
-		}
-
-		[SecuritySafeCritical]
 		internal static int CompareOrdinalIgnoreCaseEx(string strA, int indexA, string strB, int indexB, int lengthA, int lengthB)
 		{
 			return TextInfo.InternalCompareStringOrdinalIgnoreCase(strA, indexA, strB, indexB, lengthA, lengthB);
@@ -306,7 +300,7 @@ namespace System.Globalization
 			return this.ToUpperInternal(str);
 		}
 
-		private static char ToUpperAsciiInvariant(char c)
+		internal static char ToUpperAsciiInvariant(char c)
 		{
 			if ('a' <= c && c <= 'z')
 			{
@@ -915,7 +909,7 @@ namespace System.Globalization
 			return 'ↄ';
 		}
 
-		private unsafe static int InternalCompareStringOrdinalIgnoreCase(string strA, int indexA, string strB, int indexB, int lenA, int lenB)
+		internal unsafe static int InternalCompareStringOrdinalIgnoreCase(string strA, int indexA, string strB, int indexB, int lenA, int lenB)
 		{
 			if (strA == null)
 			{
@@ -965,6 +959,57 @@ namespace System.Globalization
 					ptr5++;
 				}
 				return num - num2;
+			}
+		}
+
+		internal unsafe void ToLowerAsciiInvariant(ReadOnlySpan<char> source, Span<char> destination)
+		{
+			for (int i = 0; i < source.Length; i++)
+			{
+				*destination[i] = TextInfo.ToLowerAsciiInvariant((char)(*source[i]));
+			}
+		}
+
+		internal unsafe void ToUpperAsciiInvariant(ReadOnlySpan<char> source, Span<char> destination)
+		{
+			for (int i = 0; i < source.Length; i++)
+			{
+				*destination[i] = TextInfo.ToUpperAsciiInvariant((char)(*source[i]));
+			}
+		}
+
+		internal unsafe void ChangeCase(ReadOnlySpan<char> source, Span<char> destination, bool toUpper)
+		{
+			if (source.IsEmpty)
+			{
+				return;
+			}
+			fixed (char* reference = MemoryMarshal.GetReference<char>(source))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(destination))
+				{
+					char* ptr2 = reference2;
+					int i = 0;
+					char* ptr3 = ptr;
+					char* ptr4 = ptr2;
+					if (toUpper)
+					{
+						while (i < source.Length)
+						{
+							*(ptr4++) = this.ToUpper(*(ptr3++));
+							i++;
+						}
+					}
+					else
+					{
+						while (i < source.Length)
+						{
+							*(ptr4++) = this.ToLower(*(ptr3++));
+							i++;
+						}
+					}
+				}
 			}
 		}
 

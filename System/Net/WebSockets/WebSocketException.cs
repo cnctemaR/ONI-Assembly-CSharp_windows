@@ -91,10 +91,16 @@ namespace System.Net.WebSockets
 		{
 		}
 
+		private WebSocketException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
+		{
+		}
+
 		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
+			info.AddValue("WebSocketErrorCode", this._webSocketErrorCode);
 		}
 
 		public override int ErrorCode
@@ -118,7 +124,7 @@ namespace System.Net.WebSockets
 			switch (error)
 			{
 			case WebSocketError.InvalidMessageType:
-				return global::SR.Format("The received  message type is invalid after calling {0}. {0} should only be used if no more data is expected from the remote endpoint. Use '{1}' instead to keep being able to receive data but close the output channel.", string.Format("{0}.{1}", "WebSocket", "CloseAsync"), string.Format("{0}.{1}", "WebSocket", "CloseOutputAsync"));
+				return SR.Format("The received  message type is invalid after calling {0}. {0} should only be used if no more data is expected from the remote endpoint. Use '{1}' instead to keep being able to receive data but close the output channel.", "WebSocket.CloseAsync", "WebSocket.CloseOutputAsync");
 			case WebSocketError.Faulted:
 				return "An exception caused the WebSocket to enter the Aborted state. Please see the InnerException, if present, for more details.";
 			case WebSocketError.NotAWebSocket:

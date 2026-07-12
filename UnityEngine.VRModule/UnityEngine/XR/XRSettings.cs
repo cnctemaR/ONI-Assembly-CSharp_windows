@@ -5,9 +5,9 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/VR/VRModule.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Modules/VR/ScriptBindings/XR.bindings.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
+	[NativeHeader("Modules/VR/VRModule.h")]
 	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
 	[NativeConditional("ENABLE_VR")]
 	public static class XRSettings
@@ -17,6 +17,7 @@ namespace UnityEngine.XR
 			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[Obsolete("XRSettings.enabled{set;} is deprecated and should no longer be used. Instead, call Start() and Stop() on an XRDisplaySubystem instance.")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -84,8 +85,8 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[NativeName("DeviceEyeTextureDimension")]
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("DeviceEyeTextureDimension")]
 		public static extern TextureDimension deviceEyeTextureDimension
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -109,8 +110,8 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[NativeName("RenderViewportScale")]
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("RenderViewportScale")]
 		internal static extern float renderViewportScaleInternal
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -119,7 +120,7 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float occlusionMaskScale
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -128,7 +129,7 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool useOcclusionMesh
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -137,19 +138,21 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DeviceName")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string loadedDeviceName
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		[Obsolete("XRSettings.LoadDeviceByName is deprecated and should no longer be used. Instead, use the SubsystemManager to load XR devices by querying subsystem descriptors to create and start the subsystems of your choice.")]
 		public static void LoadDeviceByName(string deviceName)
 		{
 			XRSettings.LoadDeviceByName(new string[] { deviceName });
 		}
 
+		[Obsolete("XRSettings.LoadDeviceByName is deprecated and should no longer be used. Instead, use the SubsystemManager to load XR devices by querying subsystem descriptors to create and start the subsystems of your choice.")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LoadDeviceByName(string[] prioritizedDeviceNameList);
 

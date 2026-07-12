@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,48 +7,19 @@ namespace System.Net.Sockets
 {
 	public class NetworkStream : Stream
 	{
-		internal NetworkStream()
-		{
-			this.m_OwnsSocket = true;
-		}
-
 		public NetworkStream(Socket socket)
+			: this(socket, FileAccess.ReadWrite, false)
 		{
-			if (socket == null)
-			{
-				throw new ArgumentNullException("socket");
-			}
-			this.InitNetworkStream(socket, FileAccess.ReadWrite);
 		}
 
 		public NetworkStream(Socket socket, bool ownsSocket)
+			: this(socket, FileAccess.ReadWrite, ownsSocket)
 		{
-			if (socket == null)
-			{
-				throw new ArgumentNullException("socket");
-			}
-			this.InitNetworkStream(socket, FileAccess.ReadWrite);
-			this.m_OwnsSocket = ownsSocket;
-		}
-
-		internal NetworkStream(NetworkStream networkStream, bool ownsSocket)
-		{
-			Socket socket = networkStream.Socket;
-			if (socket == null)
-			{
-				throw new ArgumentNullException("networkStream");
-			}
-			this.InitNetworkStream(socket, FileAccess.ReadWrite);
-			this.m_OwnsSocket = ownsSocket;
 		}
 
 		public NetworkStream(Socket socket, FileAccess access)
+			: this(socket, access, false)
 		{
-			if (socket == null)
-			{
-				throw new ArgumentNullException("socket");
-			}
-			this.InitNetworkStream(socket, access);
 		}
 
 		public NetworkStream(Socket socket, FileAccess access, bool ownsSocket)
@@ -59,66 +28,50 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentNullException("socket");
 			}
-			this.InitNetworkStream(socket, access);
-			this.m_OwnsSocket = ownsSocket;
+			if (!socket.Blocking)
+			{
+				throw new IOException("The operation is not allowed on a non-blocking Socket.");
+			}
+			if (!socket.Connected)
+			{
+				throw new IOException("The operation is not allowed on non-connected sockets.");
+			}
+			if (socket.SocketType != SocketType.Stream)
+			{
+				throw new IOException("The operation is not allowed on non-stream oriented sockets.");
+			}
+			this._streamSocket = socket;
+			this._ownsSocket = ownsSocket;
+			switch (access)
+			{
+			case FileAccess.Read:
+				this._readable = true;
+				return;
+			case FileAccess.Write:
+				this._writeable = true;
+				return;
+			}
+			this._readable = true;
+			this._writeable = true;
 		}
 
 		protected Socket Socket
 		{
 			get
 			{
-				return this.m_StreamSocket;
+				return this._streamSocket;
 			}
-		}
-
-		internal Socket InternalSocket
-		{
-			get
-			{
-				Socket streamSocket = this.m_StreamSocket;
-				if (this.m_CleanedUp || streamSocket == null)
-				{
-					throw new ObjectDisposedException(base.GetType().FullName);
-				}
-				return streamSocket;
-			}
-		}
-
-		internal void InternalAbortSocket()
-		{
-			if (!this.m_OwnsSocket)
-			{
-				throw new InvalidOperationException();
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (this.m_CleanedUp || streamSocket == null)
-			{
-				return;
-			}
-			try
-			{
-				streamSocket.Close(0);
-			}
-			catch (ObjectDisposedException)
-			{
-			}
-		}
-
-		internal void ConvertToNotSocketOwner()
-		{
-			this.m_OwnsSocket = false;
-			GC.SuppressFinalize(this);
 		}
 
 		protected bool Readable
 		{
 			get
 			{
-				return this.m_Readable;
+				return this._readable;
 			}
 			set
 			{
-				this.m_Readable = value;
+				this._readable = value;
 			}
 		}
 
@@ -126,11 +79,11 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_Writeable;
+				return this._writeable;
 			}
 			set
 			{
-				this.m_Writeable = value;
+				this._writeable = value;
 			}
 		}
 
@@ -138,7 +91,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_Readable;
+				return this._readable;
 			}
 		}
 
@@ -154,7 +107,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_Writeable;
+				return this._writeable;
 			}
 		}
 
@@ -170,7 +123,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				int num = (int)this.m_StreamSocket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
+				int num = (int)this._streamSocket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
 				if (num == 0)
 				{
 					return -1;
@@ -181,7 +134,7 @@ namespace System.Net.Sockets
 			{
 				if (value <= 0 && value != -1)
 				{
-					throw new ArgumentOutOfRangeException("value", global::SR.GetString("Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0."));
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0.");
 				}
 				this.SetSocketTimeoutOption(SocketShutdown.Receive, value, false);
 			}
@@ -191,7 +144,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				int num = (int)this.m_StreamSocket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
+				int num = (int)this._streamSocket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
 				if (num == 0)
 				{
 					return -1;
@@ -202,7 +155,7 @@ namespace System.Net.Sockets
 			{
 				if (value <= 0 && value != -1)
 				{
-					throw new ArgumentOutOfRangeException("value", global::SR.GetString("Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0."));
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0.");
 				}
 				this.SetSocketTimeoutOption(SocketShutdown.Send, value, false);
 			}
@@ -212,16 +165,11 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				if (this.m_CleanedUp)
+				if (this._cleanedUp)
 				{
 					throw new ObjectDisposedException(base.GetType().FullName);
 				}
-				Socket streamSocket = this.m_StreamSocket;
-				if (streamSocket == null)
-				{
-					throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-				}
-				return streamSocket.Available != 0;
+				return this._streamSocket.Available != 0;
 			}
 		}
 
@@ -229,7 +177,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+				throw new NotSupportedException("This stream does not support seek operations.");
 			}
 		}
 
@@ -237,155 +185,148 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+				throw new NotSupportedException("This stream does not support seek operations.");
 			}
 			set
 			{
-				throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+				throw new NotSupportedException("This stream does not support seek operations.");
 			}
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+			throw new NotSupportedException("This stream does not support seek operations.");
 		}
 
-		internal void InitNetworkStream(Socket socket, FileAccess Access)
-		{
-			if (!socket.Blocking)
-			{
-				throw new IOException(global::SR.GetString("The operation is not allowed on a non-blocking Socket."));
-			}
-			if (!socket.Connected)
-			{
-				throw new IOException(global::SR.GetString("The operation is not allowed on non-connected sockets."));
-			}
-			if (socket.SocketType != SocketType.Stream)
-			{
-				throw new IOException(global::SR.GetString("The operation is not allowed on non-stream oriented sockets."));
-			}
-			this.m_StreamSocket = socket;
-			switch (Access)
-			{
-			case FileAccess.Read:
-				this.m_Readable = true;
-				return;
-			case FileAccess.Write:
-				this.m_Writeable = true;
-				return;
-			}
-			this.m_Readable = true;
-			this.m_Writeable = true;
-		}
-
-		internal bool PollRead()
-		{
-			if (this.m_CleanedUp)
-			{
-				return false;
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			return streamSocket != null && streamSocket.Poll(0, SelectMode.SelectRead);
-		}
-
-		internal bool Poll(int microSeconds, SelectMode mode)
-		{
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
-			return streamSocket.Poll(microSeconds, mode);
-		}
-
-		public override int Read([In] [Out] byte[] buffer, int offset, int size)
+		public override int Read(byte[] buffer, int offset, int size)
 		{
 			bool canRead = this.CanRead;
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
 			if (!canRead)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support reading."));
+				throw new InvalidOperationException("The stream does not support reading.");
 			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
 			}
-			if (offset < 0 || offset > buffer.Length)
+			if ((ulong)offset > (ulong)((long)buffer.Length))
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || size > buffer.Length - offset)
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
 			{
 				throw new ArgumentOutOfRangeException("size");
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
 			}
 			int num;
 			try
 			{
-				num = streamSocket.Receive(buffer, offset, size, SocketFlags.None);
+				num = this._streamSocket.Receive(buffer, offset, size, SocketFlags.None);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
 			}
 			return num;
+		}
+
+		public override int Read(Span<byte> destination)
+		{
+			if (base.GetType() != typeof(NetworkStream))
+			{
+				return base.Read(destination);
+			}
+			if (this._cleanedUp)
+			{
+				throw new ObjectDisposedException(base.GetType().FullName);
+			}
+			if (!this.CanRead)
+			{
+				throw new InvalidOperationException("The stream does not support reading.");
+			}
+			SocketError socketError;
+			int num = this._streamSocket.Receive(destination, SocketFlags.None, out socketError);
+			if (socketError != SocketError.Success)
+			{
+				SocketException ex = new SocketException((int)socketError);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
+			}
+			return num;
+		}
+
+		public unsafe override int ReadByte()
+		{
+			byte b;
+			if (this.Read(new Span<byte>((void*)(&b), 1)) != 0)
+			{
+				return (int)b;
+			}
+			return -1;
 		}
 
 		public override void Write(byte[] buffer, int offset, int size)
 		{
 			bool canWrite = this.CanWrite;
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
 			if (!canWrite)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support writing."));
+				throw new InvalidOperationException("The stream does not support writing.");
 			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
 			}
-			if (offset < 0 || offset > buffer.Length)
+			if ((ulong)offset > (ulong)((long)buffer.Length))
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || size > buffer.Length - offset)
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
 			{
 				throw new ArgumentOutOfRangeException("size");
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
 			try
 			{
-				streamSocket.Send(buffer, offset, size, SocketFlags.None);
+				this._streamSocket.Send(buffer, offset, size, SocketFlags.None);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
 			}
+		}
+
+		public override void Write(ReadOnlySpan<byte> source)
+		{
+			if (base.GetType() != typeof(NetworkStream))
+			{
+				base.Write(source);
+				return;
+			}
+			if (this._cleanedUp)
+			{
+				throw new ObjectDisposedException(base.GetType().FullName);
+			}
+			if (!this.CanWrite)
+			{
+				throw new InvalidOperationException("The stream does not support writing.");
+			}
+			SocketError socketError;
+			this._streamSocket.Send(source, SocketFlags.None, out socketError);
+			if (socketError != SocketError.Success)
+			{
+				SocketException ex = new SocketException((int)socketError);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
+			}
+		}
+
+		public unsafe override void WriteByte(byte value)
+		{
+			this.Write(new ReadOnlySpan<byte>((void*)(&value), 1));
 		}
 
 		public void Close(int timeout)
@@ -394,26 +335,22 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentOutOfRangeException("timeout");
 			}
-			this.m_CloseTimeout = timeout;
-			this.Close();
+			this._closeTimeout = timeout;
+			base.Dispose();
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			int cleanedUp = (this.m_CleanedUp ? 1 : 0);
-			this.m_CleanedUp = true;
-			if (cleanedUp == 0 && disposing && this.m_StreamSocket != null)
+			int cleanedUp = (this._cleanedUp ? 1 : 0);
+			this._cleanedUp = true;
+			if (cleanedUp == 0 && disposing)
 			{
-				this.m_Readable = false;
-				this.m_Writeable = false;
-				if (this.m_OwnsSocket)
+				this._readable = false;
+				this._writeable = false;
+				if (this._ownsSocket)
 				{
-					Socket streamSocket = this.m_StreamSocket;
-					if (streamSocket != null)
-					{
-						streamSocket.InternalShutdown(SocketShutdown.Both);
-						streamSocket.Close(this.m_CloseTimeout);
-					}
+					this._streamSocket.InternalShutdown(SocketShutdown.Both);
+					this._streamSocket.Close(this._closeTimeout);
 				}
 			}
 			base.Dispose(disposing);
@@ -424,95 +361,44 @@ namespace System.Net.Sockets
 			this.Dispose(false);
 		}
 
-		internal bool Connected
-		{
-			get
-			{
-				Socket streamSocket = this.m_StreamSocket;
-				return !this.m_CleanedUp && streamSocket != null && streamSocket.Connected;
-			}
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
 		{
 			bool canRead = this.CanRead;
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
 			if (!canRead)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support reading."));
+				throw new InvalidOperationException("The stream does not support reading.");
 			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
 			}
-			if (offset < 0 || offset > buffer.Length)
+			if ((ulong)offset > (ulong)((long)buffer.Length))
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || size > buffer.Length - offset)
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
 			{
 				throw new ArgumentOutOfRangeException("size");
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
 			IAsyncResult asyncResult;
 			try
 			{
-				asyncResult = streamSocket.BeginReceive(buffer, offset, size, SocketFlags.None, callback, state);
+				asyncResult = this._streamSocket.BeginReceive(buffer, offset, size, SocketFlags.None, callback, state);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { ex.Message }), ex);
-			}
-			return asyncResult;
-		}
-
-		internal virtual IAsyncResult UnsafeBeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
-		{
-			bool canRead = this.CanRead;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (!canRead)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support reading."));
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
-			IAsyncResult asyncResult;
-			try
-			{
-				asyncResult = streamSocket.UnsafeBeginReceive(buffer, offset, size, SocketFlags.None, callback, state);
-			}
-			catch (Exception ex)
-			{
-				if (NclUtilities.IsFatal(ex))
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
 			}
 			return asyncResult;
 		}
 
 		public override int EndRead(IAsyncResult asyncResult)
 		{
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
@@ -520,107 +406,56 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
 			int num;
 			try
 			{
-				num = streamSocket.EndReceive(asyncResult);
+				num = this._streamSocket.EndReceive(asyncResult);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to read data from the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
 			}
 			return num;
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
 		{
 			bool canWrite = this.CanWrite;
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
 			if (!canWrite)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support writing."));
+				throw new InvalidOperationException("The stream does not support writing.");
 			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
 			}
-			if (offset < 0 || offset > buffer.Length)
+			if ((ulong)offset > (ulong)((long)buffer.Length))
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || size > buffer.Length - offset)
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
 			{
 				throw new ArgumentOutOfRangeException("size");
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
 			IAsyncResult asyncResult;
 			try
 			{
-				asyncResult = streamSocket.BeginSend(buffer, offset, size, SocketFlags.None, callback, state);
+				asyncResult = this._streamSocket.BeginSend(buffer, offset, size, SocketFlags.None, callback, state);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
-			}
-			return asyncResult;
-		}
-
-		internal virtual IAsyncResult UnsafeBeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
-		{
-			bool canWrite = this.CanWrite;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (!canWrite)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The stream does not support writing."));
-			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
-			IAsyncResult asyncResult;
-			try
-			{
-				asyncResult = streamSocket.UnsafeBeginSend(buffer, offset, size, SocketFlags.None, callback, state);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
 			}
 			return asyncResult;
 		}
 
 		public override void EndWrite(IAsyncResult asyncResult)
 		{
-			if (this.m_CleanedUp)
+			if (this._cleanedUp)
 			{
 				throw new ObjectDisposedException(base.GetType().FullName);
 			}
@@ -628,127 +463,130 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
-			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
-			}
 			try
 			{
-				streamSocket.EndSend(asyncResult);
+				this._streamSocket.EndSend(asyncResult);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
 			}
 		}
 
-		internal virtual void MultipleWrite(BufferOffsetSize[] buffers)
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
 		{
-			if (buffers == null)
+			bool canRead = this.CanRead;
+			if (this._cleanedUp)
 			{
-				throw new ArgumentNullException("buffers");
+				throw new ObjectDisposedException(base.GetType().FullName);
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
+			if (!canRead)
 			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
+				throw new InvalidOperationException("The stream does not support reading.");
 			}
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer");
+			}
+			if ((ulong)offset > (ulong)((long)buffer.Length))
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
+			{
+				throw new ArgumentOutOfRangeException("size");
+			}
+			Task<int> task;
 			try
 			{
-				streamSocket.MultipleSend(buffers, SocketFlags.None);
+				task = this._streamSocket.ReceiveAsync(new Memory<byte>(buffer, offset, size), SocketFlags.None, true, cancellationToken).AsTask();
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
 			}
+			return task;
 		}
 
-		internal virtual IAsyncResult BeginMultipleWrite(BufferOffsetSize[] buffers, AsyncCallback callback, object state)
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
 		{
-			if (buffers == null)
+			bool canRead = this.CanRead;
+			if (this._cleanedUp)
 			{
-				throw new ArgumentNullException("buffers");
+				throw new ObjectDisposedException(base.GetType().FullName);
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
+			if (!canRead)
 			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
+				throw new InvalidOperationException("The stream does not support reading.");
 			}
-			IAsyncResult asyncResult;
+			ValueTask<int> valueTask;
 			try
 			{
-				asyncResult = streamSocket.BeginMultipleSend(buffers, SocketFlags.None, callback, state);
+				valueTask = this._streamSocket.ReceiveAsync(buffer, SocketFlags.None, true, cancellationToken);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to read data from the transport connection: {0}.", ex.Message), ex);
 			}
-			return asyncResult;
+			return valueTask;
 		}
 
-		internal virtual IAsyncResult UnsafeBeginMultipleWrite(BufferOffsetSize[] buffers, AsyncCallback callback, object state)
+		public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
 		{
-			if (buffers == null)
+			bool canWrite = this.CanWrite;
+			if (this._cleanedUp)
 			{
-				throw new ArgumentNullException("buffers");
+				throw new ObjectDisposedException(base.GetType().FullName);
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
+			if (!canWrite)
 			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
+				throw new InvalidOperationException("The stream does not support writing.");
 			}
-			IAsyncResult asyncResult;
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer");
+			}
+			if ((ulong)offset > (ulong)((long)buffer.Length))
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if ((ulong)size > (ulong)((long)(buffer.Length - offset)))
+			{
+				throw new ArgumentOutOfRangeException("size");
+			}
+			Task task;
 			try
 			{
-				asyncResult = streamSocket.UnsafeBeginMultipleSend(buffers, SocketFlags.None, callback, state);
+				task = this._streamSocket.SendAsyncForNetworkStream(new ReadOnlyMemory<byte>(buffer, offset, size), SocketFlags.None, cancellationToken).AsTask();
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
 			}
-			return asyncResult;
+			return task;
 		}
 
-		internal virtual void EndMultipleWrite(IAsyncResult asyncResult)
+		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
 		{
-			if (asyncResult == null)
+			bool canWrite = this.CanWrite;
+			if (this._cleanedUp)
 			{
-				throw new ArgumentNullException("asyncResult");
+				throw new ObjectDisposedException(base.GetType().FullName);
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
+			if (!canWrite)
 			{
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { global::SR.GetString("The connection was closed") }));
+				throw new InvalidOperationException("The stream does not support writing.");
 			}
+			ValueTask valueTask;
 			try
 			{
-				streamSocket.EndMultipleSend(asyncResult);
+				valueTask = this._streamSocket.SendAsyncForNetworkStream(buffer, SocketFlags.None, cancellationToken);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OutOfMemoryException))
 			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				throw new IOException(global::SR.GetString("Unable to write data to the transport connection: {0}.", new object[] { ex.Message }), ex);
+				throw new IOException(SR.Format("Unable to write data to the transport connection: {0}.", ex.Message), ex);
 			}
+			return valueTask;
 		}
 
 		public override void Flush()
@@ -762,46 +600,58 @@ namespace System.Net.Sockets
 
 		public override void SetLength(long value)
 		{
-			throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+			throw new NotSupportedException("This stream does not support seek operations.");
 		}
 
 		internal void SetSocketTimeoutOption(SocketShutdown mode, int timeout, bool silent)
 		{
+			if (NetEventSource.IsEnabled)
+			{
+				NetEventSource.Enter(this, mode, timeout, silent, "SetSocketTimeoutOption");
+			}
 			if (timeout < 0)
 			{
 				timeout = 0;
 			}
-			Socket streamSocket = this.m_StreamSocket;
-			if (streamSocket == null)
+			if ((mode == SocketShutdown.Send || mode == SocketShutdown.Both) && timeout != this._currentWriteTimeout)
 			{
-				return;
+				this._streamSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, timeout, silent);
+				this._currentWriteTimeout = timeout;
 			}
-			if ((mode == SocketShutdown.Send || mode == SocketShutdown.Both) && timeout != this.m_CurrentWriteTimeout)
+			if ((mode == SocketShutdown.Receive || mode == SocketShutdown.Both) && timeout != this._currentReadTimeout)
 			{
-				streamSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, timeout, silent);
-				this.m_CurrentWriteTimeout = timeout;
-			}
-			if ((mode == SocketShutdown.Receive || mode == SocketShutdown.Both) && timeout != this.m_CurrentReadTimeout)
-			{
-				streamSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout, silent);
-				this.m_CurrentReadTimeout = timeout;
+				this._streamSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout, silent);
+				this._currentReadTimeout = timeout;
 			}
 		}
 
-		private Socket m_StreamSocket;
+		internal Socket InternalSocket
+		{
+			get
+			{
+				Socket streamSocket = this._streamSocket;
+				if (this._cleanedUp || streamSocket == null)
+				{
+					throw new ObjectDisposedException(base.GetType().FullName);
+				}
+				return streamSocket;
+			}
+		}
 
-		private bool m_Readable;
+		private readonly Socket _streamSocket;
 
-		private bool m_Writeable;
+		private readonly bool _ownsSocket;
 
-		private bool m_OwnsSocket;
+		private bool _readable;
 
-		private int m_CloseTimeout = -1;
+		private bool _writeable;
 
-		private volatile bool m_CleanedUp;
+		private int _closeTimeout = -1;
 
-		private int m_CurrentReadTimeout = -1;
+		private volatile bool _cleanedUp;
 
-		private int m_CurrentWriteTimeout = -1;
+		private int _currentReadTimeout = -1;
+
+		private int _currentWriteTimeout = -1;
 	}
 }

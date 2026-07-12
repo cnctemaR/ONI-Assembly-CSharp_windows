@@ -152,15 +152,15 @@ namespace System.Diagnostics
 				}
 				catch (ArgumentException ex)
 				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex);
+					throw new ConfigurationErrorsException(SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex);
 				}
 				catch (FormatException ex2)
 				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex2);
+					throw new ConfigurationErrorsException(SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex2);
 				}
 				catch (OverflowException ex3)
 				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex3);
+					throw new ConfigurationErrorsException(SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex3);
 				}
 			}
 		}

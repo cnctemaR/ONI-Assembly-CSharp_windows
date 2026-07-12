@@ -8,8 +8,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
 	[NativeHeader("Runtime/Export/Resources/Resources.bindings.h")]
+	[NativeHeader("Runtime/Misc/ResourceManagerUtility.h")]
 	public sealed class Resources
 	{
 		internal static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object
@@ -114,7 +114,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object InstanceIDToObject(int instanceID);
 
-		[FreeFunction("Resources_Bindings::InstanceIDToObjectList")]
+		[FreeFunction("Resources_Bindings::InstanceIDToObjectList", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InstanceIDToObjectList(IntPtr instanceIDs, int instanceCount, List<Object> objects);
 
@@ -138,6 +138,60 @@ namespace UnityEngine
 			else
 			{
 				Resources.InstanceIDToObjectList((IntPtr)instanceIDs.GetUnsafeReadOnlyPtr<int>(), instanceIDs.Length, objects);
+			}
+		}
+
+		[FreeFunction("Resources_Bindings::InstanceIDsToValidArray", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InstanceIDsToValidArray_Internal(IntPtr instanceIDs, int instanceCount, IntPtr validArray, int validArrayCount);
+
+		[FreeFunction("Resources_Bindings::DoesObjectWithInstanceIDExist", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool InstanceIDIsValid(int instanceId);
+
+		public static void InstanceIDsToValidArray(NativeArray<int> instanceIDs, NativeArray<bool> validArray)
+		{
+			bool flag = !instanceIDs.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "instanceIDs");
+			}
+			bool flag2 = !validArray.IsCreated;
+			if (flag2)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "validArray");
+			}
+			bool flag3 = instanceIDs.Length != validArray.Length;
+			if (flag3)
+			{
+				throw new ArgumentException("Size mismatch! Both arrays must be the same length.");
+			}
+			bool flag4 = instanceIDs.Length == 0;
+			if (!flag4)
+			{
+				Resources.InstanceIDsToValidArray_Internal((IntPtr)instanceIDs.GetUnsafeReadOnlyPtr<int>(), instanceIDs.Length, (IntPtr)validArray.GetUnsafePtr<bool>(), validArray.Length);
+			}
+		}
+
+		public unsafe static void InstanceIDsToValidArray(ReadOnlySpan<int> instanceIDs, Span<bool> validArray)
+		{
+			bool flag = instanceIDs.Length != validArray.Length;
+			if (flag)
+			{
+				throw new ArgumentException("Size mismatch! Both arrays must be the same length.");
+			}
+			bool flag2 = instanceIDs.Length == 0;
+			if (!flag2)
+			{
+				fixed (int* pinnableReference = instanceIDs.GetPinnableReference())
+				{
+					int* ptr = pinnableReference;
+					fixed (bool* pinnableReference2 = validArray.GetPinnableReference())
+					{
+						bool* ptr2 = pinnableReference2;
+						Resources.InstanceIDsToValidArray_Internal((IntPtr)((void*)ptr), instanceIDs.Length, (IntPtr)((void*)ptr2), validArray.Length);
+					}
+				}
 			}
 		}
 	}

@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class PropGravitasLabWallConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "PropGravitasLabWall";

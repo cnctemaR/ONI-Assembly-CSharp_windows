@@ -7,7 +7,7 @@ namespace TUNING
 	{
 		public const float EATING_SECONDS_PER_CALORIE = 2E-05f;
 
-		public const float FOOD_CALORIES_PER_CYCLE = 1000000f;
+		public static float FOOD_CALORIES_PER_CYCLE = -DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_CYCLE;
 
 		public const int FOOD_AMOUNT_INGREDIENT_ONLY = 0;
 

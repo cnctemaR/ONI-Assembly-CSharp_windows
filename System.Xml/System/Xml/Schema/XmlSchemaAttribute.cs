@@ -6,8 +6,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaAttribute : XmlSchemaAnnotated
 	{
-		[XmlAttribute("default")]
 		[DefaultValue(null)]
+		[XmlAttribute("default")]
 		public string DefaultValue
 		{
 			get
@@ -20,8 +20,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("fixed")]
 		[DefaultValue(null)]
+		[XmlAttribute("fixed")]
 		public string FixedValue
 		{
 			get
@@ -34,8 +34,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("form")]
 		[DefaultValue(XmlSchemaForm.None)]
+		[XmlAttribute("form")]
 		public XmlSchemaForm Form
 		{
 			get
@@ -123,8 +123,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[Obsolete("This property has been deprecated. Please use AttributeSchemaType property that returns a strongly typed attribute type. http://go.microsoft.com/fwlink/?linkid=14202")]
 		[XmlIgnore]
+		[Obsolete("This property has been deprecated. Please use AttributeSchemaType property that returns a strongly typed attribute type. http://go.microsoft.com/fwlink/?linkid=14202")]
 		public object AttributeType
 		{
 			get

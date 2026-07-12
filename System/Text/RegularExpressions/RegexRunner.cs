@@ -1,9 +1,7 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace System.Text.RegularExpressions
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	public abstract class RegexRunner
 	{
 		protected internal RegexRunner()
@@ -19,8 +17,8 @@ namespace System.Text.RegularExpressions
 		{
 			bool flag = false;
 			Regex.ValidateMatchTimeout(timeout);
-			this.ignoreTimeout = Regex.InfiniteMatchTimeout == timeout;
-			this.timeout = (this.ignoreTimeout ? ((int)Regex.InfiniteMatchTimeout.TotalMilliseconds) : ((int)(timeout.TotalMilliseconds + 0.5)));
+			this._ignoreTimeout = Regex.InfiniteMatchTimeout == timeout;
+			this._timeout = (this._ignoreTimeout ? ((int)Regex.InfiniteMatchTimeout.TotalMilliseconds) : ((int)(timeout.TotalMilliseconds + 0.5)));
 			this.runregex = regex;
 			this.runtext = text;
 			this.runtextbeg = textbeg;
@@ -71,42 +69,42 @@ namespace System.Text.RegularExpressions
 
 		private void StartTimeoutWatch()
 		{
-			if (this.ignoreTimeout)
+			if (this._ignoreTimeout)
 			{
 				return;
 			}
-			this.timeoutChecksToSkip = 1000;
-			this.timeoutOccursAt = Environment.TickCount + this.timeout;
+			this._timeoutChecksToSkip = 1000;
+			this._timeoutOccursAt = Environment.TickCount + this._timeout;
 		}
 
 		protected void CheckTimeout()
 		{
-			if (this.ignoreTimeout)
+			if (this._ignoreTimeout)
 			{
 				return;
 			}
-			int num = this.timeoutChecksToSkip - 1;
-			this.timeoutChecksToSkip = num;
-			if (num != 0)
-			{
-				return;
-			}
-			this.timeoutChecksToSkip = 1000;
 			this.DoCheckTimeout();
 		}
 
 		private void DoCheckTimeout()
 		{
+			int num = this._timeoutChecksToSkip - 1;
+			this._timeoutChecksToSkip = num;
+			if (num != 0)
+			{
+				return;
+			}
+			this._timeoutChecksToSkip = 1000;
 			int tickCount = Environment.TickCount;
-			if (tickCount < this.timeoutOccursAt)
+			if (tickCount < this._timeoutOccursAt)
 			{
 				return;
 			}
-			if (0 > this.timeoutOccursAt && 0 < tickCount)
+			if (0 > this._timeoutOccursAt && 0 < tickCount)
 			{
 				return;
 			}
-			throw new RegexMatchTimeoutException(this.runtext, this.runregex.pattern, TimeSpan.FromMilliseconds((double)this.timeout));
+			throw new RegexMatchTimeoutException(this.runtext, this.runregex.pattern, TimeSpan.FromMilliseconds((double)this._timeout));
 		}
 
 		protected abstract void Go();
@@ -352,14 +350,14 @@ namespace System.Text.RegularExpressions
 
 		protected internal Regex runregex;
 
-		private int timeout;
+		private int _timeout;
 
-		private bool ignoreTimeout;
+		private bool _ignoreTimeout;
 
-		private int timeoutOccursAt;
+		private int _timeoutOccursAt;
 
 		private const int TimeoutCheckFrequency = 1000;
 
-		private int timeoutChecksToSkip;
+		private int _timeoutChecksToSkip;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -94,13 +93,6 @@ namespace MS.Internal.Xml.XPath
 			{
 				return (QueryProps)23;
 			}
-		}
-
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			this.input.PrintQuery(w);
-			w.WriteEndElement();
 		}
 
 		internal Query input;

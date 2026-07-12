@@ -283,23 +283,7 @@ public class ScenePartitioner : ISim1000ms
 		this.dirtyNodes.Clear();
 	}
 
-	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
-	{
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
-		this.queryId++;
-		for (int i = 0; i < cells.Count; i++)
-		{
-			int num = 0;
-			int num2 = 0;
-			Grid.CellToXY(cells[i], out num, out num2);
-			this.GatherEntries(num, num2, 1, 1, layer, event_data, pooledList, this.queryId);
-		}
-		this.RunLayerGlobalEvent(cells, layer, event_data);
-		this.RunEntries(pooledList, event_data);
-		pooledList.Recycle();
-	}
-
-	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
+	public void TriggerEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
@@ -324,18 +308,7 @@ public class ScenePartitioner : ISim1000ms
 		pooledList.Recycle();
 	}
 
-	private void RunLayerGlobalEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
-	{
-		if (layer.OnEvent != null)
-		{
-			for (int i = 0; i < cells.Count; i++)
-			{
-				layer.OnEvent(cells[i], event_data);
-			}
-		}
-	}
-
-	private void RunLayerGlobalEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
+	private void RunLayerGlobalEvent(IEnumerable<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		if (layer.OnEvent != null)
 		{
@@ -417,27 +390,33 @@ public class ScenePartitioner : ISim1000ms
 		}
 	}
 
-	public void UnsafeReadonlyGatherEntries(int x, int y, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
+	public IEnumerable<object> AsyncSafeEnumerate(int x, int y, int width, int height, ScenePartitionerLayer layer)
 	{
 		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
-		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
-		int num2 = Math.Max(nodeExtents.y, 0);
-		int num3 = Math.Max(nodeExtents.x, 0);
-		int num4 = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
-		int layer2 = layer.layer;
-		for (int i = num2; i < num; i++)
+		int max_y = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(1));
+		int num = Math.Max(nodeExtents.y, 0);
+		int start_x = Math.Max(nodeExtents.x, 0);
+		int max_x = Math.Min(nodeExtents.x + nodeExtents.width, this.nodes.GetLength(2));
+		int layer_idx = layer.layer;
+		int num2;
+		for (int node_y = num; node_y < max_y; node_y = num2)
 		{
-			for (int j = num3; j < num4; j++)
+			for (int node_x = start_x; node_x < max_x; node_x = num2)
 			{
-				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer2, i, j].entries)
+				foreach (ScenePartitionerEntry scenePartitionerEntry in this.nodes[layer_idx, node_y, node_x].entries)
 				{
 					if (scenePartitionerEntry != null && scenePartitionerEntry.obj != null && x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
 					{
-						gathered_entries.Add(scenePartitionerEntry);
+						yield return scenePartitionerEntry.obj;
 					}
 				}
+				HashSet<ScenePartitionerEntry>.Enumerator enumerator = default(HashSet<ScenePartitionerEntry>.Enumerator);
+				num2 = node_x + 1;
 			}
+			num2 = node_y + 1;
 		}
+		yield break;
+		yield break;
 	}
 
 	public void Cleanup()

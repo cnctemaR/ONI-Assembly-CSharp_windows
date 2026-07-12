@@ -1393,8 +1393,7 @@ namespace Mono.Math
 				if (num5 != 0)
 				{
 					BigInteger[] array2 = array;
-					int num19 = 1;
-					array2[num19] >>= num5;
+					array2[1] = array2[1] >> num5;
 				}
 				return array;
 			}

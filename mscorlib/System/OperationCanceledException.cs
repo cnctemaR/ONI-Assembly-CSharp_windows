@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class OperationCanceledException : SystemException
 	{
@@ -22,21 +20,21 @@ namespace System
 		}
 
 		public OperationCanceledException()
-			: base(Environment.GetResourceString("The operation was canceled."))
+			: base("The operation was canceled.")
 		{
-			base.SetErrorCode(-2146233029);
+			base.HResult = -2146233029;
 		}
 
 		public OperationCanceledException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233029);
+			base.HResult = -2146233029;
 		}
 
 		public OperationCanceledException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233029);
+			base.HResult = -2146233029;
 		}
 
 		public OperationCanceledException(CancellationToken token)

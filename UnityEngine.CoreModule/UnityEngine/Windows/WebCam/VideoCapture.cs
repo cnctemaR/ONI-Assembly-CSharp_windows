@@ -10,8 +10,8 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.Windows.WebCam
 {
 	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
-	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
 	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class VideoCapture : IDisposable
 	{
@@ -55,8 +55,8 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("GetSupportedResolutions")]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Resolution[] GetSupportedResolutions_Internal();
 
@@ -65,8 +65,8 @@ namespace UnityEngine.Windows.WebCam
 			return VideoCapture.GetSupportedFrameRatesForResolution_Internal(resolution.width, resolution.height);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("GetSupportedFrameRatesForResolution")]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float[] GetSupportedFrameRatesForResolution_Internal(int resolutionWidth, int resolutionHeight);
 
@@ -215,9 +215,9 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
 		[ThreadAndSerializationSafe]
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetUnsafePointerToVideoDeviceController();
 
@@ -254,9 +254,9 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
+		[ThreadAndSerializationSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DisposeThreaded_Internal();
 
@@ -267,7 +267,7 @@ namespace UnityEngine.Windows.WebCam
 
 		private static Resolution[] s_SupportedResolutions;
 
-		private static readonly long HR_SUCCESS = 0L;
+		private static readonly long HR_SUCCESS;
 
 		public enum CaptureResultType
 		{

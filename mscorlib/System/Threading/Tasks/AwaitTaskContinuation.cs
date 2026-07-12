@@ -1,43 +1,26 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security;
+using Internal.Runtime.Augments;
 
 namespace System.Threading.Tasks
 {
 	internal class AwaitTaskContinuation : TaskContinuation, IThreadPoolWorkItem
 	{
-		[SecurityCritical]
-		internal AwaitTaskContinuation(Action action, bool flowExecutionContext, ref StackCrawlMark stackMark)
-		{
-			this.m_action = action;
-			if (flowExecutionContext)
-			{
-				this.m_capturedContext = ExecutionContext.Capture(ref stackMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx | ExecutionContext.CaptureOptions.OptimizeDefaultCase);
-			}
-		}
-
-		[SecurityCritical]
 		internal AwaitTaskContinuation(Action action, bool flowExecutionContext)
 		{
 			this.m_action = action;
 			if (flowExecutionContext)
 			{
-				this.m_capturedContext = ExecutionContext.FastCapture();
+				this.m_capturedContext = ExecutionContext.Capture();
 			}
 		}
 
 		protected Task CreateTask(Action<object> action, object state, TaskScheduler scheduler)
 		{
-			return new Task(action, state, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.QueuedByRuntime, scheduler)
-			{
-				CapturedContext = this.m_capturedContext
-			};
+			return new Task(action, state, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.QueuedByRuntime, scheduler);
 		}
 
-		[SecuritySafeCritical]
-		internal override void Run(Task task, bool canInlineContinuationTask)
+		internal override void Run(Task ignored, bool canInlineContinuationTask)
 		{
 			if (canInlineContinuationTask && AwaitTaskContinuation.IsValidLocationForInlining)
 			{
@@ -51,8 +34,8 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				SynchronizationContext currentNoFlow = SynchronizationContext.CurrentNoFlow;
-				if (currentNoFlow != null && currentNoFlow.GetType() != typeof(SynchronizationContext))
+				SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+				if (synchronizationContext != null && synchronizationContext.GetType() != typeof(SynchronizationContext))
 				{
 					return false;
 				}
@@ -61,25 +44,6 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[SecurityCritical]
-		private void ExecuteWorkItemHelper()
-		{
-			if (this.m_capturedContext == null)
-			{
-				this.m_action();
-				return;
-			}
-			try
-			{
-				ExecutionContext.Run(this.m_capturedContext, AwaitTaskContinuation.GetInvokeActionCallback(), this.m_action, true);
-			}
-			finally
-			{
-				this.m_capturedContext.Dispose();
-			}
-		}
-
-		[SecurityCritical]
 		void IThreadPoolWorkItem.ExecuteWorkItem()
 		{
 			if (this.m_capturedContext == null)
@@ -87,21 +51,14 @@ namespace System.Threading.Tasks
 				this.m_action();
 				return;
 			}
-			this.ExecuteWorkItemHelper();
+			ExecutionContext.Run(this.m_capturedContext, AwaitTaskContinuation.GetInvokeActionCallback(), this.m_action);
 		}
 
-		[SecurityCritical]
-		void IThreadPoolWorkItem.MarkAborted(ThreadAbortException tae)
-		{
-		}
-
-		[SecurityCritical]
 		private static void InvokeAction(object state)
 		{
 			((Action)state)();
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected static ContextCallback GetInvokeActionCallback()
 		{
@@ -113,24 +70,17 @@ namespace System.Threading.Tasks
 			return contextCallback;
 		}
 
-		[SecurityCritical]
 		protected void RunCallback(ContextCallback callback, object state, ref Task currentTask)
 		{
 			Task task = currentTask;
+			SynchronizationContext currentExplicit = SynchronizationContext.CurrentExplicit;
 			try
 			{
 				if (task != null)
 				{
 					currentTask = null;
 				}
-				if (this.m_capturedContext == null)
-				{
-					callback(state);
-				}
-				else
-				{
-					ExecutionContext.Run(this.m_capturedContext, callback, state, true);
-				}
+				callback(state);
 			}
 			catch (Exception ex)
 			{
@@ -142,19 +92,15 @@ namespace System.Threading.Tasks
 				{
 					currentTask = task;
 				}
-				if (this.m_capturedContext != null)
-				{
-					this.m_capturedContext.Dispose();
-				}
+				SynchronizationContext.SetSynchronizationContext(currentExplicit);
 			}
 		}
 
-		[SecurityCritical]
 		internal static void RunOrScheduleAction(Action action, bool allowInlining, ref Task currentTask)
 		{
 			if (!allowInlining || !AwaitTaskContinuation.IsValidLocationForInlining)
 			{
-				AwaitTaskContinuation.UnsafeScheduleAction(action, currentTask);
+				AwaitTaskContinuation.UnsafeScheduleAction(action);
 				return;
 			}
 			Task task = currentTask;
@@ -179,22 +125,14 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[SecurityCritical]
-		internal static void UnsafeScheduleAction(Action action, Task task)
+		internal static void UnsafeScheduleAction(Action action)
 		{
 			ThreadPool.UnsafeQueueCustomWorkItem(new AwaitTaskContinuation(action, false), false);
 		}
 
 		protected static void ThrowAsyncIfNecessary(Exception exc)
 		{
-			if (!(exc is ThreadAbortException) && !(exc is AppDomainUnloadedException) && !WindowsRuntimeMarshal.ReportUnhandledError(exc))
-			{
-				ExceptionDispatchInfo exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exc);
-				ThreadPool.QueueUserWorkItem(delegate(object s)
-				{
-					((ExceptionDispatchInfo)s).Throw();
-				}, exceptionDispatchInfo);
-			}
+			RuntimeAugments.ReportUnhandledException(exc);
 		}
 
 		internal override Delegate[] GetDelegateContinuationsForDebugger()
@@ -202,11 +140,14 @@ namespace System.Threading.Tasks
 			return new Delegate[] { AsyncMethodBuilderCore.TryGetStateMachineForDebugger(this.m_action) };
 		}
 
+		public void MarkAborted(ThreadAbortException e)
+		{
+		}
+
 		private readonly ExecutionContext m_capturedContext;
 
 		protected readonly Action m_action;
 
-		[SecurityCritical]
 		private static ContextCallback s_invokeActionCallback;
 	}
 }

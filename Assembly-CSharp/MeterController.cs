@@ -138,6 +138,15 @@ public class MeterController
 		this.meterController.Rotation = rot;
 	}
 
+	public void Unlink()
+	{
+		if (this.link != null)
+		{
+			this.link.Unregister();
+			this.link = null;
+		}
+	}
+
 	public GameObject gameObject;
 
 	public Func<float, int, float> interpolateFunction = new Func<float, int, float>(MeterController.MinMaxStepLerp);

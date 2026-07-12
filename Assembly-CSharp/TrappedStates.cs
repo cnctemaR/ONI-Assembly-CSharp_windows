@@ -7,7 +7,15 @@ public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.trapped;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.TRAPPED.NAME, CREATURES.STATUSITEMS.TRAPPED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.TRAPPED.NAME;
+		string text2 = CREATURES.STATUSITEMS.TRAPPED.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.trapped.Enter(delegate(TrappedStates.Instance smi)
 		{
 			Navigator component = smi.GetComponent<Navigator>();

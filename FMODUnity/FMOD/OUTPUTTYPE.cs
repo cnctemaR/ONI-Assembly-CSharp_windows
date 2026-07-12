@@ -24,6 +24,8 @@ namespace FMOD
 		WINSONIC,
 		AAUDIO,
 		AUDIOWORKLET,
+		PHASE,
+		OHAUDIO,
 		MAX
 	}
 }

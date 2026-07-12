@@ -21,7 +21,7 @@ public class DehydratedMushroomWrapConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		KAnimFile anim = Assets.GetAnim("dehydrated_food_mushroom_wrap_kanim");
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedMushroomWrapConfig.ID.Name, ITEMS.FOOD.MUSHROOMWRAP.DEHYDRATED.NAME, ITEMS.FOOD.MUSHROOMWRAP.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedMushroomWrapConfig.ID.Name, global::STRINGS.ITEMS.FOOD.MUSHROOMWRAP.DEHYDRATED.NAME, global::STRINGS.ITEMS.FOOD.MUSHROOMWRAP.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
 		EntityTemplates.ExtendEntityToDehydratedFoodPackage(gameObject, FOOD.FOOD_TYPES.MUSHROOM_WRAP);
 		return gameObject;
 	}

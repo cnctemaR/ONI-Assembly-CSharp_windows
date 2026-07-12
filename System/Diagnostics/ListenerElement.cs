@@ -112,16 +112,16 @@ namespace System.Diagnostics
 				{
 					if (this._attributes != null || base.ElementInformation.Properties[ListenerElement._propFilter.Name].ValueOrigin == PropertyValueOrigin.SetHere || this.TraceOutputOptions != TraceOptions.None || !string.IsNullOrEmpty(base.InitData))
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("A listener with no type name specified references the sharedListeners section and cannot have any attributes other than 'Name'.  Listener: '{0}'.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("A listener with no type name specified references the sharedListeners section and cannot have any attributes other than 'Name'.  Listener: '{0}'.", new object[] { this.Name }));
 					}
 					if (DiagnosticsConfiguration.SharedListeners == null)
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
 					}
 					ListenerElement listenerElement = DiagnosticsConfiguration.SharedListeners[this.Name];
 					if (listenerElement == null)
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
 					}
 					this._runtimeObject = listenerElement.GetRuntimeObject();
 					traceListener = (TraceListener)this._runtimeObject;
@@ -148,7 +148,7 @@ namespace System.Diagnostics
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ConfigurationErrorsException(global::SR.GetString("Couldn't create listener '{0}'.", new object[] { this.Name }), ex);
+				throw new ConfigurationErrorsException(SR.GetString("Couldn't create listener '{0}'.", new object[] { this.Name }), ex);
 			}
 			return traceListener;
 		}
@@ -215,16 +215,16 @@ namespace System.Diagnostics
 				{
 					if (this._attributes != null || base.ElementInformation.Properties[ListenerElement._propFilter.Name].ValueOrigin == PropertyValueOrigin.SetHere || this.TraceOutputOptions != TraceOptions.None || !string.IsNullOrEmpty(base.InitData))
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("A listener with no type name specified references the sharedListeners section and cannot have any attributes other than 'Name'.  Listener: '{0}'.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("A listener with no type name specified references the sharedListeners section and cannot have any attributes other than 'Name'.  Listener: '{0}'.", new object[] { this.Name }));
 					}
 					if (DiagnosticsConfiguration.SharedListeners == null)
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
 					}
 					ListenerElement listenerElement = DiagnosticsConfiguration.SharedListeners[this.Name];
 					if (listenerElement == null)
 					{
-						throw new ConfigurationErrorsException(global::SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
+						throw new ConfigurationErrorsException(SR.GetString("Listener '{0}' does not exist in the sharedListeners section.", new object[] { this.Name }));
 					}
 					this._runtimeObject = listenerElement.RefreshRuntimeObject(listener);
 					traceListener = (TraceListener)this._runtimeObject;
@@ -254,7 +254,7 @@ namespace System.Diagnostics
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ConfigurationErrorsException(global::SR.GetString("Couldn't create listener '{0}'.", new object[] { this.Name }), ex);
+				throw new ConfigurationErrorsException(SR.GetString("Couldn't create listener '{0}'.", new object[] { this.Name }), ex);
 			}
 			return traceListener;
 		}

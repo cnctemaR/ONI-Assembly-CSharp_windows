@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Internal;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -10,15 +11,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
-	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	public sealed class Camera : Behaviour
 	{
 		[NativeProperty("Near")]
@@ -209,6 +210,12 @@ namespace UnityEngine
 			set;
 		}
 
+		internal extern Material skyboxMaterial
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[NativeConditional("UNITY_EDITOR")]
 		public extern ulong overrideSceneCullingMask
 		{
@@ -250,11 +257,13 @@ namespace UnityEngine
 			}
 		}
 
-		internal static extern int PreviewCullingLayer
+		[Obsolete("PreviewCullingLayer is obsolete. Use scene culling masks instead.", false)]
+		internal static int PreviewCullingLayer
 		{
-			[FreeFunction("CameraScripting::GetPreviewCullingLayer")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return 31;
+			}
 		}
 
 		public extern bool useOcclusionCulling
@@ -340,6 +349,84 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern int iso
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float shutterSpeed
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float aperture
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float focusDistance
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float focalLength
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern int bladeCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public Vector2 curvature
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_curvature_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_curvature_Injected(ref value);
+			}
+		}
+
+		public extern float barrelClipping
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float anamorphism
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public Vector2 sensorSize
 		{
 			get
@@ -366,14 +453,6 @@ namespace UnityEngine
 			{
 				this.set_lensShift_Injected(ref value);
 			}
-		}
-
-		public extern float focalLength
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
 		}
 
 		public extern Camera.GateFitMode gateFit
@@ -774,6 +853,7 @@ namespace UnityEngine
 
 		public extern bool stereoEnabled
 		{
+			[NativeMethod("GetStereoEnabledForBuiltInOrSRP")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -923,6 +1003,19 @@ namespace UnityEngine
 			return this.RenderToCubemapImpl(cubemap, 63);
 		}
 
+		[NativeConditional("UNITY_EDITOR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetFilterMode();
+
+		[NativeConditional("UNITY_EDITOR")]
+		public Camera.SceneViewFilterMode sceneViewFilterMode
+		{
+			get
+			{
+				return (Camera.SceneViewFilterMode)this.GetFilterMode();
+			}
+		}
+
 		[NativeName("RenderToCubemap")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool RenderToCubemapEyeImpl(RenderTexture cubemap, int faceMask, Camera.MonoOrStereoscopicEye stereoEye);
@@ -944,6 +1037,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RenderDontRestore();
 
+		[Obsolete("SubmitRenderRequests is obsolete, use SubmitRenderRequest with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
 		public void SubmitRenderRequests(List<Camera.RenderRequest> renderRequests)
 		{
 			bool flag = renderRequests == null || renderRequests.Count == 0;
@@ -962,9 +1056,47 @@ namespace UnityEngine
 			}
 		}
 
+		public void SubmitRenderRequest<RequestData>(RequestData renderRequest)
+		{
+			bool flag = renderRequest == null;
+			if (flag)
+			{
+				throw new ArgumentException("SubmitRenderRequests is invoked with invalid renderRequests");
+			}
+			ObjectIdRequest objectIdRequest = renderRequest as ObjectIdRequest;
+			bool flag2 = objectIdRequest != null;
+			if (flag2)
+			{
+				bool flag3 = objectIdRequest.destination.depthStencilFormat == GraphicsFormat.None;
+				if (flag3)
+				{
+					Debug.LogWarning("ObjectId Render Request submitted without a depth stencil, which can produce results that are not depth tested correctly");
+				}
+				bool flag4 = GraphicsSettings.currentRenderPipeline == null || !RenderPipelineManager.currentPipeline.IsRenderRequestSupported<ObjectIdRequest>(this, objectIdRequest);
+				if (flag4)
+				{
+					throw new ArgumentException((GraphicsSettings.currentRenderPipeline == null) ? "The Built-In Render Pipeline does not support ObjectIdRequest outside of the editor." : "The current render pipeline does not support ObjectIdRequest, and the fallback implementation of the Built-In Render Pipeline is not available outside of the editor.");
+				}
+			}
+			bool flag5 = GraphicsSettings.currentRenderPipeline == null;
+			if (flag5)
+			{
+				Debug.LogWarning("Trying to invoke 'SubmitRenderRequest' when no SRP is set. A scriptable render pipeline is needed for this function call");
+			}
+			else
+			{
+				this.SubmitRenderRequestsInternal(renderRequest);
+			}
+		}
+
 		[FreeFunction("CameraScripting::SubmitRenderRequests", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SubmitRenderRequestsInternal(object requests);
+
+		[FreeFunction("CameraScripting::SubmitBuiltInObjectIDRenderRequest", HasExplicitThis = true)]
+		[NativeConditional("UNITY_EDITOR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Object[] SubmitBuiltInObjectIDRenderRequest(RenderTexture target, int mipLevel, CubemapFace cubemapFace, int depthSlice);
 
 		[FreeFunction("CameraScripting::SetupCurrent")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1095,8 +1227,8 @@ namespace UnityEngine
 			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
 		}
 
-		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
 		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
+		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 
@@ -1120,6 +1252,12 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_backgroundColor_Injected(ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_curvature_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_curvature_Injected(ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_sensorSize_Injected(out Vector2 ret);
@@ -1238,6 +1376,14 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetStereoViewMatrix_Injected(Camera.StereoscopicEye eye, ref Matrix4x4 matrix);
 
+		public const float kMinAperture = 0.7f;
+
+		public const float kMaxAperture = 32f;
+
+		public const int kMinBladeCount = 3;
+
+		public const int kMaxBladeCount = 11;
+
 		public static Camera.CameraCallback onPreCull;
 
 		public static Camera.CameraCallback onPreRender;
@@ -1292,6 +1438,13 @@ namespace UnityEngine
 			Mono
 		}
 
+		public enum SceneViewFilterMode
+		{
+			Off,
+			ShowFiltered
+		}
+
+		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
 		public enum RenderRequestMode
 		{
 			None,
@@ -1310,6 +1463,7 @@ namespace UnityEngine
 			DiffuseColor
 		}
 
+		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
 		public enum RenderRequestOutputSpace
 		{
 			ScreenSpace = -1,
@@ -1324,6 +1478,7 @@ namespace UnityEngine
 			UV8
 		}
 
+		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
 		public struct RenderRequest
 		{
 			public RenderRequest(Camera.RenderRequestMode mode, RenderTexture rt)

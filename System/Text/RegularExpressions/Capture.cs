@@ -3,37 +3,26 @@ using Unity;
 
 namespace System.Text.RegularExpressions
 {
-	[Serializable]
 	public class Capture
 	{
-		internal Capture(string text, int i, int l)
+		internal Capture(string text, int index, int length)
 		{
-			this._text = text;
-			this._index = i;
-			this._length = l;
+			this.Text = text;
+			this.Index = index;
+			this.Length = length;
 		}
 
-		public int Index
-		{
-			get
-			{
-				return this._index;
-			}
-		}
+		public int Index { get; private protected set; }
 
-		public int Length
-		{
-			get
-			{
-				return this._length;
-			}
-		}
+		public int Length { get; private protected set; }
+
+		protected internal string Text { internal get; private protected set; }
 
 		public string Value
 		{
 			get
 			{
-				return this._text.Substring(this._index, this._length);
+				return this.Text.Substring(this.Index, this.Length);
 			}
 		}
 
@@ -42,30 +31,19 @@ namespace System.Text.RegularExpressions
 			return this.Value;
 		}
 
-		internal string GetOriginalString()
+		internal ReadOnlySpan<char> GetLeftSubstring()
 		{
-			return this._text;
+			return this.Text.AsSpan(0, this.Index);
 		}
 
-		internal string GetLeftSubstring()
+		internal ReadOnlySpan<char> GetRightSubstring()
 		{
-			return this._text.Substring(0, this._index);
-		}
-
-		internal string GetRightSubstring()
-		{
-			return this._text.Substring(this._index + this._length, this._text.Length - this._index - this._length);
+			return this.Text.AsSpan(this.Index + this.Length, this.Text.Length - this.Index - this.Length);
 		}
 
 		internal Capture()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
-
-		internal string _text;
-
-		internal int _index;
-
-		internal int _length;
 	}
 }

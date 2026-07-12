@@ -7,26 +7,26 @@ namespace System.Collections.Specialized
 	{
 		internal StringEnumerator(StringCollection mappings)
 		{
-			this.temp = mappings;
-			this.baseEnumerator = this.temp.GetEnumerator();
+			this._temp = mappings;
+			this._baseEnumerator = this._temp.GetEnumerator();
 		}
 
 		public string Current
 		{
 			get
 			{
-				return (string)this.baseEnumerator.Current;
+				return (string)this._baseEnumerator.Current;
 			}
 		}
 
 		public bool MoveNext()
 		{
-			return this.baseEnumerator.MoveNext();
+			return this._baseEnumerator.MoveNext();
 		}
 
 		public void Reset()
 		{
-			this.baseEnumerator.Reset();
+			this._baseEnumerator.Reset();
 		}
 
 		internal StringEnumerator()
@@ -34,8 +34,8 @@ namespace System.Collections.Specialized
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private IEnumerator baseEnumerator;
+		private IEnumerator _baseEnumerator;
 
-		private IEnumerable temp;
+		private IEnumerable _temp;
 	}
 }

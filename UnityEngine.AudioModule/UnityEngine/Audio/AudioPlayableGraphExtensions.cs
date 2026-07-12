@@ -5,9 +5,9 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Audio
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableGraphExtensions.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[StaticAccessor("AudioPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableGraphExtensions.bindings.h")]
 	internal static class AudioPlayableGraphExtensions
 	{
 		[NativeThrows]

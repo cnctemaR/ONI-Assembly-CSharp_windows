@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -59,6 +60,7 @@ namespace Database
 			this.DailyRationLimitReached.AddNotification(null, null, null);
 			this.HoldingBreath = this.CreateStatusItem("HoldingBreath", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Hungry = this.CreateStatusItem("Hungry", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
+			this.Slippering = this.CreateStatusItem("Slippering", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Unhappy = this.CreateStatusItem("Unhappy", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Unhappy.AddNotification(null, null, null);
 			this.NervousBreakdown = this.CreateStatusItem("NervousBreakdown", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
@@ -176,14 +178,14 @@ namespace Database
 			this.Storing.resolveStringCallback = delegate(string str, object data)
 			{
 				Workable workable3 = (Workable)data;
-				if (workable3 != null && workable3.worker != null)
+				if (workable3 != null && workable3.worker as StandardWorker != null)
 				{
 					KSelectable component = workable3.GetComponent<KSelectable>();
 					if (component)
 					{
 						str = str.Replace("{Target}", component.GetName());
 					}
-					Pickupable pickupable = workable3.worker.workCompleteData as Pickupable;
+					Pickupable pickupable = (workable3.worker as StandardWorker).workCompleteData as Pickupable;
 					if (workable3.worker != null && pickupable)
 					{
 						KSelectable component2 = pickupable.GetComponent<KSelectable>();
@@ -323,6 +325,28 @@ namespace Database
 			this.Arting.resolveStringCallback = func;
 			this.SevereWounds = this.CreateStatusItem("SevereWounds", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
 			this.SevereWounds.AddNotification(null, null, null);
+			this.BionicOfflineIncapacitated = this.CreateStatusItem("BionicOfflineIncapacitated", "DUPLICANTS", "status_electrobank", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
+			this.BionicOfflineIncapacitated.AddNotification(null, null, null);
+			this.BionicWantsOilChange = this.CreateStatusItem("BionicWantsOilChange", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicWaitingForReboot = this.CreateStatusItem("BionicWaitingForReboot", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicBeingRebooted = this.CreateStatusItem("BionicBeingRebooted", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicRequiresSkillPerk = this.CreateStatusItem("BionicRequiresSkillPerk", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BionicRequiresSkillPerk.resolveStringCallback = delegate(string str, object data)
+			{
+				string text4 = (string)data;
+				SkillPerk skillPerk = Db.Get().SkillPerks.Get(text4);
+				List<Skill> skillsWithPerk = Db.Get().Skills.GetSkillsWithPerk(skillPerk);
+				List<string> list = new List<string>();
+				foreach (Skill skill in skillsWithPerk)
+				{
+					if (!skill.deprecated)
+					{
+						list.Add(skill.Name);
+					}
+				}
+				str = str.Replace("{Skills}", string.Join(", ", list.ToArray()));
+				return str;
+			};
 			this.Incapacitated = this.CreateStatusItem("Incapacitated", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
 			this.Incapacitated.AddNotification(null, null, null);
 			this.Incapacitated.resolveStringCallback = delegate(string str, object data)
@@ -345,8 +369,16 @@ namespace Database
 			this.LowImmunity = this.CreateStatusItem("LowImmunity", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.LowImmunity.AddNotification(null, null, null);
 			this.Studying = this.CreateStatusItem("Studying", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.InstallingElectrobank = this.CreateStatusItem("InstallingElectrobank", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Socializing = this.CreateStatusItem("Socializing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.BionicExplorerBooster = this.CreateStatusItem("BionicExplorerBooster", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 2);
+			this.BionicExplorerBooster.resolveStringCallback = delegate(string str, object data)
+			{
+				BionicUpgrade_ExplorerBoosterMonitor.Instance instance4 = (BionicUpgrade_ExplorerBoosterMonitor.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance4.CurrentProgress * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
 			this.ContactWithGerms = this.CreateStatusItem("ContactWithGerms", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
 			this.ContactWithGerms.resolveStringCallback = delegate(string str, object data)
 			{
@@ -402,48 +434,52 @@ namespace Database
 			this.LightWorkEfficiencyBonus = this.CreateStatusItem("LightWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.LightWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text4 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(15.000001f, GameUtil.TimeSlice.None), true));
-				return string.Format(str, text4);
+				string text5 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(DUPLICANTSTATS.STANDARD.Light.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text5);
 			};
 			this.LaboratoryWorkEfficiencyBonus = this.CreateStatusItem("LaboratoryWorkEfficiencyBonus", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.LaboratoryWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
 			{
-				string text5 = string.Format(DUPLICANTS.STATUSITEMS.LABORATORYWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None), true));
-				return string.Format(str, text5);
+				string text6 = string.Format(DUPLICANTS.STATUSITEMS.LABORATORYWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text6);
 			};
 			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistPlanning = this.CreateStatusItem("BalloonArtistPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistHandingOut = this.CreateStatusItem("BalloonArtistHandingOut", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Partying = this.CreateStatusItem("Partying", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.DataRainerPlanning = this.CreateStatusItem("DataRainerPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.DataRainerRaining = this.CreateStatusItem("DataRainerRaining", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.RoboDancerPlanning = this.CreateStatusItem("RoboDancerPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.RoboDancerDancing = this.CreateStatusItem("RoboDancerDancing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.GasLiquidIrritation = this.CreateStatusItem("GasLiquidIrritated", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.GasLiquidIrritation.resolveStringCallback = (string str, object data) => ((GasLiquidExposureMonitor.Instance)data).IsMajorIrritation() ? DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MAJOR : DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MINOR;
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GasLiquidExposureMonitor.Instance instance4 = (GasLiquidExposureMonitor.Instance)data;
-				string text6 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
-				string text7 = "";
-				Effect appliedEffect = instance4.sm.GetAppliedEffect(instance4);
+				GasLiquidExposureMonitor.Instance instance5 = (GasLiquidExposureMonitor.Instance)data;
+				string text7 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
+				string text8 = "";
+				Effect appliedEffect = instance5.sm.GetAppliedEffect(instance5);
 				if (appliedEffect != null)
 				{
-					text7 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
+					text8 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance4.CurrentlyExposedToElement().name);
-				float currentExposure = instance4.sm.GetCurrentExposure(instance4);
+				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance5.CurrentlyExposedToElement().name);
+				float currentExposure = instance5.sm.GetCurrentExposure(instance5);
 				if (currentExposure < 0f)
 				{
-					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
+					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
 				}
 				else if (currentExposure > 0f)
 				{
-					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
+					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
 				}
 				else
 				{
-					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
+					text9 = text9.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
-				float num7 = (instance4.exposure - instance4.minorIrritationThreshold) / Math.Abs(instance4.exposureRate);
-				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
-				return string.Concat(new string[] { text6, "\n\n", text7, "\n\n", text8, "\n\n", text9 });
+				float num7 = (instance5.exposure - instance5.minorIrritationThreshold) / Math.Abs(instance5.exposureRate);
+				string text10 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
+				return string.Concat(new string[] { text7, "\n\n", text8, "\n\n", text9, "\n\n", text10 });
 			};
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
@@ -452,18 +488,18 @@ namespace Database
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback_shouldStillCallIfDataIsNull = true;
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback = delegate(string str, object data)
 			{
-				string text10 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
+				string text11 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
 				Effect effect = Db.Get().effects.Get("SleepClinic");
-				string text11;
+				string text12;
 				if (effect != null)
 				{
-					text11 = Effect.CreateTooltip(effect, false, "\n    • ", true);
+					text12 = Effect.CreateTooltip(effect, false, "\n    • ", true);
 				}
 				else
 				{
-					text11 = "";
+					text12 = "";
 				}
-				return text10 + "\n\n" + text11;
+				return text11 + "\n\n" + text12;
 			};
 			this.MegaBrainTank_Pajamas_Sleeping = this.CreateStatusItem("MegaBrainTank_Pajamas_Sleeping", DUPLICANTS.STATUSITEMS.DREAMING.NAME, DUPLICANTS.STATUSITEMS.DREAMING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.MegaBrainTank_Pajamas_Sleeping.resolveTooltipCallback = delegate(string str, object data)
@@ -490,11 +526,38 @@ namespace Database
 			this.JoyResponse_HeardJoySinger = this.CreateStatusItem("JoyResponse_HeardJoySinger", DUPLICANTS.MODIFIERS.HEARDJOYSINGER.NAME, DUPLICANTS.MODIFIERS.HEARDJOYSINGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HeardJoySinger.resolveTooltipCallback = delegate(string str, object data)
 			{
-				InspirationEffectMonitor.Instance instance5 = (InspirationEffectMonitor.Instance)data;
-				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance5.sm.inspirationTimeRemaining.Get(instance5), "F1", false));
+				InspirationEffectMonitor.Instance instance6 = (InspirationEffectMonitor.Instance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance6.sm.inspirationTimeRemaining.Get(instance6), "F1", false));
 			};
 			this.JoyResponse_StickerBombing = this.CreateStatusItem("JoyResponse_StickerBombing", DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.NAME, DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.EnteringDock = this.CreateStatusItem("EnteringDock", DUPLICANTS.STATUSITEMS.REMOTEWORKER.ENTERINGDOCK.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.ENTERINGDOCK.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.UnreachableDock = this.CreateStatusItem("UnreachableDock", DUPLICANTS.STATUSITEMS.REMOTEWORKER.UNREACHABLEDOCK.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.UNREACHABLEDOCK.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, 2);
+			this.NoHomeDock = this.CreateStatusItem("UnreachableDock", DUPLICANTS.STATUSITEMS.REMOTEWORKER.NOHOMEDOCK.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.NOHOMEDOCK.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerCapacitorStatus = this.CreateStatusItem("RemoteWorkerCapacitorStatus", DUPLICANTS.STATUSITEMS.REMOTEWORKER.POWERSTATUS.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.POWERSTATUS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerCapacitorStatus.resolveStringCallback = delegate(string str, object obj)
+			{
+				RemoteWorkerCapacitor remoteWorkerCapacitor = obj as RemoteWorkerCapacitor;
+				float num9 = 0f;
+				float num10 = 0f;
+				if (remoteWorkerCapacitor != null)
+				{
+					num9 = remoteWorkerCapacitor.Charge;
+					num10 = remoteWorkerCapacitor.ChargeRatio * 100f;
+				}
+				return str.Replace("{CHARGE}", GameUtil.GetFormattedJoules(num9, "F1", GameUtil.TimeSlice.None)).Replace("{RATIO}", GameUtil.GetFormattedPercent(num10, GameUtil.TimeSlice.None));
+			};
+			this.RemoteWorkerLowPower = this.CreateStatusItem("RemoteWorkerLowPower", DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWPOWER.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWPOWER.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerOutOfPower = this.CreateStatusItem("RemoteWorkerOutOfPower", DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFPOWER.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFPOWER.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerHighGunkLevel = this.CreateStatusItem("RemoteWorkerHighGunkLevel", DUPLICANTS.STATUSITEMS.REMOTEWORKER.HIGHGUNK.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.HIGHGUNK.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerFullGunkLevel = this.CreateStatusItem("RemoteWorkerFullGunkLevel", DUPLICANTS.STATUSITEMS.REMOTEWORKER.FULLGUNK.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.FULLGUNK.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerLowOil = this.CreateStatusItem("RemoteWorkerLowOil", DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWOIL.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.LOWOIL.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerOutOfOil = this.CreateStatusItem("RemoteWorkerOutOfOil", DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFOIL.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.OUTOFOIL.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerRecharging = this.CreateStatusItem("RemoteWorkerRecharging", DUPLICANTS.STATUSITEMS.REMOTEWORKER.RECHARGING.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.RECHARGING.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerOiling = this.CreateStatusItem("RemoteWorkerOiling", DUPLICANTS.STATUSITEMS.REMOTEWORKER.OILING.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.OILING.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, 2);
+			this.RemoteWorkerDraining = this.CreateStatusItem("RemoteWorkerDraining", DUPLICANTS.STATUSITEMS.REMOTEWORKER.DRAINING.NAME, DUPLICANTS.STATUSITEMS.REMOTEWORKER.DRAINING.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, 2);
+			this.BionicCriticalBattery = this.CreateStatusItem("BionicCriticalBattery", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
+			this.BionicCriticalBattery.AddNotification(null, null, null);
 		}
 
 		public StatusItem Idle;
@@ -564,6 +627,8 @@ namespace Database
 		public StatusItem Vomiting;
 
 		public StatusItem Coughing;
+
+		public StatusItem Slippering;
 
 		public StatusItem BreathingO2;
 
@@ -677,6 +742,18 @@ namespace Database
 
 		public StatusItem Incapacitated;
 
+		public StatusItem BionicOfflineIncapacitated;
+
+		public StatusItem BionicWaitingForReboot;
+
+		public StatusItem BionicBeingRebooted;
+
+		public StatusItem BionicRequiresSkillPerk;
+
+		public StatusItem BionicWantsOilChange;
+
+		public StatusItem InstallingElectrobank;
+
 		public StatusItem Fighting;
 
 		public StatusItem Fleeing;
@@ -738,6 +815,44 @@ namespace Database
 		public StatusItem ArmingTrap;
 
 		public StatusItem WaxedForTransitTube;
+
+		public StatusItem DataRainerPlanning;
+
+		public StatusItem DataRainerRaining;
+
+		public StatusItem RoboDancerPlanning;
+
+		public StatusItem RoboDancerDancing;
+
+		public StatusItem BionicExplorerBooster;
+
+		public StatusItem EnteringDock;
+
+		public StatusItem UnreachableDock;
+
+		public StatusItem NoHomeDock;
+
+		public StatusItem RemoteWorkerCapacitorStatus;
+
+		public StatusItem RemoteWorkerLowPower;
+
+		public StatusItem RemoteWorkerOutOfPower;
+
+		public StatusItem RemoteWorkerHighGunkLevel;
+
+		public StatusItem RemoteWorkerFullGunkLevel;
+
+		public StatusItem RemoteWorkerLowOil;
+
+		public StatusItem RemoteWorkerOutOfOil;
+
+		public StatusItem RemoteWorkerRecharging;
+
+		public StatusItem RemoteWorkerOiling;
+
+		public StatusItem RemoteWorkerDraining;
+
+		public StatusItem BionicCriticalBattery;
 
 		private const int NONE_OVERLAY = 0;
 	}

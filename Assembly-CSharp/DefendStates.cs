@@ -6,10 +6,18 @@ public class DefendStates : GameStateMachine<DefendStates, DefendStates.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.protectEntity.moveToThreat;
-		this.root.Enter("SetTarget", delegate(DefendStates.Instance smi)
+		GameStateMachine<DefendStates, DefendStates.Instance, IStateMachineTarget, DefendStates.Def>.State state = this.root.Enter("SetTarget", delegate(DefendStates.Instance smi)
 		{
 			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().MainThreat, smi, false);
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.ATTACKINGENTITY.NAME, CREATURES.STATUSITEMS.ATTACKINGENTITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		});
+		string text = CREATURES.STATUSITEMS.ATTACKINGENTITY.NAME;
+		string text2 = CREATURES.STATUSITEMS.ATTACKINGENTITY.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.protectEntity.moveToThreat.InitializeStates(this.masterTarget, this.target, this.protectEntity.attackThreat, null, CrabTuning.DEFEND_OFFSETS, null);
 		this.protectEntity.attackThreat.Enter(delegate(DefendStates.Instance smi)
 		{

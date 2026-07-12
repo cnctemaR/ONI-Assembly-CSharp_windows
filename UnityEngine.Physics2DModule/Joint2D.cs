@@ -1,11 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform), typeof(Rigidbody2D))]
 	[NativeHeader("Modules/Physics2D/Joint2D.h")]
+	[RequireComponent(typeof(Transform), typeof(Rigidbody2D))]
 	public class Joint2D : Behaviour
 	{
 		public extern Rigidbody2D attachedRigidbody
@@ -46,6 +47,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern JointBreakAction2D breakAction
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public Vector2 reactionForce
 		{
 			[NativeMethod("GetReactionForceFixedTime")]
@@ -73,6 +82,20 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetReactionTorque(float timeStep);
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Joint2D.collideConnected has been deprecated. Use Joint2D.enableCollision instead (UnityUpgradable) -> enableCollision", true)]
+		public bool collideConnected
+		{
+			get
+			{
+				return this.enableCollision;
+			}
+			set
+			{
+				this.enableCollision = value;
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_reactionForce_Injected(out Vector2 ret);

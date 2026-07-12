@@ -9,12 +9,12 @@ namespace System.ComponentModel
 	public class LicenseException : SystemException
 	{
 		public LicenseException(Type type)
-			: this(type, null, global::SR.GetString("A valid license cannot be granted for the type {0}. Contact the manufacturer of the component for more information.", new object[] { type.FullName }))
+			: this(type, null, SR.GetString("A valid license cannot be granted for the type {0}. Contact the manufacturer of the component for more information.", new object[] { type.FullName }))
 		{
 		}
 
 		public LicenseException(Type type, object instance)
-			: this(type, null, global::SR.GetString("An instance of type '{1}' was being created, and a valid license could not be granted for the type '{0}'. Please,  contact the manufacturer of the component for more information.", new object[]
+			: this(type, null, SR.GetString("An instance of type '{1}' was being created, and a valid license could not be granted for the type '{0}'. Please,  contact the manufacturer of the component for more information.", new object[]
 			{
 				type.FullName,
 				instance.GetType().FullName

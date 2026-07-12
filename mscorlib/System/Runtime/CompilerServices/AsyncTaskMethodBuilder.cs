@@ -15,8 +15,8 @@ namespace System.Runtime.CompilerServices
 			return default(AsyncTaskMethodBuilder);
 		}
 
-		[DebuggerStepThrough]
 		[SecuritySafeCritical]
+		[DebuggerStepThrough]
 		public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
 		{
 			if (stateMachine == null)
@@ -74,7 +74,7 @@ namespace System.Runtime.CompilerServices
 			this.m_builder.SetNotificationForWaitCompletion(enabled);
 		}
 
-		private object ObjectIdForDebugger
+		internal object ObjectIdForDebugger
 		{
 			get
 			{

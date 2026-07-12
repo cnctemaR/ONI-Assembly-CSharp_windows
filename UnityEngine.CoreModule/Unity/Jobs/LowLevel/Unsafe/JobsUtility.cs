@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Burst;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -21,7 +22,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetWorkStealingRange(ref JobRanges ranges, int jobIndex, out int beginIndex, out int endIndex);
 
-		[FreeFunction("ScheduleManagedJob", ThrowsException = true)]
+		[FreeFunction("ScheduleManagedJob", ThrowsException = true, IsThreadSafe = true)]
 		public static JobHandle Schedule(ref JobsUtility.JobScheduleParameters parameters)
 		{
 			JobHandle jobHandle;
@@ -29,7 +30,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("ScheduleManagedJobParallelFor", ThrowsException = true)]
+		[FreeFunction("ScheduleManagedJobParallelFor", ThrowsException = true, IsThreadSafe = true)]
 		public static JobHandle ScheduleParallelFor(ref JobsUtility.JobScheduleParameters parameters, int arrayLength, int innerloopBatchCount)
 		{
 			JobHandle jobHandle;
@@ -37,7 +38,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("ScheduleManagedJobParallelForDeferArraySize", ThrowsException = true)]
+		[FreeFunction("ScheduleManagedJobParallelForDeferArraySize", ThrowsException = true, IsThreadSafe = true)]
 		public unsafe static JobHandle ScheduleParallelForDeferArraySize(ref JobsUtility.JobScheduleParameters parameters, int innerloopBatchCount, void* listData, void* listDataAtomicSafetyHandle)
 		{
 			JobHandle jobHandle;
@@ -66,7 +67,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void PatchBufferMinMaxRanges(IntPtr bufferRangePatchData, void* jobdata, int startIndex, int rangeSize);
 
-		[FreeFunction(ThrowsException = true)]
+		[FreeFunction(ThrowsException = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, object managedJobFunction0, object managedJobFunction1, object managedJobFunction2);
 
@@ -152,6 +153,34 @@ namespace Unity.Jobs.LowLevel.Unsafe
 					throw new ArgumentOutOfRangeException("JobWorkerCount", string.Format("Invalid JobWorkerCount {0} must be in the range 0 -> {1}", value, JobsUtility.JobWorkerMaximumCount));
 				}
 				JobsUtility.SetJobQueueMaximumActiveThreadCount(value);
+			}
+		}
+
+		public static extern int ThreadIndex
+		{
+			[FreeFunction("GetJobWorkerIndex", IsThreadSafe = true)]
+			[BurstAuthorizedExternalMethod]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern int ThreadIndexCount
+		{
+			[BurstAuthorizedExternalMethod]
+			[FreeFunction("GetJobWorkerIndexCount", IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[FreeFunction("IsJobQueueBatchingEnabled")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetJobBatchingEnabled();
+
+		internal static bool JobBatchingEnabled
+		{
+			get
+			{
+				return JobsUtility.GetJobBatchingEnabled();
 			}
 		}
 

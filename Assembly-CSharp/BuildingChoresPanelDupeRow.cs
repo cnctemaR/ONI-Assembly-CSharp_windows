@@ -22,8 +22,8 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 		}
 		else
 		{
-			string text2 = data.context.chore.GetPreconditions()[data.context.failedPreconditionId].description;
-			DebugUtil.Assert(text2 != null, "Chore requires description!", data.context.chore.GetPreconditions()[data.context.failedPreconditionId].id);
+			string text2 = data.context.chore.GetPreconditions()[data.context.failedPreconditionId].condition.description;
+			DebugUtil.Assert(text2 != null, "Chore requires description!", data.context.chore.GetPreconditions()[data.context.failedPreconditionId].condition.id);
 			if (data.context.chore.driver != null)
 			{
 				text2 = text2.Replace("{Assignee}", data.context.chore.driver.GetProperName());
@@ -71,7 +71,7 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 		text = text.Replace("{Errand}", GameUtil.GetChoreName(context.chore, context.data));
 		if (!flag)
 		{
-			text = text.Replace("{FailedPrecondition}", context.chore.GetPreconditions()[context.failedPreconditionId].description);
+			text = text.Replace("{FailedPrecondition}", context.chore.GetPreconditions()[context.failedPreconditionId].condition.description);
 		}
 		else
 		{

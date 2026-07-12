@@ -8,16 +8,17 @@ namespace System.Security.Policy
 	[ComVisible(true)]
 	public sealed class ApplicationTrustEnumerator : IEnumerator
 	{
-		internal ApplicationTrustEnumerator(ApplicationTrustCollection collection)
+		internal ApplicationTrustEnumerator(ApplicationTrustCollection atc)
 		{
-			this.e = collection.GetEnumerator();
+			this.trusts = atc;
+			this.current = -1;
 		}
 
 		public ApplicationTrust Current
 		{
 			get
 			{
-				return (ApplicationTrust)this.e.Current;
+				return this.trusts[this.current];
 			}
 		}
 
@@ -25,19 +26,24 @@ namespace System.Security.Policy
 		{
 			get
 			{
-				return this.e.Current;
+				return this.trusts[this.current];
 			}
+		}
+
+		public void Reset()
+		{
+			this.current = -1;
 		}
 
 		[SecuritySafeCritical]
 		public bool MoveNext()
 		{
-			return this.e.MoveNext();
-		}
-
-		public void Reset()
-		{
-			this.e.Reset();
+			if (this.current == this.trusts.Count - 1)
+			{
+				return false;
+			}
+			this.current++;
+			return true;
 		}
 
 		internal ApplicationTrustEnumerator()
@@ -45,6 +51,8 @@ namespace System.Security.Policy
 			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private IEnumerator e;
+		private ApplicationTrustCollection trusts;
+
+		private int current;
 	}
 }

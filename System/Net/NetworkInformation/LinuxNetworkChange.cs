@@ -226,8 +226,6 @@ namespace System.Net.NetworkInformation
 
 		private NetworkAvailabilityChangedEventHandler AvailabilityChanged;
 
-		private const string LIBNAME = "MonoPosixHelper";
-
 		[Flags]
 		private enum EventType
 		{

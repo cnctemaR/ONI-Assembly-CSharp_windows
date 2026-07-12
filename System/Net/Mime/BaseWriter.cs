@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.IO;
 using System.Net.Mail;
+using System.Runtime.ExceptionServices;
 
 namespace System.Net.Mime
 {
@@ -13,11 +14,11 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("stream");
 			}
-			this.stream = stream;
-			this.shouldEncodeLeadingDots = shouldEncodeLeadingDots;
-			this.onCloseHandler = new EventHandler(this.OnClose);
-			this.bufferBuilder = new BufferBuilder();
-			this.lineLength = BaseWriter.DefaultLineLength;
+			this._stream = stream;
+			this._shouldEncodeLeadingDots = shouldEncodeLeadingDots;
+			this._onCloseHandler = new EventHandler(this.OnClose);
+			this._bufferBuilder = new BufferBuilder();
+			this._lineLength = 76;
 		}
 
 		internal abstract void WriteHeaders(NameValueCollection headers, bool allowUnicode);
@@ -32,15 +33,15 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (this.isInContent)
+			if (this._isInContent)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation cannot be performed while in content."));
+				throw new InvalidOperationException("This operation cannot be performed while in content.");
 			}
 			this.CheckBoundary();
-			this.bufferBuilder.Append(name);
-			this.bufferBuilder.Append(": ");
+			this._bufferBuilder.Append(name);
+			this._bufferBuilder.Append(": ");
 			this.WriteAndFold(value, name.Length + 2, allowUnicode);
-			this.bufferBuilder.Append(BaseWriter.CRLF);
+			this._bufferBuilder.Append(BaseWriter.s_crlf);
 		}
 
 		private void WriteAndFold(string value, int charsAlreadyOnLine, bool allowUnicode)
@@ -52,15 +53,15 @@ namespace System.Net.Mime
 				if (MailBnfHelper.IsFWSAt(value, i))
 				{
 					i += 2;
-					this.bufferBuilder.Append(value, num2, i - num2, allowUnicode);
+					this._bufferBuilder.Append(value, num2, i - num2, allowUnicode);
 					num2 = i;
 					num = i;
 					charsAlreadyOnLine = 0;
 				}
-				else if (i - num2 > this.lineLength - charsAlreadyOnLine && num != num2)
+				else if (i - num2 > this._lineLength - charsAlreadyOnLine && num != num2)
 				{
-					this.bufferBuilder.Append(value, num2, num - num2, allowUnicode);
-					this.bufferBuilder.Append(BaseWriter.CRLF);
+					this._bufferBuilder.Append(value, num2, num - num2, allowUnicode);
+					this._bufferBuilder.Append(BaseWriter.s_crlf);
 					num2 = num;
 					charsAlreadyOnLine = 0;
 				}
@@ -71,7 +72,7 @@ namespace System.Net.Mime
 			}
 			if (value.Length - num2 > 0)
 			{
-				this.bufferBuilder.Append(value, num2, value.Length - num2, allowUnicode);
+				this._bufferBuilder.Append(value, num2, value.Length - num2, allowUnicode);
 			}
 		}
 
@@ -82,26 +83,26 @@ namespace System.Net.Mime
 
 		private Stream GetContentStream(MultiAsyncResult multiResult)
 		{
-			if (this.isInContent)
+			if (this._isInContent)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation cannot be performed while in content."));
+				throw new InvalidOperationException("This operation cannot be performed while in content.");
 			}
-			this.isInContent = true;
+			this._isInContent = true;
 			this.CheckBoundary();
-			this.bufferBuilder.Append(BaseWriter.CRLF);
+			this._bufferBuilder.Append(BaseWriter.s_crlf);
 			this.Flush(multiResult);
-			ClosableStream closableStream = new ClosableStream(new EightBitStream(this.stream, this.shouldEncodeLeadingDots), this.onCloseHandler);
-			this.contentStream = closableStream;
+			ClosableStream closableStream = new ClosableStream(new EightBitStream(this._stream, this._shouldEncodeLeadingDots), this._onCloseHandler);
+			this._contentStream = closableStream;
 			return closableStream;
 		}
 
 		internal IAsyncResult BeginGetContentStream(AsyncCallback callback, object state)
 		{
 			MultiAsyncResult multiAsyncResult = new MultiAsyncResult(this, callback, state);
-			Stream stream = this.GetContentStream(multiAsyncResult);
+			Stream contentStream = this.GetContentStream(multiAsyncResult);
 			if (!(multiAsyncResult.Result is Exception))
 			{
-				multiAsyncResult.Result = stream;
+				multiAsyncResult.Result = contentStream;
 			}
 			multiAsyncResult.CompleteSequence();
 			return multiAsyncResult;
@@ -110,32 +111,33 @@ namespace System.Net.Mime
 		internal Stream EndGetContentStream(IAsyncResult result)
 		{
 			object obj = MultiAsyncResult.End(result);
-			if (obj is Exception)
+			Exception ex = obj as Exception;
+			if (ex != null)
 			{
-				throw (Exception)obj;
+				ExceptionDispatchInfo.Throw(ex);
 			}
 			return (Stream)obj;
 		}
 
 		protected void Flush(MultiAsyncResult multiResult)
 		{
-			if (this.bufferBuilder.Length > 0)
+			if (this._bufferBuilder.Length > 0)
 			{
 				if (multiResult != null)
 				{
 					multiResult.Enter();
-					IAsyncResult asyncResult = this.stream.BeginWrite(this.bufferBuilder.GetBuffer(), 0, this.bufferBuilder.Length, BaseWriter.onWrite, multiResult);
+					IAsyncResult asyncResult = this._stream.BeginWrite(this._bufferBuilder.GetBuffer(), 0, this._bufferBuilder.Length, BaseWriter.s_onWrite, multiResult);
 					if (asyncResult.CompletedSynchronously)
 					{
-						this.stream.EndWrite(asyncResult);
+						this._stream.EndWrite(asyncResult);
 						multiResult.Leave();
 					}
 				}
 				else
 				{
-					this.stream.Write(this.bufferBuilder.GetBuffer(), 0, this.bufferBuilder.Length);
+					this._stream.Write(this._bufferBuilder.GetBuffer(), 0, this._bufferBuilder.Length);
 				}
-				this.bufferBuilder.Reset();
+				this._bufferBuilder.Reset();
 			}
 		}
 
@@ -147,7 +149,7 @@ namespace System.Net.Mime
 				BaseWriter baseWriter = (BaseWriter)multiAsyncResult.Context;
 				try
 				{
-					baseWriter.stream.EndWrite(result);
+					baseWriter._stream.EndWrite(result);
 					multiAsyncResult.Leave();
 				}
 				catch (Exception ex)
@@ -165,24 +167,24 @@ namespace System.Net.Mime
 		{
 		}
 
-		private static int DefaultLineLength = 76;
+		private const int DefaultLineLength = 76;
 
-		private static AsyncCallback onWrite = new AsyncCallback(BaseWriter.OnWrite);
+		private static readonly AsyncCallback s_onWrite = new AsyncCallback(BaseWriter.OnWrite);
 
-		protected static byte[] CRLF = new byte[] { 13, 10 };
+		protected static readonly byte[] s_crlf = new byte[] { 13, 10 };
 
-		protected BufferBuilder bufferBuilder;
+		protected readonly BufferBuilder _bufferBuilder;
 
-		protected Stream contentStream;
+		protected readonly Stream _stream;
 
-		protected bool isInContent;
+		private readonly EventHandler _onCloseHandler;
 
-		protected Stream stream;
+		private readonly bool _shouldEncodeLeadingDots;
 
-		private int lineLength;
+		private int _lineLength;
 
-		private EventHandler onCloseHandler;
+		protected Stream _contentStream;
 
-		private bool shouldEncodeLeadingDots;
+		protected bool _isInContent;
 	}
 }

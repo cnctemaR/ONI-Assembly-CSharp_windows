@@ -83,14 +83,14 @@ namespace System.Net
 
 		private static Hashtable ParseProtocolProxies(string proxyListString)
 		{
-			string[] array = proxyListString.Split(new char[] { ';' });
+			string[] array = proxyListString.Split(';', StringSplitOptions.None);
 			Hashtable hashtable = new Hashtable(CaseInsensitiveAscii.StaticInstance);
 			for (int i = 0; i < array.Length; i++)
 			{
 				string text = array[i].Trim();
 				if (!(text == string.Empty))
 				{
-					string[] array2 = text.Split(new char[] { '=' });
+					string[] array2 = text.Split('=', StringSplitOptions.None);
 					if (array2.Length != 2)
 					{
 						throw WebProxyDataBuilder.CreateInvalidProxyStringException(proxyListString);
@@ -109,7 +109,7 @@ namespace System.Net
 
 		private static FormatException CreateInvalidProxyStringException(string originalProxyString)
 		{
-			string @string = global::SR.GetString("The system proxy settings contain an invalid proxy server setting: '{0}'.", new object[] { originalProxyString });
+			string @string = SR.GetString("The system proxy settings contain an invalid proxy server setting: '{0}'.", new object[] { originalProxyString });
 			bool on = Logging.On;
 			return new FormatException(@string);
 		}
@@ -170,7 +170,7 @@ namespace System.Net
 
 		private static ArrayList ParseBypassList(string bypassListString, out bool bypassOnLocal)
 		{
-			string[] array = bypassListString.Split(new char[] { ';' });
+			string[] array = bypassListString.Split(';', StringSplitOptions.None);
 			bypassOnLocal = false;
 			if (array.Length == 0)
 			{

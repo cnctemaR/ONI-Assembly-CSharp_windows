@@ -116,7 +116,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			}
 			else if (recipe.RequiresTechUnlock())
 			{
-				if (recipe.IsRequiredTechUnlocked())
+				if ((recipe.IsRequiredTechUnlocked() || Db.Get().Techs.Get(recipe.requiredTech).ArePrerequisitesComplete()) && (!recipe.RequiresAllIngredientsDiscovered || this.AllRecipeRequirementsDiscovered(recipe)))
 				{
 					flag = true;
 				}
@@ -124,6 +124,13 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			else if (target.GetRecipeQueueCount(recipe) != 0)
 			{
 				flag = true;
+			}
+			else if (recipe.RequiresAllIngredientsDiscovered)
+			{
+				if (this.AllRecipeRequirementsDiscovered(recipe))
+				{
+					flag = true;
+				}
 			}
 			else if (this.AnyRecipeRequirementsDiscovered(recipe))
 			{
@@ -293,6 +300,18 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		bool flag = fabricator.GetRecipeQueueCount(this.recipeMap[entryGO]) == ComplexFabricator.QUEUE_INFINITE;
 		component.GetReference<LocText>("CountLabel").text = (flag ? "" : fabricator.GetRecipeQueueCount(this.recipeMap[entryGO]).ToString());
 		component.GetReference<RectTransform>("InfiniteIcon").gameObject.SetActive(flag);
+		bool flag2 = !this.recipeMap[entryGO].IsRequiredTechUnlocked();
+		GameObject gameObject = component.GetReference<RectTransform>("TechRequired").gameObject;
+		gameObject.SetActive(flag2);
+		KButton component2 = gameObject.GetComponent<KButton>();
+		component2.ClearOnClick();
+		if (flag2)
+		{
+			component2.onClick += delegate
+			{
+				ManagementMenu.Instance.OpenResearch(this.recipeMap[entryGO].requiredTech);
+			};
+		}
 	}
 
 	private void ToggleClicked(KToggle toggle)
@@ -376,6 +395,18 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			}
 		}
 		return false;
+	}
+
+	private bool AllRecipeRequirementsDiscovered(ComplexRecipe recipe)
+	{
+		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
+		{
+			if (!DiscoveredResources.Instance.IsDiscovered(recipeElement.material))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void Update()

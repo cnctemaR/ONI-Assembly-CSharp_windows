@@ -11,7 +11,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformLinux>("b7716510a1f36934c87976f3a81dbf3d");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -19,17 +19,17 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.LinuxPlayer, this);
 		}
 
-		public override string GetPluginPath(string pluginName)
+		internal override string GetPluginPath(string pluginName)
 		{
 			return string.Format("{0}/lib{1}.so", this.GetPluginBasePath(), pluginName);
 		}
 
-		public override List<CodecChannelCount> DefaultCodecChannels
+		internal override List<CodecChannelCount> DefaultCodecChannels
 		{
 			get
 			{

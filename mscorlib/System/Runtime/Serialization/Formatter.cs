@@ -2,11 +2,9 @@
 using System.Collections;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[Serializable]
 	public abstract class Formatter : IFormatter
@@ -31,7 +29,7 @@ namespace System.Runtime.Serialization
 			objID = this.m_idGenerator.HasId(obj, out flag);
 			if (flag)
 			{
-				throw new SerializationException(Environment.GetResourceString("Object has never been assigned an objectID."));
+				throw new SerializationException("Object has never been assigned an objectID");
 			}
 			return obj;
 		}

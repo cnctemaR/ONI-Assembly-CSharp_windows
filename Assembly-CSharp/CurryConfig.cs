@@ -12,7 +12,7 @@ public class CurryConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFood(EntityTemplates.CreateLooseEntity("Curry", ITEMS.FOOD.CURRY.NAME, ITEMS.FOOD.CURRY.DESC, 1f, false, Assets.GetAnim("curried_beans_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.9f, 0.5f, true, 0, SimHashes.Creature, null), FOOD.FOOD_TYPES.CURRY);
+		return EntityTemplates.ExtendEntityToFood(EntityTemplates.CreateLooseEntity("Curry", global::STRINGS.ITEMS.FOOD.CURRY.NAME, global::STRINGS.ITEMS.FOOD.CURRY.DESC, 1f, false, Assets.GetAnim("curried_beans_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.9f, 0.5f, true, 0, SimHashes.Creature, null), FOOD.FOOD_TYPES.CURRY);
 	}
 
 	public void OnPrefabInit(GameObject inst)

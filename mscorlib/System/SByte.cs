@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
 	[CLSCompliant(false)]
-	[ComVisible(true)]
 	[Serializable]
-	public struct SByte : IComparable, IFormattable, IConvertible, IComparable<sbyte>, IEquatable<sbyte>
+	public readonly struct SByte : IComparable, IConvertible, IFormattable, IComparable<sbyte>, IEquatable<sbyte>, ISpanFormattable
 	{
 		public int CompareTo(object obj)
 		{
@@ -18,7 +17,7 @@ namespace System
 			}
 			if (!(obj is sbyte))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type SByte."));
+				throw new ArgumentException("Object must be of type SByte.");
 			}
 			return (int)(this - (sbyte)obj);
 		}
@@ -33,6 +32,7 @@ namespace System
 			return obj is sbyte && this == (sbyte)obj;
 		}
 
+		[NonVersionable]
 		public bool Equals(sbyte obj)
 		{
 			return this == obj;
@@ -43,41 +43,47 @@ namespace System
 			return (int)this ^ ((int)this << 8);
 		}
 
-		[SecuritySafeCritical]
 		public override string ToString()
 		{
-			return Number.FormatInt32((int)this, null, NumberFormatInfo.CurrentInfo);
+			return Number.FormatInt32((int)this, null, null);
 		}
 
 		[SecuritySafeCritical]
 		public string ToString(IFormatProvider provider)
 		{
-			return Number.FormatInt32((int)this, null, NumberFormatInfo.GetInstance(provider));
+			return Number.FormatInt32((int)this, null, provider);
 		}
 
 		public string ToString(string format)
 		{
-			return this.ToString(format, NumberFormatInfo.CurrentInfo);
+			return this.ToString(format, null);
 		}
 
 		public string ToString(string format, IFormatProvider provider)
 		{
-			return this.ToString(format, NumberFormatInfo.GetInstance(provider));
-		}
-
-		[SecuritySafeCritical]
-		private string ToString(string format, NumberFormatInfo info)
-		{
 			if (this < 0 && format != null && format.Length > 0 && (format[0] == 'X' || format[0] == 'x'))
 			{
-				return Number.FormatUInt32((uint)this & 255U, format, info);
+				return Number.FormatUInt32((uint)this & 255U, format, provider);
 			}
-			return Number.FormatInt32((int)this, format, info);
+			return Number.FormatInt32((int)this, format, provider);
+		}
+
+		public unsafe bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			if (this < 0 && format.Length > 0 && (*format[0] == 88 || *format[0] == 120))
+			{
+				return Number.TryFormatUInt32((uint)this & 255U, format, provider, destination, out charsWritten);
+			}
+			return Number.TryFormatInt32((int)this, format, provider, destination, out charsWritten);
 		}
 
 		[CLSCompliant(false)]
 		public static sbyte Parse(string s)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return sbyte.Parse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
 		}
 
@@ -85,12 +91,20 @@ namespace System
 		public static sbyte Parse(string s, NumberStyles style)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return sbyte.Parse(s, style, NumberFormatInfo.CurrentInfo);
 		}
 
 		[CLSCompliant(false)]
 		public static sbyte Parse(string s, IFormatProvider provider)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return sbyte.Parse(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
 		}
 
@@ -98,10 +112,30 @@ namespace System
 		public static sbyte Parse(string s, NumberStyles style, IFormatProvider provider)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return sbyte.Parse(s, style, NumberFormatInfo.GetInstance(provider));
+		}
+
+		[CLSCompliant(false)]
+		public static sbyte Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
 			return sbyte.Parse(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
 		private static sbyte Parse(string s, NumberStyles style, NumberFormatInfo info)
+		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return sbyte.Parse(s, style, info);
+		}
+
+		private static sbyte Parse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info)
 		{
 			int num = 0;
 			try
@@ -110,13 +144,13 @@ namespace System
 			}
 			catch (OverflowException ex)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."), ex);
+				throw new OverflowException("Value was either too large or too small for a signed byte.", ex);
 			}
 			if ((style & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
 			{
 				if (num < 0 || num > 255)
 				{
-					throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+					throw new OverflowException("Value was either too large or too small for a signed byte.");
 				}
 				return (sbyte)num;
 			}
@@ -124,7 +158,7 @@ namespace System
 			{
 				if (num < -128 || num > 127)
 				{
-					throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+					throw new OverflowException("Value was either too large or too small for a signed byte.");
 				}
 				return (sbyte)num;
 			}
@@ -133,6 +167,17 @@ namespace System
 		[CLSCompliant(false)]
 		public static bool TryParse(string s, out sbyte result)
 		{
+			if (s == null)
+			{
+				result = 0;
+				return false;
+			}
+			return sbyte.TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		[CLSCompliant(false)]
+		public static bool TryParse(ReadOnlySpan<char> s, out sbyte result)
+		{
 			return sbyte.TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
 		}
 
@@ -140,10 +185,22 @@ namespace System
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out sbyte result)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				result = 0;
+				return false;
+			}
 			return sbyte.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
 		}
 
-		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out sbyte result)
+		[CLSCompliant(false)]
+		public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out sbyte result)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return sbyte.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out sbyte result)
 		{
 			result = 0;
 			int num;
@@ -243,7 +300,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "SByte", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "SByte", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -251,7 +308,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		private sbyte m_value;
+		private readonly sbyte m_value;
 
 		public const sbyte MaxValue = 127;
 

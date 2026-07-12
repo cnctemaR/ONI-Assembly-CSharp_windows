@@ -10,6 +10,7 @@ namespace System.Collections.Generic
 	{
 		public static EqualityComparer<T> Default
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				EqualityComparer<T> equalityComparer = EqualityComparer<T>.defaultComparer;

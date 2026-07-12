@@ -11,7 +11,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformWindows>("2c5177b11d81d824dbb064f9ac8527da");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -19,7 +19,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.WindowsPlayer, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.MetroPlayerX86, this);
@@ -27,12 +27,12 @@ namespace FMODUnity
 			settings.DeclareRuntimePlatform(RuntimePlatform.MetroPlayerARM, this);
 		}
 
-		public override string GetPluginPath(string pluginName)
+		internal override string GetPluginPath(string pluginName)
 		{
 			return string.Format("{0}/X86_64/{1}.dll", this.GetPluginBasePath(), pluginName);
 		}
 
-		public override List<CodecChannelCount> DefaultCodecChannels
+		internal override List<CodecChannelCount> DefaultCodecChannels
 		{
 			get
 			{

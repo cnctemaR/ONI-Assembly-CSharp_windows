@@ -25,6 +25,22 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		public override bool IsFixedSize
+		{
+			get
+			{
+				return ((IList)this.InnerList).IsFixedSize;
+			}
+		}
+
+		public override bool IsReadOnly
+		{
+			get
+			{
+				return ((IList)this.InnerList).IsReadOnly;
+			}
+		}
+
 		public SqlParameter this[int index]
 		{
 			get

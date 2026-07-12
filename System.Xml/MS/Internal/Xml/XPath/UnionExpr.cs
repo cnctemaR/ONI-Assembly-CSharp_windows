@@ -11,8 +11,8 @@ namespace MS.Internal.Xml.XPath
 		{
 			this.qy1 = query1;
 			this.qy2 = query2;
-			this.advance1 = true;
-			this.advance2 = true;
+			this._advance1 = true;
+			this._advance2 = true;
 		}
 
 		private UnionExpr(UnionExpr other)
@@ -20,19 +20,19 @@ namespace MS.Internal.Xml.XPath
 		{
 			this.qy1 = Query.Clone(other.qy1);
 			this.qy2 = Query.Clone(other.qy2);
-			this.advance1 = other.advance1;
-			this.advance2 = other.advance2;
-			this.currentNode = Query.Clone(other.currentNode);
-			this.nextNode = Query.Clone(other.nextNode);
+			this._advance1 = other._advance1;
+			this._advance2 = other._advance2;
+			this._currentNode = Query.Clone(other._currentNode);
+			this._nextNode = Query.Clone(other._nextNode);
 		}
 
 		public override void Reset()
 		{
 			this.qy1.Reset();
 			this.qy2.Reset();
-			this.advance1 = true;
-			this.advance2 = true;
-			this.nextNode = null;
+			this._advance1 = true;
+			this._advance2 = true;
+			this._nextNode = null;
 		}
 
 		public override void SetXsltContext(XsltContext xsltContext)
@@ -45,57 +45,57 @@ namespace MS.Internal.Xml.XPath
 		{
 			this.qy1.Evaluate(context);
 			this.qy2.Evaluate(context);
-			this.advance1 = true;
-			this.advance2 = true;
-			this.nextNode = null;
+			this._advance1 = true;
+			this._advance2 = true;
+			this._nextNode = null;
 			base.ResetCount();
 			return this;
 		}
 
 		private XPathNavigator ProcessSamePosition(XPathNavigator result)
 		{
-			this.currentNode = result;
-			this.advance1 = (this.advance2 = true);
+			this._currentNode = result;
+			this._advance1 = (this._advance2 = true);
 			return result;
 		}
 
 		private XPathNavigator ProcessBeforePosition(XPathNavigator res1, XPathNavigator res2)
 		{
-			this.nextNode = res2;
-			this.advance2 = false;
-			this.advance1 = true;
-			this.currentNode = res1;
+			this._nextNode = res2;
+			this._advance2 = false;
+			this._advance1 = true;
+			this._currentNode = res1;
 			return res1;
 		}
 
 		private XPathNavigator ProcessAfterPosition(XPathNavigator res1, XPathNavigator res2)
 		{
-			this.nextNode = res1;
-			this.advance1 = false;
-			this.advance2 = true;
-			this.currentNode = res2;
+			this._nextNode = res1;
+			this._advance1 = false;
+			this._advance2 = true;
+			this._currentNode = res2;
 			return res2;
 		}
 
 		public override XPathNavigator Advance()
 		{
 			XPathNavigator xpathNavigator;
-			if (this.advance1)
+			if (this._advance1)
 			{
 				xpathNavigator = this.qy1.Advance();
 			}
 			else
 			{
-				xpathNavigator = this.nextNode;
+				xpathNavigator = this._nextNode;
 			}
 			XPathNavigator xpathNavigator2;
-			if (this.advance2)
+			if (this._advance2)
 			{
 				xpathNavigator2 = this.qy2.Advance();
 			}
 			else
 			{
-				xpathNavigator2 = this.nextNode;
+				xpathNavigator2 = this._nextNode;
 			}
 			if (xpathNavigator != null && xpathNavigator2 != null)
 			{
@@ -114,16 +114,16 @@ namespace MS.Internal.Xml.XPath
 			{
 				if (xpathNavigator2 == null)
 				{
-					this.advance1 = true;
-					this.advance2 = false;
-					this.currentNode = xpathNavigator;
-					this.nextNode = null;
+					this._advance1 = true;
+					this._advance2 = false;
+					this._currentNode = xpathNavigator;
+					this._nextNode = null;
 					return xpathNavigator;
 				}
-				this.advance1 = false;
-				this.advance2 = true;
-				this.currentNode = xpathNavigator2;
-				this.nextNode = null;
+				this._advance1 = false;
+				this._advance2 = true;
+				this._currentNode = xpathNavigator2;
+				this._nextNode = null;
 				return xpathNavigator2;
 			}
 		}
@@ -159,7 +159,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.currentNode;
+				return this._currentNode;
 			}
 		}
 
@@ -171,30 +171,16 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			if (this.qy1 != null)
-			{
-				this.qy1.PrintQuery(w);
-			}
-			if (this.qy2 != null)
-			{
-				this.qy2.PrintQuery(w);
-			}
-			w.WriteEndElement();
-		}
-
 		internal Query qy1;
 
 		internal Query qy2;
 
-		private bool advance1;
+		private bool _advance1;
 
-		private bool advance2;
+		private bool _advance2;
 
-		private XPathNavigator currentNode;
+		private XPathNavigator _currentNode;
 
-		private XPathNavigator nextNode;
+		private XPathNavigator _nextNode;
 	}
 }

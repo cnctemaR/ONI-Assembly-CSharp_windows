@@ -35,16 +35,22 @@ public class SafeCellSensor : Sensor
 
 	public void RunSafeCellQuery(bool avoid_light)
 	{
+		this.cell = this.RunAndGetSafeCellQueryResult(avoid_light);
+		if (this.cell == Grid.PosToCell(this.navigator))
+		{
+			this.cell = Grid.InvalidCell;
+		}
+	}
+
+	public int RunAndGetSafeCellQueryResult(bool avoid_light)
+	{
 		MinionPathFinderAbilities minionPathFinderAbilities = (MinionPathFinderAbilities)this.navigator.GetCurrentAbilities();
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(true);
 		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain, avoid_light);
 		this.navigator.RunQuery(safeCellQuery);
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(false);
 		this.cell = safeCellQuery.GetResultCell();
-		if (this.cell == Grid.PosToCell(this.navigator))
-		{
-			this.cell = Grid.InvalidCell;
-		}
+		return this.cell;
 	}
 
 	public int GetSensorCell()

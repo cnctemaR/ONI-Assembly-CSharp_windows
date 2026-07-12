@@ -2065,8 +2065,7 @@ namespace System.Xml.Serialization
 			{
 				SpecialMapping specialMapping = (SpecialMapping)text.Mapping;
 				this.WriteSourceBeginTyped(member.ArraySource, specialMapping.TypeDesc);
-				TypeKind kind = specialMapping.TypeDesc.Kind;
-				if (kind != TypeKind.Node)
+				if (specialMapping.TypeDesc.Kind != TypeKind.Node)
 				{
 					throw new InvalidOperationException(Res.GetString("Internal error."));
 				}
@@ -2953,7 +2952,10 @@ namespace System.Xml.Serialization
 				}
 				else
 				{
-					base.Writer.WriteLine("// missing real mapping for " + serializableMapping.XsiType);
+					IndentedWriter writer2 = base.Writer;
+					string text = "// missing real mapping for ";
+					XmlQualifiedName xsiType = serializableMapping.XsiType;
+					writer2.WriteLine(text + ((xsiType != null) ? xsiType.ToString() : null));
 					base.Writer.Write("throw CreateMissingIXmlSerializableType(");
 					base.WriteQuotedCSharpString(serializableMapping.XsiType.Name);
 					base.Writer.Write(", ");
@@ -2962,9 +2964,9 @@ namespace System.Xml.Serialization
 					base.WriteQuotedCSharpString(head.Type.FullName);
 					base.Writer.WriteLine(");");
 				}
-				IndentedWriter writer2 = base.Writer;
-				num = writer2.Indent;
-				writer2.Indent = num - 1;
+				IndentedWriter writer3 = base.Writer;
+				num = writer3.Indent;
+				writer3.Indent = num - 1;
 				base.Writer.WriteLine("}");
 				this.WriteDerivedSerializable(head, serializableMapping, source, isWrappedAny);
 			}

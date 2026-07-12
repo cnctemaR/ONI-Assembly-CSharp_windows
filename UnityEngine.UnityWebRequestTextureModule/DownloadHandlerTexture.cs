@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
@@ -28,41 +29,23 @@ namespace UnityEngine.Networking
 			this.mNonReadable = !readable;
 		}
 
-		protected override byte[] GetData()
+		protected override NativeArray<byte> GetNativeData()
 		{
-			return DownloadHandler.InternalGetByteArray(this);
+			return DownloadHandler.InternalGetNativeArray(this, ref this.m_NativeData);
+		}
+
+		public override void Dispose()
+		{
+			DownloadHandler.DisposeNativeArray(ref this.m_NativeData);
+			base.Dispose();
 		}
 
 		public Texture2D texture
 		{
 			get
 			{
-				return this.InternalGetTexture();
+				return this.InternalGetTextureNative();
 			}
-		}
-
-		private Texture2D InternalGetTexture()
-		{
-			bool flag = this.mHasTexture;
-			if (flag)
-			{
-				bool flag2 = this.mTexture == null;
-				if (flag2)
-				{
-					this.mTexture = new Texture2D(2, 2);
-					this.mTexture.LoadImage(this.GetData(), this.mNonReadable);
-				}
-			}
-			else
-			{
-				bool flag3 = this.mTexture == null;
-				if (flag3)
-				{
-					this.mTexture = this.InternalGetTextureNative();
-					this.mHasTexture = true;
-				}
-			}
-			return this.mTexture;
 		}
 
 		[NativeThrows]
@@ -74,9 +57,7 @@ namespace UnityEngine.Networking
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerTexture>(www).texture;
 		}
 
-		private Texture2D mTexture;
-
-		private bool mHasTexture;
+		private NativeArray<byte> m_NativeData;
 
 		private bool mNonReadable;
 	}

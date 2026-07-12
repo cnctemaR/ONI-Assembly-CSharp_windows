@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB553}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EC7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>
@@ -19,18 +19,35 @@
     <Compile Include="DiagnosticListener.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="Locale.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\BinaryOrderedUdtNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\BinarySerializeSerializer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\BooleanNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\ByteNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\DataAccessKind.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\DoubleNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\DummyStream.cs" />
     <Compile Include="Microsoft\SqlServer\Server\EMDEventType.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ExtendedClrTypeCode.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\FieldInfoEx.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\FloatNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\Format.cs" />
     <Compile Include="Microsoft\SqlServer\Server\IBinarySerialize.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\IntNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\InvalidUdtException.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedGetters.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedGettersV3.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedSetters.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedSettersV3.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\LongNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\MemoryRecordBuffer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\MetaDataUtilsSmi.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\NormalizedSerializer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\Normalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\SByteNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\SerializationHelperSql9.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\Serializer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\ShortNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SmiDefaultFieldsProperty.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SmiEventSink.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SmiEventSink_Default.cs" />
@@ -65,10 +82,11 @@
     <Compile Include="Microsoft\SqlServer\Server\SqlUserDefinedTypeAttribute.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SystemDataAccessKind.cs" />
     <Compile Include="Microsoft\SqlServer\Server\TriggerAction.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\UIntNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\ULongNormalizer.cs" />
+    <Compile Include="Microsoft\SqlServer\Server\UShortNormalizer.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ValueUtilsSmi.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeGssContextHandle.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeGssCredHandle.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeGssNameHandle.cs" />
+    <Compile Include="Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Res.cs" />
     <Compile Include="SqlDependencyProcessDispatcher.cs" />
@@ -141,7 +159,6 @@
     <Compile Include="System\Data\Common\DbTransaction.cs" />
     <Compile Include="System\Data\Common\DecimalStorage.cs" />
     <Compile Include="System\Data\Common\DoubleStorage.cs" />
-    <Compile Include="System\Data\Common\ExternDll.cs" />
     <Compile Include="System\Data\Common\GroupByBehavior.cs" />
     <Compile Include="System\Data\Common\HandlerBase.cs" />
     <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
@@ -185,7 +202,6 @@
     <Compile Include="System\Data\Common\UInt16Storage.cs" />
     <Compile Include="System\Data\Common\UInt32Storage.cs" />
     <Compile Include="System\Data\Common\UInt64Storage.cs" />
-    <Compile Include="System\Data\Common\UnsafeNativeMethods.cs" />
     <Compile Include="System\Data\ConflictOption.cs" />
     <Compile Include="System\Data\ConnectionState.cs" />
     <Compile Include="System\Data\ConstNode.cs" />
@@ -205,6 +221,7 @@
     <Compile Include="System\Data\DataException.cs" />
     <Compile Include="System\Data\DataExpression.cs" />
     <Compile Include="System\Data\DataKey.cs" />
+    <Compile Include="System\Data\DataReaderExtensions.cs" />
     <Compile Include="System\Data\DataRelation.cs" />
     <Compile Include="System\Data\DataRelationCollection.cs" />
     <Compile Include="System\Data\DataRelationPropertyDescriptor.cs" />
@@ -425,11 +442,13 @@
     <Compile Include="System\Data\SqlClient\CallbackType.cs" />
     <Compile Include="System\Data\SqlClient\DataFeed.cs" />
     <Compile Include="System\Data\SqlClient\EncryptionOptions.cs" />
+    <Compile Include="System\Data\SqlClient\FederatedAuthenticationFeatureExtensionData.cs" />
     <Compile Include="System\Data\SqlClient\LastIOTimer.cs" />
     <Compile Include="System\Data\SqlClient\MetaType.cs" />
     <Compile Include="System\Data\SqlClient\MultiPartTableName.cs" />
     <Compile Include="System\Data\SqlClient\OnChangeEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\ParameterPeekAheadValue.cs" />
+    <Compile Include="System\Data\SqlClient\ParsingErrorState.cs" />
     <Compile Include="System\Data\SqlClient\PoolBlockingPeriod.cs" />
     <Compile Include="System\Data\SqlClient\PreLoginHandshakeStatus.cs" />
     <Compile Include="System\Data\SqlClient\PreLoginOptions.cs" />
@@ -442,7 +461,10 @@
     <Compile Include="System\Data\SqlClient\SessionStateRecord.cs" />
     <Compile Include="System\Data\SqlClient\SniContext.cs" />
     <Compile Include="System\Data\SqlClient\SNIErrorDetails.cs" />
+    <Compile Include="System\Data\SqlClient\SNIHandle.cs" />
+    <Compile Include="System\Data\SqlClient\SNILoadHandle.cs" />
     <Compile Include="System\Data\SqlClient\SNINativeMethodWrapper.cs" />
+    <Compile Include="System\Data\SqlClient\SNIPacket.cs" />
     <Compile Include="System\Data\SqlClient\SNI\DataSource.cs" />
     <Compile Include="System\Data\SqlClient\SNI\LocalDB.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIAsyncCallback.cs" />
@@ -466,7 +488,11 @@
     <Compile Include="System\Data\SqlClient\SNI\TdsParserStateObjectManaged.cs" />
     <Compile Include="System\Data\SqlClient\SortOrder.cs" />
     <Compile Include="System\Data\SqlClient\SQL.cs" />
+    <Compile Include="System\Data\SqlClient\SqlAuthenticationInitializer.cs" />
     <Compile Include="System\Data\SqlClient\SqlAuthenticationMethod.cs" />
+    <Compile Include="System\Data\SqlClient\SqlAuthenticationParameters.cs" />
+    <Compile Include="System\Data\SqlClient\SqlAuthenticationProvider.cs" />
+    <Compile Include="System\Data\SqlClient\SqlAuthenticationToken.cs" />
     <Compile Include="System\Data\SqlClient\SqlBuffer.cs" />
     <Compile Include="System\Data\SqlClient\SqlBulkCopy.cs" />
     <Compile Include="System\Data\SqlClient\SqlBulkCopyColumnMapping.cs" />
@@ -476,6 +502,7 @@
     <Compile Include="System\Data\SqlClient\SqlCachedStream.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientDiagnosticListenerExtensions.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientFactory.cs" />
+    <Compile Include="System\Data\SqlClient\SqlClientLogger.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientMetaDataCollectionNames.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientPermission.cs" />
     <Compile Include="System\Data\SqlClient\SqlClientPermissionAttribute.cs" />
@@ -483,6 +510,7 @@
     <Compile Include="System\Data\SqlClient\SqlColumnEncryptionCertificateStoreProvider.cs" />
     <Compile Include="System\Data\SqlClient\SqlColumnEncryptionCngProvider.cs" />
     <Compile Include="System\Data\SqlClient\SqlColumnEncryptionCspProvider.cs" />
+    <Compile Include="System\Data\SqlClient\SqlColumnEncryptionEnclaveProvider.cs" />
     <Compile Include="System\Data\SqlClient\SqlColumnEncryptionKeyStoreProvider.cs" />
     <Compile Include="System\Data\SqlClient\SqlCommand.cs" />
     <Compile Include="System\Data\SqlClient\SqlCommandBuilder.cs" />
@@ -508,6 +536,8 @@
     <Compile Include="System\Data\SqlClient\SqlDelegatedTransaction.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependency.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependencyPerAppDomainDispatcher.cs" />
+    <Compile Include="System\Data\SqlClient\SqlEnclaveAttestationParameters.cs" />
+    <Compile Include="System\Data\SqlClient\SqlEnclaveSession.cs" />
     <Compile Include="System\Data\SqlClient\SqlEnvChange.cs" />
     <Compile Include="System\Data\SqlClient\SqlError.cs" />
     <Compile Include="System\Data\SqlClient\SqlErrorCollection.cs" />
@@ -544,6 +574,7 @@
     <Compile Include="System\Data\SqlClient\SqlStream.cs" />
     <Compile Include="System\Data\SqlClient\SqlStreamingXml.cs" />
     <Compile Include="System\Data\SqlClient\SqlTransaction.cs" />
+    <Compile Include="System\Data\SqlClient\SqlUdtInfo.cs" />
     <Compile Include="System\Data\SqlClient\SqlUnicodeEncoding.cs" />
     <Compile Include="System\Data\SqlClient\StreamDataFeed.cs" />
     <Compile Include="System\Data\SqlClient\SysTxForGlobalTransactions.cs" />
@@ -555,12 +586,14 @@
     <Compile Include="System\Data\SqlClient\TdsParserState.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObject.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.cs" />
+    <Compile Include="System\Data\SqlClient\TdsParserStateObjectNative.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStaticMethods.cs" />
     <Compile Include="System\Data\SqlClient\TdsRecordBufferSetter.cs" />
     <Compile Include="System\Data\SqlClient\TdsValueSetter.cs" />
     <Compile Include="System\Data\SqlClient\TextDataFeed.cs" />
     <Compile Include="System\Data\SqlClient\TransactionState.cs" />
     <Compile Include="System\Data\SqlClient\TransactionType.cs" />
+    <Compile Include="System\Data\SqlClient\WritePacketCache.cs" />
     <Compile Include="System\Data\SqlClient\XmlDataFeed.cs" />
     <Compile Include="System\Data\SqlClient\_ColumnMapping.cs" />
     <Compile Include="System\Data\SqlClient\_SqlMetaData.cs" />
@@ -639,6 +672,7 @@
     <Compile Include="System\Data\TreeAccessMethod.cs" />
     <Compile Include="System\Data\TypedDataSetGenerator.cs" />
     <Compile Include="System\Data\TypedDataSetGeneratorException.cs" />
+    <Compile Include="System\Data\TypeLimiter.cs" />
     <Compile Include="System\Data\UnaryNode.cs" />
     <Compile Include="System\Data\UniqueConstraint.cs" />
     <Compile Include="System\Data\UpdateRowSource.cs" />
@@ -659,31 +693,18 @@
     <Compile Include="System\Data\XSDSchema.cs" />
     <Compile Include="System\Data\ZeroOpNode.cs" />
     <Compile Include="System\HResults.cs" />
+    <Compile Include="System\LocalAppContext.cs" />
+    <Compile Include="System\LocalAppContextSwitches.cs" />
     <Compile Include="System\MonoDocumentationNoteAttribute.cs" />
     <Compile Include="System\MonoExtensionAttribute.cs" />
     <Compile Include="System\MonoInternalNoteAttribute.cs" />
     <Compile Include="System\MonoLimitationAttribute.cs" />
     <Compile Include="System\MonoNotSupportedAttribute.cs" />
     <Compile Include="System\MonoTODOAttribute.cs" />
-    <Compile Include="System\Net\ContextFlagsAdapterPal.cs" />
-    <Compile Include="System\Net\ContextFlagsPal.cs" />
-    <Compile Include="System\Net\DebugThreadTracking.cs" />
-    <Compile Include="System\Net\InternalException.cs" />
-    <Compile Include="System\Net\NegotiationInfoClass.cs" />
-    <Compile Include="System\Net\NetEventSource.cs" />
-    <Compile Include="System\Net\SecurityStatusPal.cs" />
-    <Compile Include="System\Net\SecurityStatusPalErrorCode.cs" />
-    <Compile Include="System\Net\Security\NegotiateStreamPal.cs" />
-    <Compile Include="System\Net\Security\SafeCredentialReference.cs" />
-    <Compile Include="System\Net\Security\SafeDeleteContext.cs" />
-    <Compile Include="System\Net\Security\SafeDeleteNegoContext.cs" />
-    <Compile Include="System\Net\Security\SafeFreeCredentials.cs" />
-    <Compile Include="System\Net\Security\SafeFreeNegoCredentials.cs" />
-    <Compile Include="System\Net\Security\SecurityBuffer.cs" />
-    <Compile Include="System\Net\Security\SecurityBufferType.cs" />
-    <Compile Include="System\Net\ThreadKinds.cs" />
     <Compile Include="System\NotImplemented.cs" />
     <Compile Include="System\Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableContextAttribute.cs" />
     <Compile Include="System\Threading\Tasks\TaskToApm.cs" />
     <Compile Include="System\Xml\BaseRegionIterator.cs" />
     <Compile Include="System\Xml\BaseTreeIterator.cs" />
@@ -706,35 +727,39 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB551}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC4}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB552}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC5}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Drawing\System.Drawing.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC9}</Project>
+      <Name>System.Drawing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.EnterpriseServices\System.EnterpriseServices.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB555}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ECA}</Project>
       <Name>System.EnterpriseServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB557}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ECE}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB55C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ED3}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB55D}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ED4}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

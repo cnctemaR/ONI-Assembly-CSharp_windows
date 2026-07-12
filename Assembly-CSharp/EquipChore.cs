@@ -11,8 +11,8 @@ public class EquipChore : Chore<EquipChore.StatesInstance>
 		this.showAvailabilityInHoverText = false;
 		Prioritizable.AddRef(equippable.gameObject);
 		Game.Instance.Trigger(1980521255, equippable.gameObject);
-		base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, equippable.GetComponent<Assignable>());
-		base.AddPrecondition(ChorePreconditions.instance.CanPickup, equippable.GetComponent<Pickupable>());
+		this.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, equippable.GetComponent<Assignable>());
+		this.AddPrecondition(ChorePreconditions.instance.CanPickup, equippable.GetComponent<Pickupable>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)

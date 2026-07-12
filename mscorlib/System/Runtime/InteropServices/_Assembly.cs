@@ -7,11 +7,11 @@ using System.Security.Policy;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsDual)]
 	[ComVisible(true)]
-	[TypeLibImportClass(typeof(Assembly))]
 	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsDual)]
 	[Guid("17156360-2F1A-384A-BC52-FDE93C215C5B")]
+	[TypeLibImportClass(typeof(Assembly))]
 	public interface _Assembly
 	{
 		string ToString();

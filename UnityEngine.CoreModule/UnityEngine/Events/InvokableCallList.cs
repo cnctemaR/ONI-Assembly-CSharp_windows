@@ -38,19 +38,27 @@ namespace UnityEngine.Events
 				}
 			}
 			this.m_RuntimeCalls.RemoveAll(new Predicate<BaseInvokableCall>(list.Contains));
-			this.m_NeedsUpdate = true;
+			List<BaseInvokableCall> list2 = new List<BaseInvokableCall>(this.m_PersistentCalls.Count + this.m_RuntimeCalls.Count);
+			list2.AddRange(this.m_PersistentCalls);
+			list2.AddRange(this.m_RuntimeCalls);
+			this.m_ExecutingCalls = list2;
+			this.m_NeedsUpdate = false;
 		}
 
 		public void Clear()
 		{
 			this.m_RuntimeCalls.Clear();
-			this.m_NeedsUpdate = true;
+			List<BaseInvokableCall> list = new List<BaseInvokableCall>(this.m_PersistentCalls);
+			this.m_ExecutingCalls = list;
+			this.m_NeedsUpdate = false;
 		}
 
 		public void ClearPersistent()
 		{
 			this.m_PersistentCalls.Clear();
-			this.m_NeedsUpdate = true;
+			List<BaseInvokableCall> list = new List<BaseInvokableCall>(this.m_RuntimeCalls);
+			this.m_ExecutingCalls = list;
+			this.m_NeedsUpdate = false;
 		}
 
 		public List<BaseInvokableCall> PrepareInvoke()
@@ -70,7 +78,7 @@ namespace UnityEngine.Events
 
 		private readonly List<BaseInvokableCall> m_RuntimeCalls = new List<BaseInvokableCall>();
 
-		private readonly List<BaseInvokableCall> m_ExecutingCalls = new List<BaseInvokableCall>();
+		private List<BaseInvokableCall> m_ExecutingCalls = new List<BaseInvokableCall>();
 
 		private bool m_NeedsUpdate = true;
 	}

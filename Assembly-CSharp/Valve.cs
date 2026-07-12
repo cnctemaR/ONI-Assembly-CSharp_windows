@@ -96,7 +96,7 @@ public class Valve : Workable, ISaveLoadable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.UpdateFlow();

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Events;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -8,6 +10,42 @@ namespace UnityEngine
 	[RequireComponent(typeof(Transform))]
 	public sealed class SpriteRenderer : Renderer
 	{
+		public void RegisterSpriteChangeCallback(UnityAction<SpriteRenderer> callback)
+		{
+			bool flag = this.m_SpriteChangeEvent == null;
+			if (flag)
+			{
+				this.m_SpriteChangeEvent = new UnityEvent<SpriteRenderer>();
+			}
+			this.m_SpriteChangeEvent.AddListener(callback);
+		}
+
+		public void UnregisterSpriteChangeCallback(UnityAction<SpriteRenderer> callback)
+		{
+			bool flag = this.m_SpriteChangeEvent != null;
+			if (flag)
+			{
+				this.m_SpriteChangeEvent.RemoveListener(callback);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private void InvokeSpriteChanged()
+		{
+			try
+			{
+				UnityEvent<SpriteRenderer> spriteChangeEvent = this.m_SpriteChangeEvent;
+				if (spriteChangeEvent != null)
+				{
+					spriteChangeEvent.Invoke(this);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex, this);
+			}
+		}
+
 		internal extern bool shouldSupportTiling
 		{
 			[NativeMethod("ShouldSupportTiling")]
@@ -107,6 +145,27 @@ namespace UnityEngine
 			set;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetCurrentMeshDataPtr();
+
+		internal unsafe Mesh.MeshDataArray GetCurrentMeshData()
+		{
+			IntPtr currentMeshDataPtr = this.GetCurrentMeshDataPtr();
+			bool flag = currentMeshDataPtr == IntPtr.Zero;
+			Mesh.MeshDataArray meshDataArray;
+			if (flag)
+			{
+				meshDataArray = new Mesh.MeshDataArray(0);
+			}
+			else
+			{
+				Mesh.MeshDataArray meshDataArray2 = new Mesh.MeshDataArray(1);
+				*meshDataArray2.m_Ptrs = currentMeshDataPtr;
+				meshDataArray = meshDataArray2;
+			}
+			return meshDataArray;
+		}
+
 		[NativeMethod(Name = "GetSpriteBounds")]
 		internal Bounds Internal_GetSpriteBounds(SpriteDrawMode mode)
 		{
@@ -114,6 +173,9 @@ namespace UnityEngine
 			this.Internal_GetSpriteBounds_Injected(mode, out bounds);
 			return bounds;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void GetSecondaryTextureProperties([NotNull("ArgumentNullException")] MaterialPropertyBlock mbp);
 
 		internal Bounds GetSpriteBounds()
 		{
@@ -134,5 +196,7 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_GetSpriteBounds_Injected(SpriteDrawMode mode, out Bounds ret);
+
+		private UnityEvent<SpriteRenderer> m_SpriteChangeEvent;
 	}
 }

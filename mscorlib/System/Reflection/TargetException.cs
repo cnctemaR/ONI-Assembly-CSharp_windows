@@ -1,28 +1,25 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class TargetException : ApplicationException
 	{
 		public TargetException()
+			: this(null)
 		{
-			base.SetErrorCode(-2146232829);
 		}
 
 		public TargetException(string message)
-			: base(message)
+			: this(message, null)
 		{
-			base.SetErrorCode(-2146232829);
 		}
 
 		public TargetException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146232829);
+			base.HResult = -2146232829;
 		}
 
 		protected TargetException(SerializationInfo info, StreamingContext context)

@@ -1,11 +1,13 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace Unity.Collections
 {
+	[UsedByNativeCode]
 	public enum NativeLeakDetectionMode
 	{
-		EnabledWithStackTrace = 3,
-		Enabled = 2,
-		Disabled = 1
+		Disabled = 1,
+		Enabled,
+		EnabledWithStackTrace
 	}
 }

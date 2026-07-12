@@ -107,7 +107,7 @@ public class EmptySolidConduitWorkable : Workable, IEmptyConduitWorkable
 		this.UpdateStatusItem(null);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.elapsedTime == -1f)
 		{
@@ -144,7 +144,7 @@ public class EmptySolidConduitWorkable : Workable, IEmptyConduitWorkable
 		return flag;
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		worker.Work(4f);
 		return true;

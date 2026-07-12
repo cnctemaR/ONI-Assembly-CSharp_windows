@@ -7,6 +7,18 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/OxygenBreather")]
 public class OxygenBreather : KMonoBehaviour, ISim200ms
 {
+	public float ConsumptionRate
+	{
+		get
+		{
+			if (this.airConsumptionRate != null)
+			{
+				return this.airConsumptionRate.GetTotalValue();
+			}
+			return 0f;
+		}
+	}
+
 	public float CO2EmitRate
 	{
 		get
@@ -111,6 +123,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 				if (this.hasAirTimer.TryStop(2f))
 				{
 					this.hasAir = flag;
+					base.Trigger(-933153513, this.hasAir);
 					return;
 				}
 			}

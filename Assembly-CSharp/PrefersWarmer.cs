@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 
 [SkipSaveFileSerialization]
 public class PrefersWarmer : StateMachineComponent<PrefersWarmer.StatesInstance>
@@ -26,6 +27,6 @@ public class PrefersWarmer : StateMachineComponent<PrefersWarmer.StatesInstance>
 			this.root.ToggleAttributeModifier(DUPLICANTS.TRAITS.NEEDS.PREFERSWARMER.NAME, (PrefersWarmer.StatesInstance smi) => this.modifier, null);
 		}
 
-		private AttributeModifier modifier = new AttributeModifier("ThermalConductivityBarrier", -0.005f, DUPLICANTS.TRAITS.NEEDS.PREFERSWARMER.NAME, false, false, true);
+		private AttributeModifier modifier = new AttributeModifier("ThermalConductivityBarrier", DUPLICANTSTATS.STANDARD.Temperature.Conductivity_Barrier_Modification.SKINNY, DUPLICANTS.TRAITS.NEEDS.PREFERSWARMER.NAME, false, false, true);
 	}
 }

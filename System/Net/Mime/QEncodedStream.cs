@@ -7,19 +7,21 @@ namespace System.Net.Mime
 	internal class QEncodedStream : DelegatedStream, IEncodableStream
 	{
 		internal QEncodedStream(WriteStateInfoBase wsi)
+			: base(new MemoryStream())
 		{
-			this.writeState = wsi;
+			this._writeState = wsi;
 		}
 
 		private QEncodedStream.ReadStateInfo ReadState
 		{
 			get
 			{
-				if (this.readState == null)
+				QEncodedStream.ReadStateInfo readStateInfo;
+				if ((readStateInfo = this._readState) == null)
 				{
-					this.readState = new QEncodedStream.ReadStateInfo();
+					readStateInfo = (this._readState = new QEncodedStream.ReadStateInfo());
 				}
-				return this.readState;
+				return readStateInfo;
 			}
 		}
 
@@ -27,7 +29,7 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.writeState;
+				return this._writeState;
 			}
 		}
 
@@ -58,120 +60,116 @@ namespace System.Net.Mime
 
 		public unsafe int DecodeBytes(byte[] buffer, int offset, int count)
 		{
-			fixed (byte[] array = buffer)
+			byte* ptr;
+			if (buffer == null || buffer.Length == 0)
 			{
-				byte* ptr;
-				if (buffer == null || array.Length == 0)
+				ptr = null;
+			}
+			else
+			{
+				ptr = &buffer[0];
+			}
+			byte* ptr2 = ptr + offset;
+			byte* ptr3 = ptr2;
+			byte* ptr4 = ptr2;
+			byte* ptr5 = ptr2 + count;
+			if (this.ReadState.IsEscaped)
+			{
+				if (this.ReadState.Byte == -1)
 				{
-					ptr = null;
+					if (count == 1)
+					{
+						this.ReadState.Byte = (short)(*ptr3);
+						return 0;
+					}
+					if (*ptr3 != 13 || ptr3[1] != 10)
+					{
+						byte b = QEncodedStream.s_hexDecodeMap[(int)(*ptr3)];
+						byte b2 = QEncodedStream.s_hexDecodeMap[(int)ptr3[1]];
+						if (b == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b));
+						}
+						if (b2 == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b2));
+						}
+						*(ptr4++) = (byte)(((int)b << 4) + (int)b2);
+					}
+					ptr3 += 2;
 				}
 				else
 				{
-					ptr = &array[0];
+					if (this.ReadState.Byte != 13 || *ptr3 != 10)
+					{
+						byte b3 = QEncodedStream.s_hexDecodeMap[(int)this.ReadState.Byte];
+						byte b4 = QEncodedStream.s_hexDecodeMap[(int)(*ptr3)];
+						if (b3 == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b3));
+						}
+						if (b4 == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b4));
+						}
+						*(ptr4++) = (byte)(((int)b3 << 4) + (int)b4);
+					}
+					ptr3++;
 				}
-				byte* ptr2 = ptr + offset;
-				byte* ptr3 = ptr2;
-				byte* ptr4 = ptr2;
-				byte* ptr5 = ptr2 + count;
-				if (this.ReadState.IsEscaped)
-				{
-					if (this.ReadState.Byte == -1)
-					{
-						if (count == 1)
-						{
-							this.ReadState.Byte = (short)(*ptr3);
-							return 0;
-						}
-						if (*ptr3 != 13 || ptr3[1] != 10)
-						{
-							byte b = QEncodedStream.hexDecodeMap[(int)(*ptr3)];
-							byte b2 = QEncodedStream.hexDecodeMap[(int)ptr3[1]];
-							if (b == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b }));
-							}
-							if (b2 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b2 }));
-							}
-							*(ptr4++) = (byte)(((int)b << 4) + (int)b2);
-						}
-						ptr3 += 2;
-					}
-					else
-					{
-						if (this.ReadState.Byte != 13 || *ptr3 != 10)
-						{
-							byte b3 = QEncodedStream.hexDecodeMap[(int)this.ReadState.Byte];
-							byte b4 = QEncodedStream.hexDecodeMap[(int)(*ptr3)];
-							if (b3 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b3 }));
-							}
-							if (b4 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b4 }));
-							}
-							*(ptr4++) = (byte)(((int)b3 << 4) + (int)b4);
-						}
-						ptr3++;
-					}
-					this.ReadState.IsEscaped = false;
-					this.ReadState.Byte = -1;
-				}
-				while (ptr3 < ptr5)
-				{
-					if (*ptr3 == 61)
-					{
-						long num = (long)(ptr5 - ptr3);
-						if (num != 1L)
-						{
-							if (num != 2L)
-							{
-								if (ptr3[1] != 13 || ptr3[2] != 10)
-								{
-									byte b5 = QEncodedStream.hexDecodeMap[(int)ptr3[1]];
-									byte b6 = QEncodedStream.hexDecodeMap[(int)ptr3[2]];
-									if (b5 == 255)
-									{
-										throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b5 }));
-									}
-									if (b6 == 255)
-									{
-										throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b6 }));
-									}
-									*(ptr4++) = (byte)(((int)b5 << 4) + (int)b6);
-								}
-								ptr3 += 3;
-								continue;
-							}
-							this.ReadState.Byte = (short)ptr3[1];
-						}
-						this.ReadState.IsEscaped = true;
-						break;
-					}
-					if (*ptr3 == 95)
-					{
-						*(ptr4++) = 32;
-						ptr3++;
-					}
-					else
-					{
-						*(ptr4++) = *(ptr3++);
-					}
-				}
-				count = (int)((long)(ptr4 - ptr2));
+				this.ReadState.IsEscaped = false;
+				this.ReadState.Byte = -1;
 			}
-			return count;
+			while (ptr3 < ptr5)
+			{
+				if (*ptr3 == 61)
+				{
+					long num = (long)(ptr5 - ptr3);
+					if (num != 1L)
+					{
+						if (num != 2L)
+						{
+							if (ptr3[1] != 13 || ptr3[2] != 10)
+							{
+								byte b5 = QEncodedStream.s_hexDecodeMap[(int)ptr3[1]];
+								byte b6 = QEncodedStream.s_hexDecodeMap[(int)ptr3[2]];
+								if (b5 == 255)
+								{
+									throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b5));
+								}
+								if (b6 == 255)
+								{
+									throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b6));
+								}
+								*(ptr4++) = (byte)(((int)b5 << 4) + (int)b6);
+							}
+							ptr3 += 3;
+							continue;
+						}
+						this.ReadState.Byte = (short)ptr3[1];
+					}
+					this.ReadState.IsEscaped = true;
+					break;
+				}
+				if (*ptr3 == 95)
+				{
+					*(ptr4++) = 32;
+					ptr3++;
+				}
+				else
+				{
+					*(ptr4++) = *(ptr3++);
+				}
+			}
+			return (int)((long)(ptr4 - ptr2));
 		}
 
 		public int EncodeBytes(byte[] buffer, int offset, int count)
 		{
-			this.writeState.AppendHeader();
+			this._writeState.AppendHeader();
 			int i;
 			for (i = offset; i < count + offset; i++)
 			{
-				if ((this.WriteState.CurrentLineLength + 3 + this.WriteState.FooterLength >= this.WriteState.MaxLineLength && (buffer[i] == 32 || buffer[i] == 9 || buffer[i] == 13 || buffer[i] == 10)) || this.WriteState.CurrentLineLength + this.writeState.FooterLength >= this.WriteState.MaxLineLength)
+				if ((this.WriteState.CurrentLineLength + 3 + this.WriteState.FooterLength >= this.WriteState.MaxLineLength && (buffer[i] == 32 || buffer[i] == 9 || buffer[i] == 13 || buffer[i] == 10)) || this.WriteState.CurrentLineLength + this._writeState.FooterLength >= this.WriteState.MaxLineLength)
 				{
 					this.WriteState.AppendCRLF(true);
 				}
@@ -184,19 +182,29 @@ namespace System.Net.Mime
 				{
 					this.WriteState.Append(95);
 				}
-				else if (Uri.IsAsciiLetterOrDigit((char)buffer[i]))
+				else if (QEncodedStream.IsAsciiLetterOrDigit((char)buffer[i]))
 				{
 					this.WriteState.Append(buffer[i]);
 				}
 				else
 				{
 					this.WriteState.Append(61);
-					this.WriteState.Append(QEncodedStream.hexEncodeMap[buffer[i] >> 4]);
-					this.WriteState.Append(QEncodedStream.hexEncodeMap[(int)(buffer[i] & 15)]);
+					this.WriteState.Append(QEncodedStream.s_hexEncodeMap[buffer[i] >> 4]);
+					this.WriteState.Append(QEncodedStream.s_hexEncodeMap[(int)(buffer[i] & 15)]);
 				}
 			}
 			this.WriteState.AppendFooter();
 			return i - offset;
+		}
+
+		private static bool IsAsciiLetterOrDigit(char character)
+		{
+			return QEncodedStream.IsAsciiLetter(character) || (character >= '0' && character <= '9');
+		}
+
+		private static bool IsAsciiLetter(char character)
+		{
+			return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z');
 		}
 
 		public Stream GetStream()
@@ -222,7 +230,7 @@ namespace System.Net.Mime
 
 		private void FlushInternal()
 		{
-			if (this.writeState != null && this.writeState.Length > 0)
+			if (this._writeState != null && this._writeState.Length > 0)
 			{
 				base.Write(this.WriteState.Buffer, 0, this.WriteState.Length);
 				this.WriteState.Reset();
@@ -255,9 +263,9 @@ namespace System.Net.Mime
 			}
 		}
 
-		private const int sizeOfFoldingCRLF = 3;
+		private const int SizeOfFoldingCRLF = 3;
 
-		private static byte[] hexDecodeMap = new byte[]
+		private static readonly byte[] s_hexDecodeMap = new byte[]
 		{
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
@@ -287,45 +295,21 @@ namespace System.Net.Mime
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue
 		};
 
-		private static byte[] hexEncodeMap = new byte[]
+		private static readonly byte[] s_hexEncodeMap = new byte[]
 		{
 			48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
 			65, 66, 67, 68, 69, 70
 		};
 
-		private QEncodedStream.ReadStateInfo readState;
+		private QEncodedStream.ReadStateInfo _readState;
 
-		private WriteStateInfoBase writeState;
+		private WriteStateInfoBase _writeState;
 
-		private class ReadStateInfo
+		private sealed class ReadStateInfo
 		{
-			internal bool IsEscaped
-			{
-				get
-				{
-					return this.isEscaped;
-				}
-				set
-				{
-					this.isEscaped = value;
-				}
-			}
+			internal bool IsEscaped { get; set; }
 
-			internal short Byte
-			{
-				get
-				{
-					return this.b1;
-				}
-				set
-				{
-					this.b1 = value;
-				}
-			}
-
-			private bool isEscaped;
-
-			private short b1 = -1;
+			internal short Byte { get; set; } = -1;
 		}
 
 		private class WriteAsyncResult : LazyAsyncResult
@@ -333,16 +317,16 @@ namespace System.Net.Mime
 			internal WriteAsyncResult(QEncodedStream parent, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 				: base(null, state, callback)
 			{
-				this.parent = parent;
-				this.buffer = buffer;
-				this.offset = offset;
-				this.count = count;
+				this._parent = parent;
+				this._buffer = buffer;
+				this._offset = offset;
+				this._count = count;
 			}
 
 			private void CompleteWrite(IAsyncResult result)
 			{
-				this.parent.BaseStream.EndWrite(result);
-				this.parent.WriteState.Reset();
+				this._parent.BaseStream.EndWrite(result);
+				this._parent.WriteState.Reset();
 			}
 
 			internal static void End(IAsyncResult result)
@@ -371,12 +355,12 @@ namespace System.Net.Mime
 			{
 				for (;;)
 				{
-					this.written += this.parent.EncodeBytes(this.buffer, this.offset + this.written, this.count - this.written);
-					if (this.written >= this.count)
+					this._written += this._parent.EncodeBytes(this._buffer, this._offset + this._written, this._count - this._written);
+					if (this._written >= this._count)
 					{
 						break;
 					}
-					IAsyncResult asyncResult = this.parent.BaseStream.BeginWrite(this.parent.WriteState.Buffer, 0, this.parent.WriteState.Length, QEncodedStream.WriteAsyncResult.onWrite, this);
+					IAsyncResult asyncResult = this._parent.BaseStream.BeginWrite(this._parent.WriteState.Buffer, 0, this._parent.WriteState.Length, QEncodedStream.WriteAsyncResult.s_onWrite, this);
 					if (!asyncResult.CompletedSynchronously)
 					{
 						return;
@@ -386,17 +370,17 @@ namespace System.Net.Mime
 				base.InvokeCallback();
 			}
 
-			private QEncodedStream parent;
+			private static readonly AsyncCallback s_onWrite = new AsyncCallback(QEncodedStream.WriteAsyncResult.OnWrite);
 
-			private byte[] buffer;
+			private readonly QEncodedStream _parent;
 
-			private int offset;
+			private readonly byte[] _buffer;
 
-			private int count;
+			private readonly int _offset;
 
-			private static AsyncCallback onWrite = new AsyncCallback(QEncodedStream.WriteAsyncResult.OnWrite);
+			private readonly int _count;
 
-			private int written;
+			private int _written;
 		}
 	}
 }

@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Parameter)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Parameter)]
 	internal class UnityTypeAttribute : Attribute, IBindingsAttribute
 	{
 	}

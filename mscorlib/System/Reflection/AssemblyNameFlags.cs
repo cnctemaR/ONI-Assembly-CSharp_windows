@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Flags]
-	[Serializable]
 	public enum AssemblyNameFlags
 	{
 		None = 0,

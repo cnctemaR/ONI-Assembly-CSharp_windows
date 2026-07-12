@@ -117,8 +117,8 @@ namespace System.Runtime.Serialization.Formatters.Binary
 			return this.Deserialize(serializationStream, handler, true, methodCallMessage);
 		}
 
-		[ComVisible(false)]
 		[SecurityCritical]
+		[ComVisible(false)]
 		public object UnsafeDeserialize(Stream serializationStream, HeaderHandler handler)
 		{
 			return this.Deserialize(serializationStream, handler, false);

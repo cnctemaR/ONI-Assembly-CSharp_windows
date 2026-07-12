@@ -9,55 +9,23 @@ namespace System.Net
 		internal UploadProgressChangedEventArgs(int progressPercentage, object userToken, long bytesSent, long totalBytesToSend, long bytesReceived, long totalBytesToReceive)
 			: base(progressPercentage, userToken)
 		{
-			this.m_BytesReceived = bytesReceived;
-			this.m_TotalBytesToReceive = totalBytesToReceive;
-			this.m_BytesSent = bytesSent;
-			this.m_TotalBytesToSend = totalBytesToSend;
+			this.BytesReceived = bytesReceived;
+			this.TotalBytesToReceive = totalBytesToReceive;
+			this.BytesSent = bytesSent;
+			this.TotalBytesToSend = totalBytesToSend;
 		}
 
-		public long BytesReceived
-		{
-			get
-			{
-				return this.m_BytesReceived;
-			}
-		}
+		public long BytesReceived { get; }
 
-		public long TotalBytesToReceive
-		{
-			get
-			{
-				return this.m_TotalBytesToReceive;
-			}
-		}
+		public long TotalBytesToReceive { get; }
 
-		public long BytesSent
-		{
-			get
-			{
-				return this.m_BytesSent;
-			}
-		}
+		public long BytesSent { get; }
 
-		public long TotalBytesToSend
-		{
-			get
-			{
-				return this.m_TotalBytesToSend;
-			}
-		}
+		public long TotalBytesToSend { get; }
 
 		internal UploadProgressChangedEventArgs()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
-
-		private long m_BytesReceived;
-
-		private long m_TotalBytesToReceive;
-
-		private long m_BytesSent;
-
-		private long m_TotalBytesToSend;
 	}
 }

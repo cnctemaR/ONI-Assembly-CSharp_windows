@@ -9,7 +9,7 @@ namespace UnityEngine
 		{
 			using (StaticBatchingUtility.s_CombineMarker.Auto())
 			{
-				InternalStaticBatchingUtility.CombineRoot(staticBatchRoot, null);
+				StaticBatchingUtility.CombineRoot(staticBatchRoot);
 			}
 		}
 
@@ -17,14 +17,30 @@ namespace UnityEngine
 		{
 			using (StaticBatchingUtility.s_CombineMarker.Auto())
 			{
-				InternalStaticBatchingUtility.CombineGameObjects(gos, staticBatchRoot, false, null);
+				StaticBatchingHelper.CombineMeshes(gos, staticBatchRoot);
 			}
 		}
 
+		private static void CombineRoot(GameObject staticBatchRoot)
+		{
+			bool flag = staticBatchRoot == null;
+			MeshFilter[] array;
+			if (flag)
+			{
+				array = (MeshFilter[])Object.FindObjectsOfType(typeof(MeshFilter));
+			}
+			else
+			{
+				array = staticBatchRoot.GetComponentsInChildren<MeshFilter>();
+			}
+			GameObject[] array2 = new GameObject[array.Length];
+			for (int i = 0; i < array.Length; i++)
+			{
+				array2[i] = array[i].gameObject;
+			}
+			StaticBatchingHelper.CombineMeshes(array2, staticBatchRoot);
+		}
+
 		internal static ProfilerMarker s_CombineMarker = new ProfilerMarker("StaticBatching.Combine");
-
-		internal static ProfilerMarker s_SortMarker = new ProfilerMarker("StaticBatching.SortObjects");
-
-		internal static ProfilerMarker s_MakeBatchMarker = new ProfilerMarker("StaticBatching.MakeBatch");
 	}
 }

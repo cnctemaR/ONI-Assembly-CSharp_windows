@@ -312,7 +312,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 
 	private bool IsAchievementValidForDLCContext(string[] dlcid, string clusterTag)
 	{
-		return DlcManager.HasAnyContentSubscribed(dlcid) && (!(SaveLoader.Instance != null) || ((clusterTag == null || CustomGameSettings.Instance.GetCurrentClusterLayout().clusterTags.Contains(clusterTag)) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(dlcid)));
+		return DlcManager.IsAnyContentSubscribed(dlcid) && (!(SaveLoader.Instance != null) || ((clusterTag == null || CustomGameSettings.Instance.GetCurrentClusterLayout().clusterTags.Contains(clusterTag)) && SaveLoader.Instance.IsDlcListActiveForCurrentSave(dlcid)));
 	}
 
 	private void PopulateAchievements()

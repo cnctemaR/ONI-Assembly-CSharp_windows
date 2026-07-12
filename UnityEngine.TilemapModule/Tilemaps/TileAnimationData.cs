@@ -44,10 +44,24 @@ namespace UnityEngine.Tilemaps
 			}
 		}
 
+		public TileAnimationFlags flags
+		{
+			get
+			{
+				return this.m_Flags;
+			}
+			set
+			{
+				this.m_Flags = value;
+			}
+		}
+
 		private Sprite[] m_AnimatedSprites;
 
 		private float m_AnimationSpeed;
 
 		private float m_AnimationStartTime;
+
+		private TileAnimationFlags m_Flags;
 	}
 }

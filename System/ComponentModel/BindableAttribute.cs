@@ -12,8 +12,8 @@ namespace System.ComponentModel
 
 		public BindableAttribute(bool bindable, BindingDirection direction)
 		{
-			this.bindable = bindable;
-			this.direction = direction;
+			this.Bindable = bindable;
+			this.Direction = direction;
 		}
 
 		public BindableAttribute(BindableSupport flags)
@@ -23,40 +23,28 @@ namespace System.ComponentModel
 
 		public BindableAttribute(BindableSupport flags, BindingDirection direction)
 		{
-			this.bindable = flags > BindableSupport.No;
-			this.isDefault = flags == BindableSupport.Default;
-			this.direction = direction;
+			this.Bindable = flags > BindableSupport.No;
+			this._isDefault = flags == BindableSupport.Default;
+			this.Direction = direction;
 		}
 
-		public bool Bindable
-		{
-			get
-			{
-				return this.bindable;
-			}
-		}
+		public bool Bindable { get; }
 
-		public BindingDirection Direction
-		{
-			get
-			{
-				return this.direction;
-			}
-		}
+		public BindingDirection Direction { get; }
 
 		public override bool Equals(object obj)
 		{
-			return obj == this || (obj != null && obj is BindableAttribute && ((BindableAttribute)obj).Bindable == this.bindable);
+			return obj == this || (obj != null && obj is BindableAttribute && ((BindableAttribute)obj).Bindable == this.Bindable);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.bindable.GetHashCode();
+			return this.Bindable.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(BindableAttribute.Default) || this.isDefault;
+			return this.Equals(BindableAttribute.Default) || this._isDefault;
 		}
 
 		public static readonly BindableAttribute Yes = new BindableAttribute(true);
@@ -65,10 +53,6 @@ namespace System.ComponentModel
 
 		public static readonly BindableAttribute Default = BindableAttribute.No;
 
-		private bool bindable;
-
-		private bool isDefault;
-
-		private BindingDirection direction;
+		private bool _isDefault;
 	}
 }

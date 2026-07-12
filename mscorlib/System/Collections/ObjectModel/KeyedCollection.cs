@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Collections.ObjectModel
 {
+	[DebuggerTypeProxy(typeof(CollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
-	[ComVisible(false)]
-	[DebuggerTypeProxy(typeof(Mscorlib_KeyedCollectionDebugView<, >))]
 	[Serializable]
 	public abstract class KeyedCollection<TKey, TItem> : Collection<TItem>
 	{
@@ -22,6 +20,7 @@ namespace System.Collections.ObjectModel
 		}
 
 		protected KeyedCollection(IEqualityComparer<TKey> comparer, int dictionaryCreationThreshold)
+			: base(new List<TItem>())
 		{
 			if (comparer == null)
 			{
@@ -33,10 +32,18 @@ namespace System.Collections.ObjectModel
 			}
 			if (dictionaryCreationThreshold < -1)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.dictionaryCreationThreshold, ExceptionResource.ArgumentOutOfRange_InvalidThreshold);
+				throw new ArgumentOutOfRangeException("dictionaryCreationThreshold", "The specified threshold for creating dictionary is out of range.");
 			}
 			this.comparer = comparer;
 			this.threshold = dictionaryCreationThreshold;
+		}
+
+		private new List<TItem> Items
+		{
+			get
+			{
+				return (List<TItem>)base.Items;
+			}
 		}
 
 		public IEqualityComparer<TKey> Comparer
@@ -51,23 +58,12 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (key == null)
+				TItem titem;
+				if (this.TryGetValue(key, out titem))
 				{
-					ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+					return titem;
 				}
-				if (this.dict != null)
-				{
-					return this.dict[key];
-				}
-				foreach (TItem titem in base.Items)
-				{
-					if (this.comparer.Equals(this.GetKeyForItem(titem), key))
-					{
-						return titem;
-					}
-				}
-				ThrowHelper.ThrowKeyNotFoundException();
-				return default(TItem);
+				throw new KeyNotFoundException(SR.Format("The given key '{0}' was not present in the dictionary.", key.ToString()));
 			}
 		}
 
@@ -75,23 +71,42 @@ namespace System.Collections.ObjectModel
 		{
 			if (key == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+				throw new ArgumentNullException("key");
 			}
 			if (this.dict != null)
 			{
 				return this.dict.ContainsKey(key);
 			}
-			if (key != null)
+			foreach (TItem titem in this.Items)
 			{
-				foreach (TItem titem in base.Items)
+				if (this.comparer.Equals(this.GetKeyForItem(titem), key))
 				{
-					if (this.comparer.Equals(this.GetKeyForItem(titem), key))
-					{
-						return true;
-					}
+					return true;
 				}
-				return false;
 			}
+			return false;
+		}
+
+		public bool TryGetValue(TKey key, out TItem item)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			if (this.dict != null)
+			{
+				return this.dict.TryGetValue(key, out item);
+			}
+			foreach (TItem titem in this.Items)
+			{
+				TKey keyForItem = this.GetKeyForItem(titem);
+				if (keyForItem != null && this.comparer.Equals(key, keyForItem))
+				{
+					item = titem;
+					return true;
+				}
+			}
+			item = default(TItem);
 			return false;
 		}
 
@@ -100,7 +115,7 @@ namespace System.Collections.ObjectModel
 			TKey keyForItem;
 			if (this.dict == null || (keyForItem = this.GetKeyForItem(item)) == null)
 			{
-				return base.Items.Contains(item);
+				return this.Items.Contains(item);
 			}
 			TItem titem;
 			return this.dict.TryGetValue(keyForItem, out titem) && EqualityComparer<TItem>.Default.Equals(titem, item);
@@ -110,21 +125,19 @@ namespace System.Collections.ObjectModel
 		{
 			if (key == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+				throw new ArgumentNullException("key");
 			}
 			if (this.dict != null)
 			{
-				return this.dict.ContainsKey(key) && base.Remove(this.dict[key]);
+				TItem titem;
+				return this.dict.TryGetValue(key, out titem) && base.Remove(titem);
 			}
-			if (key != null)
+			for (int i = 0; i < this.Items.Count; i++)
 			{
-				for (int i = 0; i < base.Items.Count; i++)
+				if (this.comparer.Equals(this.GetKeyForItem(this.Items[i]), key))
 				{
-					if (this.comparer.Equals(this.GetKeyForItem(base.Items[i]), key))
-					{
-						this.RemoveItem(i);
-						return true;
-					}
+					this.RemoveItem(i);
+					return true;
 				}
 			}
 			return false;
@@ -142,7 +155,7 @@ namespace System.Collections.ObjectModel
 		{
 			if (!this.ContainsItem(item))
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_ItemNotExist);
+				throw new ArgumentException("The specified item does not exist in this KeyedCollection.");
 			}
 			TKey keyForItem = this.GetKeyForItem(item);
 			if (!this.comparer.Equals(keyForItem, newKey))
@@ -182,7 +195,7 @@ namespace System.Collections.ObjectModel
 
 		protected override void RemoveItem(int index)
 		{
-			TKey keyForItem = this.GetKeyForItem(base.Items[index]);
+			TKey keyForItem = this.GetKeyForItem(this.Items[index]);
 			if (keyForItem != null)
 			{
 				this.RemoveKey(keyForItem);
@@ -193,7 +206,7 @@ namespace System.Collections.ObjectModel
 		protected override void SetItem(int index, TItem item)
 		{
 			TKey keyForItem = this.GetKeyForItem(item);
-			TKey keyForItem2 = this.GetKeyForItem(base.Items[index]);
+			TKey keyForItem2 = this.GetKeyForItem(this.Items[index]);
 			if (this.comparer.Equals(keyForItem2, keyForItem))
 			{
 				if (keyForItem != null && this.dict != null)
@@ -230,7 +243,7 @@ namespace System.Collections.ObjectModel
 			}
 			if (this.Contains(key))
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_AddingDuplicate);
+				throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", key));
 			}
 			this.keyCount++;
 		}
@@ -238,7 +251,7 @@ namespace System.Collections.ObjectModel
 		private void CreateDictionary()
 		{
 			this.dict = new Dictionary<TKey, TItem>(this.comparer);
-			foreach (TItem titem in base.Items)
+			foreach (TItem titem in this.Items)
 			{
 				TKey keyForItem = this.GetKeyForItem(titem);
 				if (keyForItem != null)
@@ -260,12 +273,12 @@ namespace System.Collections.ObjectModel
 
 		private const int defaultThreshold = 0;
 
-		private IEqualityComparer<TKey> comparer;
+		private readonly IEqualityComparer<TKey> comparer;
 
 		private Dictionary<TKey, TItem> dict;
 
 		private int keyCount;
 
-		private int threshold;
+		private readonly int threshold;
 	}
 }

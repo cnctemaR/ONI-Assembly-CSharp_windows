@@ -6,7 +6,15 @@ public class DropElementStates : GameStateMachine<DropElementStates, DropElement
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.dropping;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<DropElementStates, DropElementStates.Instance, IStateMachineTarget, DropElementStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.EXPELLING_GAS.NAME;
+		string text2 = CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.dropping.PlayAnim("dirty").OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.Enter("DropElement", delegate(DropElementStates.Instance smi)
 		{

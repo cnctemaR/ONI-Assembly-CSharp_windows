@@ -7,9 +7,9 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	internal sealed class _AndroidJNIHelper
 	{
-		public static IntPtr CreateJavaProxy(IntPtr delegateHandle, AndroidJavaProxy proxy)
+		public static IntPtr CreateJavaProxy(IntPtr player, IntPtr delegateHandle, AndroidJavaProxy proxy)
 		{
-			return AndroidReflection.NewProxyInstance(delegateHandle, proxy.javaInterface.GetRawClass());
+			return AndroidReflection.NewProxyInstance(player, delegateHandle, proxy.javaInterface.GetRawClass());
 		}
 
 		public static IntPtr CreateJavaRunnable(AndroidJavaRunnable jrunnable)
@@ -23,49 +23,24 @@ namespace UnityEngine
 			IntPtr intPtr;
 			try
 			{
-				int num = 0;
-				bool flag = jargs != IntPtr.Zero;
-				if (flag)
-				{
-					num = AndroidJNISafe.GetArrayLength(jargs);
-				}
-				AndroidJavaObject[] array = new AndroidJavaObject[num];
-				for (int i = 0; i < num; i++)
-				{
-					IntPtr objectArrayElement = AndroidJNISafe.GetObjectArrayElement(jargs, i);
-					array[i] = ((objectArrayElement != IntPtr.Zero) ? new AndroidJavaObject(objectArrayElement) : null);
-				}
-				using (AndroidJavaObject androidJavaObject = proxy.Invoke(AndroidJNI.GetStringChars(jmethodName), array))
-				{
-					bool flag2 = androidJavaObject == null;
-					if (flag2)
-					{
-						intPtr = IntPtr.Zero;
-					}
-					else
-					{
-						intPtr = AndroidJNI.NewLocalRef(androidJavaObject.GetRawObject());
-					}
-				}
+				intPtr = proxy.Invoke(AndroidJNI.GetStringChars(jmethodName), jargs);
 			}
 			catch (Exception ex)
 			{
-				AndroidReflection.SetNativeExceptionOnProxy(proxy.GetRawProxy(), ex, false);
-				intPtr = IntPtr.Zero;
+				intPtr = AndroidReflection.CreateInvocationError(ex, false);
 			}
 			return intPtr;
 		}
 
-		public static jvalue[] CreateJNIArgArray(object[] args)
+		public static void CreateJNIArgArray(object[] args, Span<jvalue> ret)
 		{
-			jvalue[] array = new jvalue[args.GetLength(0)];
 			int num = 0;
 			foreach (object obj in args)
 			{
 				bool flag = obj == null;
 				if (flag)
 				{
-					array[num].l = IntPtr.Zero;
+					ret[num].l = IntPtr.Zero;
 				}
 				else
 				{
@@ -75,14 +50,14 @@ namespace UnityEngine
 						bool flag3 = obj is int;
 						if (flag3)
 						{
-							array[num].i = (int)obj;
+							ret[num].i = (int)obj;
 						}
 						else
 						{
 							bool flag4 = obj is bool;
 							if (flag4)
 							{
-								array[num].z = (bool)obj;
+								ret[num].z = (bool)obj;
 							}
 							else
 							{
@@ -90,49 +65,49 @@ namespace UnityEngine
 								if (flag5)
 								{
 									Debug.LogWarning("Passing Byte arguments to Java methods is obsolete, pass SByte parameters instead");
-									array[num].b = (sbyte)((byte)obj);
+									ret[num].b = (sbyte)((byte)obj);
 								}
 								else
 								{
 									bool flag6 = obj is sbyte;
 									if (flag6)
 									{
-										array[num].b = (sbyte)obj;
+										ret[num].b = (sbyte)obj;
 									}
 									else
 									{
 										bool flag7 = obj is short;
 										if (flag7)
 										{
-											array[num].s = (short)obj;
+											ret[num].s = (short)obj;
 										}
 										else
 										{
 											bool flag8 = obj is long;
 											if (flag8)
 											{
-												array[num].j = (long)obj;
+												ret[num].j = (long)obj;
 											}
 											else
 											{
 												bool flag9 = obj is float;
 												if (flag9)
 												{
-													array[num].f = (float)obj;
+													ret[num].f = (float)obj;
 												}
 												else
 												{
 													bool flag10 = obj is double;
 													if (flag10)
 													{
-														array[num].d = (double)obj;
+														ret[num].d = (double)obj;
 													}
 													else
 													{
 														bool flag11 = obj is char;
 														if (flag11)
 														{
-															array[num].c = (char)obj;
+															ret[num].c = (char)obj;
 														}
 													}
 												}
@@ -148,35 +123,35 @@ namespace UnityEngine
 						bool flag12 = obj is string;
 						if (flag12)
 						{
-							array[num].l = AndroidJNISafe.NewString((string)obj);
+							ret[num].l = AndroidJNISafe.NewString((string)obj);
 						}
 						else
 						{
 							bool flag13 = obj is AndroidJavaClass;
 							if (flag13)
 							{
-								array[num].l = ((AndroidJavaClass)obj).GetRawClass();
+								ret[num].l = ((AndroidJavaClass)obj).GetRawClass();
 							}
 							else
 							{
 								bool flag14 = obj is AndroidJavaObject;
 								if (flag14)
 								{
-									array[num].l = ((AndroidJavaObject)obj).GetRawObject();
+									ret[num].l = ((AndroidJavaObject)obj).GetRawObject();
 								}
 								else
 								{
 									bool flag15 = obj is Array;
 									if (flag15)
 									{
-										array[num].l = _AndroidJNIHelper.ConvertToJNIArray((Array)obj);
+										ret[num].l = _AndroidJNIHelper.ConvertToJNIArray((Array)obj);
 									}
 									else
 									{
 										bool flag16 = obj is AndroidJavaProxy;
 										if (flag16)
 										{
-											array[num].l = ((AndroidJavaProxy)obj).GetRawProxy();
+											ret[num].l = ((AndroidJavaProxy)obj).GetRawProxy();
 										}
 										else
 										{
@@ -187,7 +162,7 @@ namespace UnityEngine
 												Type type = obj.GetType();
 												throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
 											}
-											array[num].l = AndroidJNIHelper.CreateJavaRunnable((AndroidJavaRunnable)obj);
+											ret[num].l = AndroidJNIHelper.CreateJavaRunnable((AndroidJavaRunnable)obj);
 										}
 									}
 								}
@@ -197,7 +172,6 @@ namespace UnityEngine
 				}
 				num++;
 			}
-			return array;
 		}
 
 		public static object UnboxArray(AndroidJavaObject obj)
@@ -211,11 +185,11 @@ namespace UnityEngine
 			else
 			{
 				AndroidJavaClass androidJavaClass = new AndroidJavaClass("java/lang/reflect/Array");
-				AndroidJavaObject androidJavaObject = obj.Call<AndroidJavaObject>("getClass", new object[0]);
-				AndroidJavaObject androidJavaObject2 = androidJavaObject.Call<AndroidJavaObject>("getComponentType", new object[0]);
-				string text = androidJavaObject2.Call<string>("getName", new object[0]);
+				AndroidJavaObject androidJavaObject = obj.Call<AndroidJavaObject>("getClass", Array.Empty<object>());
+				AndroidJavaObject androidJavaObject2 = androidJavaObject.Call<AndroidJavaObject>("getComponentType", Array.Empty<object>());
+				string text = androidJavaObject2.Call<string>("getName", Array.Empty<object>());
 				int num = androidJavaClass.CallStatic<int>("getLength", new object[] { obj });
-				bool flag2 = androidJavaObject2.Call<bool>("isPrimitive", new object[0]);
+				bool flag2 = androidJavaObject2.Call<bool>("isPrimitive", Array.Empty<object>());
 				Array array;
 				if (flag2)
 				{
@@ -322,69 +296,69 @@ namespace UnityEngine
 			}
 			else
 			{
-				using (AndroidJavaObject androidJavaObject = obj.Call<AndroidJavaObject>("getClass", new object[0]))
+				using (AndroidJavaObject androidJavaObject = obj.Call<AndroidJavaObject>("getClass", Array.Empty<object>()))
 				{
-					string text = androidJavaObject.Call<string>("getName", new object[0]);
+					string text = androidJavaObject.Call<string>("getName", Array.Empty<object>());
 					bool flag2 = "java.lang.Integer" == text;
 					if (flag2)
 					{
-						obj2 = obj.Call<int>("intValue", new object[0]);
+						obj2 = obj.Call<int>("intValue", Array.Empty<object>());
 					}
 					else
 					{
 						bool flag3 = "java.lang.Boolean" == text;
 						if (flag3)
 						{
-							obj2 = obj.Call<bool>("booleanValue", new object[0]);
+							obj2 = obj.Call<bool>("booleanValue", Array.Empty<object>());
 						}
 						else
 						{
 							bool flag4 = "java.lang.Byte" == text;
 							if (flag4)
 							{
-								obj2 = obj.Call<sbyte>("byteValue", new object[0]);
+								obj2 = obj.Call<sbyte>("byteValue", Array.Empty<object>());
 							}
 							else
 							{
 								bool flag5 = "java.lang.Short" == text;
 								if (flag5)
 								{
-									obj2 = obj.Call<short>("shortValue", new object[0]);
+									obj2 = obj.Call<short>("shortValue", Array.Empty<object>());
 								}
 								else
 								{
 									bool flag6 = "java.lang.Long" == text;
 									if (flag6)
 									{
-										obj2 = obj.Call<long>("longValue", new object[0]);
+										obj2 = obj.Call<long>("longValue", Array.Empty<object>());
 									}
 									else
 									{
 										bool flag7 = "java.lang.Float" == text;
 										if (flag7)
 										{
-											obj2 = obj.Call<float>("floatValue", new object[0]);
+											obj2 = obj.Call<float>("floatValue", Array.Empty<object>());
 										}
 										else
 										{
 											bool flag8 = "java.lang.Double" == text;
 											if (flag8)
 											{
-												obj2 = obj.Call<double>("doubleValue", new object[0]);
+												obj2 = obj.Call<double>("doubleValue", Array.Empty<object>());
 											}
 											else
 											{
 												bool flag9 = "java.lang.Character" == text;
 												if (flag9)
 												{
-													obj2 = obj.Call<char>("charValue", new object[0]);
+													obj2 = obj.Call<char>("charValue", Array.Empty<object>());
 												}
 												else
 												{
 													bool flag10 = "java.lang.String" == text;
 													if (flag10)
 													{
-														obj2 = obj.Call<string>("toString", new object[0]);
+														obj2 = obj.Call<string>("toString", Array.Empty<object>());
 													}
 													else
 													{
@@ -395,7 +369,7 @@ namespace UnityEngine
 														}
 														else
 														{
-															bool flag12 = androidJavaObject.Call<bool>("isArray", new object[0]);
+															bool flag12 = androidJavaObject.Call<bool>("isArray", Array.Empty<object>());
 															if (flag12)
 															{
 																obj2 = _AndroidJNIHelper.UnboxArray(obj);
@@ -560,17 +534,21 @@ namespace UnityEngine
 			return androidJavaObject;
 		}
 
-		public static void DeleteJNIArgArray(object[] args, jvalue[] jniArgs)
+		public static void DeleteJNIArgArray(object[] args, Span<jvalue> jniArgs)
 		{
-			int num = 0;
-			foreach (object obj in args)
+			bool flag = args == null;
+			if (!flag)
 			{
-				bool flag = obj is string || obj is AndroidJavaRunnable || obj is Array;
-				if (flag)
+				int num = 0;
+				foreach (object obj in args)
 				{
-					AndroidJNISafe.DeleteLocalRef(jniArgs[num].l);
+					bool flag2 = obj is string || obj is AndroidJavaRunnable || obj is AndroidJavaProxy || obj is Array;
+					if (flag2)
+					{
+						AndroidJNISafe.DeleteLocalRef(jniArgs[num].l);
+					}
+					num++;
 				}
-				num++;
 			}
 		}
 
@@ -677,46 +655,87 @@ namespace UnityEngine
 				else
 				{
 					bool flag12 = elementType == typeof(AndroidJavaObject);
-					if (!flag12)
+					if (flag12)
 					{
-						string text = "JNI; Unknown array type '";
-						Type type = elementType;
-						throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
-					}
-					AndroidJavaObject[] array3 = (AndroidJavaObject[])array;
-					int length2 = array.GetLength(0);
-					IntPtr[] array4 = new IntPtr[length2];
-					IntPtr intPtr5 = AndroidJNISafe.FindClass("java/lang/Object");
-					IntPtr intPtr6 = IntPtr.Zero;
-					for (int j = 0; j < length2; j++)
-					{
-						bool flag13 = array3[j] != null;
-						if (flag13)
+						AndroidJavaObject[] array3 = (AndroidJavaObject[])array;
+						int length2 = array.GetLength(0);
+						IntPtr[] array4 = new IntPtr[length2];
+						IntPtr intPtr5 = AndroidJNISafe.FindClass("java/lang/Object");
+						IntPtr intPtr6 = IntPtr.Zero;
+						for (int j = 0; j < length2; j++)
 						{
-							array4[j] = array3[j].GetRawObject();
-							IntPtr rawClass = array3[j].GetRawClass();
-							bool flag14 = intPtr6 != rawClass;
-							if (flag14)
+							bool flag13 = array3[j] != null;
+							if (flag13)
 							{
-								bool flag15 = intPtr6 == IntPtr.Zero;
-								if (flag15)
+								array4[j] = array3[j].GetRawObject();
+								IntPtr rawClass = array3[j].GetRawClass();
+								bool flag14 = intPtr6 == IntPtr.Zero;
+								if (flag14)
 								{
 									intPtr6 = rawClass;
 								}
 								else
 								{
-									intPtr6 = intPtr5;
+									bool flag15 = intPtr6 != intPtr5 && !AndroidJNI.IsSameObject(intPtr6, rawClass);
+									if (flag15)
+									{
+										intPtr6 = intPtr5;
+									}
 								}
 							}
+							else
+							{
+								array4[j] = IntPtr.Zero;
+							}
 						}
-						else
-						{
-							array4[j] = IntPtr.Zero;
-						}
+						IntPtr intPtr7 = AndroidJNISafe.ToObjectArray(array4, intPtr6);
+						AndroidJNISafe.DeleteLocalRef(intPtr5);
+						intPtr = intPtr7;
 					}
-					IntPtr intPtr7 = AndroidJNISafe.ToObjectArray(array4, intPtr6);
-					AndroidJNISafe.DeleteLocalRef(intPtr5);
-					intPtr = intPtr7;
+					else
+					{
+						bool flag16 = AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), elementType);
+						if (!flag16)
+						{
+							string text = "JNI; Unknown array type '";
+							Type type = elementType;
+							throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
+						}
+						AndroidJavaProxy[] array5 = (AndroidJavaProxy[])array;
+						int length3 = array.GetLength(0);
+						IntPtr[] array6 = new IntPtr[length3];
+						IntPtr intPtr8 = AndroidJNISafe.FindClass("java/lang/Object");
+						IntPtr intPtr9 = IntPtr.Zero;
+						for (int k = 0; k < length3; k++)
+						{
+							bool flag17 = array5[k] != null;
+							if (flag17)
+							{
+								array6[k] = array5[k].GetRawProxy();
+								IntPtr rawClass2 = array5[k].javaInterface.GetRawClass();
+								bool flag18 = intPtr9 == IntPtr.Zero;
+								if (flag18)
+								{
+									intPtr9 = rawClass2;
+								}
+								else
+								{
+									bool flag19 = intPtr9 != intPtr8 && !AndroidJNI.IsSameObject(intPtr9, rawClass2);
+									if (flag19)
+									{
+										intPtr9 = intPtr8;
+									}
+								}
+							}
+							else
+							{
+								array6[k] = IntPtr.Zero;
+							}
+						}
+						IntPtr intPtr10 = AndroidJNISafe.ToObjectArray(array6, intPtr9);
+						AndroidJNISafe.DeleteLocalRef(intPtr8);
+						intPtr = intPtr10;
+					}
 				}
 			}
 			return intPtr;
@@ -1074,60 +1093,68 @@ namespace UnityEngine
 						{
 							using (AndroidJavaObject androidJavaObject = new AndroidJavaObject(((AndroidJavaProxy)obj).javaInterface.GetRawClass()))
 							{
-								return "L" + androidJavaObject.Call<string>("getName", new object[0]) + ";";
+								return "L" + androidJavaObject.Call<string>("getName", Array.Empty<object>()) + ";";
 							}
 						}
-						bool flag14 = type.Equals(typeof(AndroidJavaRunnable));
+						bool flag14 = obj == type && AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), type);
 						if (flag14)
 						{
-							text = "Ljava/lang/Runnable;";
+							text = "";
 						}
 						else
 						{
-							bool flag15 = type.Equals(typeof(AndroidJavaClass));
+							bool flag15 = type.Equals(typeof(AndroidJavaRunnable));
 							if (flag15)
 							{
-								text = "Ljava/lang/Class;";
+								text = "Ljava/lang/Runnable;";
 							}
 							else
 							{
-								bool flag16 = type.Equals(typeof(AndroidJavaObject));
+								bool flag16 = type.Equals(typeof(AndroidJavaClass));
 								if (flag16)
 								{
-									bool flag17 = obj == type;
+									text = "Ljava/lang/Class;";
+								}
+								else
+								{
+									bool flag17 = type.Equals(typeof(AndroidJavaObject));
 									if (flag17)
 									{
-										return "Ljava/lang/Object;";
+										bool flag18 = obj == type;
+										if (flag18)
+										{
+											return "Ljava/lang/Object;";
+										}
+										AndroidJavaObject androidJavaObject2 = (AndroidJavaObject)obj;
+										using (AndroidJavaObject androidJavaObject3 = androidJavaObject2.Call<AndroidJavaObject>("getClass", Array.Empty<object>()))
+										{
+											return "L" + androidJavaObject3.Call<string>("getName", Array.Empty<object>()) + ";";
+										}
 									}
-									AndroidJavaObject androidJavaObject2 = (AndroidJavaObject)obj;
-									using (AndroidJavaObject androidJavaObject3 = androidJavaObject2.Call<AndroidJavaObject>("getClass", new object[0]))
+									bool flag19 = AndroidReflection.IsAssignableFrom(typeof(Array), type);
+									if (!flag19)
 									{
-										return "L" + androidJavaObject3.Call<string>("getName", new object[0]) + ";";
+										string[] array = new string[6];
+										array[0] = "JNI: Unknown signature for type '";
+										int num = 1;
+										Type type2 = type;
+										array[num] = ((type2 != null) ? type2.ToString() : null);
+										array[2] = "' (obj = ";
+										array[3] = ((obj != null) ? obj.ToString() : null);
+										array[4] = ") ";
+										array[5] = ((type == obj) ? "equal" : "instance");
+										throw new Exception(string.Concat(array));
 									}
+									bool flag20 = type.GetArrayRank() != 1;
+									if (flag20)
+									{
+										throw new Exception("JNI: System.Array in n dimensions is not allowed");
+									}
+									StringBuilder stringBuilder = new StringBuilder();
+									stringBuilder.Append('[');
+									stringBuilder.Append(_AndroidJNIHelper.GetSignature(type.GetElementType()));
+									text = ((stringBuilder.Length > 1) ? stringBuilder.ToString() : "");
 								}
-								bool flag18 = AndroidReflection.IsAssignableFrom(typeof(Array), type);
-								if (!flag18)
-								{
-									string[] array = new string[6];
-									array[0] = "JNI: Unknown signature for type '";
-									int num = 1;
-									Type type2 = type;
-									array[num] = ((type2 != null) ? type2.ToString() : null);
-									array[2] = "' (obj = ";
-									array[3] = ((obj != null) ? obj.ToString() : null);
-									array[4] = ") ";
-									array[5] = ((type == obj) ? "equal" : "instance");
-									throw new Exception(string.Concat(array));
-								}
-								bool flag19 = type.GetArrayRank() != 1;
-								if (flag19)
-								{
-									throw new Exception("JNI: System.Array in n dimensions is not allowed");
-								}
-								StringBuilder stringBuilder = new StringBuilder();
-								stringBuilder.Append('[');
-								stringBuilder.Append(_AndroidJNIHelper.GetSignature(type.GetElementType()));
-								text = stringBuilder.ToString();
 							}
 						}
 					}
@@ -1138,27 +1165,47 @@ namespace UnityEngine
 
 		public static string GetSignature(object[] args)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append('(');
-			foreach (object obj in args)
+			bool flag = args == null || args.Length == 0;
+			string text;
+			if (flag)
 			{
-				stringBuilder.Append(_AndroidJNIHelper.GetSignature(obj));
+				text = "()V";
 			}
-			stringBuilder.Append(")V");
-			return stringBuilder.ToString();
+			else
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append('(');
+				foreach (object obj in args)
+				{
+					stringBuilder.Append(_AndroidJNIHelper.GetSignature(obj));
+				}
+				stringBuilder.Append(")V");
+				text = stringBuilder.ToString();
+			}
+			return text;
 		}
 
 		public static string GetSignature<ReturnType>(object[] args)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append('(');
-			foreach (object obj in args)
+			bool flag = args == null || args.Length == 0;
+			string text;
+			if (flag)
 			{
-				stringBuilder.Append(_AndroidJNIHelper.GetSignature(obj));
+				text = "()" + _AndroidJNIHelper.GetSignature(typeof(ReturnType));
 			}
-			stringBuilder.Append(')');
-			stringBuilder.Append(_AndroidJNIHelper.GetSignature(typeof(ReturnType)));
-			return stringBuilder.ToString();
+			else
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append('(');
+				foreach (object obj in args)
+				{
+					stringBuilder.Append(_AndroidJNIHelper.GetSignature(obj));
+				}
+				stringBuilder.Append(')');
+				stringBuilder.Append(_AndroidJNIHelper.GetSignature(typeof(ReturnType)));
+				text = stringBuilder.ToString();
+			}
+			return text;
 		}
 	}
 }

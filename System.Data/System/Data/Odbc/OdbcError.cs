@@ -66,7 +66,7 @@ namespace System.Data.Odbc
 
 		internal OdbcError()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		internal string _message;

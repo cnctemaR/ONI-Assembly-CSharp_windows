@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Threading
 {
@@ -9,7 +8,6 @@ namespace System.Threading
 		{
 		}
 
-		[SecurityCritical]
 		public AsyncLocal(Action<AsyncLocalValueChangedArgs<T>> valueChangedHandler)
 		{
 			this.m_valueChangedHandler = valueChangedHandler;
@@ -17,7 +15,6 @@ namespace System.Threading
 
 		public T Value
 		{
-			[SecuritySafeCritical]
 			get
 			{
 				object localValue = ExecutionContext.GetLocalValue(this);
@@ -27,14 +24,12 @@ namespace System.Threading
 				}
 				return default(T);
 			}
-			[SecuritySafeCritical]
 			set
 			{
 				ExecutionContext.SetLocalValue(this, value, this.m_valueChangedHandler != null);
 			}
 		}
 
-		[SecurityCritical]
 		void IAsyncLocal.OnValueChanged(object previousValueObj, object currentValueObj, bool contextChanged)
 		{
 			T t = ((previousValueObj == null) ? default(T) : ((T)((object)previousValueObj)));
@@ -42,7 +37,6 @@ namespace System.Threading
 			this.m_valueChangedHandler(new AsyncLocalValueChangedArgs<T>(t, t2, contextChanged));
 		}
 
-		[SecurityCritical]
 		private readonly Action<AsyncLocalValueChangedArgs<T>> m_valueChangedHandler;
 	}
 }

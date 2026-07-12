@@ -6,18 +6,18 @@ namespace System.Xml.Linq
 	{
 		public XObjectChangeEventArgs(XObjectChange objectChange)
 		{
-			this.objectChange = objectChange;
+			this._objectChange = objectChange;
 		}
 
 		public XObjectChange ObjectChange
 		{
 			get
 			{
-				return this.objectChange;
+				return this._objectChange;
 			}
 		}
 
-		private XObjectChange objectChange;
+		private XObjectChange _objectChange;
 
 		public static readonly XObjectChangeEventArgs Add = new XObjectChangeEventArgs(XObjectChange.Add);
 

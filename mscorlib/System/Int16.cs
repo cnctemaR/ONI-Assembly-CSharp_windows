@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Int16 : IComparable, IFormattable, IConvertible, IComparable<short>, IEquatable<short>
+	public readonly struct Int16 : IComparable, IConvertible, IFormattable, IComparable<short>, IEquatable<short>, ISpanFormattable
 	{
 		public int CompareTo(object value)
 		{
@@ -19,7 +18,7 @@ namespace System
 			{
 				return (int)(this - (short)value);
 			}
-			throw new ArgumentException(Environment.GetResourceString("Object must be of type Int16."));
+			throw new ArgumentException("Object must be of type Int16.");
 		}
 
 		public int CompareTo(short value)
@@ -32,6 +31,7 @@ namespace System
 			return obj is short && this == (short)obj;
 		}
 
+		[NonVersionable]
 		public bool Equals(short obj)
 		{
 			return this == obj;
@@ -42,61 +42,85 @@ namespace System
 			return (int)((ushort)this) | ((int)this << 16);
 		}
 
-		[SecuritySafeCritical]
 		public override string ToString()
 		{
-			return Number.FormatInt32((int)this, null, NumberFormatInfo.CurrentInfo);
+			return Number.FormatInt32((int)this, null, null);
 		}
 
 		[SecuritySafeCritical]
 		public string ToString(IFormatProvider provider)
 		{
-			return Number.FormatInt32((int)this, null, NumberFormatInfo.GetInstance(provider));
+			return Number.FormatInt32((int)this, null, provider);
 		}
 
 		public string ToString(string format)
 		{
-			return this.ToString(format, NumberFormatInfo.CurrentInfo);
+			return this.ToString(format, null);
 		}
 
 		public string ToString(string format, IFormatProvider provider)
 		{
-			return this.ToString(format, NumberFormatInfo.GetInstance(provider));
-		}
-
-		[SecuritySafeCritical]
-		private string ToString(string format, NumberFormatInfo info)
-		{
 			if (this < 0 && format != null && format.Length > 0 && (format[0] == 'X' || format[0] == 'x'))
 			{
-				return Number.FormatUInt32((uint)this & 65535U, format, info);
+				return Number.FormatUInt32((uint)this & 65535U, format, provider);
 			}
-			return Number.FormatInt32((int)this, format, info);
+			return Number.FormatInt32((int)this, format, provider);
+		}
+
+		public unsafe bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			if (this < 0 && format.Length > 0 && (*format[0] == 88 || *format[0] == 120))
+			{
+				return Number.TryFormatUInt32((uint)this & 65535U, format, provider, destination, out charsWritten);
+			}
+			return Number.TryFormatInt32((int)this, format, provider, destination, out charsWritten);
 		}
 
 		public static short Parse(string s)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return short.Parse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static short Parse(string s, NumberStyles style)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return short.Parse(s, style, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static short Parse(string s, IFormatProvider provider)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return short.Parse(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static short Parse(string s, NumberStyles style, IFormatProvider provider)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return short.Parse(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
-		private static short Parse(string s, NumberStyles style, NumberFormatInfo info)
+		public static short Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return short.Parse(s, style, NumberFormatInfo.GetInstance(provider));
+		}
+
+		private static short Parse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info)
 		{
 			int num = 0;
 			try
@@ -105,13 +129,13 @@ namespace System
 			}
 			catch (OverflowException ex)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."), ex);
+				throw new OverflowException("Value was either too large or too small for an Int16.", ex);
 			}
 			if ((style & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
 			{
 				if (num < 0 || num > 65535)
 				{
-					throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+					throw new OverflowException("Value was either too large or too small for an Int16.");
 				}
 				return (short)num;
 			}
@@ -119,7 +143,7 @@ namespace System
 			{
 				if (num < -32768 || num > 32767)
 				{
-					throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+					throw new OverflowException("Value was either too large or too small for an Int16.");
 				}
 				return (short)num;
 			}
@@ -127,16 +151,37 @@ namespace System
 
 		public static bool TryParse(string s, out short result)
 		{
+			if (s == null)
+			{
+				result = 0;
+				return false;
+			}
+			return short.TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, out short result)
+		{
 			return short.TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
 		}
 
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out short result)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				result = 0;
+				return false;
+			}
 			return short.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
 		}
 
-		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out short result)
+		public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out short result)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			return short.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out short result)
 		{
 			result = 0;
 			int num;
@@ -236,7 +281,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Int16", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Int16", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -244,7 +289,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		internal short m_value;
+		private readonly short m_value;
 
 		public const short MaxValue = 32767;
 

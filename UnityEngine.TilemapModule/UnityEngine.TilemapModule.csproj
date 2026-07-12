@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB58C}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F07}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TilemapModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -20,28 +20,35 @@
     <Compile Include="Tilemaps\ITilemap.cs" />
     <Compile Include="Tilemaps\Tile.cs" />
     <Compile Include="Tilemaps\TileAnimationData.cs" />
+    <Compile Include="Tilemaps\TileAnimationFlags.cs" />
     <Compile Include="Tilemaps\TileBase.cs" />
+    <Compile Include="Tilemaps\TileChangeData.cs" />
     <Compile Include="Tilemaps\TileData.cs" />
+    <Compile Include="Tilemaps\TileDataNative.cs" />
     <Compile Include="Tilemaps\TileFlags.cs" />
     <Compile Include="Tilemaps\Tilemap.cs" />
     <Compile Include="Tilemaps\TilemapCollider2D.cs" />
     <Compile Include="Tilemaps\TilemapRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.GridModule\UnityEngine.GridModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB573}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EEB}</Project>
       <Name>UnityEngine.GridModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB57D}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EF6}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

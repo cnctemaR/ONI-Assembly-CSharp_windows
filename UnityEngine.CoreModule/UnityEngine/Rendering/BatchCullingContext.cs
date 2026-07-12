@@ -1,62 +1,59 @@
 ﻿using System;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	public struct BatchCullingContext
 	{
-		[Obsolete("For internal BatchRendererGroup use only")]
-		public BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<BatchVisibility> inOutBatchVisibility, NativeArray<int> outVisibleIndices, LODParameters inLodParameters)
+		internal BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<CullingSplit> inCullingSplits, LODParameters inLodParameters, Matrix4x4 inLocalToWorldMatrix, BatchCullingViewType inViewType, BatchCullingProjectionType inProjectionType, BatchCullingFlags inBatchCullingFlags, ulong inViewID, uint inCullingLayerMask, ulong inSceneCullingMask, int inReceiverPlaneOffset, int inReceiverPlaneCount)
 		{
 			this.cullingPlanes = inCullingPlanes;
-			this.batchVisibility = inOutBatchVisibility;
-			this.visibleIndices = outVisibleIndices;
-			this.visibleIndicesY = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(null, 0, Allocator.Invalid);
+			this.cullingSplits = inCullingSplits;
 			this.lodParameters = inLodParameters;
-			this.cullingMatrix = Matrix4x4.identity;
-			this.nearPlane = 0f;
-		}
-
-		[Obsolete("For internal BatchRendererGroup use only")]
-		public BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<BatchVisibility> inOutBatchVisibility, NativeArray<int> outVisibleIndices, LODParameters inLodParameters, Matrix4x4 inCullingMatrix, float inNearPlane)
-		{
-			this.cullingPlanes = inCullingPlanes;
-			this.batchVisibility = inOutBatchVisibility;
-			this.visibleIndices = outVisibleIndices;
-			this.visibleIndicesY = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(null, 0, Allocator.Invalid);
-			this.lodParameters = inLodParameters;
-			this.cullingMatrix = inCullingMatrix;
-			this.nearPlane = inNearPlane;
-		}
-
-		internal BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<BatchVisibility> inOutBatchVisibility, NativeArray<int> outVisibleIndices, NativeArray<int> outVisibleIndicesY, LODParameters inLodParameters, Matrix4x4 inCullingMatrix, float inNearPlane)
-		{
-			this.cullingPlanes = inCullingPlanes;
-			this.batchVisibility = inOutBatchVisibility;
-			this.visibleIndices = outVisibleIndices;
-			this.visibleIndicesY = outVisibleIndicesY;
-			this.lodParameters = inLodParameters;
-			this.cullingMatrix = inCullingMatrix;
-			this.nearPlane = inNearPlane;
+			this.localToWorldMatrix = inLocalToWorldMatrix;
+			this.viewType = inViewType;
+			this.projectionType = inProjectionType;
+			this.cullingFlags = inBatchCullingFlags;
+			this.viewID = new BatchPackedCullingViewID
+			{
+				handle = inViewID
+			};
+			this.cullingLayerMask = inCullingLayerMask;
+			this.sceneCullingMask = inSceneCullingMask;
+			this.receiverPlaneOffset = inReceiverPlaneOffset;
+			this.receiverPlaneCount = inReceiverPlaneCount;
+			this.isOrthographic = 0;
 		}
 
 		public readonly NativeArray<Plane> cullingPlanes;
 
-		public NativeArray<BatchVisibility> batchVisibility;
-
-		public NativeArray<int> visibleIndices;
-
-		public NativeArray<int> visibleIndicesY;
+		public readonly NativeArray<CullingSplit> cullingSplits;
 
 		public readonly LODParameters lodParameters;
 
-		public readonly Matrix4x4 cullingMatrix;
+		public readonly Matrix4x4 localToWorldMatrix;
 
-		public readonly float nearPlane;
+		public readonly BatchCullingViewType viewType;
+
+		public readonly BatchCullingProjectionType projectionType;
+
+		public readonly BatchCullingFlags cullingFlags;
+
+		public readonly BatchPackedCullingViewID viewID;
+
+		public readonly uint cullingLayerMask;
+
+		public readonly ulong sceneCullingMask;
+
+		[Obsolete("BatchCullingContext.isOrthographic is deprecated. Use BatchCullingContext.projectionType instead.")]
+		public readonly byte isOrthographic;
+
+		public readonly int receiverPlaneOffset;
+
+		public readonly int receiverPlaneCount;
 	}
 }

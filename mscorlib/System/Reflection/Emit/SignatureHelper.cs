@@ -5,9 +5,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
+	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_SignatureHelper))]
-	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class SignatureHelper : _SignatureHelper
 	{

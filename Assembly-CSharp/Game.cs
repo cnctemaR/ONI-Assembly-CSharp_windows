@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Threading;
 using FMOD.Studio;
 using Klei;
 using Klei.AI;
@@ -19,6 +20,11 @@ using UnityEngine.SceneManagement;
 [AddComponentMenu("KMonoBehaviour/scripts/Game")]
 public class Game : KMonoBehaviour
 {
+	public static bool IsOnMainThread()
+	{
+		return Game.MainThread == Thread.CurrentThread;
+	}
+
 	public static bool IsQuitting()
 	{
 		return Game.quitting;
@@ -83,6 +89,14 @@ public class Game : KMonoBehaviour
 			if (BuildMenu.Instance != null)
 			{
 				BuildMenu.Instance.Refresh();
+			}
+			if (OverlayMenu.Instance != null)
+			{
+				OverlayMenu.Instance.Refresh();
+			}
+			if (ManagementMenu.Instance != null)
+			{
+				ManagementMenu.Instance.Refresh();
 			}
 		}
 	}
@@ -165,7 +179,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(626616U);
+		this.changelistsPlayedOn.Add(642443U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -919,7 +933,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 626616U;
+		uint num = 642443U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1143,9 +1157,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(626616U))
+		if (!this.changelistsPlayedOn.Contains(642443U))
 		{
-			this.changelistsPlayedOn.Add(626616U);
+			this.changelistsPlayedOn.Add(642443U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1484,7 +1498,8 @@ public class Game : KMonoBehaviour
 		PopFXManager.DestroyInstance();
 		ProgressBarsConfig.DestroyInstance();
 		PropertyTextures.DestroyInstance();
-		RationTracker.DestroyInstance();
+		WorldResourceAmountTracker<RationTracker>.DestroyInstance();
+		WorldResourceAmountTracker<ElectrobankTracker>.DestroyInstance();
 		ReportManager.DestroyInstance();
 		Research.DestroyInstance();
 		RootMenu.DestroyInstance();
@@ -1596,6 +1611,8 @@ public class Game : KMonoBehaviour
 		KMonoBehaviour.lastObj = null;
 		(KComponentSpawn.instance.comps as GameComps).Clear();
 	}
+
+	private static readonly Thread MainThread = Thread.CurrentThread;
 
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
 

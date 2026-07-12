@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Int64 : IComparable, IFormattable, IConvertible, IComparable<long>, IEquatable<long>
+	public readonly struct Int64 : IComparable, IConvertible, IFormattable, IComparable<long>, IEquatable<long>, ISpanFormattable
 	{
 		public int CompareTo(object value)
 		{
@@ -17,7 +16,7 @@ namespace System
 			}
 			if (!(value is long))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Int64."));
+				throw new ArgumentException("Object must be of type Int64.");
 			}
 			long num = (long)value;
 			if (this < num)
@@ -49,6 +48,7 @@ namespace System
 			return obj is long && this == (long)obj;
 		}
 
+		[NonVersionable]
 		public bool Equals(long obj)
 		{
 			return this == obj;
@@ -59,47 +59,72 @@ namespace System
 			return (int)this ^ (int)(this >> 32);
 		}
 
-		[SecuritySafeCritical]
 		public override string ToString()
 		{
-			return Number.FormatInt64(this, null, NumberFormatInfo.CurrentInfo);
+			return Number.FormatInt64(this, null, null);
 		}
 
 		[SecuritySafeCritical]
 		public string ToString(IFormatProvider provider)
 		{
-			return Number.FormatInt64(this, null, NumberFormatInfo.GetInstance(provider));
+			return Number.FormatInt64(this, null, provider);
 		}
 
-		[SecuritySafeCritical]
 		public string ToString(string format)
 		{
-			return Number.FormatInt64(this, format, NumberFormatInfo.CurrentInfo);
+			return Number.FormatInt64(this, format, null);
 		}
 
 		[SecuritySafeCritical]
 		public string ToString(string format, IFormatProvider provider)
 		{
-			return Number.FormatInt64(this, format, NumberFormatInfo.GetInstance(provider));
+			return Number.FormatInt64(this, format, provider);
+		}
+
+		public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			return Number.TryFormatInt64(this, format, provider, destination, out charsWritten);
 		}
 
 		public static long Parse(string s)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return Number.ParseInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static long Parse(string s, NumberStyles style)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return Number.ParseInt64(s, style, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static long Parse(string s, IFormatProvider provider)
 		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
 			return Number.ParseInt64(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static long Parse(string s, NumberStyles style, IFormatProvider provider)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseInt64(s, style, NumberFormatInfo.GetInstance(provider));
+		}
+
+		public static long Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
 			return Number.ParseInt64(s, style, NumberFormatInfo.GetInstance(provider));
@@ -107,10 +132,31 @@ namespace System
 
 		public static bool TryParse(string s, out long result)
 		{
+			if (s == null)
+			{
+				result = 0L;
+				return false;
+			}
+			return Number.TryParseInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, out long result)
+		{
 			return Number.TryParseInt64(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
 		}
 
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out long result)
+		{
+			NumberFormatInfo.ValidateParseStyleInteger(style);
+			if (s == null)
+			{
+				result = 0L;
+				return false;
+			}
+			return Number.TryParseInt64(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out long result)
 		{
 			NumberFormatInfo.ValidateParseStyleInteger(style);
 			return Number.TryParseInt64(s, style, NumberFormatInfo.GetInstance(provider), out result);
@@ -188,7 +234,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Int64", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Int64", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -196,7 +242,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		internal long m_value;
+		private readonly long m_value;
 
 		public const long MaxValue = 9223372036854775807L;
 

@@ -137,18 +137,15 @@ namespace System
 			return num;
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int InternalCompareTo(object o1, object o2);
 
-		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern RuntimeType InternalGetUnderlyingType(RuntimeType enumType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetEnumValuesAndNames(RuntimeType enumType, out ulong[] values, out string[] names);
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern object InternalBoxEnum(RuntimeType enumType, long value);
 
@@ -348,12 +345,7 @@ namespace System
 			{
 				throw new ArgumentNullException("value");
 			}
-			TypeCode typeCode = Convert.GetTypeCode(value);
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8 && (typeCode == TypeCode.Boolean || typeCode == TypeCode.Char))
-			{
-				throw new ArgumentException(Environment.GetResourceString("The value passed in must be an enum base or an underlying type for an enum, such as an Int32."), "value");
-			}
-			switch (typeCode)
+			switch (Convert.GetTypeCode(value))
 			{
 			case TypeCode.Boolean:
 				return Enum.ToObject(enumType, (bool)value);
@@ -470,11 +462,9 @@ namespace System
 			return this.get_value();
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool InternalHasFlag(Enum flags);
 
-		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int get_hashcode();
 
@@ -695,8 +685,8 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		[CLSCompliant(false)]
 		[ComVisible(true)]
+		[CLSCompliant(false)]
 		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, sbyte value)
 		{
@@ -756,8 +746,8 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, (long)value);
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(true)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, byte value)
 		{
 			if (enumType == null)
@@ -797,9 +787,9 @@ namespace System
 			return Enum.InternalBoxEnum(runtimeType, (long)((ulong)value));
 		}
 
+		[SecuritySafeCritical]
 		[CLSCompliant(false)]
 		[ComVisible(true)]
-		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, uint value)
 		{
 			if (enumType == null)
@@ -839,8 +829,8 @@ namespace System
 		}
 
 		[ComVisible(true)]
-		[SecuritySafeCritical]
 		[CLSCompliant(false)]
+		[SecuritySafeCritical]
 		public static object ToObject(Type enumType, ulong value)
 		{
 			if (enumType == null)
@@ -895,6 +885,41 @@ namespace System
 				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "enumType");
 			}
 			return Enum.InternalBoxEnum(runtimeType, value ? 1L : 0L);
+		}
+
+		public static TEnum Parse<TEnum>(string value) where TEnum : struct
+		{
+			return Enum.Parse<TEnum>(value, false);
+		}
+
+		public static TEnum Parse<TEnum>(string value, bool ignoreCase) where TEnum : struct
+		{
+			Enum.EnumResult enumResult = new Enum.EnumResult
+			{
+				canThrow = true
+			};
+			if (Enum.TryParseEnum(typeof(TEnum), value, ignoreCase, ref enumResult))
+			{
+				return (TEnum)((object)enumResult.parsedEnum);
+			}
+			throw enumResult.GetEnumParseException();
+		}
+
+		public static bool TryParse(Type enumType, string value, bool ignoreCase, out object result)
+		{
+			result = null;
+			Enum.EnumResult enumResult = default(Enum.EnumResult);
+			bool flag = Enum.TryParseEnum(enumType, value, ignoreCase, ref enumResult);
+			if (flag)
+			{
+				result = enumResult.parsedEnum;
+			}
+			return flag;
+		}
+
+		public static bool TryParse(Type enumType, string value, out object result)
+		{
+			return Enum.TryParse(enumType, value, false, out result);
 		}
 
 		private static readonly char[] enumSeperatorCharArray = new char[] { ',' };

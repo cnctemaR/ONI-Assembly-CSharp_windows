@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
@@ -92,18 +93,26 @@ namespace UnityEngine
 			return this.rgba == other.rgba;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
+			bool flag = formatProvider == null;
+			if (flag)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
+			}
 			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
 				this.r.ToString(format, formatProvider),

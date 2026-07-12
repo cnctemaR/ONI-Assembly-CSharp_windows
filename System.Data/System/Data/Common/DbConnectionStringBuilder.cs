@@ -99,10 +99,10 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
-		[DesignOnly(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[DesignOnly(true)]
+		[Browsable(false)]
 		public bool BrowsableConnectionString
 		{
 			get

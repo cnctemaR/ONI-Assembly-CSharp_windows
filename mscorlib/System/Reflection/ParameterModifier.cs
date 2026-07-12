@@ -1,27 +1,16 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[Serializable]
-	public struct ParameterModifier
+	public readonly struct ParameterModifier
 	{
 		public ParameterModifier(int parameterCount)
 		{
 			if (parameterCount <= 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Must specify one or more parameters."));
+				throw new ArgumentException("Must specify one or more parameters.");
 			}
 			this._byRef = new bool[parameterCount];
-		}
-
-		internal bool[] IsByRefArray
-		{
-			get
-			{
-				return this._byRef;
-			}
 		}
 
 		public bool this[int index]
@@ -36,6 +25,6 @@ namespace System.Reflection
 			}
 		}
 
-		private bool[] _byRef;
+		private readonly bool[] _byRef;
 	}
 }

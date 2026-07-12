@@ -160,23 +160,39 @@ namespace Unity.TLS.LowLevel
 
 		public const int UNITYTLS_SSL_HANDSHAKE_SERVER_FINISHED = 13;
 
+		public const int UNITYTLS_SSL_HANDSHAKE_FLUSH_BUFFERS = 14;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_WRAPUP = 15;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_OVER = 16;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_SERVER_NEW_SESSION_TICKET = 17;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_HELLO_VERIFY_REQUIRED = 18;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_COUNT = 19;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_BEGIN = 0;
+
+		public const int UNITYTLS_SSL_HANDSHAKE_DONE = 16;
+
 		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_FLUSH_BUFFERS = 14;
 
 		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_WRAPUP = 15;
 
 		public const int UNITYTLS_SSL_HANDSHAKE_HANDSHAKE_OVER = 16;
 
-		public const int UnityTLSRole_None = 0;
-
-		public const int UnityTLSRole_Server = 1;
-
-		public const int UnityTLSRole_Client = 2;
-
 		public const int UnityTLSClientAuth_None = 0;
 
 		public const int UnityTLSClientAuth_Optional = 1;
 
 		public const int UnityTLSClientAuth_Required = 2;
+
+		public const int UnityTLSRole_None = 0;
+
+		public const int UnityTLSRole_Server = 1;
+
+		public const int UnityTLSRole_Client = 2;
 
 		public const int UnityTLSTransportProtocol_Stream = 0;
 
@@ -191,6 +207,15 @@ namespace Unity.TLS.LowLevel
 		public const int UnityTLSClientState_Messaging = 3;
 
 		public const int UnityTLSClientState_Fail = 64;
+
+		public struct unitytls_errorstate
+		{
+			public uint magic;
+
+			public uint code;
+
+			public ulong reserved;
+		}
 
 		public struct unitytls_dataRef
 		{
@@ -250,13 +275,15 @@ namespace Unity.TLS.LowLevel
 
 			public unsafe byte* hostname;
 
-			public int tracelevel;
+			public uint tracelevel;
 
 			public IntPtr logCallback;
 
 			public uint ssl_handshake_timeout_min;
 
 			public uint ssl_handshake_timeout_max;
+
+			public ushort mtu;
 		}
 
 		public struct unitytls_client

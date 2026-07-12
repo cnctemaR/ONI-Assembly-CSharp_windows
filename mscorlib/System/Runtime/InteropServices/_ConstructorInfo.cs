@@ -5,9 +5,9 @@ using System.Reflection;
 namespace System.Runtime.InteropServices
 {
 	[CLSCompliant(false)]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("E9A19478-9646-3679-9B10-8411AE1FD57D")]
 	[TypeLibImportClass(typeof(ConstructorInfo))]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComVisible(true)]
 	public interface _ConstructorInfo
 	{

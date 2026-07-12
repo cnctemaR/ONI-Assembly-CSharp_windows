@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum TypeAttributes
 	{
 		VisibilityMask = 7,
@@ -29,7 +26,6 @@ namespace System.Reflection
 		SpecialName = 1024,
 		Import = 4096,
 		Serializable = 8192,
-		[ComVisible(false)]
 		WindowsRuntime = 16384,
 		StringFormatMask = 196608,
 		AnsiClass = 0,
@@ -38,8 +34,8 @@ namespace System.Reflection
 		CustomFormatClass = 196608,
 		CustomFormatMask = 12582912,
 		BeforeFieldInit = 1048576,
-		ReservedMask = 264192,
 		RTSpecialName = 2048,
-		HasSecurity = 262144
+		HasSecurity = 262144,
+		ReservedMask = 264192
 	}
 }

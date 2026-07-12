@@ -14,7 +14,10 @@ namespace System.Net.WebSockets
 			}
 			WebSocketHandle.CheckPlatformSupport();
 			this._state = 0;
-			this._options = new ClientWebSocketOptions();
+			this._options = new ClientWebSocketOptions
+			{
+				Proxy = ClientWebSocket.DefaultWebProxy.Instance
+			};
 			if (NetEventSource.IsEnabled)
 			{
 				NetEventSource.Exit(this, null, ".ctor");
@@ -140,7 +143,19 @@ namespace System.Net.WebSockets
 			return this._innerWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
 		}
 
+		public override ValueTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+		{
+			this.ThrowIfNotConnected();
+			return this._innerWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
+		}
+
 		public override Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken)
+		{
+			this.ThrowIfNotConnected();
+			return this._innerWebSocket.ReceiveAsync(buffer, cancellationToken);
+		}
+
+		public override ValueTask<ValueWebSocketReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
 		{
 			this.ThrowIfNotConnected();
 			return this._innerWebSocket.ReceiveAsync(buffer, cancellationToken);
@@ -207,6 +222,33 @@ namespace System.Net.WebSockets
 			Connecting,
 			Connected,
 			Disposed
+		}
+
+		internal sealed class DefaultWebProxy : IWebProxy
+		{
+			public static ClientWebSocket.DefaultWebProxy Instance { get; } = new ClientWebSocket.DefaultWebProxy();
+
+			public ICredentials Credentials
+			{
+				get
+				{
+					throw new NotSupportedException();
+				}
+				set
+				{
+					throw new NotSupportedException();
+				}
+			}
+
+			public Uri GetProxy(Uri destination)
+			{
+				throw new NotSupportedException();
+			}
+
+			public bool IsBypassed(Uri host)
+			{
+				throw new NotSupportedException();
+			}
 		}
 	}
 }

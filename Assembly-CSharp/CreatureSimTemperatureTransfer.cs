@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
@@ -90,9 +91,9 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 
 	public string temperatureAttributeName = "Temperature";
 
-	public float skinThickness = 0.002f;
+	public float skinThickness = DUPLICANTSTATS.STANDARD.Temperature.SKIN_THICKNESS;
 
-	public string skinThicknessAttributeModifierName = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
+	public string skinThicknessAttributeModifierName = DUPLICANTS.MODEL.STANDARD.NAME;
 
 	public AttributeModifier averageTemperatureTransferPerSecond;
 

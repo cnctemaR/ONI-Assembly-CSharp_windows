@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Sockets
@@ -126,6 +127,35 @@ namespace System.Net.Sockets
 		public static Task<int> SendToAsync(this Socket socket, ArraySegment<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
 		{
 			return Task<int>.Factory.FromAsync<ArraySegment<byte>, SocketFlags, EndPoint>((ArraySegment<byte> targetBuffer, SocketFlags flags, EndPoint endPoint, AsyncCallback callback, object state) => ((Socket)state).BeginSendTo(targetBuffer.Array, targetBuffer.Offset, targetBuffer.Count, flags, endPoint, callback, state), (IAsyncResult asyncResult) => ((Socket)asyncResult.AsyncState).EndSendTo(asyncResult), buffer, socketFlags, remoteEP, socket);
+		}
+
+		public static ValueTask<int> SendAsync(this Socket socket, ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return socket.SendAsync(buffer, socketFlags, cancellationToken);
+		}
+
+		public static ValueTask<int> ReceiveAsync(this Socket socket, Memory<byte> memory, SocketFlags socketFlags, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>(socket);
+			byte[] buffer = memory.ToArray();
+			socket.BeginReceive(buffer, 0, memory.Length, socketFlags, delegate(IAsyncResult iar)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				Memory<byte> memory2 = new Memory<byte>(buffer);
+				memory2.CopyTo(memory);
+				TaskCompletionSource<int> taskCompletionSource2 = (TaskCompletionSource<int>)iar.AsyncState;
+				Socket socket2 = (Socket)taskCompletionSource2.Task.AsyncState;
+				try
+				{
+					taskCompletionSource2.TrySetResult(socket2.EndReceive(iar));
+				}
+				catch (Exception ex)
+				{
+					taskCompletionSource2.TrySetException(ex);
+				}
+			}, taskCompletionSource);
+			cancellationToken.ThrowIfCancellationRequested();
+			return new ValueTask<int>(taskCompletionSource.Task);
 		}
 	}
 }

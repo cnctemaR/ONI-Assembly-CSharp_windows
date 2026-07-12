@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	public struct PlayableGraph
 	{
 		public Playable GetRootPlayable(int index)
@@ -175,6 +175,12 @@ namespace UnityEngine.Playables
 			return PlayableGraph.GetRootPlayableCount_Injected(ref this);
 		}
 
+		[FreeFunction("PlayableGraphBindings::SynchronizeEvaluation", HasExplicitThis = true, ThrowsException = true)]
+		internal void SynchronizeEvaluation(PlayableGraph playable)
+		{
+			PlayableGraph.SynchronizeEvaluation_Injected(ref this, ref playable);
+		}
+
 		[FreeFunction("PlayableGraphBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
 		public int GetOutputCount()
 		{
@@ -207,6 +213,32 @@ namespace UnityEngine.Playables
 		internal void DestroyOutputInternal(PlayableOutputHandle handle)
 		{
 			PlayableGraph.DestroyOutputInternal_Injected(ref this, ref handle);
+		}
+
+		[FreeFunction("PlayableGraphBindings::IsMatchFrameRateEnabled", HasExplicitThis = true, ThrowsException = true)]
+		internal bool IsMatchFrameRateEnabled()
+		{
+			return PlayableGraph.IsMatchFrameRateEnabled_Injected(ref this);
+		}
+
+		[FreeFunction("PlayableGraphBindings::EnableMatchFrameRate", HasExplicitThis = true, ThrowsException = true)]
+		internal void EnableMatchFrameRate(FrameRate frameRate)
+		{
+			PlayableGraph.EnableMatchFrameRate_Injected(ref this, ref frameRate);
+		}
+
+		[FreeFunction("PlayableGraphBindings::DisableMatchFrameRate", HasExplicitThis = true, ThrowsException = true)]
+		internal void DisableMatchFrameRate()
+		{
+			PlayableGraph.DisableMatchFrameRate_Injected(ref this);
+		}
+
+		[FreeFunction("PlayableGraphBindings::GetFrameRate", HasExplicitThis = true, ThrowsException = true)]
+		internal FrameRate GetFrameRate()
+		{
+			FrameRate frameRate;
+			PlayableGraph.GetFrameRate_Injected(ref this, out frameRate);
+			return frameRate;
 		}
 
 		[FreeFunction("PlayableGraphBindings::GetOutputInternal", HasExplicitThis = true, ThrowsException = true)]
@@ -294,6 +326,9 @@ namespace UnityEngine.Playables
 		private static extern int GetRootPlayableCount_Injected(ref PlayableGraph _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SynchronizeEvaluation_Injected(ref PlayableGraph _unity_self, ref PlayableGraph playable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetOutputCount_Injected(ref PlayableGraph _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -307,6 +342,18 @@ namespace UnityEngine.Playables
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyOutputInternal_Injected(ref PlayableGraph _unity_self, ref PlayableOutputHandle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsMatchFrameRateEnabled_Injected(ref PlayableGraph _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableMatchFrameRate_Injected(ref PlayableGraph _unity_self, ref FrameRate frameRate);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableMatchFrameRate_Injected(ref PlayableGraph _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFrameRate_Injected(ref PlayableGraph _unity_self, out FrameRate ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetOutputInternal_Injected(ref PlayableGraph _unity_self, int index, out PlayableOutputHandle handle);

@@ -160,7 +160,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			} };
 		}
 
-		public void OnCompleteWork(Worker worker)
+		public void OnCompleteWork(WorkerBase worker)
 		{
 		}
 
@@ -217,13 +217,13 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			this.shouldTransferDiseaseWithWorker = false;
 		}
 
-		protected override void OnStartWork(Worker worker)
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			base.OnStartWork(worker);
 			this.diseaseRemoved = 0;
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			base.OnWorkTick(worker, dt);
 			OreScrubber component = base.GetComponent<OreScrubber>();
@@ -253,7 +253,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			return this.diseaseRemoved > component.diseaseRemovalCount;
 		}
 
-		protected override void OnCompleteWork(Worker worker)
+		protected override void OnCompleteWork(WorkerBase worker)
 		{
 			base.OnCompleteWork(worker);
 		}

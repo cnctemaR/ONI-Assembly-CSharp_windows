@@ -2,18 +2,17 @@
 using System.IO;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Mono.Net.Security;
 using Mono.Net.Security.Private;
 using Mono.Security.Interface;
-using Unity;
 
 namespace System.Net.Security
 {
 	public class SslStream : AuthenticatedStream
 	{
-		internal IMonoSslStream Impl
+		internal MobileAuthenticatedStream Impl
 		{
 			get
 			{
@@ -31,9 +30,18 @@ namespace System.Net.Security
 			}
 		}
 
-		private static MonoTlsProvider GetProvider()
+		internal string InternalTargetHost
 		{
-			return MonoTlsProviderFactory.GetProvider();
+			get
+			{
+				this.CheckDisposed();
+				return this.impl.TargetHost;
+			}
+		}
+
+		private static MobileTlsProvider GetProvider()
+		{
+			return (MobileTlsProvider)Mono.Security.Interface.MonoTlsProviderFactory.GetProvider();
 		}
 
 		public SslStream(Stream innerStream)
@@ -45,7 +53,8 @@ namespace System.Net.Security
 			: base(innerStream, leaveInnerStreamOpen)
 		{
 			this.provider = SslStream.GetProvider();
-			this.impl = this.provider.CreateSslStreamInternal(this, innerStream, leaveInnerStreamOpen, null);
+			this.settings = MonoTlsSettings.CopyDefaultSettings();
+			this.impl = this.provider.CreateSslStream(this, innerStream, leaveInnerStreamOpen, this.settings);
 		}
 
 		public SslStream(Stream innerStream, bool leaveInnerStreamOpen, RemoteCertificateValidationCallback userCertificateValidationCallback)
@@ -57,10 +66,10 @@ namespace System.Net.Security
 			: base(innerStream, leaveInnerStreamOpen)
 		{
 			this.provider = SslStream.GetProvider();
-			MonoTlsSettings monoTlsSettings = MonoTlsSettings.CopyDefaultSettings();
-			monoTlsSettings.RemoteCertificateValidationCallback = CallbackHelpers.PublicToMono(userCertificateValidationCallback);
-			monoTlsSettings.ClientCertificateSelectionCallback = CallbackHelpers.PublicToMono(userCertificateSelectionCallback);
-			this.impl = this.provider.CreateSslStream(innerStream, leaveInnerStreamOpen, monoTlsSettings);
+			this.settings = MonoTlsSettings.CopyDefaultSettings();
+			this.SetAndVerifyValidationCallback(userCertificateValidationCallback);
+			this.SetAndVerifySelectionCallback(userCertificateSelectionCallback);
+			this.impl = this.provider.CreateSslStream(this, innerStream, leaveInnerStreamOpen, this.settings);
 		}
 
 		[MonoLimitation("encryptionPolicy is ignored")]
@@ -72,18 +81,81 @@ namespace System.Net.Security
 		internal SslStream(Stream innerStream, bool leaveInnerStreamOpen, MonoTlsProvider provider, MonoTlsSettings settings)
 			: base(innerStream, leaveInnerStreamOpen)
 		{
-			this.provider = provider;
-			this.impl = provider.CreateSslStreamInternal(this, innerStream, leaveInnerStreamOpen, settings);
+			this.provider = (MobileTlsProvider)provider;
+			this.settings = settings.Clone();
+			this.explicitSettings = true;
+			this.impl = this.provider.CreateSslStream(this, innerStream, leaveInnerStreamOpen, settings);
 		}
 
-		internal static IMonoSslStream CreateMonoSslStream(Stream innerStream, bool leaveInnerStreamOpen, MonoTlsProvider provider, MonoTlsSettings settings)
+		internal static IMonoSslStream CreateMonoSslStream(Stream innerStream, bool leaveInnerStreamOpen, MobileTlsProvider provider, MonoTlsSettings settings)
 		{
 			return new SslStream(innerStream, leaveInnerStreamOpen, provider, settings).Impl;
 		}
 
+		private void SetAndVerifyValidationCallback(RemoteCertificateValidationCallback callback)
+		{
+			if (this.validationCallback == null)
+			{
+				this.validationCallback = callback;
+				this.settings.RemoteCertificateValidationCallback = CallbackHelpers.PublicToMono(callback);
+				return;
+			}
+			if ((callback != null && this.validationCallback != callback) || (this.explicitSettings & (this.settings.RemoteCertificateValidationCallback != null)))
+			{
+				throw new InvalidOperationException(SR.Format("The '{0}' option was already set in the SslStream constructor.", "RemoteCertificateValidationCallback"));
+			}
+		}
+
+		private void SetAndVerifySelectionCallback(LocalCertificateSelectionCallback callback)
+		{
+			if (this.selectionCallback == null)
+			{
+				this.selectionCallback = callback;
+				if (callback == null)
+				{
+					this.settings.ClientCertificateSelectionCallback = null;
+					return;
+				}
+				this.settings.ClientCertificateSelectionCallback = (string t, X509CertificateCollection lc, X509Certificate rc, string[] ai) => callback(this, t, lc, rc, ai);
+				return;
+			}
+			else
+			{
+				if ((callback != null && this.selectionCallback != callback) || (this.explicitSettings && this.settings.ClientCertificateSelectionCallback != null))
+				{
+					throw new InvalidOperationException(SR.Format("The '{0}' option was already set in the SslStream constructor.", "LocalCertificateSelectionCallback"));
+				}
+				return;
+			}
+		}
+
+		private MonoSslServerAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+		{
+			if (sslServerAuthenticationOptions.ServerCertificate == null && sslServerAuthenticationOptions.ServerCertificateSelectionCallback == null && this.selectionCallback == null)
+			{
+				throw new ArgumentNullException("ServerCertificate");
+			}
+			if ((sslServerAuthenticationOptions.ServerCertificate != null || this.selectionCallback != null) && sslServerAuthenticationOptions.ServerCertificateSelectionCallback != null)
+			{
+				throw new InvalidOperationException(SR.Format("The '{0}' option was already set in the SslStream constructor.", "ServerCertificateSelectionCallback"));
+			}
+			MonoSslServerAuthenticationOptions monoSslServerAuthenticationOptions = new MonoSslServerAuthenticationOptions(sslServerAuthenticationOptions);
+			ServerCertificateSelectionCallback serverSelectionCallback = sslServerAuthenticationOptions.ServerCertificateSelectionCallback;
+			if (serverSelectionCallback != null)
+			{
+				monoSslServerAuthenticationOptions.ServerCertSelectionDelegate = (string x) => serverSelectionCallback(this, x);
+			}
+			return monoSslServerAuthenticationOptions;
+		}
+
 		public virtual void AuthenticateAsClient(string targetHost)
 		{
-			this.Impl.AuthenticateAsClient(targetHost);
+			this.AuthenticateAsClient(targetHost, new X509CertificateCollection(), SslProtocols.None, false);
+		}
+
+		public virtual void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation)
+		{
+			this.AuthenticateAsClient(targetHost, clientCertificates, SslProtocols.None, checkCertificateRevocation);
 		}
 
 		public virtual void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
@@ -93,22 +165,32 @@ namespace System.Net.Security
 
 		public virtual IAsyncResult BeginAuthenticateAsClient(string targetHost, AsyncCallback asyncCallback, object asyncState)
 		{
-			return this.Impl.BeginAuthenticateAsClient(targetHost, asyncCallback, asyncState);
+			return this.BeginAuthenticateAsClient(targetHost, new X509CertificateCollection(), SslProtocols.None, false, asyncCallback, asyncState);
+		}
+
+		public virtual IAsyncResult BeginAuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
+		{
+			return this.BeginAuthenticateAsClient(targetHost, clientCertificates, SslProtocols.None, checkCertificateRevocation, asyncCallback, asyncState);
 		}
 
 		public virtual IAsyncResult BeginAuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
 		{
-			return this.Impl.BeginAuthenticateAsClient(targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation, asyncCallback, asyncState);
+			return TaskToApm.Begin(this.Impl.AuthenticateAsClientAsync(targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation), asyncCallback, asyncState);
 		}
 
 		public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult)
 		{
-			this.Impl.EndAuthenticateAsClient(asyncResult);
+			TaskToApm.End(asyncResult);
 		}
 
 		public virtual void AuthenticateAsServer(X509Certificate serverCertificate)
 		{
-			this.Impl.AuthenticateAsServer(serverCertificate);
+			this.Impl.AuthenticateAsServer(serverCertificate, false, SslProtocols.None, false);
+		}
+
+		public virtual void AuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation)
+		{
+			this.Impl.AuthenticateAsServer(serverCertificate, clientCertificateRequired, SslProtocols.None, checkCertificateRevocation);
 		}
 
 		public virtual void AuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
@@ -118,30 +200,40 @@ namespace System.Net.Security
 
 		public virtual IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, AsyncCallback asyncCallback, object asyncState)
 		{
-			return this.Impl.BeginAuthenticateAsServer(serverCertificate, asyncCallback, asyncState);
+			return this.BeginAuthenticateAsServer(serverCertificate, false, SslProtocols.None, false, asyncCallback, asyncState);
+		}
+
+		public virtual IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
+		{
+			return this.BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, SslProtocols.None, checkCertificateRevocation, asyncCallback, asyncState);
 		}
 
 		public virtual IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
 		{
-			return this.Impl.BeginAuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation, asyncCallback, asyncState);
+			return TaskToApm.Begin(this.Impl.AuthenticateAsServerAsync(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation), asyncCallback, asyncState);
 		}
 
 		public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult)
 		{
-			this.Impl.EndAuthenticateAsServer(asyncResult);
+			TaskToApm.End(asyncResult);
 		}
 
 		public TransportContext TransportContext
 		{
 			get
 			{
-				throw new NotSupportedException();
+				return null;
 			}
 		}
 
 		public virtual Task AuthenticateAsClientAsync(string targetHost)
 		{
-			return this.Impl.AuthenticateAsClientAsync(targetHost);
+			return this.Impl.AuthenticateAsClientAsync(targetHost, new X509CertificateCollection(), SslProtocols.None, false);
+		}
+
+		public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation)
+		{
+			return this.Impl.AuthenticateAsClientAsync(targetHost, clientCertificates, SslProtocols.None, checkCertificateRevocation);
 		}
 
 		public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
@@ -149,14 +241,31 @@ namespace System.Net.Security
 			return this.Impl.AuthenticateAsClientAsync(targetHost, clientCertificates, enabledSslProtocols, checkCertificateRevocation);
 		}
 
+		public Task AuthenticateAsClientAsync(SslClientAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken)
+		{
+			this.SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
+			this.SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
+			return this.Impl.AuthenticateAsClientAsync(new MonoSslClientAuthenticationOptions(sslClientAuthenticationOptions), cancellationToken);
+		}
+
 		public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate)
 		{
-			return this.Impl.AuthenticateAsServerAsync(serverCertificate);
+			return this.Impl.AuthenticateAsServerAsync(serverCertificate, false, SslProtocols.None, false);
+		}
+
+		public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation)
+		{
+			return this.Impl.AuthenticateAsServerAsync(serverCertificate, clientCertificateRequired, SslProtocols.None, checkCertificateRevocation);
 		}
 
 		public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
 		{
 			return this.Impl.AuthenticateAsServerAsync(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation);
+		}
+
+		public Task AuthenticateAsServerAsync(SslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken)
+		{
+			return this.Impl.AuthenticateAsServerAsync(this.CreateAuthenticationOptions(sslServerAuthenticationOptions), cancellationToken);
 		}
 
 		public virtual Task ShutdownAsync()
@@ -284,6 +393,14 @@ namespace System.Net.Security
 			}
 		}
 
+		public SslApplicationProtocol NegotiatedApplicationProtocol
+		{
+			get
+			{
+				throw new PlatformNotSupportedException("https://github.com/mono/mono/issues/12880");
+			}
+		}
+
 		public override bool CanSeek
 		{
 			get
@@ -356,7 +473,7 @@ namespace System.Net.Security
 			}
 			set
 			{
-				throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+				throw new NotSupportedException(SR.GetString("This stream does not support seek operations."));
 			}
 		}
 
@@ -367,7 +484,7 @@ namespace System.Net.Security
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			throw new NotSupportedException(global::SR.GetString("This stream does not support seek operations."));
+			throw new NotSupportedException(SR.GetString("This stream does not support seek operations."));
 		}
 
 		public override Task FlushAsync(CancellationToken cancellationToken)
@@ -419,66 +536,46 @@ namespace System.Net.Security
 			this.Impl.Write(buffer, offset, count);
 		}
 
-		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			return this.Impl.BeginRead(buffer, offset, count, asyncCallback, asyncState);
+			return this.Impl.ReadAsync(buffer, offset, count, cancellationToken);
+		}
+
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			return this.Impl.WriteAsync(buffer, offset, count, cancellationToken);
+		}
+
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			return TaskToApm.Begin(this.Impl.ReadAsync(buffer, offset, count), callback, state);
 		}
 
 		public override int EndRead(IAsyncResult asyncResult)
 		{
-			return this.Impl.EndRead(asyncResult);
+			return TaskToApm.End<int>(asyncResult);
 		}
 
-		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
-			return this.Impl.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+			return TaskToApm.Begin(this.Impl.WriteAsync(buffer, offset, count), callback, state);
 		}
 
 		public override void EndWrite(IAsyncResult asyncResult)
 		{
-			this.Impl.EndWrite(asyncResult);
+			TaskToApm.End(asyncResult);
 		}
 
-		public virtual void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-		}
+		private MobileTlsProvider provider;
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
-		}
+		private MonoTlsSettings settings;
 
-		public virtual void AuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-		}
+		private RemoteCertificateValidationCallback validationCallback;
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
-		}
+		private LocalCertificateSelectionCallback selectionCallback;
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public virtual IAsyncResult BeginAuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
-		}
+		private MobileAuthenticatedStream impl;
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public virtual IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
-		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
-		}
-
-		private MonoTlsProvider provider;
-
-		private IMonoSslStream impl;
+		private bool explicitSettings;
 	}
 }

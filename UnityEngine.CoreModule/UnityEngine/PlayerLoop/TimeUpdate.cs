@@ -10,5 +10,10 @@ namespace UnityEngine.PlayerLoop
 		public struct WaitForLastPresentationAndUpdateTime
 		{
 		}
+
+		[Obsolete("ProfilerStartFrame player loop component has been moved to the Initialization category. (UnityUpgradable) -> UnityEngine.PlayerLoop.Initialization/ProfilerStartFrame", true)]
+		public struct ProfilerStartFrame
+		{
+		}
 	}
 }

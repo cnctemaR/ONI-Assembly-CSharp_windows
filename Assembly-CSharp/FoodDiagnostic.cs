@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class FoodDiagnostic : ColonyDiagnostic
@@ -14,6 +15,8 @@ public class FoodDiagnostic : ColonyDiagnostic
 		this.presentationSetting = ColonyDiagnostic.PresentationSetting.CurrentValue;
 		base.AddCriterion("CheckEnoughFood", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.FOODDIAGNOSTIC.CRITERIA.CHECKENOUGHFOOD, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckEnoughFood)));
 		base.AddCriterion("CheckStarvation", new DiagnosticCriterion(UI.COLONY_DIAGNOSTICS.FOODDIAGNOSTIC.CRITERIA.CHECKSTARVATION, new Func<ColonyDiagnostic.DiagnosticResult>(this.CheckStarvation)));
+		this.multiplier = MinionIdentity.GetCalorieBurnMultiplier();
+		this.recommendedKCalPerDuplicant = 3000f * this.multiplier;
 	}
 
 	private ColonyDiagnostic.DiagnosticResult CheckAnyFood()
@@ -38,27 +41,23 @@ public class FoodDiagnostic : ColonyDiagnostic
 	private ColonyDiagnostic.DiagnosticResult CheckEnoughFood()
 	{
 		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.GENERIC_CRITERIA_PASS, null);
-		List<MinionIdentity> worldItems = Components.LiveMinionIdentities.GetWorldItems(base.worldID, false);
+		List<MinionIdentity> list = Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).FindAll((MinionIdentity MID) => Db.Get().Amounts.Calories.Lookup(MID) != null);
 		if (this.tracker.GetDataTimeLength() < 10f)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
 			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_DATA;
 		}
-		else
+		else if ((float)list.Count * (1000f * this.recommendedKCalPerDuplicant) > this.tracker.GetAverageValue(this.trackerSampleCountSeconds))
 		{
-			int num = 3000;
-			if ((float)worldItems.Count * (1000f * (float)num) > this.tracker.GetAverageValue(this.trackerSampleCountSeconds))
-			{
-				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
-				float currentValue = this.tracker.GetCurrentValue();
-				float num2 = (float)Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Count * -1000000f;
-				string formattedCalories = GameUtil.GetFormattedCalories(currentValue, GameUtil.TimeSlice.None, true);
-				string formattedCalories2 = GameUtil.GetFormattedCalories(Mathf.Abs(num2), GameUtil.TimeSlice.None, true);
-				string text = MISC.NOTIFICATIONS.FOODLOW.TOOLTIP;
-				text = text.Replace("{0}", formattedCalories);
-				text = text.Replace("{1}", formattedCalories2);
-				diagnosticResult.Message = text;
-			}
+			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
+			float currentValue = this.tracker.GetCurrentValue();
+			float num = (float)list.Count * DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_CYCLE * this.multiplier;
+			string formattedCalories = GameUtil.GetFormattedCalories(currentValue, GameUtil.TimeSlice.None, true);
+			string formattedCalories2 = GameUtil.GetFormattedCalories(Mathf.Abs(num), GameUtil.TimeSlice.None, true);
+			string text = MISC.NOTIFICATIONS.FOODLOW.TOOLTIP;
+			text = text.Replace("{0}", formattedCalories);
+			text = text.Replace("{1}", formattedCalories2);
+			diagnosticResult.Message = text;
 		}
 		return diagnosticResult;
 	}
@@ -101,4 +100,12 @@ public class FoodDiagnostic : ColonyDiagnostic
 		}
 		return diagnosticResult;
 	}
+
+	private const int CYCLES_OF_FOOD = 3;
+
+	private const float BASE_KCAL_PER_CYCLE = 1000f;
+
+	private float multiplier = 1f;
+
+	private float recommendedKCalPerDuplicant;
 }

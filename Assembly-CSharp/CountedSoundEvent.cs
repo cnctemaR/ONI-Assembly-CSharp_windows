@@ -19,7 +19,7 @@ public class CountedSoundEvent : SoundEvent
 	{
 		if (sound_name.Contains(":"))
 		{
-			string[] array = sound_name.Split(new char[] { ':' });
+			string[] array = sound_name.Split(':', StringSplitOptions.None);
 			if (array.Length != 2)
 			{
 				DebugUtil.LogErrorArgs(new object[]
@@ -80,7 +80,7 @@ public class CountedSoundEvent : SoundEvent
 				int num2 = ((this.counterModulus == -1) ? 0 : ((num + 1) % this.counterModulus));
 				GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
 			}
-			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			Vector3 vector = behaviour.position;
 			vector.z = 0f;
 			if (base.objectIsSelectedAndVisible)
 			{

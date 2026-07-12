@@ -2,7 +2,7 @@
 
 namespace System.Runtime.InteropServices
 {
-	public struct OSPlatform : IEquatable<OSPlatform>
+	public readonly struct OSPlatform : IEquatable<OSPlatform>
 	{
 		public static OSPlatform Linux { get; } = new OSPlatform("LINUX");
 

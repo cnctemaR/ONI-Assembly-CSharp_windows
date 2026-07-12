@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public sealed class DataMisalignedException : SystemException
 	{
 		public DataMisalignedException()
-			: base(Environment.GetResourceString("A datatype misalignment was detected in a load or store instruction."))
+			: base("A datatype misalignment was detected in a load or store instruction.")
 		{
-			base.SetErrorCode(-2146233023);
+			base.HResult = -2146233023;
 		}
 
 		public DataMisalignedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233023);
+			base.HResult = -2146233023;
 		}
 
 		public DataMisalignedException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233023);
+			base.HResult = -2146233023;
 		}
 
 		internal DataMisalignedException(SerializationInfo info, StreamingContext context)

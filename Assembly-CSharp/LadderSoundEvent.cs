@@ -14,7 +14,7 @@ public class LadderSoundEvent : SoundEvent
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
 		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
 		{
-			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			Vector3 vector = behaviour.position;
 			vector.z = 0f;
 			float num = 1f;
 			if (base.objectIsSelectedAndVisible)

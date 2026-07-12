@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class NestedContainer : Container, INestedContainer, IContainer, IDisposable
 	{
 		public NestedContainer(IComponent owner)
@@ -13,33 +11,27 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("owner");
 			}
-			this._owner = owner;
-			this._owner.Disposed += this.OnOwnerDisposed;
+			this.Owner = owner;
+			this.Owner.Disposed += this.OnOwnerDisposed;
 		}
 
-		public IComponent Owner
-		{
-			get
-			{
-				return this._owner;
-			}
-		}
+		public IComponent Owner { get; }
 
 		protected virtual string OwnerName
 		{
 			get
 			{
 				string text = null;
-				if (this._owner != null && this._owner.Site != null)
+				if (this.Owner != null && this.Owner.Site != null)
 				{
-					INestedSite nestedSite = this._owner.Site as INestedSite;
+					INestedSite nestedSite = this.Owner.Site as INestedSite;
 					if (nestedSite != null)
 					{
 						text = nestedSite.FullName;
 					}
 					else
 					{
-						text = this._owner.Site.Name;
+						text = this.Owner.Site.Name;
 					}
 				}
 				return text;
@@ -59,7 +51,7 @@ namespace System.ComponentModel
 		{
 			if (disposing)
 			{
-				this._owner.Disposed -= this.OnOwnerDisposed;
+				this.Owner.Disposed -= this.OnOwnerDisposed;
 			}
 			base.Dispose(disposing);
 		}
@@ -78,38 +70,24 @@ namespace System.ComponentModel
 			base.Dispose();
 		}
 
-		private IComponent _owner;
-
 		private class Site : INestedSite, ISite, IServiceProvider
 		{
 			internal Site(IComponent component, NestedContainer container, string name)
 			{
-				this.component = component;
-				this.container = container;
-				this.name = name;
+				this.Component = component;
+				this.Container = container;
+				this._name = name;
 			}
 
-			public IComponent Component
-			{
-				get
-				{
-					return this.component;
-				}
-			}
+			public IComponent Component { get; }
 
-			public IContainer Container
-			{
-				get
-				{
-					return this.container;
-				}
-			}
+			public IContainer Container { get; }
 
 			public object GetService(Type service)
 			{
 				if (!(service == typeof(ISite)))
 				{
-					return this.container.GetService(service);
+					return ((NestedContainer)this.Container).GetService(service);
 				}
 				return this;
 			}
@@ -118,7 +96,7 @@ namespace System.ComponentModel
 			{
 				get
 				{
-					IComponent owner = this.container.Owner;
+					IComponent owner = ((NestedContainer)this.Container).Owner;
 					return owner != null && owner.Site != null && owner.Site.DesignMode;
 				}
 			}
@@ -127,17 +105,17 @@ namespace System.ComponentModel
 			{
 				get
 				{
-					if (this.name != null)
+					if (this._name != null)
 					{
-						string ownerName = this.container.OwnerName;
-						string text = this.name;
+						string ownerName = ((NestedContainer)this.Container).OwnerName;
+						string text = this._name;
 						if (ownerName != null)
 						{
 							text = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", ownerName, text);
 						}
 						return text;
 					}
-					return this.name;
+					return this._name;
 				}
 			}
 
@@ -145,23 +123,19 @@ namespace System.ComponentModel
 			{
 				get
 				{
-					return this.name;
+					return this._name;
 				}
 				set
 				{
-					if (value == null || this.name == null || !value.Equals(this.name))
+					if (value == null || this._name == null || !value.Equals(this._name))
 					{
-						this.container.ValidateName(this.component, value);
-						this.name = value;
+						((NestedContainer)this.Container).ValidateName(this.Component, value);
+						this._name = value;
 					}
 				}
 			}
 
-			private IComponent component;
-
-			private NestedContainer container;
-
-			private string name;
+			private string _name;
 		}
 	}
 }

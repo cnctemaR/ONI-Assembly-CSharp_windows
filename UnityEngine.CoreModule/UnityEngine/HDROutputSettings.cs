@@ -10,11 +10,13 @@ namespace UnityEngine
 	[NativeHeader("Runtime/GfxDevice/HDROutputSettings.h")]
 	public class HDROutputSettings
 	{
+		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]
 		internal HDROutputSettings()
 		{
 			this.m_DisplayIndex = 0;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]
 		internal HDROutputSettings(int displayIndex)
 		{
 			this.m_DisplayIndex = displayIndex;

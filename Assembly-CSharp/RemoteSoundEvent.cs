@@ -12,19 +12,19 @@ public class RemoteSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.position;
 		vector.z = 0f;
 		if (SoundEvent.ObjectIsSelectedAndVisible(behaviour.controller.gameObject))
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}
-		Workable workable = behaviour.GetComponent<Worker>().workable;
+		Workable workable = behaviour.GetComponent<WorkerBase>().GetWorkable();
 		if (workable != null)
 		{
 			Toggleable component = workable.GetComponent<Toggleable>();
 			if (component != null)
 			{
-				IToggleHandler toggleHandlerForWorker = component.GetToggleHandlerForWorker(behaviour.GetComponent<Worker>());
+				IToggleHandler toggleHandlerForWorker = component.GetToggleHandlerForWorker(behaviour.GetComponent<WorkerBase>());
 				float num = 1f;
 				if (toggleHandlerForWorker != null && toggleHandlerForWorker.IsHandlerOn())
 				{

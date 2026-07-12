@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Security.Permissions;
 using Unity;
 
 namespace System.Threading.Tasks
 {
 	[DebuggerDisplay("ShouldExitCurrentIteration = {ShouldExitCurrentIteration}")]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class ParallelLoopState
 	{
 		internal ParallelLoopState(ParallelLoopStateFlags fbase)
 		{
-			this.m_flagsBase = fbase;
+			this._flagsBase = fbase;
 		}
 
 		internal virtual bool InternalShouldExitCurrentIteration
 		{
 			get
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This method is not supported."));
+				throw new NotSupportedException("This method is not supported.");
 			}
 		}
 
@@ -34,7 +32,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return (this.m_flagsBase.LoopStateFlags & ParallelLoopStateFlags.PLS_STOPPED) != 0;
+				return (this._flagsBase.LoopStateFlags & 4) != 0;
 			}
 		}
 
@@ -42,7 +40,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return (this.m_flagsBase.LoopStateFlags & ParallelLoopStateFlags.PLS_EXCEPTIONAL) != 0;
+				return (this._flagsBase.LoopStateFlags & 1) != 0;
 			}
 		}
 
@@ -50,7 +48,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This method is not supported."));
+				throw new NotSupportedException("This method is not supported.");
 			}
 		}
 
@@ -64,12 +62,12 @@ namespace System.Threading.Tasks
 
 		public void Stop()
 		{
-			this.m_flagsBase.Stop();
+			this._flagsBase.Stop();
 		}
 
 		internal virtual void InternalBreak()
 		{
-			throw new NotSupportedException(Environment.GetResourceString("This method is not supported."));
+			throw new NotSupportedException("This method is not supported.");
 		}
 
 		public void Break()
@@ -79,18 +77,18 @@ namespace System.Threading.Tasks
 
 		internal static void Break(int iteration, ParallelLoopStateFlags32 pflags)
 		{
-			int pls_NONE = ParallelLoopStateFlags.PLS_NONE;
-			if (pflags.AtomicLoopStateUpdate(ParallelLoopStateFlags.PLS_BROKEN, ParallelLoopStateFlags.PLS_STOPPED | ParallelLoopStateFlags.PLS_EXCEPTIONAL | ParallelLoopStateFlags.PLS_CANCELED, ref pls_NONE))
+			int num = 0;
+			if (pflags.AtomicLoopStateUpdate(2, 13, ref num))
 			{
-				int num = pflags.m_lowestBreakIteration;
-				if (iteration < num)
+				int num2 = pflags._lowestBreakIteration;
+				if (iteration < num2)
 				{
 					SpinWait spinWait = default(SpinWait);
-					while (Interlocked.CompareExchange(ref pflags.m_lowestBreakIteration, iteration, num) != num)
+					while (Interlocked.CompareExchange(ref pflags._lowestBreakIteration, iteration, num2) != num2)
 					{
 						spinWait.SpinOnce();
-						num = pflags.m_lowestBreakIteration;
-						if (iteration > num)
+						num2 = pflags._lowestBreakIteration;
+						if (iteration > num2)
 						{
 							break;
 						}
@@ -98,26 +96,26 @@ namespace System.Threading.Tasks
 				}
 				return;
 			}
-			if ((pls_NONE & ParallelLoopStateFlags.PLS_STOPPED) != 0)
+			if ((num & 4) != 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Break was called after Stop was called."));
+				throw new InvalidOperationException("Break was called after Stop was called.");
 			}
 		}
 
 		internal static void Break(long iteration, ParallelLoopStateFlags64 pflags)
 		{
-			int pls_NONE = ParallelLoopStateFlags.PLS_NONE;
-			if (pflags.AtomicLoopStateUpdate(ParallelLoopStateFlags.PLS_BROKEN, ParallelLoopStateFlags.PLS_STOPPED | ParallelLoopStateFlags.PLS_EXCEPTIONAL | ParallelLoopStateFlags.PLS_CANCELED, ref pls_NONE))
+			int num = 0;
+			if (pflags.AtomicLoopStateUpdate(2, 13, ref num))
 			{
-				long num = pflags.LowestBreakIteration;
-				if (iteration < num)
+				long num2 = pflags.LowestBreakIteration;
+				if (iteration < num2)
 				{
 					SpinWait spinWait = default(SpinWait);
-					while (Interlocked.CompareExchange(ref pflags.m_lowestBreakIteration, iteration, num) != num)
+					while (Interlocked.CompareExchange(ref pflags._lowestBreakIteration, iteration, num2) != num2)
 					{
 						spinWait.SpinOnce();
-						num = pflags.LowestBreakIteration;
-						if (iteration > num)
+						num2 = pflags.LowestBreakIteration;
+						if (iteration > num2)
 						{
 							break;
 						}
@@ -125,9 +123,9 @@ namespace System.Threading.Tasks
 				}
 				return;
 			}
-			if ((pls_NONE & ParallelLoopStateFlags.PLS_STOPPED) != 0)
+			if ((num & 4) != 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Break was called after Stop was called."));
+				throw new InvalidOperationException("Break was called after Stop was called.");
 			}
 		}
 
@@ -136,6 +134,6 @@ namespace System.Threading.Tasks
 			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private ParallelLoopStateFlags m_flagsBase;
+		private readonly ParallelLoopStateFlags _flagsBase;
 	}
 }

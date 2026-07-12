@@ -7,7 +7,7 @@ namespace System.Linq.Expressions
 {
 	internal static class ArrayBuilderExtensions
 	{
-		public static ReadOnlyCollection<T> ToReadOnly<T>(this ArrayBuilder<T> builder)
+		public static ReadOnlyCollection<T> ToReadOnly<T>(this global::System.Collections.Generic.ArrayBuilder<T> builder)
 		{
 			return new TrueReadOnlyCollection<T>(builder.ToArray());
 		}

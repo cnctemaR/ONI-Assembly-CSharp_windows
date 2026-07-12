@@ -272,7 +272,7 @@ namespace System.Numerics
 			return -value;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public Vector3(float value)
 		{
 			this = new Vector3(value, value, value);
@@ -283,7 +283,7 @@ namespace System.Numerics
 			this = new Vector3(value.X, value.Y, z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public Vector3(float x, float y, float z)
 		{
 			this.X = x;
@@ -297,7 +297,7 @@ namespace System.Numerics
 			this.CopyTo(array, 0);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void CopyTo(float[] array, int index)
 		{
@@ -318,94 +318,92 @@ namespace System.Numerics
 			array[index + 2] = this.Z;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public bool Equals(Vector3 other)
 		{
 			return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Dot(Vector3 vector1, Vector3 vector2)
 		{
 			return vector1.X * vector2.X + vector1.Y * vector2.Y + vector1.Z * vector2.Z;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public static Vector3 Min(Vector3 value1, Vector3 value2)
 		{
 			return new Vector3((value1.X < value2.X) ? value1.X : value2.X, (value1.Y < value2.Y) ? value1.Y : value2.Y, (value1.Z < value2.Z) ? value1.Z : value2.Z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 Max(Vector3 value1, Vector3 value2)
 		{
 			return new Vector3((value1.X > value2.X) ? value1.X : value2.X, (value1.Y > value2.Y) ? value1.Y : value2.Y, (value1.Z > value2.Z) ? value1.Z : value2.Z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 Abs(Vector3 value)
 		{
 			return new Vector3(MathF.Abs(value.X), MathF.Abs(value.Y), MathF.Abs(value.Z));
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 SquareRoot(Vector3 value)
 		{
 			return new Vector3(MathF.Sqrt(value.X), MathF.Sqrt(value.Y), MathF.Sqrt(value.Z));
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator +(Vector3 left, Vector3 right)
 		{
 			return new Vector3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator -(Vector3 left, Vector3 right)
 		{
 			return new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator *(Vector3 left, Vector3 right)
 		{
 			return new Vector3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator *(Vector3 left, float right)
 		{
 			return left * new Vector3(right);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator *(float left, Vector3 right)
 		{
 			return new Vector3(left) * right;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator /(Vector3 left, Vector3 right)
 		{
 			return new Vector3(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
 		}
 
-		[JitIntrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3 operator /(Vector3 value1, float value2)
 		{
-			float num = 1f / value2;
-			return new Vector3(value1.X * num, value1.Y * num, value1.Z * num);
+			return value1 / new Vector3(value2);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -414,7 +412,7 @@ namespace System.Numerics
 			return Vector3.Zero - value;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Vector3 left, Vector3 right)
 		{

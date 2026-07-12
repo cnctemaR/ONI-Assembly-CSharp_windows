@@ -492,8 +492,7 @@ namespace System.Xml.Xsl.XsltOld
 			int num = 0;
 			while (i < value.Length)
 			{
-				char c = value[i];
-				if (c == '-')
+				if (value[i] == '-')
 				{
 					if (flag)
 					{

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -57,6 +58,15 @@ namespace System.Diagnostics
 			{
 				if (disposing && this.stream != null)
 				{
+					if (this.asyncReadResult != null && !this.asyncReadResult.IsCompleted && this.stream is FileStream)
+					{
+						SafeHandle safeFileHandle = ((FileStream)this.stream).SafeFileHandle;
+						MonoIOError monoIOError;
+						while (!this.asyncReadResult.IsCompleted && (MonoIO.Cancel(safeFileHandle, out monoIOError) || monoIOError != MonoIOError.ERROR_NOT_SUPPORTED))
+						{
+							this.asyncReadResult.AsyncWaitHandle.WaitOne(200);
+						}
+					}
 					this.stream.Close();
 				}
 				if (this.stream != null)
@@ -100,7 +110,7 @@ namespace System.Diagnostics
 			if (this.sb == null)
 			{
 				this.sb = new StringBuilder(1024);
-				this.stream.BeginRead(this.byteBuffer, 0, this.byteBuffer.Length, new AsyncCallback(this.ReadBuffer), null);
+				this.asyncReadResult = this.stream.BeginRead(this.byteBuffer, 0, this.byteBuffer.Length, new AsyncCallback(this.ReadBuffer), null);
 				return;
 			}
 			this.FlushMessageQueue();
@@ -116,14 +126,18 @@ namespace System.Diagnostics
 			int num;
 			try
 			{
-				Stream stream = this.stream;
-				if (stream == null)
+				object obj = this.syncObject;
+				lock (obj)
 				{
-					num = 0;
-				}
-				else
-				{
-					num = stream.EndRead(ar);
+					this.asyncReadResult = null;
+					if (this.stream == null)
+					{
+						num = 0;
+					}
+					else
+					{
+						num = this.stream.EndRead(ar);
+					}
 				}
 			}
 			catch (IOException)
@@ -192,7 +206,7 @@ namespace System.Diagnostics
 						num = 0;
 						continue;
 					}
-					this.stream.BeginRead(this.byteBuffer, 0, this.byteBuffer.Length, new AsyncCallback(this.ReadBuffer), null);
+					this.asyncReadResult = this.stream.BeginRead(this.byteBuffer, 0, this.byteBuffer.Length, new AsyncCallback(this.ReadBuffer), null);
 				}
 				break;
 			}
@@ -317,5 +331,7 @@ namespace System.Diagnostics
 		private int currentLinePos;
 
 		private object syncObject = new object();
+
+		private IAsyncResult asyncReadResult;
 	}
 }

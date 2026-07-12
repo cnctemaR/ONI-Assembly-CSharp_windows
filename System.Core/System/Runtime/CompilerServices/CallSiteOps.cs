@@ -71,8 +71,8 @@ namespace System.Runtime.CompilerServices
 			return site.Binder.GetRuleCache<T>();
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void MoveRule<T>(RuleCache<T> cache, T rule, int i) where T : class
 		{
 			if (i > 1)
@@ -81,15 +81,15 @@ namespace System.Runtime.CompilerServices
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static T[] GetCachedRules<T>(RuleCache<T> cache) where T : class
 		{
 			return cache.GetRules();
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static T Bind<T>(CallSiteBinder binder, CallSite<T> site, object[] args) where T : class
 		{
 			return binder.BindCore<T>(site, args);

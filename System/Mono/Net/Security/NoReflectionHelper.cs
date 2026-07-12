@@ -8,11 +8,6 @@ namespace Mono.Net.Security
 {
 	internal static class NoReflectionHelper
 	{
-		internal static object GetInternalValidator(object provider, object settings)
-		{
-			return ChainValidationHelper.GetInternalValidator((MonoTlsProvider)provider, (MonoTlsSettings)settings);
-		}
-
 		internal static object GetDefaultValidator(object settings)
 		{
 			return ChainValidationHelper.GetDefaultValidator((MonoTlsSettings)settings);
@@ -43,7 +38,7 @@ namespace Mono.Net.Security
 
 		internal static HttpWebRequest CreateHttpsRequest(Uri requestUri, object provider, object settings)
 		{
-			return new HttpWebRequest(requestUri, (MonoTlsProvider)provider, (MonoTlsSettings)settings);
+			return new HttpWebRequest(requestUri, (MobileTlsProvider)provider, (MonoTlsSettings)settings);
 		}
 
 		internal static object CreateHttpListener(object certificate, object provider, object settings)

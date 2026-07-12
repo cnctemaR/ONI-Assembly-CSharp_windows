@@ -7,6 +7,7 @@ namespace System.IO.Pipes
 	{
 		None = 0,
 		WriteThrough = -2147483648,
-		Asynchronous = 1073741824
+		Asynchronous = 1073741824,
+		CurrentUserOnly = 536870912
 	}
 }

@@ -8,13 +8,25 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
+		this.ownable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.HasCaloriesOwnablePrecondition));
 		base.OnPrefabInit();
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine_kanim") };
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	private bool HasCaloriesOwnablePrecondition(MinionAssignablesProxy worker)
 	{
-		worker.workable.GetComponent<Edible>().CompleteWork(worker);
+		bool flag = false;
+		MinionIdentity minionIdentity = worker.target as MinionIdentity;
+		if (minionIdentity != null)
+		{
+			flag = Db.Get().Amounts.Calories.Lookup(minionIdentity) != null;
+		}
+		return flag;
+	}
+
+	protected override void OnCompleteWork(WorkerBase worker)
+	{
+		worker.GetWorkable().GetComponent<Edible>().CompleteWork(worker);
 	}
 
 	protected override void OnSpawn()
@@ -41,6 +53,9 @@ public class MessStation : Workable, IGameObjectEffectDescriptor
 			return this.smi.HasSalt;
 		}
 	}
+
+	[MyCmpGet]
+	private Ownable ownable;
 
 	private MessStation.MessStationSM.Instance smi;
 

@@ -21,15 +21,14 @@ namespace System.Collections.Specialized
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+					throw new ArgumentNullException("key");
 				}
 				ListDictionary.DictionaryNode dictionaryNode = this.head;
 				if (this.comparer == null)
 				{
 					while (dictionaryNode != null)
 					{
-						object key2 = dictionaryNode.key;
-						if (key2 != null && key2.Equals(key))
+						if (dictionaryNode.key.Equals(key))
 						{
 							return dictionaryNode.value;
 						}
@@ -40,8 +39,8 @@ namespace System.Collections.Specialized
 				{
 					while (dictionaryNode != null)
 					{
-						object key3 = dictionaryNode.key;
-						if (key3 != null && this.comparer.Compare(key3, key) == 0)
+						object key2 = dictionaryNode.key;
+						if (this.comparer.Compare(key2, key) == 0)
 						{
 							return dictionaryNode.value;
 						}
@@ -54,7 +53,7 @@ namespace System.Collections.Specialized
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+					throw new ArgumentNullException("key");
 				}
 				this.version++;
 				ListDictionary.DictionaryNode dictionaryNode = null;
@@ -152,7 +151,7 @@ namespace System.Collections.Specialized
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				throw new ArgumentNullException("key");
 			}
 			this.version++;
 			ListDictionary.DictionaryNode dictionaryNode = null;
@@ -161,7 +160,7 @@ namespace System.Collections.Specialized
 				object key2 = next.key;
 				if ((this.comparer == null) ? key2.Equals(key) : (this.comparer.Compare(key2, key) == 0))
 				{
-					throw new ArgumentException(global::SR.GetString("An item with the same key has already been added. Key: {0}"));
+					throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", key));
 				}
 				dictionaryNode = next;
 			}
@@ -190,7 +189,7 @@ namespace System.Collections.Specialized
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				throw new ArgumentNullException("key");
 			}
 			for (ListDictionary.DictionaryNode next = this.head; next != null; next = next.next)
 			{
@@ -211,11 +210,11 @@ namespace System.Collections.Specialized
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
 			}
 			if (array.Length - index < this.count)
 			{
-				throw new ArgumentException(global::SR.GetString("Insufficient space in the target location to copy the information."));
+				throw new ArgumentException("Insufficient space in the target location to copy the information.");
 			}
 			for (ListDictionary.DictionaryNode next = this.head; next != null; next = next.next)
 			{
@@ -238,7 +237,7 @@ namespace System.Collections.Specialized
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				throw new ArgumentNullException("key");
 			}
 			this.version++;
 			ListDictionary.DictionaryNode dictionaryNode = null;
@@ -273,7 +272,7 @@ namespace System.Collections.Specialized
 
 		private int count;
 
-		private IComparer comparer;
+		private readonly IComparer comparer;
 
 		[NonSerialized]
 		private object _syncRoot;
@@ -282,10 +281,10 @@ namespace System.Collections.Specialized
 		{
 			public NodeEnumerator(ListDictionary list)
 			{
-				this.list = list;
-				this.version = list.version;
-				this.start = true;
-				this.current = null;
+				this._list = list;
+				this._version = list.version;
+				this._start = true;
+				this._current = null;
 			}
 
 			public object Current
@@ -300,11 +299,11 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					if (this.current == null)
+					if (this._current == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return new DictionaryEntry(this.current.key, this.current.value);
+					return new DictionaryEntry(this._current.key, this._current.value);
 				}
 			}
 
@@ -312,11 +311,11 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					if (this.current == null)
+					if (this._current == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return this.current.key;
+					return this._current.key;
 				}
 			}
 
@@ -324,57 +323,57 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					if (this.current == null)
+					if (this._current == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return this.current.value;
+					return this._current.value;
 				}
 			}
 
 			public bool MoveNext()
 			{
-				if (this.version != this.list.version)
+				if (this._version != this._list.version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				if (this.start)
+				if (this._start)
 				{
-					this.current = this.list.head;
-					this.start = false;
+					this._current = this._list.head;
+					this._start = false;
 				}
-				else if (this.current != null)
+				else if (this._current != null)
 				{
-					this.current = this.current.next;
+					this._current = this._current.next;
 				}
-				return this.current != null;
+				return this._current != null;
 			}
 
 			public void Reset()
 			{
-				if (this.version != this.list.version)
+				if (this._version != this._list.version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				this.start = true;
-				this.current = null;
+				this._start = true;
+				this._current = null;
 			}
 
-			private ListDictionary list;
+			private ListDictionary _list;
 
-			private ListDictionary.DictionaryNode current;
+			private ListDictionary.DictionaryNode _current;
 
-			private int version;
+			private int _version;
 
-			private bool start;
+			private bool _start;
 		}
 
 		private class NodeKeyValueCollection : ICollection, IEnumerable
 		{
 			public NodeKeyValueCollection(ListDictionary list, bool isKeys)
 			{
-				this.list = list;
-				this.isKeys = isKeys;
+				this._list = list;
+				this._isKeys = isKeys;
 			}
 
 			void ICollection.CopyTo(Array array, int index)
@@ -385,11 +384,11 @@ namespace System.Collections.Specialized
 				}
 				if (index < 0)
 				{
-					throw new ArgumentOutOfRangeException("index", global::SR.GetString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
 				}
-				for (ListDictionary.DictionaryNode dictionaryNode = this.list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
+				for (ListDictionary.DictionaryNode dictionaryNode = this._list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
 				{
-					array.SetValue(this.isKeys ? dictionaryNode.key : dictionaryNode.value, index);
+					array.SetValue(this._isKeys ? dictionaryNode.key : dictionaryNode.value, index);
 					index++;
 				}
 			}
@@ -399,7 +398,7 @@ namespace System.Collections.Specialized
 				get
 				{
 					int num = 0;
-					for (ListDictionary.DictionaryNode dictionaryNode = this.list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
+					for (ListDictionary.DictionaryNode dictionaryNode = this._list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
 					{
 						num++;
 					}
@@ -419,88 +418,88 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.list.SyncRoot;
+					return this._list.SyncRoot;
 				}
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return new ListDictionary.NodeKeyValueCollection.NodeKeyValueEnumerator(this.list, this.isKeys);
+				return new ListDictionary.NodeKeyValueCollection.NodeKeyValueEnumerator(this._list, this._isKeys);
 			}
 
-			private ListDictionary list;
+			private ListDictionary _list;
 
-			private bool isKeys;
+			private bool _isKeys;
 
 			private class NodeKeyValueEnumerator : IEnumerator
 			{
 				public NodeKeyValueEnumerator(ListDictionary list, bool isKeys)
 				{
-					this.list = list;
-					this.isKeys = isKeys;
-					this.version = list.version;
-					this.start = true;
-					this.current = null;
+					this._list = list;
+					this._isKeys = isKeys;
+					this._version = list.version;
+					this._start = true;
+					this._current = null;
 				}
 
 				public object Current
 				{
 					get
 					{
-						if (this.current == null)
+						if (this._current == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+							throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 						}
-						if (!this.isKeys)
+						if (!this._isKeys)
 						{
-							return this.current.value;
+							return this._current.value;
 						}
-						return this.current.key;
+						return this._current.key;
 					}
 				}
 
 				public bool MoveNext()
 				{
-					if (this.version != this.list.version)
+					if (this._version != this._list.version)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
-					if (this.start)
+					if (this._start)
 					{
-						this.current = this.list.head;
-						this.start = false;
+						this._current = this._list.head;
+						this._start = false;
 					}
-					else if (this.current != null)
+					else if (this._current != null)
 					{
-						this.current = this.current.next;
+						this._current = this._current.next;
 					}
-					return this.current != null;
+					return this._current != null;
 				}
 
 				public void Reset()
 				{
-					if (this.version != this.list.version)
+					if (this._version != this._list.version)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
-					this.start = true;
-					this.current = null;
+					this._start = true;
+					this._current = null;
 				}
 
-				private ListDictionary list;
+				private ListDictionary _list;
 
-				private ListDictionary.DictionaryNode current;
+				private ListDictionary.DictionaryNode _current;
 
-				private int version;
+				private int _version;
 
-				private bool isKeys;
+				private bool _isKeys;
 
-				private bool start;
+				private bool _start;
 			}
 		}
 
 		[Serializable]
-		private class DictionaryNode
+		public class DictionaryNode
 		{
 			public object key;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Threading.Tasks
 {
@@ -7,7 +6,6 @@ namespace System.Threading.Tasks
 	{
 		internal abstract void Run(Task completedTask, bool bCanInlineContinuationTask);
 
-		[SecuritySafeCritical]
 		protected static void InlineIfPossibleOrElseQueue(Task task, bool needsProtection)
 		{
 			if (needsProtection)
@@ -25,17 +23,14 @@ namespace System.Threading.Tasks
 			{
 				if (!task.m_taskScheduler.TryRunInline(task, false))
 				{
-					task.m_taskScheduler.InternalQueueTask(task);
+					task.m_taskScheduler.QueueTask(task);
 				}
 			}
 			catch (Exception ex)
 			{
-				if (!(ex is ThreadAbortException) || (task.m_stateFlags & 134217728) == 0)
-				{
-					TaskSchedulerException ex2 = new TaskSchedulerException(ex);
-					task.AddException(ex2);
-					task.Finish(false);
-				}
+				TaskSchedulerException ex2 = new TaskSchedulerException(ex);
+				task.AddException(ex2);
+				task.Finish(false);
 			}
 		}
 

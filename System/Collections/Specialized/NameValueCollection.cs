@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -53,11 +52,6 @@ namespace System.Collections.Specialized
 		[Obsolete("Please use NameValueCollection(Int32, IEqualityComparer) instead.")]
 		public NameValueCollection(int capacity, IHashCodeProvider hashProvider, IComparer comparer)
 			: base(capacity, hashProvider, comparer)
-		{
-		}
-
-		internal NameValueCollection(DBNull dummy)
-			: base(dummy)
 		{
 		}
 
@@ -134,7 +128,7 @@ namespace System.Collections.Specialized
 		{
 			if (base.IsReadOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 			this.InvalidateCachedArrays();
 			base.BaseClear();
@@ -148,15 +142,15 @@ namespace System.Collections.Specialized
 			}
 			if (dest.Rank != 1)
 			{
-				throw new ArgumentException(global::SR.GetString("Multi dimension array is not supported on this operation."));
+				throw new ArgumentException("Multi dimension array is not supported on this operation.", "dest");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Index {0} is out of range.", new object[] { index.ToString(CultureInfo.CurrentCulture) }));
+				throw new ArgumentOutOfRangeException("index", index, "Non-negative number required.");
 			}
 			if (dest.Length - index < this.Count)
 			{
-				throw new ArgumentException(global::SR.GetString("Insufficient space in the target location to copy the information."));
+				throw new ArgumentException("Insufficient space in the target location to copy the information.");
 			}
 			int count = this.Count;
 			if (this._all == null)
@@ -190,7 +184,7 @@ namespace System.Collections.Specialized
 		{
 			if (base.IsReadOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 			this.InvalidateCachedArrays();
 			ArrayList arrayList = (ArrayList)base.BaseGet(name);
@@ -224,7 +218,7 @@ namespace System.Collections.Specialized
 		{
 			if (base.IsReadOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
 			this.InvalidateCachedArrays();
 			base.BaseSet(name, new ArrayList(1) { value });
@@ -281,6 +275,11 @@ namespace System.Collections.Specialized
 				}
 				return this._allKeys;
 			}
+		}
+
+		internal NameValueCollection(DBNull dummy)
+			: base(dummy)
+		{
 		}
 
 		private string[] _all;

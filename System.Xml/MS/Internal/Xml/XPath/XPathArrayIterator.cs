@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Xml;
 using System.Xml.XPath;
 
 namespace MS.Internal.Xml.XPath
@@ -49,7 +48,7 @@ namespace MS.Internal.Xml.XPath
 			{
 				if (this.index < 1)
 				{
-					throw new InvalidOperationException(Res.GetString("Enumeration has not started. Call MoveNext.", new object[] { string.Empty }));
+					throw new InvalidOperationException(SR.Format("Enumeration has not started. Call MoveNext.", string.Empty));
 				}
 				return (XPathNavigator)this.list[this.index - 1];
 			}

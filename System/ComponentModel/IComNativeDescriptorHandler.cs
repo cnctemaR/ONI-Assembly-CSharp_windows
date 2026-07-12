@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel
 {
-	[Obsolete("This interface has been deprecated. Add a TypeDescriptionProvider to handle type TypeDescriptor.ComObjectType instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+	[Obsolete("This interface has been deprecated. Add a TypeDescriptionProvider to handle type TypeDescriptor.ComObjectType instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
 	public interface IComNativeDescriptorHandler
 	{
 		AttributeCollection GetAttributes(object component);

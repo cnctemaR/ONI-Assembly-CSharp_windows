@@ -47,5 +47,7 @@ namespace FMOD
 		public int maxConvolutionThreads;
 
 		public int maxOpusCodecs;
+
+		public int maxSpatialObjects;
 	}
 }

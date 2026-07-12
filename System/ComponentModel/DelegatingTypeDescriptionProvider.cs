@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	internal sealed class DelegatingTypeDescriptionProvider : TypeDescriptionProvider
 	{
 		internal DelegatingTypeDescriptionProvider(Type type)
@@ -65,6 +63,6 @@ namespace System.ComponentModel
 			return this.Provider.IsSupportedType(type);
 		}
 
-		private Type _type;
+		private readonly Type _type;
 	}
 }

@@ -1,45 +1,70 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public struct Single : IComparable, IFormattable, IConvertible, IComparable<float>, IEquatable<float>
+	public readonly struct Single : IComparable, IConvertible, IFormattable, IComparable<float>, IEquatable<float>, ISpanFormattable
 	{
-		[SecuritySafeCritical]
-		public unsafe static bool IsInfinity(float f)
-		{
-			return (*(int*)(&f) & int.MaxValue) == 2139095040;
-		}
-
-		[SecuritySafeCritical]
-		public unsafe static bool IsPositiveInfinity(float f)
-		{
-			return *(int*)(&f) == 2139095040;
-		}
-
-		[SecuritySafeCritical]
-		public unsafe static bool IsNegativeInfinity(float f)
-		{
-			return *(int*)(&f) == -8388608;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[SecuritySafeCritical]
-		public unsafe static bool IsNaN(float f)
-		{
-			return (*(int*)(&f) & int.MaxValue) > 2139095040;
-		}
-
+		[NonVersionable]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public unsafe static bool IsFinite(float f)
+		public static bool IsFinite(float f)
 		{
-			return (*(int*)(&f) & int.MaxValue) < 2139095040;
+			return (BitConverter.SingleToInt32Bits(f) & int.MaxValue) < 2139095040;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsInfinity(float f)
+		{
+			return (BitConverter.SingleToInt32Bits(f) & int.MaxValue) == 2139095040;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsNaN(float f)
+		{
+			return (BitConverter.SingleToInt32Bits(f) & int.MaxValue) > 2139095040;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsNegative(float f)
+		{
+			return (BitConverter.SingleToInt32Bits(f) & int.MinValue) == int.MinValue;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsNegativeInfinity(float f)
+		{
+			return f == float.NegativeInfinity;
+		}
+
+		[NonVersionable]
+		public static bool IsNormal(float f)
+		{
+			int num = BitConverter.SingleToInt32Bits(f);
+			num &= int.MaxValue;
+			return num < 2139095040 && num != 0 && (num & 2139095040) != 0;
+		}
+
+		[NonVersionable]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsPositiveInfinity(float f)
+		{
+			return f == float.PositiveInfinity;
+		}
+
+		[NonVersionable]
+		public static bool IsSubnormal(float f)
+		{
+			int num = BitConverter.SingleToInt32Bits(f);
+			num &= int.MaxValue;
+			return num < 2139095040 && num != 0 && (num & 2139095040) == 0;
 		}
 
 		public int CompareTo(object value)
@@ -50,7 +75,7 @@ namespace System
 			}
 			if (!(value is float))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Single."));
+				throw new ArgumentException("Object must be of type Single.");
 			}
 			float num = (float)value;
 			if (this < num)
@@ -101,31 +126,37 @@ namespace System
 			return 0;
 		}
 
+		[NonVersionable]
 		public static bool operator ==(float left, float right)
 		{
 			return left == right;
 		}
 
+		[NonVersionable]
 		public static bool operator !=(float left, float right)
 		{
 			return left != right;
 		}
 
+		[NonVersionable]
 		public static bool operator <(float left, float right)
 		{
 			return left < right;
 		}
 
+		[NonVersionable]
 		public static bool operator >(float left, float right)
 		{
 			return left > right;
 		}
 
+		[NonVersionable]
 		public static bool operator <=(float left, float right)
 		{
 			return left <= right;
 		}
 
+		[NonVersionable]
 		public static bool operator >=(float left, float right)
 		{
 			return left >= right;
@@ -146,18 +177,16 @@ namespace System
 			return obj == this || (float.IsNaN(obj) && float.IsNaN(this));
 		}
 
-		[SecuritySafeCritical]
-		public unsafe override int GetHashCode()
+		public override int GetHashCode()
 		{
-			float num = this;
-			if (num == 0f)
+			int num = BitConverter.SingleToInt32Bits(this);
+			if (((num - 1) & 2147483647) >= 2139095040)
 			{
-				return 0;
+				num &= 2139095040;
 			}
-			return *(int*)(&num);
+			return num;
 		}
 
-		[SecuritySafeCritical]
 		public override string ToString()
 		{
 			return Number.FormatSingle(this, null, NumberFormatInfo.CurrentInfo);
@@ -169,7 +198,6 @@ namespace System
 			return Number.FormatSingle(this, null, NumberFormatInfo.GetInstance(provider));
 		}
 
-		[SecuritySafeCritical]
 		public string ToString(string format)
 		{
 			return Number.FormatSingle(this, format, NumberFormatInfo.CurrentInfo);
@@ -181,34 +209,66 @@ namespace System
 			return Number.FormatSingle(this, format, NumberFormatInfo.GetInstance(provider));
 		}
 
+		public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default(ReadOnlySpan<char>), IFormatProvider provider = null)
+		{
+			return Number.TryFormatSingle(this, format, NumberFormatInfo.GetInstance(provider), destination, out charsWritten);
+		}
+
 		public static float Parse(string s)
 		{
-			return float.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseSingle(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static float Parse(string s, NumberStyles style)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.Parse(s, style, NumberFormatInfo.CurrentInfo);
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseSingle(s, style, NumberFormatInfo.CurrentInfo);
 		}
 
 		public static float Parse(string s, IFormatProvider provider)
 		{
-			return float.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.GetInstance(provider));
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseSingle(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static float Parse(string s, NumberStyles style, IFormatProvider provider)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.Parse(s, style, NumberFormatInfo.GetInstance(provider));
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
+			}
+			return Number.ParseSingle(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
-		private static float Parse(string s, NumberStyles style, NumberFormatInfo info)
+		public static float Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, IFormatProvider provider = null)
 		{
-			return Number.ParseSingle(s, style, info);
+			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+			return Number.ParseSingle(s, style, NumberFormatInfo.GetInstance(provider));
 		}
 
 		public static bool TryParse(string s, out float result)
+		{
+			if (s == null)
+			{
+				result = 0f;
+				return false;
+			}
+			return float.TryParse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo, out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, out float result)
 		{
 			return float.TryParse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo, out result);
 		}
@@ -216,30 +276,36 @@ namespace System
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out float result)
 		{
 			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
-		}
-
-		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out float result)
-		{
 			if (s == null)
 			{
 				result = 0f;
 				return false;
 			}
+			return float.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out float result)
+		{
+			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+			return float.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
+		}
+
+		private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out float result)
+		{
 			if (!Number.TryParseSingle(s, style, info, out result))
 			{
-				string text = s.Trim();
-				if (text.Equals(info.PositiveInfinitySymbol))
+				ReadOnlySpan<char> readOnlySpan = s.Trim();
+				if (readOnlySpan.EqualsOrdinal(info.PositiveInfinitySymbol))
 				{
 					result = float.PositiveInfinity;
 				}
-				else if (text.Equals(info.NegativeInfinitySymbol))
+				else if (readOnlySpan.EqualsOrdinal(info.NegativeInfinitySymbol))
 				{
 					result = float.NegativeInfinity;
 				}
 				else
 				{
-					if (!text.Equals(info.NaNSymbol))
+					if (!readOnlySpan.EqualsOrdinal(info.NaNSymbol))
 					{
 						return false;
 					}
@@ -261,7 +327,7 @@ namespace System
 
 		char IConvertible.ToChar(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Single", "Char" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Single", "Char"));
 		}
 
 		sbyte IConvertible.ToSByte(IFormatProvider provider)
@@ -321,7 +387,7 @@ namespace System
 
 		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Single", "DateTime" }));
+			throw new InvalidCastException(SR.Format("Invalid cast from '{0}' to '{1}'.", "Single", "DateTime"));
 		}
 
 		object IConvertible.ToType(Type type, IFormatProvider provider)
@@ -329,7 +395,7 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		internal float m_value;
+		private readonly float m_value;
 
 		public const float MinValue = -3.4028235E+38f;
 
@@ -342,5 +408,7 @@ namespace System
 		public const float NegativeInfinity = float.NegativeInfinity;
 
 		public const float NaN = float.NaN;
+
+		internal const float NegativeZero = -0f;
 	}
 }

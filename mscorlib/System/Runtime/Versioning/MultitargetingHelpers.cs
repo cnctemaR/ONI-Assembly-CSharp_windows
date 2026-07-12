@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security;
-using System.Threading;
 
 namespace System.Runtime.Versioning
 {
@@ -27,7 +26,7 @@ namespace System.Runtime.Versioning
 				}
 				if (text == null)
 				{
-					text = MultitargetingHelpers.defaultConverter(type);
+					text = type.AssemblyQualifiedName;
 				}
 			}
 			return text;
@@ -35,14 +34,12 @@ namespace System.Runtime.Versioning
 
 		private static bool IsCriticalException(Exception ex)
 		{
-			return ex is NullReferenceException || ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException || ex is IndexOutOfRangeException || ex is AccessViolationException;
+			return ex is NullReferenceException || ex is StackOverflowException || ex is OutOfMemoryException || ex is IndexOutOfRangeException || ex is AccessViolationException;
 		}
 
 		private static bool IsSecurityOrCriticalException(Exception ex)
 		{
 			return ex is SecurityException || MultitargetingHelpers.IsCriticalException(ex);
 		}
-
-		private static Func<Type, string> defaultConverter = (Type t) => t.AssemblyQualifiedName;
 	}
 }

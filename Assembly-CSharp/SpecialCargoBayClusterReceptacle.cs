@@ -76,7 +76,7 @@ public class SpecialCargoBayClusterReceptacle : SingleEntityReceptacle, IBaggedS
 		base.CreateOrder(entityTag, additionalFilterTag);
 		if (this.fetchChore != null)
 		{
-			this.fetchChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, this);
+			this.fetchChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 		}
 	}
 

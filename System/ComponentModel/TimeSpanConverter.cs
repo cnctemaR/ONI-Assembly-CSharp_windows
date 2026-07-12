@@ -2,11 +2,9 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class TimeSpanConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -21,20 +19,17 @@ namespace System.ComponentModel
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
+			string text = value as string;
+			if (text != null)
 			{
-				string text = ((string)value).Trim();
+				text = text.Trim();
 				try
 				{
 					return TimeSpan.Parse(text, culture);
 				}
 				catch (FormatException ex)
 				{
-					throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
-					{
-						(string)value,
-						"TimeSpan"
-					}), ex);
+					throw new FormatException(SR.Format("{0} is not a valid value for {1}.", (string)value, "TimeSpan"), ex);
 				}
 			}
 			return base.ConvertFrom(context, culture, value);

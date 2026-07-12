@@ -18,7 +18,7 @@ public class PartyCakeWorkable : Workable
 		this.synchronizeAnims = false;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		base.OnWorkTick(worker, dt);
 		base.GetComponent<KBatchedAnimController>().SetPositionPercent(this.GetPercentComplete());

@@ -5,7 +5,7 @@ namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct EventToken
+	public readonly struct EventToken : IEquatable<EventToken>
 	{
 		internal EventToken(int val)
 		{
@@ -51,7 +51,7 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal int tokValue;
+		internal readonly int tokValue;
 
 		public static readonly EventToken Empty;
 	}

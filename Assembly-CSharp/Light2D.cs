@@ -150,7 +150,23 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.Subscribe<Light2D>(-592767678, Light2D.OnOperationalChangedDelegate);
+		if (this.disableOnStore)
+		{
+			base.Subscribe(856640610, new Action<object>(this.OnStore));
+		}
 		this.IntensityAnimation = 1f;
+	}
+
+	private void OnStore(object data)
+	{
+		global::Debug.Assert(this.disableOnStore, "Only Light2Ds that are disabled on storage should be subscribed to OnStore.");
+		Storage storage = data as Storage;
+		if (storage != null)
+		{
+			base.enabled = storage.GetComponent<ItemPedestal>() != null || storage.GetComponent<MinionIdentity>() != null;
+			return;
+		}
+		base.enabled = true;
 	}
 
 	protected override void OnCmpEnable()
@@ -368,6 +384,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private HandleVector<int>.Handle solidPartitionerEntry = HandleVector<int>.InvalidHandle;
 
 	private HandleVector<int>.Handle liquidPartitionerEntry = HandleVector<int>.InvalidHandle;
+
+	public bool disableOnStore;
 
 	private static readonly EventSystem.IntraObjectHandler<Light2D> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Light2D>(delegate(Light2D light, object data)
 	{

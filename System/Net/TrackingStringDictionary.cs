@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace System.Net
 {
-	internal class TrackingStringDictionary : StringDictionary
+	internal sealed class TrackingStringDictionary : StringDictionary
 	{
 		internal TrackingStringDictionary()
 			: this(false)
@@ -12,49 +12,49 @@ namespace System.Net
 
 		internal TrackingStringDictionary(bool isReadOnly)
 		{
-			this.isReadOnly = isReadOnly;
+			this._isReadOnly = isReadOnly;
 		}
 
 		internal bool IsChanged
 		{
 			get
 			{
-				return this.isChanged;
+				return this._isChanged;
 			}
 			set
 			{
-				this.isChanged = value;
+				this._isChanged = value;
 			}
 		}
 
 		public override void Add(string key, string value)
 		{
-			if (this.isReadOnly)
+			if (this._isReadOnly)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The collection is read-only."));
+				throw new InvalidOperationException("The collection is read-only.");
 			}
 			base.Add(key, value);
-			this.isChanged = true;
+			this._isChanged = true;
 		}
 
 		public override void Clear()
 		{
-			if (this.isReadOnly)
+			if (this._isReadOnly)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The collection is read-only."));
+				throw new InvalidOperationException("The collection is read-only.");
 			}
 			base.Clear();
-			this.isChanged = true;
+			this._isChanged = true;
 		}
 
 		public override void Remove(string key)
 		{
-			if (this.isReadOnly)
+			if (this._isReadOnly)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The collection is read-only."));
+				throw new InvalidOperationException("The collection is read-only.");
 			}
 			base.Remove(key);
-			this.isChanged = true;
+			this._isChanged = true;
 		}
 
 		public override string this[string key]
@@ -65,17 +65,17 @@ namespace System.Net
 			}
 			set
 			{
-				if (this.isReadOnly)
+				if (this._isReadOnly)
 				{
-					throw new InvalidOperationException(global::SR.GetString("The collection is read-only."));
+					throw new InvalidOperationException("The collection is read-only.");
 				}
 				base[key] = value;
-				this.isChanged = true;
+				this._isChanged = true;
 			}
 		}
 
-		private bool isChanged;
+		private readonly bool _isReadOnly;
 
-		private bool isReadOnly;
+		private bool _isChanged;
 	}
 }

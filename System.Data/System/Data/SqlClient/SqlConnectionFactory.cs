@@ -68,7 +68,7 @@ namespace System.Data.SqlClient
 					try
 					{
 						SqlConnectionString sqlConnectionString3 = new SqlConnectionString(sqlConnectionString, sqlConnectionString.DataSource, true, new bool?(false));
-						sqlInternalConnectionTds = new SqlInternalConnectionTds(dbConnectionPoolIdentity, sqlConnectionString3, null, false, null, null, flag);
+						sqlInternalConnectionTds = new SqlInternalConnectionTds(dbConnectionPoolIdentity, sqlConnectionString3, sqlConnectionPoolKey.Credential, null, "", null, false, null, null, flag, null);
 						text = sqlInternalConnectionTds.InstanceName;
 						if (!text.StartsWith("\\\\.\\", StringComparison.Ordinal))
 						{
@@ -78,7 +78,7 @@ namespace System.Data.SqlClient
 						{
 							((SqlConnectionPoolProviderInfo)pool.ProviderInfo).InstanceName = text;
 						}
-						goto IL_0113;
+						goto IL_0125;
 					}
 					finally
 					{
@@ -89,11 +89,11 @@ namespace System.Data.SqlClient
 					}
 				}
 				text = ((SqlConnectionPoolProviderInfo)pool.ProviderInfo).InstanceName;
-				IL_0113:
+				IL_0125:
 				sqlConnectionString = new SqlConnectionString(sqlConnectionString, text, false, null);
 				poolGroupProviderInfo = null;
 			}
-			return new SqlInternalConnectionTds(dbConnectionPoolIdentity, sqlConnectionString, poolGroupProviderInfo, flag2, sqlConnectionString2, sessionData, flag);
+			return new SqlInternalConnectionTds(dbConnectionPoolIdentity, sqlConnectionString, sqlConnectionPoolKey.Credential, poolGroupProviderInfo, "", null, flag2, sqlConnectionString2, sessionData, flag, sqlConnectionPoolKey.AccessToken);
 		}
 
 		protected override DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous)

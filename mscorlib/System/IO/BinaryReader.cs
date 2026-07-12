@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -215,7 +217,16 @@ namespace System.IO
 			decimal num;
 			try
 			{
-				num = decimal.ToDecimal(this.m_buffer);
+				int[] array = new int[4];
+				Buffer.BlockCopy(this.m_buffer, 0, array, 0, 16);
+				if (!BitConverter.IsLittleEndian)
+				{
+					for (int i = 0; i < 4; i++)
+					{
+						array[i] = BinaryPrimitives.ReverseEndianness(array[i]);
+					}
+				}
+				num = new decimal(array);
 			}
 			catch (ArgumentException ex)
 			{
@@ -471,6 +482,36 @@ namespace System.IO
 				array = array2;
 			}
 			return array;
+		}
+
+		public virtual int Read(Span<char> buffer)
+		{
+			char[] array = ArrayPool<char>.Shared.Rent(buffer.Length);
+			int num2;
+			try
+			{
+				int num = this.InternalReadChars(array, 0, buffer.Length);
+				if (num > buffer.Length)
+				{
+					throw new IOException("Stream was too long.");
+				}
+				new ReadOnlySpan<char>(array, 0, num).CopyTo(buffer);
+				num2 = num;
+			}
+			finally
+			{
+				ArrayPool<char>.Shared.Return(array, false);
+			}
+			return num2;
+		}
+
+		public virtual int Read(Span<byte> buffer)
+		{
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			return this.m_stream.Read(buffer);
 		}
 
 		public virtual int Read(byte[] buffer, int index, int count)

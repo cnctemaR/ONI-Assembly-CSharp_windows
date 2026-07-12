@@ -11,5 +11,9 @@ namespace System
 		public static readonly bool IgnoreKindInUtcTimeSerialization;
 
 		public static readonly bool EnableTimeSpanSerialization;
+
+		public static readonly bool LimitXPathComplexity;
+
+		public static readonly bool AllowDefaultResolver;
 	}
 }

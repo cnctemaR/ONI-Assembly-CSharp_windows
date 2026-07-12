@@ -19,18 +19,12 @@ namespace System.Threading
 			}
 		}
 
-		internal static bool IsSingleProcessor
-		{
-			get
-			{
-				return PlatformHelper.ProcessorCount == 1;
-			}
-		}
-
 		private const int PROCESSOR_COUNT_REFRESH_INTERVAL_MS = 30000;
 
 		private static volatile int s_processorCount;
 
 		private static volatile int s_lastProcessorCountRefreshTicks;
+
+		internal static readonly bool IsSingleProcessor = PlatformHelper.ProcessorCount == 1;
 	}
 }

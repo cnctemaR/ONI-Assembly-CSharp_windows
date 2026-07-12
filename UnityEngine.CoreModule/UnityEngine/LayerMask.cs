@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/BaseClasses/TagManager.h")]
-	[NativeHeader("Runtime/BaseClasses/BitField.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/BaseClasses/BitField.h")]
+	[NativeHeader("Runtime/BaseClasses/TagManager.h")]
 	[NativeClass("BitField", "struct BitField;")]
 	public struct LayerMask
 	{

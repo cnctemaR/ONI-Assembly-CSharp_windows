@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 using UnityEngine.UI.CoroutineTween;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Dropdown", 35)]
+	[AddComponentMenu("UI/Legacy/Dropdown", 102)]
 	[RequireComponent(typeof(RectTransform))]
 	public class Dropdown : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler, ICancelHandler
 	{
@@ -359,7 +360,7 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<Canvas> list = ListPool<Canvas>.Get();
+			List<Canvas> list = CollectionPool<List<Canvas>, Canvas>.Get();
 			base.gameObject.GetComponentsInParent<Canvas>(false, list);
 			if (list.Count == 0)
 			{
@@ -375,7 +376,7 @@ namespace UnityEngine.UI
 					break;
 				}
 			}
-			ListPool<Canvas>.Release(list);
+			CollectionPool<List<Canvas>, Canvas>.Release(list);
 			if (!this.validTemplate)
 			{
 				this.SetupTemplate(canvas);
@@ -479,6 +480,7 @@ namespace UnityEngine.UI
 		protected virtual GameObject CreateBlocker(Canvas rootCanvas)
 		{
 			GameObject gameObject = new GameObject("Blocker");
+			gameObject.layer = rootCanvas.gameObject.layer;
 			RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
 			rectTransform.SetParent(rootCanvas.transform, false);
 			rectTransform.anchorMin = Vector3.zero;
@@ -519,6 +521,7 @@ namespace UnityEngine.UI
 			}
 			gameObject.AddComponent<Image>().color = Color.clear;
 			gameObject.AddComponent<Button>().onClick.AddListener(new UnityAction(this.Hide));
+			gameObject.AddComponent<CanvasGroup>().ignoreParentGroups = true;
 			return gameObject;
 		}
 

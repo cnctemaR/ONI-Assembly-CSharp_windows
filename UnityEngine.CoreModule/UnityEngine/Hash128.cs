@@ -8,59 +8,29 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Export/Hashing/Hash128.bindings.h")]
 	[NativeHeader("Runtime/Utilities/Hash128.h")]
+	[UsedByNativeCode]
 	[Serializable]
 	public struct Hash128 : IComparable, IComparable<Hash128>, IEquatable<Hash128>
 	{
 		public Hash128(uint u32_0, uint u32_1, uint u32_2, uint u32_3)
 		{
-			this.m_u32_0 = u32_0;
-			this.m_u32_1 = u32_1;
-			this.m_u32_2 = u32_2;
-			this.m_u32_3 = u32_3;
+			this.u64_0 = ((ulong)u32_1 << 32) | (ulong)u32_0;
+			this.u64_1 = ((ulong)u32_3 << 32) | (ulong)u32_2;
 		}
 
-		public unsafe Hash128(ulong u64_0, ulong u64_1)
+		public Hash128(ulong u64_0, ulong u64_1)
 		{
-			uint* ptr = (uint*)(&u64_0);
-			uint* ptr2 = (uint*)(&u64_1);
-			this.m_u32_0 = *ptr;
-			this.m_u32_1 = ptr[1];
-			this.m_u32_2 = *ptr2;
-			this.m_u32_3 = ptr2[1];
-		}
-
-		internal unsafe ulong u64_0
-		{
-			get
-			{
-				fixed (uint* ptr = &this.m_u32_0)
-				{
-					uint* ptr2 = ptr;
-					return (ulong)(*(long*)ptr2);
-				}
-			}
-		}
-
-		internal unsafe ulong u64_1
-		{
-			get
-			{
-				fixed (uint* ptr = &this.m_u32_2)
-				{
-					uint* ptr2 = ptr;
-					return (ulong)(*(long*)ptr2);
-				}
-			}
+			this.u64_0 = u64_0;
+			this.u64_1 = u64_1;
 		}
 
 		public bool isValid
 		{
 			get
 			{
-				return this.m_u32_0 != 0U || this.m_u32_1 != 0U || this.m_u32_2 != 0U || this.m_u32_3 > 0U;
+				return this.u64_0 != 0UL || this.u64_1 > 0UL;
 			}
 		}
 
@@ -340,7 +310,7 @@ namespace UnityEngine
 
 		public override int GetHashCode()
 		{
-			return this.m_u32_0.GetHashCode() ^ this.m_u32_1.GetHashCode() ^ this.m_u32_2.GetHashCode() ^ this.m_u32_3.GetHashCode();
+			return this.u64_0.GetHashCode() ^ this.u64_1.GetHashCode();
 		}
 
 		public int CompareTo(object obj)
@@ -361,7 +331,7 @@ namespace UnityEngine
 
 		public static bool operator ==(Hash128 hash1, Hash128 hash2)
 		{
-			return hash1.m_u32_0 == hash2.m_u32_0 && hash1.m_u32_1 == hash2.m_u32_1 && hash1.m_u32_2 == hash2.m_u32_2 && hash1.m_u32_3 == hash2.m_u32_3;
+			return hash1.u64_0 == hash2.u64_0 && hash1.u64_1 == hash2.u64_1;
 		}
 
 		public static bool operator !=(Hash128 hash1, Hash128 hash2)
@@ -371,31 +341,15 @@ namespace UnityEngine
 
 		public static bool operator <(Hash128 x, Hash128 y)
 		{
-			bool flag = x.m_u32_0 != y.m_u32_0;
+			bool flag = x.u64_0 != y.u64_0;
 			bool flag2;
 			if (flag)
 			{
-				flag2 = x.m_u32_0 < y.m_u32_0;
+				flag2 = x.u64_0 < y.u64_0;
 			}
 			else
 			{
-				bool flag3 = x.m_u32_1 != y.m_u32_1;
-				if (flag3)
-				{
-					flag2 = x.m_u32_1 < y.m_u32_1;
-				}
-				else
-				{
-					bool flag4 = x.m_u32_2 != y.m_u32_2;
-					if (flag4)
-					{
-						flag2 = x.m_u32_2 < y.m_u32_2;
-					}
-					else
-					{
-						flag2 = x.m_u32_3 < y.m_u32_3;
-					}
-				}
+				flag2 = x.u64_1 < y.u64_1;
 			}
 			return flag2;
 		}
@@ -418,17 +372,15 @@ namespace UnityEngine
 
 		private void ShortHash4(uint data)
 		{
-			ulong u64_ = this.u64_0;
-			ulong u64_2 = this.u64_1;
-			ulong num = 16045690984833335023UL;
-			ulong num2 = 16045690984833335023UL;
-			num2 += 288230376151711744UL;
-			num += (ulong)data;
-			Hash128.ShortEnd(ref u64_, ref u64_2, ref num, ref num2);
-			this.m_u32_0 = (uint)u64_;
-			this.m_u32_1 = (uint)(u64_ >> 32);
-			this.m_u32_2 = (uint)u64_2;
-			this.m_u32_3 = (uint)(u64_2 >> 32);
+			ulong num = this.u64_0;
+			ulong num2 = this.u64_1;
+			ulong num3 = 16045690984833335023UL;
+			ulong num4 = 16045690984833335023UL;
+			num4 += 288230376151711744UL;
+			num3 += (ulong)data;
+			Hash128.ShortEnd(ref num, ref num2, ref num3, ref num4);
+			this.u64_0 = num;
+			this.u64_1 = num2;
 		}
 
 		private static void ShortEnd(ref ulong h0, ref ulong h1, ref ulong h2, ref ulong h3)
@@ -479,13 +431,9 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Hash128ToStringImpl_Injected(ref Hash128 hash);
 
-		private uint m_u32_0;
+		internal ulong u64_0;
 
-		private uint m_u32_1;
-
-		private uint m_u32_2;
-
-		private uint m_u32_3;
+		internal ulong u64_1;
 
 		private const ulong kConst = 16045690984833335023UL;
 	}

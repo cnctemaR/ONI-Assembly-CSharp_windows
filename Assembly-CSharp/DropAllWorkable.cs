@@ -76,7 +76,7 @@ public class DropAllWorkable : Workable
 		this.RefreshStatusItem();
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage[] array = this.GetStorages();
 		for (int i = 0; i < array.Length; i++)
@@ -92,6 +92,12 @@ public class DropAllWorkable : Workable
 						gameObject.RemoveTag(tag);
 					}
 					gameObject.Trigger(580035959, worker);
+					if (this.resetTargetWorkableOnCompleteWork)
+					{
+						Pickupable component = gameObject.GetComponent<Pickupable>();
+						component.targetWorkable = component;
+						component.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+					}
 				}
 			}
 		}
@@ -162,6 +168,8 @@ public class DropAllWorkable : Workable
 	private Prioritizable _prioritizable;
 
 	public List<Tag> removeTags;
+
+	public bool resetTargetWorkableOnCompleteWork;
 
 	private static readonly EventSystem.IntraObjectHandler<DropAllWorkable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DropAllWorkable>(delegate(DropAllWorkable component, object data)
 	{

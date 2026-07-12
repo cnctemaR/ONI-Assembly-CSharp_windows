@@ -7,7 +7,7 @@ namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct IntPtr : ISerializable
+	public readonly struct IntPtr : ISerializable, IEquatable<IntPtr>
 	{
 		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
 		public IntPtr(int value)
@@ -176,7 +176,12 @@ namespace System
 			return this.m_value == null;
 		}
 
-		private unsafe void* m_value;
+		bool IEquatable<IntPtr>.Equals(IntPtr other)
+		{
+			return this.m_value == other.m_value;
+		}
+
+		private unsafe readonly void* m_value;
 
 		public static readonly IntPtr Zero;
 	}

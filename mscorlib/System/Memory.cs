@@ -6,24 +6,50 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
+	[DebuggerDisplay("{ToString(),raw}")]
 	[DebuggerTypeProxy(typeof(MemoryDebugView<>))]
-	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	public readonly struct Memory<T>
+	public readonly struct Memory<T> : IEquatable<Memory<T>>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Memory(T[] array)
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				this = default(Memory<T>);
+				return;
 			}
 			if (default(T) == null && array.GetType() != typeof(T[]))
 			{
-				ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+				ThrowHelper.ThrowArrayTypeMismatchException();
 			}
-			this._arrayOrOwnedMemory = array;
+			this._object = array;
 			this._index = 0;
 			this._length = array.Length;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal Memory(T[] array, int start)
+		{
+			if (array == null)
+			{
+				if (start != 0)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				this = default(Memory<T>);
+				return;
+			}
+			if (default(T) == null && array.GetType() != typeof(T[]))
+			{
+				ThrowHelper.ThrowArrayTypeMismatchException();
+			}
+			if (start > array.Length)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException();
+			}
+			this._object = array;
+			this._index = start;
+			this._length = array.Length - start;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -31,43 +57,56 @@ namespace System
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				if (start != 0 || length != 0)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				this = default(Memory<T>);
+				return;
 			}
 			if (default(T) == null && array.GetType() != typeof(T[]))
 			{
-				ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+				ThrowHelper.ThrowArrayTypeMismatchException();
 			}
 			if (start > array.Length || length > array.Length - start)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
-			this._arrayOrOwnedMemory = array;
+			this._object = array;
 			this._index = start;
 			this._length = length;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal Memory(OwnedMemory<T> owner, int index, int length)
+		internal Memory(MemoryManager<T> manager, int length)
 		{
-			if (owner == null)
+			if (length < 0)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
-			if (index < 0 || length < 0)
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-			}
-			this._arrayOrOwnedMemory = owner;
-			this._index = index | int.MinValue;
+			this._object = manager;
+			this._index = int.MinValue;
 			this._length = length;
 		}
 
-		private string DebuggerDisplay
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal Memory(MemoryManager<T> manager, int start, int length)
 		{
-			get
+			if (length < 0 || start < 0)
 			{
-				return string.Format("{{{0}[{1}]}}", typeof(T).Name, this._length);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
+			this._object = manager;
+			this._index = start | int.MinValue;
+			this._length = length;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal Memory(object obj, int start, int length)
+		{
+			this._object = obj;
+			this._index = start;
+			this._length = length;
 		}
 
 		public static implicit operator Memory<T>(T[] array)
@@ -75,28 +114,29 @@ namespace System
 			return new Memory<T>(array);
 		}
 
-		public static implicit operator Memory<T>(ArraySegment<T> arraySegment)
+		public static implicit operator Memory<T>(ArraySegment<T> segment)
 		{
-			return new Memory<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+			return new Memory<T>(segment.Array, segment.Offset, segment.Count);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static implicit operator ReadOnlyMemory<T>(Memory<T> memory)
+		public unsafe static implicit operator ReadOnlyMemory<T>(Memory<T> memory)
 		{
-			if (memory._index < 0)
+			return *Unsafe.As<Memory<T>, ReadOnlyMemory<T>>(ref memory);
+		}
+
+		public static Memory<T> Empty
+		{
+			get
 			{
-				return new ReadOnlyMemory<T>((OwnedMemory<T>)memory._arrayOrOwnedMemory, memory._index & int.MaxValue, memory._length);
+				return default(Memory<T>);
 			}
-			return new ReadOnlyMemory<T>((T[])memory._arrayOrOwnedMemory, memory._index, memory._length);
 		}
-
-		public static Memory<T> Empty { get; } = SpanHelpers.PerTypeValues<T>.EmptyArray;
 
 		public int Length
 		{
 			get
 			{
-				return this._length;
+				return this._length & int.MaxValue;
 			}
 		}
 
@@ -104,36 +144,46 @@ namespace System
 		{
 			get
 			{
-				return this._length == 0;
+				return (this._length & int.MaxValue) == 0;
 			}
+		}
+
+		public override string ToString()
+		{
+			if (!(typeof(T) == typeof(char)))
+			{
+				return string.Format("System.Memory<{0}>[{1}]", typeof(T).Name, this._length & int.MaxValue);
+			}
+			string text = this._object as string;
+			if (text == null)
+			{
+				return this.Span.ToString();
+			}
+			return text.Substring(this._index, this._length & int.MaxValue);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Memory<T> Slice(int start)
 		{
-			if (start > this._length)
+			int length = this._length;
+			int num = length & int.MaxValue;
+			if (start > num)
 			{
 				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 			}
-			if (this._index < 0)
-			{
-				return new Memory<T>((OwnedMemory<T>)this._arrayOrOwnedMemory, (this._index & int.MaxValue) + start, this._length - start);
-			}
-			return new Memory<T>((T[])this._arrayOrOwnedMemory, this._index + start, this._length - start);
+			return new Memory<T>(this._object, this._index + start, length - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Memory<T> Slice(int start, int length)
 		{
-			if (start > this._length || length > this._length - start)
+			int length2 = this._length;
+			int num = length2 & int.MaxValue;
+			if (start > num || length > num - start)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
-			if (this._index < 0)
-			{
-				return new Memory<T>((OwnedMemory<T>)this._arrayOrOwnedMemory, (this._index & int.MaxValue) + start, length);
-			}
-			return new Memory<T>((T[])this._arrayOrOwnedMemory, this._index + start, length);
+			return new Memory<T>(this._object, this._index + start, length | (length2 & int.MinValue));
 		}
 
 		public Span<T> Span
@@ -143,56 +193,60 @@ namespace System
 			{
 				if (this._index < 0)
 				{
-					return ((OwnedMemory<T>)this._arrayOrOwnedMemory).Span.Slice(this._index & int.MaxValue, this._length);
+					return ((MemoryManager<T>)this._object).GetSpan().Slice(this._index & int.MaxValue, this._length);
 				}
-				return new Span<T>((T[])this._arrayOrOwnedMemory, this._index, this._length);
+				if (typeof(T) == typeof(char))
+				{
+					string text = this._object as string;
+					if (text != null)
+					{
+						return new Span<T>(Unsafe.As<char, T>(text.GetRawStringData()), text.Length).Slice(this._index, this._length);
+					}
+				}
+				if (this._object != null)
+				{
+					return new Span<T>((T[])this._object, this._index, this._length & int.MaxValue);
+				}
+				return default(Span<T>);
 			}
 		}
 
-		public unsafe MemoryHandle Retain(bool pin = false)
+		public void CopyTo(Memory<T> destination)
 		{
-			MemoryHandle memoryHandle;
-			if (pin)
-			{
-				if (this._index < 0)
-				{
-					memoryHandle = ((OwnedMemory<T>)this._arrayOrOwnedMemory).Pin();
-					memoryHandle.AddOffset((this._index & int.MaxValue) * Unsafe.SizeOf<T>());
-				}
-				else
-				{
-					GCHandle gchandle = GCHandle.Alloc((T[])this._arrayOrOwnedMemory, GCHandleType.Pinned);
-					void* ptr = Unsafe.Add<T>((void*)gchandle.AddrOfPinnedObject(), this._index);
-					memoryHandle = new MemoryHandle(null, ptr, gchandle);
-				}
-			}
-			else if (this._index < 0)
-			{
-				((OwnedMemory<T>)this._arrayOrOwnedMemory).Retain();
-				memoryHandle = new MemoryHandle((OwnedMemory<T>)this._arrayOrOwnedMemory, null, default(GCHandle));
-			}
-			else
-			{
-				memoryHandle = new MemoryHandle(null, null, default(GCHandle));
-			}
-			return memoryHandle;
+			this.Span.CopyTo(destination.Span);
 		}
 
-		public bool TryGetArray(out ArraySegment<T> arraySegment)
+		public bool TryCopyTo(Memory<T> destination)
 		{
-			if (this._index >= 0)
+			return this.Span.TryCopyTo(destination.Span);
+		}
+
+		public MemoryHandle Pin()
+		{
+			if (this._index < 0)
 			{
-				arraySegment = new ArraySegment<T>((T[])this._arrayOrOwnedMemory, this._index, this._length);
-				return true;
+				return ((MemoryManager<T>)this._object).Pin(this._index & int.MaxValue);
 			}
-			ArraySegment<T> arraySegment2;
-			if (((OwnedMemory<T>)this._arrayOrOwnedMemory).TryGetArray(out arraySegment2))
+			if (typeof(T) == typeof(char))
 			{
-				arraySegment = new ArraySegment<T>(arraySegment2.Array, arraySegment2.Offset + (this._index & int.MaxValue), this._length);
-				return true;
+				string text = this._object as string;
+				if (text != null)
+				{
+					GCHandle gchandle = GCHandle.Alloc(text, GCHandleType.Pinned);
+					return new MemoryHandle(Unsafe.Add<T>(Unsafe.AsPointer<char>(text.GetRawStringData()), this._index), gchandle, null);
+				}
 			}
-			arraySegment = default(ArraySegment<T>);
-			return false;
+			T[] array = this._object as T[];
+			if (array == null)
+			{
+				return default(MemoryHandle);
+			}
+			if (this._length < 0)
+			{
+				return new MemoryHandle(Unsafe.Add<T>(Unsafe.AsPointer<byte>(array.GetRawSzArrayData()), this._index), default(GCHandle), null);
+			}
+			GCHandle gchandle2 = GCHandle.Alloc(array, GCHandleType.Pinned);
+			return new MemoryHandle(Unsafe.Add<T>(Unsafe.AsPointer<byte>(array.GetRawSzArrayData()), this._index), gchandle2, null);
 		}
 
 		public T[] ToArray()
@@ -206,19 +260,26 @@ namespace System
 			{
 				return ((ReadOnlyMemory<T>)obj).Equals(this);
 			}
-			bool flag = obj is Memory<T>;
-			Memory<T> memory = (flag ? ((Memory<T>)obj) : default(Memory<T>));
-			return flag && this.Equals(memory);
+			if (obj is Memory<T>)
+			{
+				Memory<T> memory = (Memory<T>)obj;
+				return this.Equals(memory);
+			}
+			return false;
 		}
 
 		public bool Equals(Memory<T> other)
 		{
-			return this._arrayOrOwnedMemory == other._arrayOrOwnedMemory && this._index == other._index && this._length == other._length;
+			return this._object == other._object && this._index == other._index && this._length == other._length;
 		}
 
 		public override int GetHashCode()
 		{
-			return Memory<T>.CombineHashCodes(this._arrayOrOwnedMemory.GetHashCode(), (this._index & int.MaxValue).GetHashCode(), this._length.GetHashCode());
+			if (this._object == null)
+			{
+				return 0;
+			}
+			return Memory<T>.CombineHashCodes(this._object.GetHashCode(), this._index.GetHashCode(), this._length.GetHashCode());
 		}
 
 		private static int CombineHashCodes(int left, int right)
@@ -231,12 +292,12 @@ namespace System
 			return Memory<T>.CombineHashCodes(Memory<T>.CombineHashCodes(h1, h2), h3);
 		}
 
-		private readonly object _arrayOrOwnedMemory;
+		private readonly object _object;
 
 		private readonly int _index;
 
 		private readonly int _length;
 
-		private const int RemoveOwnedFlagBitMask = 2147483647;
+		private const int RemoveFlagsBitMask = 2147483647;
 	}
 }

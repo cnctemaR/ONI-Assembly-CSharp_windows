@@ -7,20 +7,14 @@ namespace System.ComponentModel
 	{
 		public DesignTimeVisibleAttribute(bool visible)
 		{
-			this.visible = visible;
+			this.Visible = visible;
 		}
 
 		public DesignTimeVisibleAttribute()
 		{
 		}
 
-		public bool Visible
-		{
-			get
-			{
-				return this.visible;
-			}
-		}
+		public bool Visible { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -29,20 +23,18 @@ namespace System.ComponentModel
 				return true;
 			}
 			DesignTimeVisibleAttribute designTimeVisibleAttribute = obj as DesignTimeVisibleAttribute;
-			return designTimeVisibleAttribute != null && designTimeVisibleAttribute.Visible == this.visible;
+			return designTimeVisibleAttribute != null && designTimeVisibleAttribute.Visible == this.Visible;
 		}
 
 		public override int GetHashCode()
 		{
-			return typeof(DesignTimeVisibleAttribute).GetHashCode() ^ (this.visible ? (-1) : 0);
+			return typeof(DesignTimeVisibleAttribute).GetHashCode() ^ (this.Visible ? (-1) : 0);
 		}
 
 		public override bool IsDefaultAttribute()
 		{
 			return this.Visible == DesignTimeVisibleAttribute.Default.Visible;
 		}
-
-		private bool visible;
 
 		public static readonly DesignTimeVisibleAttribute Yes = new DesignTimeVisibleAttribute(true);
 

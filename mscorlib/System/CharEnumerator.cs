@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Unity;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public sealed class CharEnumerator : IEnumerator, ICloneable, IEnumerator<char>, IDisposable
+	public sealed class CharEnumerator : IEnumerator, IEnumerator<char>, IDisposable, ICloneable
 	{
 		internal CharEnumerator(string str)
 		{
-			this.str = str;
-			this.index = -1;
+			this._str = str;
+			this._index = -1;
 		}
 
 		public object Clone()
@@ -23,38 +21,30 @@ namespace System
 
 		public bool MoveNext()
 		{
-			if (this.index < this.str.Length - 1)
+			if (this._index < this._str.Length - 1)
 			{
-				this.index++;
-				this.currentElement = this.str[this.index];
+				this._index++;
+				this._currentElement = this._str[this._index];
 				return true;
 			}
-			this.index = this.str.Length;
+			this._index = this._str.Length;
 			return false;
 		}
 
 		public void Dispose()
 		{
-			if (this.str != null)
+			if (this._str != null)
 			{
-				this.index = this.str.Length;
+				this._index = this._str.Length;
 			}
-			this.str = null;
+			this._str = null;
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				if (this.index == -1)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
-				}
-				if (this.index >= this.str.Length)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
-				}
-				return this.currentElement;
+				return this.Current;
 			}
 		}
 
@@ -62,22 +52,22 @@ namespace System
 		{
 			get
 			{
-				if (this.index == -1)
+				if (this._index == -1)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 				}
-				if (this.index >= this.str.Length)
+				if (this._index >= this._str.Length)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					throw new InvalidOperationException("Enumeration already finished.");
 				}
-				return this.currentElement;
+				return this._currentElement;
 			}
 		}
 
 		public void Reset()
 		{
-			this.currentElement = '\0';
-			this.index = -1;
+			this._currentElement = '\0';
+			this._index = -1;
 		}
 
 		internal CharEnumerator()
@@ -85,10 +75,10 @@ namespace System
 			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private string str;
+		private string _str;
 
-		private int index;
+		private int _index;
 
-		private char currentElement;
+		private char _currentElement;
 	}
 }

@@ -16,7 +16,7 @@ namespace System.ComponentModel.Design
 			{
 				throw new ArgumentNullException("keyword");
 			}
-			this.contextKeyword = keyword;
+			this.HelpKeyword = keyword;
 		}
 
 		public HelpKeywordAttribute(Type t)
@@ -25,16 +25,10 @@ namespace System.ComponentModel.Design
 			{
 				throw new ArgumentNullException("t");
 			}
-			this.contextKeyword = t.FullName;
+			this.HelpKeyword = t.FullName;
 		}
 
-		public string HelpKeyword
-		{
-			get
-			{
-				return this.contextKeyword;
-			}
-		}
+		public string HelpKeyword { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -52,7 +46,5 @@ namespace System.ComponentModel.Design
 		}
 
 		public static readonly HelpKeywordAttribute Default = new HelpKeywordAttribute();
-
-		private string contextKeyword;
 	}
 }

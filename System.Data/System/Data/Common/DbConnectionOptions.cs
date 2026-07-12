@@ -767,7 +767,7 @@ namespace System.Data.Common
 				else
 				{
 					string text3 = nameValuePair.Name;
-					uint num2 = <PrivateImplementationDetails>.ComputeStringHash(text3);
+					uint num2 = global::<PrivateImplementationDetails>.ComputeStringHash(text3);
 					if (num2 <= 2781420622U)
 					{
 						if (num2 <= 1433271620U)

@@ -6,7 +6,12 @@ namespace Mono
 	internal struct SafeStringMarshal : IDisposable
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr StringToUtf8(string str);
+		private static extern IntPtr StringToUtf8_icall(ref string str);
+
+		public static IntPtr StringToUtf8(string str)
+		{
+			return SafeStringMarshal.StringToUtf8_icall(ref str);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void GFree(IntPtr ptr);

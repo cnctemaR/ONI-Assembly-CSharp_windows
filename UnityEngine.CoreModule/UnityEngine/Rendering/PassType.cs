@@ -11,13 +11,16 @@ namespace UnityEngine.Rendering
 		VertexLMRGBM,
 		ForwardBase,
 		ForwardAdd,
+		[Obsolete("Deferred Lighting was removed, so LightPrePassBase pass type is never used anymore.")]
 		LightPrePassBase,
+		[Obsolete("Deferred Lighting was removed, so LightPrePassFinal pass type is never used anymore.")]
 		LightPrePassFinal,
 		ShadowCaster,
 		Deferred = 10,
 		Meta,
 		MotionVectors,
 		ScriptableRenderPipeline,
-		ScriptableRenderPipelineDefaultUnlit
+		ScriptableRenderPipelineDefaultUnlit,
+		GrabPass
 	}
 }

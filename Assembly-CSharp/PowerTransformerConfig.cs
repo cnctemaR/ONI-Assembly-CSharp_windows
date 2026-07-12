@@ -37,6 +37,7 @@ public class PowerTransformerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
 		go.AddComponent<RequireInputs>();
 		BuildingDef def = go.GetComponent<Building>().Def;
 		Battery battery = go.AddOrGet<Battery>();

@@ -293,7 +293,7 @@ namespace System.IO
 			}
 		}
 
-		public string Name
+		public virtual string Name
 		{
 			get
 			{

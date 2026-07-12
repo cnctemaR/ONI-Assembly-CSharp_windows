@@ -434,7 +434,7 @@ public class LoadScreen : KModalScreen
 		saveError = null;
 		global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(file);
 		SaveGame.Header first = fileInfo.first;
-		string text = fileInfo.second.baseName.TrimEnd(new char[] { ' ' });
+		string text = fileInfo.second.baseName.TrimEnd(' ');
 		string fileName = global::System.IO.Path.GetFileName(file);
 		string text2 = global::System.IO.Path.Combine(dest_root, text);
 		if (!Directory.Exists(text2))
@@ -845,8 +845,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					626616U,
-					34
+					642443U,
+					35
 				});
 			}
 			return false;
@@ -861,7 +861,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					34
+					35
 				});
 			}
 			return false;
@@ -1211,7 +1211,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 34) || header.buildVersion > 626616U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 35) || header.buildVersion > 642443U;
 	}
 
 	private void UpdateSelected(KButton button, string filename, List<string> dlcIds)
@@ -1235,7 +1235,7 @@ public class LoadScreen : KModalScreen
 
 	private void Load()
 	{
-		if (!DlcManager.HasAllContentSubscribed(this.selectedSave.dlcIds))
+		if (!DlcManager.IsAllContentSubscribed(this.selectedSave.dlcIds))
 		{
 			string text = (this.selectedSave.dlcIds.Contains("") ? UI.FRONTEND.LOADSCREEN.VANILLA_RESTART : UI.FRONTEND.LOADSCREEN.EXPANSION1_RESTART);
 			this.ConfirmDoAction(text, delegate
@@ -1266,15 +1266,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 626616U)
+		if (header.buildVersion > 642443U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 626616U.ToString();
+			text2 = 642443U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 34);
+			text2 = string.Format("v{0}.{1}", 7, 35);
 		}
 		if (!flag)
 		{

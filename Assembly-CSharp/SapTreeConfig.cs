@@ -18,7 +18,14 @@ public class SapTreeConfig : IEntityConfig
 		string text3 = global::STRINGS.CREATURES.SPECIES.SAPTREE.DESC;
 		float num = 1f;
 		EffectorValues positive_DECOR_EFFECT = SapTreeConfig.POSITIVE_DECOR_EFFECT;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gravitas_sap_tree_kanim"), "idle", Grid.SceneLayer.BuildingFront, 5, 5, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Decoration }, 293f);
+		KAnimFile anim = Assets.GetAnim("gravitas_sap_tree_kanim");
+		string text4 = "idle";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.BuildingFront;
+		int num2 = 5;
+		int num3 = 5;
+		EffectorValues effectorValues = positive_DECOR_EFFECT;
+		List<Tag> list = new List<Tag> { GameTags.Decoration };
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 293f);
 		SapTree.Def def = gameObject.AddOrGetDef<SapTree.Def>();
 		def.foodSenseArea = new Vector2I(5, 1);
 		def.massEatRate = 0.05f;

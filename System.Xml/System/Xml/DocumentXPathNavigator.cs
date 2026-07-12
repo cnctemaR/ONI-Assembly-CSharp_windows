@@ -939,8 +939,7 @@ namespace System.Xml
 				{
 					return false;
 				}
-				XmlNodeType nodeType = documentXPathNavigator.source.NodeType;
-				if (nodeType == XmlNodeType.Attribute)
+				if (documentXPathNavigator.source.NodeType == XmlNodeType.Attribute)
 				{
 					documentXPathNavigator = (DocumentXPathNavigator)documentXPathNavigator.Clone();
 					if (!documentXPathNavigator.MoveToNonDescendant())
@@ -1004,15 +1003,13 @@ namespace System.Xml
 		{
 			XmlNode xmlNode = null;
 			DocumentXPathNavigator documentXPathNavigator = end as DocumentXPathNavigator;
-			XmlNodeType xmlNodeType;
 			if (documentXPathNavigator != null)
 			{
 				if (this.document != documentXPathNavigator.document)
 				{
 					return false;
 				}
-				xmlNodeType = documentXPathNavigator.source.NodeType;
-				if (xmlNodeType == XmlNodeType.Attribute)
+				if (documentXPathNavigator.source.NodeType == XmlNodeType.Attribute)
 				{
 					documentXPathNavigator = (DocumentXPathNavigator)documentXPathNavigator.Clone();
 					if (!documentXPathNavigator.MoveToNonDescendant())
@@ -1028,10 +1025,10 @@ namespace System.Xml
 				return false;
 			}
 			XmlNode xmlNode2 = this.source;
-			xmlNodeType = xmlNode2.NodeType;
-			if (xmlNodeType != XmlNodeType.Attribute)
+			XmlNodeType nodeType = xmlNode2.NodeType;
+			if (nodeType != XmlNodeType.Attribute)
 			{
-				if (xmlNodeType - XmlNodeType.Text <= 1 || xmlNodeType - XmlNodeType.Whitespace <= 1)
+				if (nodeType - XmlNodeType.Text <= 1 || nodeType - XmlNodeType.Whitespace <= 1)
 				{
 					xmlNode2 = this.TextEnd(xmlNode2);
 				}
@@ -1572,7 +1569,7 @@ namespace System.Xml
 						XmlAttribute xmlAttribute = (XmlAttribute)xmlNode;
 						if (xmlAttribute.IsNamespace)
 						{
-							goto IL_00E3;
+							goto IL_00E1;
 						}
 						xmlNode3 = DocumentXPathNavigator.OwnerNode(xmlAttribute);
 						DocumentXPathNavigator.DeleteAttribute(xmlAttribute, this.attributeIndex);
@@ -1595,9 +1592,9 @@ namespace System.Xml
 					case XmlNodeType.DocumentType:
 					case XmlNodeType.DocumentFragment:
 					case XmlNodeType.Notation:
-						goto IL_00E3;
+						goto IL_00E1;
 					default:
-						goto IL_00E3;
+						goto IL_00E1;
 					}
 					xmlNode3 = DocumentXPathNavigator.OwnerNode(xmlNode);
 					DocumentXPathNavigator.DeleteToFollowingSibling(xmlNode, xmlNode2);
@@ -1607,7 +1604,7 @@ namespace System.Xml
 						return;
 					}
 					return;
-					IL_00E3:
+					IL_00E1:
 					throw new InvalidOperationException(Res.GetString("Operation is not valid due to the current position of the navigator."));
 				}
 				if (xmlNode2.IsText)
@@ -1649,7 +1646,7 @@ namespace System.Xml
 				XmlAttribute xmlAttribute = (XmlAttribute)xmlNode;
 				if (xmlAttribute.IsNamespace)
 				{
-					goto IL_00B3;
+					goto IL_00AF;
 				}
 				xmlNode3 = DocumentXPathNavigator.OwnerNode(xmlAttribute);
 				DocumentXPathNavigator.DeleteAttribute(xmlAttribute, this.attributeIndex);
@@ -1674,9 +1671,9 @@ namespace System.Xml
 			case XmlNodeType.DocumentType:
 			case XmlNodeType.DocumentFragment:
 			case XmlNodeType.Notation:
-				goto IL_00B3;
+				goto IL_00AF;
 			default:
-				goto IL_00B3;
+				goto IL_00AF;
 			}
 			xmlNode3 = DocumentXPathNavigator.OwnerNode(xmlNode);
 			DocumentXPathNavigator.DeleteToFollowingSibling(xmlNode, xmlNode2);
@@ -1686,7 +1683,7 @@ namespace System.Xml
 				return;
 			}
 			return;
-			IL_00B3:
+			IL_00AF:
 			throw new InvalidOperationException(Res.GetString("Operation is not valid due to the current position of the navigator."));
 		}
 
@@ -1998,14 +1995,14 @@ namespace System.Xml
 
 		private static bool IsValidChild(XmlNode parent, XmlNode child)
 		{
-			XmlNodeType xmlNodeType = parent.NodeType;
-			if (xmlNodeType != XmlNodeType.Element)
+			XmlNodeType nodeType = parent.NodeType;
+			if (nodeType != XmlNodeType.Element)
 			{
-				if (xmlNodeType != XmlNodeType.Document)
+				if (nodeType != XmlNodeType.Document)
 				{
-					if (xmlNodeType == XmlNodeType.DocumentFragment)
+					if (nodeType == XmlNodeType.DocumentFragment)
 					{
-						xmlNodeType = child.NodeType;
+						XmlNodeType xmlNodeType = child.NodeType;
 						switch (xmlNodeType)
 						{
 						case XmlNodeType.Element:
@@ -2030,7 +2027,7 @@ namespace System.Xml
 				}
 				else
 				{
-					xmlNodeType = child.NodeType;
+					XmlNodeType xmlNodeType = child.NodeType;
 					if (xmlNodeType == XmlNodeType.Element || xmlNodeType - XmlNodeType.ProcessingInstruction <= 1)
 					{
 						return true;

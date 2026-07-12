@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class PropertyDescriptor : MemberDescriptor
 	{
 		protected PropertyDescriptor(string name, Attribute[] attrs)
@@ -31,7 +27,7 @@ namespace System.ComponentModel
 			get
 			{
 				AttributeCollection attributes = this.Attributes;
-				if (this.converter == null)
+				if (this._converter == null)
 				{
 					TypeConverterAttribute typeConverterAttribute = (TypeConverterAttribute)attributes[typeof(TypeConverterAttribute)];
 					if (typeConverterAttribute.ConverterTypeName != null && typeConverterAttribute.ConverterTypeName.Length > 0)
@@ -39,15 +35,15 @@ namespace System.ComponentModel
 						Type typeFromName = this.GetTypeFromName(typeConverterAttribute.ConverterTypeName);
 						if (typeFromName != null && typeof(TypeConverter).IsAssignableFrom(typeFromName))
 						{
-							this.converter = (TypeConverter)this.CreateInstance(typeFromName);
+							this._converter = (TypeConverter)this.CreateInstance(typeFromName);
 						}
 					}
-					if (this.converter == null)
+					if (this._converter == null)
 					{
-						this.converter = TypeDescriptor.GetConverter(this.PropertyType);
+						this._converter = TypeDescriptor.GetConverter(this.PropertyType);
 					}
 				}
-				return this.converter;
+				return this._converter;
 			}
 		}
 
@@ -81,12 +77,12 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("handler");
 			}
-			if (this.valueChangedHandlers == null)
+			if (this._valueChangedHandlers == null)
 			{
-				this.valueChangedHandlers = new Hashtable();
+				this._valueChangedHandlers = new Hashtable();
 			}
-			EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
-			this.valueChangedHandlers[component] = Delegate.Combine(eventHandler, handler);
+			EventHandler eventHandler = (EventHandler)this._valueChangedHandlers[component];
+			this._valueChangedHandlers[component] = Delegate.Combine(eventHandler, handler);
 		}
 
 		public abstract bool CanResetValue(object component);
@@ -127,10 +123,10 @@ namespace System.ComponentModel
 
 		protected override void FillAttributes(IList attributeList)
 		{
-			this.converter = null;
-			this.editors = null;
-			this.editorTypes = null;
-			this.editorCount = 0;
+			this._converter = null;
+			this._editors = null;
+			this._editorTypes = null;
+			this._editorCount = 0;
 			base.FillAttributes(attributeList);
 		}
 
@@ -162,13 +158,13 @@ namespace System.ComponentModel
 		{
 			object obj = null;
 			AttributeCollection attributes = this.Attributes;
-			if (this.editorTypes != null)
+			if (this._editorTypes != null)
 			{
-				for (int i = 0; i < this.editorCount; i++)
+				for (int i = 0; i < this._editorCount; i++)
 				{
-					if (this.editorTypes[i] == editorBaseType)
+					if (this._editorTypes[i] == editorBaseType)
 					{
-						return this.editors[i];
+						return this._editors[i];
 					}
 				}
 			}
@@ -195,25 +191,25 @@ namespace System.ComponentModel
 				{
 					obj = TypeDescriptor.GetEditor(this.PropertyType, editorBaseType);
 				}
-				if (this.editorTypes == null)
+				if (this._editorTypes == null)
 				{
-					this.editorTypes = new Type[5];
-					this.editors = new object[5];
+					this._editorTypes = new Type[5];
+					this._editors = new object[5];
 				}
-				if (this.editorCount >= this.editorTypes.Length)
+				if (this._editorCount >= this._editorTypes.Length)
 				{
-					Type[] array = new Type[this.editorTypes.Length * 2];
-					object[] array2 = new object[this.editors.Length * 2];
-					Array.Copy(this.editorTypes, array, this.editorTypes.Length);
-					Array.Copy(this.editors, array2, this.editors.Length);
-					this.editorTypes = array;
-					this.editors = array2;
+					Type[] array = new Type[this._editorTypes.Length * 2];
+					object[] array2 = new object[this._editors.Length * 2];
+					Array.Copy(this._editorTypes, array, this._editorTypes.Length);
+					Array.Copy(this._editors, array2, this._editors.Length);
+					this._editorTypes = array;
+					this._editors = array2;
 				}
-				this.editorTypes[this.editorCount] = editorBaseType;
-				object[] array3 = this.editors;
-				int num = this.editorCount;
-				this.editorCount = num + 1;
-				array3[num] = obj;
+				this._editorTypes[this._editorCount] = editorBaseType;
+				object[] editors = this._editors;
+				int editorCount = this._editorCount;
+				this._editorCount = editorCount + 1;
+				editors[editorCount] = obj;
 			}
 			return obj;
 		}
@@ -258,13 +254,15 @@ namespace System.ComponentModel
 
 		protected virtual void OnValueChanged(object component, EventArgs e)
 		{
-			if (component != null && this.valueChangedHandlers != null)
+			if (component != null)
 			{
-				EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
-				if (eventHandler != null)
+				Hashtable valueChangedHandlers = this._valueChangedHandlers;
+				EventHandler eventHandler = (EventHandler)((valueChangedHandlers != null) ? valueChangedHandlers[component] : null);
+				if (eventHandler == null)
 				{
-					eventHandler(component, e);
+					return;
 				}
+				eventHandler(component, e);
 			}
 		}
 
@@ -278,24 +276,24 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("handler");
 			}
-			if (this.valueChangedHandlers != null)
+			if (this._valueChangedHandlers != null)
 			{
-				EventHandler eventHandler = (EventHandler)this.valueChangedHandlers[component];
+				EventHandler eventHandler = (EventHandler)this._valueChangedHandlers[component];
 				eventHandler = (EventHandler)Delegate.Remove(eventHandler, handler);
 				if (eventHandler != null)
 				{
-					this.valueChangedHandlers[component] = eventHandler;
+					this._valueChangedHandlers[component] = eventHandler;
 					return;
 				}
-				this.valueChangedHandlers.Remove(component);
+				this._valueChangedHandlers.Remove(component);
 			}
 		}
 
 		protected internal EventHandler GetValueChangedHandler(object component)
 		{
-			if (component != null && this.valueChangedHandlers != null)
+			if (component != null && this._valueChangedHandlers != null)
 			{
-				return (EventHandler)this.valueChangedHandlers[component];
+				return (EventHandler)this._valueChangedHandlers[component];
 			}
 			return null;
 		}
@@ -314,14 +312,14 @@ namespace System.ComponentModel
 			}
 		}
 
-		private TypeConverter converter;
+		private TypeConverter _converter;
 
-		private Hashtable valueChangedHandlers;
+		private Hashtable _valueChangedHandlers;
 
-		private object[] editors;
+		private object[] _editors;
 
-		private Type[] editorTypes;
+		private Type[] _editorTypes;
 
-		private int editorCount;
+		private int _editorCount;
 	}
 }

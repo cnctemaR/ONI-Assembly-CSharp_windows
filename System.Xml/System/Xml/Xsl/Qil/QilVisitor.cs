@@ -34,13 +34,13 @@ namespace System.Xml.Xsl.Qil
 			QilNode qilNode = parent[childNum];
 			if (qilNode != null)
 			{
-				QilNodeType qilNodeType = qilNode.NodeType;
-				if (qilNodeType - QilNodeType.For <= 2)
+				QilNodeType nodeType = qilNode.NodeType;
+				if (nodeType - QilNodeType.For <= 2)
 				{
-					qilNodeType = parent.NodeType;
-					return qilNodeType - QilNodeType.GlobalVariableList > 1 && qilNodeType != QilNodeType.FormalParameterList && (qilNodeType - QilNodeType.Loop > 2 || childNum == 1);
+					QilNodeType nodeType2 = parent.NodeType;
+					return nodeType2 - QilNodeType.GlobalVariableList > 1 && nodeType2 != QilNodeType.FormalParameterList && (nodeType2 - QilNodeType.Loop > 2 || childNum == 1);
 				}
-				if (qilNodeType == QilNodeType.Function)
+				if (nodeType == QilNodeType.Function)
 				{
 					return parent.NodeType == QilNodeType.Invoke;
 				}

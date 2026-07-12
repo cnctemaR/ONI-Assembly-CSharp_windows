@@ -48,7 +48,7 @@ namespace System
 				this.intOffset = 4;
 				return;
 			}
-			throw new Exception(string.Format("Magic number is wrong: {0}", magic));
+			throw new Exception(string.Format("Magic number is unexpected: {0}", magic));
 		}
 
 		private void ReadHeader(byte[] buffer, ref int position)
@@ -97,7 +97,7 @@ namespace System
 				num++;
 			}
 			num = (int)(num + number * (TermInfoNumbers)this.intOffset);
-			return this.GetInteger(this.buffer, num);
+			return (int)this.GetInt16(this.buffer, num);
 		}
 
 		public string Get(TermInfoStrings tstr)
@@ -149,28 +149,6 @@ namespace System
 				return -1;
 			}
 			return (short)(num + num2 * 256);
-		}
-
-		private int GetInt32(byte[] buffer, int offset)
-		{
-			int num = (int)buffer[offset];
-			int num2 = (int)buffer[offset + 1];
-			int num3 = (int)buffer[offset + 2];
-			int num4 = (int)buffer[offset + 3];
-			if (num == 255 && num2 == 255 && num3 == 255 && num4 == 255)
-			{
-				return -1;
-			}
-			return num + num2 << 8 + num3 << 16 + num4 << 24;
-		}
-
-		private int GetInteger(byte[] buffer, int offset)
-		{
-			if (this.intOffset == 2)
-			{
-				return (int)this.GetInt16(buffer, offset);
-			}
-			return this.GetInt32(buffer, offset);
 		}
 
 		private string GetString(byte[] buffer, int offset)

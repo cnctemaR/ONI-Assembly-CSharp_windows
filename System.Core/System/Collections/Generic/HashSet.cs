@@ -7,8 +7,8 @@ using System.Security.Permissions;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class HashSet<T> : ICollection<T>, IEnumerable<T>, IEnumerable, ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
@@ -138,13 +138,20 @@ namespace System.Collections.Generic
 		{
 			if (this._buckets != null)
 			{
-				int num = this.InternalGetHashCode(item);
-				for (int i = this._buckets[num % this._buckets.Length] - 1; i >= 0; i = this._slots[i].next)
+				int num = 0;
+				int num2 = this.InternalGetHashCode(item);
+				HashSet<T>.Slot[] slots = this._slots;
+				for (int i = this._buckets[num2 % this._buckets.Length] - 1; i >= 0; i = slots[i].next)
 				{
-					if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
+					if (slots[i].hashCode == num2 && this._comparer.Equals(slots[i].value, item))
 					{
 						return true;
 					}
+					if (num >= slots.Length)
+					{
+						throw new InvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+					}
+					num++;
 				}
 			}
 			return false;
@@ -162,24 +169,26 @@ namespace System.Collections.Generic
 				int num = this.InternalGetHashCode(item);
 				int num2 = num % this._buckets.Length;
 				int num3 = -1;
-				for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
+				int num4 = 0;
+				HashSet<T>.Slot[] slots = this._slots;
+				for (int i = this._buckets[num2] - 1; i >= 0; i = slots[i].next)
 				{
-					if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
+					if (slots[i].hashCode == num && this._comparer.Equals(slots[i].value, item))
 					{
 						if (num3 < 0)
 						{
-							this._buckets[num2] = this._slots[i].next + 1;
+							this._buckets[num2] = slots[i].next + 1;
 						}
 						else
 						{
-							this._slots[num3].next = this._slots[i].next;
+							slots[num3].next = slots[i].next;
 						}
-						this._slots[i].hashCode = -1;
+						slots[i].hashCode = -1;
 						if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
 						{
-							this._slots[i].value = default(T);
+							slots[i].value = default(T);
 						}
-						this._slots[i].next = this._freeList;
+						slots[i].next = this._freeList;
 						this._count--;
 						this._version++;
 						if (this._count == 0)
@@ -193,6 +202,11 @@ namespace System.Collections.Generic
 						}
 						return true;
 					}
+					if (num4 >= slots.Length)
+					{
+						throw new InvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+					}
+					num4++;
 					num3 = i;
 				}
 			}
@@ -265,7 +279,7 @@ namespace System.Collections.Generic
 				T[] array = (T[])this._siInfo.GetValue("Elements", typeof(T[]));
 				if (array == null)
 				{
-					throw new SerializationException("The Keys for this dictionary are missing.");
+					throw new SerializationException("The keys for this dictionary are missing.");
 				}
 				for (int i = 0; i < array.Length; i++)
 				{
@@ -614,6 +628,26 @@ namespace System.Collections.Generic
 			}
 		}
 
+		public int EnsureCapacity(int capacity)
+		{
+			if (capacity < 0)
+			{
+				throw new ArgumentOutOfRangeException("capacity");
+			}
+			int num = ((this._slots == null) ? 0 : this._slots.Length);
+			if (num >= capacity)
+			{
+				return num;
+			}
+			if (this._buckets == null)
+			{
+				return this.Initialize(capacity);
+			}
+			int prime = HashHelpers.GetPrime(capacity);
+			this.SetCapacity(prime);
+			return prime;
+		}
+
 		public void TrimExcess()
 		{
 			if (this._count == 0)
@@ -649,11 +683,12 @@ namespace System.Collections.Generic
 			return new HashSetEqualityComparer<T>();
 		}
 
-		private void Initialize(int capacity)
+		private int Initialize(int capacity)
 		{
 			int prime = HashHelpers.GetPrime(capacity);
 			this._buckets = new int[prime];
 			this._slots = new HashSet<T>.Slot[prime];
+			return prime;
 		}
 
 		private void IncreaseCapacity()
@@ -692,33 +727,41 @@ namespace System.Collections.Generic
 			}
 			int num = this.InternalGetHashCode(value);
 			int num2 = num % this._buckets.Length;
-			for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
+			int num3 = 0;
+			HashSet<T>.Slot[] array = this._slots;
+			for (int i = this._buckets[num2] - 1; i >= 0; i = array[i].next)
 			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, value))
+				if (array[i].hashCode == num && this._comparer.Equals(array[i].value, value))
 				{
 					return false;
 				}
+				if (num3 >= array.Length)
+				{
+					throw new InvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+				}
+				num3++;
 			}
-			int num3;
+			int num4;
 			if (this._freeList >= 0)
 			{
-				num3 = this._freeList;
-				this._freeList = this._slots[num3].next;
+				num4 = this._freeList;
+				this._freeList = array[num4].next;
 			}
 			else
 			{
-				if (this._lastIndex == this._slots.Length)
+				if (this._lastIndex == array.Length)
 				{
 					this.IncreaseCapacity();
+					array = this._slots;
 					num2 = num % this._buckets.Length;
 				}
-				num3 = this._lastIndex;
+				num4 = this._lastIndex;
 				this._lastIndex++;
 			}
-			this._slots[num3].hashCode = num;
-			this._slots[num3].value = value;
-			this._slots[num3].next = this._buckets[num2] - 1;
-			this._buckets[num2] = num3 + 1;
+			array[num4].hashCode = num;
+			array[num4].value = value;
+			array[num4].next = this._buckets[num2] - 1;
+			this._buckets[num2] = num4 + 1;
 			this._count++;
 			this._version++;
 			return true;
@@ -807,13 +850,20 @@ namespace System.Collections.Generic
 
 		private int InternalIndexOf(T item)
 		{
-			int num = this.InternalGetHashCode(item);
-			for (int i = this._buckets[num % this._buckets.Length] - 1; i >= 0; i = this._slots[i].next)
+			int num = 0;
+			int num2 = this.InternalGetHashCode(item);
+			HashSet<T>.Slot[] slots = this._slots;
+			for (int i = this._buckets[num2 % this._buckets.Length] - 1; i >= 0; i = slots[i].next)
 			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
+				if (slots[i].hashCode == num2 && this._comparer.Equals(slots[i].value, item))
 				{
 					return i;
 				}
+				if (num >= slots.Length)
+				{
+					throw new InvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+				}
+				num++;
 			}
 			return -1;
 		}
@@ -873,37 +923,45 @@ namespace System.Collections.Generic
 		{
 			int num = this.InternalGetHashCode(value);
 			int num2 = num % this._buckets.Length;
-			for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
+			int num3 = 0;
+			HashSet<T>.Slot[] array = this._slots;
+			for (int i = this._buckets[num2] - 1; i >= 0; i = array[i].next)
 			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, value))
+				if (array[i].hashCode == num && this._comparer.Equals(array[i].value, value))
 				{
 					location = i;
 					return false;
 				}
+				if (num3 >= array.Length)
+				{
+					throw new InvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+				}
+				num3++;
 			}
-			int num3;
+			int num4;
 			if (this._freeList >= 0)
 			{
-				num3 = this._freeList;
-				this._freeList = this._slots[num3].next;
+				num4 = this._freeList;
+				this._freeList = array[num4].next;
 			}
 			else
 			{
-				if (this._lastIndex == this._slots.Length)
+				if (this._lastIndex == array.Length)
 				{
 					this.IncreaseCapacity();
+					array = this._slots;
 					num2 = num % this._buckets.Length;
 				}
-				num3 = this._lastIndex;
+				num4 = this._lastIndex;
 				this._lastIndex++;
 			}
-			this._slots[num3].hashCode = num;
-			this._slots[num3].value = value;
-			this._slots[num3].next = this._buckets[num2] - 1;
-			this._buckets[num2] = num3 + 1;
+			array[num4].hashCode = num;
+			array[num4].value = value;
+			array[num4].next = this._buckets[num2] - 1;
+			this._buckets[num2] = num4 + 1;
 			this._count++;
 			this._version++;
-			location = num3;
+			location = num4;
 			return true;
 		}
 

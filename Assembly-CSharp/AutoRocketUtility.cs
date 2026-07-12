@@ -108,14 +108,16 @@ public static class AutoRocketUtility
 
 	private static GameObject AddPilot(RocketControlStation station)
 	{
+		MinionStartingStats minionStartingStats = new MinionStartingStats(false, null, null, true);
 		Vector3 position = station.transform.position;
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+		GameObject gameObject = Util.KInstantiate(prefab, null, null);
+		gameObject.name = prefab.name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(position), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, null, true).Apply(gameObject);
+		minionStartingStats.Apply(gameObject);
 		MinionResume component = gameObject.GetComponent<MinionResume>();
 		if (DebugHandler.InstantBuildMode && component.AvailableSkillpoints < 1)
 		{

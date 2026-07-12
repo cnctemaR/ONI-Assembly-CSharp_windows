@@ -58,24 +58,24 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		base.gameObject.Trigger(2127324410, null);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		SimAndRenderScheduler.instance.Add(this, false);
 		this.Refresh();
 		this.MopTick(this.amountMoppedPerTick);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		this.MopTick(1000f);
 		return true;

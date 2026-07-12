@@ -109,33 +109,39 @@ public class AssignmentManager : KMonoBehaviour
 
 	public List<Assignable> GetPreferredAssignables(Assignables owner, AssignableSlot slot)
 	{
-		this.PreferredAssignableResults.Clear();
-		int num = int.MaxValue;
-		foreach (Assignable assignable in this.assignables)
+		List<Assignable> preferredAssignableResults = this.PreferredAssignableResults;
+		List<Assignable> preferredAssignableResults2;
+		lock (preferredAssignableResults)
 		{
-			if (assignable.slot == slot && assignable.assignee != null && assignable.assignee.HasOwner(owner))
+			this.PreferredAssignableResults.Clear();
+			int num = int.MaxValue;
+			foreach (Assignable assignable in this.assignables)
 			{
-				Room room = assignable.assignee as Room;
-				if (room != null && room.roomType.priority_building_use)
+				if (assignable.slot == slot && assignable.assignee != null && assignable.assignee.HasOwner(owner))
 				{
-					this.PreferredAssignableResults.Clear();
-					this.PreferredAssignableResults.Add(assignable);
-					return this.PreferredAssignableResults;
-				}
-				int num2 = assignable.assignee.NumOwners();
-				if (num2 == num)
-				{
-					this.PreferredAssignableResults.Add(assignable);
-				}
-				else if (num2 < num)
-				{
-					num = num2;
-					this.PreferredAssignableResults.Clear();
-					this.PreferredAssignableResults.Add(assignable);
+					Room room = assignable.assignee as Room;
+					if (room != null && room.roomType.priority_building_use)
+					{
+						this.PreferredAssignableResults.Clear();
+						this.PreferredAssignableResults.Add(assignable);
+						return this.PreferredAssignableResults;
+					}
+					int num2 = assignable.assignee.NumOwners();
+					if (num2 == num)
+					{
+						this.PreferredAssignableResults.Add(assignable);
+					}
+					else if (num2 < num)
+					{
+						num = num2;
+						this.PreferredAssignableResults.Clear();
+						this.PreferredAssignableResults.Add(assignable);
+					}
 				}
 			}
+			preferredAssignableResults2 = this.PreferredAssignableResults;
 		}
-		return this.PreferredAssignableResults;
+		return preferredAssignableResults2;
 	}
 
 	public bool IsPreferredAssignable(Assignables owner, Assignable candidate)
@@ -170,6 +176,8 @@ public class AssignmentManager : KMonoBehaviour
 	}
 
 	private List<Assignable> assignables = new List<Assignable>();
+
+	public const string PUBLIC_GROUP_ID = "public";
 
 	public Dictionary<string, AssignmentGroup> assignment_groups = new Dictionary<string, AssignmentGroup> { 
 	{

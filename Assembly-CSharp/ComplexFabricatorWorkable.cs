@@ -90,7 +90,7 @@ public class ComplexFabricatorWorkable : Workable
 		return conversationTopic;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		if (!this.operational.IsOperational)
@@ -106,7 +106,7 @@ public class ComplexFabricatorWorkable : Workable
 		DebugUtil.DevAssertArgs(false, new object[] { "ComplexFabricatorWorkable.OnStartWork called but CurrentMachineOrder is null", base.gameObject });
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.OnWorkTickActions != null)
 		{
@@ -116,12 +116,12 @@ public class ComplexFabricatorWorkable : Workable
 		return base.OnWorkTick(worker, dt);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (worker != null && this.GetDupeInteract != null)
 		{
-			worker.GetComponent<KBatchedAnimController>().onAnimComplete -= this.PlayNextWorkingAnim;
+			worker.GetAnimController().onAnimComplete -= this.PlayNextWorkingAnim;
 		}
 	}
 
@@ -143,7 +143,7 @@ public class ComplexFabricatorWorkable : Workable
 		return chore;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.fabricator.CompleteWorkingOrder();
@@ -175,7 +175,7 @@ public class ComplexFabricatorWorkable : Workable
 		this.visualizerLink = new KAnimLink(component, component2);
 	}
 
-	private void UpdateOrderProgress(Worker worker, float dt)
+	private void UpdateOrderProgress(WorkerBase worker, float dt)
 	{
 		float workTime = this.GetWorkTime();
 		float num = Mathf.Clamp01((workTime - base.WorkTimeRemaining) / workTime);
@@ -205,11 +205,11 @@ public class ComplexFabricatorWorkable : Workable
 
 	public void QueueWorkingAnimations()
 	{
-		KBatchedAnimController component = base.worker.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController animController = base.worker.GetAnimController();
 		if (this.GetDupeInteract != null)
 		{
-			component.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
-			component.onAnimComplete += this.PlayNextWorkingAnim;
+			animController.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
+			animController.onAnimComplete += this.PlayNextWorkingAnim;
 		}
 	}
 
@@ -221,13 +221,13 @@ public class ComplexFabricatorWorkable : Workable
 		}
 		if (this.GetDupeInteract != null)
 		{
-			KBatchedAnimController component = base.worker.GetComponent<KBatchedAnimController>();
-			if (base.worker.state == Worker.State.Working)
+			KBatchedAnimController animController = base.worker.GetAnimController();
+			if (base.worker.GetState() == WorkerBase.State.Working)
 			{
-				component.Play(this.GetDupeInteract(), KAnim.PlayMode.Once);
+				animController.Play(this.GetDupeInteract(), KAnim.PlayMode.Once);
 				return;
 			}
-			component.onAnimComplete -= this.PlayNextWorkingAnim;
+			animController.onAnimComplete -= this.PlayNextWorkingAnim;
 		}
 	}
 
@@ -237,7 +237,7 @@ public class ComplexFabricatorWorkable : Workable
 	[MyCmpReq]
 	private ComplexFabricator fabricator;
 
-	public Action<Worker, float> OnWorkTickActions;
+	public Action<WorkerBase, float> OnWorkTickActions;
 
 	public MeterController meter;
 

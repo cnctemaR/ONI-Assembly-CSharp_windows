@@ -24,7 +24,7 @@ public class FlushToiletConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
-		buildingDef.DiseaseCellVisName = "FoodPoisoning";
+		buildingDef.DiseaseCellVisName = DUPLICANTSTATS.STANDARD.Secretions.PEE_DISEASE;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
@@ -42,11 +42,11 @@ public class FlushToiletConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FlushToiletType, false);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 5f;
-		flushToilet.massEmittedPerUse = 11.7f;
-		flushToilet.newPeeTemperature = 310.15f;
-		flushToilet.diseaseId = "FoodPoisoning";
-		flushToilet.diseasePerFlush = 100000;
-		flushToilet.diseaseOnDupePerFlush = 5000;
+		flushToilet.massEmittedPerUse = 5f + DUPLICANTSTATS.STANDARD.Secretions.PEE_PER_TOILET_PEE;
+		flushToilet.newPeeTemperature = DUPLICANTSTATS.STANDARD.Temperature.Internal.IDEAL;
+		flushToilet.diseaseId = DUPLICANTSTATS.STANDARD.Secretions.PEE_DISEASE;
+		flushToilet.diseasePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE;
+		flushToilet.diseaseOnDupePerFlush = DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE / 20;
 		flushToilet.requireOutput = true;
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_toiletflush_kanim") };
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();

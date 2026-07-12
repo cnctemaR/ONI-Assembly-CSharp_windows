@@ -4,12 +4,12 @@ using System.Collections.Specialized;
 
 namespace System.Net
 {
-	internal class TrackingValidationObjectDictionary : StringDictionary
+	internal sealed class TrackingValidationObjectDictionary : StringDictionary
 	{
-		internal TrackingValidationObjectDictionary(IDictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> validators)
+		internal TrackingValidationObjectDictionary(Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> validators)
 		{
 			this.IsChanged = false;
-			this.validators = validators;
+			this._validators = validators;
 		}
 
 		private void PersistValue(string key, string value, bool addValue)
@@ -17,21 +17,22 @@ namespace System.Net
 			key = key.ToLowerInvariant();
 			if (!string.IsNullOrEmpty(value))
 			{
-				if (this.validators != null && this.validators.ContainsKey(key))
+				TrackingValidationObjectDictionary.ValidateAndParseValue validateAndParseValue;
+				if (this._validators != null && this._validators.TryGetValue(key, out validateAndParseValue))
 				{
-					object obj = this.validators[key](value);
-					if (this.internalObjects == null)
+					object obj = validateAndParseValue(value);
+					if (this._internalObjects == null)
 					{
-						this.internalObjects = new Dictionary<string, object>();
+						this._internalObjects = new Dictionary<string, object>();
 					}
 					if (addValue)
 					{
-						this.internalObjects.Add(key, obj);
+						this._internalObjects.Add(key, obj);
 						base.Add(key, obj.ToString());
 					}
 					else
 					{
-						this.internalObjects[key] = obj;
+						this._internalObjects[key] = obj;
 						base[key] = obj.ToString();
 					}
 				}
@@ -51,20 +52,21 @@ namespace System.Net
 
 		internal object InternalGet(string key)
 		{
-			if (this.internalObjects != null && this.internalObjects.ContainsKey(key))
+			object obj;
+			if (this._internalObjects != null && this._internalObjects.TryGetValue(key, out obj))
 			{
-				return this.internalObjects[key];
+				return obj;
 			}
 			return base[key];
 		}
 
 		internal void InternalSet(string key, object value)
 		{
-			if (this.internalObjects == null)
+			if (this._internalObjects == null)
 			{
-				this.internalObjects = new Dictionary<string, object>();
+				this._internalObjects = new Dictionary<string, object>();
 			}
-			this.internalObjects[key] = value;
+			this._internalObjects[key] = value;
 			base[key] = value.ToString();
 			this.IsChanged = true;
 		}
@@ -88,9 +90,9 @@ namespace System.Net
 
 		public override void Clear()
 		{
-			if (this.internalObjects != null)
+			if (this._internalObjects != null)
 			{
-				this.internalObjects.Clear();
+				this._internalObjects.Clear();
 			}
 			base.Clear();
 			this.IsChanged = true;
@@ -98,17 +100,17 @@ namespace System.Net
 
 		public override void Remove(string key)
 		{
-			if (this.internalObjects != null && this.internalObjects.ContainsKey(key))
+			if (this._internalObjects != null)
 			{
-				this.internalObjects.Remove(key);
+				this._internalObjects.Remove(key);
 			}
 			base.Remove(key);
 			this.IsChanged = true;
 		}
 
-		private IDictionary<string, object> internalObjects;
+		private readonly Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> _validators;
 
-		private readonly IDictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> validators;
+		private Dictionary<string, object> _internalObjects;
 
 		internal delegate object ValidateAndParseValue(object valueToValidate);
 	}

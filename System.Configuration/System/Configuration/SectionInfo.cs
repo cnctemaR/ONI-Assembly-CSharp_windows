@@ -64,11 +64,11 @@ namespace System.Configuration
 						{
 							if (num != 1766272347U)
 							{
-								goto IL_0290;
+								goto IL_029E;
 							}
 							if (!(name == "requirePermission"))
 							{
-								goto IL_0290;
+								goto IL_029E;
 							}
 							string value = reader.Value;
 							bool flag = value == "true";
@@ -81,14 +81,14 @@ namespace System.Configuration
 						}
 						else if (!(name == "type"))
 						{
-							goto IL_0290;
+							goto IL_029E;
 						}
 					}
 					else
 					{
 						if (!(name == "allowLocation"))
 						{
-							goto IL_0290;
+							goto IL_029E;
 						}
 						string value2 = reader.Value;
 						this.allowLocation = value2 == "true";
@@ -108,18 +108,18 @@ namespace System.Configuration
 						{
 							if (num != 1931054735U)
 							{
-								goto IL_0290;
+								goto IL_029E;
 							}
 							if (!(name == "allowExeDefinition"))
 							{
-								goto IL_0290;
+								goto IL_029E;
 							}
 						}
 						else
 						{
 							if (!(name == "restartOnExternalChanges"))
 							{
-								goto IL_0290;
+								goto IL_029E;
 							}
 							string value3 = reader.Value;
 							bool flag2 = value3 == "true";
@@ -135,11 +135,11 @@ namespace System.Configuration
 					{
 						if (num != 3263379011U)
 						{
-							goto IL_0290;
+							goto IL_029E;
 						}
 						if (!(name == "allowDefinition"))
 						{
-							goto IL_0290;
+							goto IL_029E;
 						}
 						string value4 = reader.Value;
 						try
@@ -157,7 +157,7 @@ namespace System.Configuration
 					{
 						if (!(name == "name"))
 						{
-							goto IL_0290;
+							goto IL_029E;
 						}
 						this.Name = reader.Value;
 						if (this.Name == "location")
@@ -181,7 +181,7 @@ namespace System.Configuration
 				}
 				this.TypeName = reader.Value;
 				continue;
-				IL_0290:
+				IL_029E:
 				base.ThrowException(string.Format("Unrecognized attribute: {0}", reader.Name), reader);
 			}
 			if (this.Name == null || this.TypeName == null)
@@ -225,7 +225,14 @@ namespace System.Configuration
 			if (!config.ConfigHost.IsDefinitionAllowed(config.ConfigPath, this.allowDefinition, this.allowExeDefinition))
 			{
 				object obj = ((this.allowExeDefinition != ConfigurationAllowExeDefinition.MachineToApplication) ? this.allowExeDefinition : this.allowDefinition);
-				throw new ConfigurationErrorsException(string.Concat(new object[] { "The section <", this.Name, "> can't be defined in this configuration file (the allowed definition context is '", obj, "')." }), reader);
+				throw new ConfigurationErrorsException(string.Concat(new string[]
+				{
+					"The section <",
+					this.Name,
+					"> can't be defined in this configuration file (the allowed definition context is '",
+					(obj != null) ? obj.ToString() : null,
+					"')."
+				}), reader);
 			}
 			if (config.GetSectionXml(this) != null)
 			{

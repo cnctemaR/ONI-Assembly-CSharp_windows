@@ -119,6 +119,10 @@ namespace System.Runtime.Serialization
 			RuntimeType runtimeType2 = parentType;
 			while (runtimeType2 != runtimeType)
 			{
+				if (runtimeType2 == null)
+				{
+					throw new InvalidOperationException(string.Format("Type '{0}' of type '{1}' does not derive from System.Object", parentType, (parentType != null) ? parentType.GetType() : null));
+				}
 				if (!runtimeType2.IsInterface)
 				{
 					string name = runtimeType2.Name;

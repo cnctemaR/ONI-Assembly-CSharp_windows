@@ -105,7 +105,11 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 					assignable2 = soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.Bed);
 					if (assignable2 != null)
 					{
-						base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>().Update();
+						AssignableReachabilitySensor sensor = base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>();
+						if (sensor.IsEnabled)
+						{
+							sensor.Update();
+						}
 					}
 				}
 			}

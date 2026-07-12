@@ -35,12 +35,11 @@ public class ChoreConsumerState
 		}
 		this.storage = consumer.GetComponent<Storage>();
 		this.consumableConsumer = consumer.GetComponent<ConsumableConsumer>();
-		this.worker = consumer.GetComponent<Worker>();
+		this.worker = consumer.GetComponent<WorkerBase>();
 		this.selectable = consumer.GetComponent<KSelectable>();
 		if (this.schedulable != null)
 		{
-			int blockIdx = Schedule.GetBlockIdx();
-			this.scheduleBlock = this.schedulable.GetSchedule().GetBlock(blockIdx);
+			this.scheduleBlock = this.schedulable.GetSchedule().GetCurrentScheduleBlock();
 		}
 	}
 
@@ -48,11 +47,10 @@ public class ChoreConsumerState
 	{
 		if (this.schedulable != null)
 		{
-			int blockIdx = Schedule.GetBlockIdx();
 			Schedule schedule = this.schedulable.GetSchedule();
 			if (schedule != null)
 			{
-				this.scheduleBlock = schedule.GetBlock(blockIdx);
+				this.scheduleBlock = schedule.GetCurrentScheduleBlock();
 			}
 		}
 	}
@@ -87,7 +85,7 @@ public class ChoreConsumerState
 
 	public KSelectable selectable;
 
-	public Worker worker;
+	public WorkerBase worker;
 
 	public SolidTransferArm solidTransferArm;
 

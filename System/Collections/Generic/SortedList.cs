@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
 	[Serializable]
 	public class SortedList<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -70,7 +70,7 @@ namespace System.Collections.Generic
 					{
 						if (comparer.Compare(array[num - 1], array[num]) == 0)
 						{
-							throw new ArgumentException(global::SR.Format("An item with the same key has already been added. Key: {0}", array[num]));
+							throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", array[num]));
 						}
 					}
 				}
@@ -87,7 +87,7 @@ namespace System.Collections.Generic
 			int num = Array.BinarySearch<TKey>(this.keys, 0, this._size, key, this.comparer);
 			if (num >= 0)
 			{
-				throw new ArgumentException(global::SR.Format("An item with the same key has already been added. Key: {0}", key), "key");
+				throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", key), "key");
 			}
 			this.Insert(~num, key, value);
 		}
@@ -167,11 +167,11 @@ namespace System.Collections.Generic
 			}
 			if (!(key is TKey))
 			{
-				throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
+				throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
 			}
 			if (!(value is TValue) && value != null)
 			{
-				throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+				throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
 			}
 			this.Add((TKey)((object)key), (TValue)((object)value));
 		}
@@ -470,7 +470,7 @@ namespace System.Collections.Generic
 				{
 					return this.values[num];
 				}
-				throw new KeyNotFoundException();
+				throw new KeyNotFoundException(SR.Format("The given key '{0}' was not present in the dictionary.", key.ToString()));
 			}
 			set
 			{
@@ -520,7 +520,7 @@ namespace System.Collections.Generic
 				}
 				catch (InvalidCastException)
 				{
-					throw new ArgumentException(global::SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+					throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
 				}
 			}
 		}
@@ -922,8 +922,8 @@ namespace System.Collections.Generic
 			private TValue _currentValue;
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
 		[Serializable]
 		private sealed class KeyList : IList<TKey>, ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection
 		{

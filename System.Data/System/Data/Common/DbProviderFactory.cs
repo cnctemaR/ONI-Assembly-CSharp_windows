@@ -19,6 +19,36 @@ namespace System.Data.Common
 			}
 		}
 
+		public virtual bool CanCreateDataAdapter
+		{
+			get
+			{
+				if (this._canCreateDataAdapter == null)
+				{
+					using (DbDataAdapter dbDataAdapter = this.CreateDataAdapter())
+					{
+						this._canCreateDataAdapter = new bool?(dbDataAdapter != null);
+					}
+				}
+				return this._canCreateDataAdapter.Value;
+			}
+		}
+
+		public virtual bool CanCreateCommandBuilder
+		{
+			get
+			{
+				if (this._canCreateCommandBuilder == null)
+				{
+					using (DbCommandBuilder dbCommandBuilder = this.CreateCommandBuilder())
+					{
+						this._canCreateCommandBuilder = new bool?(dbCommandBuilder != null);
+					}
+				}
+				return this._canCreateCommandBuilder.Value;
+			}
+		}
+
 		public virtual DbCommand CreateCommand()
 		{
 			return null;
@@ -53,5 +83,9 @@ namespace System.Data.Common
 		{
 			return null;
 		}
+
+		private bool? _canCreateDataAdapter;
+
+		private bool? _canCreateCommandBuilder;
 	}
 }

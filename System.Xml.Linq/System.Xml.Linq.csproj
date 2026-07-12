@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB55E}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ED5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Xml.Linq</RootNamespace>
     <AssemblyName>System.Xml.Linq</AssemblyName>
@@ -9,23 +9,19 @@
     <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XAttributeValuePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XDeferredAxis.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XDeferredSingleton.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementAttributePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementDescendantsPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementElementPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementElementsPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementValuePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementXmlPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XTypeDescriptionProvider.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XTypeDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SR.cs" />
+    <Compile Include="System\Collections\Generic\ArrayBuilder.cs" />
+    <Compile Include="System\Collections\Generic\CopyPosition.cs" />
+    <Compile Include="System\Collections\Generic\EnumerableHelpers.cs" />
+    <Compile Include="System\Collections\Generic\LargeArrayBuilder.cs" />
+    <Compile Include="System\Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
+    <Compile Include="System\Text\StringBuilderCache.cs" />
     <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
     <Compile Include="System\Xml\Linq\ElementWriter.cs" />
     <Compile Include="System\Xml\Linq\Extensions.cs" />
@@ -33,11 +29,9 @@
     <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
     <Compile Include="System\Xml\Linq\LineInfoEndElementAnnotation.cs" />
     <Compile Include="System\Xml\Linq\LoadOptions.cs" />
-    <Compile Include="System\Xml\Linq\NameSerializer.cs" />
     <Compile Include="System\Xml\Linq\NamespaceCache.cs" />
     <Compile Include="System\Xml\Linq\NamespaceResolver.cs" />
     <Compile Include="System\Xml\Linq\ReaderOptions.cs" />
-    <Compile Include="System\Xml\Linq\Res.cs" />
     <Compile Include="System\Xml\Linq\SaveOptions.cs" />
     <Compile Include="System\Xml\Linq\StreamingElementWriter.cs" />
     <Compile Include="System\Xml\Linq\XAttribute.cs" />
@@ -49,6 +43,7 @@
     <Compile Include="System\Xml\Linq\XDocumentType.cs" />
     <Compile Include="System\Xml\Linq\XElement.cs" />
     <Compile Include="System\Xml\Linq\XHashtable.cs" />
+    <Compile Include="System\Xml\Linq\XHelper.cs" />
     <Compile Include="System\Xml\Linq\XName.cs" />
     <Compile Include="System\Xml\Linq\XNamespace.cs" />
     <Compile Include="System\Xml\Linq\XNode.cs" />
@@ -67,30 +62,28 @@
     <Compile Include="System\Xml\Schema\XmlSchemaInfoEqualityComparer.cs" />
     <Compile Include="System\Xml\Schema\XNodeValidator.cs" />
     <Compile Include="System\Xml\XPath\Extensions.cs" />
+    <Compile Include="System\Xml\XPath\XAttributeExtensions.cs" />
     <Compile Include="System\Xml\XPath\XDocumentExtensions.cs" />
     <Compile Include="System\Xml\XPath\XNodeNavigator.cs" />
+    <Compile Include="System\Xml\XPath\XObjectExtensions.cs" />
     <Compile Include="System\Xml\XPath\XPathEvaluator.cs" />
     <Compile Include="Unity\ThrowStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB552}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC5}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB559}</Project>
-      <Name>System.Runtime.Serialization</Name>
-    </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB55D}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ED4}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

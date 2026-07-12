@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
 	[DebuggerDisplay("IsCancellationRequested = {IsCancellationRequested}")]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-	public struct CancellationToken
+	public readonly struct CancellationToken
 	{
 		public static CancellationToken None
 		{
@@ -24,7 +19,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_source != null && this.m_source.IsCancellationRequested;
+				return this._source != null && this._source.IsCancellationRequested;
 			}
 		}
 
@@ -32,7 +27,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_source != null && this.m_source.CanBeCanceled;
+				return this._source != null;
 			}
 		}
 
@@ -40,57 +35,42 @@ namespace System.Threading
 		{
 			get
 			{
-				if (this.m_source == null)
-				{
-					this.InitializeDefaultSource();
-				}
-				return this.m_source.WaitHandle;
+				return (this._source ?? CancellationTokenSource.s_neverCanceledSource).WaitHandle;
 			}
 		}
 
 		internal CancellationToken(CancellationTokenSource source)
 		{
-			this.m_source = source;
+			this._source = source;
 		}
 
 		public CancellationToken(bool canceled)
 		{
-			this = default(CancellationToken);
-			if (canceled)
-			{
-				this.m_source = CancellationTokenSource.InternalGetStaticSource(canceled);
-			}
-		}
-
-		private static void ActionToActionObjShunt(object obj)
-		{
-			(obj as Action)();
+			this = new CancellationToken(canceled ? CancellationTokenSource.s_canceledSource : null);
 		}
 
 		public CancellationTokenRegistration Register(Action callback)
 		{
+			Action<object> action = CancellationToken.s_actionToActionObjShunt;
 			if (callback == null)
 			{
 				throw new ArgumentNullException("callback");
 			}
-			return this.Register(CancellationToken.s_ActionToActionObjShunt, callback, false, true);
+			return this.Register(action, callback, false, true);
 		}
 
 		public CancellationTokenRegistration Register(Action callback, bool useSynchronizationContext)
 		{
+			Action<object> action = CancellationToken.s_actionToActionObjShunt;
 			if (callback == null)
 			{
 				throw new ArgumentNullException("callback");
 			}
-			return this.Register(CancellationToken.s_ActionToActionObjShunt, callback, useSynchronizationContext, true);
+			return this.Register(action, callback, useSynchronizationContext, true);
 		}
 
 		public CancellationTokenRegistration Register(Action<object> callback, object state)
 		{
-			if (callback == null)
-			{
-				throw new ArgumentNullException("callback");
-			}
 			return this.Register(callback, state, false, true);
 		}
 
@@ -104,50 +84,24 @@ namespace System.Threading
 			return this.Register(callback, state, false, false);
 		}
 
-		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private CancellationTokenRegistration Register(Action<object> callback, object state, bool useSynchronizationContext, bool useExecutionContext)
+		public CancellationTokenRegistration Register(Action<object> callback, object state, bool useSynchronizationContext, bool useExecutionContext)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			if (callback == null)
 			{
 				throw new ArgumentNullException("callback");
 			}
-			if (!this.CanBeCanceled)
+			CancellationTokenSource source = this._source;
+			if (source == null)
 			{
 				return default(CancellationTokenRegistration);
 			}
-			SynchronizationContext synchronizationContext = null;
-			ExecutionContext executionContext = null;
-			if (!this.IsCancellationRequested)
-			{
-				if (useSynchronizationContext)
-				{
-					synchronizationContext = SynchronizationContext.Current;
-				}
-				if (useExecutionContext)
-				{
-					executionContext = ExecutionContext.Capture(ref stackCrawlMark, ExecutionContext.CaptureOptions.OptimizeDefaultCase);
-				}
-			}
-			return this.m_source.InternalRegister(callback, state, synchronizationContext, executionContext);
+			return source.InternalRegister(callback, state, useSynchronizationContext ? SynchronizationContext.Current : null, useExecutionContext ? ExecutionContext.Capture() : null);
 		}
 
 		public bool Equals(CancellationToken other)
 		{
-			if (this.m_source == null && other.m_source == null)
-			{
-				return true;
-			}
-			if (this.m_source == null)
-			{
-				return other.m_source == CancellationTokenSource.InternalGetStaticSource(false);
-			}
-			if (other.m_source == null)
-			{
-				return this.m_source == CancellationTokenSource.InternalGetStaticSource(false);
-			}
-			return this.m_source == other.m_source;
+			return this._source == other._source;
 		}
 
 		public override bool Equals(object other)
@@ -157,11 +111,7 @@ namespace System.Threading
 
 		public override int GetHashCode()
 		{
-			if (this.m_source == null)
-			{
-				return CancellationTokenSource.InternalGetStaticSource(false).GetHashCode();
-			}
-			return this.m_source.GetHashCode();
+			return (this._source ?? CancellationTokenSource.s_neverCanceledSource).GetHashCode();
 		}
 
 		public static bool operator ==(CancellationToken left, CancellationToken right)
@@ -182,31 +132,16 @@ namespace System.Threading
 			}
 		}
 
-		internal void ThrowIfSourceDisposed()
-		{
-			if (this.m_source != null && this.m_source.IsDisposed)
-			{
-				CancellationToken.ThrowObjectDisposedException();
-			}
-		}
-
 		private void ThrowOperationCanceledException()
 		{
-			throw new OperationCanceledException(Environment.GetResourceString("The operation was canceled."), this);
+			throw new OperationCanceledException("The operation was canceled.", this);
 		}
 
-		private static void ThrowObjectDisposedException()
+		private readonly CancellationTokenSource _source;
+
+		private static readonly Action<object> s_actionToActionObjShunt = delegate(object obj)
 		{
-			throw new ObjectDisposedException(null, Environment.GetResourceString("The CancellationTokenSource associated with this CancellationToken has been disposed."));
-		}
-
-		private void InitializeDefaultSource()
-		{
-			this.m_source = CancellationTokenSource.InternalGetStaticSource(false);
-		}
-
-		private CancellationTokenSource m_source;
-
-		private static readonly Action<object> s_ActionToActionObjShunt = new Action<object>(CancellationToken.ActionToActionObjShunt);
+			((Action)obj)();
+		};
 	}
 }

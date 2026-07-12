@@ -15,6 +15,8 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<VomitChore.States, VomitChore.StatesInstance, VomitChore, object>.GameInstance
 	{
+		public SimHashes elementToVomit { get; private set; } = SimHashes.DirtyWater;
+
 		public StatesInstance(VomitChore master, GameObject vomiter, StatusItem status_item, Notification notification)
 			: base(master)
 		{
@@ -23,6 +25,11 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 			this.statusItem = status_item;
 			this.notification = notification;
 			this.vomitCellQuery = new SafetyQuery(Game.Instance.safetyConditions.VomitCellChecker, base.GetComponent<KMonoBehaviour>(), 10);
+			MinionIdentity component = vomiter.GetComponent<MinionIdentity>();
+			if (component != null && component.model == BionicMinionConfig.MODEL)
+			{
+				this.elementToVomit = SimHashes.LiquidGunk;
+			}
 		}
 
 		private static bool CanEmitLiquid(int cell)
@@ -36,6 +43,11 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		}
 
 		public void SpawnDirtyWater(float dt)
+		{
+			this.SpawnVomitLiquid(dt, SimHashes.DirtyWater);
+		}
+
+		public void SpawnVomitLiquid(float dt, SimHashes element)
 		{
 			if (dt > 0f)
 			{
@@ -58,10 +70,10 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
 				if (equippable != null)
 				{
-					equippable.GetComponent<Storage>().AddLiquid(SimHashes.DirtyWater, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, false, true);
+					equippable.GetComponent<Storage>().AddLiquid(element, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, false, true);
 					return;
 				}
-				SimMessages.AddRemoveSubstance(num4, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, true, -1);
+				SimMessages.AddRemoveSubstance(num4, element, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, true, -1);
 			}
 		}
 
@@ -117,9 +129,9 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 					}
 				});
 			this.vomit.buildup.PlayAnim("vomit_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.vomit.release);
-			this.vomit.release.ToggleEffect("Vomiting").PlayAnim("vomit_loop", KAnim.PlayMode.Once).Update("SpawnDirtyWater", delegate(VomitChore.StatesInstance smi, float dt)
+			this.vomit.release.ToggleEffect("Vomiting").PlayAnim("vomit_loop", KAnim.PlayMode.Once).Update("SpawnVomitLiquid", delegate(VomitChore.StatesInstance smi, float dt)
 			{
-				smi.SpawnDirtyWater(dt);
+				smi.SpawnVomitLiquid(dt, smi.elementToVomit);
 			}, UpdateRate.SIM_200ms, false)
 				.OnAnimQueueComplete(this.vomit.release_pst);
 			this.vomit.release_pst.PlayAnim("vomit_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.recover);

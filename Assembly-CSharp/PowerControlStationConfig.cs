@@ -30,8 +30,8 @@ public class PowerControlStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerStation, false);
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -41,16 +41,16 @@ public class PowerControlStationConfig : IBuildingConfig
 		storage.capacityKg = 50f;
 		storage.showInUI = true;
 		storage.storageFilters = new List<Tag> { PowerControlStationConfig.MATERIAL_FOR_TINKER };
-		TinkerStation tinkerStation = go.AddOrGet<TinkerStation>();
-		tinkerStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_electricianworkdesk_kanim") };
-		tinkerStation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
-		tinkerStation.massPerTinker = 5f;
-		tinkerStation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
-		tinkerStation.outputTemperature = 308.15f;
-		tinkerStation.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
-		tinkerStation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
-		tinkerStation.useFilteredStorage = true;
-		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.PowerFetch.IdHash;
+		TinkerStation tinkerstation = go.AddOrGet<TinkerStation>();
+		tinkerstation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_electricianworkdesk_kanim") };
+		tinkerstation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
+		tinkerstation.massPerTinker = 5f;
+		tinkerstation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
+		tinkerstation.outputTemperature = 308.15f;
+		tinkerstation.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
+		tinkerstation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
+		tinkerstation.useFilteredStorage = true;
+		tinkerstation.fetchChoreType = Db.Get().ChoreTypes.PowerFetch.IdHash;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.PowerPlant.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
@@ -62,6 +62,7 @@ public class PowerControlStationConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
 			component.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
+			tinkerstation.SetWorkTime(160f);
 		};
 	}
 

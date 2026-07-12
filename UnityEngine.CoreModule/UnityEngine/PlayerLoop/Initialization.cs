@@ -4,10 +4,15 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[RequiredByNativeCode]
 	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
+	[RequiredByNativeCode]
 	public struct Initialization
 	{
+		[RequiredByNativeCode]
+		public struct ProfilerStartFrame
+		{
+		}
+
 		[Obsolete("PlayerUpdateTime player loop component has been moved to its own category called TimeUpdate. (UnityUpgradable) -> UnityEngine.PlayerLoop.TimeUpdate/WaitForLastPresentationAndUpdateTime", true)]
 		public struct PlayerUpdateTime
 		{

@@ -31,18 +31,18 @@ namespace System.Xml.Schema
 			}
 		}
 
+		[XmlElement("length", typeof(XmlSchemaLengthFacet))]
 		[XmlElement("minLength", typeof(XmlSchemaMinLengthFacet))]
 		[XmlElement("whiteSpace", typeof(XmlSchemaWhiteSpaceFacet))]
-		[XmlElement("fractionDigits", typeof(XmlSchemaFractionDigitsFacet))]
-		[XmlElement("length", typeof(XmlSchemaLengthFacet))]
-		[XmlElement("totalDigits", typeof(XmlSchemaTotalDigitsFacet))]
-		[XmlElement("minInclusive", typeof(XmlSchemaMinInclusiveFacet))]
-		[XmlElement("enumeration", typeof(XmlSchemaEnumerationFacet))]
-		[XmlElement("maxInclusive", typeof(XmlSchemaMaxInclusiveFacet))]
-		[XmlElement("maxExclusive", typeof(XmlSchemaMaxExclusiveFacet))]
 		[XmlElement("maxLength", typeof(XmlSchemaMaxLengthFacet))]
-		[XmlElement("minExclusive", typeof(XmlSchemaMinExclusiveFacet))]
+		[XmlElement("enumeration", typeof(XmlSchemaEnumerationFacet))]
+		[XmlElement("fractionDigits", typeof(XmlSchemaFractionDigitsFacet))]
+		[XmlElement("maxInclusive", typeof(XmlSchemaMaxInclusiveFacet))]
 		[XmlElement("pattern", typeof(XmlSchemaPatternFacet))]
+		[XmlElement("maxExclusive", typeof(XmlSchemaMaxExclusiveFacet))]
+		[XmlElement("minInclusive", typeof(XmlSchemaMinInclusiveFacet))]
+		[XmlElement("totalDigits", typeof(XmlSchemaTotalDigitsFacet))]
+		[XmlElement("minExclusive", typeof(XmlSchemaMinExclusiveFacet))]
 		public XmlSchemaObjectCollection Facets
 		{
 			get

@@ -376,12 +376,12 @@ namespace System.Xml.Xsl.Runtime
 			{
 				throw new XslTransformException("Extension functions cannot return null values.", new string[] { string.Empty });
 			}
-			XmlTypeCode xmlTypeCode = xmlType.TypeCode;
-			if (xmlTypeCode <= XmlTypeCode.Node)
+			XmlTypeCode typeCode = xmlType.TypeCode;
+			if (typeCode <= XmlTypeCode.Node)
 			{
-				if (xmlTypeCode != XmlTypeCode.Item)
+				if (typeCode != XmlTypeCode.Item)
 				{
-					if (xmlTypeCode == XmlTypeCode.Node)
+					if (typeCode == XmlTypeCode.Node)
 					{
 						if (!xmlType.IsSingleton)
 						{
@@ -417,12 +417,12 @@ namespace System.Xml.Xsl.Runtime
 				else
 				{
 					Type type = value.GetType();
-					xmlTypeCode = XsltConvert.InferXsltType(type).TypeCode;
-					if (xmlTypeCode != XmlTypeCode.Item)
+					XmlTypeCode typeCode2 = XsltConvert.InferXsltType(type).TypeCode;
+					if (typeCode2 != XmlTypeCode.Item)
 					{
-						if (xmlTypeCode != XmlTypeCode.Node)
+						if (typeCode2 != XmlTypeCode.Node)
 						{
-							switch (xmlTypeCode)
+							switch (typeCode2)
 							{
 							case XmlTypeCode.String:
 								if (type == XsltConvert.DateTimeType)
@@ -469,9 +469,9 @@ namespace System.Xml.Xsl.Runtime
 					}
 				}
 			}
-			else if (xmlTypeCode != XmlTypeCode.String)
+			else if (typeCode != XmlTypeCode.String)
 			{
-				if (xmlTypeCode == XmlTypeCode.Double)
+				if (typeCode == XmlTypeCode.Double)
 				{
 					if (value.GetType() != XsltConvert.DoubleType)
 					{

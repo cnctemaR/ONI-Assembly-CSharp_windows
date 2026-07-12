@@ -13,7 +13,7 @@ public class AntihistamineConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("Antihistamine", ITEMS.PILLS.ANTIHISTAMINE.NAME, ITEMS.PILLS.ANTIHISTAMINE.DESC, 1f, true, Assets.GetAnim("pill_allergies_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("Antihistamine", global::STRINGS.ITEMS.PILLS.ANTIHISTAMINE.NAME, global::STRINGS.ITEMS.PILLS.ANTIHISTAMINE.DESC, 1f, true, Assets.GetAnim("pill_allergies_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.ANTIHISTAMINE);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -27,7 +27,7 @@ public class AntihistamineConfig : IEntityConfig
 		AntihistamineConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 100f,
-			description = ITEMS.PILLS.ANTIHISTAMINE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.ANTIHISTAMINE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Apothecary" },
 			sortOrder = 10

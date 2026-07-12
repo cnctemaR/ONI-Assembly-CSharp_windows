@@ -486,13 +486,21 @@ public class VitalsTableScreen : TableScreen
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		if (widgetRow.rowType == TableRow.RowType.Minion && minion as MinionIdentity != null)
 		{
-			return Db.Get().Amounts.Calories.Lookup(minion as MinionIdentity).GetValueString();
-		}
-		if (widgetRow.rowType == TableRow.RowType.StoredMinon)
-		{
+			AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(minion as MinionIdentity);
+			if (amountInstance != null)
+			{
+				return amountInstance.GetValueString();
+			}
 			return UI.TABLESCREENS.NA;
 		}
-		return "";
+		else
+		{
+			if (widgetRow.rowType == TableRow.RowType.StoredMinon)
+			{
+				return UI.TABLESCREENS.NA;
+			}
+			return "";
+		}
 	}
 
 	private int compare_rows_fullness(IAssignableIdentity a, IAssignableIdentity b)
@@ -511,8 +519,22 @@ public class VitalsTableScreen : TableScreen
 		{
 			return 1;
 		}
-		float value = Db.Get().Amounts.Calories.Lookup(minionIdentity).value;
-		float value2 = Db.Get().Amounts.Calories.Lookup(minionIdentity2).value;
+		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(minionIdentity);
+		AmountInstance amountInstance2 = Db.Get().Amounts.Calories.Lookup(minionIdentity2);
+		if (amountInstance == null && amountInstance2 == null)
+		{
+			return 0;
+		}
+		if (amountInstance == null)
+		{
+			return -1;
+		}
+		if (amountInstance2 == null)
+		{
+			return 1;
+		}
+		float value = amountInstance.value;
+		float value2 = amountInstance2.value;
 		return value2.CompareTo(value);
 	}
 
@@ -529,8 +551,12 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = identity as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Calories.Lookup(minionIdentity).GetTooltip(), null);
-				return;
+				AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(minionIdentity);
+				if (amountInstance != null)
+				{
+					tooltip.AddMultiStringTooltip(amountInstance.GetTooltip(), null);
+					return;
+				}
 			}
 			break;
 		}

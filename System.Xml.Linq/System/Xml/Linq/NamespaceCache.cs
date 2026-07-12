@@ -6,17 +6,17 @@ namespace System.Xml.Linq
 	{
 		public XNamespace Get(string namespaceName)
 		{
-			if (namespaceName == this.namespaceName)
+			if (namespaceName == this._namespaceName)
 			{
-				return this.ns;
+				return this._ns;
 			}
-			this.namespaceName = namespaceName;
-			this.ns = XNamespace.Get(namespaceName);
-			return this.ns;
+			this._namespaceName = namespaceName;
+			this._ns = XNamespace.Get(namespaceName);
+			return this._ns;
 		}
 
-		private XNamespace ns;
+		private XNamespace _ns;
 
-		private string namespaceName;
+		private string _namespaceName;
 	}
 }

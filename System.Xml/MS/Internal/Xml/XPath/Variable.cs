@@ -7,8 +7,8 @@ namespace MS.Internal.Xml.XPath
 	{
 		public Variable(string name, string prefix)
 		{
-			this.localname = name;
-			this.prefix = prefix;
+			this._localname = name;
+			this._prefix = prefix;
 		}
 
 		public override AstNode.AstType Type
@@ -31,7 +31,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.localname;
+				return this._localname;
 			}
 		}
 
@@ -39,12 +39,12 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 		}
 
-		private string localname;
+		private string _localname;
 
-		private string prefix;
+		private string _prefix;
 	}
 }

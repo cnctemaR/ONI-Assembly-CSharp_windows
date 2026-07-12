@@ -89,12 +89,18 @@ namespace UnityEngine.Experimental.Rendering
 		R10G10B10_XRUNormPack32,
 		A10R10G10B10_XRSRGBPack32,
 		A10R10G10B10_XRUNormPack32,
-		[EditorBrowsable(EditorBrowsableState.Never)]
+		D16_UNorm = 90,
+		D24_UNorm,
+		D24_UNorm_S8_UInt,
+		D32_SFloat,
+		D32_SFloat_S8_UInt,
+		S8_UInt,
 		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_SRGB has been deprecated. Use GraphicsFormat.RGBA_DXT1_SRGB instead (UnityUpgradable) -> RGBA_DXT1_SRGB", true)]
-		RGB_DXT1_SRGB = 96,
-		RGBA_DXT1_SRGB = 96,
-		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_UNorm has been deprecated. Use GraphicsFormat.RGBA_DXT1_UNorm instead (UnityUpgradable) -> RGBA_DXT1_UNorm", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		RGB_DXT1_SRGB,
+		RGBA_DXT1_SRGB = 96,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_UNorm has been deprecated. Use GraphicsFormat.RGBA_DXT1_UNorm instead (UnityUpgradable) -> RGBA_DXT1_UNorm", true)]
 		RGB_DXT1_UNorm,
 		RGBA_DXT1_UNorm = 97,
 		RGBA_DXT3_SRGB,
@@ -140,11 +146,19 @@ namespace UnityEngine.Experimental.Rendering
 		RGBA_ASTC10X10_UNorm,
 		RGBA_ASTC12X12_SRGB,
 		RGBA_ASTC12X12_UNorm,
-		RGBA_ASTC4X4_UFloat = 145,
+		YUV2,
+		[Obsolete("Enum member GraphicsFormat.DepthAuto has been deprecated. Use GraphicsFormat.None as a color format to indicate depth only rendering and DefaultFormat to get the default depth buffer format.", false)]
+		DepthAuto,
+		[Obsolete("Enum member GraphicsFormat.ShadowAuto has been deprecated. Use GraphicsFormat.None as a color format to indicate depth only rendering and DefaultFormat to get the default shadow buffer format.", false)]
+		ShadowAuto,
+		[Obsolete("Enum member GraphicsFormat.VideoAuto has been deprecated. Use DefaultFormat instead.", false)]
+		VideoAuto,
+		RGBA_ASTC4X4_UFloat,
 		RGBA_ASTC5X5_UFloat,
 		RGBA_ASTC6X6_UFloat,
 		RGBA_ASTC8X8_UFloat,
 		RGBA_ASTC10X10_UFloat,
-		RGBA_ASTC12X12_UFloat
+		RGBA_ASTC12X12_UFloat,
+		D16_UNorm_S8_UInt
 	}
 }

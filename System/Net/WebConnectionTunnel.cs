@@ -69,13 +69,13 @@ namespace System.Net
 				have_auth = true;
 				if (this.connectRequest == null)
 				{
-					this.connectRequest = (HttpWebRequest)WebRequest.Create(string.Concat(new object[]
+					this.connectRequest = (HttpWebRequest)WebRequest.Create(string.Concat(new string[]
 					{
 						this.ConnectUri.Scheme,
 						"://",
 						this.ConnectUri.Host,
 						":",
-						this.ConnectUri.Port,
+						this.ConnectUri.Port.ToString(),
 						"/"
 					}));
 					this.connectRequest.Method = "CONNECT";
@@ -163,7 +163,7 @@ namespace System.Net
 					}
 					else
 					{
-						string[] array = text.Split(new char[] { ' ' });
+						string[] array = text.Split(' ', StringSplitOptions.None);
 						if (array.Length < 2)
 						{
 							goto Block_6;
@@ -176,7 +176,7 @@ namespace System.Net
 						{
 							if (string.Compare(array[0], "HTTP/1.0", true) != 0)
 							{
-								goto IL_0232;
+								goto IL_022A;
 							}
 							this.ProxyVersion = HttpVersion.Version10;
 						}
@@ -209,7 +209,7 @@ namespace System.Net
 			return new ValueTuple<WebHeaderCollection, byte[], int>(webHeaderCollection, retBuffer, status);
 			Block_6:
 			throw WebConnection.GetException(WebExceptionStatus.ServerProtocolViolation, null);
-			IL_0232:
+			IL_022A:
 			throw WebConnection.GetException(WebExceptionStatus.ServerProtocolViolation, null);
 		}
 

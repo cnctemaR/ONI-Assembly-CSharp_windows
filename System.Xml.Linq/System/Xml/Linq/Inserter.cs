@@ -7,52 +7,53 @@ namespace System.Xml.Linq
 	{
 		public Inserter(XContainer parent, XNode anchor)
 		{
-			this.parent = parent;
-			this.previous = anchor;
-			this.text = null;
+			this._parent = parent;
+			this._previous = anchor;
+			this._text = null;
 		}
 
 		public void Add(object content)
 		{
 			this.AddContent(content);
-			if (this.text != null)
+			if (this._text != null)
 			{
-				if (this.parent.content == null)
+				if (this._parent.content == null)
 				{
-					if (this.parent.SkipNotify())
+					if (this._parent.SkipNotify())
 					{
-						this.parent.content = this.text;
+						this._parent.content = this._text;
 						return;
 					}
-					if (this.text.Length > 0)
+					if (this._text.Length > 0)
 					{
-						this.InsertNode(new XText(this.text));
+						this.InsertNode(new XText(this._text));
 						return;
 					}
-					if (!(this.parent is XElement))
+					if (!(this._parent is XElement))
 					{
-						this.parent.content = this.text;
+						this._parent.content = this._text;
 						return;
 					}
-					this.parent.NotifyChanging(this.parent, XObjectChangeEventArgs.Value);
-					if (this.parent.content != null)
+					this._parent.NotifyChanging(this._parent, XObjectChangeEventArgs.Value);
+					if (this._parent.content != null)
 					{
-						throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+						throw new InvalidOperationException("This operation was corrupted by external code.");
 					}
-					this.parent.content = this.text;
-					this.parent.NotifyChanged(this.parent, XObjectChangeEventArgs.Value);
+					this._parent.content = this._text;
+					this._parent.NotifyChanged(this._parent, XObjectChangeEventArgs.Value);
 					return;
 				}
-				else if (this.text.Length > 0)
+				else if (this._text.Length > 0)
 				{
-					if (this.previous is XText && !(this.previous is XCData))
+					XText xtext = this._previous as XText;
+					if (xtext != null && !(this._previous is XCData))
 					{
-						XText xtext = (XText)this.previous;
-						xtext.Value += this.text;
+						XText xtext2 = xtext;
+						xtext2.Value += this._text;
 						return;
 					}
-					this.parent.ConvertTextToNode();
-					this.InsertNode(new XText(this.text));
+					this._parent.ConvertTextToNode();
+					this.InsertNode(new XText(this._text));
 				}
 			}
 		}
@@ -101,21 +102,21 @@ namespace System.Xml.Linq
 			}
 			if (content is XAttribute)
 			{
-				throw new ArgumentException(Res.GetString("Argument_AddAttribute"));
+				throw new ArgumentException("An attribute cannot be added to content.");
 			}
 			this.AddString(XContainer.GetStringValue(content));
 		}
 
 		private void AddNode(XNode n)
 		{
-			this.parent.ValidateNode(n, this.previous);
+			this._parent.ValidateNode(n, this._previous);
 			if (n.parent != null)
 			{
 				n = n.CloneNode();
 			}
 			else
 			{
-				XNode xnode = this.parent;
+				XNode xnode = this._parent;
 				while (xnode.parent != null)
 				{
 					xnode = xnode.parent;
@@ -125,71 +126,72 @@ namespace System.Xml.Linq
 					n = n.CloneNode();
 				}
 			}
-			this.parent.ConvertTextToNode();
-			if (this.text != null)
+			this._parent.ConvertTextToNode();
+			if (this._text != null)
 			{
-				if (this.text.Length > 0)
+				if (this._text.Length > 0)
 				{
-					if (this.previous is XText && !(this.previous is XCData))
+					XText xtext = this._previous as XText;
+					if (xtext != null && !(this._previous is XCData))
 					{
-						XText xtext = (XText)this.previous;
-						xtext.Value += this.text;
+						XText xtext2 = xtext;
+						xtext2.Value += this._text;
 					}
 					else
 					{
-						this.InsertNode(new XText(this.text));
+						this.InsertNode(new XText(this._text));
 					}
 				}
-				this.text = null;
+				this._text = null;
 			}
 			this.InsertNode(n);
 		}
 
 		private void AddString(string s)
 		{
-			this.parent.ValidateString(s);
-			this.text += s;
+			this._parent.ValidateString(s);
+			this._text += s;
 		}
 
 		private void InsertNode(XNode n)
 		{
-			bool flag = this.parent.NotifyChanging(n, XObjectChangeEventArgs.Add);
+			bool flag = this._parent.NotifyChanging(n, XObjectChangeEventArgs.Add);
 			if (n.parent != null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+				throw new InvalidOperationException("This operation was corrupted by external code.");
 			}
-			n.parent = this.parent;
-			if (this.parent.content == null || this.parent.content is string)
+			n.parent = this._parent;
+			if (this._parent.content == null || this._parent.content is string)
 			{
 				n.next = n;
-				this.parent.content = n;
+				this._parent.content = n;
 			}
-			else if (this.previous == null)
+			else if (this._previous == null)
 			{
-				XNode xnode = (XNode)this.parent.content;
+				XNode xnode = (XNode)this._parent.content;
 				n.next = xnode.next;
 				xnode.next = n;
 			}
 			else
 			{
-				n.next = this.previous.next;
-				this.previous.next = n;
-				if (this.parent.content == this.previous)
+				n.next = this._previous.next;
+				this._previous.next = n;
+				if (this._parent.content == this._previous)
 				{
-					this.parent.content = n;
+					this._parent.content = n;
 				}
 			}
-			this.previous = n;
+			this._previous = n;
 			if (flag)
 			{
-				this.parent.NotifyChanged(n, XObjectChangeEventArgs.Add);
+				this._parent.NotifyChanged(n, XObjectChangeEventArgs.Add);
 			}
 		}
 
-		private XContainer parent;
+		private XContainer _parent;
 
-		private XNode previous;
+		private XNode _previous;
 
-		private string text;
+		private string _text;
 	}
 }

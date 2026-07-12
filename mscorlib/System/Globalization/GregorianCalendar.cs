@@ -416,6 +416,8 @@ namespace System.Globalization
 
 		internal const int MaxYear = 9999;
 
+		internal const int MinYear = 1;
+
 		internal GregorianCalendarTypes m_type;
 
 		internal static readonly int[] DaysToMonth365 = new int[]

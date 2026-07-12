@@ -1,42 +1,36 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Security;
 using System.Text;
-using Unity;
 
 namespace System
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	public static class StringNormalizationExtensions
 	{
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static bool IsNormalized(this string value)
+		public static bool IsNormalized(this string strInput)
 		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return default(bool);
+			return strInput.IsNormalized(NormalizationForm.FormC);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[SecurityCritical]
-		public static bool IsNormalized(this string value, NormalizationForm normalizationForm)
+		public static bool IsNormalized(this string strInput, NormalizationForm normalizationForm)
 		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return default(bool);
+			if (strInput == null)
+			{
+				throw new ArgumentNullException("strInput");
+			}
+			return strInput.IsNormalized(normalizationForm);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static string Normalize(this string value)
+		public static string Normalize(this string strInput)
 		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
+			return strInput.Normalize(NormalizationForm.FormC);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[SecurityCritical]
-		public static string Normalize(this string value, NormalizationForm normalizationForm)
+		public static string Normalize(this string strInput, NormalizationForm normalizationForm)
 		{
-			global::Unity.ThrowStub.ThrowNotSupportedException();
-			return null;
+			if (strInput == null)
+			{
+				throw new ArgumentNullException("strInput");
+			}
+			return strInput.Normalize(normalizationForm);
 		}
 	}
 }

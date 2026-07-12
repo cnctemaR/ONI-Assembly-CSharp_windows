@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class MercuryCeilingLightConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
 	}
 
 	public override BuildingDef CreateBuildingDef()

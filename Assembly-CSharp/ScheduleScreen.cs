@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 
 public class ScheduleScreen : KScreen
 {
+	public string SelectedPaint { get; set; }
+
 	public override float GetSortKey()
 	{
 		return 50f;
@@ -13,21 +15,12 @@ public class ScheduleScreen : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.ConsumeMouseScroll = true;
-		this.entries = new List<ScheduleScreenEntry>();
-		this.paintStyles = new Dictionary<string, ColorStyleSetting>();
-		this.paintStyles["Hygene"] = this.hygene_color;
-		this.paintStyles["Worktime"] = this.work_color;
-		this.paintStyles["Recreation"] = this.recreation_color;
-		this.paintStyles["Sleep"] = this.sleep_color;
+		this.scheduleEntries = new List<ScheduleScreenEntry>();
+		ScheduleScreen.Instance = this;
 	}
 
 	protected override void OnSpawn()
 	{
-		this.paintButtons = new List<SchedulePaintButton>();
-		foreach (ScheduleGroup scheduleGroup in Db.Get().ScheduleGroups.allGroups)
-		{
-			this.AddPaintButton(scheduleGroup);
-		}
 		foreach (Schedule schedule in ScheduleManager.Instance.GetSchedules())
 		{
 			this.AddScheduleEntry(schedule);
@@ -45,6 +38,7 @@ public class ScheduleScreen : KScreen
 	{
 		base.OnCleanUp();
 		ScheduleManager.Instance.onSchedulesChanged -= this.OnSchedulesChanged;
+		ScheduleScreen.Instance = null;
 	}
 
 	protected override void OnShow(bool show)
@@ -56,12 +50,12 @@ public class ScheduleScreen : KScreen
 		}
 	}
 
-	private void AddPaintButton(ScheduleGroup group)
+	public void RefreshAllPaintButtons()
 	{
-		SchedulePaintButton schedulePaintButton = Util.KInstantiateUI<SchedulePaintButton>(this.paintButtonPrefab.gameObject, this.paintButtonContainer, true);
-		schedulePaintButton.SetGroup(group, this.paintStyles, new Action<SchedulePaintButton>(this.OnPaintButtonClick));
-		schedulePaintButton.SetToggle(false);
-		this.paintButtons.Add(schedulePaintButton);
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
+		{
+			scheduleScreenEntry.RefreshPaintButtons();
+		}
 	}
 
 	private void OnAddScheduleClick()
@@ -69,45 +63,20 @@ public class ScheduleScreen : KScreen
 		ScheduleManager.Instance.AddDefaultSchedule(false);
 	}
 
-	private void OnPaintButtonClick(SchedulePaintButton clicked)
-	{
-		if (this.selectedPaint != clicked)
-		{
-			foreach (SchedulePaintButton schedulePaintButton in this.paintButtons)
-			{
-				schedulePaintButton.SetToggle(schedulePaintButton == clicked);
-			}
-			this.selectedPaint = clicked;
-			return;
-		}
-		clicked.SetToggle(false);
-		this.selectedPaint = null;
-	}
-
-	private void OnPaintDragged(ScheduleScreenEntry entry, float ratio)
-	{
-		if (this.selectedPaint == null)
-		{
-			return;
-		}
-		int num = Mathf.FloorToInt(ratio * (float)entry.schedule.GetBlocks().Count);
-		entry.schedule.SetGroup(num, this.selectedPaint.group);
-	}
-
 	private void AddScheduleEntry(Schedule schedule)
 	{
 		ScheduleScreenEntry scheduleScreenEntry = Util.KInstantiateUI<ScheduleScreenEntry>(this.scheduleEntryPrefab.gameObject, this.scheduleEntryContainer, true);
-		scheduleScreenEntry.Setup(schedule, this.paintStyles, new Action<ScheduleScreenEntry, float>(this.OnPaintDragged));
-		this.entries.Add(scheduleScreenEntry);
+		scheduleScreenEntry.Setup(schedule);
+		this.scheduleEntries.Add(scheduleScreenEntry);
 	}
 
 	private void OnSchedulesChanged(List<Schedule> schedules)
 	{
-		foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
 		{
 			Util.KDestroyGameObject(scheduleScreenEntry);
 		}
-		this.entries.Clear();
+		this.scheduleEntries.Clear();
 		foreach (Schedule schedule in schedules)
 		{
 			this.AddScheduleEntry(schedule);
@@ -116,9 +85,17 @@ public class ScheduleScreen : KScreen
 
 	private void RefreshWidgetWorldData(object data = null)
 	{
-		foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
 		{
 			scheduleScreenEntry.RefreshWidgetWorldData();
+		}
+	}
+
+	public void OnChangeCurrentTimetable()
+	{
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
+		{
+			scheduleScreenEntry.RefreshTimeOfDayPositioner();
 		}
 	}
 
@@ -146,7 +123,7 @@ public class ScheduleScreen : KScreen
 			GameObject currentSelectedGameObject = global::UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 			if (currentSelectedGameObject != null)
 			{
-				foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+				foreach (ScheduleScreenEntry scheduleScreenEntry in this.scheduleEntries)
 				{
 					if (currentSelectedGameObject == scheduleScreenEntry.GetNameInputField())
 					{
@@ -159,11 +136,7 @@ public class ScheduleScreen : KScreen
 		return flag;
 	}
 
-	[SerializeField]
-	private SchedulePaintButton paintButtonPrefab;
-
-	[SerializeField]
-	private GameObject paintButtonContainer;
+	public static ScheduleScreen Instance;
 
 	[SerializeField]
 	private ScheduleScreenEntry scheduleEntryPrefab;
@@ -177,23 +150,5 @@ public class ScheduleScreen : KScreen
 	[SerializeField]
 	private KButton closeButton;
 
-	[SerializeField]
-	private ColorStyleSetting hygene_color;
-
-	[SerializeField]
-	private ColorStyleSetting work_color;
-
-	[SerializeField]
-	private ColorStyleSetting recreation_color;
-
-	[SerializeField]
-	private ColorStyleSetting sleep_color;
-
-	private Dictionary<string, ColorStyleSetting> paintStyles;
-
-	private List<ScheduleScreenEntry> entries;
-
-	private List<SchedulePaintButton> paintButtons;
-
-	private SchedulePaintButton selectedPaint;
+	private List<ScheduleScreenEntry> scheduleEntries;
 }

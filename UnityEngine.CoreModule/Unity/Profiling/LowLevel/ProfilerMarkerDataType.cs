@@ -4,13 +4,15 @@ namespace Unity.Profiling.LowLevel
 {
 	public enum ProfilerMarkerDataType : byte
 	{
-		Int32 = 2,
+		InstanceId = 1,
+		Int32,
 		UInt32,
 		Int64,
 		UInt64,
 		Float,
 		Double,
 		String16 = 9,
-		Blob8 = 11
+		Blob8 = 11,
+		GfxResourceId
 	}
 }

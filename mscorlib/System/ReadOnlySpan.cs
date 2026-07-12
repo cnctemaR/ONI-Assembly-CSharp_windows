@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 
 namespace System
 {
-	[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
+	[NonVersionable]
 	[DebuggerTypeProxy(typeof(SpanDebugView<>))]
-	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	[DebuggerDisplay("{ToString(),raw}")]
 	public readonly ref struct ReadOnlySpan<T>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -14,11 +15,11 @@ namespace System
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				this = default(ReadOnlySpan<T>);
+				return;
 			}
+			this._pointer = new ByReference<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()));
 			this._length = array.Length;
-			this._pinnable = Unsafe.As<Pinnable<T>>(array);
-			this._byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,59 +27,140 @@ namespace System
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				if (start != 0 || length != 0)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				this = default(ReadOnlySpan<T>);
+				return;
 			}
 			if (start > array.Length || length > array.Length - start)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
+			this._pointer = new ByReference<T>(Unsafe.Add<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()), start));
 			this._length = length;
-			this._pinnable = Unsafe.As<Pinnable<T>>(array);
-			this._byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start);
 		}
 
+		[CLSCompliant(false)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe ReadOnlySpan(void* pointer, int length)
 		{
-			if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
 			{
-				ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+				ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(T));
 			}
 			if (length < 0)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
+			this._pointer = new ByReference<T>(Unsafe.As<byte, T>(ref *(byte*)pointer));
 			this._length = length;
-			this._pinnable = null;
-			this._byteOffset = new IntPtr(pointer);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ReadOnlySpan<T> DangerousCreate(object obj, ref T objectData, int length)
+		internal ReadOnlySpan(ref T ptr, int length)
 		{
-			Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
-			IntPtr intPtr = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
-			return new ReadOnlySpan<T>(pinnable, intPtr, length);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal ReadOnlySpan(Pinnable<T> pinnable, IntPtr byteOffset, int length)
-		{
+			this._pointer = new ByReference<T>(ref ptr);
 			this._length = length;
-			this._pinnable = pinnable;
-			this._byteOffset = byteOffset;
 		}
 
-		private string DebuggerDisplay
+		public ref T this[int index]
 		{
+			[NonVersionable]
+			[Intrinsic]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return string.Format("{{{0}[{1}]}}", typeof(T).Name, this._length);
+				if (index >= this._length)
+				{
+					ThrowHelper.ThrowIndexOutOfRangeException();
+				}
+				return Unsafe.Add<T>(this._pointer.Value, index);
 			}
+		}
+
+		public readonly ref T GetPinnableReference()
+		{
+			if (this._length == 0)
+			{
+				return Unsafe.AsRef<T>(null);
+			}
+			return this._pointer.Value;
+		}
+
+		public void CopyTo(Span<T> destination)
+		{
+			if (this._length <= destination.Length)
+			{
+				Buffer.Memmove<T>(destination._pointer.Value, this._pointer.Value, (ulong)((long)this._length));
+				return;
+			}
+			ThrowHelper.ThrowArgumentException_DestinationTooShort();
+		}
+
+		public bool TryCopyTo(Span<T> destination)
+		{
+			bool flag = false;
+			if (this._length <= destination.Length)
+			{
+				Buffer.Memmove<T>(destination._pointer.Value, this._pointer.Value, (ulong)((long)this._length));
+				flag = true;
+			}
+			return flag;
+		}
+
+		public static bool operator ==(ReadOnlySpan<T> left, ReadOnlySpan<T> right)
+		{
+			return left._length == right._length && Unsafe.AreSame<T>(left._pointer.Value, right._pointer.Value);
+		}
+
+		public unsafe override string ToString()
+		{
+			if (typeof(T) == typeof(char))
+			{
+				fixed (char* ptr = Unsafe.As<T, char>(this._pointer.Value))
+				{
+					return new string(ptr, 0, this._length);
+				}
+			}
+			return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, this._length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ReadOnlySpan<T> Slice(int start)
+		{
+			if (start > this._length)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException();
+			}
+			return new ReadOnlySpan<T>(Unsafe.Add<T>(this._pointer.Value, start), this._length - start);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ReadOnlySpan<T> Slice(int start, int length)
+		{
+			if (start > this._length || length > this._length - start)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException();
+			}
+			return new ReadOnlySpan<T>(Unsafe.Add<T>(this._pointer.Value, start), length);
+		}
+
+		public T[] ToArray()
+		{
+			if (this._length == 0)
+			{
+				return Array.Empty<T>();
+			}
+			T[] array = new T[this._length];
+			Buffer.Memmove<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()), this._pointer.Value, (ulong)((long)this._length));
+			return array;
 		}
 
 		public int Length
 		{
+			[NonVersionable]
 			get
 			{
 				return this._length;
@@ -87,57 +169,11 @@ namespace System
 
 		public bool IsEmpty
 		{
+			[NonVersionable]
 			get
 			{
 				return this._length == 0;
 			}
-		}
-
-		public unsafe T this[int index]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
-			{
-				if (index >= this._length)
-				{
-					ThrowHelper.ThrowIndexOutOfRangeException();
-				}
-				if (this._pinnable == null)
-				{
-					return *Unsafe.Add<T>(Unsafe.AsRef<T>(this._byteOffset.ToPointer()), index);
-				}
-				return *Unsafe.Add<T>(Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset), index);
-			}
-		}
-
-		public void CopyTo(Span<T> destination)
-		{
-			if (!this.TryCopyTo(destination))
-			{
-				ThrowHelper.ThrowArgumentException_DestinationTooShort();
-			}
-		}
-
-		public bool TryCopyTo(Span<T> destination)
-		{
-			int length = this._length;
-			int length2 = destination.Length;
-			if (length == 0)
-			{
-				return true;
-			}
-			if (length > length2)
-			{
-				return false;
-			}
-			ref T ptr = ref this.DangerousGetPinnableReference();
-			SpanHelpers.CopyTo<T>(destination.DangerousGetPinnableReference(), length2, ref ptr, length);
-			return true;
-		}
-
-		public static bool operator ==(ReadOnlySpan<T> left, ReadOnlySpan<T> right)
-		{
-			return left._length == right._length && Unsafe.AreSame<T>(left.DangerousGetPinnableReference(), right.DangerousGetPinnableReference());
 		}
 
 		public static bool operator !=(ReadOnlySpan<T> left, ReadOnlySpan<T> right)
@@ -145,13 +181,13 @@ namespace System
 			return !(left == right);
 		}
 
-		[Obsolete("Equals() on Span will always throw an exception. Use == instead.")]
+		[Obsolete("Equals() on ReadOnlySpan will always throw an exception. Use == instead.")]
 		public override bool Equals(object obj)
 		{
 			throw new NotSupportedException("Equals() on Span and ReadOnlySpan is not supported. Use operator== instead.");
 		}
 
-		[Obsolete("GetHashCode() on Span will always throw an exception.")]
+		[Obsolete("GetHashCode() on ReadOnlySpan will always throw an exception.")]
 		public override int GetHashCode()
 		{
 			throw new NotSupportedException("GetHashCode() on Span and ReadOnlySpan is not supported.");
@@ -162,43 +198,9 @@ namespace System
 			return new ReadOnlySpan<T>(array);
 		}
 
-		public static implicit operator ReadOnlySpan<T>(ArraySegment<T> arraySegment)
+		public static implicit operator ReadOnlySpan<T>(ArraySegment<T> segment)
 		{
-			return new ReadOnlySpan<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ReadOnlySpan<T> Slice(int start)
-		{
-			if (start > this._length)
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-			}
-			IntPtr intPtr = this._byteOffset.Add<T>(start);
-			int num = this._length - start;
-			return new ReadOnlySpan<T>(this._pinnable, intPtr, num);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ReadOnlySpan<T> Slice(int start, int length)
-		{
-			if (start > this._length || length > this._length - start)
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-			}
-			IntPtr intPtr = this._byteOffset.Add<T>(start);
-			return new ReadOnlySpan<T>(this._pinnable, intPtr, length);
-		}
-
-		public T[] ToArray()
-		{
-			if (this._length == 0)
-			{
-				return SpanHelpers.PerTypeValues<T>.EmptyArray;
-			}
-			T[] array = new T[this._length];
-			this.CopyTo(array);
-			return array;
+			return new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
 		}
 
 		public static ReadOnlySpan<T> Empty
@@ -209,36 +211,49 @@ namespace System
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ref T DangerousGetPinnableReference()
+		public ReadOnlySpan<T>.Enumerator GetEnumerator()
 		{
-			if (this._pinnable == null)
-			{
-				return Unsafe.AsRef<T>(this._byteOffset.ToPointer());
-			}
-			return Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset);
+			return new ReadOnlySpan<T>.Enumerator(this);
 		}
 
-		internal Pinnable<T> Pinnable
-		{
-			get
-			{
-				return this._pinnable;
-			}
-		}
-
-		internal IntPtr ByteOffset
-		{
-			get
-			{
-				return this._byteOffset;
-			}
-		}
-
-		private readonly Pinnable<T> _pinnable;
-
-		private readonly IntPtr _byteOffset;
+		internal readonly ByReference<T> _pointer;
 
 		private readonly int _length;
+
+		[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
+		public ref struct Enumerator
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			internal Enumerator(ReadOnlySpan<T> span)
+			{
+				this._span = span;
+				this._index = -1;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			public bool MoveNext()
+			{
+				int num = this._index + 1;
+				if (num < this._span.Length)
+				{
+					this._index = num;
+					return true;
+				}
+				return false;
+			}
+
+			public readonly ref T Current
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get
+				{
+					return this._span[this._index];
+				}
+			}
+
+			private readonly ReadOnlySpan<T> _span;
+
+			private int _index;
+		}
 	}
 }

@@ -13,10 +13,10 @@ namespace Mono.Interop
 	internal class ComInteropProxy : RealProxy, IRemotingTypeInfo
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddProxy(IntPtr pItf, ComInteropProxy proxy);
+		private static extern void AddProxy(IntPtr pItf, ref ComInteropProxy proxy);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern ComInteropProxy FindProxy(IntPtr pItf);
+		internal static extern void FindProxy(IntPtr pItf, ref ComInteropProxy proxy);
 
 		private ComInteropProxy(Type t)
 			: base(t)
@@ -26,9 +26,12 @@ namespace Mono.Interop
 
 		private void CacheProxy()
 		{
-			if (ComInteropProxy.FindProxy(this.com_object.IUnknown) == null)
+			ComInteropProxy comInteropProxy = null;
+			ComInteropProxy.FindProxy(this.com_object.IUnknown, ref comInteropProxy);
+			if (comInteropProxy == null)
 			{
-				ComInteropProxy.AddProxy(this.com_object.IUnknown, this);
+				ComInteropProxy comInteropProxy2 = this;
+				ComInteropProxy.AddProxy(this.com_object.IUnknown, ref comInteropProxy2);
 				return;
 			}
 			Interlocked.Increment(ref this.ref_count);
@@ -51,7 +54,8 @@ namespace Mono.Interop
 			Guid iid_IUnknown = __ComObject.IID_IUnknown;
 			IntPtr intPtr;
 			Marshal.ThrowExceptionForHR(Marshal.QueryInterface(pItf, ref iid_IUnknown, out intPtr));
-			ComInteropProxy comInteropProxy = ComInteropProxy.FindProxy(intPtr);
+			ComInteropProxy comInteropProxy = null;
+			ComInteropProxy.FindProxy(intPtr, ref comInteropProxy);
 			if (comInteropProxy == null)
 			{
 				Marshal.Release(intPtr);
@@ -65,7 +69,8 @@ namespace Mono.Interop
 		internal static ComInteropProxy CreateProxy(Type t)
 		{
 			IntPtr intPtr = __ComObject.CreateIUnknown(t);
-			ComInteropProxy comInteropProxy = ComInteropProxy.FindProxy(intPtr);
+			ComInteropProxy comInteropProxy = null;
+			ComInteropProxy.FindProxy(intPtr, ref comInteropProxy);
 			ComInteropProxy comInteropProxy2;
 			if (comInteropProxy != null)
 			{
@@ -87,8 +92,6 @@ namespace Mono.Interop
 
 		public override IMessage Invoke(IMessage msg)
 		{
-			Console.WriteLine("Invoke");
-			Console.WriteLine(Environment.StackTrace);
 			throw new Exception("The method or operation is not implemented.");
 		}
 

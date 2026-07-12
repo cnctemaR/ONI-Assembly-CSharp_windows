@@ -7,21 +7,10 @@ namespace System.ComponentModel
 	{
 		public DesignOnlyAttribute(bool isDesignOnly)
 		{
-			this.isDesignOnly = isDesignOnly;
+			this.IsDesignOnly = isDesignOnly;
 		}
 
-		public bool IsDesignOnly
-		{
-			get
-			{
-				return this.isDesignOnly;
-			}
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.IsDesignOnly == DesignOnlyAttribute.Default.IsDesignOnly;
-		}
+		public bool IsDesignOnly { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -30,15 +19,20 @@ namespace System.ComponentModel
 				return true;
 			}
 			DesignOnlyAttribute designOnlyAttribute = obj as DesignOnlyAttribute;
-			return designOnlyAttribute != null && designOnlyAttribute.isDesignOnly == this.isDesignOnly;
+			bool? flag = ((designOnlyAttribute != null) ? new bool?(designOnlyAttribute.IsDesignOnly) : null);
+			bool isDesignOnly = this.IsDesignOnly;
+			return (flag.GetValueOrDefault() == isDesignOnly) & (flag != null);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.isDesignOnly.GetHashCode();
+			return this.IsDesignOnly.GetHashCode();
 		}
 
-		private bool isDesignOnly;
+		public override bool IsDefaultAttribute()
+		{
+			return this.IsDesignOnly == DesignOnlyAttribute.Default.IsDesignOnly;
+		}
 
 		public static readonly DesignOnlyAttribute Yes = new DesignOnlyAttribute(true);
 

@@ -20,6 +20,30 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public bool conservativeEnclosingSphere
+		{
+			get
+			{
+				return this.m_ConservativeEnclosingSphere;
+			}
+			set
+			{
+				this.m_ConservativeEnclosingSphere = value;
+			}
+		}
+
+		public int numIterationsEnclosingSphere
+		{
+			get
+			{
+				return this.m_NumIterationsEnclosingSphere;
+			}
+			set
+			{
+				this.m_NumIterationsEnclosingSphere = value;
+			}
+		}
+
 		public int cullingPlaneCount
 		{
 			get
@@ -106,6 +130,18 @@ namespace UnityEngine.Rendering
 			set
 			{
 				this.m_ShadowDistance = value;
+			}
+		}
+
+		public float shadowNearPlaneOffset
+		{
+			get
+			{
+				return this.m_ShadowNearPlaneOffset;
+			}
+			set
+			{
+				this.m_ShadowNearPlaneOffset = value;
 			}
 		}
 
@@ -302,7 +338,7 @@ namespace UnityEngine.Rendering
 					return false;
 				}
 			}
-			return this.m_IsOrthographic == other.m_IsOrthographic && this.m_LODParameters.Equals(other.m_LODParameters) && this.m_CullingPlaneCount == other.m_CullingPlaneCount && this.m_CullingMask == other.m_CullingMask && this.m_SceneMask == other.m_SceneMask && this.m_LayerCull == other.m_LayerCull && this.m_CullingMatrix.Equals(other.m_CullingMatrix) && this.m_Origin.Equals(other.m_Origin) && this.m_ShadowDistance.Equals(other.m_ShadowDistance) && this.m_CullingOptions == other.m_CullingOptions && this.m_ReflectionProbeSortingCriteria == other.m_ReflectionProbeSortingCriteria && this.m_CameraProperties.Equals(other.m_CameraProperties) && this.m_AccurateOcclusionThreshold.Equals(other.m_AccurateOcclusionThreshold) && this.m_StereoViewMatrix.Equals(other.m_StereoViewMatrix) && this.m_StereoProjectionMatrix.Equals(other.m_StereoProjectionMatrix) && this.m_StereoSeparationDistance.Equals(other.m_StereoSeparationDistance) && this.m_maximumVisibleLights == other.m_maximumVisibleLights;
+			return this.m_IsOrthographic == other.m_IsOrthographic && this.m_LODParameters.Equals(other.m_LODParameters) && this.m_CullingPlaneCount == other.m_CullingPlaneCount && this.m_CullingMask == other.m_CullingMask && this.m_SceneMask == other.m_SceneMask && this.m_ViewID == other.m_ViewID && this.m_LayerCull == other.m_LayerCull && this.m_CullingMatrix.Equals(other.m_CullingMatrix) && this.m_Origin.Equals(other.m_Origin) && this.m_ShadowDistance.Equals(other.m_ShadowDistance) && this.m_ShadowNearPlaneOffset.Equals(other.m_ShadowNearPlaneOffset) && this.m_CullingOptions == other.m_CullingOptions && this.m_ReflectionProbeSortingCriteria == other.m_ReflectionProbeSortingCriteria && this.m_CameraProperties.Equals(other.m_CameraProperties) && this.m_AccurateOcclusionThreshold.Equals(other.m_AccurateOcclusionThreshold) && this.m_StereoViewMatrix.Equals(other.m_StereoViewMatrix) && this.m_StereoProjectionMatrix.Equals(other.m_StereoProjectionMatrix) && this.m_StereoSeparationDistance.Equals(other.m_StereoSeparationDistance) && this.m_maximumVisibleLights == other.m_maximumVisibleLights && this.m_ConservativeEnclosingSphere == other.m_ConservativeEnclosingSphere && this.m_NumIterationsEnclosingSphere == other.m_NumIterationsEnclosingSphere;
 		}
 
 		public override bool Equals(object obj)
@@ -318,10 +354,12 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ this.m_CullingPlaneCount;
 			num = (num * 397) ^ (int)this.m_CullingMask;
 			num = (num * 397) ^ this.m_SceneMask.GetHashCode();
+			num = (num * 397) ^ this.m_ViewID.GetHashCode();
 			num = (num * 397) ^ this.m_LayerCull;
 			num = (num * 397) ^ this.m_CullingMatrix.GetHashCode();
 			num = (num * 397) ^ this.m_Origin.GetHashCode();
 			num = (num * 397) ^ this.m_ShadowDistance.GetHashCode();
+			num = (num * 397) ^ this.m_ShadowNearPlaneOffset.GetHashCode();
 			num = (num * 397) ^ (int)this.m_CullingOptions;
 			num = (num * 397) ^ (int)this.m_ReflectionProbeSortingCriteria;
 			num = (num * 397) ^ this.m_CameraProperties.GetHashCode();
@@ -330,7 +368,9 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ this.m_StereoViewMatrix.GetHashCode();
 			num = (num * 397) ^ this.m_StereoProjectionMatrix.GetHashCode();
 			num = (num * 397) ^ this.m_StereoSeparationDistance.GetHashCode();
-			return (num * 397) ^ this.m_maximumVisibleLights;
+			num = (num * 397) ^ this.m_maximumVisibleLights;
+			num = (num * 397) ^ this.m_ConservativeEnclosingSphere.GetHashCode();
+			return (num * 397) ^ this.m_NumIterationsEnclosingSphere.GetHashCode();
 		}
 
 		public static bool operator ==(ScriptableCullingParameters left, ScriptableCullingParameters right)
@@ -360,6 +400,8 @@ namespace UnityEngine.Rendering
 
 		private ulong m_SceneMask;
 
+		private ulong m_ViewID;
+
 		private const int k_LayerCount = 32;
 
 		public static readonly int layerCount = 32;
@@ -374,6 +416,8 @@ namespace UnityEngine.Rendering
 		private Vector3 m_Origin;
 
 		private float m_ShadowDistance;
+
+		private float m_ShadowNearPlaneOffset;
 
 		private CullingOptions m_CullingOptions;
 
@@ -397,6 +441,10 @@ namespace UnityEngine.Rendering
 
 		private int m_maximumVisibleLights;
 
+		private bool m_ConservativeEnclosingSphere;
+
+		private int m_NumIterationsEnclosingSphere;
+
 		[CompilerGenerated]
 		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
@@ -405,8 +453,8 @@ namespace UnityEngine.Rendering
 			public byte FixedElementField;
 		}
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 128)]
 		public struct <m_LayerFarCullDistances>e__FixedBuffer
 		{

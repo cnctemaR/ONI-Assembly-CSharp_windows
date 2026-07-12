@@ -49,7 +49,7 @@ namespace System.Diagnostics
 
 		public override void WriteLine(string message)
 		{
-			this.TraceEvent(null, global::SR.GetString("Trace"), TraceEventType.Information, 0, message);
+			this.TraceEvent(null, SR.GetString("Trace"), TraceEventType.Information, 0, message);
 		}
 
 		public override void Fail(string message, string detailMessage)
@@ -60,7 +60,7 @@ namespace System.Diagnostics
 				stringBuilder.Append(" ");
 				stringBuilder.Append(detailMessage);
 			}
-			this.TraceEvent(null, global::SR.GetString("Trace"), TraceEventType.Error, 0, stringBuilder.ToString());
+			this.TraceEvent(null, SR.GetString("Trace"), TraceEventType.Error, 0, stringBuilder.ToString());
 		}
 
 		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)

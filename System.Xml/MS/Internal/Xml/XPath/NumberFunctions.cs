@@ -9,22 +9,22 @@ namespace MS.Internal.Xml.XPath
 	{
 		public NumberFunctions(Function.FunctionType ftype, Query arg)
 		{
-			this.arg = arg;
-			this.ftype = ftype;
+			this._arg = arg;
+			this._ftype = ftype;
 		}
 
 		private NumberFunctions(NumberFunctions other)
 			: base(other)
 		{
-			this.arg = Query.Clone(other.arg);
-			this.ftype = other.ftype;
+			this._arg = Query.Clone(other._arg);
+			this._ftype = other._ftype;
 		}
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			if (this.arg != null)
+			if (this._arg != null)
 			{
-				this.arg.SetXsltContext(context);
+				this._arg.SetXsltContext(context);
 			}
 		}
 
@@ -44,12 +44,12 @@ namespace MS.Internal.Xml.XPath
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
 		{
-			Function.FunctionType functionType = this.ftype;
-			if (functionType == Function.FunctionType.FuncNumber)
+			Function.FunctionType ftype = this._ftype;
+			if (ftype == Function.FunctionType.FuncNumber)
 			{
 				return this.Number(nodeIterator);
 			}
-			switch (functionType)
+			switch (ftype)
 			{
 			case Function.FunctionType.FuncSum:
 				return this.Sum(nodeIterator);
@@ -66,11 +66,11 @@ namespace MS.Internal.Xml.XPath
 
 		private double Number(XPathNodeIterator nodeIterator)
 		{
-			if (this.arg == null)
+			if (this._arg == null)
 			{
 				return XmlConvert.ToXPathDouble(nodeIterator.Current.Value);
 			}
-			object obj = this.arg.Evaluate(nodeIterator);
+			object obj = this._arg.Evaluate(nodeIterator);
 			switch (base.GetXPathType(obj))
 			{
 			case XPathResultType.Number:
@@ -81,7 +81,7 @@ namespace MS.Internal.Xml.XPath
 				return NumberFunctions.Number((bool)obj);
 			case XPathResultType.NodeSet:
 			{
-				XPathNavigator xpathNavigator = this.arg.Advance();
+				XPathNavigator xpathNavigator = this._arg.Advance();
 				if (xpathNavigator != null)
 				{
 					return NumberFunctions.Number(xpathNavigator.Value);
@@ -97,9 +97,9 @@ namespace MS.Internal.Xml.XPath
 		private double Sum(XPathNodeIterator nodeIterator)
 		{
 			double num = 0.0;
-			this.arg.Evaluate(nodeIterator);
+			this._arg.Evaluate(nodeIterator);
 			XPathNavigator xpathNavigator;
-			while ((xpathNavigator = this.arg.Advance()) != null)
+			while ((xpathNavigator = this._arg.Advance()) != null)
 			{
 				num += NumberFunctions.Number(xpathNavigator.Value);
 			}
@@ -108,17 +108,17 @@ namespace MS.Internal.Xml.XPath
 
 		private double Floor(XPathNodeIterator nodeIterator)
 		{
-			return Math.Floor((double)this.arg.Evaluate(nodeIterator));
+			return Math.Floor((double)this._arg.Evaluate(nodeIterator));
 		}
 
 		private double Ceiling(XPathNodeIterator nodeIterator)
 		{
-			return Math.Ceiling((double)this.arg.Evaluate(nodeIterator));
+			return Math.Ceiling((double)this._arg.Evaluate(nodeIterator));
 		}
 
 		private double Round(XPathNodeIterator nodeIterator)
 		{
-			return XmlConvert.XPathRound(XmlConvert.ToXPathDouble(this.arg.Evaluate(nodeIterator)));
+			return XmlConvert.XPathRound(XmlConvert.ToXPathDouble(this._arg.Evaluate(nodeIterator)));
 		}
 
 		public override XPathResultType StaticType
@@ -134,19 +134,8 @@ namespace MS.Internal.Xml.XPath
 			return new NumberFunctions(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("name", this.ftype.ToString());
-			if (this.arg != null)
-			{
-				this.arg.PrintQuery(w);
-			}
-			w.WriteEndElement();
-		}
+		private Query _arg;
 
-		private Query arg;
-
-		private Function.FunctionType ftype;
+		private Function.FunctionType _ftype;
 	}
 }

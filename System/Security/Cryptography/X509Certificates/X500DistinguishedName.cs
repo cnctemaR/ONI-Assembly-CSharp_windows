@@ -63,7 +63,7 @@ namespace System.Security.Cryptography.X509Certificates
 				this.DecodeRawData();
 				return;
 			}
-			Mono.Security.ASN1 asn = Mono.Security.X509.X501.FromString(distinguishedName);
+			Mono.Security.ASN1 asn = X501.FromString(distinguishedName);
 			if ((flag & X500DistinguishedNameFlags.Reversed) != X500DistinguishedNameFlags.None)
 			{
 				Mono.Security.ASN1 asn2 = new Mono.Security.ASN1(48);
@@ -130,7 +130,7 @@ namespace System.Security.Cryptography.X509Certificates
 			bool flag2 = (flag & X500DistinguishedNameFlags.Reversed) > X500DistinguishedNameFlags.None;
 			bool flag3 = (flag & X500DistinguishedNameFlags.DoNotUseQuotes) == X500DistinguishedNameFlags.None;
 			string separator = X500DistinguishedName.GetSeparator(flag);
-			return Mono.Security.X509.X501.ToString(new Mono.Security.ASN1(base.RawData), flag2, separator, flag3);
+			return X501.ToString(new Mono.Security.ASN1(base.RawData), flag2, separator, flag3);
 		}
 
 		public override string Format(bool multiLine)
@@ -172,7 +172,7 @@ namespace System.Security.Cryptography.X509Certificates
 				return;
 			}
 			Mono.Security.ASN1 asn = new Mono.Security.ASN1(base.RawData);
-			this.name = Mono.Security.X509.X501.ToString(asn, true, ", ", true);
+			this.name = X501.ToString(asn, true, ", ", true);
 		}
 
 		private static string Canonize(string s)
@@ -183,29 +183,29 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				i++;
 			}
-			s = s.TrimEnd(Array.Empty<char>());
+			s = s.TrimEnd();
 			bool flag = false;
 			while (i < s.Length)
 			{
 				if (!flag)
 				{
-					goto IL_0050;
+					goto IL_004B;
 				}
 				flag = char.IsWhiteSpace(s, i);
 				if (!flag)
 				{
-					goto IL_0050;
+					goto IL_004B;
 				}
-				IL_006E:
+				IL_0069:
 				i++;
 				continue;
-				IL_0050:
+				IL_004B:
 				if (char.IsWhiteSpace(s, i))
 				{
 					flag = true;
 				}
 				stringBuilder.Append(char.ToUpperInvariant(s[i]));
-				goto IL_006E;
+				goto IL_0069;
 			}
 			return stringBuilder.ToString();
 		}

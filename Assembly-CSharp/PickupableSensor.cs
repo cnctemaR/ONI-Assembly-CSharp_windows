@@ -5,7 +5,7 @@ public class PickupableSensor : Sensor
 	public PickupableSensor(Sensors sensors)
 		: base(sensors)
 	{
-		this.worker = base.GetComponent<Worker>();
+		this.worker = base.GetComponent<WorkerBase>();
 		this.pathProber = base.GetComponent<PathProber>();
 	}
 
@@ -17,5 +17,5 @@ public class PickupableSensor : Sensor
 
 	private PathProber pathProber;
 
-	private Worker worker;
+	private WorkerBase worker;
 }

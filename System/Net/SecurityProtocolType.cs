@@ -9,6 +9,7 @@ namespace System.Net
 		Ssl3 = 48,
 		Tls = 192,
 		Tls11 = 768,
-		Tls12 = 3072
+		Tls12 = 3072,
+		Tls13 = 12288
 	}
 }

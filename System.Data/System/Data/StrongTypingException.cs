@@ -9,7 +9,6 @@ namespace System.Data
 		protected StrongTypingException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			throw new PlatformNotSupportedException();
 		}
 
 		public StrongTypingException()

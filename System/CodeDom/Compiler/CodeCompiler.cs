@@ -174,7 +174,7 @@ namespace System.CodeDom.Compiler
 				if (ea[i] != null)
 				{
 					this.ResolveReferencedAssemblies(options, ea[i]);
-					array[i] = options.TempFiles.AddExtension(i + this.FileExtension);
+					array[i] = options.TempFiles.AddExtension(i.ToString() + this.FileExtension);
 					using (FileStream fileStream = new FileStream(array[i], FileMode.Create, FileAccess.Write, FileShare.Read))
 					{
 						using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
@@ -246,7 +246,7 @@ namespace System.CodeDom.Compiler
 			string[] array = new string[sources.Length];
 			for (int i = 0; i < sources.Length; i++)
 			{
-				string text = options.TempFiles.AddExtension(i + this.FileExtension);
+				string text = options.TempFiles.AddExtension(i.ToString() + this.FileExtension);
 				using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.Read))
 				{
 					using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))

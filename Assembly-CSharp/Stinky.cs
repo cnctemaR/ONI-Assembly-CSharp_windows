@@ -35,7 +35,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, true, -1);
 		GameObject gameObject2 = gameObject;
 		bool flag = SoundEvent.ObjectIsSelectedAndVisible(gameObject2);
-		Vector3 vector3 = gameObject2.GetComponent<Transform>().GetPosition();
+		Vector3 vector3 = gameObject2.transform.GetPosition();
 		float num2 = 1f;
 		if (flag)
 		{

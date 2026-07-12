@@ -15,9 +15,9 @@ using System.Xml.Serialization;
 
 namespace System.Data
 {
-	[ToolboxItem(false)]
-	[DefaultProperty("ColumnName")]
 	[DesignTimeVisible(false)]
+	[DefaultProperty("ColumnName")]
+	[ToolboxItem(false)]
 	public class DataColumn : MarshalByValueComponent
 	{
 		public DataColumn()
@@ -69,6 +69,7 @@ namespace System.Data
 
 		private void UpdateColumnType(Type type, StorageType typeCode)
 		{
+			TypeLimiter.EnsureTypeIsAllowed(type, null);
 			this._dataType = type;
 			this._storageType = typeCode;
 			if (StorageType.DateTime != typeCode)
@@ -257,8 +258,8 @@ namespace System.Data
 			return this._caption != null;
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue("")]
+		[RefreshProperties(RefreshProperties.All)]
 		public string ColumnName
 		{
 			get
@@ -406,9 +407,9 @@ namespace System.Data
 			}
 		}
 
+		[DefaultValue(typeof(string))]
 		[RefreshProperties(RefreshProperties.All)]
 		[TypeConverter(typeof(ColumnTypeConverter))]
-		[DefaultValue(typeof(string))]
 		public Type DataType
 		{
 			get
@@ -515,8 +516,8 @@ namespace System.Data
 			}
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue(DataSetDateTime.UnspecifiedLocal)]
+		[RefreshProperties(RefreshProperties.All)]
 		public DataSetDateTime DateTimeMode
 		{
 			get
@@ -621,8 +622,8 @@ namespace System.Data
 			this.DataExpression.Bind(this._table);
 		}
 
-		[DefaultValue("")]
 		[RefreshProperties(RefreshProperties.All)]
+		[DefaultValue("")]
 		public string Expression
 		{
 			get
@@ -925,8 +926,8 @@ namespace System.Data
 			this.Namespace = null;
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public int Ordinal
 		{
 			get
@@ -1014,8 +1015,8 @@ namespace System.Data
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DataTable Table
 		{
 			get
@@ -1110,8 +1111,8 @@ namespace System.Data
 			this._storage.Set(record, this._storage._nullValue);
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[DefaultValue(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool Unique
 		{
 			get

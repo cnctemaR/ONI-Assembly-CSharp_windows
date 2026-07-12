@@ -23,6 +23,18 @@ namespace System.Reflection
 			this.lazyData.data_length = data_length;
 		}
 
+		internal CustomAttributeData(ConstructorInfo ctorInfo)
+			: this(ctorInfo, Array.Empty<CustomAttributeTypedArgument>(), Array.Empty<CustomAttributeNamedArgument>())
+		{
+		}
+
+		internal CustomAttributeData(ConstructorInfo ctorInfo, IList<CustomAttributeTypedArgument> ctorArgs, IList<CustomAttributeNamedArgument> namedArgs)
+		{
+			this.ctorInfo = ctorInfo;
+			this.ctorArgs = ctorArgs;
+			this.namedArgs = namedArgs;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ResolveArgumentsInternal(ConstructorInfo ctor, Assembly assembly, IntPtr data, uint data_length, out object[] ctorArgs, out object[] namedArgs);
 
@@ -35,8 +47,8 @@ namespace System.Reflection
 			object[] array;
 			object[] array2;
 			CustomAttributeData.ResolveArgumentsInternal(this.ctorInfo, this.lazyData.assembly, this.lazyData.data, this.lazyData.data_length, out array, out array2);
-			this.ctorArgs = Array.AsReadOnly<CustomAttributeTypedArgument>((array != null) ? CustomAttributeData.UnboxValues<CustomAttributeTypedArgument>(array) : EmptyArray<CustomAttributeTypedArgument>.Value);
-			this.namedArgs = Array.AsReadOnly<CustomAttributeNamedArgument>((array2 != null) ? CustomAttributeData.UnboxValues<CustomAttributeNamedArgument>(array2) : EmptyArray<CustomAttributeNamedArgument>.Value);
+			this.ctorArgs = Array.AsReadOnly<CustomAttributeTypedArgument>((array != null) ? CustomAttributeData.UnboxValues<CustomAttributeTypedArgument>(array) : Array.Empty<CustomAttributeTypedArgument>());
+			this.namedArgs = Array.AsReadOnly<CustomAttributeNamedArgument>((array2 != null) ? CustomAttributeData.UnboxValues<CustomAttributeNamedArgument>(array2) : Array.Empty<CustomAttributeNamedArgument>());
 			this.lazyData = null;
 		}
 
@@ -70,27 +82,27 @@ namespace System.Reflection
 
 		public static IList<CustomAttributeData> GetCustomAttributes(Assembly target)
 		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
+			return MonoCustomAttrs.GetCustomAttributesData(target, false);
 		}
 
 		public static IList<CustomAttributeData> GetCustomAttributes(MemberInfo target)
 		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
+			return MonoCustomAttrs.GetCustomAttributesData(target, false);
 		}
 
 		internal static IList<CustomAttributeData> GetCustomAttributesInternal(RuntimeType target)
 		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
+			return MonoCustomAttrs.GetCustomAttributesData(target, false);
 		}
 
 		public static IList<CustomAttributeData> GetCustomAttributes(Module target)
 		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
+			return MonoCustomAttrs.GetCustomAttributesData(target, false);
 		}
 
 		public static IList<CustomAttributeData> GetCustomAttributes(ParameterInfo target)
 		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
+			return MonoCustomAttrs.GetCustomAttributesData(target, false);
 		}
 
 		public Type AttributeType

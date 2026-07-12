@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 using System.Threading;
 
 namespace System.Text
@@ -21,15 +20,15 @@ namespace System.Text
 
 		public InternalEncoderBestFitFallbackBuffer(InternalEncoderBestFitFallback fallback)
 		{
-			this.oFallback = fallback;
-			if (this.oFallback.arrayBestFit == null)
+			this._oFallback = fallback;
+			if (this._oFallback._arrayBestFit == null)
 			{
 				object internalSyncObject = InternalEncoderBestFitFallbackBuffer.InternalSyncObject;
 				lock (internalSyncObject)
 				{
-					if (this.oFallback.arrayBestFit == null)
+					if (this._oFallback._arrayBestFit == null)
 					{
-						this.oFallback.arrayBestFit = fallback.encoding.GetBestFitUnicodeToBytesData();
+						this._oFallback._arrayBestFit = fallback._encoding.GetBestFitUnicodeToBytesData();
 					}
 				}
 			}
@@ -37,11 +36,11 @@ namespace System.Text
 
 		public override bool Fallback(char charUnknown, int index)
 		{
-			this.iCount = (this.iSize = 1);
-			this.cBestFit = this.TryBestFit(charUnknown);
-			if (this.cBestFit == '\0')
+			this._iCount = (this._iSize = 1);
+			this._cBestFit = this.TryBestFit(charUnknown);
+			if (this._cBestFit == '\0')
 			{
-				this.cBestFit = '?';
+				this._cBestFit = '?';
 			}
 			return true;
 		}
@@ -50,57 +49,56 @@ namespace System.Text
 		{
 			if (!char.IsHighSurrogate(charUnknownHigh))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
+				throw new ArgumentOutOfRangeException("charUnknownHigh", SR.Format("Valid values are between {0} and {1}, inclusive.", 55296, 56319));
 			}
 			if (!char.IsLowSurrogate(charUnknownLow))
 			{
-				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
+				throw new ArgumentOutOfRangeException("charUnknownLow", SR.Format("Valid values are between {0} and {1}, inclusive.", 56320, 57343));
 			}
-			this.cBestFit = '?';
-			this.iCount = (this.iSize = 2);
+			this._cBestFit = '?';
+			this._iCount = (this._iSize = 2);
 			return true;
 		}
 
 		public override char GetNextChar()
 		{
-			this.iCount--;
-			if (this.iCount < 0)
+			this._iCount--;
+			if (this._iCount < 0)
 			{
 				return '\0';
 			}
-			if (this.iCount == 2147483647)
+			if (this._iCount == 2147483647)
 			{
-				this.iCount = -1;
+				this._iCount = -1;
 				return '\0';
 			}
-			return this.cBestFit;
+			return this._cBestFit;
 		}
 
 		public override bool MovePrevious()
 		{
-			if (this.iCount >= 0)
+			if (this._iCount >= 0)
 			{
-				this.iCount++;
+				this._iCount++;
 			}
-			return this.iCount >= 0 && this.iCount <= this.iSize;
+			return this._iCount >= 0 && this._iCount <= this._iSize;
 		}
 
 		public override int Remaining
 		{
 			get
 			{
-				if (this.iCount <= 0)
+				if (this._iCount <= 0)
 				{
 					return 0;
 				}
-				return this.iCount;
+				return this._iCount;
 			}
 		}
 
-		[SecuritySafeCritical]
 		public override void Reset()
 		{
-			this.iCount = -1;
+			this._iCount = -1;
 			this.charStart = null;
 			this.bFallingBack = false;
 		}
@@ -108,15 +106,15 @@ namespace System.Text
 		private char TryBestFit(char cUnknown)
 		{
 			int num = 0;
-			int num2 = this.oFallback.arrayBestFit.Length;
+			int num2 = this._oFallback._arrayBestFit.Length;
 			int num3;
 			while ((num3 = num2 - num) > 6)
 			{
 				int i = (num3 / 2 + num) & 65534;
-				char c = this.oFallback.arrayBestFit[i];
+				char c = this._oFallback._arrayBestFit[i];
 				if (c == cUnknown)
 				{
-					return this.oFallback.arrayBestFit[i + 1];
+					return this._oFallback._arrayBestFit[i + 1];
 				}
 				if (c < cUnknown)
 				{
@@ -129,21 +127,21 @@ namespace System.Text
 			}
 			for (int i = num; i < num2; i += 2)
 			{
-				if (this.oFallback.arrayBestFit[i] == cUnknown)
+				if (this._oFallback._arrayBestFit[i] == cUnknown)
 				{
-					return this.oFallback.arrayBestFit[i + 1];
+					return this._oFallback._arrayBestFit[i + 1];
 				}
 			}
 			return '\0';
 		}
 
-		private char cBestFit;
+		private char _cBestFit;
 
-		private InternalEncoderBestFitFallback oFallback;
+		private InternalEncoderBestFitFallback _oFallback;
 
-		private int iCount = -1;
+		private int _iCount = -1;
 
-		private int iSize;
+		private int _iSize;
 
 		private static object s_InternalSyncObject;
 	}

@@ -22,7 +22,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.Prefix;
+				return this.Prefix;
 			}
 		}
 
@@ -30,7 +30,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.Name.Name;
+				return this.Name.Name;
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.IsDeclaredInExternal;
+				return this.IsDeclaredInExternal;
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return base.DefaultValueTyped;
+				return this.DefaultValueTyped;
 			}
 		}
 

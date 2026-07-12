@@ -129,8 +129,8 @@ namespace System.Net.WebSockets
 				{
 					throw new PlatformNotSupportedException();
 				}
-				HttpListenerBasicIdentity httpListenerBasicIdentity;
-				if ((httpListenerBasicIdentity = user.Identity as HttpListenerBasicIdentity) != null)
+				HttpListenerBasicIdentity httpListenerBasicIdentity = user.Identity as HttpListenerBasicIdentity;
+				if (httpListenerBasicIdentity != null)
 				{
 					return new GenericPrincipal(new HttpListenerBasicIdentity(httpListenerBasicIdentity.Name, httpListenerBasicIdentity.Password), null);
 				}

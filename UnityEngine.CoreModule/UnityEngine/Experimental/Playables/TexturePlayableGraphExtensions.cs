@@ -5,9 +5,9 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Export/Director/TexturePlayableGraphExtensions.bindings.h")]
 	[StaticAccessor("TexturePlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[NativeHeader("Runtime/Export/Director/TexturePlayableGraphExtensions.bindings.h")]
 	internal static class TexturePlayableGraphExtensions
 	{
 		[NativeThrows]

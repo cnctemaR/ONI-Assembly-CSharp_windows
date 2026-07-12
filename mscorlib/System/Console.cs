@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 
 namespace System
 {
@@ -17,12 +18,12 @@ namespace System
 				{
 					Console.inputEncoding = Encoding.GetEncoding(Console.WindowsConsole.GetInputCodePage());
 					Console.outputEncoding = Encoding.GetEncoding(Console.WindowsConsole.GetOutputCodePage());
-					goto IL_008E;
+					goto IL_009B;
 				}
 				catch
 				{
 					Console.inputEncoding = (Console.outputEncoding = Encoding.Default);
-					goto IL_008E;
+					goto IL_009B;
 				}
 			}
 			int num = 0;
@@ -35,7 +36,7 @@ namespace System
 			{
 				Console.inputEncoding = (Console.outputEncoding = Encoding.Default);
 			}
-			IL_008E:
+			IL_009B:
 			Console.SetupStreams(Console.inputEncoding, Console.outputEncoding);
 		}
 
@@ -99,7 +100,9 @@ namespace System
 			Stream stream;
 			try
 			{
-				stream = new FileStream(handle, access, false, bufferSize, false, true);
+				FileStream fileStream = new FileStream(handle, access, false, bufferSize, false, true);
+				GC.SuppressFinalize(fileStream);
+				stream = fileStream;
 			}
 			catch (IOException)
 			{
@@ -148,7 +151,7 @@ namespace System
 			{
 				throw new ArgumentNullException("newError");
 			}
-			Console.stderr = newError;
+			Console.stderr = TextWriter.Synchronized(newError);
 		}
 
 		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
@@ -158,7 +161,7 @@ namespace System
 			{
 				throw new ArgumentNullException("newIn");
 			}
-			Console.stdin = newIn;
+			Console.stdin = TextReader.Synchronized(newIn);
 		}
 
 		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
@@ -168,7 +171,7 @@ namespace System
 			{
 				throw new ArgumentNullException("newOut");
 			}
-			Console.stdout = newOut;
+			Console.stdout = TextWriter.Synchronized(newOut);
 		}
 
 		public static void Write(bool value)
@@ -571,7 +574,6 @@ namespace System
 			}
 		}
 
-		[MonoLimitation("Only works on windows")]
 		public static bool NumberLock
 		{
 			get
@@ -604,7 +606,6 @@ namespace System
 			}
 		}
 
-		[MonoLimitation("Only works on windows")]
 		public static int WindowHeight
 		{
 			get
@@ -617,7 +618,6 @@ namespace System
 			}
 		}
 
-		[MonoLimitation("Only works on windows")]
 		public static int WindowLeft
 		{
 			get
@@ -630,7 +630,6 @@ namespace System
 			}
 		}
 
-		[MonoLimitation("Only works on windows")]
 		public static int WindowTop
 		{
 			get
@@ -643,7 +642,6 @@ namespace System
 			}
 		}
 
-		[MonoLimitation("Only works on windows")]
 		public static int WindowWidth
 		{
 			get
@@ -779,7 +777,15 @@ namespace System
 			}
 		}
 
-		internal static void DoConsoleCancelEvent()
+		private static void DoConsoleCancelEventInBackground()
+		{
+			ThreadPool.UnsafeQueueUserWorkItem(delegate(object _)
+			{
+				Console.DoConsoleCancelEvent();
+			}, null);
+		}
+
+		private static void DoConsoleCancelEvent()
 		{
 			bool flag = true;
 			if (Console.cancel_event != null)
@@ -809,13 +815,17 @@ namespace System
 
 		private static TextReader stdin;
 
+		private const string LibLog = "/system/lib/liblog.so";
+
+		private const string LibLog64 = "/system/lib64/liblog.so";
+
+		internal static bool IsRunningOnAndroid = File.Exists("/system/lib/liblog.so") || File.Exists("/system/lib64/liblog.so");
+
 		private static Encoding inputEncoding;
 
 		private static Encoding outputEncoding;
 
 		private static ConsoleCancelEventHandler cancel_event;
-
-		private static readonly Console.InternalCancelHandler cancel_handler = new Console.InternalCancelHandler(Console.DoConsoleCancelEvent);
 
 		private class WindowsConsole
 		{
@@ -867,7 +877,5 @@ namespace System
 
 			private delegate bool WindowsCancelHandler(int keyCode);
 		}
-
-		private delegate void InternalCancelHandler();
 	}
 }

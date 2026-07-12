@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 
 namespace System
 {
-	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
+	[DebuggerDisplay("{ToString(),raw}")]
 	[DebuggerTypeProxy(typeof(SpanDebugView<>))]
+	[NonVersionable]
 	public readonly ref struct Span<T>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -13,15 +16,15 @@ namespace System
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				this = default(Span<T>);
+				return;
 			}
 			if (default(T) == null && array.GetType() != typeof(T[]))
 			{
-				ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+				ThrowHelper.ThrowArrayTypeMismatchException();
 			}
+			this._pointer = new ByReference<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()));
 			this._length = array.Length;
-			this._pinnable = Unsafe.As<Pinnable<T>>(array);
-			this._byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,63 +32,212 @@ namespace System
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				if (start != 0 || length != 0)
+				{
+					ThrowHelper.ThrowArgumentOutOfRangeException();
+				}
+				this = default(Span<T>);
+				return;
 			}
 			if (default(T) == null && array.GetType() != typeof(T[]))
 			{
-				ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+				ThrowHelper.ThrowArrayTypeMismatchException();
 			}
 			if (start > array.Length || length > array.Length - start)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
+			this._pointer = new ByReference<T>(Unsafe.Add<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()), start));
 			this._length = length;
-			this._pinnable = Unsafe.As<Pinnable<T>>(array);
-			this._byteOffset = SpanHelpers.PerTypeValues<T>.ArrayAdjustment.Add<T>(start);
 		}
 
+		[CLSCompliant(false)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe Span(void* pointer, int length)
 		{
-			if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
 			{
-				ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+				ThrowHelper.ThrowInvalidTypeWithPointersNotSupported(typeof(T));
 			}
 			if (length < 0)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+				ThrowHelper.ThrowArgumentOutOfRangeException();
 			}
+			this._pointer = new ByReference<T>(Unsafe.As<byte, T>(ref *(byte*)pointer));
 			this._length = length;
-			this._pinnable = null;
-			this._byteOffset = new IntPtr(pointer);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
+		internal Span(ref T ptr, int length)
 		{
-			Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
-			IntPtr intPtr = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
-			return new Span<T>(pinnable, intPtr, length);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal Span(Pinnable<T> pinnable, IntPtr byteOffset, int length)
-		{
+			this._pointer = new ByReference<T>(ref ptr);
 			this._length = length;
-			this._pinnable = pinnable;
-			this._byteOffset = byteOffset;
 		}
 
-		private string DebuggerDisplay
+		public ref T this[int index]
 		{
+			[NonVersionable]
+			[Intrinsic]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return string.Format("{{{0}[{1}]}}", typeof(T).Name, this._length);
+				if (index >= this._length)
+				{
+					ThrowHelper.ThrowIndexOutOfRangeException();
+				}
+				return Unsafe.Add<T>(this._pointer.Value, index);
 			}
+		}
+
+		public ref T GetPinnableReference()
+		{
+			if (this._length == 0)
+			{
+				return Unsafe.AsRef<T>(null);
+			}
+			return this._pointer.Value;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Clear()
+		{
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+			{
+				SpanHelpers.ClearWithReferences(Unsafe.As<T, IntPtr>(this._pointer.Value), (ulong)((long)this._length * (long)(Unsafe.SizeOf<T>() / IntPtr.Size)));
+				return;
+			}
+			SpanHelpers.ClearWithoutReferences(Unsafe.As<T, byte>(this._pointer.Value), (ulong)((long)this._length * (long)Unsafe.SizeOf<T>()));
+		}
+
+		public unsafe void Fill(T value)
+		{
+			if (Unsafe.SizeOf<T>() == 1)
+			{
+				uint length = (uint)this._length;
+				if (length == 0U)
+				{
+					return;
+				}
+				T t = value;
+				Unsafe.InitBlockUnaligned(Unsafe.As<T, byte>(this._pointer.Value), *Unsafe.As<T, byte>(ref t), length);
+				return;
+			}
+			else
+			{
+				ulong num = (ulong)this._length;
+				if (num == 0UL)
+				{
+					return;
+				}
+				ref T value2 = ref this._pointer.Value;
+				ulong num2 = (ulong)Unsafe.SizeOf<T>();
+				ulong num3;
+				for (num3 = 0UL; num3 < (num & 18446744073709551608UL); num3 += 8UL)
+				{
+					*Unsafe.AddByteOffset<T>(ref value2, num3 * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 1UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 2UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 3UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 4UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 5UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 6UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 7UL) * num2) = value;
+				}
+				if (num3 < (num & 18446744073709551612UL))
+				{
+					*Unsafe.AddByteOffset<T>(ref value2, num3 * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 1UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 2UL) * num2) = value;
+					*Unsafe.AddByteOffset<T>(ref value2, (num3 + 3UL) * num2) = value;
+					num3 += 4UL;
+				}
+				while (num3 < num)
+				{
+					*Unsafe.AddByteOffset<T>(ref value2, num3 * num2) = value;
+					num3 += 1UL;
+				}
+				return;
+			}
+		}
+
+		public void CopyTo(Span<T> destination)
+		{
+			if (this._length <= destination.Length)
+			{
+				Buffer.Memmove<T>(destination._pointer.Value, this._pointer.Value, (ulong)((long)this._length));
+				return;
+			}
+			ThrowHelper.ThrowArgumentException_DestinationTooShort();
+		}
+
+		public bool TryCopyTo(Span<T> destination)
+		{
+			bool flag = false;
+			if (this._length <= destination.Length)
+			{
+				Buffer.Memmove<T>(destination._pointer.Value, this._pointer.Value, (ulong)((long)this._length));
+				flag = true;
+			}
+			return flag;
+		}
+
+		public static bool operator ==(Span<T> left, Span<T> right)
+		{
+			return left._length == right._length && Unsafe.AreSame<T>(left._pointer.Value, right._pointer.Value);
+		}
+
+		public static implicit operator ReadOnlySpan<T>(Span<T> span)
+		{
+			return new ReadOnlySpan<T>(span._pointer.Value, span._length);
+		}
+
+		public unsafe override string ToString()
+		{
+			if (typeof(T) == typeof(char))
+			{
+				fixed (char* ptr = Unsafe.As<T, char>(this._pointer.Value))
+				{
+					return new string(ptr, 0, this._length);
+				}
+			}
+			return string.Format("System.Span<{0}>[{1}]", typeof(T).Name, this._length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Span<T> Slice(int start)
+		{
+			if (start > this._length)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException();
+			}
+			return new Span<T>(Unsafe.Add<T>(this._pointer.Value, start), this._length - start);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Span<T> Slice(int start, int length)
+		{
+			if (start > this._length || length > this._length - start)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException();
+			}
+			return new Span<T>(Unsafe.Add<T>(this._pointer.Value, start), length);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T[] ToArray()
+		{
+			if (this._length == 0)
+			{
+				return Array.Empty<T>();
+			}
+			T[] array = new T[this._length];
+			Buffer.Memmove<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()), this._pointer.Value, (ulong)((long)this._length));
+			return array;
 		}
 
 		public int Length
 		{
+			[NonVersionable]
 			get
 			{
 				return this._length;
@@ -94,135 +246,11 @@ namespace System
 
 		public bool IsEmpty
 		{
+			[NonVersionable]
 			get
 			{
 				return this._length == 0;
 			}
-		}
-
-		public ref T this[int index]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
-			{
-				if (index >= this._length)
-				{
-					ThrowHelper.ThrowIndexOutOfRangeException();
-				}
-				if (this._pinnable == null)
-				{
-					return Unsafe.Add<T>(Unsafe.AsRef<T>(this._byteOffset.ToPointer()), index);
-				}
-				return Unsafe.Add<T>(Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset), index);
-			}
-		}
-
-		public unsafe void Clear()
-		{
-			int length = this._length;
-			if (length == 0)
-			{
-				return;
-			}
-			UIntPtr uintPtr = (UIntPtr)((ulong)length * (ulong)((long)Unsafe.SizeOf<T>()));
-			if ((Unsafe.SizeOf<T>() & (sizeof(IntPtr) - 1)) != 0)
-			{
-				if (this._pinnable == null)
-				{
-					byte* ptr = (byte*)this._byteOffset.ToPointer();
-					SpanHelpers.ClearLessThanPointerSized(ptr, uintPtr);
-					return;
-				}
-				SpanHelpers.ClearLessThanPointerSized(Unsafe.As<T, byte>(Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset)), uintPtr);
-				return;
-			}
-			else
-			{
-				if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-				{
-					UIntPtr uintPtr2 = (UIntPtr)((ulong)((long)(length * Unsafe.SizeOf<T>() / sizeof(IntPtr))));
-					SpanHelpers.ClearPointerSizedWithReferences(Unsafe.As<T, IntPtr>(this.DangerousGetPinnableReference()), uintPtr2);
-					return;
-				}
-				SpanHelpers.ClearPointerSizedWithoutReferences(Unsafe.As<T, byte>(this.DangerousGetPinnableReference()), uintPtr);
-				return;
-			}
-		}
-
-		public unsafe void Fill(T value)
-		{
-			int length = this._length;
-			if (length == 0)
-			{
-				return;
-			}
-			if (Unsafe.SizeOf<T>() != 1)
-			{
-				ref T ptr = ref this.DangerousGetPinnableReference();
-				int i;
-				for (i = 0; i < (length & -8); i += 8)
-				{
-					*Unsafe.Add<T>(ref ptr, i) = value;
-					*Unsafe.Add<T>(ref ptr, i + 1) = value;
-					*Unsafe.Add<T>(ref ptr, i + 2) = value;
-					*Unsafe.Add<T>(ref ptr, i + 3) = value;
-					*Unsafe.Add<T>(ref ptr, i + 4) = value;
-					*Unsafe.Add<T>(ref ptr, i + 5) = value;
-					*Unsafe.Add<T>(ref ptr, i + 6) = value;
-					*Unsafe.Add<T>(ref ptr, i + 7) = value;
-				}
-				if (i < (length & -4))
-				{
-					*Unsafe.Add<T>(ref ptr, i) = value;
-					*Unsafe.Add<T>(ref ptr, i + 1) = value;
-					*Unsafe.Add<T>(ref ptr, i + 2) = value;
-					*Unsafe.Add<T>(ref ptr, i + 3) = value;
-					i += 4;
-				}
-				while (i < length)
-				{
-					*Unsafe.Add<T>(ref ptr, i) = value;
-					i++;
-				}
-				return;
-			}
-			byte b = *Unsafe.As<T, byte>(ref value);
-			if (this._pinnable == null)
-			{
-				Unsafe.InitBlockUnaligned(this._byteOffset.ToPointer(), b, (uint)length);
-				return;
-			}
-			Unsafe.InitBlockUnaligned(Unsafe.As<T, byte>(Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset)), b, (uint)length);
-		}
-
-		public void CopyTo(Span<T> destination)
-		{
-			if (!this.TryCopyTo(destination))
-			{
-				ThrowHelper.ThrowArgumentException_DestinationTooShort();
-			}
-		}
-
-		public bool TryCopyTo(Span<T> destination)
-		{
-			int length = this._length;
-			int length2 = destination._length;
-			if (length == 0)
-			{
-				return true;
-			}
-			if (length > length2)
-			{
-				return false;
-			}
-			ref T ptr = ref this.DangerousGetPinnableReference();
-			SpanHelpers.CopyTo<T>(destination.DangerousGetPinnableReference(), length2, ref ptr, length);
-			return true;
-		}
-
-		public static bool operator ==(Span<T> left, Span<T> right)
-		{
-			return left._length == right._length && Unsafe.AreSame<T>(left.DangerousGetPinnableReference(), right.DangerousGetPinnableReference());
 		}
 
 		public static bool operator !=(Span<T> left, Span<T> right)
@@ -247,48 +275,9 @@ namespace System
 			return new Span<T>(array);
 		}
 
-		public static implicit operator Span<T>(ArraySegment<T> arraySegment)
+		public static implicit operator Span<T>(ArraySegment<T> segment)
 		{
-			return new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
-		}
-
-		public static implicit operator ReadOnlySpan<T>(Span<T> span)
-		{
-			return new ReadOnlySpan<T>(span._pinnable, span._byteOffset, span._length);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Span<T> Slice(int start)
-		{
-			if (start > this._length)
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-			}
-			IntPtr intPtr = this._byteOffset.Add<T>(start);
-			int num = this._length - start;
-			return new Span<T>(this._pinnable, intPtr, num);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Span<T> Slice(int start, int length)
-		{
-			if (start > this._length || length > this._length - start)
-			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-			}
-			IntPtr intPtr = this._byteOffset.Add<T>(start);
-			return new Span<T>(this._pinnable, intPtr, length);
-		}
-
-		public T[] ToArray()
-		{
-			if (this._length == 0)
-			{
-				return SpanHelpers.PerTypeValues<T>.EmptyArray;
-			}
-			T[] array = new T[this._length];
-			this.CopyTo(array);
-			return array;
+			return new Span<T>(segment.Array, segment.Offset, segment.Count);
 		}
 
 		public static Span<T> Empty
@@ -299,36 +288,49 @@ namespace System
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public ref T DangerousGetPinnableReference()
+		public Span<T>.Enumerator GetEnumerator()
 		{
-			if (this._pinnable == null)
-			{
-				return Unsafe.AsRef<T>(this._byteOffset.ToPointer());
-			}
-			return Unsafe.AddByteOffset<T>(ref this._pinnable.Data, this._byteOffset);
+			return new Span<T>.Enumerator(this);
 		}
 
-		internal Pinnable<T> Pinnable
-		{
-			get
-			{
-				return this._pinnable;
-			}
-		}
-
-		internal IntPtr ByteOffset
-		{
-			get
-			{
-				return this._byteOffset;
-			}
-		}
-
-		private readonly Pinnable<T> _pinnable;
-
-		private readonly IntPtr _byteOffset;
+		internal readonly ByReference<T> _pointer;
 
 		private readonly int _length;
+
+		[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
+		public ref struct Enumerator
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			internal Enumerator(Span<T> span)
+			{
+				this._span = span;
+				this._index = -1;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			public bool MoveNext()
+			{
+				int num = this._index + 1;
+				if (num < this._span.Length)
+				{
+					this._index = num;
+					return true;
+				}
+				return false;
+			}
+
+			public ref T Current
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get
+				{
+					return this._span[this._index];
+				}
+			}
+
+			private readonly Span<T> _span;
+
+			private int _index;
+		}
 	}
 }

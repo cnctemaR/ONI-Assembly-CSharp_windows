@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Transform/Transform.h")]
-	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	[NativeHeader("Configuration/UnityConfigure.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	public class Transform : Component, IEnumerable
 	{
 		protected Transform()
@@ -169,8 +169,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetRotationOrderInternal();
 
-		[NativeMethod("SetRotationOrder")]
 		[NativeConditional("UNITY_EDITOR")]
+		[NativeMethod("SetRotationOrder")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
 
@@ -253,6 +253,17 @@ namespace UnityEngine
 		{
 			this.SetPositionAndRotation_Injected(ref position, ref rotation);
 		}
+
+		public void SetLocalPositionAndRotation(Vector3 localPosition, Quaternion localRotation)
+		{
+			this.SetLocalPositionAndRotation_Injected(ref localPosition, ref localRotation);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void GetLocalPositionAndRotation(out Vector3 localPosition, out Quaternion localRotation);
 
 		public void Translate(Vector3 translation, [DefaultValue("Space.Self")] Space relativeTo)
 		{
@@ -410,6 +421,32 @@ namespace UnityEngine
 			return this.TransformDirection(new Vector3(x, y, z));
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void TransformDirections([Span("count", true)] Vector3* directions, int count, [Span("transformedCount", false)] Vector3* transformedDirections, int transformedCount);
+
+		public unsafe void TransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		{
+			bool flag = directions.Length != transformedDirections.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.TransformDirections() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = directions.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedDirections.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.TransformDirections(ptr, directions.Length, ptr2, transformedDirections.Length);
+				}
+			}
+		}
+
+		public void TransformDirections(Span<Vector3> directions)
+		{
+			this.TransformDirections(directions, directions);
+		}
+
 		public Vector3 InverseTransformDirection(Vector3 direction)
 		{
 			Vector3 vector;
@@ -420,6 +457,32 @@ namespace UnityEngine
 		public Vector3 InverseTransformDirection(float x, float y, float z)
 		{
 			return this.InverseTransformDirection(new Vector3(x, y, z));
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void InverseTransformDirections([Span("count", true)] Vector3* directions, int count, [Span("transformedCount", false)] Vector3* transformedDirections, int transformedCount);
+
+		public unsafe void InverseTransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		{
+			bool flag = directions.Length != transformedDirections.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformDirections() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = directions.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedDirections.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.InverseTransformDirections(ptr, directions.Length, ptr2, transformedDirections.Length);
+				}
+			}
+		}
+
+		public void InverseTransformDirections(Span<Vector3> directions)
+		{
+			this.InverseTransformDirections(directions, directions);
 		}
 
 		public Vector3 TransformVector(Vector3 vector)
@@ -434,6 +497,32 @@ namespace UnityEngine
 			return this.TransformVector(new Vector3(x, y, z));
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void TransformVectors([Span("count", true)] Vector3* vectors, int count, [Span("transformedCount", false)] Vector3* transformedVectors, int transformedCount);
+
+		public unsafe void TransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		{
+			bool flag = vectors.Length != transformedVectors.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.TransformVectors() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = vectors.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedVectors.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.TransformVectors(ptr, vectors.Length, ptr2, transformedVectors.Length);
+				}
+			}
+		}
+
+		public void TransformVectors(Span<Vector3> vectors)
+		{
+			this.TransformVectors(vectors, vectors);
+		}
+
 		public Vector3 InverseTransformVector(Vector3 vector)
 		{
 			Vector3 vector2;
@@ -444,6 +533,32 @@ namespace UnityEngine
 		public Vector3 InverseTransformVector(float x, float y, float z)
 		{
 			return this.InverseTransformVector(new Vector3(x, y, z));
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void InverseTransformVectors([Span("count", true)] Vector3* vectors, int count, [Span("transformedCount", false)] Vector3* transformedVectors, int transformedCount);
+
+		public unsafe void InverseTransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		{
+			bool flag = vectors.Length != transformedVectors.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformVectors() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = vectors.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedVectors.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.InverseTransformVectors(ptr, vectors.Length, ptr2, transformedVectors.Length);
+				}
+			}
+		}
+
+		public void InverseTransformVectors(Span<Vector3> vectors)
+		{
+			this.InverseTransformVectors(vectors, vectors);
 		}
 
 		public Vector3 TransformPoint(Vector3 position)
@@ -458,6 +573,32 @@ namespace UnityEngine
 			return this.TransformPoint(new Vector3(x, y, z));
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void TransformPoints([Span("count", true)] Vector3* positions, int count, [Span("transformedCount", false)] Vector3* transformedPositions, int transformedCount);
+
+		public unsafe void TransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		{
+			bool flag = positions.Length != transformedPositions.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.TransformPoints() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = positions.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedPositions.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.TransformPoints(ptr, positions.Length, ptr2, transformedPositions.Length);
+				}
+			}
+		}
+
+		public void TransformPoints(Span<Vector3> positions)
+		{
+			this.TransformPoints(positions, positions);
+		}
+
 		public Vector3 InverseTransformPoint(Vector3 position)
 		{
 			Vector3 vector;
@@ -468,6 +609,32 @@ namespace UnityEngine
 		public Vector3 InverseTransformPoint(float x, float y, float z)
 		{
 			return this.InverseTransformPoint(new Vector3(x, y, z));
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void InverseTransformPoints([Span("count", true)] Vector3* positions, int count, [Span("transformedCount", false)] Vector3* transformedPositions, int transformedCount);
+
+		public unsafe void InverseTransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		{
+			bool flag = positions.Length != transformedPositions.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformPoints() must be the same length");
+			}
+			fixed (Vector3* pinnableReference = positions.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Vector3* pinnableReference2 = transformedPositions.GetPinnableReference())
+				{
+					Vector3* ptr2 = pinnableReference2;
+					this.InverseTransformPoints(ptr, positions.Length, ptr2, transformedPositions.Length);
+				}
+			}
+		}
+
+		public void InverseTransformPoints(Span<Vector3> positions)
+		{
+			this.InverseTransformPoints(positions, positions);
 		}
 
 		public Transform root
@@ -573,13 +740,13 @@ namespace UnityEngine
 			this.RotateAroundLocal_Injected(ref axis, angle);
 		}
 
-		[FreeFunction("GetChild", HasExplicitThis = true)]
 		[NativeThrows]
+		[FreeFunction("GetChild", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
-		[NativeMethod("GetChildrenCount")]
 		[Obsolete("warning use Transform.childCount instead (UnityUpgradable) -> Transform.childCount", false)]
+		[NativeMethod("GetChildrenCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetChildCount();
 
@@ -615,10 +782,31 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int internal_getHierarchyCount();
 
-		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
 		[NativeConditional("UNITY_EDITOR")]
+		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern bool IsNonUniformScaleTransform();
+
+		[NativeConditional("UNITY_EDITOR")]
+		internal bool constrainProportionsScale
+		{
+			get
+			{
+				return this.IsConstrainProportionsScale();
+			}
+			set
+			{
+				this.SetConstrainProportionsScale(value);
+			}
+		}
+
+		[NativeConditional("UNITY_EDITOR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstrainProportionsScale(bool isLinked);
+
+		[NativeConditional("UNITY_EDITOR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool IsConstrainProportionsScale();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_position_Injected(out Vector3 ret);
@@ -667,6 +855,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetPositionAndRotation_Injected(ref Vector3 position, ref Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetLocalPositionAndRotation_Injected(ref Vector3 localPosition, ref Quaternion localRotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RotateAroundInternal_Injected(ref Vector3 axis, float angle);

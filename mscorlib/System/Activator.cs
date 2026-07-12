@@ -15,8 +15,8 @@ using Unity;
 
 namespace System
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Activator))]
 	public sealed class Activator : _Activator
 	{
@@ -37,7 +37,7 @@ namespace System
 			{
 				throw new ArgumentNullException("type");
 			}
-			if (type is TypeBuilder)
+			if (RuntimeFeature.IsDynamicCodeSupported && type is TypeBuilder)
 			{
 				throw new NotSupportedException(Environment.GetResourceString("CreateInstance cannot be used with an object of type TypeBuilder."));
 			}
@@ -104,8 +104,13 @@ namespace System
 			return Activator.CreateInstance(assemblyName, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes, null, ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static object CreateInstance(Type type, bool nonPublic)
+		{
+			return Activator.CreateInstance(type, nonPublic, true);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		internal static object CreateInstance(Type type, bool nonPublic, bool wrapExceptions)
 		{
 			if (type == null)
 			{
@@ -117,7 +122,7 @@ namespace System
 				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "type");
 			}
 			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return runtimeType.CreateInstanceDefaultCtor(!nonPublic, false, true, ref stackCrawlMark);
+			return runtimeType.CreateInstanceDefaultCtor(!nonPublic, false, true, wrapExceptions, ref stackCrawlMark);
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -129,7 +134,7 @@ namespace System
 				throw new MissingMethodException(Environment.GetResourceString("No parameterless constructor defined for this object."));
 			}
 			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return (T)((object)runtimeType.CreateInstanceDefaultCtor(true, true, true, ref stackCrawlMark));
+			return (T)((object)runtimeType.CreateInstanceDefaultCtor(true, true, true, true, ref stackCrawlMark));
 		}
 
 		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
@@ -142,8 +147,8 @@ namespace System
 			return Activator.CreateInstanceFrom(assemblyFile, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes);
 		}
 
-		[SecuritySafeCritical]
 		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstance which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
+		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
 		{

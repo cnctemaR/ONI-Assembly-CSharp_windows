@@ -1,45 +1,36 @@
 ﻿using System;
+using System.Buffers;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
-	public abstract class TextWriter : MarshalByRefObject, IDisposable
+	public abstract class TextWriter : MarshalByRefObject, IDisposable, IAsyncDisposable
 	{
-		private static string InitialNewLine
-		{
-			get
-			{
-				return Environment.NewLine;
-			}
-		}
-
 		protected TextWriter()
 		{
-			this.InternalFormatProvider = null;
+			this._internalFormatProvider = null;
 		}
 
 		protected TextWriter(IFormatProvider formatProvider)
 		{
-			this.InternalFormatProvider = formatProvider;
+			this._internalFormatProvider = formatProvider;
 		}
 
 		public virtual IFormatProvider FormatProvider
 		{
 			get
 			{
-				if (this.InternalFormatProvider == null)
+				if (this._internalFormatProvider == null)
 				{
-					return Thread.CurrentThread.CurrentCulture;
+					return CultureInfo.CurrentCulture;
 				}
-				return this.InternalFormatProvider;
+				return this._internalFormatProvider;
 			}
 		}
 
@@ -59,6 +50,22 @@ namespace System.IO
 			GC.SuppressFinalize(this);
 		}
 
+		public virtual ValueTask DisposeAsync()
+		{
+			ValueTask valueTask;
+			try
+			{
+				this.Dispose();
+				valueTask = default(ValueTask);
+				valueTask = valueTask;
+			}
+			catch (Exception ex)
+			{
+				valueTask = new ValueTask(Task.FromException(ex));
+			}
+			return valueTask;
+		}
+
 		public virtual void Flush()
 		{
 		}
@@ -69,30 +76,17 @@ namespace System.IO
 		{
 			get
 			{
-				return new string(this.CoreNewLine);
+				return this.CoreNewLineStr;
 			}
 			set
 			{
 				if (value == null)
 				{
-					value = TextWriter.InitialNewLine;
+					value = Environment.NewLine;
 				}
+				this.CoreNewLineStr = value;
 				this.CoreNewLine = value.ToCharArray();
 			}
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
-		public static TextWriter Synchronized(TextWriter writer)
-		{
-			if (writer == null)
-			{
-				throw new ArgumentNullException("writer");
-			}
-			if (writer is TextWriter.SyncTextWriter)
-			{
-				return writer;
-			}
-			return new TextWriter.SyncTextWriter(writer);
 		}
 
 		public virtual void Write(char value)
@@ -111,23 +105,37 @@ namespace System.IO
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			for (int i = 0; i < count; i++)
 			{
 				this.Write(buffer[index + i]);
+			}
+		}
+
+		public virtual void Write(ReadOnlySpan<char> buffer)
+		{
+			char[] array = ArrayPool<char>.Shared.Rent(buffer.Length);
+			try
+			{
+				buffer.CopyTo(new Span<char>(array));
+				this.Write(array, 0, buffer.Length);
+			}
+			finally
+			{
+				ArrayPool<char>.Shared.Return(array, false);
 			}
 		}
 
@@ -238,6 +246,20 @@ namespace System.IO
 			this.WriteLine();
 		}
 
+		public virtual void WriteLine(ReadOnlySpan<char> buffer)
+		{
+			char[] array = ArrayPool<char>.Shared.Rent(buffer.Length);
+			try
+			{
+				buffer.CopyTo(new Span<char>(array));
+				this.WriteLine(array, 0, buffer.Length);
+			}
+			finally
+			{
+				ArrayPool<char>.Shared.Return(array, false);
+			}
+		}
+
 		public virtual void WriteLine(bool value)
 		{
 			this.Write(value);
@@ -290,29 +312,11 @@ namespace System.IO
 
 		public virtual void WriteLine(string value)
 		{
-			if (value == null)
+			if (value != null)
 			{
-				this.WriteLine();
-				return;
+				this.Write(value);
 			}
-			int length = value.Length;
-			int num = this.CoreNewLine.Length;
-			char[] array = new char[length + num];
-			value.CopyTo(0, array, 0, length);
-			if (num == 2)
-			{
-				array[length] = this.CoreNewLine[0];
-				array[length + 1] = this.CoreNewLine[1];
-			}
-			else if (num == 1)
-			{
-				array[length] = this.CoreNewLine[0];
-			}
-			else
-			{
-				Buffer.InternalBlockCopy(this.CoreNewLine, 0, array, length * 2, num * 2);
-			}
-			this.Write(array, 0, length + num);
+			this.Write(this.CoreNewLineStr);
 		}
 
 		public virtual void WriteLine(object value)
@@ -351,24 +355,26 @@ namespace System.IO
 			this.WriteLine(string.Format(this.FormatProvider, format, arg));
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteAsync(char value)
 		{
 			Tuple<TextWriter, char> tuple = new Tuple<TextWriter, char>(this, value);
-			return Task.Factory.StartNew(TextWriter._WriteCharDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, char> tuple2 = (Tuple<TextWriter, char>)state;
+				tuple2.Item1.Write(tuple2.Item2);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteAsync(string value)
 		{
 			Tuple<TextWriter, string> tuple = new Tuple<TextWriter, string>(this, value);
-			return Task.Factory.StartNew(TextWriter._WriteStringDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, string> tuple2 = (Tuple<TextWriter, string>)state;
+				tuple2.Item1.Write(tuple2.Item2);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task WriteAsync(char[] buffer)
 		{
 			if (buffer == null)
@@ -378,116 +384,118 @@ namespace System.IO
 			return this.WriteAsync(buffer, 0, buffer.Length);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteAsync(char[] buffer, int index, int count)
 		{
 			Tuple<TextWriter, char[], int, int> tuple = new Tuple<TextWriter, char[], int, int>(this, buffer, index, count);
-			return Task.Factory.StartNew(TextWriter._WriteCharArrayRangeDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, char[], int, int> tuple2 = (Tuple<TextWriter, char[], int, int>)state;
+				tuple2.Item1.Write(tuple2.Item2, tuple2.Item3, tuple2.Item4);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			ArraySegment<char> arraySegment;
+			if (!MemoryMarshal.TryGetArray<char>(buffer, out arraySegment))
+			{
+				return Task.Factory.StartNew(delegate(object state)
+				{
+					Tuple<TextWriter, ReadOnlyMemory<char>> tuple = (Tuple<TextWriter, ReadOnlyMemory<char>>)state;
+					tuple.Item1.Write(tuple.Item2.Span);
+				}, Tuple.Create<TextWriter, ReadOnlyMemory<char>>(this, buffer), cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			}
+			return this.WriteAsync(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+		}
+
 		public virtual Task WriteLineAsync(char value)
 		{
 			Tuple<TextWriter, char> tuple = new Tuple<TextWriter, char>(this, value);
-			return Task.Factory.StartNew(TextWriter._WriteLineCharDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, char> tuple2 = (Tuple<TextWriter, char>)state;
+				tuple2.Item1.WriteLine(tuple2.Item2);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteLineAsync(string value)
 		{
 			Tuple<TextWriter, string> tuple = new Tuple<TextWriter, string>(this, value);
-			return Task.Factory.StartNew(TextWriter._WriteLineStringDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, string> tuple2 = (Tuple<TextWriter, string>)state;
+				tuple2.Item1.WriteLine(tuple2.Item2);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task WriteLineAsync(char[] buffer)
 		{
 			if (buffer == null)
 			{
-				return Task.CompletedTask;
+				return this.WriteLineAsync();
 			}
 			return this.WriteLineAsync(buffer, 0, buffer.Length);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteLineAsync(char[] buffer, int index, int count)
 		{
 			Tuple<TextWriter, char[], int, int> tuple = new Tuple<TextWriter, char[], int, int>(this, buffer, index, count);
-			return Task.Factory.StartNew(TextWriter._WriteLineCharArrayRangeDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				Tuple<TextWriter, char[], int, int> tuple2 = (Tuple<TextWriter, char[], int, int>)state;
+				tuple2.Item1.WriteLine(tuple2.Item2, tuple2.Item3, tuple2.Item4);
+			}, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			ArraySegment<char> arraySegment;
+			if (!MemoryMarshal.TryGetArray<char>(buffer, out arraySegment))
+			{
+				return Task.Factory.StartNew(delegate(object state)
+				{
+					Tuple<TextWriter, ReadOnlyMemory<char>> tuple = (Tuple<TextWriter, ReadOnlyMemory<char>>)state;
+					tuple.Item1.WriteLine(tuple.Item2.Span);
+				}, Tuple.Create<TextWriter, ReadOnlyMemory<char>>(this, buffer), cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			}
+			return this.WriteLineAsync(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+		}
+
 		public virtual Task WriteLineAsync()
 		{
 			return this.WriteAsync(this.CoreNewLine);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task FlushAsync()
 		{
-			return Task.Factory.StartNew(TextWriter._FlushDelegate, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+			return Task.Factory.StartNew(delegate(object state)
+			{
+				((TextWriter)state).Flush();
+			}, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		public static TextWriter Synchronized(TextWriter writer)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (!(writer is TextWriter.SyncTextWriter))
+			{
+				return new TextWriter.SyncTextWriter(writer);
+			}
+			return writer;
 		}
 
 		public static readonly TextWriter Null = new TextWriter.NullTextWriter();
 
-		[NonSerialized]
-		private static Action<object> _WriteCharDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, char> tuple = (Tuple<TextWriter, char>)state;
-			tuple.Item1.Write(tuple.Item2);
-		};
+		private static readonly char[] s_coreNewLine = Environment.NewLine.ToCharArray();
 
-		[NonSerialized]
-		private static Action<object> _WriteStringDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, string> tuple2 = (Tuple<TextWriter, string>)state;
-			tuple2.Item1.Write(tuple2.Item2);
-		};
+		protected char[] CoreNewLine = TextWriter.s_coreNewLine;
 
-		[NonSerialized]
-		private static Action<object> _WriteCharArrayRangeDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, char[], int, int> tuple3 = (Tuple<TextWriter, char[], int, int>)state;
-			tuple3.Item1.Write(tuple3.Item2, tuple3.Item3, tuple3.Item4);
-		};
+		private string CoreNewLineStr = Environment.NewLine;
 
-		[NonSerialized]
-		private static Action<object> _WriteLineCharDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, char> tuple4 = (Tuple<TextWriter, char>)state;
-			tuple4.Item1.WriteLine(tuple4.Item2);
-		};
-
-		[NonSerialized]
-		private static Action<object> _WriteLineStringDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, string> tuple5 = (Tuple<TextWriter, string>)state;
-			tuple5.Item1.WriteLine(tuple5.Item2);
-		};
-
-		[NonSerialized]
-		private static Action<object> _WriteLineCharArrayRangeDelegate = delegate(object state)
-		{
-			Tuple<TextWriter, char[], int, int> tuple6 = (Tuple<TextWriter, char[], int, int>)state;
-			tuple6.Item1.WriteLine(tuple6.Item2, tuple6.Item3, tuple6.Item4);
-		};
-
-		[NonSerialized]
-		private static Action<object> _FlushDelegate = delegate(object state)
-		{
-			((TextWriter)state).Flush();
-		};
-
-		protected char[] CoreNewLine = TextWriter.InitialNewLine.ToCharArray();
-
-		private IFormatProvider InternalFormatProvider;
+		private IFormatProvider _internalFormatProvider;
 
 		[Serializable]
 		private sealed class NullTextWriter : TextWriter
@@ -501,7 +509,7 @@ namespace System.IO
 			{
 				get
 				{
-					return Encoding.Default;
+					return Encoding.Unicode;
 				}
 			}
 
@@ -522,6 +530,10 @@ namespace System.IO
 			}
 
 			public override void WriteLine(object value)
+			{
+			}
+
+			public override void Write(char value)
 			{
 			}
 		}
@@ -796,7 +808,6 @@ namespace System.IO
 				this._out.WriteLine(format, arg);
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteAsync(char value)
 			{
@@ -804,7 +815,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteAsync(string value)
 			{
@@ -812,7 +822,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteAsync(char[] buffer, int index, int count)
 			{
@@ -820,7 +829,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteLineAsync(char value)
 			{
@@ -828,7 +836,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteLineAsync(string value)
 			{
@@ -836,7 +843,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task WriteLineAsync(char[] buffer, int index, int count)
 			{
@@ -844,7 +850,6 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			[ComVisible(false)]
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override Task FlushAsync()
 			{
@@ -852,7 +857,7 @@ namespace System.IO
 				return Task.CompletedTask;
 			}
 
-			private TextWriter _out;
+			private readonly TextWriter _out;
 		}
 	}
 }

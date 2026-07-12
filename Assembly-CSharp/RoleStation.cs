@@ -25,7 +25,7 @@ public class RoleStation : Workable, IGameObjectEffectDescriptor
 		this.UpdateSkillPointAvailableStatusItem(null);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		Telepad.StatesInstance statesInstance = this.GetSMI<Telepad.StatesInstance>();
 		statesInstance.sm.idlePortal.Trigger(statesInstance);
@@ -54,7 +54,7 @@ public class RoleStation : Workable, IGameObjectEffectDescriptor
 		return new WorkChore<RoleStation>(Db.Get().ChoreTypes.LearnSkill, this, null, true, null, null, null, false, null, false, true, Assets.GetAnim("anim_hat_kanim"), false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		worker.GetComponent<MinionResume>().SkillLearned();

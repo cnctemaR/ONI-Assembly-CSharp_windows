@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
 	[DebuggerDisplay("Set = {IsSet}")]
-	[ComVisible(false)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class ManualResetEventSlim : IDisposable
 	{
 		public WaitHandle WaitHandle
@@ -57,7 +53,7 @@ namespace System.Threading
 			{
 				if (value >= 524287)
 				{
-					throw new InvalidOperationException(string.Format(Environment.GetResourceString("There are too many threads currently waiting on the event. A maximum of {0} waiting threads are supported."), 524287));
+					throw new InvalidOperationException(string.Format("There are too many threads currently waiting on the event. A maximum of {0} waiting threads are supported.", 524287));
 				}
 				this.UpdateStateAtomically(value, 524287);
 			}
@@ -70,7 +66,7 @@ namespace System.Threading
 
 		public ManualResetEventSlim(bool initialState)
 		{
-			this.Initialize(initialState, 10);
+			this.Initialize(initialState, SpinWait.SpinCountforSpinBeforeWait);
 		}
 
 		public ManualResetEventSlim(bool initialState, int spinCount)
@@ -81,7 +77,7 @@ namespace System.Threading
 			}
 			if (spinCount > 2047)
 			{
-				throw new ArgumentOutOfRangeException("spinCount", string.Format(Environment.GetResourceString("The spinCount argument must be in the range 0 to {0}, inclusive."), 2047));
+				throw new ArgumentOutOfRangeException("spinCount", string.Format("The spinCount argument must be in the range 0 to {0}, inclusive.", 2047));
 			}
 			this.Initialize(initialState, spinCount);
 		}
@@ -108,7 +104,7 @@ namespace System.Threading
 			ManualResetEvent manualResetEvent = new ManualResetEvent(isSet);
 			if (Interlocked.CompareExchange<ManualResetEvent>(ref this.m_eventObj, manualResetEvent, null) != null)
 			{
-				manualResetEvent.Close();
+				manualResetEvent.Dispose();
 				return false;
 			}
 			if (this.IsSet != isSet)
@@ -222,40 +218,16 @@ namespace System.Threading
 					num = TimeoutHelper.GetTime();
 					flag = true;
 				}
-				int num3 = 10;
-				int num4 = 5;
-				int num5 = 20;
 				int spinCount = this.SpinCount;
-				for (int i = 0; i < spinCount; i++)
+				SpinWait spinWait = default(SpinWait);
+				while (spinWait.Count < spinCount)
 				{
+					spinWait.SpinOnce(40);
 					if (this.IsSet)
 					{
 						return true;
 					}
-					if (i < num3)
-					{
-						if (i == num3 / 2)
-						{
-							Thread.Yield();
-						}
-						else
-						{
-							Thread.SpinWait(PlatformHelper.ProcessorCount * (4 << i));
-						}
-					}
-					else if (i % num5 == 0)
-					{
-						Thread.Sleep(1);
-					}
-					else if (i % num4 == 0)
-					{
-						Thread.Sleep(0);
-					}
-					else
-					{
-						Thread.Yield();
-					}
-					if (i >= 100 && i % 10 == 0)
+					if (spinWait.Count >= 100 && spinWait.Count % 10 == 0)
 					{
 						cancellationToken.ThrowIfCancellationRequested();
 					}
@@ -324,7 +296,7 @@ namespace System.Threading
 					ManualResetEvent manualResetEvent = eventObj;
 					lock (manualResetEvent)
 					{
-						eventObj.Close();
+						eventObj.Dispose();
 						this.m_eventObj = null;
 					}
 				}
@@ -335,7 +307,7 @@ namespace System.Threading
 		{
 			if ((this.m_combinedState & 1073741824) != 0)
 			{
-				throw new ObjectDisposedException(Environment.GetResourceString("The event has been disposed."));
+				throw new ObjectDisposedException("The event has been disposed.");
 			}
 		}
 
@@ -375,8 +347,6 @@ namespace System.Threading
 		}
 
 		private const int DEFAULT_SPIN_SP = 1;
-
-		private const int DEFAULT_SPIN_MP = 10;
 
 		private volatile object m_lock;
 

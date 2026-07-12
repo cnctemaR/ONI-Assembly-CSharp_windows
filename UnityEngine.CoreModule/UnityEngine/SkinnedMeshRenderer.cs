@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Graphics/Mesh/SkinnedMeshRenderer.h")]
 	public class SkinnedMeshRenderer : Renderer
 	{
@@ -79,35 +81,40 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void BakeMesh([NotNull("NullExceptionObject")] Mesh mesh, bool useScale);
 
-		[FreeFunction(Name = "SkinnedMeshRendererScripting::GetLocalAABB", HasExplicitThis = true)]
-		private Bounds GetLocalAABB()
+		public GraphicsBuffer GetVertexBuffer()
 		{
-			Bounds bounds;
-			this.GetLocalAABB_Injected(out bounds);
-			return bounds;
-		}
-
-		private void SetLocalAABB(Bounds b)
-		{
-			this.SetLocalAABB_Injected(ref b);
-		}
-
-		public Bounds localBounds
-		{
-			get
+			bool flag = this == null;
+			if (flag)
 			{
-				return this.GetLocalAABB();
+				throw new NullReferenceException();
 			}
-			set
-			{
-				this.SetLocalAABB(value);
-			}
+			return this.GetVertexBufferImpl();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetLocalAABB_Injected(out Bounds ret);
+		public GraphicsBuffer GetPreviousVertexBuffer()
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			return this.GetPreviousVertexBufferImpl();
+		}
 
+		[FreeFunction(Name = "SkinnedMeshRendererScripting::GetVertexBufferPtr", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalAABB_Injected(ref Bounds b);
+		private extern GraphicsBuffer GetVertexBufferImpl();
+
+		[FreeFunction(Name = "SkinnedMeshRendererScripting::GetPreviousVertexBufferPtr", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer GetPreviousVertexBufferImpl();
+
+		public extern GraphicsBuffer.Target vertexBufferTarget
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 	}
 }

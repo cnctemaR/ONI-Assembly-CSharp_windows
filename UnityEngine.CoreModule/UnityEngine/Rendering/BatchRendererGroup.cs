@@ -10,15 +10,15 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[NativeHeader("Runtime/Math/Matrix4x4.h")]
+	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class BatchRendererGroup : IDisposable
 	{
-		public BatchRendererGroup(BatchRendererGroup.OnPerformCulling cullingCallback)
+		public unsafe BatchRendererGroup(BatchRendererGroup.OnPerformCulling cullingCallback, IntPtr userContext)
 		{
 			this.m_PerformCulling = cullingCallback;
-			this.m_GroupHandle = BatchRendererGroup.Create(this);
+			this.m_GroupHandle = BatchRendererGroup.Create(this, (void*)userContext);
 		}
 
 		public void Dispose()
@@ -27,166 +27,162 @@ namespace UnityEngine.Rendering
 			this.m_GroupHandle = IntPtr.Zero;
 		}
 
-		public int AddBatch(Mesh mesh, int subMeshIndex, Material material, int layer, ShadowCastingMode castShadows, bool receiveShadows, bool invertCulling, Bounds bounds, int instanceCount, MaterialPropertyBlock customProps, GameObject associatedSceneObject)
+		public ThreadedBatchContext GetThreadedBatchContext()
 		{
-			return this.AddBatch(mesh, subMeshIndex, material, layer, castShadows, receiveShadows, invertCulling, bounds, instanceCount, customProps, associatedSceneObject, 9223372036854775808UL, uint.MaxValue);
+			return new ThreadedBatchContext
+			{
+				batchRendererGroup = this.m_GroupHandle
+			};
 		}
 
-		public int AddBatch(Mesh mesh, int subMeshIndex, Material material, int layer, ShadowCastingMode castShadows, bool receiveShadows, bool invertCulling, Bounds bounds, int instanceCount, MaterialPropertyBlock customProps, GameObject associatedSceneObject, ulong sceneCullingMask)
+		private BatchID AddDrawCommandBatch(IntPtr values, int count, GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize)
 		{
-			return this.AddBatch(mesh, subMeshIndex, material, layer, castShadows, receiveShadows, invertCulling, bounds, instanceCount, customProps, associatedSceneObject, sceneCullingMask, uint.MaxValue);
+			BatchID batchID;
+			this.AddDrawCommandBatch_Injected(values, count, ref buffer, bufferOffset, windowSize, out batchID);
+			return batchID;
 		}
 
-		public int AddBatch(Mesh mesh, int subMeshIndex, Material material, int layer, ShadowCastingMode castShadows, bool receiveShadows, bool invertCulling, Bounds bounds, int instanceCount, MaterialPropertyBlock customProps, GameObject associatedSceneObject, ulong sceneCullingMask, uint renderingLayerMask)
+		public BatchID AddBatch(NativeArray<MetadataValue> batchMetadata, GraphicsBufferHandle buffer)
 		{
-			return this.AddBatch_Injected(mesh, subMeshIndex, material, layer, castShadows, receiveShadows, invertCulling, ref bounds, instanceCount, customProps, associatedSceneObject, sceneCullingMask, renderingLayerMask);
+			return this.AddDrawCommandBatch((IntPtr)batchMetadata.GetUnsafeReadOnlyPtr<MetadataValue>(), batchMetadata.Length, buffer, 0U, 0U);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBatchFlags(int batchIndex, ulong flags);
-
-		public void SetBatchPropertyMetadata(int batchIndex, NativeArray<int> cbufferLengths, NativeArray<int> cbufferMetadata)
+		public BatchID AddBatch(NativeArray<MetadataValue> batchMetadata, GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize)
 		{
-			this.InternalSetBatchPropertyMetadata(batchIndex, (IntPtr)cbufferLengths.GetUnsafeReadOnlyPtr<int>(), cbufferLengths.Length, (IntPtr)cbufferMetadata.GetUnsafeReadOnlyPtr<int>(), cbufferMetadata.Length);
+			return this.AddDrawCommandBatch((IntPtr)batchMetadata.GetUnsafeReadOnlyPtr<MetadataValue>(), batchMetadata.Length, buffer, bufferOffset, windowSize);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetBatchPropertyMetadata(int batchIndex, IntPtr cbufferLengths, int cbufferLengthsCount, IntPtr cbufferMetadata, int cbufferMetadataCount);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetInstancingData(int batchIndex, int instanceCount, MaterialPropertyBlock customProps);
-
-		public unsafe NativeArray<Matrix4x4> GetBatchMatrices(int batchIndex)
+		private void RemoveDrawCommandBatch(BatchID batchID)
 		{
-			int num = 0;
-			void* batchMatrices = this.GetBatchMatrices(batchIndex, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>(batchMatrices, num, Allocator.Invalid);
+			this.RemoveDrawCommandBatch_Injected(ref batchID);
 		}
 
-		public unsafe NativeArray<int> GetBatchScalarArrayInt(int batchIndex, string propertyName)
+		public void RemoveBatch(BatchID batchID)
 		{
-			int num = 0;
-			void* batchScalarArray = this.GetBatchScalarArray(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batchScalarArray, num, Allocator.Invalid);
+			this.RemoveDrawCommandBatch(batchID);
 		}
 
-		public unsafe NativeArray<float> GetBatchScalarArray(int batchIndex, string propertyName)
+		private void SetDrawCommandBatchBuffer(BatchID batchID, GraphicsBufferHandle buffer)
 		{
-			int num = 0;
-			void* batchScalarArray = this.GetBatchScalarArray(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(batchScalarArray, num, Allocator.Invalid);
+			this.SetDrawCommandBatchBuffer_Injected(ref batchID, ref buffer);
 		}
 
-		public unsafe NativeArray<int> GetBatchVectorArrayInt(int batchIndex, string propertyName)
+		public void SetBatchBuffer(BatchID batchID, GraphicsBufferHandle buffer)
 		{
-			int num = 0;
-			void* batchVectorArray = this.GetBatchVectorArray(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batchVectorArray, num, Allocator.Invalid);
+			this.SetDrawCommandBatchBuffer(batchID, buffer);
 		}
 
-		public unsafe NativeArray<Vector4> GetBatchVectorArray(int batchIndex, string propertyName)
+		public BatchMaterialID RegisterMaterial(Material material)
 		{
-			int num = 0;
-			void* batchVectorArray = this.GetBatchVectorArray(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector4>(batchVectorArray, num, Allocator.Invalid);
+			BatchMaterialID batchMaterialID;
+			this.RegisterMaterial_Injected(material, out batchMaterialID);
+			return batchMaterialID;
 		}
 
-		public unsafe NativeArray<Matrix4x4> GetBatchMatrixArray(int batchIndex, string propertyName)
+		public BatchMaterialID RegisterMaterial(int materialInstanceID)
 		{
-			int num = 0;
-			void* batchMatrixArray = this.GetBatchMatrixArray(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>(batchMatrixArray, num, Allocator.Invalid);
+			return this.RegisterMaterial_InstanceID(materialInstanceID);
 		}
 
-		public unsafe NativeArray<int> GetBatchScalarArrayInt(int batchIndex, int propertyName)
+		private BatchMaterialID RegisterMaterial_InstanceID(int materialInstanceID)
 		{
-			int num = 0;
-			void* batchScalarArray_Internal = this.GetBatchScalarArray_Internal(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batchScalarArray_Internal, num, Allocator.Invalid);
+			BatchMaterialID batchMaterialID;
+			this.RegisterMaterial_InstanceID_Injected(materialInstanceID, out batchMaterialID);
+			return batchMaterialID;
 		}
 
-		public unsafe NativeArray<float> GetBatchScalarArray(int batchIndex, int propertyName)
+		public void UnregisterMaterial(BatchMaterialID material)
 		{
-			int num = 0;
-			void* batchScalarArray_Internal = this.GetBatchScalarArray_Internal(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(batchScalarArray_Internal, num, Allocator.Invalid);
+			this.UnregisterMaterial_Injected(ref material);
 		}
 
-		public unsafe NativeArray<int> GetBatchVectorArrayInt(int batchIndex, int propertyName)
+		public Material GetRegisteredMaterial(BatchMaterialID material)
 		{
-			int num = 0;
-			void* batchVectorArray_Internal = this.GetBatchVectorArray_Internal(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batchVectorArray_Internal, num, Allocator.Invalid);
+			return this.GetRegisteredMaterial_Injected(ref material);
 		}
 
-		public unsafe NativeArray<Vector4> GetBatchVectorArray(int batchIndex, int propertyName)
+		public BatchMeshID RegisterMesh(Mesh mesh)
 		{
-			int num = 0;
-			void* batchVectorArray_Internal = this.GetBatchVectorArray_Internal(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector4>(batchVectorArray_Internal, num, Allocator.Invalid);
+			BatchMeshID batchMeshID;
+			this.RegisterMesh_Injected(mesh, out batchMeshID);
+			return batchMeshID;
 		}
 
-		public unsafe NativeArray<Matrix4x4> GetBatchMatrixArray(int batchIndex, int propertyName)
+		public BatchMeshID RegisterMesh(int meshInstanceID)
 		{
-			int num = 0;
-			void* batchMatrixArray_Internal = this.GetBatchMatrixArray_Internal(batchIndex, propertyName, out num);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>(batchMatrixArray_Internal, num, Allocator.Invalid);
+			return this.RegisterMesh_InstanceID(meshInstanceID);
 		}
 
-		public void SetBatchBounds(int batchIndex, Bounds bounds)
+		private BatchMeshID RegisterMesh_InstanceID(int meshInstanceID)
 		{
-			this.SetBatchBounds_Injected(batchIndex, ref bounds);
+			BatchMeshID batchMeshID;
+			this.RegisterMesh_InstanceID_Injected(meshInstanceID, out batchMeshID);
+			return batchMeshID;
+		}
+
+		public void UnregisterMesh(BatchMeshID mesh)
+		{
+			this.UnregisterMesh_Injected(ref mesh);
+		}
+
+		public Mesh GetRegisteredMesh(BatchMeshID mesh)
+		{
+			return this.GetRegisteredMesh_Injected(ref mesh);
+		}
+
+		public void SetGlobalBounds(Bounds bounds)
+		{
+			this.SetGlobalBounds_Injected(ref bounds);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetNumBatches();
+		public extern void SetPickingMaterial(Material material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RemoveBatch(int index);
+		public extern void SetErrorMaterial(Material material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchMatrices(int batchIndex, out int matrixCount);
+		public extern void SetLoadingMaterial(Material material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchScalarArray(int batchIndex, string propertyName, out int elementCount);
+		public extern void SetEnabledViewTypes(BatchCullingViewType[] viewTypes);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchVectorArray(int batchIndex, string propertyName, out int elementCount);
+		private static extern BatchBufferTarget GetBufferTarget();
+
+		public static BatchBufferTarget BufferTarget
+		{
+			get
+			{
+				return BatchRendererGroup.GetBufferTarget();
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchMatrixArray(int batchIndex, string propertyName, out int elementCount);
-
-		[NativeName("GetBatchScalarArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchScalarArray_Internal(int batchIndex, int propertyName, out int elementCount);
-
-		[NativeName("GetBatchVectorArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchVectorArray_Internal(int batchIndex, int propertyName, out int elementCount);
-
-		[NativeName("GetBatchMatrixArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* GetBatchMatrixArray_Internal(int batchIndex, int propertyName, out int elementCount);
+		public static extern int GetConstantBufferMaxWindowSize();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EnableVisibleIndicesYArray(bool enabled);
+		public static extern int GetConstantBufferOffsetAlignment();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(BatchRendererGroup group);
+		private unsafe static extern IntPtr Create(BatchRendererGroup group, void* userContext);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Destroy(IntPtr groupHandle);
 
 		[RequiredByNativeCode]
-		private unsafe static void InvokeOnPerformCulling(BatchRendererGroup group, ref BatchRendererCullingOutput context, ref LODParameters lodParameters)
+		private unsafe static void InvokeOnPerformCulling(BatchRendererGroup group, ref BatchRendererCullingOutput context, ref LODParameters lodParameters, IntPtr userContext)
 		{
-			NativeArray<Plane> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Plane>((void*)context.cullingPlanes, context.cullingPlanesCount, Allocator.Invalid);
-			NativeArray<BatchVisibility> nativeArray2 = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<BatchVisibility>((void*)context.batchVisibility, context.batchVisibilityCount, Allocator.Invalid);
-			NativeArray<int> nativeArray3 = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>((void*)context.visibleIndices, context.visibleIndicesCount, Allocator.Invalid);
-			NativeArray<int> nativeArray4 = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>((void*)context.visibleIndicesY, context.visibleIndicesCount, Allocator.Invalid);
+			NativeArray<Plane> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Plane>((void*)context.cullingPlanes, context.cullingPlaneCount, Allocator.Invalid);
+			NativeArray<CullingSplit> nativeArray2 = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<CullingSplit>((void*)context.cullingSplits, context.cullingSplitCount, Allocator.Invalid);
+			NativeArray<BatchCullingOutputDrawCommands> nativeArray3 = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<BatchCullingOutputDrawCommands>((void*)context.drawCommands, 1, Allocator.Invalid);
 			try
 			{
-				context.cullingJobsFence = group.m_PerformCulling(group, new BatchCullingContext(nativeArray, nativeArray2, nativeArray3, nativeArray4, lodParameters, context.cullingMatrix, context.nearPlane));
+				BatchCullingOutput batchCullingOutput = new BatchCullingOutput
+				{
+					drawCommands = nativeArray3
+				};
+				context.cullingJobsFence = group.m_PerformCulling(group, new BatchCullingContext(nativeArray, nativeArray2, lodParameters, context.localToWorldMatrix, context.viewType, context.projectionType, context.cullingFlags, context.viewID, context.cullingLayerMask, context.sceneCullingMask, context.receiverPlaneOffset, context.receiverPlaneCount), batchCullingOutput, userContext);
 			}
 			finally
 			{
@@ -195,15 +191,45 @@ namespace UnityEngine.Rendering
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int AddBatch_Injected(Mesh mesh, int subMeshIndex, Material material, int layer, ShadowCastingMode castShadows, bool receiveShadows, bool invertCulling, ref Bounds bounds, int instanceCount, MaterialPropertyBlock customProps, GameObject associatedSceneObject, ulong sceneCullingMask, uint renderingLayerMask);
+		private extern void AddDrawCommandBatch_Injected(IntPtr values, int count, ref GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize, out BatchID ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBatchBounds_Injected(int batchIndex, ref Bounds bounds);
+		private extern void RemoveDrawCommandBatch_Injected(ref BatchID batchID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetDrawCommandBatchBuffer_Injected(ref BatchID batchID, ref GraphicsBufferHandle buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RegisterMaterial_Injected(Material material, out BatchMaterialID ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RegisterMaterial_InstanceID_Injected(int materialInstanceID, out BatchMaterialID ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void UnregisterMaterial_Injected(ref BatchMaterialID material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Material GetRegisteredMaterial_Injected(ref BatchMaterialID material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RegisterMesh_Injected(Mesh mesh, out BatchMeshID ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RegisterMesh_InstanceID_Injected(int meshInstanceID, out BatchMeshID ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void UnregisterMesh_Injected(ref BatchMeshID mesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Mesh GetRegisteredMesh_Injected(ref BatchMeshID mesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetGlobalBounds_Injected(ref Bounds bounds);
 
 		private IntPtr m_GroupHandle = IntPtr.Zero;
 
 		private BatchRendererGroup.OnPerformCulling m_PerformCulling;
 
-		public delegate JobHandle OnPerformCulling(BatchRendererGroup rendererGroup, BatchCullingContext cullingContext);
+		public delegate JobHandle OnPerformCulling(BatchRendererGroup rendererGroup, BatchCullingContext cullingContext, BatchCullingOutput cullingOutput, IntPtr userContext);
 	}
 }

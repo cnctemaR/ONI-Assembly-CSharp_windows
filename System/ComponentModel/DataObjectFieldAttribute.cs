@@ -22,43 +22,19 @@ namespace System.ComponentModel
 
 		public DataObjectFieldAttribute(bool primaryKey, bool isIdentity, bool isNullable, int length)
 		{
-			this._primaryKey = primaryKey;
-			this._isIdentity = isIdentity;
-			this._isNullable = isNullable;
-			this._length = length;
+			this.PrimaryKey = primaryKey;
+			this.IsIdentity = isIdentity;
+			this.IsNullable = isNullable;
+			this.Length = length;
 		}
 
-		public bool IsIdentity
-		{
-			get
-			{
-				return this._isIdentity;
-			}
-		}
+		public bool IsIdentity { get; }
 
-		public bool IsNullable
-		{
-			get
-			{
-				return this._isNullable;
-			}
-		}
+		public bool IsNullable { get; }
 
-		public int Length
-		{
-			get
-			{
-				return this._length;
-			}
-		}
+		public int Length { get; }
 
-		public bool PrimaryKey
-		{
-			get
-			{
-				return this._primaryKey;
-			}
-		}
+		public bool PrimaryKey { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -74,13 +50,5 @@ namespace System.ComponentModel
 		{
 			return base.GetHashCode();
 		}
-
-		private bool _primaryKey;
-
-		private bool _isIdentity;
-
-		private bool _isNullable;
-
-		private int _length;
 	}
 }

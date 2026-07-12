@@ -4,25 +4,6 @@ namespace UnityEngine.Android
 {
 	public struct Permission
 	{
-		private static AndroidJavaObject GetActivity()
-		{
-			bool flag = Permission.m_Activity != null;
-			AndroidJavaObject androidJavaObject;
-			if (flag)
-			{
-				androidJavaObject = Permission.m_Activity;
-			}
-			else
-			{
-				using (AndroidJavaClass androidJavaClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-				{
-					Permission.m_Activity = androidJavaClass.GetStatic<AndroidJavaObject>("currentActivity");
-				}
-				androidJavaObject = Permission.m_Activity;
-			}
-			return androidJavaObject;
-		}
-
 		private static AndroidJavaObject GetUnityPermissions()
 		{
 			bool flag = Permission.m_UnityPermissions != null;
@@ -93,7 +74,5 @@ namespace UnityEngine.Android
 		public const string ExternalStorageWrite = "android.permission.WRITE_EXTERNAL_STORAGE";
 
 		private static AndroidJavaObject m_UnityPermissions;
-
-		private static AndroidJavaObject m_Activity;
 	}
 }

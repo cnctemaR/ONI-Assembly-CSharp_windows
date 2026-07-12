@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Mono.Globalization.Unicode
 {
-	internal class SimpleCollator
+	internal class SimpleCollator : ISimpleCollator
 	{
 		public SimpleCollator(CultureInfo culture)
 		{
@@ -587,6 +587,11 @@ namespace Mono.Globalization.Unicode
 		public int Compare(string s1, string s2)
 		{
 			return this.Compare(s1, 0, s1.Length, s2, 0, s2.Length, CompareOptions.None);
+		}
+
+		int ISimpleCollator.Compare(string s1, int idx1, int len1, string s2, int idx2, int len2, CompareOptions options)
+		{
+			return this.Compare(s1, idx1, len1, s2, idx2, len2, options);
 		}
 
 		internal unsafe int Compare(string s1, int idx1, int len1, string s2, int idx2, int len2, CompareOptions options)
@@ -1486,7 +1491,7 @@ namespace Mono.Globalization.Unicode
 		{
 			if (opt == CompareOptions.Ordinal)
 			{
-				return this.LastIndexOfOrdinal(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
 			if (opt == CompareOptions.OrdinalIgnoreCase)
 			{
@@ -1991,8 +1996,6 @@ namespace Mono.Globalization.Unicode
 			}
 			return this.MatchesPrimitive(option, buffer, num2, ext, sortkey, ti, noLv4);
 		}
-
-		private static bool QuickCheckDisabled = Environment.internalGetEnvironmentVariable("MONO_COLLATION_QUICK_CHECK_DISABLED") == "yes";
 
 		private static SimpleCollator invariant = new SimpleCollator(CultureInfo.InvariantCulture);
 

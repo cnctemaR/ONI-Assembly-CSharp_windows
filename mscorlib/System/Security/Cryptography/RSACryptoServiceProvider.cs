@@ -380,7 +380,7 @@ namespace System.Security.Cryptography
 			}
 			if (hashAlgorithm == null)
 			{
-				throw new ArgumentException("Could not find provider for halg='" + halg + "'.", "halg");
+				throw new ArgumentException("Could not find provider for halg='" + ((halg != null) ? halg.ToString() : null) + "'.", "halg");
 			}
 			return hashAlgorithm;
 		}
@@ -577,8 +577,8 @@ namespace System.Security.Cryptography
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		[ComVisible(false)]
+		[SecuritySafeCritical]
 		public void ImportCspBlob(byte[] keyBlob)
 		{
 			if (keyBlob == null)

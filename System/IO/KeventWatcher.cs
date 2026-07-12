@@ -36,29 +36,35 @@ namespace System.IO
 			return true;
 		}
 
-		public void StartDispatching(FileSystemWatcher fsw)
+		public void StartDispatching(object handle)
 		{
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
 			KqueueMonitor kqueueMonitor;
-			if (KeventWatcher.watches.ContainsKey(fsw))
+			if (KeventWatcher.watches.ContainsKey(fileSystemWatcher))
 			{
-				kqueueMonitor = (KqueueMonitor)KeventWatcher.watches[fsw];
+				kqueueMonitor = (KqueueMonitor)KeventWatcher.watches[fileSystemWatcher];
 			}
 			else
 			{
-				kqueueMonitor = new KqueueMonitor(fsw);
-				KeventWatcher.watches.Add(fsw, kqueueMonitor);
+				kqueueMonitor = new KqueueMonitor(fileSystemWatcher);
+				KeventWatcher.watches.Add(fileSystemWatcher, kqueueMonitor);
 			}
 			kqueueMonitor.Start();
 		}
 
-		public void StopDispatching(FileSystemWatcher fsw)
+		public void StopDispatching(object handle)
 		{
-			KqueueMonitor kqueueMonitor = (KqueueMonitor)KeventWatcher.watches[fsw];
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
+			KqueueMonitor kqueueMonitor = (KqueueMonitor)KeventWatcher.watches[fileSystemWatcher];
 			if (kqueueMonitor == null)
 			{
 				return;
 			}
 			kqueueMonitor.Stop();
+		}
+
+		public void Dispose(object handle)
+		{
 		}
 
 		[DllImport("libc")]

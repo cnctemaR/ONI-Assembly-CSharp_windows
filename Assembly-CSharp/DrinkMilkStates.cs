@@ -39,16 +39,30 @@ public class DrinkMilkStates : GameStateMachine<DrinkMilkStates, DrinkMilkStates
 				}
 				return false;
 			}, UpdateRate.SIM_200ms);
-		this.goingToDrink.MoveTo(new Func<DrinkMilkStates.Instance, int>(DrinkMilkStates.GetCellToDrinkFrom), this.drink, null, false).ToggleStatusItem(CREATURES.STATUSITEMS.LOOKINGFORMILK.NAME, CREATURES.STATUSITEMS.LOOKINGFORMILK.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.drink.DefaultState(this.drink.pre).Enter("FaceMilkFeeder", new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.FaceMilkFeeder)).ToggleStatusItem(CREATURES.STATUSITEMS.DRINKINGMILK.NAME, CREATURES.STATUSITEMS.DRINKINGMILK.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main)
-			.Enter(delegate(DrinkMilkStates.Instance smi)
-			{
-				DrinkMilkStates.SetSceneLayer(smi, smi.def.shouldBeBehindMilkTank ? Grid.SceneLayer.BuildingUse : Grid.SceneLayer.Creatures);
-			})
-			.Exit(delegate(DrinkMilkStates.Instance smi)
-			{
-				DrinkMilkStates.SetSceneLayer(smi, Grid.SceneLayer.Creatures);
-			});
+		GameStateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State state = this.goingToDrink.MoveTo(new Func<DrinkMilkStates.Instance, int>(DrinkMilkStates.GetCellToDrinkFrom), this.drink, null, false);
+		string text = CREATURES.STATUSITEMS.LOOKINGFORMILK.NAME;
+		string text2 = CREATURES.STATUSITEMS.LOOKINGFORMILK.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory);
+		GameStateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State state2 = this.drink.DefaultState(this.drink.pre).Enter("FaceMilkFeeder", new StateMachine<DrinkMilkStates, DrinkMilkStates.Instance, IStateMachineTarget, DrinkMilkStates.Def>.State.Callback(DrinkMilkStates.FaceMilkFeeder));
+		string text4 = CREATURES.STATUSITEMS.DRINKINGMILK.NAME;
+		string text5 = CREATURES.STATUSITEMS.DRINKINGMILK.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory).Enter(delegate(DrinkMilkStates.Instance smi)
+		{
+			DrinkMilkStates.SetSceneLayer(smi, smi.def.shouldBeBehindMilkTank ? Grid.SceneLayer.BuildingUse : Grid.SceneLayer.Creatures);
+		}).Exit(delegate(DrinkMilkStates.Instance smi)
+		{
+			DrinkMilkStates.SetSceneLayer(smi, Grid.SceneLayer.Creatures);
+		});
 		this.drink.pre.QueueAnim(new Func<DrinkMilkStates.Instance, string>(DrinkMilkStates.GetAnimDrinkPre), false, null).OnAnimQueueComplete(this.drink.loop);
 		this.drink.loop.QueueAnim(new Func<DrinkMilkStates.Instance, string>(DrinkMilkStates.GetAnimDrinkLoop), true, null).Enter(delegate(DrinkMilkStates.Instance smi)
 		{

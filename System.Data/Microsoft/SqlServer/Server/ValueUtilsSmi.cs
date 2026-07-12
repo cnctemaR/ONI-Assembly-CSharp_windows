@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 
@@ -912,7 +913,8 @@ namespace Microsoft.SqlServer.Server
 					obj = ValueUtilsSmi.GetSqlXml_Unchecked(sink, getters, ordinal).Value;
 					break;
 				case SqlDbType.Udt:
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					obj = ValueUtilsSmi.GetUdt_LengthChecked(sink, getters, ordinal, metaData);
+					break;
 				}
 			}
 			return obj;
@@ -925,9 +927,12 @@ namespace Microsoft.SqlServer.Server
 			{
 				if (SqlDbType.Udt == metaData.SqlDbType)
 				{
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					obj = ValueUtilsSmi.NullUdtInstance(metaData);
 				}
-				obj = ValueUtilsSmi.s_typeSpecificNullForSqlValue[(int)metaData.SqlDbType];
+				else
+				{
+					obj = ValueUtilsSmi.s_typeSpecificNullForSqlValue[(int)metaData.SqlDbType];
+				}
 			}
 			else
 			{
@@ -968,9 +973,12 @@ namespace Microsoft.SqlServer.Server
 			{
 				if (SqlDbType.Udt == metaData.SqlDbType)
 				{
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					obj = ValueUtilsSmi.NullUdtInstance(metaData);
 				}
-				obj = ValueUtilsSmi.s_typeSpecificNullForSqlValue[(int)metaData.SqlDbType];
+				else
+				{
+					obj = ValueUtilsSmi.s_typeSpecificNullForSqlValue[(int)metaData.SqlDbType];
+				}
 			}
 			else
 			{
@@ -1054,10 +1062,16 @@ namespace Microsoft.SqlServer.Server
 					obj = ValueUtilsSmi.GetSqlXml_Unchecked(sink, getters, ordinal);
 					break;
 				case SqlDbType.Udt:
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					obj = ValueUtilsSmi.GetUdt_LengthChecked(sink, getters, ordinal, metaData);
+					break;
 				}
 			}
 			return obj;
+		}
+
+		internal static object NullUdtInstance(SmiMetaData metaData)
+		{
+			return metaData.Type.InvokeMember("Null", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty, null, null, new object[0], CultureInfo.InvariantCulture);
 		}
 
 		internal static void SetDBNull(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, bool value)
@@ -1344,7 +1358,8 @@ namespace Microsoft.SqlServer.Server
 			case ExtendedClrTypeCode.UInt64:
 				throw ADP.InvalidCast();
 			case ExtendedClrTypeCode.Object:
-				throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+				ValueUtilsSmi.SetUdt_LengthChecked(sink, setters, ordinal, metaData, value);
+				return;
 			case ExtendedClrTypeCode.ByteArray:
 				ValueUtilsSmi.SetByteArray_LengthChecked(sink, setters, ordinal, metaData, (byte[])value, offset);
 				return;
@@ -1493,7 +1508,7 @@ namespace Microsoft.SqlServer.Server
 						object obj2 = dataRow[j];
 						if (ExtendedClrTypeCode.Invalid == array[j])
 						{
-							array[j] = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(smiMetaData.SqlDbType, smiMetaData.IsMultiValued, obj2);
+							array[j] = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(smiMetaData.SqlDbType, smiMetaData.IsMultiValued, obj2, smiMetaData.Type);
 						}
 						ValueUtilsSmi.SetCompatibleValueV200(sink, setters, j, smiMetaData, obj2, array[j], 0, -1, null);
 					}
@@ -1513,86 +1528,87 @@ namespace Microsoft.SqlServer.Server
 					{
 					case SqlDbType.BigInt:
 						ValueUtilsSmi.SetInt64_Unchecked(sink, setters, i, reader.GetInt64(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Binary:
 						ValueUtilsSmi.SetSqlBytes_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlBytes(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Bit:
 						ValueUtilsSmi.SetBoolean_Unchecked(sink, setters, i, reader.GetBoolean(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Char:
 						ValueUtilsSmi.SetSqlChars_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlChars(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.DateTime:
 						ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], reader.GetDateTime(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Decimal:
 						ValueUtilsSmi.SetSqlDecimal_Unchecked(sink, setters, i, reader.GetSqlDecimal(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Float:
 						ValueUtilsSmi.SetDouble_Unchecked(sink, setters, i, reader.GetDouble(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Image:
 						ValueUtilsSmi.SetSqlBytes_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlBytes(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Int:
 						ValueUtilsSmi.SetInt32_Unchecked(sink, setters, i, reader.GetInt32(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Money:
 						ValueUtilsSmi.SetSqlMoney_Unchecked(sink, setters, i, metaData[i], reader.GetSqlMoney(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.NChar:
 					case SqlDbType.NText:
 					case SqlDbType.NVarChar:
 						ValueUtilsSmi.SetSqlChars_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlChars(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Real:
 						ValueUtilsSmi.SetSingle_Unchecked(sink, setters, i, reader.GetFloat(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.UniqueIdentifier:
 						ValueUtilsSmi.SetGuid_Unchecked(sink, setters, i, reader.GetGuid(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.SmallDateTime:
 						ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], reader.GetDateTime(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.SmallInt:
 						ValueUtilsSmi.SetInt16_Unchecked(sink, setters, i, reader.GetInt16(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.SmallMoney:
 						ValueUtilsSmi.SetSqlMoney_Checked(sink, setters, i, metaData[i], reader.GetSqlMoney(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Text:
 						ValueUtilsSmi.SetSqlChars_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlChars(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Timestamp:
 						ValueUtilsSmi.SetSqlBytes_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlBytes(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.TinyInt:
 						ValueUtilsSmi.SetByte_Unchecked(sink, setters, i, reader.GetByte(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.VarBinary:
 						ValueUtilsSmi.SetSqlBytes_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlBytes(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.VarChar:
 						ValueUtilsSmi.SetSqlChars_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlChars(i), 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Variant:
 					{
 						object sqlValue = reader.GetSqlValue(i);
 						ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCode(sqlValue);
 						ValueUtilsSmi.SetCompatibleValue(sink, setters, i, metaData[i], sqlValue, extendedClrTypeCode, 0);
-						goto IL_02BC;
+						goto IL_02BB;
 					}
 					case SqlDbType.Xml:
 						ValueUtilsSmi.SetSqlXml_Unchecked(sink, setters, i, reader.GetSqlXml(i));
-						goto IL_02BC;
+						goto IL_02BB;
 					case SqlDbType.Udt:
-						throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+						ValueUtilsSmi.SetSqlBytes_LengthChecked(sink, setters, i, metaData[i], reader.GetSqlBytes(i), 0);
+						goto IL_02BB;
 					}
 					throw ADP.NotSupported();
 				}
 				ValueUtilsSmi.SetDBNull_Unchecked(sink, setters, i);
-				IL_02BC:;
+				IL_02BB:;
 			}
 		}
 
@@ -1606,77 +1622,77 @@ namespace Microsoft.SqlServer.Server
 					{
 					case SqlDbType.BigInt:
 						ValueUtilsSmi.SetInt64_Unchecked(sink, setters, i, reader.GetInt64(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Binary:
 						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Bit:
 						ValueUtilsSmi.SetBoolean_Unchecked(sink, setters, i, reader.GetBoolean(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Char:
 						ValueUtilsSmi.SetCharsOrString_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.DateTime:
 						ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], reader.GetDateTime(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Decimal:
 					{
 						SqlDataReader sqlDataReader = reader as SqlDataReader;
 						if (sqlDataReader != null)
 						{
 							ValueUtilsSmi.SetSqlDecimal_Unchecked(sink, setters, i, sqlDataReader.GetSqlDecimal(i));
-							goto IL_0424;
+							goto IL_0425;
 						}
 						ValueUtilsSmi.SetSqlDecimal_Unchecked(sink, setters, i, new SqlDecimal(reader.GetDecimal(i)));
-						goto IL_0424;
+						goto IL_0425;
 					}
 					case SqlDbType.Float:
 						ValueUtilsSmi.SetDouble_Unchecked(sink, setters, i, reader.GetDouble(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Image:
 						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Int:
 						ValueUtilsSmi.SetInt32_Unchecked(sink, setters, i, reader.GetInt32(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Money:
 						ValueUtilsSmi.SetSqlMoney_Checked(sink, setters, i, metaData[i], new SqlMoney(reader.GetDecimal(i)));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.NChar:
 					case SqlDbType.NText:
 					case SqlDbType.NVarChar:
 						ValueUtilsSmi.SetCharsOrString_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Real:
 						ValueUtilsSmi.SetSingle_Unchecked(sink, setters, i, reader.GetFloat(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.UniqueIdentifier:
 						ValueUtilsSmi.SetGuid_Unchecked(sink, setters, i, reader.GetGuid(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.SmallDateTime:
 						ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], reader.GetDateTime(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.SmallInt:
 						ValueUtilsSmi.SetInt16_Unchecked(sink, setters, i, reader.GetInt16(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.SmallMoney:
 						ValueUtilsSmi.SetSqlMoney_Checked(sink, setters, i, metaData[i], new SqlMoney(reader.GetDecimal(i)));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Text:
 						ValueUtilsSmi.SetCharsOrString_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Timestamp:
 						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.TinyInt:
 						ValueUtilsSmi.SetByte_Unchecked(sink, setters, i, reader.GetByte(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.VarBinary:
 						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.VarChar:
 						ValueUtilsSmi.SetCharsOrString_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Variant:
 					{
 						SqlDataReader sqlDataReader2 = reader as SqlDataReader;
@@ -1691,14 +1707,14 @@ namespace Microsoft.SqlServer.Server
 						{
 							obj = reader.GetValue(i);
 						}
-						ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(metaData[i].SqlDbType, metaData[i].IsMultiValued, obj);
+						ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(metaData[i].SqlDbType, metaData[i].IsMultiValued, obj, null);
 						if (storageType == SqlBuffer.StorageType.DateTime2 || storageType == SqlBuffer.StorageType.Date)
 						{
 							ValueUtilsSmi.SetCompatibleValueV200(sink, setters, i, metaData[i], obj, extendedClrTypeCode, 0, 0, null, storageType);
-							goto IL_0424;
+							goto IL_0425;
 						}
 						ValueUtilsSmi.SetCompatibleValueV200(sink, setters, i, metaData[i], obj, extendedClrTypeCode, 0, 0, null);
-						goto IL_0424;
+						goto IL_0425;
 					}
 					case SqlDbType.Xml:
 					{
@@ -1706,17 +1722,18 @@ namespace Microsoft.SqlServer.Server
 						if (sqlDataReader3 != null)
 						{
 							ValueUtilsSmi.SetSqlXml_Unchecked(sink, setters, i, sqlDataReader3.GetSqlXml(i));
-							goto IL_0424;
+							goto IL_0425;
 						}
 						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
-						goto IL_0424;
+						goto IL_0425;
 					}
 					case SqlDbType.Udt:
-						throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+						ValueUtilsSmi.SetBytes_FromReader(sink, setters, i, metaData[i], reader, 0);
+						goto IL_0425;
 					case SqlDbType.Date:
 					case SqlDbType.DateTime2:
 						ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], reader.GetDateTime(i));
-						goto IL_0424;
+						goto IL_0425;
 					case SqlDbType.Time:
 					{
 						SqlDataReader sqlDataReader4 = reader as SqlDataReader;
@@ -1730,7 +1747,7 @@ namespace Microsoft.SqlServer.Server
 							timeSpan = (TimeSpan)reader.GetValue(i);
 						}
 						ValueUtilsSmi.SetTimeSpan_Checked(sink, setters, i, metaData[i], timeSpan);
-						goto IL_0424;
+						goto IL_0425;
 					}
 					case SqlDbType.DateTimeOffset:
 					{
@@ -1745,13 +1762,13 @@ namespace Microsoft.SqlServer.Server
 							dateTimeOffset = (DateTimeOffset)reader.GetValue(i);
 						}
 						ValueUtilsSmi.SetDateTimeOffset_Unchecked(sink, setters, i, dateTimeOffset);
-						goto IL_0424;
+						goto IL_0425;
 					}
 					}
 					throw ADP.NotSupported();
 				}
 				ValueUtilsSmi.SetDBNull_Unchecked(sink, setters, i);
-				IL_0424:;
+				IL_0425:;
 			}
 		}
 
@@ -1767,85 +1784,86 @@ namespace Microsoft.SqlServer.Server
 						{
 						case SqlDbType.BigInt:
 							ValueUtilsSmi.SetInt64_Unchecked(sink, setters, i, record.GetInt64(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Binary:
 							ValueUtilsSmi.SetBytes_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Bit:
 							ValueUtilsSmi.SetBoolean_Unchecked(sink, setters, i, record.GetBoolean(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Char:
 							ValueUtilsSmi.SetChars_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.DateTime:
 							ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], record.GetDateTime(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Decimal:
 							ValueUtilsSmi.SetSqlDecimal_Unchecked(sink, setters, i, record.GetSqlDecimal(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Float:
 							ValueUtilsSmi.SetDouble_Unchecked(sink, setters, i, record.GetDouble(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Image:
 							ValueUtilsSmi.SetBytes_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Int:
 							ValueUtilsSmi.SetInt32_Unchecked(sink, setters, i, record.GetInt32(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Money:
 							ValueUtilsSmi.SetSqlMoney_Unchecked(sink, setters, i, metaData[i], record.GetSqlMoney(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.NChar:
 						case SqlDbType.NText:
 						case SqlDbType.NVarChar:
 							ValueUtilsSmi.SetChars_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Real:
 							ValueUtilsSmi.SetSingle_Unchecked(sink, setters, i, record.GetFloat(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.UniqueIdentifier:
 							ValueUtilsSmi.SetGuid_Unchecked(sink, setters, i, record.GetGuid(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.SmallDateTime:
 							ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], record.GetDateTime(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.SmallInt:
 							ValueUtilsSmi.SetInt16_Unchecked(sink, setters, i, record.GetInt16(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.SmallMoney:
 							ValueUtilsSmi.SetSqlMoney_Checked(sink, setters, i, metaData[i], record.GetSqlMoney(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Text:
 							ValueUtilsSmi.SetChars_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Timestamp:
 							ValueUtilsSmi.SetBytes_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.TinyInt:
 							ValueUtilsSmi.SetByte_Unchecked(sink, setters, i, record.GetByte(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.VarBinary:
 							ValueUtilsSmi.SetBytes_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.VarChar:
 							ValueUtilsSmi.SetChars_FromRecord(sink, setters, i, metaData[i], record, 0);
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Variant:
 						{
 							object sqlValue = record.GetSqlValue(i);
 							ExtendedClrTypeCode extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCode(sqlValue);
 							ValueUtilsSmi.SetCompatibleValueV200(sink, setters, i, metaData[i], sqlValue, extendedClrTypeCode, 0, -1, null);
-							goto IL_0333;
+							goto IL_032C;
 						}
 						case SqlDbType.Xml:
 							ValueUtilsSmi.SetSqlXml_Unchecked(sink, setters, i, record.GetSqlXml(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Udt:
-							throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+							ValueUtilsSmi.SetBytes_FromRecord(sink, setters, i, metaData[i], record, 0);
+							goto IL_032C;
 						case SqlDbType.Date:
 						case SqlDbType.DateTime2:
 							ValueUtilsSmi.SetDateTime_Checked(sink, setters, i, metaData[i], record.GetDateTime(i));
-							goto IL_0333;
+							goto IL_032C;
 						case SqlDbType.Time:
 						{
 							TimeSpan timeSpan;
@@ -1858,7 +1876,7 @@ namespace Microsoft.SqlServer.Server
 								timeSpan = (TimeSpan)record.GetValue(i);
 							}
 							ValueUtilsSmi.SetTimeSpan_Checked(sink, setters, i, metaData[i], timeSpan);
-							goto IL_0333;
+							goto IL_032C;
 						}
 						case SqlDbType.DateTimeOffset:
 						{
@@ -1872,14 +1890,14 @@ namespace Microsoft.SqlServer.Server
 								dateTimeOffset = (DateTimeOffset)record.GetValue(i);
 							}
 							ValueUtilsSmi.SetDateTimeOffset_Unchecked(sink, setters, i, dateTimeOffset);
-							goto IL_0333;
+							goto IL_032C;
 						}
 						}
 						throw ADP.NotSupported();
 					}
 					ValueUtilsSmi.SetDBNull_Unchecked(sink, setters, i);
 				}
-				IL_0333:;
+				IL_032C:;
 			}
 		}
 
@@ -1904,6 +1922,20 @@ namespace Microsoft.SqlServer.Server
 			stream.Flush();
 			stream.Seek(0L, SeekOrigin.Begin);
 			return stream;
+		}
+
+		private static object GetUdt_LengthChecked(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
+		{
+			object obj;
+			if (ValueUtilsSmi.IsDBNull_Unchecked(sink, getters, ordinal))
+			{
+				obj = metaData.Type.InvokeMember("Null", BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty, null, null, new object[0], CultureInfo.InvariantCulture);
+			}
+			else
+			{
+				obj = SerializationHelperSql9.Deserialize(new SmiGettersStream(sink, getters, ordinal, metaData), metaData.Type);
+			}
+			return obj;
 		}
 
 		private static decimal GetDecimal_PossiblyMoney(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal, SmiMetaData metaData)
@@ -2217,6 +2249,17 @@ namespace Microsoft.SqlServer.Server
 		{
 			int num = ValueUtilsSmi.CheckXetParameters(metaData.SqlDbType, metaData.MaxLength, -1L, 0L, value.Length, offset, checked(value.Length - offset));
 			ValueUtilsSmi.SetString_Unchecked(sink, setters, ordinal, value, offset, num);
+		}
+
+		private static void SetUdt_LengthChecked(SmiEventSink_Default sink, ITypedSettersV3 setters, int ordinal, SmiMetaData metaData, object value)
+		{
+			if (ADP.IsNull(value))
+			{
+				setters.SetDBNull(sink, ordinal);
+				sink.ProcessMessagesAndThrow();
+				return;
+			}
+			SerializationHelperSql9.Serialize(new SmiSettersStream(sink, setters, ordinal, metaData), value);
 		}
 
 		private static void ThrowIfInvalidSetterAccess(SmiMetaData metaData, ExtendedClrTypeCode setterTypeCode)
@@ -2914,7 +2957,7 @@ namespace Microsoft.SqlServer.Server
 			}
 			if (SqlDbType.Variant == metaData.SqlDbType)
 			{
-				metaData = new SmiMetaData(SqlDbType.NVarChar, 4000L, 0, 0, (long)value.LCID, value.SqlCompareOptions);
+				metaData = new SmiMetaData(SqlDbType.NVarChar, 4000L, 0, 0, (long)value.LCID, value.SqlCompareOptions, null);
 				setters.SetVariantMetaData(sink, ordinal, metaData);
 				sink.ProcessMessagesAndThrow();
 			}
@@ -2985,7 +3028,9 @@ namespace Microsoft.SqlServer.Server
 					enumerator = peekAhead.Enumerator;
 					setters.NewElement(sink);
 					sink.ProcessMessagesAndThrow();
-					ValueUtilsSmi.FillCompatibleSettersFromRecord(sink, setters, array, peekAhead.FirstRecord, smiDefaultFieldsProperty);
+					SmiTypedGetterSetter smiTypedGetterSetter = setters;
+					SmiMetaData[] array2 = array;
+					ValueUtilsSmi.FillCompatibleSettersFromRecord(sink, smiTypedGetterSetter, array2, peekAhead.FirstRecord, smiDefaultFieldsProperty);
 					num++;
 				}
 				else
@@ -3010,7 +3055,9 @@ namespace Microsoft.SqlServer.Server
 								throw SQL.EnumeratedRecordMetaDataChanged(sqlDataRecord.GetName(i), num);
 							}
 						}
-						ValueUtilsSmi.FillCompatibleSettersFromRecord(sink, setters, array, sqlDataRecord, smiDefaultFieldsProperty);
+						SmiTypedGetterSetter smiTypedGetterSetter2 = setters;
+						SmiMetaData[] array2 = array;
+						ValueUtilsSmi.FillCompatibleSettersFromRecord(sink, smiTypedGetterSetter2, array2, sqlDataRecord, smiDefaultFieldsProperty);
 						num++;
 					}
 					setters.EndElements(sink);

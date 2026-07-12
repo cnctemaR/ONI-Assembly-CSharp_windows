@@ -12,6 +12,9 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 	public void Init()
 	{
 		this.AddAmountLine(Db.Get().Amounts.HitPoints, null);
+		this.AddAmountLine(Db.Get().Amounts.BionicInternalBattery, null);
+		this.AddAmountLine(Db.Get().Amounts.BionicOil, null);
+		this.AddAmountLine(Db.Get().Amounts.BionicGunk, null);
 		this.AddAttributeLine(Db.Get().CritterAttributes.Happiness, null);
 		this.AddAmountLine(Db.Get().Amounts.Wildness, null);
 		this.AddAmountLine(Db.Get().Amounts.Incubation, null);
@@ -24,6 +27,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, null);
 		this.AddAmountLine(Db.Get().Amounts.Bladder, null);
 		this.AddAmountLine(Db.Get().Amounts.Breath, null);
+		this.AddAmountLine(Db.Get().Amounts.BionicOxygenTank, null);
 		this.AddAmountLine(Db.Get().Amounts.Stamina, null);
 		this.AddAttributeLine(Db.Get().CritterAttributes.Metabolism, null);
 		this.AddAmountLine(Db.Get().Amounts.Calories, null);
@@ -36,6 +40,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		this.AddAmountLine(Db.Get().Amounts.InternalBattery, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalChemicalBattery, null);
 		this.AddAmountLine(Db.Get().Amounts.InternalBioBattery, null);
+		this.AddAmountLine(Db.Get().Amounts.InternalElectroBank, null);
 		if (DlcManager.FeatureRadiationEnabled())
 		{
 			this.AddAmountLine(Db.Get().Amounts.RadiationBalance, null);

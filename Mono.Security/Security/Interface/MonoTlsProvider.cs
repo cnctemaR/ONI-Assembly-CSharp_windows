@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Net.Security;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Mono.Security.Interface
 {
@@ -26,8 +24,6 @@ namespace Mono.Security.Interface
 
 		public abstract IMonoSslStream CreateSslStream(Stream innerStream, bool leaveInnerStreamOpen, MonoTlsSettings settings = null);
 
-		internal abstract IMonoSslStream CreateSslStreamInternal(SslStream sslStream, Stream innerStream, bool leaveInnerStreamOpen, MonoTlsSettings settings);
-
 		internal virtual bool HasNativeCertificates
 		{
 			get
@@ -35,18 +31,6 @@ namespace Mono.Security.Interface
 				return false;
 			}
 		}
-
-		internal virtual X509Certificate2Impl GetNativeCertificate(byte[] data, string password, X509KeyStorageFlags flags)
-		{
-			throw new InvalidOperationException();
-		}
-
-		internal virtual X509Certificate2Impl GetNativeCertificate(X509Certificate certificate)
-		{
-			throw new InvalidOperationException();
-		}
-
-		internal abstract bool ValidateCertificate(ICertificateValidator2 validator, string targetHost, bool serverMode, X509CertificateCollection certificates, bool wantsChain, ref X509Chain chain, ref MonoSslPolicyErrors errors, ref int status11);
 
 		internal abstract bool SupportsCleanShutdown { get; }
 	}

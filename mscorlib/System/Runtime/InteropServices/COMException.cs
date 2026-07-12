@@ -1,50 +1,35 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.Serialization;
-using System.Security;
-using Microsoft.Win32;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class COMException : ExternalException
 	{
-		public COMException()
-			: base(Environment.GetResourceString("Error HRESULT E_FAIL has been returned from a call to a COM component."))
+		internal COMException(int hr)
 		{
-			base.SetErrorCode(-2147467259);
+			base.HResult = hr;
+		}
+
+		public COMException()
+		{
 		}
 
 		public COMException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147467259);
 		}
 
 		public COMException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2147467259);
 		}
 
 		public COMException(string message, int errorCode)
 			: base(message)
 		{
-			base.SetErrorCode(errorCode);
-		}
-
-		[SecuritySafeCritical]
-		internal COMException(int hresult)
-			: base(Win32Native.GetMessage(hresult))
-		{
-			base.SetErrorCode(hresult);
-		}
-
-		internal COMException(string message, int hresult, Exception inner)
-			: base(message, inner)
-		{
-			base.SetErrorCode(hresult);
+			base.HResult = errorCode;
 		}
 
 		protected COMException(SerializationInfo info, StreamingContext context)

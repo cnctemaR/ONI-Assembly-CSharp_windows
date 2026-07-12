@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Database;
 using FMODUnity;
 using Klei.AI;
@@ -129,7 +130,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private void UpdateArmAnim()
 	{
 		FetchAreaChore fetchAreaChore = this.choreDriver.GetCurrentChore() as FetchAreaChore;
-		if (this.worker.workable && fetchAreaChore != null && this.rotation_complete)
+		if (this.worker.GetWorkable() && fetchAreaChore != null && this.rotation_complete)
 		{
 			this.StopRotateSound();
 			this.SetArmAnim(fetchAreaChore.IsDelivering ? SolidTransferArm.ArmAnim.Drop : SolidTransferArm.ArmAnim.Pickup);
@@ -138,7 +139,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.SetArmAnim(SolidTransferArm.ArmAnim.Idle);
 	}
 
-	private bool AsyncUpdate(int cell, HashSet<int> workspace, List<ScenePartitionerEntry> entries, GameObject game_object)
+	private bool AsyncUpdate(int cell, HashSet<int> workspace, GameObject game_object)
 	{
 		workspace.Clear();
 		int num;
@@ -162,12 +163,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.reachableCells.UnionWith(workspace);
 		}
 		this.pickupables.Clear();
-		entries.Clear();
-		GameScenePartitioner.Instance.UnsafeReadonlyGatherEntries(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.pickupablesLayer, entries);
-		GameScenePartitioner.Instance.UnsafeReadonlyGatherEntries(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.storedPickupablesLayer, entries);
-		foreach (ScenePartitionerEntry scenePartitionerEntry in entries)
+		foreach (object obj in GameScenePartitioner.Instance.AsyncSafeEnumerate(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.pickupablesLayer).Concat<object>(GameScenePartitioner.Instance.AsyncSafeEnumerate(num - this.pickupRange, num2 - this.pickupRange, 2 * this.pickupRange + 1, 2 * this.pickupRange + 1, GameScenePartitioner.Instance.storedPickupablesLayer)))
 		{
-			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
+			Pickupable pickupable = obj as Pickupable;
 			if (Grid.GetCellRange(cell, pickupable.cachedCell) <= this.pickupRange && this.IsPickupableRelevantToMyInterests(pickupable.KPrefabID, pickupable.cachedCell) && pickupable.CouldBePickedUpByTransferArm(game_object))
 			{
 				this.pickupables.Add(pickupable);
@@ -200,9 +198,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	public void RenderEveryTick(float dt)
 	{
-		if (this.worker.workable)
+		if (this.worker.GetWorkable())
 		{
-			Vector3 targetPoint = this.worker.workable.GetTargetPoint();
+			Vector3 targetPoint = this.worker.GetWorkable().GetTargetPoint();
 			targetPoint.z = 0f;
 			Vector3 position = base.transform.GetPosition();
 			position.z = 0f;
@@ -352,7 +350,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private Rotatable rotatable;
 
 	[MyCmpAdd]
-	private Worker worker;
+	private StandardWorker worker;
 
 	[MyCmpAdd]
 	private ChoreConsumer choreConsumer;
@@ -510,21 +508,19 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			this.start = start;
 			this.end = end;
 			this.reachable_cells_workspace = HashSetPool<int, SolidTransferArm>.Allocate();
-			this.pickupable_entries = ListPool<ScenePartitionerEntry, SolidTransferArm>.Allocate();
 		}
 
 		public void Run(SolidTransferArm.BatchUpdateContext context)
 		{
 			for (int num = this.start; num != this.end; num++)
 			{
-				context.refreshed_reachable_cells[num] = context.solid_transfer_arms[num].AsyncUpdate(context.cells[num], this.reachable_cells_workspace, this.pickupable_entries, context.game_objects[num]);
+				context.refreshed_reachable_cells[num] = context.solid_transfer_arms[num].AsyncUpdate(context.cells[num], this.reachable_cells_workspace, context.game_objects[num]);
 			}
 		}
 
 		public void Finish()
 		{
 			this.reachable_cells_workspace.Recycle();
-			this.pickupable_entries.Recycle();
 		}
 
 		private int start;
@@ -532,8 +528,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		private int end;
 
 		private HashSetPool<int, SolidTransferArm>.PooledHashSet reachable_cells_workspace;
-
-		private ListPool<ScenePartitionerEntry, SolidTransferArm>.PooledList pickupable_entries;
 	}
 
 	public struct CachedPickupable

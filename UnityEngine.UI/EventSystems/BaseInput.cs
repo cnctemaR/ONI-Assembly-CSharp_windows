@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
 {
@@ -64,7 +63,7 @@ namespace UnityEngine.EventSystems
 		{
 			get
 			{
-				return MultipleDisplayUtilities.GetMousePositionRelativeToMainDisplayResolution();
+				return Input.mousePosition;
 			}
 		}
 

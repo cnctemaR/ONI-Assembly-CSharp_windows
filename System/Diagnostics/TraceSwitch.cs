@@ -27,7 +27,7 @@ namespace System.Diagnostics
 			{
 				if (value < TraceLevel.Off || value > TraceLevel.Verbose)
 				{
-					throw new ArgumentException(global::SR.GetString("The Level must be set to a value in the enumeration TraceLevel."));
+					throw new ArgumentException(SR.GetString("The Level must be set to a value in the enumeration TraceLevel."));
 				}
 				base.SwitchSetting = (int)value;
 			}

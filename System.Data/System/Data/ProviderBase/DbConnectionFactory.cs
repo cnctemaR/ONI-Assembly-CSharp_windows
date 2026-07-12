@@ -88,7 +88,7 @@ namespace System.Data.ProviderBase
 
 		private Timer CreatePruningTimer()
 		{
-			return new Timer(new TimerCallback(this.PruneConnectionPoolGroups), null, 240000, 30000);
+			return ADP.UnsafeCreateTimer(new TimerCallback(this.PruneConnectionPoolGroups), null, 240000, 30000);
 		}
 
 		protected DbConnectionOptions FindConnectionOptions(DbConnectionPoolKey key)
@@ -109,143 +109,6 @@ namespace System.Data.ProviderBase
 				task = (DbConnectionFactory.s_completedTask = Task.FromResult<DbConnectionInternal>(null));
 			}
 			return task;
-		}
-
-		internal bool TryGetConnection(DbConnection owningConnection, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, out DbConnectionInternal connection)
-		{
-			DbConnectionFactory.<>c__DisplayClass22_0 CS$<>8__locals1 = new DbConnectionFactory.<>c__DisplayClass22_0();
-			CS$<>8__locals1.retry = retry;
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.owningConnection = owningConnection;
-			CS$<>8__locals1.userOptions = userOptions;
-			CS$<>8__locals1.oldConnection = oldConnection;
-			connection = null;
-			int num = 10;
-			int num2 = 1;
-			for (;;)
-			{
-				CS$<>8__locals1.poolGroup = this.GetConnectionPoolGroup(CS$<>8__locals1.owningConnection);
-				DbConnectionPool connectionPool = this.GetConnectionPool(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup);
-				if (connectionPool == null)
-				{
-					CS$<>8__locals1.poolGroup = this.GetConnectionPoolGroup(CS$<>8__locals1.owningConnection);
-					if (CS$<>8__locals1.retry != null)
-					{
-						break;
-					}
-					connection = this.CreateNonPooledConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup, CS$<>8__locals1.userOptions);
-				}
-				else
-				{
-					if (((SqlConnection)CS$<>8__locals1.owningConnection).ForceNewConnection)
-					{
-						connection = connectionPool.ReplaceConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.userOptions, CS$<>8__locals1.oldConnection);
-					}
-					else if (!connectionPool.TryGetConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.retry, CS$<>8__locals1.userOptions, out connection))
-					{
-						return false;
-					}
-					if (connection == null)
-					{
-						if (connectionPool.IsRunning)
-						{
-							goto Block_8;
-						}
-						Thread.Sleep(num2);
-						num2 *= 2;
-					}
-				}
-				if (connection != null || num-- <= 0)
-				{
-					goto IL_0268;
-				}
-			}
-			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-			Task<DbConnectionInternal>[] array = DbConnectionFactory.s_pendingOpenNonPooled;
-			Task<DbConnectionInternal> task3;
-			lock (array)
-			{
-				int i;
-				for (i = 0; i < DbConnectionFactory.s_pendingOpenNonPooled.Length; i++)
-				{
-					Task task4 = DbConnectionFactory.s_pendingOpenNonPooled[i];
-					if (task4 == null)
-					{
-						DbConnectionFactory.s_pendingOpenNonPooled[i] = DbConnectionFactory.GetCompletedTask();
-						break;
-					}
-					if (task4.IsCompleted)
-					{
-						break;
-					}
-				}
-				if (i == DbConnectionFactory.s_pendingOpenNonPooled.Length)
-				{
-					i = (int)((ulong)DbConnectionFactory.s_pendingOpenNonPooledNext % (ulong)((long)DbConnectionFactory.s_pendingOpenNonPooled.Length));
-					DbConnectionFactory.s_pendingOpenNonPooledNext += 1U;
-				}
-				Task<DbConnectionInternal> task2 = DbConnectionFactory.s_pendingOpenNonPooled[i];
-				Func<Task<DbConnectionInternal>, DbConnectionInternal> func;
-				if ((func = CS$<>8__locals1.<>9__1) == null)
-				{
-					func = (CS$<>8__locals1.<>9__1 = delegate(Task<DbConnectionInternal> _)
-					{
-						Transaction currentTransaction = ADP.GetCurrentTransaction();
-						DbConnectionInternal dbConnectionInternal2;
-						try
-						{
-							ADP.SetCurrentTransaction(CS$<>8__locals1.retry.Task.AsyncState as Transaction);
-							DbConnectionInternal dbConnectionInternal = CS$<>8__locals1.<>4__this.CreateNonPooledConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup, CS$<>8__locals1.userOptions);
-							if (CS$<>8__locals1.oldConnection != null && CS$<>8__locals1.oldConnection.State == ConnectionState.Open)
-							{
-								CS$<>8__locals1.oldConnection.PrepareForReplaceConnection();
-								CS$<>8__locals1.oldConnection.Dispose();
-							}
-							dbConnectionInternal2 = dbConnectionInternal;
-						}
-						finally
-						{
-							ADP.SetCurrentTransaction(currentTransaction);
-						}
-						return dbConnectionInternal2;
-					});
-				}
-				task3 = task2.ContinueWith<DbConnectionInternal>(func, cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, TaskScheduler.Default);
-				DbConnectionFactory.s_pendingOpenNonPooled[i] = task3;
-			}
-			if (CS$<>8__locals1.owningConnection.ConnectionTimeout > 0)
-			{
-				int num3 = CS$<>8__locals1.owningConnection.ConnectionTimeout * 1000;
-				cancellationTokenSource.CancelAfter(num3);
-			}
-			task3.ContinueWith(delegate(Task<DbConnectionInternal> task)
-			{
-				cancellationTokenSource.Dispose();
-				if (task.IsCanceled)
-				{
-					CS$<>8__locals1.retry.TrySetException(ADP.ExceptionWithStackTrace(ADP.NonPooledOpenTimeout()));
-					return;
-				}
-				if (task.IsFaulted)
-				{
-					CS$<>8__locals1.retry.TrySetException(task.Exception.InnerException);
-					return;
-				}
-				if (!CS$<>8__locals1.retry.TrySetResult(task.Result))
-				{
-					task.Result.DoomThisConnection();
-					task.Result.Dispose();
-				}
-			}, TaskScheduler.Default);
-			return false;
-			Block_8:
-			throw ADP.PooledOpenTimeout();
-			IL_0268:
-			if (connection == null)
-			{
-				throw ADP.PooledOpenTimeout();
-			}
-			return true;
 		}
 
 		private DbConnectionPool GetConnectionPool(DbConnection owningObject, DbConnectionPoolGroup connectionPoolGroup)
@@ -440,6 +303,143 @@ namespace System.Data.ProviderBase
 		internal abstract bool SetInnerConnectionFrom(DbConnection owningObject, DbConnectionInternal to, DbConnectionInternal from);
 
 		internal abstract void SetInnerConnectionTo(DbConnection owningObject, DbConnectionInternal to);
+
+		internal bool TryGetConnection(DbConnection owningConnection, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, out DbConnectionInternal connection)
+		{
+			DbConnectionFactory.<>c__DisplayClass40_0 CS$<>8__locals1 = new DbConnectionFactory.<>c__DisplayClass40_0();
+			CS$<>8__locals1.retry = retry;
+			CS$<>8__locals1.<>4__this = this;
+			CS$<>8__locals1.owningConnection = owningConnection;
+			CS$<>8__locals1.userOptions = userOptions;
+			CS$<>8__locals1.oldConnection = oldConnection;
+			connection = null;
+			int num = 10;
+			int num2 = 1;
+			for (;;)
+			{
+				CS$<>8__locals1.poolGroup = this.GetConnectionPoolGroup(CS$<>8__locals1.owningConnection);
+				DbConnectionPool connectionPool = this.GetConnectionPool(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup);
+				if (connectionPool == null)
+				{
+					CS$<>8__locals1.poolGroup = this.GetConnectionPoolGroup(CS$<>8__locals1.owningConnection);
+					if (CS$<>8__locals1.retry != null)
+					{
+						break;
+					}
+					connection = this.CreateNonPooledConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup, CS$<>8__locals1.userOptions);
+				}
+				else
+				{
+					if (((SqlConnection)CS$<>8__locals1.owningConnection).ForceNewConnection)
+					{
+						connection = connectionPool.ReplaceConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.userOptions, CS$<>8__locals1.oldConnection);
+					}
+					else if (!connectionPool.TryGetConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.retry, CS$<>8__locals1.userOptions, out connection))
+					{
+						return false;
+					}
+					if (connection == null)
+					{
+						if (connectionPool.IsRunning)
+						{
+							goto Block_8;
+						}
+						Thread.Sleep(num2);
+						num2 *= 2;
+					}
+				}
+				if (connection != null || num-- <= 0)
+				{
+					goto IL_0268;
+				}
+			}
+			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+			Task<DbConnectionInternal>[] array = DbConnectionFactory.s_pendingOpenNonPooled;
+			Task<DbConnectionInternal> task3;
+			lock (array)
+			{
+				int i;
+				for (i = 0; i < DbConnectionFactory.s_pendingOpenNonPooled.Length; i++)
+				{
+					Task task4 = DbConnectionFactory.s_pendingOpenNonPooled[i];
+					if (task4 == null)
+					{
+						DbConnectionFactory.s_pendingOpenNonPooled[i] = DbConnectionFactory.GetCompletedTask();
+						break;
+					}
+					if (task4.IsCompleted)
+					{
+						break;
+					}
+				}
+				if (i == DbConnectionFactory.s_pendingOpenNonPooled.Length)
+				{
+					i = (int)((ulong)DbConnectionFactory.s_pendingOpenNonPooledNext % (ulong)((long)DbConnectionFactory.s_pendingOpenNonPooled.Length));
+					DbConnectionFactory.s_pendingOpenNonPooledNext += 1U;
+				}
+				Task<DbConnectionInternal> task2 = DbConnectionFactory.s_pendingOpenNonPooled[i];
+				Func<Task<DbConnectionInternal>, DbConnectionInternal> func;
+				if ((func = CS$<>8__locals1.<>9__1) == null)
+				{
+					func = (CS$<>8__locals1.<>9__1 = delegate(Task<DbConnectionInternal> _)
+					{
+						Transaction currentTransaction = ADP.GetCurrentTransaction();
+						DbConnectionInternal dbConnectionInternal2;
+						try
+						{
+							ADP.SetCurrentTransaction(CS$<>8__locals1.retry.Task.AsyncState as Transaction);
+							DbConnectionInternal dbConnectionInternal = CS$<>8__locals1.<>4__this.CreateNonPooledConnection(CS$<>8__locals1.owningConnection, CS$<>8__locals1.poolGroup, CS$<>8__locals1.userOptions);
+							if (CS$<>8__locals1.oldConnection != null && CS$<>8__locals1.oldConnection.State == ConnectionState.Open)
+							{
+								CS$<>8__locals1.oldConnection.PrepareForReplaceConnection();
+								CS$<>8__locals1.oldConnection.Dispose();
+							}
+							dbConnectionInternal2 = dbConnectionInternal;
+						}
+						finally
+						{
+							ADP.SetCurrentTransaction(currentTransaction);
+						}
+						return dbConnectionInternal2;
+					});
+				}
+				task3 = task2.ContinueWith<DbConnectionInternal>(func, cancellationTokenSource.Token, TaskContinuationOptions.LongRunning, TaskScheduler.Default);
+				DbConnectionFactory.s_pendingOpenNonPooled[i] = task3;
+			}
+			if (CS$<>8__locals1.owningConnection.ConnectionTimeout > 0)
+			{
+				int num3 = CS$<>8__locals1.owningConnection.ConnectionTimeout * 1000;
+				cancellationTokenSource.CancelAfter(num3);
+			}
+			task3.ContinueWith(delegate(Task<DbConnectionInternal> task)
+			{
+				cancellationTokenSource.Dispose();
+				if (task.IsCanceled)
+				{
+					CS$<>8__locals1.retry.TrySetException(ADP.ExceptionWithStackTrace(ADP.NonPooledOpenTimeout()));
+					return;
+				}
+				if (task.IsFaulted)
+				{
+					CS$<>8__locals1.retry.TrySetException(task.Exception.InnerException);
+					return;
+				}
+				if (!CS$<>8__locals1.retry.TrySetResult(task.Result))
+				{
+					task.Result.DoomThisConnection();
+					task.Result.Dispose();
+				}
+			}, TaskScheduler.Default);
+			return false;
+			Block_8:
+			throw ADP.PooledOpenTimeout();
+			IL_0268:
+			if (connection == null)
+			{
+				throw ADP.PooledOpenTimeout();
+			}
+			return true;
+		}
 
 		private Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> _connectionPoolGroups;
 

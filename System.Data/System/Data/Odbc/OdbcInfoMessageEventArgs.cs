@@ -44,7 +44,7 @@ namespace System.Data.Odbc
 
 		internal OdbcInfoMessageEventArgs()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private OdbcErrorCollection _errors;

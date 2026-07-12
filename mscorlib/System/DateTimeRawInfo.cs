@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Security;
 
 namespace System
 {
 	internal struct DateTimeRawInfo
 	{
-		[SecurityCritical]
 		internal unsafe void Init(int* numberBuffer)
 		{
 			this.month = -1;
@@ -17,7 +15,6 @@ namespace System
 			this.num = numberBuffer;
 		}
 
-		[SecuritySafeCritical]
 		internal unsafe void AddNumber(int value)
 		{
 			ref int ptr = ref *this.num;
@@ -26,13 +23,11 @@ namespace System
 			*((ref ptr) + (IntPtr)num * 4) = value;
 		}
 
-		[SecuritySafeCritical]
 		internal unsafe int GetNumber(int index)
 		{
 			return this.num[index];
 		}
 
-		[SecurityCritical]
 		private unsafe int* num;
 
 		internal int numCount;
@@ -50,7 +45,5 @@ namespace System
 		internal double fraction;
 
 		internal bool hasSameDateAndTimeSeparators;
-
-		internal bool timeZone;
 	}
 }

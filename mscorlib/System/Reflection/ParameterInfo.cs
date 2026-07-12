@@ -1,68 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
-using System.Text;
+using Unity;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_ParameterInfo))]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class ParameterInfo : ICustomAttributeProvider, _ParameterInfo, IObjectReference
+	public class ParameterInfo : ICustomAttributeProvider, IObjectReference, _ParameterInfo
 	{
 		protected ParameterInfo()
 		{
 		}
 
-		public override string ToString()
+		public virtual ParameterAttributes Attributes
 		{
-			Type type = this.ClassImpl;
-			while (type.HasElementType)
+			get
 			{
-				type = type.GetElementType();
+				return this.AttrsImpl;
 			}
-			string text = ((type.IsPrimitive || this.ClassImpl == typeof(void) || this.ClassImpl.Namespace == this.MemberImpl.DeclaringType.Namespace) ? this.ClassImpl.Name : this.ClassImpl.FullName);
-			if (!this.IsRetval)
-			{
-				text += " ";
-				text += this.NameImpl;
-			}
-			return text;
 		}
 
-		internal static void FormatParameters(StringBuilder sb, ParameterInfo[] p, CallingConventions callingConvention, bool serialization)
+		public virtual MemberInfo Member
 		{
-			for (int i = 0; i < p.Length; i++)
+			get
 			{
-				if (i > 0)
-				{
-					sb.Append(", ");
-				}
-				Type parameterType = p[i].ParameterType;
-				string text = parameterType.FormatTypeName(serialization);
-				if (parameterType.IsByRef && !serialization)
-				{
-					sb.Append(text.TrimEnd(new char[] { '&' }));
-					sb.Append(" ByRef");
-				}
-				else
-				{
-					sb.Append(text);
-				}
+				return this.MemberImpl;
 			}
-			if ((callingConvention & CallingConventions.VarArgs) != (CallingConventions)0)
+		}
+
+		public virtual string Name
+		{
+			get
 			{
-				if (p.Length != 0)
-				{
-					sb.Append(", ");
-				}
-				sb.Append("...");
+				return this.NameImpl;
 			}
 		}
 
@@ -74,11 +47,11 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual ParameterAttributes Attributes
+		public virtual int Position
 		{
 			get
 			{
-				return this.AttrsImpl;
+				return this.PositionImpl;
 			}
 		}
 
@@ -122,83 +95,37 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual MemberInfo Member
+		public virtual object DefaultValue
 		{
 			get
 			{
-				return this.MemberImpl;
+				throw NotImplemented.ByDesign;
 			}
 		}
 
-		public virtual string Name
+		public virtual object RawDefaultValue
 		{
 			get
 			{
-				return this.NameImpl;
+				throw NotImplemented.ByDesign;
 			}
 		}
 
-		public virtual int Position
+		public virtual bool HasDefaultValue
 		{
 			get
 			{
-				return this.PositionImpl;
+				throw NotImplemented.ByDesign;
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetMetadataToken();
-
-		internal object[] GetPseudoCustomAttributes()
+		public virtual bool IsDefined(Type attributeType, bool inherit)
 		{
-			int num = 0;
-			if (this.IsIn)
+			if (attributeType == null)
 			{
-				num++;
+				throw new ArgumentNullException("attributeType");
 			}
-			if (this.IsOut)
-			{
-				num++;
-			}
-			if (this.IsOptional)
-			{
-				num++;
-			}
-			if (this.marshalAs != null)
-			{
-				num++;
-			}
-			if (num == 0)
-			{
-				return null;
-			}
-			object[] array = new object[num];
-			num = 0;
-			if (this.IsIn)
-			{
-				array[num++] = new InAttribute();
-			}
-			if (this.IsOptional)
-			{
-				array[num++] = new OptionalAttribute();
-			}
-			if (this.IsOut)
-			{
-				array[num++] = new OutAttribute();
-			}
-			if (this.marshalAs != null)
-			{
-				array[num++] = this.marshalAs.Copy();
-			}
-			return array;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Type[] GetTypeModifiers(bool optional);
-
-		internal object GetDefaultValueImpl()
-		{
-			return this.DefaultValueImpl;
+			return false;
 		}
 
 		public virtual IEnumerable<CustomAttributeData> CustomAttributes
@@ -209,48 +136,33 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual bool HasDefaultValue
+		public virtual IList<CustomAttributeData> GetCustomAttributesData()
 		{
-			get
+			throw NotImplemented.ByDesign;
+		}
+
+		public virtual object[] GetCustomAttributes(bool inherit)
+		{
+			return Array.Empty<object>();
+		}
+
+		public virtual object[] GetCustomAttributes(Type attributeType, bool inherit)
+		{
+			if (attributeType == null)
 			{
-				throw new NotImplementedException();
+				throw new ArgumentNullException("attributeType");
 			}
+			return Array.Empty<object>();
 		}
 
-		void _ParameterInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		public virtual Type[] GetOptionalCustomModifiers()
 		{
-			throw new NotImplementedException();
+			return Array.Empty<Type>();
 		}
 
-		void _ParameterInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		public virtual Type[] GetRequiredCustomModifiers()
 		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterInfo.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual object DefaultValue
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		public virtual object RawDefaultValue
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
+			return Array.Empty<Type>();
 		}
 
 		public virtual int MetadataToken
@@ -261,61 +173,72 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual object[] GetCustomAttributes(bool inherit)
-		{
-			return new object[0];
-		}
-
-		public virtual object[] GetCustomAttributes(Type attributeType, bool inherit)
-		{
-			return new object[0];
-		}
-
 		[SecurityCritical]
 		public object GetRealObject(StreamingContext context)
 		{
-			throw new NotImplementedException();
+			if (this.MemberImpl == null)
+			{
+				throw new SerializationException("Insufficient state to return the real object.");
+			}
+			MemberTypes memberType = this.MemberImpl.MemberType;
+			if (memberType != MemberTypes.Constructor && memberType != MemberTypes.Method)
+			{
+				if (memberType != MemberTypes.Property)
+				{
+					throw new SerializationException("Serialized member does not have a ParameterInfo.");
+				}
+				ParameterInfo[] array = ((PropertyInfo)this.MemberImpl).GetIndexParameters();
+				if (array != null && this.PositionImpl > -1 && this.PositionImpl < array.Length)
+				{
+					return array[this.PositionImpl];
+				}
+				throw new SerializationException("Non existent ParameterInfo. Position bigger than member's parameters length.");
+			}
+			else if (this.PositionImpl == -1)
+			{
+				if (this.MemberImpl.MemberType == MemberTypes.Method)
+				{
+					return ((MethodInfo)this.MemberImpl).ReturnParameter;
+				}
+				throw new SerializationException("Non existent ParameterInfo. Position bigger than member's parameters length.");
+			}
+			else
+			{
+				ParameterInfo[] array = ((MethodBase)this.MemberImpl).GetParametersNoCopy();
+				if (array != null && this.PositionImpl < array.Length)
+				{
+					return array[this.PositionImpl];
+				}
+				throw new SerializationException("Non existent ParameterInfo. Position bigger than member's parameters length.");
+			}
 		}
 
-		public virtual bool IsDefined(Type attributeType, bool inherit)
+		public override string ToString()
 		{
-			return false;
+			return this.ParameterType.FormatTypeName() + " " + this.Name;
 		}
 
-		public virtual Type[] GetRequiredCustomModifiers()
+		void _ParameterInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
-			return new Type[0];
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		public virtual Type[] GetOptionalCustomModifiers()
+		void _ParameterInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
 		{
-			return new Type[0];
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		public virtual IList<CustomAttributeData> GetCustomAttributesData()
+		void _ParameterInfo.GetTypeInfoCount(out uint pcTInfo)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		internal static ParameterInfo New(ParameterBuilder pb, Type type, MemberInfo member, int position)
+		void _ParameterInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
 		{
-			return new MonoParameterInfo(pb, type, member, position);
+			ThrowStub.ThrowNotSupportedException();
 		}
 
-		internal static ParameterInfo New(ParameterInfo pinfo, Type type, MemberInfo member, int position)
-		{
-			return new MonoParameterInfo(pinfo, type, member, position);
-		}
-
-		internal static ParameterInfo New(ParameterInfo pinfo, MemberInfo member)
-		{
-			return new MonoParameterInfo(pinfo, member);
-		}
-
-		internal static ParameterInfo New(Type type, MemberInfo member, MarshalAsAttribute marshalAs)
-		{
-			return new MonoParameterInfo(type, member, marshalAs);
-		}
+		protected ParameterAttributes AttrsImpl;
 
 		protected Type ClassImpl;
 
@@ -327,8 +250,6 @@ namespace System.Reflection
 
 		protected int PositionImpl;
 
-		protected ParameterAttributes AttrsImpl;
-
-		internal MarshalAsAttribute marshalAs;
+		private const int MetadataToken_ParamDef = 134217728;
 	}
 }

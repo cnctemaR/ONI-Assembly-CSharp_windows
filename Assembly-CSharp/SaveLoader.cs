@@ -1174,6 +1174,43 @@ public class SaveLoader : KMonoBehaviour
 		return false;
 	}
 
+	public bool IsAllDlcActiveForCurrentSave(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return true;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (!(text == "") && !this.IsDLCActiveForCurrentSave(text))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool IsAnyDlcActiveForCurrentSave(string[] dlcIds)
+	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return false;
+		}
+		foreach (string text in dlcIds)
+		{
+			if (!(text == "") && this.IsDLCActiveForCurrentSave(text))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool IsCorrectDlcActiveForCurrentSave(string[] required, string[] forbidden)
+	{
+		return this.IsAllDlcActiveForCurrentSave(required) && !this.IsAnyDlcActiveForCurrentSave(forbidden);
+	}
+
 	public string GetSaveLoadContentLetters()
 	{
 		if (this.GameInfo.dlcIds.Count <= 0)

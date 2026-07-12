@@ -7,9 +7,9 @@ namespace System.Xml.Linq
 	{
 		public XDeclaration(string version, string encoding, string standalone)
 		{
-			this.version = version;
-			this.encoding = encoding;
-			this.standalone = standalone;
+			this._version = version;
+			this._encoding = encoding;
+			this._standalone = standalone;
 		}
 
 		public XDeclaration(XDeclaration other)
@@ -18,16 +18,16 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("other");
 			}
-			this.version = other.version;
-			this.encoding = other.encoding;
-			this.standalone = other.standalone;
+			this._version = other._version;
+			this._encoding = other._encoding;
+			this._standalone = other._standalone;
 		}
 
 		internal XDeclaration(XmlReader r)
 		{
-			this.version = r.GetAttribute("version");
-			this.encoding = r.GetAttribute("encoding");
-			this.standalone = r.GetAttribute("standalone");
+			this._version = r.GetAttribute("version");
+			this._encoding = r.GetAttribute("encoding");
+			this._standalone = r.GetAttribute("standalone");
 			r.Read();
 		}
 
@@ -35,11 +35,11 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				return this.encoding;
+				return this._encoding;
 			}
 			set
 			{
-				this.encoding = value;
+				this._encoding = value;
 			}
 		}
 
@@ -47,11 +47,11 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				return this.standalone;
+				return this._standalone;
 			}
 			set
 			{
-				this.standalone = value;
+				this._standalone = value;
 			}
 		}
 
@@ -59,43 +59,44 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				return this.version;
+				return this._version;
 			}
 			set
 			{
-				this.version = value;
+				this._version = value;
 			}
 		}
 
 		public override string ToString()
 		{
-			StringBuilder stringBuilder = new StringBuilder("<?xml");
-			if (this.version != null)
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+			stringBuilder.Append("<?xml");
+			if (this._version != null)
 			{
 				stringBuilder.Append(" version=\"");
-				stringBuilder.Append(this.version);
-				stringBuilder.Append("\"");
+				stringBuilder.Append(this._version);
+				stringBuilder.Append('"');
 			}
-			if (this.encoding != null)
+			if (this._encoding != null)
 			{
 				stringBuilder.Append(" encoding=\"");
-				stringBuilder.Append(this.encoding);
-				stringBuilder.Append("\"");
+				stringBuilder.Append(this._encoding);
+				stringBuilder.Append('"');
 			}
-			if (this.standalone != null)
+			if (this._standalone != null)
 			{
 				stringBuilder.Append(" standalone=\"");
-				stringBuilder.Append(this.standalone);
-				stringBuilder.Append("\"");
+				stringBuilder.Append(this._standalone);
+				stringBuilder.Append('"');
 			}
 			stringBuilder.Append("?>");
-			return stringBuilder.ToString();
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
 		}
 
-		private string version;
+		private string _version;
 
-		private string encoding;
+		private string _encoding;
 
-		private string standalone;
+		private string _standalone;
 	}
 }

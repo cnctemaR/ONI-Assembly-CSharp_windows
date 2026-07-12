@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class TypeLibVarAttribute : Attribute
 	{
 		public TypeLibVarAttribute(TypeLibVarFlags flags)

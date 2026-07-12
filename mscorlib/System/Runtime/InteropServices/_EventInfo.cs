@@ -4,10 +4,10 @@ using System.Reflection;
 namespace System.Runtime.InteropServices
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("9DE59C64-D889-35A1-B897-587D74469E5B")]
-	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[TypeLibImportClass(typeof(EventInfo))]
+	[Guid("9DE59C64-D889-35A1-B897-587D74469E5B")]
+	[ComVisible(true)]
 	public interface _EventInfo
 	{
 		void AddEventHandler(object target, Delegate handler);

@@ -19,6 +19,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		smi.mouth = global::Util.KInstantiate(Assets.GetPrefab(MouthAnimation.ID), null, null).GetComponent<KBatchedAnimController>();
 		smi.mouth.gameObject.SetActive(true);
 		smi.sm.mouth.Set(smi.mouth.gameObject, smi, false);
+		smi.SetMouthId();
 	}
 
 	private static void DestroyMouth(SpeechMonitor.Instance smi)
@@ -30,20 +31,21 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		}
 	}
 
-	private static string GetRandomSpeechAnim(string speech_prefix)
+	private static string GetRandomSpeechAnim(SpeechMonitor.Instance smi)
 	{
-		return speech_prefix + global::UnityEngine.Random.Range(1, TuningData<SpeechMonitor.Tuning>.Get().speechCount).ToString();
+		return smi.speechPrefix + global::UnityEngine.Random.Range(1, TuningData<SpeechMonitor.Tuning>.Get().speechCount).ToString() + smi.mouthId;
 	}
 
 	public static bool IsAllowedToPlaySpeech(GameObject go)
 	{
-		if (go.HasTag(GameTags.Dead))
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		if (component.HasTag(GameTags.Dead) || component.HasTag(GameTags.Incapacitated))
 		{
 			return false;
 		}
-		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
-		KAnim.Anim currentAnim = component.GetCurrentAnim();
-		return currentAnim == null || (GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim) && SpeechMonitor.CanOverrideHead(component));
+		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
+		KAnim.Anim currentAnim = component2.GetCurrentAnim();
+		return currentAnim == null || (GameAudioSheets.Get().IsAnimAllowedToPlaySpeech(currentAnim) && SpeechMonitor.CanOverrideHead(component2));
 	}
 
 	private static bool CanOverrideHead(KBatchedAnimController kbac)
@@ -52,17 +54,20 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		KAnim.Anim currentAnim = kbac.GetCurrentAnim();
 		if (currentAnim == null)
 		{
-			return false;
+			flag = false;
 		}
-		int currentFrameIndex = kbac.GetCurrentFrameIndex();
-		if (currentFrameIndex <= 0)
+		else if (currentAnim.animFile.name != SpeechMonitor.GENERIC_CONVO_ANIM_NAME)
 		{
-			return false;
-		}
-		KAnim.Anim.Frame frame;
-		if (KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag).TryGetFrame(currentFrameIndex, out frame) && frame.hasHead)
-		{
-			flag = true;
+			int currentFrameIndex = kbac.GetCurrentFrameIndex();
+			KAnim.Anim.Frame frame;
+			if (currentFrameIndex <= 0)
+			{
+				flag = false;
+			}
+			else if (KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag).TryGetFrame(currentFrameIndex, out frame) && frame.hasHead)
+			{
+				flag = false;
+			}
 		}
 		return flag;
 	}
@@ -76,15 +81,15 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		}
 		if (smi.ev.isValid())
 		{
-			smi.mouth.Play(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
-			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
-			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
-			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Play(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
 		}
 		else
 		{
-			smi.mouth.Play(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
-			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi.speechPrefix), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Play(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
+			smi.mouth.Queue(SpeechMonitor.GetRandomSpeechAnim(smi), KAnim.PlayMode.Once, 1f, 0f);
 		}
 		SpeechMonitor.UpdateTalking(smi, 0f);
 	}
@@ -160,6 +165,8 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 
 	private static HashedString HASH_SNAPTO_MOUTH = "snapto_mouth";
 
+	private static HashedString GENERIC_CONVO_ANIM_NAME = new HashedString("anim_generic_convo_kanim");
+
 	public class Def : StateMachine.BaseDef
 	{
 	}
@@ -208,6 +215,14 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 			component.SetSymbolOverride(symbol2.firstFrameIdx, ref symbolFrameInstance);
 		}
 
+		public void SetMouthId()
+		{
+			if (base.smi.Get<Accessorizer>().GetAccessory(Db.Get().AccessorySlots.Mouth).Id.Contains("006"))
+			{
+				base.smi.mouthId = "_006";
+			}
+		}
+
 		public KBatchedAnimController mouth;
 
 		public string speechPrefix = "happy";
@@ -215,5 +230,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		public string voiceEvent;
 
 		public EventInstance ev;
+
+		public string mouthId;
 	}
 }

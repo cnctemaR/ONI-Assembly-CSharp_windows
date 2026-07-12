@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class SerializationStore : IDisposable
 	{
 		public abstract ICollection Errors { get; }

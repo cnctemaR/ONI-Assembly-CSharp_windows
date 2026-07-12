@@ -497,17 +497,17 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			}
 		}
 
-		protected override void OnStartWork(Worker worker)
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			base.ShowProgressBar(false);
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			return true;
 		}
 
-		protected override void OnCompleteWork(Worker worker)
+		protected override void OnCompleteWork(WorkerBase worker)
 		{
 			Equipment equipment = worker.GetComponent<MinionIdentity>().GetEquipment();
 			if (equipment.IsSlotOccupied(Db.Get().AssignableSlots.Suit))
@@ -528,7 +528,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			}
 		}
 
-		public override HashedString[] GetWorkAnims(Worker worker)
+		public override HashedString[] GetWorkAnims(WorkerBase worker)
 		{
 			return new HashedString[]
 			{
@@ -660,9 +660,25 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				})
 				.PlayAnim("no_suit_pre")
 				.QueueAnim("no_suit", false, null);
-			this.empty.notconfigured.ParamTransition<bool>(this.isConfigured, this.empty.configured, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsTrue).ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.TOOLTIP, "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-			this.empty.configured.RefreshUserMenuOnEnter().ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.READY.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.READY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-			this.waitingforsuit.EventTransition(GameHashes.OnStorageChange, this.charging, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() != null).Enter("CreateFetchChore", delegate(SuitLocker.StatesInstance smi)
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state = this.empty.notconfigured.ParamTransition<bool>(this.isConfigured, this.empty.configured, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsTrue);
+			string text = BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.NAME;
+			string text2 = BUILDING.STATUSITEMS.SUIT_LOCKER_NEEDS_CONFIGURATION.TOOLTIP;
+			string text3 = "status_item_no_filter_set";
+			StatusItem.IconType iconType = StatusItem.IconType.Custom;
+			NotificationType notificationType = NotificationType.BadMinor;
+			bool flag = false;
+			StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory);
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state2 = this.empty.configured.RefreshUserMenuOnEnter();
+			string text4 = BUILDING.STATUSITEMS.SUIT_LOCKER.READY.NAME;
+			string text5 = BUILDING.STATUSITEMS.SUIT_LOCKER.READY.TOOLTIP;
+			string text6 = "";
+			StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+			NotificationType notificationType2 = NotificationType.Neutral;
+			bool flag2 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory);
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state3 = this.waitingforsuit.EventTransition(GameHashes.OnStorageChange, this.charging, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() != null).Enter("CreateFetchChore", delegate(SuitLocker.StatesInstance smi)
 			{
 				smi.master.CreateFetchChore();
 			}).ParamTransition<bool>(this.isWaitingForSuit, this.empty, GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.IsFalse)
@@ -676,8 +692,15 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				.Exit("CancelFetchChore", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.CancelFetchChore();
-				})
-				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+				});
+			string text7 = BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.NAME;
+			string text8 = BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.TOOLTIP;
+			string text9 = "";
+			StatusItem.IconType iconType3 = StatusItem.IconType.Info;
+			NotificationType notificationType3 = NotificationType.Neutral;
+			bool flag3 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state3.ToggleStatusItem(text7, text8, text9, iconType3, notificationType3, flag3, default(HashedString), 129022, null, null, statusItemCategory);
 			this.charging.DefaultState(this.charging.pre).RefreshUserMenuOnEnter().EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null)
 				.ToggleStatusItem(Db.Get().MiscStatusItems.StoredItemDurability, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit().gameObject)
 				.Enter(delegate(SuitLocker.StatesInstance smi)
@@ -700,7 +723,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				smi.GetComponent<KBatchedAnimController>().Play("no_suit_pst", KAnim.PlayMode.Once, 1f, 0f);
 				smi.GetComponent<KBatchedAnimController>().Queue("charging_pre", KAnim.PlayMode.Once, 1f, 0f);
 			}).OnAnimQueueComplete(this.charging.operational);
-			this.charging.operational.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.nooxygen, (SuitLocker.StatesInstance smi) => !smi.master.HasOxygen(), UpdateRate.SIM_200ms).PlayAnim("charging_loop", KAnim.PlayMode.Loop)
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state4 = this.charging.operational.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.nooxygen, (SuitLocker.StatesInstance smi) => !smi.master.HasOxygen(), UpdateRate.SIM_200ms).PlayAnim("charging_loop", KAnim.PlayMode.Loop)
 				.Enter("SetActive", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(true, false);
@@ -713,17 +736,45 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				.Exit("ClearActive", delegate(SuitLocker.StatesInstance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
-				})
-				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-			this.charging.nooxygen.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.operational, (SuitLocker.StatesInstance smi) => smi.master.HasOxygen(), UpdateRate.SIM_200ms).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
-				.PlayAnim("no_o2_loop", KAnim.PlayMode.Loop)
-				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.TOOLTIP, "status_item_suit_locker_no_oxygen", StatusItem.IconType.Custom, NotificationType.BadMinor, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-			this.charging.notoperational.TagTransition(GameTags.Operational, this.charging.operational, false).PlayAnim("not_charging_loop", KAnim.PlayMode.Loop).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
-				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+				});
+			string text10 = BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.NAME;
+			string text11 = BUILDING.STATUSITEMS.SUIT_LOCKER.CHARGING.TOOLTIP;
+			string text12 = "";
+			StatusItem.IconType iconType4 = StatusItem.IconType.Info;
+			NotificationType notificationType4 = NotificationType.Neutral;
+			bool flag4 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state4.ToggleStatusItem(text10, text11, text12, iconType4, notificationType4, flag4, default(HashedString), 129022, null, null, statusItemCategory);
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state5 = this.charging.nooxygen.TagTransition(GameTags.Operational, this.charging.notoperational, true).Transition(this.charging.operational, (SuitLocker.StatesInstance smi) => smi.master.HasOxygen(), UpdateRate.SIM_200ms).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms)
+				.PlayAnim("no_o2_loop", KAnim.PlayMode.Loop);
+			string text13 = BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.NAME;
+			string text14 = BUILDING.STATUSITEMS.SUIT_LOCKER.NO_OXYGEN.TOOLTIP;
+			string text15 = "status_item_suit_locker_no_oxygen";
+			StatusItem.IconType iconType5 = StatusItem.IconType.Custom;
+			NotificationType notificationType5 = NotificationType.BadMinor;
+			bool flag5 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state5.ToggleStatusItem(text13, text14, text15, iconType5, notificationType5, flag5, default(HashedString), 129022, null, null, statusItemCategory);
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state6 = this.charging.notoperational.TagTransition(GameTags.Operational, this.charging.operational, false).PlayAnim("not_charging_loop", KAnim.PlayMode.Loop).Transition(this.charging.pst, (SuitLocker.StatesInstance smi) => smi.master.IsSuitFullyCharged(), UpdateRate.SIM_200ms);
+			string text16 = BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.NAME;
+			string text17 = BUILDING.STATUSITEMS.SUIT_LOCKER.NOT_OPERATIONAL.TOOLTIP;
+			string text18 = "";
+			StatusItem.IconType iconType6 = StatusItem.IconType.Info;
+			NotificationType notificationType6 = NotificationType.Neutral;
+			bool flag6 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state6.ToggleStatusItem(text16, text17, text18, iconType6, notificationType6, flag6, default(HashedString), 129022, null, null, statusItemCategory);
 			this.charging.pst.PlayAnim("charging_pst").OnAnimQueueComplete(this.suitfullycharged);
-			this.suitfullycharged.EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null).PlayAnim("has_suit").RefreshUserMenuOnEnter()
-				.ToggleStatusItem(Db.Get().MiscStatusItems.StoredItemDurability, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit().gameObject)
-				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			GameStateMachine<SuitLocker.States, SuitLocker.StatesInstance, SuitLocker, object>.State state7 = this.suitfullycharged.EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null).PlayAnim("has_suit").RefreshUserMenuOnEnter()
+				.ToggleStatusItem(Db.Get().MiscStatusItems.StoredItemDurability, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit().gameObject);
+			string text19 = BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.NAME;
+			string text20 = BUILDING.STATUSITEMS.SUIT_LOCKER.FULLY_CHARGED.TOOLTIP;
+			string text21 = "";
+			StatusItem.IconType iconType7 = StatusItem.IconType.Info;
+			NotificationType notificationType7 = NotificationType.Neutral;
+			bool flag7 = false;
+			statusItemCategory = Db.Get().StatusItemCategories.Main;
+			state7.ToggleStatusItem(text19, text20, text21, iconType7, notificationType7, flag7, default(HashedString), 129022, null, null, statusItemCategory);
 		}
 
 		public SuitLocker.States.EmptyStates empty;

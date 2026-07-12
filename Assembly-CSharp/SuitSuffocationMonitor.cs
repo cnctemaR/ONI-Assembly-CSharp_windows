@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 
 public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, SuitSuffocationMonitor.Instance>
 {
@@ -49,9 +50,9 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 		{
 			this.breath = Db.Get().Amounts.Breath.Lookup(master.gameObject);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
-			float num = 0.90909094f;
-			this.breathing = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.BREATHING.NAME, false, false, true);
-			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false, true);
+			float breath_RATE = DUPLICANTSTATS.STANDARD.Breath.BREATH_RATE;
+			this.breathing = new AttributeModifier(deltaAttribute.Id, breath_RATE, DUPLICANTS.MODIFIERS.BREATHING.NAME, false, false, true);
+			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -breath_RATE, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false, true);
 			this.suitTank = suit_tank;
 		}
 
@@ -67,7 +68,7 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 
 		public bool IsSuffocating()
 		{
-			return this.breath.value <= 45.454548f;
+			return this.breath.value <= DUPLICANTSTATS.STANDARD.Breath.SUFFOCATE_AMOUNT;
 		}
 
 		public void Kill()

@@ -1,42 +1,131 @@
 ﻿using System;
-using System.Collections.Generic;
-using UnityEngine.Scripting;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	internal struct DiagnosticSwitch
+	[NativeClass("DiagnosticSwitch", "struct DiagnosticSwitch;")]
+	[NativeAsStruct]
+	[NativeHeader("Runtime/Utilities/DiagnosticSwitch.h")]
+	[StructLayout(LayoutKind.Sequential)]
+	internal class DiagnosticSwitch
 	{
-		[UsedByNativeCode]
-		private static void AppendDiagnosticSwitchToList(List<DiagnosticSwitch> list, string name, string description, DiagnosticSwitchFlags flags, object value, object minValue, object maxValue, object persistentValue, EnumInfo enumInfo)
+		private DiagnosticSwitch()
 		{
-			list.Add(new DiagnosticSwitch
-			{
-				name = name,
-				description = description,
-				flags = flags,
-				value = value,
-				minValue = minValue,
-				maxValue = maxValue,
-				persistentValue = persistentValue,
-				enumInfo = enumInfo
-			});
 		}
 
-		public string name;
+		public extern string name
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public string description;
+		public extern string description
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public DiagnosticSwitchFlags flags;
+		[NativeName("OwningModuleName")]
+		public extern string owningModule
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public object value;
+		public extern DiagnosticSwitch.Flags flags
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public object minValue;
+		public object value
+		{
+			get
+			{
+				return this.GetScriptingValue();
+			}
+			set
+			{
+				this.SetScriptingValue(value, false);
+			}
+		}
 
-		public object maxValue;
+		[NativeName("ScriptingDefaultValue")]
+		public extern object defaultValue
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public object persistentValue;
+		[NativeName("ScriptingMinValue")]
+		public extern object minValue
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		public EnumInfo enumInfo;
+		[NativeName("ScriptingMaxValue")]
+		public extern object maxValue
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public object persistentValue
+		{
+			get
+			{
+				return this.GetScriptingPersistentValue();
+			}
+			set
+			{
+				this.SetScriptingValue(value, true);
+			}
+		}
+
+		[NativeName("ScriptingEnumInfo")]
+		public extern EnumInfo enumInfo
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern object GetScriptingValue();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern object GetScriptingPersistentValue();
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetScriptingValue(object value, bool setPersistent);
+
+		public bool isSetToDefault
+		{
+			get
+			{
+				return object.Equals(this.persistentValue, this.defaultValue);
+			}
+		}
+
+		public bool needsRestart
+		{
+			get
+			{
+				return !object.Equals(this.value, this.persistentValue);
+			}
+		}
+
+		private IntPtr m_Ptr;
+
+		[Flags]
+		internal enum Flags
+		{
+			None = 0,
+			CanChangeAfterEngineStart = 1,
+			PropagateToAssetImportWorkerProcess = 2
+		}
 	}
 }

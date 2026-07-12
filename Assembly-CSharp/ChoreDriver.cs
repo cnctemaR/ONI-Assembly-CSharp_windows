@@ -64,7 +64,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 
 		public Navigator navigator { get; private set; }
 
-		public Worker worker { get; private set; }
+		public WorkerBase worker { get; private set; }
 
 		public StatesInstance(ChoreDriver master)
 			: base(master)
@@ -72,7 +72,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			this.masterProperName = base.master.GetProperName();
 			this.masterPrefabId = base.master.GetComponent<KPrefabID>();
 			this.navigator = base.master.GetComponent<Navigator>();
-			this.worker = base.master.GetComponent<Worker>();
+			this.worker = base.master.GetComponent<WorkerBase>();
 			this.choreConsumer = base.GetComponent<ChoreConsumer>();
 			ChoreConsumer choreConsumer = this.choreConsumer;
 			choreConsumer.choreRulesChanged = (global::System.Action)Delegate.Combine(choreConsumer.choreRulesChanged, new global::System.Action(this.OnChoreRulesChanged));
@@ -104,6 +104,10 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 				currentChore.Fail(reason);
 				base.Trigger(1745615042, currentChore);
 			}
+			if (base.smi.choreConsumer.prioritizeBrainIfNoChore)
+			{
+				Game.BrainScheduler.PrioritizeBrain(this.brain);
+			}
 		}
 
 		private void OnChoreExit(Chore chore)
@@ -131,6 +135,9 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 		}
 
 		private ChoreConsumer choreConsumer;
+
+		[MyCmpGet]
+		private Brain brain;
 	}
 
 	public class States : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>
@@ -141,7 +148,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			this.saveHistory = true;
 			this.nochore.Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.masterPrefabId.IsPrefabID(GameTags.Minion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
+				if (smi.masterPrefabId.HasTag(GameTags.BaseMinion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
 				{
 					ReportManager.Instance.ReportValue(ReportManager.ReportType.WorkTime, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, DUPLICANTS.CHORES.THINKING.NAME), smi.master.GetProperName());
 				}
@@ -151,7 +158,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 				smi.BeginChore();
 			}).Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.masterPrefabId.IsPrefabID(GameTags.Minion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
+				if (smi.masterPrefabId.HasTag(GameTags.BaseMinion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
 				{
 					Chore chore = this.currentChore.Get(smi);
 					if (chore == null)
@@ -164,7 +171,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 						return;
 					}
 					ReportManager.ReportType reportType = chore.GetReportType();
-					Workable workable = smi.worker.workable;
+					Workable workable = smi.worker.GetWorkable();
 					if (workable != null)
 					{
 						ReportManager.ReportType reportType2 = workable.GetReportType();

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum PackingSize
 	{
 		Unspecified,

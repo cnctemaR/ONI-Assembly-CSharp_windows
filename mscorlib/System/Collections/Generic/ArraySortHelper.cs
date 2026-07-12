@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
 	internal class ArraySortHelper<T>
 	{
-		public static void Sort(T[] keys, int index, int length, IComparer<T> comparer)
+		public void Sort(T[] keys, int index, int length, IComparer<T> comparer)
 		{
 			try
 			{
@@ -18,13 +19,17 @@ namespace System.Collections.Generic
 			{
 				IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
 			}
+			catch (ThreadAbortException)
+			{
+				throw;
+			}
 			catch (Exception ex)
 			{
 				throw new InvalidOperationException("Failed to compare two elements in the array.", ex);
 			}
 		}
 
-		public static int BinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer)
+		public int BinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer)
 		{
 			int num;
 			try
@@ -34,6 +39,10 @@ namespace System.Collections.Generic
 					comparer = Comparer<T>.Default;
 				}
 				num = ArraySortHelper<T>.InternalBinarySearch(array, index, length, value, comparer);
+			}
+			catch (ThreadAbortException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -51,6 +60,10 @@ namespace System.Collections.Generic
 			catch (IndexOutOfRangeException)
 			{
 				IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
+			}
+			catch (ThreadAbortException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -108,7 +121,7 @@ namespace System.Collections.Generic
 			{
 				return;
 			}
-			ArraySortHelper<T>.IntroSort(keys, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(keys.Length), comparer);
+			ArraySortHelper<T>.IntroSort(keys, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(length), comparer);
 		}
 
 		private static void IntroSort(T[] keys, int lo, int hi, int depthLimit, Comparison<T> comparer)
@@ -228,5 +241,15 @@ namespace System.Collections.Generic
 				keys[num + 1] = t;
 			}
 		}
+
+		public static ArraySortHelper<T> Default
+		{
+			get
+			{
+				return ArraySortHelper<T>.s_defaultArraySortHelper;
+			}
+		}
+
+		private static readonly ArraySortHelper<T> s_defaultArraySortHelper = new ArraySortHelper<T>();
 	}
 }

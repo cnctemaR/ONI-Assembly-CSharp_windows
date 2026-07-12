@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ECC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.IO</RootNamespace>
+    <AssemblyName>System.IO.Compression.FileSystem</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Compression\ZipFile.cs" />
+    <Compile Include="Compression\ZipFileExtensions.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="PathInternal.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SR.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.IO.Compression\System.IO.Compression.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713ECB}</Project>
+      <Name>System.IO.Compression</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

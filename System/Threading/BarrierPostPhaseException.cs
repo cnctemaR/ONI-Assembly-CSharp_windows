@@ -23,7 +23,7 @@ namespace System.Threading
 		}
 
 		public BarrierPostPhaseException(string message, Exception innerException)
-			: base((message == null) ? global::SR.GetString("The postPhaseAction failed with an exception.") : message, innerException)
+			: base((message == null) ? SR.GetString("The postPhaseAction failed with an exception.") : message, innerException)
 		{
 		}
 

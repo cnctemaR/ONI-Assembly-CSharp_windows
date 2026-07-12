@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -77,7 +78,7 @@ namespace UnityEngine.UI
 			}
 			float num = defaultValue;
 			int num2 = int.MinValue;
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			rect.GetComponents(typeof(ILayoutElement), list);
 			int count = list.Count;
 			for (int i = 0; i < count; i++)
@@ -106,7 +107,7 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 			return num;
 		}
 	}

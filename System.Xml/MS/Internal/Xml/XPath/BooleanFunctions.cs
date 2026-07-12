@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -9,29 +8,29 @@ namespace MS.Internal.Xml.XPath
 	{
 		public BooleanFunctions(Function.FunctionType funcType, Query arg)
 		{
-			this.arg = arg;
-			this.funcType = funcType;
+			this._arg = arg;
+			this._funcType = funcType;
 		}
 
 		private BooleanFunctions(BooleanFunctions other)
 			: base(other)
 		{
-			this.arg = Query.Clone(other.arg);
-			this.funcType = other.funcType;
+			this._arg = Query.Clone(other._arg);
+			this._funcType = other._funcType;
 		}
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			if (this.arg != null)
+			if (this._arg != null)
 			{
-				this.arg.SetXsltContext(context);
+				this._arg.SetXsltContext(context);
 			}
 		}
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
 		{
-			Function.FunctionType functionType = this.funcType;
-			switch (functionType)
+			Function.FunctionType funcType = this._funcType;
+			switch (funcType)
 			{
 			case Function.FunctionType.FuncBoolean:
 				return this.toBoolean(nodeIterator);
@@ -44,7 +43,7 @@ namespace MS.Internal.Xml.XPath
 			case Function.FunctionType.FuncNot:
 				return this.Not(nodeIterator);
 			default:
-				if (functionType == Function.FunctionType.FuncLang)
+				if (funcType == Function.FunctionType.FuncLang)
 				{
 					return this.Lang(nodeIterator);
 				}
@@ -65,14 +64,15 @@ namespace MS.Internal.Xml.XPath
 
 		internal bool toBoolean(XPathNodeIterator nodeIterator)
 		{
-			object obj = this.arg.Evaluate(nodeIterator);
+			object obj = this._arg.Evaluate(nodeIterator);
 			if (obj is XPathNodeIterator)
 			{
-				return this.arg.Advance() != null;
+				return this._arg.Advance() != null;
 			}
-			if (obj is string)
+			string text = obj as string;
+			if (text != null)
 			{
-				return BooleanFunctions.toBoolean((string)obj);
+				return BooleanFunctions.toBoolean(text);
 			}
 			if (obj is double)
 			{
@@ -91,12 +91,12 @@ namespace MS.Internal.Xml.XPath
 
 		private bool Not(XPathNodeIterator nodeIterator)
 		{
-			return !(bool)this.arg.Evaluate(nodeIterator);
+			return !(bool)this._arg.Evaluate(nodeIterator);
 		}
 
 		private bool Lang(XPathNodeIterator nodeIterator)
 		{
-			string text = this.arg.Evaluate(nodeIterator).ToString();
+			string text = this._arg.Evaluate(nodeIterator).ToString();
 			string xmlLang = nodeIterator.Current.XmlLang;
 			return xmlLang.StartsWith(text, StringComparison.OrdinalIgnoreCase) && (xmlLang.Length == text.Length || xmlLang[text.Length] == '-');
 		}
@@ -106,19 +106,8 @@ namespace MS.Internal.Xml.XPath
 			return new BooleanFunctions(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("name", this.funcType.ToString());
-			if (this.arg != null)
-			{
-				this.arg.PrintQuery(w);
-			}
-			w.WriteEndElement();
-		}
+		private Query _arg;
 
-		private Query arg;
-
-		private Function.FunctionType funcType;
+		private Function.FunctionType _funcType;
 	}
 }

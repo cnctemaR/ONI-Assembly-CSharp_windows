@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeType("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
-	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -68,10 +68,10 @@ namespace UnityEngine
 			return Sprite.CreateSpriteWithoutTextureScripting_Injected(ref rect, ref pivot, pixelsToUnits, texture);
 		}
 
-		[FreeFunction("SpritesBindings::CreateSprite")]
-		internal static Sprite CreateSprite(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape)
+		[FreeFunction("SpritesBindings::CreateSprite", ThrowsException = true)]
+		internal static Sprite CreateSprite(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape, [Unmarshalled] SecondarySpriteTexture[] secondaryTexture)
 		{
-			return Sprite.CreateSprite_Injected(texture, ref rect, ref pivot, pixelsPerUnit, extrude, meshType, ref border, generateFallbackPhysicsShape);
+			return Sprite.CreateSprite_Injected(texture, ref rect, ref pivot, pixelsPerUnit, extrude, meshType, ref border, generateFallbackPhysicsShape, secondaryTexture);
 		}
 
 		public Bounds bounds
@@ -112,6 +112,13 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Texture2D GetSecondaryTexture(int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetSecondaryTextureCount();
+
+		[FreeFunction("SpritesBindings::GetSecondaryTextures", ThrowsException = true, HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetSecondaryTextures([NotNull("ArgumentNullException")] [Unmarshalled] SecondarySpriteTexture[] secondaryTexture);
 
 		public extern float pixelsPerUnit
 		{
@@ -173,17 +180,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				bool flag = this.packed && this.packingMode != SpritePackingMode.Rectangle;
-				Rect rect;
-				if (flag)
-				{
-					rect = Rect.zero;
-				}
-				else
-				{
-					rect = this.GetTextureRect();
-				}
-				return rect;
+				return this.GetTextureRect();
 			}
 		}
 
@@ -191,17 +188,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				bool flag = this.packed && this.packingMode != SpritePackingMode.Rectangle;
-				Vector2 vector;
-				if (flag)
-				{
-					vector = Vector2.zero;
-				}
-				else
-				{
-					vector = this.GetTextureRectOffset();
-				}
-				return vector;
+				return this.GetTextureRectOffset();
 			}
 		}
 
@@ -258,20 +245,25 @@ namespace UnityEngine
 
 		[FreeFunction("SpritesBindings::GetPhysicsShape", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetPhysicsShapeImpl(Sprite sprite, int shapeIdx, List<Vector2> physicsShape);
+		private static extern void GetPhysicsShapeImpl(Sprite sprite, int shapeIdx, [NotNull("ArgumentNullException")] List<Vector2> physicsShape);
 
 		public void OverridePhysicsShape(IList<Vector2[]> physicsShapes)
 		{
+			bool flag = physicsShapes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("physicsShapes");
+			}
 			for (int i = 0; i < physicsShapes.Count; i++)
 			{
 				Vector2[] array = physicsShapes[i];
-				bool flag = array == null;
-				if (flag)
-				{
-					throw new ArgumentNullException(string.Format("Physics Shape at {0} is null.", i));
-				}
-				bool flag2 = array.Length < 3;
+				bool flag2 = array == null;
 				if (flag2)
+				{
+					throw new ArgumentNullException("physicsShape", string.Format("Physics Shape at {0} is null.", i));
+				}
+				bool flag3 = array.Length < 3;
+				if (flag3)
 				{
 					throw new ArgumentException(string.Format("Physics Shape at {0} has less than 3 vertices ({1}).", i, array.Length));
 				}
@@ -289,11 +281,11 @@ namespace UnityEngine
 
 		[FreeFunction("SpritesBindings::OverridePhysicsShape", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void OverridePhysicsShape(Sprite sprite, Vector2[] physicsShape, int idx);
+		private static extern void OverridePhysicsShape(Sprite sprite, [Unmarshalled] Vector2[] physicsShape, int idx);
 
 		[FreeFunction("SpritesBindings::OverrideGeometry", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void OverrideGeometry(Vector2[] vertices, ushort[] triangles);
+		public extern void OverrideGeometry([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices, [Unmarshalled] [NotNull("ArgumentNullException")] ushort[] triangles);
 
 		internal static Sprite Create(Rect rect, Vector2 pivot, float pixelsToUnits, Texture2D texture)
 		{
@@ -306,6 +298,11 @@ namespace UnityEngine
 		}
 
 		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape)
+		{
+			return Sprite.Create(texture, rect, pivot, pixelsPerUnit, extrude, meshType, border, generateFallbackPhysicsShape, null);
+		}
+
+		public static Sprite Create(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape, SecondarySpriteTexture[] secondaryTextures)
 		{
 			bool flag = texture == null;
 			Sprite sprite;
@@ -325,7 +322,19 @@ namespace UnityEngine
 				{
 					throw new ArgumentException("pixelsPerUnit must be set to a positive non-zero value.");
 				}
-				sprite = Sprite.CreateSprite(texture, rect, pivot, pixelsPerUnit, extrude, meshType, border, generateFallbackPhysicsShape);
+				bool flag4 = secondaryTextures != null;
+				if (flag4)
+				{
+					foreach (SecondarySpriteTexture secondarySpriteTexture in secondaryTextures)
+					{
+						bool flag5 = secondarySpriteTexture.texture == texture;
+						if (flag5)
+						{
+							throw new ArgumentException(string.Format("{0} is using source Texture as Secondary Texture.", secondarySpriteTexture.name));
+						}
+					}
+				}
+				sprite = Sprite.CreateSprite(texture, rect, pivot, pixelsPerUnit, extrude, meshType, border, generateFallbackPhysicsShape, secondaryTextures);
 			}
 			return sprite;
 		}
@@ -374,7 +383,7 @@ namespace UnityEngine
 		private static extern Sprite CreateSpriteWithoutTextureScripting_Injected(ref Rect rect, ref Vector2 pivot, float pixelsToUnits, Texture2D texture);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Sprite CreateSprite_Injected(Texture2D texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, ref Vector4 border, bool generateFallbackPhysicsShape);
+		private static extern Sprite CreateSprite_Injected(Texture2D texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, ref Vector4 border, bool generateFallbackPhysicsShape, SecondarySpriteTexture[] secondaryTexture);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_bounds_Injected(out Bounds ret);

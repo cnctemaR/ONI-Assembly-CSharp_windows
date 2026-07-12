@@ -241,10 +241,10 @@ namespace System.Data.Odbc
 			}
 		}
 
-		[Browsable(false)]
 		[DefaultValue(true)]
-		[DesignOnly(true)]
+		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignOnly(true)]
 		public override bool DesignTimeVisible
 		{
 			get

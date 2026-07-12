@@ -53,18 +53,18 @@ public class WorkableReactable : Reactable
 
 	protected override void InternalBegin()
 	{
-		this.worker = this.reactor.GetComponent<Worker>();
-		this.worker.StartWork(new Worker.StartWorkInfo(this.workable));
+		this.worker = this.reactor.GetComponent<WorkerBase>();
+		this.worker.StartWork(new WorkerBase.StartWorkInfo(this.workable));
 	}
 
 	public override void Update(float dt)
 	{
-		if (this.worker.workable == null)
+		if (this.worker.GetWorkable() == null)
 		{
 			base.End();
 			return;
 		}
-		if (this.worker.Work(dt) != Worker.WorkResult.InProgress)
+		if (this.worker.Work(dt) != WorkerBase.WorkResult.InProgress)
 		{
 			base.End();
 		}
@@ -84,7 +84,7 @@ public class WorkableReactable : Reactable
 
 	protected Workable workable;
 
-	private Worker worker;
+	private WorkerBase worker;
 
 	public WorkableReactable.AllowedDirection allowedDirection;
 

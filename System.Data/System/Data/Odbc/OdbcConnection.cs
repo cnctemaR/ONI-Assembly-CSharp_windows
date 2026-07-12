@@ -51,8 +51,8 @@ namespace System.Data.Odbc
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[DefaultValue(15)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public new int ConnectionTimeout
 		{
 			get
@@ -86,8 +86,8 @@ namespace System.Data.Odbc
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public override string DataSource
 		{
 			get
@@ -353,7 +353,7 @@ namespace System.Data.Odbc
 				}
 				if (retCode == ODBC32.RetCode.SUCCESS || ODBC32.RetCode.SUCCESS_WITH_INFO == retCode)
 				{
-					text = Encoding.Unicode.GetString(array, 0, Math.Min(num, array.Length));
+					text = (BitConverter.IsLittleEndian ? Encoding.Unicode : Encoding.BigEndianUnicode).GetString(array, 0, Math.Min(num, array.Length));
 				}
 				else if (retCode == ODBC32.RetCode.ERROR)
 				{
@@ -450,7 +450,7 @@ namespace System.Data.Odbc
 				}
 				if (retCode == ODBC32.RetCode.SUCCESS || retCode == ODBC32.RetCode.SUCCESS_WITH_INFO)
 				{
-					text = Encoding.Unicode.GetString(array, 0, Math.Min((int)num, array.Length));
+					text = (BitConverter.IsLittleEndian ? Encoding.Unicode : Encoding.BigEndianUnicode).GetString(array, 0, Math.Min((int)num, array.Length));
 				}
 				else if (handleError)
 				{
@@ -964,6 +964,21 @@ namespace System.Data.Odbc
 			base.Dispose(disposing);
 		}
 
+		public override DataTable GetSchema()
+		{
+			return this.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
+		}
+
+		public override DataTable GetSchema(string collectionName)
+		{
+			return this.GetSchema(collectionName, null);
+		}
+
+		public override DataTable GetSchema(string collectionName, string[] restrictionValues)
+		{
+			return this.InnerConnection.GetSchema(this.ConnectionFactory, this.PoolGroup, this, collectionName, restrictionValues);
+		}
+
 		internal void NotifyWeakReference(int message)
 		{
 			this.InnerConnection.NotifyWeakReference(message);
@@ -1022,7 +1037,7 @@ namespace System.Data.Odbc
 
 		public void EnlistDistributedTransaction(ITransaction transaction)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private int _connectionTimeout = 15;

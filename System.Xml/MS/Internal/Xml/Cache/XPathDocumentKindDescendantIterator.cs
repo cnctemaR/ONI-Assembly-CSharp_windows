@@ -8,21 +8,21 @@ namespace MS.Internal.Xml.Cache
 		public XPathDocumentKindDescendantIterator(XPathDocumentNavigator root, XPathNodeType typ, bool matchSelf)
 			: base(root)
 		{
-			this.typ = typ;
-			this.matchSelf = matchSelf;
+			this._typ = typ;
+			this._matchSelf = matchSelf;
 			if (root.NodeType != XPathNodeType.Root)
 			{
-				this.end = new XPathDocumentNavigator(root);
-				this.end.MoveToNonDescendant();
+				this._end = new XPathDocumentNavigator(root);
+				this._end.MoveToNonDescendant();
 			}
 		}
 
 		public XPathDocumentKindDescendantIterator(XPathDocumentKindDescendantIterator iter)
 			: base(iter)
 		{
-			this.end = iter.end;
-			this.typ = iter.typ;
-			this.matchSelf = iter.matchSelf;
+			this._end = iter._end;
+			this._typ = iter._typ;
+			this._matchSelf = iter._matchSelf;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -32,16 +32,16 @@ namespace MS.Internal.Xml.Cache
 
 		public override bool MoveNext()
 		{
-			if (this.matchSelf)
+			if (this._matchSelf)
 			{
-				this.matchSelf = false;
-				if (this.ctxt.IsKindMatch(this.typ))
+				this._matchSelf = false;
+				if (this.ctxt.IsKindMatch(this._typ))
 				{
 					this.pos++;
 					return true;
 				}
 			}
-			if (!this.ctxt.MoveToFollowing(this.typ, this.end))
+			if (!this.ctxt.MoveToFollowing(this._typ, this._end))
 			{
 				return false;
 			}
@@ -49,10 +49,10 @@ namespace MS.Internal.Xml.Cache
 			return true;
 		}
 
-		private XPathDocumentNavigator end;
+		private XPathDocumentNavigator _end;
 
-		private XPathNodeType typ;
+		private XPathNodeType _typ;
 
-		private bool matchSelf;
+		private bool _matchSelf;
 	}
 }

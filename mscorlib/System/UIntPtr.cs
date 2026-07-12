@@ -4,10 +4,10 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
-	public struct UIntPtr : ISerializable
+	public readonly struct UIntPtr : ISerializable, IEquatable<UIntPtr>
 	{
 		public UIntPtr(ulong value)
 		{
@@ -148,8 +148,13 @@ namespace System
 			return (UIntPtr)((void*)((byte*)(void*)pointer - offset));
 		}
 
+		bool IEquatable<UIntPtr>.Equals(UIntPtr other)
+		{
+			return this._pointer == other._pointer;
+		}
+
 		public static readonly UIntPtr Zero = new UIntPtr(0U);
 
-		private unsafe void* _pointer;
+		private unsafe readonly void* _pointer;
 	}
 }

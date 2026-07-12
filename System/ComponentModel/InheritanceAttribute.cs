@@ -7,25 +7,19 @@ namespace System.ComponentModel
 	{
 		public InheritanceAttribute()
 		{
-			this.inheritanceLevel = InheritanceAttribute.Default.inheritanceLevel;
+			this.InheritanceLevel = InheritanceAttribute.Default.InheritanceLevel;
 		}
 
 		public InheritanceAttribute(InheritanceLevel inheritanceLevel)
 		{
-			this.inheritanceLevel = inheritanceLevel;
+			this.InheritanceLevel = inheritanceLevel;
 		}
 
-		public InheritanceLevel InheritanceLevel
-		{
-			get
-			{
-				return this.inheritanceLevel;
-			}
-		}
+		public InheritanceLevel InheritanceLevel { get; }
 
 		public override bool Equals(object value)
 		{
-			return value == this || (value is InheritanceAttribute && ((InheritanceAttribute)value).InheritanceLevel == this.inheritanceLevel);
+			return value == this || (value is InheritanceAttribute && ((InheritanceAttribute)value).InheritanceLevel == this.InheritanceLevel);
 		}
 
 		public override int GetHashCode()
@@ -42,8 +36,6 @@ namespace System.ComponentModel
 		{
 			return TypeDescriptor.GetConverter(typeof(InheritanceLevel)).ConvertToString(this.InheritanceLevel);
 		}
-
-		private readonly InheritanceLevel inheritanceLevel;
 
 		public static readonly InheritanceAttribute Inherited = new InheritanceAttribute(InheritanceLevel.Inherited);
 

@@ -39,8 +39,9 @@ namespace System.IO
 			return true;
 		}
 
-		public void StartDispatching(FileSystemWatcher fsw)
+		public void StartDispatching(object handle)
 		{
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
 			FAMWatcher famwatcher = this;
 			FAMData famdata;
 			lock (famwatcher)
@@ -51,15 +52,15 @@ namespace System.IO
 					FAMWatcher.thread.IsBackground = true;
 					FAMWatcher.thread.Start();
 				}
-				famdata = (FAMData)FAMWatcher.watches[fsw];
+				famdata = (FAMData)FAMWatcher.watches[fileSystemWatcher];
 			}
 			if (famdata == null)
 			{
 				famdata = new FAMData();
-				famdata.FSW = fsw;
-				famdata.Directory = fsw.FullPath;
-				famdata.FileMask = fsw.MangledFilter;
-				famdata.IncludeSubdirs = fsw.IncludeSubdirectories;
+				famdata.FSW = fileSystemWatcher;
+				famdata.Directory = fileSystemWatcher.FullPath;
+				famdata.FileMask = fileSystemWatcher.MangledFilter;
+				famdata.IncludeSubdirs = fileSystemWatcher.IncludeSubdirectories;
 				if (famdata.IncludeSubdirs)
 				{
 					famdata.SubDirs = new Hashtable();
@@ -69,7 +70,7 @@ namespace System.IO
 				famwatcher = this;
 				lock (famwatcher)
 				{
-					FAMWatcher.watches[fsw] = famdata;
+					FAMWatcher.watches[fileSystemWatcher] = famdata;
 					FAMWatcher.requests[famdata.Request.ReqNum] = famdata;
 					FAMWatcher.stop = false;
 				}
@@ -135,15 +136,16 @@ namespace System.IO
 			}
 		}
 
-		public void StopDispatching(FileSystemWatcher fsw)
+		public void StopDispatching(object handle)
 		{
+			FileSystemWatcher fileSystemWatcher = handle as FileSystemWatcher;
 			lock (this)
 			{
-				FAMData famdata = (FAMData)FAMWatcher.watches[fsw];
+				FAMData famdata = (FAMData)FAMWatcher.watches[fileSystemWatcher];
 				if (famdata != null)
 				{
 					FAMWatcher.StopMonitoringDirectory(famdata);
-					FAMWatcher.watches.Remove(fsw);
+					FAMWatcher.watches.Remove(fileSystemWatcher);
 					FAMWatcher.requests.Remove(famdata.Request.ReqNum);
 					if (FAMWatcher.watches.Count == 0)
 					{
@@ -383,6 +385,10 @@ namespace System.IO
 				return FAMWatcher.gamin_Pending(ref fc);
 			}
 			return FAMWatcher.fam_Pending(ref fc);
+		}
+
+		public void Dispose(object handle)
+		{
 		}
 
 		[DllImport("libfam.so.0", EntryPoint = "FAMOpen")]

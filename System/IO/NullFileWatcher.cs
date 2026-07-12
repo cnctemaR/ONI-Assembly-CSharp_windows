@@ -4,11 +4,15 @@ namespace System.IO
 {
 	internal class NullFileWatcher : IFileWatcher
 	{
-		public void StartDispatching(FileSystemWatcher fsw)
+		public void StartDispatching(object handle)
 		{
 		}
 
-		public void StopDispatching(FileSystemWatcher fsw)
+		public void StopDispatching(object handle)
+		{
+		}
+
+		public void Dispose(object handle)
 		{
 		}
 

@@ -188,29 +188,26 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 				if (currentQualitySetting != null)
 				{
 					string id = currentQualitySetting.id;
-					if (id != null)
+					if (id == "Easiest")
 					{
-						if (id == "Easiest")
-						{
-							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIEST;
-							return;
-						}
-						if (id == "Easier")
-						{
-							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIER;
-							return;
-						}
-						if (id == "Harder")
-						{
-							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDER;
-							return;
-						}
-						if (!(id == "Hardest"))
-						{
-							return;
-						}
-						this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDEST;
+						this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIEST;
+						return;
 					}
+					if (id == "Easier")
+					{
+						this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIER;
+						return;
+					}
+					if (id == "Harder")
+					{
+						this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDER;
+						return;
+					}
+					if (!(id == "Hardest"))
+					{
+						return;
+					}
+					this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDEST;
 				}
 			}
 		}

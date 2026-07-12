@@ -242,8 +242,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[MonoTODO("not implemented")]
 		[ComVisible(false)]
+		[MonoTODO("not implemented")]
 		public SecurityIdentifier User
 		{
 			get

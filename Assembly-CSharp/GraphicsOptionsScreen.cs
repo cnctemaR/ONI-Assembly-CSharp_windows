@@ -95,14 +95,15 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		int num = Screen.currentResolution.width;
 		int num2 = Screen.currentResolution.height;
-		int num3 = Screen.currentResolution.refreshRate;
-		bool flag = Screen.fullScreen;
+		RefreshRate refreshRate = Screen.currentResolution.refreshRateRatio;
+		FullScreenMode fullScreenMode = Screen.fullScreenMode;
 		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
 		{
 			int @int = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
 			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
-			int int3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
-			bool flag2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, Screen.fullScreen ? 1 : 0) == 1;
+			uint int3 = (uint)KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKeyNumerator, (int)Screen.currentResolution.refreshRateRatio.numerator);
+			uint int4 = (uint)KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKeyDenominator, (int)Screen.currentResolution.refreshRateRatio.denominator);
+			FullScreenMode fullScreenMode2 = ((KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, Screen.fullScreen ? 1 : 0) == 1) ? FullScreenMode.MaximizedWindow : FullScreenMode.Windowed);
 			if (int2 <= 1 || @int <= 1)
 			{
 				DebugUtil.LogArgs(new object[] { "Saved resolution was invalid, ignoring..." });
@@ -111,8 +112,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 			{
 				num = @int;
 				num2 = int2;
-				num3 = int3;
-				flag = flag2;
+				refreshRate.numerator = int3;
+				refreshRate.denominator = int4;
+				fullScreenMode = fullScreenMode2;
 			}
 		}
 		if (num <= 1 || num2 <= 1)
@@ -124,7 +126,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 				{
 					num = resolution.width;
 					num2 = resolution.height;
-					num3 = 0;
+					refreshRate = default(RefreshRate);
 				}
 			}
 			if (num <= 1 || num2 <= 1)
@@ -135,7 +137,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 					{
 						num = resolution2.width;
 						num2 = resolution2.height;
-						num3 = 0;
+						refreshRate = default(RefreshRate);
 					}
 				}
 			}
@@ -143,11 +145,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 			{
 				foreach (Resolution resolution3 in Screen.resolutions)
 				{
-					if (resolution3.width > 1 && resolution3.height > 1 && resolution3.refreshRate > 0)
+					if (resolution3.width > 1 && resolution3.height > 1 && resolution3.refreshRateRatio.value > 0.0)
 					{
 						num = resolution3.width;
 						num2 = resolution3.height;
-						num3 = 0;
+						refreshRate = default(RefreshRate);
 					}
 				}
 			}
@@ -156,17 +158,17 @@ internal class GraphicsOptionsScreen : KModalScreen
 				string text = "Could not find a suitable resolution for this screen! Reported available resolutions are:";
 				foreach (Resolution resolution4 in Screen.resolutions)
 				{
-					text += string.Format("\n{0}x{1} @ {2}hz", resolution4.width, resolution4.height, resolution4.refreshRate);
+					text += string.Format("\n{0}x{1} @ {2}hz", resolution4.width, resolution4.height, resolution4.refreshRateRatio.value);
 				}
 				global::Debug.LogError(text);
 				num = 1280;
 				num2 = 720;
-				flag = false;
-				num3 = 0;
+				fullScreenMode = FullScreenMode.Windowed;
+				refreshRate = default(RefreshRate);
 			}
 		}
-		DebugUtil.LogArgs(new object[] { string.Format("Applying resolution {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, num3, flag }) });
-		Screen.SetResolution(num, num2, flag, num3);
+		DebugUtil.LogArgs(new object[] { string.Format("Applying resolution {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, refreshRate, fullScreenMode }) });
+		Screen.SetResolution(num, num2, fullScreenMode, refreshRate);
 	}
 
 	public static void SetColorModeFromPrefs()
@@ -185,7 +187,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		settings.resolution = Screen.currentResolution;
 		settings.resolution.width = Screen.width;
 		settings.resolution.height = Screen.height;
-		settings.fullscreen = Screen.fullScreen;
+		settings.fullscreen = Screen.fullScreenMode;
 		settings.lowRes = QualitySettings.GetQualityLevel();
 		settings.colorSetId = Array.IndexOf<ColorSet>(GlobalAssets.Instance.colorSetOptions, GlobalAssets.Instance.colorSet);
 		GraphicsOptionsScreen.SaveSettingsToPrefs(settings);
@@ -198,13 +200,14 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			settings.resolution.width,
 			settings.resolution.height,
-			settings.resolution.refreshRate,
+			settings.resolution.refreshRateRatio,
 			settings.fullscreen
 		});
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionWidthKey, settings.resolution.width);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
-		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
-		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, settings.fullscreen ? 1 : 0);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKeyNumerator, (int)settings.resolution.refreshRateRatio.numerator);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKeyDenominator, (int)settings.resolution.refreshRateRatio.denominator);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (settings.fullscreen == FullScreenMode.Windowed) ? 0 : 1);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ColorModeKey, settings.colorSetId);
 	}
 
@@ -248,17 +251,22 @@ internal class GraphicsOptionsScreen : KModalScreen
 		Resolution resolution = default(Resolution);
 		resolution.width = Screen.width;
 		resolution.height = Screen.height;
-		resolution.refreshRate = Screen.currentResolution.refreshRate;
-		this.options.Add(new Dropdown.OptionData(resolution.ToString()));
+		resolution.refreshRateRatio = Screen.currentResolution.refreshRateRatio;
+		this.options.Add(new Dropdown.OptionData(this.ResolutionDisplayString(resolution)));
 		this.resolutions.Add(resolution);
 		foreach (Resolution resolution2 in Screen.resolutions)
 		{
 			if (resolution2.height >= 720)
 			{
-				this.options.Add(new Dropdown.OptionData(resolution2.ToString()));
+				this.options.Add(new Dropdown.OptionData(this.ResolutionDisplayString(resolution2)));
 				this.resolutions.Add(resolution2);
 			}
 		}
+	}
+
+	private string ResolutionDisplayString(Resolution resolution)
+	{
+		return string.Format("{0} x {1} @ {2}Hz", resolution.width, resolution.height, Mathf.Floor((float)resolution.refreshRateRatio.value));
 	}
 
 	private void BuildColorModeOptions()
@@ -296,11 +304,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 		for (int i = 0; i < this.resolutions.Count; i++)
 		{
 			Resolution resolution2 = this.resolutions[i];
-			if (resolution2.width == resolution.width && resolution2.height == resolution.height && resolution2.refreshRate == 0)
+			if (resolution2.width == resolution.width && resolution2.height == resolution.height && resolution2.refreshRateRatio.value == 0.0)
 			{
 				num2 = i;
 			}
-			if (resolution2.width == resolution.width && resolution2.height == resolution.height && Math.Abs(resolution2.refreshRate - resolution.refreshRate) <= 1)
+			if (resolution2.width == resolution.width && resolution2.height == resolution.height && Math.Abs(resolution2.refreshRateRatio.value - resolution.refreshRateRatio.value) <= 1.0)
 			{
 				num = i;
 				break;
@@ -317,12 +325,12 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		return new GraphicsOptionsScreen.Settings
 		{
-			fullscreen = Screen.fullScreen,
+			fullscreen = Screen.fullScreenMode,
 			resolution = new Resolution
 			{
 				width = Screen.width,
 				height = Screen.height,
-				refreshRate = Screen.currentResolution.refreshRate
+				refreshRateRatio = Screen.currentResolution.refreshRateRatio
 			},
 			lowRes = QualitySettings.GetQualityLevel(),
 			colorSetId = Array.IndexOf<ColorSet>(GlobalAssets.Instance.colorSetOptions, GlobalAssets.Instance.colorSet)
@@ -335,7 +343,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
 			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
-			new_settings.fullscreen = this.fullscreenToggle.CurrentState != 0;
+			new_settings.fullscreen = ((this.fullscreenToggle.CurrentState == 0) ? FullScreenMode.Windowed : FullScreenMode.MaximizedWindow);
 			new_settings.lowRes = this.lowResToggle.CurrentState;
 			new_settings.colorSetId = this.colorModeId;
 			if (GlobalAssets.Instance.colorSetOptions[this.colorModeId] != GlobalAssets.Instance.colorSet)
@@ -381,12 +389,12 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private void RefreshApplyButton()
 	{
 		GraphicsOptionsScreen.Settings settings = this.CaptureSettings();
-		if (settings.fullscreen && this.fullscreenToggle.CurrentState == 0)
+		if (settings.fullscreen != FullScreenMode.Windowed && this.fullscreenToggle.CurrentState == 0)
 		{
 			this.applyButton.isInteractable = true;
 			return;
 		}
-		if (!settings.fullscreen && this.fullscreenToggle.CurrentState == 1)
+		if (settings.fullscreen == FullScreenMode.Windowed && this.fullscreenToggle.CurrentState == 1)
 		{
 			this.applyButton.isInteractable = true;
 			return;
@@ -453,8 +461,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private void ApplySettings(GraphicsOptionsScreen.Settings new_settings)
 	{
 		Resolution resolution = new_settings.resolution;
-		Screen.SetResolution(resolution.width, resolution.height, new_settings.fullscreen, resolution.refreshRate);
-		Screen.fullScreen = new_settings.fullscreen;
+		Screen.SetResolution(resolution.width, resolution.height, new_settings.fullscreen, resolution.refreshRateRatio);
+		Screen.fullScreenMode = new_settings.fullscreen;
 		int resolutionIndex = this.GetResolutionIndex(new_settings.resolution);
 		if (resolutionIndex != -1)
 		{
@@ -539,13 +547,19 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static readonly string ResolutionHeightKey = "ResolutionHeight";
 
-	public static readonly string RefreshRateKey = "RefreshRate";
+	public static readonly string RefreshRateKeyNumerator = "RefreshRateNumerator";
+
+	public static readonly string RefreshRateKeyDenominator = "RefreshRateNumerator";
 
 	public static readonly string FullScreenKey = "FullScreen";
 
 	public static readonly string LowResKey = "LowResTextures";
 
 	public static readonly string ColorModeKey = "ColorModeID";
+
+	private const FullScreenMode FULLSCREEN = FullScreenMode.MaximizedWindow;
+
+	private const FullScreenMode WINDOWED = FullScreenMode.Windowed;
 
 	private KCanvasScaler[] CanvasScalers;
 
@@ -567,7 +581,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private struct Settings
 	{
-		public bool fullscreen;
+		public FullScreenMode fullscreen;
 
 		public Resolution resolution;
 

@@ -1,83 +1,183 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System
 {
+	[DebuggerTypeProxy(typeof(LazyDebugView<>))]
 	[DebuggerDisplay("ThreadSafetyMode={Mode}, IsValueCreated={IsValueCreated}, IsValueFaulted={IsValueFaulted}, Value={ValueForDebugDisplay}")]
-	[DebuggerTypeProxy(typeof(System_LazyDebugView<>))]
-	[ComVisible(false)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	[Serializable]
 	public class Lazy<T>
 	{
+		private static T CreateViaDefaultConstructor()
+		{
+			return (T)((object)LazyHelper.CreateViaDefaultConstructor(typeof(T)));
+		}
+
 		public Lazy()
-			: this(LazyThreadSafetyMode.ExecutionAndPublication)
+			: this(null, LazyThreadSafetyMode.ExecutionAndPublication, true)
 		{
 		}
 
+		public Lazy(T value)
+		{
+			this._value = value;
+		}
+
 		public Lazy(Func<T> valueFactory)
-			: this(valueFactory, LazyThreadSafetyMode.ExecutionAndPublication)
+			: this(valueFactory, LazyThreadSafetyMode.ExecutionAndPublication, false)
 		{
 		}
 
 		public Lazy(bool isThreadSafe)
-			: this(isThreadSafe ? LazyThreadSafetyMode.ExecutionAndPublication : LazyThreadSafetyMode.None)
+			: this(null, LazyHelper.GetModeFromIsThreadSafe(isThreadSafe), true)
 		{
 		}
 
 		public Lazy(LazyThreadSafetyMode mode)
+			: this(null, mode, true)
 		{
-			this.m_threadSafeObj = Lazy<T>.GetObjectFromMode(mode);
 		}
 
 		public Lazy(Func<T> valueFactory, bool isThreadSafe)
-			: this(valueFactory, isThreadSafe ? LazyThreadSafetyMode.ExecutionAndPublication : LazyThreadSafetyMode.None)
+			: this(valueFactory, LazyHelper.GetModeFromIsThreadSafe(isThreadSafe), false)
 		{
 		}
 
 		public Lazy(Func<T> valueFactory, LazyThreadSafetyMode mode)
+			: this(valueFactory, mode, false)
 		{
-			if (valueFactory == null)
+		}
+
+		private Lazy(Func<T> valueFactory, LazyThreadSafetyMode mode, bool useDefaultConstructor)
+		{
+			if (valueFactory == null && !useDefaultConstructor)
 			{
 				throw new ArgumentNullException("valueFactory");
 			}
-			this.m_threadSafeObj = Lazy<T>.GetObjectFromMode(mode);
-			this.m_valueFactory = valueFactory;
+			this._factory = valueFactory;
+			this._state = LazyHelper.Create(mode, useDefaultConstructor);
 		}
 
-		private static object GetObjectFromMode(LazyThreadSafetyMode mode)
+		private void ViaConstructor()
 		{
-			if (mode == LazyThreadSafetyMode.ExecutionAndPublication)
-			{
-				return new object();
-			}
-			if (mode == LazyThreadSafetyMode.PublicationOnly)
-			{
-				return LazyHelpers.PUBLICATION_ONLY_SENTINEL;
-			}
-			if (mode != LazyThreadSafetyMode.None)
-			{
-				throw new ArgumentOutOfRangeException("mode", Environment.GetResourceString("The mode argument specifies an invalid value."));
-			}
-			return null;
+			this._value = Lazy<T>.CreateViaDefaultConstructor();
+			this._state = null;
 		}
 
-		[OnSerializing]
-		private void OnSerializing(StreamingContext context)
+		private void ViaFactory(LazyThreadSafetyMode mode)
 		{
-			T value = this.Value;
+			try
+			{
+				Func<T> factory = this._factory;
+				if (factory == null)
+				{
+					throw new InvalidOperationException("ValueFactory attempted to access the Value property of this instance.");
+				}
+				this._factory = null;
+				this._value = factory();
+				this._state = null;
+			}
+			catch (Exception ex)
+			{
+				this._state = new LazyHelper(mode, ex);
+				throw;
+			}
+		}
+
+		private void ExecutionAndPublication(LazyHelper executionAndPublication, bool useDefaultConstructor)
+		{
+			lock (executionAndPublication)
+			{
+				if (this._state == executionAndPublication)
+				{
+					if (useDefaultConstructor)
+					{
+						this.ViaConstructor();
+					}
+					else
+					{
+						this.ViaFactory(LazyThreadSafetyMode.ExecutionAndPublication);
+					}
+				}
+			}
+		}
+
+		private void PublicationOnly(LazyHelper publicationOnly, T possibleValue)
+		{
+			if (Interlocked.CompareExchange<LazyHelper>(ref this._state, LazyHelper.PublicationOnlyWaitForOtherThreadToPublish, publicationOnly) == publicationOnly)
+			{
+				this._factory = null;
+				this._value = possibleValue;
+				this._state = null;
+			}
+		}
+
+		private void PublicationOnlyViaConstructor(LazyHelper initializer)
+		{
+			this.PublicationOnly(initializer, Lazy<T>.CreateViaDefaultConstructor());
+		}
+
+		private void PublicationOnlyViaFactory(LazyHelper initializer)
+		{
+			Func<T> factory = this._factory;
+			if (factory == null)
+			{
+				this.PublicationOnlyWaitForOtherThreadToPublish();
+				return;
+			}
+			this.PublicationOnly(initializer, factory());
+		}
+
+		private void PublicationOnlyWaitForOtherThreadToPublish()
+		{
+			SpinWait spinWait = default(SpinWait);
+			while (this._state != null)
+			{
+				spinWait.SpinOnce();
+			}
+		}
+
+		private T CreateValue()
+		{
+			LazyHelper state = this._state;
+			if (state != null)
+			{
+				switch (state.State)
+				{
+				case LazyState.NoneViaConstructor:
+					this.ViaConstructor();
+					goto IL_0084;
+				case LazyState.NoneViaFactory:
+					this.ViaFactory(LazyThreadSafetyMode.None);
+					goto IL_0084;
+				case LazyState.PublicationOnlyViaConstructor:
+					this.PublicationOnlyViaConstructor(state);
+					goto IL_0084;
+				case LazyState.PublicationOnlyViaFactory:
+					this.PublicationOnlyViaFactory(state);
+					goto IL_0084;
+				case LazyState.PublicationOnlyWait:
+					this.PublicationOnlyWaitForOtherThreadToPublish();
+					goto IL_0084;
+				case LazyState.ExecutionAndPublicationViaConstructor:
+					this.ExecutionAndPublication(state, true);
+					goto IL_0084;
+				case LazyState.ExecutionAndPublicationViaFactory:
+					this.ExecutionAndPublication(state, false);
+					goto IL_0084;
+				}
+				state.ThrowException();
+			}
+			IL_0084:
+			return this.Value;
 		}
 
 		public override string ToString()
 		{
 			if (!this.IsValueCreated)
 			{
-				return Environment.GetResourceString("Value is not created.");
+				return "Value is not created.";
 			}
 			T value = this.Value;
 			return value.ToString();
@@ -91,23 +191,15 @@ namespace System
 				{
 					return default(T);
 				}
-				return ((Lazy<T>.Boxed)this.m_boxed).m_value;
+				return this._value;
 			}
 		}
 
-		internal LazyThreadSafetyMode Mode
+		internal LazyThreadSafetyMode? Mode
 		{
 			get
 			{
-				if (this.m_threadSafeObj == null)
-				{
-					return LazyThreadSafetyMode.None;
-				}
-				if (this.m_threadSafeObj == LazyHelpers.PUBLICATION_ONLY_SENTINEL)
-				{
-					return LazyThreadSafetyMode.PublicationOnly;
-				}
-				return LazyThreadSafetyMode.ExecutionAndPublication;
+				return LazyHelper.GetMode(this._state);
 			}
 		}
 
@@ -115,7 +207,7 @@ namespace System
 		{
 			get
 			{
-				return this.m_boxed is Lazy<T>.LazyInternalExceptionHolder;
+				return LazyHelper.GetIsValueFaulted(this._state);
 			}
 		}
 
@@ -123,7 +215,7 @@ namespace System
 		{
 			get
 			{
-				return this.m_boxed != null && this.m_boxed is Lazy<T>.Boxed;
+				return this._state == null;
 			}
 		}
 
@@ -132,154 +224,18 @@ namespace System
 		{
 			get
 			{
-				if (this.m_boxed != null)
+				if (this._state != null)
 				{
-					Lazy<T>.Boxed boxed = this.m_boxed as Lazy<T>.Boxed;
-					if (boxed != null)
-					{
-						return boxed.m_value;
-					}
-					(this.m_boxed as Lazy<T>.LazyInternalExceptionHolder).m_edi.Throw();
+					return this.CreateValue();
 				}
-				Debugger.NotifyOfCrossThreadDependency();
-				return this.LazyInitValue();
+				return this._value;
 			}
 		}
 
-		private T LazyInitValue()
-		{
-			Lazy<T>.Boxed boxed = null;
-			LazyThreadSafetyMode mode = this.Mode;
-			if (mode == LazyThreadSafetyMode.None)
-			{
-				boxed = this.CreateValue();
-				this.m_boxed = boxed;
-			}
-			else if (mode == LazyThreadSafetyMode.PublicationOnly)
-			{
-				boxed = this.CreateValue();
-				if (boxed == null || Interlocked.CompareExchange(ref this.m_boxed, boxed, null) != null)
-				{
-					boxed = (Lazy<T>.Boxed)this.m_boxed;
-				}
-				else
-				{
-					this.m_valueFactory = Lazy<T>.ALREADY_INVOKED_SENTINEL;
-				}
-			}
-			else
-			{
-				object obj = Volatile.Read<object>(ref this.m_threadSafeObj);
-				bool flag = false;
-				try
-				{
-					if (obj != Lazy<T>.ALREADY_INVOKED_SENTINEL)
-					{
-						Monitor.Enter(obj, ref flag);
-					}
-					if (this.m_boxed == null)
-					{
-						boxed = this.CreateValue();
-						this.m_boxed = boxed;
-						Volatile.Write<object>(ref this.m_threadSafeObj, Lazy<T>.ALREADY_INVOKED_SENTINEL);
-					}
-					else
-					{
-						boxed = this.m_boxed as Lazy<T>.Boxed;
-						if (boxed == null)
-						{
-							(this.m_boxed as Lazy<T>.LazyInternalExceptionHolder).m_edi.Throw();
-						}
-					}
-				}
-				finally
-				{
-					if (flag)
-					{
-						Monitor.Exit(obj);
-					}
-				}
-			}
-			return boxed.m_value;
-		}
+		private volatile LazyHelper _state;
 
-		private Lazy<T>.Boxed CreateValue()
-		{
-			Lazy<T>.Boxed boxed = null;
-			LazyThreadSafetyMode mode = this.Mode;
-			if (this.m_valueFactory != null)
-			{
-				try
-				{
-					if (mode != LazyThreadSafetyMode.PublicationOnly && this.m_valueFactory == Lazy<T>.ALREADY_INVOKED_SENTINEL)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("ValueFactory attempted to access the Value property of this instance."));
-					}
-					Func<T> valueFactory = this.m_valueFactory;
-					if (mode != LazyThreadSafetyMode.PublicationOnly)
-					{
-						this.m_valueFactory = Lazy<T>.ALREADY_INVOKED_SENTINEL;
-					}
-					else if (valueFactory == Lazy<T>.ALREADY_INVOKED_SENTINEL)
-					{
-						return null;
-					}
-					return new Lazy<T>.Boxed(valueFactory());
-				}
-				catch (Exception ex)
-				{
-					if (mode != LazyThreadSafetyMode.PublicationOnly)
-					{
-						this.m_boxed = new Lazy<T>.LazyInternalExceptionHolder(ex);
-					}
-					throw;
-				}
-			}
-			try
-			{
-				boxed = new Lazy<T>.Boxed((T)((object)Activator.CreateInstance(typeof(T))));
-			}
-			catch (MissingMethodException)
-			{
-				Exception ex2 = new MissingMemberException(Environment.GetResourceString("The lazily-initialized type does not have a public, parameterless constructor."));
-				if (mode != LazyThreadSafetyMode.PublicationOnly)
-				{
-					this.m_boxed = new Lazy<T>.LazyInternalExceptionHolder(ex2);
-				}
-				throw ex2;
-			}
-			return boxed;
-		}
+		private Func<T> _factory;
 
-		private static readonly Func<T> ALREADY_INVOKED_SENTINEL = () => default(T);
-
-		private object m_boxed;
-
-		[NonSerialized]
-		private Func<T> m_valueFactory;
-
-		[NonSerialized]
-		private object m_threadSafeObj;
-
-		[Serializable]
-		private class Boxed
-		{
-			internal Boxed(T value)
-			{
-				this.m_value = value;
-			}
-
-			internal T m_value;
-		}
-
-		private class LazyInternalExceptionHolder
-		{
-			internal LazyInternalExceptionHolder(Exception ex)
-			{
-				this.m_edi = ExceptionDispatchInfo.Capture(ex);
-			}
-
-			internal ExceptionDispatchInfo m_edi;
-		}
+		private T _value;
 	}
 }

@@ -18,8 +18,8 @@ namespace System.Net
 	[Serializable]
 	public abstract class WebRequest : MarshalByRefObject, ISerializable
 	{
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IWebRequestCreate CreatorInstance
 		{
 			get
@@ -28,8 +28,8 @@ namespace System.Net
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void RegisterPortableWebRequestCreator(IWebRequestCreate creator)
 		{
 		}
@@ -87,7 +87,7 @@ namespace System.Net
 				return webRequest;
 			}
 			bool on3 = Logging.On;
-			throw new NotSupportedException(global::SR.GetString("The URI prefix is not recognized."));
+			throw new NotSupportedException(SR.GetString("The URI prefix is not recognized."));
 		}
 
 		public static WebRequest Create(string requestUriString)
@@ -134,7 +134,7 @@ namespace System.Net
 			}
 			if (requestUri.Scheme != Uri.UriSchemeHttp && requestUri.Scheme != Uri.UriSchemeHttps)
 			{
-				throw new NotSupportedException(global::SR.GetString("The URI prefix is not recognized."));
+				throw new NotSupportedException(SR.GetString("The URI prefix is not recognized."));
 			}
 			return (HttpWebRequest)WebRequest.CreateDefault(requestUri);
 		}
@@ -546,11 +546,6 @@ namespace System.Net
 			{
 				this.m_ImpersonationLevel = value;
 			}
-		}
-
-		internal virtual void RequestCallback(object obj)
-		{
-			throw ExceptionHelper.MethodNotImplementedException;
 		}
 
 		internal static IWebProxy InternalDefaultWebProxy

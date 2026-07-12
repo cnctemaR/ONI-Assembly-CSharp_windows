@@ -13,7 +13,7 @@ public class AdvancedCureConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("AdvancedCure", ITEMS.PILLS.ADVANCEDCURE.NAME, ITEMS.PILLS.ADVANCEDCURE.DESC, 1f, true, Assets.GetAnim("vial_spore_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("AdvancedCure", global::STRINGS.ITEMS.PILLS.ADVANCEDCURE.NAME, global::STRINGS.ITEMS.PILLS.ADVANCEDCURE.DESC, 1f, true, Assets.GetAnim("vial_spore_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.ADVANCEDCURE);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -28,7 +28,7 @@ public class AdvancedCureConfig : IEntityConfig
 		AdvancedCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID(text, array, array2), array, array2)
 		{
 			time = 200f,
-			description = ITEMS.PILLS.ADVANCEDCURE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.ADVANCEDCURE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { text },
 			sortOrder = 20,

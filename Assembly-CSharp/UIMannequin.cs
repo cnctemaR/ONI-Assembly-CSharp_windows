@@ -41,7 +41,7 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 			this.animController.animScale = 0.38f;
 			this.animController.Play("idle", KAnim.PlayMode.Paused, 1f, 0f);
 			this.spawn = this.animController.gameObject;
-			MinionConfig.ConfigureSymbols(this.spawn, false);
+			BaseMinionConfig.ConfigureSymbols(this.spawn, false);
 			base.gameObject.AddOrGet<MinionVoiceProviderMB>().voice = Option.None;
 		}
 	}
@@ -54,7 +54,7 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 			outfit = UIMinionOrMannequinITargetExtensions.GetOutfitWithDefaultItems(outfitType, outfit);
 		}
 		this.SpawnedAvatar.GetComponent<SymbolOverrideController>().RemoveAllSymbolOverrides(0);
-		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
+		BaseMinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
 		Accessorizer component = this.SpawnedAvatar.GetComponent<Accessorizer>();
 		WearableAccessorizer component2 = this.SpawnedAvatar.GetComponent<WearableAccessorizer>();
 		component.ApplyMinionPersonality(this.personalityToUseForDefaultClothing.UnwrapOr(Db.Get().Personalities.Get("ABE"), null));

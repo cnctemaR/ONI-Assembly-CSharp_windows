@@ -67,7 +67,11 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			this.inhaleExposureTick = new Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo>();
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
 			OxygenBreather component = base.GetComponent<OxygenBreather>();
-			component.onSimConsume = (Action<Sim.MassConsumedCallback>)Delegate.Combine(component.onSimConsume, new Action<Sim.MassConsumedCallback>(this.OnAirConsumed));
+			if (component != null)
+			{
+				OxygenBreather oxygenBreather = component;
+				oxygenBreather.onSimConsume = (Action<Sim.MassConsumedCallback>)Delegate.Combine(oxygenBreather.onSimConsume, new Action<Sim.MassConsumedCallback>(this.OnAirConsumed));
+			}
 		}
 
 		public override void StartSM()

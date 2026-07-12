@@ -24,7 +24,7 @@ namespace ProcGen
 
 		public ClusterLayout.ClusterAudioSettings clusterAudio { get; set; }
 
-		public List<ClusterLayout.ClusterUnlock> clusterUnlocks { get; set; }
+		public List<LoreCollectionOverride> clusterUnlocks { get; set; }
 
 		[Obsolete("Use requiredDlcIds")]
 		public string requiredDlcId { get; set; }
@@ -69,7 +69,7 @@ namespace ProcGen
 			this.welcomeMessage = null;
 			this.clusterAudio = new ClusterLayout.ClusterAudioSettings();
 			this.clusterTags = new List<string>();
-			this.clusterUnlocks = new List<ClusterLayout.ClusterUnlock>();
+			this.clusterUnlocks = new List<LoreCollectionOverride>();
 		}
 
 		public static string GetName(string path, string addPrefix)
@@ -87,7 +87,7 @@ namespace ProcGen
 			if (string.IsNullOrEmpty(this.coordinatePrefix))
 			{
 				string text = "";
-				string[] array = Strings.Get(this.name).String.Split(new char[] { ' ' });
+				string[] array = Strings.Get(this.name).String.Split(' ', StringSplitOptions.None);
 				int num = 5 - array.Length;
 				bool flag = true;
 				foreach (string text2 in array)
@@ -150,29 +150,6 @@ namespace ProcGen
 				this.musicFirst = null;
 				this.stingerDay = "Stinger_Day";
 				this.stingerNight = "Stinger_Loop_Night";
-			}
-		}
-
-		[Serializable]
-		public class ClusterUnlock
-		{
-			public string id { get; set; }
-
-			public string collection { get; set; }
-
-			public ClusterLayout.ClusterUnlock.OrderRule orderRule { get; private set; }
-
-			public ClusterUnlock()
-			{
-				this.orderRule = ClusterLayout.ClusterUnlock.OrderRule.Prepend;
-			}
-
-			public enum OrderRule
-			{
-				Prepend,
-				Append,
-				Replace,
-				Invalid
 			}
 		}
 

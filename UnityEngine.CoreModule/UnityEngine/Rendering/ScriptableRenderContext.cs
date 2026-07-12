@@ -1,23 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
+using UnityEngine.Rendering.RendererUtils;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
-	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderContext.bindings.h")]
-	[NativeHeader("Modules/UI/CanvasManager.h")]
+	[NativeHeader("Modules/UI/Canvas.h")]
 	[NativeType("Runtime/Graphics/ScriptableRenderLoop/ScriptableRenderContext.h")]
 	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableDrawRenderersUtility.h")]
-	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderContext.bindings.h")]
+	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
+	[NativeHeader("Modules/UI/CanvasManager.h")]
 	public struct ScriptableRenderContext : IEquatable<ScriptableRenderContext>
 	{
 		[FreeFunction("ScriptableRenderContext::BeginRenderPass")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void BeginRenderPass_Internal(IntPtr self, int width, int height, int samples, IntPtr colors, int colorCount, int depthAttachmentIndex);
+		private static extern void BeginRenderPass_Internal(IntPtr self, int width, int height, int volumeDepth, int samples, IntPtr colors, int colorCount, int depthAttachmentIndex);
 
 		[FreeFunction("ScriptableRenderContext::BeginSubPass")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -46,14 +48,14 @@ namespace UnityEngine.Rendering
 			ScriptableRenderContext.Submit_Internal_Injected(ref this);
 		}
 
-		private int GetNumberOfCameras_Internal()
+		private bool SubmitForRenderPassValidation_Internal()
 		{
-			return ScriptableRenderContext.GetNumberOfCameras_Internal_Injected(ref this);
+			return ScriptableRenderContext.SubmitForRenderPassValidation_Internal_Injected(ref this);
 		}
 
-		private Camera GetCamera_Internal(int index)
+		private void GetCameras_Internal(Type listType, object resultList)
 		{
-			return ScriptableRenderContext.GetCamera_Internal_Injected(ref this, index);
+			ScriptableRenderContext.GetCameras_Internal_Injected(ref this, listType, resultList);
 		}
 
 		private void DrawRenderers_Internal(IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount)
@@ -132,14 +134,50 @@ namespace UnityEngine.Rendering
 			return this.m_Ptr;
 		}
 
+		private RendererList CreateRendererList_Internal(IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount)
+		{
+			RendererList rendererList;
+			ScriptableRenderContext.CreateRendererList_Internal_Injected(ref this, cullResults, ref drawingSettings, ref filteringSettings, ref tagName, isPassTagName, tagValues, stateBlocks, stateCount, out rendererList);
+			return rendererList;
+		}
+
+		private RendererList CreateShadowRendererList_Internal(IntPtr shadowDrawinSettings)
+		{
+			RendererList rendererList;
+			ScriptableRenderContext.CreateShadowRendererList_Internal_Injected(ref this, shadowDrawinSettings, out rendererList);
+			return rendererList;
+		}
+
+		private RendererList CreateSkyboxRendererList_Internal([NotNull("NullExceptionObject")] Camera camera, int mode, Matrix4x4 proj, Matrix4x4 view, Matrix4x4 projR, Matrix4x4 viewR)
+		{
+			RendererList rendererList;
+			ScriptableRenderContext.CreateSkyboxRendererList_Internal_Injected(ref this, camera, mode, ref proj, ref view, ref projR, ref viewR, out rendererList);
+			return rendererList;
+		}
+
+		private void PrepareRendererListsAsync_Internal(object rendererLists)
+		{
+			ScriptableRenderContext.PrepareRendererListsAsync_Internal_Injected(ref this, rendererLists);
+		}
+
+		private RendererListStatus QueryRendererListStatus_Internal(RendererList handle)
+		{
+			return ScriptableRenderContext.QueryRendererListStatus_Internal_Injected(ref this, ref handle);
+		}
+
 		internal ScriptableRenderContext(IntPtr ptr)
 		{
 			this.m_Ptr = ptr;
 		}
 
+		public void BeginRenderPass(int width, int height, int volumeDepth, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex = -1)
+		{
+			ScriptableRenderContext.BeginRenderPass_Internal(this.m_Ptr, width, height, volumeDepth, samples, (IntPtr)attachments.GetUnsafeReadOnlyPtr<AttachmentDescriptor>(), attachments.Length, depthAttachmentIndex);
+		}
+
 		public void BeginRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex = -1)
 		{
-			ScriptableRenderContext.BeginRenderPass_Internal(this.m_Ptr, width, height, samples, (IntPtr)attachments.GetUnsafeReadOnlyPtr<AttachmentDescriptor>(), attachments.Length, depthAttachmentIndex);
+			ScriptableRenderContext.BeginRenderPass_Internal(this.m_Ptr, width, height, 1, samples, (IntPtr)attachments.GetUnsafeReadOnlyPtr<AttachmentDescriptor>(), attachments.Length, depthAttachmentIndex);
 		}
 
 		public ScopedRenderPass BeginScopedRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex = -1)
@@ -207,14 +245,14 @@ namespace UnityEngine.Rendering
 			this.Submit_Internal();
 		}
 
-		internal int GetNumberOfCameras()
+		public bool SubmitForRenderPassValidation()
 		{
-			return this.GetNumberOfCameras_Internal();
+			return this.SubmitForRenderPassValidation_Internal();
 		}
 
-		internal Camera GetCamera(int index)
+		internal void GetCameras(List<Camera> results)
 		{
-			return this.GetCamera_Internal(index);
+			this.GetCameras_Internal(typeof(Camera), results);
 		}
 
 		public void DrawRenderers(CullingResults cullingResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings)
@@ -268,6 +306,11 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentNullException("commandBuffer");
 			}
+			bool flag2 = commandBuffer.m_Ptr == IntPtr.Zero;
+			if (flag2)
+			{
+				throw new ObjectDisposedException("commandBuffer");
+			}
 			this.ExecuteCommandBuffer_Internal(commandBuffer);
 		}
 
@@ -277,6 +320,11 @@ namespace UnityEngine.Rendering
 			if (flag)
 			{
 				throw new ArgumentNullException("commandBuffer");
+			}
+			bool flag2 = commandBuffer.m_Ptr == IntPtr.Zero;
+			if (flag2)
+			{
+				throw new ObjectDisposedException("commandBuffer");
 			}
 			this.ExecuteCommandBufferAsync_Internal(commandBuffer, queueType);
 		}
@@ -384,6 +432,54 @@ namespace UnityEngine.Rendering
 			return !left.Equals(right);
 		}
 
+		public RendererList CreateRendererList(RendererListDesc desc)
+		{
+			RendererListParams rendererListParams = RendererListDesc.ConvertToParameters(in desc);
+			RendererList rendererList = this.CreateRendererList(ref rendererListParams);
+			rendererListParams.Dispose();
+			return rendererList;
+		}
+
+		public RendererList CreateRendererList(ref RendererListParams param)
+		{
+			param.Validate();
+			return this.CreateRendererList_Internal(param.cullingResults.ptr, ref param.drawSettings, ref param.filteringSettings, param.tagName, param.isPassTagName, param.tagsValuePtr, param.stateBlocksPtr, param.numStateBlocks);
+		}
+
+		public unsafe RendererList CreateShadowRendererList(ref ShadowDrawingSettings settings)
+		{
+			fixed (ShadowDrawingSettings* ptr = &settings)
+			{
+				ShadowDrawingSettings* ptr2 = ptr;
+				return this.CreateShadowRendererList_Internal((IntPtr)((void*)ptr2));
+			}
+		}
+
+		public RendererList CreateSkyboxRendererList(Camera camera, Matrix4x4 projectionMatrixL, Matrix4x4 viewMatrixL, Matrix4x4 projectionMatrixR, Matrix4x4 viewMatrixR)
+		{
+			return this.CreateSkyboxRendererList_Internal(camera, 2, projectionMatrixL, viewMatrixL, projectionMatrixR, viewMatrixR);
+		}
+
+		public RendererList CreateSkyboxRendererList(Camera camera, Matrix4x4 projectionMatrix, Matrix4x4 viewMatrix)
+		{
+			return this.CreateSkyboxRendererList_Internal(camera, 1, projectionMatrix, viewMatrix, Matrix4x4.identity, Matrix4x4.identity);
+		}
+
+		public RendererList CreateSkyboxRendererList(Camera camera)
+		{
+			return this.CreateSkyboxRendererList_Internal(camera, 0, Matrix4x4.identity, Matrix4x4.identity, Matrix4x4.identity, Matrix4x4.identity);
+		}
+
+		public void PrepareRendererListsAsync(List<RendererList> rendererLists)
+		{
+			this.PrepareRendererListsAsync_Internal(rendererLists);
+		}
+
+		public RendererListStatus QueryRendererListStatus(RendererList rendererList)
+		{
+			return this.QueryRendererListStatus_Internal(rendererList);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Cull_Injected(ref ScriptableCullingParameters parameters, ref ScriptableRenderContext renderLoop, IntPtr results);
 
@@ -391,10 +487,10 @@ namespace UnityEngine.Rendering
 		private static extern void Submit_Internal_Injected(ref ScriptableRenderContext _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetNumberOfCameras_Internal_Injected(ref ScriptableRenderContext _unity_self);
+		private static extern bool SubmitForRenderPassValidation_Internal_Injected(ref ScriptableRenderContext _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Camera GetCamera_Internal_Injected(ref ScriptableRenderContext _unity_self, int index);
+		private static extern void GetCameras_Internal_Injected(ref ScriptableRenderContext _unity_self, Type listType, object resultList);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawRenderers_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ref ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount);
@@ -435,8 +531,30 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawUIOverlay_Internal_Injected(ref ScriptableRenderContext _unity_self, Camera camera);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateRendererList_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ref ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount, out RendererList ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateShadowRendererList_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr shadowDrawinSettings, out RendererList ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateSkyboxRendererList_Internal_Injected(ref ScriptableRenderContext _unity_self, Camera camera, int mode, ref Matrix4x4 proj, ref Matrix4x4 view, ref Matrix4x4 projR, ref Matrix4x4 viewR, out RendererList ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void PrepareRendererListsAsync_Internal_Injected(ref ScriptableRenderContext _unity_self, object rendererLists);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RendererListStatus QueryRendererListStatus_Internal_Injected(ref ScriptableRenderContext _unity_self, ref RendererList handle);
+
 		private static readonly ShaderTagId kRenderTypeTag = new ShaderTagId("RenderType");
 
 		private IntPtr m_Ptr;
+
+		internal enum SkyboxXRMode
+		{
+			Off,
+			Enabled,
+			LegacySinglePass
+		}
 	}
 }

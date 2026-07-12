@@ -16,7 +16,7 @@ public class GetBalloonWorkable : Workable
 		this.workingPstFailed = new HashedString[] { GetBalloonWorkable.PST_ANIM };
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		BalloonOverrideSymbol balloonOverride = this.balloonArtist.GetBalloonOverride();
@@ -28,7 +28,7 @@ public class GetBalloonWorkable : Workable
 		worker.gameObject.GetComponent<SymbolOverrideController>().AddSymbolOverride("body", balloonOverride.symbol.Unwrap(), 0);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("EquippableBalloon"), worker.transform.GetPosition());
 		gameObject.GetComponent<Equippable>().Assign(worker.GetComponent<MinionIdentity>());

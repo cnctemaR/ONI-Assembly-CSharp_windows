@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Security.Principal
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum TokenAccessLevels
 	{
 		AssignPrimary = 1,

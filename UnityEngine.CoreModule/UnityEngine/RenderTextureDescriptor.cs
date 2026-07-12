@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Internal;
 using UnityEngine.Rendering;
 
 namespace UnityEngine
@@ -26,20 +27,34 @@ namespace UnityEngine
 			{
 				this._graphicsFormat = value;
 				this.SetOrClearRenderTextureCreationFlag(GraphicsFormatUtility.IsSRGBFormat(value), RenderTextureCreationFlags.SRGB);
+				this.depthBufferBits = this.depthBufferBits;
 			}
 		}
 
 		public GraphicsFormat stencilFormat { readonly get; set; }
 
+		public GraphicsFormat depthStencilFormat { readonly get; set; }
+
 		public RenderTextureFormat colorFormat
 		{
 			get
 			{
-				return GraphicsFormatUtility.GetRenderTextureFormat(this.graphicsFormat);
+				bool flag = this.graphicsFormat > GraphicsFormat.None;
+				RenderTextureFormat renderTextureFormat;
+				if (flag)
+				{
+					renderTextureFormat = GraphicsFormatUtility.GetRenderTextureFormat(this.graphicsFormat);
+				}
+				else
+				{
+					renderTextureFormat = ((this.shadowSamplingMode != ShadowSamplingMode.None) ? RenderTextureFormat.Shadowmap : RenderTextureFormat.Depth);
+				}
+				return renderTextureFormat;
 			}
 			set
 			{
-				this.graphicsFormat = SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(value, this.sRGB), FormatUsage.Render);
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(value, this.sRGB);
+				this.graphicsFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
 			}
 		}
 
@@ -51,7 +66,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(this.colorFormat, value);
+				this.graphicsFormat = ((value && QualitySettings.activeColorSpace == ColorSpace.Linear && this.colorFormat != RenderTextureFormat.R8 && this.colorFormat != RenderTextureFormat.RG16) ? GraphicsFormatUtility.GetSRGBFormat(this.graphicsFormat) : GraphicsFormatUtility.GetLinearFormat(this.graphicsFormat));
 			}
 		}
 
@@ -59,27 +74,11 @@ namespace UnityEngine
 		{
 			get
 			{
-				return RenderTextureDescriptor.depthFormatBits[this._depthBufferBits];
+				return GraphicsFormatUtility.GetDepthBits(this.depthStencilFormat);
 			}
 			set
 			{
-				bool flag = value <= 0;
-				if (flag)
-				{
-					this._depthBufferBits = 0;
-				}
-				else
-				{
-					bool flag2 = value <= 16;
-					if (flag2)
-					{
-						this._depthBufferBits = 1;
-					}
-					else
-					{
-						this._depthBufferBits = 2;
-					}
-				}
+				this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(value, this.graphicsFormat);
 			}
 		}
 
@@ -99,31 +98,44 @@ namespace UnityEngine
 
 		public RenderTextureMemoryless memoryless { readonly get; set; }
 
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height)
 		{
-			this = new RenderTextureDescriptor(width, height, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR), 0, Texture.GenerateAllMips);
+			this = new RenderTextureDescriptor(width, height, RenderTextureFormat.Default);
 		}
 
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat)
 		{
 			this = new RenderTextureDescriptor(width, height, colorFormat, 0);
 		}
 
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits)
 		{
-			this = new RenderTextureDescriptor(width, height, SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(colorFormat, false), FormatUsage.Render), depthBufferBits);
+			this = new RenderTextureDescriptor(width, height, colorFormat, depthBufferBits, Texture.GenerateAllMips);
 		}
 
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, int depthBufferBits)
 		{
 			this = new RenderTextureDescriptor(width, height, colorFormat, depthBufferBits, Texture.GenerateAllMips);
 		}
 
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height, RenderTextureFormat colorFormat, int depthBufferBits, int mipCount)
 		{
-			this = new RenderTextureDescriptor(width, height, SystemInfo.GetCompatibleFormat(GraphicsFormatUtility.GetGraphicsFormat(colorFormat, false), FormatUsage.Render), depthBufferBits, mipCount);
+			this = new RenderTextureDescriptor(width, height, colorFormat, depthBufferBits, mipCount, RenderTextureReadWrite.Linear);
 		}
 
+		public RenderTextureDescriptor(int width, int height, [DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat colorFormat, [DefaultValue("0")] int depthBufferBits, [DefaultValue("Texture.GenerateAllMips")] int mipCount, [DefaultValue("RenderTextureReadWrite.Linear")] RenderTextureReadWrite readWrite)
+		{
+			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(colorFormat, readWrite);
+			GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
+			this = new RenderTextureDescriptor(width, height, compatibleFormat, RenderTexture.GetDepthStencilFormatLegacy(depthBufferBits, colorFormat), mipCount);
+		}
+
+		[ExcludeFromDocs]
 		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, int depthBufferBits, int mipCount)
 		{
 			this = default(RenderTextureDescriptor);
@@ -133,7 +145,31 @@ namespace UnityEngine
 			this.volumeDepth = 1;
 			this.msaaSamples = 1;
 			this.graphicsFormat = colorFormat;
-			this.depthBufferBits = depthBufferBits;
+			this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(depthBufferBits, colorFormat);
+			this.mipCount = mipCount;
+			this.dimension = TextureDimension.Tex2D;
+			this.shadowSamplingMode = ShadowSamplingMode.None;
+			this.vrUsage = VRTextureUsage.None;
+			this.memoryless = RenderTextureMemoryless.None;
+		}
+
+		[ExcludeFromDocs]
+		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat)
+		{
+			this = new RenderTextureDescriptor(width, height, colorFormat, depthStencilFormat, Texture.GenerateAllMips);
+		}
+
+		[ExcludeFromDocs]
+		public RenderTextureDescriptor(int width, int height, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int mipCount)
+		{
+			this = default(RenderTextureDescriptor);
+			this._flags = RenderTextureCreationFlags.AutoGenerateMips | RenderTextureCreationFlags.AllowVerticalFlip;
+			this.width = width;
+			this.height = height;
+			this.volumeDepth = 1;
+			this.msaaSamples = 1;
+			this.graphicsFormat = colorFormat;
+			this.depthStencilFormat = depthStencilFormat;
 			this.mipCount = mipCount;
 			this.dimension = TextureDimension.Tex2D;
 			this.shadowSamplingMode = ShadowSamplingMode.None;
@@ -226,10 +262,6 @@ namespace UnityEngine
 		}
 
 		private GraphicsFormat _graphicsFormat;
-
-		private int _depthBufferBits;
-
-		private static int[] depthFormatBits = new int[] { 0, 16, 24 };
 
 		private RenderTextureCreationFlags _flags;
 	}

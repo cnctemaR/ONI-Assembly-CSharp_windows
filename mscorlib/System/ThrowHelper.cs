@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System
 {
+	[StackTraceHidden]
 	internal static class ThrowHelper
 	{
 		internal static void ThrowArgumentNullException(ExceptionArgument argument)
@@ -19,15 +22,15 @@ namespace System
 			return new ArgumentNullException(argument.ToString());
 		}
 
-		internal static void ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type)
+		internal static void ThrowArrayTypeMismatchException()
 		{
-			throw ThrowHelper.CreateArrayTypeMismatchException_ArrayTypeMustBeExactMatch(type);
+			throw ThrowHelper.CreateArrayTypeMismatchException();
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static Exception CreateArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type)
+		private static Exception CreateArrayTypeMismatchException()
 		{
-			return new ArrayTypeMismatchException(SR.Format("The array type must be exactly {0}.", type));
+			return new ArrayTypeMismatchException();
 		}
 
 		internal static void ThrowArgumentException_InvalidTypeWithPointersNotSupported(Type type)
@@ -63,6 +66,17 @@ namespace System
 			return new IndexOutOfRangeException();
 		}
 
+		internal static void ThrowArgumentOutOfRangeException()
+		{
+			throw ThrowHelper.CreateArgumentOutOfRangeException();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentOutOfRangeException()
+		{
+			return new ArgumentOutOfRangeException();
+		}
+
 		internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument)
 		{
 			throw ThrowHelper.CreateArgumentOutOfRangeException(argument);
@@ -72,6 +86,39 @@ namespace System
 		private static Exception CreateArgumentOutOfRangeException(ExceptionArgument argument)
 		{
 			return new ArgumentOutOfRangeException(argument.ToString());
+		}
+
+		internal static void ThrowArgumentOutOfRangeException_PrecisionTooLarge()
+		{
+			throw ThrowHelper.CreateArgumentOutOfRangeException_PrecisionTooLarge();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentOutOfRangeException_PrecisionTooLarge()
+		{
+			return new ArgumentOutOfRangeException("precision", SR.Format("Precision cannot be larger than {0}.", 99));
+		}
+
+		internal static void ThrowArgumentOutOfRangeException_SymbolDoesNotFit()
+		{
+			throw ThrowHelper.CreateArgumentOutOfRangeException_SymbolDoesNotFit();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentOutOfRangeException_SymbolDoesNotFit()
+		{
+			return new ArgumentOutOfRangeException("symbol", "Format specifier was invalid.");
+		}
+
+		internal static void ThrowInvalidOperationException()
+		{
+			throw ThrowHelper.CreateInvalidOperationException();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateInvalidOperationException()
+		{
+			return new InvalidOperationException();
 		}
 
 		internal static void ThrowInvalidOperationException_OutstandingReferences()
@@ -85,20 +132,165 @@ namespace System
 			return new InvalidOperationException("Release all references before disposing this instance.");
 		}
 
-		internal static void ThrowObjectDisposedException_MemoryDisposed(string objectName)
+		internal static void ThrowInvalidOperationException_UnexpectedSegmentType()
 		{
-			throw ThrowHelper.CreateObjectDisposedException_MemoryDisposed(objectName);
+			throw ThrowHelper.CreateInvalidOperationException_UnexpectedSegmentType();
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static Exception CreateObjectDisposedException_MemoryDisposed(string objectName)
+		private static Exception CreateInvalidOperationException_UnexpectedSegmentType()
 		{
-			return new ObjectDisposedException(objectName, "Memory<T> has been disposed.");
+			return new InvalidOperationException("Unexpected segment type.");
 		}
 
-		internal static void ThrowArgumentOutOfRangeException()
+		internal static void ThrowInvalidOperationException_EndPositionNotReached()
 		{
-			ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_Index);
+			throw ThrowHelper.CreateInvalidOperationException_EndPositionNotReached();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateInvalidOperationException_EndPositionNotReached()
+		{
+			return new InvalidOperationException("End position was not reached during enumeration.");
+		}
+
+		internal static void ThrowArgumentOutOfRangeException_PositionOutOfRange()
+		{
+			throw ThrowHelper.CreateArgumentOutOfRangeException_PositionOutOfRange();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentOutOfRangeException_PositionOutOfRange()
+		{
+			return new ArgumentOutOfRangeException("position");
+		}
+
+		internal static void ThrowArgumentOutOfRangeException_OffsetOutOfRange()
+		{
+			throw ThrowHelper.CreateArgumentOutOfRangeException_OffsetOutOfRange();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentOutOfRangeException_OffsetOutOfRange()
+		{
+			return new ArgumentOutOfRangeException("offset");
+		}
+
+		internal static void ThrowObjectDisposedException_ArrayMemoryPoolBuffer()
+		{
+			throw ThrowHelper.CreateObjectDisposedException_ArrayMemoryPoolBuffer();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateObjectDisposedException_ArrayMemoryPoolBuffer()
+		{
+			return new ObjectDisposedException("ArrayMemoryPoolBuffer");
+		}
+
+		internal static void ThrowFormatException_BadFormatSpecifier()
+		{
+			throw ThrowHelper.CreateFormatException_BadFormatSpecifier();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateFormatException_BadFormatSpecifier()
+		{
+			return new FormatException("Format specifier was invalid.");
+		}
+
+		internal static void ThrowArgumentException_OverlapAlignmentMismatch()
+		{
+			throw ThrowHelper.CreateArgumentException_OverlapAlignmentMismatch();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateArgumentException_OverlapAlignmentMismatch()
+		{
+			return new ArgumentException("Overlapping spans have mismatching alignment.");
+		}
+
+		internal static void ThrowNotSupportedException()
+		{
+			throw ThrowHelper.CreateThrowNotSupportedException();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Exception CreateThrowNotSupportedException()
+		{
+			return new NotSupportedException();
+		}
+
+		public static bool TryFormatThrowFormatException(out int bytesWritten)
+		{
+			bytesWritten = 0;
+			ThrowHelper.ThrowFormatException_BadFormatSpecifier();
+			return false;
+		}
+
+		public static bool TryParseThrowFormatException<T>(out T value, out int bytesConsumed)
+		{
+			value = default(T);
+			bytesConsumed = 0;
+			ThrowHelper.ThrowFormatException_BadFormatSpecifier();
+			return false;
+		}
+
+		public static void ThrowArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+		{
+			throw ThrowHelper.CreateArgumentValidationException<T>(startSegment, startIndex, endSegment);
+		}
+
+		private static Exception CreateArgumentValidationException<T>(ReadOnlySequenceSegment<T> startSegment, int startIndex, ReadOnlySequenceSegment<T> endSegment)
+		{
+			if (startSegment == null)
+			{
+				return ThrowHelper.CreateArgumentNullException(ExceptionArgument.startSegment);
+			}
+			if (endSegment == null)
+			{
+				return ThrowHelper.CreateArgumentNullException(ExceptionArgument.endSegment);
+			}
+			if (startSegment != endSegment && startSegment.RunningIndex > endSegment.RunningIndex)
+			{
+				return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.endSegment);
+			}
+			if (startSegment.Memory.Length < startIndex)
+			{
+				return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.startIndex);
+			}
+			return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.endIndex);
+		}
+
+		public static void ThrowArgumentValidationException(Array array, int start)
+		{
+			throw ThrowHelper.CreateArgumentValidationException(array, start);
+		}
+
+		private static Exception CreateArgumentValidationException(Array array, int start)
+		{
+			if (array == null)
+			{
+				return ThrowHelper.CreateArgumentNullException(ExceptionArgument.array);
+			}
+			if (start > array.Length)
+			{
+				return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.start);
+			}
+			return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.length);
+		}
+
+		public static void ThrowStartOrEndArgumentValidationException(long start)
+		{
+			throw ThrowHelper.CreateStartOrEndArgumentValidationException(start);
+		}
+
+		private static Exception CreateStartOrEndArgumentValidationException(long start)
+		{
+			if (start < 0L)
+			{
+				return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.start);
+			}
+			return ThrowHelper.CreateArgumentOutOfRangeException(ExceptionArgument.length);
 		}
 
 		internal static void ThrowWrongKeyTypeArgumentException(object key, Type targetType)
@@ -163,6 +355,118 @@ namespace System
 		internal static void ThrowObjectDisposedException(string objectName, ExceptionResource resource)
 		{
 			throw new ObjectDisposedException(objectName, Environment.GetResourceString(ThrowHelper.GetResourceName(resource)));
+		}
+
+		internal static void ThrowInvalidOperationException_InvalidOperation_EnumFailedVersion()
+		{
+			throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+		}
+
+		internal static void ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen()
+		{
+			throw new InvalidOperationException("Enumeration has either not started or has already finished.");
+		}
+
+		internal static void ThrowInvalidOperationException_InvalidOperation_EnumNotStarted()
+		{
+			throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
+		}
+
+		internal static void ThrowInvalidOperationException_InvalidOperation_EnumEnded()
+		{
+			throw new InvalidOperationException("Enumeration already finished.");
+		}
+
+		internal static void ThrowInvalidOperationException_InvalidOperation_NoValue()
+		{
+			throw new InvalidOperationException("Nullable object must have a value.");
+		}
+
+		private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(ExceptionArgument argument, string resource)
+		{
+			return new ArgumentOutOfRangeException(ThrowHelper.GetArgumentName(argument), resource);
+		}
+
+		internal static void ThrowArgumentOutOfRange_IndexException()
+		{
+			throw ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.index, "Index was out of range. Must be non-negative and less than the size of the collection.");
+		}
+
+		internal static void ThrowIndexArgumentOutOfRange_NeedNonNegNumException()
+		{
+			throw ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.index, "Non-negative number required.");
+		}
+
+		internal static void ThrowArgumentException_Argument_InvalidArrayType()
+		{
+			throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
+		}
+
+		private static ArgumentException GetAddingDuplicateWithKeyArgumentException(object key)
+		{
+			return new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", key));
+		}
+
+		internal static void ThrowAddingDuplicateWithKeyArgumentException(object key)
+		{
+			throw ThrowHelper.GetAddingDuplicateWithKeyArgumentException(key);
+		}
+
+		private static KeyNotFoundException GetKeyNotFoundException(object key)
+		{
+			throw new KeyNotFoundException(SR.Format("The given key '{0}' was not present in the dictionary.", key.ToString()));
+		}
+
+		internal static void ThrowKeyNotFoundException(object key)
+		{
+			throw ThrowHelper.GetKeyNotFoundException(key);
+		}
+
+		internal static void ThrowInvalidTypeWithPointersNotSupported(Type targetType)
+		{
+			throw new ArgumentException(SR.Format("Cannot use type '{0}'. Only value types without pointers or references are supported.", targetType));
+		}
+
+		internal static void ThrowInvalidOperationException_ConcurrentOperationsNotSupported()
+		{
+			throw ThrowHelper.GetInvalidOperationException("Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.");
+		}
+
+		internal static InvalidOperationException GetInvalidOperationException(string str)
+		{
+			return new InvalidOperationException(str);
+		}
+
+		internal static void ThrowArraySegmentCtorValidationFailedExceptions(Array array, int offset, int count)
+		{
+			throw ThrowHelper.GetArraySegmentCtorValidationFailedException(array, offset, count);
+		}
+
+		private static Exception GetArraySegmentCtorValidationFailedException(Array array, int offset, int count)
+		{
+			if (array == null)
+			{
+				return ThrowHelper.GetArgumentNullException(ExceptionArgument.array);
+			}
+			if (offset < 0)
+			{
+				return ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.offset, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (count < 0)
+			{
+				return ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			return ThrowHelper.GetArgumentException(ExceptionResource.Argument_InvalidOffLen);
+		}
+
+		private static ArgumentException GetArgumentException(ExceptionResource resource)
+		{
+			return new ArgumentException(resource.ToString());
+		}
+
+		private static ArgumentNullException GetArgumentNullException(ExceptionArgument argument)
+		{
+			return new ArgumentNullException(ThrowHelper.GetArgumentName(argument));
 		}
 
 		internal static void IfNullAndNullsAreIllegalThenThrow<T>(object value, ExceptionArgument argName)
@@ -254,6 +558,21 @@ namespace System
 				return string.Empty;
 			}
 			return text;
+		}
+
+		private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(ExceptionArgument argument, ExceptionResource resource)
+		{
+			return new ArgumentOutOfRangeException(ThrowHelper.GetArgumentName(argument), resource.ToString());
+		}
+
+		internal static void ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index()
+		{
+			throw ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+		}
+
+		internal static void ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count()
+		{
+			throw ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_Count);
 		}
 
 		internal static string GetResourceName(ExceptionResource resource)
@@ -403,6 +722,11 @@ namespace System
 				return string.Empty;
 			}
 			return text;
+		}
+
+		internal static void ThrowValueArgumentOutOfRange_NeedNonNegNumException()
+		{
+			throw ThrowHelper.GetArgumentOutOfRangeException(ExceptionArgument.value, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
 		}
 	}
 }

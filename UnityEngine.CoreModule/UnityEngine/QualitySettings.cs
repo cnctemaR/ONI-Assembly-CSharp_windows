@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -11,6 +13,19 @@ namespace UnityEngine
 	[StaticAccessor("GetQualitySettings()", StaticAccessorType.Dot)]
 	public sealed class QualitySettings : Object
 	{
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<int, int> activeQualityLevelChanged;
+
+		[RequiredByNativeCode]
+		internal static void OnActiveQualityLevelChanged(int previousQualityLevel, int currentQualityLevel)
+		{
+			Action<int, int> action = QualitySettings.activeQualityLevelChanged;
+			if (action != null)
+			{
+				action(previousQualityLevel, currentQualityLevel);
+			}
+		}
+
 		public static void IncreaseLevel([DefaultValue("false")] bool applyExpensiveChanges)
 		{
 			QualitySettings.SetQualityLevel(QualitySettings.GetQualityLevel() + 1, applyExpensiveChanges);
@@ -46,6 +61,48 @@ namespace UnityEngine
 			set
 			{
 				QualitySettings.SetQualityLevel((int)value, true);
+			}
+		}
+
+		public static void ForEach(Action callback)
+		{
+			bool flag = callback == null;
+			if (!flag)
+			{
+				int qualityLevel = QualitySettings.GetQualityLevel();
+				try
+				{
+					for (int i = 0; i < QualitySettings.count; i++)
+					{
+						QualitySettings.SetQualityLevel(i, false);
+						callback();
+					}
+				}
+				finally
+				{
+					QualitySettings.SetQualityLevel(qualityLevel, false);
+				}
+			}
+		}
+
+		public static void ForEach(Action<int, string> callback)
+		{
+			bool flag = callback == null;
+			if (!flag)
+			{
+				int qualityLevel = QualitySettings.GetQualityLevel();
+				try
+				{
+					for (int i = 0; i < QualitySettings.count; i++)
+					{
+						QualitySettings.SetQualityLevel(i, false);
+						callback(i, QualitySettings.names[i]);
+					}
+				}
+				finally
+				{
+					QualitySettings.SetQualityLevel(qualityLevel, false);
+				}
 			}
 		}
 
@@ -160,6 +217,8 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeProperty("GlobalTextureMipmapLimit")]
+		[Obsolete("masterTextureLimit has been deprecated. Use globalTextureMipmapLimit instead (UnityUpgradable) -> globalTextureMipmapLimit", false)]
 		public static extern int masterTextureLimit
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -168,7 +227,23 @@ namespace UnityEngine
 			set;
 		}
 
+		public static extern int globalTextureMipmapLimit
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public static extern int maximumLODLevel
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern bool enableLODCrossFade
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -208,6 +283,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public static extern int realtimeGICPUUsage
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public static extern int antiAliasing
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -240,6 +323,26 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeName("SetLODSettings")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetLODSettings(float lodBias, int maximumLODLevel, bool setDirty = true);
+
+		[NativeName("SetTextureMipmapLimitSettings")]
+		[NativeThrows]
+		public static void SetTextureMipmapLimitSettings(string groupName, TextureMipmapLimitSettings textureMipmapLimitSettings)
+		{
+			QualitySettings.SetTextureMipmapLimitSettings_Injected(groupName, ref textureMipmapLimitSettings);
+		}
+
+		[NativeName("GetTextureMipmapLimitSettings")]
+		[NativeThrows]
+		public static TextureMipmapLimitSettings GetTextureMipmapLimitSettings(string groupName)
+		{
+			TextureMipmapLimitSettings textureMipmapLimitSettings;
+			QualitySettings.GetTextureMipmapLimitSettings_Injected(groupName, out textureMipmapLimitSettings);
+			return textureMipmapLimitSettings;
+		}
+
 		public static extern bool realtimeReflectionProbes
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -256,7 +359,87 @@ namespace UnityEngine
 			set;
 		}
 
+		public static extern bool useLegacyDetailDistribution
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public static extern float resolutionScalingFixedDPIFactor
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern TerrainQualityOverrides terrainQualityOverrides
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainPixelError
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainDetailDensityScale
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainBasemapDistance
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainDetailDistance
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainTreeDistance
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainBillboardStart
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainFadeLength
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern float terrainMaxTrees
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -316,6 +499,13 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public static extern int count
+		{
+			[NativeName("GetQualitySettingsCount")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public static extern bool streamingMipmapsActive
@@ -379,6 +569,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetQualityLevel();
 
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern Object GetQualitySettings();
+
 		[NativeName("SetCurrentIndex")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetQualityLevel(int index, [DefaultValue("true")] bool applyExpensiveChanges);
@@ -392,16 +586,16 @@ namespace UnityEngine
 
 		public static extern ColorSpace desiredColorSpace
 		{
-			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[NativeName("GetColorSpace")]
+			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern ColorSpace activeColorSpace
 		{
-			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[NativeName("GetColorSpace")]
+			[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -411,5 +605,11 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void set_shadowCascade4Split_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTextureMipmapLimitSettings_Injected(string groupName, ref TextureMipmapLimitSettings textureMipmapLimitSettings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTextureMipmapLimitSettings_Injected(string groupName, out TextureMipmapLimitSettings ret);
 	}
 }

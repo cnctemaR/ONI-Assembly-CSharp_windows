@@ -12,7 +12,7 @@ namespace Mono.Audio
 			int num = this.stream.Read(array, 0, 24);
 			if (num != 24 || array[0] != 46 || array[1] != 115 || array[2] != 110 || array[3] != 100)
 			{
-				throw new Exception("incorrect format" + num);
+				throw new Exception("incorrect format" + num.ToString());
 			}
 			int num2 = (int)array[7];
 			num2 |= (int)array[6] << 8;
@@ -37,7 +37,7 @@ namespace Mono.Audio
 			this.channels = (short)num4;
 			if (num2 < 24 || (num4 != 1 && num4 != 2))
 			{
-				throw new Exception("incorrect format offset" + num2);
+				throw new Exception("incorrect format offset" + num2.ToString());
 			}
 			if (num2 != 24)
 			{
@@ -56,7 +56,7 @@ namespace Mono.Audio
 				}
 				return;
 			}
-			throw new Exception("incorrect format encoding" + num3);
+			throw new Exception("incorrect format encoding" + num3.ToString());
 		}
 
 		public override void Play(AudioDevice dev)

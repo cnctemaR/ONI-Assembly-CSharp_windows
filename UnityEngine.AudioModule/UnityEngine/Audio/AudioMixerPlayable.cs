@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Audio
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixerPlayable.bindings.h")]
-	[StaticAccessor("AudioMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Modules/Audio/Public/Director/AudioMixerPlayable.h")]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixerPlayable.bindings.h")]
+	[StaticAccessor("AudioMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct AudioMixerPlayable : IPlayable, IEquatable<AudioMixerPlayable>
 	{
 		public static AudioMixerPlayable Create(PlayableGraph graph, int inputCount = 0, bool normalizeInputVolumes = false)

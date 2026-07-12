@@ -79,6 +79,7 @@ public class MinionPersonalityPanel : DetailScreenTab
 		}
 		targetPanel.SetActive(true);
 		targetPanel.SetLabel("name", DUPLICANTS.NAMETITLE + component.name, "");
+		targetPanel.SetLabel("model", DUPLICANTS.MODELTITLE + component.model.ProperName(), GameTags.Minions.Models.GetModelTooltipForTag(component.model));
 		targetPanel.SetLabel("age", DUPLICANTS.ARRIVALTIME + GameUtil.GetFormattedCycles(((float)GameClock.Instance.GetCycle() - component.arrivalTime) * 600f, "F0", true), string.Format(DUPLICANTS.ARRIVALTIME_TOOLTIP, component.arrivalTime + 1f, component.name));
 		targetPanel.SetLabel("gender", DUPLICANTS.GENDERTITLE + string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.GENDER.{0}.NAME", component.genderStringKey.ToUpper())), component.gender), "");
 		targetPanel.SetLabel("personality", string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component.nameStringKey.ToUpper())), component.name), string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.DESC_TOOLTIP", component.nameStringKey.ToUpper())), component.name));
@@ -219,12 +220,18 @@ public class MinionPersonalityPanel : DetailScreenTab
 		{
 			foreach (Skill skill2 in list)
 			{
-				string text = "";
-				foreach (SkillPerk skillPerk in skill2.perks)
+				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(skill2.dlcId))
 				{
-					text = text + "  • " + skillPerk.Name + "\n";
+					string text = "";
+					foreach (SkillPerk skillPerk in skill2.perks)
+					{
+						if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
+						{
+							text = text + "  • " + skillPerk.Name + "\n";
+						}
+					}
+					targetPanel.SetLabel(skill2.Id, "  • " + skill2.Name, skill2.description + "\n" + text);
 				}
-				targetPanel.SetLabel(skill2.Id, "  • " + skill2.Name, skill2.description + "\n" + text);
 			}
 		}
 		targetPanel.Commit();

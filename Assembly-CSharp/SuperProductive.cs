@@ -28,10 +28,10 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 		this.overjoyed.working.ScheduleGoTo(0.33f, this.overjoyed.superProductive);
 		this.overjoyed.superProductive.Enter(delegate(SuperProductive.Instance smi)
 		{
-			Worker component = smi.GetComponent<Worker>();
-			if (component != null && component.state == Worker.State.Working)
+			WorkerBase component = smi.GetComponent<WorkerBase>();
+			if (component != null && component.GetState() == WorkerBase.State.Working)
 			{
-				Workable workable = component.workable;
+				Workable workable = component.GetWorkable();
 				if (workable != null)
 				{
 					float num = workable.WorkTimeRemaining;

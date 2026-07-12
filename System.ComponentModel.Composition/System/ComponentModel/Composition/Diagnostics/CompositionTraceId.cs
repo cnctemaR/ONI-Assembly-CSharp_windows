@@ -1,0 +1,15 @@
+﻿using System;
+
+namespace System.ComponentModel.Composition.Diagnostics
+{
+	internal enum CompositionTraceId : ushort
+	{
+		Rejection_DefinitionRejected = 1,
+		Rejection_DefinitionResurrected,
+		Discovery_AssemblyLoadFailed,
+		Discovery_DefinitionMarkedWithPartNotDiscoverableAttribute,
+		Discovery_DefinitionMismatchedExportArity,
+		Discovery_DefinitionContainsNoExports,
+		Discovery_MemberMarkedWithMultipleImportAndImportMany
+	}
+}

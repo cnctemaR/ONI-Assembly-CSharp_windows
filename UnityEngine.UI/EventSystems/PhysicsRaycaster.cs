@@ -20,7 +20,11 @@ namespace UnityEngine.EventSystems
 				{
 					this.m_EventCamera = base.GetComponent<Camera>();
 				}
-				return this.m_EventCamera ?? Camera.main;
+				if (this.m_EventCamera == null)
+				{
+					return Camera.main;
+				}
+				return this.m_EventCamera;
 			}
 		}
 
@@ -78,7 +82,7 @@ namespace UnityEngine.EventSystems
 			{
 				return false;
 			}
-			Vector3 vector = Display.RelativeMouseAt(eventData.position);
+			Vector3 vector = MultipleDisplayUtilities.RelativeMouseAtScaled(eventData.position);
 			if (vector != Vector3.zero)
 			{
 				eventDisplayIndex = (int)vector.z;

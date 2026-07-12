@@ -2,13 +2,140 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Threading;
 
 namespace System
 {
 	public static class Convert
 	{
+		private unsafe static bool TryDecodeFromUtf16(ReadOnlySpan<char> utf16, Span<byte> bytes, out int consumed, out int written)
+		{
+			ref char reference = ref MemoryMarshal.GetReference<char>(utf16);
+			ref byte reference2 = ref MemoryMarshal.GetReference<byte>(bytes);
+			int num = utf16.Length & -4;
+			int length = bytes.Length;
+			int i = 0;
+			int num2 = 0;
+			if (utf16.Length != 0)
+			{
+				ref sbyte ptr = ref Convert.s_decodingMap[0];
+				int num3;
+				if (length >= (num >> 2) * 3)
+				{
+					num3 = num - 4;
+				}
+				else
+				{
+					num3 = length / 3 * 4;
+				}
+				while (i < num3)
+				{
+					int num4 = Convert.Decode(Unsafe.Add<char>(ref reference, i), ref ptr);
+					if (num4 < 0)
+					{
+						IL_0201:
+						consumed = i;
+						written = num2;
+						return false;
+					}
+					Convert.WriteThreeLowOrderBytes(Unsafe.Add<byte>(ref reference2, num2), num4);
+					num2 += 3;
+					i += 4;
+				}
+				if (num3 != num - 4 || i == num)
+				{
+					goto IL_0201;
+				}
+				int num5 = (int)(*Unsafe.Add<char>(ref reference, num - 4));
+				int num6 = (int)(*Unsafe.Add<char>(ref reference, num - 3));
+				int num7 = (int)(*Unsafe.Add<char>(ref reference, num - 2));
+				int num8 = (int)(*Unsafe.Add<char>(ref reference, num - 1));
+				if (((long)(num5 | num6 | num7 | num8) & (long)((ulong)(-256))) != 0L)
+				{
+					goto IL_0201;
+				}
+				num5 = (int)(*Unsafe.Add<sbyte>(ref ptr, num5));
+				num6 = (int)(*Unsafe.Add<sbyte>(ref ptr, num6));
+				num5 <<= 18;
+				num6 <<= 12;
+				num5 |= num6;
+				if (num8 != 61)
+				{
+					num7 = (int)(*Unsafe.Add<sbyte>(ref ptr, num7));
+					num8 = (int)(*Unsafe.Add<sbyte>(ref ptr, num8));
+					num7 <<= 6;
+					num5 |= num8;
+					num5 |= num7;
+					if (num5 < 0 || num2 > length - 3)
+					{
+						goto IL_0201;
+					}
+					Convert.WriteThreeLowOrderBytes(Unsafe.Add<byte>(ref reference2, num2), num5);
+					num2 += 3;
+				}
+				else if (num7 != 61)
+				{
+					num7 = (int)(*Unsafe.Add<sbyte>(ref ptr, num7));
+					num7 <<= 6;
+					num5 |= num7;
+					if (num5 < 0 || num2 > length - 2)
+					{
+						goto IL_0201;
+					}
+					*Unsafe.Add<byte>(ref reference2, num2) = (byte)(num5 >> 16);
+					*Unsafe.Add<byte>(ref reference2, num2 + 1) = (byte)(num5 >> 8);
+					num2 += 2;
+				}
+				else
+				{
+					if (num5 < 0 || num2 > length - 1)
+					{
+						goto IL_0201;
+					}
+					*Unsafe.Add<byte>(ref reference2, num2) = (byte)(num5 >> 16);
+					num2++;
+				}
+				i += 4;
+				if (num != utf16.Length)
+				{
+					goto IL_0201;
+				}
+			}
+			consumed = i;
+			written = num2;
+			return true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static int Decode(ref char encodedChars, ref sbyte decodingMap)
+		{
+			int num = (int)encodedChars;
+			int num2 = (int)(*Unsafe.Add<char>(ref encodedChars, 1));
+			int num3 = (int)(*Unsafe.Add<char>(ref encodedChars, 2));
+			int num4 = (int)(*Unsafe.Add<char>(ref encodedChars, 3));
+			if (((long)(num | num2 | num3 | num4) & (long)((ulong)(-256))) != 0L)
+			{
+				return -1;
+			}
+			num = (int)(*Unsafe.Add<sbyte>(ref decodingMap, num));
+			num2 = (int)(*Unsafe.Add<sbyte>(ref decodingMap, num2));
+			num3 = (int)(*Unsafe.Add<sbyte>(ref decodingMap, num3));
+			num4 = (int)(*Unsafe.Add<sbyte>(ref decodingMap, num4));
+			num <<= 18;
+			num2 <<= 12;
+			num3 <<= 6;
+			num |= num4;
+			num2 |= num3;
+			return num | num2;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static void WriteThreeLowOrderBytes(ref byte destination, int value)
+		{
+			destination = (byte)(value >> 16);
+			*Unsafe.Add<byte>(ref destination, 1) = (byte)(value >> 8);
+			*Unsafe.Add<byte>(ref destination, 2) = (byte)value;
+		}
+
 		public static TypeCode GetTypeCode(object value)
 		{
 			if (value == null)
@@ -35,7 +162,7 @@ namespace System
 
 		public static object ChangeType(object value, TypeCode typeCode)
 		{
-			return Convert.ChangeType(value, typeCode, Thread.CurrentThread.CurrentCulture);
+			return Convert.ChangeType(value, typeCode, CultureInfo.CurrentCulture);
 		}
 
 		public static object ChangeType(object value, TypeCode typeCode, IFormatProvider provider)
@@ -47,16 +174,16 @@ namespace System
 			IConvertible convertible = value as IConvertible;
 			if (convertible == null)
 			{
-				throw new InvalidCastException(Environment.GetResourceString("Object must implement IConvertible."));
+				throw new InvalidCastException("Object must implement IConvertible.");
 			}
 			switch (typeCode)
 			{
 			case TypeCode.Empty:
-				throw new InvalidCastException(Environment.GetResourceString("Object cannot be cast to Empty."));
+				throw new InvalidCastException("Object cannot be cast to Empty.");
 			case TypeCode.Object:
 				return value;
 			case TypeCode.DBNull:
-				throw new InvalidCastException(Environment.GetResourceString("Object cannot be cast to DBNull."));
+				throw new InvalidCastException("Object cannot be cast to DBNull.");
 			case TypeCode.Boolean:
 				return convertible.ToBoolean(provider);
 			case TypeCode.Char:
@@ -88,7 +215,7 @@ namespace System
 			case TypeCode.String:
 				return convertible.ToString(provider);
 			}
-			throw new ArgumentException(Environment.GetResourceString("Unknown TypeCode value."));
+			throw new ArgumentException("Unknown TypeCode value.");
 		}
 
 		internal static object DefaultToType(IConvertible value, Type targetType, IFormatProvider provider)
@@ -97,100 +224,92 @@ namespace System
 			{
 				throw new ArgumentNullException("targetType");
 			}
-			RuntimeType runtimeType = targetType as RuntimeType;
-			if (runtimeType != null)
+			if (value.GetType() == targetType)
 			{
-				if (value.GetType() == targetType)
-				{
-					return value;
-				}
-				if (runtimeType == Convert.ConvertTypes[3])
-				{
-					return value.ToBoolean(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[4])
-				{
-					return value.ToChar(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[5])
-				{
-					return value.ToSByte(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[6])
-				{
-					return value.ToByte(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[7])
-				{
-					return value.ToInt16(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[8])
-				{
-					return value.ToUInt16(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[9])
-				{
-					return value.ToInt32(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[10])
-				{
-					return value.ToUInt32(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[11])
-				{
-					return value.ToInt64(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[12])
-				{
-					return value.ToUInt64(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[13])
-				{
-					return value.ToSingle(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[14])
-				{
-					return value.ToDouble(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[15])
-				{
-					return value.ToDecimal(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[16])
-				{
-					return value.ToDateTime(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[18])
-				{
-					return value.ToString(provider);
-				}
-				if (runtimeType == Convert.ConvertTypes[1])
-				{
-					return value;
-				}
-				if (runtimeType == Convert.EnumType)
-				{
-					return (Enum)value;
-				}
-				if (runtimeType == Convert.ConvertTypes[2])
-				{
-					throw new InvalidCastException(Environment.GetResourceString("Object cannot be cast to DBNull."));
-				}
-				if (runtimeType == Convert.ConvertTypes[0])
-				{
-					throw new InvalidCastException(Environment.GetResourceString("Object cannot be cast to Empty."));
-				}
+				return value;
 			}
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[]
+			if (targetType == Convert.ConvertTypes[3])
 			{
-				value.GetType().FullName,
-				targetType.FullName
-			}));
+				return value.ToBoolean(provider);
+			}
+			if (targetType == Convert.ConvertTypes[4])
+			{
+				return value.ToChar(provider);
+			}
+			if (targetType == Convert.ConvertTypes[5])
+			{
+				return value.ToSByte(provider);
+			}
+			if (targetType == Convert.ConvertTypes[6])
+			{
+				return value.ToByte(provider);
+			}
+			if (targetType == Convert.ConvertTypes[7])
+			{
+				return value.ToInt16(provider);
+			}
+			if (targetType == Convert.ConvertTypes[8])
+			{
+				return value.ToUInt16(provider);
+			}
+			if (targetType == Convert.ConvertTypes[9])
+			{
+				return value.ToInt32(provider);
+			}
+			if (targetType == Convert.ConvertTypes[10])
+			{
+				return value.ToUInt32(provider);
+			}
+			if (targetType == Convert.ConvertTypes[11])
+			{
+				return value.ToInt64(provider);
+			}
+			if (targetType == Convert.ConvertTypes[12])
+			{
+				return value.ToUInt64(provider);
+			}
+			if (targetType == Convert.ConvertTypes[13])
+			{
+				return value.ToSingle(provider);
+			}
+			if (targetType == Convert.ConvertTypes[14])
+			{
+				return value.ToDouble(provider);
+			}
+			if (targetType == Convert.ConvertTypes[15])
+			{
+				return value.ToDecimal(provider);
+			}
+			if (targetType == Convert.ConvertTypes[16])
+			{
+				return value.ToDateTime(provider);
+			}
+			if (targetType == Convert.ConvertTypes[18])
+			{
+				return value.ToString(provider);
+			}
+			if (targetType == Convert.ConvertTypes[1])
+			{
+				return value;
+			}
+			if (targetType == Convert.EnumType)
+			{
+				return (Enum)value;
+			}
+			if (targetType == Convert.ConvertTypes[2])
+			{
+				throw new InvalidCastException("Object cannot be cast to DBNull.");
+			}
+			if (targetType == Convert.ConvertTypes[0])
+			{
+				throw new InvalidCastException("Object cannot be cast to Empty.");
+			}
+			throw new InvalidCastException(string.Format("Invalid cast from '{0}' to '{1}'.", value.GetType().FullName, targetType.FullName));
 		}
 
 		public static object ChangeType(object value, Type conversionType)
 		{
-			return Convert.ChangeType(value, conversionType, Thread.CurrentThread.CurrentCulture);
+			return Convert.ChangeType(value, conversionType, CultureInfo.CurrentCulture);
 		}
 
 		public static object ChangeType(object value, Type conversionType, IFormatProvider provider)
@@ -203,7 +322,7 @@ namespace System
 			{
 				if (conversionType.IsValueType)
 				{
-					throw new InvalidCastException(Environment.GetResourceString("Null object cannot be converted to a value type."));
+					throw new InvalidCastException("Null object cannot be converted to a value type.");
 				}
 				return null;
 			}
@@ -216,78 +335,131 @@ namespace System
 					{
 						return value;
 					}
-					throw new InvalidCastException(Environment.GetResourceString("Object must implement IConvertible."));
+					throw new InvalidCastException("Object must implement IConvertible.");
 				}
 				else
 				{
-					RuntimeType runtimeType = conversionType as RuntimeType;
-					if (runtimeType == Convert.ConvertTypes[3])
+					if (conversionType == Convert.ConvertTypes[3])
 					{
 						return convertible.ToBoolean(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[4])
+					if (conversionType == Convert.ConvertTypes[4])
 					{
 						return convertible.ToChar(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[5])
+					if (conversionType == Convert.ConvertTypes[5])
 					{
 						return convertible.ToSByte(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[6])
+					if (conversionType == Convert.ConvertTypes[6])
 					{
 						return convertible.ToByte(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[7])
+					if (conversionType == Convert.ConvertTypes[7])
 					{
 						return convertible.ToInt16(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[8])
+					if (conversionType == Convert.ConvertTypes[8])
 					{
 						return convertible.ToUInt16(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[9])
+					if (conversionType == Convert.ConvertTypes[9])
 					{
 						return convertible.ToInt32(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[10])
+					if (conversionType == Convert.ConvertTypes[10])
 					{
 						return convertible.ToUInt32(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[11])
+					if (conversionType == Convert.ConvertTypes[11])
 					{
 						return convertible.ToInt64(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[12])
+					if (conversionType == Convert.ConvertTypes[12])
 					{
 						return convertible.ToUInt64(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[13])
+					if (conversionType == Convert.ConvertTypes[13])
 					{
 						return convertible.ToSingle(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[14])
+					if (conversionType == Convert.ConvertTypes[14])
 					{
 						return convertible.ToDouble(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[15])
+					if (conversionType == Convert.ConvertTypes[15])
 					{
 						return convertible.ToDecimal(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[16])
+					if (conversionType == Convert.ConvertTypes[16])
 					{
 						return convertible.ToDateTime(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[18])
+					if (conversionType == Convert.ConvertTypes[18])
 					{
 						return convertible.ToString(provider);
 					}
-					if (runtimeType == Convert.ConvertTypes[1])
+					if (conversionType == Convert.ConvertTypes[1])
 					{
 						return value;
 					}
 					return convertible.ToType(conversionType, provider);
 				}
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowCharOverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for a character.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowByteOverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for an unsigned byte.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowSByteOverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for a signed byte.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowInt16OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for an Int16.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowUInt16OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for a UInt16.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowInt32OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for an Int32.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowUInt32OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for a UInt32.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowInt64OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for an Int64.");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ThrowUInt64OverflowException()
+		{
+			throw new OverflowException("Value was either too large or too small for a UInt64.");
 		}
 
 		public static bool ToBoolean(object value)
@@ -417,7 +589,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -431,7 +603,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -446,7 +618,7 @@ namespace System
 		{
 			if (value < 0 || value > 65535)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -456,7 +628,7 @@ namespace System
 		{
 			if (value > 65535U)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -465,7 +637,7 @@ namespace System
 		{
 			if (value < 0L || value > 65535L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -475,7 +647,7 @@ namespace System
 		{
 			if (value > 65535UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a character."));
+				Convert.ThrowCharOverflowException();
 			}
 			return (char)value;
 		}
@@ -493,7 +665,7 @@ namespace System
 			}
 			if (value.Length != 1)
 			{
-				throw new FormatException(Environment.GetResourceString("String must be exactly one character long."));
+				throw new FormatException("String must be exactly one character long.");
 			}
 			return value[0];
 		}
@@ -559,7 +731,7 @@ namespace System
 		{
 			if (value > '\u007f')
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -569,7 +741,7 @@ namespace System
 		{
 			if (value > 127)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -579,7 +751,7 @@ namespace System
 		{
 			if (value < -128 || value > 127)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -589,7 +761,7 @@ namespace System
 		{
 			if (value > 127)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -599,7 +771,7 @@ namespace System
 		{
 			if (value < -128 || value > 127)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -609,7 +781,7 @@ namespace System
 		{
 			if ((ulong)value > 127UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -619,7 +791,7 @@ namespace System
 		{
 			if (value < -128L || value > 127L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -629,7 +801,7 @@ namespace System
 		{
 			if (value > 127UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)value;
 		}
@@ -710,7 +882,7 @@ namespace System
 		{
 			if (value > 'ÿ')
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -720,7 +892,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -729,7 +901,7 @@ namespace System
 		{
 			if (value < 0 || value > 255)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -739,7 +911,7 @@ namespace System
 		{
 			if (value > 255)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -748,7 +920,7 @@ namespace System
 		{
 			if (value < 0 || value > 255)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -758,7 +930,7 @@ namespace System
 		{
 			if (value > 255U)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -767,7 +939,7 @@ namespace System
 		{
 			if (value < 0L || value > 255L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -777,7 +949,7 @@ namespace System
 		{
 			if (value > 255UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)value;
 		}
@@ -851,7 +1023,7 @@ namespace System
 		{
 			if (value > '翿')
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -872,7 +1044,7 @@ namespace System
 		{
 			if (value > 32767)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -881,7 +1053,7 @@ namespace System
 		{
 			if (value < -32768 || value > 32767)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -891,7 +1063,7 @@ namespace System
 		{
 			if ((ulong)value > 32767UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -905,7 +1077,7 @@ namespace System
 		{
 			if (value < -32768L || value > 32767L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -915,7 +1087,7 @@ namespace System
 		{
 			if (value > 32767UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)value;
 		}
@@ -999,7 +1171,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1015,7 +1187,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1025,7 +1197,7 @@ namespace System
 		{
 			if (value < 0 || value > 65535)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1041,7 +1213,7 @@ namespace System
 		{
 			if (value > 65535U)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1051,7 +1223,7 @@ namespace System
 		{
 			if (value < 0L || value > 65535L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1061,7 +1233,7 @@ namespace System
 		{
 			if (value > 65535UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)value;
 		}
@@ -1169,7 +1341,7 @@ namespace System
 		{
 			if (value > 2147483647U)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int32."));
+				Convert.ThrowInt32OverflowException();
 			}
 			return (int)value;
 		}
@@ -1183,7 +1355,7 @@ namespace System
 		{
 			if (value < -2147483648L || value > 2147483647L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int32."));
+				Convert.ThrowInt32OverflowException();
 			}
 			return (int)value;
 		}
@@ -1193,7 +1365,7 @@ namespace System
 		{
 			if (value > 2147483647UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int32."));
+				Convert.ThrowInt32OverflowException();
 			}
 			return (int)value;
 		}
@@ -1228,13 +1400,12 @@ namespace System
 				}
 				return num3;
 			}
-			throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int32."));
+			throw new OverflowException("Value was either too large or too small for an Int32.");
 		}
 
-		[SecuritySafeCritical]
 		public static int ToInt32(decimal value)
 		{
-			return decimal.FCallToInt32(value);
+			return decimal.ToInt32(decimal.Round(value, 0));
 		}
 
 		public static int ToInt32(string value)
@@ -1301,7 +1472,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+				Convert.ThrowUInt32OverflowException();
 			}
 			return (uint)value;
 		}
@@ -1317,7 +1488,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+				Convert.ThrowUInt32OverflowException();
 			}
 			return (uint)value;
 		}
@@ -1333,7 +1504,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+				Convert.ThrowUInt32OverflowException();
 			}
 			return (uint)value;
 		}
@@ -1349,7 +1520,7 @@ namespace System
 		{
 			if (value < 0L || value > (long)((ulong)(-1)))
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+				Convert.ThrowUInt32OverflowException();
 			}
 			return (uint)value;
 		}
@@ -1359,7 +1530,7 @@ namespace System
 		{
 			if (value > (ulong)(-1))
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+				Convert.ThrowUInt32OverflowException();
 			}
 			return (uint)value;
 		}
@@ -1383,7 +1554,7 @@ namespace System
 				}
 				return num;
 			}
-			throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt32."));
+			throw new OverflowException("Value was either too large or too small for a UInt32.");
 		}
 
 		[CLSCompliant(false)]
@@ -1484,7 +1655,7 @@ namespace System
 		{
 			if (value > 9223372036854775807UL)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int64."));
+				Convert.ThrowInt64OverflowException();
 			}
 			return (long)value;
 		}
@@ -1573,7 +1744,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt64."));
+				Convert.ThrowUInt64OverflowException();
 			}
 			return (ulong)((long)value);
 		}
@@ -1589,7 +1760,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt64."));
+				Convert.ThrowUInt64OverflowException();
 			}
 			return (ulong)((long)value);
 		}
@@ -1605,7 +1776,7 @@ namespace System
 		{
 			if (value < 0)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt64."));
+				Convert.ThrowUInt64OverflowException();
 			}
 			return (ulong)((long)value);
 		}
@@ -1621,7 +1792,7 @@ namespace System
 		{
 			if (value < 0L)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt64."));
+				Convert.ThrowUInt64OverflowException();
 			}
 			return (ulong)value;
 		}
@@ -2147,7 +2318,7 @@ namespace System
 
 		public static string ToString(bool value, IFormatProvider provider)
 		{
-			return value.ToString(provider);
+			return value.ToString();
 		}
 
 		public static string ToString(char value)
@@ -2157,7 +2328,7 @@ namespace System
 
 		public static string ToString(char value, IFormatProvider provider)
 		{
-			return value.ToString(provider);
+			return value.ToString();
 		}
 
 		[CLSCompliant(false)]
@@ -2302,12 +2473,16 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			int num = ParseNumbers.StringToInt(value, fromBase, 4608);
+			if (value == null)
+			{
+				return 0;
+			}
+			int num = ParseNumbers.StringToInt(value.AsSpan(), fromBase, 4608);
 			if (num < 0 || num > 255)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an unsigned byte."));
+				Convert.ThrowByteOverflowException();
 			}
 			return (byte)num;
 		}
@@ -2317,16 +2492,20 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			int num = ParseNumbers.StringToInt(value, fromBase, 5120);
+			if (value == null)
+			{
+				return 0;
+			}
+			int num = ParseNumbers.StringToInt(value.AsSpan(), fromBase, 5120);
 			if (fromBase != 10 && num <= 255)
 			{
 				return (sbyte)num;
 			}
 			if (num < -128 || num > 127)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a signed byte."));
+				Convert.ThrowSByteOverflowException();
 			}
 			return (sbyte)num;
 		}
@@ -2335,16 +2514,20 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			int num = ParseNumbers.StringToInt(value, fromBase, 6144);
+			if (value == null)
+			{
+				return 0;
+			}
+			int num = ParseNumbers.StringToInt(value.AsSpan(), fromBase, 6144);
 			if (fromBase != 10 && num <= 65535)
 			{
 				return (short)num;
 			}
 			if (num < -32768 || num > 32767)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for an Int16."));
+				Convert.ThrowInt16OverflowException();
 			}
 			return (short)num;
 		}
@@ -2354,12 +2537,16 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			int num = ParseNumbers.StringToInt(value, fromBase, 4608);
+			if (value == null)
+			{
+				return 0;
+			}
+			int num = ParseNumbers.StringToInt(value.AsSpan(), fromBase, 4608);
 			if (num < 0 || num > 65535)
 			{
-				throw new OverflowException(Environment.GetResourceString("Value was either too large or too small for a UInt16."));
+				Convert.ThrowUInt16OverflowException();
 			}
 			return (ushort)num;
 		}
@@ -2368,9 +2555,13 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			return ParseNumbers.StringToInt(value, fromBase, 4096);
+			if (value == null)
+			{
+				return 0;
+			}
+			return ParseNumbers.StringToInt(value.AsSpan(), fromBase, 4096);
 		}
 
 		[CLSCompliant(false)]
@@ -2378,18 +2569,26 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			return (uint)ParseNumbers.StringToInt(value, fromBase, 4608);
+			if (value == null)
+			{
+				return 0U;
+			}
+			return (uint)ParseNumbers.StringToInt(value.AsSpan(), fromBase, 4608);
 		}
 
 		public static long ToInt64(string value, int fromBase)
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			return ParseNumbers.StringToLong(value, fromBase, 4096);
+			if (value == null)
+			{
+				return 0L;
+			}
+			return ParseNumbers.StringToLong(value.AsSpan(), fromBase, 4096);
 		}
 
 		[CLSCompliant(false)]
@@ -2397,47 +2596,47 @@ namespace System
 		{
 			if (fromBase != 2 && fromBase != 8 && fromBase != 10 && fromBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
-			return (ulong)ParseNumbers.StringToLong(value, fromBase, 4608);
+			if (value == null)
+			{
+				return 0UL;
+			}
+			return (ulong)ParseNumbers.StringToLong(value.AsSpan(), fromBase, 4608);
 		}
 
-		[SecuritySafeCritical]
 		public static string ToString(byte value, int toBase)
 		{
 			if (toBase != 2 && toBase != 8 && toBase != 10 && toBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
 			return ParseNumbers.IntToString((int)value, toBase, -1, ' ', 64);
 		}
 
-		[SecuritySafeCritical]
 		public static string ToString(short value, int toBase)
 		{
 			if (toBase != 2 && toBase != 8 && toBase != 10 && toBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
 			return ParseNumbers.IntToString((int)value, toBase, -1, ' ', 128);
 		}
 
-		[SecuritySafeCritical]
 		public static string ToString(int value, int toBase)
 		{
 			if (toBase != 2 && toBase != 8 && toBase != 10 && toBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
 			return ParseNumbers.IntToString(value, toBase, -1, ' ', 0);
 		}
 
-		[SecuritySafeCritical]
 		public static string ToString(long value, int toBase)
 		{
 			if (toBase != 2 && toBase != 8 && toBase != 10 && toBase != 16)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Invalid Base."));
+				throw new ArgumentException("Invalid Base.");
 			}
 			return ParseNumbers.LongToString(value, toBase, -1, ' ', 0);
 		}
@@ -2448,17 +2647,16 @@ namespace System
 			{
 				throw new ArgumentNullException("inArray");
 			}
-			return Convert.ToBase64String(inArray, 0, inArray.Length, Base64FormattingOptions.None);
+			return Convert.ToBase64String(new ReadOnlySpan<byte>(inArray), Base64FormattingOptions.None);
 		}
 
-		[ComVisible(false)]
 		public static string ToBase64String(byte[] inArray, Base64FormattingOptions options)
 		{
 			if (inArray == null)
 			{
 				throw new ArgumentNullException("inArray");
 			}
-			return Convert.ToBase64String(inArray, 0, inArray.Length, options);
+			return Convert.ToBase64String(new ReadOnlySpan<byte>(inArray), options);
 		}
 
 		public static string ToBase64String(byte[] inArray, int offset, int length)
@@ -2466,9 +2664,7 @@ namespace System
 			return Convert.ToBase64String(inArray, offset, length, Base64FormattingOptions.None);
 		}
 
-		[ComVisible(false)]
-		[SecuritySafeCritical]
-		public unsafe static string ToBase64String(byte[] inArray, int offset, int length, Base64FormattingOptions options)
+		public static string ToBase64String(byte[] inArray, int offset, int length, Base64FormattingOptions options)
 		{
 			if (inArray == null)
 			{
@@ -2476,43 +2672,44 @@ namespace System
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("offset", "Value must be positive.");
 			}
+			if (offset > inArray.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("offset", "Offset and length must refer to a position in the string.");
+			}
+			return Convert.ToBase64String(new ReadOnlySpan<byte>(inArray, offset, length), options);
+		}
+
+		public unsafe static string ToBase64String(ReadOnlySpan<byte> bytes, Base64FormattingOptions options = Base64FormattingOptions.None)
+		{
 			if (options < Base64FormattingOptions.None || options > Base64FormattingOptions.InsertLineBreaks)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Illegal enum value: {0}.", new object[] { (int)options }));
+				throw new ArgumentException(string.Format("Illegal enum value: {0}.", (int)options), "options");
 			}
-			int num = inArray.Length;
-			if (offset > num - length)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Offset and length must refer to a position in the string."));
-			}
-			if (num == 0)
+			if (bytes.Length == 0)
 			{
 				return string.Empty;
 			}
 			bool flag = options == Base64FormattingOptions.InsertLineBreaks;
-			string text2;
-			string text = (text2 = string.FastAllocateString(Convert.ToBase64_CalculateAndValidateOutputLength(length, flag)));
-			char* ptr = text2;
-			if (ptr != null)
+			string text = string.FastAllocateString(Convert.ToBase64_CalculateAndValidateOutputLength(bytes.Length, flag));
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
+				byte* ptr = reference;
+				fixed (string text2 = text)
+				{
+					char* ptr2 = text2;
+					if (ptr2 != null)
+					{
+						ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					Convert.ConvertToBase64Array(ptr2, ptr, 0, bytes.Length, flag);
+				}
 			}
-			byte* ptr2;
-			if (inArray == null || inArray.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &inArray[0];
-			}
-			Convert.ConvertToBase64Array(ptr, ptr2, offset, length, flag);
 			return text;
 		}
 
@@ -2521,8 +2718,6 @@ namespace System
 			return Convert.ToBase64CharArray(inArray, offsetIn, length, outArray, offsetOut, Base64FormattingOptions.None);
 		}
 
-		[ComVisible(false)]
-		[SecuritySafeCritical]
 		public unsafe static int ToBase64CharArray(byte[] inArray, int offsetIn, int length, char[] outArray, int offsetOut, Base64FormattingOptions options)
 		{
 			if (inArray == null)
@@ -2535,24 +2730,24 @@ namespace System
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (offsetIn < 0)
 			{
-				throw new ArgumentOutOfRangeException("offsetIn", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("offsetIn", "Value must be positive.");
 			}
 			if (offsetOut < 0)
 			{
-				throw new ArgumentOutOfRangeException("offsetOut", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("offsetOut", "Value must be positive.");
 			}
 			if (options < Base64FormattingOptions.None || options > Base64FormattingOptions.InsertLineBreaks)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Illegal enum value: {0}.", new object[] { (int)options }));
+				throw new ArgumentException(string.Format("Illegal enum value: {0}.", (int)options), "options");
 			}
 			int num = inArray.Length;
 			if (offsetIn > num - length)
 			{
-				throw new ArgumentOutOfRangeException("offsetIn", Environment.GetResourceString("Offset and length must refer to a position in the string."));
+				throw new ArgumentOutOfRangeException("offsetIn", "Offset and length must refer to a position in the string.");
 			}
 			if (num == 0)
 			{
@@ -2563,91 +2758,104 @@ namespace System
 			int num3 = Convert.ToBase64_CalculateAndValidateOutputLength(length, flag);
 			if (offsetOut > num2 - num3)
 			{
-				throw new ArgumentOutOfRangeException("offsetOut", Environment.GetResourceString("Either offset did not refer to a position in the string, or there is an insufficient length of destination character array."));
+				throw new ArgumentOutOfRangeException("offsetOut", "Either offset did not refer to a position in the string, or there is an insufficient length of destination character array.");
 			}
 			int num4;
 			fixed (char* ptr = &outArray[offsetOut])
 			{
 				char* ptr2 = ptr;
-				fixed (byte[] array = inArray)
+				fixed (byte* ptr3 = &inArray[0])
 				{
-					byte* ptr3;
-					if (inArray == null || array.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array[0];
-					}
-					num4 = Convert.ConvertToBase64Array(ptr2, ptr3, offsetIn, length, flag);
+					byte* ptr4 = ptr3;
+					num4 = Convert.ConvertToBase64Array(ptr2, ptr4, offsetIn, length, flag);
 				}
 			}
 			return num4;
 		}
 
-		[SecurityCritical]
+		public unsafe static bool TryToBase64Chars(ReadOnlySpan<byte> bytes, Span<char> chars, out int charsWritten, Base64FormattingOptions options = Base64FormattingOptions.None)
+		{
+			if (options < Base64FormattingOptions.None || options > Base64FormattingOptions.InsertLineBreaks)
+			{
+				throw new ArgumentException(string.Format("Illegal enum value: {0}.", (int)options), "options");
+			}
+			if (bytes.Length == 0)
+			{
+				charsWritten = 0;
+				return true;
+			}
+			bool flag = options == Base64FormattingOptions.InsertLineBreaks;
+			if (Convert.ToBase64_CalculateAndValidateOutputLength(bytes.Length, flag) > chars.Length)
+			{
+				charsWritten = 0;
+				return false;
+			}
+			fixed (char* reference = MemoryMarshal.GetReference<char>(chars))
+			{
+				char* ptr = reference;
+				fixed (byte* reference2 = MemoryMarshal.GetReference<byte>(bytes))
+				{
+					byte* ptr2 = reference2;
+					charsWritten = Convert.ConvertToBase64Array(ptr, ptr2, 0, bytes.Length, flag);
+					return true;
+				}
+			}
+		}
+
 		private unsafe static int ConvertToBase64Array(char* outChars, byte* inData, int offset, int length, bool insertLineBreaks)
 		{
 			int num = length % 3;
 			int num2 = offset + (length - num);
 			int num3 = 0;
 			int num4 = 0;
-			char[] array;
-			char* ptr;
-			if ((array = Convert.base64Table) == null || array.Length == 0)
+			fixed (char* ptr = &Convert.base64Table[0])
 			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &array[0];
-			}
-			int i;
-			for (i = offset; i < num2; i += 3)
-			{
-				if (insertLineBreaks)
+				char* ptr2 = ptr;
+				int i;
+				for (i = offset; i < num2; i += 3)
 				{
-					if (num4 == 76)
+					if (insertLineBreaks)
 					{
-						outChars[num3++] = '\r';
-						outChars[num3++] = '\n';
-						num4 = 0;
+						if (num4 == 76)
+						{
+							outChars[num3++] = '\r';
+							outChars[num3++] = '\n';
+							num4 = 0;
+						}
+						num4 += 4;
 					}
-					num4 += 4;
+					outChars[num3] = ptr2[(inData[i] & 252) >> 2];
+					outChars[num3 + 1] = ptr2[((int)(inData[i] & 3) << 4) | ((inData[i + 1] & 240) >> 4)];
+					outChars[num3 + 2] = ptr2[((int)(inData[i + 1] & 15) << 2) | ((inData[i + 2] & 192) >> 6)];
+					outChars[num3 + 3] = ptr2[inData[i + 2] & 63];
+					num3 += 4;
 				}
-				outChars[num3] = ptr[(inData[i] & 252) >> 2];
-				outChars[num3 + 1] = ptr[((int)(inData[i] & 3) << 4) | ((inData[i + 1] & 240) >> 4)];
-				outChars[num3 + 2] = ptr[((int)(inData[i + 1] & 15) << 2) | ((inData[i + 2] & 192) >> 6)];
-				outChars[num3 + 3] = ptr[inData[i + 2] & 63];
-				num3 += 4;
-			}
-			i = num2;
-			if (insertLineBreaks && num != 0 && num4 == 76)
-			{
-				outChars[num3++] = '\r';
-				outChars[num3++] = '\n';
-			}
-			if (num != 1)
-			{
-				if (num == 2)
+				i = num2;
+				if (insertLineBreaks && num != 0 && num4 == 76)
 				{
-					outChars[num3] = ptr[(inData[i] & 252) >> 2];
-					outChars[num3 + 1] = ptr[((int)(inData[i] & 3) << 4) | ((inData[i + 1] & 240) >> 4)];
-					outChars[num3 + 2] = ptr[(inData[i + 1] & 15) << 2];
-					outChars[num3 + 3] = ptr[64];
+					outChars[num3++] = '\r';
+					outChars[num3++] = '\n';
+				}
+				if (num != 1)
+				{
+					if (num == 2)
+					{
+						outChars[num3] = ptr2[(inData[i] & 252) >> 2];
+						outChars[num3 + 1] = ptr2[((int)(inData[i] & 3) << 4) | ((inData[i + 1] & 240) >> 4)];
+						outChars[num3 + 2] = ptr2[(inData[i + 1] & 15) << 2];
+						outChars[num3 + 3] = ptr2[64];
+						num3 += 4;
+					}
+				}
+				else
+				{
+					outChars[num3] = ptr2[(inData[i] & 252) >> 2];
+					outChars[num3 + 1] = ptr2[(inData[i] & 3) << 4];
+					outChars[num3 + 2] = ptr2[64];
+					outChars[num3 + 3] = ptr2[64];
 					num3 += 4;
 				}
 			}
-			else
-			{
-				outChars[num3] = ptr[(inData[i] & 252) >> 2];
-				outChars[num3 + 1] = ptr[(inData[i] & 3) << 4];
-				outChars[num3 + 2] = ptr[64];
-				outChars[num3 + 3] = ptr[64];
-				num3 += 4;
-			}
-			array = null;
 			return num3;
 		}
 
@@ -2675,7 +2883,6 @@ namespace System
 			return (int)num;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static byte[] FromBase64String(string s)
 		{
 			if (s == null)
@@ -2690,7 +2897,110 @@ namespace System
 			return Convert.FromBase64CharPtr(ptr, s.Length);
 		}
 
-		[SecuritySafeCritical]
+		public static bool TryFromBase64String(string s, Span<byte> bytes, out int bytesWritten)
+		{
+			if (s == null)
+			{
+				throw new ArgumentNullException("s");
+			}
+			return Convert.TryFromBase64Chars(s.AsSpan(), bytes, out bytesWritten);
+		}
+
+		public unsafe static bool TryFromBase64Chars(ReadOnlySpan<char> chars, Span<byte> bytes, out int bytesWritten)
+		{
+			Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)8], 4);
+			bytesWritten = 0;
+			while (chars.Length != 0)
+			{
+				int num;
+				int num2;
+				bool flag = Convert.TryDecodeFromUtf16(chars, bytes, out num, out num2);
+				bytesWritten += num2;
+				if (flag)
+				{
+					return true;
+				}
+				chars = chars.Slice(num);
+				bytes = bytes.Slice(num2);
+				if (((char)(*chars[0])).IsSpace())
+				{
+					int num3 = 1;
+					while (num3 != chars.Length && ((char)(*chars[num3])).IsSpace())
+					{
+						num3++;
+					}
+					chars = chars.Slice(num3);
+					if (num2 % 3 != 0 && chars.Length != 0)
+					{
+						bytesWritten = 0;
+						return false;
+					}
+				}
+				else
+				{
+					int num4;
+					int num5;
+					Convert.CopyToTempBufferWithoutWhiteSpace(chars, span, out num4, out num5);
+					if ((num5 & 3) != 0)
+					{
+						bytesWritten = 0;
+						return false;
+					}
+					span = span.Slice(0, num5);
+					int num6;
+					int num7;
+					if (!Convert.TryDecodeFromUtf16(span, bytes, out num6, out num7))
+					{
+						bytesWritten = 0;
+						return false;
+					}
+					bytesWritten += num7;
+					chars = chars.Slice(num4);
+					bytes = bytes.Slice(num7);
+					if (num7 % 3 != 0)
+					{
+						for (int i = 0; i < chars.Length; i++)
+						{
+							if (!((char)(*chars[i])).IsSpace())
+							{
+								bytesWritten = 0;
+								return false;
+							}
+						}
+						return true;
+					}
+				}
+			}
+			return true;
+		}
+
+		private unsafe static void CopyToTempBufferWithoutWhiteSpace(ReadOnlySpan<char> chars, Span<char> tempBuffer, out int consumed, out int charsWritten)
+		{
+			charsWritten = 0;
+			for (int i = 0; i < chars.Length; i++)
+			{
+				char c = (char)(*chars[i]);
+				if (!c.IsSpace())
+				{
+					int num = charsWritten;
+					charsWritten = num + 1;
+					*tempBuffer[num] = c;
+					if (charsWritten == tempBuffer.Length)
+					{
+						consumed = i + 1;
+						return;
+					}
+				}
+			}
+			consumed = chars.Length;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static bool IsSpace(this char c)
+		{
+			return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+		}
+
 		public unsafe static byte[] FromBase64CharArray(char[] inArray, int offset, int length)
 		{
 			if (inArray == null)
@@ -2699,29 +3009,26 @@ namespace System
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Value must be positive."));
+				throw new ArgumentOutOfRangeException("offset", "Value must be positive.");
 			}
 			if (offset > inArray.Length - length)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Offset and length must refer to a position in the string."));
+				throw new ArgumentOutOfRangeException("offset", "Offset and length must refer to a position in the string.");
 			}
-			char* ptr;
-			if (inArray == null || inArray.Length == 0)
+			if (inArray.Length == 0)
 			{
-				ptr = null;
+				return Array.Empty<byte>();
 			}
-			else
+			fixed (char* ptr = &inArray[0])
 			{
-				ptr = &inArray[0];
+				return Convert.FromBase64CharPtr(ptr + offset, length);
 			}
-			return Convert.FromBase64CharPtr(ptr + offset, length);
 		}
 
-		[SecurityCritical]
 		private unsafe static byte[] FromBase64CharPtr(char* inputPtr, int inputLength)
 		{
 			while (inputLength > 0)
@@ -2733,141 +3040,15 @@ namespace System
 				}
 				inputLength--;
 			}
-			int num2 = Convert.FromBase64_ComputeResultLength(inputPtr, inputLength);
-			byte[] array2;
-			byte[] array = (array2 = new byte[num2]);
-			byte* ptr;
-			if (array == null || array2.Length == 0)
+			byte[] array = new byte[Convert.FromBase64_ComputeResultLength(inputPtr, inputLength)];
+			int num2;
+			if (!Convert.TryFromBase64Chars(new ReadOnlySpan<char>((void*)inputPtr, inputLength), array, out num2))
 			{
-				ptr = null;
+				throw new FormatException("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.");
 			}
-			else
-			{
-				ptr = &array2[0];
-			}
-			Convert.FromBase64_Decode(inputPtr, inputLength, ptr, num2);
-			array2 = null;
 			return array;
 		}
 
-		[SecurityCritical]
-		private unsafe static int FromBase64_Decode(char* startInputPtr, int inputLength, byte* startDestPtr, int destLength)
-		{
-			char* ptr = startInputPtr;
-			byte* ptr2 = startDestPtr;
-			char* ptr3 = ptr + inputLength;
-			byte* ptr4 = ptr2 + destLength;
-			uint num = 255U;
-			while (ptr < ptr3)
-			{
-				uint num2 = (uint)(*ptr);
-				ptr++;
-				if (num2 - 65U <= 25U)
-				{
-					num2 -= 65U;
-				}
-				else if (num2 - 97U <= 25U)
-				{
-					num2 -= 71U;
-				}
-				else
-				{
-					if (num2 - 48U > 9U)
-					{
-						if (num2 <= 32U)
-						{
-							if (num2 - 9U <= 1U || num2 == 13U || num2 == 32U)
-							{
-								continue;
-							}
-						}
-						else
-						{
-							if (num2 == 43U)
-							{
-								num2 = 62U;
-								goto IL_00A7;
-							}
-							if (num2 == 47U)
-							{
-								num2 = 63U;
-								goto IL_00A7;
-							}
-							if (num2 == 61U)
-							{
-								if (ptr == ptr3)
-								{
-									num <<= 6;
-									if ((num & 2147483648U) == 0U)
-									{
-										throw new FormatException(Environment.GetResourceString("Invalid length for a Base-64 char array or string."));
-									}
-									if ((int)((long)(ptr4 - ptr2)) < 2)
-									{
-										return -1;
-									}
-									*(ptr2++) = (byte)(num >> 16);
-									*(ptr2++) = (byte)(num >> 8);
-									num = 255U;
-									break;
-								}
-								else
-								{
-									while (ptr < ptr3 - 1)
-									{
-										int num3 = (int)(*ptr);
-										if (num3 != 32 && num3 != 10 && num3 != 13 && num3 != 9)
-										{
-											break;
-										}
-										ptr++;
-									}
-									if (ptr != ptr3 - 1 || *ptr != '=')
-									{
-										throw new FormatException(Environment.GetResourceString("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters."));
-									}
-									num <<= 12;
-									if ((num & 2147483648U) == 0U)
-									{
-										throw new FormatException(Environment.GetResourceString("Invalid length for a Base-64 char array or string."));
-									}
-									if ((int)((long)(ptr4 - ptr2)) < 1)
-									{
-										return -1;
-									}
-									*(ptr2++) = (byte)(num >> 16);
-									num = 255U;
-									break;
-								}
-							}
-						}
-						throw new FormatException(Environment.GetResourceString("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters."));
-					}
-					num2 -= 4294967292U;
-				}
-				IL_00A7:
-				num = (num << 6) | num2;
-				if ((num & 2147483648U) != 0U)
-				{
-					if ((int)((long)(ptr4 - ptr2)) < 3)
-					{
-						return -1;
-					}
-					*ptr2 = (byte)(num >> 16);
-					ptr2[1] = (byte)(num >> 8);
-					ptr2[2] = (byte)num;
-					ptr2 += 3;
-					num = 255U;
-				}
-			}
-			if (num != 255U)
-			{
-				throw new FormatException(Environment.GetResourceString("Invalid length for a Base-64 char array or string."));
-			}
-			return (int)((long)(ptr2 - startDestPtr));
-		}
-
-		[SecurityCritical]
 		private unsafe static int FromBase64_ComputeResultLength(char* inputPtr, int inputLength)
 		{
 			char* ptr = inputPtr + inputLength;
@@ -2897,7 +3078,7 @@ namespace System
 				{
 					if (num2 != 2)
 					{
-						throw new FormatException(Environment.GetResourceString("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters."));
+						throw new FormatException("The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.");
 					}
 					num2 = 1;
 				}
@@ -2905,30 +3086,62 @@ namespace System
 			return num / 4 * 3 + num2;
 		}
 
-		internal static readonly RuntimeType[] ConvertTypes = new RuntimeType[]
+		private static readonly sbyte[] s_decodingMap = new sbyte[]
 		{
-			(RuntimeType)typeof(Empty),
-			(RuntimeType)typeof(object),
-			(RuntimeType)typeof(DBNull),
-			(RuntimeType)typeof(bool),
-			(RuntimeType)typeof(char),
-			(RuntimeType)typeof(sbyte),
-			(RuntimeType)typeof(byte),
-			(RuntimeType)typeof(short),
-			(RuntimeType)typeof(ushort),
-			(RuntimeType)typeof(int),
-			(RuntimeType)typeof(uint),
-			(RuntimeType)typeof(long),
-			(RuntimeType)typeof(ulong),
-			(RuntimeType)typeof(float),
-			(RuntimeType)typeof(double),
-			(RuntimeType)typeof(decimal),
-			(RuntimeType)typeof(DateTime),
-			(RuntimeType)typeof(object),
-			(RuntimeType)typeof(string)
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, 62, -1, -1, -1, 63, 52, 53,
+			54, 55, 56, 57, 58, 59, 60, 61, -1, -1,
+			-1, -1, -1, -1, -1, 0, 1, 2, 3, 4,
+			5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+			15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+			25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
+			29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+			39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+			49, 50, 51, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1
 		};
 
-		private static readonly RuntimeType EnumType = (RuntimeType)typeof(Enum);
+		private const byte EncodingPad = 61;
+
+		internal static readonly Type[] ConvertTypes = new Type[]
+		{
+			typeof(Empty),
+			typeof(object),
+			typeof(DBNull),
+			typeof(bool),
+			typeof(char),
+			typeof(sbyte),
+			typeof(byte),
+			typeof(short),
+			typeof(ushort),
+			typeof(int),
+			typeof(uint),
+			typeof(long),
+			typeof(ulong),
+			typeof(float),
+			typeof(double),
+			typeof(decimal),
+			typeof(DateTime),
+			typeof(object),
+			typeof(string)
+		};
+
+		private static readonly Type EnumType = typeof(Enum);
 
 		internal static readonly char[] base64Table = new char[]
 		{

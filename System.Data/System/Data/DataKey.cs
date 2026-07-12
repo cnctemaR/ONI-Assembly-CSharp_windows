@@ -2,7 +2,7 @@
 
 namespace System.Data
 {
-	internal struct DataKey
+	internal readonly struct DataKey
 	{
 		internal DataKey(DataColumn[] columns, bool copyColumns)
 		{

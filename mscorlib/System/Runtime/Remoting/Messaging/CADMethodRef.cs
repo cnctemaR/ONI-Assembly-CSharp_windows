@@ -65,7 +65,7 @@ namespace System.Runtime.Remoting.Messaging
 			}
 			if (methodBase == null)
 			{
-				throw new RemotingException(string.Format("Method '{0}' not found in type '{1}'", this.methodName, this.typeName));
+				throw new RemotingException(string.Concat(new string[] { "Method '", this.methodName, "' not found in type '", this.typeName, "'" }));
 			}
 			return methodBase;
 		}

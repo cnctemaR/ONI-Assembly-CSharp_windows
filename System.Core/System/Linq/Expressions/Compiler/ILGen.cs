@@ -40,7 +40,7 @@ namespace System.Linq.Expressions.Compiler
 					il.Emit(OpCodes.Ldarg_S, (byte)index);
 					return;
 				}
-				il.Emit(OpCodes.Ldarg, index);
+				il.Emit(OpCodes.Ldarg, (short)index);
 				return;
 			}
 		}
@@ -52,7 +52,7 @@ namespace System.Linq.Expressions.Compiler
 				il.Emit(OpCodes.Ldarga_S, (byte)index);
 				return;
 			}
-			il.Emit(OpCodes.Ldarga, index);
+			il.Emit(OpCodes.Ldarga, (short)index);
 		}
 
 		internal static void EmitStoreArg(this ILGenerator il, int index)
@@ -62,7 +62,7 @@ namespace System.Linq.Expressions.Compiler
 				il.Emit(OpCodes.Starg_S, (byte)index);
 				return;
 			}
-			il.Emit(OpCodes.Starg, index);
+			il.Emit(OpCodes.Starg, (short)index);
 		}
 
 		internal static void EmitLoadValueIndirect(this ILGenerator il, Type type)

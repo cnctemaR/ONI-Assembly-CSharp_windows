@@ -14,11 +14,11 @@ public class CompostWorkable : Workable
 		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 	}
 }

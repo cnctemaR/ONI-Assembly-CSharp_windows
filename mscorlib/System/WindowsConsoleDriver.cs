@@ -205,10 +205,10 @@ namespace System
 					}
 					if (!WindowsConsoleDriver.ReadConsoleInput(this.inputHandle, out inputRecord, 1, out num))
 					{
-						throw new InvalidOperationException("Error in ReadConsoleInput " + Marshal.GetLastWin32Error());
+						throw new InvalidOperationException("Error in ReadConsoleInput " + Marshal.GetLastWin32Error().ToString());
 					}
 				}
-				throw new InvalidOperationException("Error in PeekConsoleInput " + Marshal.GetLastWin32Error());
+				throw new InvalidOperationException("Error in PeekConsoleInput " + Marshal.GetLastWin32Error().ToString());
 			}
 		}
 
@@ -227,7 +227,7 @@ namespace System
 				Coord largestConsoleWindowSize = WindowsConsoleDriver.GetLargestConsoleWindowSize(this.outputHandle);
 				if (largestConsoleWindowSize.X == 0 && largestConsoleWindowSize.Y == 0)
 				{
-					throw new Exception("GetLargestConsoleWindowSize" + Marshal.GetLastWin32Error());
+					throw new Exception("GetLargestConsoleWindowSize" + Marshal.GetLastWin32Error().ToString());
 				}
 				return (int)largestConsoleWindowSize.Y;
 			}
@@ -240,7 +240,7 @@ namespace System
 				Coord largestConsoleWindowSize = WindowsConsoleDriver.GetLargestConsoleWindowSize(this.outputHandle);
 				if (largestConsoleWindowSize.X == 0 && largestConsoleWindowSize.Y == 0)
 				{
-					throw new Exception("GetLargestConsoleWindowSize" + Marshal.GetLastWin32Error());
+					throw new Exception("GetLargestConsoleWindowSize" + Marshal.GetLastWin32Error().ToString());
 				}
 				return (int)largestConsoleWindowSize.X;
 			}
@@ -264,7 +264,7 @@ namespace System
 					stringBuilder = new StringBuilder(26001);
 					if (WindowsConsoleDriver.GetConsoleTitle(stringBuilder, 26000) == 0)
 					{
-						throw new Exception("Got " + Marshal.GetLastWin32Error());
+						throw new Exception("Got " + Marshal.GetLastWin32Error().ToString());
 					}
 				}
 				return stringBuilder.ToString();
@@ -277,7 +277,7 @@ namespace System
 				}
 				if (!WindowsConsoleDriver.SetConsoleTitle(value))
 				{
-					throw new Exception("Got " + Marshal.GetLastWin32Error());
+					throw new Exception("Got " + Marshal.GetLastWin32Error().ToString());
 				}
 			}
 		}
@@ -289,7 +289,7 @@ namespace System
 				int num;
 				if (!WindowsConsoleDriver.GetConsoleMode(this.inputHandle, out num))
 				{
-					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error());
+					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error().ToString());
 				}
 				return (num & 1) == 0;
 			}
@@ -298,7 +298,7 @@ namespace System
 				int num;
 				if (!WindowsConsoleDriver.GetConsoleMode(this.inputHandle, out num))
 				{
-					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error());
+					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error().ToString());
 				}
 				if ((num & 1) == 0 == value)
 				{
@@ -314,7 +314,7 @@ namespace System
 				}
 				if (!WindowsConsoleDriver.SetConsoleMode(this.inputHandle, num))
 				{
-					throw new Exception("Failed in SetConsoleMode: " + Marshal.GetLastWin32Error());
+					throw new Exception("Failed in SetConsoleMode: " + Marshal.GetLastWin32Error().ToString());
 				}
 			}
 		}
@@ -476,7 +476,7 @@ namespace System
 					return new ConsoleKeyInfo(inputRecord.Character, (ConsoleKey)inputRecord.VirtualKeyCode, flag3, flag, flag2);
 				}
 			}
-			throw new InvalidOperationException("Error in ReadConsoleInput " + Marshal.GetLastWin32Error());
+			throw new InvalidOperationException("Error in ReadConsoleInput " + Marshal.GetLastWin32Error().ToString());
 		}
 
 		public void ResetColor()
@@ -518,7 +518,7 @@ namespace System
 			window.Top = (short)top;
 			if (!WindowsConsoleDriver.SetConsoleWindowInfo(this.outputHandle, true, ref window))
 			{
-				throw new ArgumentOutOfRangeException("left/top", "Windows error " + Marshal.GetLastWin32Error());
+				throw new ArgumentOutOfRangeException("left/top", "Windows error " + Marshal.GetLastWin32Error().ToString());
 			}
 		}
 
@@ -531,7 +531,7 @@ namespace System
 			window.Bottom = (short)((int)window.Top + height - 1);
 			if (!WindowsConsoleDriver.SetConsoleWindowInfo(this.outputHandle, true, ref window))
 			{
-				throw new ArgumentOutOfRangeException("left/top", "Windows error " + Marshal.GetLastWin32Error());
+				throw new ArgumentOutOfRangeException("left/top", "Windows error " + Marshal.GetLastWin32Error().ToString());
 			}
 		}
 

@@ -10,20 +10,20 @@ namespace MS.Internal.Xml.XPath
 	{
 		internal CompiledXpathExpr(Query query, string expression, bool needContext)
 		{
-			this.query = query;
-			this.expr = expression;
-			this.needContext = needContext;
+			this._query = query;
+			this._expr = expression;
+			this._needContext = needContext;
 		}
 
 		internal Query QueryTree
 		{
 			get
 			{
-				if (this.needContext)
+				if (this._needContext)
 				{
 					throw XPathException.Create("Namespace Manager or XsltContext needed. This query has a prefix, variable, or user-defined function.");
 				}
-				return this.query;
+				return this._query;
 			}
 		}
 
@@ -31,7 +31,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.expr;
+				return this._expr;
 			}
 		}
 
@@ -41,23 +41,25 @@ namespace MS.Internal.Xml.XPath
 
 		public override void AddSort(object expr, IComparer comparer)
 		{
+			string text = expr as string;
 			Query query;
-			if (expr is string)
+			if (text != null)
 			{
-				query = new QueryBuilder().Build((string)expr, out this.needContext);
+				query = new QueryBuilder().Build(text, out this._needContext);
 			}
 			else
 			{
-				if (!(expr is CompiledXpathExpr))
+				CompiledXpathExpr compiledXpathExpr = expr as CompiledXpathExpr;
+				if (compiledXpathExpr == null)
 				{
 					throw XPathException.Create("This is an invalid object. Only objects returned from Compile() can be passed as input.");
 				}
-				query = ((CompiledXpathExpr)expr).QueryTree;
+				query = compiledXpathExpr.QueryTree;
 			}
-			SortQuery sortQuery = this.query as SortQuery;
+			SortQuery sortQuery = this._query as SortQuery;
 			if (sortQuery == null)
 			{
-				sortQuery = (this.query = new SortQuery(this.query));
+				sortQuery = (this._query = new SortQuery(this._query));
 			}
 			sortQuery.AddSort(query, comparer);
 		}
@@ -69,7 +71,7 @@ namespace MS.Internal.Xml.XPath
 
 		public override XPathExpression Clone()
 		{
-			return new CompiledXpathExpr(Query.Clone(this.query), this.expr, this.needContext);
+			return new CompiledXpathExpr(Query.Clone(this._query), this._expr, this._needContext);
 		}
 
 		public override void SetContext(XmlNamespaceManager nsManager)
@@ -88,30 +90,30 @@ namespace MS.Internal.Xml.XPath
 				}
 				xsltContext = new CompiledXpathExpr.UndefinedXsltContext(nsResolver);
 			}
-			this.query.SetXsltContext(xsltContext);
-			this.needContext = false;
+			this._query.SetXsltContext(xsltContext);
+			this._needContext = false;
 		}
 
 		public override XPathResultType ReturnType
 		{
 			get
 			{
-				return this.query.StaticType;
+				return this._query.StaticType;
 			}
 		}
 
-		private Query query;
+		private Query _query;
 
-		private string expr;
+		private string _expr;
 
-		private bool needContext;
+		private bool _needContext;
 
 		private class UndefinedXsltContext : XsltContext
 		{
 			public UndefinedXsltContext(IXmlNamespaceResolver nsResolver)
 				: base(false)
 			{
-				this.nsResolver = nsResolver;
+				this._nsResolver = nsResolver;
 			}
 
 			public override string DefaultNamespace
@@ -128,7 +130,7 @@ namespace MS.Internal.Xml.XPath
 				{
 					return string.Empty;
 				}
-				string text = this.nsResolver.LookupNamespace(prefix);
+				string text = this._nsResolver.LookupNamespace(prefix);
 				if (text == null)
 				{
 					throw XPathException.Create("Namespace prefix '{0}' is not defined.", prefix);
@@ -164,7 +166,7 @@ namespace MS.Internal.Xml.XPath
 				return string.CompareOrdinal(baseUri, nextbaseUri);
 			}
 
-			private IXmlNamespaceResolver nsResolver;
+			private IXmlNamespaceResolver _nsResolver;
 		}
 	}
 }

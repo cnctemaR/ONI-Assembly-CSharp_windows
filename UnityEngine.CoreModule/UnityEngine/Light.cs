@@ -6,10 +6,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/Light.h")]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	public sealed class Light : Behaviour
 	{
 		[NativeProperty("LightType")]
@@ -261,8 +261,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float shadowSoftness
 		{
 			get
@@ -274,8 +274,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		public float shadowSoftnessFade
 		{
 			get
@@ -322,8 +322,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("warning bakedIndex has been removed please use bakingOutput.isBaked instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public int bakedIndex
 		{
 			get
@@ -387,6 +387,7 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("Light_Bindings::GetLights")]
+		[Obsolete("Light.GetLights has been deprecated, use FindObjectsOfType in combination with light.cullingmask/light.type", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Light[] GetLights(LightType type, int layer);
 

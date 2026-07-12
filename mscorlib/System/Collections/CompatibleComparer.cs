@@ -3,12 +3,33 @@
 namespace System.Collections
 {
 	[Serializable]
-	internal class CompatibleComparer : IEqualityComparer
+	internal sealed class CompatibleComparer : IEqualityComparer
 	{
-		internal CompatibleComparer(IComparer comparer, IHashCodeProvider hashCodeProvider)
+		internal CompatibleComparer(IHashCodeProvider hashCodeProvider, IComparer comparer)
 		{
-			this._comparer = comparer;
 			this._hcp = hashCodeProvider;
+			this._comparer = comparer;
+		}
+
+		internal IHashCodeProvider HashCodeProvider
+		{
+			get
+			{
+				return this._hcp;
+			}
+		}
+
+		internal IComparer Comparer
+		{
+			get
+			{
+				return this._comparer;
+			}
+		}
+
+		public bool Equals(object a, object b)
+		{
+			return this.Compare(a, b) == 0;
 		}
 
 		public int Compare(object a, object b)
@@ -34,12 +55,7 @@ namespace System.Collections
 			{
 				return comparable.CompareTo(b);
 			}
-			throw new ArgumentException(Environment.GetResourceString("At least one object must implement IComparable."));
-		}
-
-		public bool Equals(object a, object b)
-		{
-			return this.Compare(a, b) == 0;
+			throw new ArgumentException("At least one object must implement IComparable.");
 		}
 
 		public int GetHashCode(object obj)
@@ -48,31 +64,15 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("obj");
 			}
-			if (this._hcp != null)
+			if (this._hcp == null)
 			{
-				return this._hcp.GetHashCode(obj);
+				return obj.GetHashCode();
 			}
-			return obj.GetHashCode();
+			return this._hcp.GetHashCode(obj);
 		}
 
-		internal IComparer Comparer
-		{
-			get
-			{
-				return this._comparer;
-			}
-		}
+		private readonly IHashCodeProvider _hcp;
 
-		internal IHashCodeProvider HashCodeProvider
-		{
-			get
-			{
-				return this._hcp;
-			}
-		}
-
-		private IComparer _comparer;
-
-		private IHashCodeProvider _hcp;
+		private readonly IComparer _comparer;
 	}
 }

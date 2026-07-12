@@ -206,7 +206,7 @@ namespace Microsoft.SqlServer.Server
 			return metaData.MaxLength == -1L || metaData.SqlDbType == SqlDbType.Image || metaData.SqlDbType == SqlDbType.NText || metaData.SqlDbType == SqlDbType.Text || metaData.SqlDbType == SqlDbType.Udt;
 		}
 
-		internal static ExtendedClrTypeCode DetermineExtendedTypeCodeForUseWithSqlDbType(SqlDbType dbType, bool isMultiValued, object value)
+		internal static ExtendedClrTypeCode DetermineExtendedTypeCodeForUseWithSqlDbType(SqlDbType dbType, bool isMultiValued, object value, Type udtType)
 		{
 			ExtendedClrTypeCode extendedClrTypeCode = ExtendedClrTypeCode.Invalid;
 			if (value == null)
@@ -409,7 +409,15 @@ namespace Microsoft.SqlServer.Server
 					}
 					break;
 				case SqlDbType.Udt:
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					if (null == udtType || value.GetType() == udtType)
+					{
+						extendedClrTypeCode = ExtendedClrTypeCode.Object;
+					}
+					else
+					{
+						extendedClrTypeCode = ExtendedClrTypeCode.Invalid;
+					}
+					break;
 				case SqlDbType.Structured:
 					if (isMultiValued)
 					{
@@ -497,7 +505,7 @@ namespace Microsoft.SqlServer.Server
 		{
 			if (SqlDbType.Xml == source.SqlDbType)
 			{
-				return new SqlMetaData(source.Name, source.SqlDbType, source.MaxLength, source.Precision, source.Scale, source.LocaleId, source.CompareOptions, source.TypeSpecificNamePart1, source.TypeSpecificNamePart2, source.TypeSpecificNamePart3, true);
+				return new SqlMetaData(source.Name, source.SqlDbType, source.MaxLength, source.Precision, source.Scale, source.LocaleId, source.CompareOptions, source.TypeSpecificNamePart1, source.TypeSpecificNamePart2, source.TypeSpecificNamePart3, true, source.Type);
 			}
 			return new SqlMetaData(source.Name, source.SqlDbType, source.MaxLength, source.Precision, source.Scale, source.LocaleId, source.CompareOptions, null);
 		}
@@ -515,9 +523,36 @@ namespace Microsoft.SqlServer.Server
 			}
 			else if (SqlDbType.Udt == source.SqlDbType)
 			{
-				throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+				string serverTypeName = source.ServerTypeName;
+				if (serverTypeName != null)
+				{
+					string[] array = SqlParameter.ParseTypeName(serverTypeName, true);
+					if (1 == array.Length)
+					{
+						text3 = array[0];
+					}
+					else if (2 == array.Length)
+					{
+						text2 = array[0];
+						text3 = array[1];
+					}
+					else
+					{
+						if (3 != array.Length)
+						{
+							throw ADP.ArgumentOutOfRange("typeName");
+						}
+						text = array[0];
+						text2 = array[1];
+						text3 = array[2];
+					}
+					if ((!string.IsNullOrEmpty(text) && 255 < text.Length) || (!string.IsNullOrEmpty(text2) && 255 < text2.Length) || (!string.IsNullOrEmpty(text3) && 255 < text3.Length))
+					{
+						throw ADP.ArgumentOutOfRange("typeName");
+					}
+				}
 			}
-			return new SmiExtendedMetaData(source.SqlDbType, source.MaxLength, source.Precision, source.Scale, source.LocaleId, source.CompareOptions, source.Name, text, text2, text3);
+			return new SmiExtendedMetaData(source.SqlDbType, source.MaxLength, source.Precision, source.Scale, source.LocaleId, source.CompareOptions, null, source.Name, text, text2, text3);
 		}
 
 		internal static bool IsCompatible(SmiMetaData firstMd, SqlMetaData secondMd)
@@ -619,7 +654,7 @@ namespace Microsoft.SqlServer.Server
 				}
 				cultureInfo = ((parent != null) ? parent.Locale : CultureInfo.CurrentCulture);
 			}
-			return new SmiExtendedMetaData(sqlDbType, num, b4, b, (long)cultureInfo.LCID, SmiMetaData.DefaultNVarChar.CompareOptions, false, null, null, column.ColumnName, null, null, null);
+			return new SmiExtendedMetaData(sqlDbType, num, b4, b, (long)cultureInfo.LCID, SmiMetaData.DefaultNVarChar.CompareOptions, null, false, null, null, column.ColumnName, null, null, null);
 		}
 
 		internal static long AdjustMaxLength(SqlDbType dbType, long maxLength)
@@ -857,7 +892,7 @@ namespace Microsoft.SqlServer.Server
 			}
 			throw SQL.UnsupportedColumnTypeForSqlProvider(text, type.ToString());
 			IL_0315:
-			return new SmiExtendedMetaData(sqlDbType, num, b, b2, (long)CultureInfo.CurrentCulture.LCID, SmiMetaData.GetDefaultForType(sqlDbType).CompareOptions, false, null, null, text, null, null, null);
+			return new SmiExtendedMetaData(sqlDbType, num, b, b2, (long)CultureInfo.CurrentCulture.LCID, SmiMetaData.GetDefaultForType(sqlDbType).CompareOptions, null, false, null, null, text, null, null, null);
 		}
 
 		internal const SqlDbType InvalidSqlDbType = (SqlDbType)(-1);

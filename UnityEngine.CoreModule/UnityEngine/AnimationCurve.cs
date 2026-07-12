@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Math/AnimationCurve.bindings.h")]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimationCurve : IEquatable<AnimationCurve>
 	{
@@ -22,6 +22,10 @@ namespace UnityEngine
 		[FreeFunction("AnimationCurveBindings::Internal_Equals", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_Equals(IntPtr other);
+
+		[FreeFunction("AnimationCurveBindings::Internal_CopyFrom", HasExplicitThis = true, IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_CopyFrom(IntPtr other);
 
 		~AnimationCurve()
 		{
@@ -59,12 +63,16 @@ namespace UnityEngine
 			return this.AddKey_Internal_Injected(ref key);
 		}
 
-		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		public int MoveKey(int index, Keyframe key)
 		{
 			return this.MoveKey_Injected(index, ref key);
 		}
+
+		[FreeFunction("AnimationCurveBindings::ClearKeys", HasExplicitThis = true, IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ClearKeys();
 
 		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
@@ -102,6 +110,10 @@ namespace UnityEngine
 		[FreeFunction("AnimationCurveBindings::GetKeys", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Keyframe[] GetKeys();
+
+		[FreeFunction("AnimationCurveBindings::GetHashCode", HasExplicitThis = true, IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public override extern int GetHashCode();
 
 		[FreeFunction("AnimationCurveBindings::SmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
@@ -198,15 +210,7 @@ namespace UnityEngine
 			else
 			{
 				bool flag3 = this == o;
-				if (flag3)
-				{
-					flag2 = true;
-				}
-				else
-				{
-					bool flag4 = o.GetType() != base.GetType();
-					flag2 = !flag4 && this.Equals((AnimationCurve)o);
-				}
+				flag2 = flag3 || (o.GetType() == base.GetType() && this.Equals((AnimationCurve)o));
 			}
 			return flag2;
 		}
@@ -222,22 +226,14 @@ namespace UnityEngine
 			else
 			{
 				bool flag3 = this == other;
-				if (flag3)
-				{
-					flag2 = true;
-				}
-				else
-				{
-					bool flag4 = this.m_Ptr.Equals(other.m_Ptr);
-					flag2 = flag4 || this.Internal_Equals(other.m_Ptr);
-				}
+				flag2 = flag3 || this.m_Ptr.Equals(other.m_Ptr) || this.Internal_Equals(other.m_Ptr);
 			}
 			return flag2;
 		}
 
-		public override int GetHashCode()
+		public void CopyFrom(AnimationCurve other)
 		{
-			return this.m_Ptr.GetHashCode();
+			this.Internal_CopyFrom(other.m_Ptr);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

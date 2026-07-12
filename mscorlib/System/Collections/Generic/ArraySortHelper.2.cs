@@ -1,28 +1,10 @@
 ﻿using System;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
 	internal class ArraySortHelper<TKey, TValue>
 	{
-		public static ArraySortHelper<TKey, TValue> Default
-		{
-			get
-			{
-				ArraySortHelper<TKey, TValue> arraySortHelper = ArraySortHelper<TKey, TValue>.s_defaultArraySortHelper;
-				if (arraySortHelper == null)
-				{
-					arraySortHelper = ArraySortHelper<TKey, TValue>.CreateArraySortHelper();
-				}
-				return arraySortHelper;
-			}
-		}
-
-		private static ArraySortHelper<TKey, TValue> CreateArraySortHelper()
-		{
-			ArraySortHelper<TKey, TValue>.s_defaultArraySortHelper = new ArraySortHelper<TKey, TValue>();
-			return ArraySortHelper<TKey, TValue>.s_defaultArraySortHelper;
-		}
-
 		public void Sort(TKey[] keys, TValue[] values, int index, int length, IComparer<TKey> comparer)
 		{
 			try
@@ -37,6 +19,10 @@ namespace System.Collections.Generic
 			{
 				IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
 			}
+			catch (ThreadAbortException)
+			{
+				throw;
+			}
 			catch (Exception ex)
 			{
 				throw new InvalidOperationException("Failed to compare two elements in the array.", ex);
@@ -50,12 +36,9 @@ namespace System.Collections.Generic
 				TKey tkey = keys[a];
 				keys[a] = keys[b];
 				keys[b] = tkey;
-				if (values != null)
-				{
-					TValue tvalue = values[a];
-					values[a] = values[b];
-					values[b] = tvalue;
-				}
+				TValue tvalue = values[a];
+				values[a] = values[b];
+				values[b] = tvalue;
 			}
 		}
 
@@ -66,12 +49,9 @@ namespace System.Collections.Generic
 				TKey tkey = keys[i];
 				keys[i] = keys[j];
 				keys[j] = tkey;
-				if (values != null)
-				{
-					TValue tvalue = values[i];
-					values[i] = values[j];
-					values[j] = tvalue;
-				}
+				TValue tvalue = values[i];
+				values[i] = values[j];
+				values[j] = tvalue;
 			}
 		}
 
@@ -81,7 +61,7 @@ namespace System.Collections.Generic
 			{
 				return;
 			}
-			ArraySortHelper<TKey, TValue>.IntroSort(keys, values, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(keys.Length), comparer);
+			ArraySortHelper<TKey, TValue>.IntroSort(keys, values, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(length), comparer);
 		}
 
 		private static void IntroSort(TKey[] keys, TValue[] values, int lo, int hi, int depthLimit, IComparer<TKey> comparer)
@@ -170,7 +150,7 @@ namespace System.Collections.Generic
 		private static void DownHeap(TKey[] keys, TValue[] values, int i, int n, int lo, IComparer<TKey> comparer)
 		{
 			TKey tkey = keys[lo + i - 1];
-			TValue tvalue = ((values != null) ? values[lo + i - 1] : default(TValue));
+			TValue tvalue = values[lo + i - 1];
 			while (i <= n / 2)
 			{
 				int num = 2 * i;
@@ -183,17 +163,11 @@ namespace System.Collections.Generic
 					break;
 				}
 				keys[lo + i - 1] = keys[lo + num - 1];
-				if (values != null)
-				{
-					values[lo + i - 1] = values[lo + num - 1];
-				}
+				values[lo + i - 1] = values[lo + num - 1];
 				i = num;
 			}
 			keys[lo + i - 1] = tkey;
-			if (values != null)
-			{
-				values[lo + i - 1] = tvalue;
-			}
+			values[lo + i - 1] = tvalue;
 		}
 
 		private static void InsertionSort(TKey[] keys, TValue[] values, int lo, int hi, IComparer<TKey> comparer)
@@ -202,24 +176,26 @@ namespace System.Collections.Generic
 			{
 				int num = i;
 				TKey tkey = keys[i + 1];
-				TValue tvalue = ((values != null) ? values[i + 1] : default(TValue));
+				TValue tvalue = values[i + 1];
 				while (num >= lo && comparer.Compare(tkey, keys[num]) < 0)
 				{
 					keys[num + 1] = keys[num];
-					if (values != null)
-					{
-						values[num + 1] = values[num];
-					}
+					values[num + 1] = values[num];
 					num--;
 				}
 				keys[num + 1] = tkey;
-				if (values != null)
-				{
-					values[num + 1] = tvalue;
-				}
+				values[num + 1] = tvalue;
 			}
 		}
 
-		private static volatile ArraySortHelper<TKey, TValue> s_defaultArraySortHelper;
+		public static ArraySortHelper<TKey, TValue> Default
+		{
+			get
+			{
+				return ArraySortHelper<TKey, TValue>.s_defaultArraySortHelper;
+			}
+		}
+
+		private static readonly ArraySortHelper<TKey, TValue> s_defaultArraySortHelper = new ArraySortHelper<TKey, TValue>();
 	}
 }

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ServiceContainer : IServiceContainer, IServiceProvider, IDisposable
 	{
 		public ServiceContainer()
@@ -14,7 +12,7 @@ namespace System.ComponentModel.Design
 
 		public ServiceContainer(IServiceProvider parentProvider)
 		{
-			this.parentProvider = parentProvider;
+			this._parentProvider = parentProvider;
 		}
 
 		private IServiceContainer Container
@@ -22,9 +20,9 @@ namespace System.ComponentModel.Design
 			get
 			{
 				IServiceContainer serviceContainer = null;
-				if (this.parentProvider != null)
+				if (this._parentProvider != null)
 				{
-					serviceContainer = (IServiceContainer)this.parentProvider.GetService(typeof(IServiceContainer));
+					serviceContainer = (IServiceContainer)this._parentProvider.GetService(typeof(IServiceContainer));
 				}
 				return serviceContainer;
 			}
@@ -34,7 +32,7 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return ServiceContainer._defaultServices;
+				return ServiceContainer.s_defaultServices;
 			}
 		}
 
@@ -42,11 +40,12 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				if (this.services == null)
+				ServiceContainer.ServiceCollection<object> serviceCollection;
+				if ((serviceCollection = this._services) == null)
 				{
-					this.services = new ServiceContainer.ServiceCollection<object>();
+					serviceCollection = (this._services = new ServiceContainer.ServiceCollection<object>());
 				}
-				return this.services;
+				return serviceCollection;
 			}
 		}
 
@@ -74,13 +73,13 @@ namespace System.ComponentModel.Design
 			{
 				throw new ArgumentNullException("serviceInstance");
 			}
-			if (!(serviceInstance is ServiceCreatorCallback) && !serviceInstance.GetType().IsCOMObject && !serviceType.IsAssignableFrom(serviceInstance.GetType()))
+			if (!(serviceInstance is ServiceCreatorCallback) && !serviceInstance.GetType().IsCOMObject && !serviceType.IsInstanceOfType(serviceInstance))
 			{
-				throw new ArgumentException(global::SR.GetString("The service instance must derive from or implement {0}.", new object[] { serviceType.FullName }));
+				throw new ArgumentException(SR.Format("The service instance must derive from or implement {0}.", serviceType.FullName));
 			}
 			if (this.Services.ContainsKey(serviceType))
 			{
-				throw new ArgumentException(global::SR.GetString("The service {0} already exists in the service container.", new object[] { serviceType.FullName }), "serviceType");
+				throw new ArgumentException(SR.Format("The service {0} already exists in the service container.", serviceType.FullName), "serviceType");
 			}
 			this.Services[serviceType] = serviceInstance;
 		}
@@ -111,7 +110,7 @@ namespace System.ComponentModel.Design
 			}
 			if (this.Services.ContainsKey(serviceType))
 			{
-				throw new ArgumentException(global::SR.GetString("The service {0} already exists in the service container.", new object[] { serviceType.FullName }), "serviceType");
+				throw new ArgumentException(SR.Format("The service {0} already exists in the service container.", serviceType.FullName), "serviceType");
 			}
 			this.Services[serviceType] = callback;
 		}
@@ -125,11 +124,11 @@ namespace System.ComponentModel.Design
 		{
 			if (disposing)
 			{
-				ServiceContainer.ServiceCollection<object> serviceCollection = this.services;
-				this.services = null;
-				if (serviceCollection != null)
+				ServiceContainer.ServiceCollection<object> services = this._services;
+				this._services = null;
+				if (services != null)
 				{
-					foreach (object obj in serviceCollection.Values)
+					foreach (object obj in services.Values)
 					{
 						if (obj is IDisposable)
 						{
@@ -159,15 +158,15 @@ namespace System.ComponentModel.Design
 			if (obj is ServiceCreatorCallback)
 			{
 				obj = ((ServiceCreatorCallback)obj)(this, serviceType);
-				if (obj != null && !obj.GetType().IsCOMObject && !serviceType.IsAssignableFrom(obj.GetType()))
+				if (obj != null && !obj.GetType().IsCOMObject && !serviceType.IsInstanceOfType(obj))
 				{
 					obj = null;
 				}
 				this.Services[serviceType] = obj;
 			}
-			if (obj == null && this.parentProvider != null)
+			if (obj == null && this._parentProvider != null)
 			{
-				obj = this.parentProvider.GetService(serviceType);
+				obj = this._parentProvider.GetService(serviceType);
 			}
 			return obj;
 		}
@@ -195,26 +194,26 @@ namespace System.ComponentModel.Design
 			this.Services.Remove(serviceType);
 		}
 
-		private ServiceContainer.ServiceCollection<object> services;
+		private ServiceContainer.ServiceCollection<object> _services;
 
-		private IServiceProvider parentProvider;
+		private IServiceProvider _parentProvider;
 
-		private static Type[] _defaultServices = new Type[]
+		private static Type[] s_defaultServices = new Type[]
 		{
 			typeof(IServiceContainer),
 			typeof(ServiceContainer)
 		};
 
-		private static TraceSwitch TRACESERVICE = new TraceSwitch("TRACESERVICE", "ServiceProvider: Trace service provider requests.");
+		private static TraceSwitch s_TRACESERVICE = new TraceSwitch("TRACESERVICE", "ServiceProvider: Trace service provider requests.");
 
 		private sealed class ServiceCollection<T> : Dictionary<Type, T>
 		{
 			public ServiceCollection()
-				: base(ServiceContainer.ServiceCollection<T>.serviceTypeComparer)
+				: base(ServiceContainer.ServiceCollection<T>.s_serviceTypeComparer)
 			{
 			}
 
-			private static ServiceContainer.ServiceCollection<T>.EmbeddedTypeAwareTypeComparer serviceTypeComparer = new ServiceContainer.ServiceCollection<T>.EmbeddedTypeAwareTypeComparer();
+			private static ServiceContainer.ServiceCollection<T>.EmbeddedTypeAwareTypeComparer s_serviceTypeComparer = new ServiceContainer.ServiceCollection<T>.EmbeddedTypeAwareTypeComparer();
 
 			private sealed class EmbeddedTypeAwareTypeComparer : IEqualityComparer<Type>
 			{

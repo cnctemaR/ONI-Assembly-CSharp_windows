@@ -43,7 +43,7 @@ public class MetalTileConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
-		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_3;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.BONUS_3;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = MetalTileConfig.BlockTileConnectorID;

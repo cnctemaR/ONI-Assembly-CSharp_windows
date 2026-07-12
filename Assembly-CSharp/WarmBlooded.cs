@@ -2,6 +2,7 @@
 using Klei;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
@@ -78,17 +79,17 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 
 	public string TemperatureAmountName = "Temperature";
 
-	public float IdealTemperature = 310.15f;
+	public float IdealTemperature = DUPLICANTSTATS.STANDARD.Temperature.Internal.IDEAL;
 
-	public float BaseGenerationKW = 0.08368001f;
+	public float BaseGenerationKW = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_BASE_GENERATION_KILOWATTS;
 
-	public string BaseTemperatureModifierDescription = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
+	public string BaseTemperatureModifierDescription = DUPLICANTS.MODEL.STANDARD.NAME;
 
-	public float KCal2Joules = 4184f;
+	public float KCal2Joules = DUPLICANTSTATS.STANDARD.BaseStats.KCAL2JOULES;
 
-	public float WarmingKW = 0.5578667f;
+	public float WarmingKW = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_WARMING_KILOWATTS;
 
-	public float CoolingKW = 0.5578667f;
+	public float CoolingKW = DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_COOLING_KILOWATTS;
 
 	public string CaloriesModifierDescription = DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME;
 

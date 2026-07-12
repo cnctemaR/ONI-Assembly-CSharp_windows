@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
@@ -22,19 +23,22 @@ namespace UnityEngine.Networking
 			this.InternalCreateBuffer();
 		}
 
-		protected override byte[] GetData()
+		protected override NativeArray<byte> GetNativeData()
 		{
-			return this.InternalGetData();
+			return DownloadHandler.InternalGetNativeArray(this, ref this.m_NativeData);
 		}
 
-		private byte[] InternalGetData()
+		public override void Dispose()
 		{
-			return DownloadHandler.InternalGetByteArray(this);
+			DownloadHandler.DisposeNativeArray(ref this.m_NativeData);
+			base.Dispose();
 		}
 
 		public static string GetContent(UnityWebRequest www)
 		{
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerBuffer>(www).text;
 		}
+
+		private NativeArray<byte> m_NativeData;
 	}
 }

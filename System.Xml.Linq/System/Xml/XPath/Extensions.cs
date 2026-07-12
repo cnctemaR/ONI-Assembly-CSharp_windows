@@ -20,14 +20,14 @@ namespace System.Xml.XPath
 			}
 			if (node is XDocumentType)
 			{
-				throw new ArgumentException(Res.GetString("Argument_CreateNavigator", new object[] { XmlNodeType.DocumentType }));
+				throw new ArgumentException(global::SR.Format("This XPathNavigator cannot be created on a node of type {0}.", XmlNodeType.DocumentType));
 			}
 			XText xtext = node as XText;
 			if (xtext != null)
 			{
-				if (xtext.parent is XDocument)
+				if (xtext.GetParent() is XDocument)
 				{
-					throw new ArgumentException(Res.GetString("Argument_CreateNavigator", new object[] { XmlNodeType.Whitespace }));
+					throw new ArgumentException(global::SR.Format("This XPathNavigator cannot be created on a node of type {0}.", XmlNodeType.Whitespace));
 				}
 				node = Extensions.CalibrateText(xtext);
 			}
@@ -74,31 +74,20 @@ namespace System.Xml.XPath
 
 		private static XText CalibrateText(XText n)
 		{
-			if (n.parent == null)
+			XContainer parent = n.GetParent();
+			if (parent == null)
 			{
 				return n;
 			}
-			XNode xnode = (XNode)n.parent.content;
-			XText xtext;
-			for (;;)
+			foreach (XNode xnode in parent.Nodes())
 			{
-				IL_001B:
-				xnode = xnode.next;
-				xtext = xnode as XText;
-				if (xtext != null)
+				XText xtext = xnode as XText;
+				if (xtext != null && xnode == n)
 				{
-					while (xnode != n)
-					{
-						xnode = xnode.next;
-						if (!(xnode is XText))
-						{
-							goto IL_001B;
-						}
-					}
-					break;
+					return xtext;
 				}
 			}
-			return xtext;
+			return null;
 		}
 	}
 }

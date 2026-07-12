@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,8 +12,9 @@ namespace System.Net
 	internal class WebRequestStream : WebConnectionStream
 	{
 		public WebRequestStream(WebConnection connection, WebOperation operation, Stream stream, WebConnectionTunnel tunnel)
-			: base(connection, operation, stream)
+			: base(connection, operation)
 		{
+			this.InnerStream = stream;
 			this.allowBuffering = operation.Request.InternalAllowBuffering;
 			this.sendChunked = operation.Request.SendChunked && operation.WriteBuffer == null;
 			if (!this.sendChunked && this.allowBuffering && operation.WriteBuffer == null)
@@ -26,15 +28,9 @@ namespace System.Net
 			}
 		}
 
-		public bool KeepAlive { get; }
+		internal Stream InnerStream { get; }
 
-		public override long Length
-		{
-			get
-			{
-				throw new NotSupportedException();
-			}
-		}
+		public bool KeepAlive { get; }
 
 		public override bool CanRead
 		{
@@ -125,13 +121,8 @@ namespace System.Net
 			}
 		}
 
-		public override async Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			base.Operation.ThrowIfClosedOrDisposed(cancellationToken);
-			if (base.Operation.WriteBuffer != null)
-			{
-				throw new InvalidOperationException();
-			}
 			if (buffer == null)
 			{
 				throw new ArgumentNullException("buffer");
@@ -141,15 +132,29 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
-			WebCompletionSource completion = new WebCompletionSource();
-			if (Interlocked.CompareExchange<WebCompletionSource>(ref this.pendingWrite, completion, null) != null)
+			if (cancellationToken.IsCancellationRequested)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
+				return Task.FromCanceled(cancellationToken);
 			}
+			base.Operation.ThrowIfClosedOrDisposed(cancellationToken);
+			if (base.Operation.WriteBuffer != null)
+			{
+				throw new InvalidOperationException();
+			}
+			WebCompletionSource webCompletionSource = new WebCompletionSource();
+			if (Interlocked.CompareExchange<WebCompletionSource>(ref this.pendingWrite, webCompletionSource, null) != null)
+			{
+				throw new InvalidOperationException(SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
+			}
+			return this.WriteAsyncInner(buffer, offset, count, webCompletionSource, cancellationToken);
+		}
+
+		private async Task WriteAsyncInner(byte[] buffer, int offset, int size, WebCompletionSource completion, CancellationToken cancellationToken)
+		{
 			try
 			{
 				await this.ProcessWrite(buffer, offset, size, cancellationToken).ConfigureAwait(false);
@@ -164,13 +169,22 @@ namespace System.Net
 			{
 				this.KillBuffer();
 				this.closed = true;
-				if (ex is SocketException)
+				ExceptionDispatchInfo exceptionDispatchInfo = base.Operation.CheckDisposed(cancellationToken);
+				if (exceptionDispatchInfo != null)
+				{
+					ex = exceptionDispatchInfo.SourceException;
+				}
+				else if (ex is SocketException)
 				{
 					ex = new IOException("Error writing request", ex);
 				}
 				base.Operation.CompleteRequestWritten(this, ex);
 				this.pendingWrite = null;
 				completion.TrySetException(ex);
+				if (exceptionDispatchInfo != null)
+				{
+					exceptionDispatchInfo.Throw();
+				}
 				throw;
 			}
 		}
@@ -226,17 +240,7 @@ namespace System.Net
 					this.totalWritten += (long)size;
 				}
 			}
-			try
-			{
-				await base.InnerStream.WriteAsync(buffer, offset, size, cancellationToken).ConfigureAwait(false);
-			}
-			catch
-			{
-				if (!this.IgnoreIOErrors)
-				{
-					throw;
-				}
-			}
+			await this.InnerStream.WriteAsync(buffer, offset, size, cancellationToken).ConfigureAwait(false);
 		}
 
 		private void CheckWriteOverflow(long contentLength, long totalWritten, long size)
@@ -302,7 +306,7 @@ namespace System.Net
 					this.headers = base.Request.GetRequestHeaders();
 					try
 					{
-						await base.InnerStream.WriteAsync(this.headers, 0, this.headers.Length, cancellationToken).ConfigureAwait(false);
+						await this.InnerStream.WriteAsync(this.headers, 0, this.headers.Length, cancellationToken).ConfigureAwait(false);
 						long contentLength = base.Request.ContentLength;
 						if (!this.sendChunked && contentLength == 0L)
 						{
@@ -341,7 +345,7 @@ namespace System.Net
 					base.Operation.ThrowIfClosedOrDisposed(cancellationToken);
 					if (buffer != null && buffer.Size > 0)
 					{
-						await base.InnerStream.WriteAsync(buffer.Buffer, 0, buffer.Size, cancellationToken);
+						await this.InnerStream.WriteAsync(buffer.Buffer, 0, buffer.Size, cancellationToken);
 					}
 					await this.FinishWriting(cancellationToken);
 				}
@@ -354,16 +358,17 @@ namespace System.Net
 			{
 				base.Operation.ThrowIfClosedOrDisposed(cancellationToken);
 				byte[] bytes = Encoding.ASCII.GetBytes("0\r\n\r\n");
-				await base.InnerStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+				await this.InnerStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
 		private async Task WriteChunkTrailer()
 		{
-			using (CancellationTokenSource cts = new CancellationTokenSource())
+			CancellationTokenSource cts = new CancellationTokenSource();
+			try
 			{
 				cts.CancelAfter(this.WriteTimeout);
-				Task timeoutTask = Task.Delay(this.WriteTimeout);
+				Task timeoutTask = Task.Delay(this.WriteTimeout, cts.Token);
 				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter;
 				do
 				{
@@ -371,9 +376,9 @@ namespace System.Net
 					WebCompletionSource webCompletionSource2 = Interlocked.CompareExchange<WebCompletionSource>(ref this.pendingWrite, webCompletionSource, null);
 					if (webCompletionSource2 == null)
 					{
-						goto IL_0103;
+						goto IL_010D;
 					}
-					Task<bool> task = webCompletionSource2.WaitForCompletion(true);
+					Task<object> task = webCompletionSource2.WaitForCompletion();
 					configuredTaskAwaiter = Task.WhenAny(new Task[] { timeoutTask, task }).ConfigureAwait(false).GetAwaiter();
 					if (!configuredTaskAwaiter.IsCompleted)
 					{
@@ -385,21 +390,19 @@ namespace System.Net
 				}
 				while (configuredTaskAwaiter.GetResult() != timeoutTask);
 				throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
-				IL_0103:
-				try
-				{
-					await this.WriteChunkTrailer_inner(cts.Token).ConfigureAwait(false);
-				}
-				catch
-				{
-				}
-				finally
-				{
-					this.pendingWrite = null;
-				}
+				IL_010D:
+				await this.WriteChunkTrailer_inner(cts.Token).ConfigureAwait(false);
 				timeoutTask = null;
 			}
-			CancellationTokenSource cts = null;
+			catch
+			{
+			}
+			finally
+			{
+				this.pendingWrite = null;
+				cts.Cancel();
+				cts.Dispose();
+			}
 		}
 
 		internal void KillBuffer()
@@ -410,6 +413,11 @@ namespace System.Net
 		public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
 		{
 			return Task.FromException<int>(new NotSupportedException("The stream does not support reading."));
+		}
+
+		protected override bool TryReadFromBufferedContent(byte[] buffer, int offset, int count, out int result)
+		{
+			throw new InvalidOperationException();
 		}
 
 		protected override void Close_internal(ref bool disposed)

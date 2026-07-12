@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 
 namespace MS.Internal.Xml.XPath
@@ -46,25 +45,6 @@ namespace MS.Internal.Xml.XPath
 				}
 			}
 			return null;
-		}
-
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			if (this.matchSelf)
-			{
-				w.WriteAttributeString("self", "yes");
-			}
-			if (base.NameTest)
-			{
-				w.WriteAttributeString("name", (base.Prefix.Length != 0) ? (base.Prefix + ":" + base.Name) : base.Name);
-			}
-			if (base.TypeTest != XPathNodeType.Element)
-			{
-				w.WriteAttributeString("nodeType", base.TypeTest.ToString());
-			}
-			this.qyInput.PrintQuery(w);
-			w.WriteEndElement();
 		}
 
 		protected bool matchSelf;

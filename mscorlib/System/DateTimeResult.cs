@@ -3,10 +3,11 @@ using System.Globalization;
 
 namespace System
 {
-	internal struct DateTimeResult
+	internal ref struct DateTimeResult
 	{
-		internal void Init()
+		internal void Init(ReadOnlySpan<char> originalDateTimeString)
 		{
+			this.originalDateTimeString = originalDateTimeString;
 			this.Year = -1;
 			this.Month = -1;
 			this.Day = -1;
@@ -19,6 +20,32 @@ namespace System
 			this.Year = year;
 			this.Month = month;
 			this.Day = day;
+		}
+
+		internal void SetBadFormatSpecifierFailure()
+		{
+			this.SetBadFormatSpecifierFailure(ReadOnlySpan<char>.Empty);
+		}
+
+		internal void SetBadFormatSpecifierFailure(ReadOnlySpan<char> failedFormatSpecifier)
+		{
+			this.failure = ParseFailureKind.FormatWithFormatSpecifier;
+			this.failureMessageID = "Format specifier was invalid.";
+			this.failedFormatSpecifier = failedFormatSpecifier;
+		}
+
+		internal void SetBadDateTimeFailure()
+		{
+			this.failure = ParseFailureKind.FormatWithOriginalDateTime;
+			this.failureMessageID = "String was not recognized as a valid DateTime.";
+			this.failureMessageFormatArgument = null;
+		}
+
+		internal void SetFailure(ParseFailureKind failure, string failureMessageID)
+		{
+			this.failure = failure;
+			this.failureMessageID = failureMessageID;
+			this.failureMessageFormatArgument = null;
 		}
 
 		internal void SetFailure(ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument)
@@ -67,5 +94,9 @@ namespace System
 		internal object failureMessageFormatArgument;
 
 		internal string failureArgumentName;
+
+		internal ReadOnlySpan<char> originalDateTimeString;
+
+		internal ReadOnlySpan<char> failedFormatSpecifier;
 	}
 }

@@ -1,79 +1,66 @@
 ﻿using System;
-using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class FileLoadException : IOException
 	{
 		public FileLoadException()
-			: base(Environment.GetResourceString("Could not load the specified file."))
+			: base("Could not load the specified file.")
 		{
-			base.SetErrorCode(-2146232799);
+			base.HResult = -2146232799;
 		}
 
 		public FileLoadException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146232799);
+			base.HResult = -2146232799;
 		}
 
 		public FileLoadException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146232799);
+			base.HResult = -2146232799;
 		}
 
 		public FileLoadException(string message, string fileName)
 			: base(message)
 		{
-			base.SetErrorCode(-2146232799);
-			this._fileName = fileName;
+			base.HResult = -2146232799;
+			this.FileName = fileName;
 		}
 
 		public FileLoadException(string message, string fileName, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146232799);
-			this._fileName = fileName;
+			base.HResult = -2146232799;
+			this.FileName = fileName;
 		}
 
 		public override string Message
 		{
 			get
 			{
-				this.SetMessageField();
+				if (this._message == null)
+				{
+					this._message = FileLoadException.FormatFileLoadExceptionMessage(this.FileName, base.HResult);
+				}
 				return this._message;
 			}
 		}
 
-		private void SetMessageField()
-		{
-			if (this._message == null)
-			{
-				this._message = FileLoadException.FormatFileLoadExceptionMessage(this._fileName, base.HResult);
-			}
-		}
+		public string FileName { get; }
 
-		public string FileName
-		{
-			get
-			{
-				return this._fileName;
-			}
-		}
+		public string FusionLog { get; }
 
 		public override string ToString()
 		{
-			string text = base.GetType().FullName + ": " + this.Message;
-			if (this._fileName != null && this._fileName.Length != 0)
+			string text = base.GetType().ToString() + ": " + this.Message;
+			if (this.FileName != null && this.FileName.Length != 0)
 			{
-				text = text + Environment.NewLine + Environment.GetResourceString("File name: '{0}'", new object[] { this._fileName });
+				text = text + Environment.NewLine + SR.Format("File name: '{0}'", this.FileName);
 			}
 			if (base.InnerException != null)
 			{
@@ -83,21 +70,15 @@ namespace System.IO
 			{
 				text = text + Environment.NewLine + this.StackTrace;
 			}
-			try
+			if (this.FusionLog != null)
 			{
-				if (this.FusionLog != null)
+				if (text == null)
 				{
-					if (text == null)
-					{
-						text = " ";
-					}
-					text += Environment.NewLine;
-					text += Environment.NewLine;
-					text += this.FusionLog;
+					text = " ";
 				}
-			}
-			catch (SecurityException)
-			{
+				text += Environment.NewLine;
+				text += Environment.NewLine;
+				text += this.FusionLog;
 			}
 			return text;
 		}
@@ -105,58 +86,25 @@ namespace System.IO
 		protected FileLoadException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this._fileName = info.GetString("FileLoad_FileName");
-			try
-			{
-				this._fusionLog = info.GetString("FileLoad_FusionLog");
-			}
-			catch
-			{
-				this._fusionLog = null;
-			}
-		}
-
-		private FileLoadException(string fileName, string fusionLog, int hResult)
-			: base(null)
-		{
-			base.SetErrorCode(hResult);
-			this._fileName = fileName;
-			this._fusionLog = fusionLog;
-			this.SetMessageField();
-		}
-
-		public string FusionLog
-		{
-			[SecuritySafeCritical]
-			[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlEvidence | SecurityPermissionFlag.ControlPolicy)]
-			get
-			{
-				return this._fusionLog;
-			}
+			this.FileName = info.GetString("FileLoad_FileName");
+			this.FusionLog = info.GetString("FileLoad_FusionLog");
 		}
 
 		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
-			info.AddValue("FileLoad_FileName", this._fileName, typeof(string));
-			try
-			{
-				info.AddValue("FileLoad_FusionLog", this.FusionLog, typeof(string));
-			}
-			catch (SecurityException)
-			{
-			}
+			info.AddValue("FileLoad_FileName", this.FileName, typeof(string));
+			info.AddValue("FileLoad_FusionLog", this.FusionLog, typeof(string));
 		}
 
-		[SecuritySafeCritical]
 		internal static string FormatFileLoadExceptionMessage(string fileName, int hResult)
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Could not load file or assembly '{0}' or one of its dependencies", fileName);
+			if (fileName != null)
+			{
+				return SR.Format("Could not load the file '{0}'.", fileName);
+			}
+			return "Could not load the specified file.";
 		}
-
-		private string _fileName;
-
-		private string _fusionLog;
 	}
 }

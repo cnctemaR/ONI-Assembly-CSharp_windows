@@ -15,69 +15,66 @@ namespace System.Net.Mime
 
 		public override void Remove(string name)
 		{
-			bool on = Logging.On;
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
 			}
 			if (name == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "name"), "name");
 			}
 			MailHeaderID id = MailHeaderInfo.GetID(name);
-			if (id == MailHeaderID.ContentType && this.part != null)
+			if (id == MailHeaderID.ContentType && this._part != null)
 			{
-				this.part.ContentType = null;
+				this._part.ContentType = null;
 			}
-			else if (id == MailHeaderID.ContentDisposition && this.part is MimePart)
+			else if (id == MailHeaderID.ContentDisposition && this._part is MimePart)
 			{
-				((MimePart)this.part).ContentDisposition = null;
+				((MimePart)this._part).ContentDisposition = null;
 			}
 			base.Remove(name);
 		}
 
 		public override string Get(string name)
 		{
-			bool on = Logging.On;
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
 			}
 			if (name == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "name"), "name");
 			}
 			MailHeaderID id = MailHeaderInfo.GetID(name);
-			if (id == MailHeaderID.ContentType && this.part != null)
+			if (id == MailHeaderID.ContentType && this._part != null)
 			{
-				this.part.ContentType.PersistIfNeeded(this, false);
+				this._part.ContentType.PersistIfNeeded(this, false);
 			}
-			else if (id == MailHeaderID.ContentDisposition && this.part is MimePart)
+			else if (id == MailHeaderID.ContentDisposition && this._part is MimePart)
 			{
-				((MimePart)this.part).ContentDisposition.PersistIfNeeded(this, false);
+				((MimePart)this._part).ContentDisposition.PersistIfNeeded(this, false);
 			}
 			return base.Get(name);
 		}
 
 		public override string[] GetValues(string name)
 		{
-			bool on = Logging.On;
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
 			}
 			if (name == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "name"), "name");
 			}
 			MailHeaderID id = MailHeaderInfo.GetID(name);
-			if (id == MailHeaderID.ContentType && this.part != null)
+			if (id == MailHeaderID.ContentType && this._part != null)
 			{
-				this.part.ContentType.PersistIfNeeded(this, false);
+				this._part.ContentType.PersistIfNeeded(this, false);
 			}
-			else if (id == MailHeaderID.ContentDisposition && this.part is MimePart)
+			else if (id == MailHeaderID.ContentDisposition && this._part is MimePart)
 			{
-				((MimePart)this.part).ContentDisposition.PersistIfNeeded(this, false);
+				((MimePart)this._part).ContentDisposition.PersistIfNeeded(this, false);
 			}
 			return base.GetValues(name);
 		}
@@ -104,7 +101,6 @@ namespace System.Net.Mime
 
 		public override void Set(string name, string value)
 		{
-			bool on = Logging.On;
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
@@ -115,27 +111,27 @@ namespace System.Net.Mime
 			}
 			if (name == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "name"), "name");
 			}
 			if (value == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "value" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "value"), "value");
 			}
 			if (!MimeBasePart.IsAscii(name, false))
 			{
-				throw new FormatException(global::SR.GetString("An invalid character was found in header name."));
+				throw new FormatException(SR.Format("An invalid character was found in header name.", Array.Empty<object>()));
 			}
 			name = MailHeaderInfo.NormalizeCase(name);
 			MailHeaderID id = MailHeaderInfo.GetID(name);
 			value = value.Normalize(NormalizationForm.FormC);
-			if (id == MailHeaderID.ContentType && this.part != null)
+			if (id == MailHeaderID.ContentType && this._part != null)
 			{
-				this.part.ContentType.Set(value.ToLower(CultureInfo.InvariantCulture), this);
+				this._part.ContentType.Set(value.ToLower(CultureInfo.InvariantCulture), this);
 				return;
 			}
-			if (id == MailHeaderID.ContentDisposition && this.part is MimePart)
+			if (id == MailHeaderID.ContentDisposition && this._part is MimePart)
 			{
-				((MimePart)this.part).ContentDisposition.Set(value.ToLower(CultureInfo.InvariantCulture), this);
+				((MimePart)this._part).ContentDisposition.Set(value.ToLower(CultureInfo.InvariantCulture), this);
 				return;
 			}
 			base.Set(name, value);
@@ -143,7 +139,6 @@ namespace System.Net.Mime
 
 		public override void Add(string name, string value)
 		{
-			bool on = Logging.On;
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
@@ -154,29 +149,29 @@ namespace System.Net.Mime
 			}
 			if (name == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "name"), "name");
 			}
 			if (value == string.Empty)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "value" }), "name");
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "value"), "value");
 			}
 			MailBnfHelper.ValidateHeaderName(name);
 			name = MailHeaderInfo.NormalizeCase(name);
 			MailHeaderID id = MailHeaderInfo.GetID(name);
 			value = value.Normalize(NormalizationForm.FormC);
-			if (id == MailHeaderID.ContentType && this.part != null)
+			if (id == MailHeaderID.ContentType && this._part != null)
 			{
-				this.part.ContentType.Set(value.ToLower(CultureInfo.InvariantCulture), this);
+				this._part.ContentType.Set(value.ToLower(CultureInfo.InvariantCulture), this);
 				return;
 			}
-			if (id == MailHeaderID.ContentDisposition && this.part is MimePart)
+			if (id == MailHeaderID.ContentDisposition && this._part is MimePart)
 			{
-				((MimePart)this.part).ContentDisposition.Set(value.ToLower(CultureInfo.InvariantCulture), this);
+				((MimePart)this._part).ContentDisposition.Set(value.ToLower(CultureInfo.InvariantCulture), this);
 				return;
 			}
 			this.InternalAdd(name, value);
 		}
 
-		private MimeBasePart part;
+		private MimeBasePart _part;
 	}
 }

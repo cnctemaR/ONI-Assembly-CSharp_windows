@@ -7,8 +7,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/TrailRenderer.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/TrailRenderer.h")]
 	public sealed class TrailRenderer : Renderer
 	{
 		[Obsolete("Use positionCount instead (UnityUpgradable) -> positionCount", false)]
@@ -139,6 +139,20 @@ namespace UnityEngine
 			return vector;
 		}
 
+		public Vector2 textureScale
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_textureScale_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_textureScale_Injected(ref value);
+			}
+		}
+
 		public extern float shadowBias
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -164,6 +178,14 @@ namespace UnityEngine
 		}
 
 		public extern LineAlignment alignment
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern SpriteMaskInteraction maskInteraction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -222,6 +244,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetPositions([NotNull("ArgumentNullException")] [Out] Vector3[] positions);
 
+		[FreeFunction(Name = "TrailRendererScripting::GetVisiblePositions", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetVisiblePositions([NotNull("ArgumentNullException")] [Out] Vector3[] positions);
+
 		[FreeFunction(Name = "TrailRendererScripting::SetPositions", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetPositions([NotNull("ArgumentNullException")] Vector3[] positions);
@@ -256,6 +282,16 @@ namespace UnityEngine
 			return this.GetPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
 		}
 
+		public int GetVisiblePositions([Out] NativeArray<Vector3> positions)
+		{
+			return this.GetVisiblePositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
+		public int GetVisiblePositions([Out] NativeSlice<Vector3> positions)
+		{
+			return this.GetVisiblePositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
 		public void AddPositions([Out] NativeArray<Vector3> positions)
 		{
 			this.AddPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
@@ -273,6 +309,10 @@ namespace UnityEngine
 		[FreeFunction(Name = "TrailRendererScripting::GetPositionsWithNativeContainer", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetPositionsWithNativeContainer(IntPtr positions, int length);
+
+		[FreeFunction(Name = "TrailRendererScripting::GetVisiblePositionsWithNativeContainer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetVisiblePositionsWithNativeContainer(IntPtr positions, int length);
 
 		[FreeFunction(Name = "TrailRendererScripting::AddPositionsWithNativeContainer", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -295,6 +335,12 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetPosition_Injected(int index, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_textureScale_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_textureScale_Injected(ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void AddPosition_Injected(ref Vector3 position);

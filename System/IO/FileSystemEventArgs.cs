@@ -6,21 +6,31 @@ namespace System.IO
 	{
 		public FileSystemEventArgs(WatcherChangeTypes changeType, string directory, string name)
 		{
-			this.changeType = changeType;
-			this.directory = directory;
-			this.name = name;
+			this._changeType = changeType;
+			this._name = name;
+			this._fullPath = Path.GetFullPath(FileSystemEventArgs.Combine(directory, name));
 		}
 
-		internal void SetName(string name)
+		internal static string Combine(string directoryPath, string name)
 		{
-			this.name = name;
+			bool flag = false;
+			if (directoryPath.Length > 0)
+			{
+				char c = directoryPath[directoryPath.Length - 1];
+				flag = c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
+			}
+			if (!flag)
+			{
+				return directoryPath + Path.DirectorySeparatorChar.ToString() + name;
+			}
+			return directoryPath + name;
 		}
 
 		public WatcherChangeTypes ChangeType
 		{
 			get
 			{
-				return this.changeType;
+				return this._changeType;
 			}
 		}
 
@@ -28,7 +38,7 @@ namespace System.IO
 		{
 			get
 			{
-				return Path.Combine(this.directory, this.name);
+				return this._fullPath;
 			}
 		}
 
@@ -36,14 +46,14 @@ namespace System.IO
 		{
 			get
 			{
-				return this.name;
+				return this._name;
 			}
 		}
 
-		private WatcherChangeTypes changeType;
+		private readonly WatcherChangeTypes _changeType;
 
-		private string directory;
+		private readonly string _name;
 
-		private string name;
+		private readonly string _fullPath;
 	}
 }

@@ -15,7 +15,7 @@ namespace System.Xml.Xsl.Qil
 		public QilXmlWriter(XmlWriter writer, QilXmlWriter.Options options)
 		{
 			this.writer = writer;
-			this.ngen = new QilXmlWriter.NameGenerator();
+			this._ngen = new QilXmlWriter.NameGenerator();
 			this.options = options;
 		}
 
@@ -81,7 +81,7 @@ namespace System.Xml.Xsl.Qil
 			if (node is QilReference)
 			{
 				QilReference qilReference = (QilReference)node;
-				this.writer.WriteAttributeString("id", this.ngen.NameOf(node));
+				this.writer.WriteAttributeString("id", this._ngen.NameOf(node));
 				if (qilReference.DebugName != null)
 				{
 					this.writer.WriteAttributeString("name", qilReference.DebugName.ToString());
@@ -102,7 +102,7 @@ namespace System.Xml.Xsl.Qil
 		protected override QilNode VisitReference(QilNode node)
 		{
 			QilReference qilReference = (QilReference)node;
-			string text = this.ngen.NameOf(node);
+			string text = this._ngen.NameOf(node);
 			if (text == null)
 			{
 				text = "OUT-OF-SCOPE REFERENCE";
@@ -126,7 +126,7 @@ namespace System.Xml.Xsl.Qil
 				foreach (QilNode qilNode in list)
 				{
 					this.writer.WriteStartElement(Enum.GetName(typeof(QilNodeType), qilNode.NodeType));
-					this.writer.WriteAttributeString("id", this.ngen.NameOf(qilNode));
+					this.writer.WriteAttributeString("id", this._ngen.NameOf(qilNode));
 					this.WriteXmlType(qilNode);
 					if (qilNode.NodeType == QilNodeType.Function)
 					{
@@ -154,12 +154,12 @@ namespace System.Xml.Xsl.Qil
 
 		protected override void BeginScope(QilNode node)
 		{
-			this.ngen.NameOf(node);
+			this._ngen.NameOf(node);
 		}
 
 		protected override void EndScope(QilNode node)
 		{
-			this.ngen.ClearName(node);
+			this._ngen.ClearName(node);
 		}
 
 		protected override void BeforeVisit(QilNode node)
@@ -190,7 +190,7 @@ namespace System.Xml.Xsl.Qil
 
 		protected QilXmlWriter.Options options;
 
-		private QilXmlWriter.NameGenerator ngen;
+		private QilXmlWriter.NameGenerator _ngen;
 
 		[Flags]
 		public enum Options
@@ -209,30 +209,30 @@ namespace System.Xml.Xsl.Qil
 			public IList<QilNode> Find(QilExpression qil)
 			{
 				this.Visit(qil);
-				return this.fwdrefs;
+				return this._fwdrefs;
 			}
 
 			protected override QilNode Visit(QilNode node)
 			{
 				if (node is QilIterator || node is QilFunction)
 				{
-					this.backrefs.Add(node);
+					this._backrefs.Add(node);
 				}
 				return base.Visit(node);
 			}
 
 			protected override QilNode VisitReference(QilNode node)
 			{
-				if (!this.backrefs.Contains(node) && !this.fwdrefs.Contains(node))
+				if (!this._backrefs.Contains(node) && !this._fwdrefs.Contains(node))
 				{
-					this.fwdrefs.Add(node);
+					this._fwdrefs.Add(node);
 				}
 				return node;
 			}
 
-			private List<QilNode> fwdrefs = new List<QilNode>();
+			private List<QilNode> _fwdrefs = new List<QilNode>();
 
-			private List<QilNode> backrefs = new List<QilNode>();
+			private List<QilNode> _backrefs = new List<QilNode>();
 		}
 
 		private sealed class NameGenerator
@@ -240,41 +240,41 @@ namespace System.Xml.Xsl.Qil
 			public NameGenerator()
 			{
 				string text = "$";
-				this.len = (this.zero = text.Length);
-				this.start = 'a';
-				this.end = 'z';
-				this.name = new StringBuilder(text, this.len + 2);
-				this.name.Append(this.start);
+				this._len = (this._zero = text.Length);
+				this._start = 'a';
+				this._end = 'z';
+				this._name = new StringBuilder(text, this._len + 2);
+				this._name.Append(this._start);
 			}
 
 			public string NextName()
 			{
-				string text = this.name.ToString();
-				char c = this.name[this.len];
-				if (c == this.end)
+				string text = this._name.ToString();
+				char c = this._name[this._len];
+				if (c == this._end)
 				{
-					this.name[this.len] = this.start;
-					int num = this.len;
-					while (num-- > this.zero && this.name[num] == this.end)
+					this._name[this._len] = this._start;
+					int len = this._len;
+					while (len-- > this._zero && this._name[len] == this._end)
 					{
-						this.name[num] = this.start;
+						this._name[len] = this._start;
 					}
-					if (num < this.zero)
+					if (len < this._zero)
 					{
-						this.len++;
-						this.name.Append(this.start);
+						this._len++;
+						this._name.Append(this._start);
 					}
 					else
 					{
-						StringBuilder stringBuilder = this.name;
-						int num2 = num;
-						char c2 = stringBuilder[num2];
-						stringBuilder[num2] = c2 + '\u0001';
+						StringBuilder name = this._name;
+						int num = len;
+						char c2 = name[num];
+						name[num] = c2 + '\u0001';
 					}
 				}
 				else
 				{
-					this.name[this.len] = c + '\u0001';
+					this._name[this._len] = c + '\u0001';
 				}
 				return text;
 			}
@@ -304,15 +304,15 @@ namespace System.Xml.Xsl.Qil
 				}
 			}
 
-			private StringBuilder name;
+			private StringBuilder _name;
 
-			private int len;
+			private int _len;
 
-			private int zero;
+			private int _zero;
 
-			private char start;
+			private char _start;
 
-			private char end;
+			private char _end;
 
 			private class NameAnnotation : ListBase<object>
 			{

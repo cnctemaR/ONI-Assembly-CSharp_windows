@@ -67,6 +67,14 @@ namespace System
 			return type;
 		}
 
+		internal static void GetUnitySerializationInfo(SerializationInfo info, int unityType)
+		{
+			info.SetType(typeof(UnitySerializationHolder));
+			info.AddValue("Data", null, typeof(string));
+			info.AddValue("UnityType", unityType);
+			info.AddValue("AssemblyName", string.Empty);
+		}
+
 		internal static void GetUnitySerializationInfo(SerializationInfo info, RuntimeType type)
 		{
 			if (type.GetRootElementType().IsGenericParameter)

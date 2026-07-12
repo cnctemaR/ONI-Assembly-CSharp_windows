@@ -370,31 +370,31 @@ namespace System
 			case ParsingError.None:
 				return null;
 			case ParsingError.BadFormat:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The format of the URI could not be determined."));
+				return new UriFormatException(SR.GetString("Invalid URI: The format of the URI could not be determined."));
 			case ParsingError.BadScheme:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The URI scheme is not valid."));
+				return new UriFormatException(SR.GetString("Invalid URI: The URI scheme is not valid."));
 			case ParsingError.BadAuthority:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The Authority/Host could not be parsed."));
+				return new UriFormatException(SR.GetString("Invalid URI: The Authority/Host could not be parsed."));
 			case ParsingError.EmptyUriString:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The URI is empty."));
+				return new UriFormatException(SR.GetString("Invalid URI: The URI is empty."));
 			case ParsingError.SchemeLimit:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The Uri scheme is too long."));
+				return new UriFormatException(SR.GetString("Invalid URI: The Uri scheme is too long."));
 			case ParsingError.SizeLimit:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The Uri string is too long."));
+				return new UriFormatException(SR.GetString("Invalid URI: The Uri string is too long."));
 			case ParsingError.MustRootedPath:
-				return new UriFormatException(global::SR.GetString("Invalid URI: A Dos path must be rooted, for example, 'c:\\\\'."));
+				return new UriFormatException(SR.GetString("Invalid URI: A Dos path must be rooted, for example, 'c:\\\\'."));
 			case ParsingError.BadHostName:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The hostname could not be parsed."));
+				return new UriFormatException(SR.GetString("Invalid URI: The hostname could not be parsed."));
 			case ParsingError.NonEmptyHost:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The format of the URI could not be determined."));
+				return new UriFormatException(SR.GetString("Invalid URI: The format of the URI could not be determined."));
 			case ParsingError.BadPort:
-				return new UriFormatException(global::SR.GetString("Invalid URI: Invalid port specified."));
+				return new UriFormatException(SR.GetString("Invalid URI: Invalid port specified."));
 			case ParsingError.BadAuthorityTerminator:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The Authority/Host cannot end with a backslash character ('\\\\')."));
+				return new UriFormatException(SR.GetString("Invalid URI: The Authority/Host cannot end with a backslash character ('\\\\')."));
 			case ParsingError.CannotCreateRelative:
-				return new UriFormatException(global::SR.GetString("A relative URI cannot be created because the 'uriString' parameter represents an absolute URI."));
+				return new UriFormatException(SR.GetString("A relative URI cannot be created because the 'uriString' parameter represents an absolute URI."));
 			default:
-				return new UriFormatException(global::SR.GetString("Invalid URI: The format of the URI could not be determined."));
+				return new UriFormatException(SR.GetString("Invalid URI: The format of the URI could not be determined."));
 			}
 		}
 
@@ -438,7 +438,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				string text = this.PrivateAbsolutePath;
 				if (this.IsDosPath && text[0] == '/')
@@ -474,7 +474,7 @@ namespace System
 			{
 				if (this.m_Syntax == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				Uri.UriInfo uriInfo = this.EnsureUriInfo();
 				if (uriInfo.MoreInfo == null)
@@ -497,7 +497,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.GetLocalPath();
 			}
@@ -509,7 +509,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.GetParts(UriComponents.Host | UriComponents.Port, UriFormat.UriEscaped);
 			}
@@ -521,7 +521,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				if (this.m_Syntax.IsSimple)
 				{
@@ -572,7 +572,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				if (this.m_Syntax.IsSimple)
 				{
@@ -592,7 +592,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.m_Syntax.SchemeName == Uri.UriSchemeFile;
 			}
@@ -604,7 +604,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				this.EnsureHostString(false);
 				return this.InFact(Uri.Flags.LoopbackHost);
@@ -617,7 +617,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				string text = this.GetParts(UriComponents.PathAndQuery, UriFormat.UriEscaped);
 				if (this.IsDosPath && text[0] == '/')
@@ -634,7 +634,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				string[] array = null;
 				if (array == null)
@@ -670,7 +670,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.IsUncPath;
 			}
@@ -682,7 +682,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.GetParts(UriComponents.Host, UriFormat.UriEscaped);
 			}
@@ -806,7 +806,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				if (this.m_Syntax.IsSimple)
 				{
@@ -830,7 +830,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				Uri.UriInfo uriInfo = this.EnsureUriInfo();
 				if (uriInfo.MoreInfo == null)
@@ -853,7 +853,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				Uri.UriInfo uriInfo = this.EnsureUriInfo();
 				if (uriInfo.MoreInfo == null)
@@ -876,7 +876,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.m_Syntax.SchemeName;
 			}
@@ -908,7 +908,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				if (this.AllowIdn && ((this.m_Flags & Uri.Flags.IdnHost) != Uri.Flags.Zero || (this.m_Flags & Uri.Flags.UnicodeHost) != Uri.Flags.Zero))
 				{
@@ -980,7 +980,7 @@ namespace System
 			{
 				if (this.IsNotAbsoluteUri)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+					throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 				}
 				return this.GetParts(UriComponents.UserInfo, UriFormat.UriEscaped);
 			}
@@ -1043,7 +1043,7 @@ namespace System
 		{
 			if (this.IsNotAbsoluteUri)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			this.EnsureUriInfo();
 			switch (part)
@@ -1400,7 +1400,7 @@ namespace System
 			}
 			if (this.IsNotAbsoluteUri || uri.IsNotAbsoluteUri)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			if (this.Scheme == uri.Scheme && this.Host == uri.Host && this.Port == uri.Port)
 			{
@@ -2028,7 +2028,7 @@ namespace System
 					int num3 = (int)(text4[i] - '0');
 					if (num3 < 0 || num3 > 9 || (num2 = num2 * 10 + num3) > 65535)
 					{
-						throw new UriFormatException(global::SR.GetString("A derived type '{0}' has reported an invalid value for the Uri port '{1}'.", new object[]
+						throw new UriFormatException(SR.GetString("A derived type '{0}' has reported an invalid value for the Uri port '{1}'.", new object[]
 						{
 							this.m_Syntax.GetType().FullName,
 							text4
@@ -4228,7 +4228,7 @@ namespace System
 			}
 			if (this.IsNotAbsoluteUri || toUri.IsNotAbsoluteUri)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			if (this.Scheme == toUri.Scheme && this.Host == toUri.Host && this.Port == toUri.Port)
 			{
@@ -4305,7 +4305,7 @@ namespace System
 		{
 			if ((uriKind < UriKind.RelativeOrAbsolute || uriKind > UriKind.Relative) && uriKind != (UriKind)300)
 			{
-				throw new ArgumentException(global::SR.GetString("The value '{0}' passed for the UriKind parameter is invalid.", new object[] { uriKind }));
+				throw new ArgumentException(SR.GetString("The value '{0}' passed for the UriKind parameter is invalid.", new object[] { uriKind }));
 			}
 			this.m_String = ((uri == null) ? string.Empty : uri);
 			if (dontEscape)
@@ -4586,7 +4586,7 @@ namespace System
 		{
 			if ((components & UriComponents.SerializationInfoString) != (UriComponents)0 && components != UriComponents.SerializationInfoString)
 			{
-				throw new ArgumentOutOfRangeException("components", components, global::SR.GetString("UriComponents.SerializationInfoString must not be combined with other UriComponents."));
+				throw new ArgumentOutOfRangeException("components", components, SR.GetString("UriComponents.SerializationInfoString must not be combined with other UriComponents."));
 			}
 			if ((format & (UriFormat)(-4)) != (UriFormat)0)
 			{
@@ -4598,7 +4598,7 @@ namespace System
 				{
 					return this.GetRelativeSerializationString(format);
 				}
-				throw new InvalidOperationException(global::SR.GetString("This operation is not supported for a relative URI."));
+				throw new InvalidOperationException(SR.GetString("This operation is not supported for a relative URI."));
 			}
 			else
 			{
@@ -4665,7 +4665,7 @@ namespace System
 		{
 			if (this.UserDrivenParsing)
 			{
-				throw new InvalidOperationException(global::SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
+				throw new InvalidOperationException(SR.GetString("A derived type '{0}' is responsible for parsing this Uri instance. The base implementation must not be used.", new object[] { base.GetType().FullName }));
 			}
 			fixed (string @string = this.m_String)
 			{
@@ -4833,7 +4833,7 @@ namespace System
 		{
 			if ((uriKind < UriKind.RelativeOrAbsolute || uriKind > UriKind.Relative) && uriKind != (UriKind)300)
 			{
-				throw new ArgumentException(global::SR.GetString("The value '{0}' passed for the UriKind parameter is invalid.", new object[] { uriKind }));
+				throw new ArgumentException(SR.GetString("The value '{0}' passed for the UriKind parameter is invalid.", new object[] { uriKind }));
 			}
 			UriParser uriParser = null;
 			Uri.Flags flags = Uri.Flags.Zero;

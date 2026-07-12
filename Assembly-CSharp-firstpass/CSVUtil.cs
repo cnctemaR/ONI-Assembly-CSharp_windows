@@ -95,7 +95,7 @@ public static class CSVUtil
 						field.SetValue(target, default(CellOffset));
 						return;
 					}
-					string[] array = val.Split(new char[] { ',' });
+					string[] array = val.Split(',', StringSplitOptions.None);
 					field.SetValue(target, new CellOffset(int.Parse(array[0]), int.Parse(array[1])));
 					return;
 				}
@@ -106,7 +106,7 @@ public static class CSVUtil
 						field.SetValue(target, Vector3.zero);
 						return;
 					}
-					string[] array2 = val.Split(new char[] { ',' });
+					string[] array2 = val.Split(',', StringSplitOptions.None);
 					field.SetValue(target, new Vector3(float.Parse(array2[0]), float.Parse(array2[1]), float.Parse(array2[2])));
 					return;
 				}

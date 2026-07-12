@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Mono.Util;
 
 namespace System.IO.Compression
@@ -36,9 +37,17 @@ namespace System.IO.Compression
 			{
 				this.disposed = true;
 				GC.SuppressFinalize(this);
-				this.io_buffer = null;
+			}
+			else
+			{
+				this.base_stream = Stream.Null;
+			}
+			this.io_buffer = null;
+			if (this.z_stream != null && !this.z_stream.IsInvalid)
+			{
 				this.z_stream.Dispose();
 			}
+			GCHandle gchandle = this.data;
 			if (this.data.IsAllocated)
 			{
 				this.data.Free();
@@ -47,19 +56,21 @@ namespace System.IO.Compression
 
 		public void Flush()
 		{
-			DeflateStreamNative.CheckResult(DeflateStreamNative.Flush(this.z_stream), "Flush");
+			int num = DeflateStreamNative.Flush(this.z_stream);
+			this.CheckResult(num, "Flush");
 		}
 
 		public int ReadZStream(IntPtr buffer, int length)
 		{
 			int num = DeflateStreamNative.ReadZStream(this.z_stream, buffer, length);
-			DeflateStreamNative.CheckResult(num, "ReadInternal");
+			this.CheckResult(num, "ReadInternal");
 			return num;
 		}
 
 		public void WriteZStream(IntPtr buffer, int length)
 		{
-			DeflateStreamNative.CheckResult(DeflateStreamNative.WriteZStream(this.z_stream, buffer, length), "WriteInternal");
+			int num = DeflateStreamNative.WriteZStream(this.z_stream, buffer, length);
+			this.CheckResult(num, "WriteInternal");
 		}
 
 		[MonoPInvokeCallback(typeof(DeflateStreamNative.UnmanagedReadOrWrite))]
@@ -80,7 +91,16 @@ namespace System.IO.Compression
 				this.io_buffer = new byte[4096];
 			}
 			int num = Math.Min(length, this.io_buffer.Length);
-			int num2 = this.base_stream.Read(this.io_buffer, 0, num);
+			int num2;
+			try
+			{
+				num2 = this.base_stream.Read(this.io_buffer, 0, num);
+			}
+			catch (Exception ex)
+			{
+				this.last_error = ex;
+				return -12;
+			}
 			if (num2 > 0)
 			{
 				Marshal.Copy(this.io_buffer, 0, buffer, num2);
@@ -110,7 +130,15 @@ namespace System.IO.Compression
 				}
 				int num2 = Math.Min(length, this.io_buffer.Length);
 				Marshal.Copy(buffer, this.io_buffer, 0, num2);
-				this.base_stream.Write(this.io_buffer, 0, num2);
+				try
+				{
+					this.base_stream.Write(this.io_buffer, 0, num2);
+				}
+				catch (Exception ex)
+				{
+					this.last_error = ex;
+					return -12;
+				}
 				buffer = new IntPtr((void*)((byte*)buffer.ToPointer() + num2));
 				length -= num2;
 				num += num2;
@@ -118,42 +146,47 @@ namespace System.IO.Compression
 			return num;
 		}
 
-		private static void CheckResult(int result, string where)
+		private void CheckResult(int result, string where)
 		{
 			if (result >= 0)
 			{
 				return;
+			}
+			Exception ex = Interlocked.Exchange<Exception>(ref this.last_error, null);
+			if (ex != null)
+			{
+				throw ex;
 			}
 			string text;
 			switch (result)
 			{
 			case -11:
 				text = "IO error";
-				goto IL_0082;
+				goto IL_0094;
 			case -10:
 				text = "Invalid argument(s)";
-				goto IL_0082;
+				goto IL_0094;
 			case -6:
 				text = "Invalid version";
-				goto IL_0082;
+				goto IL_0094;
 			case -5:
 				text = "Internal error (no progress possible)";
-				goto IL_0082;
+				goto IL_0094;
 			case -4:
 				text = "Not enough memory";
-				goto IL_0082;
+				goto IL_0094;
 			case -3:
 				text = "Corrupted data";
-				goto IL_0082;
+				goto IL_0094;
 			case -2:
 				text = "Internal error";
-				goto IL_0082;
+				goto IL_0094;
 			case -1:
 				text = "Unknown error";
-				goto IL_0082;
+				goto IL_0094;
 			}
 			text = "Unknown error";
-			IL_0082:
+			IL_0094:
 			throw new IOException(text + " " + where);
 		}
 
@@ -186,7 +219,7 @@ namespace System.IO.Compression
 
 		private byte[] io_buffer;
 
-		private const string LIBNAME = "MonoPosixHelper";
+		private Exception last_error;
 
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		private delegate int UnmanagedReadOrWrite(IntPtr buffer, int length, IntPtr data);
@@ -206,9 +239,20 @@ namespace System.IO.Compression
 			{
 			}
 
+			internal SafeDeflateStreamHandle(IntPtr handle)
+				: base(handle, true)
+			{
+			}
+
 			protected override bool ReleaseHandle()
 			{
-				DeflateStreamNative.CloseZStream(this.handle);
+				try
+				{
+					DeflateStreamNative.CloseZStream(this.handle);
+				}
+				catch
+				{
+				}
 				return true;
 			}
 		}

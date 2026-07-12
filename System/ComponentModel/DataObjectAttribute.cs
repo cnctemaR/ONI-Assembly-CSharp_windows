@@ -12,16 +12,10 @@ namespace System.ComponentModel
 
 		public DataObjectAttribute(bool isDataObject)
 		{
-			this._isDataObject = isDataObject;
+			this.IsDataObject = isDataObject;
 		}
 
-		public bool IsDataObject
-		{
-			get
-			{
-				return this._isDataObject;
-			}
-		}
+		public bool IsDataObject { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -35,7 +29,7 @@ namespace System.ComponentModel
 
 		public override int GetHashCode()
 		{
-			return this._isDataObject.GetHashCode();
+			return this.IsDataObject.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
@@ -48,7 +42,5 @@ namespace System.ComponentModel
 		public static readonly DataObjectAttribute NonDataObject = new DataObjectAttribute(false);
 
 		public static readonly DataObjectAttribute Default = DataObjectAttribute.NonDataObject;
-
-		private bool _isDataObject;
 	}
 }

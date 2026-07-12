@@ -366,13 +366,13 @@ namespace Mono.Net.Dns
 				if (type != DnsQType.A && type != DnsQType.AAAA && type != DnsQType.PTR)
 				{
 					args.ResolverError = ResolverError.ResponseHeaderError;
-					args.ErrorMessage = "QType " + dnsQuestion.Type;
+					args.ErrorMessage = "QType " + dnsQuestion.Type.ToString();
 					return;
 				}
 				if (dnsQuestion.Class != DnsQClass.Internet)
 				{
 					args.ResolverError = ResolverError.ResponseHeaderError;
-					args.ErrorMessage = "QClass " + dnsQuestion.Class;
+					args.ErrorMessage = "QClass " + dnsQuestion.Class.ToString();
 					return;
 				}
 				ReadOnlyCollection<DnsResourceRecord> answers = response.GetAnswers();

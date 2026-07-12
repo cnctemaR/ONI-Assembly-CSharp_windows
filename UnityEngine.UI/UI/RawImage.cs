@@ -99,6 +99,7 @@ namespace UnityEngine.UI
 		{
 			this.SetMaterialDirty();
 			this.SetVerticesDirty();
+			base.SetRaycastDirty();
 		}
 
 		[FormerlySerializedAs("m_Tex")]

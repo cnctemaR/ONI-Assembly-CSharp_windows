@@ -16,12 +16,16 @@ public class LightBugConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -LightBugTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
-		GameObject gameObject2 = BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
+		HashSet<Tag> hashSet = new HashSet<Tag>();
+		hashSet.Add(TagManager.Create(PrickleFruitConfig.ID));
+		hashSet.Add(TagManager.Create("GrilledPrickleFruit"));
+		if (DlcManager.IsContentSubscribed("DLC2_ID"))
 		{
-			TagManager.Create(PrickleFruitConfig.ID),
-			TagManager.Create("GrilledPrickleFruit"),
-			SimHashes.Phosphorite.CreateTag()
-		}, Tag.Invalid, LightBugConfig.CALORIES_PER_KG_OF_ORE);
+			hashSet.Add(TagManager.Create("HardSkinBerry"));
+			hashSet.Add(TagManager.Create("CookedPikeapple"));
+		}
+		hashSet.Add(SimHashes.Phosphorite.CreateTag());
+		GameObject gameObject2 = BaseLightBugConfig.SetupDiet(gameObject, hashSet, Tag.Invalid, LightBugConfig.CALORIES_PER_KG_OF_ORE);
 		gameObject2.AddTag(GameTags.OriginalCreature);
 		return gameObject2;
 	}

@@ -110,6 +110,8 @@ public class ScheduleMinionWidget : KMonoBehaviour
 			entry.button.isInteractable = true;
 		}
 		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("worldContainer").gameObject.SetActive(false);
+		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("ScheduleIcon").gameObject.SetActive(true);
+		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PortraitContainer").gameObject.SetActive(false);
 	}
 
 	public void SetupBlank(Schedule schedule)
@@ -171,6 +173,8 @@ public class ScheduleMinionWidget : KMonoBehaviour
 		Traits component = minionIdentity.GetComponent<Traits>();
 		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("NightOwlIcon").gameObject.SetActive(component.HasTrait("NightOwl"));
 		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("EarlyBirdIcon").gameObject.SetActive(component.HasTrait("EarlyBird"));
+		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("ScheduleIcon").gameObject.SetActive(false);
+		entry.gameObject.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PortraitContainer").gameObject.SetActive(true);
 	}
 
 	private int BlankDropEntrySort(IListableOption a, IListableOption b, object obj)

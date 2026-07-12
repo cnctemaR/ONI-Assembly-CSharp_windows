@@ -711,13 +711,12 @@ namespace System.Data
 						xmlElement8.SetAttribute("namespace", text);
 						if (this._schFormat != SchemaFormat.WebService && !flag4)
 						{
-							xmlElement8.SetAttribute("schemaLocation", string.Concat(new object[]
-							{
-								this._fileName,
-								"_",
-								this._prefixes[text],
-								".xsd"
-							}));
+							XmlElement xmlElement9 = xmlElement8;
+							string text2 = "schemaLocation";
+							string fileName = this._fileName;
+							string text3 = "_";
+							object obj3 = this._prefixes[text];
+							xmlElement9.SetAttribute(text2, fileName + text3 + ((obj3 != null) ? obj3.ToString() : null) + ".xsd");
 						}
 						xmlElement.PrependChild(xmlElement8);
 					}
@@ -740,9 +739,9 @@ namespace System.Data
 				{
 					while (enumerator.MoveNext())
 					{
-						object obj3 = enumerator.Current;
-						string text2 = (string)obj3;
-						if (!(text2 == ((this._ds != null) ? this._ds.Namespace : dt.Namespace)) && !string.IsNullOrEmpty(text2))
+						object obj4 = enumerator.Current;
+						string text4 = (string)obj4;
+						if (!(text4 == ((this._ds != null) ? this._ds.Namespace : dt.Namespace)) && !string.IsNullOrEmpty(text4))
 						{
 							XmlWriter xmlWriter2 = null;
 							if (!flag)
@@ -751,14 +750,15 @@ namespace System.Data
 							}
 							else
 							{
-								xmlWriter2 = new XmlTextWriter(string.Concat(new object[]
-								{
-									this._filePath,
-									this._fileName,
-									"_",
-									this._prefixes[text2],
-									".xsd"
-								}), null);
+								string[] array3 = new string[5];
+								array3[0] = this._filePath;
+								array3[1] = this._fileName;
+								array3[2] = "_";
+								int num = 3;
+								object obj5 = this._prefixes[text4];
+								array3[num] = ((obj5 != null) ? obj5.ToString() : null);
+								array3[4] = ".xsd";
+								xmlWriter2 = new XmlTextWriter(string.Concat(array3), null);
 							}
 							try
 							{
@@ -770,31 +770,31 @@ namespace System.Data
 									}
 									xmlWriter2.WriteStartDocument(true);
 								}
-								XmlElement xmlElement9 = (XmlElement)this._namespaces[text2];
-								this._dc.AppendChild(xmlElement9);
-								foreach (object obj4 in this._namespaces.Keys)
+								XmlElement xmlElement10 = (XmlElement)this._namespaces[text4];
+								this._dc.AppendChild(xmlElement10);
+								foreach (object obj6 in this._namespaces.Keys)
 								{
-									string text3 = (string)obj4;
-									if (!(text2 == text3))
+									string text5 = (string)obj6;
+									if (!(text4 == text5))
 									{
-										string text4 = (string)this._prefixes[text3];
-										if (text4 != null)
+										string text6 = (string)this._prefixes[text5];
+										if (text6 != null)
 										{
-											xmlElement9.SetAttribute("xmlns:" + text4, text3);
-											XmlElement xmlElement10 = this._dc.CreateElement("xs", "import", "http://www.w3.org/2001/XMLSchema");
-											xmlElement10.SetAttribute("namespace", text3);
+											xmlElement10.SetAttribute("xmlns:" + text6, text5);
+											XmlElement xmlElement11 = this._dc.CreateElement("xs", "import", "http://www.w3.org/2001/XMLSchema");
+											xmlElement11.SetAttribute("namespace", text5);
 											if (this._schFormat != SchemaFormat.WebService && !flag4)
 											{
-												if (text3 == ((this._ds != null) ? this._ds.Namespace : dt.Namespace))
+												if (text5 == ((this._ds != null) ? this._ds.Namespace : dt.Namespace))
 												{
-													xmlElement10.SetAttribute("schemaLocation", this._fileName + this._fileExt);
+													xmlElement11.SetAttribute("schemaLocation", this._fileName + this._fileExt);
 												}
 												else
 												{
-													xmlElement10.SetAttribute("schemaLocation", this._fileName + "_" + text4 + ".xsd");
+													xmlElement11.SetAttribute("schemaLocation", this._fileName + "_" + text6 + ".xsd");
 												}
 											}
-											xmlElement9.PrependChild(xmlElement10);
+											xmlElement10.PrependChild(xmlElement11);
 										}
 									}
 								}
@@ -806,7 +806,7 @@ namespace System.Data
 								{
 									this._dc.Save(xmlWriter2);
 								}
-								this._dc.RemoveChild(xmlElement9);
+								this._dc.RemoveChild(xmlElement10);
 								if (flag)
 								{
 									xmlWriter2.WriteEndDocument();
@@ -821,12 +821,12 @@ namespace System.Data
 							}
 						}
 					}
-					goto IL_0B69;
+					goto IL_0B6C;
 				}
 			}
 			xd.AppendChild(xmlElement);
 			xd.Save(xmlWriter);
-			IL_0B69:
+			IL_0B6C:
 			if (xmlComment != null)
 			{
 				xmlElement.PrependChild(xmlComment);
@@ -1337,10 +1337,13 @@ namespace System.Data
 					schema2.AppendChild(xmlElement);
 				}
 				xmlElement = this._dc.CreateElement("xs", text, "http://www.w3.org/2001/XMLSchema");
-				xmlElement.SetAttribute("ref", this._prefixes[col.Namespace] + ":" + col.EncodedColumnName);
+				XmlElement xmlElement2 = xmlElement;
+				string text3 = "ref";
+				object obj = this._prefixes[col.Namespace];
+				xmlElement2.SetAttribute(text3, ((obj != null) ? obj.ToString() : null) + ":" + col.EncodedColumnName);
 				if (col.Table.Namespace != this._ds.Namespace)
 				{
-					string text3 = (string)this._prefixes[col.Namespace];
+					string text4 = (string)this._prefixes[col.Namespace];
 					this.GetSchema(col.Table.Namespace);
 				}
 			}

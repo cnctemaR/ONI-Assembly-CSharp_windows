@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class DictionaryBase : IDictionary, ICollection, IEnumerable
 	{
@@ -11,11 +9,11 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this.hashtable == null)
+				if (this._hashtable == null)
 				{
-					this.hashtable = new Hashtable();
+					this._hashtable = new Hashtable();
 				}
-				return this.hashtable;
+				return this._hashtable;
 			}
 		}
 
@@ -31,9 +29,9 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this.hashtable != null)
+				if (this._hashtable != null)
 				{
-					return this.hashtable.Count;
+					return this._hashtable.Count;
 				}
 				return 0;
 			}
@@ -229,6 +227,6 @@ namespace System.Collections
 		{
 		}
 
-		private Hashtable hashtable;
+		private Hashtable _hashtable;
 	}
 }

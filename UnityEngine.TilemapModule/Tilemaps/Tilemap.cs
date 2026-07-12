@@ -1,18 +1,109 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[NativeHeader("Modules/Grid/Public/Grid.h")]
 	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapTile.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
 	[NativeType(Header = "Modules/Tilemap/Public/Tilemap.h")]
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Modules/Grid/Public/Grid.h")]
-	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	public sealed class Tilemap : GridLayout
 	{
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<Tilemap, Tilemap.SyncTile[]> tilemapTileChanged;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<Tilemap, NativeArray<Vector3Int>> tilemapPositionsChanged;
+
+		internal bool bufferSyncTile
+		{
+			get
+			{
+				return this.m_BufferSyncTile;
+			}
+			set
+			{
+				bool flag = !value && this.m_BufferSyncTile != value && Tilemap.HasSyncTileCallback();
+				if (flag)
+				{
+					this.SendAndClearSyncTileBuffer();
+				}
+				this.m_BufferSyncTile = value;
+			}
+		}
+
+		internal static bool HasSyncTileCallback()
+		{
+			return Tilemap.tilemapTileChanged != null;
+		}
+
+		internal static bool HasPositionsChangedCallback()
+		{
+			return Tilemap.tilemapPositionsChanged != null;
+		}
+
+		private void HandleSyncTileCallback(Tilemap.SyncTile[] syncTiles)
+		{
+			bool flag = Tilemap.tilemapTileChanged == null;
+			if (!flag)
+			{
+				this.SendTilemapTileChangedCallback(syncTiles);
+			}
+		}
+
+		private unsafe void HandlePositionsChangedCallback(int count, IntPtr positionsIntPtr)
+		{
+			bool flag = Tilemap.tilemapPositionsChanged == null;
+			if (!flag)
+			{
+				void* ptr = positionsIntPtr.ToPointer();
+				NativeArray<Vector3Int> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3Int>(ptr, count, Allocator.Invalid);
+				this.SendTilemapPositionsChangedCallback(nativeArray);
+			}
+		}
+
+		private void SendTilemapTileChangedCallback(Tilemap.SyncTile[] syncTiles)
+		{
+			try
+			{
+				Tilemap.tilemapTileChanged(this, syncTiles);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex, this);
+			}
+		}
+
+		private void SendTilemapPositionsChangedCallback(NativeArray<Vector3Int> positions)
+		{
+			try
+			{
+				Tilemap.tilemapPositionsChanged(this, positions);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex, this);
+			}
+		}
+
+		internal static void SetSyncTileCallback(Action<Tilemap, Tilemap.SyncTile[]> callback)
+		{
+			Tilemap.tilemapTileChanged += callback;
+		}
+
+		internal static void RemoveSyncTileCallback(Action<Tilemap, Tilemap.SyncTile[]> callback)
+		{
+			Tilemap.tilemapTileChanged -= callback;
+		}
+
 		public extern Grid layoutGrid
 		{
 			[NativeMethod(Name = "GetAttachedGrid")]
@@ -22,12 +113,12 @@ namespace UnityEngine.Tilemaps
 
 		public Vector3 GetCellCenterLocal(Vector3Int position)
 		{
-			return base.CellToLocalInterpolated(position + this.tileAnchor);
+			return base.CellToLocalInterpolated(position) + base.CellToLocalInterpolated(this.tileAnchor);
 		}
 
 		public Vector3 GetCellCenterWorld(Vector3Int position)
 		{
-			return base.LocalToWorld(base.CellToLocalInterpolated(position + this.tileAnchor));
+			return base.LocalToWorld(base.CellToLocalInterpolated(position) + base.CellToLocalInterpolated(this.tileAnchor));
 		}
 
 		public BoundsInt cellBounds
@@ -180,6 +271,33 @@ namespace UnityEngine.Tilemaps
 			return array;
 		}
 
+		[FreeFunction(Name = "TilemapBindings::GetTileAssetsBlockNonAlloc", HasExplicitThis = true)]
+		internal int GetTileAssetsBlockNonAlloc(Vector3Int startPosition, Vector3Int endPosition, [Unmarshalled] Object[] tiles)
+		{
+			return this.GetTileAssetsBlockNonAlloc_Injected(ref startPosition, ref endPosition, tiles);
+		}
+
+		public int GetTilesBlockNonAlloc(BoundsInt bounds, TileBase[] tiles)
+		{
+			return this.GetTileAssetsBlockNonAlloc(bounds.min, bounds.size, tiles);
+		}
+
+		public int GetTilesRangeCount(Vector3Int startPosition, Vector3Int endPosition)
+		{
+			return this.GetTilesRangeCount_Injected(ref startPosition, ref endPosition);
+		}
+
+		[FreeFunction(Name = "TilemapBindings::GetTileAssetsRangeNonAlloc", HasExplicitThis = true)]
+		internal int GetTileAssetsRangeNonAlloc(Vector3Int startPosition, Vector3Int endPosition, [Unmarshalled] Vector3Int[] positions, [Unmarshalled] Object[] tiles)
+		{
+			return this.GetTileAssetsRangeNonAlloc_Injected(ref startPosition, ref endPosition, positions, tiles);
+		}
+
+		public int GetTilesRangeNonAlloc(Vector3Int startPosition, Vector3Int endPosition, Vector3Int[] positions, TileBase[] tiles)
+		{
+			return this.GetTileAssetsRangeNonAlloc(startPosition, endPosition, positions, tiles);
+		}
+
 		internal void SetTileAsset(Vector3Int position, Object tile)
 		{
 			this.SetTileAsset_Injected(ref position, tile);
@@ -209,6 +327,16 @@ namespace UnityEngine.Tilemaps
 			this.INTERNAL_CALL_SetTileAssetsBlock(position.min, position.size, tileArray);
 		}
 
+		[NativeMethod(Name = "SetTileChangeData")]
+		public void SetTile(TileChangeData tileChangeData, bool ignoreLockFlags)
+		{
+			this.SetTile_Injected(ref tileChangeData, ignoreLockFlags);
+		}
+
+		[NativeMethod(Name = "SetTileChangeDataArray")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetTiles(TileChangeData[] tileChangeDataArray, bool ignoreLockFlags);
+
 		public bool HasTile(Vector3Int position)
 		{
 			return this.GetTileAsset(position) != null;
@@ -219,6 +347,10 @@ namespace UnityEngine.Tilemaps
 		{
 			this.RefreshTile_Injected(ref position);
 		}
+
+		[FreeFunction(Name = "TilemapBindings::RefreshTileAssetsNative", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal unsafe extern void RefreshTilesNative(void* positions, int count);
 
 		[NativeMethod(Name = "RefreshAllTileAssets")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -243,14 +375,26 @@ namespace UnityEngine.Tilemaps
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetUsedTilesCount();
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetUsedSpritesCount();
+
 		public int GetUsedTilesNonAlloc(TileBase[] usedTiles)
 		{
 			return this.Internal_GetUsedTilesNonAlloc(usedTiles);
 		}
 
+		public int GetUsedSpritesNonAlloc(Sprite[] usedSprites)
+		{
+			return this.Internal_GetUsedSpritesNonAlloc(usedSprites);
+		}
+
 		[FreeFunction(Name = "TilemapBindings::GetUsedTilesNonAlloc", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int Internal_GetUsedTilesNonAlloc(Object[] usedTiles);
+		internal extern int Internal_GetUsedTilesNonAlloc([Unmarshalled] Object[] usedTiles);
+
+		[FreeFunction(Name = "TilemapBindings::GetUsedSpritesNonAlloc", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int Internal_GetUsedSpritesNonAlloc([Unmarshalled] Object[] usedSprites);
 
 		public Sprite GetSprite(Vector3Int position)
 		{
@@ -327,6 +471,56 @@ namespace UnityEngine.Tilemaps
 			return this.GetColliderType_Injected(ref position);
 		}
 
+		[NativeMethod(Name = "GetTileAnimationFrameCount")]
+		public int GetAnimationFrameCount(Vector3Int position)
+		{
+			return this.GetAnimationFrameCount_Injected(ref position);
+		}
+
+		[NativeMethod(Name = "GetTileAnimationFrame")]
+		public int GetAnimationFrame(Vector3Int position)
+		{
+			return this.GetAnimationFrame_Injected(ref position);
+		}
+
+		[NativeMethod(Name = "SetTileAnimationFrame")]
+		public void SetAnimationFrame(Vector3Int position, int frame)
+		{
+			this.SetAnimationFrame_Injected(ref position, frame);
+		}
+
+		[NativeMethod(Name = "GetTileAnimationTime")]
+		public float GetAnimationTime(Vector3Int position)
+		{
+			return this.GetAnimationTime_Injected(ref position);
+		}
+
+		[NativeMethod(Name = "SetTileAnimationTime")]
+		public void SetAnimationTime(Vector3Int position, float time)
+		{
+			this.SetAnimationTime_Injected(ref position, time);
+		}
+
+		public TileAnimationFlags GetTileAnimationFlags(Vector3Int position)
+		{
+			return this.GetTileAnimationFlags_Injected(ref position);
+		}
+
+		public void SetTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
+		{
+			this.SetTileAnimationFlags_Injected(ref position, flags);
+		}
+
+		public void AddTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
+		{
+			this.AddTileAnimationFlags_Injected(ref position, flags);
+		}
+
+		public void RemoveTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
+		{
+			this.RemoveTileAnimationFlags_Injected(ref position, flags);
+		}
+
 		public void FloodFill(Vector3Int position, TileBase tile)
 		{
 			this.FloodFillTileAsset(position, tile);
@@ -378,6 +572,29 @@ namespace UnityEngine.Tilemaps
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CompressBounds();
 
+		[RequiredByNativeCode]
+		internal void GetSyncTileCallbackSettings(ref Tilemap.SyncTileCallbackSettings settings)
+		{
+			settings.hasSyncTileCallback = Tilemap.HasSyncTileCallback();
+			settings.hasPositionsChangedCallback = Tilemap.HasPositionsChangedCallback();
+			settings.isBufferSyncTile = this.bufferSyncTile;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SendAndClearSyncTileBuffer();
+
+		[RequiredByNativeCode]
+		private void DoSyncTileCallback(Tilemap.SyncTile[] syncTiles)
+		{
+			this.HandleSyncTileCallback(syncTiles);
+		}
+
+		[RequiredByNativeCode]
+		private void DoPositionsChangedCallback(int count, IntPtr positionsIntPtr)
+		{
+			this.HandlePositionsChangedCallback(count, positionsIntPtr);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_localBounds_Injected(out Bounds ret);
 
@@ -421,10 +638,22 @@ namespace UnityEngine.Tilemaps
 		private extern Object[] GetTileAssetsBlock_Injected(ref Vector3Int position, ref Vector3Int blockDimensions);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetTileAssetsBlockNonAlloc_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition, Object[] tiles);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetTilesRangeCount_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetTileAssetsRangeNonAlloc_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition, Vector3Int[] positions, Object[] tiles);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetTileAsset_Injected(ref Vector3Int position, Object tile);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_CALL_SetTileAssetsBlock_Injected(ref Vector3Int position, ref Vector3Int blockDimensions, Object[] tileArray);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetTile_Injected(ref TileChangeData tileChangeData, bool ignoreLockFlags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void RefreshTile_Injected(ref Vector3Int position);
@@ -469,6 +698,33 @@ namespace UnityEngine.Tilemaps
 		private extern Tile.ColliderType GetColliderType_Injected(ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetAnimationFrameCount_Injected(ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetAnimationFrame_Injected(ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetAnimationFrame_Injected(ref Vector3Int position, int frame);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern float GetAnimationTime_Injected(ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetAnimationTime_Injected(ref Vector3Int position, float time);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern TileAnimationFlags GetTileAnimationFlags_Injected(ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void AddTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RemoveTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void FloodFillTileAsset_Injected(ref Vector3Int position, Object tile);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -480,6 +736,8 @@ namespace UnityEngine.Tilemaps
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DeleteCells_Injected(ref Vector3Int position, int numColumns, int numRows, int numLayers);
 
+		private bool m_BufferSyncTile;
+
 		public enum Orientation
 		{
 			XY,
@@ -489,6 +747,49 @@ namespace UnityEngine.Tilemaps
 			ZX,
 			ZY,
 			Custom
+		}
+
+		[RequiredByNativeCode]
+		public struct SyncTile
+		{
+			public Vector3Int position
+			{
+				get
+				{
+					return this.m_Position;
+				}
+			}
+
+			public TileBase tile
+			{
+				get
+				{
+					return this.m_Tile;
+				}
+			}
+
+			public TileData tileData
+			{
+				get
+				{
+					return this.m_TileData;
+				}
+			}
+
+			internal Vector3Int m_Position;
+
+			internal TileBase m_Tile;
+
+			internal TileData m_TileData;
+		}
+
+		internal struct SyncTileCallbackSettings
+		{
+			internal bool hasSyncTileCallback;
+
+			internal bool hasPositionsChangedCallback;
+
+			internal bool isBufferSyncTile;
 		}
 	}
 }

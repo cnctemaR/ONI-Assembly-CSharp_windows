@@ -597,7 +597,9 @@ namespace STRINGS
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Floxes are nonhostile critters that graze on live and fallen ",
+					"Floxes are nonhostile critters that graze on ",
+					UI.FormatAsLink("Bristle Blossoms", "PRICKLEFLOWER"),
+					" and ",
 					UI.FormatAsLink("Pikeapples", "HARDSKINBERRY"),
 					".\n\nWhen Flox antlers are fully grown, they harden into shearable ",
 					UI.FormatAsLink("Wood", "WOOD"),
@@ -622,6 +624,10 @@ namespace STRINGS
 				{
 					"Bammoths are lumbering, nonhostile creatures that subsist on ",
 					UI.FormatAsLink("Plume Squash", "CARROT"),
+					", ",
+					UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED"),
+					" and ",
+					UI.FormatAsLink("Squash Fries", "FRIESCARROT"),
 					".\n\nTheir thick overcoats can be shorn for ",
 					ITEMS.INDUSTRIAL_PRODUCTS.BASIC_FABRIC.NAME,
 					"."
@@ -635,6 +641,31 @@ namespace STRINGS
 
 					public static LocString DESC = "A floofy little Bammini.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Bammoth", "ICEBELLY") + ".";
 				}
+
+				public class VARIANT_GOLD
+				{
+					public static LocString NAME = UI.FormatAsLink("Regal Bammoth", "GOLDBELLY");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Regal Bammoths are nonhostile creatures that subsist on ",
+						UI.FormatAsLink("Plume Squash", "CARROT"),
+						" and ",
+						UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED"),
+						".\n\nTheir ornate crests grow only when they are fed ",
+						UI.FormatAsLink("Squash Fries", "FRIESCARROT"),
+						"."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Regal Bammini Egg", "GOLDBELLY");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Regal Bammini", "GOLDBELLY");
+
+						public static LocString DESC = "A haughty little Regal Bammini.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Regal Bammoth", "GOLDBELLY") + ".";
+					}
+				}
 			}
 
 			public class SEAL
@@ -645,7 +676,9 @@ namespace STRINGS
 				{
 					"Spigot Seals are charismatic creatures who produce ",
 					UI.FormatAsLink("Ethanol", "ETHANOL"),
-					".\n\nThey enjoy sipping ",
+					".\n\nThey eat ",
+					UI.FormatAsLink("Sucrose", "SUCROSE"),
+					", and drink ",
 					ELEMENTS.SUGARWATER.NAME,
 					" straight from the ",
 					UI.FormatAsLink("Bonbon Tree", "SPACETREE"),
@@ -1386,7 +1419,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Bluff Briars exude pheromones causing critters to view them as especially beautiful.";
 
-				public static LocString DOMESTICATEDDESC = "This plant improves " + UI.FormatAsLink("Decor", "DECOR") + ".";
+				public static LocString DOMESTICATEDDESC = "This plant improves ambient " + UI.FormatAsLink("Decor", "DECOR") + ".";
 
 				public static LocString GROWTH_BONUS = "Growth Bonus";
 
@@ -1836,9 +1869,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Nosh Sprout", "BEAN_PLANT");
 
-				public static LocString DESC = "Nosh Sprouts thrive in colder climates and produce edible " + UI.FormatAsLink("Nosh Beans", "BEAN") + ".";
+				public static LocString DESC = "Nosh Sprouts thrive in colder climates and produce edible " + UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED") + ".";
 
-				public static LocString DOMESTICATEDDESC = "This plant produces " + UI.FormatAsLink("Nosh Beans", "BEAN") + ".";
+				public static LocString DOMESTICATEDDESC = "This plant produces " + UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED") + ".";
 			}
 
 			public class WOOD_TREE
@@ -3902,7 +3935,11 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Body Temperature",
 					UI.PST_KEYWORD,
-					" range is between <b>{0}</b> and <b>{1}</b>"
+					" range is between <b>{0}</b> and <b>{1}</b>\n\nIts livable ",
+					UI.PRE_KEYWORD,
+					"External Temperature",
+					UI.PST_KEYWORD,
+					" range is between <b>{2}</b> and <b>{3}</b>"
 				});
 			}
 
@@ -4398,6 +4435,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter's feeling down because its needs aren't being met\n\nIt will produce less materials as a result";
 			}
 
+			public class CRITTER_TEMPERATURE_UNCOMFORTABLE
+			{
+				public static LocString NAME = "Uncomfortable Body Temperature";
+
+				public static LocString TOOLTIP = "";
+			}
+
+			public class CRITTER_TEMPERATURE_DEADLY
+			{
+				public static LocString NAME = "Deadly Temperature";
+
+				public static LocString TOOLTIP = "";
+			}
+
 			public class MISERABLE
 			{
 				public static LocString NAME = "Mood: Miserable";
@@ -4417,20 +4468,6 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" because it ate from a feeder"
 				});
-			}
-
-			public class CRITTER_TEMPERATURE_UNCOMFORTABLE
-			{
-				public static LocString NAME = "Uncomfortable Body Temperature";
-
-				public static LocString TOOLTIP = "";
-			}
-
-			public class CRITTER_TEMPERATURE_DEADLY
-			{
-				public static LocString NAME = "Deadly Temperature";
-
-				public static LocString TOOLTIP = "";
 			}
 
 			public class WILD
@@ -4571,6 +4608,13 @@ namespace STRINGS
 				public static LocString NAME = "Just Ate";
 
 				public static LocString TOOLTIP = "This critter's recent meal is boosting their fur growth";
+			}
+
+			public class GOLDBELLYWELLFED
+			{
+				public static LocString NAME = "Regal Meal";
+
+				public static LocString TOOLTIP = "This critter's recent meal is boosting their crest growth";
 			}
 
 			public class CRITTERCONDOINTERACTEFFECT

@@ -156,6 +156,27 @@ namespace System.Security.Cryptography
 			throw new CryptographicException(-2146893816);
 		}
 
+		public void AppendData(ReadOnlySpan<byte> data)
+		{
+			this.AppendData(data.ToArray());
+		}
+
+		public bool TryGetHashAndReset(Span<byte> destination, out int bytesWritten)
+		{
+			if (this._disposed)
+			{
+				throw new ObjectDisposedException(typeof(IncrementalHash).Name);
+			}
+			byte[] hashAndReset = this.GetHashAndReset();
+			if (hashAndReset.AsSpan<byte>().TryCopyTo(destination))
+			{
+				bytesWritten = hashAndReset.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
 		internal IncrementalHash()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();

@@ -28,13 +28,28 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 			this.ReserverCrop(smi);
 			smi.GoTo(this.moveToCrop);
 		});
-		this.moveToCrop.ToggleStatusItem(CREATURES.STATUSITEMS.DIVERGENT_WILL_TEND.NAME, CREATURES.STATUSITEMS.DIVERGENT_WILL_TEND.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).MoveTo((CropTendingStates.Instance smi) => smi.moveCell, this.tendCrop, this.behaviourcomplete, false).ParamTransition<GameObject>(this.targetCrop, this.behaviourcomplete, (CropTendingStates.Instance smi, GameObject p) => this.targetCrop.Get(smi) == null);
-		this.tendCrop.DefaultState(this.tendCrop.pre).ToggleStatusItem(CREATURES.STATUSITEMS.DIVERGENT_TENDING.NAME, CREATURES.STATUSITEMS.DIVERGENT_TENDING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ParamTransition<GameObject>(this.targetCrop, this.behaviourcomplete, (CropTendingStates.Instance smi, GameObject p) => this.targetCrop.Get(smi) == null)
-			.Enter(delegate(CropTendingStates.Instance smi)
-			{
-				smi.animSet = this.GetCropTendingAnimSet(smi);
-				this.StoreSymbolsVisibility(smi);
-			});
+		GameStateMachine<CropTendingStates, CropTendingStates.Instance, IStateMachineTarget, CropTendingStates.Def>.State state = this.moveToCrop;
+		string text = CREATURES.STATUSITEMS.DIVERGENT_WILL_TEND.NAME;
+		string text2 = CREATURES.STATUSITEMS.DIVERGENT_WILL_TEND.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory).MoveTo((CropTendingStates.Instance smi) => smi.moveCell, this.tendCrop, this.behaviourcomplete, false).ParamTransition<GameObject>(this.targetCrop, this.behaviourcomplete, (CropTendingStates.Instance smi, GameObject p) => this.targetCrop.Get(smi) == null);
+		GameStateMachine<CropTendingStates, CropTendingStates.Instance, IStateMachineTarget, CropTendingStates.Def>.State state2 = this.tendCrop.DefaultState(this.tendCrop.pre);
+		string text4 = CREATURES.STATUSITEMS.DIVERGENT_TENDING.NAME;
+		string text5 = CREATURES.STATUSITEMS.DIVERGENT_TENDING.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory).ParamTransition<GameObject>(this.targetCrop, this.behaviourcomplete, (CropTendingStates.Instance smi, GameObject p) => this.targetCrop.Get(smi) == null).Enter(delegate(CropTendingStates.Instance smi)
+		{
+			smi.animSet = this.GetCropTendingAnimSet(smi);
+			this.StoreSymbolsVisibility(smi);
+		});
 		this.tendCrop.pre.Face(this.targetCrop, 0f).PlayAnim((CropTendingStates.Instance smi) => smi.animSet.crop_tending_pre, KAnim.PlayMode.Once).OnAnimQueueComplete(this.tendCrop.tend);
 		this.tendCrop.tend.Enter(delegate(CropTendingStates.Instance smi)
 		{
@@ -81,60 +96,77 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 		int num3 = -1;
 		foreach (Crop crop2 in Components.Crops.GetWorldItems(smi.gameObject.GetMyWorldId(), false))
 		{
-			if (smi.effect != null)
+			if (Vector2.SqrMagnitude(crop2.transform.position - smi.transform.position) <= 625f)
 			{
-				Effects component2 = crop2.GetComponent<Effects>();
-				if (component2 != null)
+				if (smi.effect != null)
 				{
-					bool flag = false;
-					foreach (string text in smi.def.ignoreEffectGroup)
+					Effects component2 = crop2.GetComponent<Effects>();
+					if (component2 != null)
 					{
-						if (component2.HasEffect(text))
+						bool flag = false;
+						foreach (string text in smi.def.ignoreEffectGroup)
 						{
-							flag = true;
-							break;
-						}
-					}
-					if (flag)
-					{
-						continue;
-					}
-				}
-			}
-			Growing component3 = crop2.GetComponent<Growing>();
-			if ((!(component3 != null) || !component3.IsGrown()) && !crop2.HasTag(GameTags.Creatures.ReservedByCreature) && Vector2.SqrMagnitude(crop2.transform.position - smi.transform.position) <= 625f)
-			{
-				int num4;
-				smi.def.interests.TryGetValue(crop2.PrefabID(), out num4);
-				if (num4 >= num3)
-				{
-					bool flag2 = num4 > num3;
-					int num5 = Grid.PosToCell(crop2);
-					int[] array = new int[]
-					{
-						Grid.CellLeft(num5),
-						Grid.CellRight(num5)
-					};
-					int num6 = 100;
-					int num7 = Grid.InvalidCell;
-					for (int j = 0; j < array.Length; j++)
-					{
-						if (Grid.IsValidCell(array[j]))
-						{
-							int navigationCost = component.GetNavigationCost(array[j]);
-							if (navigationCost != -1 && navigationCost < num6)
+							if (component2.HasEffect(text))
 							{
-								num6 = navigationCost;
-								num7 = array[j];
+								flag = true;
+								break;
 							}
 						}
+						if (flag)
+						{
+							continue;
+						}
 					}
-					if (num6 != -1 && num7 != Grid.InvalidCell && (flag2 || num6 < num2))
+				}
+				Growing component3 = crop2.GetComponent<Growing>();
+				if (!(component3 != null) || !component3.IsGrown())
+				{
+					KPrefabID component4 = crop2.GetComponent<KPrefabID>();
+					if (!component4.HasTag(GameTags.Creatures.ReservedByCreature))
 					{
-						num = num7;
-						num2 = num6;
-						num3 = num4;
-						crop = crop2;
+						int num4;
+						smi.def.interests.TryGetValue(crop2.PrefabID(), out num4);
+						if (num4 >= num3)
+						{
+							bool flag2 = num4 > num3;
+							int num5 = Grid.PosToCell(crop2);
+							int[] array = new int[]
+							{
+								Grid.CellLeft(num5),
+								Grid.CellRight(num5)
+							};
+							if (component4.HasTag(GameTags.PlantedOnFloorVessel))
+							{
+								array = new int[]
+								{
+									Grid.CellLeft(num5),
+									Grid.CellRight(num5),
+									Grid.CellDownLeft(num5),
+									Grid.CellDownRight(num5)
+								};
+							}
+							int num6 = 100;
+							int num7 = Grid.InvalidCell;
+							for (int j = 0; j < array.Length; j++)
+							{
+								if (Grid.IsValidCell(array[j]))
+								{
+									int navigationCost = component.GetNavigationCost(array[j]);
+									if (navigationCost != -1 && navigationCost < num6)
+									{
+										num6 = navigationCost;
+										num7 = array[j];
+									}
+								}
+							}
+							if (num6 != -1 && num7 != Grid.InvalidCell && (flag2 || num6 < num2))
+							{
+								num = num7;
+								num2 = num6;
+								num3 = num4;
+								crop = crop2;
+							}
+						}
 					}
 				}
 			}

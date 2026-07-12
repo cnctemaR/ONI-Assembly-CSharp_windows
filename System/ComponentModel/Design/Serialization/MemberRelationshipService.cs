@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class MemberRelationshipService
 	{
 		public MemberRelationship this[MemberRelationship source]
@@ -87,7 +85,7 @@ namespace System.ComponentModel.Design.Serialization
 				{
 					text2 = relationship.Owner.ToString();
 				}
-				throw new ArgumentException(global::SR.GetString("Relationships between {0}.{1} and {2}.{3} are not supported.", new object[]
+				throw new ArgumentException(SR.Format("Relationships between {0}.{1} and {2}.{3} are not supported.", new object[]
 				{
 					text,
 					source.Member.Name,
@@ -112,7 +110,7 @@ namespace System.ComponentModel.Design.Serialization
 			{
 				this.Owner = new WeakReference(rel.Owner);
 				this.Member = rel.Member;
-				this.hashCode = ((rel.Owner == null) ? 0 : rel.Owner.GetHashCode());
+				this._hashCode = ((rel.Owner == null) ? 0 : rel.Owner.GetHashCode());
 			}
 
 			public override bool Equals(object o)
@@ -139,14 +137,14 @@ namespace System.ComponentModel.Design.Serialization
 
 			public override int GetHashCode()
 			{
-				return this.hashCode;
+				return this._hashCode;
 			}
 
 			internal WeakReference Owner;
 
 			internal MemberDescriptor Member;
 
-			private int hashCode;
+			private int _hashCode;
 		}
 	}
 }

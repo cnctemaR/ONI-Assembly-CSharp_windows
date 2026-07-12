@@ -33,7 +33,7 @@ public class AsteroidDescriptorPanel : KMonoBehaviour
 		int num = Mathf.Clamp(cluster.difficulty, 0, ColonyDestinationAsteroidBeltData.survivalOptions.Count - 1);
 		global::Tuple<string, string, string> tuple = ColonyDestinationAsteroidBeltData.survivalOptions[num];
 		string text = string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third);
-		text = text.Trim(new char[] { '\n' });
+		text = text.Trim('\n');
 		this.clusterDifficultyLabel.SetText(text);
 	}
 

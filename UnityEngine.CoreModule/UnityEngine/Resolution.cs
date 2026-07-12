@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -30,7 +31,7 @@ namespace UnityEngine
 			}
 		}
 
-		public int refreshRate
+		public RefreshRate refreshRateRatio
 		{
 			get
 			{
@@ -39,6 +40,21 @@ namespace UnityEngine
 			set
 			{
 				this.m_RefreshRate = value;
+			}
+		}
+
+		[Obsolete("Resolution.refreshRate is obsolete. Use refreshRateRatio instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public int refreshRate
+		{
+			get
+			{
+				return (int)Math.Round(this.m_RefreshRate.value);
+			}
+			set
+			{
+				this.m_RefreshRate.numerator = (uint)value;
+				this.m_RefreshRate.denominator = 1U;
 			}
 		}
 
@@ -51,6 +67,6 @@ namespace UnityEngine
 
 		private int m_Height;
 
-		private int m_RefreshRate;
+		private RefreshRate m_RefreshRate;
 	}
 }

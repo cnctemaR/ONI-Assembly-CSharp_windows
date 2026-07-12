@@ -8,7 +8,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.rootNode;
+				return this._rootNode;
 			}
 		}
 
@@ -16,7 +16,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.topNode;
+				return this._topNode;
 			}
 		}
 
@@ -24,7 +24,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.isAttribute;
+				return this._isAttribute;
 			}
 		}
 
@@ -32,7 +32,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.isDss;
+				return this._isDss;
 			}
 		}
 
@@ -40,31 +40,31 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.isSelfAxis;
+				return this._isSelfAxis;
 			}
 		}
 
 		public ForwardAxis(DoubleLinkAxis axis, bool isdesorself)
 		{
-			this.isDss = isdesorself;
-			this.isAttribute = Asttree.IsAttribute(axis);
-			this.topNode = axis;
-			this.rootNode = axis;
-			while (this.rootNode.Input != null)
+			this._isDss = isdesorself;
+			this._isAttribute = Asttree.IsAttribute(axis);
+			this._topNode = axis;
+			this._rootNode = axis;
+			while (this._rootNode.Input != null)
 			{
-				this.rootNode = (DoubleLinkAxis)this.rootNode.Input;
+				this._rootNode = (DoubleLinkAxis)this._rootNode.Input;
 			}
-			this.isSelfAxis = Asttree.IsSelf(this.topNode);
+			this._isSelfAxis = Asttree.IsSelf(this._topNode);
 		}
 
-		private DoubleLinkAxis topNode;
+		private DoubleLinkAxis _topNode;
 
-		private DoubleLinkAxis rootNode;
+		private DoubleLinkAxis _rootNode;
 
-		private bool isAttribute;
+		private bool _isAttribute;
 
-		private bool isDss;
+		private bool _isDss;
 
-		private bool isSelfAxis;
+		private bool _isSelfAxis;
 	}
 }

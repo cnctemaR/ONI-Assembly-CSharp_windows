@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System
@@ -13,7 +14,6 @@ namespace System
 			DateTimeFormat.FormatDigits(outputBuffer, value, len, false);
 		}
 
-		[SecuritySafeCritical]
 		internal unsafe static void FormatDigits(StringBuilder outputBuffer, int value, int len, bool overrideLengthLimit)
 		{
 			if (!overrideLengthLimit && len > 2)
@@ -43,11 +43,11 @@ namespace System
 			outputBuffer.Append(HebrewNumber.ToString(digits));
 		}
 
-		internal static int ParseRepeatPattern(string format, int pos, char patternChar)
+		internal unsafe static int ParseRepeatPattern(ReadOnlySpan<char> format, int pos, char patternChar)
 		{
 			int length = format.Length;
 			int num = pos + 1;
-			while (num < length && format[num] == patternChar)
+			while (num < length && *format[num] == (ushort)patternChar)
 			{
 				num++;
 			}
@@ -89,15 +89,15 @@ namespace System
 			return dtfi.GetMonthName(month);
 		}
 
-		internal static int ParseQuoteString(string format, int pos, StringBuilder result)
+		internal unsafe static int ParseQuoteString(ReadOnlySpan<char> format, int pos, StringBuilder result)
 		{
 			int length = format.Length;
 			int num = pos;
-			char c = format[pos++];
+			char c = (char)(*format[pos++]);
 			bool flag = false;
 			while (pos < length)
 			{
-				char c2 = format[pos++];
+				char c2 = (char)(*format[pos++]);
 				if (c2 == c)
 				{
 					flag = true;
@@ -107,9 +107,9 @@ namespace System
 				{
 					if (pos >= length)
 					{
-						throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+						throw new FormatException("Input string was not in a correct format.");
 					}
-					result.Append(format[pos++]);
+					result.Append((char)(*format[pos++]));
 				}
 				else
 				{
@@ -118,31 +118,31 @@ namespace System
 			}
 			if (!flag)
 			{
-				throw new FormatException(string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Cannot find a matching quote character for the character '{0}'."), c));
+				throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Cannot find a matching quote character for the character '{0}'.", c));
 			}
 			return pos - num;
 		}
 
-		internal static int ParseNextChar(string format, int pos)
+		internal unsafe static int ParseNextChar(ReadOnlySpan<char> format, int pos)
 		{
 			if (pos >= format.Length - 1)
 			{
 				return -1;
 			}
-			return (int)format[pos + 1];
+			return (int)(*format[pos + 1]);
 		}
 
-		private static bool IsUseGenitiveForm(string format, int index, int tokenLen, char patternToMatch)
+		private unsafe static bool IsUseGenitiveForm(ReadOnlySpan<char> format, int index, int tokenLen, char patternToMatch)
 		{
 			int num = 0;
 			int num2 = index - 1;
-			while (num2 >= 0 && format[num2] != patternToMatch)
+			while (num2 >= 0 && *format[num2] != (ushort)patternToMatch)
 			{
 				num2--;
 			}
 			if (num2 >= 0)
 			{
-				while (--num2 >= 0 && format[num2] == patternToMatch)
+				while (--num2 >= 0 && *format[num2] == (ushort)patternToMatch)
 				{
 					num++;
 				}
@@ -152,14 +152,14 @@ namespace System
 				}
 			}
 			num2 = index + tokenLen;
-			while (num2 < format.Length && format[num2] != patternToMatch)
+			while (num2 < format.Length && *format[num2] != (ushort)patternToMatch)
 			{
 				num2++;
 			}
 			if (num2 < format.Length)
 			{
 				num = 0;
-				while (++num2 < format.Length && format[num2] == patternToMatch)
+				while (++num2 < format.Length && *format[num2] == (ushort)patternToMatch)
 				{
 					num++;
 				}
@@ -171,16 +171,22 @@ namespace System
 			return false;
 		}
 
-		private static string FormatCustomized(DateTime dateTime, string format, DateTimeFormatInfo dtfi, TimeSpan offset)
+		private unsafe static StringBuilder FormatCustomized(DateTime dateTime, ReadOnlySpan<char> format, DateTimeFormatInfo dtfi, TimeSpan offset, StringBuilder result)
 		{
 			Calendar calendar = dtfi.Calendar;
-			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			bool flag = calendar.ID == 8;
-			bool flag2 = true;
+			bool flag = false;
+			if (result == null)
+			{
+				flag = true;
+				result = StringBuilderCache.Acquire(16);
+			}
+			bool flag2 = !GlobalizationMode.Invariant && (ushort)calendar.ID == 8;
+			bool flag3 = !GlobalizationMode.Invariant && (ushort)calendar.ID == 3;
+			bool flag4 = true;
 			int i = 0;
 			while (i < format.Length)
 			{
-				char c = format[i];
+				char c = (char)(*format[i]);
 				int num2;
 				if (c <= 'K')
 				{
@@ -192,31 +198,34 @@ namespace System
 							{
 								if (c != '%')
 								{
-									goto IL_05C0;
+									goto IL_0686;
 								}
 								int num = DateTimeFormat.ParseNextChar(format, i);
 								if (num >= 0 && num != 37)
 								{
-									stringBuilder.Append(DateTimeFormat.FormatCustomized(dateTime, ((char)num).ToString(), dtfi, offset));
+									char c2 = (char)num;
+									DateTimeFormat.FormatCustomized(dateTime, MemoryMarshal.CreateReadOnlySpan<char>(ref c2, 1), dtfi, offset, result);
 									num2 = 2;
-									goto IL_05CC;
+									goto IL_0693;
 								}
-								throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+								if (flag)
+								{
+									StringBuilderCache.Release(result);
+								}
+								throw new FormatException("Input string was not in a correct format.");
 							}
 						}
 						else if (c != '\'')
 						{
 							if (c != '/')
 							{
-								goto IL_05C0;
+								goto IL_0686;
 							}
-							stringBuilder.Append(dtfi.DateSeparator);
+							result.Append(dtfi.DateSeparator);
 							num2 = 1;
-							goto IL_05CC;
+							goto IL_0693;
 						}
-						StringBuilder stringBuilder2 = new StringBuilder();
-						num2 = DateTimeFormat.ParseQuoteString(format, i, stringBuilder2);
-						stringBuilder.Append(stringBuilder2);
+						num2 = DateTimeFormat.ParseQuoteString(format, i, result);
 					}
 					else if (c <= 'F')
 					{
@@ -224,13 +233,13 @@ namespace System
 						{
 							if (c != 'F')
 							{
-								goto IL_05C0;
+								goto IL_0686;
 							}
-							goto IL_01D8;
+							goto IL_0209;
 						}
 						else
 						{
-							stringBuilder.Append(dtfi.TimeSeparator);
+							result.Append(dtfi.TimeSeparator);
 							num2 = 1;
 						}
 					}
@@ -238,15 +247,15 @@ namespace System
 					{
 						if (c != 'K')
 						{
-							goto IL_05C0;
+							goto IL_0686;
 						}
 						num2 = 1;
-						DateTimeFormat.FormatCustomizedRoundripTimeZone(dateTime, offset, stringBuilder);
+						DateTimeFormat.FormatCustomizedRoundripTimeZone(dateTime, offset, result);
 					}
 					else
 					{
 						num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-						DateTimeFormat.FormatDigits(stringBuilder, dateTime.Hour, num2);
+						DateTimeFormat.FormatDigits(result, dateTime.Hour, num2);
 					}
 				}
 				else if (c <= 'm')
@@ -257,14 +266,18 @@ namespace System
 						{
 							if (c != '\\')
 							{
-								goto IL_05C0;
+								goto IL_0686;
 							}
 							int num = DateTimeFormat.ParseNextChar(format, i);
 							if (num < 0)
 							{
-								throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+								if (flag)
+								{
+									StringBuilderCache.Release(result);
+								}
+								throw new FormatException("Input string was not in a correct format.");
 							}
-							stringBuilder.Append((char)num);
+							result.Append((char)num);
 							num2 = 2;
 						}
 						else
@@ -273,28 +286,28 @@ namespace System
 							int month = calendar.GetMonth(dateTime);
 							if (num2 <= 2)
 							{
-								if (flag)
+								if (flag2 && !GlobalizationMode.Invariant)
 								{
-									DateTimeFormat.HebrewFormatDigits(stringBuilder, month);
+									DateTimeFormat.HebrewFormatDigits(result, month);
 								}
 								else
 								{
-									DateTimeFormat.FormatDigits(stringBuilder, month, num2);
+									DateTimeFormat.FormatDigits(result, month, num2);
 								}
 							}
-							else if (flag)
+							else if (flag2 && !GlobalizationMode.Invariant)
 							{
-								stringBuilder.Append(DateTimeFormat.FormatHebrewMonthName(dateTime, month, num2, dtfi));
+								result.Append(DateTimeFormat.FormatHebrewMonthName(dateTime, month, num2, dtfi));
 							}
 							else if ((dtfi.FormatFlags & DateTimeFormatFlags.UseGenitiveMonth) != DateTimeFormatFlags.None && num2 >= 4)
 							{
-								stringBuilder.Append(dtfi.internalGetMonthName(month, DateTimeFormat.IsUseGenitiveForm(format, i, num2, 'd') ? MonthNameStyles.Genitive : MonthNameStyles.Regular, false));
+								result.Append(dtfi.internalGetMonthName(month, DateTimeFormat.IsUseGenitiveForm(format, i, num2, 'd') ? MonthNameStyles.Genitive : MonthNameStyles.Regular, false));
 							}
 							else
 							{
-								stringBuilder.Append(DateTimeFormat.FormatMonth(month, num2, dtfi));
+								result.Append(DateTimeFormat.FormatMonth(month, num2, dtfi));
 							}
-							flag2 = false;
+							flag4 = false;
 						}
 					}
 					else
@@ -306,29 +319,29 @@ namespace System
 							if (num2 <= 2)
 							{
 								int dayOfMonth = calendar.GetDayOfMonth(dateTime);
-								if (flag)
+								if (flag2 && !GlobalizationMode.Invariant)
 								{
-									DateTimeFormat.HebrewFormatDigits(stringBuilder, dayOfMonth);
+									DateTimeFormat.HebrewFormatDigits(result, dayOfMonth);
 								}
 								else
 								{
-									DateTimeFormat.FormatDigits(stringBuilder, dayOfMonth, num2);
+									DateTimeFormat.FormatDigits(result, dayOfMonth, num2);
 								}
 							}
 							else
 							{
 								int dayOfWeek = (int)calendar.GetDayOfWeek(dateTime);
-								stringBuilder.Append(DateTimeFormat.FormatDayOfWeek(dayOfWeek, num2, dtfi));
+								result.Append(DateTimeFormat.FormatDayOfWeek(dayOfWeek, num2, dtfi));
 							}
-							flag2 = false;
+							flag4 = false;
 							break;
 						case 'e':
-							goto IL_05C0;
+							goto IL_0686;
 						case 'f':
-							goto IL_01D8;
+							goto IL_0209;
 						case 'g':
 							num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-							stringBuilder.Append(dtfi.GetEraName(calendar.GetEra(dateTime)));
+							result.Append(dtfi.GetEraName(calendar.GetEra(dateTime)));
 							break;
 						case 'h':
 						{
@@ -338,16 +351,16 @@ namespace System
 							{
 								num3 = 12;
 							}
-							DateTimeFormat.FormatDigits(stringBuilder, num3, num2);
+							DateTimeFormat.FormatDigits(result, num3, num2);
 							break;
 						}
 						default:
 							if (c != 'm')
 							{
-								goto IL_05C0;
+								goto IL_0686;
 							}
 							num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-							DateTimeFormat.FormatDigits(stringBuilder, dateTime.Minute, num2);
+							DateTimeFormat.FormatDigits(result, dateTime.Minute, num2);
 							break;
 						}
 					}
@@ -358,7 +371,7 @@ namespace System
 					{
 						if (c != 't')
 						{
-							goto IL_05C0;
+							goto IL_0686;
 						}
 						num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 						if (num2 == 1)
@@ -367,72 +380,80 @@ namespace System
 							{
 								if (dtfi.AMDesignator.Length >= 1)
 								{
-									stringBuilder.Append(dtfi.AMDesignator[0]);
+									result.Append(dtfi.AMDesignator[0]);
 								}
 							}
 							else if (dtfi.PMDesignator.Length >= 1)
 							{
-								stringBuilder.Append(dtfi.PMDesignator[0]);
+								result.Append(dtfi.PMDesignator[0]);
 							}
 						}
 						else
 						{
-							stringBuilder.Append((dateTime.Hour < 12) ? dtfi.AMDesignator : dtfi.PMDesignator);
+							result.Append((dateTime.Hour < 12) ? dtfi.AMDesignator : dtfi.PMDesignator);
 						}
 					}
 					else
 					{
 						num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-						DateTimeFormat.FormatDigits(stringBuilder, dateTime.Second, num2);
+						DateTimeFormat.FormatDigits(result, dateTime.Second, num2);
 					}
 				}
 				else if (c != 'y')
 				{
 					if (c != 'z')
 					{
-						goto IL_05C0;
+						goto IL_0686;
 					}
 					num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-					DateTimeFormat.FormatCustomizedTimeZone(dateTime, offset, format, num2, flag2, stringBuilder);
+					DateTimeFormat.FormatCustomizedTimeZone(dateTime, offset, format, num2, flag4, result);
 				}
 				else
 				{
 					int year = calendar.GetYear(dateTime);
 					num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
-					if (dtfi.HasForceTwoDigitYears)
+					if (flag3 && !AppContextSwitches.FormatJapaneseFirstYearAsANumber && year == 1 && i + num2 < format.Length - 1 && *format[i + num2] == 39 && *format[i + num2 + 1] == (ushort)"年"[0])
 					{
-						DateTimeFormat.FormatDigits(stringBuilder, year, (num2 <= 2) ? num2 : 2);
+						result.Append("元"[0]);
 					}
-					else if (calendar.ID == 8)
+					else if (dtfi.HasForceTwoDigitYears)
 					{
-						DateTimeFormat.HebrewFormatDigits(stringBuilder, year);
+						DateTimeFormat.FormatDigits(result, year, (num2 <= 2) ? num2 : 2);
+					}
+					else if (flag2 && !GlobalizationMode.Invariant)
+					{
+						DateTimeFormat.HebrewFormatDigits(result, year);
 					}
 					else if (num2 <= 2)
 					{
-						DateTimeFormat.FormatDigits(stringBuilder, year % 100, num2);
+						DateTimeFormat.FormatDigits(result, year % 100, num2);
 					}
 					else
 					{
-						string text = "D" + num2;
-						stringBuilder.Append(year.ToString(text, CultureInfo.InvariantCulture));
+						string text = "D" + num2.ToString();
+						result.Append(year.ToString(text, CultureInfo.InvariantCulture));
 					}
-					flag2 = false;
+					flag4 = false;
 				}
-				IL_05CC:
+				IL_0693:
 				i += num2;
 				continue;
-				IL_01D8:
+				IL_0209:
 				num2 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 				if (num2 > 7)
 				{
-					throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+					if (flag)
+					{
+						StringBuilderCache.Release(result);
+					}
+					throw new FormatException("Input string was not in a correct format.");
 				}
 				long num4 = dateTime.Ticks % 10000000L;
 				num4 /= (long)Math.Pow(10.0, (double)(7 - num2));
 				if (c == 'f')
 				{
-					stringBuilder.Append(((int)num4).ToString(DateTimeFormat.fixedNumberFormats[num2 - 1], CultureInfo.InvariantCulture));
-					goto IL_05CC;
+					result.Append(((int)num4).ToString(DateTimeFormat.fixedNumberFormats[num2 - 1], CultureInfo.InvariantCulture));
+					goto IL_0693;
 				}
 				int num5 = num2;
 				while (num5 > 0 && num4 % 10L == 0L)
@@ -442,24 +463,24 @@ namespace System
 				}
 				if (num5 > 0)
 				{
-					stringBuilder.Append(((int)num4).ToString(DateTimeFormat.fixedNumberFormats[num5 - 1], CultureInfo.InvariantCulture));
-					goto IL_05CC;
+					result.Append(((int)num4).ToString(DateTimeFormat.fixedNumberFormats[num5 - 1], CultureInfo.InvariantCulture));
+					goto IL_0693;
 				}
-				if (stringBuilder.Length > 0 && stringBuilder[stringBuilder.Length - 1] == '.')
+				if (result.Length > 0 && result[result.Length - 1] == '.')
 				{
-					stringBuilder.Remove(stringBuilder.Length - 1, 1);
-					goto IL_05CC;
+					result.Remove(result.Length - 1, 1);
+					goto IL_0693;
 				}
-				goto IL_05CC;
-				IL_05C0:
-				stringBuilder.Append(c);
+				goto IL_0693;
+				IL_0686:
+				result.Append(c);
 				num2 = 1;
-				goto IL_05CC;
+				goto IL_0693;
 			}
-			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+			return result;
 		}
 
-		private static void FormatCustomizedTimeZone(DateTime dateTime, TimeSpan offset, string format, int tokenLen, bool timeOnly, StringBuilder result)
+		private static void FormatCustomizedTimeZone(DateTime dateTime, TimeSpan offset, ReadOnlySpan<char> format, int tokenLen, bool timeOnly, StringBuilder result)
 		{
 			if (offset == DateTimeFormat.NullOffset)
 			{
@@ -469,9 +490,7 @@ namespace System
 				}
 				else if (dateTime.Kind == DateTimeKind.Utc)
 				{
-					DateTimeFormat.InvalidFormatForUtc(format, dateTime);
-					dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
-					offset = TimeZoneInfo.GetLocalUtcOffset(dateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime);
+					offset = TimeSpan.Zero;
 				}
 				else
 				{
@@ -524,12 +543,20 @@ namespace System
 				result.Append('-');
 				offset = offset.Negate();
 			}
-			result.AppendFormat(CultureInfo.InvariantCulture, "{0:00}:{1:00}", offset.Hours, offset.Minutes);
+			DateTimeFormat.Append2DigitNumber(result, offset.Hours);
+			result.Append(':');
+			DateTimeFormat.Append2DigitNumber(result, offset.Minutes);
 		}
 
-		internal static string GetRealFormat(string format, DateTimeFormatInfo dtfi)
+		private static void Append2DigitNumber(StringBuilder result, int val)
 		{
-			char c = format[0];
+			result.Append((char)(48 + val / 10));
+			result.Append((char)(48 + val % 10));
+		}
+
+		internal unsafe static string GetRealFormat(ReadOnlySpan<char> format, DateTimeFormatInfo dtfi)
+		{
+			char c = (char)(*format[0]);
 			if (c > 'U')
 			{
 				if (c != 'Y')
@@ -539,7 +566,7 @@ namespace System
 					case 'd':
 						return dtfi.ShortDatePattern;
 					case 'e':
-						goto IL_0159;
+						goto IL_015B;
 					case 'f':
 						return dtfi.LongDatePattern + " " + dtfi.ShortTimePattern;
 					case 'g':
@@ -548,18 +575,18 @@ namespace System
 						switch (c)
 						{
 						case 'm':
-							goto IL_0109;
+							goto IL_010B;
 						case 'n':
 						case 'p':
 						case 'q':
 						case 'v':
 						case 'w':
 						case 'x':
-							goto IL_0159;
+							goto IL_015B;
 						case 'o':
-							goto IL_0112;
+							goto IL_0114;
 						case 'r':
-							goto IL_011A;
+							goto IL_011C;
 						case 's':
 							return dtfi.SortableDateTimePattern;
 						case 't':
@@ -569,7 +596,7 @@ namespace System
 						case 'y':
 							break;
 						default:
-							goto IL_0159;
+							goto IL_015B;
 						}
 						break;
 					}
@@ -581,7 +608,7 @@ namespace System
 			case 'D':
 				return dtfi.LongDatePattern;
 			case 'E':
-				goto IL_0159;
+				goto IL_015B;
 			case 'F':
 				return dtfi.FullDateTimePattern;
 			case 'G':
@@ -595,42 +622,42 @@ namespace System
 				case 'P':
 				case 'Q':
 				case 'S':
-					goto IL_0159;
+					goto IL_015B;
 				case 'O':
-					goto IL_0112;
+					goto IL_0114;
 				case 'R':
-					goto IL_011A;
+					goto IL_011C;
 				case 'T':
 					return dtfi.LongTimePattern;
 				case 'U':
 					return dtfi.FullDateTimePattern;
 				default:
-					goto IL_0159;
+					goto IL_015B;
 				}
 				break;
 			}
-			IL_0109:
+			IL_010B:
 			return dtfi.MonthDayPattern;
-			IL_0112:
+			IL_0114:
 			return "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffK";
-			IL_011A:
+			IL_011C:
 			return dtfi.RFC1123Pattern;
-			IL_0159:
-			throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+			IL_015B:
+			throw new FormatException("Input string was not in a correct format.");
 		}
 
-		private static string ExpandPredefinedFormat(string format, ref DateTime dateTime, ref DateTimeFormatInfo dtfi, ref TimeSpan offset)
+		private unsafe static string ExpandPredefinedFormat(ReadOnlySpan<char> format, ref DateTime dateTime, ref DateTimeFormatInfo dtfi, ref TimeSpan offset)
 		{
-			char c = format[0];
+			char c = (char)(*format[0]);
 			if (c <= 'R')
 			{
 				if (c != 'O')
 				{
 					if (c != 'R')
 					{
-						goto IL_0160;
+						goto IL_015D;
 					}
-					goto IL_005A;
+					goto IL_005C;
 				}
 			}
 			else if (c != 'U')
@@ -642,12 +669,12 @@ namespace System
 				case 'p':
 				case 'q':
 				case 't':
-					goto IL_0160;
+					goto IL_015D;
 				case 'r':
-					goto IL_005A;
+					goto IL_005C;
 				case 's':
 					dtfi = DateTimeFormatInfo.InvariantInfo;
-					goto IL_0160;
+					goto IL_015D;
 				case 'u':
 					if (offset != DateTimeFormat.NullOffset)
 					{
@@ -658,16 +685,16 @@ namespace System
 						DateTimeFormat.InvalidFormatForLocal(format, dateTime);
 					}
 					dtfi = DateTimeFormatInfo.InvariantInfo;
-					goto IL_0160;
+					goto IL_015D;
 				default:
-					goto IL_0160;
+					goto IL_015D;
 				}
 			}
 			else
 			{
 				if (offset != DateTimeFormat.NullOffset)
 				{
-					throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+					throw new FormatException("Input string was not in a correct format.");
 				}
 				dtfi = (DateTimeFormatInfo)dtfi.Clone();
 				if (dtfi.Calendar.GetType() != typeof(GregorianCalendar))
@@ -675,11 +702,11 @@ namespace System
 					dtfi.Calendar = GregorianCalendar.GetDefaultInstance();
 				}
 				dateTime = dateTime.ToUniversalTime();
-				goto IL_0160;
+				goto IL_015D;
 			}
 			dtfi = DateTimeFormatInfo.InvariantInfo;
-			goto IL_0160;
-			IL_005A:
+			goto IL_015D;
+			IL_005C:
 			if (offset != DateTimeFormat.NullOffset)
 			{
 				dateTime -= offset;
@@ -689,70 +716,291 @@ namespace System
 				DateTimeFormat.InvalidFormatForLocal(format, dateTime);
 			}
 			dtfi = DateTimeFormatInfo.InvariantInfo;
-			IL_0160:
-			format = DateTimeFormat.GetRealFormat(format, dtfi);
-			return format;
+			IL_015D:
+			return DateTimeFormat.GetRealFormat(format, dtfi);
 		}
 
-		internal static string Format(DateTime dateTime, string format, DateTimeFormatInfo dtfi)
+		internal static string Format(DateTime dateTime, string format, IFormatProvider provider)
 		{
-			return DateTimeFormat.Format(dateTime, format, dtfi, DateTimeFormat.NullOffset);
+			return DateTimeFormat.Format(dateTime, format, provider, DateTimeFormat.NullOffset);
 		}
 
-		internal static string Format(DateTime dateTime, string format, DateTimeFormatInfo dtfi, TimeSpan offset)
+		internal unsafe static string Format(DateTime dateTime, string format, IFormatProvider provider, TimeSpan offset)
 		{
-			if (format == null || format.Length == 0)
+			if (format != null && format.Length == 1)
+			{
+				char c = format[0];
+				if (c <= 'R')
+				{
+					if (c != 'O')
+					{
+						if (c != 'R')
+						{
+							goto IL_0093;
+						}
+						goto IL_006E;
+					}
+				}
+				else if (c != 'o')
+				{
+					if (c != 'r')
+					{
+						goto IL_0093;
+					}
+					goto IL_006E;
+				}
+				Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)66], 33);
+				int num;
+				DateTimeFormat.TryFormatO(dateTime, offset, span, out num);
+				return span.Slice(0, num).ToString();
+				IL_006E:
+				string text = string.FastAllocateString(29);
+				int num2;
+				DateTimeFormat.TryFormatR(dateTime, offset, new Span<char>(text.GetRawStringData(), text.Length), out num2);
+				return text;
+			}
+			IL_0093:
+			DateTimeFormatInfo instance = DateTimeFormatInfo.GetInstance(provider);
+			return StringBuilderCache.GetStringAndRelease(DateTimeFormat.FormatStringBuilder(dateTime, format, instance, offset));
+		}
+
+		internal static bool TryFormat(DateTime dateTime, Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
+		{
+			return DateTimeFormat.TryFormat(dateTime, destination, out charsWritten, format, provider, DateTimeFormat.NullOffset);
+		}
+
+		internal unsafe static bool TryFormat(DateTime dateTime, Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider, TimeSpan offset)
+		{
+			if (format.Length == 1)
+			{
+				char c = (char)(*format[0]);
+				if (c <= 'R')
+				{
+					if (c != 'O')
+					{
+						if (c != 'R')
+						{
+							goto IL_0047;
+						}
+						goto IL_003C;
+					}
+				}
+				else if (c != 'o')
+				{
+					if (c != 'r')
+					{
+						goto IL_0047;
+					}
+					goto IL_003C;
+				}
+				return DateTimeFormat.TryFormatO(dateTime, offset, destination, out charsWritten);
+				IL_003C:
+				return DateTimeFormat.TryFormatR(dateTime, offset, destination, out charsWritten);
+			}
+			IL_0047:
+			DateTimeFormatInfo instance = DateTimeFormatInfo.GetInstance(provider);
+			StringBuilder stringBuilder = DateTimeFormat.FormatStringBuilder(dateTime, format, instance, offset);
+			bool flag = stringBuilder.Length <= destination.Length;
+			if (flag)
+			{
+				stringBuilder.CopyTo(0, destination, stringBuilder.Length);
+				charsWritten = stringBuilder.Length;
+			}
+			else
+			{
+				charsWritten = 0;
+			}
+			StringBuilderCache.Release(stringBuilder);
+			return flag;
+		}
+
+		private static StringBuilder FormatStringBuilder(DateTime dateTime, ReadOnlySpan<char> format, DateTimeFormatInfo dtfi, TimeSpan offset)
+		{
+			if (format.Length == 0)
 			{
 				bool flag = false;
 				if (dateTime.Ticks < 864000000000L)
 				{
-					int id = dtfi.Calendar.ID;
-					switch (id)
+					CalendarId calendarId = (CalendarId)dtfi.Calendar.ID;
+					switch (calendarId)
 					{
-					case 3:
-					case 4:
-					case 6:
-					case 8:
+					case CalendarId.JAPAN:
+					case CalendarId.TAIWAN:
+					case CalendarId.HIJRI:
+					case CalendarId.HEBREW:
 						break;
-					case 5:
-					case 7:
-						goto IL_0063;
+					case CalendarId.KOREA:
+					case CalendarId.THAI:
+						goto IL_0062;
 					default:
-						if (id != 13 && id - 22 > 1)
+						if (calendarId != CalendarId.JULIAN && calendarId - CalendarId.PERSIAN > 1)
 						{
-							goto IL_0063;
+							goto IL_0062;
 						}
 						break;
 					}
 					flag = true;
 					dtfi = DateTimeFormatInfo.InvariantInfo;
 				}
-				IL_0063:
+				IL_0062:
 				if (offset == DateTimeFormat.NullOffset)
 				{
-					if (flag)
-					{
-						format = "s";
-					}
-					else
-					{
-						format = "G";
-					}
-				}
-				else if (flag)
-				{
-					format = "yyyy'-'MM'-'ddTHH':'mm':'ss zzz";
+					format = (flag ? "s" : "G");
 				}
 				else
 				{
-					format = dtfi.DateTimeOffsetPattern;
+					format = (flag ? "yyyy'-'MM'-'ddTHH':'mm':'ss zzz" : dtfi.DateTimeOffsetPattern);
 				}
 			}
 			if (format.Length == 1)
 			{
 				format = DateTimeFormat.ExpandPredefinedFormat(format, ref dateTime, ref dtfi, ref offset);
 			}
-			return DateTimeFormat.FormatCustomized(dateTime, format, dtfi, offset);
+			return DateTimeFormat.FormatCustomized(dateTime, format, dtfi, offset, null);
+		}
+
+		private unsafe static bool TryFormatO(DateTime dateTime, TimeSpan offset, Span<char> destination, out int charsWritten)
+		{
+			int num = 27;
+			DateTimeKind dateTimeKind = DateTimeKind.Local;
+			if (offset == DateTimeFormat.NullOffset)
+			{
+				dateTimeKind = dateTime.Kind;
+				if (dateTimeKind == DateTimeKind.Local)
+				{
+					offset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+					num += 6;
+				}
+				else if (dateTimeKind == DateTimeKind.Utc)
+				{
+					num++;
+				}
+			}
+			else
+			{
+				num += 6;
+			}
+			if (destination.Length < num)
+			{
+				charsWritten = 0;
+				return false;
+			}
+			charsWritten = num;
+			ref char ptr = ref destination[26];
+			DateTimeFormat.WriteFourDecimalDigits((uint)dateTime.Year, destination, 0);
+			*destination[4] = '-';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Month, destination, 5);
+			*destination[7] = '-';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Day, destination, 8);
+			*destination[10] = 'T';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Hour, destination, 11);
+			*destination[13] = ':';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Minute, destination, 14);
+			*destination[16] = ':';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Second, destination, 17);
+			*destination[19] = '.';
+			DateTimeFormat.WriteDigits((ulong)((uint)(dateTime.Ticks % 10000000L)), destination.Slice(20, 7));
+			if (dateTimeKind == DateTimeKind.Local)
+			{
+				char c;
+				if (offset < default(TimeSpan))
+				{
+					c = '-';
+					offset = TimeSpan.FromTicks(-offset.Ticks);
+				}
+				else
+				{
+					c = '+';
+				}
+				DateTimeFormat.WriteTwoDecimalDigits((uint)offset.Minutes, destination, 31);
+				*destination[30] = ':';
+				DateTimeFormat.WriteTwoDecimalDigits((uint)offset.Hours, destination, 28);
+				*destination[27] = c;
+			}
+			else if (dateTimeKind == DateTimeKind.Utc)
+			{
+				*destination[27] = 'Z';
+			}
+			return true;
+		}
+
+		private unsafe static bool TryFormatR(DateTime dateTime, TimeSpan offset, Span<char> destination, out int charsWritten)
+		{
+			if (28 >= destination.Length)
+			{
+				charsWritten = 0;
+				return false;
+			}
+			if (offset != DateTimeFormat.NullOffset)
+			{
+				dateTime -= offset;
+			}
+			int num;
+			int num2;
+			int num3;
+			dateTime.GetDatePart(out num, out num2, out num3);
+			string text = DateTimeFormat.InvariantAbbreviatedDayNames[(int)dateTime.DayOfWeek];
+			string text2 = DateTimeFormat.InvariantAbbreviatedMonthNames[num2 - 1];
+			*destination[0] = text[0];
+			*destination[1] = text[1];
+			*destination[2] = text[2];
+			*destination[3] = ',';
+			*destination[4] = ' ';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)num3, destination, 5);
+			*destination[7] = ' ';
+			*destination[8] = text2[0];
+			*destination[9] = text2[1];
+			*destination[10] = text2[2];
+			*destination[11] = ' ';
+			DateTimeFormat.WriteFourDecimalDigits((uint)num, destination, 12);
+			*destination[16] = ' ';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Hour, destination, 17);
+			*destination[19] = ':';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Minute, destination, 20);
+			*destination[22] = ':';
+			DateTimeFormat.WriteTwoDecimalDigits((uint)dateTime.Second, destination, 23);
+			*destination[25] = ' ';
+			*destination[26] = 'G';
+			*destination[27] = 'M';
+			*destination[28] = 'T';
+			charsWritten = 29;
+			return true;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static void WriteTwoDecimalDigits(uint value, Span<char> destination, int offset)
+		{
+			uint num = 48U + value;
+			value /= 10U;
+			*destination[offset + 1] = (char)(num - value * 10U);
+			*destination[offset] = (char)(48U + value);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static void WriteFourDecimalDigits(uint value, Span<char> buffer, int startingIndex = 0)
+		{
+			uint num = 48U + value;
+			value /= 10U;
+			*buffer[startingIndex + 3] = (char)(num - value * 10U);
+			num = 48U + value;
+			value /= 10U;
+			*buffer[startingIndex + 2] = (char)(num - value * 10U);
+			num = 48U + value;
+			value /= 10U;
+			*buffer[startingIndex + 1] = (char)(num - value * 10U);
+			*buffer[startingIndex] = (char)(48U + value);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static void WriteDigits(ulong value, Span<char> buffer)
+		{
+			for (int i = buffer.Length - 1; i >= 1; i--)
+			{
+				ulong num = 48UL + value;
+				value /= 10UL;
+				*buffer[i] = (char)(num - value * 10UL);
+			}
+			*buffer[0] = (char)(48UL + value);
 		}
 
 		internal static string[] GetAllDateTimes(DateTime dateTime, char format, DateTimeFormatInfo dtfi)
@@ -768,7 +1016,7 @@ namespace System
 				case 'G':
 					break;
 				case 'E':
-					goto IL_0140;
+					goto IL_0138;
 				default:
 					switch (format)
 					{
@@ -779,7 +1027,7 @@ namespace System
 					case 'P':
 					case 'Q':
 					case 'S':
-						goto IL_0140;
+						goto IL_0138;
 					case 'O':
 					case 'R':
 						goto IL_011E;
@@ -795,7 +1043,7 @@ namespace System
 						return array2;
 					}
 					default:
-						goto IL_0140;
+						goto IL_0138;
 					}
 					break;
 				}
@@ -809,7 +1057,7 @@ namespace System
 				case 'g':
 					break;
 				case 'e':
-					goto IL_0140;
+					goto IL_0138;
 				default:
 					switch (format)
 					{
@@ -823,14 +1071,14 @@ namespace System
 					case 'v':
 					case 'w':
 					case 'x':
-						goto IL_0140;
+						goto IL_0138;
 					case 'o':
 					case 'r':
 					case 's':
 					case 'u':
 						goto IL_011E;
 					default:
-						goto IL_0140;
+						goto IL_0138;
 					}
 					break;
 				}
@@ -843,9 +1091,9 @@ namespace System
 			}
 			return array2;
 			IL_011E:
-			return new string[] { DateTimeFormat.Format(dateTime, new string(new char[] { format }), dtfi) };
-			IL_0140:
-			throw new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+			return new string[] { DateTimeFormat.Format(dateTime, new string(format, 1), dtfi) };
+			IL_0138:
+			throw new FormatException("Input string was not in a correct format.");
 		}
 
 		internal static string[] GetAllDateTimes(DateTime dateTime, DateTimeFormatInfo dtfi)
@@ -864,12 +1112,7 @@ namespace System
 			return array;
 		}
 
-		internal static void InvalidFormatForLocal(string format, DateTime dateTime)
-		{
-		}
-
-		[SecuritySafeCritical]
-		internal static void InvalidFormatForUtc(string format, DateTime dateTime)
+		internal static void InvalidFormatForLocal(ReadOnlySpan<char> format, DateTime dateTime)
 		{
 		}
 
@@ -888,6 +1131,14 @@ namespace System
 		internal const string RoundtripDateTimeUnfixed = "yyyy'-'MM'-'ddTHH':'mm':'ss zzz";
 
 		private const int DEFAULT_ALL_DATETIMES_SIZE = 132;
+
+		internal static readonly DateTimeFormatInfo InvariantFormatInfo = CultureInfo.InvariantCulture.DateTimeFormat;
+
+		internal static readonly string[] InvariantAbbreviatedMonthNames = DateTimeFormat.InvariantFormatInfo.AbbreviatedMonthNames;
+
+		internal static readonly string[] InvariantAbbreviatedDayNames = DateTimeFormat.InvariantFormatInfo.AbbreviatedDayNames;
+
+		internal const string Gmt = "GMT";
 
 		internal static string[] fixedNumberFormats = new string[] { "0", "00", "000", "0000", "00000", "000000", "0000000" };
 	}

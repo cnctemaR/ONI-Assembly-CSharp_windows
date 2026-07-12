@@ -260,54 +260,51 @@ public class SpaceScannerNetworkManager : ISim1000ms
 
 	private static void UpdateWorldDataScratchpads(Dictionary<int, SpaceScannerWorldData> worldIdToDataMap)
 	{
-		using (Dictionary<int, SpaceScannerWorldData>.Enumerator enumerator = worldIdToDataMap.GetEnumerator())
+		foreach (KeyValuePair<int, SpaceScannerWorldData> keyValuePair in worldIdToDataMap)
 		{
-			while (enumerator.MoveNext())
+			int num;
+			SpaceScannerWorldData spaceScannerWorldData;
+			keyValuePair.Deconstruct(out num, out spaceScannerWorldData);
+			SpaceScannerWorldData worldData = spaceScannerWorldData;
+			if (worldData.scratchpad == null)
 			{
-				int num;
-				SpaceScannerWorldData spaceScannerWorldData;
-				enumerator.Current.Deconstruct<int, SpaceScannerWorldData>(out num, out spaceScannerWorldData);
-				SpaceScannerWorldData worldData = spaceScannerWorldData;
-				if (worldData.scratchpad == null)
-				{
-					worldData.scratchpad = new SpaceScannerWorldData.Scratchpad();
-				}
-				worldData.scratchpad.ballisticObjects.Clear();
-				worldData.scratchpad.lastDetectedMeteorShowers.RemoveWhere((MeteorShowerEvent.StatesInstance meteorShower) => meteorShower.IsNullOrDestroyed() || meteorShower.IsNullOrStopped() || 200f < meteorShower.TimeUntilNextShower());
-				worldData.scratchpad.lastDetectedRocketsBaseGame.RemoveWhere(delegate(LaunchConditionManager rocket)
-				{
-					if (rocket.IsNullOrDestroyed())
-					{
-						return true;
-					}
-					Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(rocket);
-					return spacecraftFromLaunchConditionManager.IsNullOrDestroyed() || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && 200f < spacecraftFromLaunchConditionManager.GetTimeLeft()) || spacecraftFromLaunchConditionManager.GetTimeLeft() < 1f;
-				});
-				worldData.scratchpad.lastDetectedRocketsDLC1.RemoveWhere(delegate(Clustercraft clustercraft)
-				{
-					if (clustercraft.IsNullOrDestroyed())
-					{
-						return true;
-					}
-					ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
-					if (component.IsNullOrDestroyed())
-					{
-						return true;
-					}
-					if (component.IsTraveling())
-					{
-						if (component.GetDestinationWorldID() != worldData.worldId)
-						{
-							return true;
-						}
-						if (200f < component.TravelETA())
-						{
-							return true;
-						}
-					}
-					return component.TravelETA() < 1f;
-				});
+				worldData.scratchpad = new SpaceScannerWorldData.Scratchpad();
 			}
+			worldData.scratchpad.ballisticObjects.Clear();
+			worldData.scratchpad.lastDetectedMeteorShowers.RemoveWhere((MeteorShowerEvent.StatesInstance meteorShower) => meteorShower.IsNullOrDestroyed() || meteorShower.IsNullOrStopped() || 200f < meteorShower.TimeUntilNextShower());
+			worldData.scratchpad.lastDetectedRocketsBaseGame.RemoveWhere(delegate(LaunchConditionManager rocket)
+			{
+				if (rocket.IsNullOrDestroyed())
+				{
+					return true;
+				}
+				Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(rocket);
+				return spacecraftFromLaunchConditionManager.IsNullOrDestroyed() || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && 200f < spacecraftFromLaunchConditionManager.GetTimeLeft()) || spacecraftFromLaunchConditionManager.GetTimeLeft() < 1f;
+			});
+			worldData.scratchpad.lastDetectedRocketsDLC1.RemoveWhere(delegate(Clustercraft clustercraft)
+			{
+				if (clustercraft.IsNullOrDestroyed())
+				{
+					return true;
+				}
+				ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
+				if (component.IsNullOrDestroyed())
+				{
+					return true;
+				}
+				if (component.IsTraveling())
+				{
+					if (component.GetDestinationWorldID() != worldData.worldId)
+					{
+						return true;
+					}
+					if (200f < component.TravelETA())
+					{
+						return true;
+					}
+				}
+				return component.TravelETA() < 1f;
+			});
 		}
 		if (Components.DetectorNetworks.GetWorldsIds().Count == 0)
 		{

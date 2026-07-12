@@ -9,8 +9,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/Material.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/Material.h")]
 	public class Material : Object
 	{
 		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", false)]
@@ -42,8 +42,8 @@ namespace UnityEngine
 			Material.CreateWithMaterial(this, source);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Material(string contents)
 		{
 			Material.CreateWithString(this);
@@ -207,6 +207,124 @@ namespace UnityEngine
 			return this.HasProperty(Shader.PropertyToID(name));
 		}
 
+		[NativeName("HasFloatFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasFloatImpl(int name);
+
+		public bool HasFloat(string name)
+		{
+			return this.HasFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasFloat(int nameID)
+		{
+			return this.HasFloatImpl(nameID);
+		}
+
+		public bool HasInt(string name)
+		{
+			return this.HasFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasInt(int nameID)
+		{
+			return this.HasFloatImpl(nameID);
+		}
+
+		[NativeName("HasIntegerFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasIntImpl(int name);
+
+		public bool HasInteger(string name)
+		{
+			return this.HasIntImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasInteger(int nameID)
+		{
+			return this.HasIntImpl(nameID);
+		}
+
+		[NativeName("HasTextureFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasTextureImpl(int name);
+
+		public bool HasTexture(string name)
+		{
+			return this.HasTextureImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasTexture(int nameID)
+		{
+			return this.HasTextureImpl(nameID);
+		}
+
+		[NativeName("HasMatrixFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasMatrixImpl(int name);
+
+		public bool HasMatrix(string name)
+		{
+			return this.HasMatrixImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasMatrix(int nameID)
+		{
+			return this.HasMatrixImpl(nameID);
+		}
+
+		[NativeName("HasVectorFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasVectorImpl(int name);
+
+		public bool HasVector(string name)
+		{
+			return this.HasVectorImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasVector(int nameID)
+		{
+			return this.HasVectorImpl(nameID);
+		}
+
+		public bool HasColor(string name)
+		{
+			return this.HasVectorImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasColor(int nameID)
+		{
+			return this.HasVectorImpl(nameID);
+		}
+
+		[NativeName("HasBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasBufferImpl(int name);
+
+		public bool HasBuffer(string name)
+		{
+			return this.HasBufferImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasBuffer(int nameID)
+		{
+			return this.HasBufferImpl(nameID);
+		}
+
+		[NativeName("HasConstantBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasConstantBufferImpl(int name);
+
+		public bool HasConstantBuffer(string name)
+		{
+			return this.HasConstantBufferImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasConstantBuffer(int nameID)
+		{
+			return this.HasConstantBufferImpl(nameID);
+		}
+
 		public extern int renderQueue
 		{
 			[NativeName("GetActualRenderQueue")]
@@ -232,6 +350,70 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsKeywordEnabled(string keyword);
+
+		[FreeFunction("MaterialScripting::EnableKeyword", HasExplicitThis = true)]
+		private void EnableLocalKeyword(LocalKeyword keyword)
+		{
+			this.EnableLocalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("MaterialScripting::DisableKeyword", HasExplicitThis = true)]
+		private void DisableLocalKeyword(LocalKeyword keyword)
+		{
+			this.DisableLocalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("MaterialScripting::SetKeyword", HasExplicitThis = true)]
+		private void SetLocalKeyword(LocalKeyword keyword, bool value)
+		{
+			this.SetLocalKeyword_Injected(ref keyword, value);
+		}
+
+		[FreeFunction("MaterialScripting::IsKeywordEnabled", HasExplicitThis = true)]
+		private bool IsLocalKeywordEnabled(LocalKeyword keyword)
+		{
+			return this.IsLocalKeywordEnabled_Injected(ref keyword);
+		}
+
+		public void EnableKeyword(in LocalKeyword keyword)
+		{
+			this.EnableLocalKeyword(keyword);
+		}
+
+		public void DisableKeyword(in LocalKeyword keyword)
+		{
+			this.DisableLocalKeyword(keyword);
+		}
+
+		public void SetKeyword(in LocalKeyword keyword, bool value)
+		{
+			this.SetLocalKeyword(keyword, value);
+		}
+
+		public bool IsKeywordEnabled(in LocalKeyword keyword)
+		{
+			return this.IsLocalKeywordEnabled(keyword);
+		}
+
+		[FreeFunction("MaterialScripting::GetEnabledKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern LocalKeyword[] GetEnabledKeywords();
+
+		[FreeFunction("MaterialScripting::SetEnabledKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetEnabledKeywords(LocalKeyword[] keywords);
+
+		public LocalKeyword[] enabledKeywords
+		{
+			get
+			{
+				return this.GetEnabledKeywords();
+			}
+			set
+			{
+				this.SetEnabledKeywords(value);
+			}
+		}
 
 		public extern MaterialGlobalIlluminationFlags globalIlluminationFlags
 		{
@@ -309,6 +491,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CopyPropertiesFromMaterial(Material mat);
 
+		[FreeFunction("MaterialScripting::CopyMatchingPropertiesFrom", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void CopyMatchingPropertiesFromMaterial(Material mat);
+
 		[FreeFunction("MaterialScripting::GetShaderKeywords", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern string[] GetShaderKeywords();
@@ -328,6 +514,10 @@ namespace UnityEngine
 				this.SetShaderKeywords(value);
 			}
 		}
+
+		[FreeFunction("MaterialScripting::GetPropertyNames", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string[] GetPropertyNamesImpl(int propertyType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int ComputeCRC();
@@ -368,6 +558,10 @@ namespace UnityEngine
 			this.GetTexturePropertyNameIDsInternal(outNames);
 		}
 
+		[NativeName("SetIntFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetIntImpl(int name, int value);
+
 		[NativeName("SetFloatFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetFloatImpl(int name, float value);
@@ -396,7 +590,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
 
-		[NativeName("SetGraphicsBufferFromScript")]
+		[NativeName("SetBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
 
@@ -404,9 +598,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
-		[NativeName("SetConstantGraphicsBufferFromScript")]
+		[NativeName("SetConstantBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
+
+		[NativeName("GetIntFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetIntImpl(int name);
 
 		[NativeName("GetFloatFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -431,6 +629,22 @@ namespace UnityEngine
 		[NativeName("GetTextureFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Texture GetTextureImpl(int name);
+
+		[NativeName("GetBufferFromScript")]
+		private GraphicsBufferHandle GetBufferImpl(int name)
+		{
+			GraphicsBufferHandle graphicsBufferHandle;
+			this.GetBufferImpl_Injected(name, out graphicsBufferHandle);
+			return graphicsBufferHandle;
+		}
+
+		[NativeName("GetConstantBufferFromScript")]
+		private GraphicsBufferHandle GetConstantBufferImpl(int name)
+		{
+			GraphicsBufferHandle graphicsBufferHandle;
+			this.GetConstantBufferImpl_Injected(name, out graphicsBufferHandle);
+			return graphicsBufferHandle;
+		}
 
 		[FreeFunction(Name = "MaterialScripting::SetFloatArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -664,6 +878,16 @@ namespace UnityEngine
 			}
 		}
 
+		public void SetInt(string name, int value)
+		{
+			this.SetFloatImpl(Shader.PropertyToID(name), (float)value);
+		}
+
+		public void SetInt(int nameID, int value)
+		{
+			this.SetFloatImpl(nameID, (float)value);
+		}
+
 		public void SetFloat(string name, float value)
 		{
 			this.SetFloatImpl(Shader.PropertyToID(name), value);
@@ -674,14 +898,14 @@ namespace UnityEngine
 			this.SetFloatImpl(nameID, value);
 		}
 
-		public void SetInt(string name, int value)
+		public void SetInteger(string name, int value)
 		{
-			this.SetFloatImpl(Shader.PropertyToID(name), (float)value);
+			this.SetIntImpl(Shader.PropertyToID(name), value);
 		}
 
-		public void SetInt(int nameID, int value)
+		public void SetInteger(int nameID, int value)
 		{
-			this.SetFloatImpl(nameID, (float)value);
+			this.SetIntImpl(nameID, value);
 		}
 
 		public void SetColor(string name, Color value)
@@ -854,6 +1078,16 @@ namespace UnityEngine
 			this.SetMatrixArray(nameID, values, values.Length);
 		}
 
+		public int GetInt(string name)
+		{
+			return (int)this.GetFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public int GetInt(int nameID)
+		{
+			return (int)this.GetFloatImpl(nameID);
+		}
+
 		public float GetFloat(string name)
 		{
 			return this.GetFloatImpl(Shader.PropertyToID(name));
@@ -864,14 +1098,14 @@ namespace UnityEngine
 			return this.GetFloatImpl(nameID);
 		}
 
-		public int GetInt(string name)
+		public int GetInteger(string name)
 		{
-			return (int)this.GetFloatImpl(Shader.PropertyToID(name));
+			return this.GetIntImpl(Shader.PropertyToID(name));
 		}
 
-		public int GetInt(int nameID)
+		public int GetInteger(int nameID)
 		{
-			return (int)this.GetFloatImpl(nameID);
+			return this.GetIntImpl(nameID);
 		}
 
 		public Color GetColor(string name)
@@ -912,6 +1146,16 @@ namespace UnityEngine
 		public Texture GetTexture(int nameID)
 		{
 			return this.GetTextureImpl(nameID);
+		}
+
+		public GraphicsBufferHandle GetBuffer(string name)
+		{
+			return this.GetBufferImpl(Shader.PropertyToID(name));
+		}
+
+		public GraphicsBufferHandle GetConstantBuffer(string name)
+		{
+			return this.GetConstantBufferImpl(Shader.PropertyToID(name));
 		}
 
 		public float[] GetFloatArray(string name)
@@ -1036,6 +1280,23 @@ namespace UnityEngine
 			return new Vector2(textureScaleAndOffsetImpl.x, textureScaleAndOffsetImpl.y);
 		}
 
+		public string[] GetPropertyNames(MaterialPropertyType type)
+		{
+			return this.GetPropertyNamesImpl((int)type);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EnableLocalKeyword_Injected(ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DisableLocalKeyword_Injected(ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetLocalKeyword_Injected(ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool IsLocalKeywordEnabled_Injected(ref LocalKeyword keyword);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetColorImpl_Injected(int name, ref Color value);
 
@@ -1047,6 +1308,12 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetMatrixImpl_Injected(int name, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetBufferImpl_Injected(int name, out GraphicsBufferHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetConstantBufferImpl_Injected(int name, out GraphicsBufferHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetTextureScaleAndOffsetImpl_Injected(int name, out Vector4 ret);

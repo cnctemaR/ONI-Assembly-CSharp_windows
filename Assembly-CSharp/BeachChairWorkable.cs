@@ -22,7 +22,7 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		this.beachChair = base.GetComponent<BeachChair>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.timeLit = 0f;
 		this.beachChair.SetWorker(worker);
@@ -30,10 +30,10 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		worker.GetComponent<Effects>().Add("BeachChairRelaxing", false);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		bool flag = (float)Grid.LightIntensity[num] >= 9999f;
+		bool flag = (float)Grid.LightIntensity[num] >= (float)BeachChairConfig.TAN_LUX - 1f;
 		this.beachChair.SetLit(flag);
 		if (flag)
 		{
@@ -47,7 +47,7 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		return false;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (this.timeLit / this.workTime >= 0.75f)
@@ -63,13 +63,13 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		component.Add(this.beachChair.trackingEffect, true);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 		worker.GetComponent<Effects>().Remove("BeachChairRelaxing");
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();

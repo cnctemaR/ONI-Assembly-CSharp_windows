@@ -6,9 +6,8 @@ using UnityEngine.Rendering;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Camera/RenderSettings.h")]
-	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
+	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
 	public sealed class RenderSettings : Object
 	{
 		[Obsolete("Use RenderSettings.ambientIntensity instead (UnityUpgradable) -> ambientIntensity", false)]
@@ -204,10 +203,32 @@ namespace UnityEngine
 			}
 		}
 
-		public static extern Cubemap customReflection
+		[Obsolete("RenderSettings.customReflection has been deprecated in favor of RenderSettings.customReflectionTexture.", false)]
+		public static Cubemap customReflection
+		{
+			get
+			{
+				Cubemap cubemap = RenderSettings.customReflectionTexture as Cubemap;
+				bool flag = cubemap == null;
+				if (flag)
+				{
+					throw new ArgumentException("RenderSettings.customReflection is currently not referencing a cubemap.");
+				}
+				return cubemap;
+			}
+			[NativeThrows]
+			set
+			{
+				RenderSettings.customReflectionTexture = value;
+			}
+		}
+
+		[NativeProperty("CustomReflection")]
+		public static extern Texture customReflectionTexture
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[NativeThrows]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -226,6 +247,13 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[NativeProperty("GeneratedSkyboxReflection")]
+		internal static extern Cubemap defaultReflection
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public static extern DefaultReflectionMode defaultReflectionMode

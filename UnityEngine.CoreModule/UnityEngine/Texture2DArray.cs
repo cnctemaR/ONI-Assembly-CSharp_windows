@@ -11,6 +11,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/Texture2DArray.h")]
+	[ExcludeFromPreset]
 	public sealed class Texture2DArray : Texture
 	{
 		public static extern int allSlices
@@ -42,11 +43,11 @@ namespace UnityEngine
 
 		[FreeFunction("Texture2DArrayScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags);
+		private static extern bool Internal_CreateImpl([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags);
 
-		private static void Internal_Create([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags)
+		private static void Internal_Create([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags)
 		{
-			bool flag = !Texture2DArray.Internal_CreateImpl(mono, w, h, d, mipCount, format, flags);
+			bool flag = !Texture2DArray.Internal_CreateImpl(mono, w, h, d, mipCount, format, colorSpace, flags);
 			if (flag)
 			{
 				throw new UnityException("Failed to create 2D array texture because of invalid parameters.");
@@ -85,7 +86,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels(Color[] colors, int arrayElement, int miplevel);
+		public extern void SetPixels([Unmarshalled] Color[] colors, int arrayElement, int miplevel);
 
 		public void SetPixels(Color[] colors, int arrayElement)
 		{
@@ -94,7 +95,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels32(Color32[] colors, int arrayElement, int miplevel);
+		public extern void SetPixels32([Unmarshalled] Color32[] colors, int arrayElement, int miplevel);
 
 		public void SetPixels32(Color32[] colors, int arrayElement)
 		{
@@ -104,9 +105,55 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetImageDataPointer();
 
+		internal bool ValidateFormat(TextureFormat format, int width, int height)
+		{
+			bool flag = base.ValidateFormat(format);
+			bool flag2 = flag;
+			if (flag2)
+			{
+				bool flag3 = TextureFormat.PVRTC_RGB2 <= format && format <= TextureFormat.PVRTC_RGBA4;
+				bool flag4 = flag3 && (width != height || !Mathf.IsPowerOfTwo(width));
+				if (flag4)
+				{
+					throw new UnityException(string.Format("'{0}' demands texture to be square and have power-of-two dimensions", format.ToString()));
+				}
+			}
+			return flag;
+		}
+
+		internal bool ValidateFormat(GraphicsFormat format, int width, int height)
+		{
+			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag2 = flag;
+			if (flag2)
+			{
+				bool flag3 = GraphicsFormatUtility.IsPVRTCFormat(format);
+				bool flag4 = flag3 && (width != height || !Mathf.IsPowerOfTwo(width));
+				if (flag4)
+				{
+					throw new UnityException(string.Format("'{0}' demands texture to be square and have power-of-two dimensions", format.ToString()));
+				}
+			}
+			return flag;
+		}
+
+		[ExcludeFromDocs]
 		public Texture2DArray(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags)
 			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags)
 		{
+		}
+
+		[ExcludeFromDocs]
+		public Texture2DArray(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags, int mipCount)
+			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags)
+		{
+			GraphicsFormat graphicsFormat = SystemInfo.GetGraphicsFormat(format);
+			bool flag = !this.ValidateFormat(graphicsFormat, width, height);
+			if (!flag)
+			{
+				Texture2DArray.ValidateIsNotCrunched(flags);
+				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, base.GetTextureColorSpace(graphicsFormat), flags);
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -115,19 +162,20 @@ namespace UnityEngine
 		{
 		}
 
+		[ExcludeFromDocs]
 		public Texture2DArray(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
 		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag = !this.ValidateFormat(format, width, height);
 			if (!flag)
 			{
 				Texture2DArray.ValidateIsNotCrunched(flags);
-				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, format, flags);
+				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, format, base.GetTextureColorSpace(format), flags);
 			}
 		}
 
-		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, [DefaultValue("true")] bool linear)
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear, bool createUninitialized)
 		{
-			bool flag = !base.ValidateFormat(textureFormat);
+			bool flag = !this.ValidateFormat(textureFormat, width, height);
 			if (!flag)
 			{
 				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
@@ -137,18 +185,33 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
+				if (createUninitialized)
+				{
+					textureCreationFlags |= TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate;
+				}
 				Texture2DArray.ValidateIsNotCrunched(textureCreationFlags);
-				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, textureCreationFlags);
+				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, base.GetTextureColorSpace(linear), textureCreationFlags);
 			}
 		}
 
-		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, bool mipChain, [DefaultValue("true")] bool linear)
-			: this(width, height, depth, textureFormat, mipChain ? (-1) : 1, linear)
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear)
+			: this(width, height, depth, textureFormat, mipCount, linear, false)
 		{
 		}
 
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, bool mipChain, [DefaultValue("false")] bool linear, [DefaultValue("false")] bool createUninitialized)
+			: this(width, height, depth, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear, createUninitialized)
+		{
+		}
+
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, bool mipChain, [DefaultValue("false")] bool linear)
+			: this(width, height, depth, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear)
+		{
+		}
+
+		[ExcludeFromDocs]
 		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, bool mipChain)
-			: this(width, height, depth, textureFormat, mipChain ? (-1) : 1, false)
+			: this(width, height, depth, textureFormat, mipChain ? Texture.GenerateAllMips : 1, false)
 		{
 		}
 
@@ -162,7 +225,19 @@ namespace UnityEngine
 			this.ApplyImpl(updateMipmaps, makeNoLongerReadable);
 		}
 
-		public void SetPixelData<T>(T[] data, int mipLevel, int element, int sourceDataStartIndex = 0)
+		[ExcludeFromDocs]
+		public void Apply(bool updateMipmaps)
+		{
+			this.Apply(updateMipmaps, false);
+		}
+
+		[ExcludeFromDocs]
+		public void Apply()
+		{
+			this.Apply(true, false);
+		}
+
+		public void SetPixelData<T>(T[] data, int mipLevel, int element, [DefaultValue("0")] int sourceDataStartIndex = 0)
 		{
 			bool flag = sourceDataStartIndex < 0;
 			if (flag)
@@ -179,10 +254,10 @@ namespace UnityEngine
 			{
 				throw new UnityException("No texture data provided to SetPixelData.");
 			}
-			this.SetPixelDataImplArray(data, mipLevel, element, Marshal.SizeOf(data[0]), data.Length, sourceDataStartIndex);
+			this.SetPixelDataImplArray(data, mipLevel, element, Marshal.SizeOf<T>(data[0]), data.Length, sourceDataStartIndex);
 		}
 
-		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, int element, int sourceDataStartIndex = 0) where T : struct
+		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, int element, [DefaultValue("0")] int sourceDataStartIndex = 0) where T : struct
 		{
 			bool flag = sourceDataStartIndex < 0;
 			if (flag)
@@ -209,22 +284,28 @@ namespace UnityEngine
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			int pixelDataOffset = base.GetPixelDataOffset(base.mipmapCount, element);
-			int pixelDataOffset2 = base.GetPixelDataOffset(mipLevel, element);
-			int pixelDataSize = base.GetPixelDataSize(mipLevel, element);
+			bool flag2 = mipLevel < 0 || mipLevel >= base.mipmapCount;
+			if (flag2)
+			{
+				throw new ArgumentException("The passed in miplevel " + mipLevel.ToString() + " is invalid. The valid range is 0 through " + (base.mipmapCount - 1).ToString());
+			}
+			bool flag3 = element < 0 || element >= this.depth;
+			if (flag3)
+			{
+				throw new ArgumentException("The passed in element " + element.ToString() + " is invalid. The valid range is 0 through " + (this.depth - 1).ToString());
+			}
+			ulong pixelDataOffset = base.GetPixelDataOffset(base.mipmapCount, element);
+			ulong pixelDataOffset2 = base.GetPixelDataOffset(mipLevel, element);
+			ulong pixelDataSize = base.GetPixelDataSize(mipLevel, element);
 			int num = UnsafeUtility.SizeOf<T>();
-			IntPtr intPtr = new IntPtr(this.GetImageDataPointer().ToInt64() + (long)(pixelDataOffset * element + pixelDataOffset2));
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
-		}
-
-		public void Apply(bool updateMipmaps)
-		{
-			this.Apply(updateMipmaps, false);
-		}
-
-		public void Apply()
-		{
-			this.Apply(true, false);
+			ulong num2 = pixelDataSize / (ulong)((long)num);
+			bool flag4 = num2 > 2147483647UL;
+			if (flag4)
+			{
+				throw base.CreateNativeArrayLengthOverflowException();
+			}
+			IntPtr intPtr = new IntPtr((long)this.GetImageDataPointer() + (long)(pixelDataOffset * (ulong)((long)element) + pixelDataOffset2));
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, (int)num2, Allocator.None);
 		}
 
 		private static void ValidateIsNotCrunched(TextureCreationFlags flags)

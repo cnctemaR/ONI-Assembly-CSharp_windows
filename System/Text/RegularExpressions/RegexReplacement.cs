@@ -6,14 +6,13 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class RegexReplacement
 	{
-		internal RegexReplacement(string rep, RegexNode concat, Hashtable _caps)
+		public RegexReplacement(string rep, RegexNode concat, Hashtable _caps)
 		{
-			this._rep = rep;
 			if (concat.Type() != 25)
 			{
-				throw new ArgumentException(global::SR.GetString("Replacement pattern error."));
+				throw new ArgumentException("Replacement pattern error.");
 			}
-			StringBuilder stringBuilder = new StringBuilder();
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 			List<string> list = new List<string>();
 			List<int> list2 = new List<int>();
 			int i = 0;
@@ -23,13 +22,13 @@ namespace System.Text.RegularExpressions
 				switch (regexNode.Type())
 				{
 				case 9:
-					stringBuilder.Append(regexNode._ch);
+					stringBuilder.Append(regexNode.Ch);
 					break;
 				case 10:
 				case 11:
-					goto IL_00E9;
+					goto IL_00E2;
 				case 12:
-					stringBuilder.Append(regexNode._str);
+					stringBuilder.Append(regexNode.Str);
 					break;
 				case 13:
 				{
@@ -39,7 +38,7 @@ namespace System.Text.RegularExpressions
 						list.Add(stringBuilder.ToString());
 						stringBuilder.Length = 0;
 					}
-					int num = regexNode._m;
+					int num = regexNode.M;
 					if (_caps != null && num >= 0)
 					{
 						num = (int)_caps[num];
@@ -48,21 +47,36 @@ namespace System.Text.RegularExpressions
 					break;
 				}
 				default:
-					goto IL_00E9;
+					goto IL_00E2;
 				}
 				i++;
 				continue;
-				IL_00E9:
-				throw new ArgumentException(global::SR.GetString("Replacement pattern error."));
+				IL_00E2:
+				throw new ArgumentException("Replacement pattern error.");
 			}
 			if (stringBuilder.Length > 0)
 			{
 				list2.Add(list.Count);
 				list.Add(stringBuilder.ToString());
 			}
+			StringBuilderCache.Release(stringBuilder);
+			this.Pattern = rep;
 			this._strings = list;
 			this._rules = list2;
 		}
+
+		public static RegexReplacement GetOrCreate(WeakReference<RegexReplacement> replRef, string replacement, Hashtable caps, int capsize, Hashtable capnames, RegexOptions roptions)
+		{
+			RegexReplacement regexReplacement;
+			if (!replRef.TryGetTarget(out regexReplacement) || !regexReplacement.Pattern.Equals(replacement))
+			{
+				regexReplacement = RegexParser.ParseReplacement(replacement, caps, capsize, capnames, roptions);
+				replRef.SetTarget(regexReplacement);
+			}
+			return regexReplacement;
+		}
+
+		public string Pattern { get; }
 
 		private void ReplacementImpl(StringBuilder sb, Match match)
 		{
@@ -82,7 +96,7 @@ namespace System.Text.RegularExpressions
 					switch (-5 - num)
 					{
 					case -4:
-						sb.Append(match.GetOriginalString());
+						sb.Append(match.Text);
 						break;
 					case -3:
 						sb.Append(match.LastGroupToStringImpl());
@@ -109,53 +123,45 @@ namespace System.Text.RegularExpressions
 				}
 				else if (num < -4)
 				{
-					al.Add(match.GroupToStringImpl(-5 - num));
+					al.Add(match.GroupToStringImpl(-5 - num).ToString());
 				}
 				else
 				{
 					switch (-5 - num)
 					{
 					case -4:
-						al.Add(match.GetOriginalString());
+						al.Add(match.Text);
 						break;
 					case -3:
-						al.Add(match.LastGroupToStringImpl());
+						al.Add(match.LastGroupToStringImpl().ToString());
 						break;
 					case -2:
-						al.Add(match.GetRightSubstring());
+						al.Add(match.GetRightSubstring().ToString());
 						break;
 					case -1:
-						al.Add(match.GetLeftSubstring());
+						al.Add(match.GetLeftSubstring().ToString());
 						break;
 					}
 				}
 			}
 		}
 
-		internal string Pattern
+		public string Replacement(Match match)
 		{
-			get
-			{
-				return this._rep;
-			}
-		}
-
-		internal string Replacement(Match match)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 			this.ReplacementImpl(stringBuilder, match);
-			return stringBuilder.ToString();
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
 		}
 
-		internal string Replace(Regex regex, string input, int count, int startat)
+		public string Replace(Regex regex, string input, int count, int startat)
 		{
 			if (count < -1)
 			{
-				throw new ArgumentOutOfRangeException("count", global::SR.GetString("Count cannot be less than -1."));
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than -1.");
 			}
 			if (startat < 0 || startat > input.Length)
 			{
-				throw new ArgumentOutOfRangeException("startat", global::SR.GetString("Start index cannot be less than 0 or greater than input length."));
+				throw new ArgumentOutOfRangeException("startat", "Start index cannot be less than 0 or greater than input length.");
 			}
 			if (count == 0)
 			{
@@ -166,10 +172,9 @@ namespace System.Text.RegularExpressions
 			{
 				return input;
 			}
-			StringBuilder stringBuilder;
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 			if (!regex.RightToLeft)
 			{
-				stringBuilder = new StringBuilder();
 				int num = 0;
 				do
 				{
@@ -210,7 +215,6 @@ namespace System.Text.RegularExpressions
 					match = match.NextMatch();
 				}
 				while (match.Success);
-				stringBuilder = new StringBuilder();
 				if (num2 > 0)
 				{
 					stringBuilder.Append(input, 0, num2);
@@ -220,174 +224,21 @@ namespace System.Text.RegularExpressions
 					stringBuilder.Append(list[i]);
 				}
 			}
-			return stringBuilder.ToString();
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
 		}
 
-		internal static string Replace(MatchEvaluator evaluator, Regex regex, string input, int count, int startat)
-		{
-			if (evaluator == null)
-			{
-				throw new ArgumentNullException("evaluator");
-			}
-			if (count < -1)
-			{
-				throw new ArgumentOutOfRangeException("count", global::SR.GetString("Count cannot be less than -1."));
-			}
-			if (startat < 0 || startat > input.Length)
-			{
-				throw new ArgumentOutOfRangeException("startat", global::SR.GetString("Start index cannot be less than 0 or greater than input length."));
-			}
-			if (count == 0)
-			{
-				return input;
-			}
-			Match match = regex.Match(input, startat);
-			if (!match.Success)
-			{
-				return input;
-			}
-			StringBuilder stringBuilder;
-			if (!regex.RightToLeft)
-			{
-				stringBuilder = new StringBuilder();
-				int num = 0;
-				do
-				{
-					if (match.Index != num)
-					{
-						stringBuilder.Append(input, num, match.Index - num);
-					}
-					num = match.Index + match.Length;
-					stringBuilder.Append(evaluator(match));
-					if (--count == 0)
-					{
-						break;
-					}
-					match = match.NextMatch();
-				}
-				while (match.Success);
-				if (num < input.Length)
-				{
-					stringBuilder.Append(input, num, input.Length - num);
-				}
-			}
-			else
-			{
-				List<string> list = new List<string>();
-				int num2 = input.Length;
-				do
-				{
-					if (match.Index + match.Length != num2)
-					{
-						list.Add(input.Substring(match.Index + match.Length, num2 - match.Index - match.Length));
-					}
-					num2 = match.Index;
-					list.Add(evaluator(match));
-					if (--count == 0)
-					{
-						break;
-					}
-					match = match.NextMatch();
-				}
-				while (match.Success);
-				stringBuilder = new StringBuilder();
-				if (num2 > 0)
-				{
-					stringBuilder.Append(input, 0, num2);
-				}
-				for (int i = list.Count - 1; i >= 0; i--)
-				{
-					stringBuilder.Append(list[i]);
-				}
-			}
-			return stringBuilder.ToString();
-		}
+		private const int Specials = 4;
 
-		internal static string[] Split(Regex regex, string input, int count, int startat)
-		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", global::SR.GetString("Count cannot be less than -1."));
-			}
-			if (startat < 0 || startat > input.Length)
-			{
-				throw new ArgumentOutOfRangeException("startat", global::SR.GetString("Start index cannot be less than 0 or greater than input length."));
-			}
-			if (count == 1)
-			{
-				return new string[] { input };
-			}
-			count--;
-			Match match = regex.Match(input, startat);
-			if (!match.Success)
-			{
-				return new string[] { input };
-			}
-			List<string> list = new List<string>();
-			if (!regex.RightToLeft)
-			{
-				int num = 0;
-				do
-				{
-					list.Add(input.Substring(num, match.Index - num));
-					num = match.Index + match.Length;
-					for (int i = 1; i < match.Groups.Count; i++)
-					{
-						if (match.IsMatched(i))
-						{
-							list.Add(match.Groups[i].ToString());
-						}
-					}
-					if (--count == 0)
-					{
-						break;
-					}
-					match = match.NextMatch();
-				}
-				while (match.Success);
-				list.Add(input.Substring(num, input.Length - num));
-			}
-			else
-			{
-				int num2 = input.Length;
-				do
-				{
-					list.Add(input.Substring(match.Index + match.Length, num2 - match.Index - match.Length));
-					num2 = match.Index;
-					for (int j = 1; j < match.Groups.Count; j++)
-					{
-						if (match.IsMatched(j))
-						{
-							list.Add(match.Groups[j].ToString());
-						}
-					}
-					if (--count == 0)
-					{
-						break;
-					}
-					match = match.NextMatch();
-				}
-				while (match.Success);
-				list.Add(input.Substring(0, num2));
-				list.Reverse(0, list.Count);
-			}
-			return list.ToArray();
-		}
+		public const int LeftPortion = -1;
 
-		internal string _rep;
+		public const int RightPortion = -2;
 
-		internal List<string> _strings;
+		public const int LastGroup = -3;
 
-		internal List<int> _rules;
+		public const int WholeString = -4;
 
-		internal const int Specials = 4;
+		private readonly List<string> _strings;
 
-		internal const int LeftPortion = -1;
-
-		internal const int RightPortion = -2;
-
-		internal const int LastGroup = -3;
-
-		internal const int WholeString = -4;
+		private readonly List<int> _rules;
 	}
 }

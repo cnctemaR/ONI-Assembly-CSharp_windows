@@ -11,14 +11,14 @@ namespace System.Net
 
 		public static string GetWebStatusString(string Res, WebExceptionStatus Status)
 		{
-			string @string = global::SR.GetString(WebExceptionMapping.GetWebStatusString(Status));
-			string string2 = global::SR.GetString(Res);
+			string @string = SR.GetString(WebExceptionMapping.GetWebStatusString(Status));
+			string string2 = SR.GetString(Res);
 			return string.Format(CultureInfo.CurrentCulture, string2, @string);
 		}
 
 		public static string GetWebStatusString(WebExceptionStatus Status)
 		{
-			return global::SR.GetString(WebExceptionMapping.GetWebStatusString(Status));
+			return SR.GetString(WebExceptionMapping.GetWebStatusString(Status));
 		}
 
 		public static string GetWebStatusCodeString(HttpStatusCode statusCode, string statusDescription)
@@ -29,7 +29,7 @@ namespace System.Net
 			string text3 = null;
 			try
 			{
-				text3 = global::SR.GetString("net_httpstatuscode_" + statusCode.ToString(), null);
+				text3 = SR.GetString("net_httpstatuscode_" + statusCode.ToString(), null);
 			}
 			catch
 			{
@@ -53,7 +53,7 @@ namespace System.Net
 			string text3 = null;
 			try
 			{
-				text3 = global::SR.GetString("net_ftpstatuscode_" + statusCode.ToString(), null);
+				text3 = SR.GetString("net_ftpstatuscode_" + statusCode.ToString(), null);
 			}
 			catch
 			{

@@ -403,7 +403,7 @@ public class Grid
 	{
 		if (cell % Grid.WidthInCells <= 0)
 		{
-			return -1;
+			return Grid.InvalidCell;
 		}
 		return cell - 1;
 	}
@@ -412,7 +412,7 @@ public class Grid
 	{
 		if (cell % Grid.WidthInCells >= Grid.WidthInCells - 1)
 		{
-			return -1;
+			return Grid.InvalidCell;
 		}
 		return cell + 1;
 	}
@@ -427,7 +427,7 @@ public class Grid
 
 	public static int CellUpLeft(int cell)
 	{
-		int num = -1;
+		int num = Grid.InvalidCell;
 		if (cell < (Grid.HeightInCells - 1) * Grid.WidthInCells && cell % Grid.WidthInCells > 0)
 		{
 			num = cell - 1 + Grid.WidthInCells;
@@ -437,7 +437,7 @@ public class Grid
 
 	public static int CellUpRight(int cell)
 	{
-		int num = -1;
+		int num = Grid.InvalidCell;
 		if (cell < (Grid.HeightInCells - 1) * Grid.WidthInCells && cell % Grid.WidthInCells < Grid.WidthInCells - 1)
 		{
 			num = cell + 1 + Grid.WidthInCells;
@@ -447,7 +447,7 @@ public class Grid
 
 	public static int CellDownLeft(int cell)
 	{
-		int num = -1;
+		int num = Grid.InvalidCell;
 		if (cell > Grid.WidthInCells && cell % Grid.WidthInCells > 0)
 		{
 			num = cell - 1 - Grid.WidthInCells;
@@ -457,7 +457,7 @@ public class Grid
 
 	public static int CellDownRight(int cell)
 	{
-		int num = -1;
+		int num = Grid.InvalidCell;
 		if (cell >= Grid.WidthInCells && cell % Grid.WidthInCells < Grid.WidthInCells - 1)
 		{
 			num = cell + 1 - Grid.WidthInCells;
@@ -1018,11 +1018,11 @@ public class Grid
 			{
 				num3 = 1;
 			}
-			num4 = 0;
+			num5 = 0;
 		}
 		int num9 = num7 >> 1;
-		int num10 = num5 + num6 * Grid.WidthInCells;
-		int num11 = num4 + num3 * Grid.WidthInCells;
+		int num10 = num4 + num6 * Grid.WidthInCells;
+		int num11 = num5 + num3 * Grid.WidthInCells;
 		int num12 = Grid.XYToCell(x, y);
 		for (int i = 1; i < num7; i++)
 		{

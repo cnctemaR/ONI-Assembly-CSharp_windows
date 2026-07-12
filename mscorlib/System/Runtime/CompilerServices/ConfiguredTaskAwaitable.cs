@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 
 namespace System.Runtime.CompilerServices
 {
-	public struct ConfiguredTaskAwaitable
+	public readonly struct ConfiguredTaskAwaitable
 	{
 		internal ConfiguredTaskAwaitable(Task task, bool continueOnCapturedContext)
 		{
@@ -19,8 +19,7 @@ namespace System.Runtime.CompilerServices
 
 		private readonly ConfiguredTaskAwaitable.ConfiguredTaskAwaiter m_configuredTaskAwaiter;
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-		public struct ConfiguredTaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion
+		public readonly struct ConfiguredTaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion, IConfiguredTaskAwaiter
 		{
 			internal ConfiguredTaskAwaiter(Task task, bool continueOnCapturedContext)
 			{
@@ -48,14 +47,15 @@ namespace System.Runtime.CompilerServices
 				TaskAwaiter.OnCompletedInternal(this.m_task, continuation, this.m_continueOnCapturedContext, false);
 			}
 
+			[StackTraceHidden]
 			public void GetResult()
 			{
 				TaskAwaiter.ValidateEnd(this.m_task);
 			}
 
-			private readonly Task m_task;
+			internal readonly Task m_task;
 
-			private readonly bool m_continueOnCapturedContext;
+			internal readonly bool m_continueOnCapturedContext;
 		}
 	}
 }

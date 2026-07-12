@@ -19,7 +19,7 @@ public class SculptingSoundEvent : SoundEvent
 	{
 		if (sound_name.Contains(":"))
 		{
-			string[] array = sound_name.Split(new char[] { ':' });
+			string[] array = sound_name.Split(':', StringSplitOptions.None);
 			if (array.Length != 2)
 			{
 				DebugUtil.LogErrorArgs(new object[]
@@ -80,7 +80,7 @@ public class SculptingSoundEvent : SoundEvent
 				int num2 = ((this.counterModulus == -1) ? 0 : ((num + 1) % this.counterModulus));
 				GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
 			}
-			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			Vector3 vector = behaviour.position;
 			float num3 = 1f;
 			if (base.objectIsSelectedAndVisible)
 			{
@@ -92,29 +92,26 @@ public class SculptingSoundEvent : SoundEvent
 				vector.z = 0f;
 			}
 			string text = GlobalAssets.GetSound("Hammer_sculpture", false);
-			Worker component = behaviour.GetComponent<Worker>();
+			WorkerBase component = behaviour.GetComponent<WorkerBase>();
 			if (component != null)
 			{
-				Workable workable = component.workable;
+				Workable workable = component.GetWorkable();
 				if (workable != null)
 				{
 					Building component2 = workable.GetComponent<Building>();
 					if (component2 != null)
 					{
 						string name = component2.Def.name;
-						if (name != null)
+						if (!(name == "MetalSculpture"))
 						{
-							if (!(name == "MetalSculpture"))
+							if (name == "MarbleSculpture")
 							{
-								if (name == "MarbleSculpture")
-								{
-									text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
-								}
+								text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
 							}
-							else
-							{
-								text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
-							}
+						}
+						else
+						{
+							text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
 						}
 					}
 				}

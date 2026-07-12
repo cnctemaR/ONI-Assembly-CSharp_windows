@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ListChangedEventArgs : EventArgs
 	{
 		public ListChangedEventArgs(ListChangedType listChangedType, int newIndex)
@@ -14,61 +12,29 @@ namespace System.ComponentModel
 		public ListChangedEventArgs(ListChangedType listChangedType, int newIndex, PropertyDescriptor propDesc)
 			: this(listChangedType, newIndex)
 		{
-			this.propDesc = propDesc;
-			this.oldIndex = newIndex;
+			this.PropertyDescriptor = propDesc;
+			this.OldIndex = newIndex;
 		}
 
 		public ListChangedEventArgs(ListChangedType listChangedType, PropertyDescriptor propDesc)
 		{
-			this.listChangedType = listChangedType;
-			this.propDesc = propDesc;
+			this.ListChangedType = listChangedType;
+			this.PropertyDescriptor = propDesc;
 		}
 
 		public ListChangedEventArgs(ListChangedType listChangedType, int newIndex, int oldIndex)
 		{
-			this.listChangedType = listChangedType;
-			this.newIndex = newIndex;
-			this.oldIndex = oldIndex;
+			this.ListChangedType = listChangedType;
+			this.NewIndex = newIndex;
+			this.OldIndex = oldIndex;
 		}
 
-		public ListChangedType ListChangedType
-		{
-			get
-			{
-				return this.listChangedType;
-			}
-		}
+		public ListChangedType ListChangedType { get; }
 
-		public int NewIndex
-		{
-			get
-			{
-				return this.newIndex;
-			}
-		}
+		public int NewIndex { get; }
 
-		public int OldIndex
-		{
-			get
-			{
-				return this.oldIndex;
-			}
-		}
+		public int OldIndex { get; }
 
-		public PropertyDescriptor PropertyDescriptor
-		{
-			get
-			{
-				return this.propDesc;
-			}
-		}
-
-		private ListChangedType listChangedType;
-
-		private int newIndex;
-
-		private int oldIndex;
-
-		private PropertyDescriptor propDesc;
+		public PropertyDescriptor PropertyDescriptor { get; }
 	}
 }

@@ -6,8 +6,8 @@ using System.Security.Policy;
 
 namespace System.Runtime.Hosting
 {
-	[MonoTODO("missing manifest support")]
 	[ComVisible(true)]
+	[MonoTODO("missing manifest support")]
 	public class ApplicationActivator
 	{
 		public virtual ObjectHandle CreateInstance(ActivationContext activationContext)

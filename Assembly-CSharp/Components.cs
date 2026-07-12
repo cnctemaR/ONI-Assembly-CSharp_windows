@@ -17,7 +17,11 @@ public class Components
 
 	public static Components.Cmps<MinionResume> MinionResumes = new Components.Cmps<MinionResume>();
 
-	public static Components.Cmps<Sleepable> Sleepables = new Components.Cmps<Sleepable>();
+	public static Dictionary<Tag, Components.Cmps<MinionIdentity>> MinionIdentitiesByModel = new Dictionary<Tag, Components.Cmps<MinionIdentity>>();
+
+	public static Dictionary<Tag, Components.Cmps<MinionIdentity>> LiveMinionIdentitiesByModel = new Dictionary<Tag, Components.Cmps<MinionIdentity>>();
+
+	public static Components.CmpsByWorld<Sleepable> NormalBeds = new Components.CmpsByWorld<Sleepable>();
 
 	public static Components.Cmps<IUsable> Toilets = new Components.Cmps<IUsable>();
 
@@ -169,6 +173,8 @@ public class Components
 
 	public static Components.Cmps<GameObject> FoodRehydrators = new Components.Cmps<GameObject>();
 
+	public static Components.CmpsByWorld<SocialGatheringPoint> SocialGatheringPoints = new Components.CmpsByWorld<SocialGatheringPoint>();
+
 	public static Components.CmpsByWorld<Geyser> Geysers = new Components.CmpsByWorld<Geyser>();
 
 	public static Components.CmpsByWorld<GeoTuner.Instance> GeoTuners = new Components.CmpsByWorld<GeoTuner.Instance>();
@@ -178,6 +184,12 @@ public class Components
 	public static Components.CmpsByWorld<GeothermalController> GeothermalControllers = new Components.CmpsByWorld<GeothermalController>();
 
 	public static Components.CmpsByWorld<GeothermalVent> GeothermalVents = new Components.CmpsByWorld<GeothermalVent>();
+
+	public static Components.CmpsByWorld<RemoteWorkerDock> RemoteWorkerDocks = new Components.CmpsByWorld<RemoteWorkerDock>();
+
+	public static Components.CmpsByWorld<IRemoteDockWorkTarget> RemoteDockWorkTargets = new Components.CmpsByWorld<IRemoteDockWorkTarget>();
+
+	public static Components.Cmps<Assignable> AssignableItems = new Components.Cmps<Assignable>();
 
 	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
 
@@ -192,6 +204,8 @@ public class Components
 	public static Components.Cmps<BeeHive.StatesInstance> BeeHives = new Components.Cmps<BeeHive.StatesInstance>();
 
 	public static Components.Cmps<StateMachine.Instance> EffectImmunityProviderStations = new Components.Cmps<StateMachine.Instance>();
+
+	public static Components.Cmps<PeeChoreMonitor.Instance> CriticalBladders = new Components.Cmps<PeeChoreMonitor.Instance>();
 
 	public class Cmps<T> : ICollection, IEnumerable, IEnumerable<T>
 	{
@@ -276,18 +290,39 @@ public class Components
 
 		public List<T> GetWorldItems(int worldId, bool checkChildWorlds = false)
 		{
-			List<T> list = new List<T>();
-			foreach (T t in this.Items)
+			ICollection<int> collection = null;
+			if (checkChildWorlds)
 			{
-				KMonoBehaviour kmonoBehaviour = t as KMonoBehaviour;
-				bool flag = kmonoBehaviour.GetMyWorldId() == worldId;
-				if (!flag && checkChildWorlds)
+				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+			}
+			return this.GetWorldItems(worldId, collection, null);
+		}
+
+		public List<T> GetWorldItems(int worldId, bool checkChildWorlds, Func<T, bool> filter)
+		{
+			ICollection<int> collection = null;
+			if (checkChildWorlds)
+			{
+				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+			}
+			return this.GetWorldItems(worldId, collection, filter);
+		}
+
+		public List<T> GetWorldItems(int worldId, ICollection<int> otherWorldIds, Func<T, bool> filter)
+		{
+			List<T> list = new List<T>();
+			for (int i = 0; i < this.Items.Count; i++)
+			{
+				T t = this.Items[i];
+				int myWorldId = (t as KMonoBehaviour).GetMyWorldId();
+				bool flag = worldId == myWorldId;
+				if (!flag && otherWorldIds != null && otherWorldIds.Contains(myWorldId))
 				{
-					WorldContainer myWorld = kmonoBehaviour.GetMyWorld();
-					if (myWorld != null && myWorld.ParentWorldId == worldId)
-					{
-						flag = true;
-					}
+					flag = true;
+				}
+				if (flag && filter != null)
+				{
+					flag = filter(t);
 				}
 				if (flag)
 				{
@@ -295,6 +330,32 @@ public class Components
 				}
 			}
 			return list;
+		}
+
+		public IEnumerable<T> WorldItemsEnumerate(int worldId, bool checkChildWorlds = false)
+		{
+			ICollection<int> collection = null;
+			if (checkChildWorlds)
+			{
+				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+			}
+			return this.WorldItemsEnumerate(worldId, collection);
+		}
+
+		public IEnumerable<T> WorldItemsEnumerate(int worldId, ICollection<int> otherWorldIds = null)
+		{
+			int num;
+			for (int index = 0; index < this.Items.Count; index = num + 1)
+			{
+				T t = this.Items[index];
+				int myWorldId = (t as KMonoBehaviour).GetMyWorldId();
+				if (myWorldId == worldId || (otherWorldIds != null && otherWorldIds.Contains(myWorldId)))
+				{
+					yield return t;
+				}
+				num = index;
+			}
+			yield break;
 		}
 
 		public event Action<T> OnAdd;
@@ -404,10 +465,59 @@ public class Components
 				int num = 0;
 				foreach (KeyValuePair<int, Components.Cmps<T>> keyValuePair in this.m_CmpsByWorld)
 				{
-					num += this.m_CmpsByWorld.Count;
+					num += keyValuePair.Value.Count;
 				}
 				return num;
 			}
+		}
+
+		public int CountWorldItems(int worldId, bool includeChildren = false)
+		{
+			int num = this.GetItems(worldId).Count;
+			if (includeChildren)
+			{
+				foreach (int num2 in ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds())
+				{
+					num += this.GetItems(num2).Count;
+				}
+			}
+			return num;
+		}
+
+		public IEnumerable<T> WorldItemsEnumerate(int worldId, bool checkChildWorlds = false)
+		{
+			ICollection<int> collection = null;
+			if (checkChildWorlds)
+			{
+				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+			}
+			return this.WorldItemsEnumerate(worldId, collection);
+		}
+
+		public IEnumerable<T> WorldItemsEnumerate(int worldId, ICollection<int> otherWorldIds = null)
+		{
+			List<T> items = this.GetItems(worldId);
+			int num;
+			for (int index = 0; index < items.Count; index = num + 1)
+			{
+				yield return items[index];
+				num = index;
+			}
+			if (otherWorldIds != null)
+			{
+				foreach (int num2 in otherWorldIds)
+				{
+					items = this.GetItems(num2);
+					for (int index = 0; index < items.Count; index = num + 1)
+					{
+						yield return items[index];
+						num = index;
+					}
+				}
+				IEnumerator<int> enumerator = null;
+			}
+			yield break;
+			yield break;
 		}
 
 		private Dictionary<int, Components.Cmps<T>> m_CmpsByWorld;

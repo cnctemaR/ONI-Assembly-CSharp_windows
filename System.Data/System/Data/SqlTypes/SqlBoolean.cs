@@ -166,7 +166,7 @@ namespace System.Data.SqlTypes
 			{
 				return SqlBoolean.Null;
 			}
-			s = s.TrimStart(Array.Empty<char>());
+			s = s.TrimStart();
 			char c = s[0];
 			if (char.IsNumber(c) || '-' == c || '+' == c)
 			{

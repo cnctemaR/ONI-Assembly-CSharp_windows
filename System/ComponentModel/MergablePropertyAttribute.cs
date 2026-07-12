@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public MergablePropertyAttribute(bool allowMerge)
 		{
-			this.allowMerge = allowMerge;
+			this.AllowMerge = allowMerge;
 		}
 
-		public bool AllowMerge
-		{
-			get
-			{
-				return this.allowMerge;
-			}
-		}
+		public bool AllowMerge { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -25,7 +19,9 @@ namespace System.ComponentModel
 				return true;
 			}
 			MergablePropertyAttribute mergablePropertyAttribute = obj as MergablePropertyAttribute;
-			return mergablePropertyAttribute != null && mergablePropertyAttribute.AllowMerge == this.allowMerge;
+			bool? flag = ((mergablePropertyAttribute != null) ? new bool?(mergablePropertyAttribute.AllowMerge) : null);
+			bool allowMerge = this.AllowMerge;
+			return (flag.GetValueOrDefault() == allowMerge) & (flag != null);
 		}
 
 		public override int GetHashCode()
@@ -43,7 +39,5 @@ namespace System.ComponentModel
 		public static readonly MergablePropertyAttribute No = new MergablePropertyAttribute(false);
 
 		public static readonly MergablePropertyAttribute Default = MergablePropertyAttribute.Yes;
-
-		private bool allowMerge;
 	}
 }

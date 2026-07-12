@@ -61,7 +61,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		MushBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array, array2), array, array2)
 		{
 			time = 40f,
-			description = ITEMS.FOOD.MUSHBAR.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.MUSHBAR.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 1
@@ -78,7 +78,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		BasicPlantBarConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array3, array4), array3, array4)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.BASICPLANTBAR.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.BASICPLANTBAR.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 2
@@ -95,7 +95,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		TofuConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array5, array6), array5, array6)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.TOFU.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.TOFU.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
@@ -112,7 +112,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		FruitCakeConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array7, array8), array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.FRUITCAKE.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.FRUITCAKE.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
@@ -129,7 +129,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		PemmicanConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array9, array10), array9, array10, DlcManager.AVAILABLE_DLC_2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.PEMMICAN.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.PEMMICAN.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 4

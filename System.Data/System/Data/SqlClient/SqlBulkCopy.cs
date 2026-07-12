@@ -37,7 +37,6 @@ namespace System.Data.SqlClient
 		}
 
 		public SqlBulkCopy(string connectionString)
-			: this(new SqlConnection(connectionString))
 		{
 			if (connectionString == null)
 			{
@@ -301,24 +300,24 @@ namespace System.Data.SqlClient
 						{
 							this.AppendColumnNameAndTypeName(stringBuilder, sqlMetaData.column, "sql_variant");
 						}
+						else if (sqlMetaData.type == SqlDbType.Udt)
+						{
+							this.AppendColumnNameAndTypeName(stringBuilder, sqlMetaData.column, "varbinary");
+						}
 						else
 						{
-							if (sqlMetaData.type == SqlDbType.Udt)
-							{
-								throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
-							}
 							this.AppendColumnNameAndTypeName(stringBuilder, sqlMetaData.column, sqlMetaData.type.ToString());
 						}
-						byte b = sqlMetaData.metaType.NullableType;
-						if (b <= 106)
+						byte nullableType = sqlMetaData.metaType.NullableType;
+						if (nullableType <= 106)
 						{
-							if (b - 41 > 2)
+							if (nullableType - 41 > 2)
 							{
-								if (b != 106)
+								if (nullableType != 106)
 								{
-									goto IL_029B;
+									goto IL_0299;
 								}
-								goto IL_0217;
+								goto IL_0215;
 							}
 							else
 							{
@@ -327,13 +326,13 @@ namespace System.Data.SqlClient
 						}
 						else
 						{
-							if (b == 108)
+							if (nullableType == 108)
 							{
-								goto IL_0217;
+								goto IL_0215;
 							}
-							if (b != 240)
+							if (nullableType != 240)
 							{
-								goto IL_029B;
+								goto IL_0299;
 							}
 							if (sqlMetaData.IsLargeUdt)
 							{
@@ -345,26 +344,26 @@ namespace System.Data.SqlClient
 								stringBuilder.AppendFormat(null, "({0})", length);
 							}
 						}
-						IL_032C:
+						IL_032A:
 						object obj = internalResults[2][i][3];
 						SqlDbType type = sqlMetaData.type;
 						if (type <= SqlDbType.NVarChar)
 						{
 							if (type != SqlDbType.Char && type - SqlDbType.NChar > 2)
 							{
-								goto IL_0371;
+								goto IL_036F;
 							}
-							goto IL_036C;
+							goto IL_036A;
 						}
 						else
 						{
 							if (type == SqlDbType.Text || type == SqlDbType.VarChar)
 							{
-								goto IL_036C;
+								goto IL_036A;
 							}
-							goto IL_0371;
+							goto IL_036F;
 						}
-						IL_0374:
+						IL_0372:
 						bool flag2;
 						if (obj == null || !flag2)
 						{
@@ -388,33 +387,33 @@ namespace System.Data.SqlClient
 							throw SQL.BulkLoadLcidMismatch(localeId, this._SqlDataReaderRowSource.GetName(internalSourceColumnOrdinal), lcid, sqlMetaData.column);
 						}
 						break;
-						IL_0371:
+						IL_036F:
 						flag2 = false;
-						goto IL_0374;
-						IL_036C:
+						goto IL_0372;
+						IL_036A:
 						flag2 = true;
-						goto IL_0374;
-						IL_0217:
+						goto IL_0372;
+						IL_0215:
 						stringBuilder.AppendFormat(null, "({0},{1})", sqlMetaData.precision, sqlMetaData.scale);
-						goto IL_032C;
-						IL_029B:
+						goto IL_032A;
+						IL_0299:
 						if (!sqlMetaData.metaType.IsFixed && !sqlMetaData.metaType.IsLong)
 						{
 							int num3 = sqlMetaData.length;
-							b = sqlMetaData.metaType.NullableType;
-							if (b == 99 || b == 231 || b == 239)
+							byte nullableType2 = sqlMetaData.metaType.NullableType;
+							if (nullableType2 == 99 || nullableType2 == 231 || nullableType2 == 239)
 							{
 								num3 /= 2;
 							}
 							stringBuilder.AppendFormat(null, "({0})", num3);
-							goto IL_032C;
+							goto IL_032A;
 						}
 						if (sqlMetaData.metaType.IsPlp && sqlMetaData.metaType.SqlDbType != SqlDbType.Xml)
 						{
 							stringBuilder.Append("(max)");
-							goto IL_032C;
+							goto IL_032A;
 						}
-						goto IL_032C;
+						goto IL_032A;
 					}
 					else
 					{
@@ -941,14 +940,14 @@ namespace System.Data.SqlClient
 
 		private object ValidateBulkCopyVariant(object value)
 		{
-			byte tdstype = MetaType.GetMetaTypeFromValue(value, true, true).TDSType;
+			byte tdstype = MetaType.GetMetaTypeFromValue(value, true).TDSType;
 			if (tdstype <= 108)
 			{
 				if (tdstype <= 43)
 				{
 					if (tdstype != 36 && tdstype - 40 > 3)
 					{
-						goto IL_00AD;
+						goto IL_00AC;
 					}
 				}
 				else
@@ -971,11 +970,11 @@ namespace System.Data.SqlClient
 					case 55:
 					case 57:
 					case 58:
-						goto IL_00AD;
+						goto IL_00AC;
 					default:
 						if (tdstype != 108)
 						{
-							goto IL_00AD;
+							goto IL_00AC;
 						}
 						break;
 					}
@@ -985,19 +984,19 @@ namespace System.Data.SqlClient
 			{
 				if (tdstype != 127 && tdstype != 165)
 				{
-					goto IL_00AD;
+					goto IL_00AC;
 				}
 			}
 			else if (tdstype != 167 && tdstype != 231)
 			{
-				goto IL_00AD;
+				goto IL_00AC;
 			}
 			if (value is INullable)
 			{
 				return MetaType.GetComValueFromSqlVariant(value);
 			}
 			return value;
-			IL_00AD:
+			IL_00AC:
 			throw SQL.BulkLoadInvalidVariantValue();
 		}
 
@@ -1037,11 +1036,11 @@ namespace System.Data.SqlClient
 							case 47:
 							case 48:
 							case 49:
-								goto IL_02A3;
+								goto IL_02B9;
 							default:
 								if (nullableType - 58 > 1)
 								{
-									goto IL_02A3;
+									goto IL_02B9;
 								}
 								break;
 							}
@@ -1053,16 +1052,16 @@ namespace System.Data.SqlClient
 							case 98:
 								value = this.ValidateBulkCopyVariant(value);
 								flag = true;
-								goto IL_02B6;
+								goto IL_02CC;
 							case 99:
-								goto IL_0212;
+								goto IL_0219;
 							case 100:
 							case 101:
 							case 102:
 							case 103:
 							case 105:
 							case 107:
-								goto IL_02A3;
+								goto IL_02B9;
 							case 104:
 							case 109:
 							case 110:
@@ -1100,12 +1099,12 @@ namespace System.Data.SqlClient
 								value = sqlDecimal;
 								isSqlType = true;
 								flag = false;
-								goto IL_02B6;
+								goto IL_02CC;
 							}
 							default:
 								if (nullableType != 165)
 								{
-									goto IL_02A3;
+									goto IL_02B9;
 								}
 								break;
 							}
@@ -1115,48 +1114,54 @@ namespace System.Data.SqlClient
 					{
 						if (nullableType != 167 && nullableType != 173)
 						{
-							goto IL_02A3;
+							goto IL_02B9;
 						}
 					}
 					else if (nullableType != 175)
 					{
 						if (nullableType == 231)
 						{
-							goto IL_0212;
+							goto IL_0219;
 						}
 						switch (nullableType)
 						{
 						case 239:
-							goto IL_0212;
+							goto IL_0219;
 						case 240:
-							throw ADP.DbTypeNotSupported("UDT");
+							if (!(value is byte[]))
+							{
+								value = this._connection.GetBytes(value);
+								flag = true;
+								goto IL_02CC;
+							}
+							goto IL_02CC;
 						case 241:
 							if (value is XmlReader)
 							{
 								value = new XmlDataFeed((XmlReader)value);
 								flag = true;
 								coercedToDataFeed = true;
-								goto IL_02B6;
+								goto IL_02CC;
 							}
-							goto IL_02B6;
+							goto IL_02CC;
 						default:
-							goto IL_02A3;
+							goto IL_02B9;
 						}
 					}
 					metaType2 = MetaType.GetMetaTypeFromSqlDbType(metaType.SqlDbType, false);
 					value = SqlParameter.CoerceValue(value, metaType2, out coercedToDataFeed, out flag, false);
-					goto IL_02B6;
-					IL_0212:
+					goto IL_02CC;
+					IL_0219:
 					metaType2 = MetaType.GetMetaTypeFromSqlDbType(metaType.SqlDbType, false);
 					value = SqlParameter.CoerceValue(value, metaType2, out coercedToDataFeed, out flag, false);
 					if (!coercedToDataFeed && ((isSqlType && !flag) ? ((SqlString)value).Value.Length : ((string)value).Length) > metadata.length / 2)
 					{
 						throw SQL.BulkLoadStringTooLong();
 					}
-					goto IL_02B6;
-					IL_02A3:
+					goto IL_02CC;
+					IL_02B9:
 					throw SQL.BulkLoadCannotConvertValue(value.GetType(), metadata.metaType, null);
-					IL_02B6:
+					IL_02CC:
 					if (flag)
 					{
 						isSqlType = false;
@@ -1513,16 +1518,22 @@ namespace System.Data.SqlClient
 					flag = false;
 					task2 = task.ContinueWith<Task>(delegate(Task t)
 					{
-						this.AbortTransaction();
-						this._isBulkCopyingInProgress = false;
-						if (this._parser != null)
+						try
 						{
-							this._parser._asyncWrite = false;
+							this.AbortTransaction();
 						}
-						if (this._parserLock != null)
+						finally
 						{
-							this._parserLock.Release();
-							this._parserLock = null;
+							this._isBulkCopyingInProgress = false;
+							if (this._parser != null)
+							{
+								this._parser._asyncWrite = false;
+							}
+							if (this._parserLock != null)
+							{
+								this._parserLock.Release();
+								this._parserLock = null;
+							}
 						}
 						return t;
 					}, TaskScheduler.Default).Unwrap();
@@ -1552,16 +1563,22 @@ namespace System.Data.SqlClient
 				this._columnMappings.ReadOnly = false;
 				if (flag)
 				{
-					this.AbortTransaction();
-					this._isBulkCopyingInProgress = false;
-					if (this._parser != null)
+					try
 					{
-						this._parser._asyncWrite = false;
+						this.AbortTransaction();
 					}
-					if (this._parserLock != null)
+					finally
 					{
-						this._parserLock.Release();
-						this._parserLock = null;
+						this._isBulkCopyingInProgress = false;
+						if (this._parser != null)
+						{
+							this._parser._asyncWrite = false;
+						}
+						if (this._parserLock != null)
+						{
+							this._parserLock.Release();
+							this._parserLock = null;
+						}
 					}
 				}
 			}
@@ -1610,7 +1627,7 @@ namespace System.Data.SqlClient
 							case SqlBulkCopy.ValueSourceType.DbDataReader:
 								try
 								{
-									num = this._DbDataReaderRowSource.GetOrdinal(text);
+									num = ((IDataReader)this._rowSource).GetOrdinal(text);
 								}
 								catch (IndexOutOfRangeException ex)
 								{
@@ -2560,7 +2577,7 @@ namespace System.Data.SqlClient
 			DataFeedXml
 		}
 
-		private struct SourceColumnMetadata
+		private readonly struct SourceColumnMetadata
 		{
 			public SourceColumnMetadata(SqlBulkCopy.ValueMethod method, bool isSqlType, bool isDataFeed)
 			{

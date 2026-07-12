@@ -7,29 +7,21 @@ namespace System.ComponentModel
 	{
 		public DefaultPropertyAttribute(string name)
 		{
-			this.name = name;
+			this.Name = name;
 		}
 
-		public string Name
-		{
-			get
-			{
-				return this.name;
-			}
-		}
+		public string Name { get; }
 
 		public override bool Equals(object obj)
 		{
 			DefaultPropertyAttribute defaultPropertyAttribute = obj as DefaultPropertyAttribute;
-			return defaultPropertyAttribute != null && defaultPropertyAttribute.Name == this.name;
+			return defaultPropertyAttribute != null && defaultPropertyAttribute.Name == this.Name;
 		}
 
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
 		}
-
-		private readonly string name;
 
 		public static readonly DefaultPropertyAttribute Default = new DefaultPropertyAttribute(null);
 	}

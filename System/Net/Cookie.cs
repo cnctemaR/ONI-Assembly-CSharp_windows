@@ -158,7 +158,7 @@ namespace System.Net
 			{
 				if (ValidationHelper.IsBlankString(value) || !this.InternalSetName(value))
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
 					{
 						"Name",
 						(value == null) ? "<null>" : value
@@ -263,7 +263,7 @@ namespace System.Net
 			{
 				if (isThrow)
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
 					{
 						"Name",
 						(this.m_name == null) ? "<null>" : this.m_name
@@ -275,7 +275,7 @@ namespace System.Net
 			{
 				if (isThrow)
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
 					{
 						"Value",
 						(this.m_value == null) ? "<null>" : this.m_value
@@ -287,7 +287,7 @@ namespace System.Net
 			{
 				if (isThrow)
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Comment", this.Comment }));
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Comment", this.Comment }));
 				}
 				return false;
 			}
@@ -308,7 +308,7 @@ namespace System.Net
 							{
 								if (isThrow)
 								{
-									throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
+									throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[]
 									{
 										"Domain",
 										(text == null) ? "<null>" : text
@@ -324,7 +324,7 @@ namespace System.Net
 									{
 										if (isThrow)
 										{
-											throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", this.m_domain }));
+											throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", this.m_domain }));
 										}
 										return false;
 									}
@@ -370,7 +370,7 @@ namespace System.Net
 						{
 							if (isThrow)
 							{
-								throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", this.m_domain }));
+								throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", this.m_domain }));
 							}
 							return false;
 						}
@@ -392,7 +392,7 @@ namespace System.Net
 					{
 						if (isThrow)
 						{
-							throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Path", this.m_path }));
+							throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Path", this.m_path }));
 						}
 						return false;
 					}
@@ -417,7 +417,7 @@ namespace System.Net
 						{
 							if (isThrow)
 							{
-								throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", this.m_port }));
+								throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", this.m_port }));
 							}
 							return false;
 						}
@@ -426,7 +426,7 @@ namespace System.Net
 				}
 				if (isThrow)
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Path", this.Path }));
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Path", this.Path }));
 				}
 				return false;
 			}
@@ -464,7 +464,7 @@ namespace System.Net
 				}
 				if (value[0] != '"' || value[value.Length - 1] != '"')
 				{
-					throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
+					throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
 				}
 				string[] array = value.Split(Cookie.PortSplitDelimiters);
 				List<int> list = new List<int>();
@@ -475,11 +475,11 @@ namespace System.Net
 						int num;
 						if (!int.TryParse(array[i], out num))
 						{
-							throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
+							throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
 						}
 						if (num < 0 || num > 65535)
 						{
-							throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
+							throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Port", value }));
 						}
 						list.Add(num);
 					}
@@ -616,7 +616,18 @@ namespace System.Net
 
 		public override int GetHashCode()
 		{
-			return string.Concat(new object[] { this.Name, "=", this.Value, ";", this.Path, "; ", this.Domain, "; ", this.Version }).GetHashCode();
+			return string.Concat(new string[]
+			{
+				this.Name,
+				"=",
+				this.Value,
+				";",
+				this.Path,
+				"; ",
+				this.Domain,
+				"; ",
+				this.Version.ToString()
+			}).GetHashCode();
 		}
 
 		public override string ToString()

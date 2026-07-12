@@ -73,7 +73,7 @@ namespace System.Security.Cryptography
 			{
 				if (value == CipherMode.CFB || value == CipherMode.OFB)
 				{
-					throw new CryptographicException(global::SR.GetString("The specified cipher mode is not valid for this algorithm."));
+					throw new CryptographicException(global::SR.GetString("Specified cipher mode is not valid for this algorithm."));
 				}
 				this.m_rijndael.Mode = value;
 			}
@@ -104,11 +104,11 @@ namespace System.Security.Cryptography
 			}
 			if (!base.ValidKeySize(key.Length * 8))
 			{
-				throw new ArgumentException(global::SR.GetString("The specified key is not a valid size for this algorithm."), "key");
+				throw new ArgumentException(global::SR.GetString("Specified key is not a valid size for this algorithm."), "key");
 			}
 			if (iv != null && iv.Length * 8 != this.BlockSizeValue)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
+				throw new ArgumentException(global::SR.GetString("Specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
 			}
 			return this.m_rijndael.CreateDecryptor(key, iv);
 		}
@@ -126,11 +126,11 @@ namespace System.Security.Cryptography
 			}
 			if (!base.ValidKeySize(key.Length * 8))
 			{
-				throw new ArgumentException(global::SR.GetString("The specified key is not a valid size for this algorithm."), "key");
+				throw new ArgumentException(global::SR.GetString("Specified key is not a valid size for this algorithm."), "key");
 			}
 			if (iv != null && iv.Length * 8 != this.BlockSizeValue)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
+				throw new ArgumentException(global::SR.GetString("Specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
 			}
 			return this.m_rijndael.CreateEncryptor(key, iv);
 		}

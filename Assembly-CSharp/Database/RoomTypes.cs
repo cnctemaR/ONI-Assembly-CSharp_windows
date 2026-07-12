@@ -134,15 +134,28 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
 			}, 2, null, true, true, null, 10));
+			if (DlcManager.IsContentSubscribed("DLC3_ID"))
+			{
+				this.BionicUpkeep = base.Add(new RoomType("BionicUpkeep", ROOMS.TYPES.BIONICUPKEEP.NAME, ROOMS.TYPES.BIONICUPKEEP.DESCRIPTION, ROOMS.TYPES.BIONICUPKEEP.TOOLTIP, ROOMS.TYPES.BIONICUPKEEP.EFFECT, Db.Get().RoomTypeCategories.Bionic, RoomConstraints.BIONIC_GUNKEMPTIER, new RoomConstraints.Constraint[]
+				{
+					RoomConstraints.BIONIC_LUBRICATION,
+					RoomConstraints.MINIMUM_SIZE_12,
+					RoomConstraints.MAXIMUM_SIZE_64
+				}, new RoomDetails.Detail[]
+				{
+					RoomDetails.SIZE,
+					RoomDetails.BUILDING_COUNT
+				}, 1, null, false, false, new string[] { "RoomBionicUpkeep" }, 11));
+			}
 			this.PowerPlant = base.Add(new RoomType("PowerPlant", ROOMS.TYPES.POWER_PLANT.NAME, ROOMS.TYPES.POWER_PLANT.DESCRIPTION, ROOMS.TYPES.POWER_PLANT.TOOLTIP, ROOMS.TYPES.POWER_PLANT.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.POWER_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
-				RoomConstraints.MAXIMUM_SIZE_96
+				RoomConstraints.MAXIMUM_SIZE_120
 			}, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 11));
+			}, 2, null, true, true, null, 12));
 			this.Farm = base.Add(new RoomType("Farm", ROOMS.TYPES.FARM.NAME, ROOMS.TYPES.FARM.DESCRIPTION, ROOMS.TYPES.FARM.TOOLTIP, ROOMS.TYPES.FARM.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.FARM_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -151,7 +164,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 12));
+			}, 2, null, true, true, null, 13));
 			this.CreaturePen = base.Add(new RoomType("CreaturePen", ROOMS.TYPES.CREATUREPEN.NAME, ROOMS.TYPES.CREATUREPEN.DESCRIPTION, ROOMS.TYPES.CREATUREPEN.TOOLTIP, ROOMS.TYPES.CREATUREPEN.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.RANCH_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -161,7 +174,7 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT
-			}, 2, null, true, true, null, 13));
+			}, 2, null, true, true, null, 14));
 			this.Laboratory = base.Add(new RoomType("Laboratory", ROOMS.TYPES.LABORATORY.NAME, ROOMS.TYPES.LABORATORY.DESCRIPTION, ROOMS.TYPES.LABORATORY.TOOLTIP, ROOMS.TYPES.LABORATORY.EFFECT, Db.Get().RoomTypeCategories.Science, RoomConstraints.SCIENCE_BUILDINGS, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.LIGHT,
@@ -172,7 +185,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 14));
+			}, 2, null, true, true, null, 15));
 			this.MachineShop = new RoomType("MachineShop", ROOMS.TYPES.MACHINE_SHOP.NAME, ROOMS.TYPES.MACHINE_SHOP.DESCRIPTION, ROOMS.TYPES.MACHINE_SHOP.TOOLTIP, ROOMS.TYPES.MACHINE_SHOP.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.MACHINE_SHOP, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -181,7 +194,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 14);
+			}, 2, null, true, true, null, 16);
 			this.RecRoom = base.Add(new RoomType("RecRoom", ROOMS.TYPES.REC_ROOM.NAME, ROOMS.TYPES.REC_ROOM.DESCRIPTION, ROOMS.TYPES.REC_ROOM.TOOLTIP, ROOMS.TYPES.REC_ROOM.EFFECT, Db.Get().RoomTypeCategories.Recreation, RoomConstraints.REC_BUILDING, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -192,7 +205,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 0, null, true, true, null, 15));
+			}, 0, null, true, true, null, 17));
 			this.NatureReserve = base.Add(new RoomType("NatureReserve", ROOMS.TYPES.NATURERESERVE.NAME, ROOMS.TYPES.NATURERESERVE.DESCRIPTION, ROOMS.TYPES.NATURERESERVE.TOOLTIP, ROOMS.TYPES.NATURERESERVE.EFFECT, Db.Get().RoomTypeCategories.Park, RoomConstraints.PARK_BUILDING, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.WILDPLANTS,
@@ -205,7 +218,7 @@ namespace Database
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT,
 				RoomDetails.PLANT_COUNT
-			}, 1, null, false, false, new string[] { "RoomNatureReserve" }, 17));
+			}, 1, null, false, false, new string[] { "RoomNatureReserve" }, 19));
 			this.Park = base.Add(new RoomType("Park", ROOMS.TYPES.PARK.NAME, ROOMS.TYPES.PARK.DESCRIPTION, ROOMS.TYPES.PARK.TOOLTIP, ROOMS.TYPES.PARK.EFFECT, Db.Get().RoomTypeCategories.Park, RoomConstraints.PARK_BUILDING, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.WILDPLANT,
@@ -218,7 +231,7 @@ namespace Database
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT,
 				RoomDetails.PLANT_COUNT
-			}, 1, new RoomType[] { this.NatureReserve }, false, false, new string[] { "RoomPark" }, 16));
+			}, 1, new RoomType[] { this.NatureReserve }, false, false, new string[] { "RoomPark" }, 18));
 		}
 
 		public Assignables[] GetAssignees(Room room)
@@ -409,6 +422,8 @@ namespace Database
 		public RoomType NatureReserve;
 
 		public RoomType Laboratory;
+
+		public RoomType BionicUpkeep;
 
 		public struct RoomTypeQueryResult
 		{

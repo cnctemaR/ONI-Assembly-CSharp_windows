@@ -20,8 +20,8 @@ namespace UnityEngine
 			}
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
+		[SecuritySafeCritical]
 		public unsafe static string ExtractStackTrace()
 		{
 			int num = 16384;
@@ -50,8 +50,8 @@ namespace UnityEngine
 			return text + "\n" + text2;
 		}
 
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		internal static void ExtractStringFromExceptionInternal(object exceptiono, out string message, out string stackTrace)
 		{
 			bool flag = exceptiono == null;

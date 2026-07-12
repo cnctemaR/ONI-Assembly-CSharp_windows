@@ -317,7 +317,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			base.sm.LaunchRocket(this);
 		}
 
-		public void SetPilotSpeedMult(Worker pilot)
+		public void SetPilotSpeedMult(WorkerBase pilot)
 		{
 			AttributeConverter pilotingSpeed = Db.Get().AttributeConverters.PilotingSpeed;
 			AttributeConverterInstance converter = pilot.GetComponent<AttributeConverters>().GetConverter(pilotingSpeed.Id);

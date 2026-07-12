@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,18 +31,18 @@ namespace System.Xml.Resolvers
 
 		public XmlPreloadedResolver(XmlResolver fallbackResolver, XmlKnownDtds preloadedDtds, IEqualityComparer<Uri> uriComparer)
 		{
-			this.fallbackResolver = fallbackResolver;
-			this.mappings = new Dictionary<Uri, XmlPreloadedResolver.PreloadedData>(16, uriComparer);
-			this.preloadedDtds = preloadedDtds;
+			this._fallbackResolver = fallbackResolver;
+			this._mappings = new Dictionary<Uri, XmlPreloadedResolver.PreloadedData>(16, uriComparer);
+			this._preloadedDtds = preloadedDtds;
 			if (preloadedDtds != XmlKnownDtds.None)
 			{
 				if ((preloadedDtds & XmlKnownDtds.Xhtml10) != XmlKnownDtds.None)
 				{
-					this.AddKnownDtd(XmlPreloadedResolver.Xhtml10_Dtd);
+					this.AddKnownDtd(XmlPreloadedResolver.s_xhtml10_Dtd);
 				}
 				if ((preloadedDtds & XmlKnownDtds.Rss091) != XmlKnownDtds.None)
 				{
-					this.AddKnownDtd(XmlPreloadedResolver.Rss091_Dtd);
+					this.AddKnownDtd(XmlPreloadedResolver.s_rss091_Dtd);
 				}
 			}
 		}
@@ -52,17 +51,17 @@ namespace System.Xml.Resolvers
 		{
 			if (relativeUri != null && relativeUri.StartsWith("-//", StringComparison.CurrentCulture))
 			{
-				if ((this.preloadedDtds & XmlKnownDtds.Xhtml10) != XmlKnownDtds.None && relativeUri.StartsWith("-//W3C//", StringComparison.CurrentCulture))
+				if ((this._preloadedDtds & XmlKnownDtds.Xhtml10) != XmlKnownDtds.None && relativeUri.StartsWith("-//W3C//", StringComparison.CurrentCulture))
 				{
-					for (int i = 0; i < XmlPreloadedResolver.Xhtml10_Dtd.Length; i++)
+					for (int i = 0; i < XmlPreloadedResolver.s_xhtml10_Dtd.Length; i++)
 					{
-						if (relativeUri == XmlPreloadedResolver.Xhtml10_Dtd[i].publicId)
+						if (relativeUri == XmlPreloadedResolver.s_xhtml10_Dtd[i].publicId)
 						{
 							return new Uri(relativeUri, UriKind.Relative);
 						}
 					}
 				}
-				if ((this.preloadedDtds & XmlKnownDtds.Rss091) != XmlKnownDtds.None && relativeUri == XmlPreloadedResolver.Rss091_Dtd[0].publicId)
+				if ((this._preloadedDtds & XmlKnownDtds.Rss091) != XmlKnownDtds.None && relativeUri == XmlPreloadedResolver.s_rss091_Dtd[0].publicId)
 				{
 					return new Uri(relativeUri, UriKind.Relative);
 				}
@@ -77,13 +76,13 @@ namespace System.Xml.Resolvers
 				throw new ArgumentNullException("absoluteUri");
 			}
 			XmlPreloadedResolver.PreloadedData preloadedData;
-			if (!this.mappings.TryGetValue(absoluteUri, out preloadedData))
+			if (!this._mappings.TryGetValue(absoluteUri, out preloadedData))
 			{
-				if (this.fallbackResolver != null)
+				if (this._fallbackResolver != null)
 				{
-					return this.fallbackResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
+					return this._fallbackResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
 				}
-				throw new XmlException(Res.GetString("Cannot resolve '{0}'.", new object[] { absoluteUri.ToString() }));
+				throw new XmlException(SR.Format("Cannot resolve '{0}'.", absoluteUri.ToString()));
 			}
 			else
 			{
@@ -95,7 +94,7 @@ namespace System.Xml.Resolvers
 				{
 					return preloadedData.AsTextReader();
 				}
-				throw new XmlException(Res.GetString("Object type is not supported."));
+				throw new XmlException("Object type is not supported.");
 			}
 		}
 
@@ -103,9 +102,9 @@ namespace System.Xml.Resolvers
 		{
 			set
 			{
-				if (this.fallbackResolver != null)
+				if (this._fallbackResolver != null)
 				{
-					this.fallbackResolver.Credentials = value;
+					this._fallbackResolver.Credentials = value;
 				}
 			}
 		}
@@ -117,13 +116,13 @@ namespace System.Xml.Resolvers
 				throw new ArgumentNullException("absoluteUri");
 			}
 			XmlPreloadedResolver.PreloadedData preloadedData;
-			if (this.mappings.TryGetValue(absoluteUri, out preloadedData))
+			if (this._mappings.TryGetValue(absoluteUri, out preloadedData))
 			{
 				return preloadedData.SupportsType(type);
 			}
-			if (this.fallbackResolver != null)
+			if (this._fallbackResolver != null)
 			{
-				return this.fallbackResolver.SupportsType(absoluteUri, type);
+				return this._fallbackResolver.SupportsType(absoluteUri, type);
 			}
 			return base.SupportsType(absoluteUri, type);
 		}
@@ -195,7 +194,7 @@ namespace System.Xml.Resolvers
 				}
 				int num3 = (int)memoryStream.Position;
 				byte[] array3 = new byte[num3];
-				Array.Copy(memoryStream.GetBuffer(), array3, num3);
+				Array.Copy(memoryStream.ToArray(), array3, num3);
 				this.Add(uri, new XmlPreloadedResolver.ByteArrayChunk(array3));
 			}
 		}
@@ -217,7 +216,7 @@ namespace System.Xml.Resolvers
 		{
 			get
 			{
-				return this.mappings.Keys;
+				return this._mappings.Keys;
 			}
 		}
 
@@ -227,25 +226,25 @@ namespace System.Xml.Resolvers
 			{
 				throw new ArgumentNullException("uri");
 			}
-			this.mappings.Remove(uri);
+			this._mappings.Remove(uri);
 		}
 
 		private void Add(Uri uri, XmlPreloadedResolver.PreloadedData data)
 		{
-			if (this.mappings.ContainsKey(uri))
+			if (this._mappings.ContainsKey(uri))
 			{
-				this.mappings[uri] = data;
+				this._mappings[uri] = data;
 				return;
 			}
-			this.mappings.Add(uri, data);
+			this._mappings.Add(uri, data);
 		}
 
 		private void AddKnownDtd(XmlPreloadedResolver.XmlKnownDtdData[] dtdSet)
 		{
 			foreach (XmlPreloadedResolver.XmlKnownDtdData xmlKnownDtdData in dtdSet)
 			{
-				this.mappings.Add(new Uri(xmlKnownDtdData.publicId, UriKind.RelativeOrAbsolute), xmlKnownDtdData);
-				this.mappings.Add(new Uri(xmlKnownDtdData.systemId, UriKind.RelativeOrAbsolute), xmlKnownDtdData);
+				this._mappings.Add(new Uri(xmlKnownDtdData.publicId, UriKind.RelativeOrAbsolute), xmlKnownDtdData);
+				this._mappings.Add(new Uri(xmlKnownDtdData.systemId, UriKind.RelativeOrAbsolute), xmlKnownDtdData);
 			}
 		}
 
@@ -256,13 +255,13 @@ namespace System.Xml.Resolvers
 				throw new ArgumentNullException("absoluteUri");
 			}
 			XmlPreloadedResolver.PreloadedData preloadedData;
-			if (!this.mappings.TryGetValue(absoluteUri, out preloadedData))
+			if (!this._mappings.TryGetValue(absoluteUri, out preloadedData))
 			{
-				if (this.fallbackResolver != null)
+				if (this._fallbackResolver != null)
 				{
-					return this.fallbackResolver.GetEntityAsync(absoluteUri, role, ofObjectToReturn);
+					return this._fallbackResolver.GetEntityAsync(absoluteUri, role, ofObjectToReturn);
 				}
-				throw new XmlException(Res.GetString("Cannot resolve '{0}'.", new object[] { absoluteUri.ToString() }));
+				throw new XmlException(SR.Format("Cannot resolve '{0}'.", absoluteUri.ToString()));
 			}
 			else
 			{
@@ -274,17 +273,17 @@ namespace System.Xml.Resolvers
 				{
 					return Task.FromResult<object>(preloadedData.AsTextReader());
 				}
-				throw new XmlException(Res.GetString("Object type is not supported."));
+				throw new XmlException("Object type is not supported.");
 			}
 		}
 
-		private XmlResolver fallbackResolver;
+		private XmlResolver _fallbackResolver;
 
-		private Dictionary<Uri, XmlPreloadedResolver.PreloadedData> mappings;
+		private Dictionary<Uri, XmlPreloadedResolver.PreloadedData> _mappings;
 
-		private XmlKnownDtds preloadedDtds;
+		private XmlKnownDtds _preloadedDtds;
 
-		private static XmlPreloadedResolver.XmlKnownDtdData[] Xhtml10_Dtd = new XmlPreloadedResolver.XmlKnownDtdData[]
+		private static XmlPreloadedResolver.XmlKnownDtdData[] s_xhtml10_Dtd = new XmlPreloadedResolver.XmlKnownDtdData[]
 		{
 			new XmlPreloadedResolver.XmlKnownDtdData("-//W3C//DTD XHTML 1.0 Strict//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd", "xhtml1-strict.dtd"),
 			new XmlPreloadedResolver.XmlKnownDtdData("-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", "xhtml1-transitional.dtd"),
@@ -294,7 +293,7 @@ namespace System.Xml.Resolvers
 			new XmlPreloadedResolver.XmlKnownDtdData("-//W3C//ENTITIES Special for XHTML//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent", "xhtml-special.ent")
 		};
 
-		private static XmlPreloadedResolver.XmlKnownDtdData[] Rss091_Dtd = new XmlPreloadedResolver.XmlKnownDtdData[]
+		private static XmlPreloadedResolver.XmlKnownDtdData[] s_rss091_Dtd = new XmlPreloadedResolver.XmlKnownDtdData[]
 		{
 			new XmlPreloadedResolver.XmlKnownDtdData("-//Netscape Communications//DTD RSS 0.91//EN", "http://my.netscape.com/publish/formats/rss-0.91.dtd", "rss-0.91.dtd")
 		};
@@ -305,7 +304,7 @@ namespace System.Xml.Resolvers
 
 			internal virtual TextReader AsTextReader()
 			{
-				throw new XmlException(Res.GetString("Object type is not supported."));
+				throw new XmlException("Object type is not supported.");
 			}
 
 			internal virtual bool SupportsType(Type type)
@@ -320,19 +319,19 @@ namespace System.Xml.Resolvers
 			{
 				this.publicId = publicId;
 				this.systemId = systemId;
-				this.resourceName = resourceName;
+				this._resourceName = resourceName;
 			}
 
 			internal override Stream AsStream()
 			{
-				return Assembly.GetExecutingAssembly().GetManifestResourceStream(this.resourceName);
+				return base.GetType().Assembly.GetManifestResourceStream(this._resourceName);
 			}
 
 			internal string publicId;
 
 			internal string systemId;
 
-			private string resourceName;
+			private string _resourceName;
 		}
 
 		private class ByteArrayChunk : XmlPreloadedResolver.PreloadedData
@@ -344,38 +343,38 @@ namespace System.Xml.Resolvers
 
 			internal ByteArrayChunk(byte[] array, int offset, int length)
 			{
-				this.array = array;
-				this.offset = offset;
-				this.length = length;
+				this._array = array;
+				this._offset = offset;
+				this._length = length;
 			}
 
 			internal override Stream AsStream()
 			{
-				return new MemoryStream(this.array, this.offset, this.length);
+				return new MemoryStream(this._array, this._offset, this._length);
 			}
 
-			private byte[] array;
+			private byte[] _array;
 
-			private int offset;
+			private int _offset;
 
-			private int length;
+			private int _length;
 		}
 
 		private class StringData : XmlPreloadedResolver.PreloadedData
 		{
 			internal StringData(string str)
 			{
-				this.str = str;
+				this._str = str;
 			}
 
 			internal override Stream AsStream()
 			{
-				return new MemoryStream(Encoding.Unicode.GetBytes(this.str));
+				return new MemoryStream(Encoding.Unicode.GetBytes(this._str));
 			}
 
 			internal override TextReader AsTextReader()
 			{
-				return new StringReader(this.str);
+				return new StringReader(this._str);
 			}
 
 			internal override bool SupportsType(Type type)
@@ -383,7 +382,7 @@ namespace System.Xml.Resolvers
 				return type == typeof(TextReader) || base.SupportsType(type);
 			}
 
-			private string str;
+			private string _str;
 		}
 	}
 }

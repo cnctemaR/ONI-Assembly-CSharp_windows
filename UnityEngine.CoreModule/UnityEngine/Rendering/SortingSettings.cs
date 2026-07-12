@@ -72,7 +72,7 @@ namespace UnityEngine.Rendering
 
 		public bool Equals(SortingSettings other)
 		{
-			return this.m_WorldToCameraMatrix.Equals(other.m_WorldToCameraMatrix) && this.m_CameraPosition.Equals(other.m_CameraPosition) && this.m_CustomAxis.Equals(other.m_CustomAxis) && this.m_Criteria == other.m_Criteria && this.m_DistanceMetric == other.m_DistanceMetric && this.m_PreviousVPMatrix.Equals(other.m_PreviousVPMatrix) && this.m_NonJitteredVPMatrix.Equals(other.m_NonJitteredVPMatrix);
+			return this.m_WorldToCameraMatrix.Equals(other.m_WorldToCameraMatrix) && this.m_CameraPosition.Equals(other.m_CameraPosition) && this.m_CustomAxis.Equals(other.m_CustomAxis) && this.m_Criteria == other.m_Criteria && this.m_DistanceMetric == other.m_DistanceMetric;
 		}
 
 		public override bool Equals(object obj)
@@ -87,9 +87,7 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ this.m_CameraPosition.GetHashCode();
 			num = (num * 397) ^ this.m_CustomAxis.GetHashCode();
 			num = (num * 397) ^ (int)this.m_Criteria;
-			num = (num * 397) ^ (int)this.m_DistanceMetric;
-			num = (num * 397) ^ this.m_PreviousVPMatrix.GetHashCode();
-			return (num * 397) ^ this.m_NonJitteredVPMatrix.GetHashCode();
+			return (num * 397) ^ (int)this.m_DistanceMetric;
 		}
 
 		public static bool operator ==(SortingSettings left, SortingSettings right)
@@ -111,9 +109,5 @@ namespace UnityEngine.Rendering
 		private SortingCriteria m_Criteria;
 
 		private DistanceMetric m_DistanceMetric;
-
-		private Matrix4x4 m_PreviousVPMatrix;
-
-		private Matrix4x4 m_NonJitteredVPMatrix;
 	}
 }

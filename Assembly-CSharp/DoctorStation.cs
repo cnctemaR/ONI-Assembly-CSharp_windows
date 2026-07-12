@@ -62,19 +62,19 @@ public class DoctorStation : Workable
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.smi.sm.hasPatient.Set(true, this.smi, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		this.smi.sm.hasPatient.Set(false, this.smi, false);
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

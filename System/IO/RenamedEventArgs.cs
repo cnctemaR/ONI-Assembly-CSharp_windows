@@ -7,15 +7,15 @@ namespace System.IO
 		public RenamedEventArgs(WatcherChangeTypes changeType, string directory, string name, string oldName)
 			: base(changeType, directory, name)
 		{
-			this.oldName = oldName;
-			this.oldFullPath = Path.Combine(directory, oldName);
+			this._oldName = oldName;
+			this._oldFullPath = FileSystemEventArgs.Combine(directory, oldName);
 		}
 
 		public string OldFullPath
 		{
 			get
 			{
-				return this.oldFullPath;
+				return this._oldFullPath;
 			}
 		}
 
@@ -23,12 +23,12 @@ namespace System.IO
 		{
 			get
 			{
-				return this.oldName;
+				return this._oldName;
 			}
 		}
 
-		private string oldName;
+		private readonly string _oldName;
 
-		private string oldFullPath;
+		private readonly string _oldFullPath;
 	}
 }

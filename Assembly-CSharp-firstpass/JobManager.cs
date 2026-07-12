@@ -9,8 +9,8 @@ public class JobManager
 
 	private void Initialize()
 	{
-		this.semaphore = new Semaphore(0, CPUBudget.coreCount);
-		for (int i = 0; i < CPUBudget.coreCount; i++)
+		this.semaphore = new Semaphore(0, CPUBudget.coreCount - 1);
+		for (int i = 0; i < CPUBudget.coreCount - 1; i++)
 		{
 			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this, string.Format("KWorker{0}", i)));
 		}
@@ -57,6 +57,9 @@ public class JobManager
 		this.workItems = work_items;
 		Thread.MemoryBarrier();
 		this.semaphore.Release(this.threads.Count);
+		while (this.DoNextWorkItem())
+		{
+		}
 		this.manualResetEvent.WaitOne();
 		this.manualResetEvent.Reset();
 		if (JobManager.errorOccured)

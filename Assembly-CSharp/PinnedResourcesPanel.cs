@@ -281,7 +281,7 @@ public class PinnedResourcesPanel : KScreen, IRender1000ms
 			}
 			case GameUtil.MeasureUnit.kcal:
 			{
-				float num = RationTracker.Get().CountRationsByFoodType(tag.Name, ClusterManager.Instance.activeWorld.worldInventory, true);
+				float num = WorldResourceAmountTracker<RationTracker>.Get().CountAmountForItemWithID(tag.Name, ClusterManager.Instance.activeWorld.worldInventory, true);
 				if (this.rows[tag].CheckAmountChanged(num, true))
 				{
 					this.rows[tag].valueLabel.SetText(GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));

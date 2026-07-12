@@ -19,8 +19,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("extension", typeof(XmlSchemaComplexContentExtension))]
 		[XmlElement("restriction", typeof(XmlSchemaComplexContentRestriction))]
+		[XmlElement("extension", typeof(XmlSchemaComplexContentExtension))]
 		public override XmlSchemaContent Content
 		{
 			get

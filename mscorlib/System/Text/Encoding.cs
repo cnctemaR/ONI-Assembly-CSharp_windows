@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
@@ -175,7 +176,7 @@ namespace System.Text
 			}
 			if (Encoding.encodings != null)
 			{
-				encoding = (Encoding)Encoding.encodings[codepage];
+				Encoding.encodings.TryGetValue(codepage, out encoding);
 			}
 			if (encoding == null)
 			{
@@ -184,9 +185,9 @@ namespace System.Text
 				{
 					if (Encoding.encodings == null)
 					{
-						Encoding.encodings = new Hashtable();
+						Encoding.encodings = new Dictionary<int, Encoding>();
 					}
-					if ((encoding = (Encoding)Encoding.encodings[codepage]) != null)
+					if (Encoding.encodings.TryGetValue(codepage, out encoding))
 					{
 						return encoding;
 					}
@@ -197,11 +198,11 @@ namespace System.Text
 							if (codepage == 0)
 							{
 								encoding = Encoding.Default;
-								goto IL_0245;
+								goto IL_0233;
 							}
 							if (codepage - 1 > 2)
 							{
-								goto IL_01C2;
+								goto IL_01B0;
 							}
 						}
 						else if (codepage != 42)
@@ -209,14 +210,14 @@ namespace System.Text
 							if (codepage == 1200)
 							{
 								encoding = Encoding.Unicode;
-								goto IL_0245;
+								goto IL_0233;
 							}
 							if (codepage != 1201)
 							{
-								goto IL_01C2;
+								goto IL_01B0;
 							}
 							encoding = Encoding.BigEndianUnicode;
-							goto IL_0245;
+							goto IL_0233;
 						}
 						throw new ArgumentException(Environment.GetResourceString("{0} is not a supported code page.", new object[] { codepage }), "codepage");
 					}
@@ -225,17 +226,17 @@ namespace System.Text
 						if (codepage == 12000)
 						{
 							encoding = Encoding.UTF32;
-							goto IL_0245;
+							goto IL_0233;
 						}
 						if (codepage == 12001)
 						{
 							encoding = new UTF32Encoding(true, true);
-							goto IL_0245;
+							goto IL_0233;
 						}
 						if (codepage == 20127)
 						{
 							encoding = Encoding.ASCII;
-							goto IL_0245;
+							goto IL_0233;
 						}
 					}
 					else
@@ -243,20 +244,20 @@ namespace System.Text
 						if (codepage == 28591)
 						{
 							encoding = Encoding.Latin1;
-							goto IL_0245;
+							goto IL_0233;
 						}
 						if (codepage == 65000)
 						{
 							encoding = Encoding.UTF7;
-							goto IL_0245;
+							goto IL_0233;
 						}
 						if (codepage == 65001)
 						{
 							encoding = Encoding.UTF8;
-							goto IL_0245;
+							goto IL_0233;
 						}
 					}
-					IL_01C2:
+					IL_01B0:
 					if (EncodingTable.GetCodePageDataItem(codepage) == null)
 					{
 						throw new NotSupportedException(Environment.GetResourceString("No data is available for encoding {0}. For information on defining a custom encoding, see the documentation for the Encoding.RegisterProvider method.", new object[] { codepage }));
@@ -280,7 +281,7 @@ namespace System.Text
 					{
 						encoding = Encoding.UTF32;
 					}
-					IL_0245:
+					IL_0233:
 					Encoding.encodings.Add(codepage, encoding);
 				}
 				return encoding;
@@ -330,6 +331,14 @@ namespace System.Text
 		public virtual byte[] GetPreamble()
 		{
 			return EmptyArray<byte>.Value;
+		}
+
+		public virtual ReadOnlySpan<byte> Preamble
+		{
+			get
+			{
+				return this.GetPreamble();
+			}
 		}
 
 		private void GetDataItem()
@@ -561,8 +570,13 @@ namespace System.Text
 
 		public abstract int GetByteCount(char[] chars, int index, int count);
 
-		[SecurityCritical]
+		public int GetByteCount(string str, int index, int count)
+		{
+			return this.GetByteCount(str.ToCharArray(), index, count);
+		}
+
 		[ComVisible(false)]
+		[SecurityCritical]
 		[CLSCompliant(false)]
 		public unsafe virtual int GetByteCount(char* chars, int count)
 		{
@@ -674,9 +688,9 @@ namespace System.Text
 
 		public abstract int GetCharCount(byte[] bytes, int index, int count);
 
+		[SecurityCritical]
 		[CLSCompliant(false)]
 		[ComVisible(false)]
-		[SecurityCritical]
 		public unsafe virtual int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
@@ -756,8 +770,8 @@ namespace System.Text
 			return this.GetChars(bytes, byteCount, chars, charCount);
 		}
 
-		[CLSCompliant(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
 		[ComVisible(false)]
 		public unsafe string GetString(byte* bytes, int byteCount)
 		{
@@ -770,6 +784,28 @@ namespace System.Text
 				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
 			}
 			return string.CreateStringFromEncoding(bytes, byteCount, this);
+		}
+
+		public unsafe virtual int GetChars(ReadOnlySpan<byte> bytes, Span<char> chars)
+		{
+			fixed (byte* nonNullPinnableReference = MemoryMarshal.GetNonNullPinnableReference<byte>(bytes))
+			{
+				byte* ptr = nonNullPinnableReference;
+				fixed (char* nonNullPinnableReference2 = MemoryMarshal.GetNonNullPinnableReference<char>(chars))
+				{
+					char* ptr2 = nonNullPinnableReference2;
+					return this.GetChars(ptr, bytes.Length, ptr2, chars.Length);
+				}
+			}
+		}
+
+		public unsafe string GetString(ReadOnlySpan<byte> bytes)
+		{
+			fixed (byte* nonNullPinnableReference = MemoryMarshal.GetNonNullPinnableReference<byte>(bytes))
+			{
+				byte* ptr = nonNullPinnableReference;
+				return this.GetString(ptr, bytes.Length);
+			}
 		}
 
 		public virtual int CodePage
@@ -939,7 +975,7 @@ namespace System.Text
 		[SecurityCritical]
 		internal void ThrowBytesOverflow(EncoderNLS encoder, bool nothingEncoded)
 		{
-			if (encoder == null || encoder.m_throwOnOverflow || nothingEncoded)
+			if (encoder == null || encoder._throwOnOverflow || nothingEncoded)
 			{
 				if (encoder != null && encoder.InternalHasFallbackBuffer)
 				{
@@ -962,7 +998,7 @@ namespace System.Text
 		[SecurityCritical]
 		internal void ThrowCharsOverflow(DecoderNLS decoder, bool nothingDecoded)
 		{
-			if (decoder == null || decoder.m_throwOnOverflow || nothingDecoded)
+			if (decoder == null || decoder._throwOnOverflow || nothingDecoded)
 			{
 				if (decoder != null && decoder.InternalHasFallbackBuffer)
 				{
@@ -971,6 +1007,74 @@ namespace System.Text
 				this.ThrowCharsOverflow();
 			}
 			decoder.ClearMustFlush();
+		}
+
+		public unsafe virtual int GetCharCount(ReadOnlySpan<byte> bytes)
+		{
+			fixed (byte* nonNullPinnableReference = MemoryMarshal.GetNonNullPinnableReference<byte>(bytes))
+			{
+				byte* ptr = nonNullPinnableReference;
+				return this.GetCharCount(ptr, bytes.Length);
+			}
+		}
+
+		public unsafe virtual int GetByteCount(ReadOnlySpan<char> chars)
+		{
+			fixed (char* nonNullPinnableReference = MemoryMarshal.GetNonNullPinnableReference<char>(chars))
+			{
+				char* ptr = nonNullPinnableReference;
+				return this.GetByteCount(ptr, chars.Length);
+			}
+		}
+
+		public unsafe virtual int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes)
+		{
+			fixed (char* nonNullPinnableReference = MemoryMarshal.GetNonNullPinnableReference<char>(chars))
+			{
+				char* ptr = nonNullPinnableReference;
+				fixed (byte* nonNullPinnableReference2 = MemoryMarshal.GetNonNullPinnableReference<byte>(bytes))
+				{
+					byte* ptr2 = nonNullPinnableReference2;
+					return this.GetBytes(ptr, chars.Length, ptr2, bytes.Length);
+				}
+			}
+		}
+
+		public unsafe byte[] GetBytes(string s, int index, int count)
+		{
+			if (s == null)
+			{
+				throw new ArgumentNullException("s", "String reference not set to an instance of a String.");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
+			}
+			if (index > s.Length - count)
+			{
+				throw new ArgumentOutOfRangeException("index", "Index and count must refer to a location within the string.");
+			}
+			char* ptr = s;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			int byteCount = this.GetByteCount(ptr + index, count);
+			if (byteCount == 0)
+			{
+				return Array.Empty<byte>();
+			}
+			byte[] array = new byte[byteCount];
+			fixed (byte* ptr2 = &array[0])
+			{
+				byte* ptr3 = ptr2;
+				this.GetBytes(ptr + index, count, ptr3, byteCount);
+			}
+			return array;
 		}
 
 		private static volatile Encoding defaultEncoding;
@@ -989,7 +1093,7 @@ namespace System.Text
 
 		private static volatile Encoding latin1Encoding;
 
-		private static volatile Hashtable encodings;
+		private static volatile Dictionary<int, Encoding> encodings;
 
 		private const int MIMECONTF_MAILNEWS = 1;
 
@@ -1119,7 +1223,7 @@ namespace System.Text
 				this.m_encoding = (Encoding)info.GetValue("encoding", typeof(Encoding));
 				try
 				{
-					this.m_fallback = (EncoderFallback)info.GetValue("m_fallback", typeof(EncoderFallback));
+					this._fallback = (EncoderFallback)info.GetValue("_fallback", typeof(EncoderFallback));
 					this.charLeftOver = (char)info.GetValue("charLeftOver", typeof(char));
 				}
 				catch (SerializationException)
@@ -1135,16 +1239,16 @@ namespace System.Text
 					return this;
 				}
 				Encoder encoder = this.m_encoding.GetEncoder();
-				if (this.m_fallback != null)
+				if (this._fallback != null)
 				{
-					encoder.m_fallback = this.m_fallback;
+					encoder._fallback = this._fallback;
 				}
 				if (this.charLeftOver != '\0')
 				{
 					EncoderNLS encoderNLS = encoder as EncoderNLS;
 					if (encoderNLS != null)
 					{
-						encoderNLS.charLeftOver = this.charLeftOver;
+						encoderNLS._charLeftOver = this.charLeftOver;
 					}
 				}
 				return encoder;
@@ -1209,11 +1313,11 @@ namespace System.Text
 				this.m_encoding = (Encoding)info.GetValue("encoding", typeof(Encoding));
 				try
 				{
-					this.m_fallback = (DecoderFallback)info.GetValue("m_fallback", typeof(DecoderFallback));
+					this._fallback = (DecoderFallback)info.GetValue("_fallback", typeof(DecoderFallback));
 				}
 				catch (SerializationException)
 				{
-					this.m_fallback = null;
+					this._fallback = null;
 				}
 			}
 
@@ -1225,9 +1329,9 @@ namespace System.Text
 					return this;
 				}
 				Decoder decoder = this.m_encoding.GetDecoder();
-				if (this.m_fallback != null)
+				if (this._fallback != null)
 				{
-					decoder.m_fallback = this.m_fallback;
+					decoder._fallback = this._fallback;
 				}
 				return decoder;
 			}
@@ -1481,7 +1585,7 @@ namespace System.Text
 				else
 				{
 					this.fallbackBuffer = this.encoder.FallbackBuffer;
-					if (this.encoder.m_throwOnOverflow && this.encoder.InternalHasFallbackBuffer && this.fallbackBuffer.Remaining > 0)
+					if (this.encoder._throwOnOverflow && this.encoder.InternalHasFallbackBuffer && this.fallbackBuffer.Remaining > 0)
 					{
 						throw new ArgumentException(Environment.GetResourceString("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", new object[]
 						{

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
-	public struct RuntimeArgumentHandle
+	public ref struct RuntimeArgumentHandle
 	{
 		internal IntPtr args;
 	}

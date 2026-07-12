@@ -1,82 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace System
 {
 	internal static class IPv6AddressHelper
 	{
-		internal unsafe static string ParseCanonicalName(string str, int start, ref bool isLoopback, ref string scopeId)
-		{
-			ushort* ptr = stackalloc ushort[(UIntPtr)16];
-			*(long*)ptr = 0L;
-			*(long*)(ptr + 4) = 0L;
-			isLoopback = IPv6AddressHelper.Parse(str, ptr, start, ref scopeId);
-			return "[" + IPv6AddressHelper.CreateCanonicalName(ptr) + "]";
-		}
-
-		internal unsafe static string CreateCanonicalName(ushort* numbers)
-		{
-			if (UriParser.ShouldUseLegacyV2Quirks)
-			{
-				return string.Format(CultureInfo.InvariantCulture, "{0:X4}:{1:X4}:{2:X4}:{3:X4}:{4:X4}:{5:X4}:{6:X4}:{7:X4}", new object[]
-				{
-					*numbers,
-					numbers[1],
-					numbers[2],
-					numbers[3],
-					numbers[4],
-					numbers[5],
-					numbers[6],
-					numbers[7]
-				});
-			}
-			KeyValuePair<int, int> keyValuePair = IPv6AddressHelper.FindCompressionRange(numbers);
-			bool flag = IPv6AddressHelper.ShouldHaveIpv4Embedded(numbers);
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < 8; i++)
-			{
-				if (flag && i == 6)
-				{
-					stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, ":{0:d}.{1:d}.{2:d}.{3:d}", new object[]
-					{
-						numbers[i] >> 8,
-						(int)(numbers[i] & 255),
-						numbers[i + 1] >> 8,
-						(int)(numbers[i + 1] & 255)
-					}));
-					break;
-				}
-				if (keyValuePair.Key == i)
-				{
-					stringBuilder.Append(":");
-				}
-				if (keyValuePair.Key <= i && keyValuePair.Value == 7)
-				{
-					stringBuilder.Append(":");
-					break;
-				}
-				if (keyValuePair.Key > i || i > keyValuePair.Value)
-				{
-					if (i != 0)
-					{
-						stringBuilder.Append(":");
-					}
-					stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, "{0:x}", numbers[i]));
-				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		private unsafe static KeyValuePair<int, int> FindCompressionRange(ushort* numbers)
+		[return: TupleElementNames(new string[] { "longestSequenceStart", "longestSequenceLength" })]
+		internal unsafe static ValueTuple<int, int> FindCompressionRange(ReadOnlySpan<ushort> numbers)
 		{
 			int num = 0;
 			int num2 = -1;
 			int num3 = 0;
-			for (int i = 0; i < 8; i++)
+			for (int i = 0; i < numbers.Length; i++)
 			{
-				if (numbers[i] == 0)
+				if (*numbers[i] == 0)
 				{
 					num3++;
 					if (num3 > num)
@@ -90,11 +27,352 @@ namespace System
 					num3 = 0;
 				}
 			}
-			if (num >= 2)
+			if (num <= 1)
 			{
-				return new KeyValuePair<int, int>(num2, num2 + num - 1);
+				return new ValueTuple<int, int>(-1, -1);
 			}
-			return new KeyValuePair<int, int>(-1, -1);
+			return new ValueTuple<int, int>(num2, num2 + num);
+		}
+
+		internal unsafe static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
+		{
+			if (*numbers[0] == 0 && *numbers[1] == 0 && *numbers[2] == 0 && *numbers[3] == 0 && *numbers[6] != 0)
+			{
+				if (*numbers[4] == 0 && (*numbers[5] == 0 || *numbers[5] == 65535))
+				{
+					return true;
+				}
+				if (*numbers[4] == 65535 && *numbers[5] == 0)
+				{
+					return true;
+				}
+			}
+			return *numbers[4] == 0 && *numbers[5] == 24318;
+		}
+
+		internal unsafe static bool IsValidStrict(char* name, int start, ref int end)
+		{
+			int num = 0;
+			int num2 = 0;
+			bool flag = false;
+			bool flag2 = false;
+			bool flag3 = true;
+			int num3 = 1;
+			bool flag4 = false;
+			if (start < end && name[start] == '[')
+			{
+				start++;
+				flag4 = true;
+			}
+			for (int i = start; i < end; i++)
+			{
+				if (Uri.IsHexDigit(name[i]))
+				{
+					num2++;
+					flag3 = false;
+				}
+				else
+				{
+					if (num2 > 4)
+					{
+						return false;
+					}
+					if (num2 != 0)
+					{
+						num++;
+						num3 = i - num2;
+						num2 = 0;
+					}
+					char c = name[i];
+					if (c <= '.')
+					{
+						if (c == '%')
+						{
+							while (i + 1 < end)
+							{
+								i++;
+								if (name[i] == ']')
+								{
+									goto IL_00D0;
+								}
+								if (name[i] == '/')
+								{
+									return false;
+								}
+							}
+							goto IL_01C7;
+						}
+						if (c != '.')
+						{
+							return false;
+						}
+						if (flag2)
+						{
+							return false;
+						}
+						i = end;
+						if (!IPv4AddressHelper.IsValid(name, num3, ref i, true, false, false))
+						{
+							return false;
+						}
+						num++;
+						num3 = i - num2;
+						flag2 = true;
+						i--;
+						goto IL_01C7;
+					}
+					else
+					{
+						if (c == '/')
+						{
+							return false;
+						}
+						if (c != ':')
+						{
+							if (c != ']')
+							{
+								return false;
+							}
+						}
+						else
+						{
+							if (i <= 0 || name[i - 1] != ':')
+							{
+								flag3 = true;
+								goto IL_01C7;
+							}
+							if (flag)
+							{
+								return false;
+							}
+							flag = true;
+							flag3 = false;
+							goto IL_01C7;
+						}
+					}
+					IL_00D0:
+					if (!flag4)
+					{
+						return false;
+					}
+					flag4 = false;
+					if (i + 1 < end && name[i + 1] != ':')
+					{
+						return false;
+					}
+					if (i + 3 < end && name[i + 2] == '0' && name[i + 3] == 'x')
+					{
+						for (i += 4; i < end; i++)
+						{
+							if (!Uri.IsHexDigit(name[i]))
+							{
+								return false;
+							}
+						}
+						goto IL_01C9;
+					}
+					for (i += 2; i < end; i++)
+					{
+						if (name[i] < '0' || name[i] > '9')
+						{
+							return false;
+						}
+					}
+					goto IL_01C9;
+					IL_01C7:
+					num2 = 0;
+				}
+				IL_01C9:;
+			}
+			if (num2 != 0)
+			{
+				if (num2 > 4)
+				{
+					return false;
+				}
+				num++;
+			}
+			return !flag3 && (flag ? (num < 8) : (num == 8)) && !flag4;
+		}
+
+		internal unsafe static void Parse(ReadOnlySpan<char> address, ushort* numbers, int start, ref string scopeId)
+		{
+			int num = 0;
+			int num2 = 0;
+			int num3 = -1;
+			bool flag = true;
+			int num4 = 0;
+			if (*address[start] == 91)
+			{
+				start++;
+			}
+			int i = start;
+			while (i < address.Length && *address[i] != 93)
+			{
+				char c = (char)(*address[i]);
+				if (c != '%')
+				{
+					if (c != '/')
+					{
+						if (c != ':')
+						{
+							num = num * 16 + Uri.FromHex((char)(*address[i++]));
+						}
+						else
+						{
+							numbers[num2++] = (ushort)num;
+							num = 0;
+							i++;
+							if (*address[i] == 58)
+							{
+								num3 = num2;
+								i++;
+							}
+							else if (num3 < 0 && num2 < 6)
+							{
+								continue;
+							}
+							int num5 = i;
+							while (num5 < address.Length && *address[num5] != 93 && *address[num5] != 58 && *address[num5] != 37 && *address[num5] != 47)
+							{
+								if (num5 >= i + 4)
+								{
+									break;
+								}
+								if (*address[num5] == 46)
+								{
+									while (num5 < address.Length && *address[num5] != 93 && *address[num5] != 47 && *address[num5] != 37)
+									{
+										num5++;
+									}
+									num = IPv4AddressHelper.ParseHostNumber(address, i, num5);
+									numbers[num2++] = (ushort)(num >> 16);
+									numbers[num2++] = (ushort)num;
+									i = num5;
+									num = 0;
+									flag = false;
+									break;
+								}
+								num5++;
+							}
+						}
+					}
+					else
+					{
+						if (flag)
+						{
+							numbers[num2++] = (ushort)num;
+							flag = false;
+						}
+						i++;
+						while (*address[i] != 93)
+						{
+							num4 = num4 * 10 + (int)(*address[i] - 48);
+							i++;
+						}
+					}
+				}
+				else
+				{
+					if (flag)
+					{
+						numbers[num2++] = (ushort)num;
+						flag = false;
+					}
+					start = i;
+					i++;
+					while (i < address.Length && *address[i] != 93 && *address[i] != 47)
+					{
+						i++;
+					}
+					scopeId = new string(address.Slice(start, i - start));
+					while (i < address.Length)
+					{
+						if (*address[i] == 93)
+						{
+							break;
+						}
+						i++;
+					}
+				}
+			}
+			if (flag)
+			{
+				numbers[num2++] = (ushort)num;
+			}
+			if (num3 > 0)
+			{
+				int num6 = 7;
+				int num7 = num2 - 1;
+				for (int j = num2 - num3; j > 0; j--)
+				{
+					numbers[num6--] = numbers[num7];
+					numbers[num7--] = 0;
+				}
+			}
+		}
+
+		internal unsafe static string ParseCanonicalName(string str, int start, ref bool isLoopback, ref string scopeId)
+		{
+			ushort* ptr = stackalloc ushort[(UIntPtr)16];
+			*(long*)ptr = 0L;
+			*(long*)(ptr + 4) = 0L;
+			Span<ushort> span = new Span<ushort>((void*)ptr, 8);
+			IPv6AddressHelper.Parse(str, ptr, start, ref scopeId);
+			isLoopback = IPv6AddressHelper.IsLoopback(span);
+			ValueTuple<int, int> valueTuple = IPv6AddressHelper.FindCompressionRange(span);
+			int item = valueTuple.Item1;
+			int item2 = valueTuple.Item2;
+			bool flag = IPv6AddressHelper.ShouldHaveIpv4Embedded(span);
+			Span<char> span2 = new Span<char>(stackalloc byte[(UIntPtr)96], 48);
+			*span2[0] = '[';
+			int num = 1;
+			for (int i = 0; i < 8; i++)
+			{
+				if (flag && i == 6)
+				{
+					*span2[num++] = ':';
+					int num2;
+					(*span[i] >> 8).TryFormat(span2.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+					num += num2;
+					*span2[num++] = '.';
+					((int)(*span[i] & 255)).TryFormat(span2.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+					num += num2;
+					*span2[num++] = '.';
+					(*span[i + 1] >> 8).TryFormat(span2.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+					num += num2;
+					*span2[num++] = '.';
+					((int)(*span[i + 1] & 255)).TryFormat(span2.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+					num += num2;
+					break;
+				}
+				if (item == i)
+				{
+					*span2[num++] = ':';
+				}
+				if (item <= i && item2 == 8)
+				{
+					*span2[num++] = ':';
+					break;
+				}
+				if (item > i || i >= item2)
+				{
+					if (i != 0)
+					{
+						*span2[num++] = ':';
+					}
+					int num2;
+					span[i].TryFormat(span2.Slice(num), out num2, "x", null);
+					num += num2;
+				}
+			}
+			*span2[num++] = ']';
+			return new string(span2.Slice(0, num));
+		}
+
+		private unsafe static bool IsLoopback(ReadOnlySpan<ushort> numbers)
+		{
+			return *numbers[0] == 0 && *numbers[1] == 0 && *numbers[2] == 0 && *numbers[3] == 0 && *numbers[4] == 0 && ((*numbers[5] == 0 && *numbers[6] == 0 && *numbers[7] == 1) || (*numbers[6] == 32512 && *numbers[7] == 1 && (*numbers[5] == 0 || *numbers[5] == ushort.MaxValue)));
 		}
 
 		private unsafe static bool ShouldHaveIpv4Embedded(ushort* numbers)
@@ -250,133 +528,6 @@ namespace System
 			return IPv6AddressHelper.InternalIsValid(name, start, ref end, false);
 		}
 
-		internal unsafe static bool IsValidStrict(char* name, int start, ref int end)
-		{
-			return IPv6AddressHelper.InternalIsValid(name, start, ref end, true);
-		}
-
-		internal unsafe static bool Parse(string address, ushort* numbers, int start, ref string scopeId)
-		{
-			int num = 0;
-			int num2 = 0;
-			int num3 = -1;
-			bool flag = true;
-			int num4 = 0;
-			if (address[start] == '[')
-			{
-				start++;
-			}
-			int num5 = start;
-			while (num5 < address.Length && address[num5] != ']')
-			{
-				char c = address[num5];
-				if (c != '%')
-				{
-					if (c != '/')
-					{
-						if (c != ':')
-						{
-							num = num * 16 + Uri.FromHex(address[num5++]);
-						}
-						else
-						{
-							numbers[num2++] = (ushort)num;
-							num = 0;
-							num5++;
-							if (address[num5] == ':')
-							{
-								num3 = num2;
-								num5++;
-							}
-							else if (num3 < 0 && num2 < 6)
-							{
-								continue;
-							}
-							int num6 = num5;
-							while (address[num6] != ']' && address[num6] != ':' && address[num6] != '%' && address[num6] != '/')
-							{
-								if (num6 >= num5 + 4)
-								{
-									break;
-								}
-								if (address[num6] == '.')
-								{
-									while (address[num6] != ']' && address[num6] != '/' && address[num6] != '%')
-									{
-										num6++;
-									}
-									num = IPv4AddressHelper.ParseHostNumber(address, num5, num6);
-									numbers[num2++] = (ushort)(num >> 16);
-									numbers[num2++] = (ushort)num;
-									num5 = num6;
-									num = 0;
-									flag = false;
-									break;
-								}
-								num6++;
-							}
-						}
-					}
-					else
-					{
-						if (flag)
-						{
-							numbers[num2++] = (ushort)num;
-							flag = false;
-						}
-						num5++;
-						while (address[num5] != ']')
-						{
-							num4 = num4 * 10 + (int)(address[num5] - '0');
-							num5++;
-						}
-					}
-				}
-				else
-				{
-					if (flag)
-					{
-						numbers[num2++] = (ushort)num;
-						flag = false;
-					}
-					start = num5;
-					num5++;
-					while (address[num5] != ']' && address[num5] != '/')
-					{
-						num5++;
-					}
-					scopeId = address.Substring(start, num5 - start);
-					while (address[num5] != ']')
-					{
-						num5++;
-					}
-				}
-			}
-			if (flag)
-			{
-				numbers[num2++] = (ushort)num;
-			}
-			if (num3 > 0)
-			{
-				int num7 = 7;
-				int num8 = num2 - 1;
-				for (int i = num2 - num3; i > 0; i--)
-				{
-					numbers[num7--] = numbers[num8];
-					numbers[num8--] = 0;
-				}
-			}
-			return *numbers == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[4] == 0 && ((numbers[5] == 0 && numbers[6] == 0 && numbers[7] == 1) || (numbers[6] == 32512 && numbers[7] == 1 && (numbers[5] == 0 || numbers[5] == ushort.MaxValue)));
-		}
-
 		private const int NumberOfLabels = 8;
-
-		private const string LegacyFormat = "{0:X4}:{1:X4}:{2:X4}:{3:X4}:{4:X4}:{5:X4}:{6:X4}:{7:X4}";
-
-		private const string CanonicalNumberFormat = "{0:x}";
-
-		private const string EmbeddedIPv4Format = ":{0:d}.{1:d}.{2:d}.{3:d}";
-
-		private const string Separator = ":";
 	}
 }

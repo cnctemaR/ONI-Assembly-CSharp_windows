@@ -4,10 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Audio
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixer.bindings.h")]
 	[ExcludeFromPreset]
-	[ExcludeFromObjectFactory]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixer.bindings.h")]
 	[NativeHeader("Modules/Audio/Public/AudioMixer.h")]
+	[ExcludeFromObjectFactory]
 	public class AudioMixer : Object
 	{
 		internal AudioMixer()
@@ -74,5 +74,9 @@ namespace UnityEngine.Audio
 		[NativeMethod]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool GetFloat(string name, out float value);
+
+		[NativeMethod("AudioMixerBindings::GetAbsoluteAudibilityFromGroup", HasExplicitThis = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern float GetAbsoluteAudibilityFromGroup(AudioMixerGroup group);
 	}
 }

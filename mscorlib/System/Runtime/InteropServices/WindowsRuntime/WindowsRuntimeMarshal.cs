@@ -597,7 +597,17 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 			{
 				public override string ToString()
 				{
-					return string.Concat(new object[] { "(", this.target, ", ", this.method, ")" });
+					string[] array = new string[5];
+					array[0] = "(";
+					int num = 1;
+					object obj = this.target;
+					array[num] = ((obj != null) ? obj.ToString() : null);
+					array[2] = ", ";
+					int num2 = 3;
+					MethodInfo methodInfo = this.method;
+					array[num2] = ((methodInfo != null) ? methodInfo.ToString() : null);
+					array[4] = ")";
+					return string.Concat(array);
 				}
 
 				internal object target;

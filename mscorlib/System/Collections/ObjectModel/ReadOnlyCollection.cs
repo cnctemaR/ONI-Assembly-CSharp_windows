@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Collections.ObjectModel
 {
+	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
-	[ComVisible(false)]
 	[Serializable]
 	public class ReadOnlyCollection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>
 	{
@@ -160,7 +158,7 @@ namespace System.Collections.ObjectModel
 			}
 			if (index < 0)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.arrayIndex, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+				ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
 			}
 			if (array.Length - index < this.Count)
 			{
@@ -176,12 +174,12 @@ namespace System.Collections.ObjectModel
 			Type typeFromHandle = typeof(T);
 			if (!elementType.IsAssignableFrom(typeFromHandle) && !typeFromHandle.IsAssignableFrom(elementType))
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 			object[] array3 = array as object[];
 			if (array3 == null)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 			int count = this.list.Count;
 			try
@@ -193,7 +191,7 @@ namespace System.Collections.ObjectModel
 			}
 			catch (ArrayTypeMismatchException)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
 			}
 		}
 

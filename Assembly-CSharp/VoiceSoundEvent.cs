@@ -24,15 +24,16 @@ public class VoiceSoundEvent : SoundEvent
 		{
 			return eventInstance;
 		}
+		bool flag = component.model == BionicMinionConfig.MODEL;
 		if (name.Contains(":"))
 		{
-			float num = float.Parse(name.Split(new char[] { ':' })[1]);
+			float num = float.Parse(name.Split(':', StringSplitOptions.None)[1]);
 			if ((float)global::UnityEngine.Random.Range(0, 100) > num)
 			{
 				return eventInstance;
 			}
 		}
-		Worker component2 = controller.GetComponent<Worker>();
+		WorkerBase component2 = controller.GetComponent<WorkerBase>();
 		string assetName = VoiceSoundEvent.GetAssetName(name, component2);
 		StaminaMonitor.Instance smi = component2.GetSMI<StaminaMonitor.Instance>();
 		if (!name.Contains("sleep_") && smi != null && smi.IsSleeping())
@@ -63,10 +64,15 @@ public class VoiceSoundEvent : SoundEvent
 				{
 					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, controller.name) });
 				}
+				else
+				{
+					component3.UpdateFirstParameter(sound, "isBionic", (float)(flag ? 1 : 0));
+				}
 			}
 			else
 			{
 				eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f, false);
+				eventInstance.setParameterByName("isBionic", (float)(flag ? 1 : 0), false);
 				if (sound.Contains("sleep_") && controller.GetComponent<Traits>().HasTrait("Snorer"))
 				{
 					eventInstance.setParameterByName("snoring", 1f, false);
@@ -96,7 +102,7 @@ public class VoiceSoundEvent : SoundEvent
 		string text2 = name;
 		if (name.Contains(":"))
 		{
-			text2 = name.Split(new char[] { ':' })[0];
+			text2 = name.Split(':', StringSplitOptions.None)[0];
 		}
 		return StringFormatter.Combine("DupVoc_", text, "_", text2);
 	}

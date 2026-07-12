@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Analytics
 {
 	[RequiredByNativeCode]
-	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
 	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
+	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
 	public static class AnalyticsSessionInfo
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

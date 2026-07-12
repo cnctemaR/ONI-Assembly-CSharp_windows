@@ -7,10 +7,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ShaderPropertySheet.h")]
-	[NativeHeader("Runtime/Math/SphericalHarmonicsL2.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Math/SphericalHarmonicsL2.h")]
 	public sealed class MaterialPropertyBlock
 	{
 		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", false)]
@@ -73,6 +73,11 @@ namespace UnityEngine
 			this.SetTexture(nameID, value);
 		}
 
+		[ThreadSafe]
+		[NativeName("GetIntFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetIntImpl(int name);
+
 		[NativeName("GetFloatFromScript")]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -105,25 +110,62 @@ namespace UnityEngine
 			return matrix4x;
 		}
 
-		[NativeName("GetTextureFromScript")]
 		[ThreadSafe]
+		[NativeName("GetTextureFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Texture GetTextureImpl(int name);
+
+		[NativeName("HasPropertyFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasPropertyImpl(int name);
+
+		[NativeName("HasFloatFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasFloatImpl(int name);
+
+		[NativeName("HasIntegerFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasIntImpl(int name);
+
+		[NativeName("HasTextureFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasTextureImpl(int name);
+
+		[NativeName("HasMatrixFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasMatrixImpl(int name);
+
+		[NativeName("HasVectorFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasVectorImpl(int name);
+
+		[NativeName("HasBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasBufferImpl(int name);
+
+		[NativeName("HasConstantBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasConstantBufferImpl(int name);
+
+		[ThreadSafe]
+		[NativeName("SetIntFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetIntImpl(int name, int value);
 
 		[NativeName("SetFloatFromScript")]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetFloatImpl(int name, float value);
 
-		[NativeName("SetVectorFromScript")]
 		[ThreadSafe]
+		[NativeName("SetVectorFromScript")]
 		private void SetVectorImpl(int name, Vector4 value)
 		{
 			this.SetVectorImpl_Injected(name, ref value);
 		}
 
-		[NativeName("SetColorFromScript")]
 		[ThreadSafe]
+		[NativeName("SetColorFromScript")]
 		private void SetColorImpl(int name, Color value)
 		{
 			this.SetColorImpl_Injected(name, ref value);
@@ -151,28 +193,28 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
 
+		[NativeName("SetBufferFromScript")]
 		[ThreadSafe]
-		[NativeName("SetGraphicsBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
 
-		[NativeName("SetConstantBufferFromScript")]
 		[ThreadSafe]
+		[NativeName("SetConstantBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
 
-		[NativeName("SetConstantGraphicsBufferFromScript")]
 		[ThreadSafe]
+		[NativeName("SetConstantBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
 
-		[NativeName("SetFloatArrayFromScript")]
 		[ThreadSafe]
+		[NativeName("SetFloatArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetFloatArrayImpl(int name, float[] values, int count);
 
-		[NativeName("SetVectorArrayFromScript")]
 		[ThreadSafe]
+		[NativeName("SetVectorArrayFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetVectorArrayImpl(int name, Vector4[] values, int count);
 
@@ -181,8 +223,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetMatrixArrayImpl(int name, Matrix4x4[] values, int count);
 
-		[ThreadSafe]
 		[NativeName("GetFloatArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern float[] GetFloatArrayImpl(int name);
 
@@ -196,13 +238,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Matrix4x4[] GetMatrixArrayImpl(int name);
 
-		[NativeName("GetFloatArrayCountFromScript")]
 		[ThreadSafe]
+		[NativeName("GetFloatArrayCountFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetFloatArrayCountImpl(int name);
 
-		[ThreadSafe]
 		[NativeName("GetVectorArrayCountFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetVectorArrayCountImpl(int name);
 
@@ -211,23 +253,23 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetMatrixArrayCountImpl(int name);
 
-		[ThreadSafe]
 		[NativeName("ExtractFloatArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ExtractFloatArrayImpl(int name, [Out] float[] val);
 
-		[ThreadSafe]
 		[NativeName("ExtractVectorArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ExtractVectorArrayImpl(int name, [Out] Vector4[] val);
 
-		[ThreadSafe]
 		[NativeName("ExtractMatrixArrayFromScript")]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ExtractMatrixArrayImpl(int name, [Out] Matrix4x4[] val);
 
-		[FreeFunction("ConvertAndCopySHCoefficientArraysToPropertySheetFromScript")]
 		[ThreadSafe]
+		[FreeFunction("ConvertAndCopySHCoefficientArraysToPropertySheetFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_CopySHCoefficientArraysFrom(MaterialPropertyBlock properties, SphericalHarmonicsL2[] lightProbes, int sourceStart, int destStart, int count);
 
@@ -393,6 +435,16 @@ namespace UnityEngine
 			GC.SuppressFinalize(this);
 		}
 
+		public void SetInt(string name, int value)
+		{
+			this.SetFloatImpl(Shader.PropertyToID(name), (float)value);
+		}
+
+		public void SetInt(int nameID, int value)
+		{
+			this.SetFloatImpl(nameID, (float)value);
+		}
+
 		public void SetFloat(string name, float value)
 		{
 			this.SetFloatImpl(Shader.PropertyToID(name), value);
@@ -403,14 +455,14 @@ namespace UnityEngine
 			this.SetFloatImpl(nameID, value);
 		}
 
-		public void SetInt(string name, int value)
+		public void SetInteger(string name, int value)
 		{
-			this.SetFloatImpl(Shader.PropertyToID(name), (float)value);
+			this.SetIntImpl(Shader.PropertyToID(name), value);
 		}
 
-		public void SetInt(int nameID, int value)
+		public void SetInteger(int nameID, int value)
 		{
-			this.SetFloatImpl(nameID, (float)value);
+			this.SetIntImpl(nameID, value);
 		}
 
 		public void SetVector(string name, Vector4 value)
@@ -563,6 +615,106 @@ namespace UnityEngine
 			this.SetMatrixArray(nameID, values, values.Length);
 		}
 
+		public bool HasProperty(string name)
+		{
+			return this.HasPropertyImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasProperty(int nameID)
+		{
+			return this.HasPropertyImpl(nameID);
+		}
+
+		public bool HasInt(string name)
+		{
+			return this.HasFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasInt(int nameID)
+		{
+			return this.HasFloatImpl(nameID);
+		}
+
+		public bool HasFloat(string name)
+		{
+			return this.HasFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasFloat(int nameID)
+		{
+			return this.HasFloatImpl(nameID);
+		}
+
+		public bool HasInteger(string name)
+		{
+			return this.HasIntImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasInteger(int nameID)
+		{
+			return this.HasIntImpl(nameID);
+		}
+
+		public bool HasTexture(string name)
+		{
+			return this.HasTextureImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasTexture(int nameID)
+		{
+			return this.HasTextureImpl(nameID);
+		}
+
+		public bool HasMatrix(string name)
+		{
+			return this.HasMatrixImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasMatrix(int nameID)
+		{
+			return this.HasMatrixImpl(nameID);
+		}
+
+		public bool HasVector(string name)
+		{
+			return this.HasVectorImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasVector(int nameID)
+		{
+			return this.HasVectorImpl(nameID);
+		}
+
+		public bool HasColor(string name)
+		{
+			return this.HasVectorImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasColor(int nameID)
+		{
+			return this.HasVectorImpl(nameID);
+		}
+
+		public bool HasBuffer(string name)
+		{
+			return this.HasBufferImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasBuffer(int nameID)
+		{
+			return this.HasBufferImpl(nameID);
+		}
+
+		public bool HasConstantBuffer(string name)
+		{
+			return this.HasConstantBufferImpl(Shader.PropertyToID(name));
+		}
+
+		public bool HasConstantBuffer(int nameID)
+		{
+			return this.HasConstantBufferImpl(nameID);
+		}
+
 		public float GetFloat(string name)
 		{
 			return this.GetFloatImpl(Shader.PropertyToID(name));
@@ -581,6 +733,16 @@ namespace UnityEngine
 		public int GetInt(int nameID)
 		{
 			return (int)this.GetFloatImpl(nameID);
+		}
+
+		public int GetInteger(string name)
+		{
+			return this.GetIntImpl(Shader.PropertyToID(name));
+		}
+
+		public int GetInteger(int nameID)
+		{
+			return this.GetIntImpl(nameID);
 		}
 
 		public Vector4 GetVector(string name)

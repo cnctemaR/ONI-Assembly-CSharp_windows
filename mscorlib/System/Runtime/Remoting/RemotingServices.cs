@@ -306,12 +306,12 @@ namespace System.Runtime.Remoting
 				}
 			}
 			int num = Interlocked.Increment(ref RemotingServices.next_id);
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
 				RemotingServices.app_id,
 				Environment.TickCount.ToString("x"),
 				"_",
-				num,
+				num.ToString(),
 				".rem"
 			});
 		}
@@ -450,7 +450,7 @@ namespace System.Runtime.Remoting
 		public static bool IsMethodOverloaded(IMethodMessage msg)
 		{
 			RuntimeType runtimeType = (RuntimeType)msg.MethodBase.DeclaringType;
-			return runtimeType.GetMethodsByName(msg.MethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, false, runtimeType).Length > 1;
+			return runtimeType.GetMethodsByName(msg.MethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, RuntimeType.MemberListType.CaseSensitive, runtimeType).Length > 1;
 		}
 
 		public static bool IsObjectOutOfAppDomain(object tp)
@@ -745,7 +745,11 @@ namespace System.Runtime.Remoting
 				return null;
 			}
 			MemoryStream memoryStream = new MemoryStream();
-			RemotingServices._serializationFormatter.Serialize(memoryStream, obj);
+			BinaryFormatter serializationFormatter = RemotingServices._serializationFormatter;
+			lock (serializationFormatter)
+			{
+				RemotingServices._serializationFormatter.Serialize(memoryStream, obj);
+			}
 			return memoryStream.ToArray();
 		}
 
@@ -757,7 +761,12 @@ namespace System.Runtime.Remoting
 				return null;
 			}
 			MemoryStream memoryStream = new MemoryStream(array);
-			object obj = RemotingServices._deserializationFormatter.Deserialize(memoryStream);
+			BinaryFormatter deserializationFormatter = RemotingServices._deserializationFormatter;
+			object obj;
+			lock (deserializationFormatter)
+			{
+				obj = RemotingServices._deserializationFormatter.Deserialize(memoryStream);
+			}
 			if (obj is RemotingServices.CACD)
 			{
 				RemotingServices.CACD cacd = (RemotingServices.CACD)obj;
@@ -781,7 +790,11 @@ namespace System.Runtime.Remoting
 			finally
 			{
 				MemoryStream memoryStream = new MemoryStream();
-				RemotingServices._serializationFormatter.Serialize(memoryStream, ex);
+				BinaryFormatter serializationFormatter = RemotingServices._serializationFormatter;
+				lock (serializationFormatter)
+				{
+					RemotingServices._serializationFormatter.Serialize(memoryStream, ex);
+				}
 				array = memoryStream.ToArray();
 			}
 			return array;

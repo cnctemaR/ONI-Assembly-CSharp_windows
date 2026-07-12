@@ -22,7 +22,7 @@ public class DreckoConfig : IEntityConfig
 				"SpiceVine".ToTag(),
 				SwampLilyConfig.ID.ToTag(),
 				"BasicSingleHarvestPlant".ToTag()
-			}, DreckoConfig.POOP_ELEMENT, DreckoConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false, true, false)
+			}, DreckoConfig.POOP_ELEMENT, DreckoConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false, Diet.Info.FoodType.EatPlantDirectly, false, null)
 		});
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;

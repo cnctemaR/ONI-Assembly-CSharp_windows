@@ -34,16 +34,16 @@ namespace System.Configuration
 			{
 				if (timeSpan < this.minValue || timeSpan > this.maxValue)
 				{
-					throw new ArgumentException(string.Concat(new object[] { "The value must be in the range ", this.minValue, " - ", this.maxValue }));
+					throw new ArgumentException("The value must be in the range " + this.minValue.ToString() + " - " + this.maxValue.ToString());
 				}
 			}
 			else if (timeSpan >= this.minValue && timeSpan <= this.maxValue)
 			{
-				throw new ArgumentException(string.Concat(new object[] { "The value must not be in the range ", this.minValue, " - ", this.maxValue }));
+				throw new ArgumentException("The value must not be in the range " + this.minValue.ToString() + " - " + this.maxValue.ToString());
 			}
 			if (this.resolutionInSeconds != 0L && timeSpan.Ticks % (10000000L * this.resolutionInSeconds) != 0L)
 			{
-				throw new ArgumentException("The value must have a resolution of " + TimeSpan.FromTicks(10000000L * this.resolutionInSeconds));
+				throw new ArgumentException("The value must have a resolution of " + TimeSpan.FromTicks(10000000L * this.resolutionInSeconds).ToString());
 			}
 		}
 

@@ -7,13 +7,14 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/ResourceManager.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/ResourceManager.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	public sealed class Shader : Object
 	{
 		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]
@@ -37,6 +38,15 @@ namespace UnityEngine
 		[FreeFunction("GetBuiltinResource<Shader>")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Shader FindBuiltin(string name);
+
+		[NativeProperty("MaxChunksRuntimeOverride")]
+		public static extern int maximumChunksOverride
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		[NativeProperty("MaximumShaderLOD")]
 		public extern int maximumLOD
@@ -71,6 +81,40 @@ namespace UnityEngine
 			set;
 		}
 
+		public static GlobalKeyword[] enabledGlobalKeywords
+		{
+			get
+			{
+				return Shader.GetEnabledGlobalKeywords();
+			}
+		}
+
+		public static GlobalKeyword[] globalKeywords
+		{
+			get
+			{
+				return Shader.GetAllGlobalKeywords();
+			}
+		}
+
+		public LocalKeywordSpace keywordSpace
+		{
+			get
+			{
+				LocalKeywordSpace localKeywordSpace;
+				this.get_keywordSpace_Injected(out localKeywordSpace);
+				return localKeywordSpace;
+			}
+		}
+
+		[FreeFunction("keywords::GetEnabledGlobalKeywords")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern GlobalKeyword[] GetEnabledGlobalKeywords();
+
+		[FreeFunction("keywords::GetAllGlobalKeywords")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern GlobalKeyword[] GetAllGlobalKeywords();
+
 		[FreeFunction("ShaderScripting::EnableKeyword")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EnableKeyword(string keyword);
@@ -82,6 +126,50 @@ namespace UnityEngine
 		[FreeFunction("ShaderScripting::IsKeywordEnabled")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsKeywordEnabled(string keyword);
+
+		[FreeFunction("ShaderScripting::EnableKeyword")]
+		internal static void EnableKeywordFast(GlobalKeyword keyword)
+		{
+			Shader.EnableKeywordFast_Injected(ref keyword);
+		}
+
+		[FreeFunction("ShaderScripting::DisableKeyword")]
+		internal static void DisableKeywordFast(GlobalKeyword keyword)
+		{
+			Shader.DisableKeywordFast_Injected(ref keyword);
+		}
+
+		[FreeFunction("ShaderScripting::SetKeyword")]
+		internal static void SetKeywordFast(GlobalKeyword keyword, bool value)
+		{
+			Shader.SetKeywordFast_Injected(ref keyword, value);
+		}
+
+		[FreeFunction("ShaderScripting::IsKeywordEnabled")]
+		internal static bool IsKeywordEnabledFast(GlobalKeyword keyword)
+		{
+			return Shader.IsKeywordEnabledFast_Injected(ref keyword);
+		}
+
+		public static void EnableKeyword(in GlobalKeyword keyword)
+		{
+			Shader.EnableKeywordFast(keyword);
+		}
+
+		public static void DisableKeyword(in GlobalKeyword keyword)
+		{
+			Shader.DisableKeywordFast(keyword);
+		}
+
+		public static void SetKeyword(in GlobalKeyword keyword, bool value)
+		{
+			Shader.SetKeywordFast(keyword, value);
+		}
+
+		public static bool IsKeywordEnabled(in GlobalKeyword keyword)
+		{
+			return Shader.IsKeywordEnabledFast(keyword);
+		}
 
 		public extern int renderQueue
 		{
@@ -123,6 +211,17 @@ namespace UnityEngine
 			get;
 		}
 
+		public extern int subshaderCount
+		{
+			[FreeFunction(Name = "ShaderScripting::GetSubshaderCount", HasExplicitThis = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[FreeFunction(Name = "ShaderScripting::GetPassCountInSubshader", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetPassCountInSubshader(int subshaderIndex);
+
 		public ShaderTagId FindPassTagValue(int passIndex, ShaderTagId tagName)
 		{
 			bool flag = passIndex < 0 || passIndex >= this.passCount;
@@ -137,9 +236,54 @@ namespace UnityEngine
 			};
 		}
 
+		public ShaderTagId FindPassTagValue(int subshaderIndex, int passIndex, ShaderTagId tagName)
+		{
+			bool flag = subshaderIndex < 0 || subshaderIndex >= this.subshaderCount;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException("subshaderIndex");
+			}
+			bool flag2 = passIndex < 0 || passIndex >= this.GetPassCountInSubshader(subshaderIndex);
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException("passIndex");
+			}
+			int num = this.Internal_FindPassTagValueInSubShader(subshaderIndex, passIndex, tagName.id);
+			return new ShaderTagId
+			{
+				id = num
+			};
+		}
+
+		public ShaderTagId FindSubshaderTagValue(int subshaderIndex, ShaderTagId tagName)
+		{
+			bool flag = subshaderIndex < 0 || subshaderIndex >= this.subshaderCount;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Invalid subshaderIndex {0}. Value must be in the range [0, {1})", subshaderIndex, this.subshaderCount));
+			}
+			int num = this.Internal_FindSubshaderTagValue(subshaderIndex, tagName.id);
+			return new ShaderTagId
+			{
+				id = num
+			};
+		}
+
 		[FreeFunction(Name = "ShaderScripting::FindPassTagValue", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int Internal_FindPassTagValue(int passIndex, int tagName);
+
+		[FreeFunction(Name = "ShaderScripting::FindPassTagValue", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int Internal_FindPassTagValueInSubShader(int subShaderIndex, int passIndex, int tagName);
+
+		[FreeFunction(Name = "ShaderScripting::FindSubshaderTagValue", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int Internal_FindSubshaderTagValue(int subShaderIndex, int tagName);
+
+		[FreeFunction("ShaderScripting::SetGlobalInt")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalIntImpl(int name, int value);
 
 		[FreeFunction("ShaderScripting::SetGlobalFloat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -180,6 +324,10 @@ namespace UnityEngine
 		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
+
+		[FreeFunction("ShaderScripting::GetGlobalInt")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetGlobalIntImpl(int name);
 
 		[FreeFunction("ShaderScripting::GetGlobalFloat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -364,6 +512,16 @@ namespace UnityEngine
 			}
 		}
 
+		public static void SetGlobalInt(string name, int value)
+		{
+			Shader.SetGlobalFloatImpl(Shader.PropertyToID(name), (float)value);
+		}
+
+		public static void SetGlobalInt(int nameID, int value)
+		{
+			Shader.SetGlobalFloatImpl(nameID, (float)value);
+		}
+
 		public static void SetGlobalFloat(string name, float value)
 		{
 			Shader.SetGlobalFloatImpl(Shader.PropertyToID(name), value);
@@ -374,14 +532,14 @@ namespace UnityEngine
 			Shader.SetGlobalFloatImpl(nameID, value);
 		}
 
-		public static void SetGlobalInt(string name, int value)
+		public static void SetGlobalInteger(string name, int value)
 		{
-			Shader.SetGlobalFloatImpl(Shader.PropertyToID(name), (float)value);
+			Shader.SetGlobalIntImpl(Shader.PropertyToID(name), value);
 		}
 
-		public static void SetGlobalInt(int nameID, int value)
+		public static void SetGlobalInteger(int nameID, int value)
 		{
-			Shader.SetGlobalFloatImpl(nameID, (float)value);
+			Shader.SetGlobalIntImpl(nameID, value);
 		}
 
 		public static void SetGlobalVector(string name, Vector4 value)
@@ -534,6 +692,16 @@ namespace UnityEngine
 			Shader.SetGlobalMatrixArray(nameID, values, values.Length);
 		}
 
+		public static int GetGlobalInt(string name)
+		{
+			return (int)Shader.GetGlobalFloatImpl(Shader.PropertyToID(name));
+		}
+
+		public static int GetGlobalInt(int nameID)
+		{
+			return (int)Shader.GetGlobalFloatImpl(nameID);
+		}
+
 		public static float GetGlobalFloat(string name)
 		{
 			return Shader.GetGlobalFloatImpl(Shader.PropertyToID(name));
@@ -544,14 +712,14 @@ namespace UnityEngine
 			return Shader.GetGlobalFloatImpl(nameID);
 		}
 
-		public static int GetGlobalInt(string name)
+		public static int GetGlobalInteger(string name)
 		{
-			return (int)Shader.GetGlobalFloatImpl(Shader.PropertyToID(name));
+			return Shader.GetGlobalIntImpl(Shader.PropertyToID(name));
 		}
 
-		public static int GetGlobalInt(int nameID)
+		public static int GetGlobalInteger(int nameID)
 		{
-			return (int)Shader.GetGlobalFloatImpl(nameID);
+			return Shader.GetGlobalIntImpl(nameID);
 		}
 
 		public static Vector4 GetGlobalVector(string name)
@@ -682,6 +850,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string[] GetPropertyAttributes([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
+		[FreeFunction("ShaderScripting::GetPropertyDefaultIntValue")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyDefaultIntValue([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+
 		[FreeFunction("ShaderScripting::GetPropertyDefaultValue")]
 		private static Vector4 GetPropertyDefaultValue([NotNull("ArgumentNullException")] Shader shader, int propertyIndex)
 		{
@@ -789,6 +961,17 @@ namespace UnityEngine
 			return new Vector2(propertyDefaultValue[1], propertyDefaultValue[2]);
 		}
 
+		public int GetPropertyDefaultIntValue(int propertyIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			bool flag = this.GetPropertyType(propertyIndex) != ShaderPropertyType.Int;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Int.");
+			}
+			return Shader.GetPropertyDefaultIntValue(this, propertyIndex);
+		}
+
 		public TextureDimension GetPropertyTextureDimension(int propertyIndex)
 		{
 			Shader.CheckPropertyIndex(this, propertyIndex);
@@ -823,6 +1006,21 @@ namespace UnityEngine
 			}
 			return Shader.FindTextureStackImpl(this, propertyIndex, out stackName, out layerIndex);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_keywordSpace_Injected(out LocalKeywordSpace ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableKeywordFast_Injected(ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableKeywordFast_Injected(ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetKeywordFast_Injected(ref GlobalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordEnabledFast_Injected(ref GlobalKeyword keyword);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalVectorImpl_Injected(int name, ref Vector4 value);

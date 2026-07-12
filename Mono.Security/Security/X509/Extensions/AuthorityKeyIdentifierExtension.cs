@@ -31,8 +31,7 @@ namespace Mono.Security.X509.Extensions
 			for (int i = 0; i < asn.Count; i++)
 			{
 				ASN1 asn2 = asn[i];
-				byte tag = asn2.Tag;
-				if (tag == 128)
+				if (asn2.Tag == 128)
 				{
 					this.aki = asn2.Value;
 				}

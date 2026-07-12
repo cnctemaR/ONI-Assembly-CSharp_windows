@@ -7,40 +7,40 @@ namespace System.Text
 	public sealed class DecoderFallbackException : ArgumentException
 	{
 		public DecoderFallbackException()
-			: base(Environment.GetResourceString("Value does not fall within the expected range."))
+			: base("Value does not fall within the expected range.")
 		{
-			base.SetErrorCode(-2147024809);
+			base.HResult = -2147024809;
 		}
 
 		public DecoderFallbackException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024809);
+			base.HResult = -2147024809;
 		}
 
 		public DecoderFallbackException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024809);
-		}
-
-		internal DecoderFallbackException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
+			base.HResult = -2147024809;
 		}
 
 		public DecoderFallbackException(string message, byte[] bytesUnknown, int index)
 			: base(message)
 		{
-			this.bytesUnknown = bytesUnknown;
-			this.index = index;
+			this._bytesUnknown = bytesUnknown;
+			this._index = index;
+		}
+
+		private DecoderFallbackException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
+		{
 		}
 
 		public byte[] BytesUnknown
 		{
 			get
 			{
-				return this.bytesUnknown;
+				return this._bytesUnknown;
 			}
 		}
 
@@ -48,12 +48,12 @@ namespace System.Text
 		{
 			get
 			{
-				return this.index;
+				return this._index;
 			}
 		}
 
-		private byte[] bytesUnknown;
+		private byte[] _bytesUnknown;
 
-		private int index;
+		private int _index;
 	}
 }

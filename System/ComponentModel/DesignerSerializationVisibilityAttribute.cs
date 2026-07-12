@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility visibility)
 		{
-			this.visibility = visibility;
+			this.Visibility = visibility;
 		}
 
-		public DesignerSerializationVisibility Visibility
-		{
-			get
-			{
-				return this.visibility;
-			}
-		}
+		public DesignerSerializationVisibility Visibility { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -25,7 +19,9 @@ namespace System.ComponentModel
 				return true;
 			}
 			DesignerSerializationVisibilityAttribute designerSerializationVisibilityAttribute = obj as DesignerSerializationVisibilityAttribute;
-			return designerSerializationVisibilityAttribute != null && designerSerializationVisibilityAttribute.Visibility == this.visibility;
+			DesignerSerializationVisibility? designerSerializationVisibility = ((designerSerializationVisibilityAttribute != null) ? new DesignerSerializationVisibility?(designerSerializationVisibilityAttribute.Visibility) : null);
+			DesignerSerializationVisibility visibility = this.Visibility;
+			return (designerSerializationVisibility.GetValueOrDefault() == visibility) & (designerSerializationVisibility != null);
 		}
 
 		public override int GetHashCode()
@@ -45,7 +41,5 @@ namespace System.ComponentModel
 		public static readonly DesignerSerializationVisibilityAttribute Visible = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Visible);
 
 		public static readonly DesignerSerializationVisibilityAttribute Default = DesignerSerializationVisibilityAttribute.Visible;
-
-		private DesignerSerializationVisibility visibility;
 	}
 }

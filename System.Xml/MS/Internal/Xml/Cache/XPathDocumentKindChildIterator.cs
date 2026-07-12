@@ -8,13 +8,13 @@ namespace MS.Internal.Xml.Cache
 		public XPathDocumentKindChildIterator(XPathDocumentNavigator parent, XPathNodeType typ)
 			: base(parent)
 		{
-			this.typ = typ;
+			this._typ = typ;
 		}
 
 		public XPathDocumentKindChildIterator(XPathDocumentKindChildIterator iter)
 			: base(iter)
 		{
-			this.typ = iter.typ;
+			this._typ = iter._typ;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -26,12 +26,12 @@ namespace MS.Internal.Xml.Cache
 		{
 			if (this.pos == 0)
 			{
-				if (!this.ctxt.MoveToChild(this.typ))
+				if (!this.ctxt.MoveToChild(this._typ))
 				{
 					return false;
 				}
 			}
-			else if (!this.ctxt.MoveToNext(this.typ))
+			else if (!this.ctxt.MoveToNext(this._typ))
 			{
 				return false;
 			}
@@ -39,6 +39,6 @@ namespace MS.Internal.Xml.Cache
 			return true;
 		}
 
-		private XPathNodeType typ;
+		private XPathNodeType _typ;
 	}
 }

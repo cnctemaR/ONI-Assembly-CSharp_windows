@@ -42,8 +42,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 
 	public static void BeginBlinking(BlinkMonitor.Instance smi)
 	{
-		string text = "eyes1";
-		smi.eyes.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+		smi.eyes.Play(smi.eye_anim, KAnim.PlayMode.Once, 1f, 0f);
 		BlinkMonitor.UpdateBlinking(smi, 0f);
 	}
 
@@ -119,5 +118,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 		}
 
 		public KBatchedAnimController eyes;
+
+		public string eye_anim;
 	}
 }

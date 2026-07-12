@@ -17,7 +17,7 @@ public class WarpReceiver : Workable
 		Components.WarpReceivers.Add(this);
 	}
 
-	public void ReceiveWarpedDuplicant(Worker dupe)
+	public void ReceiveWarpedDuplicant(WorkerBase dupe)
 	{
 		dupe.transform.SetPosition(Grid.CellToPos(Grid.PosToCell(this), CellAlignment.Bottom, Grid.SceneLayer.Move));
 		Debug.Assert(this.chore == null);

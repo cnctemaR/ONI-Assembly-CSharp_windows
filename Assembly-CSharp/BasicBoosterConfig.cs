@@ -13,7 +13,7 @@ public class BasicBoosterConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicBooster", ITEMS.PILLS.BASICBOOSTER.NAME, ITEMS.PILLS.BASICBOOSTER.DESC, 1f, true, Assets.GetAnim("pill_2_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicBooster", global::STRINGS.ITEMS.PILLS.BASICBOOSTER.NAME, global::STRINGS.ITEMS.PILLS.BASICBOOSTER.DESC, 1f, true, Assets.GetAnim("pill_2_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.BASICBOOSTER);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -26,7 +26,7 @@ public class BasicBoosterConfig : IEntityConfig
 		BasicBoosterConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Apothecary", array, array2), array, array2)
 		{
 			time = 50f,
-			description = ITEMS.PILLS.BASICBOOSTER.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.BASICBOOSTER.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Apothecary" },
 			sortOrder = 1

@@ -56,6 +56,7 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ClearCookieCache(string domain, string path);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr Create();
 
@@ -285,30 +286,35 @@ namespace UnityEngine.Networking
 				}
 				string text = value.ToUpper();
 				string text2 = text;
-				if (text2 != null)
+				if (!(text2 == "GET"))
 				{
-					if (text2 == "GET")
+					if (!(text2 == "POST"))
 					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
-						return;
+						if (!(text2 == "PUT"))
+						{
+							if (!(text2 == "HEAD"))
+							{
+								this.InternalSetCustomMethod(value.ToUpper());
+							}
+							else
+							{
+								this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
+							}
+						}
+						else
+						{
+							this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
+						}
 					}
-					if (text2 == "POST")
+					else
 					{
 						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Post);
-						return;
-					}
-					if (text2 == "PUT")
-					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
-						return;
-					}
-					if (text2 == "HEAD")
-					{
-						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
-						return;
 					}
 				}
-				this.InternalSetCustomMethod(value.ToUpper());
+				else
+				{
+					this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
+				}
 			}
 		}
 
@@ -374,7 +380,7 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				string text = "http://localhost/";
+				string text = "https://localhost/";
 				this.InternalSetUrl(WebRequestUtils.MakeInitialUrl(value, text));
 			}
 		}
@@ -794,8 +800,8 @@ namespace UnityEngine.Networking
 			return new UnityWebRequest(uri, "HEAD");
 		}
 
-		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
 		public static UnityWebRequest GetTexture(string uri)
 		{
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
@@ -808,15 +814,15 @@ namespace UnityEngine.Networking
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("UnityWebRequest.GetAudioClip is obsolete. Use UnityWebRequestMultimedia.GetAudioClip instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestMultimedia.GetAudioClip(*)", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static UnityWebRequest GetAudioClip(string uri, AudioType audioType)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("UnityWebRequest.GetAssetBundle is obsolete. Use UnityWebRequestAssetBundle.GetAssetBundle instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestAssetBundle.GetAssetBundle(*)", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static UnityWebRequest GetAssetBundle(string uri)
 		{
 			return null;
@@ -870,32 +876,75 @@ namespace UnityEngine.Networking
 			return new UnityWebRequest(uri, "PUT", new DownloadHandlerBuffer(), new UploadHandlerRaw(Encoding.UTF8.GetBytes(bodyData)));
 		}
 
+		[Obsolete("UnityWebRequest.Post with only a string data is obsolete. Use UnityWebRequest.Post with content type argument or UnityWebRequest.PostWwwForm instead (UnityUpgradable) -> [UnityEngine] UnityWebRequest.PostWwwForm(*)", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static UnityWebRequest Post(string uri, string postData)
 		{
-			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			UnityWebRequest.SetupPost(unityWebRequest, postData);
-			return unityWebRequest;
+			return UnityWebRequest.PostWwwForm(uri, postData);
 		}
 
+		[Obsolete("UnityWebRequest.Post with only a string data is obsolete. Use UnityWebRequest.Post with content type argument or UnityWebRequest.PostWwwForm instead (UnityUpgradable) -> [UnityEngine] UnityWebRequest.PostWwwForm(*)", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static UnityWebRequest Post(Uri uri, string postData)
 		{
+			return UnityWebRequest.PostWwwForm(uri, postData);
+		}
+
+		public static UnityWebRequest PostWwwForm(string uri, string form)
+		{
 			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
-			UnityWebRequest.SetupPost(unityWebRequest, postData);
+			UnityWebRequest.SetupPostWwwForm(unityWebRequest, form);
 			return unityWebRequest;
 		}
 
-		private static void SetupPost(UnityWebRequest request, string postData)
+		public static UnityWebRequest PostWwwForm(Uri uri, string form)
 		{
-			byte[] array = null;
-			bool flag = !string.IsNullOrEmpty(postData);
-			if (flag)
+			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
+			UnityWebRequest.SetupPostWwwForm(unityWebRequest, form);
+			return unityWebRequest;
+		}
+
+		private static void SetupPostWwwForm(UnityWebRequest request, string postData)
+		{
+			request.downloadHandler = new DownloadHandlerBuffer();
+			bool flag = string.IsNullOrEmpty(postData);
+			if (!flag)
 			{
 				string text = WWWTranscoder.DataEncode(postData, Encoding.UTF8);
-				array = Encoding.UTF8.GetBytes(text);
+				byte[] bytes = Encoding.UTF8.GetBytes(text);
+				request.uploadHandler = new UploadHandlerRaw(bytes);
+				request.uploadHandler.contentType = "application/x-www-form-urlencoded";
 			}
-			request.uploadHandler = new UploadHandlerRaw(array);
-			request.uploadHandler.contentType = "application/x-www-form-urlencoded";
+		}
+
+		public static UnityWebRequest Post(string uri, string postData, string contentType)
+		{
+			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
+			UnityWebRequest.SetupPost(unityWebRequest, postData, contentType);
+			return unityWebRequest;
+		}
+
+		public static UnityWebRequest Post(Uri uri, string postData, string contentType)
+		{
+			UnityWebRequest unityWebRequest = new UnityWebRequest(uri, "POST");
+			UnityWebRequest.SetupPost(unityWebRequest, postData, contentType);
+			return unityWebRequest;
+		}
+
+		private static void SetupPost(UnityWebRequest request, string postData, string contentType)
+		{
 			request.downloadHandler = new DownloadHandlerBuffer();
+			bool flag = string.IsNullOrEmpty(postData);
+			if (flag)
+			{
+				request.SetRequestHeader("Content-Type", contentType);
+			}
+			else
+			{
+				byte[] bytes = Encoding.UTF8.GetBytes(postData);
+				request.uploadHandler = new UploadHandlerRaw(bytes);
+				request.uploadHandler.contentType = contentType;
+			}
 		}
 
 		public static UnityWebRequest Post(string uri, WWWForm formData)
@@ -914,22 +963,21 @@ namespace UnityEngine.Networking
 
 		private static void SetupPost(UnityWebRequest request, WWWForm formData)
 		{
-			byte[] array = null;
-			bool flag = formData != null;
-			if (flag)
+			request.downloadHandler = new DownloadHandlerBuffer();
+			bool flag = formData == null;
+			if (!flag)
 			{
-				array = formData.data;
+				byte[] array = formData.data;
 				bool flag2 = array.Length == 0;
 				if (flag2)
 				{
 					array = null;
 				}
-			}
-			request.uploadHandler = new UploadHandlerRaw(array);
-			request.downloadHandler = new DownloadHandlerBuffer();
-			bool flag3 = formData != null;
-			if (flag3)
-			{
+				bool flag3 = array != null;
+				if (flag3)
+				{
+					request.uploadHandler = new UploadHandlerRaw(array);
+				}
 				Dictionary<string, string> headers = formData.headers;
 				foreach (KeyValuePair<string, string> keyValuePair in headers)
 				{
@@ -966,17 +1014,21 @@ namespace UnityEngine.Networking
 
 		private static void SetupPost(UnityWebRequest request, List<IMultipartFormSection> multipartFormSections, byte[] boundary)
 		{
+			request.downloadHandler = new DownloadHandlerBuffer();
 			byte[] array = null;
 			bool flag = multipartFormSections != null && multipartFormSections.Count != 0;
 			if (flag)
 			{
 				array = UnityWebRequest.SerializeFormSections(multipartFormSections, boundary);
 			}
-			request.uploadHandler = new UploadHandlerRaw(array)
+			bool flag2 = array == null;
+			if (!flag2)
 			{
-				contentType = "multipart/form-data; boundary=" + Encoding.UTF8.GetString(boundary, 0, boundary.Length)
-			};
-			request.downloadHandler = new DownloadHandlerBuffer();
+				request.uploadHandler = new UploadHandlerRaw(array)
+				{
+					contentType = "multipart/form-data; boundary=" + Encoding.UTF8.GetString(boundary, 0, boundary.Length)
+				};
+			}
 		}
 
 		public static UnityWebRequest Post(string uri, Dictionary<string, string> formFields)
@@ -995,17 +1047,21 @@ namespace UnityEngine.Networking
 
 		private static void SetupPost(UnityWebRequest request, Dictionary<string, string> formFields)
 		{
+			request.downloadHandler = new DownloadHandlerBuffer();
 			byte[] array = null;
 			bool flag = formFields != null && formFields.Count != 0;
 			if (flag)
 			{
 				array = UnityWebRequest.SerializeSimpleForm(formFields);
 			}
-			request.uploadHandler = new UploadHandlerRaw(array)
+			bool flag2 = array == null;
+			if (!flag2)
 			{
-				contentType = "application/x-www-form-urlencoded"
-			};
-			request.downloadHandler = new DownloadHandlerBuffer();
+				request.uploadHandler = new UploadHandlerRaw(array)
+				{
+					contentType = "application/x-www-form-urlencoded"
+				};
+			}
 		}
 
 		public static string EscapeURL(string s)
@@ -1210,6 +1266,7 @@ namespace UnityEngine.Networking
 		internal enum UnityWebRequestError
 		{
 			OK,
+			OKCached,
 			Unknown,
 			SDKError,
 			UnsupportedProtocol,
@@ -1237,7 +1294,18 @@ namespace UnityEngine.Networking
 			UnrecognizedContentEncoding,
 			LoginFailed,
 			SSLShutdownFailed,
-			NoInternetConnection
+			RedirectLimitInvalid,
+			InvalidRedirect,
+			CannotModifyRequest,
+			HeaderNameContainsInvalidCharacters,
+			HeaderValueContainsInvalidCharacters,
+			CannotOverrideSystemHeaders,
+			AlreadySent,
+			InvalidMethod,
+			NotImplemented,
+			NoInternetConnection,
+			DataProcessingError,
+			InsecureConnectionNotAllowed
 		}
 
 		public enum Result

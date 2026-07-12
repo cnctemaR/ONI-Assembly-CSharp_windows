@@ -13,7 +13,7 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.debugName;
+				return this._debugName;
 			}
 			set
 			{
@@ -21,12 +21,12 @@ namespace System.Xml.Xsl.Qil
 				{
 					value = value.Substring(0, 1000);
 				}
-				this.debugName = value;
+				this._debugName = value;
 			}
 		}
 
 		private const int MaxDebugNameLength = 1000;
 
-		private string debugName;
+		private string _debugName;
 	}
 }

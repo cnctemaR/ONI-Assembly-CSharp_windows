@@ -76,9 +76,9 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
-		if (this.useGunForDelivery && worker.usesMultiTool)
+		if (this.useGunForDelivery && worker.UsesMultiTool())
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
 			anim.smi = new MultitoolController.Instance(this, worker, "store", Assets.GetPrefab(EffectConfigs.OreAbsorbId));
@@ -279,6 +279,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 							if (!block_events)
 							{
 								base.Trigger(-1697596308, go);
+								Action<GameObject> onStorageChange = this.OnStorageChange;
+								if (onStorageChange != null)
+								{
+									onStorageChange(go);
+								}
 								base.Trigger(-778359855, this);
 								if (this.OnStorageIncreased != null)
 								{
@@ -305,6 +310,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			{
 				go.Trigger(856640610, this);
 				base.Trigger(-1697596308, go);
+				Action<GameObject> onStorageChange2 = this.OnStorageChange;
+				if (onStorageChange2 != null)
+				{
+					onStorageChange2(go);
+				}
 				base.Trigger(-778359855, this);
 				if (this.OnStorageIncreased != null)
 				{
@@ -348,6 +358,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			primaryElement.Temperature = finalTemperature;
 			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddOre");
 			base.Trigger(-1697596308, primaryElement.gameObject);
+			Action<GameObject> onStorageChange = this.OnStorageChange;
+			if (onStorageChange != null)
+			{
+				onStorageChange(primaryElement.gameObject);
+			}
 		}
 		else
 		{
@@ -375,6 +390,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			primaryElement.Temperature = finalTemperature;
 			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddLiquid");
 			base.Trigger(-1697596308, primaryElement.gameObject);
+			Action<GameObject> onStorageChange = this.OnStorageChange;
+			if (onStorageChange != null)
+			{
+				onStorageChange(primaryElement.gameObject);
+			}
 		}
 		else
 		{
@@ -401,6 +421,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			primaryElement.SetMassTemperature(mass2 + mass, finalTemperature);
 			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddGasChunk");
 			base.Trigger(-1697596308, primaryElement.gameObject);
+			Action<GameObject> onStorageChange = this.OnStorageChange;
+			if (onStorageChange != null)
+			{
+				onStorageChange(primaryElement.gameObject);
+			}
 		}
 		else
 		{
@@ -448,6 +473,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 				if (!block_events)
 				{
 					base.Trigger(-1697596308, component2.gameObject);
+					Action<GameObject> onStorageChange = this.OnStorageChange;
+					if (onStorageChange != null)
+					{
+						onStorageChange(component2.gameObject);
+					}
 				}
 			}
 			else
@@ -474,6 +504,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 				if (!block_events)
 				{
 					base.Trigger(-1697596308, go);
+					Action<GameObject> onStorageChange = this.OnStorageChange;
+					if (onStorageChange != null)
+					{
+						onStorageChange(go);
+					}
 				}
 				return true;
 			}
@@ -507,6 +542,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 								flag2 = true;
 								num -= pickupable.GetComponent<PrimaryElement>().Mass;
 								base.Trigger(-1697596308, pickupable.gameObject);
+								Action<GameObject> onStorageChange = this.OnStorageChange;
+								if (onStorageChange != null)
+								{
+									onStorageChange(pickupable.gameObject);
+								}
 								flag = true;
 								if (showInWorldNotification)
 								{
@@ -519,6 +559,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 								flag2 = true;
 								num -= pickupable.GetComponent<PrimaryElement>().Mass;
 								base.Trigger(-1697596308, pickupable.gameObject);
+								Action<GameObject> onStorageChange2 = this.OnStorageChange;
+								if (onStorageChange2 != null)
+								{
+									onStorageChange2(pickupable.gameObject);
+								}
 								flag = true;
 								if (showInWorldNotification)
 								{
@@ -539,6 +584,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 						num -= pickupable.GetComponent<PrimaryElement>().Mass;
 						this.MakeWorldActive(pickupable.gameObject);
 						base.Trigger(-1697596308, pickupable.gameObject);
+						Action<GameObject> onStorageChange3 = this.OnStorageChange;
+						if (onStorageChange3 != null)
+						{
+							onStorageChange3(pickupable.gameObject);
+						}
 						flag = true;
 						if (showInWorldNotification)
 						{
@@ -765,6 +815,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 		go.Trigger(856640610, null);
 		base.Trigger(-1697596308, go);
+		Action<GameObject> onStorageChange = this.OnStorageChange;
+		if (onStorageChange != null)
+		{
+			onStorageChange(go);
+		}
 		this.ApplyStoredItemModifiers(go, false, false);
 		if (go != null)
 		{
@@ -830,6 +885,10 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	private void Flatten(Tag tag_to_combine)
 	{
 		GameObject gameObject = this.FindFirst(tag_to_combine);
+		if (gameObject == null)
+		{
+			return;
+		}
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		for (int i = this.items.Count - 1; i >= 0; i--)
 		{
@@ -919,6 +978,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 					this.deleted_objects.Add(gameObject);
 				}
 				base.Trigger(-1697596308, gameObject);
+				Action<GameObject> onStorageChange = this.OnStorageChange;
+				if (onStorageChange != null)
+				{
+					onStorageChange(gameObject);
+				}
 			}
 			num++;
 		}
@@ -961,11 +1025,25 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 				component.Units = 0f;
 				component.ModifyDiseaseCount(-component.DiseaseCount, "consume item");
 				base.Trigger(-1697596308, item_go);
+				Action<GameObject> onStorageChange = this.OnStorageChange;
+				if (onStorageChange == null)
+				{
+					return;
+				}
+				onStorageChange(item_go);
 				return;
 			}
-			this.items.Remove(item_go);
-			base.Trigger(-1697596308, item_go);
-			item_go.DeleteObject();
+			else
+			{
+				this.items.Remove(item_go);
+				base.Trigger(-1697596308, item_go);
+				Action<GameObject> onStorageChange2 = this.OnStorageChange;
+				if (onStorageChange2 != null)
+				{
+					onStorageChange2(item_go);
+				}
+				item_go.DeleteObject();
+			}
 		}
 	}
 
@@ -976,7 +1054,15 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	private void OnDeath(object data)
 	{
-		this.DropAll(true, true, default(Vector3), true, null);
+		List<GameObject> list = new List<GameObject>();
+		bool flag = true;
+		bool flag2 = true;
+		List<GameObject> list2 = list;
+		this.DropAll(flag, flag2, default(Vector3), true, list2);
+		if (this.onDestroyItemsDropped != null)
+		{
+			this.onDestroyItemsDropped(list);
+		}
 	}
 
 	public bool IsFull()
@@ -1129,7 +1215,10 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	{
 		this.endOfLife = true;
 		List<GameObject> list = new List<GameObject>();
-		this.DropAll(true, false, default(Vector3), true, list);
+		bool flag = true;
+		bool flag2 = false;
+		List<GameObject> list2 = list;
+		this.DropAll(flag, flag2, default(Vector3), true, list2);
 		if (this.onDestroyItemsDropped != null)
 		{
 			this.onDestroyItemsDropped(list);
@@ -1145,6 +1234,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			this.TransferDiseaseWithObject(go);
 		}
 		base.Trigger(-1697596308, go);
+		Action<GameObject> onStorageChange = this.OnStorageChange;
+		if (onStorageChange != null)
+		{
+			onStorageChange(go);
+		}
 		this.ApplyStoredItemModifiers(go, false, false);
 	}
 
@@ -1535,6 +1629,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	public Action<List<GameObject>> onDestroyItemsDropped;
 
+	public Action<GameObject> OnStorageChange;
+
 	public Vector2 dropOffset = Vector2.zero;
 
 	[MyCmpGet]
@@ -1545,6 +1641,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public Storage.FetchCategory fetchCategory;
 
 	public int storageNetworkID = -1;
+
+	public Tag storageID = GameTags.StoragesIds.DefaultStorage;
 
 	public float storageFullMargin;
 

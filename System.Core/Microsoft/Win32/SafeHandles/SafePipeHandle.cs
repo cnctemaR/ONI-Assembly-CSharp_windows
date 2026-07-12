@@ -1,23 +1,30 @@
 ﻿using System;
-using System.IO;
-using System.Security.Permissions;
 
 namespace Microsoft.Win32.SafeHandles
 {
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
-	[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 	public sealed class SafePipeHandle : SafeHandleZeroOrMinusOneIsInvalid
 	{
+		protected override bool ReleaseHandle()
+		{
+			return global::Interop.Kernel32.CloseHandle(this.handle);
+		}
+
+		internal SafePipeHandle()
+			: this(new IntPtr(0), true)
+		{
+		}
+
 		public SafePipeHandle(IntPtr preexistingHandle, bool ownsHandle)
 			: base(ownsHandle)
 		{
-			this.handle = preexistingHandle;
+			base.SetHandle(preexistingHandle);
 		}
 
-		protected override bool ReleaseHandle()
+		internal void SetHandle(int descriptor)
 		{
-			MonoIOError monoIOError;
-			return MonoIO.Close(this.handle, out monoIOError);
+			base.SetHandle((IntPtr)descriptor);
 		}
+
+		private const int DefaultInvalidHandle = 0;
 	}
 }

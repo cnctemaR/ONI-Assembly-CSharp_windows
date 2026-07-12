@@ -1,31 +1,25 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class CollectionBase : IList, ICollection, IEnumerable
 	{
 		protected CollectionBase()
 		{
-			this.list = new ArrayList();
+			this._list = new ArrayList();
 		}
 
 		protected CollectionBase(int capacity)
 		{
-			this.list = new ArrayList(capacity);
+			this._list = new ArrayList(capacity);
 		}
 
 		protected ArrayList InnerList
 		{
 			get
 			{
-				if (this.list == null)
-				{
-					this.list = new ArrayList();
-				}
-				return this.list;
+				return this._list;
 			}
 		}
 
@@ -37,7 +31,6 @@ namespace System.Collections
 			}
 		}
 
-		[ComVisible(false)]
 		public int Capacity
 		{
 			get
@@ -54,11 +47,7 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this.list != null)
-				{
-					return this.list.Count;
-				}
-				return 0;
+				return this._list.Count;
 			}
 		}
 
@@ -73,7 +62,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			object obj = this.InnerList[index];
 			this.OnValidate(obj);
@@ -133,7 +122,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index >= this.Count)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				return this.InnerList[index];
 			}
@@ -141,7 +130,7 @@ namespace System.Collections
 			{
 				if (index < 0 || index >= this.Count)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				this.OnValidate(value);
 				object obj = this.InnerList[index];
@@ -187,7 +176,7 @@ namespace System.Collections
 			int num = this.InnerList.IndexOf(value);
 			if (num < 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Cannot remove the specified item because it was not found in the specified Collection."));
+				throw new ArgumentException("Cannot remove the specified item because it was not found in the specified Collection.");
 			}
 			this.OnRemove(num, value);
 			this.InnerList.RemoveAt(num);
@@ -211,7 +200,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index > this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			this.OnValidate(value);
 			this.OnInsert(index, value);
@@ -272,6 +261,6 @@ namespace System.Collections
 		{
 		}
 
-		private ArrayList list;
+		private ArrayList _list;
 	}
 }

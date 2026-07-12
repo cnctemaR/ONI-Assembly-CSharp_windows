@@ -378,8 +378,8 @@ namespace System.Runtime.Serialization
 			return this.m_converter.Convert(element, type);
 		}
 
-		[ComVisible(true)]
 		[SecuritySafeCritical]
+		[ComVisible(true)]
 		internal object GetValueNoThrow(string name, Type type)
 		{
 			Type type2;

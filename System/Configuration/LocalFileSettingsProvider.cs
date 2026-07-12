@@ -13,8 +13,8 @@ namespace System.Configuration
 
 		[MonoTODO]
 		[FileIOPermission(SecurityAction.Assert, AllFiles = FileIOPermissionAccess.Read | FileIOPermissionAccess.PathDiscovery)]
-		[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 		[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
+		[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 		public SettingsPropertyValue GetPreviousVersion(SettingsContext context, SettingsProperty property)
 		{
 			return this.impl.GetPreviousVersion(context, property);

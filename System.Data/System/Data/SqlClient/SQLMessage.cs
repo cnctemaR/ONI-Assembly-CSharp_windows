@@ -50,7 +50,7 @@ namespace System.Data.SqlClient
 
 		internal static string KerberosTicketMissingError()
 		{
-			return SR.GetString("Cannot access Kerberos ticket. Ensure Kerberos has been initialized with 'kinit'.");
+			return SR.GetString("Cannot authenticate using Kerberos. Ensure Kerberos has been initialized on the client with 'kinit' and a Service Principal Name has been registered for the SQL Server to allow Kerberos authentication.");
 		}
 
 		internal static string Timeout()

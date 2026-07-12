@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml.XPath;
 
@@ -9,17 +8,17 @@ namespace MS.Internal.Xml.XPath
 	{
 		private void Reset()
 		{
-			this.parseDepth = 0;
-			this.needContext = false;
+			this._parseDepth = 0;
+			this._needContext = false;
 		}
 
 		private Query ProcessAxis(Axis root, QueryBuilder.Flags flags, out QueryBuilder.Props props)
 		{
 			if (root.Prefix.Length > 0)
 			{
-				this.needContext = true;
+				this._needContext = true;
 			}
-			this.firstInput = null;
+			this._firstInput = null;
 			Query query2;
 			Query query3;
 			if (root.Input != null)
@@ -148,12 +147,12 @@ namespace MS.Internal.Xml.XPath
 				query2 = new XPathSelfQuery(query3, root.Name, root.Prefix, root.NodeType);
 				break;
 			default:
-				throw XPathException.Create("The XPath query '{0}' is not supported.", this.query);
+				throw XPathException.Create("The XPath query '{0}' is not supported.", this._query);
 			}
 			return query2;
 		}
 
-		private bool CanBeNumber(Query q)
+		private static bool CanBeNumber(Query q)
 		{
 			return q.StaticType == XPathResultType.Any || q.StaticType == XPathResultType.Number;
 		}
@@ -163,7 +162,7 @@ namespace MS.Internal.Xml.XPath
 			bool flag = (flags & QueryBuilder.Flags.Filter) == QueryBuilder.Flags.None;
 			QueryBuilder.Props props2;
 			Query query = this.ProcessNode(root.Condition, QueryBuilder.Flags.None, out props2);
-			if (this.CanBeNumber(query) || (props2 & (QueryBuilder.Props)6) != QueryBuilder.Props.None)
+			if (QueryBuilder.CanBeNumber(query) || (props2 & (QueryBuilder.Props)6) != QueryBuilder.Props.None)
 			{
 				props2 |= QueryBuilder.Props.HasPosition;
 				flags |= QueryBuilder.Flags.PosFilter;
@@ -193,9 +192,9 @@ namespace MS.Internal.Xml.XPath
 			{
 				query2 = ((DocumentOrderQuery)query2).input;
 			}
-			if (this.firstInput == null)
+			if (this._firstInput == null)
 			{
-				this.firstInput = query2 as BaseAxisQuery;
+				this._firstInput = query2 as BaseAxisQuery;
 			}
 			bool flag2 = (query2.Properties & QueryProps.Merge) > QueryProps.None;
 			bool flag3 = (query2.Properties & QueryProps.Reverse) > QueryProps.None;
@@ -210,24 +209,24 @@ namespace MS.Internal.Xml.XPath
 					query2 = new ForwardPositionQuery(query2);
 				}
 			}
-			if (flag && this.firstInput != null)
+			if (flag && this._firstInput != null)
 			{
 				if (flag2 && (props & QueryBuilder.Props.PosFilter) != QueryBuilder.Props.None)
 				{
 					query2 = new FilterQuery(query2, query, false);
-					Query qyInput = this.firstInput.qyInput;
+					Query qyInput = this._firstInput.qyInput;
 					if (!(qyInput is ContextQuery))
 					{
-						this.firstInput.qyInput = new ContextQuery();
-						this.firstInput = null;
+						this._firstInput.qyInput = new ContextQuery();
+						this._firstInput = null;
 						return new MergeFilterQuery(qyInput, query2);
 					}
-					this.firstInput = null;
+					this._firstInput = null;
 					return query2;
 				}
 				else
 				{
-					this.firstInput = null;
+					this._firstInput = null;
 				}
 			}
 			return new FilterQuery(query2, query, (props2 & QueryBuilder.Props.HasPosition) == QueryBuilder.Props.None);
@@ -268,10 +267,10 @@ namespace MS.Internal.Xml.XPath
 
 		private Query ProcessVariable(Variable root)
 		{
-			this.needContext = true;
-			if (!this.allowVar)
+			this._needContext = true;
+			if (!this._allowVar)
 			{
-				throw XPathException.Create("'{0}' is an invalid key pattern. It either contains a variable reference or 'key()' function.", this.query);
+				throw XPathException.Create("'{0}' is an invalid key pattern. It either contains a variable reference or 'key()' function.", this._query);
 			}
 			return new VariableQuery(root.Localname, root.Prefix);
 		}
@@ -294,10 +293,10 @@ namespace MS.Internal.Xml.XPath
 				return query2;
 			}
 			case Function.FunctionType.FuncCount:
-				return new NodeFunctions(Function.FunctionType.FuncCount, this.ProcessNode((AstNode)root.ArgumentList[0], QueryBuilder.Flags.None, out props));
+				return new NodeFunctions(Function.FunctionType.FuncCount, this.ProcessNode(root.ArgumentList[0], QueryBuilder.Flags.None, out props));
 			case Function.FunctionType.FuncID:
 			{
-				Query query3 = new IDQuery(this.ProcessNode((AstNode)root.ArgumentList[0], QueryBuilder.Flags.None, out props));
+				Query query3 = new IDQuery(this.ProcessNode(root.ArgumentList[0], QueryBuilder.Flags.None, out props));
 				props |= QueryBuilder.Props.NonFlat;
 				return query3;
 			}
@@ -306,7 +305,7 @@ namespace MS.Internal.Xml.XPath
 			case Function.FunctionType.FuncName:
 				if (root.ArgumentList != null && root.ArgumentList.Count > 0)
 				{
-					return new NodeFunctions(root.TypeOfFunction, this.ProcessNode((AstNode)root.ArgumentList[0], QueryBuilder.Flags.None, out props));
+					return new NodeFunctions(root.TypeOfFunction, this.ProcessNode(root.ArgumentList[0], QueryBuilder.Flags.None, out props));
 				}
 				return new NodeFunctions(root.TypeOfFunction, null);
 			case Function.FunctionType.FuncString:
@@ -323,7 +322,7 @@ namespace MS.Internal.Xml.XPath
 			case Function.FunctionType.FuncBoolean:
 			case Function.FunctionType.FuncNot:
 			case Function.FunctionType.FuncLang:
-				return new BooleanFunctions(root.TypeOfFunction, this.ProcessNode((AstNode)root.ArgumentList[0], QueryBuilder.Flags.None, out props));
+				return new BooleanFunctions(root.TypeOfFunction, this.ProcessNode(root.ArgumentList[0], QueryBuilder.Flags.None, out props));
 			case Function.FunctionType.FuncNumber:
 			case Function.FunctionType.FuncSum:
 			case Function.FunctionType.FuncFloor:
@@ -331,7 +330,7 @@ namespace MS.Internal.Xml.XPath
 			case Function.FunctionType.FuncRound:
 				if (root.ArgumentList != null && root.ArgumentList.Count > 0)
 				{
-					return new NumberFunctions(root.TypeOfFunction, this.ProcessNode((AstNode)root.ArgumentList[0], QueryBuilder.Flags.None, out props));
+					return new NumberFunctions(root.TypeOfFunction, this.ProcessNode(root.ArgumentList[0], QueryBuilder.Flags.None, out props));
 				}
 				return new NumberFunctions(Function.FunctionType.FuncNumber, null);
 			case Function.FunctionType.FuncTrue:
@@ -339,25 +338,25 @@ namespace MS.Internal.Xml.XPath
 				return new BooleanFunctions(root.TypeOfFunction, null);
 			case Function.FunctionType.FuncUserDefined:
 			{
-				this.needContext = true;
-				if (!this.allowCurrent && root.Name == "current" && root.Prefix.Length == 0)
+				this._needContext = true;
+				if (!this._allowCurrent && root.Name == "current" && root.Prefix.Length == 0)
 				{
 					throw XPathException.Create("The 'current()' function cannot be used in a pattern.");
 				}
-				if (!this.allowKey && root.Name == "key" && root.Prefix.Length == 0)
+				if (!this._allowKey && root.Name == "key" && root.Prefix.Length == 0)
 				{
-					throw XPathException.Create("'{0}' is an invalid key pattern. It either contains a variable reference or 'key()' function.", this.query);
+					throw XPathException.Create("'{0}' is an invalid key pattern. It either contains a variable reference or 'key()' function.", this._query);
 				}
 				Query query4 = new FunctionQuery(root.Prefix, root.Name, this.ProcessArguments(root.ArgumentList, out props));
 				props |= QueryBuilder.Props.NonFlat;
 				return query4;
 			}
 			default:
-				throw XPathException.Create("The XPath query '{0}' is not supported.", this.query);
+				throw XPathException.Create("The XPath query '{0}' is not supported.", this._query);
 			}
 		}
 
-		private List<Query> ProcessArguments(ArrayList args, out QueryBuilder.Props props)
+		private List<Query> ProcessArguments(List<AstNode> args, out QueryBuilder.Props props)
 		{
 			int num = ((args != null) ? args.Count : 0);
 			List<Query> list = new List<Query>(num);
@@ -365,7 +364,7 @@ namespace MS.Internal.Xml.XPath
 			for (int i = 0; i < num; i++)
 			{
 				QueryBuilder.Props props2;
-				list.Add(this.ProcessNode((AstNode)args[i], QueryBuilder.Flags.None, out props2));
+				list.Add(this.ProcessNode(args[i], QueryBuilder.Flags.None, out props2));
 				props |= props2;
 			}
 			return list;
@@ -373,8 +372,8 @@ namespace MS.Internal.Xml.XPath
 
 		private Query ProcessNode(AstNode root, QueryBuilder.Flags flags, out QueryBuilder.Props props)
 		{
-			int num = this.parseDepth + 1;
-			this.parseDepth = num;
+			int num = this._parseDepth + 1;
+			this._parseDepth = num;
 			if (num > 1024)
 			{
 				throw XPathException.Create("The xpath query is too complex.");
@@ -408,61 +407,61 @@ namespace MS.Internal.Xml.XPath
 				query = this.ProcessVariable((Variable)root);
 				break;
 			}
-			this.parseDepth--;
+			this._parseDepth--;
 			return query;
 		}
 
 		private Query Build(AstNode root, string query)
 		{
 			this.Reset();
-			this.query = query;
+			this._query = query;
 			QueryBuilder.Props props;
 			return this.ProcessNode(root, QueryBuilder.Flags.None, out props);
 		}
 
 		internal Query Build(string query, bool allowVar, bool allowKey)
 		{
-			this.allowVar = allowVar;
-			this.allowKey = allowKey;
-			this.allowCurrent = true;
-			return this.Build(XPathParser.ParseXPathExpresion(query), query);
+			this._allowVar = allowVar;
+			this._allowKey = allowKey;
+			this._allowCurrent = true;
+			return this.Build(XPathParser.ParseXPathExpression(query), query);
 		}
 
 		internal Query Build(string query, out bool needContext)
 		{
 			Query query2 = this.Build(query, true, true);
-			needContext = this.needContext;
+			needContext = this._needContext;
 			return query2;
 		}
 
 		internal Query BuildPatternQuery(string query, bool allowVar, bool allowKey)
 		{
-			this.allowVar = allowVar;
-			this.allowKey = allowKey;
-			this.allowCurrent = false;
+			this._allowVar = allowVar;
+			this._allowKey = allowKey;
+			this._allowCurrent = false;
 			return this.Build(XPathParser.ParseXPathPattern(query), query);
 		}
 
 		internal Query BuildPatternQuery(string query, out bool needContext)
 		{
 			Query query2 = this.BuildPatternQuery(query, true, true);
-			needContext = this.needContext;
+			needContext = this._needContext;
 			return query2;
 		}
 
-		private string query;
+		private string _query;
 
-		private bool allowVar;
+		private bool _allowVar;
 
-		private bool allowKey;
+		private bool _allowKey;
 
-		private bool allowCurrent;
+		private bool _allowCurrent;
 
-		private bool needContext;
+		private bool _needContext;
 
-		private BaseAxisQuery firstInput;
+		private BaseAxisQuery _firstInput;
 
-		private int parseDepth;
+		private int _parseDepth;
 
 		private const int MaxParseDepth = 1024;
 

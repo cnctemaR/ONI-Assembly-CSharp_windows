@@ -5,6 +5,14 @@ namespace UnityEngine.Timeline
 {
 	internal static class TimelineUndo
 	{
+		internal static bool undoEnabled
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		public static void PushDestroyUndo(TimelineAsset timeline, Object thingToDirty, Object objectToDestroy)
 		{
 			if (objectToDestroy != null)
@@ -28,7 +36,7 @@ namespace UnityEngine.Timeline
 		{
 		}
 
-		private static string UndoName(string name)
+		internal static string UndoName(string name)
 		{
 			return "Timeline " + name;
 		}

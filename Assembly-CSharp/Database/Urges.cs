@@ -7,6 +7,7 @@ namespace Database
 		public Urges()
 		{
 			this.HealCritical = base.Add(new Urge("HealCritical"));
+			this.BeOffline = base.Add(new Urge("BeOffline"));
 			this.BeIncapacitated = base.Add(new Urge("BeIncapacitated"));
 			this.PacifyEat = base.Add(new Urge("PacifyEat"));
 			this.PacifySleep = base.Add(new Urge("PacifySleep"));
@@ -19,6 +20,8 @@ namespace Database
 			this.WashHands = base.Add(new Urge("WashHands"));
 			this.Shower = base.Add(new Urge("Shower"));
 			this.Eat = base.Add(new Urge("Eat"));
+			this.ReloadElectrobank = base.Add(new Urge("ReloadElectrobank"));
+			this.RemoveDischargedElectrobank = base.Add(new Urge("RemoveDischargedElectrobank"));
 			this.Pee = base.Add(new Urge("Pee"));
 			this.RestDueToDisease = base.Add(new Urge("RestDueToDisease"));
 			this.Sleep = base.Add(new Urge("Sleep"));
@@ -33,15 +36,24 @@ namespace Database
 			this.CoolDown = base.Add(new Urge("CoolDown"));
 			this.LearnSkill = base.Add(new Urge("LearnSkill"));
 			this.EmoteIdle = base.Add(new Urge("EmoteIdle"));
+			this.OilRefill = base.Add(new Urge("OilRefill"));
+			this.GunkPee = base.Add(new Urge("GunkPee"));
+			this.FindOxygenRefill = base.Add(new Urge("FindOxygenRefill"));
 		}
 
 		public Urge BeIncapacitated;
+
+		public Urge BeOffline;
 
 		public Urge Sleep;
 
 		public Urge Narcolepsy;
 
 		public Urge Eat;
+
+		public Urge RemoveDischargedElectrobank;
+
+		public Urge ReloadElectrobank;
 
 		public Urge WashHands;
 
@@ -54,6 +66,8 @@ namespace Database
 		public Urge HealCritical;
 
 		public Urge RecoverBreath;
+
+		public Urge FindOxygenRefill;
 
 		public Urge RecoverWarmth;
 
@@ -90,5 +104,9 @@ namespace Database
 		public Urge LearnSkill;
 
 		public Urge EmoteIdle;
+
+		public Urge OilRefill;
+
+		public Urge GunkPee;
 	}
 }

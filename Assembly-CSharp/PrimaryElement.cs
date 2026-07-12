@@ -475,6 +475,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	public static float MAX_MASS = 100000f;
 
+	public SimTemperatureTransfer sttOptimizationHook;
+
 	public PrimaryElement.GetTemperatureCallback getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(PrimaryElement.OnGetTemperature);
 
 	public PrimaryElement.SetTemperatureCallback setTemperatureCallback = new PrimaryElement.SetTemperatureCallback(PrimaryElement.OnSetTemperature);

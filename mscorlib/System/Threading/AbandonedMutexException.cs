@@ -1,59 +1,48 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
 	[Serializable]
 	public class AbandonedMutexException : SystemException
 	{
 		public AbandonedMutexException()
-			: base(Environment.GetResourceString("The wait completed due to an abandoned mutex."))
+			: base("The wait completed due to an abandoned mutex.")
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 		}
 
 		public AbandonedMutexException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 		}
 
 		public AbandonedMutexException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 		}
 
 		public AbandonedMutexException(int location, WaitHandle handle)
-			: base(Environment.GetResourceString("The wait completed due to an abandoned mutex."))
+			: base("The wait completed due to an abandoned mutex.")
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 			this.SetupException(location, handle);
 		}
 
 		public AbandonedMutexException(string message, int location, WaitHandle handle)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 			this.SetupException(location, handle);
 		}
 
 		public AbandonedMutexException(string message, Exception inner, int location, WaitHandle handle)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233043);
+			base.HResult = -2146233043;
 			this.SetupException(location, handle);
-		}
-
-		private void SetupException(int location, WaitHandle handle)
-		{
-			this.m_MutexIndex = location;
-			if (handle != null)
-			{
-				this.m_Mutex = handle as Mutex;
-			}
 		}
 
 		protected AbandonedMutexException(SerializationInfo info, StreamingContext context)
@@ -61,11 +50,20 @@ namespace System.Threading
 		{
 		}
 
+		private void SetupException(int location, WaitHandle handle)
+		{
+			this._mutexIndex = location;
+			if (handle != null)
+			{
+				this._mutex = handle as Mutex;
+			}
+		}
+
 		public Mutex Mutex
 		{
 			get
 			{
-				return this.m_Mutex;
+				return this._mutex;
 			}
 		}
 
@@ -73,12 +71,12 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_MutexIndex;
+				return this._mutexIndex;
 			}
 		}
 
-		private int m_MutexIndex = -1;
+		private int _mutexIndex = -1;
 
-		private Mutex m_Mutex;
+		private Mutex _mutex;
 	}
 }

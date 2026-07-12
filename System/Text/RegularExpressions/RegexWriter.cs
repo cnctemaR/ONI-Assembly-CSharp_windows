@@ -5,151 +5,148 @@ using System.Globalization;
 
 namespace System.Text.RegularExpressions
 {
-	internal sealed class RegexWriter
+	internal ref struct RegexWriter
 	{
-		internal static RegexCode Write(RegexTree t)
+		private RegexWriter(Span<int> emittedSpan, Span<int> intStackSpan)
 		{
-			return new RegexWriter().RegexCodeFromRegexTree(t);
+			this._emitted = new global::System.Collections.Generic.ValueListBuilder<int>(emittedSpan);
+			this._intStack = new global::System.Collections.Generic.ValueListBuilder<int>(intStackSpan);
+			this._stringHash = new Dictionary<string, int>();
+			this._stringTable = new List<string>();
+			this._caps = null;
+			this._trackCount = 0;
 		}
 
-		private RegexWriter()
+		public unsafe static RegexCode Write(RegexTree tree)
 		{
-			this._intStack = new int[32];
-			this._emitted = new int[32];
-			this._stringhash = new Dictionary<string, int>();
-			this._stringtable = new List<string>();
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)224], 56);
+			Span<int> span2 = new Span<int>(stackalloc byte[(UIntPtr)128], 32);
+			RegexWriter regexWriter = new RegexWriter(span, span2);
+			RegexCode regexCode = regexWriter.RegexCodeFromRegexTree(tree);
+			regexWriter.Dispose();
+			return regexCode;
 		}
 
-		internal void PushInt(int I)
+		public void Dispose()
 		{
-			if (this._depth >= this._intStack.Length)
+			this._emitted.Dispose();
+			this._intStack.Dispose();
+		}
+
+		public RegexCode RegexCodeFromRegexTree(RegexTree tree)
+		{
+			int num;
+			if (tree.CapNumList == null || tree.CapTop == tree.CapNumList.Length)
 			{
-				int[] array = new int[this._depth * 2];
-				Array.Copy(this._intStack, 0, array, 0, this._depth);
-				this._intStack = array;
+				num = tree.CapTop;
+				this._caps = null;
 			}
-			int[] intStack = this._intStack;
-			int depth = this._depth;
-			this._depth = depth + 1;
-			intStack[depth] = I;
-		}
-
-		internal bool EmptyStack()
-		{
-			return this._depth == 0;
-		}
-
-		internal int PopInt()
-		{
-			int[] intStack = this._intStack;
-			int num = this._depth - 1;
-			this._depth = num;
-			return intStack[num];
-		}
-
-		internal int CurPos()
-		{
-			return this._curpos;
-		}
-
-		internal void PatchJump(int Offset, int jumpDest)
-		{
-			this._emitted[Offset + 1] = jumpDest;
-		}
-
-		internal void Emit(int op)
-		{
-			if (this._counting)
+			else
 			{
-				this._count++;
-				if (RegexCode.OpcodeBacktracks(op))
+				num = tree.CapNumList.Length;
+				this._caps = tree.Caps;
+				for (int i = 0; i < tree.CapNumList.Length; i++)
 				{
-					this._trackcount++;
+					this._caps[tree.CapNumList[i]] = i;
 				}
-				return;
 			}
-			int[] emitted = this._emitted;
-			int curpos = this._curpos;
-			this._curpos = curpos + 1;
-			emitted[curpos] = op;
-		}
-
-		internal void Emit(int op, int opd1)
-		{
-			if (this._counting)
+			RegexNode regexNode = tree.Root;
+			int num2 = 0;
+			this.Emit(23, 0);
+			for (;;)
 			{
-				this._count += 2;
-				if (RegexCode.OpcodeBacktracks(op))
+				if (regexNode.Children == null)
 				{
-					this._trackcount++;
+					this.EmitFragment(regexNode.NType, regexNode, 0);
 				}
-				return;
-			}
-			int[] emitted = this._emitted;
-			int num = this._curpos;
-			this._curpos = num + 1;
-			emitted[num] = op;
-			int[] emitted2 = this._emitted;
-			num = this._curpos;
-			this._curpos = num + 1;
-			emitted2[num] = opd1;
-		}
-
-		internal void Emit(int op, int opd1, int opd2)
-		{
-			if (this._counting)
-			{
-				this._count += 3;
-				if (RegexCode.OpcodeBacktracks(op))
+				else if (num2 < regexNode.Children.Count)
 				{
-					this._trackcount++;
+					this.EmitFragment(regexNode.NType | 64, regexNode, num2);
+					regexNode = regexNode.Children[num2];
+					this._intStack.Append(num2);
+					num2 = 0;
+					continue;
 				}
-				return;
+				if (this._intStack.Length == 0)
+				{
+					break;
+				}
+				num2 = this._intStack.Pop();
+				regexNode = regexNode.Next;
+				this.EmitFragment(regexNode.NType | 128, regexNode, num2);
+				num2++;
 			}
-			int[] emitted = this._emitted;
-			int num = this._curpos;
-			this._curpos = num + 1;
-			emitted[num] = op;
-			int[] emitted2 = this._emitted;
-			num = this._curpos;
-			this._curpos = num + 1;
-			emitted2[num] = opd1;
-			int[] emitted3 = this._emitted;
-			num = this._curpos;
-			this._curpos = num + 1;
-			emitted3[num] = opd2;
+			this.PatchJump(0, this._emitted.Length);
+			this.Emit(40);
+			RegexPrefix? regexPrefix = RegexFCD.FirstChars(tree);
+			RegexPrefix regexPrefix2 = RegexFCD.Prefix(tree);
+			bool flag = (tree.Options & RegexOptions.RightToLeft) > RegexOptions.None;
+			CultureInfo cultureInfo = (((tree.Options & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
+			RegexBoyerMoore regexBoyerMoore;
+			if (regexPrefix2.Prefix.Length > 0)
+			{
+				regexBoyerMoore = new RegexBoyerMoore(regexPrefix2.Prefix, regexPrefix2.CaseInsensitive, flag, cultureInfo);
+			}
+			else
+			{
+				regexBoyerMoore = null;
+			}
+			int num3 = RegexFCD.Anchors(tree);
+			return new RegexCode(this._emitted.AsSpan().ToArray(), this._stringTable, this._trackCount, this._caps, num, regexBoyerMoore, regexPrefix, num3, flag);
 		}
 
-		internal int StringCode(string str)
+		private unsafe void PatchJump(int offset, int jumpDest)
 		{
-			if (this._counting)
+			*this._emitted[offset + 1] = jumpDest;
+		}
+
+		private void Emit(int op)
+		{
+			if (RegexCode.OpcodeBacktracks(op))
 			{
-				return 0;
+				this._trackCount++;
 			}
+			this._emitted.Append(op);
+		}
+
+		private void Emit(int op, int opd1)
+		{
+			if (RegexCode.OpcodeBacktracks(op))
+			{
+				this._trackCount++;
+			}
+			this._emitted.Append(op);
+			this._emitted.Append(opd1);
+		}
+
+		private void Emit(int op, int opd1, int opd2)
+		{
+			if (RegexCode.OpcodeBacktracks(op))
+			{
+				this._trackCount++;
+			}
+			this._emitted.Append(op);
+			this._emitted.Append(opd1);
+			this._emitted.Append(opd2);
+		}
+
+		private int StringCode(string str)
+		{
 			if (str == null)
 			{
 				str = string.Empty;
 			}
-			int num;
-			if (this._stringhash.ContainsKey(str))
+			int count;
+			if (!this._stringHash.TryGetValue(str, out count))
 			{
-				num = this._stringhash[str];
+				count = this._stringTable.Count;
+				this._stringHash[str] = count;
+				this._stringTable.Add(str);
 			}
-			else
-			{
-				num = this._stringtable.Count;
-				this._stringhash[str] = num;
-				this._stringtable.Add(str);
-			}
-			return num;
+			return count;
 		}
 
-		internal ArgumentException MakeException(string message)
-		{
-			return new ArgumentException(message);
-		}
-
-		internal int MapCapnum(int capnum)
+		private int MapCapnum(int capnum)
 		{
 			if (capnum == -1)
 			{
@@ -162,82 +159,7 @@ namespace System.Text.RegularExpressions
 			return capnum;
 		}
 
-		internal RegexCode RegexCodeFromRegexTree(RegexTree tree)
-		{
-			int num;
-			if (tree._capnumlist == null || tree._captop == tree._capnumlist.Length)
-			{
-				num = tree._captop;
-				this._caps = null;
-			}
-			else
-			{
-				num = tree._capnumlist.Length;
-				this._caps = tree._caps;
-				for (int i = 0; i < tree._capnumlist.Length; i++)
-				{
-					this._caps[tree._capnumlist[i]] = i;
-				}
-			}
-			this._counting = true;
-			for (;;)
-			{
-				if (!this._counting)
-				{
-					this._emitted = new int[this._count];
-				}
-				RegexNode regexNode = tree._root;
-				int num2 = 0;
-				this.Emit(23, 0);
-				for (;;)
-				{
-					if (regexNode._children == null)
-					{
-						this.EmitFragment(regexNode._type, regexNode, 0);
-					}
-					else if (num2 < regexNode._children.Count)
-					{
-						this.EmitFragment(regexNode._type | 64, regexNode, num2);
-						regexNode = regexNode._children[num2];
-						this.PushInt(num2);
-						num2 = 0;
-						continue;
-					}
-					if (this.EmptyStack())
-					{
-						break;
-					}
-					num2 = this.PopInt();
-					regexNode = regexNode._next;
-					this.EmitFragment(regexNode._type | 128, regexNode, num2);
-					num2++;
-				}
-				this.PatchJump(0, this.CurPos());
-				this.Emit(40);
-				if (!this._counting)
-				{
-					break;
-				}
-				this._counting = false;
-			}
-			RegexPrefix regexPrefix = RegexFCD.FirstChars(tree);
-			RegexPrefix regexPrefix2 = RegexFCD.Prefix(tree);
-			bool flag = (tree._options & RegexOptions.RightToLeft) > RegexOptions.None;
-			CultureInfo cultureInfo = (((tree._options & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
-			RegexBoyerMoore regexBoyerMoore;
-			if (regexPrefix2 != null && regexPrefix2.Prefix.Length > 0)
-			{
-				regexBoyerMoore = new RegexBoyerMoore(regexPrefix2.Prefix, regexPrefix2.CaseInsensitive, flag, cultureInfo);
-			}
-			else
-			{
-				regexBoyerMoore = null;
-			}
-			int num3 = RegexFCD.Anchors(tree);
-			return new RegexCode(this._emitted, this._stringtable, this._trackcount, this._caps, num, regexBoyerMoore, regexPrefix, num3, flag);
-		}
-
-		internal void EmitFragment(int nodetype, RegexNode node, int CurIndex)
+		private void EmitFragment(int nodetype, RegexNode node, int curIndex)
 		{
 			int num = 0;
 			if (nodetype <= 13)
@@ -246,7 +168,7 @@ namespace System.Text.RegularExpressions
 				{
 					num |= 64;
 				}
-				if ((node._options & RegexOptions.IgnoreCase) != RegexOptions.None)
+				if ((node.Options & RegexOptions.IgnoreCase) != RegexOptions.None)
 				{
 					num |= 512;
 				}
@@ -257,40 +179,40 @@ namespace System.Text.RegularExpressions
 			case 4:
 			case 6:
 			case 7:
-				if (node._m > 0)
+				if (node.M > 0)
 				{
-					this.Emit(((node._type == 3 || node._type == 6) ? 0 : 1) | num, (int)node._ch, node._m);
+					this.Emit(((node.NType == 3 || node.NType == 6) ? 0 : 1) | num, (int)node.Ch, node.M);
 				}
-				if (node._n > node._m)
+				if (node.N > node.M)
 				{
-					this.Emit(node._type | num, (int)node._ch, (node._n == int.MaxValue) ? int.MaxValue : (node._n - node._m));
+					this.Emit(node.NType | num, (int)node.Ch, (node.N == int.MaxValue) ? int.MaxValue : (node.N - node.M));
 					return;
 				}
 				return;
 			case 5:
 			case 8:
-				if (node._m > 0)
+				if (node.M > 0)
 				{
-					this.Emit(2 | num, this.StringCode(node._str), node._m);
+					this.Emit(2 | num, this.StringCode(node.Str), node.M);
 				}
-				if (node._n > node._m)
+				if (node.N > node.M)
 				{
-					this.Emit(node._type | num, this.StringCode(node._str), (node._n == int.MaxValue) ? int.MaxValue : (node._n - node._m));
+					this.Emit(node.NType | num, this.StringCode(node.Str), (node.N == int.MaxValue) ? int.MaxValue : (node.N - node.M));
 					return;
 				}
 				return;
 			case 9:
 			case 10:
-				this.Emit(node._type | num, (int)node._ch);
+				this.Emit(node.NType | num, (int)node.Ch);
 				return;
 			case 11:
-				this.Emit(node._type | num, this.StringCode(node._str));
+				this.Emit(node.NType | num, this.StringCode(node.Str));
 				return;
 			case 12:
-				this.Emit(node._type | num, this.StringCode(node._str));
+				this.Emit(node.NType | num, this.StringCode(node.Str));
 				return;
 			case 13:
-				this.Emit(node._type | num, this.MapCapnum(node._m));
+				this.Emit(node.NType | num, this.MapCapnum(node.M));
 				return;
 			case 14:
 			case 15:
@@ -303,7 +225,7 @@ namespace System.Text.RegularExpressions
 			case 22:
 			case 41:
 			case 42:
-				this.Emit(node._type);
+				this.Emit(node.NType);
 				return;
 			case 23:
 				return;
@@ -329,9 +251,9 @@ namespace System.Text.RegularExpressions
 				switch (nodetype)
 				{
 				case 88:
-					if (CurIndex < node._children.Count - 1)
+					if (curIndex < node.Children.Count - 1)
 					{
-						this.PushInt(this.CurPos());
+						this._intStack.Append(this._emitted.Length);
 						this.Emit(23, 0);
 						return;
 					}
@@ -341,20 +263,20 @@ namespace System.Text.RegularExpressions
 					return;
 				case 90:
 				case 91:
-					if (node._n < 2147483647 || node._m > 1)
+					if (node.N < 2147483647 || node.M > 1)
 					{
-						this.Emit((node._m == 0) ? 26 : 27, (node._m == 0) ? 0 : (1 - node._m));
+						this.Emit((node.M == 0) ? 26 : 27, (node.M == 0) ? 0 : (1 - node.M));
 					}
 					else
 					{
-						this.Emit((node._m == 0) ? 30 : 31);
+						this.Emit((node.M == 0) ? 30 : 31);
 					}
-					if (node._m == 0)
+					if (node.M == 0)
 					{
-						this.PushInt(this.CurPos());
+						this._intStack.Append(this._emitted.Length);
 						this.Emit(38, 0);
 					}
-					this.PushInt(this.CurPos());
+					this._intStack.Append(this._emitted.Length);
 					return;
 				case 92:
 					this.Emit(31);
@@ -365,29 +287,29 @@ namespace System.Text.RegularExpressions
 					return;
 				case 95:
 					this.Emit(34);
-					this.PushInt(this.CurPos());
+					this._intStack.Append(this._emitted.Length);
 					this.Emit(23, 0);
 					return;
 				case 96:
 					this.Emit(34);
 					return;
 				case 97:
-					if (CurIndex == 0)
+					if (curIndex == 0)
 					{
 						this.Emit(34);
-						this.PushInt(this.CurPos());
+						this._intStack.Append(this._emitted.Length);
 						this.Emit(23, 0);
-						this.Emit(37, this.MapCapnum(node._m));
+						this.Emit(37, this.MapCapnum(node.M));
 						this.Emit(36);
 						return;
 					}
 					return;
 				case 98:
-					if (CurIndex == 0)
+					if (curIndex == 0)
 					{
 						this.Emit(34);
 						this.Emit(31);
-						this.PushInt(this.CurPos());
+						this._intStack.Append(this._emitted.Length);
 						this.Emit(23, 0);
 						return;
 					}
@@ -397,17 +319,17 @@ namespace System.Text.RegularExpressions
 					{
 					case 152:
 					{
-						if (CurIndex < node._children.Count - 1)
+						if (curIndex < node.Children.Count - 1)
 						{
-							int num2 = this.PopInt();
-							this.PushInt(this.CurPos());
+							int num2 = this._intStack.Pop();
+							this._intStack.Append(this._emitted.Length);
 							this.Emit(38, 0);
-							this.PatchJump(num2, this.CurPos());
+							this.PatchJump(num2, this._emitted.Length);
 							return;
 						}
-						for (int i = 0; i < CurIndex; i++)
+						for (int i = 0; i < curIndex; i++)
 						{
-							this.PatchJump(this.PopInt(), this.CurPos());
+							this.PatchJump(this._intStack.Pop(), this._emitted.Length);
 						}
 						return;
 					}
@@ -417,25 +339,25 @@ namespace System.Text.RegularExpressions
 					case 154:
 					case 155:
 					{
-						int num3 = this.CurPos();
-						int num4 = nodetype - 154;
-						if (node._n < 2147483647 || node._m > 1)
+						int length = this._emitted.Length;
+						int num3 = nodetype - 154;
+						if (node.N < 2147483647 || node.M > 1)
 						{
-							this.Emit(28 + num4, this.PopInt(), (node._n == int.MaxValue) ? int.MaxValue : (node._n - node._m));
+							this.Emit(28 + num3, this._intStack.Pop(), (node.N == int.MaxValue) ? int.MaxValue : (node.N - node.M));
 						}
 						else
 						{
-							this.Emit(24 + num4, this.PopInt());
+							this.Emit(24 + num3, this._intStack.Pop());
 						}
-						if (node._m == 0)
+						if (node.M == 0)
 						{
-							this.PatchJump(this.PopInt(), num3);
+							this.PatchJump(this._intStack.Pop(), length);
 							return;
 						}
 						return;
 					}
 					case 156:
-						this.Emit(32, this.MapCapnum(node._m), this.MapCapnum(node._n));
+						this.Emit(32, this.MapCapnum(node.M), this.MapCapnum(node.N));
 						return;
 					case 158:
 						this.Emit(33);
@@ -443,36 +365,36 @@ namespace System.Text.RegularExpressions
 						return;
 					case 159:
 						this.Emit(35);
-						this.PatchJump(this.PopInt(), this.CurPos());
+						this.PatchJump(this._intStack.Pop(), this._emitted.Length);
 						this.Emit(36);
 						return;
 					case 160:
 						this.Emit(36);
 						return;
 					case 161:
-						if (CurIndex != 0)
+						if (curIndex != 0)
 						{
-							if (CurIndex != 1)
+							if (curIndex != 1)
 							{
 								return;
 							}
 						}
 						else
 						{
-							int num5 = this.PopInt();
-							this.PushInt(this.CurPos());
+							int num4 = this._intStack.Pop();
+							this._intStack.Append(this._emitted.Length);
 							this.Emit(38, 0);
-							this.PatchJump(num5, this.CurPos());
+							this.PatchJump(num4, this._emitted.Length);
 							this.Emit(36);
-							if (node._children.Count > 1)
+							if (node.Children.Count > 1)
 							{
 								return;
 							}
 						}
-						this.PatchJump(this.PopInt(), this.CurPos());
+						this.PatchJump(this._intStack.Pop(), this._emitted.Length);
 						return;
 					case 162:
-						switch (CurIndex)
+						switch (curIndex)
 						{
 						case 0:
 							this.Emit(33);
@@ -480,13 +402,13 @@ namespace System.Text.RegularExpressions
 							return;
 						case 1:
 						{
-							int num6 = this.PopInt();
-							this.PushInt(this.CurPos());
+							int num5 = this._intStack.Pop();
+							this._intStack.Append(this._emitted.Length);
 							this.Emit(38, 0);
-							this.PatchJump(num6, this.CurPos());
+							this.PatchJump(num5, this._emitted.Length);
 							this.Emit(33);
 							this.Emit(36);
-							if (node._children.Count > 2)
+							if (node.Children.Count > 2)
 							{
 								return;
 							}
@@ -497,38 +419,34 @@ namespace System.Text.RegularExpressions
 						default:
 							return;
 						}
-						this.PatchJump(this.PopInt(), this.CurPos());
+						this.PatchJump(this._intStack.Pop(), this._emitted.Length);
 						return;
 					}
 					break;
 				}
 				break;
 			}
-			throw this.MakeException(global::SR.GetString("Unexpected opcode in regular expression generation: {0}.", new object[] { nodetype.ToString(CultureInfo.CurrentCulture) }));
+			throw new ArgumentException(SR.Format("Unexpected opcode in regular expression generation: {0}.", nodetype.ToString(CultureInfo.CurrentCulture)));
 		}
 
-		internal int[] _intStack;
+		private const int BeforeChild = 64;
 
-		internal int _depth;
+		private const int AfterChild = 128;
 
-		internal int[] _emitted;
+		private const int EmittedSize = 56;
 
-		internal int _curpos;
+		private const int IntStackSize = 32;
 
-		internal Dictionary<string, int> _stringhash;
+		private global::System.Collections.Generic.ValueListBuilder<int> _emitted;
 
-		internal List<string> _stringtable;
+		private global::System.Collections.Generic.ValueListBuilder<int> _intStack;
 
-		internal bool _counting;
+		private readonly Dictionary<string, int> _stringHash;
 
-		internal int _count;
+		private readonly List<string> _stringTable;
 
-		internal int _trackcount;
+		private Hashtable _caps;
 
-		internal Hashtable _caps;
-
-		internal const int BeforeChild = 64;
-
-		internal const int AfterChild = 128;
+		private int _trackCount;
 	}
 }

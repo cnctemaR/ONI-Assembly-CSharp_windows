@@ -127,7 +127,7 @@ public class Uprootable : Workable, IDigActionEntity
 		this.isMarkedForUproot = true;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.Uproot();
 	}
@@ -197,7 +197,7 @@ public class Uprootable : Workable, IDigActionEntity
 		Components.Uprootables.Remove(this);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);

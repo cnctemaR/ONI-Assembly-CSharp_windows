@@ -88,13 +88,13 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IGameObj
 		}
 	}
 
-	public void AddWorker(Worker player)
+	public void AddWorker(WorkerBase player)
 	{
 		this.players.Add(player);
 		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
 	}
 
-	public void RemoveWorker(Worker player)
+	public void RemoveWorker(WorkerBase player)
 	{
 		this.players.Remove(player);
 		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
@@ -127,7 +127,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IGameObj
 
 	private Chore[] chores;
 
-	private HashSet<Worker> players = new HashSet<Worker>();
+	private HashSet<WorkerBase> players = new HashSet<WorkerBase>();
 
 	private static string[] building_anims = new string[] { "working_loop", "working_loop2", "working_loop3" };
 

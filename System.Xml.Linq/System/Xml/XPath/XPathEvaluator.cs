@@ -5,18 +5,19 @@ using System.Xml.Linq;
 
 namespace System.Xml.XPath
 {
-	internal struct XPathEvaluator
+	internal readonly struct XPathEvaluator
 	{
 		public object Evaluate<T>(XNode node, string expression, IXmlNamespaceResolver resolver) where T : class
 		{
 			object obj = node.CreateNavigator().Evaluate(expression, resolver);
-			if (obj is XPathNodeIterator)
+			XPathNodeIterator xpathNodeIterator = obj as XPathNodeIterator;
+			if (xpathNodeIterator != null)
 			{
-				return this.EvaluateIterator<T>((XPathNodeIterator)obj);
+				return this.EvaluateIterator<T>(xpathNodeIterator);
 			}
 			if (!(obj is T))
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_UnexpectedEvaluation", new object[] { obj.GetType() }));
+				throw new InvalidOperationException(global::SR.Format("The XPath expression evaluated to unexpected type {0}.", obj.GetType()));
 			}
 			return (T)((object)obj);
 		}
@@ -29,21 +30,22 @@ namespace System.Xml.XPath
 				object r = xpathNavigator.UnderlyingObject;
 				if (!(r is T))
 				{
-					throw new InvalidOperationException(Res.GetString("InvalidOperation_UnexpectedEvaluation", new object[] { r.GetType() }));
+					throw new InvalidOperationException(global::SR.Format("The XPath expression evaluated to unexpected type {0}.", r.GetType()));
 				}
 				yield return (T)((object)r);
 				XText t = r as XText;
-				if (t != null && t.parent != null)
+				if (t != null && t.GetParent() != null)
 				{
-					while (t != t.parent.content)
+					do
 					{
-						t = t.next as XText;
+						t = t.NextNode as XText;
 						if (t == null)
 						{
 							break;
 						}
 						yield return (T)((object)t);
 					}
+					while (t != t.GetParent().LastNode);
 				}
 				r = null;
 				t = null;

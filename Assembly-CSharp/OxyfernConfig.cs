@@ -62,7 +62,19 @@ public class OxyfernConfig : IEntityConfig
 		{
 			new ElementConverter.OutputElement(0.031250004f, SimHashes.Oxygen, 0f, true, false, 0f, 1f, 0.75f, byte.MaxValue, 0, true)
 		};
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "OxyfernSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.DESC, Assets.GetAnim("seed_oxyfern_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 20, global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "OxyfernSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_oxyfern_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 20, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, null), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;

@@ -6,25 +6,40 @@ namespace UnityEngine
 	[NativeHeader("Runtime/GfxDevice/FrameTiming.h")]
 	public struct FrameTiming
 	{
-		[NativeName("m_CPUTimePresentCalled")]
-		public ulong cpuTimePresentCalled;
-
-		[NativeName("m_CPUFrameTime")]
+		[NativeName("totalFrameTime")]
 		public double cpuFrameTime;
 
-		[NativeName("m_CPUTimeFrameComplete")]
-		public ulong cpuTimeFrameComplete;
+		[NativeName("mainThreadActiveTime")]
+		public double cpuMainThreadFrameTime;
 
-		[NativeName("m_GPUFrameTime")]
+		[NativeName("mainThreadPresentWaitTime")]
+		public double cpuMainThreadPresentWaitTime;
+
+		[NativeName("renderThreadActiveTime")]
+		public double cpuRenderThreadFrameTime;
+
+		[NativeName("gpuFrameTime")]
 		public double gpuFrameTime;
 
-		[NativeName("m_HeightScale")]
+		[NativeName("frameStartTimestamp")]
+		public ulong frameStartTimestamp;
+
+		[NativeName("firstSubmitTimestamp")]
+		public ulong firstSubmitTimestamp;
+
+		[NativeName("presentFrameTimestamp")]
+		public ulong cpuTimePresentCalled;
+
+		[NativeName("frameCompleteTimestamp")]
+		public ulong cpuTimeFrameComplete;
+
+		[NativeName("heightScale")]
 		public float heightScale;
 
-		[NativeName("m_WidthScale")]
+		[NativeName("widthScale")]
 		public float widthScale;
 
-		[NativeName("m_SyncInterval")]
+		[NativeName("syncInterval")]
 		public uint syncInterval;
 	}
 }

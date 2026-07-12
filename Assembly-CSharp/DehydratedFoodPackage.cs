@@ -61,7 +61,7 @@ public class DehydratedFoodPackage : Workable, IApproachable
 		this.DehydrateItem(this.storage.items.ElementAtOrDefault<GameObject>(0));
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		if (this.Rehydrator != null)
@@ -75,7 +75,7 @@ public class DehydratedFoodPackage : Workable, IApproachable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		if (this.storage.items.Count != 1)
@@ -89,14 +89,14 @@ public class DehydratedFoodPackage : Workable, IApproachable
 		DehydratedManager component = this.Rehydrator.GetComponent<DehydratedManager>();
 		this.Rehydrator.GetComponent<AccessabilityManager>().SetActiveWorkable(null);
 		component.ConsumeResourcesForRehydration(base.gameObject, gameObject);
-		DehydratedFoodPackage.RehydrateStartWorkItem rehydrateStartWorkItem = (DehydratedFoodPackage.RehydrateStartWorkItem)worker.startWorkInfo;
+		DehydratedFoodPackage.RehydrateStartWorkItem rehydrateStartWorkItem = (DehydratedFoodPackage.RehydrateStartWorkItem)worker.GetStartWorkInfo();
 		if (rehydrateStartWorkItem != null && rehydrateStartWorkItem.setResultCb != null && gameObject != null)
 		{
 			rehydrateStartWorkItem.setResultCb(gameObject);
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (this.Rehydrator != null)
@@ -153,7 +153,7 @@ public class DehydratedFoodPackage : Workable, IApproachable
 	[MyCmpReq]
 	private Storage storage;
 
-	public class RehydrateStartWorkItem : Worker.StartWorkInfo
+	public class RehydrateStartWorkItem : WorkerBase.StartWorkInfo
 	{
 		public RehydrateStartWorkItem(DehydratedFoodPackage pkg, Action<GameObject> setResultCB)
 			: base(pkg)

@@ -5,8 +5,8 @@ using System.Security;
 namespace System.Runtime.InteropServices
 {
 	[ComVisible(true)]
-	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
 	[ClassInterface(ClassInterfaceType.None)]
+	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
 	public class RegistrationServices : IRegistrationServices
 	{
 		public virtual Guid GetManagedCategoryGuid()
@@ -20,8 +20,8 @@ namespace System.Runtime.InteropServices
 			return Marshal.GenerateProgIdForType(type);
 		}
 
-		[SecurityCritical]
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual Type[] GetRegistrableTypesInAssembly(Assembly assembly)
 		{
 			throw new NotImplementedException();
@@ -34,22 +34,22 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[SecurityCritical]
+		[MonoTODO("implement")]
 		public virtual void RegisterTypeForComClients(Type type, ref Guid g)
 		{
 			throw new NotImplementedException();
 		}
 
-		[SecuritySafeCritical]
 		[MonoTODO("implement")]
+		[SecuritySafeCritical]
 		public virtual bool TypeRepresentsComType(Type type)
 		{
 			throw new NotImplementedException();
 		}
 
-		[SecurityCritical]
 		[MonoTODO("implement")]
+		[SecurityCritical]
 		public virtual bool TypeRequiresRegistration(Type type)
 		{
 			throw new NotImplementedException();
@@ -62,15 +62,15 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[ComVisible(false)]
+		[MonoTODO("implement")]
 		public virtual int RegisterTypeForComClients(Type type, RegistrationClassContext classContext, RegistrationConnectionType flags)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[ComVisible(false)]
+		[MonoTODO("implement")]
 		public virtual void UnregisterTypeForComClients(int cookie)
 		{
 			throw new NotImplementedException();

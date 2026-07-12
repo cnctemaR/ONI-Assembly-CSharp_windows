@@ -53,8 +53,8 @@ namespace System.Threading
 			};
 		}
 
-		[Obsolete("Use Pack(iocb, userData) instead")]
 		[MonoTODO("Security - we need to propagate the call stack")]
+		[Obsolete("Use Pack(iocb, userData) instead")]
 		[CLSCompliant(false)]
 		public unsafe NativeOverlapped* Pack(IOCompletionCallback iocb)
 		{
@@ -77,16 +77,16 @@ namespace System.Threading
 			return ptr;
 		}
 
-		[CLSCompliant(false)]
 		[Obsolete("Use UnsafePack(iocb, userData) instead")]
+		[CLSCompliant(false)]
 		[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
 		public unsafe NativeOverlapped* UnsafePack(IOCompletionCallback iocb)
 		{
 			return this.Pack(iocb);
 		}
 
-		[CLSCompliant(false)]
 		[ComVisible(false)]
+		[CLSCompliant(false)]
 		public unsafe NativeOverlapped* UnsafePack(IOCompletionCallback iocb, object userData)
 		{
 			return this.Pack(iocb, userData);

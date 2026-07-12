@@ -22,7 +22,20 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 		{
 			RobotAi.ToggleRegistration(smi, false);
 		});
-		this.alive.normal.TagTransition(GameTags.Stored, this.alive.stored, false).ToggleStateMachine((RobotAi.Instance smi) => new FallMonitor.Instance(smi.master, false, null));
+		this.alive.normal.TagTransition(GameTags.Stored, this.alive.stored, false).Enter(delegate(RobotAi.Instance smi)
+		{
+			if (!smi.HasTag(GameTags.Robots.Models.FetchDrone))
+			{
+				smi.fallMonitor = new FallMonitor.Instance(smi.master, false, null);
+				smi.fallMonitor.StartSM();
+			}
+		}).Exit(delegate(RobotAi.Instance smi)
+		{
+			if (smi.fallMonitor != null)
+			{
+				smi.fallMonitor.StopSM("StoredRobotAI");
+			}
+		});
 		this.alive.stored.PlayAnim("in_storage").TagTransition(GameTags.Stored, this.alive.normal, true).ToggleBrain("stored")
 			.Enter(delegate(RobotAi.Instance smi)
 			{
@@ -108,5 +121,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 		{
 			Game.Instance.userMenu.Refresh(base.master.gameObject);
 		}
+
+		public FallMonitor.Instance fallMonitor;
 	}
 }

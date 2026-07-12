@@ -194,7 +194,7 @@ public class OverlayMenu : KIconToggleMenu
 
 		public bool IsUnlocked()
 		{
-			return DebugHandler.InstantBuildMode || string.IsNullOrEmpty(this.requiredTechItem) || Db.Get().Techs.IsTechItemComplete(this.requiredTechItem);
+			return DebugHandler.InstantBuildMode || string.IsNullOrEmpty(this.requiredTechItem) || Db.Get().Techs.IsTechItemComplete(this.requiredTechItem) || Game.Instance.SandboxModeActive;
 		}
 
 		public HashedString simView;

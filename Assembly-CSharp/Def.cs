@@ -53,17 +53,18 @@ public class Def : ScriptableObject
 				{
 					return Def.GetUISprite(ElementLoader.GetElement(gameObject.PrefabID()), animName, centered);
 				}
+				KPrefabID component = gameObject.GetComponent<KPrefabID>();
 				CreatureBrain creatureBrain = gameObject.GetComponent<CreatureBrain>();
 				if (creatureBrain != null)
 				{
 					animName = creatureBrain.symbolPrefix + "ui";
 				}
-				SpaceArtifact component = gameObject.GetComponent<SpaceArtifact>();
-				if (component != null)
+				SpaceArtifact component2 = gameObject.GetComponent<SpaceArtifact>();
+				if (component2 != null)
 				{
-					animName = component.GetUIAnim();
+					animName = component2.GetUIAnim();
 				}
-				if (gameObject.HasTag(GameTags.Egg))
+				if (component.HasTag(GameTags.Egg))
 				{
 					IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
 					if (def != null)
@@ -79,14 +80,18 @@ public class Def : ScriptableObject
 						}
 					}
 				}
-				if (gameObject.HasTag(GameTags.MoltShell))
+				if (component.HasTag(GameTags.MoltShell))
 				{
 					animName = gameObject.GetComponent<SimpleMassStatusItem>().symbolPrefix + animName;
 				}
-				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-				if (component2)
+				if (component.HasTag(GameTags.BionicUpgrade))
 				{
-					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, "");
+					animName = BionicUpgradeComponentConfig.UpgradesData[component.PrefabID()].uiAnimName;
+				}
+				KBatchedAnimController component3 = gameObject.GetComponent<KBatchedAnimController>();
+				if (component3)
+				{
+					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component3.AnimFiles[0], animName, centered, "");
 					return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
 				}
 				if (gameObject.GetComponent<Building>() != null)

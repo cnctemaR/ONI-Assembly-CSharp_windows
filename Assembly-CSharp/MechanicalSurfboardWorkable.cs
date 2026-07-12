@@ -22,13 +22,13 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		this.surfboard = base.GetComponent<MechanicalSurfboard>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.operational.SetActive(true, false);
 		worker.GetComponent<Effects>().Add("MechanicalSurfing", false);
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);
 		AttributeInstance attributeInstance = worker.GetAttributes().Get(Db.Get().Attributes.Athletics);
@@ -47,7 +47,7 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		return animInfo;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		Building component = base.GetComponent<Building>();
 		MechanicalSurfboard component2 = base.GetComponent<MechanicalSurfboard>();
@@ -66,7 +66,7 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		return false;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(this.surfboard.specificEffect))
@@ -79,13 +79,13 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 		worker.GetComponent<Effects>().Remove("MechanicalSurfing");
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();

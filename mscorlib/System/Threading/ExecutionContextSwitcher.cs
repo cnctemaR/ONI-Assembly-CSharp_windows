@@ -7,9 +7,9 @@ namespace System.Threading
 {
 	internal struct ExecutionContextSwitcher
 	{
+		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[HandleProcessCorruptedStateExceptions]
-		[SecurityCritical]
 		internal bool UndoNoThrow()
 		{
 			try

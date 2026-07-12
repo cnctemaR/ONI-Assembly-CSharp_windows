@@ -66,9 +66,9 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 
 	private static bool CanPreemptCB(Chore.Precondition.Context context)
 	{
-		Worker component = context.chore.driver.GetComponent<Worker>();
+		WorkerBase component = context.chore.driver.GetComponent<WorkerBase>();
 		float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(component).Evaluate();
-		Worker worker = context.consumerState.worker;
+		WorkerBase worker = context.consumerState.worker;
 		return Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() > num && context.chore.gameObject.GetComponent<ResearchCenter>().GetPercentComplete() < 1f;
 	}
 
@@ -87,14 +87,14 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 		return num / num2;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this);
 		this.operational.SetActive(true, false);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		float efficiencyMultiplier = this.GetEfficiencyMultiplier(worker);
 		float num = 2f + efficiencyMultiplier;
@@ -106,7 +106,7 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 		return base.OnWorkTick(worker, dt);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		base.ShowProgressBar(false);
@@ -281,7 +281,7 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, 
 		return descriptors;
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

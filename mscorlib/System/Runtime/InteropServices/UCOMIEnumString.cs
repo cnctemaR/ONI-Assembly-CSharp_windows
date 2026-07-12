@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("00000101-0000-0000-c000-000000000046")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("00000101-0000-0000-c000-000000000046")]
 	[Obsolete]
 	[ComImport]
 	public interface UCOMIEnumString

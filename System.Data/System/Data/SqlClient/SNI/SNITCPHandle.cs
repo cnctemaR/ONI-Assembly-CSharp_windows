@@ -56,8 +56,6 @@ namespace System.Data.SqlClient.SNI
 
 		public SNITCPHandle(string serverName, int port, long timerExpire, object callbackObject, bool parallel)
 		{
-			this._writeScheduler = new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler;
-			this._writeTaskFactory = new TaskFactory(this._writeScheduler);
 			this._callbackObject = callbackObject;
 			this._targetServer = serverName;
 			try
@@ -69,7 +67,6 @@ namespace System.Data.SqlClient.SNI
 					timeSpan = DateTime.FromFileTime(timerExpire) - DateTime.Now;
 					timeSpan = ((timeSpan.Ticks < 0L) ? TimeSpan.FromTicks(0L) : timeSpan);
 				}
-				Task<Socket> task;
 				if (parallel)
 				{
 					Task<IPAddress[]> hostAddressesAsync = Dns.GetHostAddressesAsync(serverName);
@@ -80,18 +77,18 @@ namespace System.Data.SqlClient.SNI
 						this.ReportTcpSNIError(0U, 47U, string.Empty);
 						return;
 					}
-					task = SNITCPHandle.ParallelConnectAsync(result, port);
+					Task<Socket> task = SNITCPHandle.ParallelConnectAsync(result, port);
+					if (!(flag ? task.Wait(-1) : task.Wait(timeSpan)))
+					{
+						this.ReportTcpSNIError(0U, 40U, string.Empty);
+						return;
+					}
+					this._socket = task.Result;
 				}
 				else
 				{
-					task = SNITCPHandle.ConnectAsync(serverName, port);
+					this._socket = SNITCPHandle.Connect(serverName, port, flag ? TimeSpan.FromMilliseconds(2147483647.0) : timeSpan);
 				}
-				if (!(flag ? task.Wait(-1) : task.Wait(timeSpan)))
-				{
-					this.ReportTcpSNIError(0U, 40U, string.Empty);
-					return;
-				}
-				this._socket = task.Result;
 				if (this._socket == null || !this._socket.Connected)
 				{
 					if (this._socket != null)
@@ -121,32 +118,54 @@ namespace System.Data.SqlClient.SNI
 			this._status = 0U;
 		}
 
-		private static async Task<Socket> ConnectAsync(string serverName, int port)
+		private static Socket Connect(string serverName, int port, TimeSpan timeout)
 		{
-			IPAddress[] array = await Dns.GetHostAddressesAsync(serverName).ConfigureAwait(false);
-			IPAddress targetAddrV4 = Array.Find<IPAddress>(array, (IPAddress addr) => addr.AddressFamily == AddressFamily.InterNetwork);
-			IPAddress targetAddrV5 = Array.Find<IPAddress>(array, (IPAddress addr) => addr.AddressFamily == AddressFamily.InterNetworkV6);
-			Socket socket2;
-			if (targetAddrV4 != null && targetAddrV5 != null)
+			SNITCPHandle.<>c__DisplayClass20_0 CS$<>8__locals1 = new SNITCPHandle.<>c__DisplayClass20_0();
+			IPAddress[] array = Dns.GetHostAddresses(serverName);
+			IPAddress ipaddress = null;
+			IPAddress ipaddress2 = null;
+			foreach (IPAddress ipaddress3 in array)
 			{
-				socket2 = await SNITCPHandle.ParallelConnectAsync(new IPAddress[] { targetAddrV4, targetAddrV5 }, port).ConfigureAwait(false);
+				if (ipaddress3.AddressFamily == AddressFamily.InterNetwork)
+				{
+					ipaddress = ipaddress3;
+				}
+				else if (ipaddress3.AddressFamily == AddressFamily.InterNetworkV6)
+				{
+					ipaddress2 = ipaddress3;
+				}
 			}
-			else
+			array = new IPAddress[] { ipaddress, ipaddress2 };
+			CS$<>8__locals1.sockets = new Socket[2];
+			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+			cancellationTokenSource.CancelAfter(timeout);
+			cancellationTokenSource.Token.Register(new Action(CS$<>8__locals1.<Connect>g__Cancel|0));
+			Socket socket = null;
+			for (int j = 0; j < CS$<>8__locals1.sockets.Length; j++)
 			{
-				IPAddress ipaddress = ((targetAddrV4 != null) ? targetAddrV4 : targetAddrV5);
-				Socket socket = new Socket(ipaddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 				try
 				{
-					await socket.ConnectAsync(ipaddress, port).ConfigureAwait(false);
+					if (array[j] != null)
+					{
+						CS$<>8__locals1.sockets[j] = new Socket(array[j].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+						CS$<>8__locals1.sockets[j].Connect(array[j], port);
+						if (CS$<>8__locals1.sockets[j] != null)
+						{
+							if (CS$<>8__locals1.sockets[j].Connected)
+							{
+								socket = CS$<>8__locals1.sockets[j];
+								break;
+							}
+							CS$<>8__locals1.sockets[j].Dispose();
+							CS$<>8__locals1.sockets[j] = null;
+						}
+					}
 				}
 				catch
 				{
-					socket.Dispose();
-					throw;
 				}
-				socket2 = socket;
 			}
-			return socket2;
+			return socket;
 		}
 
 		private static Task<Socket> ParallelConnectAsync(IPAddress[] serverAddresses, int port)
@@ -244,7 +263,7 @@ namespace System.Data.SqlClient.SNI
 			this._validateCert = (options & 1U) > 0U;
 			try
 			{
-				this._sslStream.AuthenticateAsClientAsync(this._targetServer).GetAwaiter().GetResult();
+				this._sslStream.AuthenticateAsClient(this._targetServer);
 				this._sslOverTdsStream.FinishHandshake();
 			}
 			catch (AuthenticationException ex)
@@ -261,10 +280,7 @@ namespace System.Data.SqlClient.SNI
 
 		public override void DisableSsl()
 		{
-			if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-			{
-				this._sslStream.Dispose();
-			}
+			this._sslStream.Dispose();
 			this._sslStream = null;
 			this._sslOverTdsStream.Dispose();
 			this._sslOverTdsStream = null;
@@ -279,8 +295,6 @@ namespace System.Data.SqlClient.SNI
 		public override void SetBufferSize(int bufferSize)
 		{
 			this._bufferSize = bufferSize;
-			this._socket.SendBufferSize = bufferSize;
-			this._socket.ReceiveBufferSize = bufferSize;
 		}
 
 		public override uint Send(SNIPacket packet)
@@ -330,8 +344,7 @@ namespace System.Data.SqlClient.SNI
 						}
 						this._socket.ReceiveTimeout = 0;
 					}
-					packet = new SNIPacket(null);
-					packet.Allocate(this._bufferSize);
+					packet = new SNIPacket(this._bufferSize);
 					packet.ReadFromStream(this._stream);
 					if (packet.Length == 0)
 					{
@@ -374,66 +387,28 @@ namespace System.Data.SqlClient.SNI
 			this._sendCallback = sendCallback;
 		}
 
-		public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
+		public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
 		{
-			SNIPacket packet2 = packet;
-			this._writeTaskFactory.StartNew(delegate
+			SNIAsyncCallback sniasyncCallback = callback ?? this._sendCallback;
+			lock (this)
 			{
-				try
-				{
-					SNITCPHandle <>4__this = this;
-					lock (<>4__this)
-					{
-						packet.WriteToStream(this._stream);
-					}
-				}
-				catch (Exception ex)
-				{
-					SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 35U, ex);
-					if (callback != null)
-					{
-						callback(packet, 1U);
-					}
-					else
-					{
-						this._sendCallback(packet, 1U);
-					}
-					return;
-				}
-				if (callback != null)
-				{
-					callback(packet, 0U);
-					return;
-				}
-				this._sendCallback(packet, 0U);
-			});
+				packet.WriteToStreamAsync(this._stream, sniasyncCallback, SNIProviders.TCP_PROV, disposePacketAfterSendAsync);
+			}
 			return 997U;
 		}
 
 		public override uint ReceiveAsync(ref SNIPacket packet)
 		{
+			packet = new SNIPacket(this._bufferSize);
 			uint num;
-			lock (this)
+			try
 			{
-				packet = new SNIPacket(null);
-				packet.Allocate(this._bufferSize);
-				try
-				{
-					packet.ReadFromStreamAsync(this._stream, this._receiveCallback);
-					num = 997U;
-				}
-				catch (ObjectDisposedException ex)
-				{
-					num = this.ReportErrorAndReleasePacket(packet, ex);
-				}
-				catch (SocketException ex2)
-				{
-					num = this.ReportErrorAndReleasePacket(packet, ex2);
-				}
-				catch (IOException ex3)
-				{
-					num = this.ReportErrorAndReleasePacket(packet, ex3);
-				}
+				packet.ReadFromStreamAsync(this._stream, this._receiveCallback);
+				num = 997U;
+			}
+			catch (Exception ex) when (ex is ObjectDisposedException || ex is SocketException || ex is IOException)
+			{
+				num = this.ReportErrorAndReleasePacket(packet, ex);
 			}
 			return num;
 		}
@@ -495,10 +470,6 @@ namespace System.Data.SqlClient.SNI
 		private readonly Socket _socket;
 
 		private NetworkStream _tcpStream;
-
-		private readonly TaskScheduler _writeScheduler;
-
-		private readonly TaskFactory _writeTaskFactory;
 
 		private Stream _stream;
 

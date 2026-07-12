@@ -75,11 +75,11 @@ namespace UnityEngine
 
 		[FreeFunction("PlayerConnection_Bindings::SendMessage")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SendMessage(string messageId, byte[] data, int playerId);
+		private static extern void SendMessage(string messageId, [Unmarshalled] byte[] data, int playerId);
 
 		[FreeFunction("PlayerConnection_Bindings::TrySendMessage")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TrySendMessage(string messageId, byte[] data, int playerId);
+		private static extern bool TrySendMessage(string messageId, [Unmarshalled] byte[] data, int playerId);
 
 		[FreeFunction("PlayerConnection_Bindings::PollInternal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]

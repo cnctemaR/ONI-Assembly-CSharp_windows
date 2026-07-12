@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 
 namespace System.Runtime.CompilerServices
 {
-	public struct ConfiguredTaskAwaitable<TResult>
+	public readonly struct ConfiguredTaskAwaitable<TResult>
 	{
 		internal ConfiguredTaskAwaitable(Task<TResult> task, bool continueOnCapturedContext)
 		{
@@ -19,8 +19,7 @@ namespace System.Runtime.CompilerServices
 
 		private readonly ConfiguredTaskAwaitable<TResult>.ConfiguredTaskAwaiter m_configuredTaskAwaiter;
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-		public struct ConfiguredTaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion
+		public readonly struct ConfiguredTaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion, IConfiguredTaskAwaiter
 		{
 			internal ConfiguredTaskAwaiter(Task<TResult> task, bool continueOnCapturedContext)
 			{
@@ -48,6 +47,7 @@ namespace System.Runtime.CompilerServices
 				TaskAwaiter.OnCompletedInternal(this.m_task, continuation, this.m_continueOnCapturedContext, false);
 			}
 
+			[StackTraceHidden]
 			public TResult GetResult()
 			{
 				TaskAwaiter.ValidateEnd(this.m_task);

@@ -40,12 +40,12 @@ namespace System.Xml.Xsl.Xslt
 
 		private QilNode ParseLocationPathPattern()
 		{
-			LexKind lexKind = this.scanner.Kind;
-			if (lexKind != LexKind.SlashSlash)
+			LexKind kind = this.scanner.Kind;
+			if (kind != LexKind.SlashSlash)
 			{
-				if (lexKind != LexKind.Name)
+				if (kind != LexKind.Name)
 				{
-					if (lexKind == LexKind.Slash)
+					if (kind == LexKind.Slash)
 					{
 						this.scanner.NextLex();
 						QilNode qilNode = this.ptrnBuilder.Axis(XPathAxis.Root, XPathNodeType.All, null, null);
@@ -59,10 +59,10 @@ namespace System.Xml.Xsl.Xslt
 				else if (this.scanner.CanBeFunction && this.scanner.Prefix.Length == 0 && (this.scanner.Name == "id" || this.scanner.Name == "key"))
 				{
 					QilNode qilNode = this.ParseIdKeyPattern();
-					lexKind = this.scanner.Kind;
-					if (lexKind != LexKind.SlashSlash)
+					LexKind kind2 = this.scanner.Kind;
+					if (kind2 != LexKind.SlashSlash)
 					{
-						if (lexKind == LexKind.Slash)
+						if (kind2 == LexKind.Slash)
 						{
 							this.scanner.NextLex();
 							qilNode = this.ptrnBuilder.JoinStep(qilNode, this.ParseRelativePathPattern());

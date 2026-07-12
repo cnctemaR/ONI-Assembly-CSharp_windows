@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB55D}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ED4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Xml</RootNamespace>
     <AssemblyName>System.Xml</AssemblyName>
@@ -718,6 +718,7 @@
     <Compile Include="System\Xml\XmlSqlBinaryReader.cs" />
     <Compile Include="System\Xml\XmlStandalone.cs" />
     <Compile Include="System\Xml\XmlSubtreeReader.cs" />
+    <Compile Include="System\Xml\XmlSystemPathResolver.cs" />
     <Compile Include="System\Xml\XmlText.cs" />
     <Compile Include="System\Xml\XmlTextEncoder.cs" />
     <Compile Include="System\Xml\XmlTextReader.cs" />
@@ -828,7 +829,6 @@
     <Compile Include="System\Xml\Xsl\Qil\QilUnary.cs" />
     <Compile Include="System\Xml\Xsl\Qil\QilValidationVisitor.cs" />
     <Compile Include="System\Xml\Xsl\Qil\QilVisitor.cs" />
-    <Compile Include="System\Xml\Xsl\Qil\QilXmlReader.cs" />
     <Compile Include="System\Xml\Xsl\Qil\QilXmlWriter.cs" />
     <Compile Include="System\Xml\Xsl\Qil\SerializationHints.cs" />
     <Compile Include="System\Xml\Xsl\Qil\SubstitutionList.cs" />
@@ -1097,15 +1097,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB551}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC4}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

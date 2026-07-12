@@ -105,6 +105,11 @@ namespace FMOD
 			return DSP.FMOD5_DSP_Reset(this.handle);
 		}
 
+		public RESULT setCallback(DSP_CALLBACK callback)
+		{
+			return DSP.FMOD5_DSP_SetCallback(this.handle, callback);
+		}
+
 		public RESULT setParameterFloat(int index, float value)
 		{
 			return DSP.FMOD5_DSP_SetParameterFloat(this.handle, index, value);
@@ -294,6 +299,9 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSP_Reset(IntPtr dsp);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_DSP_SetCallback(IntPtr dsp, DSP_CALLBACK callback);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSP_SetParameterFloat(IntPtr dsp, int index, float value);

@@ -322,7 +322,7 @@ namespace UnityEngine.Timeline
 
 		private Playable CompileTrackPlayable(PlayableGraph graph, AnimationTrack track, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
 		{
-			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, track.clips.Length, false);
+			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, track.clips.Length);
 			for (int i = 0; i < track.clips.Length; i++)
 			{
 				TimelineClip timelineClip = track.clips[i];
@@ -356,7 +356,7 @@ namespace UnityEngine.Timeline
 			return Playable.Null;
 		}
 
-		internal override Playable OnCreateClipPlayableGraph(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
+		internal override Playable CreateMixerPlayableGraph(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
 		{
 			if (base.isSubTrack)
 			{
@@ -488,7 +488,7 @@ namespace UnityEngine.Timeline
 
 		private static AnimationLayerMixerPlayable CreateGroupMixer(PlayableGraph graph, GameObject go, int inputCount)
 		{
-			return AnimationLayerMixerPlayable.Create(graph, inputCount);
+			return AnimationLayerMixerPlayable.Create(graph, inputCount, false);
 		}
 
 		private Playable CreateInfiniteTrackPlayable(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
@@ -497,7 +497,7 @@ namespace UnityEngine.Timeline
 			{
 				return Playable.Null;
 			}
-			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, 1, false);
+			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, 1);
 			Playable playable = AnimationPlayableAsset.CreatePlayable(graph, this.m_InfiniteClip, this.m_InfiniteClipOffsetPosition, this.m_InfiniteClipOffsetEulerAngles, false, mode, this.infiniteClipApplyFootIK, AnimationPlayableAsset.LoopMode.Off);
 			if (playable.IsValid<Playable>())
 			{

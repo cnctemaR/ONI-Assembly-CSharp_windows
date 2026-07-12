@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using Unity;
 
 namespace System.Text.RegularExpressions
@@ -12,7 +11,7 @@ namespace System.Text.RegularExpressions
 		{
 			this._caps = caps;
 			this._capcount = capcount;
-			this._name = name;
+			this.Name = name;
 		}
 
 		public bool Success
@@ -23,13 +22,7 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		public string Name
-		{
-			get
-			{
-				return this._name;
-			}
-		}
+		public string Name { get; }
 
 		public CaptureCollection Captures
 		{
@@ -50,9 +43,9 @@ namespace System.Text.RegularExpressions
 				throw new ArgumentNullException("inner");
 			}
 			CaptureCollection captures = inner.Captures;
-			if (inner._capcount > 0)
+			if (inner.Success)
 			{
-				Capture capture = captures[0];
+				captures.ForceInitialized();
 			}
 			return inner;
 		}
@@ -62,15 +55,12 @@ namespace System.Text.RegularExpressions
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		internal static Group _emptygroup = new Group(string.Empty, new int[0], 0, string.Empty);
+		internal static readonly Group s_emptyGroup = new Group(string.Empty, Array.Empty<int>(), 0, string.Empty);
 
-		internal int[] _caps;
+		internal readonly int[] _caps;
 
 		internal int _capcount;
 
 		internal CaptureCollection _capcoll;
-
-		[OptionalField]
-		internal string _name;
 	}
 }

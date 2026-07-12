@@ -201,7 +201,23 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
 		private void ParseError(ParseRecord processing, ParseRecord onStack)
 		{
-			throw new SerializationException(Environment.GetResourceString("Parse error. Current element is not compatible with the next element, {0}.", new object[] { string.Concat(new object[] { onStack.PRname, " ", onStack.PRparseTypeEnum, " ", processing.PRname, " ", processing.PRparseTypeEnum }) }));
+			string text = "Parse error. Current element is not compatible with the next element, {0}.";
+			object[] array = new object[1];
+			int num = 0;
+			string[] array2 = new string[7];
+			array2[0] = onStack.PRname;
+			array2[1] = " ";
+			int num2 = 2;
+			object obj = onStack.PRparseTypeEnum;
+			array2[num2] = ((obj != null) ? obj.ToString() : null);
+			array2[3] = " ";
+			array2[4] = processing.PRname;
+			array2[5] = " ";
+			int num3 = 6;
+			object obj2 = processing.PRparseTypeEnum;
+			array2[num3] = ((obj2 != null) ? obj2.ToString() : null);
+			array[num] = string.Concat(array2);
+			throw new SerializationException(Environment.GetResourceString(text, array));
 		}
 
 		private void ParseSerializedStreamHeader(ParseRecord pr)
@@ -391,7 +407,8 @@ namespace System.Runtime.Serialization.Formatters.Binary
 				{
 					if (pr.PRarrayElementType == Converter.typeofString)
 					{
-						pr.PRobjectA = new string[pr.PRlengthA[0]];
+						object[] array = new string[pr.PRlengthA[0]];
+						pr.PRobjectA = array;
 						pr.PRnewObj = pr.PRobjectA;
 						flag = false;
 					}

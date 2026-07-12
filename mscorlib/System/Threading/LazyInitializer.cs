@@ -1,27 +1,40 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public static class LazyInitializer
 	{
 		public static T EnsureInitialized<T>(ref T target) where T : class
 		{
-			if (Volatile.Read<T>(ref target) != null)
+			T t;
+			if ((t = Volatile.Read<T>(ref target)) == null)
 			{
-				return target;
+				t = LazyInitializer.EnsureInitializedCore<T>(ref target);
 			}
-			return LazyInitializer.EnsureInitializedCore<T>(ref target, LazyHelpers<T>.s_activatorFactorySelector);
+			return t;
+		}
+
+		private static T EnsureInitializedCore<T>(ref T target) where T : class
+		{
+			try
+			{
+				Interlocked.CompareExchange<T>(ref target, Activator.CreateInstance<T>(), default(T));
+			}
+			catch (MissingMethodException)
+			{
+				throw new MissingMemberException("The lazily-initialized type does not have a public, parameterless constructor.");
+			}
+			return target;
 		}
 
 		public static T EnsureInitialized<T>(ref T target, Func<T> valueFactory) where T : class
 		{
-			if (Volatile.Read<T>(ref target) != null)
+			T t;
+			if ((t = Volatile.Read<T>(ref target)) == null)
 			{
-				return target;
+				t = LazyInitializer.EnsureInitializedCore<T>(ref target, valueFactory);
 			}
-			return LazyInitializer.EnsureInitializedCore<T>(ref target, valueFactory);
+			return t;
 		}
 
 		private static T EnsureInitializedCore<T>(ref T target, Func<T> valueFactory) where T : class
@@ -29,7 +42,7 @@ namespace System.Threading
 			T t = valueFactory();
 			if (t == null)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("ValueFactory returned null."));
+				throw new InvalidOperationException("ValueFactory returned null.");
 			}
 			Interlocked.CompareExchange<T>(ref target, t, default(T));
 			return target;
@@ -41,7 +54,28 @@ namespace System.Threading
 			{
 				return target;
 			}
-			return LazyInitializer.EnsureInitializedCore<T>(ref target, ref initialized, ref syncLock, LazyHelpers<T>.s_activatorFactorySelector);
+			return LazyInitializer.EnsureInitializedCore<T>(ref target, ref initialized, ref syncLock);
+		}
+
+		private static T EnsureInitializedCore<T>(ref T target, ref bool initialized, ref object syncLock)
+		{
+			object obj = LazyInitializer.EnsureLockInitialized(ref syncLock);
+			lock (obj)
+			{
+				if (!Volatile.Read(ref initialized))
+				{
+					try
+					{
+						target = Activator.CreateInstance<T>();
+					}
+					catch (MissingMethodException)
+					{
+						throw new MissingMemberException("The lazily-initialized type does not have a public, parameterless constructor.");
+					}
+					Volatile.Write(ref initialized, true);
+				}
+			}
+			return target;
 		}
 
 		public static T EnsureInitialized<T>(ref T target, ref bool initialized, ref object syncLock, Func<T> valueFactory)
@@ -55,18 +89,8 @@ namespace System.Threading
 
 		private static T EnsureInitializedCore<T>(ref T target, ref bool initialized, ref object syncLock, Func<T> valueFactory)
 		{
-			object obj = syncLock;
-			if (obj == null)
-			{
-				object obj2 = new object();
-				obj = Interlocked.CompareExchange(ref syncLock, obj2, null);
-				if (obj == null)
-				{
-					obj = obj2;
-				}
-			}
-			object obj3 = obj;
-			lock (obj3)
+			object obj = LazyInitializer.EnsureLockInitialized(ref syncLock);
+			lock (obj)
 			{
 				if (!Volatile.Read(ref initialized))
 				{
@@ -75,6 +99,43 @@ namespace System.Threading
 				}
 			}
 			return target;
+		}
+
+		public static T EnsureInitialized<T>(ref T target, ref object syncLock, Func<T> valueFactory) where T : class
+		{
+			T t;
+			if ((t = Volatile.Read<T>(ref target)) == null)
+			{
+				t = LazyInitializer.EnsureInitializedCore<T>(ref target, ref syncLock, valueFactory);
+			}
+			return t;
+		}
+
+		private static T EnsureInitializedCore<T>(ref T target, ref object syncLock, Func<T> valueFactory) where T : class
+		{
+			object obj = LazyInitializer.EnsureLockInitialized(ref syncLock);
+			lock (obj)
+			{
+				if (Volatile.Read<T>(ref target) == null)
+				{
+					Volatile.Write<T>(ref target, valueFactory());
+					if (target == null)
+					{
+						throw new InvalidOperationException("ValueFactory returned null.");
+					}
+				}
+			}
+			return target;
+		}
+
+		private static object EnsureLockInitialized(ref object syncLock)
+		{
+			object obj;
+			if ((obj = syncLock) == null)
+			{
+				obj = Interlocked.CompareExchange(ref syncLock, new object(), null) ?? syncLock;
+			}
+			return obj;
 		}
 	}
 }

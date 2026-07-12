@@ -171,7 +171,7 @@ namespace System.Data
 
 		internal DataViewSettingCollection()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataViewManager _dataViewManager;

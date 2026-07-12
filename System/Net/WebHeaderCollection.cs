@@ -231,7 +231,7 @@ namespace System.Net
 			{
 				if (!this.AllowHttpRequestHeader)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This collection holds response headers and cannot contain the specified request header."));
+					throw new InvalidOperationException(SR.GetString("This collection holds response headers and cannot contain the specified request header."));
 				}
 				return base[UnsafeNclNativeMethods.HttpApi.HTTP_REQUEST_HEADER_ID.ToString((int)header)];
 			}
@@ -239,7 +239,7 @@ namespace System.Net
 			{
 				if (!this.AllowHttpRequestHeader)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This collection holds response headers and cannot contain the specified request header."));
+					throw new InvalidOperationException(SR.GetString("This collection holds response headers and cannot contain the specified request header."));
 				}
 				base[UnsafeNclNativeMethods.HttpApi.HTTP_REQUEST_HEADER_ID.ToString((int)header)] = value;
 			}
@@ -251,7 +251,7 @@ namespace System.Net
 			{
 				if (!this.AllowHttpResponseHeader)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+					throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 				}
 				if (this.m_CommonHeaders != null)
 				{
@@ -270,11 +270,11 @@ namespace System.Net
 			{
 				if (!this.AllowHttpResponseHeader)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+					throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 				}
 				if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 				{
-					throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+					throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 				}
 				base[UnsafeNclNativeMethods.HttpApi.HTTP_RESPONSE_HEADER_ID.ToString((int)header)] = value;
 			}
@@ -284,7 +284,7 @@ namespace System.Net
 		{
 			if (!this.AllowHttpRequestHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds response headers and cannot contain the specified request header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds response headers and cannot contain the specified request header."));
 			}
 			this.Add(UnsafeNclNativeMethods.HttpApi.HTTP_REQUEST_HEADER_ID.ToString((int)header), value);
 		}
@@ -293,11 +293,11 @@ namespace System.Net
 		{
 			if (!this.AllowHttpResponseHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 			}
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.Add(UnsafeNclNativeMethods.HttpApi.HTTP_RESPONSE_HEADER_ID.ToString((int)header), value);
 		}
@@ -306,7 +306,7 @@ namespace System.Net
 		{
 			if (!this.AllowHttpRequestHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds response headers and cannot contain the specified request header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds response headers and cannot contain the specified request header."));
 			}
 			this.Set(UnsafeNclNativeMethods.HttpApi.HTTP_REQUEST_HEADER_ID.ToString((int)header), value);
 		}
@@ -315,11 +315,11 @@ namespace System.Net
 		{
 			if (!this.AllowHttpResponseHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 			}
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.Set(UnsafeNclNativeMethods.HttpApi.HTTP_RESPONSE_HEADER_ID.ToString((int)header), value);
 		}
@@ -328,11 +328,11 @@ namespace System.Net
 		{
 			if (!this.AllowHttpResponseHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 			}
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.SetInternal(UnsafeNclNativeMethods.HttpApi.HTTP_RESPONSE_HEADER_ID.ToString((int)header), value);
 		}
@@ -341,7 +341,7 @@ namespace System.Net
 		{
 			if (!this.AllowHttpRequestHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds response headers and cannot contain the specified request header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds response headers and cannot contain the specified request header."));
 			}
 			this.Remove(UnsafeNclNativeMethods.HttpApi.HTTP_REQUEST_HEADER_ID.ToString((int)header));
 		}
@@ -350,7 +350,7 @@ namespace System.Net
 		{
 			if (!this.AllowHttpResponseHeader)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This collection holds request headers and cannot contain the specified response header."));
+				throw new InvalidOperationException(SR.GetString("This collection holds request headers and cannot contain the specified response header."));
 			}
 			this.Remove(UnsafeNclNativeMethods.HttpApi.HTTP_RESPONSE_HEADER_ID.ToString((int)header));
 		}
@@ -361,7 +361,7 @@ namespace System.Net
 			headerValue = WebHeaderCollection.CheckBadChars(headerValue, true);
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && headerValue != null && headerValue.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("headerValue", headerValue, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("headerValue", headerValue, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.NormalizeCommonHeaders();
 			base.InvalidateCachedArrays();
@@ -442,20 +442,20 @@ namespace System.Net
 							}
 							else if (c == '\u007f' || (c < ' ' && c != '\t'))
 							{
-								throw new ArgumentException(global::SR.GetString("Specified value has invalid Control characters."), "value");
+								throw new ArgumentException(SR.GetString("Specified value has invalid Control characters."), "value");
 							}
 							break;
 						case 1:
 							if (c != '\n')
 							{
-								throw new ArgumentException(global::SR.GetString("Specified value has invalid CRLF characters."), "value");
+								throw new ArgumentException(SR.GetString("Specified value has invalid CRLF characters."), "value");
 							}
 							num = 2;
 							break;
 						case 2:
 							if (c != ' ' && c != '\t')
 							{
-								throw new ArgumentException(global::SR.GetString("Specified value has invalid CRLF characters."), "value");
+								throw new ArgumentException(SR.GetString("Specified value has invalid CRLF characters."), "value");
 							}
 							num = 0;
 							break;
@@ -463,25 +463,25 @@ namespace System.Net
 					}
 					if (num != 0)
 					{
-						throw new ArgumentException(global::SR.GetString("Specified value has invalid CRLF characters."), "value");
+						throw new ArgumentException(SR.GetString("Specified value has invalid CRLF characters."), "value");
 					}
 				}
 				else
 				{
 					if (name.IndexOfAny(ValidationHelper.InvalidParamChars) != -1)
 					{
-						throw new ArgumentException(global::SR.GetString("Specified value has invalid HTTP Header characters."), "name");
+						throw new ArgumentException(SR.GetString("Specified value has invalid HTTP Header characters."), "name");
 					}
 					if (WebHeaderCollection.ContainsNonAsciiChars(name))
 					{
-						throw new ArgumentException(global::SR.GetString("Specified value has invalid non-ASCII characters."), "name");
+						throw new ArgumentException(SR.GetString("Specified value has invalid non-ASCII characters."), "name");
 					}
 				}
 				return name;
 			}
 			if (!isHeaderValue)
 			{
-				throw (name == null) ? new ArgumentNullException("name") : new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
+				throw (name == null) ? new ArgumentNullException("name") : new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "name" }), "name");
 			}
 			return string.Empty;
 		}
@@ -509,12 +509,12 @@ namespace System.Net
 			{
 				if (WebHeaderCollection.HInfo[headerName].IsRequestRestricted)
 				{
-					throw new ArgumentException(global::SR.GetString("The '{0}' header must be modified using the appropriate property or method.", new object[] { headerName }), "name");
+					throw new ArgumentException(SR.GetString("The '{0}' header must be modified using the appropriate property or method.", new object[] { headerName }), "name");
 				}
 			}
 			else if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && WebHeaderCollection.HInfo[headerName].IsResponseRestricted)
 			{
-				throw new ArgumentException(global::SR.GetString("The '{0}' header must be modified using the appropriate property or method.", new object[] { headerName }), "name");
+				throw new ArgumentException(SR.GetString("The '{0}' header must be modified using the appropriate property or method.", new object[] { headerName }), "name");
 			}
 		}
 
@@ -525,7 +525,7 @@ namespace System.Net
 			value = WebHeaderCollection.CheckBadChars(value, true);
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.NormalizeCommonHeaders();
 			base.InvalidateCachedArrays();
@@ -541,7 +541,7 @@ namespace System.Net
 			int num = header.IndexOf(':');
 			if (num < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("Specified value does not have a ':' separator."), "header");
+				throw new ArgumentException(SR.GetString("Specified value does not have a ':' separator."), "header");
 			}
 			string text = header.Substring(0, num);
 			string text2 = header.Substring(num + 1);
@@ -550,7 +550,7 @@ namespace System.Net
 			text2 = WebHeaderCollection.CheckBadChars(text2, true);
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && text2 != null && text2.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", text2, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", text2, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.NormalizeCommonHeaders();
 			base.InvalidateCachedArrays();
@@ -568,7 +568,7 @@ namespace System.Net
 			value = WebHeaderCollection.CheckBadChars(value, true);
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.NormalizeCommonHeaders();
 			base.InvalidateCachedArrays();
@@ -585,7 +585,7 @@ namespace System.Net
 			value = WebHeaderCollection.CheckBadChars(value, true);
 			if (this.m_Type == WebHeaderCollectionType.HttpListenerResponse && value != null && value.Length > 65535)
 			{
-				throw new ArgumentOutOfRangeException("value", value, global::SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
+				throw new ArgumentOutOfRangeException("value", value, SR.GetString("Header values cannot be longer than {0} characters.", new object[] { ushort.MaxValue }));
 			}
 			this.NormalizeCommonHeaders();
 			base.InvalidateCachedArrays();
@@ -1707,7 +1707,7 @@ namespace System.Net
 				return array;
 			}
 
-			[global::System.Runtime.CompilerServices.FriendAccessAllowed]
+			[FriendAccessAllowed]
 			internal static string DecodeUtf8FromString(string input)
 			{
 				if (string.IsNullOrWhiteSpace(input))

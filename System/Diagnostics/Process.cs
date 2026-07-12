@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Globalization;
@@ -16,21 +17,21 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
-	[Designer("System.Diagnostics.Design.ProcessDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	[DefaultProperty("StartInfo")]
 	[DefaultEvent("Exited")]
+	[Designer("System.Diagnostics.Design.ProcessDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 	[MonitoringDescription("Provides access to local and remote processes, enabling starting and stopping of local processes.")]
+	[DefaultProperty("StartInfo")]
 	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	[HostProtection(SecurityAction.LinkDemand, SharedState = true, Synchronization = true, ExternalProcessMgmt = true, SelfAffectingProcessMgmt = true)]
 	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class Process : Component
 	{
-		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
 		[Browsable(true)]
+		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
 		public event DataReceivedEventHandler OutputDataReceived;
 
-		[Browsable(true)]
 		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
+		[Browsable(true)]
 		public event DataReceivedEventHandler ErrorDataReceived;
 
 		public Process()
@@ -52,9 +53,9 @@ namespace System.Diagnostics
 			this.m_processAccess = 2035711;
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		private bool Associated
 		{
 			get
@@ -63,15 +64,15 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The value returned from the associated process when it terminated.")]
 		public int ExitCode
 		{
 			get
 			{
 				this.EnsureState(Process.State.Exited);
-				if (this.exitCode == -1 && !Environment.IsRunningOnWindows)
+				if (this.exitCode == -1 && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				{
 					throw new InvalidOperationException("Cannot get the exit code from a non-child process on Unix");
 				}
@@ -159,7 +160,7 @@ namespace System.Diagnostics
 				safeProcessHandle = this.GetProcessHandle(num, false);
 				if (safeProcessHandle.IsInvalid)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
+					throw new InvalidOperationException(SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
 				}
 				if (!Microsoft.Win32.NativeMethods.GetProcessTimes(safeProcessHandle, out processThreadTimes.create, out processThreadTimes.exit, out processThreadTimes.kernel, out processThreadTimes.user))
 				{
@@ -173,9 +174,9 @@ namespace System.Diagnostics
 			return processThreadTimes;
 		}
 
+		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The time that the associated process exited.")]
-		[Browsable(false)]
 		public DateTime ExitTime
 		{
 			get
@@ -190,9 +191,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Returns the native handle for this process.   The handle is only available if the process was started using this component.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public IntPtr Handle
 		{
 			get
@@ -224,9 +225,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The name of the machine the running the process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The name of the machine the running the process.")]
 		public string MachineName
 		{
 			get
@@ -236,8 +237,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The maximum amount of physical memory the process has required since it was started.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The maximum amount of physical memory the process has required since it was started.")]
 		public IntPtr MaxWorkingSet
 		{
 			get
@@ -251,8 +252,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The minimum amount of physical memory the process has required since it was started.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IntPtr MinWorkingSet
 		{
 			get
@@ -278,8 +279,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The priority that the threads in the process run relative to.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public ProcessPriorityClass PriorityClass
 		{
 			get
@@ -329,8 +330,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The amount of CPU time the process spent inside the operating system core.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public TimeSpan PrivilegedProcessorTime
 		{
 			get
@@ -340,9 +341,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("Specifies information used to start a process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Browsable(false)]
-		[MonitoringDescription("Specifies information used to start a process.")]
 		public ProcessStartInfo StartInfo
 		{
 			get
@@ -363,8 +364,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The time at which the process was started.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DateTime StartTime
 		{
 			get
@@ -374,9 +375,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The object used to marshal the event handler calls issued as a result of a Process exit.")]
 		[DefaultValue(null)]
 		[Browsable(false)]
+		[MonitoringDescription("The object used to marshal the event handler calls issued as a result of a Process exit.")]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
@@ -453,8 +454,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		[MonitoringDescription("Standard input stream of the process.")]
 		public StreamWriter StandardInput
 		{
@@ -462,7 +463,7 @@ namespace System.Diagnostics
 			{
 				if (this.standardInput == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("StandardIn has not been redirected."));
+					throw new InvalidOperationException(SR.GetString("StandardIn has not been redirected."));
 				}
 				this.inputStreamReadMode = Process.StreamReadMode.syncMode;
 				return this.standardInput;
@@ -478,7 +479,7 @@ namespace System.Diagnostics
 			{
 				if (this.standardOutput == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
+					throw new InvalidOperationException(SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
 				}
 				if (this.outputStreamReadMode == Process.StreamReadMode.undefined)
 				{
@@ -486,7 +487,7 @@ namespace System.Diagnostics
 				}
 				else if (this.outputStreamReadMode != Process.StreamReadMode.syncMode)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
+					throw new InvalidOperationException(SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
 				}
 				return this.standardOutput;
 			}
@@ -501,7 +502,7 @@ namespace System.Diagnostics
 			{
 				if (this.standardError == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("StandardError has not been redirected."));
+					throw new InvalidOperationException(SR.GetString("StandardError has not been redirected."));
 				}
 				if (this.errorStreamReadMode == Process.StreamReadMode.undefined)
 				{
@@ -509,14 +510,14 @@ namespace System.Diagnostics
 				}
 				else if (this.errorStreamReadMode != Process.StreamReadMode.syncMode)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
+					throw new InvalidOperationException(SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
 				}
 				return this.standardError;
 			}
 		}
 
-		[Category("Behavior")]
 		[MonitoringDescription("If the WatchForExit property is set to true, then this event is raised when the associated process exits.")]
+		[Category("Behavior")]
 		public event EventHandler Exited
 		{
 			add
@@ -616,30 +617,30 @@ namespace System.Diagnostics
 		{
 			if ((state & Process.State.Associated) != (Process.State)0 && !this.Associated)
 			{
-				throw new InvalidOperationException(global::SR.GetString("No process is associated with this object."));
+				throw new InvalidOperationException(SR.GetString("No process is associated with this object."));
 			}
 			if ((state & Process.State.HaveId) != (Process.State)0 && !this.haveProcessId)
 			{
 				this.EnsureState(Process.State.Associated);
-				throw new InvalidOperationException(global::SR.GetString("Feature requires a process identifier."));
+				throw new InvalidOperationException(SR.GetString("Feature requires a process identifier."));
 			}
 			if ((state & Process.State.IsLocal) != (Process.State)0 && this.isRemoteMachine)
 			{
-				throw new NotSupportedException(global::SR.GetString("Feature is not supported for remote machines."));
+				throw new NotSupportedException(SR.GetString("Feature is not supported for remote machines."));
 			}
 			if ((state & Process.State.HaveProcessInfo) != (Process.State)0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Process has exited, so the requested information is not available."));
+				throw new InvalidOperationException(SR.GetString("Process has exited, so the requested information is not available."));
 			}
 			if ((state & Process.State.Exited) != (Process.State)0)
 			{
 				if (!this.HasExited)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Process must exit before requested information can be determined."));
+					throw new InvalidOperationException(SR.GetString("Process must exit before requested information can be determined."));
 				}
 				if (!this.haveProcessHandle)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Process was not started by this object, so requested information cannot be determined."));
+					throw new InvalidOperationException(SR.GetString("Process was not started by this object, so requested information cannot be determined."));
 				}
 			}
 		}
@@ -754,9 +755,9 @@ namespace System.Diagnostics
 						{
 							if (this.haveProcessId)
 							{
-								throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
+								throw new InvalidOperationException(SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
 							}
-							throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process has exited."));
+							throw new InvalidOperationException(SR.GetString("Cannot process request because the process has exited."));
 						}
 					}
 					finally
@@ -778,7 +779,7 @@ namespace System.Diagnostics
 			}
 			if (throwIfExited && (access & 1024) != 0 && Microsoft.Win32.NativeMethods.GetExitCodeProcess(invalidHandle, out this.exitCode) && this.exitCode != 259)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
+				throw new InvalidOperationException(SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
 			}
 			return invalidHandle;
 		}
@@ -858,9 +859,9 @@ namespace System.Diagnostics
 				{
 					if (newMin != null)
 					{
-						throw new ArgumentException(global::SR.GetString("Minimum working set size is invalid. It must be less than or equal to the maximum working set size."));
+						throw new ArgumentException(SR.GetString("Minimum working set size is invalid. It must be less than or equal to the maximum working set size."));
 					}
-					throw new ArgumentException(global::SR.GetString("Maximum working set size is invalid. It must be greater than or equal to the minimum working set size."));
+					throw new ArgumentException(SR.GetString("Maximum working set size is invalid. It must be greater than or equal to the minimum working set size."));
 				}
 				else
 				{
@@ -889,7 +890,7 @@ namespace System.Diagnostics
 			ProcessStartInfo processStartInfo = this.StartInfo;
 			if (processStartInfo.FileName.Length == 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot start process because a file name has not been provided."));
+				throw new InvalidOperationException(SR.GetString("Cannot start process because a file name has not been provided."));
 			}
 			if (processStartInfo.UseShellExecute)
 			{
@@ -1074,7 +1075,7 @@ namespace System.Diagnostics
 						return false;
 					}
 				}
-				throw new InvalidOperationException(global::SR.GetString("WaitForInputIdle failed.  This could be because the process does not have a graphical interface."));
+				throw new InvalidOperationException(SR.GetString("WaitForInputIdle failed.  This could be because the process does not have a graphical interface."));
 			}
 			finally
 			{
@@ -1098,18 +1099,18 @@ namespace System.Diagnostics
 			}
 			else if (this.outputStreamReadMode != Process.StreamReadMode.asyncMode)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
+				throw new InvalidOperationException(SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
 			}
 			if (this.pendingOutputRead)
 			{
-				throw new InvalidOperationException(global::SR.GetString("An async read operation has already been started on the stream."));
+				throw new InvalidOperationException(SR.GetString("An async read operation has already been started on the stream."));
 			}
 			this.pendingOutputRead = true;
 			if (this.output == null)
 			{
 				if (this.standardOutput == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
+					throw new InvalidOperationException(SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
 				}
 				Stream baseStream = this.standardOutput.BaseStream;
 				this.output = new AsyncStreamReader(this, baseStream, new UserCallBack(this.OutputReadNotifyUser), this.standardOutput.CurrentEncoding);
@@ -1126,18 +1127,18 @@ namespace System.Diagnostics
 			}
 			else if (this.errorStreamReadMode != Process.StreamReadMode.asyncMode)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
+				throw new InvalidOperationException(SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
 			}
 			if (this.pendingErrorRead)
 			{
-				throw new InvalidOperationException(global::SR.GetString("An async read operation has already been started on the stream."));
+				throw new InvalidOperationException(SR.GetString("An async read operation has already been started on the stream."));
 			}
 			this.pendingErrorRead = true;
 			if (this.error == null)
 			{
 				if (this.standardError == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("StandardError has not been redirected."));
+					throw new InvalidOperationException(SR.GetString("StandardError has not been redirected."));
 				}
 				Stream baseStream = this.standardError.BaseStream;
 				this.error = new AsyncStreamReader(this, baseStream, new UserCallBack(this.ErrorReadNotifyUser), this.standardError.CurrentEncoding);
@@ -1154,7 +1155,7 @@ namespace System.Diagnostics
 				this.pendingOutputRead = false;
 				return;
 			}
-			throw new InvalidOperationException(global::SR.GetString("No async read operation is in progress on the stream."));
+			throw new InvalidOperationException(SR.GetString("No async read operation is in progress on the stream."));
 		}
 
 		[ComVisible(false)]
@@ -1166,7 +1167,7 @@ namespace System.Diagnostics
 				this.pendingErrorRead = false;
 				return;
 			}
-			throw new InvalidOperationException(global::SR.GetString("No async read operation is in progress on the stream."));
+			throw new InvalidOperationException(SR.GetString("No async read operation is in progress on the stream."));
 		}
 
 		internal void OutputReadNotifyUser(string data)
@@ -1205,9 +1206,9 @@ namespace System.Diagnostics
 			this.SetProcessId(id);
 		}
 
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Base process priority.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonoTODO]
 		public int BasePriority
 		{
 			get
@@ -1216,9 +1217,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Handles for this process.")]
 		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int HandleCount
 		{
 			get
@@ -1228,8 +1229,8 @@ namespace System.Diagnostics
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
 		[MonitoringDescription("The main module of the process.")]
+		[Browsable(false)]
 		public ProcessModule MainModule
 		{
 			get
@@ -1246,20 +1247,22 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr MainWindowHandle_icall(int pid);
+
 		[MonitoringDescription("The handle of the main window of the process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IntPtr MainWindowHandle
 		{
 			get
 			{
-				return (IntPtr)0;
+				return Process.MainWindowHandle_icall(this.processId);
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonoTODO]
 		[MonitoringDescription("The title of the main window of the process.")]
+		[MonoTODO]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public string MainWindowTitle
 		{
 			get
@@ -1268,17 +1271,28 @@ namespace System.Diagnostics
 			}
 		}
 
+		private static void AppendArguments(StringBuilder stringBuilder, Collection<string> argumentList)
+		{
+			if (argumentList.Count > 0)
+			{
+				foreach (string text in argumentList)
+				{
+					PasteArguments.AppendArgument(stringBuilder, text);
+				}
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern ProcessModule[] GetModules_internal(IntPtr handle);
+		private extern ProcessModule[] GetModules_icall(IntPtr handle);
 
 		private ProcessModule[] GetModules_internal(SafeProcessHandle handle)
 		{
 			bool flag = false;
-			ProcessModule[] modules_internal;
+			ProcessModule[] modules_icall;
 			try
 			{
 				handle.DangerousAddRef(ref flag);
-				modules_internal = this.GetModules_internal(handle.DangerousGetHandle());
+				modules_icall = this.GetModules_icall(handle.DangerousGetHandle());
 			}
 			finally
 			{
@@ -1287,11 +1301,11 @@ namespace System.Diagnostics
 					handle.DangerousRelease();
 				}
 			}
-			return modules_internal;
+			return modules_icall;
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The modules that are loaded as part of this process.")]
 		public ProcessModuleCollection Modules
 		{
@@ -1317,10 +1331,10 @@ namespace System.Diagnostics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern long GetProcessData(int pid, int data_type, out int error);
 
-		[MonoTODO]
-		[Obsolete("Use NonpagedSystemMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The number of bytes that are not pageable.")]
+		[Obsolete("Use NonpagedSystemMemorySize64")]
+		[MonoTODO]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int NonpagedSystemMemorySize
 		{
 			get
@@ -1329,9 +1343,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The number of bytes that are paged.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Obsolete("Use PagedMemorySize64")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The number of bytes that are paged.")]
 		public int PagedMemorySize
 		{
 			get
@@ -1351,9 +1365,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
 		[Obsolete("Use PeakPagedMemorySize64")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
 		public int PeakPagedMemorySize
 		{
@@ -1363,9 +1377,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
 		[Obsolete("Use PeakVirtualMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int PeakVirtualMemorySize
 		{
 			get
@@ -1375,9 +1389,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of system memory used by this process.")]
 		[Obsolete("Use PeakWorkingSet64")]
+		[MonitoringDescription("The maximum amount of system memory used by this process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int PeakWorkingSet
 		{
 			get
@@ -1387,10 +1401,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
+		[ComVisible(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The number of bytes that are not pageable.")]
-		[ComVisible(false)]
+		[MonoTODO]
 		public long NonpagedSystemMemorySize64
 		{
 			get
@@ -1422,10 +1436,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
-		[ComVisible(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[ComVisible(false)]
+		[MonoTODO]
 		public long PeakPagedMemorySize64
 		{
 			get
@@ -1434,9 +1448,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ComVisible(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[ComVisible(false)]
 		public long PeakVirtualMemorySize64
 		{
 			get
@@ -1446,9 +1460,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The maximum amount of system memory used by this process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The maximum amount of system memory used by this process.")]
 		public long PeakWorkingSet64
 		{
 			get
@@ -1458,9 +1472,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
 		[MonoTODO]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
 		public bool PriorityBoostEnabled
 		{
 			get
@@ -1472,8 +1486,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Obsolete("Use PrivateMemorySize64")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The amount of memory exclusively used by this process.")]
 		public int PrivateMemorySize
 		{
@@ -1484,9 +1498,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonoNotSupported("")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The session ID for this process.")]
-		[MonoNotSupported("")]
 		public int SessionId
 		{
 			get
@@ -1496,7 +1510,7 @@ namespace System.Diagnostics
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string ProcessName_internal(IntPtr handle);
+		private static extern string ProcessName_icall(IntPtr handle);
 
 		private static string ProcessName_internal(SafeProcessHandle handle)
 		{
@@ -1505,7 +1519,7 @@ namespace System.Diagnostics
 			try
 			{
 				handle.DangerousAddRef(ref flag);
-				text = Process.ProcessName_internal(handle.DangerousGetHandle());
+				text = Process.ProcessName_icall(handle.DangerousGetHandle());
 			}
 			finally
 			{
@@ -1562,9 +1576,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("Is this process responsive.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
-		[MonitoringDescription("Is this process responsive.")]
 		public bool Responding
 		{
 			get
@@ -1573,9 +1587,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The number of threads of this process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The number of threads of this process.")]
 		public ProcessThreadCollection Threads
 		{
 			get
@@ -1589,9 +1603,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Obsolete("Use VirtualMemorySize64")]
-		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
 		public int VirtualMemorySize
 		{
 			get
@@ -1601,9 +1615,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("The amount of physical memory currently used for this process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Obsolete("Use WorkingSet64")]
-		[MonitoringDescription("The amount of physical memory currently used for this process.")]
 		public int WorkingSet
 		{
 			get
@@ -1637,9 +1651,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
 		[MonitoringDescription("The amount of physical memory currently used for this process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public long WorkingSet64
 		{
 			get
@@ -1703,13 +1717,17 @@ namespace System.Diagnostics
 				return processes;
 			}
 			int num = 0;
-			for (int i = 0; i < processes.Length; i++)
+			foreach (Process process in processes)
 			{
 				try
 				{
-					if (string.Compare(processName, processes[i].ProcessName, true) == 0)
+					if (string.Compare(processName, process.ProcessName, true) == 0)
 					{
-						processes[num++] = processes[i];
+						processes[num++] = process;
+					}
+					else
+					{
+						process.Dispose();
 					}
 				}
 				catch (SystemException)
@@ -1772,23 +1790,23 @@ namespace System.Diagnostics
 			}
 			if (!string.IsNullOrEmpty(startInfo.UserName) || startInfo.Password != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to start a process as a user."));
+				throw new InvalidOperationException(SR.GetString("The Process object must have the UseShellExecute property set to false in order to start a process as a user."));
 			}
 			if (startInfo.RedirectStandardInput || startInfo.RedirectStandardOutput || startInfo.RedirectStandardError)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to redirect IO streams."));
+				throw new InvalidOperationException(SR.GetString("The Process object must have the UseShellExecute property set to false in order to redirect IO streams."));
 			}
 			if (startInfo.StandardErrorEncoding != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
+				throw new InvalidOperationException(SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
 			}
 			if (startInfo.StandardOutputEncoding != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
+				throw new InvalidOperationException(SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
 			}
 			if (startInfo.environmentVariables != null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to use environment variables."));
+				throw new InvalidOperationException(SR.GetString("The Process object must have the UseShellExecute property set to false in order to use environment variables."));
 			}
 			Process.ProcInfo procInfo = default(Process.ProcInfo);
 			Process.FillUserInfo(startInfo, ref procInfo);
@@ -1861,11 +1879,11 @@ namespace System.Diagnostics
 		{
 			if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
 			{
-				throw new InvalidOperationException(global::SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
+				throw new InvalidOperationException(SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
 			}
 			if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
 			{
-				throw new InvalidOperationException(global::SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
+				throw new InvalidOperationException(SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
 			}
 			if (this.disposed)
 			{
@@ -1874,32 +1892,25 @@ namespace System.Diagnostics
 			Process.ProcInfo procInfo = default(Process.ProcInfo);
 			if (startInfo.HaveEnvVars)
 			{
-				List<string> list = null;
-				StringBuilder stringBuilder = null;
+				List<string> list = new List<string>();
 				foreach (object obj in startInfo.EnvironmentVariables)
 				{
 					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
 					if (dictionaryEntry.Value != null)
 					{
-						if (list == null)
-						{
-							list = new List<string>();
-						}
-						if (stringBuilder == null)
-						{
-							stringBuilder = new StringBuilder();
-						}
-						else
-						{
-							stringBuilder.Clear();
-						}
-						stringBuilder.Append((string)dictionaryEntry.Key);
-						stringBuilder.Append('=');
-						stringBuilder.Append((string)dictionaryEntry.Value);
-						list.Add(stringBuilder.ToString());
+						list.Add((string)dictionaryEntry.Key + "=" + (string)dictionaryEntry.Value);
 					}
 				}
-				procInfo.envVariables = ((list != null) ? list.ToArray() : null);
+				procInfo.envVariables = list.ToArray();
+			}
+			if (startInfo.ArgumentList.Count > 0)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				foreach (string text in startInfo.ArgumentList)
+				{
+					PasteArguments.AppendArgument(stringBuilder, text);
+				}
+				startInfo.Arguments = stringBuilder.ToString();
 			}
 			IntPtr intPtr = IntPtr.Zero;
 			IntPtr intPtr2 = IntPtr.Zero;
@@ -2009,8 +2020,8 @@ namespace System.Diagnostics
 			{
 				MonoIOError monoIOError;
 				MonoIO.Close(intPtr, out monoIOError);
-				Encoding inputEncoding = Console.InputEncoding;
-				this.standardInput = new StreamWriter(new FileStream(intPtr2, FileAccess.Write, true, 8192), inputEncoding)
+				Encoding encoding = startInfo.StandardInputEncoding ?? Console.InputEncoding;
+				this.standardInput = new StreamWriter(new FileStream(intPtr2, FileAccess.Write, true, 8192), encoding)
 				{
 					AutoFlush = true
 				};
@@ -2019,15 +2030,15 @@ namespace System.Diagnostics
 			{
 				MonoIOError monoIOError;
 				MonoIO.Close(intPtr4, out monoIOError);
-				Encoding encoding = startInfo.StandardOutputEncoding ?? Console.Out.Encoding;
-				this.standardOutput = new StreamReader(new FileStream(intPtr3, FileAccess.Read, true, 8192), encoding, true);
+				Encoding encoding2 = startInfo.StandardOutputEncoding ?? Console.OutputEncoding;
+				this.standardOutput = new StreamReader(new FileStream(intPtr3, FileAccess.Read, true, 8192), encoding2, true);
 			}
 			if (startInfo.RedirectStandardError)
 			{
 				MonoIOError monoIOError;
 				MonoIO.Close(intPtr6, out monoIOError);
-				Encoding encoding2 = startInfo.StandardErrorEncoding ?? Console.Out.Encoding;
-				this.standardError = new StreamReader(new FileStream(intPtr5, FileAccess.Read, true, 8192), encoding2, true);
+				Encoding encoding3 = startInfo.StandardErrorEncoding ?? Console.OutputEncoding;
+				this.standardError = new StreamReader(new FileStream(intPtr5, FileAccess.Read, true, 8192), encoding3, true);
 			}
 			return true;
 		}

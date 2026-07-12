@@ -115,7 +115,7 @@ namespace System.Security.AccessControl
 				}
 				return AceType.SystemAlarm;
 			default:
-				throw new ArgumentException("Unrecognized ACE qualifier: " + qualifier, "qualifier");
+				throw new ArgumentException("Unrecognized ACE qualifier: " + qualifier.ToString(), "qualifier");
 			}
 		}
 	}

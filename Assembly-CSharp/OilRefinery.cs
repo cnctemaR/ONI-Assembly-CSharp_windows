@@ -164,22 +164,22 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			base.SetWorkTime(float.PositiveInfinity);
 		}
 
-		protected override void OnStartWork(Worker worker)
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			this.operational.SetActive(true, false);
 		}
 
-		protected override void OnStopWork(Worker worker)
+		protected override void OnStopWork(WorkerBase worker)
 		{
 			this.operational.SetActive(false, false);
 		}
 
-		protected override void OnCompleteWork(Worker worker)
+		protected override void OnCompleteWork(WorkerBase worker)
 		{
 			this.operational.SetActive(false, false);
 		}
 
-		public override bool InstantlyFinish(Worker worker)
+		public override bool InstantlyFinish(WorkerBase worker)
 		{
 			return false;
 		}

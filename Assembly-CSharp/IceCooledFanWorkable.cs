@@ -29,17 +29,17 @@ public class IceCooledFanWorkable : Workable
 		base.OnSpawn();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.operational.SetActive(true, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 	}

@@ -29,13 +29,14 @@ namespace System.IO
 				}
 				driveName = char.ToUpperInvariant(driveName[0]).ToString() + ":\\";
 			}
-			foreach (DriveInfo driveInfo in DriveInfo.GetDrives())
+			DriveInfo[] drives = DriveInfo.GetDrives();
+			Array.Sort<DriveInfo>(drives, (DriveInfo di1, DriveInfo di2) => string.Compare(di2.path, di1.path, true));
+			foreach (DriveInfo driveInfo in drives)
 			{
-				if (driveInfo.path == driveName)
+				if (driveName.StartsWith(driveInfo.path, StringComparison.OrdinalIgnoreCase))
 				{
 					this.path = driveInfo.path;
 					this.drive_format = driveInfo.drive_format;
-					this.path = driveInfo.path;
 					return;
 				}
 			}
@@ -176,13 +177,43 @@ namespace System.IO
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetDiskFreeSpaceInternal(string pathName, out ulong freeBytesAvail, out ulong totalNumberOfBytes, out ulong totalNumberOfFreeBytes, out MonoIOError error);
+		private unsafe static extern bool GetDiskFreeSpaceInternal(char* pathName, int pathName_length, out ulong freeBytesAvail, out ulong totalNumberOfBytes, out ulong totalNumberOfFreeBytes, out MonoIOError error);
+
+		private unsafe static bool GetDiskFreeSpaceInternal(string pathName, out ulong freeBytesAvail, out ulong totalNumberOfBytes, out ulong totalNumberOfFreeBytes, out MonoIOError error)
+		{
+			char* ptr = pathName;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return DriveInfo.GetDiskFreeSpaceInternal(ptr, (pathName != null) ? pathName.Length : 0, out freeBytesAvail, out totalNumberOfBytes, out totalNumberOfFreeBytes, out error);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern uint GetDriveTypeInternal(string rootPathName);
+		private unsafe static extern uint GetDriveTypeInternal(char* rootPathName, int rootPathName_length);
+
+		private unsafe static uint GetDriveTypeInternal(string rootPathName)
+		{
+			char* ptr = rootPathName;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return DriveInfo.GetDriveTypeInternal(ptr, (rootPathName != null) ? rootPathName.Length : 0);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetDriveFormat(string rootPathName);
+		private unsafe static extern string GetDriveFormatInternal(char* rootPathName, int rootPathName_length);
+
+		private unsafe static string GetDriveFormat(string rootPathName)
+		{
+			char* ptr = rootPathName;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return DriveInfo.GetDriveFormatInternal(ptr, (rootPathName != null) ? rootPathName.Length : 0);
+		}
 
 		private string drive_format;
 

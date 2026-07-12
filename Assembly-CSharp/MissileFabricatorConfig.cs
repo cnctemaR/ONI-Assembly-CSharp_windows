@@ -78,7 +78,7 @@ public class MissileFabricatorConfig : IBuildingConfig
 		{
 			time = 80f,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array[0].material).name, ElementLoader.GetElement(array[1].material).name),
+			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, global::STRINGS.ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array[0].material).name, ElementLoader.GetElement(array[1].material).name),
 			fabricators = new List<Tag> { TagManager.Create("MissileFabricator") }
 		};
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
@@ -97,7 +97,7 @@ public class MissileFabricatorConfig : IBuildingConfig
 		{
 			time = 80f,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array3[0].material).name, ElementLoader.GetElement(array3[1].material).name),
+			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, global::STRINGS.ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array3[0].material).name, ElementLoader.GetElement(array3[1].material).name),
 			fabricators = new List<Tag> { TagManager.Create("MissileFabricator") }
 		};
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
@@ -116,7 +116,7 @@ public class MissileFabricatorConfig : IBuildingConfig
 		{
 			time = 80f,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array5[0].material).name, ElementLoader.GetElement(array5[1].material).name),
+			description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, global::STRINGS.ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array5[0].material).name, ElementLoader.GetElement(array5[1].material).name),
 			fabricators = new List<Tag> { TagManager.Create("MissileFabricator") }
 		};
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text5, text6);
@@ -137,7 +137,7 @@ public class MissileFabricatorConfig : IBuildingConfig
 			{
 				time = 80f,
 				nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
-				description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array7[0].material).name, ElementLoader.GetElement(array7[1].material).name),
+				description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MISSILEFABRICATOR.RECIPE_DESCRIPTION, global::STRINGS.ITEMS.MISSILE_BASIC.NAME, ElementLoader.GetElement(array7[0].material).name, ElementLoader.GetElement(array7[1].material).name),
 				fabricators = new List<Tag> { TagManager.Create("MissileFabricator") }
 			};
 			ComplexRecipeManager.Get().AddObsoleteIDMapping(text7, text8);

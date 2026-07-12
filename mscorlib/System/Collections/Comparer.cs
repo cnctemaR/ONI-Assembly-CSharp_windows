@@ -1,41 +1,39 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Serializable]
 	public sealed class Comparer : IComparer, ISerializable
 	{
-		private Comparer()
-		{
-			this.m_compareInfo = null;
-		}
-
 		public Comparer(CultureInfo culture)
 		{
 			if (culture == null)
 			{
 				throw new ArgumentNullException("culture");
 			}
-			this.m_compareInfo = culture.CompareInfo;
+			this._compareInfo = culture.CompareInfo;
 		}
 
 		private Comparer(SerializationInfo info, StreamingContext context)
 		{
-			this.m_compareInfo = null;
-			SerializationInfoEnumerator enumerator = info.GetEnumerator();
-			while (enumerator.MoveNext())
+			if (info == null)
 			{
-				string name = enumerator.Name;
-				if (name == "CompareInfo")
-				{
-					this.m_compareInfo = (CompareInfo)info.GetValue("CompareInfo", typeof(CompareInfo));
-				}
+				throw new ArgumentNullException("info");
 			}
+			this._compareInfo = (CompareInfo)info.GetValue("CompareInfo", typeof(CompareInfo));
+		}
+
+		[SecurityCritical]
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("CompareInfo", this._compareInfo);
 		}
 
 		public int Compare(object a, object b)
@@ -52,14 +50,11 @@ namespace System.Collections
 			{
 				return 1;
 			}
-			if (this.m_compareInfo != null)
+			string text = a as string;
+			string text2 = b as string;
+			if (text != null && text2 != null)
 			{
-				string text = a as string;
-				string text2 = b as string;
-				if (text != null && text2 != null)
-				{
-					return this.m_compareInfo.Compare(text, text2);
-				}
+				return this._compareInfo.Compare(text, text2);
 			}
 			IComparable comparable = a as IComparable;
 			if (comparable != null)
@@ -71,28 +66,13 @@ namespace System.Collections
 			{
 				return -comparable2.CompareTo(a);
 			}
-			throw new ArgumentException(Environment.GetResourceString("At least one object must implement IComparable."));
+			throw new ArgumentException("At least one object must implement IComparable.");
 		}
 
-		[SecurityCritical]
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			if (this.m_compareInfo != null)
-			{
-				info.AddValue("CompareInfo", this.m_compareInfo);
-			}
-		}
-
-		private CompareInfo m_compareInfo;
+		private CompareInfo _compareInfo;
 
 		public static readonly Comparer Default = new Comparer(CultureInfo.CurrentCulture);
 
 		public static readonly Comparer DefaultInvariant = new Comparer(CultureInfo.InvariantCulture);
-
-		private const string CompareInfoName = "CompareInfo";
 	}
 }

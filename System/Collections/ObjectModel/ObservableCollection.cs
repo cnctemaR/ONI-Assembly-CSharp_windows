@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace System.Collections.ObjectModel
 {
-	[TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
+	[DebuggerTypeProxy(typeof(global::System.Collections.Generic.CollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class ObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
 	{
@@ -14,31 +16,23 @@ namespace System.Collections.ObjectModel
 		{
 		}
 
-		public ObservableCollection(List<T> list)
-			: base((list != null) ? new List<T>(list.Count) : list)
+		public ObservableCollection(IEnumerable<T> collection)
+			: base(ObservableCollection<T>.CreateCopy(collection, "collection"))
 		{
-			this.CopyFrom(list);
 		}
 
-		public ObservableCollection(IEnumerable<T> collection)
+		public ObservableCollection(List<T> list)
+			: base(ObservableCollection<T>.CreateCopy(list, "list"))
+		{
+		}
+
+		private static List<T> CreateCopy(IEnumerable<T> collection, string paramName)
 		{
 			if (collection == null)
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(paramName);
 			}
-			this.CopyFrom(collection);
-		}
-
-		private void CopyFrom(IEnumerable<T> collection)
-		{
-			IList<T> items = base.Items;
-			if (collection != null && items != null)
-			{
-				foreach (T t in collection)
-				{
-					items.Add(t);
-				}
-			}
+			return new List<T>(collection);
 		}
 
 		public void Move(int oldIndex, int newIndex)
@@ -65,8 +59,8 @@ namespace System.Collections.ObjectModel
 		{
 			this.CheckReentrancy();
 			base.ClearItems();
-			this.OnPropertyChanged("Count");
-			this.OnPropertyChanged("Item[]");
+			this.OnCountPropertyChanged();
+			this.OnIndexerPropertyChanged();
 			this.OnCollectionReset();
 		}
 
@@ -75,8 +69,8 @@ namespace System.Collections.ObjectModel
 			this.CheckReentrancy();
 			T t = base[index];
 			base.RemoveItem(index);
-			this.OnPropertyChanged("Count");
-			this.OnPropertyChanged("Item[]");
+			this.OnCountPropertyChanged();
+			this.OnIndexerPropertyChanged();
 			this.OnCollectionChanged(NotifyCollectionChangedAction.Remove, t, index);
 		}
 
@@ -84,8 +78,8 @@ namespace System.Collections.ObjectModel
 		{
 			this.CheckReentrancy();
 			base.InsertItem(index, item);
-			this.OnPropertyChanged("Count");
-			this.OnPropertyChanged("Item[]");
+			this.OnCountPropertyChanged();
+			this.OnIndexerPropertyChanged();
 			this.OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
 		}
 
@@ -94,7 +88,7 @@ namespace System.Collections.ObjectModel
 			this.CheckReentrancy();
 			T t = base[index];
 			base.SetItem(index, item);
-			this.OnPropertyChanged("Item[]");
+			this.OnIndexerPropertyChanged();
 			this.OnCollectionChanged(NotifyCollectionChangedAction.Replace, t, item, index);
 		}
 
@@ -104,16 +98,18 @@ namespace System.Collections.ObjectModel
 			T t = base[oldIndex];
 			base.RemoveItem(oldIndex);
 			base.InsertItem(newIndex, t);
-			this.OnPropertyChanged("Item[]");
+			this.OnIndexerPropertyChanged();
 			this.OnCollectionChanged(NotifyCollectionChangedAction.Move, t, newIndex, oldIndex);
 		}
 
 		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
-			if (this.PropertyChanged != null)
+			PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+			if (propertyChanged == null)
 			{
-				this.PropertyChanged(this, e);
+				return;
 			}
+			propertyChanged(this, e);
 		}
 
 		[field: NonSerialized]
@@ -121,32 +117,47 @@ namespace System.Collections.ObjectModel
 
 		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			if (this.CollectionChanged != null)
+			NotifyCollectionChangedEventHandler collectionChanged = this.CollectionChanged;
+			if (collectionChanged != null)
 			{
-				using (this.BlockReentrancy())
+				this._blockReentrancyCount++;
+				try
 				{
-					this.CollectionChanged(this, e);
+					collectionChanged(this, e);
+				}
+				finally
+				{
+					this._blockReentrancyCount--;
 				}
 			}
 		}
 
 		protected IDisposable BlockReentrancy()
 		{
-			this._monitor.Enter();
-			return this._monitor;
+			this._blockReentrancyCount++;
+			return this.EnsureMonitorInitialized();
 		}
 
 		protected void CheckReentrancy()
 		{
-			if (this._monitor.Busy && this.CollectionChanged != null && this.CollectionChanged.GetInvocationList().Length > 1)
+			if (this._blockReentrancyCount > 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot change ObservableCollection during a CollectionChanged event."));
+				NotifyCollectionChangedEventHandler collectionChanged = this.CollectionChanged;
+				if (collectionChanged != null && collectionChanged.GetInvocationList().Length > 1)
+				{
+					throw new InvalidOperationException("Cannot change ObservableCollection during a CollectionChanged event.");
+				}
 			}
 		}
 
-		private void OnPropertyChanged(string propertyName)
+		private void OnCountPropertyChanged()
 		{
-			this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+			this.OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+		}
+
+		private void OnIndexerPropertyChanged()
+		{
+			this.OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
 		}
 
 		private void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
@@ -166,38 +177,58 @@ namespace System.Collections.ObjectModel
 
 		private void OnCollectionReset()
 		{
-			this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+			this.OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
 		}
 
-		private const string CountString = "Count";
-
-		private const string IndexerName = "Item[]";
-
-		private ObservableCollection<T>.SimpleMonitor _monitor = new ObservableCollection<T>.SimpleMonitor();
-
-		[TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
-		[Serializable]
-		private class SimpleMonitor : IDisposable
+		private ObservableCollection<T>.SimpleMonitor EnsureMonitorInitialized()
 		{
-			public void Enter()
+			ObservableCollection<T>.SimpleMonitor simpleMonitor;
+			if ((simpleMonitor = this._monitor) == null)
 			{
-				this._busyCount++;
+				simpleMonitor = (this._monitor = new ObservableCollection<T>.SimpleMonitor(this));
+			}
+			return simpleMonitor;
+		}
+
+		[OnSerializing]
+		private void OnSerializing(StreamingContext context)
+		{
+			this.EnsureMonitorInitialized();
+			this._monitor._busyCount = this._blockReentrancyCount;
+		}
+
+		[OnDeserialized]
+		private void OnDeserialized(StreamingContext context)
+		{
+			if (this._monitor != null)
+			{
+				this._blockReentrancyCount = this._monitor._busyCount;
+				this._monitor._collection = this;
+			}
+		}
+
+		private ObservableCollection<T>.SimpleMonitor _monitor;
+
+		[NonSerialized]
+		private int _blockReentrancyCount;
+
+		[Serializable]
+		private sealed class SimpleMonitor : IDisposable
+		{
+			public SimpleMonitor(ObservableCollection<T> collection)
+			{
+				this._collection = collection;
 			}
 
 			public void Dispose()
 			{
-				this._busyCount--;
+				this._collection._blockReentrancyCount--;
 			}
 
-			public bool Busy
-			{
-				get
-				{
-					return this._busyCount > 0;
-				}
-			}
+			internal int _busyCount;
 
-			private int _busyCount;
+			[NonSerialized]
+			internal ObservableCollection<T> _collection;
 		}
 	}
 }

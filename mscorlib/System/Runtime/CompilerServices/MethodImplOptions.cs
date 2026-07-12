@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum MethodImplOptions
 	{
@@ -16,6 +16,7 @@ namespace System.Runtime.CompilerServices
 		NoInlining = 8,
 		[ComVisible(false)]
 		AggressiveInlining = 256,
-		NoOptimization = 64
+		NoOptimization = 64,
+		SecurityMitigations = 1024
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,9 +8,13 @@ namespace System.Data.SqlClient.SNI
 {
 	internal class SNIPacket : IDisposable, IEquatable<SNIPacket>
 	{
-		public SNIPacket(SNIHandle handle)
+		public SNIPacket()
 		{
-			this._offset = 0;
+		}
+
+		public SNIPacket(int capacity)
+		{
+			this.Allocate(capacity);
 		}
 
 		public string Description
@@ -50,9 +55,7 @@ namespace System.Data.SqlClient.SNI
 
 		public void Dispose()
 		{
-			this._data = null;
-			this._length = 0;
-			this._capacity = 0;
+			this.Release();
 		}
 
 		public void SetCompletionCallback(SNIAsyncCallback completionCallback)
@@ -67,16 +70,31 @@ namespace System.Data.SqlClient.SNI
 
 		public void Allocate(int capacity)
 		{
+			if (this._data != null && this._data.Length < capacity)
+			{
+				if (this._isBufferFromArrayPool)
+				{
+					this._arrayPool.Return(this._data, false);
+				}
+				this._data = null;
+			}
+			if (this._data == null)
+			{
+				this._data = this._arrayPool.Rent(capacity);
+				this._isBufferFromArrayPool = true;
+			}
 			this._capacity = capacity;
-			this._data = new byte[capacity];
+			this._length = 0;
+			this._offset = 0;
 		}
 
 		public SNIPacket Clone()
 		{
-			SNIPacket snipacket = new SNIPacket(null);
-			snipacket._data = new byte[this._length];
-			Buffer.BlockCopy(this._data, 0, snipacket._data, 0, this._length);
+			SNIPacket snipacket = new SNIPacket(this._capacity);
+			Buffer.BlockCopy(this._data, 0, snipacket._data, 0, this._capacity);
 			snipacket._length = this._length;
+			snipacket._description = this._description;
+			snipacket._completionCallback = this._completionCallback;
 			return snipacket;
 		}
 
@@ -90,8 +108,9 @@ namespace System.Data.SqlClient.SNI
 		{
 			this._data = data;
 			this._length = length;
-			this._capacity = length;
+			this._capacity = data.Length;
 			this._offset = 0;
+			this._isBufferFromArrayPool = false;
 		}
 
 		public int TakeData(SNIPacket packet, int size)
@@ -130,23 +149,33 @@ namespace System.Data.SqlClient.SNI
 
 		public void Release()
 		{
-			this._length = 0;
-			this._capacity = 0;
-			this._data = null;
+			if (this._data != null)
+			{
+				if (this._isBufferFromArrayPool)
+				{
+					this._arrayPool.Return(this._data, false);
+				}
+				this._data = null;
+				this._capacity = 0;
+			}
+			this.Reset();
 		}
 
 		public void Reset()
 		{
 			this._length = 0;
-			this._data = new byte[this._capacity];
+			this._offset = 0;
+			this._description = null;
+			this._completionCallback = null;
 		}
 
 		public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
 		{
 			bool error = false;
-			stream.ReadAsync(this._data, 0, this._capacity).ContinueWith(delegate(Task<int> t)
+			stream.ReadAsync(this._data, 0, this._capacity, CancellationToken.None).ContinueWith(delegate(Task<int> t)
 			{
-				Exception ex = ((t.Exception != null) ? t.Exception.InnerException : null);
+				AggregateException exception = t.Exception;
+				Exception ex = ((exception != null) ? exception.InnerException : null);
 				if (ex != null)
 				{
 					SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 35U, ex);
@@ -166,7 +195,7 @@ namespace System.Data.SqlClient.SNI
 					this.Release();
 				}
 				callback(this, error ? 1U : 0U);
-			}, CancellationToken.None, TaskContinuationOptions.LongRunning | TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
+			}, CancellationToken.None, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
 		}
 
 		public void ReadFromStream(Stream stream)
@@ -177,6 +206,25 @@ namespace System.Data.SqlClient.SNI
 		public void WriteToStream(Stream stream)
 		{
 			stream.Write(this._data, 0, this._length);
+		}
+
+		public async void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeAfterWriteAsync = false)
+		{
+			uint status = 0U;
+			try
+			{
+				await stream.WriteAsync(this._data, 0, this._length, CancellationToken.None).ConfigureAwait(false);
+			}
+			catch (Exception ex)
+			{
+				SNILoadHandle.SingletonInstance.LastError = new SNIError(provider, 35U, ex);
+				status = 1U;
+			}
+			callback(this, status);
+			if (disposeAfterWriteAsync)
+			{
+				this.Dispose();
+			}
 		}
 
 		public override int GetHashCode()
@@ -206,5 +254,9 @@ namespace System.Data.SqlClient.SNI
 		private string _description;
 
 		private SNIAsyncCallback _completionCallback;
+
+		private ArrayPool<byte> _arrayPool = ArrayPool<byte>.Shared;
+
+		private bool _isBufferFromArrayPool;
 	}
 }

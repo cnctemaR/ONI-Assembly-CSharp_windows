@@ -68,8 +68,8 @@ namespace System.Linq
 
 		public int GetCount(bool onlyIfCheap)
 		{
-			IIListProvider<TElement> iilistProvider;
-			if ((iilistProvider = this._source as IIListProvider<TElement>) != null)
+			IIListProvider<TElement> iilistProvider = this._source as IIListProvider<TElement>;
+			if (iilistProvider != null)
 			{
 				return iilistProvider.GetCount(onlyIfCheap);
 			}

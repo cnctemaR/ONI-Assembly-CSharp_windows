@@ -9,7 +9,7 @@ public class KCalTracker : WorldTracker
 
 	public override void UpdateData()
 	{
-		base.AddPoint(RationTracker.Get().CountRations(null, ClusterManager.Instance.GetWorld(base.WorldID).worldInventory, true));
+		base.AddPoint(WorldResourceAmountTracker<RationTracker>.Get().CountAmount(null, ClusterManager.Instance.GetWorld(base.WorldID).worldInventory, true));
 	}
 
 	public override string FormatValueString(float value)

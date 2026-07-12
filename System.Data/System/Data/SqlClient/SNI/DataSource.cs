@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace System.Data.SqlClient.SNI
@@ -48,7 +47,7 @@ namespace System.Data.SqlClient.SNI
 
 		private void PopulateProtocol()
 		{
-			string[] array = this._workingDataSource.Split(new char[] { ':' });
+			string[] array = this._workingDataSource.Split(':', StringSplitOptions.None);
 			if (array.Length <= 1)
 			{
 				this.ConnectionProtocol = DataSource.Protocol.None;
@@ -76,9 +75,9 @@ namespace System.Data.SqlClient.SNI
 		public static string GetLocalDBInstance(string dataSource, out bool error)
 		{
 			string text = null;
-			string[] array = dataSource.ToLowerInvariant().Split(new char[] { '\\' });
+			string[] array = dataSource.ToLowerInvariant().Split('\\', StringSplitOptions.None);
 			error = false;
-			if (array.Length == 2 && "(localdb)".Equals(array[0].TrimStart(Array.Empty<char>())))
+			if (array.Length == 2 && "(localdb)".Equals(array[0].TrimStart()))
 			{
 				if (string.IsNullOrWhiteSpace(array[1]))
 				{
@@ -197,7 +196,7 @@ namespace System.Data.SqlClient.SNI
 			}
 			try
 			{
-				string[] array = this._dataSourceAfterTrimmingProtocol.Split(new char[] { '\\' });
+				string[] array = this._dataSourceAfterTrimmingProtocol.Split('\\', StringSplitOptions.None);
 				if (array.Length < 6)
 				{
 					this.ReportSNIError(SNIProviders.NP_PROV);

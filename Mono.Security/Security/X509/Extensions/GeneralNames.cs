@@ -83,7 +83,7 @@ namespace Mono.Security.X509.Extensions
 				case 133:
 					break;
 				case 132:
-					goto IL_00C3;
+					goto IL_00C6;
 				case 134:
 					if (this.uris == null)
 					{
@@ -118,20 +118,20 @@ namespace Mono.Security.X509.Extensions
 				default:
 					if (tag == 164)
 					{
-						goto IL_00C3;
+						goto IL_00C6;
 					}
 					break;
 				}
-				IL_01CC:
+				IL_01CB:
 				i++;
 				continue;
-				IL_00C3:
+				IL_00C6:
 				if (this.directoryNames == null)
 				{
 					this.directoryNames = new ArrayList();
 				}
 				this.directoryNames.Add(X501.ToString(sequence[i][0]));
-				goto IL_01CC;
+				goto IL_01CB;
 			}
 		}
 

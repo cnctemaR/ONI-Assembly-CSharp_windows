@@ -196,40 +196,77 @@ namespace UnityEngine.UI
 			{
 				num5 = num;
 				num6 = Mathf.Clamp(num, 1, count);
-				num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)count / (float)num5));
+				if (this.m_Constraint == GridLayoutGroup.Constraint.FixedRowCount)
+				{
+					num7 = Mathf.Min(num2, count);
+				}
+				else
+				{
+					num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)count / (float)num5));
+				}
 			}
 			else
 			{
 				num5 = num2;
 				num7 = Mathf.Clamp(num2, 1, count);
-				num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)count / (float)num5));
-			}
-			Vector2 vector = new Vector2((float)num6 * this.cellSize.x + (float)(num6 - 1) * this.spacing.x, (float)num7 * this.cellSize.y + (float)(num7 - 1) * this.spacing.y);
-			Vector2 vector2 = new Vector2(base.GetStartOffset(0, vector.x), base.GetStartOffset(1, vector.y));
-			for (int j = 0; j < count; j++)
-			{
-				int num8;
-				int num9;
-				if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
+				if (this.m_Constraint == GridLayoutGroup.Constraint.FixedColumnCount)
 				{
-					num8 = j % num5;
-					num9 = j / num5;
+					num6 = Mathf.Min(num, count);
 				}
 				else
 				{
-					num8 = j / num5;
-					num9 = j % num5;
+					num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)count / (float)num5));
+				}
+			}
+			Vector2 vector = new Vector2((float)num6 * this.cellSize.x + (float)(num6 - 1) * this.spacing.x, (float)num7 * this.cellSize.y + (float)(num7 - 1) * this.spacing.y);
+			Vector2 vector2 = new Vector2(base.GetStartOffset(0, vector.x), base.GetStartOffset(1, vector.y));
+			int num8 = 0;
+			if (count > this.m_ConstraintCount && Mathf.CeilToInt((float)count / (float)num5) < this.m_ConstraintCount)
+			{
+				num8 = this.m_ConstraintCount - Mathf.CeilToInt((float)count / (float)num5);
+				num8 += Mathf.FloorToInt((float)num8 / ((float)num5 - 1f));
+				if (count % num5 == 1)
+				{
+					num8++;
+				}
+			}
+			for (int j = 0; j < count; j++)
+			{
+				int num9;
+				int num10;
+				if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
+				{
+					if (this.m_Constraint == GridLayoutGroup.Constraint.FixedRowCount && count - j <= num8)
+					{
+						num9 = 0;
+						num10 = this.m_ConstraintCount - (count - j);
+					}
+					else
+					{
+						num9 = j % num5;
+						num10 = j / num5;
+					}
+				}
+				else if (this.m_Constraint == GridLayoutGroup.Constraint.FixedColumnCount && count - j <= num8)
+				{
+					num9 = this.m_ConstraintCount - (count - j);
+					num10 = 0;
+				}
+				else
+				{
+					num9 = j / num5;
+					num10 = j % num5;
 				}
 				if (num3 == 1)
 				{
-					num8 = num6 - 1 - num8;
+					num9 = num6 - 1 - num9;
 				}
 				if (num4 == 1)
 				{
-					num9 = num7 - 1 - num9;
+					num10 = num7 - 1 - num10;
 				}
-				base.SetChildAlongAxis(base.rectChildren[j], 0, vector2.x + (this.cellSize[0] + this.spacing[0]) * (float)num8, this.cellSize[0]);
-				base.SetChildAlongAxis(base.rectChildren[j], 1, vector2.y + (this.cellSize[1] + this.spacing[1]) * (float)num9, this.cellSize[1]);
+				base.SetChildAlongAxis(base.rectChildren[j], 0, vector2.x + (this.cellSize[0] + this.spacing[0]) * (float)num9, this.cellSize[0]);
+				base.SetChildAlongAxis(base.rectChildren[j], 1, vector2.y + (this.cellSize[1] + this.spacing[1]) * (float)num10, this.cellSize[1]);
 			}
 		}
 

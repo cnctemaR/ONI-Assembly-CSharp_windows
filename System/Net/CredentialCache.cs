@@ -25,7 +25,7 @@ namespace System.Net
 			}
 			if (cred is SystemNetworkCredential)
 			{
-				throw new ArgumentException(global::SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authType }), "authType");
+				throw new ArgumentException(SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authType }), "authType");
 			}
 			this.m_version++;
 			CredentialKey credentialKey = new CredentialKey(uriPrefix, authType);
@@ -48,7 +48,7 @@ namespace System.Net
 			}
 			if (host.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
 			}
 			if (port < 0)
 			{
@@ -56,7 +56,7 @@ namespace System.Net
 			}
 			if (credential is SystemNetworkCredential)
 			{
-				throw new ArgumentException(global::SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authenticationType }), "authenticationType");
+				throw new ArgumentException(SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authenticationType }), "authenticationType");
 			}
 			this.m_version++;
 			CredentialHostKey credentialHostKey = new CredentialHostKey(host, port, authenticationType);
@@ -142,7 +142,7 @@ namespace System.Net
 			}
 			if (host.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
 			}
 			if (port < 0)
 			{
@@ -206,11 +206,11 @@ namespace System.Net
 				{
 					if (this.m_index < 0 || this.m_index >= this.m_array.Length)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException(SR.GetString("Enumeration has either not started or has already finished."));
 					}
 					if (this.m_version != this.m_cache.m_version)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 					}
 					return this.m_array[this.m_index];
 				}
@@ -220,7 +220,7 @@ namespace System.Net
 			{
 				if (this.m_version != this.m_cache.m_version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 				}
 				int num = this.m_index + 1;
 				this.m_index = num;

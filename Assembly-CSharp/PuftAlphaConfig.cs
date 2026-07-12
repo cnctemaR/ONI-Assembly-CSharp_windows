@@ -19,9 +19,9 @@ public class PuftAlphaConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
 		gameObject = BasePuftConfig.SetupDiet(gameObject, new List<Diet.Info>
 		{
-			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.ContaminatedOxygen.CreateTag() }), SimHashes.SlimeMold.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, false, false),
-			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.ChlorineGas.CreateTag() }), SimHashes.BleachStone.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, false, false),
-			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Oxygen.CreateTag() }), SimHashes.OxyRock.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, false, false)
+			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.ContaminatedOxygen.CreateTag() }), SimHashes.SlimeMold.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, Diet.Info.FoodType.EatSolid, false, null),
+			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.ChlorineGas.CreateTag() }), SimHashes.BleachStone.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, Diet.Info.FoodType.EatSolid, false, null),
+			new Diet.Info(new HashSet<Tag>(new Tag[] { SimHashes.Oxygen.CreateTag() }), SimHashes.OxyRock.CreateTag(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.BAD_2, "SlimeLung", 0f, false, Diet.Info.FoodType.EatSolid, false, null)
 		}.ToArray(), PuftAlphaConfig.CALORIES_PER_KG_OF_ORE, PuftAlphaConfig.MIN_POOP_SIZE_IN_KG);
 		gameObject.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = "SlimeLung";
 		return gameObject;

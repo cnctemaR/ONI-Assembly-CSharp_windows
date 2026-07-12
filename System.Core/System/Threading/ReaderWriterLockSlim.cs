@@ -721,7 +721,7 @@ namespace System.Threading
 
 		private void EnterMyLockSpin()
 		{
-			int processorCount = Environment.ProcessorCount;
+			int processorCount = PlatformHelper.ProcessorCount;
 			int num = 0;
 			for (;;)
 			{
@@ -752,7 +752,7 @@ namespace System.Threading
 
 		private static void SpinWait(int SpinCount)
 		{
-			if (SpinCount < 5 && Environment.ProcessorCount > 1)
+			if (SpinCount < 5 && PlatformHelper.ProcessorCount > 1)
 			{
 				Thread.SpinWait(20 * SpinCount);
 				return;

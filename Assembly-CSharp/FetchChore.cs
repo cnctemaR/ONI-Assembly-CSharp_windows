@@ -64,12 +64,12 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		if (is_success)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, base.choreType.Name, GameUtil.GetChoreName(this, pickupable));
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, pickupable));
 			this.fetchTarget = pickupable;
-			base.driver = driver;
+			this.driver = driver;
 			this.fetcher = driver.gameObject;
 			base.Succeed("FetchAreaEnd");
-			SaveGame.Instance.ColonyAchievementTracker.LogFetchChore(this.fetcher, base.choreType);
+			SaveGame.Instance.ColonyAchievementTracker.LogFetchChore(this.fetcher, this.choreType);
 			return;
 		}
 		base.SetOverrideTarget(null);
@@ -168,18 +168,18 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			DebugUtil.DevAssert(!this.requiredTag.IsValid, "Only one requiredTag is supported at a time, this will stomp!", null);
 			this.requiredTag = GameTags.Garbage;
 		}
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
-		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
-		Deconstructable component = base.target.GetComponent<Deconstructable>();
+		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
+		this.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
+		Deconstructable component = this.target.GetComponent<Deconstructable>();
 		if (component != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
+			this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component);
 		}
-		BuildingEnabledButton component2 = base.target.GetComponent<BuildingEnabledButton>();
+		BuildingEnabledButton component2 = this.target.GetComponent<BuildingEnabledButton>();
 		if (component2 != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component2);
+			this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component2);
 		}
 		if (operational_requirement != Operational.State.None)
 		{
@@ -191,7 +191,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 				{
 					precondition = ChorePreconditions.instance.IsFunctional;
 				}
-				base.AddPrecondition(precondition, component3);
+				this.AddPrecondition(precondition, component3);
 			}
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
@@ -199,7 +199,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.automatable = destination.GetComponent<Automatable>();
 		if (this.automatable)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, this.automatable);
+			this.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, this.automatable);
 		}
 	}
 
@@ -223,13 +223,18 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.masterPriority.priority_value = priority_value;
 	}
 
-	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
+	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> incomplete_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
 	{
 	}
 
 	public void CollectChoresFromGlobalChoreProvider(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
 	{
-		base.CollectChores(consumer_state, succeeded_contexts, failed_contexts, is_attempting_override);
+		this.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded_contexts, null, failed_contexts, is_attempting_override);
+	}
+
+	public void CollectChoresFromGlobalChoreProvider(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> incomplete_contexts, List<Chore.Precondition.Context> failed_contexts, bool is_attempting_override)
+	{
+		base.CollectChores(consumer_state, succeeded_contexts, incomplete_contexts, failed_contexts, is_attempting_override);
 	}
 
 	public override void Cleanup()

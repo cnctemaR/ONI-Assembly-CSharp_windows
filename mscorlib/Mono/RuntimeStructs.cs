@@ -40,53 +40,5 @@ namespace Mono
 
 			internal int len;
 		}
-
-		private struct HandleStackMark
-		{
-			private int size;
-
-			private int interior_size;
-
-			private IntPtr chunk;
-		}
-
-		private struct MonoError
-		{
-			private ushort error_code;
-
-			private ushort hidden_0;
-
-			private IntPtr hidden_1;
-
-			private IntPtr hidden_2;
-
-			private IntPtr hidden_3;
-
-			private IntPtr hidden_4;
-
-			private IntPtr hidden_5;
-
-			private IntPtr hidden_6;
-
-			private IntPtr hidden_7;
-
-			private IntPtr hidden_8;
-
-			private IntPtr hidden_11;
-
-			private IntPtr hidden_12;
-
-			private IntPtr hidden_13;
-
-			private IntPtr hidden_14;
-
-			private IntPtr hidden_15;
-
-			private IntPtr hidden_16;
-
-			private IntPtr hidden_17;
-
-			private IntPtr hidden_18;
-		}
 	}
 }

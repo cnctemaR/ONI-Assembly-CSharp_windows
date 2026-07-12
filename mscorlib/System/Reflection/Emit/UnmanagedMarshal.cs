@@ -4,8 +4,8 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[Obsolete("An alternate API is available: Emit the MarshalAs custom attribute instead.")]
 	[ComVisible(true)]
+	[Obsolete("An alternate API is available: Emit the MarshalAs custom attribute instead.")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class UnmanagedMarshal

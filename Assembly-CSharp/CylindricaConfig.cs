@@ -28,7 +28,20 @@ public class CylindricaConfig : IEntityConfig
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = CylindricaConfig.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = CylindricaConfig.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "CylindricaSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.CYLINDRICA.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.CYLINDRICA.DESC, Assets.GetAnim("seed_potted_cylindricafan_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 12, global::STRINGS.CREATURES.SPECIES.CYLINDRICA.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, this.GetDlcIds()), "Cylindrica_preview", Assets.GetAnim("potted_cylindricafan_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "CylindricaSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.CYLINDRICA.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.CYLINDRICA.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_potted_cylindricafan_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.CYLINDRICA.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 12, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, dlcIds), "Cylindrica_preview", Assets.GetAnim("potted_cylindricafan_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

@@ -6,7 +6,7 @@ public class DevToolMenuNodeList
 {
 	public DevToolMenuNodeParent AddOrGetParentFor(string childPath)
 	{
-		string[] array = Path.GetDirectoryName(childPath).Split(new char[] { '/' });
+		string[] array = Path.GetDirectoryName(childPath).Split('/', StringSplitOptions.None);
 		string text = "";
 		DevToolMenuNodeParent devToolMenuNodeParent = this.root;
 		string[] array2 = array;

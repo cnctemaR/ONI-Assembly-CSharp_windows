@@ -54,7 +54,7 @@ namespace Microsoft.SqlServer.Server
 
 		internal SqlTriggerContext()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private TriggerAction _triggerAction;

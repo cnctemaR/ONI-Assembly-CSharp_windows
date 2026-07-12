@@ -143,7 +143,7 @@ namespace System.Runtime.CompilerServices
 			}
 		}
 
-		private Task Task
+		internal Task Task
 		{
 			get
 			{

@@ -224,14 +224,6 @@ namespace ImGuiNET
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 5)]
-		public struct <MouseDown>e__FixedBuffer
-		{
-			public byte FixedElementField;
-		}
-
-		[CompilerGenerated]
-		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 512)]
 		public struct <KeysDown>e__FixedBuffer
 		{
@@ -240,10 +232,26 @@ namespace ImGuiNET
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 84)]
-		public struct <NavInputs>e__FixedBuffer
+		[StructLayout(LayoutKind.Sequential, Size = 2048)]
+		public struct <KeysDownDuration>e__FixedBuffer
 		{
 			public float FixedElementField;
+		}
+
+		[CompilerGenerated]
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 2048)]
+		public struct <KeysDownDurationPrev>e__FixedBuffer
+		{
+			public float FixedElementField;
+		}
+
+		[CompilerGenerated]
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 5)]
+		public struct <MouseClicked>e__FixedBuffer
+		{
+			public byte FixedElementField;
 		}
 
 		[CompilerGenerated]
@@ -257,14 +265,6 @@ namespace ImGuiNET
 		[CompilerGenerated]
 		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 5)]
-		public struct <MouseClicked>e__FixedBuffer
-		{
-			public byte FixedElementField;
-		}
-
-		[CompilerGenerated]
-		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 5)]
 		public struct <MouseDoubleClicked>e__FixedBuffer
 		{
 			public byte FixedElementField;
@@ -273,23 +273,7 @@ namespace ImGuiNET
 		[CompilerGenerated]
 		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 5)]
-		public struct <MouseReleased>e__FixedBuffer
-		{
-			public byte FixedElementField;
-		}
-
-		[CompilerGenerated]
-		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 5)]
-		public struct <MouseDownOwned>e__FixedBuffer
-		{
-			public byte FixedElementField;
-		}
-
-		[CompilerGenerated]
-		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 5)]
-		public struct <MouseDownWasDoubleClick>e__FixedBuffer
+		public struct <MouseDown>e__FixedBuffer
 		{
 			public byte FixedElementField;
 		}
@@ -312,6 +296,22 @@ namespace ImGuiNET
 
 		[CompilerGenerated]
 		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 5)]
+		public struct <MouseDownOwned>e__FixedBuffer
+		{
+			public byte FixedElementField;
+		}
+
+		[CompilerGenerated]
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 5)]
+		public struct <MouseDownWasDoubleClick>e__FixedBuffer
+		{
+			public byte FixedElementField;
+		}
+
+		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 20)]
 		public struct <MouseDragMaxDistanceSqr>e__FixedBuffer
 		{
@@ -320,16 +320,16 @@ namespace ImGuiNET
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 2048)]
-		public struct <KeysDownDuration>e__FixedBuffer
+		[StructLayout(LayoutKind.Sequential, Size = 5)]
+		public struct <MouseReleased>e__FixedBuffer
 		{
-			public float FixedElementField;
+			public byte FixedElementField;
 		}
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 2048)]
-		public struct <KeysDownDurationPrev>e__FixedBuffer
+		[StructLayout(LayoutKind.Sequential, Size = 84)]
+		public struct <NavInputs>e__FixedBuffer
 		{
 			public float FixedElementField;
 		}

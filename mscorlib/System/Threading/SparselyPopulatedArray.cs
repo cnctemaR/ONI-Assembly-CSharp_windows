@@ -6,14 +6,14 @@ namespace System.Threading
 	{
 		internal SparselyPopulatedArray(int initialSize)
 		{
-			this.m_tail = new SparselyPopulatedArrayFragment<T>(initialSize);
+			this._head = (this._tail = new SparselyPopulatedArrayFragment<T>(initialSize));
 		}
 
 		internal SparselyPopulatedArrayFragment<T> Tail
 		{
 			get
 			{
-				return this.m_tail;
+				return this._tail;
 			}
 		}
 
@@ -23,48 +23,50 @@ namespace System.Threading
 			int num2;
 			for (;;)
 			{
-				SparselyPopulatedArrayFragment<T> sparselyPopulatedArrayFragment = this.m_tail;
-				while (sparselyPopulatedArrayFragment.m_next != null)
+				SparselyPopulatedArrayFragment<T> sparselyPopulatedArrayFragment = this._tail;
+				while (sparselyPopulatedArrayFragment._next != null)
 				{
-					sparselyPopulatedArrayFragment = (this.m_tail = sparselyPopulatedArrayFragment.m_next);
+					sparselyPopulatedArrayFragment = (this._tail = sparselyPopulatedArrayFragment._next);
 				}
-				for (sparselyPopulatedArrayFragment2 = sparselyPopulatedArrayFragment; sparselyPopulatedArrayFragment2 != null; sparselyPopulatedArrayFragment2 = sparselyPopulatedArrayFragment2.m_prev)
+				for (sparselyPopulatedArrayFragment2 = sparselyPopulatedArrayFragment; sparselyPopulatedArrayFragment2 != null; sparselyPopulatedArrayFragment2 = sparselyPopulatedArrayFragment2._prev)
 				{
-					if (sparselyPopulatedArrayFragment2.m_freeCount < 1)
+					if (sparselyPopulatedArrayFragment2._freeCount < 1)
 					{
-						sparselyPopulatedArrayFragment2.m_freeCount--;
+						sparselyPopulatedArrayFragment2._freeCount--;
 					}
-					if (sparselyPopulatedArrayFragment2.m_freeCount > 0 || sparselyPopulatedArrayFragment2.m_freeCount < -10)
+					if (sparselyPopulatedArrayFragment2._freeCount > 0 || sparselyPopulatedArrayFragment2._freeCount < -10)
 					{
 						int length = sparselyPopulatedArrayFragment2.Length;
-						int num = (length - sparselyPopulatedArrayFragment2.m_freeCount) % length;
+						int num = (length - sparselyPopulatedArrayFragment2._freeCount) % length;
 						if (num < 0)
 						{
 							num = 0;
-							sparselyPopulatedArrayFragment2.m_freeCount--;
+							sparselyPopulatedArrayFragment2._freeCount--;
 						}
 						for (int i = 0; i < length; i++)
 						{
 							num2 = (num + i) % length;
-							if (sparselyPopulatedArrayFragment2.m_elements[num2] == null && Interlocked.CompareExchange<T>(ref sparselyPopulatedArrayFragment2.m_elements[num2], element, default(T)) == null)
+							if (sparselyPopulatedArrayFragment2._elements[num2] == null && Interlocked.CompareExchange<T>(ref sparselyPopulatedArrayFragment2._elements[num2], element, default(T)) == null)
 							{
 								goto Block_5;
 							}
 						}
 					}
 				}
-				SparselyPopulatedArrayFragment<T> sparselyPopulatedArrayFragment3 = new SparselyPopulatedArrayFragment<T>((sparselyPopulatedArrayFragment.m_elements.Length == 4096) ? 4096 : (sparselyPopulatedArrayFragment.m_elements.Length * 2), sparselyPopulatedArrayFragment);
-				if (Interlocked.CompareExchange<SparselyPopulatedArrayFragment<T>>(ref sparselyPopulatedArrayFragment.m_next, sparselyPopulatedArrayFragment3, null) == null)
+				SparselyPopulatedArrayFragment<T> sparselyPopulatedArrayFragment3 = new SparselyPopulatedArrayFragment<T>((sparselyPopulatedArrayFragment._elements.Length == 4096) ? 4096 : (sparselyPopulatedArrayFragment._elements.Length * 2), sparselyPopulatedArrayFragment);
+				if (Interlocked.CompareExchange<SparselyPopulatedArrayFragment<T>>(ref sparselyPopulatedArrayFragment._next, sparselyPopulatedArrayFragment3, null) == null)
 				{
-					this.m_tail = sparselyPopulatedArrayFragment3;
+					this._tail = sparselyPopulatedArrayFragment3;
 				}
 			}
 			Block_5:
-			int num3 = sparselyPopulatedArrayFragment2.m_freeCount - 1;
-			sparselyPopulatedArrayFragment2.m_freeCount = ((num3 > 0) ? num3 : 0);
+			int num3 = sparselyPopulatedArrayFragment2._freeCount - 1;
+			sparselyPopulatedArrayFragment2._freeCount = ((num3 > 0) ? num3 : 0);
 			return new SparselyPopulatedArrayAddInfo<T>(sparselyPopulatedArrayFragment2, num2);
 		}
 
-		private volatile SparselyPopulatedArrayFragment<T> m_tail;
+		private readonly SparselyPopulatedArrayFragment<T> _head;
+
+		private volatile SparselyPopulatedArrayFragment<T> _tail;
 	}
 }

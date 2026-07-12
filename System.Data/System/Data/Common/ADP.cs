@@ -20,6 +20,29 @@ namespace System.Data.Common
 {
 	internal static class ADP
 	{
+		internal static Timer UnsafeCreateTimer(TimerCallback callback, object state, int dueTime, int period)
+		{
+			bool flag = false;
+			Timer timer;
+			try
+			{
+				if (!ExecutionContext.IsFlowSuppressed())
+				{
+					ExecutionContext.SuppressFlow();
+					flag = true;
+				}
+				timer = new Timer(callback, state, dueTime, period);
+			}
+			finally
+			{
+				if (flag)
+				{
+					ExecutionContext.RestoreFlow();
+				}
+			}
+			return timer;
+		}
+
 		internal static Task<bool> TrueTask
 		{
 			get
@@ -1136,6 +1159,13 @@ namespace System.Data.Common
 			return new OverflowException(error, inner);
 		}
 
+		internal static TypeLoadException TypeLoad(string error)
+		{
+			TypeLoadException ex = new TypeLoadException(error);
+			ADP.TraceExceptionAsReturnValue(ex);
+			return ex;
+		}
+
 		internal static PlatformNotSupportedException DbTypeNotSupported(string dbType)
 		{
 			return new PlatformNotSupportedException(SR.GetString("Type {0} is not supported on this platform.", new object[] { dbType }));
@@ -1208,7 +1238,7 @@ namespace System.Data.Common
 
 		internal static Exception MethodNotImplemented([CallerMemberName] string methodName = "")
 		{
-			return NotImplemented.ByDesignWithMessage(methodName);
+			return global::System.NotImplemented.ByDesignWithMessage(methodName);
 		}
 
 		internal static Exception QueryFailed(string collectionName, Exception e)
@@ -1466,9 +1496,9 @@ namespace System.Data.Common
 			return ADP.IO(SR.GetString("An error occurred while reading."), internalException);
 		}
 
-		internal static ArgumentException InvalidDataType(string typeName)
+		internal static ArgumentException InvalidDataType(TypeCode typecode)
 		{
-			return ADP.Argument(SR.GetString("The parameter data type of {0} is invalid.", new object[] { typeName }));
+			return ADP.Argument(SR.GetString("The parameter data type of {0} is invalid.", new object[] { typecode.ToString() }));
 		}
 
 		internal static ArgumentException UnknownDataType(Type dataType)
@@ -1483,6 +1513,17 @@ namespace System.Data.Common
 				type.ToString(),
 				enumtype.Name
 			}));
+		}
+
+		internal static ArgumentException UnknownDataTypeCode(Type dataType, TypeCode typeCode)
+		{
+			string text = "Unable to handle an unknown TypeCode {0} returned by Type {1}.";
+			object[] array = new object[2];
+			int num = 0;
+			int num2 = (int)typeCode;
+			array[num] = num2.ToString(CultureInfo.InvariantCulture);
+			array[1] = dataType.FullName;
+			return ADP.Argument(SR.GetString(text, array));
 		}
 
 		internal static ArgumentException InvalidOffsetValue(int value)
@@ -1764,7 +1805,7 @@ namespace System.Data.Common
 
 		internal static Exception DeriveParametersNotSupported(IDbCommand value)
 		{
-			return ADP.DataAdapter(SR.GetString("{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{1}.", new object[]
+			return ADP.DataAdapter(SR.GetString("{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType. {1}.", new object[]
 			{
 				value.GetType().Name,
 				value.CommandType.ToString()
@@ -1779,6 +1820,68 @@ namespace System.Data.Common
 		internal static InvalidOperationException TransactionCompletedButNotDisposed()
 		{
 			return ADP.Provider(SR.GetString("The transaction associated with the current connection has completed but has not been disposed.  The transaction must be disposed before the connection can be used to execute SQL statements."));
+		}
+
+		internal static ArgumentOutOfRangeException InvalidUserDefinedTypeSerializationFormat(Format value)
+		{
+			return ADP.InvalidEnumerationValue(typeof(Format), (int)value);
+		}
+
+		internal static ArgumentOutOfRangeException NotSupportedUserDefinedTypeSerializationFormat(Format value, string method)
+		{
+			return ADP.NotSupportedEnumerationValue(typeof(Format), value.ToString(), method);
+		}
+
+		internal static ArgumentOutOfRangeException ArgumentOutOfRange(string message, string parameterName, object value)
+		{
+			ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(parameterName, value, message);
+			ADP.TraceExceptionAsReturnValue(ex);
+			return ex;
+		}
+
+		internal static ArgumentException InvalidArgumentLength(string argumentName, int limit)
+		{
+			return ADP.Argument(SR.GetString("The length of argument '{0}' exceeds its limit of '{1}'.", new object[] { argumentName, limit }));
+		}
+
+		internal static ArgumentException MustBeReadOnly(string argumentName)
+		{
+			return ADP.Argument(SR.GetString("{0} must be marked as read only.", new object[] { argumentName }));
+		}
+
+		internal static InvalidOperationException InvalidMixedUsageOfSecureAndClearCredential()
+		{
+			return ADP.InvalidOperation(SR.GetString("Cannot use Credential with UserID, UID, Password, or PWD connection string keywords."));
+		}
+
+		internal static ArgumentException InvalidMixedArgumentOfSecureAndClearCredential()
+		{
+			return ADP.Argument(SR.GetString("Cannot use Credential with UserID, UID, Password, or PWD connection string keywords."));
+		}
+
+		internal static InvalidOperationException InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity()
+		{
+			return ADP.InvalidOperation(SR.GetString("Cannot use Credential with Integrated Security connection string keyword."));
+		}
+
+		internal static ArgumentException InvalidMixedArgumentOfSecureCredentialAndIntegratedSecurity()
+		{
+			return ADP.Argument(SR.GetString("Cannot use Credential with Integrated Security connection string keyword."));
+		}
+
+		internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndIntegratedSecurity()
+		{
+			return ADP.InvalidOperation(SR.GetString("Cannot set the AccessToken property if the 'Integrated Security' connection string keyword has been set to 'true' or 'SSPI'."));
+		}
+
+		internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
+		{
+			return ADP.InvalidOperation(SR.GetString("Cannot set the AccessToken property if 'UserID', 'UID', 'Password', or 'PWD' has been specified in connection string."));
+		}
+
+		internal static Exception InvalidMixedUsageOfCredentialAndAccessToken()
+		{
+			return ADP.InvalidOperation(SR.GetString("Cannot set the Credential property if the AccessToken property is already set."));
 		}
 
 		internal static bool NeedManualEnlistment()
@@ -1835,11 +1938,6 @@ namespace System.Data.Common
 			return ADP.InvalidOperation(SR.GetString("Offset must refer to a location within the value."));
 		}
 
-		internal static ArgumentException InvalidDataType(TypeCode typecode)
-		{
-			return ADP.Argument(SR.GetString("The parameter data type of {0} is invalid.", new object[] { typecode.ToString() }));
-		}
-
 		internal static InvalidOperationException QuotePrefixNotSet(string method)
 		{
 			return ADP.InvalidOperation(Res.GetString("{0} requires open connection when the quote prefix has not been set.", new object[] { method }));
@@ -1853,17 +1951,6 @@ namespace System.Data.Common
 		internal static InvalidOperationException InvalidDataDirectory()
 		{
 			return ADP.InvalidOperation(SR.GetString("The DataDirectory substitute is not a string."));
-		}
-
-		internal static ArgumentException UnknownDataTypeCode(Type dataType, TypeCode typeCode)
-		{
-			string text = "Unable to handle an unknown TypeCode {0} returned by Type {1}.";
-			object[] array = new object[2];
-			int num = 0;
-			int num2 = (int)typeCode;
-			array[num] = num2.ToString(CultureInfo.InvariantCulture);
-			array[1] = dataType.FullName;
-			return ADP.Argument(SR.GetString(text, array));
 		}
 
 		internal static void EscapeSpecialCharacters(string unescapedString, StringBuilder escapedString)
@@ -1889,23 +1976,6 @@ namespace System.Data.Common
 				}
 				return (IntPtr)(pbase.ToInt64() + unchecked((long)offset));
 			}
-		}
-
-		internal static ArgumentOutOfRangeException NotSupportedUserDefinedTypeSerializationFormat(Format value, string method)
-		{
-			return ADP.NotSupportedEnumerationValue(typeof(Format), value.ToString(), method);
-		}
-
-		internal static ArgumentOutOfRangeException InvalidUserDefinedTypeSerializationFormat(Format value)
-		{
-			return ADP.InvalidEnumerationValue(typeof(Format), (int)value);
-		}
-
-		internal static ArgumentOutOfRangeException ArgumentOutOfRange(string message, string parameterName, object value)
-		{
-			ArgumentOutOfRangeException ex = new ArgumentOutOfRangeException(parameterName, value, message);
-			ADP.TraceExceptionAsReturnValue(ex);
-			return ex;
 		}
 
 		internal static Exception InvalidXMLBadVersion()
@@ -2021,10 +2091,6 @@ namespace System.Data.Common
 		private static readonly Type s_accessViolationType = typeof(AccessViolationException);
 
 		private static readonly Type s_securityType = typeof(SecurityException);
-
-		internal static readonly bool IsWindowsNT = PlatformID.Win32NT == Environment.OSVersion.Platform;
-
-		internal static readonly bool IsPlatformNT5 = ADP.IsWindowsNT && Environment.OSVersion.Version.Major >= 5;
 
 		internal const string ConnectionString = "ConnectionString";
 

@@ -66,7 +66,7 @@ public class CustomClothingOutfits
 		{
 			string text;
 			Dictionary<string, string> dictionary;
-			keyValuePair.Deconstruct<string, Dictionary<string, string>>(out text, out dictionary);
+			keyValuePair.Deconstruct(out text, out dictionary);
 			Dictionary<string, string> dictionary2 = dictionary;
 			if (dictionary2 != null)
 			{
@@ -75,7 +75,7 @@ public class CustomClothingOutfits
 					foreach (KeyValuePair<string, string> keyValuePair2 in dictionary2)
 					{
 						string text2;
-						keyValuePair2.Deconstruct<string, string>(out text, out text2);
+						keyValuePair2.Deconstruct(out text, out text2);
 						string text3 = text;
 						if (text2 == old_outfit_name)
 						{
@@ -101,7 +101,7 @@ public class CustomClothingOutfits
 			{
 				string text;
 				Dictionary<string, string> dictionary;
-				keyValuePair.Deconstruct<string, Dictionary<string, string>>(out text, out dictionary);
+				keyValuePair.Deconstruct(out text, out dictionary);
 				Dictionary<string, string> dictionary2 = dictionary;
 				if (dictionary2 != null)
 				{
@@ -110,7 +110,7 @@ public class CustomClothingOutfits
 						foreach (KeyValuePair<string, string> keyValuePair2 in dictionary2)
 						{
 							string text2;
-							keyValuePair2.Deconstruct<string, string>(out text, out text2);
+							keyValuePair2.Deconstruct(out text, out text2);
 							string text3 = text;
 							if (text2 == outfit_name)
 							{

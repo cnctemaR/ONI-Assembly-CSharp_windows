@@ -9,33 +9,17 @@ namespace System.Net
 		internal DownloadProgressChangedEventArgs(int progressPercentage, object userToken, long bytesReceived, long totalBytesToReceive)
 			: base(progressPercentage, userToken)
 		{
-			this.m_BytesReceived = bytesReceived;
-			this.m_TotalBytesToReceive = totalBytesToReceive;
+			this.BytesReceived = bytesReceived;
+			this.TotalBytesToReceive = totalBytesToReceive;
 		}
 
-		public long BytesReceived
-		{
-			get
-			{
-				return this.m_BytesReceived;
-			}
-		}
+		public long BytesReceived { get; }
 
-		public long TotalBytesToReceive
-		{
-			get
-			{
-				return this.m_TotalBytesToReceive;
-			}
-		}
+		public long TotalBytesToReceive { get; }
 
 		internal DownloadProgressChangedEventArgs()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
-
-		private long m_BytesReceived;
-
-		private long m_TotalBytesToReceive;
 	}
 }

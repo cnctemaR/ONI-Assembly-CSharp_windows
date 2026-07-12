@@ -8,6 +8,6 @@ namespace FMOD
 
 		public const string dllSuffix = "";
 
-		public const int number = 131591;
+		public const int number = 131619;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using Unity;
 
 namespace System.Net.Configuration
 {
@@ -32,6 +33,19 @@ namespace System.Net.Configuration
 			get
 			{
 				return WebProxyScriptElement.properties;
+			}
+		}
+
+		public int AutoConfigUrlRetryInterval
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return 0;
+			}
+			set
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 

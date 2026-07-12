@@ -5,13 +5,13 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class ExclusiveReference
 	{
-		internal object Get()
+		public RegexRunner Get()
 		{
 			if (Interlocked.Exchange(ref this._locked, 1) != 0)
 			{
 				return null;
 			}
-			object @ref = this._ref;
+			RegexRunner @ref = this._ref;
 			if (@ref == null)
 			{
 				this._locked = 0;
@@ -21,7 +21,7 @@ namespace System.Text.RegularExpressions
 			return @ref;
 		}
 
-		internal void Release(object obj)
+		public void Release(RegexRunner obj)
 		{
 			if (obj == null)
 			{
@@ -37,7 +37,7 @@ namespace System.Text.RegularExpressions
 			{
 				if (this._ref == null)
 				{
-					this._ref = (RegexRunner)obj;
+					this._ref = obj;
 				}
 				this._locked = 0;
 				return;
@@ -46,8 +46,8 @@ namespace System.Text.RegularExpressions
 
 		private RegexRunner _ref;
 
-		private object _obj;
+		private RegexRunner _obj;
 
-		private int _locked;
+		private volatile int _locked;
 	}
 }

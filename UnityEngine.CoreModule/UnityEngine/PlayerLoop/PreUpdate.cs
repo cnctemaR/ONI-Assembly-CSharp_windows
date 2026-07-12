@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[RequiredByNativeCode]
 	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
+	[RequiredByNativeCode]
 	public struct PreUpdate
 	{
 		[RequiredByNativeCode]
@@ -15,6 +15,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct Physics2DUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
+		internal struct PhysicsClothUpdate
 		{
 		}
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei;
 using Klei.AI;
+using TUNING;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -303,7 +304,7 @@ public class SimDebugView : KMonoBehaviour
 	{
 		int num = 0;
 		int num2 = 0;
-		float thermalComfort = GameUtil.GetThermalComfort(cell, -0.08368001f);
+		float thermalComfort = GameUtil.GetThermalComfort(GameTags.Minions.Models.Standard, cell, -DUPLICANTSTATS.STANDARD.BaseStats.DUPLICANT_BASE_GENERATION_KILOWATTS);
 		for (int i = 0; i < this.heatFlowThresholds.Length; i++)
 		{
 			if (thermalComfort <= this.heatFlowThresholds[i].value)
@@ -364,9 +365,9 @@ public class SimDebugView : KMonoBehaviour
 	{
 		Color color = GlobalAssets.Instance.colorSet.lightOverlay;
 		color.a = Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f);
-		if (Grid.LightIntensity[cell] > 72000)
+		if (Grid.LightIntensity[cell] > DUPLICANTSTATS.STANDARD.Light.LUX_SUNBURN)
 		{
-			float num = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 72000f) / 8000f;
+			float num = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - (float)DUPLICANTSTATS.STANDARD.Light.LUX_SUNBURN) / (float)(80000 - DUPLICANTSTATS.STANDARD.Light.LUX_SUNBURN);
 			num /= 10f;
 			color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)instance.currentFrame / 32f) * num);
 		}

@@ -12,8 +12,8 @@ namespace System.Threading
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[MonoTODO]
 		public virtual void Revert(object previousState)
 		{
 			throw new NotImplementedException();

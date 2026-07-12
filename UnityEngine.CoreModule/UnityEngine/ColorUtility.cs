@@ -4,10 +4,10 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Math/ColorUtility.bindings.h")]
+	[NativeHeader("Runtime/Math/ColorUtility.h")]
 	public class ColorUtility
 	{
-		[FreeFunction]
+		[FreeFunction("TryParseHtmlColor", true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool DoTryParseHtmlColor(string htmlString, out Color32 color);
 

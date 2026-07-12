@@ -2,16 +2,13 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Unity;
 
 namespace System.Reflection
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_ConstructorInfo))]
 	[Serializable]
 	public abstract class ConstructorInfo : MethodBase, _ConstructorInfo
 	{
-		[ComVisible(true)]
 		public override MemberTypes MemberType
 		{
 			get
@@ -24,59 +21,14 @@ namespace System.Reflection
 		[DebuggerHidden]
 		public object Invoke(object[] parameters)
 		{
-			return this.Invoke(BindingFlags.CreateInstance, null, parameters ?? EmptyArray<object>.Value, null);
+			return this.Invoke(BindingFlags.CreateInstance, null, parameters, null);
 		}
 
 		public abstract object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
 
-		void _ConstructorInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		Type _ConstructorInfo.GetType()
-		{
-			return base.GetType();
-		}
-
-		void _ConstructorInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorInfo.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
-		object _ConstructorInfo.Invoke_2(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
-		{
-			return this.Invoke(obj, invokeAttr, binder, parameters, culture);
-		}
-
-		object _ConstructorInfo.Invoke_3(object obj, object[] parameters)
-		{
-			return base.Invoke(obj, parameters);
-		}
-
-		object _ConstructorInfo.Invoke_4(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
-		{
-			return this.Invoke(invokeAttr, binder, parameters, culture);
-		}
-
-		object _ConstructorInfo.Invoke_5(object[] parameters)
-		{
-			return this.Invoke(parameters);
-		}
-
 		public override bool Equals(object obj)
 		{
-			return obj == this;
+			return base.Equals(obj);
 		}
 
 		public override int GetHashCode()
@@ -86,18 +38,66 @@ namespace System.Reflection
 
 		public static bool operator ==(ConstructorInfo left, ConstructorInfo right)
 		{
-			return left == right || (!((left == null) ^ (right == null)) && left.Equals(right));
+			return left == right || (left != null && right != null && left.Equals(right));
 		}
 
 		public static bool operator !=(ConstructorInfo left, ConstructorInfo right)
 		{
-			return left != right && (((left == null) ^ (right == null)) || !left.Equals(right));
+			return !(left == right);
 		}
 
-		[ComVisible(true)]
+		void _ConstructorInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		Type _ConstructorInfo.GetType()
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		void _ConstructorInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		void _ConstructorInfo.GetTypeInfoCount(out uint pcTInfo)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		void _ConstructorInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		object _ConstructorInfo.Invoke_2(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		object _ConstructorInfo.Invoke_3(object obj, object[] parameters)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		object _ConstructorInfo.Invoke_4(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		object _ConstructorInfo.Invoke_5(object[] parameters)
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
 		public static readonly string ConstructorName = ".ctor";
 
-		[ComVisible(true)]
 		public static readonly string TypeConstructorName = ".cctor";
 	}
 }

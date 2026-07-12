@@ -35,7 +35,7 @@ namespace System.Data.Odbc
 			}
 			finally
 			{
-				retCode = UnsafeNativeMethods.SQLSetConnectAttrW(this, ODBC32.SQL_ATTR.AUTOCOMMIT, ODBC32.SQL_AUTOCOMMIT_OFF, -5);
+				retCode = global::Interop.Odbc.SQLSetConnectAttrW(this, ODBC32.SQL_ATTR.AUTOCOMMIT, ODBC32.SQL_AUTOCOMMIT_OFF, -5);
 				if (retCode <= ODBC32.RetCode.SUCCESS_WITH_INFO)
 				{
 					this._handleState = OdbcConnectionHandle.HandleState.Transacted;
@@ -141,7 +141,7 @@ namespace System.Data.Odbc
 			{
 				if (OdbcConnectionHandle.HandleState.TransactionInProgress == this._handleState)
 				{
-					retCode = UnsafeNativeMethods.SQLEndTran(base.HandleType, handle, transactionOperation);
+					retCode = global::Interop.Odbc.SQLEndTran(base.HandleType, handle, transactionOperation);
 					if (retCode == ODBC32.RetCode.SUCCESS || ODBC32.RetCode.SUCCESS_WITH_INFO == retCode)
 					{
 						this._handleState = OdbcConnectionHandle.HandleState.Transacted;
@@ -149,7 +149,7 @@ namespace System.Data.Odbc
 				}
 				if (OdbcConnectionHandle.HandleState.Transacted == this._handleState)
 				{
-					retCode = UnsafeNativeMethods.SQLSetConnectAttrW(handle, ODBC32.SQL_ATTR.AUTOCOMMIT, ODBC32.SQL_AUTOCOMMIT_ON, -5);
+					retCode = global::Interop.Odbc.SQLSetConnectAttrW(handle, ODBC32.SQL_ATTR.AUTOCOMMIT, ODBC32.SQL_AUTOCOMMIT_ON, -5);
 					this._handleState = OdbcConnectionHandle.HandleState.Connected;
 				}
 			}
@@ -166,7 +166,7 @@ namespace System.Data.Odbc
 			finally
 			{
 				short num;
-				retCode = UnsafeNativeMethods.SQLDriverConnectW(this, ADP.PtrZero, connectionString, -3, ADP.PtrZero, 0, out num, 0);
+				retCode = global::Interop.Odbc.SQLDriverConnectW(this, ADP.PtrZero, connectionString, -3, ADP.PtrZero, 0, out num, 0);
 				if (retCode <= ODBC32.RetCode.SUCCESS_WITH_INFO)
 				{
 					this._handleState = OdbcConnectionHandle.HandleState.Connected;
@@ -181,7 +181,7 @@ namespace System.Data.Odbc
 			this.CompleteTransaction(1, this.handle);
 			if (OdbcConnectionHandle.HandleState.Connected == this._handleState || OdbcConnectionHandle.HandleState.TransactionInProgress == this._handleState)
 			{
-				UnsafeNativeMethods.SQLDisconnect(this.handle);
+				global::Interop.Odbc.SQLDisconnect(this.handle);
 				this._handleState = OdbcConnectionHandle.HandleState.Allocated;
 			}
 			return base.ReleaseHandle();
@@ -189,41 +189,41 @@ namespace System.Data.Odbc
 
 		internal ODBC32.RetCode GetConnectionAttribute(ODBC32.SQL_ATTR attribute, byte[] buffer, out int cbActual)
 		{
-			return UnsafeNativeMethods.SQLGetConnectAttrW(this, attribute, buffer, buffer.Length, out cbActual);
+			return global::Interop.Odbc.SQLGetConnectAttrW(this, attribute, buffer, buffer.Length, out cbActual);
 		}
 
 		internal ODBC32.RetCode GetFunctions(ODBC32.SQL_API fFunction, out short fExists)
 		{
-			ODBC32.RetCode retCode = UnsafeNativeMethods.SQLGetFunctions(this, fFunction, out fExists);
+			ODBC32.RetCode retCode = global::Interop.Odbc.SQLGetFunctions(this, fFunction, out fExists);
 			ODBC.TraceODBC(3, "SQLGetFunctions", retCode);
 			return retCode;
 		}
 
 		internal ODBC32.RetCode GetInfo2(ODBC32.SQL_INFO info, byte[] buffer, out short cbActual)
 		{
-			return UnsafeNativeMethods.SQLGetInfoW(this, info, buffer, checked((short)buffer.Length), out cbActual);
+			return global::Interop.Odbc.SQLGetInfoW(this, info, buffer, checked((short)buffer.Length), out cbActual);
 		}
 
 		internal ODBC32.RetCode GetInfo1(ODBC32.SQL_INFO info, byte[] buffer)
 		{
-			return UnsafeNativeMethods.SQLGetInfoW(this, info, buffer, checked((short)buffer.Length), ADP.PtrZero);
+			return global::Interop.Odbc.SQLGetInfoW(this, info, buffer, checked((short)buffer.Length), ADP.PtrZero);
 		}
 
 		internal ODBC32.RetCode SetConnectionAttribute2(ODBC32.SQL_ATTR attribute, IntPtr value, int length)
 		{
-			ODBC32.RetCode retCode = UnsafeNativeMethods.SQLSetConnectAttrW(this, attribute, value, length);
+			ODBC32.RetCode retCode = global::Interop.Odbc.SQLSetConnectAttrW(this, attribute, value, length);
 			ODBC.TraceODBC(3, "SQLSetConnectAttrW", retCode);
 			return retCode;
 		}
 
 		internal ODBC32.RetCode SetConnectionAttribute3(ODBC32.SQL_ATTR attribute, string buffer, int length)
 		{
-			return UnsafeNativeMethods.SQLSetConnectAttrW(this, attribute, buffer, length);
+			return global::Interop.Odbc.SQLSetConnectAttrW(this, attribute, buffer, length);
 		}
 
 		internal ODBC32.RetCode SetConnectionAttribute4(ODBC32.SQL_ATTR attribute, IDtcTransaction transaction, int length)
 		{
-			ODBC32.RetCode retCode = UnsafeNativeMethods.SQLSetConnectAttrW(this, attribute, transaction, length);
+			ODBC32.RetCode retCode = global::Interop.Odbc.SQLSetConnectAttrW(this, attribute, transaction, length);
 			ODBC.TraceODBC(3, "SQLSetConnectAttrW", retCode);
 			return retCode;
 		}

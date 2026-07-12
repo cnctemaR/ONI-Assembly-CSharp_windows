@@ -7,39 +7,19 @@ namespace System.ComponentModel
 	{
 		public ProvidePropertyAttribute(string propertyName, Type receiverType)
 		{
-			this.propertyName = propertyName;
-			this.receiverTypeName = receiverType.AssemblyQualifiedName;
+			this.PropertyName = propertyName;
+			this.ReceiverTypeName = receiverType.AssemblyQualifiedName;
 		}
 
 		public ProvidePropertyAttribute(string propertyName, string receiverTypeName)
 		{
-			this.propertyName = propertyName;
-			this.receiverTypeName = receiverTypeName;
+			this.PropertyName = propertyName;
+			this.ReceiverTypeName = receiverTypeName;
 		}
 
-		public string PropertyName
-		{
-			get
-			{
-				return this.propertyName;
-			}
-		}
+		public string PropertyName { get; }
 
-		public string ReceiverTypeName
-		{
-			get
-			{
-				return this.receiverTypeName;
-			}
-		}
-
-		public override object TypeId
-		{
-			get
-			{
-				return base.GetType().FullName + this.propertyName;
-			}
-		}
+		public string ReceiverTypeName { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -48,16 +28,20 @@ namespace System.ComponentModel
 				return true;
 			}
 			ProvidePropertyAttribute providePropertyAttribute = obj as ProvidePropertyAttribute;
-			return providePropertyAttribute != null && providePropertyAttribute.propertyName == this.propertyName && providePropertyAttribute.receiverTypeName == this.receiverTypeName;
+			return providePropertyAttribute != null && providePropertyAttribute.PropertyName == this.PropertyName && providePropertyAttribute.ReceiverTypeName == this.ReceiverTypeName;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.propertyName.GetHashCode() ^ this.receiverTypeName.GetHashCode();
+			return this.PropertyName.GetHashCode() ^ this.ReceiverTypeName.GetHashCode();
 		}
 
-		private readonly string propertyName;
-
-		private readonly string receiverTypeName;
+		public override object TypeId
+		{
+			get
+			{
+				return base.GetType().FullName + this.PropertyName;
+			}
+		}
 	}
 }

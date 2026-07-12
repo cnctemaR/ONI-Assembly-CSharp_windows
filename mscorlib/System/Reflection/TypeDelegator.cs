@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[Serializable]
 	public class TypeDelegator : TypeInfo
 	{
 		public override bool IsAssignableFrom(TypeInfo typeInfo)
@@ -210,6 +208,22 @@ namespace System.Reflection
 			return this.typeImpl.Attributes;
 		}
 
+		public override bool IsTypeDefinition
+		{
+			get
+			{
+				return this.typeImpl.IsTypeDefinition;
+			}
+		}
+
+		public override bool IsSZArray
+		{
+			get
+			{
+				return this.typeImpl.IsSZArray;
+			}
+		}
+
 		protected override bool IsArrayImpl()
 		{
 			return this.typeImpl.IsArray;
@@ -223,6 +237,22 @@ namespace System.Reflection
 		protected override bool IsByRefImpl()
 		{
 			return this.typeImpl.IsByRef;
+		}
+
+		public override bool IsGenericTypeParameter
+		{
+			get
+			{
+				return this.typeImpl.IsGenericTypeParameter;
+			}
+		}
+
+		public override bool IsGenericMethodParameter
+		{
+			get
+			{
+				return this.typeImpl.IsGenericMethodParameter;
+			}
 		}
 
 		protected override bool IsPointerImpl()
@@ -240,11 +270,27 @@ namespace System.Reflection
 			return this.typeImpl.IsCOMObject;
 		}
 
+		public override bool IsByRefLike
+		{
+			get
+			{
+				return this.typeImpl.IsByRefLike;
+			}
+		}
+
 		public override bool IsConstructedGenericType
 		{
 			get
 			{
 				return this.typeImpl.IsConstructedGenericType;
+			}
+		}
+
+		public override bool IsCollectible
+		{
+			get
+			{
+				return this.typeImpl.IsCollectible;
 			}
 		}
 
@@ -285,14 +331,6 @@ namespace System.Reflection
 		public override InterfaceMapping GetInterfaceMap(Type interfaceType)
 		{
 			return this.typeImpl.GetInterfaceMap(interfaceType);
-		}
-
-		public override bool IsSZArray
-		{
-			get
-			{
-				return this.typeImpl.IsSZArray;
-			}
 		}
 
 		protected Type typeImpl;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Threading;
+using Unity;
 
 namespace System.Transactions
 {
@@ -42,20 +43,28 @@ namespace System.Transactions
 			}
 		}
 
-		internal Transaction()
+		internal Transaction(IsolationLevel isolationLevel)
 		{
+			this.dependents = new ArrayList();
+			this.tag = Guid.NewGuid();
+			base..ctor();
 			this.info = new TransactionInformation();
-			this.level = IsolationLevel.Serializable;
+			this.level = isolationLevel;
 		}
 
 		internal Transaction(Transaction other)
 		{
+			this.dependents = new ArrayList();
+			this.tag = Guid.NewGuid();
+			base..ctor();
 			this.level = other.level;
 			this.info = other.info;
 			this.dependents = other.dependents;
 			this.volatiles = other.Volatiles;
 			this.durables = other.Durables;
 			this.pspe = other.Pspe;
+			this.TransactionCompletedInternal = other.TransactionCompletedInternal;
+			this.internalTransaction = other;
 		}
 
 		[MonoTODO]
@@ -64,7 +73,27 @@ namespace System.Transactions
 			throw new NotImplementedException();
 		}
 
-		public event TransactionCompletedEventHandler TransactionCompleted;
+		internal event TransactionCompletedEventHandler TransactionCompletedInternal;
+
+		public event TransactionCompletedEventHandler TransactionCompleted
+		{
+			add
+			{
+				if (this.internalTransaction != null)
+				{
+					this.internalTransaction.TransactionCompleted += value;
+				}
+				this.TransactionCompletedInternal += value;
+			}
+			remove
+			{
+				if (this.internalTransaction != null)
+				{
+					this.internalTransaction.TransactionCompleted -= value;
+				}
+				this.TransactionCompletedInternal -= value;
+			}
+		}
 
 		public static Transaction Current
 		{
@@ -356,7 +385,7 @@ namespace System.Transactions
 
 		private void DoCommit()
 		{
-			if (this.Scope != null)
+			if (this.Scope != null && (!this.Scope.IsComplete || !this.Scope.IsDisposed))
 			{
 				this.Rollback(null, null);
 				this.CheckAborted();
@@ -488,7 +517,7 @@ namespace System.Transactions
 
 		private void CheckAborted()
 		{
-			if (this.aborted)
+			if (this.aborted || (this.Scope != null && this.Scope.IsAborted))
 			{
 				throw new TransactionAbortedException("Transaction has aborted", this.innerException);
 			}
@@ -496,9 +525,9 @@ namespace System.Transactions
 
 		private void FireCompleted()
 		{
-			if (this.TransactionCompleted != null)
+			if (this.TransactionCompletedInternal != null)
 			{
-				this.TransactionCompleted(this, new TransactionEventArgs(this));
+				this.TransactionCompletedInternal(this, new TransactionEventArgs(this));
 			}
 		}
 
@@ -514,14 +543,21 @@ namespace System.Transactions
 			}
 		}
 
+		internal Transaction()
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
 		[ThreadStatic]
 		private static Transaction ambient;
+
+		private Transaction internalTransaction;
 
 		private IsolationLevel level;
 
 		private TransactionInformation info;
 
-		private ArrayList dependents = new ArrayList();
+		private ArrayList dependents;
 
 		private List<IEnlistmentNotification> volatiles;
 
@@ -541,7 +577,7 @@ namespace System.Transactions
 
 		private Exception innerException;
 
-		private Guid tag = Guid.NewGuid();
+		private Guid tag;
 
 		private delegate void AsyncCommit();
 	}

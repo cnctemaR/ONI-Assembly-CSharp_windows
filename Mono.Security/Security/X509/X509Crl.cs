@@ -301,8 +301,7 @@ namespace Mono.Security.X509
 			{
 				return false;
 			}
-			string text = this.signatureOID;
-			if (text == "1.2.840.10040.4.3")
+			if (this.signatureOID == "1.2.840.10040.4.3")
 			{
 				return this.VerifySignature(x509.DSA);
 			}

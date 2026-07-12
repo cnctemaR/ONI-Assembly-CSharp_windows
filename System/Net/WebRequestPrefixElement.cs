@@ -32,7 +32,7 @@ namespace System.Net
 		{
 			if (!typeof(IWebRequestCreate).IsAssignableFrom(creatorType))
 			{
-				throw new InvalidCastException(global::SR.GetString("Invalid cast from {0} to {1}.", new object[] { creatorType.AssemblyQualifiedName, "IWebRequestCreate" }));
+				throw new InvalidCastException(SR.GetString("Invalid cast from {0} to {1}.", new object[] { creatorType.AssemblyQualifiedName, "IWebRequestCreate" }));
 			}
 			this.Prefix = P;
 			this.creatorType = creatorType;

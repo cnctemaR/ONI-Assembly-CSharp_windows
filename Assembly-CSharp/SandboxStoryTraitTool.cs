@@ -216,7 +216,7 @@ public class SandboxStoryTraitTool : InterfaceTool
 					return false;
 				}, ref CS$<>8__locals1))
 				{
-					if (brain.HasTag(GameTags.Minion))
+					if (brain.HasTag(GameTags.BaseMinion))
 					{
 						flag2 = true;
 						break;

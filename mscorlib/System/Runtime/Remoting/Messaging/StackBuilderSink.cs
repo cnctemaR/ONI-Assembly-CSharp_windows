@@ -83,10 +83,10 @@ namespace System.Runtime.Remoting.Messaging
 				}
 				if (arg != null && !type.IsInstanceOfType(arg))
 				{
-					throw new RemotingException(string.Concat(new object[]
+					throw new RemotingException(string.Concat(new string[]
 					{
 						"Cannot cast argument ",
-						parameterInfo.Position,
+						parameterInfo.Position.ToString(),
 						" of type '",
 						arg.GetType().AssemblyQualifiedName,
 						"' to type '",

@@ -45,6 +45,17 @@ namespace FMODUnity
 			};
 		}
 
+		public static ATTRIBUTES_3D To3DAttributes(this Transform transform, Vector3 velocity)
+		{
+			return new ATTRIBUTES_3D
+			{
+				forward = transform.forward.ToFMODVector(),
+				up = transform.up.ToFMODVector(),
+				position = transform.position.ToFMODVector(),
+				velocity = velocity.ToFMODVector()
+			};
+		}
+
 		public static ATTRIBUTES_3D To3DAttributes(this GameObject go)
 		{
 			return go.transform.To3DAttributes();
@@ -179,7 +190,7 @@ namespace FMODUnity
 
 		public static void DebugLog(string message)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
 			{
 				global::UnityEngine.Debug.Log(message);
 			}
@@ -187,7 +198,7 @@ namespace FMODUnity
 
 		public static void DebugLogFormat(string format, params object[] args)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
 			{
 				global::UnityEngine.Debug.LogFormat(format, args);
 			}
@@ -195,7 +206,7 @@ namespace FMODUnity
 
 		public static void DebugLogWarning(string message)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
 			{
 				global::UnityEngine.Debug.LogWarning(message);
 			}
@@ -203,7 +214,7 @@ namespace FMODUnity
 
 		public static void DebugLogWarningFormat(string format, params object[] args)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
 			{
 				global::UnityEngine.Debug.LogWarningFormat(format, args);
 			}
@@ -211,7 +222,7 @@ namespace FMODUnity
 
 		public static void DebugLogError(string message)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
 			{
 				global::UnityEngine.Debug.LogError(message);
 			}
@@ -219,7 +230,7 @@ namespace FMODUnity
 
 		public static void DebugLogErrorFormat(string format, params object[] args)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
 			{
 				global::UnityEngine.Debug.LogErrorFormat(format, args);
 			}
@@ -227,7 +238,7 @@ namespace FMODUnity
 
 		public static void DebugLogException(Exception e)
 		{
-			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			if (!Settings.IsInitialized() || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
 			{
 				global::UnityEngine.Debug.LogException(e);
 			}

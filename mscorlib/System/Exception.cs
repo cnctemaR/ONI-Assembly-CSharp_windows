@@ -10,8 +10,6 @@ using System.Security;
 
 namespace System
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_Exception))]
 	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -96,14 +94,7 @@ namespace System
 			{
 				if (this._data == null)
 				{
-					if (Exception.IsImmutableAgileException(this))
-					{
-						this._data = new EmptyReadOnlyDictionaryInternal();
-					}
-					else
-					{
-						this._data = new ListDictionaryInternal();
-					}
+					this._data = new ListDictionaryInternal();
 				}
 				return this._data;
 			}
@@ -114,7 +105,6 @@ namespace System
 			return false;
 		}
 
-		[FriendAccessAllowed]
 		internal void AddExceptionDataForRestrictedErrorInfo(string restrictedError, string restrictedErrorReference, string restrictedCapabilitySid, object restrictedErrorObject, bool hasrestrictedLanguageErrorObject = false)
 		{
 			IDictionary data = this.Data;
@@ -175,10 +165,6 @@ namespace System
 			}
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IRuntimeMethodInfo GetMethodFromStackTrace(object stackTrace);
-
 		public MethodBase TargetSite
 		{
 			[SecuritySafeCritical]
@@ -222,7 +208,6 @@ namespace System
 			return text2 + stackTrace;
 		}
 
-		[FriendAccessAllowed]
 		internal void SetErrorCode(int hr)
 		{
 			this.HResult = hr;
@@ -352,7 +337,7 @@ namespace System
 			string text;
 			if (this._remoteStackIndex == 0)
 			{
-				text = string.Concat(new object[]
+				text = string.Concat(new string[]
 				{
 					Environment.NewLine,
 					"Server stack trace: ",
@@ -361,20 +346,20 @@ namespace System
 					Environment.NewLine,
 					Environment.NewLine,
 					"Exception rethrown at [",
-					this._remoteStackIndex,
+					this._remoteStackIndex.ToString(),
 					"]: ",
 					Environment.NewLine
 				});
 			}
 			else
 			{
-				text = string.Concat(new object[]
+				text = string.Concat(new string[]
 				{
 					this.StackTrace,
 					Environment.NewLine,
 					Environment.NewLine,
 					"Exception rethrown at [",
-					this._remoteStackIndex,
+					this._remoteStackIndex.ToString(),
 					"]: ",
 					Environment.NewLine
 				});
@@ -407,17 +392,17 @@ namespace System
 			this._stackTraceString = null;
 		}
 
+		private string StripFileInfo(string stackTrace, bool isRemoteStackTrace)
+		{
+			return stackTrace;
+		}
+
 		internal string RemoteStackTrace
 		{
 			get
 			{
 				return this._remoteStackTraceString;
 			}
-		}
-
-		private string StripFileInfo(string stackTrace, bool isRemoteStackTrace)
-		{
-			return stackTrace;
 		}
 
 		[SecuritySafeCritical]
@@ -461,9 +446,10 @@ namespace System
 			}
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool nIsTransient(int hr);
+		private static bool nIsTransient(int hr)
+		{
+			throw new NotImplementedException();
+		}
 
 		[SecuritySafeCritical]
 		internal static string GetMessageFromNativeResources(Exception.ExceptionMessageKind kind)
@@ -471,11 +457,11 @@ namespace System
 			switch (kind)
 			{
 			case Exception.ExceptionMessageKind.ThreadAbort:
-				return "";
+				return "Thread was being aborted.";
 			case Exception.ExceptionMessageKind.ThreadInterrupted:
-				return "";
+				return "Thread was interrupted from a waiting state.";
 			case Exception.ExceptionMessageKind.OutOfMemory:
-				return "Out of memory";
+				return "Insufficient memory to continue the execution of the program.";
 			default:
 				return "";
 			}
@@ -493,7 +479,7 @@ namespace System
 
 		internal Exception FixRemotingException()
 		{
-			string text = string.Format((this._remoteStackIndex == 0) ? Locale.GetText("{0}{0}Server stack trace: {0}{1}{0}{0}Exception rethrown at [{2}]: {0}") : Locale.GetText("{1}{0}{0}Exception rethrown at [{2}]: {0}"), Environment.NewLine, this.StackTrace, this._remoteStackIndex);
+			string text = string.Format((this._remoteStackIndex == 0) ? "{0}{0}Server stack trace: {0}{1}{0}{0}Exception rethrown at [{2}]: {0}" : "{1}{0}{0}Exception rethrown at [{2}]: {0}", Environment.NewLine, this.StackTrace, this._remoteStackIndex);
 			this._remoteStackTraceString = text;
 			this._remoteStackIndex++;
 			this._stackTraceString = null;
@@ -536,6 +522,8 @@ namespace System
 		internal StackTrace[] captured_traces;
 
 		private IntPtr[] native_trace_ips;
+
+		private int caught_in_unmanaged;
 
 		private const int _COMPlusExceptionCode = -532462766;
 

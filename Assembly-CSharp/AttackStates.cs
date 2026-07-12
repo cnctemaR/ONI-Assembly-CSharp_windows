@@ -13,8 +13,24 @@ public class AttackStates : GameStateMachine<AttackStates, AttackStates.Instance
 			this.cellOffsets = smi.def.cellOffsets;
 		});
 		this.waitBeforeAttack.ScheduleGoTo((AttackStates.Instance smi) => global::UnityEngine.Random.Range(0f, 4f), this.approach);
-		this.approach.InitializeStates(this.masterTarget, this.target, this.attack, null, this.cellOffsets, null).ToggleStatusItem(CREATURES.STATUSITEMS.ATTACK_APPROACH.NAME, CREATURES.STATUSITEMS.ATTACK_APPROACH.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
-		this.attack.DefaultState(this.attack.pre).ToggleStatusItem(CREATURES.STATUSITEMS.ATTACK.NAME, CREATURES.STATUSITEMS.ATTACK.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>.State state = this.approach.InitializeStates(this.masterTarget, this.target, this.attack, null, this.cellOffsets, null);
+		string text = CREATURES.STATUSITEMS.ATTACK_APPROACH.NAME;
+		string text2 = CREATURES.STATUSITEMS.ATTACK_APPROACH.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, statusItemCategory);
+		GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>.State state2 = this.attack.DefaultState(this.attack.pre);
+		string text4 = CREATURES.STATUSITEMS.ATTACK.NAME;
+		string text5 = CREATURES.STATUSITEMS.ATTACK.TOOLTIP;
+		string text6 = "";
+		StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+		NotificationType notificationType2 = NotificationType.Neutral;
+		bool flag2 = false;
+		statusItemCategory = Db.Get().StatusItemCategories.Main;
+		state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, null, null, statusItemCategory);
 		this.attack.pre.PlayAnim((AttackStates.Instance smi) => smi.def.preAnim, KAnim.PlayMode.Once).Exit(delegate(AttackStates.Instance smi)
 		{
 			smi.GetComponent<Weapon>().AttackTarget(this.target.Get(smi));

@@ -120,12 +120,7 @@ namespace UnityEngine.Timeline
 
 		private void OnValidate()
 		{
-			this.editorSettings.fps = TimelineAsset.GetValidFramerate(this.editorSettings.fps);
-		}
-
-		internal static float GetValidFramerate(float framerate)
-		{
-			return Mathf.Clamp(framerate, TimelineAsset.EditorSettings.kMinFps, TimelineAsset.EditorSettings.kMaxFps);
+			this.editorSettings.frameRate = TimelineAsset.GetValidFrameRate(this.editorSettings.frameRate);
 		}
 
 		public TrackAsset GetRootTrack(int index)
@@ -150,6 +145,11 @@ namespace UnityEngine.Timeline
 		{
 			this.UpdateOutputTrackCache();
 			return this.m_CacheOutputTracks;
+		}
+
+		private static double GetValidFrameRate(double frameRate)
+		{
+			return Math.Min(Math.Max(frameRate, TimelineAsset.EditorSettings.kMinFrameRate), TimelineAsset.EditorSettings.kMaxFrameRate);
 		}
 
 		private void UpdateRootTrackCache()
@@ -193,19 +193,20 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		internal IEnumerable<TrackAsset> flattenedTracks
+		internal TrackAsset[] flattenedTracks
 		{
 			get
 			{
 				if (this.m_CacheFlattenedTracks == null)
 				{
-					this.m_CacheFlattenedTracks = new List<TrackAsset>(this.m_Tracks.Count * 2);
+					List<TrackAsset> list = new List<TrackAsset>(this.m_Tracks.Count * 2);
 					this.UpdateRootTrackCache();
-					this.m_CacheFlattenedTracks.AddRange(this.m_CacheRootTracks);
+					list.AddRange(this.m_CacheRootTracks);
 					for (int i = 0; i < this.m_CacheRootTracks.Count; i++)
 					{
-						TimelineAsset.AddSubTracksRecursive(this.m_CacheRootTracks[i], ref this.m_CacheFlattenedTracks);
+						TimelineAsset.AddSubTracksRecursive(this.m_CacheRootTracks[i], ref list);
 					}
+					this.m_CacheFlattenedTracks = list.ToArray();
 				}
 				return this.m_CacheFlattenedTracks;
 			}
@@ -250,6 +251,7 @@ namespace UnityEngine.Timeline
 			bool flag = false;
 			bool flag2 = graph.GetPlayableCount() == 0;
 			ScriptPlayable<TimelinePlayable> scriptPlayable = TimelinePlayable.Create(graph, this.GetOutputTracks(), go, flag, flag2);
+			scriptPlayable.SetDuration(this.duration);
 			scriptPlayable.SetPropagateSetTime(true);
 			if (!scriptPlayable.IsValid<ScriptPlayable<TimelinePlayable>>())
 			{
@@ -367,7 +369,6 @@ namespace UnityEngine.Timeline
 			{
 				throw new InvalidOperationException("Cannot assign a child of type " + type.Name + " to a parent of type " + parent.GetType().Name);
 			}
-			PlayableAsset playableAsset = ((parent != null) ? parent : this);
 			string text = name;
 			if (string.IsNullOrEmpty(text))
 			{
@@ -382,13 +383,7 @@ namespace UnityEngine.Timeline
 			{
 				text2 = TimelineCreateUtilities.GenerateUniqueActorName(this.trackObjects, text);
 			}
-			TrackAsset trackAsset = this.AllocateTrack(parent, text2, type);
-			if (trackAsset != null)
-			{
-				trackAsset.name = text2;
-				TimelineCreateUtilities.SaveAssetIntoObject(trackAsset, playableAsset);
-			}
-			return trackAsset;
+			return this.AllocateTrack(parent, text2, type);
 		}
 
 		public T CreateTrack<T>(TrackAsset parent, string trackName) where T : TrackAsset, new()
@@ -408,25 +403,25 @@ namespace UnityEngine.Timeline
 
 		public bool DeleteClip(TimelineClip clip)
 		{
-			if (clip == null || clip.parentTrack == null)
+			if (clip == null || clip.GetParentTrack() == null)
 			{
 				return false;
 			}
-			if (this != clip.parentTrack.timelineAsset)
+			if (this != clip.GetParentTrack().timelineAsset)
 			{
 				Debug.LogError("Cannot delete a clip from this timeline");
 				return false;
 			}
 			if (clip.curves != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves);
+				TimelineUndo.PushDestroyUndo(this, clip.GetParentTrack(), clip.curves);
 			}
 			if (clip.asset != null)
 			{
 				this.DeleteRecordedAnimation(clip);
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.asset);
+				TimelineUndo.PushDestroyUndo(this, clip.GetParentTrack(), clip.asset);
 			}
-			TrackAsset parentTrack = clip.parentTrack;
+			TrackAsset parentTrack = clip.GetParentTrack();
 			parentTrack.RemoveClip(clip);
 			parentTrack.CalculateExtrapolationTimes();
 			return true;
@@ -479,7 +474,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		internal TrackAsset AllocateTrack(TrackAsset trackAssetParent, string trackName, Type trackType)
+		private TrackAsset AllocateTrack(TrackAsset trackAssetParent, string trackName, Type trackType)
 		{
 			if (trackAssetParent != null && trackAssetParent.timelineAsset != this)
 			{
@@ -491,6 +486,8 @@ namespace UnityEngine.Timeline
 			}
 			TrackAsset trackAsset = (TrackAsset)ScriptableObject.CreateInstance(trackType);
 			trackAsset.name = trackName;
+			PlayableAsset playableAsset = ((trackAssetParent != null) ? trackAssetParent : this);
+			TimelineCreateUtilities.SaveAssetIntoObject(trackAsset, playableAsset);
 			if (trackAssetParent != null)
 			{
 				trackAssetParent.AddChild(trackAsset);
@@ -523,7 +520,7 @@ namespace UnityEngine.Timeline
 			}
 			if (clip.curves != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves);
+				TimelineUndo.PushDestroyUndo(this, clip.GetParentTrack(), clip.curves);
 			}
 			if (!clip.recordable)
 			{
@@ -561,7 +558,7 @@ namespace UnityEngine.Timeline
 
 		[HideInInspector]
 		[NonSerialized]
-		private List<TrackAsset> m_CacheFlattenedTracks;
+		private TrackAsset[] m_CacheFlattenedTracks;
 
 		[HideInInspector]
 		[SerializeField]
@@ -605,7 +602,20 @@ namespace UnityEngine.Timeline
 		[Serializable]
 		public class EditorSettings
 		{
+			[Obsolete("EditorSettings.fps has been deprecated. Use editorSettings.frameRate instead.", false)]
 			public float fps
+			{
+				get
+				{
+					return (float)this.m_Framerate;
+				}
+				set
+				{
+					this.m_Framerate = (double)Mathf.Clamp(value, (float)TimelineAsset.EditorSettings.kMinFrameRate, (float)TimelineAsset.EditorSettings.kMaxFrameRate);
+				}
+			}
+
+			public double frameRate
 			{
 				get
 				{
@@ -613,8 +623,18 @@ namespace UnityEngine.Timeline
 				}
 				set
 				{
-					this.m_Framerate = TimelineAsset.GetValidFramerate(value);
+					this.m_Framerate = TimelineAsset.GetValidFrameRate(value);
 				}
+			}
+
+			public void SetStandardFrameRate(StandardFrameRates enumValue)
+			{
+				FrameRate frameRate = TimeUtility.ToFrameRate(enumValue);
+				if (frameRate.IsValid())
+				{
+					throw new ArgumentException(string.Format("StandardFrameRates {0}, is not defined", enumValue.ToString()));
+				}
+				this.m_Framerate = frameRate.rate;
 			}
 
 			public bool scenePreview
@@ -629,15 +649,16 @@ namespace UnityEngine.Timeline
 				}
 			}
 
-			internal static readonly float kMinFps = (float)TimeUtility.kFrameRateEpsilon;
+			internal static readonly double kMinFrameRate = TimeUtility.kFrameRateEpsilon;
 
-			internal static readonly float kMaxFps = 1000f;
+			internal static readonly double kMaxFrameRate = 1000.0;
 
-			internal static readonly float kDefaultFps = 60f;
+			internal static readonly double kDefaultFrameRate = 60.0;
 
 			[HideInInspector]
 			[SerializeField]
-			private float m_Framerate = TimelineAsset.EditorSettings.kDefaultFps;
+			[FrameRateField]
+			private double m_Framerate = TimelineAsset.EditorSettings.kDefaultFrameRate;
 
 			[HideInInspector]
 			[SerializeField]

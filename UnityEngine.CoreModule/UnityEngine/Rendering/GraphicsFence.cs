@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/GPUFence.h")]
+	[UsedByNativeCode]
 	public struct GraphicsFence
 	{
 		internal static SynchronisationStageFlags TranslateSynchronizationStageToFlags(SynchronisationStage s)
@@ -19,13 +19,18 @@ namespace UnityEngine.Rendering
 			get
 			{
 				this.Validate();
-				bool flag = !SystemInfo.supportsGraphicsFence || (this.m_FenceType == GraphicsFenceType.AsyncQueueSynchronisation && !SystemInfo.supportsAsyncCompute);
+				bool flag = !SystemInfo.supportsGraphicsFence;
 				if (flag)
 				{
 					throw new NotSupportedException("Cannot determine if this GraphicsFence has passed as this platform has not implemented GraphicsFences.");
 				}
-				bool flag2 = !this.IsFencePending();
-				return flag2 || GraphicsFence.HasFencePassed_Internal(this.m_Ptr);
+				bool flag2 = this.m_FenceType == GraphicsFenceType.AsyncQueueSynchronisation && !SystemInfo.supportsAsyncCompute;
+				if (flag2)
+				{
+					throw new NotSupportedException("Cannot determine if this AsyncQueueSynchronisation GraphicsFence has passed as this platform does not support async compute.");
+				}
+				bool flag3 = !this.IsFencePending();
+				return flag3 || GraphicsFence.HasFencePassed_Internal(this.m_Ptr);
 			}
 		}
 

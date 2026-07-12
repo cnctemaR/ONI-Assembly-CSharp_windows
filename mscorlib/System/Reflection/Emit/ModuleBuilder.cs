@@ -12,11 +12,31 @@ using Unity;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_ModuleBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ModuleBuilder : Module, _ModuleBuilder
 	{
+		void _ModuleBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ModuleBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void basic_init(ModuleBuilder ab);
 
@@ -32,7 +52,7 @@ namespace System.Reflection.Emit
 			this.assembly = assb;
 			this.transient = transient;
 			this.guid = Guid.FastNewGuidArray();
-			this.table_idx = this.get_next_table_index(this, 0, true);
+			this.table_idx = this.get_next_table_index(this, 0, 1);
 			this.name_cache = new Dictionary<TypeName, TypeBuilder>();
 			this.us_string_cache = new Dictionary<string, int>(512);
 			ModuleBuilder.basic_init(this);
@@ -89,7 +109,17 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.fqname;
+				string text = this.fqname;
+				if (text == null)
+				{
+					return null;
+				}
+				if (this.assemblyb.AssemblyDir != null)
+				{
+					text = Path.Combine(this.assemblyb.AssemblyDir, text);
+					text = Path.GetFullPath(text);
+				}
+				return text;
 			}
 		}
 
@@ -116,7 +146,7 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("data");
 			}
-			FieldAttributes fieldAttributes = attributes & ~FieldAttributes.ReservedMask;
+			FieldAttributes fieldAttributes = attributes & ~(FieldAttributes.RTSpecialName | FieldAttributes.HasFieldMarshal | FieldAttributes.HasDefault | FieldAttributes.HasFieldRVA);
 			FieldBuilder fieldBuilder = this.DefineDataImpl(name, data.Length, fieldAttributes | FieldAttributes.HasFieldRVA);
 			fieldBuilder.SetRVAData(data);
 			return fieldBuilder;
@@ -124,7 +154,7 @@ namespace System.Reflection.Emit
 
 		public FieldBuilder DefineUninitializedData(string name, int size, FieldAttributes attributes)
 		{
-			return this.DefineDataImpl(name, size, attributes & ~FieldAttributes.ReservedMask);
+			return this.DefineDataImpl(name, size, attributes & ~(FieldAttributes.RTSpecialName | FieldAttributes.HasFieldMarshal | FieldAttributes.HasDefault | FieldAttributes.HasFieldRVA));
 		}
 
 		private FieldBuilder DefineDataImpl(string name, int size, FieldAttributes attributes)
@@ -146,7 +176,7 @@ namespace System.Reflection.Emit
 				throw new ArgumentException("Data size must be > 0 and < 0x3f0000", null);
 			}
 			this.CreateGlobalType();
-			string text = "$ArrayType$" + size;
+			string text = "$ArrayType$" + size.ToString();
 			Type type = this.GetType(text, false, false);
 			if (type == null)
 			{
@@ -489,7 +519,7 @@ namespace System.Reflection.Emit
 			return typeBuilder;
 		}
 
-		internal int get_next_table_index(object obj, int table, bool inc)
+		internal int get_next_table_index(object obj, int table, int count)
 		{
 			if (this.table_indexes == null)
 			{
@@ -500,14 +530,9 @@ namespace System.Reflection.Emit
 				}
 				this.table_indexes[2] = 2;
 			}
-			if (inc)
-			{
-				int[] array = this.table_indexes;
-				int num = array[table];
-				array[table] = num + 1;
-				return num;
-			}
-			return this.table_indexes[table];
+			int num = this.table_indexes[table];
+			this.table_indexes[table] += count;
+			return num;
 		}
 
 		public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
@@ -913,7 +938,7 @@ namespace System.Reflection.Emit
 
 		internal int GetToken(MemberInfo member)
 		{
-			if (member is ConstructorBuilder || member is MethodBuilder)
+			if (member is ConstructorBuilder || member is MethodBuilder || member is FieldBuilder)
 			{
 				return this.GetPseudoToken(member, false);
 			}
@@ -1066,8 +1091,8 @@ namespace System.Reflection.Emit
 					}
 					memberInfo = (key as GenericTypeParameterBuilder).RuntimeResolve();
 				}
-				int token = this.GetToken(memberInfo, open);
-				token_map[value] = token;
+				int num = this.GetToken(memberInfo, open);
+				token_map[value] = num;
 				member_map[value] = memberInfo;
 				this.RegisterToken(memberInfo, value);
 			}
@@ -1205,31 +1230,6 @@ namespace System.Reflection.Emit
 			return new Guid(this.guid);
 		}
 
-		internal static Guid Mono_GetGuid(ModuleBuilder mb)
-		{
-			return mb.GetModuleVersionId();
-		}
-
-		void _ModuleBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ModuleBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ModuleBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ModuleBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		public override Assembly Assembly
 		{
 			get
@@ -1282,30 +1282,18 @@ namespace System.Reflection.Emit
 
 		public override FieldInfo ResolveField(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
 		{
-			ResolveTokenError resolveTokenError;
-			IntPtr intPtr = Module.ResolveFieldToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
-			if (intPtr == IntPtr.Zero)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "Field");
-			}
-			return FieldInfo.GetFieldFromHandle(new RuntimeFieldHandle(intPtr));
+			return RuntimeModule.ResolveField(this, this._impl, metadataToken, genericTypeArguments, genericMethodArguments);
 		}
 
 		public override MemberInfo ResolveMember(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
 		{
-			ResolveTokenError resolveTokenError;
-			MemberInfo memberInfo = Module.ResolveMemberToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
-			if (memberInfo == null)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MemberInfo");
-			}
-			return memberInfo;
+			return RuntimeModule.ResolveMember(this, this._impl, metadataToken, genericTypeArguments, genericMethodArguments);
 		}
 
 		internal MemberInfo ResolveOrGetRegisteredToken(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
 		{
 			ResolveTokenError resolveTokenError;
-			MemberInfo memberInfo = Module.ResolveMemberToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
+			MemberInfo memberInfo = RuntimeModule.ResolveMemberToken(this._impl, metadataToken, RuntimeModule.ptrs_from_types(genericTypeArguments), RuntimeModule.ptrs_from_types(genericMethodArguments), out resolveTokenError);
 			if (memberInfo != null)
 			{
 				return memberInfo;
@@ -1313,53 +1301,29 @@ namespace System.Reflection.Emit
 			memberInfo = this.GetRegisteredToken(metadataToken) as MemberInfo;
 			if (memberInfo == null)
 			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MemberInfo");
+				throw RuntimeModule.resolve_token_exception(this.Name, metadataToken, resolveTokenError, "MemberInfo");
 			}
 			return memberInfo;
 		}
 
 		public override MethodBase ResolveMethod(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
 		{
-			ResolveTokenError resolveTokenError;
-			IntPtr intPtr = Module.ResolveMethodToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
-			if (intPtr == IntPtr.Zero)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "MethodBase");
-			}
-			return MethodBase.GetMethodFromHandleNoGenericCheck(new RuntimeMethodHandle(intPtr));
+			return RuntimeModule.ResolveMethod(this, this._impl, metadataToken, genericTypeArguments, genericMethodArguments);
 		}
 
 		public override string ResolveString(int metadataToken)
 		{
-			ResolveTokenError resolveTokenError;
-			string text = Module.ResolveStringToken(this._impl, metadataToken, out resolveTokenError);
-			if (text == null)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "string");
-			}
-			return text;
+			return RuntimeModule.ResolveString(this, this._impl, metadataToken);
 		}
 
 		public override byte[] ResolveSignature(int metadataToken)
 		{
-			ResolveTokenError resolveTokenError;
-			byte[] array = Module.ResolveSignature(this._impl, metadataToken, out resolveTokenError);
-			if (array == null)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "signature");
-			}
-			return array;
+			return RuntimeModule.ResolveSignature(this, this._impl, metadataToken);
 		}
 
 		public override Type ResolveType(int metadataToken, Type[] genericTypeArguments, Type[] genericMethodArguments)
 		{
-			ResolveTokenError resolveTokenError;
-			IntPtr intPtr = Module.ResolveTypeToken(this._impl, metadataToken, base.ptrs_from_types(genericTypeArguments), base.ptrs_from_types(genericMethodArguments), out resolveTokenError);
-			if (intPtr == IntPtr.Zero)
-			{
-				throw base.resolve_token_exception(metadataToken, resolveTokenError, "Type");
-			}
-			return Type.GetTypeFromHandle(new RuntimeTypeHandle(intPtr));
+			return RuntimeModule.ResolveType(this, this._impl, metadataToken, genericTypeArguments, genericMethodArguments);
 		}
 
 		public override bool Equals(object obj)
@@ -1439,7 +1403,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return Module.get_MetadataToken(this);
+				return RuntimeModule.get_MetadataToken(this);
 			}
 		}
 
@@ -1447,6 +1411,20 @@ namespace System.Reflection.Emit
 		{
 			ThrowStub.ThrowNotSupportedException();
 		}
+
+		internal IntPtr _impl;
+
+		internal Assembly assembly;
+
+		internal string fqname;
+
+		internal string name;
+
+		internal string scopename;
+
+		internal bool is_resource;
+
+		internal int token;
 
 		private UIntPtr dynamic_image;
 
@@ -1472,6 +1450,8 @@ namespace System.Reflection.Emit
 
 		private IntPtr unparented_classes;
 
+		private int[] table_indexes;
+
 		private TypeBuilder global_type;
 
 		private Type global_type_created;
@@ -1479,8 +1459,6 @@ namespace System.Reflection.Emit
 		private Dictionary<TypeName, TypeBuilder> name_cache;
 
 		private Dictionary<string, int> us_string_cache;
-
-		private int[] table_indexes;
 
 		private bool transient;
 

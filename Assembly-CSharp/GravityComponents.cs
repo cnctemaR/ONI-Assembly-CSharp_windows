@@ -141,7 +141,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 
 	private static Tag[] LANDS_ON_FAKEFLOOR = new Tag[]
 	{
-		GameTags.Minion,
+		GameTags.BaseMinion,
 		GameTags.Creatures.Walker,
 		GameTags.Creatures.Hoverer
 	};

@@ -8,8 +8,8 @@ namespace System.Runtime.CompilerServices
 {
 	public static class ContractHelper
 	{
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[DebuggerNonUserCode]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public static string RaiseContractFailedEvent(ContractFailureKind failureKind, string userMessage, string conditionText, Exception innerException)
 		{
 			string text = "Contract failed";
@@ -17,15 +17,15 @@ namespace System.Runtime.CompilerServices
 			return text;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[DebuggerNonUserCode]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static void TriggerFailure(ContractFailureKind kind, string displayMessage, string userMessage, string conditionText, Exception innerException)
 		{
 			ContractHelper.TriggerFailureImplementation(kind, displayMessage, userMessage, conditionText, innerException);
 		}
 
-		[SecuritySafeCritical]
 		[DebuggerNonUserCode]
+		[SecuritySafeCritical]
 		private static void RaiseContractFailedEventImplementation(ContractFailureKind failureKind, string userMessage, string conditionText, Exception innerException, ref string resultFailureMessage)
 		{
 			if (failureKind < ContractFailureKind.Precondition || failureKind > ContractFailureKind.Assume)
@@ -174,9 +174,9 @@ namespace System.Runtime.CompilerServices
 			return text;
 		}
 
+		[SecuritySafeCritical]
 		[DebuggerNonUserCode]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[SecuritySafeCritical]
 		private static void TriggerCodeContractEscalationPolicy(ContractFailureKind failureKind, string message, string conditionText, Exception innerException)
 		{
 			string text = null;

@@ -18,7 +18,14 @@ public class ToePlantConfig : IEntityConfig
 		string text3 = global::STRINGS.CREATURES.SPECIES.TOEPLANT.DESC;
 		float num = 1f;
 		EffectorValues positive_DECOR_EFFECT = ToePlantConfig.POSITIVE_DECOR_EFFECT;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("potted_toes_kanim"), "grow_seed", Grid.SceneLayer.BuildingFront, 1, 1, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, null, global::TUNING.CREATURES.TEMPERATURE.FREEZING_3);
+		KAnimFile anim = Assets.GetAnim("potted_toes_kanim");
+		string text4 = "grow_seed";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.BuildingFront;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = positive_DECOR_EFFECT;
+		float freezing_ = global::TUNING.CREATURES.TEMPERATURE.FREEZING_3;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, null, freezing_);
 		GameObject gameObject2 = gameObject;
 		SimHashes[] array = new SimHashes[]
 		{
@@ -30,7 +37,20 @@ public class ToePlantConfig : IEntityConfig
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = ToePlantConfig.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = ToePlantConfig.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "ToePlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.TOEPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.TOEPLANT.DESC, Assets.GetAnim("seed_potted_toes_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 12, global::STRINGS.CREATURES.SPECIES.TOEPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, this.GetDlcIds()), "ToePlant_preview", Assets.GetAnim("potted_toes_kanim"), "place", 1, 1);
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text5 = "ToePlantSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.TOEPLANT.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.TOEPLANT.DESC;
+		KAnimFile anim2 = Assets.GetAnim("seed_potted_toes_kanim");
+		string text8 = "object";
+		int num4 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text9 = global::STRINGS.CREATURES.SPECIES.TOEPLANT.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim2, text8, num4, list, receptacleDirection, default(Tag), 12, text9, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, dlcIds), "ToePlant_preview", Assets.GetAnim("potted_toes_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

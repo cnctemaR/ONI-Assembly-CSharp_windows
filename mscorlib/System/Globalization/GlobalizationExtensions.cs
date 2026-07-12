@@ -1,5 +1,4 @@
 ﻿using System;
-using Unity;
 
 namespace System.Globalization
 {
@@ -7,8 +6,19 @@ namespace System.Globalization
 	{
 		public static StringComparer GetStringComparer(this CompareInfo compareInfo, CompareOptions options)
 		{
-			ThrowStub.ThrowNotSupportedException();
-			return null;
+			if (compareInfo == null)
+			{
+				throw new ArgumentNullException("compareInfo");
+			}
+			if (options == CompareOptions.Ordinal)
+			{
+				return StringComparer.Ordinal;
+			}
+			if (options == CompareOptions.OrdinalIgnoreCase)
+			{
+				return StringComparer.OrdinalIgnoreCase;
+			}
+			return new CultureAwareComparer(compareInfo, options);
 		}
 	}
 }

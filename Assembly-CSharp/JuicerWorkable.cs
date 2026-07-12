@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using TUNING;
@@ -12,6 +13,16 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 		base.SetReportType(ReportManager.ReportType.PersonalTime);
 	}
 
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
+	{
+		KAnimFile[] array = null;
+		if (this.workerTypeOverrideAnims.TryGetValue(worker.PrefabID(), out array))
+		{
+			this.overrideAnims = array;
+		}
+		return base.GetAnim(worker);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -23,12 +34,12 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 		this.juicer = base.GetComponent<Juicer>();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.operational.SetActive(true, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage component = base.GetComponent<Storage>();
 		float num;
@@ -60,12 +71,12 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.operational.SetActive(false, false);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
@@ -80,6 +91,8 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 		}
 		return true;
 	}
+
+	public Dictionary<Tag, KAnimFile[]> workerTypeOverrideAnims = new Dictionary<Tag, KAnimFile[]>();
 
 	[MyCmpReq]
 	private Operational operational;

@@ -116,6 +116,11 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		public override void DisableAt(double localTime, double rootDuration, FrameData frameData)
+		{
+			this.enable = false;
+		}
+
 		private TimelineClip m_Clip;
 
 		private Playable m_Playable;

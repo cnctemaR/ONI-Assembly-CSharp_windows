@@ -18,6 +18,9 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		[FieldOffset(0)]
 		public readonly ushort Id;
 
+		[FieldOffset(2)]
+		public readonly ushort Flags;
+
 		[FieldOffset(4)]
 		public readonly Color32 Color;
 

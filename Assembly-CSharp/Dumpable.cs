@@ -55,7 +55,7 @@ public class Dumpable : Workable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.isMarkedForDumping = false;
 		this.chore = null;

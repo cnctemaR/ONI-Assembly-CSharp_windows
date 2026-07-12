@@ -32,6 +32,7 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		[Obsolete("forceModuleActive has been deprecated. There is no need to force the module awake as StandaloneInputModule works for all platforms")]
 		public bool forceModuleActive
 		{
 			get
@@ -166,11 +167,6 @@ namespace UnityEngine.EventSystems
 			this.m_InputPointerEvent = pointerEvent;
 		}
 
-		public override bool IsModuleSupported()
-		{
-			return this.m_ForceModuleActive || base.input.mousePresent || base.input.touchSupported;
-		}
-
 		public override bool ShouldActivateModule()
 		{
 			if (!base.ShouldActivateModule())
@@ -279,6 +275,10 @@ namespace UnityEngine.EventSystems
 				{
 					base.HandlePointerExitAndEnter(pointerEvent, gameObject);
 					pointerEvent.pointerEnter = gameObject;
+				}
+				if (Time.unscaledTime - pointerEvent.clickTime >= 0.3f)
+				{
+					pointerEvent.clickCount = 0;
 				}
 				GameObject gameObject2 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject, pointerEvent, ExecuteEvents.pointerDownHandler);
 				GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
@@ -483,6 +483,10 @@ namespace UnityEngine.EventSystems
 				buttonData.pressPosition = buttonData.position;
 				buttonData.pointerPressRaycast = buttonData.pointerCurrentRaycast;
 				base.DeselectIfSelectionChanged(gameObject, buttonData);
+				if (Time.unscaledTime - buttonData.clickTime >= 0.3f)
+				{
+					buttonData.clickCount = 0;
+				}
 				GameObject gameObject2 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject, buttonData, ExecuteEvents.pointerDownHandler);
 				GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
 				if (gameObject2 == null)
@@ -544,6 +548,8 @@ namespace UnityEngine.EventSystems
 
 		private PointerEventData m_InputPointerEvent;
 
+		private const float doubleClickTime = 0.3f;
+
 		[SerializeField]
 		private string m_HorizontalAxis = "Horizontal";
 
@@ -564,6 +570,7 @@ namespace UnityEngine.EventSystems
 
 		[SerializeField]
 		[FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
+		[HideInInspector]
 		private bool m_ForceModuleActive;
 
 		[Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", false)]

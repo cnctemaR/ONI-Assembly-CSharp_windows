@@ -8,15 +8,21 @@ public class HugEggStates : GameStateMachine<HugEggStates, HugEggStates.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.moving;
-		this.root.Enter(new StateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State.Callback(HugEggStates.SetTarget)).Enter(delegate(HugEggStates.Instance smi)
+		GameStateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State state = this.root.Enter(new StateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State.Callback(HugEggStates.SetTarget)).Enter(delegate(HugEggStates.Instance smi)
 		{
 			if (!HugEggStates.Reserve(smi))
 			{
 				smi.GoTo(this.behaviourcomplete);
 			}
-		}).Exit(new StateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State.Callback(HugEggStates.Unreserve))
-			.ToggleStatusItem(CREATURES.STATUSITEMS.HUGEGG.NAME, CREATURES.STATUSITEMS.HUGEGG.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main)
-			.OnTargetLost(this.target, this.behaviourcomplete);
+		}).Exit(new StateMachine<HugEggStates, HugEggStates.Instance, IStateMachineTarget, HugEggStates.Def>.State.Callback(HugEggStates.Unreserve));
+		string text = CREATURES.STATUSITEMS.HUGEGG.NAME;
+		string text2 = CREATURES.STATUSITEMS.HUGEGG.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).OnTargetLost(this.target, this.behaviourcomplete);
 		this.moving.MoveTo(new Func<HugEggStates.Instance, int>(HugEggStates.GetClimbableCell), this.hug, this.behaviourcomplete, false);
 		this.hug.DefaultState(this.hug.pre).Enter(delegate(HugEggStates.Instance smi)
 		{

@@ -13,65 +13,65 @@ namespace System.Runtime.CompilerServices
 	[DebuggerStepThrough]
 	public static class RuntimeOps
 	{
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static bool ExpandoTryGetValue(ExpandoObject expando, object indexClass, int index, string name, bool ignoreCase, out object value)
 		{
 			return expando.TryGetValue(indexClass, index, name, ignoreCase, out value);
 		}
 
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static object ExpandoTrySetValue(ExpandoObject expando, object indexClass, int index, object value, string name, bool ignoreCase)
 		{
 			expando.TrySetValue(indexClass, index, value, name, ignoreCase, false);
 			return value;
 		}
 
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static bool ExpandoTryDeleteValue(ExpandoObject expando, object indexClass, int index, string name, bool ignoreCase)
 		{
 			return expando.TryDeleteValue(indexClass, index, name, ignoreCase, ExpandoObject.Uninitialized);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static bool ExpandoCheckVersion(ExpandoObject expando, object version)
 		{
 			return expando.Class == version;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void ExpandoPromoteClass(ExpandoObject expando, object oldClass, object newClass)
 		{
 			expando.PromoteClass(oldClass, newClass);
 		}
 
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static Expression Quote(Expression expression, object hoistedLocals, object[] locals)
 		{
 			return new RuntimeOps.ExpressionQuoter((HoistedLocals)hoistedLocals, locals).Visit(expression);
 		}
 
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static IRuntimeVariables MergeRuntimeVariables(IRuntimeVariables first, IRuntimeVariables second, int[] indexes)
 		{
 			return new RuntimeOps.MergedRuntimeVariables(first, second, indexes);
 		}
 
-		[Obsolete("do not use this method", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("do not use this method", true)]
 		public static IRuntimeVariables CreateRuntimeVariables(object[] data, long[] indexes)
 		{
 			return new RuntimeOps.RuntimeVariableList(data, indexes);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("do not use this method", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static IRuntimeVariables CreateRuntimeVariables()
 		{
 			return new RuntimeOps.EmptyRuntimeVariables();

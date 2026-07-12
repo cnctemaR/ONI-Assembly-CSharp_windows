@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -45,7 +44,7 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("DebugDrawLine", IsThreadSafe = true)]
-		public static void DrawLine(Vector3 start, Vector3 end, [UnityEngine.Internal.DefaultValue("Color.white")] Color color, [UnityEngine.Internal.DefaultValue("0.0f")] float duration, [UnityEngine.Internal.DefaultValue("true")] bool depthTest)
+		public static void DrawLine(Vector3 start, Vector3 end, [DefaultValue("Color.white")] Color color, [DefaultValue("0.0f")] float duration, [DefaultValue("true")] bool depthTest)
 		{
 			Debug.DrawLine_Injected(ref start, ref end, ref color, duration, depthTest);
 		}
@@ -74,7 +73,7 @@ namespace UnityEngine
 			Debug.DrawRay(start, dir, white, num, flag);
 		}
 
-		public static void DrawRay(Vector3 start, Vector3 dir, [UnityEngine.Internal.DefaultValue("Color.white")] Color color, [UnityEngine.Internal.DefaultValue("0.0f")] float duration, [UnityEngine.Internal.DefaultValue("true")] bool depthTest)
+		public static void DrawRay(Vector3 start, Vector3 dir, [DefaultValue("Color.white")] Color color, [DefaultValue("0.0f")] float duration, [DefaultValue("true")] bool depthTest)
 		{
 			Debug.DrawLine(start, start + dir, color, duration, depthTest);
 		}
@@ -150,6 +149,14 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ClearDeveloperConsole();
+
+		public static extern bool developerConsoleEnabled
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		public static extern bool developerConsoleVisible
 		{
@@ -293,8 +300,6 @@ namespace UnityEngine
 			Debug.unityLogger.LogFormat(LogType.Assert, context, format, args);
 		}
 
-		[StaticAccessor("GetBuildSettings()", StaticAccessorType.Dot)]
-		[NativeProperty(TargetType = TargetType.Field)]
 		public static extern bool isDebugBuild
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -305,16 +310,25 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void OpenConsoleFile();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void GetDiagnosticSwitches(List<DiagnosticSwitch> results);
-
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern object GetDiagnosticSwitch(string name);
+		internal static extern DiagnosticSwitch[] diagnosticSwitches
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SetDiagnosticSwitch(string name, object value, bool setPersistent);
+		internal static DiagnosticSwitch GetDiagnosticSwitch(string name)
+		{
+			foreach (DiagnosticSwitch diagnosticSwitch in Debug.diagnosticSwitches)
+			{
+				bool flag = diagnosticSwitch.name == name;
+				if (flag)
+				{
+					return diagnosticSwitch;
+				}
+			}
+			throw new ArgumentException("Could not find DiagnosticSwitch named " + name);
+		}
 
 		[RequiredByNativeCode]
 		internal static bool CallOverridenDebugHandler(Exception exception, Object obj)
@@ -357,8 +371,8 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void Assert(bool condition, string format, params object[] args)
 		{
@@ -369,8 +383,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static ILogger logger
 		{
 			get
@@ -380,7 +394,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawLine_Injected(ref Vector3 start, ref Vector3 end, [UnityEngine.Internal.DefaultValue("Color.white")] ref Color color, [UnityEngine.Internal.DefaultValue("0.0f")] float duration, [UnityEngine.Internal.DefaultValue("true")] bool depthTest);
+		private static extern void DrawLine_Injected(ref Vector3 start, ref Vector3 end, [DefaultValue("Color.white")] ref Color color, [DefaultValue("0.0f")] float duration, [DefaultValue("true")] bool depthTest);
 
 		internal static readonly ILogger s_DefaultLogger = new Logger(new DebugLogHandler());
 

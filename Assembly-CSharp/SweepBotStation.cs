@@ -191,14 +191,7 @@ public class SweepBotStation : KMonoBehaviour
 	private void OnOperationalChanged(object data)
 	{
 		Operational component = base.GetComponent<Operational>();
-		if (component.Flags.ContainsValue(false))
-		{
-			component.SetActive(false, false);
-		}
-		else
-		{
-			component.SetActive(true, false);
-		}
+		component.SetActive(!component.Flags.ContainsValue(false), false);
 		if (this.sweepBot == null || this.sweepBot.Get() == null)
 		{
 			this.RequestNewSweepBot(null);

@@ -6,18 +6,6 @@ namespace System.Runtime.CompilerServices
 	[Serializable]
 	public sealed class RuntimeCompatibilityAttribute : Attribute
 	{
-		public bool WrapNonExceptionThrows
-		{
-			get
-			{
-				return this.m_wrapNonExceptionThrows;
-			}
-			set
-			{
-				this.m_wrapNonExceptionThrows = value;
-			}
-		}
-
-		private bool m_wrapNonExceptionThrows;
+		public bool WrapNonExceptionThrows { get; set; }
 	}
 }

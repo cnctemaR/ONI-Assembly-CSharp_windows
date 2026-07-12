@@ -1,30 +1,34 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Security.Cryptography
 {
-	[ComVisible(true)]
 	public class CryptoStream : Stream, IDisposable
 	{
 		public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode)
+			: this(stream, transform, mode, false)
+		{
+		}
+
+		public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode, bool leaveOpen)
 		{
 			this._stream = stream;
 			this._transformMode = mode;
-			this._Transform = transform;
+			this._transform = transform;
+			this._leaveOpen = leaveOpen;
 			CryptoStreamMode transformMode = this._transformMode;
 			if (transformMode != CryptoStreamMode.Read)
 			{
 				if (transformMode != CryptoStreamMode.Write)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
+					throw new ArgumentException("Argument {0} should be larger than {1}.");
 				}
 				if (!this._stream.CanWrite)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Stream was not writable."), "stream");
+					throw new ArgumentException(SR.Format("Stream was not writable.", "stream"));
 				}
 				this._canWrite = true;
 			}
@@ -32,7 +36,7 @@ namespace System.Security.Cryptography
 			{
 				if (!this._stream.CanRead)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Stream was not readable."), "stream");
+					throw new ArgumentException(SR.Format("Stream was not readable.", "stream"));
 				}
 				this._canRead = true;
 			}
@@ -67,7 +71,7 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
+				throw new NotSupportedException("Stream does not support seeking.");
 			}
 		}
 
@@ -75,11 +79,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
+				throw new NotSupportedException("Stream does not support seeking.");
 			}
 			set
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
+				throw new NotSupportedException("Stream does not support seeking.");
 			}
 		}
 
@@ -95,14 +99,14 @@ namespace System.Security.Cryptography
 		{
 			if (this._finalBlockTransformed)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once."));
+				throw new NotSupportedException("FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once.");
 			}
-			byte[] array = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
+			byte[] array = this._transform.TransformFinalBlock(this._inputBuffer, 0, this._inputBufferIndex);
 			this._finalBlockTransformed = true;
-			if (this._canWrite && this._OutputBufferIndex > 0)
+			if (this._canWrite && this._outputBufferIndex > 0)
 			{
-				this._stream.Write(this._OutputBuffer, 0, this._OutputBufferIndex);
-				this._OutputBufferIndex = 0;
+				this._stream.Write(this._outputBuffer, 0, this._outputBufferIndex);
+				this._outputBufferIndex = 0;
 			}
 			if (this._canWrite)
 			{
@@ -120,13 +124,13 @@ namespace System.Security.Cryptography
 			{
 				this._stream.Flush();
 			}
-			if (this._InputBuffer != null)
+			if (this._inputBuffer != null)
 			{
-				Array.Clear(this._InputBuffer, 0, this._InputBuffer.Length);
+				Array.Clear(this._inputBuffer, 0, this._inputBuffer.Length);
 			}
-			if (this._OutputBuffer != null)
+			if (this._outputBuffer != null)
 			{
-				Array.Clear(this._OutputBuffer, 0, this._OutputBuffer.Length);
+				Array.Clear(this._outputBuffer, 0, this._outputBuffer.Length);
 			}
 		}
 
@@ -144,438 +148,403 @@ namespace System.Security.Cryptography
 			{
 				return Task.CompletedTask;
 			}
-			return Task.FromCancellation(cancellationToken);
+			return Task.FromCanceled(cancellationToken);
 		}
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
+			throw new NotSupportedException("Stream does not support seeking.");
 		}
 
 		public override void SetLength(long value)
 		{
-			throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
-		}
-
-		public override int Read([In] [Out] byte[] buffer, int offset, int count)
-		{
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - offset < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			int i = count;
-			int num = offset;
-			if (this._OutputBufferIndex != 0)
-			{
-				if (this._OutputBufferIndex > count)
-				{
-					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, count);
-					Buffer.InternalBlockCopy(this._OutputBuffer, count, this._OutputBuffer, 0, this._OutputBufferIndex - count);
-					this._OutputBufferIndex -= count;
-					return count;
-				}
-				Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, this._OutputBufferIndex);
-				i -= this._OutputBufferIndex;
-				num += this._OutputBufferIndex;
-				this._OutputBufferIndex = 0;
-			}
-			if (this._finalBlockTransformed)
-			{
-				return count - i;
-			}
-			if (i > this._OutputBlockSize && this._Transform.CanTransformMultipleBlocks)
-			{
-				int num2 = i / this._OutputBlockSize * this._InputBlockSize;
-				byte[] array = new byte[num2];
-				Buffer.InternalBlockCopy(this._InputBuffer, 0, array, 0, this._InputBufferIndex);
-				int num3 = this._InputBufferIndex;
-				num3 += this._stream.Read(array, this._InputBufferIndex, num2 - this._InputBufferIndex);
-				this._InputBufferIndex = 0;
-				if (num3 <= this._InputBlockSize)
-				{
-					this._InputBuffer = array;
-					this._InputBufferIndex = num3;
-				}
-				else
-				{
-					int num4 = num3 / this._InputBlockSize * this._InputBlockSize;
-					int num5 = num3 - num4;
-					if (num5 != 0)
-					{
-						this._InputBufferIndex = num5;
-						Buffer.InternalBlockCopy(array, num4, this._InputBuffer, 0, num5);
-					}
-					byte[] array2 = new byte[num4 / this._InputBlockSize * this._OutputBlockSize];
-					int num6 = this._Transform.TransformBlock(array, 0, num4, array2, 0);
-					Buffer.InternalBlockCopy(array2, 0, buffer, num, num6);
-					Array.Clear(array, 0, array.Length);
-					Array.Clear(array2, 0, array2.Length);
-					i -= num6;
-					num += num6;
-				}
-			}
-			while (i > 0)
-			{
-				while (this._InputBufferIndex < this._InputBlockSize)
-				{
-					int num3 = this._stream.Read(this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
-					if (num3 != 0)
-					{
-						this._InputBufferIndex += num3;
-					}
-					else
-					{
-						byte[] array3 = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
-						this._OutputBuffer = array3;
-						this._OutputBufferIndex = array3.Length;
-						this._finalBlockTransformed = true;
-						if (i < this._OutputBufferIndex)
-						{
-							Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, i);
-							this._OutputBufferIndex -= i;
-							Buffer.InternalBlockCopy(this._OutputBuffer, i, this._OutputBuffer, 0, this._OutputBufferIndex);
-							return count;
-						}
-						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, this._OutputBufferIndex);
-						i -= this._OutputBufferIndex;
-						this._OutputBufferIndex = 0;
-						return count - i;
-					}
-				}
-				int num6 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
-				this._InputBufferIndex = 0;
-				if (i < num6)
-				{
-					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, i);
-					this._OutputBufferIndex = num6 - i;
-					Buffer.InternalBlockCopy(this._OutputBuffer, i, this._OutputBuffer, 0, this._OutputBufferIndex);
-					return count;
-				}
-				Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, num6);
-				num += num6;
-				i -= num6;
-			}
-			return count;
+			throw new NotSupportedException("Stream does not support seeking.");
 		}
 
 		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - offset < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (base.GetType() != typeof(CryptoStream))
-			{
-				return base.ReadAsync(buffer, offset, count, cancellationToken);
-			}
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCancellation<int>(cancellationToken);
-			}
+			this.CheckReadArguments(buffer, offset, count);
 			return this.ReadAsyncInternal(buffer, offset, count, cancellationToken);
+		}
+
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			return TaskToApm.Begin(this.ReadAsync(buffer, offset, count, CancellationToken.None), callback, state);
+		}
+
+		public override int EndRead(IAsyncResult asyncResult)
+		{
+			return TaskToApm.End<int>(asyncResult);
 		}
 
 		private async Task<int> ReadAsyncInternal(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			await default(CryptoStream.HopToThreadPoolAwaitable);
-			SemaphoreSlim sem = base.EnsureAsyncActiveSemaphoreInitialized();
-			await sem.WaitAsync().ConfigureAwait(false);
+			SemaphoreSlim semaphore = this.AsyncActiveSemaphore;
+			await semaphore.WaitAsync().ForceAsync();
 			int num;
 			try
 			{
-				int bytesToDeliver = count;
-				int currentOutputIndex = offset;
-				if (this._OutputBufferIndex != 0)
-				{
-					if (this._OutputBufferIndex > count)
-					{
-						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, count);
-						Buffer.InternalBlockCopy(this._OutputBuffer, count, this._OutputBuffer, 0, this._OutputBufferIndex - count);
-						this._OutputBufferIndex -= count;
-						return count;
-					}
-					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, this._OutputBufferIndex);
-					bytesToDeliver -= this._OutputBufferIndex;
-					currentOutputIndex += this._OutputBufferIndex;
-					this._OutputBufferIndex = 0;
-				}
-				if (this._finalBlockTransformed)
-				{
-					num = count - bytesToDeliver;
-				}
-				else
-				{
-					if (bytesToDeliver > this._OutputBlockSize && this._Transform.CanTransformMultipleBlocks)
-					{
-						int num2 = bytesToDeliver / this._OutputBlockSize * this._InputBlockSize;
-						byte[] tempInputBuffer = new byte[num2];
-						Buffer.InternalBlockCopy(this._InputBuffer, 0, tempInputBuffer, 0, this._InputBufferIndex);
-						int inputBufferIndex = this._InputBufferIndex;
-						int num3 = inputBufferIndex + await this._stream.ReadAsync(tempInputBuffer, this._InputBufferIndex, num2 - this._InputBufferIndex, cancellationToken).ConfigureAwait(false);
-						this._InputBufferIndex = 0;
-						if (num3 <= this._InputBlockSize)
-						{
-							this._InputBuffer = tempInputBuffer;
-							this._InputBufferIndex = num3;
-						}
-						else
-						{
-							int num4 = num3 / this._InputBlockSize * this._InputBlockSize;
-							int num5 = num3 - num4;
-							if (num5 != 0)
-							{
-								this._InputBufferIndex = num5;
-								Buffer.InternalBlockCopy(tempInputBuffer, num4, this._InputBuffer, 0, num5);
-							}
-							byte[] array = new byte[num4 / this._InputBlockSize * this._OutputBlockSize];
-							int num6 = this._Transform.TransformBlock(tempInputBuffer, 0, num4, array, 0);
-							Buffer.InternalBlockCopy(array, 0, buffer, currentOutputIndex, num6);
-							Array.Clear(tempInputBuffer, 0, tempInputBuffer.Length);
-							Array.Clear(array, 0, array.Length);
-							bytesToDeliver -= num6;
-							currentOutputIndex += num6;
-							tempInputBuffer = null;
-						}
-					}
-					while (bytesToDeliver > 0)
-					{
-						while (this._InputBufferIndex < this._InputBlockSize)
-						{
-							int num3 = await this._stream.ReadAsync(this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex, cancellationToken).ConfigureAwait(false);
-							if (num3 != 0)
-							{
-								this._InputBufferIndex += num3;
-							}
-							else
-							{
-								byte[] array2 = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
-								this._OutputBuffer = array2;
-								this._OutputBufferIndex = array2.Length;
-								this._finalBlockTransformed = true;
-								if (bytesToDeliver < this._OutputBufferIndex)
-								{
-									Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
-									this._OutputBufferIndex -= bytesToDeliver;
-									Buffer.InternalBlockCopy(this._OutputBuffer, bytesToDeliver, this._OutputBuffer, 0, this._OutputBufferIndex);
-									return count;
-								}
-								Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, this._OutputBufferIndex);
-								bytesToDeliver -= this._OutputBufferIndex;
-								this._OutputBufferIndex = 0;
-								return count - bytesToDeliver;
-							}
-						}
-						int num6 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
-						this._InputBufferIndex = 0;
-						if (bytesToDeliver < num6)
-						{
-							Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
-							this._OutputBufferIndex = num6 - bytesToDeliver;
-							Buffer.InternalBlockCopy(this._OutputBuffer, bytesToDeliver, this._OutputBuffer, 0, this._OutputBufferIndex);
-							return count;
-						}
-						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, num6);
-						currentOutputIndex += num6;
-						bytesToDeliver -= num6;
-					}
-					num = count;
-				}
+				num = await this.ReadAsyncCore(buffer, offset, count, cancellationToken, true);
 			}
 			finally
 			{
-				sem.Release();
+				semaphore.Release();
 			}
 			return num;
 		}
 
-		public override void Write(byte[] buffer, int offset, int count)
+		public override int ReadByte()
 		{
-			if (!this.CanWrite)
+			if (this._outputBufferIndex > 1)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
+				int num = (int)this._outputBuffer[0];
+				Buffer.BlockCopy(this._outputBuffer, 1, this._outputBuffer, 0, this._outputBufferIndex - 1);
+				this._outputBufferIndex--;
+				return num;
+			}
+			return base.ReadByte();
+		}
+
+		public override void WriteByte(byte value)
+		{
+			if (this._inputBufferIndex + 1 < this._inputBlockSize)
+			{
+				byte[] inputBuffer = this._inputBuffer;
+				int inputBufferIndex = this._inputBufferIndex;
+				this._inputBufferIndex = inputBufferIndex + 1;
+				inputBuffer[inputBufferIndex] = value;
+				return;
+			}
+			base.WriteByte(value);
+		}
+
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			this.CheckReadArguments(buffer, offset, count);
+			return this.ReadAsyncCore(buffer, offset, count, default(CancellationToken), false).GetAwaiter().GetResult();
+		}
+
+		private void CheckReadArguments(byte[] buffer, int offset, int count)
+		{
+			if (!this.CanRead)
+			{
+				throw new NotSupportedException("Stream does not support reading.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			int i = count;
-			int num = offset;
-			if (this._InputBufferIndex > 0)
+		}
+
+		private async Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken, bool useAsync)
+		{
+			int bytesToDeliver = count;
+			int currentOutputIndex = offset;
+			if (this._outputBufferIndex != 0)
 			{
-				if (count < this._InputBlockSize - this._InputBufferIndex)
+				if (this._outputBufferIndex > count)
 				{
-					Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, count);
-					this._InputBufferIndex += count;
-					return;
+					Buffer.BlockCopy(this._outputBuffer, 0, buffer, offset, count);
+					Buffer.BlockCopy(this._outputBuffer, count, this._outputBuffer, 0, this._outputBufferIndex - count);
+					this._outputBufferIndex -= count;
+					int num = this._outputBuffer.Length - this._outputBufferIndex;
+					CryptographicOperations.ZeroMemory(new Span<byte>(this._outputBuffer, this._outputBufferIndex, num));
+					return count;
 				}
-				Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
-				num += this._InputBlockSize - this._InputBufferIndex;
-				i -= this._InputBlockSize - this._InputBufferIndex;
-				this._InputBufferIndex = this._InputBlockSize;
+				Buffer.BlockCopy(this._outputBuffer, 0, buffer, offset, this._outputBufferIndex);
+				bytesToDeliver -= this._outputBufferIndex;
+				currentOutputIndex += this._outputBufferIndex;
+				int num2 = this._outputBuffer.Length - this._outputBufferIndex;
+				CryptographicOperations.ZeroMemory(new Span<byte>(this._outputBuffer, this._outputBufferIndex, num2));
+				this._outputBufferIndex = 0;
 			}
-			if (this._OutputBufferIndex > 0)
+			int num3;
+			if (this._finalBlockTransformed)
 			{
-				this._stream.Write(this._OutputBuffer, 0, this._OutputBufferIndex);
-				this._OutputBufferIndex = 0;
+				num3 = count - bytesToDeliver;
 			}
-			if (this._InputBufferIndex == this._InputBlockSize)
+			else
 			{
-				int num2 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
-				this._stream.Write(this._OutputBuffer, 0, num2);
-				this._InputBufferIndex = 0;
+				int num4 = bytesToDeliver / this._outputBlockSize;
+				if (num4 > 1 && this._transform.CanTransformMultipleBlocks)
+				{
+					int numWholeBlocksInBytes = num4 * this._inputBlockSize;
+					byte[] tempInputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocksInBytes);
+					byte[] tempOutputBuffer = null;
+					try
+					{
+						int num5;
+						if (useAsync)
+						{
+							num5 = await this._stream.ReadAsync(new Memory<byte>(tempInputBuffer, this._inputBufferIndex, numWholeBlocksInBytes - this._inputBufferIndex), cancellationToken);
+						}
+						else
+						{
+							num5 = this._stream.Read(tempInputBuffer, this._inputBufferIndex, numWholeBlocksInBytes - this._inputBufferIndex);
+						}
+						int num6 = num5;
+						int num7 = this._inputBufferIndex + num6;
+						if (num7 < this._inputBlockSize)
+						{
+							Buffer.BlockCopy(tempInputBuffer, this._inputBufferIndex, this._inputBuffer, this._inputBufferIndex, num6);
+							this._inputBufferIndex = num7;
+						}
+						else
+						{
+							Buffer.BlockCopy(this._inputBuffer, 0, tempInputBuffer, 0, this._inputBufferIndex);
+							CryptographicOperations.ZeroMemory(new Span<byte>(this._inputBuffer, 0, this._inputBufferIndex));
+							num6 += this._inputBufferIndex;
+							this._inputBufferIndex = 0;
+							int num8 = num6 / this._inputBlockSize;
+							int num9 = num8 * this._inputBlockSize;
+							int num10 = num6 - num9;
+							if (num10 != 0)
+							{
+								this._inputBufferIndex = num10;
+								Buffer.BlockCopy(tempInputBuffer, num9, this._inputBuffer, 0, num10);
+							}
+							tempOutputBuffer = ArrayPool<byte>.Shared.Rent(num8 * this._outputBlockSize);
+							int num11 = this._transform.TransformBlock(tempInputBuffer, 0, num9, tempOutputBuffer, 0);
+							Buffer.BlockCopy(tempOutputBuffer, 0, buffer, currentOutputIndex, num11);
+							CryptographicOperations.ZeroMemory(new Span<byte>(tempOutputBuffer, 0, num11));
+							ArrayPool<byte>.Shared.Return(tempOutputBuffer, false);
+							tempOutputBuffer = null;
+							bytesToDeliver -= num11;
+							currentOutputIndex += num11;
+						}
+					}
+					finally
+					{
+						if (tempOutputBuffer != null)
+						{
+							CryptographicOperations.ZeroMemory(tempOutputBuffer);
+							ArrayPool<byte>.Shared.Return(tempOutputBuffer, false);
+							tempOutputBuffer = null;
+						}
+						CryptographicOperations.ZeroMemory(new Span<byte>(tempInputBuffer, 0, numWholeBlocksInBytes));
+						ArrayPool<byte>.Shared.Return(tempInputBuffer, false);
+						tempInputBuffer = null;
+					}
+					tempInputBuffer = null;
+					tempOutputBuffer = null;
+				}
+				while (bytesToDeliver > 0)
+				{
+					while (this._inputBufferIndex < this._inputBlockSize)
+					{
+						int num5;
+						if (useAsync)
+						{
+							num5 = await this._stream.ReadAsync(new Memory<byte>(this._inputBuffer, this._inputBufferIndex, this._inputBlockSize - this._inputBufferIndex), cancellationToken);
+						}
+						else
+						{
+							num5 = this._stream.Read(this._inputBuffer, this._inputBufferIndex, this._inputBlockSize - this._inputBufferIndex);
+						}
+						int num6 = num5;
+						if (num6 != 0)
+						{
+							this._inputBufferIndex += num6;
+						}
+						else
+						{
+							byte[] array = this._transform.TransformFinalBlock(this._inputBuffer, 0, this._inputBufferIndex);
+							this._outputBuffer = array;
+							this._outputBufferIndex = array.Length;
+							this._finalBlockTransformed = true;
+							if (bytesToDeliver < this._outputBufferIndex)
+							{
+								Buffer.BlockCopy(this._outputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
+								this._outputBufferIndex -= bytesToDeliver;
+								Buffer.BlockCopy(this._outputBuffer, bytesToDeliver, this._outputBuffer, 0, this._outputBufferIndex);
+								int num12 = this._outputBuffer.Length - this._outputBufferIndex;
+								CryptographicOperations.ZeroMemory(new Span<byte>(this._outputBuffer, this._outputBufferIndex, num12));
+								return count;
+							}
+							Buffer.BlockCopy(this._outputBuffer, 0, buffer, currentOutputIndex, this._outputBufferIndex);
+							bytesToDeliver -= this._outputBufferIndex;
+							this._outputBufferIndex = 0;
+							CryptographicOperations.ZeroMemory(this._outputBuffer);
+							return count - bytesToDeliver;
+						}
+					}
+					int num11 = this._transform.TransformBlock(this._inputBuffer, 0, this._inputBlockSize, this._outputBuffer, 0);
+					this._inputBufferIndex = 0;
+					if (bytesToDeliver < num11)
+					{
+						Buffer.BlockCopy(this._outputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
+						this._outputBufferIndex = num11 - bytesToDeliver;
+						Buffer.BlockCopy(this._outputBuffer, bytesToDeliver, this._outputBuffer, 0, this._outputBufferIndex);
+						int num13 = this._outputBuffer.Length - this._outputBufferIndex;
+						CryptographicOperations.ZeroMemory(new Span<byte>(this._outputBuffer, this._outputBufferIndex, num13));
+						return count;
+					}
+					Buffer.BlockCopy(this._outputBuffer, 0, buffer, currentOutputIndex, num11);
+					CryptographicOperations.ZeroMemory(new Span<byte>(this._outputBuffer, 0, num11));
+					currentOutputIndex += num11;
+					bytesToDeliver -= num11;
+				}
+				num3 = count;
 			}
-			while (i > 0)
-			{
-				if (i < this._InputBlockSize)
-				{
-					Buffer.InternalBlockCopy(buffer, num, this._InputBuffer, 0, i);
-					this._InputBufferIndex += i;
-					return;
-				}
-				if (this._Transform.CanTransformMultipleBlocks)
-				{
-					int num3 = i / this._InputBlockSize;
-					int num4 = num3 * this._InputBlockSize;
-					byte[] array = new byte[num3 * this._OutputBlockSize];
-					int num2 = this._Transform.TransformBlock(buffer, num, num4, array, 0);
-					this._stream.Write(array, 0, num2);
-					num += num4;
-					i -= num4;
-				}
-				else
-				{
-					int num2 = this._Transform.TransformBlock(buffer, num, this._InputBlockSize, this._OutputBuffer, 0);
-					this._stream.Write(this._OutputBuffer, 0, num2);
-					num += this._InputBlockSize;
-					i -= this._InputBlockSize;
-				}
-			}
+			return num3;
 		}
 
 		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			if (!this.CanWrite)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
-			}
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - offset < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (base.GetType() != typeof(CryptoStream))
-			{
-				return base.WriteAsync(buffer, offset, count, cancellationToken);
-			}
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCancellation(cancellationToken);
-			}
+			this.CheckWriteArguments(buffer, offset, count);
 			return this.WriteAsyncInternal(buffer, offset, count, cancellationToken);
+		}
+
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			return TaskToApm.Begin(this.WriteAsync(buffer, offset, count, CancellationToken.None), callback, state);
+		}
+
+		public override void EndWrite(IAsyncResult asyncResult)
+		{
+			TaskToApm.End(asyncResult);
 		}
 
 		private async Task WriteAsyncInternal(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			await default(CryptoStream.HopToThreadPoolAwaitable);
-			SemaphoreSlim sem = base.EnsureAsyncActiveSemaphoreInitialized();
-			await sem.WaitAsync().ConfigureAwait(false);
+			SemaphoreSlim semaphore = this.AsyncActiveSemaphore;
+			await semaphore.WaitAsync().ForceAsync();
 			try
 			{
-				int bytesToWrite = count;
-				int currentInputIndex = offset;
-				if (this._InputBufferIndex > 0)
-				{
-					if (count < this._InputBlockSize - this._InputBufferIndex)
-					{
-						Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, count);
-						this._InputBufferIndex += count;
-						return;
-					}
-					Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
-					currentInputIndex += this._InputBlockSize - this._InputBufferIndex;
-					bytesToWrite -= this._InputBlockSize - this._InputBufferIndex;
-					this._InputBufferIndex = this._InputBlockSize;
-				}
-				if (this._OutputBufferIndex > 0)
-				{
-					await this._stream.WriteAsync(this._OutputBuffer, 0, this._OutputBufferIndex, cancellationToken).ConfigureAwait(false);
-					this._OutputBufferIndex = 0;
-				}
-				if (this._InputBufferIndex == this._InputBlockSize)
-				{
-					int num = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
-					await this._stream.WriteAsync(this._OutputBuffer, 0, num, cancellationToken).ConfigureAwait(false);
-					this._InputBufferIndex = 0;
-				}
-				while (bytesToWrite > 0)
-				{
-					if (bytesToWrite < this._InputBlockSize)
-					{
-						Buffer.InternalBlockCopy(buffer, currentInputIndex, this._InputBuffer, 0, bytesToWrite);
-						this._InputBufferIndex += bytesToWrite;
-						break;
-					}
-					if (this._Transform.CanTransformMultipleBlocks)
-					{
-						int num2 = bytesToWrite / this._InputBlockSize;
-						int numWholeBlocksInBytes = num2 * this._InputBlockSize;
-						byte[] array = new byte[num2 * this._OutputBlockSize];
-						int num = this._Transform.TransformBlock(buffer, currentInputIndex, numWholeBlocksInBytes, array, 0);
-						await this._stream.WriteAsync(array, 0, num, cancellationToken).ConfigureAwait(false);
-						currentInputIndex += numWholeBlocksInBytes;
-						bytesToWrite -= numWholeBlocksInBytes;
-					}
-					else
-					{
-						int num = this._Transform.TransformBlock(buffer, currentInputIndex, this._InputBlockSize, this._OutputBuffer, 0);
-						await this._stream.WriteAsync(this._OutputBuffer, 0, num, cancellationToken).ConfigureAwait(false);
-						currentInputIndex += this._InputBlockSize;
-						bytesToWrite -= this._InputBlockSize;
-					}
-				}
+				await this.WriteAsyncCore(buffer, offset, count, cancellationToken, true);
 			}
 			finally
 			{
-				sem.Release();
+				semaphore.Release();
+			}
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			this.CheckWriteArguments(buffer, offset, count);
+			this.WriteAsyncCore(buffer, offset, count, default(CancellationToken), false).GetAwaiter().GetResult();
+		}
+
+		private void CheckWriteArguments(byte[] buffer, int offset, int count)
+		{
+			if (!this.CanWrite)
+			{
+				throw new NotSupportedException("Stream does not support writing.");
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+		}
+
+		private async Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken, bool useAsync)
+		{
+			int bytesToWrite = count;
+			int currentInputIndex = offset;
+			if (this._inputBufferIndex > 0)
+			{
+				if (count < this._inputBlockSize - this._inputBufferIndex)
+				{
+					Buffer.BlockCopy(buffer, offset, this._inputBuffer, this._inputBufferIndex, count);
+					this._inputBufferIndex += count;
+					return;
+				}
+				Buffer.BlockCopy(buffer, offset, this._inputBuffer, this._inputBufferIndex, this._inputBlockSize - this._inputBufferIndex);
+				currentInputIndex += this._inputBlockSize - this._inputBufferIndex;
+				bytesToWrite -= this._inputBlockSize - this._inputBufferIndex;
+				this._inputBufferIndex = this._inputBlockSize;
+			}
+			if (this._outputBufferIndex > 0)
+			{
+				if (useAsync)
+				{
+					await this._stream.WriteAsync(new ReadOnlyMemory<byte>(this._outputBuffer, 0, this._outputBufferIndex), cancellationToken);
+				}
+				else
+				{
+					this._stream.Write(this._outputBuffer, 0, this._outputBufferIndex);
+				}
+				this._outputBufferIndex = 0;
+			}
+			if (this._inputBufferIndex == this._inputBlockSize)
+			{
+				int numOutputBytes = this._transform.TransformBlock(this._inputBuffer, 0, this._inputBlockSize, this._outputBuffer, 0);
+				if (useAsync)
+				{
+					await this._stream.WriteAsync(new ReadOnlyMemory<byte>(this._outputBuffer, 0, numOutputBytes), cancellationToken);
+				}
+				else
+				{
+					this._stream.Write(this._outputBuffer, 0, numOutputBytes);
+				}
+				this._inputBufferIndex = 0;
+			}
+			while (bytesToWrite > 0)
+			{
+				if (bytesToWrite < this._inputBlockSize)
+				{
+					Buffer.BlockCopy(buffer, currentInputIndex, this._inputBuffer, 0, bytesToWrite);
+					this._inputBufferIndex += bytesToWrite;
+					break;
+				}
+				int num = bytesToWrite / this._inputBlockSize;
+				if (this._transform.CanTransformMultipleBlocks && num > 1)
+				{
+					int numWholeBlocksInBytes = num * this._inputBlockSize;
+					byte[] tempOutputBuffer = ArrayPool<byte>.Shared.Rent(num * this._outputBlockSize);
+					int numOutputBytes = 0;
+					try
+					{
+						numOutputBytes = this._transform.TransformBlock(buffer, currentInputIndex, numWholeBlocksInBytes, tempOutputBuffer, 0);
+						if (useAsync)
+						{
+							await this._stream.WriteAsync(new ReadOnlyMemory<byte>(tempOutputBuffer, 0, numOutputBytes), cancellationToken);
+						}
+						else
+						{
+							this._stream.Write(tempOutputBuffer, 0, numOutputBytes);
+						}
+						currentInputIndex += numWholeBlocksInBytes;
+						bytesToWrite -= numWholeBlocksInBytes;
+					}
+					finally
+					{
+						CryptographicOperations.ZeroMemory(new Span<byte>(tempOutputBuffer, 0, numOutputBytes));
+						ArrayPool<byte>.Shared.Return(tempOutputBuffer, false);
+						tempOutputBuffer = null;
+					}
+					tempOutputBuffer = null;
+				}
+				else
+				{
+					int numOutputBytes = this._transform.TransformBlock(buffer, currentInputIndex, this._inputBlockSize, this._outputBuffer, 0);
+					if (useAsync)
+					{
+						await this._stream.WriteAsync(new ReadOnlyMemory<byte>(this._outputBuffer, 0, numOutputBytes), cancellationToken);
+					}
+					else
+					{
+						this._stream.Write(this._outputBuffer, 0, numOutputBytes);
+					}
+					currentInputIndex += this._inputBlockSize;
+					bytesToWrite -= this._inputBlockSize;
+				}
 			}
 		}
 
@@ -594,7 +563,10 @@ namespace System.Security.Cryptography
 					{
 						this.FlushFinalBlock();
 					}
-					this._stream.Close();
+					if (!this._leaveOpen)
+					{
+						this._stream.Dispose();
+					}
 				}
 			}
 			finally
@@ -602,16 +574,16 @@ namespace System.Security.Cryptography
 				try
 				{
 					this._finalBlockTransformed = true;
-					if (this._InputBuffer != null)
+					if (this._inputBuffer != null)
 					{
-						Array.Clear(this._InputBuffer, 0, this._InputBuffer.Length);
+						Array.Clear(this._inputBuffer, 0, this._inputBuffer.Length);
 					}
-					if (this._OutputBuffer != null)
+					if (this._outputBuffer != null)
 					{
-						Array.Clear(this._OutputBuffer, 0, this._OutputBuffer.Length);
+						Array.Clear(this._outputBuffer, 0, this._outputBuffer.Length);
 					}
-					this._InputBuffer = null;
-					this._OutputBuffer = null;
+					this._inputBuffer = null;
+					this._outputBuffer = null;
 					this._canRead = false;
 					this._canWrite = false;
 				}
@@ -624,32 +596,40 @@ namespace System.Security.Cryptography
 
 		private void InitializeBuffer()
 		{
-			if (this._Transform != null)
+			if (this._transform != null)
 			{
-				this._InputBlockSize = this._Transform.InputBlockSize;
-				this._InputBuffer = new byte[this._InputBlockSize];
-				this._OutputBlockSize = this._Transform.OutputBlockSize;
-				this._OutputBuffer = new byte[this._OutputBlockSize];
+				this._inputBlockSize = this._transform.InputBlockSize;
+				this._inputBuffer = new byte[this._inputBlockSize];
+				this._outputBlockSize = this._transform.OutputBlockSize;
+				this._outputBuffer = new byte[this._outputBlockSize];
 			}
 		}
 
-		private Stream _stream;
+		private SemaphoreSlim AsyncActiveSemaphore
+		{
+			get
+			{
+				return LazyInitializer.EnsureInitialized<SemaphoreSlim>(ref this._lazyAsyncActiveSemaphore, () => new SemaphoreSlim(1, 1));
+			}
+		}
 
-		private ICryptoTransform _Transform;
+		private readonly Stream _stream;
 
-		private byte[] _InputBuffer;
+		private readonly ICryptoTransform _transform;
 
-		private int _InputBufferIndex;
+		private readonly CryptoStreamMode _transformMode;
 
-		private int _InputBlockSize;
+		private byte[] _inputBuffer;
 
-		private byte[] _OutputBuffer;
+		private int _inputBufferIndex;
 
-		private int _OutputBufferIndex;
+		private int _inputBlockSize;
 
-		private int _OutputBlockSize;
+		private byte[] _outputBuffer;
 
-		private CryptoStreamMode _transformMode;
+		private int _outputBufferIndex;
+
+		private int _outputBlockSize;
 
 		private bool _canRead;
 
@@ -657,29 +637,8 @@ namespace System.Security.Cryptography
 
 		private bool _finalBlockTransformed;
 
-		private struct HopToThreadPoolAwaitable : INotifyCompletion
-		{
-			public CryptoStream.HopToThreadPoolAwaitable GetAwaiter()
-			{
-				return this;
-			}
+		private SemaphoreSlim _lazyAsyncActiveSemaphore;
 
-			public bool IsCompleted
-			{
-				get
-				{
-					return false;
-				}
-			}
-
-			public void OnCompleted(Action continuation)
-			{
-				Task.Run(continuation);
-			}
-
-			public void GetResult()
-			{
-			}
-		}
+		private readonly bool _leaveOpen;
 	}
 }

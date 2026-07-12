@@ -40,37 +40,40 @@ namespace TUNING
 			return DUPLICANTSTATS.INVALID_TRAIT_VAL;
 		}
 
-		public const float DEFAULT_MASS = 30f;
+		public static DUPLICANTSTATS GetStatsFor(GameObject gameObject)
+		{
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			if (component != null)
+			{
+				return DUPLICANTSTATS.GetStatsFor(component);
+			}
+			return null;
+		}
 
-		public const float PEE_FUSE_TIME = 120f;
+		public static DUPLICANTSTATS GetStatsFor(KPrefabID prefabID)
+		{
+			if (!prefabID.HasTag(GameTags.BaseMinion))
+			{
+				return null;
+			}
+			foreach (Tag tag in GameTags.Minions.Models.AllModels)
+			{
+				if (prefabID.HasTag(tag))
+				{
+					return DUPLICANTSTATS.GetStatsFor(tag);
+				}
+			}
+			return null;
+		}
 
-		public const float PEE_PER_FLOOR_PEE = 2f;
-
-		public const float PEE_PER_TOILET_PEE = 6.7f;
-
-		public const string PEE_DISEASE = "FoodPoisoning";
-
-		public const int DISEASE_PER_PEE = 100000;
-
-		public const int DISEASE_PER_VOMIT = 100000;
-
-		public const float KCAL2JOULES = 4184f;
-
-		public const float COOLING_EFFICIENCY = 0.08f;
-
-		public const float DUPLICANT_COOLING_KILOWATTS = 0.5578667f;
-
-		public const float WARMING_EFFICIENCY = 0.08f;
-
-		public const float DUPLICANT_WARMING_KILOWATTS = 0.5578667f;
-
-		public const float HEAT_GENERATION_EFFICIENCY = 0.012f;
-
-		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.08368001f;
-
-		public const float STANDARD_STRESS_PENALTY = 0.016666668f;
-
-		public const float STANDARD_STRESS_BONUS = -0.033333335f;
+		public static DUPLICANTSTATS GetStatsFor(Tag type)
+		{
+			if (DUPLICANTSTATS.DUPLICANT_TYPES.ContainsKey(type))
+			{
+				return DUPLICANTSTATS.DUPLICANT_TYPES[type];
+			}
+			return null;
+		}
 
 		public const float RANCHING_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.1f;
 
@@ -80,6 +83,10 @@ namespace TUNING
 
 		public const float RANCHING_CAPTURABLE_MULTIPLIER_BONUS_PER_POINT = 0.05f;
 
+		public const float STANDARD_STRESS_PENALTY = 0.016666668f;
+
+		public const float STANDARD_STRESS_BONUS = -0.033333335f;
+
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -87,8 +94,6 @@ namespace TUNING
 		public const float STANDARD_STRESS_PENALTY_SECOND = 0.25f;
 
 		public const float STANDARD_STRESS_BONUS_SECOND = -0.5f;
-
-		public const float RECOVER_BREATH_DELTA = 3f;
 
 		public const float TRAVEL_TIME_WARNING_THRESHOLD = 0.4f;
 
@@ -572,6 +577,16 @@ namespace TUNING
 			{
 				id = "HappySinger",
 				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DataRainer",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "RoboDancer",
+				dlcId = "DLC3_ID"
 			}
 		};
 
@@ -596,6 +611,59 @@ namespace TUNING
 			{
 				id = "RockCrusher",
 				dlcId = ""
+			}
+		};
+
+		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BionicBaseline",
+				dlcId = "DLC3_ID"
+			}
+		};
+
+		public static readonly List<DUPLICANTSTATS.TraitVal> BIONICUPGRADETRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostDigging",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostBuilding",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostCooking",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostArt",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostFarming",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostRanching",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostMedicine",
+				dlcId = "DLC3_ID"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DefaultBionicBoostExplorer",
+				dlcId = "DLC3_ID"
 			}
 		};
 
@@ -957,64 +1025,42 @@ namespace TUNING
 			}
 		};
 
-		public class BASESTATS
+		public static DUPLICANTSTATS STANDARD = new DUPLICANTSTATS();
+
+		public static DUPLICANTSTATS BIONICS = new DUPLICANTSTATS
 		{
-			public const float STAMINA_USED_PER_SECOND = -0.11666667f;
+			BaseStats = new DUPLICANTSTATS.BASESTATS
+			{
+				NO_OXYGEN_THRESHOLD = 0.5f,
+				MAX_CALORIES = 0f
+			}
+		};
 
-			public const float MAX_CALORIES = 4000000f;
+		private static readonly Dictionary<Tag, DUPLICANTSTATS> DUPLICANT_TYPES = new Dictionary<Tag, DUPLICANTSTATS>
+		{
+			{
+				GameTags.Minions.Models.Standard,
+				DUPLICANTSTATS.STANDARD
+			},
+			{
+				GameTags.Minions.Models.Bionic,
+				DUPLICANTSTATS.BIONICS
+			}
+		};
 
-			public const float CALORIES_BURNED_PER_CYCLE = -1000000f;
+		public DUPLICANTSTATS.BASESTATS BaseStats = new DUPLICANTSTATS.BASESTATS();
 
-			public const float CALORIES_BURNED_PER_SECOND = -1666.6666f;
+		public DUPLICANTSTATS.TEMPERATURE Temperature = new DUPLICANTSTATS.TEMPERATURE();
 
-			public const float GUESSTIMATE_CALORIES_PER_CYCLE = -1600000f;
+		public DUPLICANTSTATS.BREATH Breath = new DUPLICANTSTATS.BREATH();
 
-			public const float GUESSTIMATE_CALORIES_BURNED_PER_SECOND = -1666.6666f;
+		public DUPLICANTSTATS.LIGHT Light = new DUPLICANTSTATS.LIGHT();
 
-			public const float TRANSIT_TUBE_TRAVEL_SPEED = 18f;
+		public DUPLICANTSTATS.COMBAT Combat = new DUPLICANTSTATS.COMBAT();
 
-			public const float OXYGEN_USED_PER_SECOND = 0.1f;
+		public DUPLICANTSTATS.SECRETIONS Secretions = new DUPLICANTSTATS.SECRETIONS();
 
-			public const float OXYGEN_TO_CO2_CONVERSION = 0.02f;
-
-			public const float LOW_OXYGEN_THRESHOLD = 0.52f;
-
-			public const float NO_OXYGEN_THRESHOLD = 0.05f;
-
-			public const float MIN_CO2_TO_EMIT = 0.02f;
-
-			public const float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
-
-			public const float DECOR_EXPECTATION = 0f;
-
-			public const float FOOD_QUALITY_EXPECTATION = 0f;
-
-			public const float RECREATION_EXPECTATION = 2f;
-
-			public const float MAX_PROFESSION_DECOR_EXPECTATION = 75f;
-
-			public const float MAX_PROFESSION_FOOD_EXPECTATION = 0f;
-
-			public const int MAX_UNDERWATER_TRAVEL_COST = 8;
-
-			public const float TOILET_EFFICIENCY = 1f;
-
-			public const float ROOM_TEMPERATURE_PREFERENCE = 0f;
-
-			public const int BUILDING_DAMAGE_ACTING_OUT = 100;
-
-			public const float IMMUNE_LEVEL_MAX = 100f;
-
-			public const float IMMUNE_LEVEL_RECOVERY = 0.025f;
-
-			public const float CARRY_CAPACITY = 200f;
-
-			public const float HIT_POINTS = 100f;
-
-			public const float RADIATION_RESISTANCE = 0f;
-		}
-
-		public class RADIATION_DIFFICULTY_MODIFIERS
+		public static class RADIATION_DIFFICULTY_MODIFIERS
 		{
 			public static float HARDEST = 0.33f;
 
@@ -1027,7 +1073,7 @@ namespace TUNING
 			public static float EASIEST = 100f;
 		}
 
-		public class RADIATION_EXPOSURE_LEVELS
+		public static class RADIATION_EXPOSURE_LEVELS
 		{
 			public const float LOW = 100f;
 
@@ -1038,113 +1084,7 @@ namespace TUNING
 			public const float DEADLY = 900f;
 		}
 
-		public class CALORIES
-		{
-			public const float SATISFIED_THRESHOLD = 0.95f;
-
-			public const float HUNGRY_THRESHOLD = 0.825f;
-
-			public const float STARVING_THRESHOLD = 0.25f;
-		}
-
-		public class TEMPERATURE
-		{
-			public const float SKIN_THICKNESS = 0.002f;
-
-			public const float SURFACE_AREA = 1f;
-
-			public const float GROUND_TRANSFER_SCALE = 0f;
-
-			public class EXTERNAL
-			{
-				public const float THRESHOLD_COLD = 283.15f;
-
-				public const float THRESHOLD_HOT = 306.15f;
-
-				public const float THRESHOLD_SCALDING = 345f;
-			}
-
-			public class INTERNAL
-			{
-				public const float IDEAL = 310.15f;
-
-				public const float THRESHOLD_HYPOTHERMIA = 308.15f;
-
-				public const float THRESHOLD_HYPERTHERMIA = 312.15f;
-
-				public const float THRESHOLD_FATAL_HOT = 320.15f;
-
-				public const float THRESHOLD_FATAL_COLD = 300.15f;
-			}
-
-			public class CONDUCTIVITY_BARRIER_MODIFICATION
-			{
-				public const float SKINNY = -0.005f;
-
-				public const float PUDGY = 0.005f;
-			}
-		}
-
-		public class NOISE
-		{
-			public const int THRESHOLD_PEACEFUL = 0;
-
-			public const int THRESHOLD_QUIET = 36;
-
-			public const int THRESHOLD_TOSS_AND_TURN = 45;
-
-			public const int THRESHOLD_WAKE_UP = 60;
-
-			public const int THRESHOLD_MINOR_REACTION = 80;
-
-			public const int THRESHOLD_MAJOR_REACTION = 106;
-
-			public const int THRESHOLD_EXTREME_REACTION = 125;
-		}
-
-		public class BREATH
-		{
-			private const float BREATH_BAR_TOTAL_SECONDS = 110f;
-
-			private const float RETREAT_AT_SECONDS = 80f;
-
-			private const float SUFFOCATION_WARN_AT_SECONDS = 50f;
-
-			public const float BREATH_BAR_TOTAL_AMOUNT = 100f;
-
-			public const float RETREAT_AMOUNT = 72.72727f;
-
-			public const float SUFFOCATE_AMOUNT = 45.454548f;
-
-			public const float BREATH_RATE = 0.90909094f;
-		}
-
-		public class LIGHT
-		{
-			public const int LUX_SUNBURN = 72000;
-
-			public const float SUNBURN_DELAY_TIME = 120f;
-
-			public const int LUX_PLEASANT_LIGHT = 40000;
-
-			public const float LIGHT_WORK_EFFICIENCY_BONUS = 0.15f;
-
-			public const int NO_LIGHT = 0;
-
-			public const int VERY_LOW_LIGHT = 1;
-
-			public const int LOW_LIGHT = 500;
-
-			public const int MEDIUM_LIGHT = 1000;
-
-			public const int HIGH_LIGHT = 10000;
-
-			public const int VERY_HIGH_LIGHT = 50000;
-
-			public const int MAX_LIGHT = 100000;
-		}
-
-		public class MOVEMENT
+		public static class MOVEMENT_MODIFIERS
 		{
 			public static float NEUTRAL = 1f;
 
@@ -1165,7 +1105,7 @@ namespace TUNING
 			public static float PENALTY_4 = 0.25f;
 		}
 
-		public class QOL_STRESS
+		public static class QOL_STRESS
 		{
 			public const float ABOVE_EXPECTATIONS = -0.016666668f;
 
@@ -1173,7 +1113,7 @@ namespace TUNING
 
 			public const float MIN_STRESS = -0.033333335f;
 
-			public class BELOW_EXPECTATIONS
+			public static class BELOW_EXPECTATIONS
 			{
 				public const float EASY = 0.0033333334f;
 
@@ -1184,7 +1124,7 @@ namespace TUNING
 				public const float VERYHARD = 0.016666668f;
 			}
 
-			public class MAX_STRESS
+			public static class MAX_STRESS
 			{
 				public const float EASY = 0.016666668f;
 
@@ -1196,29 +1136,7 @@ namespace TUNING
 			}
 		}
 
-		public class COMBAT
-		{
-			public const Health.HealthState FLEE_THRESHOLD = Health.HealthState.Critical;
-
-			public class BASICWEAPON
-			{
-				public const float ATTACKS_PER_SECOND = 2f;
-
-				public const float MIN_DAMAGE_PER_HIT = 1f;
-
-				public const float MAX_DAMAGE_PER_HIT = 1f;
-
-				public const AttackProperties.TargetType TARGET_TYPE = AttackProperties.TargetType.Single;
-
-				public const AttackProperties.DamageType DAMAGE_TYPE = AttackProperties.DamageType.Standard;
-
-				public const int MAX_HITS = 1;
-
-				public const float AREA_OF_EFFECT_RADIUS = 0f;
-			}
-		}
-
-		public class CLOTHING
+		public static class CLOTHING
 		{
 			public class DECOR_MODIFICATION
 			{
@@ -1254,6 +1172,28 @@ namespace TUNING
 
 				public const float IMPROVE = 2f;
 			}
+		}
+
+		public static class NOISE
+		{
+			public const int THRESHOLD_PEACEFUL = 0;
+
+			public const int THRESHOLD_QUIET = 36;
+
+			public const int THRESHOLD_TOSS_AND_TURN = 45;
+
+			public const int THRESHOLD_WAKE_UP = 60;
+
+			public const int THRESHOLD_MINOR_REACTION = 80;
+
+			public const int THRESHOLD_MAJOR_REACTION = 106;
+
+			public const int THRESHOLD_EXTREME_REACTION = 125;
+		}
+
+		public static class ROOM
+		{
+			public const float LABORATORY_RESEARCH_EFFICIENCY_BONUS = 0.1f;
 		}
 
 		public class DISTRIBUTIONS
@@ -1316,9 +1256,272 @@ namespace TUNING
 			public static float BARELY_EVER_EXPERIENCE = DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE / 0.1f;
 		}
 
-		public class ROOM
+		public class BASESTATS
 		{
-			public const float LABORATORY_RESEARCH_EFFICIENCY_BONUS = 0.1f;
+			public float CALORIES_BURNED_PER_SECOND
+			{
+				get
+				{
+					return this.CALORIES_BURNED_PER_CYCLE / 600f;
+				}
+			}
+
+			public float HUNGRY_THRESHOLD
+			{
+				get
+				{
+					return this.SATISFIED_THRESHOLD - -this.CALORIES_BURNED_PER_CYCLE * 0.5f / this.MAX_CALORIES;
+				}
+			}
+
+			public float STARVING_THRESHOLD
+			{
+				get
+				{
+					return -this.CALORIES_BURNED_PER_CYCLE / this.MAX_CALORIES;
+				}
+			}
+
+			public float DUPLICANT_COOLING_KILOWATTS
+			{
+				get
+				{
+					return this.COOLING_EFFICIENCY * -this.CALORIES_BURNED_PER_SECOND * 0.001f * this.KCAL2JOULES / 1000f;
+				}
+			}
+
+			public float DUPLICANT_WARMING_KILOWATTS
+			{
+				get
+				{
+					return this.WARMING_EFFICIENCY * -this.CALORIES_BURNED_PER_SECOND * 0.001f * this.KCAL2JOULES / 1000f;
+				}
+			}
+
+			public float DUPLICANT_BASE_GENERATION_KILOWATTS
+			{
+				get
+				{
+					return this.HEAT_GENERATION_EFFICIENCY * -this.CALORIES_BURNED_PER_SECOND * 0.001f * this.KCAL2JOULES / 1000f;
+				}
+			}
+
+			public float GUESSTIMATE_CALORIES_BURNED_PER_SECOND
+			{
+				get
+				{
+					return this.CALORIES_BURNED_PER_CYCLE / 600f;
+				}
+			}
+
+			public float DEFAULT_MASS = 30f;
+
+			public float STAMINA_USED_PER_SECOND = -0.11666667f;
+
+			public float TRANSIT_TUBE_TRAVEL_SPEED = 18f;
+
+			public float OXYGEN_USED_PER_SECOND = 0.1f;
+
+			public float OXYGEN_TO_CO2_CONVERSION = 0.02f;
+
+			public float LOW_OXYGEN_THRESHOLD = 0.52f;
+
+			public float NO_OXYGEN_THRESHOLD = 0.05f;
+
+			public float RECOVER_BREATH_DELTA = 3f;
+
+			public float MIN_CO2_TO_EMIT = 0.02f;
+
+			public float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
+
+			public float DECOR_EXPECTATION;
+
+			public float FOOD_QUALITY_EXPECTATION;
+
+			public float RECREATION_EXPECTATION = 2f;
+
+			public float MAX_PROFESSION_DECOR_EXPECTATION = 75f;
+
+			public float MAX_PROFESSION_FOOD_EXPECTATION;
+
+			public int MAX_UNDERWATER_TRAVEL_COST = 8;
+
+			public float TOILET_EFFICIENCY = 1f;
+
+			public float ROOM_TEMPERATURE_PREFERENCE;
+
+			public int BUILDING_DAMAGE_ACTING_OUT = 100;
+
+			public float IMMUNE_LEVEL_MAX = 100f;
+
+			public float IMMUNE_LEVEL_RECOVERY = 0.025f;
+
+			public float CARRY_CAPACITY = 200f;
+
+			public float HIT_POINTS = 100f;
+
+			public float RADIATION_RESISTANCE;
+
+			public string NAV_GRID_NAME = "MinionNavGrid";
+
+			public float KCAL2JOULES = 4184f;
+
+			public float MAX_CALORIES = 4000000f;
+
+			public float CALORIES_BURNED_PER_CYCLE = -1000000f;
+
+			public float SATISFIED_THRESHOLD = 0.95f;
+
+			public float COOLING_EFFICIENCY = 0.08f;
+
+			public float WARMING_EFFICIENCY = 0.08f;
+
+			public float HEAT_GENERATION_EFFICIENCY = 0.012f;
+
+			public float GUESSTIMATE_CALORIES_PER_CYCLE = -1600000f;
+		}
+
+		public class TEMPERATURE
+		{
+			public DUPLICANTSTATS.TEMPERATURE.EXTERNAL External = new DUPLICANTSTATS.TEMPERATURE.EXTERNAL();
+
+			public DUPLICANTSTATS.TEMPERATURE.INTERNAL Internal = new DUPLICANTSTATS.TEMPERATURE.INTERNAL();
+
+			public DUPLICANTSTATS.TEMPERATURE.CONDUCTIVITY_BARRIER_MODIFICATION Conductivity_Barrier_Modification = new DUPLICANTSTATS.TEMPERATURE.CONDUCTIVITY_BARRIER_MODIFICATION();
+
+			public float SKIN_THICKNESS = 0.002f;
+
+			public float SURFACE_AREA = 1f;
+
+			public float GROUND_TRANSFER_SCALE;
+
+			public class EXTERNAL
+			{
+				public float THRESHOLD_COLD = 283.15f;
+
+				public float THRESHOLD_HOT = 306.15f;
+
+				public float THRESHOLD_SCALDING = 345f;
+			}
+
+			public class INTERNAL
+			{
+				public float IDEAL = 310.15f;
+
+				public float THRESHOLD_HYPOTHERMIA = 308.15f;
+
+				public float THRESHOLD_HYPERTHERMIA = 312.15f;
+
+				public float THRESHOLD_FATAL_HOT = 320.15f;
+
+				public float THRESHOLD_FATAL_COLD = 300.15f;
+			}
+
+			public class CONDUCTIVITY_BARRIER_MODIFICATION
+			{
+				public float SKINNY = -0.005f;
+
+				public float PUDGY = 0.005f;
+			}
+		}
+
+		public class BREATH
+		{
+			public float RETREAT_AMOUNT
+			{
+				get
+				{
+					return this.RETREAT_AT_SECONDS / this.BREATH_BAR_TOTAL_SECONDS * this.BREATH_BAR_TOTAL_AMOUNT;
+				}
+			}
+
+			public float SUFFOCATE_AMOUNT
+			{
+				get
+				{
+					return this.SUFFOCATION_WARN_AT_SECONDS / this.BREATH_BAR_TOTAL_SECONDS * this.BREATH_BAR_TOTAL_AMOUNT;
+				}
+			}
+
+			public float BREATH_RATE
+			{
+				get
+				{
+					return this.BREATH_BAR_TOTAL_AMOUNT / this.BREATH_BAR_TOTAL_SECONDS;
+				}
+			}
+
+			private float BREATH_BAR_TOTAL_SECONDS = 110f;
+
+			private float RETREAT_AT_SECONDS = 80f;
+
+			private float SUFFOCATION_WARN_AT_SECONDS = 50f;
+
+			public float BREATH_BAR_TOTAL_AMOUNT = 100f;
+		}
+
+		public class LIGHT
+		{
+			public int LUX_SUNBURN = 72000;
+
+			public float SUNBURN_DELAY_TIME = 120f;
+
+			public int LUX_PLEASANT_LIGHT = 40000;
+
+			public float LIGHT_WORK_EFFICIENCY_BONUS = 0.15f;
+
+			public int NO_LIGHT;
+
+			public int VERY_LOW_LIGHT = 1;
+
+			public int LOW_LIGHT = 500;
+
+			public int MEDIUM_LIGHT = 1000;
+
+			public int HIGH_LIGHT = 10000;
+
+			public int VERY_HIGH_LIGHT = 50000;
+
+			public int MAX_LIGHT = 100000;
+		}
+
+		public class COMBAT
+		{
+			public DUPLICANTSTATS.COMBAT.BASICWEAPON BasicWeapon = new DUPLICANTSTATS.COMBAT.BASICWEAPON();
+
+			public Health.HealthState FLEE_THRESHOLD = Health.HealthState.Critical;
+
+			public class BASICWEAPON
+			{
+				public float ATTACKS_PER_SECOND = 2f;
+
+				public float MIN_DAMAGE_PER_HIT = 1f;
+
+				public float MAX_DAMAGE_PER_HIT = 1f;
+
+				public AttackProperties.TargetType TARGET_TYPE;
+
+				public AttackProperties.DamageType DAMAGE_TYPE;
+
+				public int MAX_HITS = 1;
+
+				public float AREA_OF_EFFECT_RADIUS;
+			}
+		}
+
+		public class SECRETIONS
+		{
+			public float PEE_FUSE_TIME = 120f;
+
+			public float PEE_PER_FLOOR_PEE = 2f;
+
+			public float PEE_PER_TOILET_PEE = 6.7f;
+
+			public string PEE_DISEASE = "FoodPoisoning";
+
+			public int DISEASE_PER_PEE = 100000;
+
+			public int DISEASE_PER_VOMIT = 100000;
 		}
 	}
 }

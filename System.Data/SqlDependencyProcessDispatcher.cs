@@ -677,7 +677,12 @@ internal class SqlDependencyProcessDispatcher : MarshalByRefObject
 						this._timeoutParam.Value = this._defaultWaitforTimeout;
 						this.AsynchronouslyQueryServiceBrokerQueue();
 						this._errorState = false;
-						this._retryTimer = null;
+						Timer retryTimer = this._retryTimer;
+						if (retryTimer != null)
+						{
+							this._retryTimer = null;
+							retryTimer.Dispose();
+						}
 					}
 				}
 				if (this._stop)

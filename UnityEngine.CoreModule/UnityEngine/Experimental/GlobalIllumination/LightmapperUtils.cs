@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.GlobalIllumination
 {
@@ -22,6 +23,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		private static Color ExtractColorTemperature(Light l)
 		{
 			Color color = new Color(1f, 1f, 1f);
+			bool flag = l.useColorTemperature && GraphicsSettings.lightsUseLinearIntensity;
+			if (flag)
+			{
+				color = Mathf.CorrelatedColorTemperatureToRGB(l.colorTemperature);
+			}
 			return color;
 		}
 

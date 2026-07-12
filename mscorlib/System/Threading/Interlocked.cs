@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using System.Security;
+using Unity;
 
 namespace System.Threading
 {
@@ -17,7 +19,15 @@ namespace System.Threading
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern object CompareExchange(ref object location1, object value, object comparand);
+		private static extern void CompareExchange(ref object location1, ref object value, ref object comparand, ref object result);
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public static object CompareExchange(ref object location1, object value, object comparand)
+		{
+			object obj = null;
+			Interlocked.CompareExchange(ref location1, ref value, ref comparand, ref obj);
+			return obj;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float CompareExchange(ref float location1, float value, float comparand);
@@ -43,7 +53,15 @@ namespace System.Threading
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern object Exchange(ref object location1, object value);
+		private static extern void Exchange(ref object location1, ref object value, ref object result);
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public static object Exchange(ref object location1, object value)
+		{
+			object obj = null;
+			Interlocked.Exchange(ref location1, ref value, ref obj);
+			return obj;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float Exchange(ref float location1, float value);
@@ -60,8 +78,17 @@ namespace System.Threading
 
 		[ComVisible(false)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern T CompareExchange<T>(ref T location1, T value, T comparand) where T : class;
+		[Intrinsic]
+		public static T CompareExchange<T>(ref T location1, T value, T comparand) where T : class
+		{
+			if (Unsafe.AsPointer<T>(ref location1) == null)
+			{
+				throw new NullReferenceException();
+			}
+			T t = default(T);
+			Interlocked.CompareExchange(Unsafe.As<T, object>(ref location1), Unsafe.As<T, object>(ref value), Unsafe.As<T, object>(ref comparand), Unsafe.As<T, object>(ref t));
+			return t;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long Exchange(ref long location1, long value);
@@ -74,9 +101,18 @@ namespace System.Threading
 		public static extern double Exchange(ref double location1, double value);
 
 		[ComVisible(false)]
+		[Intrinsic]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern T Exchange<T>(ref T location1, T value) where T : class;
+		public static T Exchange<T>(ref T location1, T value) where T : class
+		{
+			if (Unsafe.AsPointer<T>(ref location1) == null)
+			{
+				throw new NullReferenceException();
+			}
+			T t = default(T);
+			Interlocked.Exchange(Unsafe.As<T, object>(ref location1), Unsafe.As<T, object>(ref value), Unsafe.As<T, object>(ref t));
+			return t;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long Read(ref long location);
@@ -92,6 +128,16 @@ namespace System.Threading
 		public static void MemoryBarrier()
 		{
 			Thread.MemoryBarrier();
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void MemoryBarrierProcessWide();
+
+		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public static void SpeculationBarrier()
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 	}
 }

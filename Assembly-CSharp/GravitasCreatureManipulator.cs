@@ -62,10 +62,10 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 		StatusItem.IconType iconType = StatusItem.IconType.Info;
 		NotificationType notificationType = NotificationType.Neutral;
 		bool flag = false;
-		HashedString hashedString = default(HashedString);
-		int num = 129022;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, hashedString, num, new Func<string, GravitasCreatureManipulator.Instance, string>(GravitasCreatureManipulator.Processing), new Func<string, GravitasCreatureManipulator.Instance, string>(GravitasCreatureManipulator.ProcessingTooltip), main);
+		Func<string, GravitasCreatureManipulator.Instance, string> func = new Func<string, GravitasCreatureManipulator.Instance, string>(GravitasCreatureManipulator.Processing);
+		Func<string, GravitasCreatureManipulator.Instance, string> func2 = new Func<string, GravitasCreatureManipulator.Instance, string>(GravitasCreatureManipulator.ProcessingTooltip);
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, func, func2, main);
 	}
 
 	private static string Processing(string str, GravitasCreatureManipulator.Instance smi)

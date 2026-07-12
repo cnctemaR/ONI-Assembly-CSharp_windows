@@ -42,7 +42,7 @@ public class CarpetTileConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
-		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_2;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.PENALTY_2;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = CarpetTileConfig.BlockTileConnectorID;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;

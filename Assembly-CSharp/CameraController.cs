@@ -233,6 +233,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		this.SetSpeedFromPrefs(null);
 		Game.Instance.Subscribe(75424175, new Action<object>(this.SetSpeedFromPrefs));
+		this.VisibleArea.Update();
 	}
 
 	private void SetSpeedFromPrefs(object data = null)
@@ -1271,8 +1272,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public bool IsVisiblePos(Vector3 pos)
 	{
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		return visibleArea.Min <= pos && pos <= visibleArea.Max;
+		return this.VisibleArea.CurrentArea.Contains(pos);
+	}
+
+	public bool IsVisiblePosExtended(Vector3 pos)
+	{
+		return this.VisibleArea.CurrentAreaExtended.Contains(pos);
 	}
 
 	protected override void OnCleanUp()
@@ -1401,7 +1406,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public Vector3 followTargetPos;
 
-	public GridVisibleArea VisibleArea = new GridVisibleArea();
+	public GridVisibleArea VisibleArea = new GridVisibleArea(8);
 
 	private float maxOrthographicSize = 20f;
 

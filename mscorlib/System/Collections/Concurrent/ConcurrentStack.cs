@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class ConcurrentStack<T> : IProducerConsumerCollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{

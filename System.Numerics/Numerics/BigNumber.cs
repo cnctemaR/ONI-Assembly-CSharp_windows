@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Buffers;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Security;
 using System.Text;
 
 namespace System.Numerics
@@ -24,7 +23,6 @@ namespace System.Numerics
 			return true;
 		}
 
-		[SecuritySafeCritical]
 		internal static bool TryParseBigInteger(string value, NumberStyles style, NumberFormatInfo info, out BigInteger result)
 		{
 			if (value == null)
@@ -32,10 +30,9 @@ namespace System.Numerics
 				result = default(BigInteger);
 				return false;
 			}
-			return BigNumber.TryParseBigInteger(BigNumber.AsReadOnlySpan(value), style, info, out result);
+			return BigNumber.TryParseBigInteger(value.AsSpan(), style, info, out result);
 		}
 
-		[SecuritySafeCritical]
 		internal static bool TryParseBigInteger(ReadOnlySpan<char> value, NumberStyles style, NumberFormatInfo info, out BigInteger result)
 		{
 			result = BigInteger.Zero;
@@ -69,17 +66,7 @@ namespace System.Numerics
 			{
 				throw new ArgumentNullException("value");
 			}
-			return BigNumber.ParseBigInteger(BigNumber.AsReadOnlySpan(value), style, info);
-		}
-
-		private unsafe static ReadOnlySpan<char> AsReadOnlySpan(string s)
-		{
-			char* ptr = s;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			return new ReadOnlySpan<char>((void*)ptr, s.Length);
+			return BigNumber.ParseBigInteger(value.AsSpan(), style, info);
 		}
 
 		internal static BigInteger ParseBigInteger(ReadOnlySpan<char> value, NumberStyles style, NumberFormatInfo info)
@@ -171,32 +158,32 @@ namespace System.Numerics
 			return true;
 		}
 
-		internal static char ParseFormatSpecifier(string format, out int digits)
+		internal unsafe static char ParseFormatSpecifier(ReadOnlySpan<char> format, out int digits)
 		{
 			digits = -1;
-			if (string.IsNullOrEmpty(format))
+			if (format.Length == 0)
 			{
 				return 'R';
 			}
 			int num = 0;
-			char c = format[num];
+			char c = (char)(*format[num]);
 			if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
 			{
 				num++;
 				int num2 = -1;
-				if (num < format.Length && format[num] >= '0' && format[num] <= '9')
+				if (num < format.Length && *format[num] >= 48 && *format[num] <= 57)
 				{
-					num2 = (int)(format[num++] - '0');
-					while (num < format.Length && format[num] >= '0' && format[num] <= '9')
+					num2 = (int)(*format[num++] - 48);
+					while (num < format.Length && *format[num] >= 48 && *format[num] <= 57)
 					{
-						num2 = num2 * 10 + (int)(format[num++] - '0');
+						num2 = num2 * 10 + (int)(*format[num++] - 48);
 						if (num2 >= 10)
 						{
 							break;
 						}
 					}
 				}
-				if (num >= format.Length || format[num] == '\0')
+				if (num >= format.Length || *format[num] == 0)
 				{
 					digits = num2;
 					return c;
@@ -205,15 +192,24 @@ namespace System.Numerics
 			return '\0';
 		}
 
-		private static string FormatBigIntegerToHexString(BigInteger value, char format, int digits, NumberFormatInfo info)
+		private unsafe static string FormatBigIntegerToHex(bool targetSpan, BigInteger value, char format, int digits, NumberFormatInfo info, Span<char> destination, out int charsWritten, out bool spanSuccess)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			byte[] array = value.ToByteArray();
-			int i = array.Length - 1;
+			byte[] array = null;
+			Span<byte> span = new Span<byte>(stackalloc byte[(UIntPtr)64], 64);
+			int num;
+			if (!value.TryWriteOrCountBytes(span, out num, false, false))
+			{
+				span = (array = ArrayPool<byte>.Shared.Rent(num));
+				value.TryWriteBytes(span, out num, false, false);
+			}
+			span = span.Slice(0, num);
+			Span<char> span2 = new Span<char>(stackalloc byte[(UIntPtr)256], 128);
+			ValueStringBuilder valueStringBuilder = new ValueStringBuilder(span2);
+			int i = span.Length - 1;
 			if (i > -1)
 			{
 				bool flag = false;
-				byte b = array[i];
+				byte b = *span[i];
 				if (b > 247)
 				{
 					b -= 240;
@@ -221,162 +217,221 @@ namespace System.Numerics
 				}
 				if (b < 8 || flag)
 				{
-					string text = string.Format(CultureInfo.InvariantCulture, "{0}1", format);
-					stringBuilder.Append(b.ToString(text, info));
+					valueStringBuilder.Append((b < 10) ? ((char)(b + 48)) : ((format == 'X') ? ((char)((b & 15) - 10 + 65)) : ((char)((b & 15) - 10 + 97))));
 					i--;
 				}
 			}
 			if (i > -1)
 			{
-				string text = string.Format(CultureInfo.InvariantCulture, "{0}2", format);
+				Span<char> span3 = valueStringBuilder.AppendSpan((i + 1) * 2);
+				int num2 = 0;
+				string text = ((format == 'x') ? "0123456789abcdef" : "0123456789ABCDEF");
 				while (i > -1)
 				{
-					stringBuilder.Append(array[i--].ToString(text, info));
+					byte b2 = *span[i--];
+					*span3[num2++] = text[b2 >> 4];
+					*span3[num2++] = text[(int)(b2 & 15)];
 				}
 			}
-			if (digits > 0 && digits > stringBuilder.Length)
+			if (digits > valueStringBuilder.Length)
 			{
-				stringBuilder.Insert(0, (value._sign >= 0) ? "0" : ((format == 'x') ? "f" : "F"), digits - stringBuilder.Length);
+				valueStringBuilder.Insert(0, (value._sign >= 0) ? '0' : ((format == 'x') ? 'f' : 'F'), digits - valueStringBuilder.Length);
 			}
-			return stringBuilder.ToString();
+			if (array != null)
+			{
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
+			if (targetSpan)
+			{
+				spanSuccess = valueStringBuilder.TryCopyTo(destination, out charsWritten);
+				return null;
+			}
+			charsWritten = 0;
+			spanSuccess = false;
+			return valueStringBuilder.ToString();
 		}
 
-		[SecuritySafeCritical]
 		internal static string FormatBigInteger(BigInteger value, string format, NumberFormatInfo info)
 		{
+			int num;
+			bool flag;
+			return BigNumber.FormatBigInteger(false, value, format, format, info, default(Span<char>), out num, out flag);
+		}
+
+		internal static bool TryFormatBigInteger(BigInteger value, ReadOnlySpan<char> format, NumberFormatInfo info, Span<char> destination, out int charsWritten)
+		{
+			bool flag;
+			BigNumber.FormatBigInteger(true, value, null, format, info, destination, out charsWritten, out flag);
+			return flag;
+		}
+
+		private unsafe static string FormatBigInteger(bool targetSpan, BigInteger value, string formatString, ReadOnlySpan<char> formatSpan, NumberFormatInfo info, Span<char> destination, out int charsWritten, out bool spanSuccess)
+		{
 			int num = 0;
-			char c = BigNumber.ParseFormatSpecifier(format, out num);
+			char c = BigNumber.ParseFormatSpecifier(formatSpan, out num);
 			if (c == 'x' || c == 'X')
 			{
-				return BigNumber.FormatBigIntegerToHexString(value, c, num, info);
+				return BigNumber.FormatBigIntegerToHex(targetSpan, value, c, num, info, destination, out charsWritten, out spanSuccess);
 			}
-			bool flag = c == 'g' || c == 'G' || c == 'd' || c == 'D' || c == 'r' || c == 'R';
 			if (value._bits == null)
 			{
 				if (c == 'g' || c == 'G' || c == 'r' || c == 'R')
 				{
-					if (num > 0)
-					{
-						format = string.Format(CultureInfo.InvariantCulture, "D{0}", num.ToString(CultureInfo.InvariantCulture));
-					}
-					else
-					{
-						format = "D";
-					}
+					formatSpan = (formatString = ((num > 0) ? string.Format("D{0}", num) : "D"));
 				}
-				return value._sign.ToString(format, info);
-			}
-			int num2 = value._bits.Length;
-			int num3;
-			try
-			{
-				num3 = checked(num2 * 10 / 9 + 2);
-			}
-			catch (OverflowException ex)
-			{
-				throw new FormatException("The value is too large to be represented by this format specifier.", ex);
-			}
-			uint[] array = new uint[num3];
-			int num4 = 0;
-			int num5 = num2;
-			while (--num5 >= 0)
-			{
-				uint num6 = value._bits[num5];
-				for (int i = 0; i < num4; i++)
+				if (targetSpan)
 				{
-					ulong num7 = NumericsHelpers.MakeUlong(array[i], num6);
-					array[i] = (uint)(num7 % 1000000000UL);
-					num6 = (uint)(num7 / 1000000000UL);
+					spanSuccess = value._sign.TryFormat(destination, out charsWritten, formatSpan, info);
+					return null;
 				}
-				if (num6 != 0U)
-				{
-					array[num4++] = num6 % 1000000000U;
-					num6 /= 1000000000U;
-					if (num6 != 0U)
-					{
-						array[num4++] = num6;
-					}
-				}
+				charsWritten = 0;
+				spanSuccess = false;
+				return value._sign.ToString(formatString, info);
 			}
-			int num8;
-			char[] array2;
-			int num10;
-			checked
+			else
 			{
+				int num2 = value._bits.Length;
+				int num3;
 				try
 				{
-					num8 = num4 * 9;
+					num3 = checked(num2 * 10 / 9 + 2);
 				}
-				catch (OverflowException ex2)
+				catch (OverflowException ex)
 				{
-					throw new FormatException("The value is too large to be represented by this format specifier.", ex2);
+					throw new FormatException("The value is too large to be represented by this format specifier.", ex);
 				}
-				if (flag)
+				uint[] array = new uint[num3];
+				int num4 = 0;
+				int num5 = num2;
+				while (--num5 >= 0)
 				{
-					if (num > 0 && num > num8)
+					uint num6 = value._bits[num5];
+					for (int i = 0; i < num4; i++)
 					{
-						num8 = num;
+						ulong num7 = NumericsHelpers.MakeUlong(array[i], num6);
+						array[i] = (uint)(num7 % 1000000000UL);
+						num6 = (uint)(num7 / 1000000000UL);
+					}
+					if (num6 != 0U)
+					{
+						array[num4++] = num6 % 1000000000U;
+						num6 /= 1000000000U;
+						if (num6 != 0U)
+						{
+							array[num4++] = num6;
+						}
+					}
+				}
+				int num8;
+				bool flag;
+				char[] array2;
+				int num10;
+				checked
+				{
+					try
+					{
+						num8 = num4 * 9;
+					}
+					catch (OverflowException ex2)
+					{
+						throw new FormatException("The value is too large to be represented by this format specifier.", ex2);
+					}
+					flag = c == 'g' || c == 'G' || c == 'd' || c == 'D' || c == 'r' || c == 'R';
+					if (flag)
+					{
+						if (num > 0 && num > num8)
+						{
+							num8 = num;
+						}
+						if (value._sign < 0)
+						{
+							try
+							{
+								num8 += info.NegativeSign.Length;
+							}
+							catch (OverflowException ex3)
+							{
+								throw new FormatException("The value is too large to be represented by this format specifier.", ex3);
+							}
+						}
+					}
+					int num9;
+					try
+					{
+						num9 = num8 + 1;
+					}
+					catch (OverflowException ex4)
+					{
+						throw new FormatException("The value is too large to be represented by this format specifier.", ex4);
+					}
+					array2 = new char[num9];
+					num10 = num8;
+				}
+				for (int j = 0; j < num4 - 1; j++)
+				{
+					uint num11 = array[j];
+					int num12 = 9;
+					while (--num12 >= 0)
+					{
+						array2[--num10] = (char)(48U + num11 % 10U);
+						num11 /= 10U;
+					}
+				}
+				for (uint num13 = array[num4 - 1]; num13 != 0U; num13 /= 10U)
+				{
+					array2[--num10] = (char)(48U + num13 % 10U);
+				}
+				if (!flag)
+				{
+					bool flag2 = value._sign < 0;
+					int num14 = 29;
+					int num15 = num8 - num10;
+					Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)256], 128);
+					ValueStringBuilder valueStringBuilder = new ValueStringBuilder(span);
+					FormatProvider.FormatBigInteger(ref valueStringBuilder, num14, num15, flag2, formatSpan, info, array2, num10);
+					if (targetSpan)
+					{
+						spanSuccess = valueStringBuilder.TryCopyTo(destination, out charsWritten);
+						return null;
+					}
+					charsWritten = 0;
+					spanSuccess = false;
+					return valueStringBuilder.ToString();
+				}
+				else
+				{
+					int num16 = num8 - num10;
+					while (num > 0 && num > num16)
+					{
+						array2[--num10] = '0';
+						num--;
 					}
 					if (value._sign < 0)
 					{
-						try
+						string negativeSign = info.NegativeSign;
+						for (int k = info.NegativeSign.Length - 1; k > -1; k--)
 						{
-							num8 += info.NegativeSign.Length;
-						}
-						catch (OverflowException ex3)
-						{
-							throw new FormatException("The value is too large to be represented by this format specifier.", ex3);
+							array2[--num10] = info.NegativeSign[k];
 						}
 					}
-				}
-				int num9;
-				try
-				{
-					num9 = num8 + 1;
-				}
-				catch (OverflowException ex4)
-				{
-					throw new FormatException("The value is too large to be represented by this format specifier.", ex4);
-				}
-				array2 = new char[num9];
-				num10 = num8;
-			}
-			for (int j = 0; j < num4 - 1; j++)
-			{
-				uint num11 = array[j];
-				int num12 = 9;
-				while (--num12 >= 0)
-				{
-					array2[--num10] = (char)(48U + num11 % 10U);
-					num11 /= 10U;
+					int num17 = num8 - num10;
+					if (!targetSpan)
+					{
+						charsWritten = 0;
+						spanSuccess = false;
+						return new string(array2, num10, num8 - num10);
+					}
+					if (new ReadOnlySpan<char>(array2, num10, num8 - num10).TryCopyTo(destination))
+					{
+						charsWritten = num17;
+						spanSuccess = true;
+						return null;
+					}
+					charsWritten = 0;
+					spanSuccess = false;
+					return null;
 				}
 			}
-			for (uint num13 = array[num4 - 1]; num13 != 0U; num13 /= 10U)
-			{
-				array2[--num10] = (char)(48U + num13 % 10U);
-			}
-			if (!flag)
-			{
-				bool flag2 = value._sign < 0;
-				int num14 = 29;
-				int num15 = num8 - num10;
-				return FormatProvider.FormatBigInteger(num14, num15, flag2, format, info, array2, num10);
-			}
-			int num16 = num8 - num10;
-			while (num > 0 && num > num16)
-			{
-				array2[--num10] = '0';
-				num--;
-			}
-			if (value._sign < 0)
-			{
-				string negativeSign = info.NegativeSign;
-				for (int k = info.NegativeSign.Length - 1; k > -1; k--)
-				{
-					array2[--num10] = info.NegativeSign[k];
-				}
-			}
-			return new string(array2, num10, num8 - num10);
 		}
 
 		private const NumberStyles InvalidNumberStyles = ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign | NumberStyles.AllowParentheses | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowHexSpecifier);

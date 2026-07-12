@@ -55,6 +55,7 @@ namespace System.Threading
 					if (this._callsInProcess == 0 && this._finalEvent != null)
 					{
 						NativeEventCalls.SetEvent(this._finalEvent.SafeWaitHandle);
+						this._finalEvent = null;
 					}
 				}
 			}
@@ -91,6 +92,7 @@ namespace System.Threading
 					if (this._unregistered && this._callsInProcess == 0 && this._finalEvent != null)
 					{
 						NativeEventCalls.SetEvent(this._finalEvent.SafeWaitHandle);
+						this._finalEvent = null;
 					}
 				}
 			}

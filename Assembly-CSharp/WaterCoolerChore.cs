@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
 public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerPrioritizable
 {
@@ -9,10 +10,10 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 	{
 		base.smi = new WaterCoolerChore.StatesInstance(this);
 		base.smi.sm.chitchatlocator.Set(chat_workable, base.smi);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, chat_workable);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
-		base.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, chat_workable);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
+		this.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, this);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -21,7 +22,7 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 		base.Begin(context);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
@@ -50,7 +51,7 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			default_state = this.drink_move;
 			base.Target(this.drinker);
 			this.drink_move.InitializeStates(this.drinker, this.masterTarget, this.drink, null, null, null);
-			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f).DefaultState(this.drink.drink);
+			this.drink.ToggleAnims(new Func<WaterCoolerChore.StatesInstance, KAnimFile>(WaterCoolerChore.States.GetAnimFileName)).DefaultState(this.drink.drink);
 			this.drink.drink.Face(this.masterTarget, 0.5f).PlayAnim("working_pre").QueueAnim("working_loop", false, null)
 				.OnAnimQueueComplete(this.drink.post);
 			this.drink.post.Enter("Drink", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.TriggerDrink)).Enter("Mark", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.MarkAsRecentlySocialized)).PlayAnim("working_pst")
@@ -60,9 +61,24 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			this.success.ReturnSuccess();
 		}
 
+		public static KAnimFile GetAnimFileName(WaterCoolerChore.StatesInstance smi)
+		{
+			GameObject gameObject = smi.sm.drinker.Get(smi);
+			if (gameObject == null)
+			{
+				return Assets.GetAnim("anim_interacts_watercooler_kanim");
+			}
+			MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
+			if (component != null && component.model == BionicMinionConfig.MODEL)
+			{
+				return Assets.GetAnim("anim_bionic_interacts_watercooler_kanim");
+			}
+			return Assets.GetAnim("anim_interacts_watercooler_kanim");
+		}
+
 		private void MarkAsRecentlySocialized(WaterCoolerChore.StatesInstance smi)
 		{
-			Effects component = this.stateTarget.Get<Worker>(smi).GetComponent<Effects>();
+			Effects component = this.stateTarget.Get<WorkerBase>(smi).GetComponent<Effects>();
 			if (!string.IsNullOrEmpty(smi.master.trackingEffect))
 			{
 				component.Add(smi.master.trackingEffect, true);
@@ -71,8 +87,8 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 
 		private void TriggerDrink(WaterCoolerChore.StatesInstance smi)
 		{
-			Worker worker = this.stateTarget.Get<Worker>(smi);
-			smi.master.target.gameObject.GetSMI<WaterCooler.StatesInstance>().Drink(worker.gameObject, true);
+			WorkerBase workerBase = this.stateTarget.Get<WorkerBase>(smi);
+			smi.master.target.gameObject.GetSMI<WaterCooler.StatesInstance>().Drink(workerBase.gameObject, true);
 		}
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter drinker;

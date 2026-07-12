@@ -46,22 +46,32 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		return base.smi.HasTag(GameTags.Usable);
 	}
 
-	public void Flush(Worker worker)
+	public void Flush(WorkerBase worker)
 	{
-		this.FlushesUsed++;
+		this.FlushMultiple(worker, 1);
+	}
+
+	public void FlushMultiple(WorkerBase worker, int flushCount)
+	{
+		int num = this.maxFlushes - this.FlushesUsed;
+		int num2 = Mathf.Min(flushCount, num);
+		this.FlushesUsed += num2;
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
-		float num = 0f;
+		float num3 = 0f;
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
-		float num2;
+		float num4;
 		SimUtil.DiseaseInfo diseaseInfo;
-		this.storage.ConsumeAndGetDisease(tag, base.smi.DirtUsedPerFlush(), out num2, out diseaseInfo, out num);
+		this.storage.ConsumeAndGetDisease(tag, base.smi.DirtUsedPerFlush() * (float)num2, out num4, out diseaseInfo, out num3);
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
-		float num3 = base.smi.MassPerFlush() + num2;
-		GameObject gameObject = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).substance.SpawnResource(base.transform.GetPosition(), num3, this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
+		int num5 = this.diseasePerFlush * num2;
+		float num6 = base.smi.MassPerFlush() + num4;
+		GameObject gameObject = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).substance.SpawnResource(base.transform.GetPosition(), num6, this.solidWasteTemperature, index, num5, true, false, false);
 		gameObject.GetComponent<PrimaryElement>().AddDisease(diseaseInfo.idx, diseaseInfo.count, "Toilet.Flush");
+		num5 += diseaseInfo.count;
 		this.storage.Store(gameObject, false, false, true, false);
-		worker.GetComponent<PrimaryElement>().AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), base.transform, Vector3.up, 1.5f, false, false);
+		int num7 = this.diseaseOnDupePerFlush * num2;
+		worker.GetComponent<PrimaryElement>().AddDisease(index, num7, "Toilet.Flush");
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, num5 + num7), base.transform, Vector3.up, 1.5f, false, false);
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms, true);
 	}
 
@@ -255,8 +265,14 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public void Flush()
 		{
-			Worker worker = base.master.GetComponent<ToiletWorkableUse>().worker;
+			WorkerBase worker = base.master.GetComponent<ToiletWorkableUse>().worker;
 			base.master.Flush(worker);
+		}
+
+		public void FlushAll()
+		{
+			WorkerBase worker = base.master.GetComponent<ToiletWorkableUse>().worker;
+			base.master.FlushMultiple(worker, base.master.maxFlushes - base.master.FlushesUsed);
 		}
 
 		public Chore cleanChore;
@@ -285,6 +301,10 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 				.EventHandler(GameHashes.Flush, delegate(Toilet.StatesInstance smi, object data)
 				{
 					smi.Flush();
+				})
+				.EventHandler(GameHashes.FlushAll, delegate(Toilet.StatesInstance smi, object data)
+				{
+					smi.FlushAll();
 				});
 			this.earlyclean.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.earlyWaitingForClean);
 			this.earlyWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)

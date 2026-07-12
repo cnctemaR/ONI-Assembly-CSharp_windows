@@ -137,7 +137,7 @@ public class WarpPortal : Workable
 		int myWorldId = base.worker.GetMyWorldId();
 		int myWorldId2 = receiver.GetMyWorldId();
 		CameraController.Instance.ActiveWorldStarWipe(myWorldId2, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null);
-		Worker worker = base.worker;
+		WorkerBase worker = base.worker;
 		worker.StopWork();
 		receiver.ReceiveWarpedDuplicant(worker);
 		ClusterManager.Instance.MigrateMinion(worker.GetComponent<MinionIdentity>(), myWorldId2, myWorldId);

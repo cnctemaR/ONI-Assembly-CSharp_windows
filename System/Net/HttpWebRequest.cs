@@ -12,6 +12,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Mono.Net.Security;
 using Mono.Security.Interface;
 using Unity;
 
@@ -25,12 +26,7 @@ namespace System.Net
 			NetConfig netConfig = ConfigurationSettings.GetConfig("system.net/settings") as NetConfig;
 			if (netConfig != null)
 			{
-				int num = netConfig.MaxResponseHeadersLength;
-				if (num != -1)
-				{
-					num *= 64;
-				}
-				HttpWebRequest.defaultMaxResponseHeadersLength = num;
+				HttpWebRequest.defaultMaxResponseHeadersLength = netConfig.MaxResponseHeadersLength;
 			}
 		}
 
@@ -47,6 +43,7 @@ namespace System.Net
 			this.pipelined = true;
 			this.version = HttpVersion.Version11;
 			this.timeout = 100000;
+			this.continueTimeout = 350;
 			this.locker = new object();
 			this.readWriteTimeout = 300000;
 			base..ctor();
@@ -58,14 +55,14 @@ namespace System.Net
 			this.ResetAuthorization();
 		}
 
-		internal HttpWebRequest(Uri uri, MonoTlsProvider tlsProvider, MonoTlsSettings settings = null)
+		internal HttpWebRequest(Uri uri, MobileTlsProvider tlsProvider, MonoTlsSettings settings = null)
 			: this(uri)
 		{
 			this.tlsProvider = tlsProvider;
 			this.tlsSettings = settings;
 		}
 
-		[Obsolete("Serialization is obsoleted for this type", false)]
+		[Obsolete("Serialization is obsoleted for this type.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		protected HttpWebRequest(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			this.allowAutoRedirect = true;
@@ -79,30 +76,11 @@ namespace System.Net
 			this.pipelined = true;
 			this.version = HttpVersion.Version11;
 			this.timeout = 100000;
+			this.continueTimeout = 350;
 			this.locker = new object();
 			this.readWriteTimeout = 300000;
 			base..ctor();
-			this.requestUri = (Uri)serializationInfo.GetValue("requestUri", typeof(Uri));
-			this.actualUri = (Uri)serializationInfo.GetValue("actualUri", typeof(Uri));
-			this.allowAutoRedirect = serializationInfo.GetBoolean("allowAutoRedirect");
-			this.allowBuffering = serializationInfo.GetBoolean("allowBuffering");
-			this.certificates = (X509CertificateCollection)serializationInfo.GetValue("certificates", typeof(X509CertificateCollection));
-			this.connectionGroup = serializationInfo.GetString("connectionGroup");
-			this.contentLength = serializationInfo.GetInt64("contentLength");
-			this.webHeaders = (WebHeaderCollection)serializationInfo.GetValue("webHeaders", typeof(WebHeaderCollection));
-			this.keepAlive = serializationInfo.GetBoolean("keepAlive");
-			this.maxAutoRedirect = serializationInfo.GetInt32("maxAutoRedirect");
-			this.mediaType = serializationInfo.GetString("mediaType");
-			this.method = serializationInfo.GetString("method");
-			this.initialMethod = serializationInfo.GetString("initialMethod");
-			this.pipelined = serializationInfo.GetBoolean("pipelined");
-			this.version = (Version)serializationInfo.GetValue("version", typeof(Version));
-			this.proxy = (IWebProxy)serializationInfo.GetValue("proxy", typeof(IWebProxy));
-			this.sendChunked = serializationInfo.GetBoolean("sendChunked");
-			this.timeout = serializationInfo.GetInt32("timeout");
-			this.redirects = serializationInfo.GetInt32("redirects");
-			this.host = serializationInfo.GetString("host");
-			this.ResetAuthorization();
+			throw new SerializationException();
 		}
 
 		private void ResetAuthorization()
@@ -174,14 +152,11 @@ namespace System.Net
 		{
 			get
 			{
-				return false;
+				return this.allowReadStreamBuffering;
 			}
 			set
 			{
-				if (value)
-				{
-					throw new InvalidOperationException();
-				}
+				this.allowReadStreamBuffering = value;
 			}
 		}
 
@@ -219,7 +194,7 @@ namespace System.Net
 			}
 		}
 
-		internal MonoTlsProvider TlsProvider
+		internal MobileTlsProvider TlsProvider
 		{
 			get
 			{
@@ -264,7 +239,7 @@ namespace System.Net
 			set
 			{
 				this.CheckRequestStarted();
-				if (string.IsNullOrEmpty(value))
+				if (string.IsNullOrWhiteSpace(value))
 				{
 					this.webHeaders.RemoveInternal("Connection");
 					return;
@@ -272,13 +247,10 @@ namespace System.Net
 				string text = value.ToLowerInvariant();
 				if (text.Contains("keep-alive") || text.Contains("close"))
 				{
-					throw new ArgumentException("Keep-Alive and Close may not be set with this property");
+					throw new ArgumentException("Keep-Alive and Close may not be set using this property.", "value");
 				}
-				if (this.keepAlive)
-				{
-					value += ", Keep-Alive";
-				}
-				this.webHeaders.CheckUpdate("Connection", value);
+				string text2 = HttpValidationHelpers.CheckBadHeaderValueChars(value);
+				this.webHeaders.CheckUpdate("Connection", text2);
 			}
 		}
 
@@ -402,11 +374,11 @@ namespace System.Net
 		{
 			get
 			{
-				throw HttpWebRequest.GetMustImplement();
+				return HttpWebRequest.defaultCachePolicy;
 			}
 			set
 			{
-				throw HttpWebRequest.GetMustImplement();
+				HttpWebRequest.defaultCachePolicy = value;
 			}
 		}
 
@@ -415,11 +387,11 @@ namespace System.Net
 		{
 			get
 			{
-				throw HttpWebRequest.GetMustImplement();
+				return HttpWebRequest.defaultMaximumErrorResponseLength;
 			}
 			set
 			{
-				throw HttpWebRequest.GetMustImplement();
+				HttpWebRequest.defaultMaximumErrorResponseLength = value;
 			}
 		}
 
@@ -480,30 +452,44 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.host == null)
+				Uri uri = this.hostUri ?? this.Address;
+				if ((!(this.hostUri == null) && this.hostHasPort) || !this.Address.IsDefaultPort)
 				{
-					return this.actualUri.Authority;
+					return uri.Host + ":" + uri.Port.ToString();
 				}
-				return this.host;
+				return uri.Host;
 			}
 			set
 			{
+				this.CheckRequestStarted();
 				if (value == null)
 				{
 					throw new ArgumentNullException("value");
 				}
-				if (!HttpWebRequest.CheckValidHost(this.actualUri.Scheme, value))
+				Uri uri;
+				if (value.IndexOf('/') != -1 || !this.TryGetHostUri(value, out uri))
 				{
-					throw new ArgumentException("Invalid host: " + value);
+					throw new ArgumentException("The specified value is not a valid Host header string.", "value");
 				}
-				this.host = value;
+				this.hostUri = uri;
+				if (!this.hostUri.IsDefaultPort)
+				{
+					this.hostHasPort = true;
+					return;
+				}
+				if (value.IndexOf(':') == -1)
+				{
+					this.hostHasPort = false;
+					return;
+				}
+				int num = value.IndexOf(']');
+				this.hostHasPort = num == -1 || value.LastIndexOf(':') > num;
 			}
 		}
 
-		private static bool CheckValidHost(string scheme, string val)
+		private bool TryGetHostUri(string hostName, out Uri hostUri)
 		{
-			IPAddress ipaddress;
-			return val.Length != 0 && val[0] != '.' && val.IndexOf('/') < 0 && (IPAddress.TryParse(val, out ipaddress) || Uri.IsWellFormedUriString(scheme + "://" + val + "/", UriKind.Absolute));
+			return Uri.TryCreate(this.Address.Scheme + "://" + hostName + this.Address.PathAndQuery, UriKind.Absolute, out hostUri);
 		}
 
 		public DateTime IfModifiedSince
@@ -570,6 +556,11 @@ namespace System.Net
 			}
 			set
 			{
+				this.CheckRequestStarted();
+				if (value < 0 && value != -1)
+				{
+					throw new ArgumentOutOfRangeException("value", "The specified value must be greater than 0.");
+				}
 				this.maxResponseHeadersLength = value;
 			}
 		}
@@ -595,13 +586,10 @@ namespace System.Net
 			}
 			set
 			{
-				if (this.requestSent)
+				this.CheckRequestStarted();
+				if (value <= 0 && value != -1)
 				{
-					throw new InvalidOperationException("The request has already been sent.");
-				}
-				if (value < -1)
-				{
-					throw new ArgumentOutOfRangeException("value", "Must be >= -1");
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value > 0.");
 				}
 				this.readWriteTimeout = value;
 			}
@@ -612,11 +600,16 @@ namespace System.Net
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return this.continueTimeout;
 			}
 			set
 			{
-				throw new NotImplementedException();
+				this.CheckRequestStarted();
+				if (value < 0 && value != -1)
+				{
+					throw new ArgumentOutOfRangeException("value", "Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value >= 0.");
+				}
+				this.continueTimeout = value;
 			}
 		}
 
@@ -640,9 +633,13 @@ namespace System.Net
 			}
 			set
 			{
-				if (value == null || value.Trim() == "")
+				if (string.IsNullOrEmpty(value))
 				{
-					throw new ArgumentException("not a valid method");
+					throw new ArgumentException("Cannot set null or blank methods on request.", "value");
+				}
+				if (HttpValidationHelpers.IsInvalidMethodOrHeaderString(value))
+				{
+					throw new ArgumentException("Cannot set null or blank methods on request.", "value");
 				}
 				this.method = value.ToUpperInvariant();
 				if (this.method != "HEAD" && this.method != "GET" && this.method != "POST" && this.method != "PUT" && this.method != "DELETE" && this.method != "CONNECT" && this.method != "TRACE" && this.method != "MKCOL")
@@ -686,7 +683,7 @@ namespace System.Net
 			{
 				if (value != HttpVersion.Version10 && value != HttpVersion.Version11)
 				{
-					throw new ArgumentException("value");
+					throw new ArgumentException("Only HTTP/1.0 and HTTP/1.1 version requests are currently supported.", "value");
 				}
 				this.force_version = true;
 				this.version = value;
@@ -796,25 +793,21 @@ namespace System.Net
 			set
 			{
 				this.CheckRequestStarted();
-				string text = value;
-				if (text != null)
-				{
-					text = text.Trim().ToLower();
-				}
-				if (text == null || text.Length == 0)
+				if (string.IsNullOrWhiteSpace(value))
 				{
 					this.webHeaders.RemoveInternal("Transfer-Encoding");
 					return;
 				}
-				if (text == "chunked")
+				if (value.ToLower().Contains("chunked"))
 				{
-					throw new ArgumentException("Chunked encoding must be set with the SendChunked property");
+					throw new ArgumentException("Chunked encoding must be set via the SendChunked property.", "value");
 				}
-				if (!this.sendChunked)
+				if (!this.SendChunked)
 				{
-					throw new ArgumentException("SendChunked must be True", "value");
+					throw new InvalidOperationException("TransferEncoding requires the SendChunked property to be set to true.");
 				}
-				this.webHeaders.CheckUpdate("Transfer-Encoding", value);
+				string text = HttpValidationHelpers.CheckBadHeaderValueChars(value);
+				this.webHeaders.CheckUpdate("Transfer-Encoding", text);
 			}
 		}
 
@@ -1064,7 +1057,7 @@ namespace System.Net
 			return webOperation2;
 		}
 
-		private async Task<Stream> MyGetRequestStreamAsync(CancellationToken cancellationToken)
+		private Task<Stream> MyGetRequestStreamAsync(CancellationToken cancellationToken)
 		{
 			if (this.Aborted)
 			{
@@ -1073,7 +1066,7 @@ namespace System.Net
 			bool flag = !(this.method == "GET") && !(this.method == "CONNECT") && !(this.method == "HEAD") && !(this.method == "TRACE");
 			if (this.method == null || !flag)
 			{
-				throw new ProtocolViolationException("Cannot send data when method is: " + this.method);
+				throw new ProtocolViolationException("Cannot send a content-body with this verb-type.");
 			}
 			if (this.contentLength == -1L && !this.sendChunked && !this.allowBuffering && this.KeepAlive)
 			{
@@ -1082,7 +1075,7 @@ namespace System.Net
 			string transferEncoding = this.TransferEncoding;
 			if (!this.sendChunked && transferEncoding != null && transferEncoding.Trim() != "")
 			{
-				throw new ProtocolViolationException("SendChunked should be true.");
+				throw new InvalidOperationException("TransferEncoding requires the SendChunked property to be set to true.");
 			}
 			object obj = this.locker;
 			WebOperation webOperation;
@@ -1090,7 +1083,7 @@ namespace System.Net
 			{
 				if (this.getResponseCalled)
 				{
-					throw new InvalidOperationException("The operation cannot be performed once the request has been submitted.");
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
 				}
 				webOperation = this.currentOperation;
 				if (webOperation == null)
@@ -1100,15 +1093,11 @@ namespace System.Net
 					webOperation = this.SendRequest(false, null, cancellationToken);
 				}
 			}
-			return await webOperation.GetRequestStream().ConfigureAwait(false);
+			return webOperation.GetRequestStream();
 		}
 
 		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
 		{
-			if (this.Aborted)
-			{
-				throw HttpWebRequest.CreateRequestAbortedException();
-			}
 			return TaskToApm.Begin(this.RunWithTimeout<Stream>(new Func<CancellationToken, Task<Stream>>(this.MyGetRequestStreamAsync)), callback, state);
 		}
 
@@ -1125,7 +1114,7 @@ namespace System.Net
 			}
 			catch (Exception ex)
 			{
-				throw HttpWebRequest.FlattenException(ex);
+				throw this.GetWebException(ex);
 			}
 			return stream;
 		}
@@ -1139,7 +1128,7 @@ namespace System.Net
 			}
 			catch (Exception ex)
 			{
-				throw HttpWebRequest.FlattenException(ex);
+				throw this.GetWebException(ex);
 			}
 			return result;
 		}
@@ -1150,22 +1139,31 @@ namespace System.Net
 			throw new NotImplementedException();
 		}
 
-		internal static async Task<T> RunWithTimeout<T>(Func<CancellationToken, Task<T>> func, int timeout, Action abort)
+		public override Task<Stream> GetRequestStreamAsync()
+		{
+			return this.RunWithTimeout<Stream>(new Func<CancellationToken, Task<Stream>>(this.MyGetRequestStreamAsync));
+		}
+
+		internal static Task<T> RunWithTimeout<T>(Func<CancellationToken, Task<T>> func, int timeout, Action abort, Func<bool> aborted, CancellationToken cancellationToken)
+		{
+			CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			return HttpWebRequest.RunWithTimeoutWorker<T>(func(cancellationTokenSource.Token), timeout, abort, aborted, cancellationTokenSource);
+		}
+
+		private static async Task<T> RunWithTimeoutWorker<T>(Task<T> workerTask, int timeout, Action abort, Func<bool> aborted, CancellationTokenSource cts)
 		{
 			T result;
-			using (CancellationTokenSource cts = new CancellationTokenSource())
+			try
 			{
-				Task timeoutTask = Task.Delay(timeout);
-				Task<T> workerTask = func(cts.Token);
-				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter = Task.WhenAny(new Task[] { workerTask, timeoutTask }).ConfigureAwait(false).GetAwaiter();
+				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = ServicePointScheduler.WaitAsync(workerTask, timeout).ConfigureAwait(false).GetAwaiter();
 				if (!configuredTaskAwaiter.IsCompleted)
 				{
 					await configuredTaskAwaiter;
-					ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
+					ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
 					configuredTaskAwaiter = configuredTaskAwaiter2;
-					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
+					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
 				}
-				if (configuredTaskAwaiter.GetResult() == timeoutTask)
+				if (!configuredTaskAwaiter.GetResult())
 				{
 					try
 					{
@@ -1188,12 +1186,21 @@ namespace System.Net
 				}
 				result = workerTask.Result;
 			}
+			catch (Exception ex)
+			{
+				throw HttpWebRequest.GetWebException(ex, aborted());
+			}
+			finally
+			{
+				cts.Dispose();
+			}
 			return result;
 		}
 
 		private Task<T> RunWithTimeout<T>(Func<CancellationToken, Task<T>> func)
 		{
-			return HttpWebRequest.RunWithTimeout<T>(func, this.timeout, new Action(this.Abort));
+			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+			return HttpWebRequest.RunWithTimeoutWorker<T>(func(cancellationTokenSource.Token), this.timeout, new Action(this.Abort), () => this.Aborted, cancellationTokenSource);
 		}
 
 		private async Task<HttpWebResponse> MyGetResponseAsync(CancellationToken cancellationToken)
@@ -1201,15 +1208,6 @@ namespace System.Net
 			if (this.Aborted)
 			{
 				throw HttpWebRequest.CreateRequestAbortedException();
-			}
-			if (this.method == null)
-			{
-				throw new ProtocolViolationException("Method is null.");
-			}
-			string transferEncoding = this.TransferEncoding;
-			if (!this.sendChunked && transferEncoding != null && transferEncoding.Trim() != "")
-			{
-				throw new ProtocolViolationException("SendChunked should be true.");
 			}
 			WebCompletionSource completion = new WebCompletionSource();
 			object obj = this.locker;
@@ -1221,7 +1219,7 @@ namespace System.Net
 				if (webCompletionSource != null)
 				{
 					webCompletionSource.ThrowOnError();
-					if (this.haveResponse && webCompletionSource.IsCompleted)
+					if (this.haveResponse && webCompletionSource.Task.IsCompleted)
 					{
 						return this.webResponse;
 					}
@@ -1251,7 +1249,7 @@ namespace System.Net
 				try
 				{
 					cancellationToken.ThrowIfCancellationRequested();
-					WebRequestStream webRequestStream = await operation.GetRequestStream();
+					WebRequestStream webRequestStream = await operation.GetRequestStreamInternal().ConfigureAwait(false);
 					this.writeStream = webRequestStream;
 					await this.writeStream.WriteRequestAsync(cancellationToken).ConfigureAwait(false);
 					stream = await operation.GetResponseStream();
@@ -1294,7 +1292,7 @@ namespace System.Net
 					{
 						await stream.ReadAllAsync(redirect || ntlm != null, cancellationToken).ConfigureAwait(false);
 					}
-					operation.CompleteResponseRead(true, null);
+					operation.Finish(true, null);
 					response.Close();
 				}
 				catch (Exception ex2)
@@ -1341,15 +1339,15 @@ namespace System.Net
 			bool redirect = false;
 			bool mustReadAll = false;
 			WebOperation webOperation = null;
-			Task<BufferOffsetSize> rewriteHandler = null;
-			BufferOffsetSize writeBuffer = null;
+			Task<BufferOffsetSize> task = null;
+			BufferOffsetSize bufferOffsetSize = null;
 			object obj = this.locker;
 			lock (obj)
 			{
 				ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException> valueTuple = this.CheckFinalStatus(response);
 				redirect = valueTuple.Item1;
 				mustReadAll = valueTuple.Item2;
-				rewriteHandler = valueTuple.Item3;
+				task = valueTuple.Item3;
 				throwMe = valueTuple.Item4;
 			}
 			if (throwMe != null)
@@ -1360,9 +1358,9 @@ namespace System.Net
 				}
 				throw throwMe;
 			}
-			if (rewriteHandler != null)
+			if (task != null)
 			{
-				writeBuffer = await rewriteHandler.ConfigureAwait(false);
+				bufferOffsetSize = await task.ConfigureAwait(false);
 			}
 			obj = this.locker;
 			lock (obj)
@@ -1378,22 +1376,22 @@ namespace System.Net
 					{
 						this.writeStream.KillBuffer();
 					}
-					return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, false, false, writeBuffer, null);
+					return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, false, false, bufferOffsetSize, null);
 				}
 				if (this.sendChunked)
 				{
 					this.sendChunked = false;
 					this.webHeaders.RemoveInternal("Transfer-Encoding");
 				}
-				webOperation = this.HandleNtlmAuth(stream, response, writeBuffer, cancellationToken).Item1;
+				webOperation = this.HandleNtlmAuth(stream, response, bufferOffsetSize, cancellationToken).Item1;
 			}
-			return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, true, mustReadAll, writeBuffer, webOperation);
+			return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, true, mustReadAll, bufferOffsetSize, webOperation);
 		}
 
 		internal static Exception FlattenException(Exception e)
 		{
-			AggregateException ex;
-			if ((ex = e as AggregateException) != null)
+			AggregateException ex = e as AggregateException;
+			if (ex != null)
 			{
 				ex = ex.Flatten();
 				if (ex.InnerExceptions.Count == 1)
@@ -1406,13 +1404,18 @@ namespace System.Net
 
 		private WebException GetWebException(Exception e)
 		{
+			return HttpWebRequest.GetWebException(e, this.Aborted);
+		}
+
+		private static WebException GetWebException(Exception e, bool aborted)
+		{
 			e = HttpWebRequest.FlattenException(e);
-			WebException ex;
-			if ((ex = e as WebException) != null && (!this.Aborted || ex.Status == WebExceptionStatus.RequestCanceled || ex.Status == WebExceptionStatus.Timeout))
+			WebException ex = e as WebException;
+			if (ex != null && (!aborted || ex.Status == WebExceptionStatus.RequestCanceled || ex.Status == WebExceptionStatus.Timeout))
 			{
 				return ex;
 			}
-			if (this.Aborted || e is OperationCanceledException || e is ObjectDisposedException)
+			if (aborted || e is OperationCanceledException || e is ObjectDisposedException)
 			{
 				return HttpWebRequest.CreateRequestAbortedException();
 			}
@@ -1421,7 +1424,7 @@ namespace System.Net
 
 		internal static WebException CreateRequestAbortedException()
 		{
-			return new WebException(global::SR.Format("The request was aborted: The request was canceled.", WebExceptionStatus.RequestCanceled), WebExceptionStatus.RequestCanceled);
+			return new WebException(SR.Format("The request was aborted: The request was canceled.", WebExceptionStatus.RequestCanceled), WebExceptionStatus.RequestCanceled);
 		}
 
 		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
@@ -1429,6 +1432,11 @@ namespace System.Net
 			if (this.Aborted)
 			{
 				throw HttpWebRequest.CreateRequestAbortedException();
+			}
+			string transferEncoding = this.TransferEncoding;
+			if (!this.sendChunked && transferEncoding != null && transferEncoding.Trim() != "")
+			{
+				throw new InvalidOperationException("TransferEncoding requires the SendChunked property to be set to true.");
 			}
 			return TaskToApm.Begin(this.RunWithTimeout<HttpWebResponse>(new Func<CancellationToken, Task<HttpWebResponse>>(this.MyGetResponseAsync)), callback, state);
 		}
@@ -1446,7 +1454,7 @@ namespace System.Net
 			}
 			catch (Exception ex)
 			{
-				throw HttpWebRequest.FlattenException(ex);
+				throw this.GetWebException(ex);
 			}
 			return webResponse;
 		}
@@ -1470,7 +1478,7 @@ namespace System.Net
 			}
 			catch (Exception ex)
 			{
-				throw HttpWebRequest.FlattenException(ex);
+				throw this.GetWebException(ex);
 			}
 			return result;
 		}
@@ -1527,32 +1535,13 @@ namespace System.Net
 
 		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			this.GetObjectData(serializationInfo, streamingContext);
+			throw new SerializationException();
 		}
 
 		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			serializationInfo.AddValue("requestUri", this.requestUri, typeof(Uri));
-			serializationInfo.AddValue("actualUri", this.actualUri, typeof(Uri));
-			serializationInfo.AddValue("allowAutoRedirect", this.allowAutoRedirect);
-			serializationInfo.AddValue("allowBuffering", this.allowBuffering);
-			serializationInfo.AddValue("certificates", this.certificates, typeof(X509CertificateCollection));
-			serializationInfo.AddValue("connectionGroup", this.connectionGroup);
-			serializationInfo.AddValue("contentLength", this.contentLength);
-			serializationInfo.AddValue("webHeaders", this.webHeaders, typeof(WebHeaderCollection));
-			serializationInfo.AddValue("keepAlive", this.keepAlive);
-			serializationInfo.AddValue("maxAutoRedirect", this.maxAutoRedirect);
-			serializationInfo.AddValue("mediaType", this.mediaType);
-			serializationInfo.AddValue("method", this.method);
-			serializationInfo.AddValue("initialMethod", this.initialMethod);
-			serializationInfo.AddValue("pipelined", this.pipelined);
-			serializationInfo.AddValue("version", this.version, typeof(Version));
-			serializationInfo.AddValue("proxy", this.proxy, typeof(IWebProxy));
-			serializationInfo.AddValue("sendChunked", this.sendChunked);
-			serializationInfo.AddValue("timeout", this.timeout);
-			serializationInfo.AddValue("redirects", this.redirects);
-			serializationInfo.AddValue("host", this.host);
+			throw new SerializationException();
 		}
 
 		private void CheckRequestStarted()
@@ -1587,28 +1576,30 @@ namespace System.Net
 			{
 			case HttpStatusCode.MultipleChoices:
 				ex = new WebException("Ambiguous redirect.");
-				goto IL_0094;
+				goto IL_0097;
 			case HttpStatusCode.MovedPermanently:
 			case HttpStatusCode.Found:
 				if (this.method == "POST")
 				{
 					this.RewriteRedirectToGet();
-					goto IL_0094;
+					goto IL_0097;
 				}
-				goto IL_0094;
+				goto IL_0097;
 			case HttpStatusCode.SeeOther:
 				this.RewriteRedirectToGet();
-				goto IL_0094;
+				goto IL_0097;
 			case HttpStatusCode.NotModified:
 				return false;
 			case HttpStatusCode.UseProxy:
 				ex = new NotImplementedException("Proxy support not available.");
-				goto IL_0094;
+				goto IL_0097;
 			case HttpStatusCode.TemporaryRedirect:
-				goto IL_0094;
+				goto IL_0097;
 			}
-			ex = new ProtocolViolationException("Invalid status code: " + (int)code);
-			IL_0094:
+			string text2 = "Invalid status code: ";
+			int num = (int)code;
+			ex = new ProtocolViolationException(text2 + num.ToString());
+			IL_0097:
 			if (this.method != "GET" && !this.InternalAllowBuffering && this.ResendContentFactory == null && (this.writeStream.WriteBufferLength > 0 || this.contentLength > 0L))
 			{
 				ex = new WebException("The request requires buffering data to succeed.", null, WebExceptionStatus.ProtocolError, response);
@@ -1704,7 +1695,27 @@ namespace System.Net
 			{
 				this.webHeaders.ChangeInternal(text, "close");
 			}
-			this.webHeaders.SetInternal("Host", this.Host);
+			string text2;
+			if (this.hostUri != null)
+			{
+				if (this.hostHasPort)
+				{
+					text2 = this.hostUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+				}
+				else
+				{
+					text2 = this.hostUri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+				}
+			}
+			else if (this.Address.IsDefaultPort)
+			{
+				text2 = this.Address.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+			}
+			else
+			{
+				text2 = this.Address.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+			}
+			this.webHeaders.SetInternal("Host", text2);
 			if (this.cookieContainer != null)
 			{
 				string cookieHeader = this.cookieContainer.GetCookieHeader(this.actualUri);
@@ -1717,18 +1728,18 @@ namespace System.Net
 					this.webHeaders.RemoveInternal("Cookie");
 				}
 			}
-			string text2 = null;
+			string text3 = null;
 			if ((this.auto_decomp & DecompressionMethods.GZip) != DecompressionMethods.None)
 			{
-				text2 = "gzip";
+				text3 = "gzip";
 			}
 			if ((this.auto_decomp & DecompressionMethods.Deflate) != DecompressionMethods.None)
 			{
-				text2 = ((text2 != null) ? "gzip, deflate" : "deflate");
+				text3 = ((text3 != null) ? "gzip, deflate" : "deflate");
 			}
-			if (text2 != null)
+			if (text3 != null)
 			{
-				this.webHeaders.ChangeInternal("Accept-Encoding", text2);
+				this.webHeaders.ChangeInternal("Accept-Encoding", text3);
 			}
 			if (!this.usedPreAuth && this.preAuthenticate)
 			{
@@ -1962,6 +1973,8 @@ namespace System.Net
 
 		private bool allowBuffering;
 
+		private bool allowReadStreamBuffering;
+
 		private X509CertificateCollection certificates;
 
 		private string connectionGroup;
@@ -2012,6 +2025,8 @@ namespace System.Net
 
 		private int timeout;
 
+		private int continueTimeout;
+
 		private WebRequestStream writeStream;
 
 		private HttpWebResponse webResponse;
@@ -2038,21 +2053,27 @@ namespace System.Net
 
 		private int maxResponseHeadersLength;
 
-		private static int defaultMaxResponseHeadersLength = 65536;
+		private static int defaultMaxResponseHeadersLength = 64;
+
+		private static int defaultMaximumErrorResponseLength = 64;
+
+		private static RequestCachePolicy defaultCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
 
 		private int readWriteTimeout;
 
-		private MonoTlsProvider tlsProvider;
+		private MobileTlsProvider tlsProvider;
 
 		private MonoTlsSettings tlsSettings;
 
 		private ServerCertValidationCallback certValidationCallback;
 
+		private bool hostHasPort;
+
+		private Uri hostUri;
+
 		private HttpWebRequest.AuthorizationState auth_state;
 
 		private HttpWebRequest.AuthorizationState proxy_auth_state;
-
-		private string host;
 
 		[NonSerialized]
 		internal Func<Stream, Task> ResendContentFactory;

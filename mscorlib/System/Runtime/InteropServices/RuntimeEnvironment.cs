@@ -55,8 +55,8 @@ namespace System.Runtime.InteropServices
 			throw new NotSupportedException();
 		}
 
-		[SecurityCritical]
 		[ComVisible(false)]
+		[SecurityCritical]
 		public static IntPtr GetRuntimeInterfaceAsIntPtr(Guid clsid, Guid riid)
 		{
 			return RuntimeEnvironment.GetRuntimeInterfaceImpl(clsid, riid);

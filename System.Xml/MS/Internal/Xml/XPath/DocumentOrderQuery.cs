@@ -21,7 +21,7 @@ namespace MS.Internal.Xml.XPath
 			XPathNavigator xpathNavigator;
 			while ((xpathNavigator = this.input.Advance()) != null)
 			{
-				base.Insert(this.outputBuffer, xpathNavigator);
+				Query.Insert(this.outputBuffer, xpathNavigator);
 			}
 			return this;
 		}

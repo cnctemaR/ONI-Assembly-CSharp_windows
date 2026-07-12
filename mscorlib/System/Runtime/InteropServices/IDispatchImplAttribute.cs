@@ -3,8 +3,8 @@
 namespace System.Runtime.InteropServices
 {
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false)]
-	[Obsolete("This attribute is deprecated and will be removed in a future version.", false)]
 	[ComVisible(true)]
+	[Obsolete("This attribute is deprecated and will be removed in a future version.", false)]
 	public sealed class IDispatchImplAttribute : Attribute
 	{
 		public IDispatchImplAttribute(IDispatchImplType implType)

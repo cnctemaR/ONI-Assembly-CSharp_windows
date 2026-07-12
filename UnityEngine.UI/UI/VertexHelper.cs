@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -32,15 +33,15 @@ namespace UnityEngine.UI
 		{
 			if (!this.m_ListsInitalized)
 			{
-				this.m_Positions = ListPool<Vector3>.Get();
-				this.m_Colors = ListPool<Color32>.Get();
-				this.m_Uv0S = ListPool<Vector4>.Get();
-				this.m_Uv1S = ListPool<Vector4>.Get();
-				this.m_Uv2S = ListPool<Vector4>.Get();
-				this.m_Uv3S = ListPool<Vector4>.Get();
-				this.m_Normals = ListPool<Vector3>.Get();
-				this.m_Tangents = ListPool<Vector4>.Get();
-				this.m_Indices = ListPool<int>.Get();
+				this.m_Positions = CollectionPool<List<Vector3>, Vector3>.Get();
+				this.m_Colors = CollectionPool<List<Color32>, Color32>.Get();
+				this.m_Uv0S = CollectionPool<List<Vector4>, Vector4>.Get();
+				this.m_Uv1S = CollectionPool<List<Vector4>, Vector4>.Get();
+				this.m_Uv2S = CollectionPool<List<Vector4>, Vector4>.Get();
+				this.m_Uv3S = CollectionPool<List<Vector4>, Vector4>.Get();
+				this.m_Normals = CollectionPool<List<Vector3>, Vector3>.Get();
+				this.m_Tangents = CollectionPool<List<Vector4>, Vector4>.Get();
+				this.m_Indices = CollectionPool<List<int>, int>.Get();
 				this.m_ListsInitalized = true;
 			}
 		}
@@ -49,15 +50,15 @@ namespace UnityEngine.UI
 		{
 			if (this.m_ListsInitalized)
 			{
-				ListPool<Vector3>.Release(this.m_Positions);
-				ListPool<Color32>.Release(this.m_Colors);
-				ListPool<Vector4>.Release(this.m_Uv0S);
-				ListPool<Vector4>.Release(this.m_Uv1S);
-				ListPool<Vector4>.Release(this.m_Uv2S);
-				ListPool<Vector4>.Release(this.m_Uv3S);
-				ListPool<Vector3>.Release(this.m_Normals);
-				ListPool<Vector4>.Release(this.m_Tangents);
-				ListPool<int>.Release(this.m_Indices);
+				CollectionPool<List<Vector3>, Vector3>.Release(this.m_Positions);
+				CollectionPool<List<Color32>, Color32>.Release(this.m_Colors);
+				CollectionPool<List<Vector4>, Vector4>.Release(this.m_Uv0S);
+				CollectionPool<List<Vector4>, Vector4>.Release(this.m_Uv1S);
+				CollectionPool<List<Vector4>, Vector4>.Release(this.m_Uv2S);
+				CollectionPool<List<Vector4>, Vector4>.Release(this.m_Uv3S);
+				CollectionPool<List<Vector3>, Vector3>.Release(this.m_Normals);
+				CollectionPool<List<Vector4>, Vector4>.Release(this.m_Tangents);
+				CollectionPool<List<int>, int>.Release(this.m_Indices);
 				this.m_Positions = null;
 				this.m_Colors = null;
 				this.m_Uv0S = null;

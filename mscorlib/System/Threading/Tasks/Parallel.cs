@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Permissions;
+using System.Runtime.ExceptionServices;
 
 namespace System.Threading.Tasks
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public static class Parallel
 	{
 		public static void Invoke(params Action[] actions)
@@ -23,118 +23,105 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("parallelOptions");
 			}
-			if (parallelOptions.CancellationToken.CanBeCanceled && AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
-			{
-				parallelOptions.CancellationToken.ThrowIfSourceDisposed();
-			}
-			if (parallelOptions.CancellationToken.IsCancellationRequested)
-			{
-				throw new OperationCanceledException(parallelOptions.CancellationToken);
-			}
+			parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 			Action[] actionsCopy = new Action[actions.Length];
 			for (int i = 0; i < actionsCopy.Length; i++)
 			{
 				actionsCopy[i] = actions[i];
 				if (actionsCopy[i] == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("One of the actions was null."));
+					throw new ArgumentException("One of the actions was null.");
 				}
+			}
+			int num = 0;
+			if (ParallelEtwProvider.Log.IsEnabled())
+			{
+				num = Interlocked.Increment(ref Parallel.s_forkJoinContextID);
+				ParallelEtwProvider.Log.ParallelInvokeBegin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), num, ParallelEtwProvider.ForkJoinOperationType.ParallelInvoke, actionsCopy.Length);
 			}
 			if (actionsCopy.Length < 1)
 			{
 				return;
 			}
-			if (actionsCopy.Length > 10 || (parallelOptions.MaxDegreeOfParallelism != -1 && parallelOptions.MaxDegreeOfParallelism < actionsCopy.Length))
+			try
 			{
-				ConcurrentQueue<Exception> exceptionQ = null;
-				try
+				if (actionsCopy.Length > 10 || (parallelOptions.MaxDegreeOfParallelism != -1 && parallelOptions.MaxDegreeOfParallelism < actionsCopy.Length))
 				{
+					ConcurrentQueue<Exception> exceptionQ = null;
 					int actionIndex = 0;
-					ParallelForReplicatingTask parallelForReplicatingTask = new ParallelForReplicatingTask(parallelOptions, delegate
+					try
 					{
-						for (int l = Interlocked.Increment(ref actionIndex); l <= actionsCopy.Length; l = Interlocked.Increment(ref actionIndex))
+						TaskReplicator.Run<object>(delegate(ref object state, int timeout, out bool replicationDelegateYieldedBeforeCompletion)
 						{
-							try
+							replicationDelegateYieldedBeforeCompletion = false;
+							for (int k = Interlocked.Increment(ref actionIndex); k <= actionsCopy.Length; k = Interlocked.Increment(ref actionIndex))
 							{
-								actionsCopy[l - 1]();
+								try
+								{
+									actionsCopy[k - 1]();
+								}
+								catch (Exception ex5)
+								{
+									LazyInitializer.EnsureInitialized<ConcurrentQueue<Exception>>(ref exceptionQ, () => new ConcurrentQueue<Exception>());
+									exceptionQ.Enqueue(ex5);
+								}
+								parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 							}
-							catch (Exception ex5)
+						}, parallelOptions, false);
+					}
+					catch (Exception ex)
+					{
+						LazyInitializer.EnsureInitialized<ConcurrentQueue<Exception>>(ref exceptionQ, () => new ConcurrentQueue<Exception>());
+						if (ex is ObjectDisposedException)
+						{
+							throw;
+						}
+						AggregateException ex2 = ex as AggregateException;
+						if (ex2 != null)
+						{
+							using (IEnumerator<Exception> enumerator = ex2.InnerExceptions.GetEnumerator())
 							{
-								LazyInitializer.EnsureInitialized<ConcurrentQueue<Exception>>(ref exceptionQ, () => new ConcurrentQueue<Exception>());
-								exceptionQ.Enqueue(ex5);
-							}
-							if (parallelOptions.CancellationToken.IsCancellationRequested)
-							{
-								throw new OperationCanceledException(parallelOptions.CancellationToken);
+								while (enumerator.MoveNext())
+								{
+									Exception ex3 = enumerator.Current;
+									exceptionQ.Enqueue(ex3);
+								}
+								goto IL_01C3;
 							}
 						}
-					}, TaskCreationOptions.None, InternalTaskOptions.SelfReplicating);
-					parallelForReplicatingTask.RunSynchronously(parallelOptions.EffectiveTaskScheduler);
-					parallelForReplicatingTask.Wait();
-				}
-				catch (Exception ex)
-				{
-					LazyInitializer.EnsureInitialized<ConcurrentQueue<Exception>>(ref exceptionQ, () => new ConcurrentQueue<Exception>());
-					AggregateException ex2 = ex as AggregateException;
-					if (ex2 != null)
-					{
-						using (IEnumerator<Exception> enumerator = ex2.InnerExceptions.GetEnumerator())
-						{
-							while (enumerator.MoveNext())
-							{
-								Exception ex3 = enumerator.Current;
-								exceptionQ.Enqueue(ex3);
-							}
-							goto IL_0208;
-						}
+						exceptionQ.Enqueue(ex);
+						IL_01C3:;
 					}
-					exceptionQ.Enqueue(ex);
-					IL_0208:;
-				}
-				if (exceptionQ != null && exceptionQ.Count > 0)
-				{
-					Parallel.ThrowIfReducableToSingleOCE(exceptionQ, parallelOptions.CancellationToken);
-					throw new AggregateException(exceptionQ);
-				}
-			}
-			else
-			{
-				Task[] array = new Task[actionsCopy.Length];
-				if (parallelOptions.CancellationToken.IsCancellationRequested)
-				{
-					throw new OperationCanceledException(parallelOptions.CancellationToken);
-				}
-				for (int j = 1; j < array.Length; j++)
-				{
-					array[j] = Task.Factory.StartNew(actionsCopy[j], parallelOptions.CancellationToken, TaskCreationOptions.None, InternalTaskOptions.None, parallelOptions.EffectiveTaskScheduler);
-				}
-				array[0] = new Task(actionsCopy[0]);
-				array[0].RunSynchronously(parallelOptions.EffectiveTaskScheduler);
-				try
-				{
-					if (array.Length <= 4)
+					if (exceptionQ != null && exceptionQ.Count > 0)
 					{
-						Task.FastWaitAll(array);
+						Parallel.ThrowSingleCancellationExceptionOrOtherException(exceptionQ, parallelOptions.CancellationToken, new AggregateException(exceptionQ));
 					}
-					else
+				}
+				else
+				{
+					Task[] array = new Task[actionsCopy.Length];
+					parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+					for (int j = 1; j < array.Length; j++)
+					{
+						array[j] = Task.Factory.StartNew(actionsCopy[j], parallelOptions.CancellationToken, TaskCreationOptions.None, parallelOptions.EffectiveTaskScheduler);
+					}
+					array[0] = new Task(actionsCopy[0], parallelOptions.CancellationToken, TaskCreationOptions.None);
+					array[0].RunSynchronously(parallelOptions.EffectiveTaskScheduler);
+					try
 					{
 						Task.WaitAll(array);
 					}
-				}
-				catch (AggregateException ex4)
-				{
-					Parallel.ThrowIfReducableToSingleOCE(ex4.InnerExceptions, parallelOptions.CancellationToken);
-					throw;
-				}
-				finally
-				{
-					for (int k = 0; k < array.Length; k++)
+					catch (AggregateException ex4)
 					{
-						if (array[k].IsCompleted)
-						{
-							array[k].Dispose();
-						}
+						Parallel.ThrowSingleCancellationExceptionOrOtherException(ex4.InnerExceptions, parallelOptions.CancellationToken, ex4);
 					}
+				}
+			}
+			finally
+			{
+				if (ParallelEtwProvider.Log.IsEnabled())
+				{
+					ParallelEtwProvider.Log.ParallelInvokeEnd(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), num);
 				}
 			}
 		}
@@ -303,140 +290,152 @@ namespace System.Threading.Tasks
 			return Parallel.ForWorker64<TLocal>(fromInclusive, toExclusive, parallelOptions, null, null, body, localInit, localFinally);
 		}
 
+		private static bool CheckTimeoutReached(int timeoutOccursAt)
+		{
+			int tickCount = Environment.TickCount;
+			return tickCount >= timeoutOccursAt && (0 <= timeoutOccursAt || 0 >= tickCount);
+		}
+
+		private static int ComputeTimeoutPoint(int timeoutLength)
+		{
+			return Environment.TickCount + timeoutLength;
+		}
+
 		private static ParallelLoopResult ForWorker<TLocal>(int fromInclusive, int toExclusive, ParallelOptions parallelOptions, Action<int> body, Action<int, ParallelLoopState> bodyWithState, Func<int, ParallelLoopState, TLocal, TLocal> bodyWithLocal, Func<TLocal> localInit, Action<TLocal> localFinally)
 		{
 			ParallelLoopResult parallelLoopResult = default(ParallelLoopResult);
 			if (toExclusive <= fromInclusive)
 			{
-				parallelLoopResult.m_completed = true;
+				parallelLoopResult._completed = true;
 				return parallelLoopResult;
 			}
 			ParallelLoopStateFlags32 sharedPStateFlags = new ParallelLoopStateFlags32();
-			TaskCreationOptions taskCreationOptions = TaskCreationOptions.None;
-			InternalTaskOptions internalTaskOptions = InternalTaskOptions.SelfReplicating;
-			if (parallelOptions.CancellationToken.IsCancellationRequested)
-			{
-				throw new OperationCanceledException(parallelOptions.CancellationToken);
-			}
+			parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 			int num = ((parallelOptions.EffectiveMaxConcurrencyLevel == -1) ? PlatformHelper.ProcessorCount : parallelOptions.EffectiveMaxConcurrencyLevel);
 			RangeManager rangeManager = new RangeManager((long)fromInclusive, (long)toExclusive, 1L, num);
 			OperationCanceledException oce = null;
-			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
-			if (parallelOptions.CancellationToken.CanBeCanceled)
+			CancellationTokenRegistration cancellationTokenRegistration = ((!parallelOptions.CancellationToken.CanBeCanceled) ? default(CancellationTokenRegistration) : parallelOptions.CancellationToken.Register(delegate(object o)
 			{
-				cancellationTokenRegistration = parallelOptions.CancellationToken.InternalRegisterWithoutEC(delegate(object o)
-				{
-					sharedPStateFlags.Cancel();
-					oce = new OperationCanceledException(parallelOptions.CancellationToken);
-				}, null);
+				oce = new OperationCanceledException(parallelOptions.CancellationToken);
+				sharedPStateFlags.Cancel();
+			}, null, false));
+			int forkJoinContextID = 0;
+			if (ParallelEtwProvider.Log.IsEnabled())
+			{
+				forkJoinContextID = Interlocked.Increment(ref Parallel.s_forkJoinContextID);
+				ParallelEtwProvider.Log.ParallelLoopBegin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, ParallelEtwProvider.ForkJoinOperationType.ParallelFor, (long)fromInclusive, (long)toExclusive);
 			}
-			ParallelForReplicatingTask rootTask = null;
 			try
 			{
-				rootTask = new ParallelForReplicatingTask(parallelOptions, delegate
+				try
 				{
-					Task internalCurrent = Task.InternalCurrent;
-					bool flag = internalCurrent == rootTask;
-					RangeWorker rangeWorker = default(RangeWorker);
-					object savedStateFromPreviousReplica = internalCurrent.SavedStateFromPreviousReplica;
-					if (savedStateFromPreviousReplica is RangeWorker)
+					TaskReplicator.Run<RangeWorker>(delegate(ref RangeWorker currentWorker, int timeout, out bool replicationDelegateYieldedBeforeCompletion)
 					{
-						rangeWorker = (RangeWorker)savedStateFromPreviousReplica;
-					}
-					else
-					{
-						rangeWorker = rangeManager.RegisterNewWorker();
-					}
-					int num2;
-					int num3;
-					if (!rangeWorker.FindNewWork32(out num2, out num3) || sharedPStateFlags.ShouldExitLoop(num2))
-					{
-						return;
-					}
-					TLocal tlocal = default(TLocal);
-					bool flag2 = false;
-					try
-					{
-						ParallelLoopState32 parallelLoopState = null;
-						if (bodyWithState != null)
+						if (!currentWorker.IsInitialized)
 						{
-							parallelLoopState = new ParallelLoopState32(sharedPStateFlags);
+							currentWorker = rangeManager.RegisterNewWorker();
 						}
-						else if (bodyWithLocal != null)
+						replicationDelegateYieldedBeforeCompletion = false;
+						int num3;
+						int num4;
+						if (!currentWorker.FindNewWork32(out num3, out num4) || sharedPStateFlags.ShouldExitLoop(num3))
 						{
-							parallelLoopState = new ParallelLoopState32(sharedPStateFlags);
-							if (localInit != null)
+							return;
+						}
+						if (ParallelEtwProvider.Log.IsEnabled())
+						{
+							ParallelEtwProvider.Log.ParallelFork(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
+						}
+						TLocal tlocal = default(TLocal);
+						bool flag = false;
+						try
+						{
+							ParallelLoopState32 parallelLoopState = null;
+							if (bodyWithState != null)
 							{
-								tlocal = localInit();
-								flag2 = true;
+								parallelLoopState = new ParallelLoopState32(sharedPStateFlags);
 							}
-						}
-						Parallel.LoopTimer loopTimer = new Parallel.LoopTimer(rootTask.ActiveChildCount);
-						for (;;)
-						{
-							if (body != null)
+							else if (bodyWithLocal != null)
 							{
-								for (int i = num2; i < num3; i++)
+								parallelLoopState = new ParallelLoopState32(sharedPStateFlags);
+								if (localInit != null)
 								{
-									if (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop())
+									tlocal = localInit();
+									flag = true;
+								}
+							}
+							int num5 = Parallel.ComputeTimeoutPoint(timeout);
+							for (;;)
+							{
+								if (body != null)
+								{
+									for (int i = num3; i < num4; i++)
 									{
-										break;
+										if (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop())
+										{
+											break;
+										}
+										body(i);
 									}
-									body(i);
 								}
-							}
-							else if (bodyWithState != null)
-							{
-								for (int j = num2; j < num3; j++)
+								else if (bodyWithState != null)
 								{
-									if (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop(j))
+									for (int j = num3; j < num4; j++)
 									{
-										break;
+										if (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop(j))
+										{
+											break;
+										}
+										parallelLoopState.CurrentIteration = j;
+										bodyWithState(j, parallelLoopState);
 									}
-									parallelLoopState.CurrentIteration = j;
-									bodyWithState(j, parallelLoopState);
 								}
-							}
-							else
-							{
-								int num4 = num2;
-								while (num4 < num3 && (sharedPStateFlags.LoopStateFlags == ParallelLoopStateFlags.PLS_NONE || !sharedPStateFlags.ShouldExitLoop(num4)))
+								else
 								{
-									parallelLoopState.CurrentIteration = num4;
-									tlocal = bodyWithLocal(num4, parallelLoopState, tlocal);
-									num4++;
+									int num6 = num3;
+									while (num6 < num4 && (sharedPStateFlags.LoopStateFlags == 0 || !sharedPStateFlags.ShouldExitLoop(num6)))
+									{
+										parallelLoopState.CurrentIteration = num6;
+										tlocal = bodyWithLocal(num6, parallelLoopState, tlocal);
+										num6++;
+									}
+								}
+								if (Parallel.CheckTimeoutReached(num5))
+								{
+									break;
+								}
+								if (!currentWorker.FindNewWork32(out num3, out num4) || (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop(num3)))
+								{
+									goto IL_01D8;
 								}
 							}
-							if (!flag && loopTimer.LimitExceeded())
-							{
-								break;
-							}
-							if (!rangeWorker.FindNewWork32(out num2, out num3) || (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop(num2)))
-							{
-								goto IL_01FD;
-							}
+							replicationDelegateYieldedBeforeCompletion = true;
+							IL_01D8:;
 						}
-						internalCurrent.SavedStateForNextReplica = rangeWorker;
-						IL_01FD:;
-					}
-					catch
-					{
-						sharedPStateFlags.SetExceptional();
-						throw;
-					}
-					finally
-					{
-						if (localFinally != null && flag2)
+						catch (Exception ex2)
 						{
-							localFinally(tlocal);
+							sharedPStateFlags.SetExceptional();
+							ExceptionDispatchInfo.Throw(ex2);
 						}
-					}
-				}, taskCreationOptions, internalTaskOptions);
-				rootTask.RunSynchronously(parallelOptions.EffectiveTaskScheduler);
-				rootTask.Wait();
-				if (parallelOptions.CancellationToken.CanBeCanceled)
+						finally
+						{
+							if (localFinally != null && flag)
+							{
+								localFinally(tlocal);
+							}
+							if (ParallelEtwProvider.Log.IsEnabled())
+							{
+								ParallelEtwProvider.Log.ParallelJoin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
+							}
+						}
+					}, parallelOptions, true);
+				}
+				finally
 				{
-					cancellationTokenRegistration.Dispose();
+					if (parallelOptions.CancellationToken.CanBeCanceled)
+					{
+						cancellationTokenRegistration.Dispose();
+					}
 				}
 				if (oce != null)
 				{
@@ -445,32 +444,32 @@ namespace System.Threading.Tasks
 			}
 			catch (AggregateException ex)
 			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				Parallel.ThrowIfReducableToSingleOCE(ex.InnerExceptions, parallelOptions.CancellationToken);
-				throw;
-			}
-			catch (TaskSchedulerException)
-			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				throw;
+				Parallel.ThrowSingleCancellationExceptionOrOtherException(ex.InnerExceptions, parallelOptions.CancellationToken, ex);
 			}
 			finally
 			{
 				int loopStateFlags = sharedPStateFlags.LoopStateFlags;
-				parallelLoopResult.m_completed = loopStateFlags == ParallelLoopStateFlags.PLS_NONE;
-				if ((loopStateFlags & ParallelLoopStateFlags.PLS_BROKEN) != 0)
+				parallelLoopResult._completed = loopStateFlags == 0;
+				if ((loopStateFlags & 2) != 0)
 				{
-					parallelLoopResult.m_lowestBreakIteration = new long?((long)sharedPStateFlags.LowestBreakIteration);
+					parallelLoopResult._lowestBreakIteration = new long?((long)sharedPStateFlags.LowestBreakIteration);
 				}
-				if (rootTask != null && rootTask.IsCompleted)
+				if (ParallelEtwProvider.Log.IsEnabled())
 				{
-					rootTask.Dispose();
+					int num2;
+					if (loopStateFlags == 0)
+					{
+						num2 = toExclusive - fromInclusive;
+					}
+					else if ((loopStateFlags & 2) != 0)
+					{
+						num2 = sharedPStateFlags.LowestBreakIteration - fromInclusive;
+					}
+					else
+					{
+						num2 = -1;
+					}
+					ParallelEtwProvider.Log.ParallelLoopEnd(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, (long)num2);
 				}
 			}
 			return parallelLoopResult;
@@ -481,135 +480,136 @@ namespace System.Threading.Tasks
 			ParallelLoopResult parallelLoopResult = default(ParallelLoopResult);
 			if (toExclusive <= fromInclusive)
 			{
-				parallelLoopResult.m_completed = true;
+				parallelLoopResult._completed = true;
 				return parallelLoopResult;
 			}
 			ParallelLoopStateFlags64 sharedPStateFlags = new ParallelLoopStateFlags64();
-			TaskCreationOptions taskCreationOptions = TaskCreationOptions.None;
-			InternalTaskOptions internalTaskOptions = InternalTaskOptions.SelfReplicating;
-			if (parallelOptions.CancellationToken.IsCancellationRequested)
-			{
-				throw new OperationCanceledException(parallelOptions.CancellationToken);
-			}
+			parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 			int num = ((parallelOptions.EffectiveMaxConcurrencyLevel == -1) ? PlatformHelper.ProcessorCount : parallelOptions.EffectiveMaxConcurrencyLevel);
 			RangeManager rangeManager = new RangeManager(fromInclusive, toExclusive, 1L, num);
 			OperationCanceledException oce = null;
-			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
-			if (parallelOptions.CancellationToken.CanBeCanceled)
+			CancellationTokenRegistration cancellationTokenRegistration = ((!parallelOptions.CancellationToken.CanBeCanceled) ? default(CancellationTokenRegistration) : parallelOptions.CancellationToken.Register(delegate(object o)
 			{
-				cancellationTokenRegistration = parallelOptions.CancellationToken.InternalRegisterWithoutEC(delegate(object o)
-				{
-					sharedPStateFlags.Cancel();
-					oce = new OperationCanceledException(parallelOptions.CancellationToken);
-				}, null);
+				oce = new OperationCanceledException(parallelOptions.CancellationToken);
+				sharedPStateFlags.Cancel();
+			}, null, false));
+			int forkJoinContextID = 0;
+			if (ParallelEtwProvider.Log.IsEnabled())
+			{
+				forkJoinContextID = Interlocked.Increment(ref Parallel.s_forkJoinContextID);
+				ParallelEtwProvider.Log.ParallelLoopBegin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, ParallelEtwProvider.ForkJoinOperationType.ParallelFor, fromInclusive, toExclusive);
 			}
-			ParallelForReplicatingTask rootTask = null;
 			try
 			{
-				rootTask = new ParallelForReplicatingTask(parallelOptions, delegate
+				try
 				{
-					Task internalCurrent = Task.InternalCurrent;
-					bool flag = internalCurrent == rootTask;
-					RangeWorker rangeWorker = default(RangeWorker);
-					object savedStateFromPreviousReplica = internalCurrent.SavedStateFromPreviousReplica;
-					if (savedStateFromPreviousReplica is RangeWorker)
+					TaskReplicator.Run<RangeWorker>(delegate(ref RangeWorker currentWorker, int timeout, out bool replicationDelegateYieldedBeforeCompletion)
 					{
-						rangeWorker = (RangeWorker)savedStateFromPreviousReplica;
-					}
-					else
-					{
-						rangeWorker = rangeManager.RegisterNewWorker();
-					}
-					long num2;
-					long num3;
-					if (!rangeWorker.FindNewWork(out num2, out num3) || sharedPStateFlags.ShouldExitLoop(num2))
-					{
-						return;
-					}
-					TLocal tlocal = default(TLocal);
-					bool flag2 = false;
-					try
-					{
-						ParallelLoopState64 parallelLoopState = null;
-						if (bodyWithState != null)
+						if (!currentWorker.IsInitialized)
 						{
-							parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
+							currentWorker = rangeManager.RegisterNewWorker();
 						}
-						else if (bodyWithLocal != null)
+						replicationDelegateYieldedBeforeCompletion = false;
+						long num3;
+						long num4;
+						if (!currentWorker.FindNewWork(out num3, out num4) || sharedPStateFlags.ShouldExitLoop(num3))
 						{
-							parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
-							if (localInit != null)
+							return;
+						}
+						if (ParallelEtwProvider.Log.IsEnabled())
+						{
+							ParallelEtwProvider.Log.ParallelFork(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
+						}
+						TLocal tlocal = default(TLocal);
+						bool flag = false;
+						try
+						{
+							ParallelLoopState64 parallelLoopState = null;
+							if (bodyWithState != null)
 							{
-								tlocal = localInit();
-								flag2 = true;
+								parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
 							}
-						}
-						Parallel.LoopTimer loopTimer = new Parallel.LoopTimer(rootTask.ActiveChildCount);
-						for (;;)
-						{
-							if (body != null)
+							else if (bodyWithLocal != null)
 							{
-								for (long num4 = num2; num4 < num3; num4 += 1L)
+								parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
+								if (localInit != null)
 								{
-									if (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop())
+									tlocal = localInit();
+									flag = true;
+								}
+							}
+							int num5 = Parallel.ComputeTimeoutPoint(timeout);
+							for (;;)
+							{
+								if (body != null)
+								{
+									for (long num6 = num3; num6 < num4; num6 += 1L)
 									{
-										break;
+										if (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop())
+										{
+											break;
+										}
+										body(num6);
 									}
-									body(num4);
 								}
-							}
-							else if (bodyWithState != null)
-							{
-								for (long num5 = num2; num5 < num3; num5 += 1L)
+								else if (bodyWithState != null)
 								{
-									if (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop(num5))
+									for (long num7 = num3; num7 < num4; num7 += 1L)
 									{
-										break;
+										if (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop(num7))
+										{
+											break;
+										}
+										parallelLoopState.CurrentIteration = num7;
+										bodyWithState(num7, parallelLoopState);
 									}
-									parallelLoopState.CurrentIteration = num5;
-									bodyWithState(num5, parallelLoopState);
 								}
-							}
-							else
-							{
-								long num6 = num2;
-								while (num6 < num3 && (sharedPStateFlags.LoopStateFlags == ParallelLoopStateFlags.PLS_NONE || !sharedPStateFlags.ShouldExitLoop(num6)))
+								else
 								{
-									parallelLoopState.CurrentIteration = num6;
-									tlocal = bodyWithLocal(num6, parallelLoopState, tlocal);
-									num6 += 1L;
+									long num8 = num3;
+									while (num8 < num4 && (sharedPStateFlags.LoopStateFlags == 0 || !sharedPStateFlags.ShouldExitLoop(num8)))
+									{
+										parallelLoopState.CurrentIteration = num8;
+										tlocal = bodyWithLocal(num8, parallelLoopState, tlocal);
+										num8 += 1L;
+									}
+								}
+								if (Parallel.CheckTimeoutReached(num5))
+								{
+									break;
+								}
+								if (!currentWorker.FindNewWork(out num3, out num4) || (sharedPStateFlags.LoopStateFlags != 0 && sharedPStateFlags.ShouldExitLoop(num3)))
+								{
+									goto IL_01DB;
 								}
 							}
-							if (!flag && loopTimer.LimitExceeded())
-							{
-								break;
-							}
-							if (!rangeWorker.FindNewWork(out num2, out num3) || (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE && sharedPStateFlags.ShouldExitLoop(num2)))
-							{
-								goto IL_0200;
-							}
+							replicationDelegateYieldedBeforeCompletion = true;
+							IL_01DB:;
 						}
-						internalCurrent.SavedStateForNextReplica = rangeWorker;
-						IL_0200:;
-					}
-					catch
-					{
-						sharedPStateFlags.SetExceptional();
-						throw;
-					}
-					finally
-					{
-						if (localFinally != null && flag2)
+						catch (Exception ex2)
 						{
-							localFinally(tlocal);
+							sharedPStateFlags.SetExceptional();
+							ExceptionDispatchInfo.Throw(ex2);
 						}
-					}
-				}, taskCreationOptions, internalTaskOptions);
-				rootTask.RunSynchronously(parallelOptions.EffectiveTaskScheduler);
-				rootTask.Wait();
-				if (parallelOptions.CancellationToken.CanBeCanceled)
+						finally
+						{
+							if (localFinally != null && flag)
+							{
+								localFinally(tlocal);
+							}
+							if (ParallelEtwProvider.Log.IsEnabled())
+							{
+								ParallelEtwProvider.Log.ParallelJoin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
+							}
+						}
+					}, parallelOptions, true);
+				}
+				finally
 				{
-					cancellationTokenRegistration.Dispose();
+					if (parallelOptions.CancellationToken.CanBeCanceled)
+					{
+						cancellationTokenRegistration.Dispose();
+					}
 				}
 				if (oce != null)
 				{
@@ -618,32 +618,32 @@ namespace System.Threading.Tasks
 			}
 			catch (AggregateException ex)
 			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				Parallel.ThrowIfReducableToSingleOCE(ex.InnerExceptions, parallelOptions.CancellationToken);
-				throw;
-			}
-			catch (TaskSchedulerException)
-			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				throw;
+				Parallel.ThrowSingleCancellationExceptionOrOtherException(ex.InnerExceptions, parallelOptions.CancellationToken, ex);
 			}
 			finally
 			{
 				int loopStateFlags = sharedPStateFlags.LoopStateFlags;
-				parallelLoopResult.m_completed = loopStateFlags == ParallelLoopStateFlags.PLS_NONE;
-				if ((loopStateFlags & ParallelLoopStateFlags.PLS_BROKEN) != 0)
+				parallelLoopResult._completed = loopStateFlags == 0;
+				if ((loopStateFlags & 2) != 0)
 				{
-					parallelLoopResult.m_lowestBreakIteration = new long?(sharedPStateFlags.LowestBreakIteration);
+					parallelLoopResult._lowestBreakIteration = new long?(sharedPStateFlags.LowestBreakIteration);
 				}
-				if (rootTask != null && rootTask.IsCompleted)
+				if (ParallelEtwProvider.Log.IsEnabled())
 				{
-					rootTask.Dispose();
+					long num2;
+					if (loopStateFlags == 0)
+					{
+						num2 = toExclusive - fromInclusive;
+					}
+					else if ((loopStateFlags & 2) != 0)
+					{
+						num2 = sharedPStateFlags.LowestBreakIteration - fromInclusive;
+					}
+					else
+					{
+						num2 = -1L;
+					}
+					ParallelEtwProvider.Log.ParallelLoopEnd(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, num2);
 				}
 			}
 			return parallelLoopResult;
@@ -833,10 +833,7 @@ namespace System.Threading.Tasks
 
 		private static ParallelLoopResult ForEachWorker<TSource, TLocal>(IEnumerable<TSource> source, ParallelOptions parallelOptions, Action<TSource> body, Action<TSource, ParallelLoopState> bodyWithState, Action<TSource, ParallelLoopState, long> bodyWithStateAndIndex, Func<TSource, ParallelLoopState, TLocal, TLocal> bodyWithStateAndLocal, Func<TSource, ParallelLoopState, long, TLocal, TLocal> bodyWithEverything, Func<TLocal> localInit, Action<TLocal> localFinally)
 		{
-			if (parallelOptions.CancellationToken.IsCancellationRequested)
-			{
-				throw new OperationCanceledException(parallelOptions.CancellationToken);
-			}
+			parallelOptions.CancellationToken.ThrowIfCancellationRequested();
 			TSource[] array = source as TSource[];
 			if (array != null)
 			{
@@ -950,7 +947,7 @@ namespace System.Threading.Tasks
 			}
 			if (!source.KeysNormalized)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true."));
+				throw new InvalidOperationException("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true.");
 			}
 			return Parallel.PartitionerForEachWorker<TSource, object>(source, Parallel.s_defaultParallelOptions, null, null, body, null, null, null, null);
 		}
@@ -996,7 +993,7 @@ namespace System.Threading.Tasks
 			}
 			if (!source.KeysNormalized)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true."));
+				throw new InvalidOperationException("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true.");
 			}
 			return Parallel.PartitionerForEachWorker<TSource, TLocal>(source, Parallel.s_defaultParallelOptions, null, null, null, null, body, localInit, localFinally);
 		}
@@ -1051,7 +1048,7 @@ namespace System.Threading.Tasks
 			}
 			if (!source.KeysNormalized)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true."));
+				throw new InvalidOperationException("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true.");
 			}
 			return Parallel.PartitionerForEachWorker<TSource, object>(source, parallelOptions, null, null, body, null, null, null, null);
 		}
@@ -1105,7 +1102,7 @@ namespace System.Threading.Tasks
 			}
 			if (!source.KeysNormalized)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true."));
+				throw new InvalidOperationException("This method requires the use of an OrderedPartitioner with the KeysNormalized property set to true.");
 			}
 			return Parallel.PartitionerForEachWorker<TSource, TLocal>(source, parallelOptions, null, null, null, null, body, localInit, localFinally);
 		}
@@ -1115,24 +1112,23 @@ namespace System.Threading.Tasks
 			OrderablePartitioner<TSource> orderedSource = source as OrderablePartitioner<TSource>;
 			if (!source.SupportsDynamicPartitions)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("The Partitioner used here must support dynamic partitioning."));
+				throw new InvalidOperationException("The Partitioner used here must support dynamic partitioning.");
 			}
-			if (parallelOptions.CancellationToken.IsCancellationRequested)
+			parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+			int forkJoinContextID = 0;
+			if (ParallelEtwProvider.Log.IsEnabled())
 			{
-				throw new OperationCanceledException(parallelOptions.CancellationToken);
+				forkJoinContextID = Interlocked.Increment(ref Parallel.s_forkJoinContextID);
+				ParallelEtwProvider.Log.ParallelLoopBegin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, ParallelEtwProvider.ForkJoinOperationType.ParallelForEach, 0L, 0L);
 			}
 			ParallelLoopStateFlags64 sharedPStateFlags = new ParallelLoopStateFlags64();
 			ParallelLoopResult parallelLoopResult = default(ParallelLoopResult);
 			OperationCanceledException oce = null;
-			CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
-			if (parallelOptions.CancellationToken.CanBeCanceled)
+			CancellationTokenRegistration cancellationTokenRegistration = ((!parallelOptions.CancellationToken.CanBeCanceled) ? default(CancellationTokenRegistration) : parallelOptions.CancellationToken.Register(delegate(object o)
 			{
-				cancellationTokenRegistration = parallelOptions.CancellationToken.InternalRegisterWithoutEC(delegate(object o)
-				{
-					sharedPStateFlags.Cancel();
-					oce = new OperationCanceledException(parallelOptions.CancellationToken);
-				}, null);
-			}
+				oce = new OperationCanceledException(parallelOptions.CancellationToken);
+				sharedPStateFlags.Cancel();
+			}, null, false));
 			IEnumerable<TSource> partitionerSource = null;
 			IEnumerable<KeyValuePair<long, TSource>> orderablePartitionerSource = null;
 			if (orderedSource != null)
@@ -1140,7 +1136,7 @@ namespace System.Threading.Tasks
 				orderablePartitionerSource = orderedSource.GetOrderableDynamicPartitions();
 				if (orderablePartitionerSource == null)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("The Partitioner used here returned a null partitioner source."));
+					throw new InvalidOperationException("The Partitioner used here returned a null partitioner source.");
 				}
 			}
 			else
@@ -1148,156 +1144,166 @@ namespace System.Threading.Tasks
 				partitionerSource = source.GetDynamicPartitions();
 				if (partitionerSource == null)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("The Partitioner used here returned a null partitioner source."));
+					throw new InvalidOperationException("The Partitioner used here returned a null partitioner source.");
 				}
 			}
-			ParallelForReplicatingTask rootTask = null;
-			Action action = delegate
+			try
 			{
-				Task internalCurrent = Task.InternalCurrent;
-				TLocal tlocal = default(TLocal);
-				bool flag = false;
-				IDisposable disposable2 = null;
 				try
 				{
-					ParallelLoopState64 parallelLoopState = null;
-					if (bodyWithState != null || bodyWithStateAndIndex != null)
+					TaskReplicator.Run<IEnumerator>(delegate(ref IEnumerator partitionState, int timeout, out bool replicationDelegateYieldedBeforeCompletion)
 					{
-						parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
-					}
-					else if (bodyWithStateAndLocal != null || bodyWithEverything != null)
-					{
-						parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
-						if (localInit != null)
+						replicationDelegateYieldedBeforeCompletion = false;
+						if (ParallelEtwProvider.Log.IsEnabled())
 						{
-							tlocal = localInit();
-							flag = true;
+							ParallelEtwProvider.Log.ParallelFork(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
 						}
-					}
-					bool flag2 = rootTask == internalCurrent;
-					Parallel.LoopTimer loopTimer = new Parallel.LoopTimer(rootTask.ActiveChildCount);
-					if (orderedSource != null)
-					{
-						IEnumerator<KeyValuePair<long, TSource>> enumerator = internalCurrent.SavedStateFromPreviousReplica as IEnumerator<KeyValuePair<long, TSource>>;
-						if (enumerator == null)
+						TLocal tlocal = default(TLocal);
+						bool flag = false;
+						try
 						{
-							enumerator = orderablePartitionerSource.GetEnumerator();
-							if (enumerator == null)
+							ParallelLoopState64 parallelLoopState = null;
+							if (bodyWithState != null || bodyWithStateAndIndex != null)
 							{
-								throw new InvalidOperationException(Environment.GetResourceString("The Partitioner source returned a null enumerator."));
+								parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
 							}
-						}
-						disposable2 = enumerator;
-						while (enumerator.MoveNext())
-						{
-							KeyValuePair<long, TSource> keyValuePair = enumerator.Current;
-							long key = keyValuePair.Key;
-							TSource value = keyValuePair.Value;
-							if (parallelLoopState != null)
+							else if (bodyWithStateAndLocal != null || bodyWithEverything != null)
 							{
-								parallelLoopState.CurrentIteration = key;
+								parallelLoopState = new ParallelLoopState64(sharedPStateFlags);
+								if (localInit != null)
+								{
+									tlocal = localInit();
+									flag = true;
+								}
 							}
-							if (simpleBody != null)
+							int num = Parallel.ComputeTimeoutPoint(timeout);
+							if (orderedSource != null)
 							{
-								simpleBody(value);
-							}
-							else if (bodyWithState != null)
-							{
-								bodyWithState(value, parallelLoopState);
-							}
-							else if (bodyWithStateAndIndex != null)
-							{
-								bodyWithStateAndIndex(value, parallelLoopState, key);
-							}
-							else if (bodyWithStateAndLocal != null)
-							{
-								tlocal = bodyWithStateAndLocal(value, parallelLoopState, tlocal);
+								IEnumerator<KeyValuePair<long, TSource>> enumerator = partitionState as IEnumerator<KeyValuePair<long, TSource>>;
+								if (enumerator == null)
+								{
+									enumerator = orderablePartitionerSource.GetEnumerator();
+									partitionState = enumerator;
+								}
+								if (enumerator == null)
+								{
+									throw new InvalidOperationException("The Partitioner source returned a null enumerator.");
+								}
+								while (enumerator.MoveNext())
+								{
+									KeyValuePair<long, TSource> keyValuePair = enumerator.Current;
+									long key = keyValuePair.Key;
+									TSource value = keyValuePair.Value;
+									if (parallelLoopState != null)
+									{
+										parallelLoopState.CurrentIteration = key;
+									}
+									if (simpleBody != null)
+									{
+										simpleBody(value);
+									}
+									else if (bodyWithState != null)
+									{
+										bodyWithState(value, parallelLoopState);
+									}
+									else if (bodyWithStateAndIndex != null)
+									{
+										bodyWithStateAndIndex(value, parallelLoopState, key);
+									}
+									else if (bodyWithStateAndLocal != null)
+									{
+										tlocal = bodyWithStateAndLocal(value, parallelLoopState, tlocal);
+									}
+									else
+									{
+										tlocal = bodyWithEverything(value, parallelLoopState, key, tlocal);
+									}
+									if (sharedPStateFlags.ShouldExitLoop(key))
+									{
+										break;
+									}
+									if (Parallel.CheckTimeoutReached(num))
+									{
+										replicationDelegateYieldedBeforeCompletion = true;
+										break;
+									}
+								}
 							}
 							else
 							{
-								tlocal = bodyWithEverything(value, parallelLoopState, key, tlocal);
-							}
-							if (sharedPStateFlags.ShouldExitLoop(key))
-							{
-								break;
-							}
-							if (!flag2 && loopTimer.LimitExceeded())
-							{
-								internalCurrent.SavedStateForNextReplica = enumerator;
-								disposable2 = null;
-								break;
+								IEnumerator<TSource> enumerator2 = partitionState as IEnumerator<TSource>;
+								if (enumerator2 == null)
+								{
+									enumerator2 = partitionerSource.GetEnumerator();
+									partitionState = enumerator2;
+								}
+								if (enumerator2 == null)
+								{
+									throw new InvalidOperationException("The Partitioner source returned a null enumerator.");
+								}
+								if (parallelLoopState != null)
+								{
+									parallelLoopState.CurrentIteration = 0L;
+								}
+								while (enumerator2.MoveNext())
+								{
+									TSource tsource = enumerator2.Current;
+									if (simpleBody != null)
+									{
+										simpleBody(tsource);
+									}
+									else if (bodyWithState != null)
+									{
+										bodyWithState(tsource, parallelLoopState);
+									}
+									else if (bodyWithStateAndLocal != null)
+									{
+										tlocal = bodyWithStateAndLocal(tsource, parallelLoopState, tlocal);
+									}
+									if (sharedPStateFlags.LoopStateFlags != 0)
+									{
+										break;
+									}
+									if (Parallel.CheckTimeoutReached(num))
+									{
+										replicationDelegateYieldedBeforeCompletion = true;
+										break;
+									}
+								}
 							}
 						}
-					}
-					else
-					{
-						IEnumerator<TSource> enumerator2 = internalCurrent.SavedStateFromPreviousReplica as IEnumerator<TSource>;
-						if (enumerator2 == null)
+						catch (Exception ex2)
 						{
-							enumerator2 = partitionerSource.GetEnumerator();
-							if (enumerator2 == null)
-							{
-								throw new InvalidOperationException(Environment.GetResourceString("The Partitioner source returned a null enumerator."));
-							}
+							sharedPStateFlags.SetExceptional();
+							ExceptionDispatchInfo.Throw(ex2);
 						}
-						disposable2 = enumerator2;
-						if (parallelLoopState != null)
+						finally
 						{
-							parallelLoopState.CurrentIteration = 0L;
-						}
-						while (enumerator2.MoveNext())
-						{
-							TSource tsource = enumerator2.Current;
-							if (simpleBody != null)
+							if (localFinally != null && flag)
 							{
-								simpleBody(tsource);
+								localFinally(tlocal);
 							}
-							else if (bodyWithState != null)
+							if (!replicationDelegateYieldedBeforeCompletion)
 							{
-								bodyWithState(tsource, parallelLoopState);
+								IDisposable disposable2 = partitionState as IDisposable;
+								if (disposable2 != null)
+								{
+									disposable2.Dispose();
+								}
 							}
-							else if (bodyWithStateAndLocal != null)
+							if (ParallelEtwProvider.Log.IsEnabled())
 							{
-								tlocal = bodyWithStateAndLocal(tsource, parallelLoopState, tlocal);
-							}
-							if (sharedPStateFlags.LoopStateFlags != ParallelLoopStateFlags.PLS_NONE)
-							{
-								break;
-							}
-							if (!flag2 && loopTimer.LimitExceeded())
-							{
-								internalCurrent.SavedStateForNextReplica = enumerator2;
-								disposable2 = null;
-								break;
+								ParallelEtwProvider.Log.ParallelJoin(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID);
 							}
 						}
-					}
-				}
-				catch
-				{
-					sharedPStateFlags.SetExceptional();
-					throw;
+					}, parallelOptions, true);
 				}
 				finally
 				{
-					if (localFinally != null && flag)
+					if (parallelOptions.CancellationToken.CanBeCanceled)
 					{
-						localFinally(tlocal);
+						cancellationTokenRegistration.Dispose();
 					}
-					if (disposable2 != null)
-					{
-						disposable2.Dispose();
-					}
-				}
-			};
-			try
-			{
-				rootTask = new ParallelForReplicatingTask(parallelOptions, action, TaskCreationOptions.None, InternalTaskOptions.SelfReplicating);
-				rootTask.RunSynchronously(parallelOptions.EffectiveTaskScheduler);
-				rootTask.Wait();
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
 				}
 				if (oce != null)
 				{
@@ -1306,32 +1312,15 @@ namespace System.Threading.Tasks
 			}
 			catch (AggregateException ex)
 			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				Parallel.ThrowIfReducableToSingleOCE(ex.InnerExceptions, parallelOptions.CancellationToken);
-				throw;
-			}
-			catch (TaskSchedulerException)
-			{
-				if (parallelOptions.CancellationToken.CanBeCanceled)
-				{
-					cancellationTokenRegistration.Dispose();
-				}
-				throw;
+				Parallel.ThrowSingleCancellationExceptionOrOtherException(ex.InnerExceptions, parallelOptions.CancellationToken, ex);
 			}
 			finally
 			{
 				int loopStateFlags = sharedPStateFlags.LoopStateFlags;
-				parallelLoopResult.m_completed = loopStateFlags == ParallelLoopStateFlags.PLS_NONE;
-				if ((loopStateFlags & ParallelLoopStateFlags.PLS_BROKEN) != 0)
+				parallelLoopResult._completed = loopStateFlags == 0;
+				if ((loopStateFlags & 2) != 0)
 				{
-					parallelLoopResult.m_lowestBreakIteration = new long?(sharedPStateFlags.LowestBreakIteration);
-				}
-				if (rootTask != null && rootTask.IsCompleted)
-				{
-					rootTask.Dispose();
+					parallelLoopResult._lowestBreakIteration = new long?(sharedPStateFlags.LowestBreakIteration);
 				}
 				IDisposable disposable;
 				if (orderablePartitionerSource != null)
@@ -1346,55 +1335,50 @@ namespace System.Threading.Tasks
 				{
 					disposable.Dispose();
 				}
+				if (ParallelEtwProvider.Log.IsEnabled())
+				{
+					ParallelEtwProvider.Log.ParallelLoopEnd(TaskScheduler.Current.Id, Task.CurrentId.GetValueOrDefault(), forkJoinContextID, 0L);
+				}
 			}
 			return parallelLoopResult;
 		}
 
-		internal static void ThrowIfReducableToSingleOCE(IEnumerable<Exception> excCollection, CancellationToken ct)
+		private static OperationCanceledException ReduceToSingleCancellationException(ICollection exceptions, CancellationToken cancelToken)
 		{
-			bool flag = false;
-			if (ct.IsCancellationRequested)
+			if (exceptions == null || exceptions.Count == 0)
 			{
-				foreach (Exception ex in excCollection)
+				return null;
+			}
+			if (!cancelToken.IsCancellationRequested)
+			{
+				return null;
+			}
+			Exception ex = null;
+			foreach (object obj in exceptions)
+			{
+				Exception ex2 = (Exception)obj;
+				if (ex == null)
 				{
-					flag = true;
-					OperationCanceledException ex2 = ex as OperationCanceledException;
-					if (ex2 == null || ex2.CancellationToken != ct)
-					{
-						return;
-					}
+					ex = ex2;
 				}
-				if (flag)
+				OperationCanceledException ex3 = ex2 as OperationCanceledException;
+				if (ex3 == null || !cancelToken.Equals(ex3.CancellationToken))
 				{
-					throw new OperationCanceledException(ct);
+					return null;
 				}
 			}
+			return (OperationCanceledException)ex;
+		}
+
+		private static void ThrowSingleCancellationExceptionOrOtherException(ICollection exceptions, CancellationToken cancelToken, Exception otherException)
+		{
+			ExceptionDispatchInfo.Throw(Parallel.ReduceToSingleCancellationException(exceptions, cancelToken) ?? otherException);
 		}
 
 		internal static int s_forkJoinContextID;
 
 		internal const int DEFAULT_LOOP_STRIDE = 16;
 
-		internal static ParallelOptions s_defaultParallelOptions = new ParallelOptions();
-
-		internal struct LoopTimer
-		{
-			public LoopTimer(int nWorkerTaskIndex)
-			{
-				int num = 100 + nWorkerTaskIndex % PlatformHelper.ProcessorCount * 50;
-				this.m_timeLimit = Environment.TickCount + num;
-			}
-
-			public bool LimitExceeded()
-			{
-				return Environment.TickCount > this.m_timeLimit;
-			}
-
-			private const int s_BaseNotifyPeriodMS = 100;
-
-			private const int s_NotifyPeriodIncrementMS = 50;
-
-			private int m_timeLimit;
-		}
+		internal static readonly ParallelOptions s_defaultParallelOptions = new ParallelOptions();
 	}
 }

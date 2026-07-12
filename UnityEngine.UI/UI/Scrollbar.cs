@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Scrollbar", 34)]
+	[AddComponentMenu("UI/Scrollbar", 36)]
 	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	public class Scrollbar : Selectable, IBeginDragHandler, IEventSystemHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
@@ -348,6 +348,8 @@ namespace UnityEngine.UI
 				{
 					float num = ((((this.axis == Scrollbar.Axis.Horizontal) ? vector.x : vector.y) < 0f) ? this.size : (-this.size));
 					this.value += (this.reverseValue ? num : (-num));
+					this.value = Mathf.Clamp01(this.value);
+					this.value = Mathf.Round(this.value * 10000f) / 10000f;
 				}
 				yield return new WaitForEndOfFrame();
 			}

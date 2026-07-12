@@ -11,7 +11,7 @@ public class HatchDrillSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.position;
 		vector.z = 0f;
 		if (SoundEvent.ObjectIsSelectedAndVisible(behaviour.controller.gameObject))
 		{

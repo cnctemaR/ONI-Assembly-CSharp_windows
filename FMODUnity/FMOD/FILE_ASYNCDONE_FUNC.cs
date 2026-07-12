@@ -2,5 +2,5 @@
 
 namespace FMOD
 {
-	public delegate RESULT FILE_ASYNCDONE_FUNC(IntPtr info, RESULT result);
+	public delegate void FILE_ASYNCDONE_FUNC(IntPtr info, RESULT result);
 }

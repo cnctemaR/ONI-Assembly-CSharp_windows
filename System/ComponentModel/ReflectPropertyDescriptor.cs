@@ -19,11 +19,11 @@ namespace System.ComponentModel
 			{
 				if (type == null)
 				{
-					throw new ArgumentException(global::SR.GetString("Invalid type for the {0} property.", new object[] { name }));
+					throw new ArgumentException(SR.GetString("Invalid type for the {0} property.", new object[] { name }));
 				}
 				if (componentClass == null)
 				{
-					throw new ArgumentException(global::SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
+					throw new ArgumentException(SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
 				}
 				this.type = type;
 				this.componentClass = componentClass;
@@ -64,7 +64,7 @@ namespace System.ComponentModel
 			this.type = oldReflectPropertyDescriptor.PropertyType;
 			if (componentClass == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
+				throw new ArgumentException(SR.GetString("Null is not a valid value for {0}.", new object[] { "componentClass" }));
 			}
 			ReflectPropertyDescriptor reflectPropertyDescriptor = oldReflectPropertyDescriptor as ReflectPropertyDescriptor;
 			if (reflectPropertyDescriptor != null)
@@ -216,7 +216,7 @@ namespace System.ComponentModel
 						}
 						if (this.getMethod == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("Accessor methods for the {0} property are missing.", new object[] { this.componentClass.FullName + "." + this.Name }));
+							throw new InvalidOperationException(SR.GetString("Accessor methods for the {0} property are missing.", new object[] { this.componentClass.FullName + "." + this.Name }));
 						}
 					}
 					else
@@ -224,7 +224,7 @@ namespace System.ComponentModel
 						this.getMethod = MemberDescriptor.FindMethod(this.componentClass, "Get" + this.Name, new Type[] { this.receiverType }, this.type);
 						if (this.getMethod == null)
 						{
-							throw new ArgumentException(global::SR.GetString("Accessor methods for the {0} property are missing.", new object[] { this.Name }));
+							throw new ArgumentException(SR.GetString("Accessor methods for the {0} property are missing.", new object[] { this.Name }));
 						}
 					}
 				}
@@ -706,7 +706,7 @@ namespace System.ComponentModel
 					{
 						text2 = innerException.GetType().Name;
 					}
-					throw new TargetInvocationException(global::SR.GetString("Property accessor '{0}' on object '{1}' threw the following exception:'{2}'", new object[] { this.Name, text, text2 }), innerException);
+					throw new TargetInvocationException(SR.GetString("Property accessor '{0}' on object '{1}' threw the following exception:'{2}'", new object[] { this.Name, text, text2 }), innerException);
 				}
 			}
 			return null;

@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-	[ComVisible(true)]
 	public sealed class AssemblyDelaySignAttribute : Attribute
 	{
 		public AssemblyDelaySignAttribute(bool delaySign)
 		{
-			this.m_delaySign = delaySign;
+			this.DelaySign = delaySign;
 		}
 
-		public bool DelaySign
-		{
-			get
-			{
-				return this.m_delaySign;
-			}
-		}
-
-		private bool m_delaySign;
+		public bool DelaySign { get; }
 	}
 }

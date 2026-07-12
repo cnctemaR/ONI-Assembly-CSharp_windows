@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Security.Permissions;
+using System.Threading.Tasks;
 
 namespace System.Threading
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-	public struct CancellationTokenRegistration : IEquatable<CancellationTokenRegistration>, IDisposable
+	public readonly struct CancellationTokenRegistration : IEquatable<CancellationTokenRegistration>, IDisposable, IAsyncDisposable
 	{
 		internal CancellationTokenRegistration(CancellationCallbackInfo callbackInfo, SparselyPopulatedArrayAddInfo<CancellationCallbackInfo> registrationInfo)
 		{
@@ -13,20 +11,32 @@ namespace System.Threading
 			this.m_registrationInfo = registrationInfo;
 		}
 
-		[FriendAccessAllowed]
-		internal bool TryDeregister()
+		public CancellationToken Token
+		{
+			get
+			{
+				CancellationCallbackInfo callbackInfo = this.m_callbackInfo;
+				if (callbackInfo == null)
+				{
+					return default(CancellationToken);
+				}
+				return callbackInfo.CancellationTokenSource.Token;
+			}
+		}
+
+		public bool Unregister()
 		{
 			return this.m_registrationInfo.Source != null && this.m_registrationInfo.Source.SafeAtomicRemove(this.m_registrationInfo.Index, this.m_callbackInfo) == this.m_callbackInfo;
 		}
 
 		public void Dispose()
 		{
-			bool flag = this.TryDeregister();
+			bool flag = this.Unregister();
 			CancellationCallbackInfo callbackInfo = this.m_callbackInfo;
 			if (callbackInfo != null)
 			{
 				CancellationTokenSource cancellationTokenSource = callbackInfo.CancellationTokenSource;
-				if (cancellationTokenSource.IsCancellationRequested && !cancellationTokenSource.IsCancellationCompleted && !flag && cancellationTokenSource.ThreadIDExecutingCallbacks != Thread.CurrentThread.ManagedThreadId)
+				if (cancellationTokenSource.IsCancellationRequested && !cancellationTokenSource.IsCancellationCompleted && !flag && cancellationTokenSource.ThreadIDExecutingCallbacks != Environment.CurrentManagedThreadId)
 				{
 					cancellationTokenSource.WaitForCallbackToComplete(this.m_callbackInfo);
 				}
@@ -60,6 +70,12 @@ namespace System.Threading
 				return this.m_registrationInfo.Source.GetHashCode() ^ this.m_registrationInfo.Index.GetHashCode();
 			}
 			return this.m_registrationInfo.Index.GetHashCode();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			this.Dispose();
+			return new ValueTask(Task.FromResult<object>(null));
 		}
 
 		private readonly CancellationCallbackInfo m_callbackInfo;

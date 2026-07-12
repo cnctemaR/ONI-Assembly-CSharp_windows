@@ -34,13 +34,13 @@ public class ArtifactAnalysisStationWorkable : Workable
 		Components.ArtifactAnalysisStations.Remove(this);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.InitialDisplayStoredArtifact();
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		this.PositionArtifact();
 		return base.OnWorkTick(worker, dt);
@@ -83,7 +83,7 @@ public class ArtifactAnalysisStationWorkable : Workable
 		gameObject.transform.SetPosition(vector);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.ConsumeCharm();

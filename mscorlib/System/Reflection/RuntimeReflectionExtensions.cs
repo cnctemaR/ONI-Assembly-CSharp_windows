@@ -5,81 +5,84 @@ namespace System.Reflection
 {
 	public static class RuntimeReflectionExtensions
 	{
-		private static void CheckAndThrow(Type t)
+		public static IEnumerable<FieldInfo> GetRuntimeFields(this Type type)
 		{
-			if (t == null)
+			if (type == null)
 			{
 				throw new ArgumentNullException("type");
 			}
-			if (!(t is RuntimeType))
-			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a runtime Type object."));
-			}
+			return type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
-		private static void CheckAndThrow(MethodInfo m)
+		public static IEnumerable<MethodInfo> GetRuntimeMethods(this Type type)
 		{
-			if (m == null)
+			if (type == null)
 			{
-				throw new ArgumentNullException("method");
+				throw new ArgumentNullException("type");
 			}
-			if (!(m is RuntimeMethodInfo))
-			{
-				throw new ArgumentException(Environment.GetResourceString("MethodInfo must be a runtime MethodInfo object."));
-			}
+			return type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		public static IEnumerable<PropertyInfo> GetRuntimeProperties(this Type type)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 			return type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		public static IEnumerable<EventInfo> GetRuntimeEvents(this Type type)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 			return type.GetEvents(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
-		public static IEnumerable<MethodInfo> GetRuntimeMethods(this Type type)
+		public static FieldInfo GetRuntimeField(this Type type, string name)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
-			return type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return type.GetField(name);
 		}
 
-		public static IEnumerable<FieldInfo> GetRuntimeFields(this Type type)
+		public static MethodInfo GetRuntimeMethod(this Type type, string name, Type[] parameters)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
-			return type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return type.GetMethod(name, parameters);
 		}
 
 		public static PropertyInfo GetRuntimeProperty(this Type type, string name)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 			return type.GetProperty(name);
 		}
 
 		public static EventInfo GetRuntimeEvent(this Type type, string name)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 			return type.GetEvent(name);
-		}
-
-		public static MethodInfo GetRuntimeMethod(this Type type, string name, Type[] parameters)
-		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
-			return type.GetMethod(name, parameters);
-		}
-
-		public static FieldInfo GetRuntimeField(this Type type, string name)
-		{
-			RuntimeReflectionExtensions.CheckAndThrow(type);
-			return type.GetField(name);
 		}
 
 		public static MethodInfo GetRuntimeBaseDefinition(this MethodInfo method)
 		{
-			RuntimeReflectionExtensions.CheckAndThrow(method);
+			if (method == null)
+			{
+				throw new ArgumentNullException("method");
+			}
 			return method.GetBaseDefinition();
 		}
 
@@ -88,10 +91,6 @@ namespace System.Reflection
 			if (typeInfo == null)
 			{
 				throw new ArgumentNullException("typeInfo");
-			}
-			if (!(typeInfo is RuntimeType))
-			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a runtime Type object."));
 			}
 			return typeInfo.GetInterfaceMap(interfaceType);
 		}
@@ -105,6 +104,6 @@ namespace System.Reflection
 			return del.Method;
 		}
 
-		private const BindingFlags everything = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+		private const BindingFlags Everything = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 	}
 }

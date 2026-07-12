@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Net.Security;
 using System.Security.Authentication.ExtendedProtection;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Mono.Net.Security.Private;
@@ -51,10 +52,9 @@ namespace System.Net
 							}
 							else
 							{
-								this.certificate = new X509Certificate2(text2)
-								{
-									PrivateKey = PrivateKey.CreateFromFile(text3).RSA
-								};
+								X509Certificate2 x509Certificate2 = new X509Certificate2(text2);
+								RSA rsa = PrivateKey.CreateFromFile(text3).RSA;
+								this.certificate = new X509Certificate2((X509Certificate2Impl)x509Certificate2.Impl.CopyWithPrivateKey(rsa));
 								x509Certificate = this.certificate;
 							}
 						}
@@ -140,7 +140,7 @@ namespace System.Net
 				}
 				if (!AuthenticationManager.OSSupportsExtendedProtection)
 				{
-					throw new PlatformNotSupportedException(global::SR.GetString("This operation requires OS support for extended protection."));
+					throw new PlatformNotSupportedException(SR.GetString("This operation requires OS support for extended protection."));
 				}
 				this.extendedProtectionSelectorDelegate = value;
 			}
@@ -209,11 +209,11 @@ namespace System.Net
 				}
 				if (!AuthenticationManager.OSSupportsExtendedProtection && value.PolicyEnforcement == PolicyEnforcement.Always)
 				{
-					throw new PlatformNotSupportedException(global::SR.GetString("This operation requires OS support for extended protection."));
+					throw new PlatformNotSupportedException(SR.GetString("This operation requires OS support for extended protection."));
 				}
 				if (value.CustomChannelBinding != null)
 				{
-					throw new ArgumentException(global::SR.GetString("Custom channel bindings are not supported."), "CustomChannelBinding");
+					throw new ArgumentException(SR.GetString("Custom channel bindings are not supported."), "CustomChannelBinding");
 				}
 				this.extendedProtectionPolicy = value;
 			}

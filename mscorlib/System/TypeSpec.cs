@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace System
 {
@@ -48,7 +49,7 @@ namespace System
 				{
 					return this.nested;
 				}
-				return EmptyArray<TypeName>.Value;
+				return Array.Empty<TypeName>();
 			}
 		}
 
@@ -60,7 +61,7 @@ namespace System
 				{
 					return this.modifier_spec;
 				}
-				return EmptyArray<ModifierSpec>.Value;
+				return Array.Empty<ModifierSpec>();
 			}
 		}
 
@@ -242,12 +243,12 @@ namespace System
 			return false;
 		}
 
-		internal Type Resolve(Func<AssemblyName, Assembly> assemblyResolver, Func<Assembly, string, bool, Type> typeResolver, bool throwOnError, bool ignoreCase)
+		internal Type Resolve(Func<AssemblyName, Assembly> assemblyResolver, Func<Assembly, string, bool, Type> typeResolver, bool throwOnError, bool ignoreCase, ref StackCrawlMark stackMark)
 		{
 			Assembly assembly = null;
 			if (assemblyResolver == null && typeResolver == null)
 			{
-				return Type.GetType(this.DisplayFullName, throwOnError, ignoreCase);
+				return RuntimeType.GetType(this.DisplayFullName, throwOnError, ignoreCase, false, ref stackMark);
 			}
 			if (this.assembly_name != null)
 			{
@@ -288,7 +289,9 @@ namespace System
 						{
 							if (throwOnError)
 							{
-								throw new TypeLoadException("Could not resolve type '" + typeIdentifier + "'");
+								string text = "Could not resolve type '";
+								TypeIdentifier typeIdentifier2 = typeIdentifier;
+								throw new TypeLoadException(text + ((typeIdentifier2 != null) ? typeIdentifier2.ToString() : null) + "'");
 							}
 							return null;
 						}
@@ -304,12 +307,14 @@ namespace System
 					int i = 0;
 					while (i < array.Length)
 					{
-						Type type2 = this.generic_params[i].Resolve(assemblyResolver, typeResolver, throwOnError, ignoreCase);
+						Type type2 = this.generic_params[i].Resolve(assemblyResolver, typeResolver, throwOnError, ignoreCase, ref stackMark);
 						if (type2 == null)
 						{
 							if (throwOnError)
 							{
-								throw new TypeLoadException("Could not resolve type '" + this.generic_params[i].name + "'");
+								string text2 = "Could not resolve type '";
+								TypeIdentifier typeIdentifier3 = this.generic_params[i].name;
+								throw new TypeLoadException(text2 + ((typeIdentifier3 != null) ? typeIdentifier3.ToString() : null) + "'");
 							}
 							return null;
 						}
@@ -336,7 +341,9 @@ namespace System
 			}
 			if (throwOnError)
 			{
-				throw new TypeLoadException("Could not resolve type '" + this.name + "'");
+				string text3 = "Could not resolve type '";
+				TypeIdentifier typeIdentifier4 = this.name;
+				throw new TypeLoadException(text3 + ((typeIdentifier4 != null) ? typeIdentifier4.ToString() : null) + "'");
 			}
 			return null;
 		}
@@ -631,13 +638,7 @@ namespace System
 					i++;
 					continue;
 					IL_04BE:
-					throw new ArgumentException(string.Concat(new object[]
-					{
-						"Bad type def, can't handle '",
-						name[i].ToString(),
-						"' at ",
-						i
-					}), "typeName");
+					throw new ArgumentException("Bad type def, can't handle '" + name[i].ToString() + "' at " + i.ToString(), "typeName");
 				}
 			}
 			p = i;

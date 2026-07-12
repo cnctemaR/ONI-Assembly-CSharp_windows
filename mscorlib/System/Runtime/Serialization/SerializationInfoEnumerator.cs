@@ -1,46 +1,40 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 using Unity;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	public sealed class SerializationInfoEnumerator : IEnumerator
 	{
 		internal SerializationInfoEnumerator(string[] members, object[] info, Type[] types, int numItems)
 		{
-			this.m_members = members;
-			this.m_data = info;
-			this.m_types = types;
-			this.m_numItems = numItems - 1;
-			this.m_currItem = -1;
-			this.m_current = false;
+			this._members = members;
+			this._data = info;
+			this._types = types;
+			this._numItems = numItems - 1;
+			this._currItem = -1;
+			this._current = false;
 		}
 
 		public bool MoveNext()
 		{
-			if (this.m_currItem < this.m_numItems)
+			if (this._currItem < this._numItems)
 			{
-				this.m_currItem++;
-				this.m_current = true;
+				this._currItem++;
+				this._current = true;
 			}
 			else
 			{
-				this.m_current = false;
+				this._current = false;
 			}
-			return this.m_current;
+			return this._current;
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return new SerializationEntry(this.m_members[this.m_currItem], this.m_data[this.m_currItem], this.m_types[this.m_currItem]);
+				return this.Current;
 			}
 		}
 
@@ -48,29 +42,29 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				if (!this.m_current)
+				if (!this._current)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 				}
-				return new SerializationEntry(this.m_members[this.m_currItem], this.m_data[this.m_currItem], this.m_types[this.m_currItem]);
+				return new SerializationEntry(this._members[this._currItem], this._data[this._currItem], this._types[this._currItem]);
 			}
 		}
 
 		public void Reset()
 		{
-			this.m_currItem = -1;
-			this.m_current = false;
+			this._currItem = -1;
+			this._current = false;
 		}
 
 		public string Name
 		{
 			get
 			{
-				if (!this.m_current)
+				if (!this._current)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 				}
-				return this.m_members[this.m_currItem];
+				return this._members[this._currItem];
 			}
 		}
 
@@ -78,11 +72,11 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				if (!this.m_current)
+				if (!this._current)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 				}
-				return this.m_data[this.m_currItem];
+				return this._data[this._currItem];
 			}
 		}
 
@@ -90,11 +84,11 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				if (!this.m_current)
+				if (!this._current)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 				}
-				return this.m_types[this.m_currItem];
+				return this._types[this._currItem];
 			}
 		}
 
@@ -103,16 +97,16 @@ namespace System.Runtime.Serialization
 			ThrowStub.ThrowNotSupportedException();
 		}
 
-		private string[] m_members;
+		private readonly string[] _members;
 
-		private object[] m_data;
+		private readonly object[] _data;
 
-		private Type[] m_types;
+		private readonly Type[] _types;
 
-		private int m_numItems;
+		private readonly int _numItems;
 
-		private int m_currItem;
+		private int _currItem;
 
-		private bool m_current;
+		private bool _current;
 	}
 }

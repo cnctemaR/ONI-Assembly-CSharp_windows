@@ -73,7 +73,7 @@ public static class ClothingOutfitUtility
 		{
 			string text3;
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry;
-			keyValuePair.Deconstruct<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>(out text3, out customTemplateOutfitEntry);
+			keyValuePair.Deconstruct(out text3, out customTemplateOutfitEntry);
 			string text4 = text3;
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry2 = customTemplateOutfitEntry;
 			ClothingOutfitResource clothingOutfitResource = dbClothingOutfits.TryGet(text4);
@@ -87,7 +87,7 @@ public static class ClothingOutfitUtility
 		{
 			string text3;
 			Dictionary<string, string> dictionary;
-			keyValuePair2.Deconstruct<string, Dictionary<string, string>>(out text3, out dictionary);
+			keyValuePair2.Deconstruct(out text3, out dictionary);
 			string text5 = text3;
 			Personality personalityFromNameStringKey = Db.Get().Personalities.GetPersonalityFromNameStringKey(text5);
 			if (personalityFromNameStringKey.IsNullOrDestroyed())
@@ -117,7 +117,7 @@ public static class ClothingOutfitUtility
 							KeyValuePair<string, string> keyValuePair3 = enumerator4.Current;
 							string text3;
 							string text7;
-							keyValuePair3.Deconstruct<string, string>(out text3, out text7);
+							keyValuePair3.Deconstruct(out text3, out text7);
 							string text8 = text3;
 							string text9 = text7;
 							if (!dictionary3.ContainsKey(text8))

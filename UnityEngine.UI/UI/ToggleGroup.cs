@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Toggle Group", 32)]
+	[AddComponentMenu("UI/Toggle Group", 31)]
 	[DisallowMultipleComponent]
 	public class ToggleGroup : UIBehaviour
 	{

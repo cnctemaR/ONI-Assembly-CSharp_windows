@@ -6,6 +6,18 @@ namespace Mono.Security.Authenticode
 {
 	public class AuthenticodeBase
 	{
+		internal bool PE64
+		{
+			get
+			{
+				if (this.blockNo < 1)
+				{
+					this.ReadFirstBlock();
+				}
+				return this.pe64;
+			}
+		}
+
 		public AuthenticodeBase()
 		{
 			this.fileblock = new byte[4096];
@@ -57,6 +69,16 @@ namespace Mono.Security.Authenticode
 			this.blockNo = 0;
 		}
 
+		internal void Open(byte[] rawdata)
+		{
+			if (this.fs != null)
+			{
+				this.Close();
+			}
+			this.fs = new MemoryStream(rawdata, false);
+			this.blockNo = 0;
+		}
+
 		internal void Close()
 		{
 			if (this.fs != null)
@@ -105,8 +127,18 @@ namespace Mono.Security.Authenticode
 			{
 				return 5;
 			}
-			this.dirSecurityOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 152);
-			this.dirSecuritySize = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 156);
+			ushort num = BitConverterLE.ToUInt16(this.fileblock, this.peOffset + 24);
+			this.pe64 = num == 523;
+			if (this.pe64)
+			{
+				this.dirSecurityOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 168);
+				this.dirSecuritySize = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 168 + 4);
+			}
+			else
+			{
+				this.dirSecurityOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 152);
+				this.dirSecuritySize = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 156);
+			}
 			this.coffSymbolTableOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 12);
 			return 0;
 		}
@@ -180,8 +212,16 @@ namespace Mono.Security.Authenticode
 			int num3 = this.peOffset + 88;
 			hash.TransformBlock(this.fileblock, 0, num3, this.fileblock, 0);
 			num3 += 4;
-			hash.TransformBlock(this.fileblock, num3, 60, this.fileblock, num3);
-			num3 += 68;
+			if (this.pe64)
+			{
+				hash.TransformBlock(this.fileblock, num3, 76, this.fileblock, num3);
+				num3 += 84;
+			}
+			else
+			{
+				hash.TransformBlock(this.fileblock, num3, 60, this.fileblock, num3);
+				num3 += 68;
+			}
 			if (num2 == 0L)
 			{
 				hash.TransformFinalBlock(this.fileblock, num3, this.blockLength - num3);
@@ -246,7 +286,7 @@ namespace Mono.Security.Authenticode
 
 		private byte[] fileblock;
 
-		private FileStream fs;
+		private Stream fs;
 
 		private int blockNo;
 
@@ -259,5 +299,7 @@ namespace Mono.Security.Authenticode
 		private int dirSecuritySize;
 
 		private int coffSymbolTableOffset;
+
+		private bool pe64;
 	}
 }

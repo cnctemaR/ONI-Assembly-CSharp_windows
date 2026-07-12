@@ -12,6 +12,8 @@ public class ComplexRecipe
 
 	public bool ProductHasFacade { get; set; }
 
+	public bool RequiresAllIngredientsDiscovered { get; set; }
+
 	public Tag FirstResult
 	{
 		get

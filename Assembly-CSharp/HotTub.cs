@@ -75,6 +75,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectE
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
 		WorkChore<HotTubWorkable> workChore = new WorkChore<HotTubWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotABionic, workable);
 		return workChore;
 	}
 

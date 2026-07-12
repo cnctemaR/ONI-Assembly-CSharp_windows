@@ -42,9 +42,21 @@ public class ColdWheatConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Crop, "ColdWheatSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.DESC, Assets.GetAnim("seed_coldwheat_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 3, global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", true, null);
-		EntityTemplates.ExtendEntityToFood(gameObject2, FOOD.FOOD_TYPES.COLD_WHEAT_SEED);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Crop;
+		string text4 = "ColdWheatSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_coldwheat_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DOMESTICATEDDESC;
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 3, text8, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", true, null);
+		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.COLD_WHEAT_SEED);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

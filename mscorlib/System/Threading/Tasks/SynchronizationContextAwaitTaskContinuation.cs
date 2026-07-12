@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Security;
 
 namespace System.Threading.Tasks
 {
 	internal sealed class SynchronizationContextAwaitTaskContinuation : AwaitTaskContinuation
 	{
-		[SecurityCritical]
-		internal SynchronizationContextAwaitTaskContinuation(SynchronizationContext context, Action action, bool flowExecutionContext, ref StackCrawlMark stackMark)
-			: base(action, flowExecutionContext, ref stackMark)
+		internal SynchronizationContextAwaitTaskContinuation(SynchronizationContext context, Action action, bool flowExecutionContext)
+			: base(action, flowExecutionContext)
 		{
 			this.m_syncContext = context;
 		}
 
-		[SecuritySafeCritical]
-		internal sealed override void Run(Task task, bool canInlineContinuationTask)
+		internal sealed override void Run(Task ignored, bool canInlineContinuationTask)
 		{
-			if (canInlineContinuationTask && this.m_syncContext == SynchronizationContext.CurrentNoFlow)
+			if (canInlineContinuationTask && this.m_syncContext == SynchronizationContext.Current)
 			{
 				base.RunCallback(AwaitTaskContinuation.GetInvokeActionCallback(), this.m_action, ref Task.t_currentTask);
 				return;
@@ -24,14 +21,12 @@ namespace System.Threading.Tasks
 			base.RunCallback(SynchronizationContextAwaitTaskContinuation.GetPostActionCallback(), this, ref Task.t_currentTask);
 		}
 
-		[SecurityCritical]
 		private static void PostAction(object state)
 		{
 			SynchronizationContextAwaitTaskContinuation synchronizationContextAwaitTaskContinuation = (SynchronizationContextAwaitTaskContinuation)state;
 			synchronizationContextAwaitTaskContinuation.m_syncContext.Post(SynchronizationContextAwaitTaskContinuation.s_postCallback, synchronizationContextAwaitTaskContinuation.m_action);
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static ContextCallback GetPostActionCallback()
 		{
@@ -48,7 +43,6 @@ namespace System.Threading.Tasks
 			((Action)state)();
 		};
 
-		[SecurityCritical]
 		private static ContextCallback s_postActionCallback;
 
 		private readonly SynchronizationContext m_syncContext;

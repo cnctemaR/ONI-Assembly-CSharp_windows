@@ -2,11 +2,9 @@
 using System.ComponentModel.Design;
 using System.Globalization;
 using System.IO;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class LicFileLicenseProvider : LicenseProvider
 	{
 		protected virtual bool IsKeyValid(string key, Type type)
@@ -71,23 +69,18 @@ namespace System.ComponentModel
 		{
 			public LicFileLicense(LicFileLicenseProvider owner, string key)
 			{
-				this.key = key;
+				this._owner = owner;
+				this.LicenseKey = key;
 			}
 
-			public override string LicenseKey
-			{
-				get
-				{
-					return this.key;
-				}
-			}
+			public override string LicenseKey { get; }
 
 			public override void Dispose()
 			{
 				GC.SuppressFinalize(this);
 			}
 
-			private string key;
+			private LicFileLicenseProvider _owner;
 		}
 	}
 }

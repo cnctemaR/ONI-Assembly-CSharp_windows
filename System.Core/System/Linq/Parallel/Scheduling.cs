@@ -25,7 +25,7 @@ namespace System.Linq.Parallel
 
 		internal const bool DefaultPreserveOrder = false;
 
-		internal static int DefaultDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 512);
+		internal static int DefaultDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 16);
 
 		internal const int DEFAULT_BOUNDED_BUFFER_CAPACITY = 512;
 

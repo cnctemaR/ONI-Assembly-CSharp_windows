@@ -22,7 +22,7 @@ namespace System.Xml.Xsl.Xslt
 
 		private static string GenerateUniqueClassName()
 		{
-			return "Script" + Interlocked.Increment(ref ScriptClass.scriptClassCounter);
+			return "Script" + Interlocked.Increment(ref ScriptClass.scriptClassCounter).ToString();
 		}
 
 		public void AddScriptBlock(string source, string uriString, int lineNumber, Location end)

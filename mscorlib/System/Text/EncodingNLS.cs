@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace System.Text
 {
-	[ComVisible(true)]
 	[Serializable]
 	internal abstract class EncodingNLS : Encoding
 	{
@@ -14,22 +12,21 @@ namespace System.Text
 		{
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetByteCount(char[] chars, int index, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (chars.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
-			if (chars.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -45,7 +42,6 @@ namespace System.Text
 			return this.GetByteCount(ptr + index, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetByteCount(string s)
 		{
 			if (s == null)
@@ -60,90 +56,73 @@ namespace System.Text
 			return this.GetByteCount(ptr, s.Length, null);
 		}
 
-		[SecurityCritical]
 		public unsafe override int GetByteCount(char* chars, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetByteCount(chars, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (s == null || bytes == null)
 			{
-				throw new ArgumentNullException((s == null) ? "s" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((s == null) ? "s" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (s.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("s", Environment.GetResourceString("Index and count must refer to a location within the string."));
+				throw new ArgumentOutOfRangeException("s", "Index and count must refer to a location within the string.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr = s;
 			if (ptr != null)
 			{
 				ptr += RuntimeHelpers.OffsetToStringData / 2;
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (chars == null || bytes == null)
 			{
-				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (chars.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (chars.Length == 0)
+			if (charCount == 0)
 			{
 				return 0;
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr;
 			if (chars == null || chars.Length == 0)
 			{
@@ -153,49 +132,41 @@ namespace System.Text
 			{
 				ptr = &chars[0];
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecurityCritical]
 		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetBytes(chars, charCount, bytes, byteCount, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetCharCount(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -211,48 +182,42 @@ namespace System.Text
 			return this.GetCharCount(ptr + index, count, null);
 		}
 
-		[SecurityCritical]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetCharCount(bytes, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (byteIndex < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", "Non-negative number required.");
 			}
 			if (bytes.Length - byteIndex < byteCount)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
 			if (charIndex < 0 || charIndex > chars.Length)
 			{
-				throw new ArgumentOutOfRangeException("charIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("charIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (bytes.Length == 0)
+			if (byteCount == 0)
 			{
 				return 0;
 			}
 			int num = chars.Length - charIndex;
-			if (chars.Length == 0)
-			{
-				chars = new char[1];
-			}
 			byte* ptr;
 			if (bytes == null || bytes.Length == 0)
 			{
@@ -262,49 +227,41 @@ namespace System.Text
 			{
 				ptr = &bytes[0];
 			}
-			char[] array;
-			char* ptr2;
-			if ((array = chars) == null || array.Length == 0)
+			fixed (char* reference = MemoryMarshal.GetReference<char>(chars))
 			{
-				ptr2 = null;
+				char* ptr2 = reference;
+				return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 		}
 
-		[SecurityCritical]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetChars(bytes, byteCount, chars, charCount, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override string GetString(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return string.Empty;
 			}

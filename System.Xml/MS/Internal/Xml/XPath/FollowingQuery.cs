@@ -13,48 +13,48 @@ namespace MS.Internal.Xml.XPath
 		private FollowingQuery(FollowingQuery other)
 			: base(other)
 		{
-			this.input = Query.Clone(other.input);
-			this.iterator = Query.Clone(other.iterator);
+			this._input = Query.Clone(other._input);
+			this._iterator = Query.Clone(other._iterator);
 		}
 
 		public override void Reset()
 		{
-			this.iterator = null;
+			this._iterator = null;
 			base.Reset();
 		}
 
 		public override XPathNavigator Advance()
 		{
-			if (this.iterator == null)
+			if (this._iterator == null)
 			{
-				this.input = this.qyInput.Advance();
-				if (this.input == null)
+				this._input = this.qyInput.Advance();
+				if (this._input == null)
 				{
 					return null;
 				}
 				XPathNavigator xpathNavigator;
 				do
 				{
-					xpathNavigator = this.input.Clone();
-					this.input = this.qyInput.Advance();
+					xpathNavigator = this._input.Clone();
+					this._input = this.qyInput.Advance();
 				}
-				while (xpathNavigator.IsDescendant(this.input));
-				this.input = xpathNavigator;
-				this.iterator = XPathEmptyIterator.Instance;
+				while (xpathNavigator.IsDescendant(this._input));
+				this._input = xpathNavigator;
+				this._iterator = XPathEmptyIterator.Instance;
 			}
-			while (!this.iterator.MoveNext())
+			while (!this._iterator.MoveNext())
 			{
 				bool flag;
-				if (this.input.NodeType == XPathNodeType.Attribute || this.input.NodeType == XPathNodeType.Namespace)
+				if (this._input.NodeType == XPathNodeType.Attribute || this._input.NodeType == XPathNodeType.Namespace)
 				{
-					this.input.MoveToParent();
+					this._input.MoveToParent();
 					flag = false;
 				}
 				else
 				{
-					while (!this.input.MoveToNext())
+					while (!this._input.MoveToNext())
 					{
-						if (!this.input.MoveToParent())
+						if (!this._input.MoveToParent())
 						{
 							return null;
 						}
@@ -63,15 +63,15 @@ namespace MS.Internal.Xml.XPath
 				}
 				if (base.NameTest)
 				{
-					this.iterator = this.input.SelectDescendants(base.Name, base.Namespace, flag);
+					this._iterator = this._input.SelectDescendants(base.Name, base.Namespace, flag);
 				}
 				else
 				{
-					this.iterator = this.input.SelectDescendants(base.TypeTest, flag);
+					this._iterator = this._input.SelectDescendants(base.TypeTest, flag);
 				}
 			}
 			this.position++;
-			this.currentNode = this.iterator.Current;
+			this.currentNode = this._iterator.Current;
 			return this.currentNode;
 		}
 
@@ -80,8 +80,8 @@ namespace MS.Internal.Xml.XPath
 			return new FollowingQuery(this);
 		}
 
-		private XPathNavigator input;
+		private XPathNavigator _input;
 
-		private XPathNodeIterator iterator;
+		private XPathNodeIterator _iterator;
 	}
 }

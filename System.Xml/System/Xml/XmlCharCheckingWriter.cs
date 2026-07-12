@@ -182,7 +182,9 @@ namespace System.Xml
 			int num;
 			if (this.checkNames && (num = this.xmlCharType.IsOnlyWhitespaceWithPos(ws)) != -1)
 			{
-				throw new ArgumentException(Res.GetString("The Whitespace or SignificantWhitespace node can contain only XML white space characters. '{0}' is not an XML white space character.", XmlException.BuildCharExceptionArgs(ws, num)));
+				string text = "The Whitespace or SignificantWhitespace node can contain only XML white space characters. '{0}' is not an XML white space character.";
+				object[] array = XmlException.BuildCharExceptionArgs(ws, num);
+				throw new ArgumentException(Res.GetString(text, array));
 			}
 			if (this.replaceNewLines)
 			{
@@ -296,7 +298,9 @@ namespace System.Xml
 			int num = ValidateNames.ParseNCName(ncname, 0);
 			if (num != ncname.Length)
 			{
-				throw new ArgumentException(Res.GetString((num == 0) ? "Name cannot begin with the '{0}' character, hexadecimal value {1}." : "The '{0}' character, hexadecimal value {1}, cannot be included in a name.", XmlException.BuildCharExceptionArgs(ncname, num)));
+				string text = ((num == 0) ? "Name cannot begin with the '{0}' character, hexadecimal value {1}." : "The '{0}' character, hexadecimal value {1}, cannot be included in a name.");
+				object[] array = XmlException.BuildCharExceptionArgs(ncname, num);
+				throw new ArgumentException(Res.GetString(text, array));
 			}
 		}
 
@@ -310,7 +314,9 @@ namespace System.Xml
 			int num = ValidateNames.ParseQName(name, 0, out num2);
 			if (num != name.Length)
 			{
-				throw new ArgumentException(Res.GetString((num == 0 || (num2 > -1 && num == num2 + 1)) ? "Name cannot begin with the '{0}' character, hexadecimal value {1}." : "The '{0}' character, hexadecimal value {1}, cannot be included in a name.", XmlException.BuildCharExceptionArgs(name, num)));
+				string text = ((num == 0 || (num2 > -1 && num == num2 + 1)) ? "Name cannot begin with the '{0}' character, hexadecimal value {1}." : "The '{0}' character, hexadecimal value {1}, cannot be included in a name.");
+				object[] array = XmlException.BuildCharExceptionArgs(name, num);
+				throw new ArgumentException(Res.GetString(text, array));
 			}
 		}
 
@@ -636,7 +642,9 @@ namespace System.Xml
 			int num;
 			if (this.checkNames && (num = this.xmlCharType.IsOnlyWhitespaceWithPos(ws)) != -1)
 			{
-				throw new ArgumentException(Res.GetString("The Whitespace or SignificantWhitespace node can contain only XML white space characters. '{0}' is not an XML white space character.", XmlException.BuildCharExceptionArgs(ws, num)));
+				string text = "The Whitespace or SignificantWhitespace node can contain only XML white space characters. '{0}' is not an XML white space character.";
+				object[] array = XmlException.BuildCharExceptionArgs(ws, num);
+				throw new ArgumentException(Res.GetString(text, array));
 			}
 			if (this.replaceNewLines)
 			{

@@ -6,9 +6,9 @@ using System.Security.Permissions;
 
 namespace System.Threading
 {
+	[ComVisible(false)]
 	[DebuggerTypeProxy(typeof(SpinLock.SystemThreading_SpinLockDebugView))]
 	[DebuggerDisplay("IsHeld = {IsHeld}")]
-	[ComVisible(false)]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public struct SpinLock
 	{

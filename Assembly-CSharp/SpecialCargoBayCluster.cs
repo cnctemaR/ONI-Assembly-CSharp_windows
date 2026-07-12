@@ -152,8 +152,16 @@ public class SpecialCargoBayCluster : GameStateMachine<SpecialCargoBayCluster, S
 					}
 				}
 			}
-			this.critterStorage.DropAll(false, false, default(Vector3), true, list);
-			this.sideProductStorage.DropAll(false, false, default(Vector3), true, list2);
+			Storage storage = this.critterStorage;
+			bool flag = false;
+			bool flag2 = false;
+			List<GameObject> list3 = list;
+			storage.DropAll(flag, flag2, default(Vector3), true, list3);
+			Storage storage2 = this.sideProductStorage;
+			bool flag3 = false;
+			bool flag4 = false;
+			list3 = list2;
+			storage2.DropAll(flag3, flag4, default(Vector3), true, list3);
 			foreach (GameObject gameObject2 in list)
 			{
 				KBatchedAnimController component2 = gameObject2.GetComponent<KBatchedAnimController>();

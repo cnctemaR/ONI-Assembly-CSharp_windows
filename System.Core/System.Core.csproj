@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB552}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EC5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Core</RootNamespace>
     <AssemblyName>System.Core</AssemblyName>
@@ -14,6 +14,8 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
+    <Compile Include="Consts.cs" />
+    <Compile Include="Interop.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeMemoryMappedFileHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeMemoryMappedViewHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeNCryptHandle.cs" />
@@ -130,6 +132,7 @@
     <Compile Include="System\Func.7.cs" />
     <Compile Include="System\Func.8.cs" />
     <Compile Include="System\Func.cs" />
+    <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\HandleInheritability.cs" />
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMapImpl.cs" />
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedFile.cs" />
@@ -142,37 +145,22 @@
     <Compile Include="System\IO\MemoryMappedFiles\MemoryMappedViewStream.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeClientStream.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.cs" />
-    <Compile Include="System\IO\Pipes\IAnonymousPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\IAnonymousPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\INamedPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\INamedPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\IPipe.cs" />
+    <Compile Include="System\IO\Pipes\ConnectionCompletionSource.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.cs" />
     <Compile Include="System\IO\Pipes\PipeAccessRights.cs" />
     <Compile Include="System\IO\Pipes\PipeAccessRule.cs" />
     <Compile Include="System\IO\Pipes\PipeAuditRule.cs" />
+    <Compile Include="System\IO\Pipes\PipeCompletionSource.cs" />
     <Compile Include="System\IO\Pipes\PipeDirection.cs" />
     <Compile Include="System\IO\Pipes\PipeOptions.cs" />
     <Compile Include="System\IO\Pipes\PipeSecurity.cs" />
+    <Compile Include="System\IO\Pipes\PipeState.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.cs" />
     <Compile Include="System\IO\Pipes\PipeStreamImpersonationWorker.cs" />
     <Compile Include="System\IO\Pipes\PipeTransmissionMode.cs" />
-    <Compile Include="System\IO\Pipes\SecurityAttributes.cs" />
-    <Compile Include="System\IO\Pipes\UnixAnonymousPipe.cs" />
-    <Compile Include="System\IO\Pipes\UnixAnonymousPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\UnixAnonymousPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\UnixNamedPipe.cs" />
-    <Compile Include="System\IO\Pipes\UnixNamedPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\UnixNamedPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\Win32AnonymousPipe.cs" />
-    <Compile Include="System\IO\Pipes\Win32AnonymousPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\Win32AnonymousPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\Win32Marshal.cs" />
-    <Compile Include="System\IO\Pipes\Win32NamedPipe.cs" />
-    <Compile Include="System\IO\Pipes\Win32NamedPipeClient.cs" />
-    <Compile Include="System\IO\Pipes\Win32NamedPipeServer.cs" />
-    <Compile Include="System\IO\Pipes\Win32PipeError.cs" />
+    <Compile Include="System\IO\Pipes\ReadWriteCompletionSource.cs" />
+    <Compile Include="System\IO\Pipes\VoidResult.cs" />
     <Compile Include="System\Linq\AggregationMinMaxHelpers.cs" />
     <Compile Include="System\Linq\Buffer.cs" />
     <Compile Include="System\Linq\CachedReflectionInfo.cs" />
@@ -547,7 +535,10 @@
     <Compile Include="System\MonoNotSupportedAttribute.cs" />
     <Compile Include="System\MonoTODOAttribute.cs" />
     <Compile Include="System\MonoUtil.cs" />
+    <Compile Include="System\Net\Sockets\UnixDomainSocketEndPoint.cs" />
     <Compile Include="System\NotImplemented.cs" />
+    <Compile Include="System\Reflection\DispatchProxy.cs" />
+    <Compile Include="System\Reflection\DispatchProxyGenerator.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallSite.2.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallSite.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallSiteBinder.cs" />
@@ -560,6 +551,7 @@
     <Compile Include="System\Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
     <Compile Include="System\Runtime\CompilerServices\IRuntimeVariables.cs" />
     <Compile Include="System\Runtime\CompilerServices\IStrongBox.cs" />
+    <Compile Include="System\Runtime\CompilerServices\PreserveDependencyAttribute.cs" />
     <Compile Include="System\Runtime\CompilerServices\ReadOnlyCollectionBuilder.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuleCache.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeOps.cs" />
@@ -632,18 +624,13 @@
     <Compile Include="Unity\ThrowStub.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mono.Posix\Mono.Posix.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54D}</Project>
-      <Name>Mono.Posix</Name>
-    </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
 </Project>

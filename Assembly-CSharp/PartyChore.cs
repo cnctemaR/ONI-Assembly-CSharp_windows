@@ -9,8 +9,8 @@ public class PartyChore : Chore<PartyChore.StatesInstance>, IWorkerPrioritizable
 	{
 		base.smi = new PartyChore.StatesInstance(this);
 		base.smi.sm.chitchatlocator.Set(chat_workable, base.smi);
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, chat_workable);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, chat_workable);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -29,7 +29,7 @@ public class PartyChore : Chore<PartyChore.StatesInstance>, IWorkerPrioritizable
 		base.End(reason);
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		return true;

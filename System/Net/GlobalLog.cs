@@ -54,8 +54,8 @@ namespace System.Net
 		{
 		}
 
-		[Conditional("TRAVE")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
+		[Conditional("TRAVE")]
 		public static void Print(string msg)
 		{
 		}
@@ -75,9 +75,9 @@ namespace System.Net
 		{
 		}
 
-		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
-		[Conditional("_FORCE_ASSERTS")]
 		[Conditional("DEBUG")]
+		[Conditional("_FORCE_ASSERTS")]
+		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Assert(bool condition, string messageFormat, params object[] data)
 		{
 			if (!condition)
@@ -91,8 +91,8 @@ namespace System.Net
 			}
 		}
 
-		[Conditional("_FORCE_ASSERTS")]
 		[Conditional("DEBUG")]
+		[Conditional("_FORCE_ASSERTS")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Assert(string message)
 		{

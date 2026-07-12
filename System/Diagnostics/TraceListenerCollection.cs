@@ -163,7 +163,7 @@ namespace System.Diagnostics
 				TraceListener traceListener = value as TraceListener;
 				if (traceListener == null)
 				{
-					throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
+					throw new ArgumentException(SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
 				}
 				this.InitializeListener(traceListener);
 				this.list[index] = traceListener;
@@ -191,7 +191,7 @@ namespace System.Diagnostics
 			TraceListener traceListener = value as TraceListener;
 			if (traceListener == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
+				throw new ArgumentException(SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
 			}
 			this.InitializeListener(traceListener);
 			object critSec = TraceInternal.critSec;
@@ -218,7 +218,7 @@ namespace System.Diagnostics
 			TraceListener traceListener = value as TraceListener;
 			if (traceListener == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
+				throw new ArgumentException(SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
 			}
 			this.InitializeListener(traceListener);
 			object critSec = TraceInternal.critSec;

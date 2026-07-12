@@ -129,7 +129,7 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		{
 			Edible edible = (Edible)data;
 			base.sm.rationsAteToday.Delta(edible.caloriesConsumed, base.smi);
-			RationTracker.Get().RegisterRationsConsumed(edible);
+			WorldResourceAmountTracker<RationTracker>.Get().RegisterAmountConsumed(edible.FoodInfo.Id, edible.caloriesConsumed);
 		}
 
 		private ChoreDriver choreDriver;

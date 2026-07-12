@@ -125,19 +125,27 @@ public class GeothermalPlantComponent : KMonoBehaviour, ICheckboxListGroupContro
 
 	public static void OnVentingHotMaterial(int worldid)
 	{
-		foreach (GeothermalVent geothermalVent in Components.GeothermalVents.GetItems(worldid))
+		using (List<GeothermalVent>.Enumerator enumerator = Components.GeothermalVents.GetItems(worldid).GetEnumerator())
 		{
-			if (geothermalVent.IsQuestEntombed())
+			while (enumerator.MoveNext())
 			{
-				geothermalVent.SetQuestComplete();
-				if (!SaveGame.Instance.ColonyAchievementTracker.GeothermalClearedEntombedVent)
+				GeothermalVent vent = enumerator.Current;
+				if (vent.IsQuestEntombed())
 				{
-					GeothermalVictorySequence.VictoryVent = geothermalVent;
-					GeothermalPlantComponent.DisplayPopup(COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.POPUPS.GEOPLANT_ERRUPTED_TITLE, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.POPUPS.GEOPLANT_ERRUPTED_DESC, "geothermalplantachievement_kanim", delegate
+					vent.SetQuestComplete();
+					if (!SaveGame.Instance.ColonyAchievementTracker.GeothermalClearedEntombedVent)
 					{
-						SaveGame.Instance.ColonyAchievementTracker.GeothermalClearedEntombedVent = true;
-					}, null);
-					break;
+						GeothermalVictorySequence.VictoryVent = vent;
+						GeothermalPlantComponent.DisplayPopup(COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.POPUPS.GEOPLANT_ERRUPTED_TITLE, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.POPUPS.GEOPLANT_ERRUPTED_DESC, "geothermalplantachievement_kanim", delegate
+						{
+							SaveGame.Instance.ColonyAchievementTracker.GeothermalClearedEntombedVent = true;
+							if (!Db.Get().ColonyAchievements.ActivateGeothermalPlant.IsValidForSave())
+							{
+								GeothermalVictorySequence.Start(vent);
+							}
+						}, null);
+						break;
+					}
 				}
 			}
 		}

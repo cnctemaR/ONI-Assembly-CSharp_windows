@@ -2,19 +2,41 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
+using UnityEngine.Internal;
 
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Input/InputBindings.h")]
 	public class Input
 	{
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetKeyInt(KeyCode key);
+		public static float GetAxis(string axisName)
+		{
+			return InputUnsafeUtility.GetAxis(axisName);
+		}
+
+		public static float GetAxisRaw(string axisName)
+		{
+			return InputUnsafeUtility.GetAxisRaw(axisName);
+		}
+
+		public static bool GetButton(string buttonName)
+		{
+			return InputUnsafeUtility.GetButton(buttonName);
+		}
+
+		public static bool GetButtonDown(string buttonName)
+		{
+			return InputUnsafeUtility.GetButtonDown(buttonName);
+		}
+
+		public static bool GetButtonUp(string buttonName)
+		{
+			return InputUnsafeUtility.GetButtonUp(buttonName);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetKeyString(string name);
+		private static extern bool GetKeyInt(KeyCode key);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -22,35 +44,7 @@ namespace UnityEngine
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetKeyUpString(string name);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetKeyDownInt(KeyCode key);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetKeyDownString(string name);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float GetAxis(string axisName);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float GetAxisRaw(string axisName);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetButton(string buttonName);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetButtonDown(string buttonName);
-
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetButtonUp(string buttonName);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -81,6 +75,30 @@ namespace UnityEngine
 		}
 
 		[NativeThrows]
+		public static PenData GetPenEvent(int index)
+		{
+			PenData penData;
+			Input.GetPenEvent_Injected(index, out penData);
+			return penData;
+		}
+
+		[NativeThrows]
+		public static PenData GetLastPenContactEvent()
+		{
+			PenData penData;
+			Input.GetLastPenContactEvent_Injected(out penData);
+			return penData;
+		}
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void ResetPenEvents();
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void ClearLastPenContactEvent();
+
+		[NativeThrows]
 		public static AccelerationEvent GetAccelerationEvent(int index)
 		{
 			AccelerationEvent accelerationEvent;
@@ -95,7 +113,7 @@ namespace UnityEngine
 
 		public static bool GetKey(string name)
 		{
-			return Input.GetKeyString(name);
+			return InputUnsafeUtility.GetKeyString(name);
 		}
 
 		public static bool GetKeyUp(KeyCode key)
@@ -105,7 +123,7 @@ namespace UnityEngine
 
 		public static bool GetKeyUp(string name)
 		{
-			return Input.GetKeyUpString(name);
+			return InputUnsafeUtility.GetKeyUpString(name);
 		}
 
 		public static bool GetKeyDown(KeyCode key)
@@ -115,20 +133,20 @@ namespace UnityEngine
 
 		public static bool GetKeyDown(string name)
 		{
-			return Input.GetKeyDownString(name);
+			return InputUnsafeUtility.GetKeyDownString(name);
 		}
 
 		[Conditional("UNITY_EDITOR")]
-		internal static void SimulateTouch(int id, Vector2 position, TouchPhase action)
+		internal static void SimulateTouch(Touch touch)
 		{
 		}
 
-		[Conditional("UNITY_EDITOR")]
-		[NativeConditional("UNITY_EDITOR")]
 		[FreeFunction("SimulateTouch")]
-		private static void SimulateTouchInternal(int id, Vector2 position, TouchPhase action, long timestamp)
+		[NativeConditional("UNITY_EDITOR")]
+		[Conditional("UNITY_EDITOR")]
+		private static void SimulateTouchInternal(Touch touch, long timestamp)
 		{
-			Input.SimulateTouchInternal_Injected(id, ref position, action, timestamp);
+			Input.SimulateTouchInternal_Injected(ref touch, timestamp);
 		}
 
 		public static extern bool simulateMouseWithTouches
@@ -232,6 +250,13 @@ namespace UnityEngine
 			get;
 		}
 
+		public static extern int penEventCount
+		{
+			[FreeFunction("GetPenEventCount")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public static extern int touchCount
 		{
 			[FreeFunction("GetTouchCount")]
@@ -280,7 +305,7 @@ namespace UnityEngine
 
 		public static extern DeviceOrientation deviceOrientation
 		{
-			[FreeFunction("GetOrientation")]
+			[FreeFunction("GetDeviceOrientation")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -395,13 +420,22 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool CheckDisabled();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetTouch_Injected(int index, out Touch ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPenEvent_Injected(int index, out PenData ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLastPenContactEvent_Injected(out PenData ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetAccelerationEvent_Injected(int index, out AccelerationEvent ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SimulateTouchInternal_Injected(int id, ref Vector2 position, TouchPhase action, long timestamp);
+		private static extern void SimulateTouchInternal_Injected(ref Touch touch, long timestamp);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_mousePosition_Injected(out Vector3 ret);

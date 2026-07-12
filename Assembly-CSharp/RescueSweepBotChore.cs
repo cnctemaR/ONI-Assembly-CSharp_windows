@@ -21,9 +21,9 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 		this.CanReachBaseStation = precondition;
 		base..ctor(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		base.smi = new RescueSweepBotChore.StatesInstance(this);
-		base.runUntilComplete = true;
-		base.AddPrecondition(RescueSweepBotChore.CanReachIncapacitated, sweepBot.GetComponent<Storage>());
-		base.AddPrecondition(this.CanReachBaseStation, baseStation.GetComponent<Storage>());
+		this.runUntilComplete = true;
+		this.AddPrecondition(RescueSweepBotChore.CanReachIncapacitated, sweepBot.GetComponent<Storage>());
+		this.AddPrecondition(this.CanReachBaseStation, baseStation.GetComponent<Storage>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -87,7 +87,7 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 			this.approachSweepBot.InitializeStates(this.rescuer, this.rescueTarget, this.holding.pickup, this.failure, Grid.DefaultOffset, null);
 			this.holding.Target(this.rescuer).Enter(delegate(RescueSweepBotChore.StatesInstance smi)
 			{
-				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.BaseMinion))
 				{
 					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
@@ -95,7 +95,7 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 				}
 			}).Exit(delegate(RescueSweepBotChore.StatesInstance smi)
 			{
-				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.BaseMinion))
 				{
 					KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);

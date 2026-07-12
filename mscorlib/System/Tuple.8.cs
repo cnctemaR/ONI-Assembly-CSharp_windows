@@ -78,7 +78,7 @@ namespace System
 
 		public override bool Equals(object obj)
 		{
-			return ((IStructuralEquatable)this).Equals(obj, ObjectEqualityComparer.Default);
+			return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
 		}
 
 		bool IStructuralEquatable.Equals(object other, IEqualityComparer comparer)
@@ -93,7 +93,7 @@ namespace System
 
 		int IComparable.CompareTo(object obj)
 		{
-			return ((IStructuralComparable)this).CompareTo(obj, LowLevelComparer.Default);
+			return ((IStructuralComparable)this).CompareTo(obj, Comparer<object>.Default);
 		}
 
 		int IStructuralComparable.CompareTo(object other, IComparer comparer)
@@ -142,7 +142,7 @@ namespace System
 
 		public override int GetHashCode()
 		{
-			return ((IStructuralEquatable)this).GetHashCode(ObjectEqualityComparer.Default);
+			return ((IStructuralEquatable)this).GetHashCode(EqualityComparer<object>.Default);
 		}
 
 		int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
@@ -158,7 +158,7 @@ namespace System
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append("(");
+			stringBuilder.Append('(');
 			return ((ITupleInternal)this).ToString(stringBuilder);
 		}
 

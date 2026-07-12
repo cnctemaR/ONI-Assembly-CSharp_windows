@@ -15,23 +15,29 @@ public class Personality : Resource
 
 	[Obsolete("Modders: Use constructor with isStartingMinion parameter")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
-		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "")
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "", GameTags.Minions.Models.Standard)
 	{
 	}
 
 	[Obsolete("Modders: Added additional body part customization to duplicant personalities")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description, bool isStartingMinion)
-		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "")
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, true, "", GameTags.Minions.Models.Standard)
 	{
 	}
 
 	[Obsolete("Modders: Added a custom gravestone image to duplicant personalities")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, int belt, int cuff, int foot, int hand, int pelvis, int leg, string description, bool isStartingMinion)
-		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, isStartingMinion, "")
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, isStartingMinion, "", GameTags.Minions.Models.Standard)
 	{
 	}
 
+	[Obsolete("Modders: Added 'model' to duplicant personalities")]
 	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, int belt, int cuff, int foot, int hand, int pelvis, int leg, string description, bool isStartingMinion, string graveStone)
+		: this(name_string_key, name, Gender, PersonalityType, StressTrait, JoyTrait, StickerType, CongenitalTrait, headShape, mouth, neck, eyes, hair, body, 0, 0, 0, 0, 0, 0, description, isStartingMinion, "", GameTags.Minions.Models.Standard)
+	{
+	}
+
+	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, int belt, int cuff, int foot, int hand, int pelvis, int leg, string description, bool isStartingMinion, string graveStone, Tag model)
 		: base(name_string_key, name)
 	{
 		this.nameStringKey = name_string_key;
@@ -56,6 +62,7 @@ public class Personality : Resource
 		this.leg = leg;
 		this.startingMinion = isStartingMinion;
 		this.graveStone = graveStone;
+		this.model = model;
 	}
 
 	public string GetDescription()
@@ -141,6 +148,8 @@ public class Personality : Resource
 	public string genderStringKey;
 
 	public string personalityType;
+
+	public Tag model;
 
 	public string stresstrait;
 

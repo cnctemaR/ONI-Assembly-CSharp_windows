@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[Serializable]
 	public class InvalidAsynchronousStateException : ArgumentException
 	{

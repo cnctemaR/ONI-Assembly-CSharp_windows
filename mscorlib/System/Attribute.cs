@@ -7,9 +7,9 @@ using System.Security;
 namespace System
 {
 	[AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Attribute))]
+	[ComVisible(true)]
 	[Serializable]
 	public abstract class Attribute : _Attribute
 	{
@@ -52,7 +52,7 @@ namespace System
 						list2.Add(attribute);
 					}
 				}
-				MethodInfo baseMethod = methodInfo.GetBaseMethod();
+				MethodInfo baseMethod = ((RuntimeMethodInfo)methodInfo).GetBaseMethod();
 				if (baseMethod == methodInfo)
 				{
 					break;
@@ -89,17 +89,26 @@ namespace System
 			{
 				return false;
 			}
-			MethodInfo methodInfo = ((MethodInfo)member).GetBaseMethod();
-			while (!methodInfo.GetParametersInternal()[parameter.Position].IsDefined(attributeType, false))
+			MethodInfo methodInfo = ((RuntimeMethodInfo)((MethodInfo)member)).GetBaseMethod();
+			for (;;)
 			{
-				MethodInfo baseMethod = methodInfo.GetBaseMethod();
+				ParameterInfo[] parametersInternal = methodInfo.GetParametersInternal();
+				if ((parametersInternal != null && parametersInternal.Length == 0) || parameter.Position < 0)
+				{
+					break;
+				}
+				if (parametersInternal[parameter.Position].IsDefined(attributeType, false))
+				{
+					return true;
+				}
+				MethodInfo baseMethod = ((RuntimeMethodInfo)methodInfo).GetBaseMethod();
 				if (baseMethod == methodInfo)
 				{
 					return false;
 				}
 				methodInfo = baseMethod;
 			}
-			return true;
+			return false;
 		}
 
 		public static Attribute[] GetCustomAttributes(MemberInfo element, Type type)

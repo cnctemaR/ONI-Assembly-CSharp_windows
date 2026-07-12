@@ -67,7 +67,7 @@ namespace System.Linq.Expressions.Compiler
 		{
 			if (this.NearestHoistedLocals != null && vars.Count > 0)
 			{
-				ArrayBuilder<long> arrayBuilder = new ArrayBuilder<long>(vars.Count);
+				global::System.Collections.Generic.ArrayBuilder<long> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<long>(vars.Count);
 				foreach (ParameterExpression parameterExpression in vars)
 				{
 					ulong num = 0UL;

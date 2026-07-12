@@ -7,26 +7,21 @@ namespace System.ComponentModel
 	{
 		public LocalizableAttribute(bool isLocalizable)
 		{
-			this.isLocalizable = isLocalizable;
+			this.IsLocalizable = isLocalizable;
 		}
 
-		public bool IsLocalizable
-		{
-			get
-			{
-				return this.isLocalizable;
-			}
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.IsLocalizable == LocalizableAttribute.Default.IsLocalizable;
-		}
+		public bool IsLocalizable { get; }
 
 		public override bool Equals(object obj)
 		{
+			if (obj == this)
+			{
+				return true;
+			}
 			LocalizableAttribute localizableAttribute = obj as LocalizableAttribute;
-			return localizableAttribute != null && localizableAttribute.IsLocalizable == this.isLocalizable;
+			bool? flag = ((localizableAttribute != null) ? new bool?(localizableAttribute.IsLocalizable) : null);
+			bool isLocalizable = this.IsLocalizable;
+			return (flag.GetValueOrDefault() == isLocalizable) & (flag != null);
 		}
 
 		public override int GetHashCode()
@@ -34,7 +29,10 @@ namespace System.ComponentModel
 			return base.GetHashCode();
 		}
 
-		private bool isLocalizable;
+		public override bool IsDefaultAttribute()
+		{
+			return this.IsLocalizable == LocalizableAttribute.Default.IsLocalizable;
+		}
 
 		public static readonly LocalizableAttribute Yes = new LocalizableAttribute(true);
 

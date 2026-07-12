@@ -1,28 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using MS.Internal.Xml.Linq.ComponentModel;
 
 namespace System.Xml.Linq
 {
 	[XmlSchemaProvider(null, IsAny = true)]
-	[TypeDescriptionProvider(typeof(XTypeDescriptionProvider<XElement>))]
 	public class XElement : XContainer, IXmlSerializable
 	{
 		public static IEnumerable<XElement> EmptySequence
 		{
 			get
 			{
-				if (XElement.emptySequence == null)
-				{
-					XElement.emptySequence = new XElement[0];
-				}
-				return XElement.emptySequence;
+				return Array.Empty<XElement>();
 			}
 		}
 
@@ -82,21 +78,34 @@ namespace System.Xml.Linq
 		{
 		}
 
+		private XElement(XElement.AsyncConstructionSentry s)
+		{
+		}
+
 		internal XElement(XmlReader r, LoadOptions o)
 		{
 			this.ReadElementFrom(r, o);
 		}
 
-		private static object ConvertForAssignment(object value)
+		internal static async Task<XElement> CreateAsync(XmlReader r, CancellationToken cancellationToken)
 		{
-			XmlNode xmlNode = value as XmlNode;
-			if (xmlNode == null)
+			XElement xe = new XElement(default(XElement.AsyncConstructionSentry));
+			await xe.ReadElementFromAsync(r, LoadOptions.None, cancellationToken).ConfigureAwait(false);
+			return xe;
+		}
+
+		public void Save(string fileName)
+		{
+			this.Save(fileName, base.GetSaveOptionsFromAnnotations());
+		}
+
+		public void Save(string fileName, SaveOptions options)
+		{
+			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
+			using (XmlWriter xmlWriter = XmlWriter.Create(fileName, xmlWriterSettings))
 			{
-				return value;
+				this.Save(xmlWriter);
 			}
-			XmlDocument xmlDocument = new XmlDocument();
-			xmlDocument.AppendChild(xmlDocument.ImportNode(xmlNode, true));
-			return XElement.Parse(xmlDocument.InnerXml);
 		}
 
 		public XAttribute FirstAttribute
@@ -198,9 +207,9 @@ namespace System.Xml.Linq
 				{
 					return text;
 				}
-				StringBuilder stringBuilder = new StringBuilder();
+				StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 				this.AppendText(stringBuilder);
-				return stringBuilder.ToString();
+				return StringBuilderCache.GetStringAndRelease(stringBuilder);
 			}
 			set
 			{
@@ -301,7 +310,7 @@ namespace System.Xml.Linq
 			}
 			if (prefix.Length == 0)
 			{
-				throw new ArgumentException(Res.GetString("Argument_InvalidPrefix", new object[] { prefix }));
+				throw new ArgumentException(global::SR.Format("'{0}' is an invalid prefix.", prefix));
 			}
 			if (prefix == "xmlns")
 			{
@@ -405,6 +414,18 @@ namespace System.Xml.Linq
 			return xelement;
 		}
 
+		public static async Task<XElement> LoadAsync(Stream stream, LoadOptions options, CancellationToken cancellationToken)
+		{
+			XmlReaderSettings xmlReaderSettings = XNode.GetXmlReaderSettings(options);
+			xmlReaderSettings.Async = true;
+			XElement xelement;
+			using (XmlReader r = XmlReader.Create(stream, xmlReaderSettings))
+			{
+				xelement = await XElement.LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
+			}
+			return xelement;
+		}
+
 		public static XElement Load(TextReader textReader)
 		{
 			return XElement.Load(textReader, LoadOptions.None);
@@ -417,6 +438,18 @@ namespace System.Xml.Linq
 			using (XmlReader xmlReader = XmlReader.Create(textReader, xmlReaderSettings))
 			{
 				xelement = XElement.Load(xmlReader, options);
+			}
+			return xelement;
+		}
+
+		public static async Task<XElement> LoadAsync(TextReader textReader, LoadOptions options, CancellationToken cancellationToken)
+		{
+			XmlReaderSettings xmlReaderSettings = XNode.GetXmlReaderSettings(options);
+			xmlReaderSettings.Async = true;
+			XElement xelement;
+			using (XmlReader r = XmlReader.Create(textReader, xmlReaderSettings))
+			{
+				xelement = await XElement.LoadAsync(r, options, cancellationToken).ConfigureAwait(false);
 			}
 			return xelement;
 		}
@@ -434,19 +467,53 @@ namespace System.Xml.Linq
 			}
 			if (reader.MoveToContent() != XmlNodeType.Element)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExpectedNodeType", new object[]
-				{
-					XmlNodeType.Element,
-					reader.NodeType
-				}));
+				throw new InvalidOperationException(global::SR.Format("The XmlReader must be on a node of type {0} instead of a node of type {1}.", XmlNodeType.Element, reader.NodeType));
 			}
 			XElement xelement = new XElement(reader, options);
 			reader.MoveToContent();
 			if (!reader.EOF)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExpectedEndOfFile"));
+				throw new InvalidOperationException("The XmlReader state should be EndOfFile after this operation.");
 			}
 			return xelement;
+		}
+
+		public static Task<XElement> LoadAsync(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+		{
+			if (reader == null)
+			{
+				throw new ArgumentNullException("reader");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<XElement>(cancellationToken);
+			}
+			return XElement.LoadAsyncInternal(reader, options, cancellationToken);
+		}
+
+		private static async Task<XElement> LoadAsyncInternal(XmlReader reader, LoadOptions options, CancellationToken cancellationToken)
+		{
+			ConfiguredTaskAwaitable<XmlNodeType>.ConfiguredTaskAwaiter configuredTaskAwaiter = reader.MoveToContentAsync().ConfigureAwait(false).GetAwaiter();
+			if (!configuredTaskAwaiter.IsCompleted)
+			{
+				await configuredTaskAwaiter;
+				ConfiguredTaskAwaitable<XmlNodeType>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
+				configuredTaskAwaiter = configuredTaskAwaiter2;
+				configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<XmlNodeType>.ConfiguredTaskAwaiter);
+			}
+			if (configuredTaskAwaiter.GetResult() != XmlNodeType.Element)
+			{
+				throw new InvalidOperationException(global::SR.Format("The XmlReader must be on a node of type {0} instead of a node of type {1}.", XmlNodeType.Element, reader.NodeType));
+			}
+			XElement e = new XElement(default(XElement.AsyncConstructionSentry));
+			await e.ReadElementFromAsync(reader, options, cancellationToken).ConfigureAwait(false);
+			cancellationToken.ThrowIfCancellationRequested();
+			await reader.MoveToContentAsync().ConfigureAwait(false);
+			if (!reader.EOF)
+			{
+				throw new InvalidOperationException("The XmlReader state should be EndOfFile after this operation.");
+			}
+			return e;
 		}
 
 		public static XElement Parse(string text)
@@ -487,7 +554,7 @@ namespace System.Xml.Linq
 				base.NotifyChanging(next, XObjectChangeEventArgs.Remove);
 				if (this.lastAttr == null || next != this.lastAttr.next)
 				{
-					throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+					throw new InvalidOperationException("This operation was corrupted by external code.");
 				}
 				if (next != this.lastAttr)
 				{
@@ -527,20 +594,6 @@ namespace System.Xml.Linq
 			this.ReplaceAttributes(content);
 		}
 
-		public void Save(string fileName)
-		{
-			this.Save(fileName, base.GetSaveOptionsFromAnnotations());
-		}
-
-		public void Save(string fileName, SaveOptions options)
-		{
-			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
-			using (XmlWriter xmlWriter = XmlWriter.Create(fileName, xmlWriterSettings))
-			{
-				this.Save(xmlWriter);
-			}
-		}
-
 		public void Save(Stream stream)
 		{
 			this.Save(stream, base.GetSaveOptionsFromAnnotations());
@@ -553,6 +606,17 @@ namespace System.Xml.Linq
 			{
 				this.Save(xmlWriter);
 			}
+		}
+
+		public async Task SaveAsync(Stream stream, SaveOptions options, CancellationToken cancellationToken)
+		{
+			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
+			xmlWriterSettings.Async = true;
+			using (XmlWriter w = XmlWriter.Create(stream, xmlWriterSettings))
+			{
+				await this.SaveAsync(w, cancellationToken).ConfigureAwait(false);
+			}
+			XmlWriter w = null;
 		}
 
 		public void Save(TextWriter textWriter)
@@ -569,6 +633,17 @@ namespace System.Xml.Linq
 			}
 		}
 
+		public async Task SaveAsync(TextWriter textWriter, SaveOptions options, CancellationToken cancellationToken)
+		{
+			XmlWriterSettings xmlWriterSettings = XNode.GetXmlWriterSettings(options);
+			xmlWriterSettings.Async = true;
+			using (XmlWriter w = XmlWriter.Create(textWriter, xmlWriterSettings))
+			{
+				await this.SaveAsync(w, cancellationToken).ConfigureAwait(false);
+			}
+			XmlWriter w = null;
+		}
+
 		public void Save(XmlWriter writer)
 		{
 			if (writer == null)
@@ -578,6 +653,27 @@ namespace System.Xml.Linq
 			writer.WriteStartDocument();
 			this.WriteTo(writer);
 			writer.WriteEndDocument();
+		}
+
+		public Task SaveAsync(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			return this.SaveAsyncInternal(writer, cancellationToken);
+		}
+
+		private async Task SaveAsyncInternal(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			await writer.WriteStartDocumentAsync().ConfigureAwait(false);
+			await this.WriteToAsync(writer, cancellationToken).ConfigureAwait(false);
+			cancellationToken.ThrowIfCancellationRequested();
+			await writer.WriteEndDocumentAsync().ConfigureAwait(false);
 		}
 
 		public void SetAttributeValue(XName name, object value)
@@ -642,6 +738,19 @@ namespace System.Xml.Linq
 			new ElementWriter(writer).WriteElement(this);
 		}
 
+		public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			return new ElementWriter(writer).WriteElementAsync(this, cancellationToken);
+		}
+
 		[CLSCompliant(false)]
 		public static explicit operator string(XElement element)
 		{
@@ -659,7 +768,7 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("element");
 			}
-			return XmlConvert.ToBoolean(element.Value.ToLower(CultureInfo.InvariantCulture));
+			return XmlConvert.ToBoolean(element.Value.ToLowerInvariant());
 		}
 
 		[CLSCompliant(false)]
@@ -669,7 +778,7 @@ namespace System.Xml.Linq
 			{
 				return null;
 			}
-			return new bool?(XmlConvert.ToBoolean(element.Value.ToLower(CultureInfo.InvariantCulture)));
+			return new bool?(XmlConvert.ToBoolean(element.Value.ToLowerInvariant()));
 		}
 
 		[CLSCompliant(false)]
@@ -905,15 +1014,11 @@ namespace System.Xml.Linq
 			}
 			if (this.parent != null || this.annotations != null || this.content != null || this.lastAttr != null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_DeserializeInstance"));
+				throw new InvalidOperationException("This instance cannot be deserialized.");
 			}
 			if (reader.MoveToContent() != XmlNodeType.Element)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExpectedNodeType", new object[]
-				{
-					XmlNodeType.Element,
-					reader.NodeType
-				}));
+				throw new InvalidOperationException(global::SR.Format("The XmlReader must be on a node of type {0} instead of a node of type {1}.", XmlNodeType.Element, reader.NodeType));
 			}
 			this.ReadElementFrom(reader, LoadOptions.None);
 		}
@@ -927,7 +1032,7 @@ namespace System.Xml.Linq
 		{
 			if (this.Attribute(a.Name) != null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_DuplicateAttribute"));
+				throw new InvalidOperationException("Duplicate attribute.");
 			}
 			if (a.parent != null)
 			{
@@ -940,7 +1045,7 @@ namespace System.Xml.Linq
 		{
 			if (this.Attribute(a.Name) != null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_DuplicateAttribute"));
+				throw new InvalidOperationException("Duplicate attribute.");
 			}
 			if (a.parent != null)
 			{
@@ -954,7 +1059,7 @@ namespace System.Xml.Linq
 			bool flag = base.NotifyChanging(a, XObjectChangeEventArgs.Add);
 			if (a.parent != null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+				throw new InvalidOperationException("This operation was corrupted by external code.");
 			}
 			this.AppendAttributeSkipNotify(a);
 			if (flag)
@@ -1078,15 +1183,39 @@ namespace System.Xml.Linq
 
 		private void ReadElementFrom(XmlReader r, LoadOptions o)
 		{
+			this.ReadElementFromImpl(r, o);
+			if (!r.IsEmptyElement)
+			{
+				r.Read();
+				base.ReadContentFrom(r, o);
+			}
+			r.Read();
+		}
+
+		private async Task ReadElementFromAsync(XmlReader r, LoadOptions o, CancellationToken cancellationTokentoken)
+		{
+			this.ReadElementFromImpl(r, o);
+			if (!r.IsEmptyElement)
+			{
+				cancellationTokentoken.ThrowIfCancellationRequested();
+				await r.ReadAsync().ConfigureAwait(false);
+				await base.ReadContentFromAsync(r, o, cancellationTokentoken).ConfigureAwait(false);
+			}
+			cancellationTokentoken.ThrowIfCancellationRequested();
+			await r.ReadAsync().ConfigureAwait(false);
+		}
+
+		private void ReadElementFromImpl(XmlReader r, LoadOptions o)
+		{
 			if (r.ReadState != ReadState.Interactive)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExpectedInteractive"));
+				throw new InvalidOperationException("The XmlReader state should be Interactive.");
 			}
 			this.name = XNamespace.Get(r.NamespaceURI).GetName(r.LocalName);
 			if ((o & LoadOptions.SetBaseUri) != LoadOptions.None)
 			{
 				string baseURI = r.BaseURI;
-				if (baseURI != null && baseURI.Length != 0)
+				if (!string.IsNullOrEmpty(baseURI))
 				{
 					base.SetBaseUri(baseURI);
 				}
@@ -1114,12 +1243,6 @@ namespace System.Xml.Linq
 				while (r.MoveToNextAttribute());
 				r.MoveToElement();
 			}
-			if (!r.IsEmptyElement)
-			{
-				r.Read();
-				base.ReadContentFrom(r, o);
-			}
-			r.Read();
 		}
 
 		internal void RemoveAttribute(XAttribute a)
@@ -1127,7 +1250,7 @@ namespace System.Xml.Linq
 			bool flag = base.NotifyChanging(a, XObjectChangeEventArgs.Remove);
 			if (a.parent != this)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+				throw new InvalidOperationException("This operation was corrupted by external code.");
 			}
 			XAttribute xattribute = this.lastAttr;
 			XAttribute next;
@@ -1181,18 +1304,20 @@ namespace System.Xml.Linq
 		{
 			if (node is XDocument)
 			{
-				throw new ArgumentException(Res.GetString("Argument_AddNode", new object[] { XmlNodeType.Document }));
+				throw new ArgumentException(global::SR.Format("A node of type {0} cannot be added to content.", XmlNodeType.Document));
 			}
 			if (node is XDocumentType)
 			{
-				throw new ArgumentException(Res.GetString("Argument_AddNode", new object[] { XmlNodeType.DocumentType }));
+				throw new ArgumentException(global::SR.Format("A node of type {0} cannot be added to content.", XmlNodeType.DocumentType));
 			}
 		}
-
-		private static IEnumerable<XElement> emptySequence;
 
 		internal XName name;
 
 		internal XAttribute lastAttr;
+
+		private struct AsyncConstructionSentry
+		{
+		}
 	}
 }

@@ -7,8 +7,8 @@ using Unity;
 
 namespace System.Diagnostics
 {
-	[ToolboxItem(false)]
 	[DesignTimeVisible(false)]
+	[ToolboxItem(false)]
 	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	[Serializable]
 	public sealed class EventLogEntry : Component, ISerializable
@@ -110,8 +110,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Editor("System.ComponentModel.Design.BinaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[MonitoringDescription("The message of this event entry.")]
+		[Editor("System.ComponentModel.Design.BinaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Message
 		{
 			get

@@ -5,29 +5,29 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class RegexTree
 	{
-		internal RegexTree(RegexNode root, Hashtable caps, int[] capnumlist, int captop, Hashtable capnames, string[] capslist, RegexOptions opts)
+		internal RegexTree(RegexNode root, Hashtable caps, int[] capNumList, int capTop, Hashtable capNames, string[] capsList, RegexOptions options)
 		{
-			this._root = root;
-			this._caps = caps;
-			this._capnumlist = capnumlist;
-			this._capnames = capnames;
-			this._capslist = capslist;
-			this._captop = captop;
-			this._options = opts;
+			this.Root = root;
+			this.Caps = caps;
+			this.CapNumList = capNumList;
+			this.CapTop = capTop;
+			this.CapNames = capNames;
+			this.CapsList = capsList;
+			this.Options = options;
 		}
 
-		internal RegexNode _root;
+		public readonly RegexNode Root;
 
-		internal Hashtable _caps;
+		public readonly Hashtable Caps;
 
-		internal int[] _capnumlist;
+		public readonly int[] CapNumList;
 
-		internal Hashtable _capnames;
+		public readonly int CapTop;
 
-		internal string[] _capslist;
+		public readonly Hashtable CapNames;
 
-		internal RegexOptions _options;
+		public readonly string[] CapsList;
 
-		internal int _captop;
+		public readonly RegexOptions Options;
 	}
 }

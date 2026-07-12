@@ -24,7 +24,19 @@ namespace UnityEngine.Rendering.VirtualTexturing
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetCPUCacheSize();
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetGPUCacheSettings(GPUCacheSetting[] cacheSettings);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern GPUCacheSetting[] GetGPUCacheSettings();
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EnableMipPreloading(int texturesPerFrame, int mipCount);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RequestRegion_Injected(Material mat, int stackNameId, ref Rect r, int mipMap, int numMips);

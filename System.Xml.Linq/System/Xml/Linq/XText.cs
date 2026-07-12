@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -70,6 +72,23 @@ namespace System.Xml.Linq
 				return;
 			}
 			writer.WriteString(this.text);
+		}
+
+		public override Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken)
+		{
+			if (writer == null)
+			{
+				throw new ArgumentNullException("writer");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			if (!(this.parent is XDocument))
+			{
+				return writer.WriteStringAsync(this.text);
+			}
+			return writer.WriteWhitespaceAsync(this.text);
 		}
 
 		internal override void AppendText(StringBuilder sb)

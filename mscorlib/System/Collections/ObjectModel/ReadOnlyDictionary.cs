@@ -6,8 +6,8 @@ using Unity;
 
 namespace System.Collections.ObjectModel
 {
-	[DebuggerTypeProxy(typeof(Mscorlib_DictionaryDebugView<, >))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(DictionaryDebugView<, >))]
 	[Serializable]
 	public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -32,11 +32,11 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (this.m_keys == null)
+				if (this._keys == null)
 				{
-					this.m_keys = new ReadOnlyDictionary<TKey, TValue>.KeyCollection(this.m_dictionary.Keys);
+					this._keys = new ReadOnlyDictionary<TKey, TValue>.KeyCollection(this.m_dictionary.Keys);
 				}
-				return this.m_keys;
+				return this._keys;
 			}
 		}
 
@@ -44,11 +44,11 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (this.m_values == null)
+				if (this._values == null)
 				{
-					this.m_values = new ReadOnlyDictionary<TKey, TValue>.ValueCollection(this.m_dictionary.Values);
+					this._values = new ReadOnlyDictionary<TKey, TValue>.ValueCollection(this.m_dictionary.Values);
 				}
-				return this.m_values;
+				return this._values;
 			}
 		}
 
@@ -88,13 +88,12 @@ namespace System.Collections.ObjectModel
 
 		void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		bool IDictionary<TKey, TValue>.Remove(TKey key)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-			return false;
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		TValue IDictionary<TKey, TValue>.this[TKey key]
@@ -105,7 +104,7 @@ namespace System.Collections.ObjectModel
 			}
 			set
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 		}
 
@@ -137,18 +136,17 @@ namespace System.Collections.ObjectModel
 
 		void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		void ICollection<KeyValuePair<TKey, TValue>>.Clear()
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-			return false;
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -165,19 +163,19 @@ namespace System.Collections.ObjectModel
 		{
 			if (key == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.key);
+				throw new ArgumentNullException("key");
 			}
 			return key is TKey;
 		}
 
 		void IDictionary.Add(object key, object value)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		void IDictionary.Clear()
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		bool IDictionary.Contains(object key)
@@ -221,7 +219,7 @@ namespace System.Collections.ObjectModel
 
 		void IDictionary.Remove(object key)
 		{
-			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			throw new NotSupportedException("Collection is read-only.");
 		}
 
 		ICollection IDictionary.Values
@@ -244,7 +242,7 @@ namespace System.Collections.ObjectModel
 			}
 			set
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 		}
 
@@ -252,23 +250,23 @@ namespace System.Collections.ObjectModel
 		{
 			if (array == null)
 			{
-				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+				throw new ArgumentNullException("array");
 			}
 			if (array.Rank != 1)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
 			if (array.GetLowerBound(0) != 0)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_NonZeroLowerBound);
+				throw new ArgumentException("The lower bound of target array must be zero.");
 			}
 			if (index < 0 || index > array.Length)
 			{
-				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (array.Length - index < this.Count)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
 			}
 			KeyValuePair<TKey, TValue>[] array2 = array as KeyValuePair<TKey, TValue>[];
 			if (array2 != null)
@@ -292,7 +290,7 @@ namespace System.Collections.ObjectModel
 			object[] array4 = array as object[];
 			if (array4 == null)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
 			}
 			try
 			{
@@ -303,7 +301,7 @@ namespace System.Collections.ObjectModel
 			}
 			catch (ArrayTypeMismatchException)
 			{
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
 			}
 		}
 
@@ -319,19 +317,19 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				if (this.m_syncRoot == null)
+				if (this._syncRoot == null)
 				{
 					ICollection collection = this.m_dictionary as ICollection;
 					if (collection != null)
 					{
-						this.m_syncRoot = collection.SyncRoot;
+						this._syncRoot = collection.SyncRoot;
 					}
 					else
 					{
-						Interlocked.CompareExchange<object>(ref this.m_syncRoot, new object(), null);
+						Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 					}
 				}
-				return this.m_syncRoot;
+				return this._syncRoot;
 			}
 		}
 
@@ -354,30 +352,30 @@ namespace System.Collections.ObjectModel
 		private readonly IDictionary<TKey, TValue> m_dictionary;
 
 		[NonSerialized]
-		private object m_syncRoot;
+		private object _syncRoot;
 
 		[NonSerialized]
-		private ReadOnlyDictionary<TKey, TValue>.KeyCollection m_keys;
+		private ReadOnlyDictionary<TKey, TValue>.KeyCollection _keys;
 
 		[NonSerialized]
-		private ReadOnlyDictionary<TKey, TValue>.ValueCollection m_values;
+		private ReadOnlyDictionary<TKey, TValue>.ValueCollection _values;
 
 		[Serializable]
 		private struct DictionaryEnumerator : IDictionaryEnumerator, IEnumerator
 		{
 			public DictionaryEnumerator(IDictionary<TKey, TValue> dictionary)
 			{
-				this.m_dictionary = dictionary;
-				this.m_enumerator = this.m_dictionary.GetEnumerator();
+				this._dictionary = dictionary;
+				this._enumerator = this._dictionary.GetEnumerator();
 			}
 
 			public DictionaryEntry Entry
 			{
 				get
 				{
-					KeyValuePair<TKey, TValue> keyValuePair = this.m_enumerator.Current;
+					KeyValuePair<TKey, TValue> keyValuePair = this._enumerator.Current;
 					object obj = keyValuePair.Key;
-					keyValuePair = this.m_enumerator.Current;
+					keyValuePair = this._enumerator.Current;
 					return new DictionaryEntry(obj, keyValuePair.Value);
 				}
 			}
@@ -386,7 +384,7 @@ namespace System.Collections.ObjectModel
 			{
 				get
 				{
-					KeyValuePair<TKey, TValue> keyValuePair = this.m_enumerator.Current;
+					KeyValuePair<TKey, TValue> keyValuePair = this._enumerator.Current;
 					return keyValuePair.Key;
 				}
 			}
@@ -395,7 +393,7 @@ namespace System.Collections.ObjectModel
 			{
 				get
 				{
-					KeyValuePair<TKey, TValue> keyValuePair = this.m_enumerator.Current;
+					KeyValuePair<TKey, TValue> keyValuePair = this._enumerator.Current;
 					return keyValuePair.Value;
 				}
 			}
@@ -410,21 +408,21 @@ namespace System.Collections.ObjectModel
 
 			public bool MoveNext()
 			{
-				return this.m_enumerator.MoveNext();
+				return this._enumerator.MoveNext();
 			}
 
 			public void Reset()
 			{
-				this.m_enumerator.Reset();
+				this._enumerator.Reset();
 			}
 
-			private readonly IDictionary<TKey, TValue> m_dictionary;
+			private readonly IDictionary<TKey, TValue> _dictionary;
 
-			private IEnumerator<KeyValuePair<TKey, TValue>> m_enumerator;
+			private IEnumerator<KeyValuePair<TKey, TValue>> _enumerator;
 		}
 
 		[DebuggerDisplay("Count = {Count}")]
-		[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
+		[DebuggerTypeProxy(typeof(CollectionDebugView<>))]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
 		{
@@ -432,36 +430,36 @@ namespace System.Collections.ObjectModel
 			{
 				if (collection == null)
 				{
-					ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
+					throw new ArgumentNullException("collection");
 				}
-				this.m_collection = collection;
+				this._collection = collection;
 			}
 
 			void ICollection<TKey>.Add(TKey item)
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			void ICollection<TKey>.Clear()
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			bool ICollection<TKey>.Contains(TKey item)
 			{
-				return this.m_collection.Contains(item);
+				return this._collection.Contains(item);
 			}
 
 			public void CopyTo(TKey[] array, int arrayIndex)
 			{
-				this.m_collection.CopyTo(array, arrayIndex);
+				this._collection.CopyTo(array, arrayIndex);
 			}
 
 			public int Count
 			{
 				get
 				{
-					return this.m_collection.Count;
+					return this._collection.Count;
 				}
 			}
 
@@ -475,23 +473,22 @@ namespace System.Collections.ObjectModel
 
 			bool ICollection<TKey>.Remove(TKey item)
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-				return false;
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public IEnumerator<TKey> GetEnumerator()
 			{
-				return this.m_collection.GetEnumerator();
+				return this._collection.GetEnumerator();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return this.m_collection.GetEnumerator();
+				return this._collection.GetEnumerator();
 			}
 
 			void ICollection.CopyTo(Array array, int index)
 			{
-				ReadOnlyDictionaryHelpers.CopyToNonGenericICollectionHelper<TKey>(this.m_collection, array, index);
+				ReadOnlyDictionaryHelpers.CopyToNonGenericICollectionHelper<TKey>(this._collection, array, index);
 			}
 
 			bool ICollection.IsSynchronized
@@ -506,19 +503,19 @@ namespace System.Collections.ObjectModel
 			{
 				get
 				{
-					if (this.m_syncRoot == null)
+					if (this._syncRoot == null)
 					{
-						ICollection collection = this.m_collection as ICollection;
+						ICollection collection = this._collection as ICollection;
 						if (collection != null)
 						{
-							this.m_syncRoot = collection.SyncRoot;
+							this._syncRoot = collection.SyncRoot;
 						}
 						else
 						{
-							Interlocked.CompareExchange<object>(ref this.m_syncRoot, new object(), null);
+							Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 						}
 					}
-					return this.m_syncRoot;
+					return this._syncRoot;
 				}
 			}
 
@@ -527,14 +524,14 @@ namespace System.Collections.ObjectModel
 				ThrowStub.ThrowNotSupportedException();
 			}
 
-			private readonly ICollection<TKey> m_collection;
+			private readonly ICollection<TKey> _collection;
 
 			[NonSerialized]
-			private object m_syncRoot;
+			private object _syncRoot;
 		}
 
+		[DebuggerTypeProxy(typeof(CollectionDebugView<>))]
 		[DebuggerDisplay("Count = {Count}")]
-		[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, IEnumerable<TValue>, IEnumerable, ICollection, IReadOnlyCollection<TValue>
 		{
@@ -542,36 +539,36 @@ namespace System.Collections.ObjectModel
 			{
 				if (collection == null)
 				{
-					ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
+					throw new ArgumentNullException("collection");
 				}
-				this.m_collection = collection;
+				this._collection = collection;
 			}
 
 			void ICollection<TValue>.Add(TValue item)
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			void ICollection<TValue>.Clear()
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			bool ICollection<TValue>.Contains(TValue item)
 			{
-				return this.m_collection.Contains(item);
+				return this._collection.Contains(item);
 			}
 
 			public void CopyTo(TValue[] array, int arrayIndex)
 			{
-				this.m_collection.CopyTo(array, arrayIndex);
+				this._collection.CopyTo(array, arrayIndex);
 			}
 
 			public int Count
 			{
 				get
 				{
-					return this.m_collection.Count;
+					return this._collection.Count;
 				}
 			}
 
@@ -585,23 +582,22 @@ namespace System.Collections.ObjectModel
 
 			bool ICollection<TValue>.Remove(TValue item)
 			{
-				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-				return false;
+				throw new NotSupportedException("Collection is read-only.");
 			}
 
 			public IEnumerator<TValue> GetEnumerator()
 			{
-				return this.m_collection.GetEnumerator();
+				return this._collection.GetEnumerator();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return this.m_collection.GetEnumerator();
+				return this._collection.GetEnumerator();
 			}
 
 			void ICollection.CopyTo(Array array, int index)
 			{
-				ReadOnlyDictionaryHelpers.CopyToNonGenericICollectionHelper<TValue>(this.m_collection, array, index);
+				ReadOnlyDictionaryHelpers.CopyToNonGenericICollectionHelper<TValue>(this._collection, array, index);
 			}
 
 			bool ICollection.IsSynchronized
@@ -616,19 +612,19 @@ namespace System.Collections.ObjectModel
 			{
 				get
 				{
-					if (this.m_syncRoot == null)
+					if (this._syncRoot == null)
 					{
-						ICollection collection = this.m_collection as ICollection;
+						ICollection collection = this._collection as ICollection;
 						if (collection != null)
 						{
-							this.m_syncRoot = collection.SyncRoot;
+							this._syncRoot = collection.SyncRoot;
 						}
 						else
 						{
-							Interlocked.CompareExchange<object>(ref this.m_syncRoot, new object(), null);
+							Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 						}
 					}
-					return this.m_syncRoot;
+					return this._syncRoot;
 				}
 			}
 
@@ -637,10 +633,10 @@ namespace System.Collections.ObjectModel
 				ThrowStub.ThrowNotSupportedException();
 			}
 
-			private readonly ICollection<TValue> m_collection;
+			private readonly ICollection<TValue> _collection;
 
 			[NonSerialized]
-			private object m_syncRoot;
+			private object _syncRoot;
 		}
 	}
 }

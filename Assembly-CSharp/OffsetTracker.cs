@@ -19,6 +19,11 @@ public class OffsetTracker
 		return this.offsets;
 	}
 
+	public virtual bool ValidateOffsets(int current_cell)
+	{
+		return current_cell == this.previousCell && this.offsets != null;
+	}
+
 	public void ForceRefresh()
 	{
 		int num = this.previousCell;

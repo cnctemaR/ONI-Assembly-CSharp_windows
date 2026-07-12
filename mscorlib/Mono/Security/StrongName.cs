@@ -151,13 +151,18 @@ namespace Mono.Security
 					{
 						return null;
 					}
-					byte[] array2 = HashAlgorithm.Create(this.TokenAlgorithm).ComputeHash(array);
+					byte[] array2 = StrongName.GetHashAlgorithm(this.TokenAlgorithm).ComputeHash(array);
 					this.keyToken = new byte[8];
 					Buffer.BlockCopy(array2, array2.Length - 8, this.keyToken, 0, 8);
 					Array.Reverse<byte>(this.keyToken, 0, 8);
 				}
 				return (byte[])this.keyToken.Clone();
 			}
+		}
+
+		private static HashAlgorithm GetHashAlgorithm(string algorithm)
+		{
+			return HashAlgorithm.Create(algorithm);
 		}
 
 		public string TokenAlgorithm
@@ -203,116 +208,222 @@ namespace Mono.Security
 			return 0U;
 		}
 
+		private static StrongName.StrongNameSignature Error(string a)
+		{
+			return null;
+		}
+
+		private static byte[] ReadMore(Stream stream, byte[] a, int newSize)
+		{
+			int num = a.Length;
+			Array.Resize<byte>(ref a, newSize);
+			if (newSize <= num)
+			{
+				return a;
+			}
+			int num2 = newSize - num;
+			if (stream.Read(a, num, num2) != num2)
+			{
+				return null;
+			}
+			return a;
+		}
+
 		internal StrongName.StrongNameSignature StrongHash(Stream stream, StrongName.StrongNameOptions options)
 		{
-			StrongName.StrongNameSignature strongNameSignature = new StrongName.StrongNameSignature();
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.TokenAlgorithm);
-			CryptoStream cryptoStream = new CryptoStream(Stream.Null, hashAlgorithm, CryptoStreamMode.Write);
-			byte[] array = new byte[128];
-			stream.Read(array, 0, 128);
-			if (BitConverterLE.ToUInt16(array, 0) != 23117)
+			byte[] array = new byte[64];
+			int num = stream.Read(array, 0, 64);
+			if (num == 64 && array[0] == 77 && array[1] == 90)
 			{
-				return null;
-			}
-			uint num = BitConverterLE.ToUInt32(array, 60);
-			cryptoStream.Write(array, 0, 128);
-			if (num != 128U)
-			{
-				byte[] array2 = new byte[num - 128U];
-				stream.Read(array2, 0, array2.Length);
-				cryptoStream.Write(array2, 0, array2.Length);
-			}
-			byte[] array3 = new byte[248];
-			stream.Read(array3, 0, 248);
-			if (BitConverterLE.ToUInt32(array3, 0) != 17744U)
-			{
-				return null;
-			}
-			if (BitConverterLE.ToUInt16(array3, 4) != 332)
-			{
-				return null;
-			}
-			byte[] array4 = new byte[8];
-			Buffer.BlockCopy(array4, 0, array3, 88, 4);
-			Buffer.BlockCopy(array4, 0, array3, 152, 8);
-			cryptoStream.Write(array3, 0, 248);
-			ushort num2 = BitConverterLE.ToUInt16(array3, 6);
-			int num3 = (int)(num2 * 40);
-			byte[] array5 = new byte[num3];
-			stream.Read(array5, 0, num3);
-			cryptoStream.Write(array5, 0, num3);
-			uint num4 = BitConverterLE.ToUInt32(array3, 232);
-			uint num5 = this.RVAtoPosition(num4, (int)num2, array5);
-			int num6 = (int)BitConverterLE.ToUInt32(array3, 236);
-			byte[] array6 = new byte[num6];
-			stream.Position = (long)((ulong)num5);
-			stream.Read(array6, 0, num6);
-			uint num7 = BitConverterLE.ToUInt32(array6, 32);
-			strongNameSignature.SignaturePosition = this.RVAtoPosition(num7, (int)num2, array5);
-			strongNameSignature.SignatureLength = BitConverterLE.ToUInt32(array6, 36);
-			uint num8 = BitConverterLE.ToUInt32(array6, 8);
-			strongNameSignature.MetadataPosition = this.RVAtoPosition(num8, (int)num2, array5);
-			strongNameSignature.MetadataLength = BitConverterLE.ToUInt32(array6, 12);
-			if (options == StrongName.StrongNameOptions.Metadata)
-			{
-				cryptoStream.Close();
-				hashAlgorithm.Initialize();
-				byte[] array7 = new byte[strongNameSignature.MetadataLength];
-				stream.Position = (long)((ulong)strongNameSignature.MetadataPosition);
-				stream.Read(array7, 0, array7.Length);
-				strongNameSignature.Hash = hashAlgorithm.ComputeHash(array7);
-				return strongNameSignature;
-			}
-			for (int i = 0; i < (int)num2; i++)
-			{
-				uint num9 = BitConverterLE.ToUInt32(array5, i * 40 + 20);
-				int num10 = (int)BitConverterLE.ToUInt32(array5, i * 40 + 16);
-				byte[] array8 = new byte[num10];
-				stream.Position = (long)((ulong)num9);
-				stream.Read(array8, 0, num10);
-				if (num9 <= strongNameSignature.SignaturePosition && (ulong)strongNameSignature.SignaturePosition < (ulong)num9 + (ulong)((long)num10))
+				int num2 = BitConverterLE.ToInt32(array, 60);
+				if (num2 < 64)
 				{
-					int num11 = (int)(strongNameSignature.SignaturePosition - num9);
-					if (num11 > 0)
-					{
-						cryptoStream.Write(array8, 0, num11);
-					}
-					strongNameSignature.Signature = new byte[strongNameSignature.SignatureLength];
-					Buffer.BlockCopy(array8, num11, strongNameSignature.Signature, 0, (int)strongNameSignature.SignatureLength);
-					Array.Reverse<byte>(strongNameSignature.Signature);
-					int num12 = (int)((long)num11 + (long)((ulong)strongNameSignature.SignatureLength));
-					int num13 = num10 - num12;
-					if (num13 > 0)
-					{
-						cryptoStream.Write(array8, num12, num13);
-					}
+					return StrongName.Error("peHeader_lt_64");
+				}
+				array = StrongName.ReadMore(stream, array, num2);
+				if (array == null)
+				{
+					return StrongName.Error("read_mz2_failed");
+				}
+			}
+			else
+			{
+				if (num < 4 || array[0] != 80 || array[1] != 69 || array[2] != 0 || array[3] != 0)
+				{
+					return StrongName.Error("read_mz_or_mzsig_failed");
+				}
+				stream.Position = 0L;
+				array = new byte[0];
+			}
+			int num3 = 2;
+			int num4 = 24 + num3;
+			byte[] array2 = new byte[num4];
+			if (stream.Read(array2, 0, num4) != num4 || array2[0] != 80 || array2[1] != 69 || array2[2] != 0 || array2[3] != 0)
+			{
+				return StrongName.Error("read_minimumHeadersSize_or_pesig_failed");
+			}
+			num3 = (int)BitConverterLE.ToUInt16(array2, 20);
+			if (num3 < 2)
+			{
+				return StrongName.Error(string.Format("sizeOfOptionalHeader_lt_2 ${0}", num3));
+			}
+			int num5 = 24 + num3;
+			if (num5 < 24)
+			{
+				return StrongName.Error("headers_overflow");
+			}
+			array2 = StrongName.ReadMore(stream, array2, num5);
+			if (array2 == null)
+			{
+				return StrongName.Error("read_pe2_failed");
+			}
+			uint num6 = (uint)BitConverterLE.ToUInt16(array2, 24);
+			int num7 = 0;
+			bool flag = false;
+			if (num6 != 267U)
+			{
+				if (num6 == 523U)
+				{
+					num7 = 16;
 				}
 				else
 				{
-					cryptoStream.Write(array8, 0, num10);
+					if (num6 != 263U)
+					{
+						return StrongName.Error("bad_magic_value");
+					}
+					flag = true;
 				}
 			}
-			cryptoStream.Close();
-			strongNameSignature.Hash = hashAlgorithm.Hash;
+			uint num8 = 0U;
+			if (!flag)
+			{
+				if (num3 >= 116 + num7 + 4)
+				{
+					num8 = BitConverterLE.ToUInt32(array2, 116 + num7);
+				}
+				int num9 = 64;
+				while (num9 < num3 && num9 < 68)
+				{
+					array2[24 + num9] = 0;
+					num9++;
+				}
+				int num10 = 128 + num7;
+				while (num10 < num3 && num10 < 136 + num7)
+				{
+					array2[24 + num10] = 0;
+					num10++;
+				}
+			}
+			int num11 = (int)BitConverterLE.ToUInt16(array2, 6);
+			byte[] array3 = new byte[num11 * 40];
+			if (stream.Read(array3, 0, array3.Length) != array3.Length)
+			{
+				return StrongName.Error("read_section_headers_failed");
+			}
+			uint num12 = 0U;
+			uint num13 = 0U;
+			uint num14 = 0U;
+			uint num15 = 0U;
+			if (15U < num8 && num3 >= 216 + num7)
+			{
+				uint num16 = BitConverterLE.ToUInt32(array2, 232 + num7);
+				uint num17 = this.RVAtoPosition(num16, num11, array3);
+				int num18 = BitConverterLE.ToInt32(array2, 236 + num7);
+				byte[] array4 = new byte[num18];
+				stream.Position = (long)((ulong)num17);
+				if (stream.Read(array4, 0, num18) != num18)
+				{
+					return StrongName.Error("read_cli_header_failed");
+				}
+				uint num19 = BitConverterLE.ToUInt32(array4, 32);
+				num12 = this.RVAtoPosition(num19, num11, array3);
+				num13 = BitConverterLE.ToUInt32(array4, 36);
+				uint num20 = BitConverterLE.ToUInt32(array4, 8);
+				num14 = this.RVAtoPosition(num20, num11, array3);
+				num15 = BitConverterLE.ToUInt32(array4, 12);
+			}
+			StrongName.StrongNameSignature strongNameSignature = new StrongName.StrongNameSignature();
+			strongNameSignature.SignaturePosition = num12;
+			strongNameSignature.SignatureLength = num13;
+			strongNameSignature.MetadataPosition = num14;
+			strongNameSignature.MetadataLength = num15;
+			using (HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.TokenAlgorithm))
+			{
+				if (options == StrongName.StrongNameOptions.Metadata)
+				{
+					hashAlgorithm.Initialize();
+					byte[] array5 = new byte[num15];
+					stream.Position = (long)((ulong)num14);
+					if (stream.Read(array5, 0, (int)num15) != (int)num15)
+					{
+						return StrongName.Error("read_cli_metadata_failed");
+					}
+					strongNameSignature.Hash = hashAlgorithm.ComputeHash(array5);
+					return strongNameSignature;
+				}
+				else
+				{
+					using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, hashAlgorithm, CryptoStreamMode.Write))
+					{
+						cryptoStream.Write(array, 0, array.Length);
+						cryptoStream.Write(array2, 0, array2.Length);
+						cryptoStream.Write(array3, 0, array3.Length);
+						for (int i = 0; i < num11; i++)
+						{
+							uint num21 = BitConverterLE.ToUInt32(array3, i * 40 + 20);
+							int num22 = BitConverterLE.ToInt32(array3, i * 40 + 16);
+							byte[] array6 = new byte[num22];
+							stream.Position = (long)((ulong)num21);
+							if (stream.Read(array6, 0, num22) != num22)
+							{
+								return StrongName.Error("read_section_failed");
+							}
+							if (num21 <= num12 && num12 < num21 + (uint)num22)
+							{
+								int num23 = (int)(num12 - num21);
+								if (num23 > 0)
+								{
+									cryptoStream.Write(array6, 0, num23);
+								}
+								strongNameSignature.Signature = new byte[num13];
+								Buffer.BlockCopy(array6, num23, strongNameSignature.Signature, 0, (int)num13);
+								Array.Reverse<byte>(strongNameSignature.Signature);
+								int num24 = (int)((long)num23 + (long)((ulong)num13));
+								int num25 = num22 - num24;
+								if (num25 > 0)
+								{
+									cryptoStream.Write(array6, num24, num25);
+								}
+							}
+							else
+							{
+								cryptoStream.Write(array6, 0, num22);
+							}
+						}
+					}
+					strongNameSignature.Hash = hashAlgorithm.Hash;
+				}
+			}
 			return strongNameSignature;
 		}
 
 		public byte[] Hash(string fileName)
 		{
-			FileStream fileStream = File.OpenRead(fileName);
-			StrongName.StrongNameSignature strongNameSignature = this.StrongHash(fileStream, StrongName.StrongNameOptions.Metadata);
-			fileStream.Close();
-			return strongNameSignature.Hash;
+			byte[] hash;
+			using (FileStream fileStream = File.OpenRead(fileName))
+			{
+				hash = this.StrongHash(fileStream, StrongName.StrongNameOptions.Metadata).Hash;
+			}
+			return hash;
 		}
 
 		public bool Sign(string fileName)
 		{
-			bool flag = false;
 			StrongName.StrongNameSignature strongNameSignature;
 			using (FileStream fileStream = File.OpenRead(fileName))
 			{
 				strongNameSignature = this.StrongHash(fileStream, StrongName.StrongNameOptions.Signature);
-				fileStream.Close();
 			}
 			if (strongNameSignature.Hash == null)
 			{
@@ -334,19 +445,16 @@ namespace Mono.Security
 			{
 				fileStream2.Position = (long)((ulong)strongNameSignature.SignaturePosition);
 				fileStream2.Write(array, 0, array.Length);
-				fileStream2.Close();
-				flag = true;
 			}
-			return flag;
+			return true;
 		}
 
 		public bool Verify(string fileName)
 		{
-			bool flag = false;
+			bool flag;
 			using (FileStream fileStream = File.OpenRead(fileName))
 			{
 				flag = this.Verify(fileStream);
-				fileStream.Close();
 			}
 			return flag;
 		}

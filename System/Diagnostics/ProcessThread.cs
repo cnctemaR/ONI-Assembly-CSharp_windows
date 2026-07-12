@@ -11,8 +11,8 @@ namespace System.Diagnostics
 		{
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The base priority of this thread.")]
+		[MonoTODO]
 		public int BasePriority
 		{
 			get
@@ -21,8 +21,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The current priority of this thread.")]
 		[MonoTODO]
+		[MonitoringDescription("The current priority of this thread.")]
 		public int CurrentPriority
 		{
 			get
@@ -76,8 +76,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The amount of CPU time used in privileged mode.")]
+		[MonoTODO]
 		public TimeSpan PrivilegedProcessorTime
 		{
 			get
@@ -86,8 +86,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[Browsable(false)]
+		[MonoTODO]
 		public IntPtr ProcessorAffinity
 		{
 			set
@@ -95,8 +95,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The start address in memory of this thread.")]
+		[MonoTODO]
 		public IntPtr StartAddress
 		{
 			get
@@ -105,8 +105,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The time this thread was started.")]
 		[MonoTODO]
+		[MonitoringDescription("The time this thread was started.")]
 		public DateTime StartTime
 		{
 			get
@@ -125,8 +125,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The total amount of CPU time used.")]
+		[MonoTODO]
 		public TimeSpan TotalProcessorTime
 		{
 			get
@@ -135,8 +135,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The amount of CPU time used in user mode.")]
 		[MonoTODO]
+		[MonitoringDescription("The amount of CPU time used in user mode.")]
 		public TimeSpan UserProcessorTime
 		{
 			get

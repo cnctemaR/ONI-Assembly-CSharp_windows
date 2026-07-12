@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
 	internal class VideoPlaybackMgr : IDisposable
 	{
 		public VideoPlaybackMgr()

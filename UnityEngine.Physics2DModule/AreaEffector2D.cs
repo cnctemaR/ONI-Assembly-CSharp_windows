@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
@@ -61,6 +62,20 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[Obsolete("AreaEffector2D.forceDirection has been deprecated. Use AreaEffector2D.forceAngle instead (UnityUpgradable) -> forceAngle", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public float forceDirection
+		{
+			get
+			{
+				return this.forceAngle;
+			}
+			set
+			{
+				this.forceAngle = value;
+			}
 		}
 	}
 }

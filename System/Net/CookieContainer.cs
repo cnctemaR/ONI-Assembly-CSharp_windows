@@ -25,7 +25,7 @@ namespace System.Net
 		{
 			if (capacity <= 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified value must be greater than 0."), "Capacity");
+				throw new ArgumentException(SR.GetString("The specified value must be greater than 0."), "Capacity");
 			}
 			this.m_maxCookies = capacity;
 		}
@@ -35,12 +35,12 @@ namespace System.Net
 		{
 			if (perDomainCapacity != 2147483647 && (perDomainCapacity <= 0 || perDomainCapacity > capacity))
 			{
-				throw new ArgumentOutOfRangeException("perDomainCapacity", global::SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "PerDomainCapacity", 0, capacity }));
+				throw new ArgumentOutOfRangeException("perDomainCapacity", SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "PerDomainCapacity", 0, capacity }));
 			}
 			this.m_maxCookiesPerDomain = perDomainCapacity;
 			if (maxCookieSize <= 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified value must be greater than 0."), "MaxCookieSize");
+				throw new ArgumentException(SR.GetString("The specified value must be greater than 0."), "MaxCookieSize");
 			}
 			this.m_maxCookieSize = maxCookieSize;
 		}
@@ -55,7 +55,7 @@ namespace System.Net
 			{
 				if (value <= 0 || (value < this.m_maxCookiesPerDomain && this.m_maxCookiesPerDomain != 2147483647))
 				{
-					throw new ArgumentOutOfRangeException("value", global::SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "Capacity", 0, this.m_maxCookiesPerDomain }));
+					throw new ArgumentOutOfRangeException("value", SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "Capacity", 0, this.m_maxCookiesPerDomain }));
 				}
 				if (value < this.m_maxCookies)
 				{
@@ -119,7 +119,7 @@ namespace System.Net
 			}
 			if (cookie.Domain.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string."), "cookie.Domain");
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string."), "cookie.Domain");
 			}
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append(cookie.Secure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp).Append(Uri.SchemeDelimiter);
@@ -136,7 +136,7 @@ namespace System.Net
 			Uri uri;
 			if (!Uri.TryCreate(stringBuilder.ToString(), UriKind.Absolute, out uri))
 			{
-				throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", cookie.Domain }));
+				throw new CookieException(SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", cookie.Domain }));
 			}
 			Cookie cookie2 = cookie.Clone();
 			cookie2.VerifySetDefaults(cookie2.Variant, uri, this.IsLocalDomain(uri.Host), this.m_fqdnMyDomain, true, true);
@@ -223,14 +223,14 @@ namespace System.Net
 					}
 					if (throwOnError)
 					{
-						throw new CookieException(global::SR.GetString("An error occurred when adding a cookie to the container."), ex);
+						throw new CookieException(SR.GetString("An error occurred when adding a cookie to the container."), ex);
 					}
 				}
 				return;
 			}
 			if (throwOnError)
 			{
-				throw new CookieException(global::SR.GetString("The value size of the cookie is '{0}'. This exceeds the configured maximum size, which is '{1}'.", new object[]
+				throw new CookieException(SR.GetString("The value size of the cookie is '{0}'. This exceeds the configured maximum size, which is '{1}'.", new object[]
 				{
 					cookie.ToString(),
 					this.m_maxCookieSize
@@ -408,7 +408,7 @@ namespace System.Net
 			{
 				return true;
 			}
-			string[] array = host.Split(new char[] { '.' });
+			string[] array = host.Split('.', StringSplitOptions.None);
 			if (array != null && array.Length == 4 && array[0] == "127")
 			{
 				int i = 1;
@@ -419,31 +419,31 @@ namespace System.Net
 					case 1:
 						break;
 					case 2:
-						goto IL_00C3;
+						goto IL_00BB;
 					case 3:
 						if (array[i][2] >= '0' && array[i][2] <= '9')
 						{
-							goto IL_00C3;
+							goto IL_00BB;
 						}
-						goto IL_00FF;
+						goto IL_00F7;
 					default:
-						goto IL_00FF;
+						goto IL_00F7;
 					}
-					IL_00DD:
+					IL_00D5:
 					if (array[i][0] >= '0' && array[i][0] <= '9')
 					{
 						i++;
 						continue;
 					}
 					break;
-					IL_00C3:
+					IL_00BB:
 					if (array[i][1] >= '0' && array[i][1] <= '9')
 					{
-						goto IL_00DD;
+						goto IL_00D5;
 					}
 					break;
 				}
-				IL_00FF:
+				IL_00F7:
 				if (i == 4)
 				{
 					return true;
@@ -527,7 +527,7 @@ namespace System.Net
 						cookieCollection.InternalAdd(cookie, true);
 					}
 				}
-				throw new CookieException(global::SR.GetString("Cookie format error."));
+				throw new CookieException(SR.GetString("Cookie format error."));
 				IL_00B0:;
 			}
 			catch (Exception ex)
@@ -538,7 +538,7 @@ namespace System.Net
 				}
 				if (isThrow)
 				{
-					throw new CookieException(global::SR.GetString("An error occurred when parsing the Cookie header for Uri '{0}'.", new object[] { uri.AbsoluteUri }), ex);
+					throw new CookieException(SR.GetString("An error occurred when parsing the Cookie header for Uri '{0}'.", new object[] { uri.AbsoluteUri }), ex);
 				}
 			}
 			foreach (object obj in cookieCollection)

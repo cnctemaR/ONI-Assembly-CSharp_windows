@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Runtime.ExceptionServices;
-using System.Security;
+using Internal.Runtime.Augments;
 
 namespace System.Threading.Tasks
 {
@@ -12,14 +12,11 @@ namespace System.Threading.Tasks
 		{
 			this._lookForOce = lookForOce;
 			this._state = 0;
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "Task.Unwrap", 0UL);
+				DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "Task.Unwrap", 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(this);
-			}
+			DebuggerSupport.AddToActiveTasks(this);
 			if (outerTask.IsCompleted)
 			{
 				this.ProcessCompletedOuterTask(outerTask);
@@ -62,7 +59,6 @@ namespace System.Threading.Tasks
 			this._state = 2;
 		}
 
-		[SecuritySafeCritical]
 		private void InvokeCoreAsync(Task completingTask)
 		{
 			ThreadPool.UnsafeQueueUserWorkItem(delegate(object state)
@@ -93,9 +89,9 @@ namespace System.Threading.Tasks
 
 		private bool TrySetFromTask(Task task, bool lookForOce)
 		{
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Join);
+				DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Join);
 			}
 			bool flag = false;
 			switch (task.Status)
@@ -103,14 +99,11 @@ namespace System.Threading.Tasks
 			case TaskStatus.RanToCompletion:
 			{
 				Task<TResult> task2 = task as Task<TResult>;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(base.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(this);
 				flag = base.TrySetResult((task2 != null) ? task2.Result : default(TResult));
 				break;
 			}
@@ -151,6 +144,14 @@ namespace System.Threading.Tasks
 				return;
 			}
 			task.AddCompletionAction(this);
+		}
+
+		public bool InvokeMayRunArbitraryCode
+		{
+			get
+			{
+				return true;
+			}
 		}
 
 		private const byte STATE_WAITING_ON_OUTER_TASK = 0;

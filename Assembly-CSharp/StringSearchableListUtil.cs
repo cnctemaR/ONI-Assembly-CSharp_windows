@@ -6,7 +6,7 @@ public static class StringSearchableListUtil
 	public static bool DoAnyTagsMatchFilter(string[] lowercaseTags, in string filter)
 	{
 		string text = filter.Trim().ToLowerInvariant();
-		string[] array = text.Split(new char[] { ' ' });
+		string[] array = text.Split(' ', StringSplitOptions.None);
 		for (int i = 0; i < lowercaseTags.Length; i++)
 		{
 			string tag = lowercaseTags[i];

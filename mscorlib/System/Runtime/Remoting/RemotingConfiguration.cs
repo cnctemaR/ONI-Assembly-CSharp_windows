@@ -33,16 +33,15 @@ namespace System.Runtime.Remoting
 			}
 		}
 
-		[MonoTODO]
 		public static CustomErrorsModes CustomErrorsMode
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return RemotingConfiguration._errorMode;
 			}
 			set
 			{
-				throw new NotImplementedException();
+				RemotingConfiguration._errorMode = value;
 			}
 		}
 
@@ -408,7 +407,7 @@ namespace System.Runtime.Remoting
 
 		public static bool CustomErrorsEnabled(bool isLocalRequest)
 		{
-			return !(RemotingConfiguration._errorMode == "off") && (RemotingConfiguration._errorMode == "on" || !isLocalRequest);
+			return RemotingConfiguration._errorMode != CustomErrorsModes.Off && (RemotingConfiguration._errorMode == CustomErrorsModes.On || !isLocalRequest);
 		}
 
 		internal static void SetCustomErrorsMode(string mode)
@@ -422,7 +421,7 @@ namespace System.Runtime.Remoting
 			{
 				throw new RemotingException("Invalid custom error mode: " + mode);
 			}
-			RemotingConfiguration._errorMode = text;
+			RemotingConfiguration._errorMode = (CustomErrorsModes)Enum.Parse(typeof(CustomErrorsModes), text, true);
 		}
 
 		private static string applicationID = null;
@@ -435,7 +434,7 @@ namespace System.Runtime.Remoting
 
 		private static bool defaultDelayedConfigRead = false;
 
-		private static string _errorMode;
+		private static CustomErrorsModes _errorMode = CustomErrorsModes.RemoteOnly;
 
 		private static Hashtable wellKnownClientEntries = new Hashtable();
 

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
 using System.Security;
+using System.Text;
 
 namespace System
 {
@@ -14,15 +15,15 @@ namespace System
 	public class AggregateException : Exception
 	{
 		public AggregateException()
-			: base(Environment.GetResourceString("One or more errors occurred."))
+			: base("One or more errors occurred.")
 		{
-			this.m_innerExceptions = new ReadOnlyCollection<Exception>(new Exception[0]);
+			this.m_innerExceptions = new ReadOnlyCollection<Exception>(Array.Empty<Exception>());
 		}
 
 		public AggregateException(string message)
 			: base(message)
 		{
-			this.m_innerExceptions = new ReadOnlyCollection<Exception>(new Exception[0]);
+			this.m_innerExceptions = new ReadOnlyCollection<Exception>(Array.Empty<Exception>());
 		}
 
 		public AggregateException(string message, Exception innerException)
@@ -36,12 +37,12 @@ namespace System
 		}
 
 		public AggregateException(IEnumerable<Exception> innerExceptions)
-			: this(Environment.GetResourceString("One or more errors occurred."), innerExceptions)
+			: this("One or more errors occurred.", innerExceptions)
 		{
 		}
 
 		public AggregateException(params Exception[] innerExceptions)
-			: this(Environment.GetResourceString("One or more errors occurred."), innerExceptions)
+			: this("One or more errors occurred.", innerExceptions)
 		{
 		}
 
@@ -68,14 +69,14 @@ namespace System
 				array[i] = innerExceptions[i];
 				if (array[i] == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("An element of innerExceptions was null."));
+					throw new ArgumentException("An element of innerExceptions was null.");
 				}
 			}
 			this.m_innerExceptions = new ReadOnlyCollection<Exception>(array);
 		}
 
 		internal AggregateException(IEnumerable<ExceptionDispatchInfo> innerExceptionInfos)
-			: this(Environment.GetResourceString("One or more errors occurred."), innerExceptionInfos)
+			: this("One or more errors occurred.", innerExceptionInfos)
 		{
 		}
 
@@ -101,13 +102,12 @@ namespace System
 				}
 				if (array[i] == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("An element of innerExceptions was null."));
+					throw new ArgumentException("An element of innerExceptions was null.");
 				}
 			}
 			this.m_innerExceptions = new ReadOnlyCollection<Exception>(array);
 		}
 
-		[SecurityCritical]
 		protected AggregateException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
@@ -118,7 +118,7 @@ namespace System
 			Exception[] array = info.GetValue("InnerExceptions", typeof(Exception[])) as Exception[];
 			if (array == null)
 			{
-				throw new SerializationException(Environment.GetResourceString("The serialization stream contains no inner exceptions."));
+				throw new SerializationException("The serialization stream contains no inner exceptions.");
 			}
 			this.m_innerExceptions = new ReadOnlyCollection<Exception>(array);
 		}
@@ -126,10 +126,6 @@ namespace System
 		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
 			base.GetObjectData(info, context);
 			Exception[] array = new Exception[this.m_innerExceptions.Count];
 			this.m_innerExceptions.CopyTo(array, 0);
@@ -209,22 +205,42 @@ namespace System
 			return new AggregateException(this.Message, list);
 		}
 
+		public override string Message
+		{
+			get
+			{
+				if (this.m_innerExceptions.Count == 0)
+				{
+					return base.Message;
+				}
+				StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+				stringBuilder.Append(base.Message);
+				stringBuilder.Append(' ');
+				for (int i = 0; i < this.m_innerExceptions.Count; i++)
+				{
+					stringBuilder.Append('(');
+					stringBuilder.Append(this.m_innerExceptions[i].Message);
+					stringBuilder.Append(") ");
+				}
+				stringBuilder.Length--;
+				return StringBuilderCache.GetStringAndRelease(stringBuilder);
+			}
+		}
+
 		public override string ToString()
 		{
-			string text = base.ToString();
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(base.ToString());
 			for (int i = 0; i < this.m_innerExceptions.Count; i++)
 			{
-				text = string.Format(CultureInfo.InvariantCulture, Environment.GetResourceString("{0}{1}---> (Inner Exception #{2}) {3}{4}{5}"), new object[]
-				{
-					text,
-					Environment.NewLine,
-					i,
-					this.m_innerExceptions[i].ToString(),
-					"<---",
-					Environment.NewLine
-				});
+				stringBuilder.AppendLine();
+				stringBuilder.Append("---> ");
+				stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "(Inner Exception #{0}) ", i);
+				stringBuilder.Append(this.m_innerExceptions[i].ToString());
+				stringBuilder.Append("<---");
+				stringBuilder.AppendLine();
 			}
-			return text;
+			return stringBuilder.ToString();
 		}
 
 		private int InnerExceptionCount

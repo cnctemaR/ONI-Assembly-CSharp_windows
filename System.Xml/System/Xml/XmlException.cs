@@ -186,7 +186,7 @@ namespace System.Xml
 
 		private static string CreateMessage(string res, string[] args, int lineNumber, int linePosition)
 		{
-			string text4;
+			string text5;
 			try
 			{
 				string text;
@@ -199,15 +199,17 @@ namespace System.Xml
 					string text2 = lineNumber.ToString(CultureInfo.InvariantCulture);
 					string text3 = linePosition.ToString(CultureInfo.InvariantCulture);
 					text = Res.GetString(res, args);
-					text = Res.GetString("{0} Line {1}, position {2}.", new string[] { text, text2, text3 });
+					string text4 = "{0} Line {1}, position {2}.";
+					object[] array = new string[] { text, text2, text3 };
+					text = Res.GetString(text4, array);
 				}
-				text4 = text;
+				text5 = text;
 			}
 			catch (MissingManifestResourceException)
 			{
-				text4 = "UNKNOWN(" + res + ")";
+				text5 = "UNKNOWN(" + res + ")";
 			}
-			return text4;
+			return text5;
 		}
 
 		internal static string[] BuildCharExceptionArgs(string data, int invCharIndex)

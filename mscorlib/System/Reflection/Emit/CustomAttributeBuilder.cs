@@ -6,12 +6,32 @@ using System.Text;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_CustomAttributeBuilder))]
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class CustomAttributeBuilder : _CustomAttributeBuilder
 	{
+		void _CustomAttributeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _CustomAttributeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _CustomAttributeBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _CustomAttributeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal ConstructorInfo Ctor
 		{
 			get
@@ -203,7 +223,11 @@ namespace System.Reflection.Emit
 				}
 				if (fieldValues[num] != null && !(fieldInfo.FieldType is TypeBuilder) && !fieldInfo.FieldType.IsEnum && !fieldInfo.FieldType.IsInstanceOfType(fieldValues[num]) && !fieldInfo.FieldType.IsArray)
 				{
-					throw new ArgumentException(string.Concat(new object[] { "Value of field '", fieldInfo.Name, "' does not match field type: ", fieldInfo.FieldType }));
+					string text = "Value of field '";
+					string name = fieldInfo.Name;
+					string text2 = "' does not match field type: ";
+					Type fieldType = fieldInfo.FieldType;
+					throw new ArgumentException(text + name + text2 + ((fieldType != null) ? fieldType.ToString() : null));
 				}
 				num++;
 			}
@@ -229,15 +253,18 @@ namespace System.Reflection.Emit
 				}
 				if (propertyValues[num] != null && !(propertyInfo.PropertyType is TypeBuilder) && !propertyInfo.PropertyType.IsEnum && !propertyInfo.PropertyType.IsInstanceOfType(propertyValues[num]) && !propertyInfo.PropertyType.IsArray)
 				{
-					throw new ArgumentException(string.Concat(new object[]
-					{
-						"Value of property '",
-						propertyInfo.Name,
-						"' does not match property type: ",
-						propertyInfo.PropertyType,
-						" -> ",
-						propertyValues[num]
-					}));
+					string[] array = new string[6];
+					array[0] = "Value of property '";
+					array[1] = propertyInfo.Name;
+					array[2] = "' does not match property type: ";
+					int num2 = 3;
+					Type propertyType = propertyInfo.PropertyType;
+					array[num2] = ((propertyType != null) ? propertyType.ToString() : null);
+					array[4] = " -> ";
+					int num3 = 5;
+					object obj = propertyValues[num];
+					array[num3] = ((obj != null) ? obj.ToString() : null);
+					throw new ArgumentException(string.Concat(array));
 				}
 				num++;
 			}
@@ -249,29 +276,34 @@ namespace System.Reflection.Emit
 					Type parameterType = parameterInfo.ParameterType;
 					if (!this.IsValidType(parameterType))
 					{
-						throw new ArgumentException("Parameter " + num + " does not have a valid type.");
+						throw new ArgumentException("Parameter " + num.ToString() + " does not have a valid type.");
 					}
 					if (!CustomAttributeBuilder.IsValidValue(parameterType, constructorArgs[num]))
 					{
-						throw new ArgumentException("Parameter " + num + " is not a valid value.");
+						throw new ArgumentException("Parameter " + num.ToString() + " is not a valid value.");
 					}
 					if (constructorArgs[num] != null)
 					{
 						if (!(parameterType is TypeBuilder) && !parameterType.IsEnum && !parameterType.IsInstanceOfType(constructorArgs[num]) && !parameterType.IsArray)
 						{
-							throw new ArgumentException(string.Concat(new object[]
-							{
-								"Value of argument ",
-								num,
-								" does not match parameter type: ",
-								parameterType,
-								" -> ",
-								constructorArgs[num]
-							}));
+							string[] array2 = new string[6];
+							array2[0] = "Value of argument ";
+							array2[1] = num.ToString();
+							array2[2] = " does not match parameter type: ";
+							int num4 = 3;
+							Type type = parameterType;
+							array2[num4] = ((type != null) ? type.ToString() : null);
+							array2[4] = " -> ";
+							int num5 = 5;
+							object obj2 = constructorArgs[num];
+							array2[num5] = ((obj2 != null) ? obj2.ToString() : null);
+							throw new ArgumentException(string.Concat(array2));
 						}
 						if (!this.IsValidParam(constructorArgs[num], parameterType))
 						{
-							throw new ArgumentException("Cannot emit a CustomAttribute with argument of type " + constructorArgs[num].GetType() + ".");
+							string text3 = "Cannot emit a CustomAttribute with argument of type ";
+							Type type2 = constructorArgs[num].GetType();
+							throw new ArgumentException(text3 + ((type2 != null) ? type2.ToString() : null) + ".");
 						}
 					}
 				}
@@ -306,11 +338,24 @@ namespace System.Reflection.Emit
 			return Encoding.UTF8.GetString(data, pos, len);
 		}
 
+		internal static string decode_string(byte[] data, int pos, out int rpos)
+		{
+			if (data[pos] == 255)
+			{
+				rpos = pos + 1;
+				return null;
+			}
+			int num = CustomAttributeBuilder.decode_len(data, pos, out pos);
+			string text = CustomAttributeBuilder.string_from_bytes(data, pos, num);
+			pos += num;
+			rpos = pos;
+			return text;
+		}
+
 		internal string string_arg()
 		{
 			int num = 2;
-			int num2 = CustomAttributeBuilder.decode_len(this.data, num, out num);
-			return CustomAttributeBuilder.string_from_bytes(this.data, num, num2);
+			return CustomAttributeBuilder.decode_string(this.data, num, out num);
 		}
 
 		internal static UnmanagedMarshal get_umarshal(CustomAttributeBuilder customBuilder, bool is_field)
@@ -336,30 +381,26 @@ namespace System.Reflection.Emit
 			int i = 0;
 			while (i < num5)
 			{
-				num4++;
+				byte b = array[num4++];
 				if (array[num4++] == 85)
 				{
-					int num6 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-					CustomAttributeBuilder.string_from_bytes(array, num4, num6);
-					num4 += num6;
+					CustomAttributeBuilder.decode_string(array, num4, out num4);
 				}
-				int num7 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-				string text3 = CustomAttributeBuilder.string_from_bytes(array, num4, num7);
-				num4 += num7;
-				uint num8 = <PrivateImplementationDetails>.ComputeStringHash(text3);
-				if (num8 <= 2523910760U)
+				string text3 = CustomAttributeBuilder.decode_string(array, num4, out num4);
+				uint num6 = <PrivateImplementationDetails>.ComputeStringHash(text3);
+				if (num6 <= 2523910760U)
 				{
-					if (num8 <= 1554623949U)
+					if (num6 <= 1554623949U)
 					{
-						if (num8 != 67206855U)
+						if (num6 != 67206855U)
 						{
-							if (num8 != 1554623949U)
+							if (num6 != 1554623949U)
 							{
-								goto IL_0381;
+								goto IL_030E;
 							}
 							if (!(text3 == "SafeArraySubType"))
 							{
-								goto IL_0381;
+								goto IL_030E;
 							}
 							unmanagedType = (UnmanagedType)((int)array[num4++] | ((int)array[num4++] << 8) | ((int)array[num4++] << 16) | ((int)array[num4++] << 24));
 						}
@@ -367,22 +408,20 @@ namespace System.Reflection.Emit
 						{
 							if (!(text3 == "MarshalCookie"))
 							{
-								goto IL_0381;
+								goto IL_030E;
 							}
-							num7 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-							text2 = CustomAttributeBuilder.string_from_bytes(array, num4, num7);
-							num4 += num7;
+							text2 = CustomAttributeBuilder.decode_string(array, num4, out num4);
 						}
 					}
-					else if (num8 != 1823397059U)
+					else if (num6 != 1823397059U)
 					{
-						if (num8 != 2523910760U)
+						if (num6 != 2523910760U)
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						if (!(text3 == "IidParameterIndex"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						num4 += 4;
 					}
@@ -390,23 +429,23 @@ namespace System.Reflection.Emit
 					{
 						if (!(text3 == "SizeParamIndex"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						num2 = (int)array[num4++] | ((int)array[num4++] << 8);
 						flag = true;
 					}
 				}
-				else if (num8 <= 2658176172U)
+				else if (num6 <= 2658176172U)
 				{
-					if (num8 != 2546868066U)
+					if (num6 != 2546868066U)
 					{
-						if (num8 != 2658176172U)
+						if (num6 != 2658176172U)
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						if (!(text3 == "ArraySubType"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						unmanagedType = (UnmanagedType)((int)array[num4++] | ((int)array[num4++] << 8) | ((int)array[num4++] << 16) | ((int)array[num4++] << 24));
 					}
@@ -414,35 +453,34 @@ namespace System.Reflection.Emit
 					{
 						if (!(text3 == "MarshalTypeRef"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
-						num7 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-						text = CustomAttributeBuilder.string_from_bytes(array, num4, num7);
-						type = Type.GetType(text);
-						num4 += num7;
+						text = CustomAttributeBuilder.decode_string(array, num4, out num4);
+						if (text != null)
+						{
+							type = Type.GetType(text);
+						}
 					}
 				}
-				else if (num8 != 2784686469U)
+				else if (num6 != 2784686469U)
 				{
-					if (num8 != 3888525279U)
+					if (num6 != 3888525279U)
 					{
-						if (num8 != 4141739223U)
+						if (num6 != 4141739223U)
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						if (!(text3 == "SafeArrayUserDefinedSubType"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
-						num7 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-						CustomAttributeBuilder.string_from_bytes(array, num4, num7);
-						num4 += num7;
+						CustomAttributeBuilder.decode_string(array, num4, out num4);
 					}
 					else
 					{
 						if (!(text3 == "SizeConst"))
 						{
-							goto IL_0381;
+							goto IL_030E;
 						}
 						num = (int)array[num4++] | ((int)array[num4++] << 8) | ((int)array[num4++] << 16) | ((int)array[num4++] << 24);
 						flag = true;
@@ -452,15 +490,13 @@ namespace System.Reflection.Emit
 				{
 					if (!(text3 == "MarshalType"))
 					{
-						goto IL_0381;
+						goto IL_030E;
 					}
-					num7 = CustomAttributeBuilder.decode_len(array, num4, out num4);
-					text = CustomAttributeBuilder.string_from_bytes(array, num4, num7);
-					num4 += num7;
+					text = CustomAttributeBuilder.decode_string(array, num4, out num4);
 				}
 				i++;
 				continue;
-				IL_0381:
+				IL_030E:
 				throw new Exception("Unknown MarshalAsAttribute field: " + text3);
 			}
 			UnmanagedType unmanagedType2 = (UnmanagedType)num3;
@@ -535,7 +571,7 @@ namespace System.Reflection.Emit
 			case 14:
 				return typeof(string);
 			default:
-				throw new Exception("Unknown element type '" + elementType + "'");
+				throw new Exception("Unknown element type '" + elementType.ToString() + "'");
 			}
 		}
 
@@ -560,7 +596,7 @@ namespace System.Reflection.Emit
 					{
 						return CustomAttributeBuilder.decode_cattr_value(CustomAttributeBuilder.elementTypeToType(num), data, pos, out rpos);
 					}
-					throw new Exception("Subtype '" + num + "' of type object not yet handled in decode_cattr_value");
+					throw new Exception("Subtype '" + num.ToString() + "' of type object not yet handled in decode_cattr_value");
 				}
 			}
 			else
@@ -582,7 +618,7 @@ namespace System.Reflection.Emit
 					return CustomAttributeBuilder.string_from_bytes(data, pos, num2);
 				}
 			}
-			throw new Exception("FIXME: Type " + t + " not yet handled in decode_cattr_value.");
+			throw new Exception("FIXME: Type " + ((t != null) ? t.ToString() : null) + " not yet handled in decode_cattr_value.");
 		}
 
 		internal static CustomAttributeBuilder.CustomAttributeInfo decode_cattr(CustomAttributeBuilder customBuilder)
@@ -593,7 +629,7 @@ namespace System.Reflection.Emit
 			CustomAttributeBuilder.CustomAttributeInfo customAttributeInfo = default(CustomAttributeBuilder.CustomAttributeInfo);
 			if (array.Length < 2)
 			{
-				throw new Exception("Custom attr length is only '" + array.Length + "'");
+				throw new Exception("Custom attr length is only '" + array.Length.ToString() + "'");
 			}
 			if (array[0] != 1 || array[1] != 0)
 			{
@@ -628,12 +664,20 @@ namespace System.Reflection.Emit
 				num += num6;
 				if (num3 != 83)
 				{
-					throw new Exception("Unknown named type: " + num3);
+					throw new Exception("Unknown named type: " + num3.ToString());
 				}
 				FieldInfo field = constructorInfo.DeclaringType.GetField(text2, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 				if (field == null)
 				{
-					throw new Exception(string.Concat(new object[] { "Custom attribute type '", constructorInfo.DeclaringType, "' doesn't contain a field named '", text2, "'" }));
+					string[] array2 = new string[5];
+					array2[0] = "Custom attribute type '";
+					int num7 = 1;
+					Type declaringType = constructorInfo.DeclaringType;
+					array2[num7] = ((declaringType != null) ? declaringType.ToString() : null);
+					array2[2] = "' doesn't contain a field named '";
+					array2[3] = text2;
+					array2[4] = "'";
+					throw new Exception(string.Concat(array2));
 				}
 				object obj = CustomAttributeBuilder.decode_cattr_value(field.FieldType, array, num, out num);
 				if (text != null)
@@ -643,26 +687,6 @@ namespace System.Reflection.Emit
 				customAttributeInfo.namedParamValues[j] = obj;
 			}
 			return customAttributeInfo;
-		}
-
-		void _CustomAttributeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _CustomAttributeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _CustomAttributeBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _CustomAttributeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		private static ParameterInfo[] GetParameters(ConstructorInfo ctor)

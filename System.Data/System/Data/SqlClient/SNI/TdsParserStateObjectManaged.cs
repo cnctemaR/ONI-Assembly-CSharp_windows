@@ -152,16 +152,12 @@ namespace System.Data.SqlClient.SNI
 			return this._sessionHandle.Status > 0U;
 		}
 
-		internal override object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error)
+		internal override object ReadSyncOverAsync(int timeoutRemaining, out uint error)
 		{
 			SNIHandle handle = this.Handle;
 			if (handle == null)
 			{
 				throw ADP.ClosedConnectionError();
-			}
-			if (isMarsOn)
-			{
-				base.IncrementPendingCallbacks();
 			}
 			SNIPacket snipacket = null;
 			error = SNIProxy.Singleton.ReadSyncOverAsync(handle, out snipacket, timeoutRemaining);
@@ -197,10 +193,13 @@ namespace System.Data.SqlClient.SNI
 
 		internal override object CreateAndSetAttentionPacket()
 		{
-			SNIPacket snipacket = new SNIPacket(this.Handle);
-			this._sniAsyncAttnPacket = snipacket;
-			this.SetPacketData(snipacket, SQL.AttentionHeader, 8);
-			return snipacket;
+			if (this._sniAsyncAttnPacket == null)
+			{
+				SNIPacket snipacket = new SNIPacket();
+				this.SetPacketData(snipacket, SQL.AttentionHeader, 8);
+				this._sniAsyncAttnPacket = snipacket;
+			}
+			return this._sniAsyncAttnPacket;
 		}
 
 		internal override uint WritePacket(object packet, bool sync)
@@ -328,7 +327,7 @@ namespace System.Data.SqlClient.SNI
 				}
 				else
 				{
-					snipacket = new SNIPacket(sniHandle);
+					snipacket = new SNIPacket();
 				}
 				return snipacket;
 			}

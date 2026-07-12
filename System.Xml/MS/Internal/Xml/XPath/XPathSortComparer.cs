@@ -13,8 +13,8 @@ namespace MS.Internal.Xml.XPath
 			{
 				size = 3;
 			}
-			this.expressions = new Query[size];
-			this.comparers = new IComparer[size];
+			this._expressions = new Query[size];
+			this._comparers = new IComparer[size];
 		}
 
 		public XPathSortComparer()
@@ -24,45 +24,45 @@ namespace MS.Internal.Xml.XPath
 
 		public void AddSort(Query evalQuery, IComparer comparer)
 		{
-			if (this.numSorts == this.expressions.Length)
+			if (this._numSorts == this._expressions.Length)
 			{
-				Query[] array = new Query[this.numSorts * 2];
-				IComparer[] array2 = new IComparer[this.numSorts * 2];
-				for (int i = 0; i < this.numSorts; i++)
+				Query[] array = new Query[this._numSorts * 2];
+				IComparer[] array2 = new IComparer[this._numSorts * 2];
+				for (int i = 0; i < this._numSorts; i++)
 				{
-					array[i] = this.expressions[i];
-					array2[i] = this.comparers[i];
+					array[i] = this._expressions[i];
+					array2[i] = this._comparers[i];
 				}
-				this.expressions = array;
-				this.comparers = array2;
+				this._expressions = array;
+				this._comparers = array2;
 			}
 			if (evalQuery.StaticType == XPathResultType.NodeSet || evalQuery.StaticType == XPathResultType.Any)
 			{
 				evalQuery = new StringFunctions(Function.FunctionType.FuncString, new Query[] { evalQuery });
 			}
-			this.expressions[this.numSorts] = evalQuery;
-			this.comparers[this.numSorts] = comparer;
-			this.numSorts++;
+			this._expressions[this._numSorts] = evalQuery;
+			this._comparers[this._numSorts] = comparer;
+			this._numSorts++;
 		}
 
 		public int NumSorts
 		{
 			get
 			{
-				return this.numSorts;
+				return this._numSorts;
 			}
 		}
 
 		public Query Expression(int i)
 		{
-			return this.expressions[i];
+			return this._expressions[i];
 		}
 
 		int IComparer<SortKey>.Compare(SortKey x, SortKey y)
 		{
 			for (int i = 0; i < x.NumKeys; i++)
 			{
-				int num = this.comparers[i].Compare(x[i], y[i]);
+				int num = this._comparers[i].Compare(x[i], y[i]);
 				if (num != 0)
 				{
 					return num;
@@ -73,22 +73,22 @@ namespace MS.Internal.Xml.XPath
 
 		internal XPathSortComparer Clone()
 		{
-			XPathSortComparer xpathSortComparer = new XPathSortComparer(this.numSorts);
-			for (int i = 0; i < this.numSorts; i++)
+			XPathSortComparer xpathSortComparer = new XPathSortComparer(this._numSorts);
+			for (int i = 0; i < this._numSorts; i++)
 			{
-				xpathSortComparer.comparers[i] = this.comparers[i];
-				xpathSortComparer.expressions[i] = (Query)this.expressions[i].Clone();
+				xpathSortComparer._comparers[i] = this._comparers[i];
+				xpathSortComparer._expressions[i] = (Query)this._expressions[i].Clone();
 			}
-			xpathSortComparer.numSorts = this.numSorts;
+			xpathSortComparer._numSorts = this._numSorts;
 			return xpathSortComparer;
 		}
 
 		private const int minSize = 3;
 
-		private Query[] expressions;
+		private Query[] _expressions;
 
-		private IComparer[] comparers;
+		private IComparer[] _comparers;
 
-		private int numSorts;
+		private int _numSorts;
 	}
 }

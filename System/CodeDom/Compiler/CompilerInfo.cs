@@ -70,7 +70,7 @@ namespace System.CodeDom.Compiler
 			{
 				return (CodeDomProvider)constructor.Invoke(new object[] { providerOptions });
 			}
-			throw new InvalidOperationException(global::SR.Format("This CodeDomProvider type does not have a constructor that takes providerOptions - \"{0}\"", this.CodeDomProviderType.ToString()));
+			throw new InvalidOperationException(SR.Format("This CodeDomProvider type does not have a constructor that takes providerOptions - \"{0}\"", this.CodeDomProviderType.ToString()));
 		}
 
 		public CompilerParameters CreateDefaultCompilerParameters()

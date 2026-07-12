@@ -45,7 +45,17 @@ namespace UnityEngine.Rendering
 		{
 			get
 			{
-				return GraphicsFormatUtility.GetRenderTextureFormat(this.m_Format);
+				bool flag = GraphicsFormatUtility.IsDepthStencilFormat(this.m_Format) && this.m_Format != GraphicsFormat.ShadowAuto;
+				RenderTextureFormat renderTextureFormat;
+				if (flag)
+				{
+					renderTextureFormat = RenderTextureFormat.Depth;
+				}
+				else
+				{
+					renderTextureFormat = GraphicsFormatUtility.GetRenderTextureFormat(this.m_Format);
+				}
+				return renderTextureFormat;
 			}
 			set
 			{

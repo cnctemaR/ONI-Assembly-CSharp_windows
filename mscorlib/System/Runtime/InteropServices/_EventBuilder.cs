@@ -3,8 +3,8 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[TypeLibImportClass(typeof(EventBuilder))]
 	[Guid("AADABA99-895D-3D65-9760-B1F12621FAE8")]

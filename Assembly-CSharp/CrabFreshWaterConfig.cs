@@ -54,7 +54,7 @@ public class CrabFreshWaterConfig : IEntityConfig
 		}
 		diseaseEmitter.SetDiseases(list);
 		diseaseEmitter.emitRange = 2;
-		diseaseEmitter.emitCount = -1 * Mathf.RoundToInt(888.8889f);
+		diseaseEmitter.emitCount = -1 * Mathf.RoundToInt((float)DUPLICANTSTATS.STANDARD.Secretions.DISEASE_PER_PEE / 600f * 6f * 2f * 4f / 9f);
 		CleaningMonitor.Def def2 = gameObject.AddOrGetDef<CleaningMonitor.Def>();
 		def2.elementState = Element.State.Liquid;
 		def2.cellOffsets = new CellOffset[]

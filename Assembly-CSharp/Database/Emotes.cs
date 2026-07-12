@@ -138,6 +138,13 @@ namespace Database
 						anim = "sneeze_pst"
 					}
 				}, "anim_sneeze_kanim");
+				this.WaterDamage = new Emote(this, "WaterDamage", new EmoteStep[]
+				{
+					new EmoteStep
+					{
+						anim = "zapped"
+					}
+				}, "anim_bionic_kanim");
 				this.Sneeze_Short = new Emote(this, "Short Sneeze", new EmoteStep[]
 				{
 					new EmoteStep
@@ -238,6 +245,8 @@ namespace Database
 			public Emote Sick;
 
 			public Emote Sneeze;
+
+			public Emote WaterDamage;
 
 			public Emote Sneeze_Short;
 

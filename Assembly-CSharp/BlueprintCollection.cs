@@ -43,7 +43,7 @@ public class BlueprintCollection
 	[CompilerGenerated]
 	internal static bool <PostProcess>g__ShouldExcludeBlueprint|10_0(IBlueprintDlcInfo blueprintDlcInfo)
 	{
-		if (!DlcManager.HasAnyContentSubscribed(blueprintDlcInfo.dlcIds))
+		if (!DlcManager.IsAnyContentSubscribed(blueprintDlcInfo.dlcIds))
 		{
 			return true;
 		}

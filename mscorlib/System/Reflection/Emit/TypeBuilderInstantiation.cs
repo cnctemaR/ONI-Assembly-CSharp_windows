@@ -33,16 +33,17 @@ namespace System.Reflection.Emit
 
 		internal override Type RuntimeResolve()
 		{
-			if (this.generic_type is TypeBuilder && !(this.generic_type as TypeBuilder).IsCreated())
+			TypeBuilder typeBuilder = this.generic_type as TypeBuilder;
+			if (typeBuilder != null && !typeBuilder.IsCreated())
 			{
-				AppDomain.CurrentDomain.DoTypeResolve(this.generic_type);
+				AppDomain.CurrentDomain.DoTypeBuilderResolve(typeBuilder);
 			}
 			for (int i = 0; i < this.type_arguments.Length; i++)
 			{
-				Type type = this.type_arguments[i];
-				if (type is TypeBuilder && !(type as TypeBuilder).IsCreated())
+				TypeBuilder typeBuilder2 = this.type_arguments[i] as TypeBuilder;
+				if (typeBuilder2 != null && !typeBuilder2.IsCreated())
 				{
-					AppDomain.CurrentDomain.DoTypeResolve(type);
+					AppDomain.CurrentDomain.DoTypeBuilderResolve(typeBuilder2);
 				}
 			}
 			return this.InternalResolve();
@@ -551,6 +552,22 @@ namespace System.Reflection.Emit
 		internal static Type MakeGenericType(Type type, Type[] typeArguments)
 		{
 			return new TypeBuilderInstantiation(type, typeArguments);
+		}
+
+		public override bool IsTypeDefinition
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsConstructedGenericType
+		{
+			get
+			{
+				return true;
+			}
 		}
 
 		internal Type generic_type;

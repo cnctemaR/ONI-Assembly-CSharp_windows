@@ -2,5 +2,5 @@
 
 public interface IWorkerPrioritizable
 {
-	bool GetWorkerPriority(Worker worker, out int priority);
+	bool GetWorkerPriority(WorkerBase worker, out int priority);
 }

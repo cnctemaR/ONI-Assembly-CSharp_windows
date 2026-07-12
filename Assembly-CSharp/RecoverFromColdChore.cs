@@ -9,8 +9,8 @@ public class RecoverFromColdChore : Chore<RecoverFromColdChore.Instance>
 		base.smi = new RecoverFromColdChore.Instance(this, target.gameObject);
 		ColdImmunityMonitor.Instance coldImmunityMonitor = target.gameObject.GetSMI<ColdImmunityMonitor.Instance>();
 		Func<int> func = () => coldImmunityMonitor.WarmUpCell;
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveToDynamicCell, func);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 	}
 
 	public class States : GameStateMachine<RecoverFromColdChore.States, RecoverFromColdChore.Instance, RecoverFromColdChore>
@@ -66,7 +66,7 @@ public class RecoverFromColdChore : Chore<RecoverFromColdChore.Instance>
 
 		public static HashedString GetAnimFileName(RecoverFromColdChore.Instance smi)
 		{
-			return RecoverFromColdChore.States.GetAnimFromColdImmunityProvider(smi, (ColdImmunityProvider.Instance p) => p.AnimFileName);
+			return RecoverFromColdChore.States.GetAnimFromColdImmunityProvider(smi, (ColdImmunityProvider.Instance p) => p.GetAnimFileName(smi.sm.entityRecovering.Get(smi)));
 		}
 
 		public static string GetPreAnimName(RecoverFromColdChore.Instance smi)

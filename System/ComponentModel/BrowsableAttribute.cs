@@ -7,16 +7,10 @@ namespace System.ComponentModel
 	{
 		public BrowsableAttribute(bool browsable)
 		{
-			this.browsable = browsable;
+			this.Browsable = browsable;
 		}
 
-		public bool Browsable
-		{
-			get
-			{
-				return this.browsable;
-			}
-		}
+		public bool Browsable { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -25,12 +19,14 @@ namespace System.ComponentModel
 				return true;
 			}
 			BrowsableAttribute browsableAttribute = obj as BrowsableAttribute;
-			return browsableAttribute != null && browsableAttribute.Browsable == this.browsable;
+			bool? flag = ((browsableAttribute != null) ? new bool?(browsableAttribute.Browsable) : null);
+			bool browsable = this.Browsable;
+			return (flag.GetValueOrDefault() == browsable) & (flag != null);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.browsable.GetHashCode();
+			return this.Browsable.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
@@ -43,7 +39,5 @@ namespace System.ComponentModel
 		public static readonly BrowsableAttribute No = new BrowsableAttribute(false);
 
 		public static readonly BrowsableAttribute Default = BrowsableAttribute.Yes;
-
-		private bool browsable = true;
 	}
 }

@@ -26,26 +26,23 @@ namespace Klei.AI
 			if (this.affectedByDifficultySettings && currentQualitySetting != null)
 			{
 				string id = currentQualitySetting.id;
-				if (id != null)
+				if (!(id == "Infrequent"))
 				{
-					if (!(id == "Infrequent"))
+					if (!(id == "Intense"))
 					{
-						if (!(id == "Intense"))
-						{
-							if (id == "Doomed")
-							{
-								num *= 1f;
-							}
-						}
-						else
+						if (id == "Doomed")
 						{
 							num *= 1f;
 						}
 					}
 					else
 					{
-						num *= 2f;
+						num *= 1f;
 					}
+				}
+				else
+				{
+					num *= 2f;
 				}
 			}
 			return num;

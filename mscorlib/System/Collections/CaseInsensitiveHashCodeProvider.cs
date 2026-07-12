@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Obsolete("Please use StringComparer instead.")]
 	[Serializable]
 	public class CaseInsensitiveHashCodeProvider : IHashCodeProvider
 	{
 		public CaseInsensitiveHashCodeProvider()
 		{
-			this.m_text = CultureInfo.CurrentCulture.TextInfo;
+			this._compareInfo = CultureInfo.CurrentCulture.CompareInfo;
 		}
 
 		public CaseInsensitiveHashCodeProvider(CultureInfo culture)
@@ -20,14 +18,14 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("culture");
 			}
-			this.m_text = culture.TextInfo;
+			this._compareInfo = culture.CompareInfo;
 		}
 
 		public static CaseInsensitiveHashCodeProvider Default
 		{
 			get
 			{
-				return new CaseInsensitiveHashCodeProvider(CultureInfo.CurrentCulture);
+				return new CaseInsensitiveHashCodeProvider();
 			}
 		}
 
@@ -35,11 +33,12 @@ namespace System.Collections
 		{
 			get
 			{
-				if (CaseInsensitiveHashCodeProvider.m_InvariantCaseInsensitiveHashCodeProvider == null)
+				CaseInsensitiveHashCodeProvider caseInsensitiveHashCodeProvider;
+				if ((caseInsensitiveHashCodeProvider = CaseInsensitiveHashCodeProvider.s_invariantCaseInsensitiveHashCodeProvider) == null)
 				{
-					CaseInsensitiveHashCodeProvider.m_InvariantCaseInsensitiveHashCodeProvider = new CaseInsensitiveHashCodeProvider(CultureInfo.InvariantCulture);
+					caseInsensitiveHashCodeProvider = (CaseInsensitiveHashCodeProvider.s_invariantCaseInsensitiveHashCodeProvider = new CaseInsensitiveHashCodeProvider(CultureInfo.InvariantCulture));
 				}
-				return CaseInsensitiveHashCodeProvider.m_InvariantCaseInsensitiveHashCodeProvider;
+				return caseInsensitiveHashCodeProvider;
 			}
 		}
 
@@ -54,11 +53,11 @@ namespace System.Collections
 			{
 				return obj.GetHashCode();
 			}
-			return this.m_text.GetCaseInsensitiveHashCode(text);
+			return this._compareInfo.GetHashCode(text, CompareOptions.IgnoreCase);
 		}
 
-		private TextInfo m_text;
+		private static volatile CaseInsensitiveHashCodeProvider s_invariantCaseInsensitiveHashCodeProvider;
 
-		private static volatile CaseInsensitiveHashCodeProvider m_InvariantCaseInsensitiveHashCodeProvider;
+		private readonly CompareInfo _compareInfo;
 	}
 }

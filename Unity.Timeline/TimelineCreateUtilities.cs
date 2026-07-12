@@ -22,7 +22,7 @@ namespace UnityEngine.Timeline
 					text = name.Substring(0, num2);
 				}
 			}
-			text = text.TrimEnd(Array.Empty<char>());
+			text = text.TrimEnd();
 			for (int i = num; i < num + 5000; i++)
 			{
 				if (i > 0)
@@ -51,6 +51,14 @@ namespace UnityEngine.Timeline
 			childAsset.hideFlags |= HideFlags.HideInHierarchy;
 		}
 
+		public static void RemoveAssetFromObject(Object childAsset, Object masterAsset)
+		{
+			if (!(childAsset == null))
+			{
+				masterAsset == null;
+			}
+		}
+
 		public static AnimationClip CreateAnimationClipForTrack(string name, TrackAsset track, bool isLegacy)
 		{
 			TimelineAsset timelineAsset = ((track != null) ? track.timelineAsset : null);
@@ -58,7 +66,7 @@ namespace UnityEngine.Timeline
 			AnimationClip animationClip = new AnimationClip();
 			animationClip.legacy = isLegacy;
 			animationClip.name = name;
-			animationClip.frameRate = ((timelineAsset == null) ? TimelineAsset.EditorSettings.kDefaultFps : timelineAsset.editorSettings.fps);
+			animationClip.frameRate = ((timelineAsset == null) ? ((float)TimelineAsset.EditorSettings.kDefaultFrameRate) : ((float)timelineAsset.editorSettings.frameRate));
 			TimelineCreateUtilities.SaveAssetIntoObject(animationClip, timelineAsset);
 			animationClip.hideFlags = hideFlags & ~HideFlags.HideInHierarchy;
 			return animationClip;

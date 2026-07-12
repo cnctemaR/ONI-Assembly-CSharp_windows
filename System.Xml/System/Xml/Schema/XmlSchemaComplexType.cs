@@ -103,8 +103,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		[XmlAttribute("block")]
+		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		public XmlSchemaDerivationMethod Block
 		{
 			get
@@ -136,8 +136,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("simpleContent", typeof(XmlSchemaSimpleContent))]
 		[XmlElement("complexContent", typeof(XmlSchemaComplexContent))]
+		[XmlElement("simpleContent", typeof(XmlSchemaSimpleContent))]
 		public XmlSchemaContentModel ContentModel
 		{
 			get
@@ -150,10 +150,10 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("group", typeof(XmlSchemaGroupRef))]
 		[XmlElement("choice", typeof(XmlSchemaChoice))]
-		[XmlElement("all", typeof(XmlSchemaAll))]
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
+		[XmlElement("group", typeof(XmlSchemaGroupRef))]
+		[XmlElement("all", typeof(XmlSchemaAll))]
 		public XmlSchemaParticle Particle
 		{
 			get

@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Reflection;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
-	public abstract class Stream : MarshalByRefObject, IDisposable
+	public abstract class Stream : MarshalByRefObject, IDisposable, IAsyncDisposable
 	{
 		internal SemaphoreSlim EnsureAsyncActiveSemaphoreInitialized()
 		{
@@ -23,7 +20,6 @@ namespace System.IO
 
 		public abstract bool CanSeek { get; }
 
-		[ComVisible(false)]
 		public virtual bool CanTimeout
 		{
 			get
@@ -38,149 +34,119 @@ namespace System.IO
 
 		public abstract long Position { get; set; }
 
-		[ComVisible(false)]
 		public virtual int ReadTimeout
 		{
 			get
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Timeouts are not supported on this stream."));
+				throw new InvalidOperationException("Timeouts are not supported on this stream.");
 			}
 			set
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Timeouts are not supported on this stream."));
+				throw new InvalidOperationException("Timeouts are not supported on this stream.");
 			}
 		}
 
-		[ComVisible(false)]
 		public virtual int WriteTimeout
 		{
 			get
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Timeouts are not supported on this stream."));
+				throw new InvalidOperationException("Timeouts are not supported on this stream.");
 			}
 			set
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Timeouts are not supported on this stream."));
+				throw new InvalidOperationException("Timeouts are not supported on this stream.");
 			}
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task CopyToAsync(Stream destination)
 		{
-			return this.CopyToAsync(destination, 81920);
+			int copyBufferSize = this.GetCopyBufferSize();
+			return this.CopyToAsync(destination, copyBufferSize);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task CopyToAsync(Stream destination, int bufferSize)
 		{
 			return this.CopyToAsync(destination, bufferSize, CancellationToken.None);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public Task CopyToAsync(Stream destination, CancellationToken cancellationToken)
+		{
+			int copyBufferSize = this.GetCopyBufferSize();
+			return this.CopyToAsync(destination, copyBufferSize, cancellationToken);
+		}
+
 		public virtual Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
 		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			if (bufferSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
-			}
-			if (!this.CanRead && !this.CanWrite)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!destination.CanRead && !destination.CanWrite)
-			{
-				throw new ObjectDisposedException("destination", Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (!destination.CanWrite)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
-			}
+			StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
 			return this.CopyToAsyncInternal(destination, bufferSize, cancellationToken);
 		}
 
 		private async Task CopyToAsyncInternal(Stream destination, int bufferSize, CancellationToken cancellationToken)
 		{
-			byte[] buffer = new byte[bufferSize];
-			int bytesRead;
-			while ((bytesRead = await this.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
+			byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+			try
 			{
-				await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+				for (;;)
+				{
+					int num = await this.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false);
+					if (num == 0)
+					{
+						break;
+					}
+					await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, num), cancellationToken).ConfigureAwait(false);
+				}
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buffer, false);
 			}
 		}
 
 		public void CopyTo(Stream destination)
 		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			if (!this.CanRead && !this.CanWrite)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!destination.CanRead && !destination.CanWrite)
-			{
-				throw new ObjectDisposedException("destination", Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (!destination.CanWrite)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
-			}
-			this.InternalCopyTo(destination, 81920);
+			int copyBufferSize = this.GetCopyBufferSize();
+			this.CopyTo(destination, copyBufferSize);
 		}
 
 		public virtual void CopyTo(Stream destination, int bufferSize)
 		{
-			if (destination == null)
+			StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+			byte[] array = ArrayPool<byte>.Shared.Rent(bufferSize);
+			try
 			{
-				throw new ArgumentNullException("destination");
+				int num;
+				while ((num = this.Read(array, 0, array.Length)) != 0)
+				{
+					destination.Write(array, 0, num);
+				}
 			}
-			if (bufferSize <= 0)
+			finally
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+				ArrayPool<byte>.Shared.Return(array, false);
 			}
-			if (!this.CanRead && !this.CanWrite)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!destination.CanRead && !destination.CanWrite)
-			{
-				throw new ObjectDisposedException("destination", Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (!destination.CanWrite)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
-			}
-			this.InternalCopyTo(destination, bufferSize);
 		}
 
-		private void InternalCopyTo(Stream destination, int bufferSize)
+		private int GetCopyBufferSize()
 		{
-			byte[] array = new byte[bufferSize];
-			int num;
-			while ((num = this.Read(array, 0, array.Length)) != 0)
+			int num = 81920;
+			if (this.CanSeek)
 			{
-				destination.Write(array, 0, num);
+				long length = this.Length;
+				long position = this.Position;
+				if (length <= position)
+				{
+					num = 1;
+				}
+				else
+				{
+					long num2 = length - position;
+					if (num2 > 0L)
+					{
+						num = (int)Math.Min((long)num, num2);
+					}
+				}
 			}
+			return num;
 		}
 
 		public virtual void Close()
@@ -200,15 +166,11 @@ namespace System.IO
 
 		public abstract void Flush();
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task FlushAsync()
 		{
 			return this.FlushAsync(CancellationToken.None);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task FlushAsync(CancellationToken cancellationToken)
 		{
 			return Task.Factory.StartNew(delegate(object state)
@@ -223,22 +185,16 @@ namespace System.IO
 			return new ManualResetEvent(false);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
-			return this.BeginReadInternal(buffer, offset, count, callback, state, false);
+			return this.BeginReadInternal(buffer, offset, count, callback, state, false, true);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		internal IAsyncResult BeginReadInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, bool serializeAsynchronously)
+		internal IAsyncResult BeginReadInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, bool serializeAsynchronously, bool apm)
 		{
 			if (!this.CanRead)
 			{
-				__Error.ReadNotSupported();
-			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
-			{
-				return this.BlockingBeginRead(buffer, offset, count, callback, state);
+				throw Error.GetReadNotSupported();
 			}
 			SemaphoreSlim semaphoreSlim = this.EnsureAsyncActiveSemaphoreInitialized();
 			Task task = null;
@@ -250,11 +206,22 @@ namespace System.IO
 			{
 				semaphoreSlim.Wait();
 			}
-			Stream.ReadWriteTask readWriteTask = new Stream.ReadWriteTask(true, delegate
+			Stream.ReadWriteTask readWriteTask = new Stream.ReadWriteTask(true, apm, delegate
 			{
 				Stream.ReadWriteTask readWriteTask2 = Task.InternalCurrent as Stream.ReadWriteTask;
-				int num = readWriteTask2._stream.Read(readWriteTask2._buffer, readWriteTask2._offset, readWriteTask2._count);
-				readWriteTask2.ClearBeginState();
+				int num;
+				try
+				{
+					num = readWriteTask2._stream.Read(readWriteTask2._buffer, readWriteTask2._offset, readWriteTask2._count);
+				}
+				finally
+				{
+					if (!readWriteTask2._apm)
+					{
+						readWriteTask2._stream.FinishTrackingAsyncOperation();
+					}
+					readWriteTask2.ClearBeginState();
+				}
 				return num;
 			}, state, this, buffer, offset, count, callback);
 			if (task != null)
@@ -274,22 +241,18 @@ namespace System.IO
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
-			{
-				return Stream.BlockingEndRead(asyncResult);
-			}
 			Stream.ReadWriteTask activeReadWriteTask = this._activeReadWriteTask;
 			if (activeReadWriteTask == null)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult."));
+				throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult.");
 			}
 			if (activeReadWriteTask != asyncResult)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult."));
+				throw new InvalidOperationException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult.");
 			}
 			if (!activeReadWriteTask._isRead)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult."));
+				throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndRead was called multiple times with the same IAsyncResult.");
 			}
 			int result;
 			try
@@ -298,32 +261,42 @@ namespace System.IO
 			}
 			finally
 			{
-				this._activeReadWriteTask = null;
-				this._asyncActiveSemaphore.Release();
+				this.FinishTrackingAsyncOperation();
 			}
 			return result;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task<int> ReadAsync(byte[] buffer, int offset, int count)
 		{
 			return this.ReadAsync(buffer, offset, count, CancellationToken.None);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			if (!cancellationToken.IsCancellationRequested)
 			{
 				return this.BeginEndReadAsync(buffer, offset, count);
 			}
-			return Task.FromCancellation<int>(cancellationToken);
+			return Task.FromCanceled<int>(cancellationToken);
+		}
+
+		public virtual ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			ArraySegment<byte> arraySegment;
+			if (MemoryMarshal.TryGetArray<byte>(buffer, out arraySegment))
+			{
+				return new ValueTask<int>(this.ReadAsync(arraySegment.Array, arraySegment.Offset, arraySegment.Count, cancellationToken));
+			}
+			byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+			return Stream.<ReadAsync>g__FinishReadAsync|44_0(this.ReadAsync(array, 0, buffer.Length, cancellationToken), array, buffer);
 		}
 
 		private Task<int> BeginEndReadAsync(byte[] buffer, int offset, int count)
 		{
+			if (!this.HasOverriddenBeginEndRead())
+			{
+				return (Task<int>)this.BeginReadInternal(buffer, offset, count, null, null, true, false);
+			}
 			return TaskFactory<int>.FromAsyncTrim<Stream, Stream.ReadWriteParameters>(this, new Stream.ReadWriteParameters
 			{
 				Buffer = buffer,
@@ -332,22 +305,16 @@ namespace System.IO
 			}, (Stream stream, Stream.ReadWriteParameters args, AsyncCallback callback, object state) => stream.BeginRead(args.Buffer, args.Offset, args.Count, callback, state), (Stream stream, IAsyncResult asyncResult) => stream.EndRead(asyncResult));
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
-			return this.BeginWriteInternal(buffer, offset, count, callback, state, false);
+			return this.BeginWriteInternal(buffer, offset, count, callback, state, false, true);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		internal IAsyncResult BeginWriteInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, bool serializeAsynchronously)
+		internal IAsyncResult BeginWriteInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, bool serializeAsynchronously, bool apm)
 		{
 			if (!this.CanWrite)
 			{
-				__Error.WriteNotSupported();
-			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
-			{
-				return this.BlockingBeginWrite(buffer, offset, count, callback, state);
+				throw Error.GetWriteNotSupported();
 			}
 			SemaphoreSlim semaphoreSlim = this.EnsureAsyncActiveSemaphoreInitialized();
 			Task task = null;
@@ -359,12 +326,24 @@ namespace System.IO
 			{
 				semaphoreSlim.Wait();
 			}
-			Stream.ReadWriteTask readWriteTask = new Stream.ReadWriteTask(false, delegate
+			Stream.ReadWriteTask readWriteTask = new Stream.ReadWriteTask(false, apm, delegate
 			{
 				Stream.ReadWriteTask readWriteTask2 = Task.InternalCurrent as Stream.ReadWriteTask;
-				readWriteTask2._stream.Write(readWriteTask2._buffer, readWriteTask2._offset, readWriteTask2._count);
-				readWriteTask2.ClearBeginState();
-				return 0;
+				int num;
+				try
+				{
+					readWriteTask2._stream.Write(readWriteTask2._buffer, readWriteTask2._offset, readWriteTask2._count);
+					num = 0;
+				}
+				finally
+				{
+					if (!readWriteTask2._apm)
+					{
+						readWriteTask2._stream.FinishTrackingAsyncOperation();
+					}
+					readWriteTask2.ClearBeginState();
+				}
+				return num;
 			}, state, this, buffer, offset, count, callback);
 			if (task != null)
 			{
@@ -386,9 +365,9 @@ namespace System.IO
 			}
 			asyncWaiter.ContinueWith(delegate(Task t, object state)
 			{
-				Tuple<Stream, Stream.ReadWriteTask> tuple = (Tuple<Stream, Stream.ReadWriteTask>)state;
-				tuple.Item1.RunReadWriteTask(tuple.Item2);
-			}, Tuple.Create<Stream, Stream.ReadWriteTask>(this, readWriteTask), default(CancellationToken), TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+				Stream.ReadWriteTask readWriteTask2 = (Stream.ReadWriteTask)state;
+				readWriteTask2._stream.RunReadWriteTask(readWriteTask2);
+			}, readWriteTask, default(CancellationToken), TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 		}
 
 		private void RunReadWriteTask(Stream.ReadWriteTask readWriteTask)
@@ -398,29 +377,30 @@ namespace System.IO
 			readWriteTask.ScheduleAndStart(false);
 		}
 
+		private void FinishTrackingAsyncOperation()
+		{
+			this._activeReadWriteTask = null;
+			this._asyncActiveSemaphore.Release();
+		}
+
 		public virtual void EndWrite(IAsyncResult asyncResult)
 		{
 			if (asyncResult == null)
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
-			{
-				Stream.BlockingEndWrite(asyncResult);
-				return;
-			}
 			Stream.ReadWriteTask activeReadWriteTask = this._activeReadWriteTask;
 			if (activeReadWriteTask == null)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult."));
+				throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult.");
 			}
 			if (activeReadWriteTask != asyncResult)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult."));
+				throw new InvalidOperationException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult.");
 			}
 			if (activeReadWriteTask._isRead)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult."));
+				throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or EndWrite was called multiple times with the same IAsyncResult.");
 			}
 			try
 			{
@@ -428,31 +408,54 @@ namespace System.IO
 			}
 			finally
 			{
-				this._activeReadWriteTask = null;
-				this._asyncActiveSemaphore.Release();
+				this.FinishTrackingAsyncOperation();
 			}
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public Task WriteAsync(byte[] buffer, int offset, int count)
 		{
 			return this.WriteAsync(buffer, offset, count, CancellationToken.None);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public virtual Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			if (!cancellationToken.IsCancellationRequested)
 			{
 				return this.BeginEndWriteAsync(buffer, offset, count);
 			}
-			return Task.FromCancellation(cancellationToken);
+			return Task.FromCanceled(cancellationToken);
+		}
+
+		public virtual ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			ArraySegment<byte> arraySegment;
+			if (MemoryMarshal.TryGetArray<byte>(buffer, out arraySegment))
+			{
+				return new ValueTask(this.WriteAsync(arraySegment.Array, arraySegment.Offset, arraySegment.Count, cancellationToken));
+			}
+			byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+			buffer.Span.CopyTo(array);
+			return new ValueTask(this.FinishWriteAsync(this.WriteAsync(array, 0, buffer.Length, cancellationToken), array));
+		}
+
+		private async Task FinishWriteAsync(Task writeTask, byte[] localBuffer)
+		{
+			try
+			{
+				await writeTask.ConfigureAwait(false);
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(localBuffer, false);
+			}
 		}
 
 		private Task BeginEndWriteAsync(byte[] buffer, int offset, int count)
 		{
+			if (!this.HasOverriddenBeginEndWrite())
+			{
+				return (Task)this.BeginWriteInternal(buffer, offset, count, null, null, true, false);
+			}
 			return TaskFactory<VoidTaskResult>.FromAsyncTrim<Stream, Stream.ReadWriteParameters>(this, new Stream.ReadWriteParameters
 			{
 				Buffer = buffer,
@@ -469,7 +472,28 @@ namespace System.IO
 
 		public abstract void SetLength(long value);
 
-		public abstract int Read([In] [Out] byte[] buffer, int offset, int count);
+		public abstract int Read(byte[] buffer, int offset, int count);
+
+		public virtual int Read(Span<byte> buffer)
+		{
+			byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+			int num2;
+			try
+			{
+				int num = this.Read(array, 0, buffer.Length);
+				if ((ulong)num > (ulong)((long)buffer.Length))
+				{
+					throw new IOException("Stream was too long.");
+				}
+				new Span<byte>(array, 0, num).CopyTo(buffer);
+				num2 = num;
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
+			return num2;
+		}
 
 		public virtual int ReadByte()
 		{
@@ -483,12 +507,25 @@ namespace System.IO
 
 		public abstract void Write(byte[] buffer, int offset, int count);
 
+		public virtual void Write(ReadOnlySpan<byte> buffer)
+		{
+			byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+			try
+			{
+				buffer.CopyTo(array);
+				this.Write(array, 0, buffer.Length);
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
+		}
+
 		public virtual void WriteByte(byte value)
 		{
 			this.Write(new byte[] { value }, 0, 1);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static Stream Synchronized(Stream stream)
 		{
 			if (stream == null)
@@ -554,29 +591,52 @@ namespace System.IO
 			Stream.SynchronousAsyncResult.EndWrite(asyncResult);
 		}
 
-		public virtual int Read(Span<byte> destination)
+		private bool HasOverriddenBeginEndRead()
 		{
-			throw new NotImplementedException();
+			return true;
 		}
 
-		public virtual void Write(ReadOnlySpan<byte> source)
+		private bool HasOverriddenBeginEndWrite()
 		{
-			throw new NotImplementedException();
+			return true;
 		}
 
-		public virtual ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
+		public virtual ValueTask DisposeAsync()
 		{
-			throw new NotImplementedException();
+			ValueTask valueTask;
+			try
+			{
+				this.Dispose();
+				valueTask = default(ValueTask);
+				valueTask = valueTask;
+			}
+			catch (Exception ex)
+			{
+				valueTask = new ValueTask(Task.FromException(ex));
+			}
+			return valueTask;
 		}
 
-		public virtual Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
+		[CompilerGenerated]
+		internal static async ValueTask<int> <ReadAsync>g__FinishReadAsync|44_0(Task<int> readTask, byte[] localBuffer, Memory<byte> localDestination)
 		{
-			throw new NotImplementedException();
+			int num2;
+			try
+			{
+				int num = await readTask.ConfigureAwait(false);
+				new Span<byte>(localBuffer, 0, num).CopyTo(localDestination.Span);
+				num2 = num;
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(localBuffer, false);
+			}
+			return num2;
 		}
 
 		public static readonly Stream Null = new Stream.NullStream();
 
-		private const int _DefaultCopyBufferSize = 81920;
+		private const int DefaultCopyBufferSize = 81920;
 
 		[NonSerialized]
 		private Stream.ReadWriteTask _activeReadWriteTask;
@@ -601,13 +661,11 @@ namespace System.IO
 				this._buffer = null;
 			}
 
-			[SecuritySafeCritical]
-			[MethodImpl(MethodImplOptions.NoInlining)]
-			public ReadWriteTask(bool isRead, Func<object, int> function, object state, Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback)
+			public ReadWriteTask(bool isRead, bool apm, Func<object, int> function, object state, Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback)
 				: base(function, state, CancellationToken.None, TaskCreationOptions.DenyChildAttach)
 			{
-				StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 				this._isRead = isRead;
+				this._apm = apm;
 				this._stream = stream;
 				this._buffer = buffer;
 				this._offset = offset;
@@ -615,12 +673,11 @@ namespace System.IO
 				if (callback != null)
 				{
 					this._callback = callback;
-					this._context = ExecutionContext.Capture(ref stackCrawlMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx | ExecutionContext.CaptureOptions.OptimizeDefaultCase);
+					this._context = ExecutionContext.Capture();
 					base.AddCompletionAction(this);
 				}
 			}
 
-			[SecurityCritical]
 			private static void InvokeAsyncCallback(object completedTask)
 			{
 				Stream.ReadWriteTask readWriteTask = (Stream.ReadWriteTask)completedTask;
@@ -629,7 +686,6 @@ namespace System.IO
 				callback(readWriteTask);
 			}
 
-			[SecuritySafeCritical]
 			void ITaskCompletionAction.Invoke(Task completingTask)
 			{
 				ExecutionContext context = this._context;
@@ -646,31 +702,36 @@ namespace System.IO
 				{
 					contextCallback = (Stream.ReadWriteTask.s_invokeAsyncCallback = new ContextCallback(Stream.ReadWriteTask.InvokeAsyncCallback));
 				}
-				using (context)
+				ExecutionContext.RunInternal(context, contextCallback, this);
+			}
+
+			bool ITaskCompletionAction.InvokeMayRunArbitraryCode
+			{
+				get
 				{
-					ExecutionContext.Run(context, contextCallback, this, true);
+					return true;
 				}
 			}
 
 			internal readonly bool _isRead;
 
+			internal readonly bool _apm;
+
 			internal Stream _stream;
 
 			internal byte[] _buffer;
 
-			internal int _offset;
+			internal readonly int _offset;
 
-			internal int _count;
+			internal readonly int _count;
 
 			private AsyncCallback _callback;
 
 			private ExecutionContext _context;
 
-			[SecurityCritical]
 			private static ContextCallback s_invokeAsyncCallback;
 		}
 
-		[Serializable]
 		private sealed class NullStream : Stream
 		{
 			internal NullStream()
@@ -720,6 +781,21 @@ namespace System.IO
 				}
 			}
 
+			public override void CopyTo(Stream destination, int bufferSize)
+			{
+				StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+			}
+
+			public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+			{
+				StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+				if (!cancellationToken.IsCancellationRequested)
+				{
+					return Task.CompletedTask;
+				}
+				return Task.FromCanceled(cancellationToken);
+			}
+
 			protected override void Dispose(bool disposing)
 			{
 			}
@@ -728,22 +804,20 @@ namespace System.IO
 			{
 			}
 
-			[ComVisible(false)]
 			public override Task FlushAsync(CancellationToken cancellationToken)
 			{
 				if (!cancellationToken.IsCancellationRequested)
 				{
 					return Task.CompletedTask;
 				}
-				return Task.FromCancellation(cancellationToken);
+				return Task.FromCanceled(cancellationToken);
 			}
 
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 			public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 			{
 				if (!this.CanRead)
 				{
-					__Error.ReadNotSupported();
+					throw Error.GetReadNotSupported();
 				}
 				return base.BlockingBeginRead(buffer, offset, count, callback, state);
 			}
@@ -757,12 +831,11 @@ namespace System.IO
 				return Stream.BlockingEndRead(asyncResult);
 			}
 
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 			public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 			{
 				if (!this.CanWrite)
 				{
-					__Error.WriteNotSupported();
+					throw Error.GetWriteNotSupported();
 				}
 				return base.BlockingBeginWrite(buffer, offset, count, callback, state);
 			}
@@ -776,20 +849,24 @@ namespace System.IO
 				Stream.BlockingEndWrite(asyncResult);
 			}
 
-			public override int Read([In] [Out] byte[] buffer, int offset, int count)
+			public override int Read(byte[] buffer, int offset, int count)
 			{
 				return 0;
 			}
 
-			[ComVisible(false)]
+			public override int Read(Span<byte> buffer)
+			{
+				return 0;
+			}
+
 			public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 			{
-				Task<int> task = Stream.NullStream.s_nullReadTask;
-				if (task == null)
-				{
-					task = (Stream.NullStream.s_nullReadTask = new Task<int>(false, 0, (TaskCreationOptions)16384, CancellationToken.None));
-				}
-				return task;
+				return Stream.NullStream.s_zeroTask;
+			}
+
+			public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+			{
+				return new ValueTask<int>(0);
 			}
 
 			public override int ReadByte()
@@ -801,14 +878,26 @@ namespace System.IO
 			{
 			}
 
-			[ComVisible(false)]
+			public override void Write(ReadOnlySpan<byte> buffer)
+			{
+			}
+
 			public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 			{
 				if (!cancellationToken.IsCancellationRequested)
 				{
 					return Task.CompletedTask;
 				}
-				return Task.FromCancellation(cancellationToken);
+				return Task.FromCanceled(cancellationToken);
+			}
+
+			public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+			{
+				if (!cancellationToken.IsCancellationRequested)
+				{
+					return default(ValueTask);
+				}
+				return new ValueTask(Task.FromCanceled(cancellationToken));
 			}
 
 			public override void WriteByte(byte value)
@@ -824,10 +913,10 @@ namespace System.IO
 			{
 			}
 
-			private static Task<int> s_nullReadTask;
+			private static readonly Task<int> s_zeroTask = Task.FromResult<int>(0);
 		}
 
-		internal sealed class SynchronousAsyncResult : IAsyncResult
+		private sealed class SynchronousAsyncResult : IAsyncResult
 		{
 			internal SynchronousAsyncResult(int bytesRead, object asyncStateObject)
 			{
@@ -893,11 +982,11 @@ namespace System.IO
 				Stream.SynchronousAsyncResult synchronousAsyncResult = asyncResult as Stream.SynchronousAsyncResult;
 				if (synchronousAsyncResult == null || synchronousAsyncResult._isWrite)
 				{
-					__Error.WrongAsyncResult();
+					throw new ArgumentException("IAsyncResult object did not come from the corresponding async method on this type.");
 				}
 				if (synchronousAsyncResult._endXxxCalled)
 				{
-					__Error.EndReadCalledTwice();
+					throw new ArgumentException("EndRead can only be called once for each asynchronous operation.");
 				}
 				synchronousAsyncResult._endXxxCalled = true;
 				synchronousAsyncResult.ThrowIfError();
@@ -909,11 +998,11 @@ namespace System.IO
 				Stream.SynchronousAsyncResult synchronousAsyncResult = asyncResult as Stream.SynchronousAsyncResult;
 				if (synchronousAsyncResult == null || !synchronousAsyncResult._isWrite)
 				{
-					__Error.WrongAsyncResult();
+					throw new ArgumentException("IAsyncResult object did not come from the corresponding async method on this type.");
 				}
 				if (synchronousAsyncResult._endXxxCalled)
 				{
-					__Error.EndWriteCalledTwice();
+					throw new ArgumentException("EndWrite can only be called once for each asynchronous operation.");
 				}
 				synchronousAsyncResult._endXxxCalled = true;
 				synchronousAsyncResult.ThrowIfError();
@@ -932,8 +1021,7 @@ namespace System.IO
 			private int _bytesRead;
 		}
 
-		[Serializable]
-		internal sealed class SyncStream : Stream, IDisposable
+		private sealed class SyncStream : Stream, IDisposable
 		{
 			internal SyncStream(Stream stream)
 			{
@@ -968,7 +1056,6 @@ namespace System.IO
 				}
 			}
 
-			[ComVisible(false)]
 			public override bool CanTimeout
 			{
 				get
@@ -1013,7 +1100,6 @@ namespace System.IO
 				}
 			}
 
-			[ComVisible(false)]
 			public override int ReadTimeout
 			{
 				get
@@ -1026,7 +1112,6 @@ namespace System.IO
 				}
 			}
 
-			[ComVisible(false)]
 			public override int WriteTimeout
 			{
 				get
@@ -1083,13 +1168,24 @@ namespace System.IO
 				}
 			}
 
-			public override int Read([In] [Out] byte[] bytes, int offset, int count)
+			public override int Read(byte[] bytes, int offset, int count)
 			{
 				Stream stream = this._stream;
 				int num;
 				lock (stream)
 				{
 					num = this._stream.Read(bytes, offset, count);
+				}
+				return num;
+			}
+
+			public override int Read(Span<byte> buffer)
+			{
+				Stream stream = this._stream;
+				int num;
+				lock (stream)
+				{
+					num = this._stream.Read(buffer);
 				}
 				return num;
 			}
@@ -1105,30 +1201,14 @@ namespace System.IO
 				return num;
 			}
 
-			private static bool OverridesBeginMethod(Stream stream, string methodName)
-			{
-				foreach (MethodInfo methodInfo in stream.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public))
-				{
-					if (methodInfo.DeclaringType == typeof(Stream) && methodInfo.Name == methodName)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 			public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 			{
-				if (this._overridesBeginRead == null)
-				{
-					this._overridesBeginRead = new bool?(Stream.SyncStream.OverridesBeginMethod(this._stream, "BeginRead"));
-				}
+				bool flag = this._stream.HasOverriddenBeginEndRead();
 				Stream stream = this._stream;
 				IAsyncResult asyncResult;
 				lock (stream)
 				{
-					asyncResult = (this._overridesBeginRead.Value ? this._stream.BeginRead(buffer, offset, count, callback, state) : this._stream.BeginReadInternal(buffer, offset, count, callback, state, true));
+					asyncResult = (flag ? this._stream.BeginRead(buffer, offset, count, callback, state) : this._stream.BeginReadInternal(buffer, offset, count, callback, state, true, true));
 				}
 				return asyncResult;
 			}
@@ -1177,6 +1257,15 @@ namespace System.IO
 				}
 			}
 
+			public override void Write(ReadOnlySpan<byte> buffer)
+			{
+				Stream stream = this._stream;
+				lock (stream)
+				{
+					this._stream.Write(buffer);
+				}
+			}
+
 			public override void WriteByte(byte b)
 			{
 				Stream stream = this._stream;
@@ -1186,18 +1275,14 @@ namespace System.IO
 				}
 			}
 
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 			public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 			{
-				if (this._overridesBeginWrite == null)
-				{
-					this._overridesBeginWrite = new bool?(Stream.SyncStream.OverridesBeginMethod(this._stream, "BeginWrite"));
-				}
+				bool flag = this._stream.HasOverriddenBeginEndWrite();
 				Stream stream = this._stream;
 				IAsyncResult asyncResult;
 				lock (stream)
 				{
-					asyncResult = (this._overridesBeginWrite.Value ? this._stream.BeginWrite(buffer, offset, count, callback, state) : this._stream.BeginWriteInternal(buffer, offset, count, callback, state, true));
+					asyncResult = (flag ? this._stream.BeginWrite(buffer, offset, count, callback, state) : this._stream.BeginWriteInternal(buffer, offset, count, callback, state, true, true));
 				}
 				return asyncResult;
 			}
@@ -1216,12 +1301,6 @@ namespace System.IO
 			}
 
 			private Stream _stream;
-
-			[NonSerialized]
-			private bool? _overridesBeginRead;
-
-			[NonSerialized]
-			private bool? _overridesBeginWrite;
 		}
 	}
 }

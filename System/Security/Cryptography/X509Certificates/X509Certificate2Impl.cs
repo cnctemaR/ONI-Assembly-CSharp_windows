@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
@@ -6,9 +8,9 @@ namespace System.Security.Cryptography.X509Certificates
 	{
 		public abstract bool Archived { get; set; }
 
-		public abstract X509ExtensionCollection Extensions { get; }
+		public abstract IEnumerable<X509Extension> Extensions { get; }
 
-		public abstract bool HasPrivateKey { get; }
+		public abstract string FriendlyName { get; set; }
 
 		public abstract X500DistinguishedName IssuerName { get; }
 
@@ -16,7 +18,7 @@ namespace System.Security.Cryptography.X509Certificates
 
 		public abstract PublicKey PublicKey { get; }
 
-		public abstract Oid SignatureAlgorithm { get; }
+		public abstract string SignatureAlgorithm { get; }
 
 		public abstract X500DistinguishedName SubjectName { get; }
 
@@ -28,11 +30,21 @@ namespace System.Security.Cryptography.X509Certificates
 
 		public abstract string GetNameInfo(X509NameType nameType, bool forIssuer);
 
-		public abstract void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags);
-
-		public abstract byte[] Export(X509ContentType contentType, string password);
-
 		public abstract bool Verify(X509Certificate2 thisCertificate);
+
+		public abstract void AppendPrivateKeyInfo(StringBuilder sb);
+
+		public sealed override X509CertificateImpl CopyWithPrivateKey(RSA privateKey)
+		{
+			X509Certificate2Impl x509Certificate2Impl = (X509Certificate2Impl)this.Clone();
+			x509Certificate2Impl.PrivateKey = privateKey;
+			return x509Certificate2Impl;
+		}
+
+		public sealed override X509Certificate CreateCertificate()
+		{
+			return new X509Certificate2(this);
+		}
 
 		public abstract void Reset();
 	}

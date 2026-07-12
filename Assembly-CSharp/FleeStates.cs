@@ -6,10 +6,18 @@ public class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.plan;
-		this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
+		GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State state = this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
 		{
 			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi.GetSMI<ThreatMonitor.Instance>().MainThreat), smi, false);
-		}).ToggleStatusItem(CREATURES.STATUSITEMS.FLEEING.NAME, CREATURES.STATUSITEMS.FLEEING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		});
+		string text = CREATURES.STATUSITEMS.FLEEING.NAME;
+		string text2 = CREATURES.STATUSITEMS.FLEEING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.plan.Enter(delegate(FleeStates.Instance smi)
 		{
 			ThreatMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ThreatMonitor.Instance>();
@@ -27,20 +35,20 @@ public class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, ISta
 		});
 		this.cower.Enter(delegate(FleeStates.Instance smi)
 		{
-			string text = "DEFAULT COWER ANIMATION";
+			string text4 = "DEFAULT COWER ANIMATION";
 			if (smi.Get<KBatchedAnimController>().HasAnimation("cower"))
 			{
-				text = "cower";
+				text4 = "cower";
 			}
 			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle"))
 			{
-				text = "idle";
+				text4 = "idle";
 			}
 			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle_loop"))
 			{
-				text = "idle_loop";
+				text4 = "idle_loop";
 			}
-			smi.Get<KBatchedAnimController>().Play(text, KAnim.PlayMode.Loop, 1f, 0f);
+			smi.Get<KBatchedAnimController>().Play(text4, KAnim.PlayMode.Loop, 1f, 0f);
 		}).ScheduleGoTo(2f, this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Flee, false);
 	}

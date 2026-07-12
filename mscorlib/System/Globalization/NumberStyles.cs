@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Globalization
 {
-	[ComVisible(true)]
 	[Flags]
-	[Serializable]
 	public enum NumberStyles
 	{
 		None = 0,

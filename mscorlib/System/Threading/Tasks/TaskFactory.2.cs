@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Security.Permissions;
+using Internal.Runtime.Augments;
 
 namespace System.Threading.Tasks
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class TaskFactory
 	{
 		private TaskScheduler DefaultScheduler
@@ -103,161 +101,116 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action action)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, null, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, null, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action action, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, null, cancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, null, cancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action action, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, null, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), creationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, null, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), creationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action action, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, null, cancellationToken, scheduler, creationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, null, cancellationToken, scheduler, creationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal Task StartNew(Action action, CancellationToken cancellationToken, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, null, cancellationToken, scheduler, creationOptions, internalOptions, ref stackCrawlMark);
+			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, null, cancellationToken, scheduler, creationOptions, internalOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action<object> action, object state)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, state, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, state, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action<object> action, object state, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, state, cancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, state, cancellationToken, this.GetDefaultScheduler(internalCurrent), this.m_defaultCreationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action<object> action, object state, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task.InternalStartNew(internalCurrent, action, state, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), creationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(internalCurrent, action, state, this.m_defaultCancellationToken, this.GetDefaultScheduler(internalCurrent), creationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task StartNew(Action<object> action, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, state, cancellationToken, scheduler, creationOptions, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(Task.InternalCurrentIfAttached(creationOptions), action, state, cancellationToken, scheduler, creationOptions, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<TResult> function)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<TResult> function, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<TResult> function, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<TResult> function, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler, ref stackCrawlMark);
+			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<object, TResult> function, object state)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<object, TResult> function, object state, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<object, TResult> function, object state, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew<TResult>(Func<object, TResult> function, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, state, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler, ref stackCrawlMark);
+			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, state, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task FromAsync(IAsyncResult asyncResult, Action<IAsyncResult> endMethod)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.FromAsync(asyncResult, endMethod, this.m_defaultCreationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return this.FromAsync(asyncResult, endMethod, this.m_defaultCreationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task FromAsync(IAsyncResult asyncResult, Action<IAsyncResult> endMethod, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.FromAsync(asyncResult, endMethod, creationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return this.FromAsync(asyncResult, endMethod, creationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task FromAsync(IAsyncResult asyncResult, Action<IAsyncResult> endMethod, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.FromAsync(asyncResult, endMethod, creationOptions, scheduler, ref stackCrawlMark);
-		}
-
-		private Task FromAsync(IAsyncResult asyncResult, Action<IAsyncResult> endMethod, TaskCreationOptions creationOptions, TaskScheduler scheduler, ref StackCrawlMark stackMark)
-		{
-			return TaskFactory<VoidTaskResult>.FromAsyncImpl(asyncResult, null, endMethod, creationOptions, scheduler, ref stackMark);
+			return TaskFactory<VoidTaskResult>.FromAsyncImpl(asyncResult, null, endMethod, creationOptions, scheduler);
 		}
 
 		public Task FromAsync(Func<AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, object state)
@@ -300,25 +253,19 @@ namespace System.Threading.Tasks
 			return TaskFactory<VoidTaskResult>.FromAsyncImpl<TArg1, TArg2, TArg3>(beginMethod, null, endMethod, arg1, arg2, arg3, state, creationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync<TResult>(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, this.m_defaultCreationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, this.m_defaultCreationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync<TResult>(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync<TResult>(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, scheduler);
 		}
 
 		public Task<TResult> FromAsync<TResult>(Func<AsyncCallback, object, IAsyncResult> beginMethod, Func<IAsyncResult, TResult> endMethod, object state)
@@ -367,11 +314,11 @@ namespace System.Threading.Tasks
 			{
 				if ((creationOptions & TaskCreationOptions.LongRunning) != TaskCreationOptions.None)
 				{
-					throw new ArgumentOutOfRangeException("creationOptions", Environment.GetResourceString("It is invalid to specify TaskCreationOptions.LongRunning in calls to FromAsync."));
+					throw new ArgumentOutOfRangeException("creationOptions", "It is invalid to specify TaskCreationOptions.LongRunning in calls to FromAsync.");
 				}
 				if ((creationOptions & TaskCreationOptions.PreferFairness) != TaskCreationOptions.None)
 				{
-					throw new ArgumentOutOfRangeException("creationOptions", Environment.GetResourceString("It is invalid to specify TaskCreationOptions.PreferFairness in calls to FromAsync."));
+					throw new ArgumentOutOfRangeException("creationOptions", "It is invalid to specify TaskCreationOptions.PreferFairness in calls to FromAsync.");
 				}
 			}
 			if ((creationOptions & ~(TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent | TaskCreationOptions.DenyChildAttach | TaskCreationOptions.HideScheduler)) != TaskCreationOptions.None)
@@ -414,180 +361,148 @@ namespace System.Threading.Tasks
 			return completeOnCountdownPromise;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll(Task[] tasks, Action<Task[]> continuationAction)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, null, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll(Task[] tasks, Action<Task[]> continuationAction, CancellationToken cancellationToken)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, null, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll(Task[] tasks, Action<Task[]> continuationAction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, null, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll(Task[] tasks, Action<Task[]> continuationAction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, null, continuationAction, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl(tasks, continuationAction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>[]> continuationAction)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, null, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>[]> continuationAction, CancellationToken cancellationToken)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, null, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>[]> continuationAction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, null, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>[]> continuationAction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, null, continuationAction, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationAction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TResult>(Task[] tasks, Func<Task[], TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TResult>(Task[] tasks, Func<Task[], TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TResult>(Task[] tasks, Func<Task[], TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TResult>(Task[] tasks, Func<Task[], TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
 		internal static Task<Task> CommonCWAnyLogic(IList<Task> tasks)
@@ -600,7 +515,7 @@ namespace System.Threading.Tasks
 				Task task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 				if (!flag)
 				{
@@ -626,180 +541,148 @@ namespace System.Threading.Tasks
 			return completeOnInvokePromise;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny(Task[] tasks, Action<Task> continuationAction)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, null, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny(Task[] tasks, Action<Task> continuationAction, CancellationToken cancellationToken)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, null, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny(Task[] tasks, Action<Task> continuationAction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, null, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny(Task[] tasks, Action<Task> continuationAction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, null, continuationAction, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl(tasks, continuationAction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TResult>(Task[] tasks, Func<Task, TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TResult>(Task[] tasks, Func<Task, TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TResult>(Task[] tasks, Func<Task, TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TResult>(Task[] tasks, Func<Task, TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult, TResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>> continuationAction)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, null, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationAction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>> continuationAction, CancellationToken cancellationToken)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, null, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationAction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>> continuationAction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, null, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationAction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>> continuationAction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationAction == null)
 			{
 				throw new ArgumentNullException("continuationAction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, null, continuationAction, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<VoidTaskResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationAction, continuationOptions, cancellationToken, scheduler);
 		}
 
 		internal static Task[] CheckMultiContinuationTasksAndCopy(Task[] tasks)
@@ -810,7 +693,7 @@ namespace System.Threading.Tasks
 			}
 			if (tasks.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
 			Task[] array = new Task[tasks.Length];
 			for (int i = 0; i < tasks.Length; i++)
@@ -818,7 +701,7 @@ namespace System.Threading.Tasks
 				array[i] = tasks[i];
 				if (array[i] == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 			}
 			return array;
@@ -832,7 +715,7 @@ namespace System.Threading.Tasks
 			}
 			if (tasks.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
 			Task<TResult>[] array = new Task<TResult>[tasks.Length];
 			for (int i = 0; i < tasks.Length; i++)
@@ -840,7 +723,7 @@ namespace System.Threading.Tasks
 				array[i] = tasks[i];
 				if (array[i] == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 			}
 			return array;
@@ -850,7 +733,7 @@ namespace System.Threading.Tasks
 		{
 			if ((continuationOptions & (TaskContinuationOptions.LongRunning | TaskContinuationOptions.ExecuteSynchronously)) == (TaskContinuationOptions.LongRunning | TaskContinuationOptions.ExecuteSynchronously))
 			{
-				throw new ArgumentOutOfRangeException("continuationOptions", Environment.GetResourceString("The specified TaskContinuationOptions combined LongRunning and ExecuteSynchronously.  Synchronous continuations should not be long running."));
+				throw new ArgumentOutOfRangeException("continuationOptions", "The specified TaskContinuationOptions combined LongRunning and ExecuteSynchronously.  Synchronous continuations should not be long running.");
 			}
 			if ((continuationOptions & ~(TaskContinuationOptions.PreferFairness | TaskContinuationOptions.LongRunning | TaskContinuationOptions.AttachedToParent | TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.HideScheduler | TaskContinuationOptions.LazyCancellation | TaskContinuationOptions.NotOnRanToCompletion | TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.NotOnCanceled | TaskContinuationOptions.ExecuteSynchronously)) != TaskContinuationOptions.None)
 			{
@@ -858,17 +741,17 @@ namespace System.Threading.Tasks
 			}
 			if ((continuationOptions & (TaskContinuationOptions.NotOnRanToCompletion | TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.NotOnCanceled)) != TaskContinuationOptions.None)
 			{
-				throw new ArgumentOutOfRangeException("continuationOptions", Environment.GetResourceString("It is invalid to exclude specific continuation kinds for continuations off of multiple tasks."));
+				throw new ArgumentOutOfRangeException("continuationOptions", "It is invalid to exclude specific continuation kinds for continuations off of multiple tasks.");
 			}
 		}
 
-		private CancellationToken m_defaultCancellationToken;
+		private readonly CancellationToken m_defaultCancellationToken;
 
-		private TaskScheduler m_defaultScheduler;
+		private readonly TaskScheduler m_defaultScheduler;
 
-		private TaskCreationOptions m_defaultCreationOptions;
+		private readonly TaskCreationOptions m_defaultCreationOptions;
 
-		private TaskContinuationOptions m_defaultContinuationOptions;
+		private readonly TaskContinuationOptions m_defaultContinuationOptions;
 
 		private sealed class CompleteOnCountdownPromise : Task<Task[]>, ITaskCompletionAction
 		{
@@ -876,21 +759,18 @@ namespace System.Threading.Tasks
 			{
 				this._tasks = tasksCopy;
 				this._count = tasksCopy.Length;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "TaskFactory.ContinueWhenAll", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "TaskFactory.ContinueWhenAll", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 			}
 
 			public void Invoke(Task completingTask)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Join);
+					DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Join);
 				}
 				if (completingTask.IsWaitNotificationEnabled)
 				{
@@ -898,15 +778,20 @@ namespace System.Threading.Tasks
 				}
 				if (Interlocked.Decrement(ref this._count) == 0)
 				{
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					base.TrySetResult(this._tasks);
+				}
+			}
+
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return true;
 				}
 			}
 
@@ -929,21 +814,18 @@ namespace System.Threading.Tasks
 			{
 				this._tasks = tasksCopy;
 				this._count = tasksCopy.Length;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "TaskFactory.ContinueWhenAll<>", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "TaskFactory.ContinueWhenAll<>", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 			}
 
 			public void Invoke(Task completingTask)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Join);
+					DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Join);
 				}
 				if (completingTask.IsWaitNotificationEnabled)
 				{
@@ -951,15 +833,20 @@ namespace System.Threading.Tasks
 				}
 				if (Interlocked.Decrement(ref this._count) == 0)
 				{
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					base.TrySetResult(this._tasks);
+				}
+			}
+
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return true;
 				}
 			}
 
@@ -967,7 +854,12 @@ namespace System.Threading.Tasks
 			{
 				get
 				{
-					return base.ShouldNotifyDebuggerOfWaitCompletion && Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(this._tasks);
+					if (base.ShouldNotifyDebuggerOfWaitCompletion)
+					{
+						Task[] tasks = this._tasks;
+						return Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(tasks);
+					}
+					return false;
 				}
 			}
 
@@ -981,30 +873,23 @@ namespace System.Threading.Tasks
 			public CompleteOnInvokePromise(IList<Task> tasks)
 			{
 				this._tasks = tasks;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "TaskFactory.ContinueWhenAny", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "TaskFactory.ContinueWhenAny", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 			}
 
 			public void Invoke(Task completingTask)
 			{
-				if (Interlocked.CompareExchange(ref this.m_firstTaskAlreadyCompleted, 1, 0) == 0)
+				if (base.TrySetResult(completingTask))
 				{
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Choice);
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Choice);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
-					base.TrySetResult(completingTask);
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					IList<Task> tasks = this._tasks;
 					int count = tasks.Count;
 					for (int i = 0; i < count; i++)
@@ -1019,9 +904,15 @@ namespace System.Threading.Tasks
 				}
 			}
 
-			private IList<Task> _tasks;
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return true;
+				}
+			}
 
-			private int m_firstTaskAlreadyCompleted;
+			private IList<Task> _tasks;
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 		{
 			if (value < 0m)
 			{
-				throw SoapHelper.GetException(this, "invalid " + value);
+				throw SoapHelper.GetException(this, "invalid " + value.ToString());
 			}
 			this._value = value;
 		}

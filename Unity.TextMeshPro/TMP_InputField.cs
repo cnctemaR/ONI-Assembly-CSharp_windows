@@ -1460,14 +1460,10 @@ namespace TMPro
 					}
 				}
 				EventType type = this.m_ProcessingEvent.type;
-				if (type - EventType.ValidateCommand <= 1)
+				if (type - EventType.ValidateCommand <= 1 && this.m_ProcessingEvent.commandName == "SelectAll")
 				{
-					string commandName = this.m_ProcessingEvent.commandName;
-					if (commandName != null && commandName == "SelectAll")
-					{
-						this.SelectAll();
-						flag = true;
-					}
+					this.SelectAll();
+					flag = true;
 				}
 			}
 			if (flag)

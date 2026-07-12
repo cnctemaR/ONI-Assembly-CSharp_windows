@@ -8,8 +8,8 @@ using Unity;
 
 namespace System.Data
 {
-	[DefaultEvent("CollectionChanged")]
 	[ListBindable(false)]
+	[DefaultEvent("CollectionChanged")]
 	public sealed class DataTableCollection : InternalDataCollectionBase
 	{
 		internal DataTableCollection(DataSet dataSet)
@@ -746,7 +746,7 @@ namespace System.Data
 
 		internal DataTableCollection()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataSet _dataSet;

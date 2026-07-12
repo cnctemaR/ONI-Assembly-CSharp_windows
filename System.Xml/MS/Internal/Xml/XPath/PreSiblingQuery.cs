@@ -16,7 +16,7 @@ namespace MS.Internal.Xml.XPath
 		{
 		}
 
-		private bool NotVisited(XPathNavigator nav, List<XPathNavigator> parentStk)
+		private static bool NotVisited(XPathNavigator nav, List<XPathNavigator> parentStk)
 		{
 			XPathNavigator xpathNavigator = nav.Clone();
 			xpathNavigator.MoveToParent();
@@ -43,7 +43,7 @@ namespace MS.Internal.Xml.XPath
 			while (stack.Count != 0)
 			{
 				XPathNavigator xpathNavigator = stack.Pop();
-				if (xpathNavigator.NodeType != XPathNodeType.Attribute && xpathNavigator.NodeType != XPathNodeType.Namespace && this.NotVisited(xpathNavigator, list))
+				if (xpathNavigator.NodeType != XPathNodeType.Attribute && xpathNavigator.NodeType != XPathNodeType.Namespace && PreSiblingQuery.NotVisited(xpathNavigator, list))
 				{
 					XPathNavigator xpathNavigator2 = xpathNavigator.Clone();
 					if (xpathNavigator2.MoveToParent())
@@ -53,7 +53,7 @@ namespace MS.Internal.Xml.XPath
 						{
 							if (this.matches(xpathNavigator2))
 							{
-								base.Insert(this.outputBuffer, xpathNavigator2);
+								Query.Insert(this.outputBuffer, xpathNavigator2);
 							}
 							if (!xpathNavigator2.MoveToNext())
 							{

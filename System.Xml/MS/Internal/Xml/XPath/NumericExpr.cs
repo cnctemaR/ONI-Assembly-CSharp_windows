@@ -17,28 +17,28 @@ namespace MS.Internal.Xml.XPath
 			{
 				opnd2 = new NumberFunctions(Function.FunctionType.FuncNumber, opnd2);
 			}
-			this.op = op;
-			this.opnd1 = opnd1;
-			this.opnd2 = opnd2;
+			this._op = op;
+			this._opnd1 = opnd1;
+			this._opnd2 = opnd2;
 		}
 
 		private NumericExpr(NumericExpr other)
 			: base(other)
 		{
-			this.op = other.op;
-			this.opnd1 = Query.Clone(other.opnd1);
-			this.opnd2 = Query.Clone(other.opnd2);
+			this._op = other._op;
+			this._opnd1 = Query.Clone(other._opnd1);
+			this._opnd2 = Query.Clone(other._opnd2);
 		}
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			this.opnd1.SetXsltContext(context);
-			this.opnd2.SetXsltContext(context);
+			this._opnd1.SetXsltContext(context);
+			this._opnd2.SetXsltContext(context);
 		}
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
 		{
-			return NumericExpr.GetValue(this.op, XmlConvert.ToXPathDouble(this.opnd1.Evaluate(nodeIterator)), XmlConvert.ToXPathDouble(this.opnd2.Evaluate(nodeIterator)));
+			return NumericExpr.GetValue(this._op, XmlConvert.ToXPathDouble(this._opnd1.Evaluate(nodeIterator)), XmlConvert.ToXPathDouble(this._opnd2.Evaluate(nodeIterator)));
 		}
 
 		private static double GetValue(Operator.Op op, double n1, double n2)
@@ -73,19 +73,10 @@ namespace MS.Internal.Xml.XPath
 			return new NumericExpr(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			w.WriteAttributeString("op", this.op.ToString());
-			this.opnd1.PrintQuery(w);
-			this.opnd2.PrintQuery(w);
-			w.WriteEndElement();
-		}
+		private Operator.Op _op;
 
-		private Operator.Op op;
+		private Query _opnd1;
 
-		private Query opnd1;
-
-		private Query opnd2;
+		private Query _opnd2;
 	}
 }

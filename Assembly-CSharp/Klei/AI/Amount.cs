@@ -68,6 +68,16 @@ namespace Klei.AI
 			return this.displayer.GetTooltip(this, instance);
 		}
 
+		public void DebugSetValue(AmountInstance instance, float value)
+		{
+			if (this.debugSetValue != null)
+			{
+				this.debugSetValue(instance, value);
+				return;
+			}
+			instance.SetValue(value);
+		}
+
 		public string description;
 
 		public bool showMax;
@@ -81,6 +91,8 @@ namespace Klei.AI
 		public Attribute maxAttribute;
 
 		public Attribute deltaAttribute;
+
+		public Action<AmountInstance, float> debugSetValue;
 
 		public bool showInUI;
 

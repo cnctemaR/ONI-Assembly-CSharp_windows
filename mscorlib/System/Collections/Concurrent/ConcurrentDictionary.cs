@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -532,7 +533,7 @@ namespace System.Collections.Concurrent
 				TValue tvalue;
 				if (!this.TryGetValue(key, out tvalue))
 				{
-					ConcurrentDictionary<TKey, TValue>.ThrowKeyNotFoundException();
+					ConcurrentDictionary<TKey, TValue>.ThrowKeyNotFoundException(key);
 				}
 				return tvalue;
 			}
@@ -548,9 +549,9 @@ namespace System.Collections.Concurrent
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void ThrowKeyNotFoundException()
+		private static void ThrowKeyNotFoundException(object key)
 		{
-			throw new KeyNotFoundException();
+			throw new KeyNotFoundException(SR.Format("The given key '{0}' was not present in the dictionary.", key.ToString()));
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -1239,13 +1240,53 @@ namespace System.Collections.Concurrent
 			return readOnlyCollection;
 		}
 
+		[OnSerializing]
+		private void OnSerializing(StreamingContext context)
+		{
+			ConcurrentDictionary<TKey, TValue>.Tables tables = this._tables;
+			this._serializationArray = this.ToArray();
+			this._serializationConcurrencyLevel = tables._locks.Length;
+			this._serializationCapacity = tables._buckets.Length;
+		}
+
+		[OnSerialized]
+		private void OnSerialized(StreamingContext context)
+		{
+			this._serializationArray = null;
+		}
+
+		[OnDeserialized]
+		private void OnDeserialized(StreamingContext context)
+		{
+			KeyValuePair<TKey, TValue>[] serializationArray = this._serializationArray;
+			ConcurrentDictionary<TKey, TValue>.Node[] array = new ConcurrentDictionary<TKey, TValue>.Node[this._serializationCapacity];
+			int[] array2 = new int[this._serializationConcurrencyLevel];
+			object[] array3 = new object[this._serializationConcurrencyLevel];
+			for (int i = 0; i < array3.Length; i++)
+			{
+				array3[i] = new object();
+			}
+			this._tables = new ConcurrentDictionary<TKey, TValue>.Tables(array, array3, array2);
+			this.InitializeFromCollection(serializationArray);
+			this._serializationArray = null;
+		}
+
+		[NonSerialized]
 		private volatile ConcurrentDictionary<TKey, TValue>.Tables _tables;
 
 		private IEqualityComparer<TKey> _comparer;
 
+		[NonSerialized]
 		private readonly bool _growLockArray;
 
+		[NonSerialized]
 		private int _budget;
+
+		private KeyValuePair<TKey, TValue>[] _serializationArray;
+
+		private int _serializationConcurrencyLevel;
+
+		private int _serializationCapacity;
 
 		private const int DefaultCapacity = 31;
 

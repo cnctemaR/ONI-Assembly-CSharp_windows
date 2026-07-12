@@ -18,31 +18,55 @@ namespace System.Security.Cryptography
 
 		public RNGCryptoServiceProvider()
 		{
-			this._handle = RNGCryptoServiceProvider.RngInitialize(null);
+			this._handle = RNGCryptoServiceProvider.RngInitialize(null, IntPtr.Zero);
 			this.Check();
 		}
 
-		public RNGCryptoServiceProvider(byte[] rgb)
+		public unsafe RNGCryptoServiceProvider(byte[] rgb)
 		{
-			this._handle = RNGCryptoServiceProvider.RngInitialize(rgb);
+			fixed (byte[] array = rgb)
+			{
+				byte* ptr;
+				if (rgb == null || array.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array[0];
+				}
+				this._handle = RNGCryptoServiceProvider.RngInitialize(ptr, (rgb != null) ? ((IntPtr)rgb.Length) : IntPtr.Zero);
+			}
 			this.Check();
 		}
 
 		public RNGCryptoServiceProvider(CspParameters cspParams)
 		{
-			this._handle = RNGCryptoServiceProvider.RngInitialize(null);
+			this._handle = RNGCryptoServiceProvider.RngInitialize(null, IntPtr.Zero);
 			this.Check();
 		}
 
-		public RNGCryptoServiceProvider(string str)
+		public unsafe RNGCryptoServiceProvider(string str)
 		{
 			if (str == null)
 			{
-				this._handle = RNGCryptoServiceProvider.RngInitialize(null);
+				this._handle = RNGCryptoServiceProvider.RngInitialize(null, IntPtr.Zero);
 			}
 			else
 			{
-				this._handle = RNGCryptoServiceProvider.RngInitialize(Encoding.UTF8.GetBytes(str));
+				byte[] bytes = Encoding.UTF8.GetBytes(str);
+				byte[] array;
+				byte* ptr;
+				if ((array = bytes) == null || array.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array[0];
+				}
+				this._handle = RNGCryptoServiceProvider.RngInitialize(ptr, (IntPtr)bytes.Length);
+				array = null;
 			}
 			this.Check();
 		}
@@ -59,55 +83,100 @@ namespace System.Security.Cryptography
 		private static extern bool RngOpen();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr RngInitialize(byte[] seed);
+		private unsafe static extern IntPtr RngInitialize(byte* seed, IntPtr seed_length);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr RngGetBytes(IntPtr handle, byte[] data);
+		private unsafe static extern IntPtr RngGetBytes(IntPtr handle, byte* data, IntPtr data_length);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RngClose(IntPtr handle);
 
-		public override void GetBytes(byte[] data)
+		public unsafe override void GetBytes(byte[] data)
 		{
 			if (data == null)
 			{
 				throw new ArgumentNullException("data");
 			}
+			fixed (byte[] array = data)
+			{
+				byte* ptr;
+				if (data == null || array.Length == 0)
+				{
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array[0];
+				}
+				if (RNGCryptoServiceProvider._lock == null)
+				{
+					this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, ptr, (IntPtr)((long)data.Length));
+				}
+				else
+				{
+					object @lock = RNGCryptoServiceProvider._lock;
+					lock (@lock)
+					{
+						this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, ptr, (IntPtr)((long)data.Length));
+					}
+				}
+			}
+			this.Check();
+		}
+
+		internal unsafe void GetBytes(byte* data, IntPtr data_length)
+		{
 			if (RNGCryptoServiceProvider._lock == null)
 			{
-				this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, data);
+				this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, data, data_length);
 			}
 			else
 			{
 				object @lock = RNGCryptoServiceProvider._lock;
 				lock (@lock)
 				{
-					this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, data);
+					this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, data, data_length);
 				}
 			}
 			this.Check();
 		}
 
-		public override void GetNonZeroBytes(byte[] data)
+		public unsafe override void GetNonZeroBytes(byte[] data)
 		{
 			if (data == null)
 			{
 				throw new ArgumentNullException("data");
 			}
-			byte[] array = new byte[data.Length * 2];
-			int i = 0;
-			while (i < data.Length)
+			byte[] array = new byte[(long)data.Length * 2L];
+			long num = 0L;
+			while (num < (long)data.Length)
 			{
-				this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, array);
-				this.Check();
-				int num = 0;
-				while (num < array.Length && i != data.Length)
+				byte[] array2;
+				byte* ptr;
+				if ((array2 = array) == null || array2.Length == 0)
 				{
-					if (array[num] != 0)
+					ptr = null;
+				}
+				else
+				{
+					ptr = &array2[0];
+				}
+				this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, ptr, (IntPtr)((long)array.Length));
+				array2 = null;
+				this.Check();
+				long num2 = 0L;
+				while (num2 < (long)array.Length && num != (long)data.Length)
+				{
+					checked
 					{
-						data[i++] = array[num];
+						if (array[(int)((IntPtr)num2)] != 0)
+						{
+							long num3 = num;
+							num = unchecked(num3 + 1L);
+							data[(int)((IntPtr)num3)] = array[(int)((IntPtr)num2)];
+						}
 					}
-					num++;
+					num2 += 1L;
 				}
 			}
 		}

@@ -6,20 +6,20 @@ namespace System.Threading.Tasks
 	{
 		public ParallelOptions()
 		{
-			this.m_scheduler = TaskScheduler.Default;
-			this.m_maxDegreeOfParallelism = -1;
-			this.m_cancellationToken = CancellationToken.None;
+			this._scheduler = TaskScheduler.Default;
+			this._maxDegreeOfParallelism = -1;
+			this._cancellationToken = CancellationToken.None;
 		}
 
 		public TaskScheduler TaskScheduler
 		{
 			get
 			{
-				return this.m_scheduler;
+				return this._scheduler;
 			}
 			set
 			{
-				this.m_scheduler = value;
+				this._scheduler = value;
 			}
 		}
 
@@ -27,11 +27,11 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				if (this.m_scheduler == null)
+				if (this._scheduler == null)
 				{
 					return TaskScheduler.Current;
 				}
-				return this.m_scheduler;
+				return this._scheduler;
 			}
 		}
 
@@ -39,7 +39,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_maxDegreeOfParallelism;
+				return this._maxDegreeOfParallelism;
 			}
 			set
 			{
@@ -47,7 +47,7 @@ namespace System.Threading.Tasks
 				{
 					throw new ArgumentOutOfRangeException("MaxDegreeOfParallelism");
 				}
-				this.m_maxDegreeOfParallelism = value;
+				this._maxDegreeOfParallelism = value;
 			}
 		}
 
@@ -55,11 +55,11 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_cancellationToken;
+				return this._cancellationToken;
 			}
 			set
 			{
-				this.m_cancellationToken = value;
+				this._cancellationToken = value;
 			}
 		}
 
@@ -77,10 +77,10 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		private TaskScheduler m_scheduler;
+		private TaskScheduler _scheduler;
 
-		private int m_maxDegreeOfParallelism;
+		private int _maxDegreeOfParallelism;
 
-		private CancellationToken m_cancellationToken;
+		private CancellationToken _cancellationToken;
 	}
 }

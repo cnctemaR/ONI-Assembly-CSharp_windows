@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class MenuCommand
 	{
 		public MenuCommand(EventHandler handler, CommandID command)
 		{
-			this.execHandler = handler;
-			this.commandID = command;
-			this.status = 3;
+			this._execHandler = handler;
+			this.CommandID = command;
+			this._status = 3;
 		}
 
 		public virtual bool Checked
 		{
 			get
 			{
-				return (this.status & 4) != 0;
+				return (this._status & 4) != 0;
 			}
 			set
 			{
@@ -35,7 +29,7 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 2) != 0;
+				return (this._status & 2) != 0;
 			}
 			set
 			{
@@ -45,7 +39,7 @@ namespace System.ComponentModel.Design
 
 		private void SetStatus(int mask, bool value)
 		{
-			int num = this.status;
+			int num = this._status;
 			if (value)
 			{
 				num |= mask;
@@ -54,9 +48,9 @@ namespace System.ComponentModel.Design
 			{
 				num &= ~mask;
 			}
-			if (num != this.status)
+			if (num != this._status)
 			{
-				this.status = num;
+				this._status = num;
 				this.OnCommandChanged(EventArgs.Empty);
 			}
 		}
@@ -65,11 +59,12 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				if (this.properties == null)
+				IDictionary dictionary;
+				if ((dictionary = this._properties) == null)
 				{
-					this.properties = new HybridDictionary();
+					dictionary = (this._properties = new HybridDictionary());
 				}
-				return this.properties;
+				return dictionary;
 			}
 		}
 
@@ -77,7 +72,7 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 1) != 0;
+				return (this._status & 1) != 0;
 			}
 			set
 			{
@@ -89,7 +84,7 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 16) == 0;
+				return (this._status & 16) == 0;
 			}
 			set
 			{
@@ -97,33 +92,17 @@ namespace System.ComponentModel.Design
 			}
 		}
 
-		public event EventHandler CommandChanged
-		{
-			add
-			{
-				this.statusHandler = (EventHandler)Delegate.Combine(this.statusHandler, value);
-			}
-			remove
-			{
-				this.statusHandler = (EventHandler)Delegate.Remove(this.statusHandler, value);
-			}
-		}
+		public event EventHandler CommandChanged;
 
-		public virtual CommandID CommandID
-		{
-			get
-			{
-				return this.commandID;
-			}
-		}
+		public virtual CommandID CommandID { get; }
 
 		public virtual void Invoke()
 		{
-			if (this.execHandler != null)
+			if (this._execHandler != null)
 			{
 				try
 				{
-					this.execHandler(this, EventArgs.Empty);
+					this._execHandler(this, EventArgs.Empty);
 				}
 				catch (CheckoutException ex)
 				{
@@ -144,49 +123,47 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return this.status;
+				return this._status;
 			}
 		}
 
 		protected virtual void OnCommandChanged(EventArgs e)
 		{
-			if (this.statusHandler != null)
+			EventHandler commandChanged = this.CommandChanged;
+			if (commandChanged == null)
 			{
-				this.statusHandler(this, e);
+				return;
 			}
+			commandChanged(this, e);
 		}
 
 		public override string ToString()
 		{
 			string text = this.CommandID.ToString() + " : ";
-			if ((this.status & 1) != 0)
+			if ((this._status & 1) != 0)
 			{
 				text += "Supported";
 			}
-			if ((this.status & 2) != 0)
+			if ((this._status & 2) != 0)
 			{
 				text += "|Enabled";
 			}
-			if ((this.status & 16) == 0)
+			if ((this._status & 16) == 0)
 			{
 				text += "|Visible";
 			}
-			if ((this.status & 4) != 0)
+			if ((this._status & 4) != 0)
 			{
 				text += "|Checked";
 			}
 			return text;
 		}
 
-		private EventHandler execHandler;
+		private EventHandler _execHandler;
 
-		private EventHandler statusHandler;
+		private int _status;
 
-		private CommandID commandID;
-
-		private int status;
-
-		private IDictionary properties;
+		private IDictionary _properties;
 
 		private const int ENABLED = 2;
 

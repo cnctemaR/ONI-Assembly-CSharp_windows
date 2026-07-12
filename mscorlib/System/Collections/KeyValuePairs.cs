@@ -3,35 +3,19 @@ using System.Diagnostics;
 
 namespace System.Collections
 {
-	[DebuggerDisplay("{value}", Name = "[{key}]", Type = "")]
+	[DebuggerDisplay("{_value}", Name = "[{_key}]")]
 	internal class KeyValuePairs
 	{
 		public KeyValuePairs(object key, object value)
 		{
-			this.value = value;
-			this.key = key;
-		}
-
-		public object Key
-		{
-			get
-			{
-				return this.key;
-			}
-		}
-
-		public object Value
-		{
-			get
-			{
-				return this.value;
-			}
+			this._value = value;
+			this._key = key;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private object key;
+		private readonly object _key;
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private object value;
+		private readonly object _value;
 	}
 }

@@ -28,7 +28,19 @@ public class CactusPlantConfig : IEntityConfig
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "CactusPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.CACTUSPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.CACTUSPLANT.DESC, Assets.GetAnim("seed_potted_cactus_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 13, global::STRINGS.CREATURES.SPECIES.CACTUSPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), "CactusPlant_preview", Assets.GetAnim("potted_cactus_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "CactusPlantSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.CACTUSPLANT.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.CACTUSPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_potted_cactus_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.CACTUSPLANT.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 13, text8, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), "CactusPlant_preview", Assets.GetAnim("potted_cactus_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Globalization;
-using System.Threading;
 using System.Xml;
 using System.Xml.XPath;
 
@@ -13,13 +12,13 @@ namespace MS.Internal.Xml.XPath
 		{
 			if (lang == null)
 			{
-				this.cinfo = Thread.CurrentThread.CurrentCulture;
+				this._cinfo = CultureInfo.CurrentCulture;
 			}
 			else
 			{
 				try
 				{
-					this.cinfo = new CultureInfo(lang);
+					this._cinfo = new CultureInfo(lang);
 				}
 				catch (ArgumentException)
 				{
@@ -37,24 +36,24 @@ namespace MS.Internal.Xml.XPath
 					caseOrder = XmlCaseOrder.LowerFirst;
 				}
 			}
-			this.order = order;
-			this.caseOrder = caseOrder;
-			this.dataType = dataType;
+			this._order = order;
+			this._caseOrder = caseOrder;
+			this._dataType = dataType;
 		}
 
 		public int Compare(object x, object y)
 		{
-			XmlDataType xmlDataType = this.dataType;
-			if (xmlDataType != XmlDataType.Text)
+			XmlDataType dataType = this._dataType;
+			if (dataType != XmlDataType.Text)
 			{
-				if (xmlDataType != XmlDataType.Number)
+				if (dataType != XmlDataType.Number)
 				{
-					throw new InvalidOperationException(Res.GetString("Operation is not valid due to the current state of the object."));
+					throw new InvalidOperationException("Operation is not valid due to the current state of the object.");
 				}
 				double num = XmlConvert.ToXPathDouble(x);
 				double num2 = XmlConvert.ToXPathDouble(y);
 				int num3 = num.CompareTo(num2);
-				if (this.order != XmlSortOrder.Ascending)
+				if (this._order != XmlSortOrder.Ascending)
 				{
 					return -num3;
 				}
@@ -62,12 +61,12 @@ namespace MS.Internal.Xml.XPath
 			}
 			else
 			{
-				string text = Convert.ToString(x, this.cinfo);
-				string text2 = Convert.ToString(y, this.cinfo);
-				int num3 = string.Compare(text, text2, this.caseOrder > XmlCaseOrder.None, this.cinfo);
-				if (num3 != 0 || this.caseOrder == XmlCaseOrder.None)
+				string text = Convert.ToString(x, this._cinfo);
+				string text2 = Convert.ToString(y, this._cinfo);
+				int num3 = this._cinfo.CompareInfo.Compare(text, text2, (this._caseOrder != XmlCaseOrder.None) ? CompareOptions.IgnoreCase : CompareOptions.None);
+				if (num3 != 0 || this._caseOrder == XmlCaseOrder.None)
 				{
-					if (this.order != XmlSortOrder.Ascending)
+					if (this._order != XmlSortOrder.Ascending)
 					{
 						return -num3;
 					}
@@ -75,8 +74,8 @@ namespace MS.Internal.Xml.XPath
 				}
 				else
 				{
-					num3 = string.Compare(text, text2, false, this.cinfo);
-					if (this.caseOrder != XmlCaseOrder.LowerFirst)
+					num3 = this._cinfo.CompareInfo.Compare(text, text2);
+					if (this._caseOrder != XmlCaseOrder.LowerFirst)
 					{
 						return -num3;
 					}
@@ -85,12 +84,12 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		private XmlSortOrder order;
+		private XmlSortOrder _order;
 
-		private XmlCaseOrder caseOrder;
+		private XmlCaseOrder _caseOrder;
 
-		private CultureInfo cinfo;
+		private CultureInfo _cinfo;
 
-		private XmlDataType dataType;
+		private XmlDataType _dataType;
 	}
 }

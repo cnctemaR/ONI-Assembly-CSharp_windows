@@ -3,10 +3,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("C7BD73DE-9F85-3290-88EE-090B8BDFE2DF")]
-	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[Guid("C7BD73DE-9F85-3290-88EE-090B8BDFE2DF")]
 	[TypeLibImportClass(typeof(EnumBuilder))]
 	public interface _EnumBuilder
 	{

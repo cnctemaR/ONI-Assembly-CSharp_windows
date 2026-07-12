@@ -146,13 +146,21 @@ namespace System.Diagnostics
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void WriteWindowsDebugString(string message);
+		private unsafe static extern void WriteWindowsDebugString(char* message);
 
-		private void WriteDebugString(string message)
+		private unsafe void WriteDebugString(string message)
 		{
 			if (DefaultTraceListener.OnWin32)
 			{
-				DefaultTraceListener.WriteWindowsDebugString(message);
+				fixed (string text = message)
+				{
+					char* ptr = text;
+					if (ptr != null)
+					{
+						ptr += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					DefaultTraceListener.WriteWindowsDebugString(ptr);
+				}
 				return;
 			}
 			this.WriteMonoTrace(message);

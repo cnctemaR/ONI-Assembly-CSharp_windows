@@ -18,7 +18,7 @@ public class HiveWorkableEmpty : Workable
 		this.workingPstFailed = new HashedString[] { HiveWorkableEmpty.PST_ANIM };
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		if (!this.wasStung)

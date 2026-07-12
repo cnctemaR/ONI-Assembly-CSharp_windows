@@ -11,7 +11,7 @@ public class LonelyMinionConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		string text = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
+		string text = DUPLICANTS.MODEL.STANDARD.NAME;
 		GameObject gameObject = EntityTemplates.CreateEntity(LonelyMinionConfig.ID, text, true);
 		gameObject.AddComponent<Accessorizer>();
 		gameObject.AddOrGet<WearableAccessorizer>();
@@ -34,7 +34,7 @@ public class LonelyMinionConfig : IEntityConfig
 		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 		symbolOverrideController.applySymbolOverridesEveryFrame = true;
 		symbolOverrideController.AddSymbolOverride("snapto_cheek", Assets.GetAnim("head_swap_kanim").GetData().build.GetSymbol(string.Format("cheek_00{0}", def.Personality.headShape)), 1);
-		MinionConfig.ConfigureSymbols(gameObject, true);
+		BaseMinionConfig.ConfigureSymbols(gameObject, true);
 		return gameObject;
 	}
 

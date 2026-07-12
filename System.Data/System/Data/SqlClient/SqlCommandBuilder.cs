@@ -152,6 +152,14 @@ namespace System.Data.SqlClient
 			object obj = datarow[SchemaTableColumn.ProviderType];
 			sqlParameter.SqlDbType = (SqlDbType)obj;
 			sqlParameter.Offset = 0;
+			if (sqlParameter.SqlDbType == SqlDbType.Udt && !sqlParameter.SourceColumnNullMapping)
+			{
+				sqlParameter.UdtTypeName = datarow["DataTypeName"] as string;
+			}
+			else
+			{
+				sqlParameter.UdtTypeName = string.Empty;
+			}
 			object obj2 = datarow[SchemaTableColumn.NumericPrecision];
 			if (DBNull.Value != obj2)
 			{

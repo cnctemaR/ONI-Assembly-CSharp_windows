@@ -9,9 +9,22 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering.VirtualTexturing
 {
 	[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
+	[Obsolete("Procedural Virtual Texturing is experimental, not ready for production use and Unity does not currently support it. The feature might be changed or removed in the future.", false)]
 	[StaticAccessor("VirtualTexturing::Procedural", StaticAccessorType.DoubleColon)]
 	public static class Procedural
 	{
+		[NativeThrows]
+		public static void SetDebugFlagInteger(Guid guid, long value)
+		{
+			UnityEngine.Rendering.VirtualTexturing.System.SetDebugFlagInteger(guid, value);
+		}
+
+		[NativeThrows]
+		public static void SetDebugFlagDouble(Guid guid, double value)
+		{
+			UnityEngine.Rendering.VirtualTexturing.System.SetDebugFlagDouble(guid, value);
+		}
+
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetCPUCacheSize(int sizeInMegabytes);
@@ -28,6 +41,14 @@ namespace UnityEngine.Rendering.VirtualTexturing
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern GPUCacheSetting[] GetGPUCacheSettings();
 
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetGPUCacheStagingAreaCapacity(uint tilesPerFrame);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern uint GetGPUCacheStagingAreaCapacity();
+
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		[StaticAccessor("VirtualTexturing::Procedural", StaticAccessorType.DoubleColon)]
 		internal static class Binding
@@ -42,10 +63,10 @@ namespace UnityEngine.Rendering.VirtualTexturing
 
 			[NativeThrows]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal static extern int PopRequests(ulong handle, IntPtr requestHandles);
+			internal static extern int PopRequests(ulong handle, IntPtr requestHandles, int length);
 
-			[NativeThrows]
 			[ThreadSafe]
+			[NativeThrows]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void GetRequestParameters(IntPtr requestHandles, IntPtr requestParameters, int length);
 
@@ -54,8 +75,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void UpdateRequestState(IntPtr requestHandles, IntPtr requestUpdates, int length);
 
-			[ThreadSafe]
 			[NativeThrows]
+			[ThreadSafe]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void UpdateRequestStateWithCommandBuffer(IntPtr requestHandles, IntPtr requestUpdates, int length, CommandBuffer fenceBuffer);
 
@@ -157,7 +178,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 					GraphicsFormat.R8G8_SRGB,
 					GraphicsFormat.R8G8_UNorm,
 					GraphicsFormat.R32_SFloat,
-					GraphicsFormat.A2B10G10R10_UNormPack32
+					GraphicsFormat.A2B10G10R10_UNormPack32,
+					GraphicsFormat.R16_UNorm
 				};
 				FormatUsage formatUsage = ((this.gpuGeneration == 1) ? FormatUsage.Render : FormatUsage.Sample);
 				for (int i = 0; i < this.layers.Length; i++)
@@ -215,8 +237,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			internal int flags;
 		}
 
-		[UsedByNativeCode]
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
+		[UsedByNativeCode]
 		internal struct RequestHandlePayload : IEquatable<Procedural.RequestHandlePayload>
 		{
 			public static bool operator !=(Procedural.RequestHandlePayload lhs, Procedural.RequestHandlePayload rhs)
@@ -347,8 +369,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			internal Procedural.RequestHandlePayload payload;
 		}
 
-		[UsedByNativeCode]
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
+		[UsedByNativeCode]
 		public struct GPUTextureStackRequestLayerParameters
 		{
 			public int GetWidth()
@@ -475,8 +497,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			private Procedural.GPUTextureStackRequestLayerParameters layer3;
 		}
 
-		[UsedByNativeCode]
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
+		[UsedByNativeCode]
 		public struct CPUTextureStackRequestParameters
 		{
 			public Procedural.CPUTextureStackRequestLayerParameters GetLayer(int index)
@@ -548,12 +570,7 @@ namespace UnityEngine.Rendering.VirtualTexturing
 				{
 					throw new InvalidOperationException("Invalid ProceduralTextureStack " + this.name);
 				}
-				bool flag2 = requestHandles.Length < this.creationParams.maxActiveRequests;
-				if (flag2)
-				{
-					throw new ArgumentException(string.Format("Provided slice has invalid length ({0} given, {1} required).", requestHandles.Length, this.creationParams.maxActiveRequests));
-				}
-				return Procedural.Binding.PopRequests(this.handle, (IntPtr)requestHandles.GetUnsafePtr<Procedural.TextureStackRequestHandle<T>>());
+				return Procedural.Binding.PopRequests(this.handle, (IntPtr)requestHandles.GetUnsafePtr<Procedural.TextureStackRequestHandle<T>>(), requestHandles.Length);
 			}
 
 			public bool IsValid()

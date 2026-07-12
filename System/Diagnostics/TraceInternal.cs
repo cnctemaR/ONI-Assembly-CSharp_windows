@@ -44,7 +44,11 @@ namespace System.Diagnostics
 			{
 				if (TraceInternal.appName == null)
 				{
-					TraceInternal.appName = Path.GetFileName(Environment.GetCommandLineArgs()[0]);
+					string[] commandLineArgs = Environment.GetCommandLineArgs();
+					if (commandLineArgs.Length != 0)
+					{
+						TraceInternal.appName = Path.GetFileName(commandLineArgs[0]);
+					}
 				}
 				return TraceInternal.appName;
 			}

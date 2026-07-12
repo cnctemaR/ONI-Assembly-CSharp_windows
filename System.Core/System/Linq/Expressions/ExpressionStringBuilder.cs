@@ -286,7 +286,7 @@ namespace System.Linq.Expressions
 			string name = node.Name;
 			if (string.IsNullOrEmpty(name))
 			{
-				this.Out("Param_" + this.GetParamId(node));
+				this.Out("Param_" + this.GetParamId(node).ToString());
 			}
 			else
 			{
@@ -935,8 +935,7 @@ namespace System.Linq.Expressions
 				this.Out(target.Name);
 				return;
 			}
-			int labelId = this.GetLabelId(target);
-			this.Out("UnnamedLabel_" + labelId);
+			this.Out("UnnamedLabel_" + this.GetLabelId(target).ToString());
 		}
 
 		private static bool IsBool(Expression node)

@@ -233,7 +233,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			string text = num2.ToString();
 			num2 = (int)quadrantOfCell[1];
 			string text2 = text + num2.ToString();
-			string[] array = NAMEGEN.GEYSER_IDS.IDs.ToString().Split(new char[] { '\n' });
+			string[] array = NAMEGEN.GEYSER_IDS.IDs.ToString().Split('\n', StringSplitOptions.None);
 			string text3 = array[global::UnityEngine.Random.Range(0, array.Length)];
 			string text4 = string.Concat(new string[]
 			{

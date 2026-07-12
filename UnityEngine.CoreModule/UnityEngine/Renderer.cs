@@ -59,14 +59,43 @@ namespace UnityEngine
 
 		public Bounds bounds
 		{
-			[FreeFunction(Name = "RendererScripting::GetBounds", HasExplicitThis = true)]
+			[FreeFunction(Name = "RendererScripting::GetWorldBounds", HasExplicitThis = true)]
 			get
 			{
 				Bounds bounds;
 				this.get_bounds_Injected(out bounds);
 				return bounds;
 			}
+			[NativeName("SetWorldAABB")]
+			set
+			{
+				this.set_bounds_Injected(ref value);
+			}
 		}
+
+		public Bounds localBounds
+		{
+			[FreeFunction(Name = "RendererScripting::GetLocalBounds", HasExplicitThis = true)]
+			get
+			{
+				Bounds bounds;
+				this.get_localBounds_Injected(out bounds);
+				return bounds;
+			}
+			[NativeName("SetLocalAABB")]
+			set
+			{
+				this.set_localBounds_Injected(ref value);
+			}
+		}
+
+		[NativeName("ResetWorldAABB")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ResetBounds();
+
+		[NativeName("ResetLocalAABB")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ResetLocalBounds();
 
 		[FreeFunction(Name = "RendererScripting::SetStaticLightmapST", HasExplicitThis = true)]
 		private void SetStaticLightmapST(Vector4 st)
@@ -100,7 +129,12 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "RendererScripting::SetMaterialArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMaterialArray([NotNull("ArgumentNullException")] Material[] m);
+		private extern void SetMaterialArray([NotNull("ArgumentNullException")] Material[] m, int length);
+
+		private void SetMaterialArray(Material[] m)
+		{
+			this.SetMaterialArray(m, (m != null) ? m.Length : 0);
+		}
 
 		[FreeFunction(Name = "RendererScripting::SetPropertyBlock", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -185,6 +219,26 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeName("GetIsStaticShadowCaster")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool GetIsStaticShadowCaster();
+
+		[NativeName("SetIsStaticShadowCaster")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetIsStaticShadowCaster(bool value);
+
+		public bool staticShadowCaster
+		{
+			get
+			{
+				return this.GetIsStaticShadowCaster();
+			}
+			set
+			{
+				this.SetIsStaticShadowCaster(value);
+			}
+		}
+
 		public extern MotionVectorGenerationMode motionVectorGenerationMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -257,6 +311,12 @@ namespace UnityEngine
 			set;
 		}
 
+		internal extern uint sortingKey
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		internal extern int sortingGroupID
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -271,6 +331,12 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		internal extern uint sortingGroupKey
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		[NativeProperty("IsDynamicOccludee")]
@@ -479,6 +545,26 @@ namespace UnityEngine
 			this.CopyMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(m));
 		}
 
+		public void SetSharedMaterials(List<Material> materials)
+		{
+			bool flag = materials == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("The material list to set cannot be null.", "materials");
+			}
+			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(materials), materials.Count);
+		}
+
+		public void SetMaterials(List<Material> materials)
+		{
+			bool flag = materials == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("The material list to set cannot be null.", "materials");
+			}
+			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(materials), materials.Count);
+		}
+
 		public void GetSharedMaterials(List<Material> m)
 		{
 			bool flag = m == null;
@@ -497,6 +583,15 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_bounds_Injected(out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_bounds_Injected(ref Bounds value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_localBounds_Injected(out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_localBounds_Injected(ref Bounds value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetStaticLightmapST_Injected(ref Vector4 st);

@@ -17,9 +17,13 @@ namespace FMODUnity
 		CollisionExit2D,
 		ObjectEnable,
 		ObjectDisable,
-		MouseEnter,
-		MouseExit,
-		MouseDown,
-		MouseUp
+		ObjectMouseEnter,
+		ObjectMouseExit,
+		ObjectMouseDown,
+		ObjectMouseUp,
+		UIMouseEnter,
+		UIMouseExit,
+		UIMouseDown,
+		UIMouseUp
 	}
 }

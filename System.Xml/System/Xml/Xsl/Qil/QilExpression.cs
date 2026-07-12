@@ -6,26 +6,21 @@ namespace System.Xml.Xsl.Qil
 {
 	internal class QilExpression : QilNode
 	{
-		public QilExpression(QilNodeType nodeType, QilNode root)
-			: this(nodeType, root, new QilFactory())
-		{
-		}
-
 		public QilExpression(QilNodeType nodeType, QilNode root, QilFactory factory)
 			: base(nodeType)
 		{
-			this.factory = factory;
-			this.isDebug = factory.False();
-			this.defWSet = factory.LiteralObject(new XmlWriterSettings
+			this._factory = factory;
+			this._isDebug = factory.False();
+			this._defWSet = factory.LiteralObject(new XmlWriterSettings
 			{
 				ConformanceLevel = ConformanceLevel.Auto
 			});
-			this.wsRules = factory.LiteralObject(new List<WhitespaceRule>());
-			this.gloVars = factory.GlobalVariableList();
-			this.gloParams = factory.GlobalParameterList();
-			this.earlBnd = factory.LiteralObject(new List<EarlyBoundInfo>());
-			this.funList = factory.FunctionList();
-			this.rootNod = root;
+			this._wsRules = factory.LiteralObject(new List<WhitespaceRule>());
+			this._gloVars = factory.GlobalVariableList();
+			this._gloParams = factory.GlobalParameterList();
+			this._earlBnd = factory.LiteralObject(new List<EarlyBoundInfo>());
+			this._funList = factory.FunctionList();
+			this._rootNod = root;
 		}
 
 		public override int Count
@@ -43,21 +38,21 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					return this.isDebug;
+					return this._isDebug;
 				case 1:
-					return this.defWSet;
+					return this._defWSet;
 				case 2:
-					return this.wsRules;
+					return this._wsRules;
 				case 3:
-					return this.gloParams;
+					return this._gloParams;
 				case 4:
-					return this.gloVars;
+					return this._gloVars;
 				case 5:
-					return this.earlBnd;
+					return this._earlBnd;
 				case 6:
-					return this.funList;
+					return this._funList;
 				case 7:
-					return this.rootNod;
+					return this._rootNod;
 				default:
 					throw new IndexOutOfRangeException();
 				}
@@ -67,28 +62,28 @@ namespace System.Xml.Xsl.Qil
 				switch (index)
 				{
 				case 0:
-					this.isDebug = value;
+					this._isDebug = value;
 					return;
 				case 1:
-					this.defWSet = value;
+					this._defWSet = value;
 					return;
 				case 2:
-					this.wsRules = value;
+					this._wsRules = value;
 					return;
 				case 3:
-					this.gloParams = value;
+					this._gloParams = value;
 					return;
 				case 4:
-					this.gloVars = value;
+					this._gloVars = value;
 					return;
 				case 5:
-					this.earlBnd = value;
+					this._earlBnd = value;
 					return;
 				case 6:
-					this.funList = value;
+					this._funList = value;
 					return;
 				case 7:
-					this.rootNod = value;
+					this._rootNod = value;
 					return;
 				default:
 					throw new IndexOutOfRangeException();
@@ -100,11 +95,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.factory;
+				return this._factory;
 			}
 			set
 			{
-				this.factory = value;
+				this._factory = value;
 			}
 		}
 
@@ -112,11 +107,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.isDebug.NodeType == QilNodeType.True;
+				return this._isDebug.NodeType == QilNodeType.True;
 			}
 			set
 			{
-				this.isDebug = (value ? this.factory.True() : this.factory.False());
+				this._isDebug = (value ? this._factory.True() : this._factory.False());
 			}
 		}
 
@@ -124,12 +119,12 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (XmlWriterSettings)((QilLiteral)this.defWSet).Value;
+				return (XmlWriterSettings)((QilLiteral)this._defWSet).Value;
 			}
 			set
 			{
 				value.ReadOnly = true;
-				((QilLiteral)this.defWSet).Value = value;
+				((QilLiteral)this._defWSet).Value = value;
 			}
 		}
 
@@ -137,11 +132,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (IList<WhitespaceRule>)((QilLiteral)this.wsRules).Value;
+				return (IList<WhitespaceRule>)((QilLiteral)this._wsRules).Value;
 			}
 			set
 			{
-				((QilLiteral)this.wsRules).Value = value;
+				((QilLiteral)this._wsRules).Value = value;
 			}
 		}
 
@@ -149,11 +144,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (QilList)this.gloParams;
+				return (QilList)this._gloParams;
 			}
 			set
 			{
-				this.gloParams = value;
+				this._gloParams = value;
 			}
 		}
 
@@ -161,11 +156,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (QilList)this.gloVars;
+				return (QilList)this._gloVars;
 			}
 			set
 			{
-				this.gloVars = value;
+				this._gloVars = value;
 			}
 		}
 
@@ -173,11 +168,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (IList<EarlyBoundInfo>)((QilLiteral)this.earlBnd).Value;
+				return (IList<EarlyBoundInfo>)((QilLiteral)this._earlBnd).Value;
 			}
 			set
 			{
-				((QilLiteral)this.earlBnd).Value = value;
+				((QilLiteral)this._earlBnd).Value = value;
 			}
 		}
 
@@ -185,11 +180,11 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (QilList)this.funList;
+				return (QilList)this._funList;
 			}
 			set
 			{
-				this.funList = value;
+				this._funList = value;
 			}
 		}
 
@@ -197,30 +192,30 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.rootNod;
+				return this._rootNod;
 			}
 			set
 			{
-				this.rootNod = value;
+				this._rootNod = value;
 			}
 		}
 
-		private QilFactory factory;
+		private QilFactory _factory;
 
-		private QilNode isDebug;
+		private QilNode _isDebug;
 
-		private QilNode defWSet;
+		private QilNode _defWSet;
 
-		private QilNode wsRules;
+		private QilNode _wsRules;
 
-		private QilNode gloVars;
+		private QilNode _gloVars;
 
-		private QilNode gloParams;
+		private QilNode _gloParams;
 
-		private QilNode earlBnd;
+		private QilNode _earlBnd;
 
-		private QilNode funList;
+		private QilNode _funList;
 
-		private QilNode rootNod;
+		private QilNode _rootNod;
 	}
 }

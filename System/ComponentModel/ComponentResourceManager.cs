@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ComponentResourceManager : ResourceManager
 	{
 		public ComponentResourceManager()
@@ -86,52 +84,49 @@ namespace System.ComponentModel
 			foreach (KeyValuePair<string, object> keyValuePair in sortedList)
 			{
 				string key = keyValuePair.Key;
-				if (key != null)
+				if (this.IgnoreCase)
 				{
-					if (this.IgnoreCase)
-					{
-						if (string.Compare(key, 0, objectName, 0, objectName.Length, StringComparison.OrdinalIgnoreCase) != 0)
-						{
-							continue;
-						}
-					}
-					else if (string.CompareOrdinal(key, 0, objectName, 0, objectName.Length) != 0)
+					if (string.Compare(key, 0, objectName, 0, objectName.Length, StringComparison.OrdinalIgnoreCase) != 0)
 					{
 						continue;
 					}
-					int length = objectName.Length;
-					if (key.Length > length && key[length] == '.')
+				}
+				else if (string.CompareOrdinal(key, 0, objectName, 0, objectName.Length) != 0)
+				{
+					continue;
+				}
+				int length = objectName.Length;
+				if (key.Length > length && (key[length] == '.' || key[length] == '-'))
+				{
+					string text = key.Substring(length + 1);
+					if (flag)
 					{
-						string text = key.Substring(length + 1);
-						if (flag)
+						PropertyDescriptor propertyDescriptor = TypeDescriptor.GetProperties(value).Find(text, this.IgnoreCase);
+						if (propertyDescriptor != null && !propertyDescriptor.IsReadOnly && (keyValuePair.Value == null || propertyDescriptor.PropertyType.IsInstanceOfType(keyValuePair.Value)))
 						{
-							PropertyDescriptor propertyDescriptor = TypeDescriptor.GetProperties(value).Find(text, this.IgnoreCase);
-							if (propertyDescriptor != null && !propertyDescriptor.IsReadOnly && (keyValuePair.Value == null || propertyDescriptor.PropertyType.IsInstanceOfType(keyValuePair.Value)))
-							{
-								propertyDescriptor.SetValue(value, keyValuePair.Value);
-							}
+							propertyDescriptor.SetValue(value, keyValuePair.Value);
 						}
-						else
+					}
+					else
+					{
+						PropertyInfo propertyInfo = null;
+						try
 						{
-							PropertyInfo propertyInfo = null;
-							try
+							propertyInfo = value.GetType().GetProperty(text, bindingFlags);
+						}
+						catch (AmbiguousMatchException)
+						{
+							Type type = value.GetType();
+							do
 							{
-								propertyInfo = value.GetType().GetProperty(text, bindingFlags);
+								propertyInfo = type.GetProperty(text, bindingFlags | BindingFlags.DeclaredOnly);
+								type = type.BaseType;
 							}
-							catch (AmbiguousMatchException)
-							{
-								Type type = value.GetType();
-								do
-								{
-									propertyInfo = type.GetProperty(text, bindingFlags | BindingFlags.DeclaredOnly);
-									type = type.BaseType;
-								}
-								while (propertyInfo == null && type != null && type != typeof(object));
-							}
-							if (propertyInfo != null && propertyInfo.CanWrite && (keyValuePair.Value == null || propertyInfo.PropertyType.IsInstanceOfType(keyValuePair.Value)))
-							{
-								propertyInfo.SetValue(value, keyValuePair.Value, null);
-							}
+							while (propertyInfo == null && type != null && type != typeof(object));
+						}
+						if (propertyInfo != null && propertyInfo.CanWrite && (keyValuePair.Value == null || propertyInfo.PropertyType.IsInstanceOfType(keyValuePair.Value)))
+						{
+							propertyInfo.SetValue(value, keyValuePair.Value, null);
 						}
 					}
 				}

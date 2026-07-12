@@ -463,6 +463,27 @@ namespace STRINGS
 			public static LocString DESCRIPTION = "The heavily damaged remnants of a frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Exploring the rubble of Blasted Ceres's sub-zero temperatures is particularly challenging, yet natural fuel sources provide a valuable payoff.</smallcaps>";
 		}
 
+		public class MINISHATTEREDSTART
+		{
+			public static LocString NAME = "Ceres Mantle Asteroid";
+
+			public static LocString DESCRIPTION = "A battered chunk of a smaller frosty starting world with sub-zero temperatures throughout.\n\n<smallcaps>Surviving Ceres Mantle's frigid landscape is no easy task, but natural fuel sources provide a valuable payoff.</smallcaps>";
+		}
+
+		public class MINISHATTEREDWARP
+		{
+			public static LocString NAME = "Sweet Ceres Asteroid";
+
+			public static LocString DESCRIPTION = "A small, snow-laden world rich with oil and nectar resources.\n\n<smallcaps>Sub-zero temperatures pose unique challenges but the potential for power production is very valuable.</smallcaps>";
+		}
+
+		public class MINISHATTEREDGEO
+		{
+			public static LocString NAME = "Ceres Core Asteroid";
+
+			public static LocString DESCRIPTION = "A molten mini asteroid with a failed experiment buried inside.\n\n<smallcaps>Extremely high temperatures threaten colony safety but could yield an unimaginably powerful payoff.</smallcaps>";
+		}
+
 		public class CERESSPACEDOUT
 		{
 			public static LocString NAME = "Ceres Minor";

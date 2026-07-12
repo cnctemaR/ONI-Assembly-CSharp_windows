@@ -1,114 +1,50 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace System
 {
-	[DebuggerStepThrough]
-	[Serializable]
-	public struct Nullable<T> where T : struct
+	public static class Nullable
 	{
-		public Nullable(T value)
+		public static int Compare<T>(T? n1, T? n2) where T : struct
 		{
-			this.has_value = true;
-			this.value = value;
-		}
-
-		public bool HasValue
-		{
-			get
+			if (n1 != null)
 			{
-				return this.has_value;
-			}
-		}
-
-		public T Value
-		{
-			get
-			{
-				if (!this.has_value)
+				if (n2 != null)
 				{
-					throw new InvalidOperationException("Nullable object must have a value.");
+					return Comparer<T>.Default.Compare(n1.value, n2.value);
 				}
-				return this.value;
+				return 1;
 			}
-		}
-
-		public override bool Equals(object other)
-		{
-			if (other == null)
+			else
 			{
-				return !this.has_value;
-			}
-			return other is T? && this.Equals((T?)other);
-		}
-
-		private bool Equals(T? other)
-		{
-			return other.has_value == this.has_value && (!this.has_value || other.value.Equals(this.value));
-		}
-
-		public override int GetHashCode()
-		{
-			if (!this.has_value)
-			{
+				if (n2 != null)
+				{
+					return -1;
+				}
 				return 0;
 			}
-			return this.value.GetHashCode();
 		}
 
-		public T GetValueOrDefault()
+		public static bool Equals<T>(T? n1, T? n2) where T : struct
 		{
-			return this.value;
-		}
-
-		public T GetValueOrDefault(T defaultValue)
-		{
-			if (!this.has_value)
+			if (n1 != null)
 			{
-				return defaultValue;
+				return n2 != null && EqualityComparer<T>.Default.Equals(n1.value, n2.value);
 			}
-			return this.value;
+			return n2 == null;
 		}
 
-		public override string ToString()
+		public static Type GetUnderlyingType(Type nullableType)
 		{
-			if (this.has_value)
+			if (nullableType == null)
 			{
-				return this.value.ToString();
+				throw new ArgumentNullException("nullableType");
 			}
-			return string.Empty;
-		}
-
-		public static implicit operator T?(T value)
-		{
-			return new T?(value);
-		}
-
-		public static explicit operator T(T? value)
-		{
-			return value.Value;
-		}
-
-		private static object Box(T? o)
-		{
-			if (!o.has_value)
+			if (nullableType.IsGenericType && !nullableType.IsGenericTypeDefinition && nullableType.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
-				return null;
+				return nullableType.GetGenericArguments()[0];
 			}
-			return o.value;
+			return null;
 		}
-
-		private static T? Unbox(object o)
-		{
-			if (o == null)
-			{
-				return null;
-			}
-			return new T?((T)((object)o));
-		}
-
-		internal T value;
-
-		internal bool has_value;
 	}
 }

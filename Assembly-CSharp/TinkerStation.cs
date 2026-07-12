@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -53,7 +52,6 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreType);
 			this.filteredStorage = new FilteredStorage(this, null, null, false, byHash);
 		}
-		base.SetWorkTime(15f);
 		base.Subscribe<TinkerStation>(-592767678, TinkerStation.OnOperationalChangedDelegate);
 	}
 
@@ -90,7 +88,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		if (!this.operational.IsOperational)
@@ -101,7 +99,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		this.operational.SetActive(true, false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		base.ShowProgressBar(false);
@@ -109,16 +107,20 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		this.operational.SetActive(false, false);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
-		float num;
-		SimUtil.DiseaseInfo diseaseInfo;
-		float num2;
-		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out num, out diseaseInfo, out num2);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
-		gameObject.GetComponent<PrimaryElement>().Temperature = this.outputTemperature;
-		gameObject.SetActive(true);
+		PrimaryElement primaryElement = this.storage.FindFirstWithMass(this.inputMaterial, this.massPerTinker);
+		if (primaryElement != null)
+		{
+			SimHashes elementID = primaryElement.ElementID;
+			this.storage.ConsumeIgnoringDisease(elementID.CreateTag(), this.massPerTinker);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition() + Vector3.up, Grid.SceneLayer.Ore, null, 0);
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			component.SetElement(elementID, true);
+			component.Temperature = this.outputTemperature;
+			gameObject.SetActive(true);
+		}
 		this.chore = null;
 	}
 

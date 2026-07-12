@@ -7,11 +7,11 @@ namespace MS.Internal.Xml.XPath
 	{
 		public Axis(Axis.AxisType axisType, AstNode input, string prefix, string name, XPathNodeType nodetype)
 		{
-			this.axisType = axisType;
-			this.input = input;
-			this.prefix = prefix;
-			this.name = name;
-			this.nodeType = nodetype;
+			this._axisType = axisType;
+			this._input = input;
+			this._prefix = prefix;
+			this._name = name;
+			this._nodeType = nodetype;
 		}
 
 		public Axis(Axis.AxisType axisType, AstNode input)
@@ -40,11 +40,11 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.input;
+				return this._input;
 			}
 			set
 			{
-				this.input = value;
+				this._input = value;
 			}
 		}
 
@@ -52,7 +52,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 		}
 
@@ -60,7 +60,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.name;
+				return this._name;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.nodeType;
+				return this._nodeType;
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.axisType;
+				return this._axisType;
 			}
 		}
 
@@ -92,27 +92,27 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.urn;
+				return this._urn;
 			}
 			set
 			{
-				this.urn = value;
+				this._urn = value;
 			}
 		}
 
-		private Axis.AxisType axisType;
+		private Axis.AxisType _axisType;
 
-		private AstNode input;
+		private AstNode _input;
 
-		private string prefix;
+		private string _prefix;
 
-		private string name;
+		private string _name;
 
-		private XPathNodeType nodeType;
+		private XPathNodeType _nodeType;
 
 		protected bool abbrAxis;
 
-		private string urn = string.Empty;
+		private string _urn = string.Empty;
 
 		public enum AxisType
 		{

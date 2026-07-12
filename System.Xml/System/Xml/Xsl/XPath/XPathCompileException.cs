@@ -67,7 +67,7 @@ namespace System.Xml.Xsl.XPath
 
 		internal string MarkOutError()
 		{
-			if (this.queryString == null || this.queryString.Trim(new char[] { ' ' }).Length == 0)
+			if (this.queryString == null || this.queryString.Trim(' ').Length == 0)
 			{
 				return null;
 			}

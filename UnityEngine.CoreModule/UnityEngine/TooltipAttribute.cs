@@ -2,7 +2,7 @@
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.All, Inherited = true, AllowMultiple = false)]
 	public class TooltipAttribute : PropertyAttribute
 	{
 		public TooltipAttribute(string tooltip)

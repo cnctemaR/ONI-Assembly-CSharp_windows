@@ -9,19 +9,24 @@ namespace System.Net
 		internal ClosableStream(Stream stream, EventHandler onClose)
 			: base(stream)
 		{
-			this.onClose = onClose;
+			this._onClose = onClose;
 		}
 
 		public override void Close()
 		{
-			if (Interlocked.Increment(ref this.closed) == 1 && this.onClose != null)
+			if (Interlocked.Increment(ref this._closed) == 1)
 			{
-				this.onClose(this, new EventArgs());
+				EventHandler onClose = this._onClose;
+				if (onClose == null)
+				{
+					return;
+				}
+				onClose(this, new EventArgs());
 			}
 		}
 
-		private EventHandler onClose;
+		private readonly EventHandler _onClose;
 
-		private int closed;
+		private int _closed;
 	}
 }

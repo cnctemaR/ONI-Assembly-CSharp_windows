@@ -12,7 +12,7 @@ public class POITechItemUnlockWorkable : Workable
 		this.synchronizeAnims = true;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		POITechItemUnlocks.Instance smi = this.GetSMI<POITechItemUnlocks.Instance>();

@@ -124,6 +124,16 @@ namespace UnityEngine.Events
 			this.DirtyPersistentCalls();
 		}
 
+		public UnityEventCallState GetPersistentListenerState(int index)
+		{
+			bool flag = index < 0 || index > this.m_PersistentCalls.Count;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException(string.Format("Index {0} is out of range of the {1} persistent listeners.", index, this.GetPersistentEventCount()));
+			}
+			return this.m_PersistentCalls.GetListener(index).callState;
+		}
+
 		protected void AddListener(object targetObj, MethodInfo method)
 		{
 			this.m_Calls.AddListener(this.GetDelegate(targetObj, method));

@@ -75,11 +75,10 @@ public class Timelapser : KMonoBehaviour
 
 	private void OnNewDay(object data = null)
 	{
-		DebugUtil.LogWarningArgs(new object[]
+		if (this.worldsToScreenshot.Count == 0)
 		{
-			this.worldsToScreenshot.Count == 0,
-			"Timelapse.OnNewDay but worldsToScreenshot is not empty"
-		});
+			DebugUtil.LogArgs(new object[] { "Timelapse.OnNewDay but worldsToScreenshot is not empty" });
+		}
 		int cycle = GameClock.Instance.GetCycle();
 		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
 		{

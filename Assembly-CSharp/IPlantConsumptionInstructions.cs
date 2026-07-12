@@ -11,4 +11,6 @@ public interface IPlantConsumptionInstructions
 	bool CanPlantBeEaten();
 
 	string GetFormattedConsumptionPerCycle(float consumer_caloriesLossPerCaloriesPerKG);
+
+	Diet.Info.FoodType GetDietFoodType();
 }

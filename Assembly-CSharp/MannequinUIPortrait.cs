@@ -31,7 +31,7 @@ public class MannequinUIPortrait : IEntityConfig
 		kbatchedAnimController.animOverrideSize = new Vector2(100f, 120f);
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("mannequin_kanim") };
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
-		MinionConfig.ConfigureSymbols(gameObject, false);
+		BaseMinionConfig.ConfigureSymbols(gameObject, false);
 		return gameObject;
 	}
 

@@ -5,7 +5,7 @@ namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct Label
+	public readonly struct Label : IEquatable<Label>
 	{
 		internal Label(int val)
 		{
@@ -43,6 +43,6 @@ namespace System.Reflection.Emit
 			return this.label.GetHashCode();
 		}
 
-		internal int label;
+		internal readonly int label;
 	}
 }

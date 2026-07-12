@@ -71,6 +71,14 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		}
 		this.aptitudeBox.SetActive(flag2);
 		this.grantedBox.SetActive(flag3);
+		if (flag3)
+		{
+			Sprite skillGrantSourceIcon = minionResume.GetSkillGrantSourceIcon(skill.Id);
+			if (skillGrantSourceIcon != null)
+			{
+				this.grantedIcon.sprite = skillGrantSourceIcon;
+			}
+		}
 		this.traitDisabledIcon.SetActive(minionResume != null && !minionResume.IsAbleToLearnSkill(skill.Id));
 		string text = "";
 		List<string> list = new List<string>();
@@ -181,11 +189,14 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		string text = "";
 		foreach (SkillPerk skillPerk in skill.perks)
 		{
-			if (!string.IsNullOrEmpty(text))
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(skillPerk.requiredDlcIds))
 			{
-				text += "\n";
+				if (!string.IsNullOrEmpty(text))
+				{
+					text += "\n";
+				}
+				text = text + "• " + skillPerk.Name;
 			}
-			text = text + "• " + skillPerk.Name;
 		}
 		return text;
 	}
@@ -414,6 +425,9 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 
 	[SerializeField]
 	private GameObject grantedBox;
+
+	[SerializeField]
+	private Image grantedIcon;
 
 	[SerializeField]
 	private GameObject traitDisabledIcon;

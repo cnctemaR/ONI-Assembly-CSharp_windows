@@ -103,21 +103,21 @@ namespace System.Security.Permissions
 				return;
 			case RegistryPermissionAccess.Read:
 				this.readList.Clear();
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				foreach (string text in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.readList.Add(text);
 				}
 				return;
 			case RegistryPermissionAccess.Write:
 				this.writeList.Clear();
-				foreach (string text2 in pathList.Split(new char[] { ';' }))
+				foreach (string text2 in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.writeList.Add(text2);
 				}
 				return;
 			case RegistryPermissionAccess.Create:
 				this.createList.Clear();
-				foreach (string text3 in pathList.Split(new char[] { ';' }))
+				foreach (string text3 in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.createList.Add(text3);
 				}
@@ -126,7 +126,7 @@ namespace System.Security.Permissions
 				this.createList.Clear();
 				this.readList.Clear();
 				this.writeList.Clear();
-				foreach (string text4 in pathList.Split(new char[] { ';' }))
+				foreach (string text4 in pathList.Split(';', StringSplitOptions.None))
 				{
 					this.createList.Add(text4);
 					this.readList.Add(text4);
@@ -387,7 +387,7 @@ namespace System.Security.Permissions
 
 		internal void AddWithUnionKey(IList list, string pathList)
 		{
-			foreach (string text in pathList.Split(new char[] { ';' }))
+			foreach (string text in pathList.Split(';', StringSplitOptions.None))
 			{
 				int count = list.Count;
 				if (count == 0)

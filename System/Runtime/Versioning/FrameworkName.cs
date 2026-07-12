@@ -87,7 +87,7 @@ namespace System.Runtime.Versioning
 			}
 			if (identifier.Trim().Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "identifier" }), "identifier");
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "identifier" }), "identifier");
 			}
 			if (version == null)
 			{
@@ -106,27 +106,27 @@ namespace System.Runtime.Versioning
 			}
 			if (frameworkName.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "frameworkName" }), "frameworkName");
+				throw new ArgumentException(SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "frameworkName" }), "frameworkName");
 			}
-			string[] array = frameworkName.Split(new char[] { ',' });
+			string[] array = frameworkName.Split(',', StringSplitOptions.None);
 			if (array.Length < 2 || array.Length > 3)
 			{
-				throw new ArgumentException(global::SR.GetString("FrameworkName cannot have less than two components or more than three components."), "frameworkName");
+				throw new ArgumentException(SR.GetString("FrameworkName cannot have less than two components or more than three components."), "frameworkName");
 			}
 			this.m_identifier = array[0].Trim();
 			if (this.m_identifier.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("FrameworkName is invalid."), "frameworkName");
+				throw new ArgumentException(SR.GetString("FrameworkName is invalid."), "frameworkName");
 			}
 			bool flag = false;
 			this.m_profile = string.Empty;
 			int i = 1;
 			while (i < array.Length)
 			{
-				string[] array2 = array[i].Split(new char[] { '=' });
+				string[] array2 = array[i].Split('=', StringSplitOptions.None);
 				if (array2.Length != 2)
 				{
-					throw new ArgumentException(global::SR.GetString("FrameworkName is invalid."), "frameworkName");
+					throw new ArgumentException(SR.GetString("FrameworkName is invalid."), "frameworkName");
 				}
 				string text = array2[0].Trim();
 				string text2 = array2[1].Trim();
@@ -140,33 +140,33 @@ namespace System.Runtime.Versioning
 					try
 					{
 						this.m_version = new Version(text2);
-						goto IL_0191;
+						goto IL_0181;
 					}
 					catch (Exception ex)
 					{
-						throw new ArgumentException(global::SR.GetString("FrameworkName version component is invalid."), "frameworkName", ex);
+						throw new ArgumentException(SR.GetString("FrameworkName version component is invalid."), "frameworkName", ex);
 					}
-					goto IL_015B;
+					goto IL_014B;
 				}
-				goto IL_015B;
-				IL_0191:
+				goto IL_014B;
+				IL_0181:
 				i++;
 				continue;
-				IL_015B:
+				IL_014B:
 				if (!text.Equals("Profile", StringComparison.OrdinalIgnoreCase))
 				{
-					throw new ArgumentException(global::SR.GetString("FrameworkName is invalid."), "frameworkName");
+					throw new ArgumentException(SR.GetString("FrameworkName is invalid."), "frameworkName");
 				}
 				if (!string.IsNullOrEmpty(text2))
 				{
 					this.m_profile = text2;
-					goto IL_0191;
+					goto IL_0181;
 				}
-				goto IL_0191;
+				goto IL_0181;
 			}
 			if (!flag)
 			{
-				throw new ArgumentException(global::SR.GetString("FrameworkName version component is missing."), "frameworkName");
+				throw new ArgumentException(SR.GetString("FrameworkName version component is missing."), "frameworkName");
 			}
 		}
 

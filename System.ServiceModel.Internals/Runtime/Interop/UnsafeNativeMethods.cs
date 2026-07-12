@@ -62,7 +62,7 @@ namespace System.Runtime.Interop
 			}
 			if (num < 0)
 			{
-				Fx.AssertAndThrow("GetComputerName returned an invalid length: " + num);
+				Fx.AssertAndThrow("GetComputerName returned an invalid length: " + num.ToString());
 			}
 			StringBuilder stringBuilder = new StringBuilder(num);
 			if (!UnsafeNativeMethods.GetComputerNameEx(nameType, stringBuilder, ref num))

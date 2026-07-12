@@ -12,7 +12,7 @@ namespace Mono.Audio
 			int num = this.stream.Read(array, 0, 12);
 			if (num != 12 || array[0] != 82 || array[1] != 73 || array[2] != 70 || array[3] != 70 || array[8] != 87 || array[9] != 65 || array[10] != 86 || array[11] != 69)
 			{
-				throw new Exception("incorrect format" + num);
+				throw new Exception("incorrect format" + num.ToString());
 			}
 			num = this.stream.Read(array, 0, 8);
 			if (num != 8 || array[0] != 102 || array[1] != 109 || array[2] != 116 || array[3] != 32)
@@ -26,7 +26,14 @@ namespace Mono.Audio
 			num = this.stream.Read(array, 0, num2);
 			if (num2 != num)
 			{
-				throw new Exception(string.Concat(new object[] { "Error: Can't Read ", num2, " bytes from stream (", num, " bytes read" }));
+				throw new Exception(string.Concat(new string[]
+				{
+					"Error: Can't Read ",
+					num2.ToString(),
+					" bytes from stream (",
+					num.ToString(),
+					" bytes read"
+				}));
 			}
 			int num3 = 0;
 			if (((int)array[num3++] | ((int)array[num3++] << 8)) != 1)

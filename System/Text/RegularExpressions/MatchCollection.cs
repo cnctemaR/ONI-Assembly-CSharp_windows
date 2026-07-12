@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Unity;
 
 namespace System.Text.RegularExpressions
 {
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(CollectionDebuggerProxy<Match>))]
 	[Serializable]
-	public class MatchCollection : ICollection, IEnumerable
+	public class MatchCollection : IList<Match>, ICollection<Match>, IEnumerable<Match>, IEnumerable, IReadOnlyList<Match>, IReadOnlyCollection<Match>, IList, ICollection
 	{
 		internal MatchCollection(Regex regex, string input, int beginning, int length, int startat)
 		{
 			if (startat < 0 || startat > input.Length)
 			{
-				throw new ArgumentOutOfRangeException("startat", global::SR.GetString("Start index cannot be less than 0 or greater than input length."));
+				throw new ArgumentOutOfRangeException("startat", "Start index cannot be less than 0 or greater than input length.");
 			}
 			this._regex = regex;
 			this._input = input;
@@ -19,19 +23,59 @@ namespace System.Text.RegularExpressions
 			this._length = length;
 			this._startat = startat;
 			this._prevlen = -1;
-			this._matches = new ArrayList();
+			this._matches = new List<Match>();
 			this._done = false;
 		}
 
-		internal Match GetMatch(int i)
+		public bool IsReadOnly
 		{
-			if (i < 0)
+			get
 			{
-				return null;
+				return true;
 			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				this.EnsureInitialized();
+				return this._matches.Count;
+			}
+		}
+
+		public virtual Match this[int i]
+		{
+			get
+			{
+				if (i < 0)
+				{
+					throw new ArgumentOutOfRangeException("i");
+				}
+				Match match = this.GetMatch(i);
+				if (match == null)
+				{
+					throw new ArgumentOutOfRangeException("i");
+				}
+				return match;
+			}
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return new MatchCollection.Enumerator(this);
+		}
+
+		IEnumerator<Match> IEnumerable<Match>.GetEnumerator()
+		{
+			return new MatchCollection.Enumerator(this);
+		}
+
+		private Match GetMatch(int i)
+		{
 			if (this._matches.Count > i)
 			{
-				return (Match)this._matches[i];
+				return this._matches[i];
 			}
 			if (this._done)
 			{
@@ -45,7 +89,7 @@ namespace System.Text.RegularExpressions
 					break;
 				}
 				this._matches.Add(match);
-				this._prevlen = match._length;
+				this._prevlen = match.Length;
 				this._startat = match._textpos;
 				if (this._matches.Count > i)
 				{
@@ -56,24 +100,11 @@ namespace System.Text.RegularExpressions
 			return null;
 		}
 
-		public int Count
+		private void EnsureInitialized()
 		{
-			get
+			if (!this._done)
 			{
-				if (this._done)
-				{
-					return this._matches.Count;
-				}
-				this.GetMatch(MatchCollection.infinite);
-				return this._matches.Count;
-			}
-		}
-
-		public object SyncRoot
-		{
-			get
-			{
-				return this;
+				this.GetMatch(int.MaxValue);
 			}
 		}
 
@@ -85,7 +116,105 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		public bool IsReadOnly
+		public object SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		public void CopyTo(Array array, int arrayIndex)
+		{
+			this.EnsureInitialized();
+			((ICollection)this._matches).CopyTo(array, arrayIndex);
+		}
+
+		public void CopyTo(Match[] array, int arrayIndex)
+		{
+			this.EnsureInitialized();
+			this._matches.CopyTo(array, arrayIndex);
+		}
+
+		int IList<Match>.IndexOf(Match item)
+		{
+			this.EnsureInitialized();
+			return this._matches.IndexOf(item);
+		}
+
+		void IList<Match>.Insert(int index, Match item)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		void IList<Match>.RemoveAt(int index)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		Match IList<Match>.this[int index]
+		{
+			get
+			{
+				return this[index];
+			}
+			set
+			{
+				throw new NotSupportedException("Collection is read-only.");
+			}
+		}
+
+		void ICollection<Match>.Add(Match item)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		void ICollection<Match>.Clear()
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		bool ICollection<Match>.Contains(Match item)
+		{
+			this.EnsureInitialized();
+			return this._matches.Contains(item);
+		}
+
+		bool ICollection<Match>.Remove(Match item)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		int IList.Add(object value)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		void IList.Clear()
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		bool IList.Contains(object value)
+		{
+			return value is Match && ((ICollection<Match>)this).Contains((Match)value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			if (!(value is Match))
+			{
+				return -1;
+			}
+			return ((IList<Match>)this).IndexOf((Match)value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		bool IList.IsFixedSize
 		{
 			get
 			{
@@ -93,39 +222,26 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		public virtual Match this[int i]
+		void IList.Remove(object value)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			throw new NotSupportedException("Collection is read-only.");
+		}
+
+		object IList.this[int index]
 		{
 			get
 			{
-				Match match = this.GetMatch(i);
-				if (match == null)
-				{
-					throw new ArgumentOutOfRangeException("i");
-				}
-				return match;
+				return this[index];
 			}
-		}
-
-		public void CopyTo(Array array, int arrayIndex)
-		{
-			if (array != null && array.Rank != 1)
+			set
 			{
-				throw new ArgumentException(global::SR.GetString("Only single dimensional arrays are supported for the requested action."));
+				throw new NotSupportedException("Collection is read-only.");
 			}
-			int count = this.Count;
-			try
-			{
-				this._matches.CopyTo(array, arrayIndex);
-			}
-			catch (ArrayTypeMismatchException ex)
-			{
-				throw new ArgumentException(global::SR.GetString("Target array type is not compatible with the type of items in the collection."), ex);
-			}
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return new MatchEnumerator(this);
 		}
 
 		internal MatchCollection()
@@ -133,22 +249,78 @@ namespace System.Text.RegularExpressions
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		internal Regex _regex;
+		private readonly Regex _regex;
 
-		internal ArrayList _matches;
+		private readonly List<Match> _matches;
 
-		internal bool _done;
+		private bool _done;
 
-		internal string _input;
+		private readonly string _input;
 
-		internal int _beginning;
+		private readonly int _beginning;
 
-		internal int _length;
+		private readonly int _length;
 
-		internal int _startat;
+		private int _startat;
 
-		internal int _prevlen;
+		private int _prevlen;
 
-		private static int infinite = int.MaxValue;
+		[Serializable]
+		private sealed class Enumerator : IEnumerator<Match>, IDisposable, IEnumerator
+		{
+			internal Enumerator(MatchCollection collection)
+			{
+				this._collection = collection;
+				this._index = -1;
+			}
+
+			public bool MoveNext()
+			{
+				if (this._index == -2)
+				{
+					return false;
+				}
+				this._index++;
+				if (this._collection.GetMatch(this._index) == null)
+				{
+					this._index = -2;
+					return false;
+				}
+				return true;
+			}
+
+			public Match Current
+			{
+				get
+				{
+					if (this._index < 0)
+					{
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
+					}
+					return this._collection.GetMatch(this._index);
+				}
+			}
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					return this.Current;
+				}
+			}
+
+			void IEnumerator.Reset()
+			{
+				this._index = -1;
+			}
+
+			void IDisposable.Dispose()
+			{
+			}
+
+			private readonly MatchCollection _collection;
+
+			private int _index;
+		}
 	}
 }

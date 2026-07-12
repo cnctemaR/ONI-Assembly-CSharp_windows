@@ -5,9 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
-	[NativeHeader("PlatformDependent/Win/Webcam/WebCam.h")]
 	[StaticAccessor("WebCam::GetInstance()", StaticAccessorType.Dot)]
+	[NativeHeader("PlatformDependent/Win/Webcam/WebCam.h")]
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	public class WebCam
 	{
 		public static extern WebCamMode Mode

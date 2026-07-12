@@ -40,6 +40,7 @@ namespace TUNING
 			new Crop.CropVal("WoodLog", 2700f, 300, true),
 			new Crop.CropVal(SimHashes.WoodLog.ToString(), 2700f, 300, true),
 			new Crop.CropVal(SimHashes.SugarWater.ToString(), 150f, 20, true),
+			new Crop.CropVal("SpaceTreeBranch", 2700f, 1, true),
 			new Crop.CropVal("HardSkinBerry", 1800f, 1, true),
 			new Crop.CropVal(CarrotConfig.ID, 5400f, 1, true),
 			new Crop.CropVal(SimHashes.OxyRock.ToString(), 1200f, 2 * Mathf.RoundToInt(17.76f), true),

@@ -19,7 +19,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 400f;
-		buildingDef.GeneratorBaseCapacity = 10000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerOutput = true;
 		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.ViewMode = OverlayModes.Power.ID;
@@ -45,7 +45,13 @@ public class ManualGeneratorConfig : IBuildingConfig
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		kbatchedAnimController.initialAnim = "off";
-		Tinkerable.MakePowerTinkerable(go);
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		base.ConfigureBuildingTemplate(go, prefab_tag);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightDutyGeneratorType, false);
 	}
 
 	public const string ID = "ManualGenerator";

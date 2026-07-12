@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Rendering;
+using UnityEngine.Tilemaps;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
@@ -59,6 +61,10 @@ namespace UnityEngine.EventSystems
 						{
 							renderer = component;
 						}
+						if (component is TilemapRenderer)
+						{
+							renderer = component;
+						}
 						if (component is SpriteShapeRenderer)
 						{
 							renderer = component;
@@ -68,15 +74,27 @@ namespace UnityEngine.EventSystems
 					{
 						gameObject = this.m_Hits[i].collider.gameObject,
 						module = this,
-						distance = Vector3.Distance(this.eventCamera.transform.position, this.m_Hits[i].point),
+						distance = this.m_Hits[i].distance,
 						worldPosition = this.m_Hits[i].point,
 						worldNormal = this.m_Hits[i].normal,
 						screenPosition = eventData.position,
 						displayIndex = num2,
 						index = (float)resultAppendList.Count,
+						sortingGroupID = ((renderer != null) ? renderer.sortingGroupID : SortingGroup.invalidSortingGroupID),
+						sortingGroupOrder = ((renderer != null) ? renderer.sortingGroupOrder : 0),
 						sortingLayer = ((renderer != null) ? renderer.sortingLayerID : 0),
 						sortingOrder = ((renderer != null) ? renderer.sortingOrder : 0)
 					};
+					if (raycastResult.sortingGroupID != SortingGroup.invalidSortingGroupID)
+					{
+						SortingGroup sortingGroupByIndex = SortingGroup.GetSortingGroupByIndex(renderer.sortingGroupID);
+						if (sortingGroupByIndex != null)
+						{
+							raycastResult.distance = Vector3.Dot(ray.direction, sortingGroupByIndex.transform.position - ray.origin);
+							raycastResult.sortingLayer = sortingGroupByIndex.sortingLayerID;
+							raycastResult.sortingOrder = sortingGroupByIndex.sortingOrder;
+						}
+					}
 					resultAppendList.Add(raycastResult);
 					i++;
 				}

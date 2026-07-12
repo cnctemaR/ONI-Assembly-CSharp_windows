@@ -38,7 +38,24 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list.Add(new CarePackageInfo("BlueGrassSeed", 1f, null));
 		list.Add(new CarePackageInfo("CarrotPlantSeed", 1f, () => Immigration.CycleCondition(24)));
 		list.Add(new CarePackageInfo("SpaceTreeSeed", 1f, () => Immigration.CycleCondition(24)));
+		list.Add(new CarePackageInfo("HardSkinBerryPlantSeed", 3f, null));
 		dictionary.Add(text, list);
+		dictionary.Add("DLC3_ID", new List<CarePackageInfo>
+		{
+			new CarePackageInfo("DisposableElectrobank_BasicSingleHarvestPlant", 5f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_CONSTRUCTION, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_EXCAVATION, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_MACHINERY, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_ATHLETICS, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_COOKING, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_MEDICINE, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_STRENGTH, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_CREATIVITY, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_AGRICULTURE, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_HUSBANDRY, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_SCIENCE, 1f, null),
+			new CarePackageInfo("bionic_upgrade_" + BionicUpgradeComponentConfig.SUFFIX_PILOTING, 1f, null)
+		});
 		this.carePackagesByDlc = dictionary;
 	}
 

@@ -16,6 +16,26 @@ namespace System.Reflection.Emit
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class MethodBuilder : MethodInfo, _MethodBuilder
 	{
+		void _MethodBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal MethodBuilder(TypeBuilder tb, string name, MethodAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] returnModReq, Type[] returnModOpt, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
 		{
 			this.init_locals = true;
@@ -45,7 +65,7 @@ namespace System.Reflection.Emit
 				Array.Copy(parameterTypes, this.parameters, parameterTypes.Length);
 			}
 			this.type = tb;
-			this.table_idx = this.get_next_table_index(this, 6, true);
+			this.table_idx = this.get_next_table_index(this, 6, 1);
 			((ModuleBuilder)tb.Module).RegisterToken(this, this.GetToken().Token);
 		}
 
@@ -232,7 +252,10 @@ namespace System.Reflection.Emit
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
+				ParameterInfo[] array2 = array;
+				int num = i;
+				ParameterBuilder[] array3 = this.pinfo;
+				array2[num] = RuntimeParameterInfo.New((array3 != null) ? array3[i + 1] : null, this.parameters[i], this, i + 1);
 			}
 			return array;
 		}
@@ -609,9 +632,9 @@ namespace System.Reflection.Emit
 			return this.name.GetHashCode();
 		}
 
-		internal override int get_next_table_index(object obj, int table, bool inc)
+		internal override int get_next_table_index(object obj, int table, int count)
 		{
-			return this.type.get_next_table_index(obj, table, inc);
+			return this.type.get_next_table_index(obj, table, count);
 		}
 
 		private void ExtendArray<T>(ref T[] array, T elem)
@@ -770,26 +793,6 @@ namespace System.Reflection.Emit
 			{
 				return this.GetModule();
 			}
-		}
-
-		void _MethodBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		public override ParameterInfo ReturnParameter

@@ -22,6 +22,8 @@ namespace FMODUnity
 
 		public static event EventHandler<FMODEventPlayableBehavior.EventArgs> GraphStop;
 
+		public float ClipStartTime { get; private set; }
+
 		public float CurrentVolume { get; private set; }
 
 		protected void PlayEvent()
@@ -41,7 +43,7 @@ namespace FMODUnity
 					}
 					else
 					{
-						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject.transform);
+						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject.transform, false);
 					}
 				}
 				else
@@ -53,6 +55,7 @@ namespace FMODUnity
 					this.eventInstance.setParameterByID(paramRef.ID, paramRef.Value, false);
 				}
 				this.eventInstance.setVolume(this.CurrentVolume);
+				this.eventInstance.setTimelinePosition((int)(this.ClipStartTime * 1000f));
 				this.eventInstance.start();
 			}
 		}
@@ -124,6 +127,7 @@ namespace FMODUnity
 			}
 			if ((double)time >= this.OwningClip.start && (double)time < this.OwningClip.end)
 			{
+				this.ClipStartTime = time - (float)this.OwningClip.start;
 				this.OnEnter();
 				return;
 			}

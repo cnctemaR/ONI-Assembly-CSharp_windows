@@ -10,10 +10,10 @@ namespace System.Net.Sockets
 	public class SocketException : Win32Exception
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int WSAGetLastError_internal();
+		private static extern int WSAGetLastError_icall();
 
 		public SocketException()
-			: base(SocketException.WSAGetLastError_internal())
+			: base(SocketException.WSAGetLastError_icall())
 		{
 		}
 

@@ -265,7 +265,7 @@ namespace System.ComponentModel
 			}
 			if (primary == secondary)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot create an association when the primary and secondary objects are the same."));
+				throw new ArgumentException(SR.GetString("Cannot create an association when the primary and secondary objects are the same."));
 			}
 			if (TypeDescriptor._associationTable == null)
 			{
@@ -298,7 +298,7 @@ namespace System.ComponentModel
 				WeakReference weakReference = (WeakReference)list[i];
 				if (weakReference.IsAlive && weakReference.Target == secondary)
 				{
-					throw new ArgumentException(global::SR.GetString("The primary and secondary objects are already associated with each other."));
+					throw new ArgumentException(SR.GetString("The primary and secondary objects are already associated with each other."));
 				}
 			}
 			IL_0112:
@@ -377,7 +377,7 @@ namespace System.ComponentModel
 				}
 				if (argTypes.Length != args.Length)
 				{
-					throw new ArgumentException(global::SR.GetString("The number of elements in the Type and Object arrays must match."));
+					throw new ArgumentException(SR.GetString("The number of elements in the Type and Object arrays must match."));
 				}
 			}
 			object obj = null;
@@ -666,6 +666,11 @@ namespace System.ComponentModel
 			return TypeDescriptor.GetDescriptor(type, "type").GetConverter();
 		}
 
+		private static object ConvertFromInvariantString(Type type, string stringValue)
+		{
+			return TypeDescriptor.GetConverter(type).ConvertFromInvariantString(stringValue);
+		}
+
 		public static EventDescriptor GetDefaultEvent(Type componentType)
 		{
 			if (componentType == null)
@@ -731,7 +736,7 @@ namespace System.ComponentModel
 			}
 			if (component is TypeDescriptor.IUnimplemented)
 			{
-				throw new NotSupportedException(global::SR.GetString("The object {0} is being remoted by a proxy that does not support interface discovery.  This type of remoted object is not supported.", new object[] { component.GetType().FullName }));
+				throw new NotSupportedException(SR.GetString("The object {0} is being remoted by a proxy that does not support interface discovery.  This type of remoted object is not supported.", new object[] { component.GetType().FullName }));
 			}
 			ICustomTypeDescriptor customTypeDescriptor = TypeDescriptor.NodeFor(component).GetTypeDescriptor(component);
 			ICustomTypeDescriptor customTypeDescriptor2 = component as ICustomTypeDescriptor;
@@ -1332,7 +1337,7 @@ namespace System.ComponentModel
 					}
 					catch (InvalidCastException)
 					{
-						throw new ArgumentException(global::SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(Attribute).FullName }));
+						throw new ArgumentException(SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(Attribute).FullName }));
 					}
 					collection = new AttributeCollection(array);
 					break;
@@ -1346,7 +1351,7 @@ namespace System.ComponentModel
 					}
 					catch (InvalidCastException)
 					{
-						throw new ArgumentException(global::SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(PropertyDescriptor).FullName }));
+						throw new ArgumentException(SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(PropertyDescriptor).FullName }));
 					}
 					collection = new PropertyDescriptorCollection(array2, true);
 					break;
@@ -1360,7 +1365,7 @@ namespace System.ComponentModel
 					}
 					catch (InvalidCastException)
 					{
-						throw new ArgumentException(global::SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(EventDescriptor).FullName }));
+						throw new ArgumentException(SR.GetString("Expected types in the collection to be of type {0}.", new object[] { typeof(EventDescriptor).FullName }));
 					}
 					collection = new EventDescriptorCollection(array3, true);
 					break;
@@ -2257,7 +2262,7 @@ namespace System.ComponentModel
 					}
 					if (argTypes.Length != args.Length)
 					{
-						throw new ArgumentException(global::SR.GetString("The number of elements in the Type and Object arrays must match."));
+						throw new ArgumentException(SR.GetString("The number of elements in the Type and Object arrays must match."));
 					}
 				}
 				return this.Provider.CreateInstance(provider, objectType, argTypes, args);
@@ -2362,7 +2367,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2371,7 +2376,7 @@ namespace System.ComponentModel
 					AttributeCollection attributes = extendedTypeDescriptor.GetAttributes();
 					if (attributes == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetAttributes"
@@ -2391,7 +2396,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2416,7 +2421,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2436,7 +2441,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2445,7 +2450,7 @@ namespace System.ComponentModel
 					TypeConverter converter = extendedTypeDescriptor.GetConverter();
 					if (converter == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetConverter"
@@ -2465,7 +2470,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2485,7 +2490,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2509,7 +2514,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2529,7 +2534,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2538,7 +2543,7 @@ namespace System.ComponentModel
 					EventDescriptorCollection events = extendedTypeDescriptor.GetEvents();
 					if (events == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetEvents"
@@ -2558,7 +2563,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2567,7 +2572,7 @@ namespace System.ComponentModel
 					EventDescriptorCollection events = extendedTypeDescriptor.GetEvents(attributes);
 					if (events == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetEvents"
@@ -2587,7 +2592,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2596,7 +2601,7 @@ namespace System.ComponentModel
 					PropertyDescriptorCollection properties = extendedTypeDescriptor.GetProperties();
 					if (properties == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetProperties"
@@ -2616,7 +2621,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2625,7 +2630,7 @@ namespace System.ComponentModel
 					PropertyDescriptorCollection properties = extendedTypeDescriptor.GetProperties(attributes);
 					if (properties == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetProperties"
@@ -2645,7 +2650,7 @@ namespace System.ComponentModel
 					ICustomTypeDescriptor extendedTypeDescriptor = provider.GetExtendedTypeDescriptor(this._instance);
 					if (extendedTypeDescriptor == null)
 					{
-						throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+						throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 						{
 							this._node.Provider.GetType().FullName,
 							"GetExtendedTypeDescriptor"
@@ -2687,7 +2692,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2696,7 +2701,7 @@ namespace System.ComponentModel
 						attributeCollection = typeDescriptor.GetAttributes();
 						if (attributeCollection == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetAttributes"
@@ -2720,7 +2725,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2749,7 +2754,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2774,7 +2779,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2783,7 +2788,7 @@ namespace System.ComponentModel
 						typeConverter = typeDescriptor.GetConverter();
 						if (typeConverter == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetConverter"
@@ -2807,7 +2812,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2832,7 +2837,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2861,7 +2866,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2886,7 +2891,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2895,7 +2900,7 @@ namespace System.ComponentModel
 						eventDescriptorCollection = typeDescriptor.GetEvents();
 						if (eventDescriptorCollection == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetEvents"
@@ -2919,7 +2924,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2928,7 +2933,7 @@ namespace System.ComponentModel
 						eventDescriptorCollection = typeDescriptor.GetEvents(attributes);
 						if (eventDescriptorCollection == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetEvents"
@@ -2952,7 +2957,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2961,7 +2966,7 @@ namespace System.ComponentModel
 						propertyDescriptorCollection = typeDescriptor.GetProperties();
 						if (propertyDescriptorCollection == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetProperties"
@@ -2985,7 +2990,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"
@@ -2994,7 +2999,7 @@ namespace System.ComponentModel
 						propertyDescriptorCollection = typeDescriptor.GetProperties(attributes);
 						if (propertyDescriptorCollection == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetProperties"
@@ -3018,7 +3023,7 @@ namespace System.ComponentModel
 						ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(this._objectType, this._instance);
 						if (typeDescriptor == null)
 						{
-							throw new InvalidOperationException(global::SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
+							throw new InvalidOperationException(SR.GetString("The type description provider {0} has returned null from {1} which is illegal.", new object[]
 							{
 								this._node.Provider.GetType().FullName,
 								"GetTypeDescriptor"

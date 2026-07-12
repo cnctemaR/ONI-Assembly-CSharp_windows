@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class DisallowMultipleComponent : Attribute
 	{
 	}

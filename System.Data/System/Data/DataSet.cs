@@ -17,9 +17,10 @@ using System.Xml.Serialization;
 
 namespace System.Data
 {
-	[XmlSchemaProvider("GetDataSetSchema")]
-	[DefaultProperty("DataSetName")]
+	[ToolboxItem("Microsoft.VSDesigner.Data.VS.DataSetToolboxItem, Microsoft.VSDesigner, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 	[XmlRoot("DataSet")]
+	[DefaultProperty("DataSetName")]
+	[XmlSchemaProvider("GetDataSetSchema")]
 	[Serializable]
 	public class DataSet : MarshalByValueComponent, IListSource, IXmlSerializable, ISupportInitializeNotification, ISupportInitialize, ISerializable
 	{
@@ -750,8 +751,8 @@ namespace System.Data
 			return this._cultureUserSet;
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public override ISite Site
 		{
 			get
@@ -1627,10 +1628,12 @@ namespace System.Data
 
 		internal XmlReadMode ReadXml(XmlReader reader, bool denyResolving)
 		{
+			IDisposable disposable = null;
 			long num = DataCommonEventSource.Log.EnterScope<int, bool>("<ds.DataSet.ReadXml|INFO> {0}, denyResolving={1}", this.ObjectID, denyResolving);
 			XmlReadMode xmlReadMode2;
 			try
 			{
+				disposable = TypeLimiter.EnterRestrictedScope(this);
 				DataTable.DSRowDiffIdUsageSection dsrowDiffIdUsageSection = default(DataTable.DSRowDiffIdUsageSection);
 				try
 				{
@@ -1844,6 +1847,10 @@ namespace System.Data
 			}
 			finally
 			{
+				if (disposable != null)
+				{
+					disposable.Dispose();
+				}
 				DataCommonEventSource.Log.ExitScope(num);
 			}
 			return xmlReadMode2;
@@ -2057,10 +2064,12 @@ namespace System.Data
 
 		internal XmlReadMode ReadXml(XmlReader reader, XmlReadMode mode, bool denyResolving)
 		{
+			IDisposable disposable = null;
 			long num = DataCommonEventSource.Log.EnterScope<int, XmlReadMode, bool>("<ds.DataSet.ReadXml|INFO> {0}, mode={1}, denyResolving={2}", this.ObjectID, mode, denyResolving);
 			XmlReadMode xmlReadMode2;
 			try
 			{
+				disposable = TypeLimiter.EnterRestrictedScope(this);
 				XmlReadMode xmlReadMode = mode;
 				if (reader == null)
 				{
@@ -2265,6 +2274,10 @@ namespace System.Data
 			}
 			finally
 			{
+				if (disposable != null)
+				{
+					disposable.Dispose();
+				}
 				DataCommonEventSource.Log.ExitScope(num);
 			}
 			return xmlReadMode2;
@@ -3103,7 +3116,7 @@ namespace System.Data
 				this.HasChanges = 0;
 			}
 
-			internal int HasChanges { get; set; }
+			internal int HasChanges { readonly get; set; }
 
 			internal bool this[int index]
 			{

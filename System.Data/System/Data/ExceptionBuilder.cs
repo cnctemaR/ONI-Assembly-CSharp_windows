@@ -158,6 +158,11 @@ namespace System.Data
 			return ExceptionBuilder._Argument(paramName, SR.Format("'{0}' argument contains null value.", paramName));
 		}
 
+		public static Exception TypeNotAllowed(Type type)
+		{
+			return ExceptionBuilder._InvalidOperation(SR.Format("Type '{0}' is not allowed here. See https://go.microsoft.com/fwlink/?linkid=2132227 for more details.", type.AssemblyQualifiedName));
+		}
+
 		public static Exception CannotModifyCollection()
 		{
 			return ExceptionBuilder._Argument("Collection itself is not modifiable.");

@@ -6,7 +6,16 @@ namespace System.Resources
 	{
 		public override string ToString()
 		{
-			return string.Concat(new object[] { "ICONDIRENTRY (", this.bWidth, "x", this.bHeight, " ", this.wBitCount, " bpp)" });
+			return string.Concat(new string[]
+			{
+				"ICONDIRENTRY (",
+				this.bWidth.ToString(),
+				"x",
+				this.bHeight.ToString(),
+				" ",
+				this.wBitCount.ToString(),
+				" bpp)"
+			});
 		}
 
 		public byte bWidth;

@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	[RequiredByNativeCode]
+	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	public struct EarlyUpdate
 	{
 		[RequiredByNativeCode]
@@ -13,7 +13,7 @@ namespace UnityEngine.PlayerLoop
 		{
 		}
 
-		[RequiredByNativeCode]
+		[Obsolete("ProfilerStartFrame player loop component has been moved to the Initialization category. (UnityUpgradable) -> UnityEngine.PlayerLoop.Initialization/ProfilerStartFrame", true)]
 		public struct ProfilerStartFrame
 		{
 		}
@@ -89,6 +89,16 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct UpdateContentLoading
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct UpdateAsyncInstantiate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct RendererNotifyInvisible
 		{
 		}
@@ -140,6 +150,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct DispatchEventQueueEvents
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct Physics2DEarlyUpdate
 		{
 		}
 

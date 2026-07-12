@@ -35,7 +35,7 @@ public class ManagementMenu : KIconToggleMenu
 		this.vitalsInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, "");
 		this.AddToggleTooltip(this.vitalsInfo, null);
 		this.researchInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, "");
-		this.AddToggleTooltip(this.researchInfo, UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH);
+		this.AddToggleTooltipForResearch(this.researchInfo, UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH);
 		this.researchInfo.prefabOverride = this.researchButtonPrefab;
 		this.jobsInfo = new ManagementMenu.ManagementMenuToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePriorities, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, "");
 		this.AddToggleTooltip(this.jobsInfo, null);
@@ -233,9 +233,9 @@ public class ManagementMenu : KIconToggleMenu
 		}
 	}
 
-	private void AddToggleTooltip(ManagementMenu.ManagementMenuToggleInfo toggleInfo, string disabledTooltip = null)
+	private ToolTip.ComplexTooltipDelegate CreateToggleTooltip(ManagementMenu.ManagementMenuToggleInfo toggleInfo, string disabledTooltip = null)
 	{
-		toggleInfo.getTooltipText = delegate
+		return delegate
 		{
 			List<global::Tuple<string, TextStyleSetting>> list = new List<global::Tuple<string, TextStyleSetting>>();
 			if (disabledTooltip != null && !toggleInfo.toggle.interactable)
@@ -248,6 +248,43 @@ public class ManagementMenu : KIconToggleMenu
 				list.Add(new global::Tuple<string, TextStyleSetting>(toggleInfo.tooltipHeader, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
 			}
 			list.Add(new global::Tuple<string, TextStyleSetting>(toggleInfo.tooltip, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			return list;
+		};
+	}
+
+	private void AddToggleTooltip(ManagementMenu.ManagementMenuToggleInfo toggleInfo, string disabledTooltip = null)
+	{
+		toggleInfo.getTooltipText = this.CreateToggleTooltip(toggleInfo, disabledTooltip);
+	}
+
+	private void AddToggleTooltipForResearch(ManagementMenu.ManagementMenuToggleInfo toggleInfo, string disabledTooltip = null)
+	{
+		toggleInfo.getTooltipText = delegate
+		{
+			List<global::Tuple<string, TextStyleSetting>> list = new List<global::Tuple<string, TextStyleSetting>>();
+			TechInstance activeResearch = Research.Instance.GetActiveResearch();
+			string text = ((activeResearch == null) ? UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH_NO_RESEARCH : string.Format(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH_CARD_NAME, activeResearch.tech.Name));
+			list.Add(new global::Tuple<string, TextStyleSetting>(text, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			if (activeResearch != null)
+			{
+				string text2 = "";
+				for (int i = 0; i < activeResearch.tech.unlockedItems.Count; i++)
+				{
+					TechItem techItem = activeResearch.tech.unlockedItems[i];
+					text2 = text2 + "\n" + string.Format(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH_ITEM_LINE, techItem.Name);
+				}
+				list.Add(new global::Tuple<string, TextStyleSetting>(text2, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			}
+			if (disabledTooltip != null && !toggleInfo.toggle.interactable)
+			{
+				list.Add(new global::Tuple<string, TextStyleSetting>(disabledTooltip, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+				return list;
+			}
+			if (toggleInfo.tooltipHeader != null)
+			{
+				list.Add(new global::Tuple<string, TextStyleSetting>(toggleInfo.tooltipHeader, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			}
+			list.Add(new global::Tuple<string, TextStyleSetting>("\n" + toggleInfo.tooltip, ToolTipScreen.Instance.defaultTooltipBodyStyle));
 			return list;
 		};
 	}
@@ -274,13 +311,20 @@ public class ManagementMenu : KIconToggleMenu
 		this.PauseMenuButton.isOn = false;
 	}
 
+	public void Refresh()
+	{
+		this.CheckResearch(null);
+		this.CheckSkills(null);
+		this.CheckStarmap(null);
+	}
+
 	public void CheckResearch(object o)
 	{
 		if (this.researchInfo.toggle == null)
 		{
 			return;
 		}
-		bool flag = Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode;
+		bool flag = Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive;
 		bool flag2 = !flag && this.activeScreen != null && this.activeScreen.toggleInfo == this.researchInfo;
 		this.ConfigureToggle(this.researchInfo.toggle, flag, flag2);
 	}
@@ -291,7 +335,7 @@ public class ManagementMenu : KIconToggleMenu
 		{
 			return;
 		}
-		bool flag = Components.RoleStations.Count <= 0 && !DebugHandler.InstantBuildMode;
+		bool flag = Components.RoleStations.Count <= 0 && !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive;
 		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.skillsInfo;
 		this.ConfigureToggle(this.skillsInfo.toggle, flag, flag2);
 	}
@@ -302,7 +346,7 @@ public class ManagementMenu : KIconToggleMenu
 		{
 			return;
 		}
-		bool flag = Components.Telescopes.Count <= 0 && !DebugHandler.InstantBuildMode;
+		bool flag = Components.Telescopes.Count <= 0 && !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive;
 		bool flag2 = this.activeScreen != null && this.activeScreen.toggleInfo == this.starmapInfo;
 		this.ConfigureToggle(this.starmapInfo.toggle, flag, flag2);
 	}
@@ -352,17 +396,17 @@ public class ManagementMenu : KIconToggleMenu
 
 	private bool ResearchAvailable()
 	{
-		return Components.ResearchCenters.Count > 0 || DebugHandler.InstantBuildMode;
+		return Components.ResearchCenters.Count > 0 || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
 	}
 
 	private bool SkillsAvailable()
 	{
-		return Components.RoleStations.Count > 0 || DebugHandler.InstantBuildMode;
+		return Components.RoleStations.Count > 0 || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
 	}
 
 	public static bool StarmapAvailable()
 	{
-		return Components.Telescopes.Count > 0 || DebugHandler.InstantBuildMode;
+		return Components.Telescopes.Count > 0 || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
 	}
 
 	public void CloseAll()
@@ -559,11 +603,15 @@ public class ManagementMenu : KIconToggleMenu
 		ReportScreen.Instance.ShowReport(day);
 	}
 
-	public void OpenResearch()
+	public void OpenResearch(string zoomToTech = null)
 	{
 		if (this.activeScreen != this.ScreenInfoMatch[ManagementMenu.Instance.researchInfo])
 		{
 			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.researchInfo]);
+		}
+		if (zoomToTech != null)
+		{
+			this.researchScreen.ZoomToTech(zoomToTech);
 		}
 	}
 

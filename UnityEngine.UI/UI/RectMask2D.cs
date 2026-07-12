@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Rect Mask 2D", 13)]
+	[AddComponentMenu("UI/Rect Mask 2D", 14)]
 	[ExecuteAlways]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
@@ -37,13 +38,13 @@ namespace UnityEngine.UI
 			}
 		}
 
-		private Canvas Canvas
+		internal Canvas Canvas
 		{
 			get
 			{
 				if (this.m_Canvas == null)
 				{
-					List<Canvas> list = ListPool<Canvas>.Get();
+					List<Canvas> list = CollectionPool<List<Canvas>, Canvas>.Get();
 					base.gameObject.GetComponentsInParent<Canvas>(false, list);
 					if (list.Count > 0)
 					{
@@ -53,7 +54,7 @@ namespace UnityEngine.UI
 					{
 						this.m_Canvas = null;
 					}
-					ListPool<Canvas>.Release(list);
+					CollectionPool<List<Canvas>, Canvas>.Release(list);
 				}
 				return this.m_Canvas;
 			}
@@ -98,8 +99,14 @@ namespace UnityEngine.UI
 			this.m_ClipTargets.Clear();
 			this.m_MaskableTargets.Clear();
 			this.m_Clippers.Clear();
-			ClipperRegistry.Unregister(this);
+			ClipperRegistry.Disable(this);
 			MaskUtilities.Notify2DMaskStateChanged(this);
+		}
+
+		protected override void OnDestroy()
+		{
+			ClipperRegistry.Unregister(this);
+			base.OnDestroy();
 		}
 
 		public virtual bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
@@ -247,6 +254,7 @@ namespace UnityEngine.UI
 
 		protected override void OnTransformParentChanged()
 		{
+			this.m_Canvas = null;
 			base.OnTransformParentChanged();
 			this.m_ShouldRecalculateClipRects = true;
 		}

@@ -2,7 +2,7 @@
 
 namespace System.Data
 {
-	internal struct IndexField
+	internal readonly struct IndexField
 	{
 		internal IndexField(DataColumn column, bool isDescending)
 		{

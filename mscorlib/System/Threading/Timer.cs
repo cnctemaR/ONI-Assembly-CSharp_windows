@@ -3,12 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace System.Threading
 {
 	[ComVisible(true)]
-	public sealed class Timer : MarshalByRefObject, IDisposable
+	public sealed class Timer : MarshalByRefObject, IDisposable, IAsyncDisposable
 	{
+		private static Timer.Scheduler scheduler
+		{
+			get
+			{
+				return Timer.Scheduler.Instance;
+			}
+		}
+
 		public Timer(TimerCallback callback, object state, int dueTime, int period)
 		{
 			this.Init(callback, state, (long)dueTime, (long)period);
@@ -45,6 +54,8 @@ namespace System.Threading
 			}
 			this.callback = callback;
 			this.state = state;
+			this.is_dead = false;
+			this.is_added = false;
 			this.Change(dueTime, period, true);
 		}
 
@@ -138,14 +149,18 @@ namespace System.Threading
 			return true;
 		}
 
+		public ValueTask DisposeAsync()
+		{
+			this.Dispose();
+			return new ValueTask(Task.FromResult<object>(null));
+		}
+
 		internal void KeepRootedWhileScheduled()
 		{
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern long GetTimeMonotonic();
-
-		private static readonly Timer.Scheduler scheduler = Timer.Scheduler.Instance;
 
 		private TimerCallback callback;
 
@@ -159,12 +174,20 @@ namespace System.Threading
 
 		private bool disposed;
 
+		private bool is_dead;
+
+		private bool is_added;
+
 		private const long MaxValue = 4294967294L;
 
-		private sealed class TimerComparer : IComparer
+		private struct TimerComparer : IComparer, IComparer<Timer>
 		{
-			public int Compare(object x, object y)
+			int IComparer.Compare(object x, object y)
 			{
+				if (x == y)
+				{
+					return 0;
+				}
 				Timer timer = x as Timer;
 				if (timer == null)
 				{
@@ -175,28 +198,46 @@ namespace System.Threading
 				{
 					return 1;
 				}
-				long num = timer.next_run - timer2.next_run;
-				if (num == 0L)
-				{
-					if (x != y)
-					{
-						return -1;
-					}
-					return 0;
-				}
-				else
-				{
-					if (num <= 0L)
-					{
-						return -1;
-					}
-					return 1;
-				}
+				return this.Compare(timer, timer2);
+			}
+
+			public int Compare(Timer tx, Timer ty)
+			{
+				return Math.Sign(tx.next_run - ty.next_run);
 			}
 		}
 
 		private sealed class Scheduler
 		{
+			private void InitScheduler()
+			{
+				this.changed = new ManualResetEvent(false);
+				new Thread(new ThreadStart(this.SchedulerThread))
+				{
+					IsBackground = true
+				}.Start();
+			}
+
+			private void WakeupScheduler()
+			{
+				this.changed.Set();
+			}
+
+			private void SchedulerThread()
+			{
+				Thread.CurrentThread.Name = "Timer-Scheduler";
+				for (;;)
+				{
+					int num = -1;
+					lock (this)
+					{
+						this.changed.Reset();
+						num = this.RunSchedulerLoop();
+					}
+					this.changed.WaitOne(num);
+				}
+			}
+
 			public static Timer.Scheduler Instance
 			{
 				get
@@ -207,20 +248,12 @@ namespace System.Threading
 
 			private Scheduler()
 			{
-				this.changed = new ManualResetEvent(false);
-				this.list = new SortedList(new Timer.TimerComparer(), 1024);
-				new Thread(new ThreadStart(this.SchedulerThread))
-				{
-					IsBackground = true
-				}.Start();
+				this.list = new List<Timer>(1024);
+				this.InitScheduler();
 			}
 
 			public void Remove(Timer timer)
 			{
-				if (timer.next_run == 0L || timer.next_run == 9223372036854775807L)
-				{
-					return;
-				}
 				lock (this)
 				{
 					this.InternalRemove(timer);
@@ -229,104 +262,56 @@ namespace System.Threading
 
 			public void Change(Timer timer, long new_next_run)
 			{
+				if (timer.is_dead)
+				{
+					timer.is_dead = false;
+				}
 				bool flag = false;
 				lock (this)
 				{
-					this.InternalRemove(timer);
-					if (new_next_run == 9223372036854775807L)
-					{
-						timer.next_run = new_next_run;
-						return;
-					}
-					if (!timer.disposed)
+					this.needReSort = true;
+					if (!timer.is_added)
 					{
 						timer.next_run = new_next_run;
 						this.Add(timer);
-						flag = this.list.GetByIndex(0) == timer;
+						flag = this.current_next_run > new_next_run;
+					}
+					else
+					{
+						if (new_next_run == 9223372036854775807L)
+						{
+							timer.next_run = new_next_run;
+							this.InternalRemove(timer);
+							return;
+						}
+						if (!timer.disposed)
+						{
+							timer.next_run = new_next_run;
+							flag = this.current_next_run > new_next_run;
+						}
 					}
 				}
 				if (flag)
 				{
-					this.changed.Set();
+					this.WakeupScheduler();
 				}
-			}
-
-			private int FindByDueTime(long nr)
-			{
-				int i = 0;
-				int num = this.list.Count - 1;
-				if (num < 0)
-				{
-					return -1;
-				}
-				if (num < 20)
-				{
-					while (i <= num)
-					{
-						Timer timer = (Timer)this.list.GetByIndex(i);
-						if (timer.next_run == nr)
-						{
-							return i;
-						}
-						if (timer.next_run > nr)
-						{
-							return -1;
-						}
-						i++;
-					}
-					return -1;
-				}
-				while (i <= num)
-				{
-					int num2 = i + (num - i >> 1);
-					Timer timer2 = (Timer)this.list.GetByIndex(num2);
-					if (nr == timer2.next_run)
-					{
-						return num2;
-					}
-					if (nr > timer2.next_run)
-					{
-						i = num2 + 1;
-					}
-					else
-					{
-						num = num2 - 1;
-					}
-				}
-				return -1;
 			}
 
 			private void Add(Timer timer)
 			{
-				int num = this.FindByDueTime(timer.next_run);
-				if (num != -1)
+				timer.is_added = true;
+				this.needReSort = true;
+				this.list.Add(timer);
+				if (this.list.Count == 1)
 				{
-					bool flag = long.MaxValue - timer.next_run > 20000L;
-					do
-					{
-						num++;
-						if (flag)
-						{
-							timer.next_run += 1L;
-						}
-						else
-						{
-							timer.next_run -= 1L;
-						}
-					}
-					while (num < this.list.Count && ((Timer)this.list.GetByIndex(num)).next_run == timer.next_run);
+					this.WakeupScheduler();
 				}
-				this.list.Add(timer, timer);
 			}
 
-			private int InternalRemove(Timer timer)
+			private void InternalRemove(Timer timer)
 			{
-				int num = this.list.IndexOfKey(timer);
-				if (num >= 0)
-				{
-					this.list.RemoveAt(num);
-				}
-				return num;
+				timer.is_dead = true;
+				this.needReSort = true;
 			}
 
 			private static void TimerCB(object o)
@@ -335,95 +320,98 @@ namespace System.Threading
 				timer.callback(timer.state);
 			}
 
-			private void SchedulerThread()
+			private void FireTimer(Timer timer)
 			{
-				Thread.CurrentThread.Name = "Timer-Scheduler";
-				List<Timer> list = new List<Timer>(512);
-				for (;;)
+				long period_ms = timer.period_ms;
+				long due_time_ms = timer.due_time_ms;
+				if (period_ms == -1L || ((period_ms == 0L || period_ms == -1L) && due_time_ms != -1L))
 				{
-					int num = -1;
-					long timeMonotonic = Timer.GetTimeMonotonic();
-					lock (this)
+					timer.next_run = long.MaxValue;
+					timer.is_dead = true;
+				}
+				else
+				{
+					timer.next_run = Timer.GetTimeMonotonic() + 10000L * timer.period_ms;
+					timer.is_dead = false;
+				}
+				ThreadPool.UnsafeQueueUserWorkItem(new WaitCallback(Timer.Scheduler.TimerCB), timer);
+			}
+
+			private int RunSchedulerLoop()
+			{
+				long timeMonotonic = Timer.GetTimeMonotonic();
+				Timer.TimerComparer timerComparer = default(Timer.TimerComparer);
+				if (this.needReSort)
+				{
+					this.list.Sort(timerComparer);
+					this.needReSort = false;
+				}
+				long num = long.MaxValue;
+				for (int i = 0; i < this.list.Count; i++)
+				{
+					Timer timer = this.list[i];
+					if (!timer.is_dead)
 					{
-						this.changed.Reset();
-						int num2 = this.list.Count;
-						for (int i = 0; i < num2; i++)
+						if (timer.next_run <= timeMonotonic)
 						{
-							Timer timer = (Timer)this.list.GetByIndex(i);
-							if (timer.next_run > timeMonotonic)
-							{
-								break;
-							}
-							this.list.RemoveAt(i);
-							num2--;
-							i--;
-							ThreadPool.UnsafeQueueUserWorkItem(new WaitCallback(Timer.Scheduler.TimerCB), timer);
-							long period_ms = timer.period_ms;
-							long due_time_ms = timer.due_time_ms;
-							if (period_ms == -1L || ((period_ms == 0L || period_ms == -1L) && due_time_ms != -1L))
-							{
-								timer.next_run = long.MaxValue;
-							}
-							else
-							{
-								timer.next_run = Timer.GetTimeMonotonic() + 10000L * timer.period_ms;
-								list.Add(timer);
-							}
+							this.FireTimer(timer);
 						}
-						num2 = list.Count;
-						for (int i = 0; i < num2; i++)
+						num = Math.Min(num, timer.next_run);
+						if (timer.next_run > timeMonotonic && timer.next_run < 9223372036854775807L)
 						{
-							Timer timer2 = list[i];
-							this.Add(timer2);
-						}
-						list.Clear();
-						this.ShrinkIfNeeded(list, 512);
-						int capacity = this.list.Capacity;
-						num2 = this.list.Count;
-						if (capacity > 1024 && num2 > 0 && capacity / num2 > 3)
-						{
-							this.list.Capacity = num2 * 2;
-						}
-						long num3 = long.MaxValue;
-						if (this.list.Count > 0)
-						{
-							num3 = ((Timer)this.list.GetByIndex(0)).next_run;
-						}
-						num = -1;
-						if (num3 != 9223372036854775807L)
-						{
-							long num4 = (num3 - Timer.GetTimeMonotonic()) / 10000L;
-							if (num4 > 2147483647L)
-							{
-								num = 2147483646;
-							}
-							else
-							{
-								num = (int)num4;
-								if (num < 0)
-								{
-									num = 0;
-								}
-							}
+							timer.is_dead = false;
 						}
 					}
-					this.changed.WaitOne(num);
 				}
-			}
-
-			private void ShrinkIfNeeded(List<Timer> list, int initial)
-			{
-				int capacity = list.Capacity;
-				int count = list.Count;
-				if (capacity > initial && count > 0 && capacity / count > 3)
+				for (int i = 0; i < this.list.Count; i++)
 				{
-					list.Capacity = count * 2;
+					Timer timer2 = this.list[i];
+					if (timer2.is_dead)
+					{
+						timer2.is_added = false;
+						this.needReSort = true;
+						this.list[i] = this.list[this.list.Count - 1];
+						i--;
+						this.list.RemoveAt(this.list.Count - 1);
+						if (this.list.Count == 0)
+						{
+							break;
+						}
+					}
 				}
+				if (this.needReSort)
+				{
+					this.list.Sort(timerComparer);
+					this.needReSort = false;
+				}
+				int num2 = -1;
+				this.current_next_run = num;
+				if (num != 9223372036854775807L)
+				{
+					long num3 = (num - Timer.GetTimeMonotonic()) / 10000L;
+					if (num3 > 2147483647L)
+					{
+						num2 = 2147483646;
+					}
+					else
+					{
+						num2 = (int)num3;
+						if (num2 < 0)
+						{
+							num2 = 0;
+						}
+					}
+				}
+				return num2;
 			}
 
-			private static Timer.Scheduler instance = new Timer.Scheduler();
+			private static readonly Timer.Scheduler instance = new Timer.Scheduler();
 
-			private SortedList list;
+			private volatile bool needReSort = true;
+
+			private List<Timer> list;
+
+			private long current_next_run = long.MaxValue;
 
 			private ManualResetEvent changed;
 		}

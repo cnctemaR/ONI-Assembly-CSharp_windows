@@ -223,7 +223,8 @@ namespace System.Runtime
 
 			private void OnWaitCallback(object state)
 			{
-				WaitHandle.WaitAny(this.waitableTimers);
+				WaitHandle[] array = this.waitableTimers;
+				WaitHandle.WaitAny(array);
 				long now = Ticks.Now;
 				object thisLock = this.ThisLock;
 				lock (thisLock)

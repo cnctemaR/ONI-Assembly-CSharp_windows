@@ -1,46 +1,58 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class BadImageFormatException : SystemException
 	{
 		public BadImageFormatException()
-			: base(Environment.GetResourceString("Format of the executable (.exe) or library (.dll) is invalid."))
+			: base("Format of the executable (.exe) or library (.dll) is invalid.")
 		{
-			base.SetErrorCode(-2147024885);
+			base.HResult = -2147024885;
 		}
 
 		public BadImageFormatException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024885);
+			base.HResult = -2147024885;
 		}
 
 		public BadImageFormatException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2147024885);
+			base.HResult = -2147024885;
 		}
 
 		public BadImageFormatException(string message, string fileName)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024885);
+			base.HResult = -2147024885;
 			this._fileName = fileName;
 		}
 
 		public BadImageFormatException(string message, string fileName, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2147024885);
+			base.HResult = -2147024885;
 			this._fileName = fileName;
+		}
+
+		protected BadImageFormatException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			this._fileName = info.GetString("BadImageFormat_FileName");
+			this._fusionLog = info.GetString("BadImageFormat_FusionLog");
+		}
+
+		[SecurityCritical]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("BadImageFormat_FileName", this._fileName, typeof(string));
+			info.AddValue("BadImageFormat_FusionLog", this._fusionLog, typeof(string));
 		}
 
 		public override string Message
@@ -58,7 +70,7 @@ namespace System
 			{
 				if (this._fileName == null && base.HResult == -2146233088)
 				{
-					this._message = Environment.GetResourceString("Format of the executable (.exe) or library (.dll) is invalid.");
+					this._message = "Format of the executable (.exe) or library (.dll) is invalid.";
 					return;
 				}
 				this._message = FileLoadException.FormatFileLoadExceptionMessage(this._fileName, base.HResult);
@@ -75,10 +87,10 @@ namespace System
 
 		public override string ToString()
 		{
-			string text = base.GetType().FullName + ": " + this.Message;
+			string text = base.GetType().ToString() + ": " + this.Message;
 			if (this._fileName != null && this._fileName.Length != 0)
 			{
-				text = text + Environment.NewLine + Environment.GetResourceString("File name: '{0}'", new object[] { this._fileName });
+				text = text + Environment.NewLine + SR.Format("File name: '{0}'", this._fileName);
 			}
 			if (base.InnerException != null)
 			{
@@ -88,69 +100,24 @@ namespace System
 			{
 				text = text + Environment.NewLine + this.StackTrace;
 			}
-			try
+			if (this._fusionLog != null)
 			{
-				if (this.FusionLog != null)
+				if (text == null)
 				{
-					if (text == null)
-					{
-						text = " ";
-					}
-					text += Environment.NewLine;
-					text += Environment.NewLine;
-					text += this.FusionLog;
+					text = " ";
 				}
-			}
-			catch (SecurityException)
-			{
+				text += Environment.NewLine;
+				text += Environment.NewLine;
+				text += this._fusionLog;
 			}
 			return text;
 		}
 
-		protected BadImageFormatException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this._fileName = info.GetString("BadImageFormat_FileName");
-			try
-			{
-				this._fusionLog = info.GetString("BadImageFormat_FusionLog");
-			}
-			catch
-			{
-				this._fusionLog = null;
-			}
-		}
-
-		private BadImageFormatException(string fileName, string fusionLog, int hResult)
-			: base(null)
-		{
-			base.SetErrorCode(hResult);
-			this._fileName = fileName;
-			this._fusionLog = fusionLog;
-			this.SetMessageField();
-		}
-
 		public string FusionLog
 		{
-			[SecuritySafeCritical]
-			[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlEvidence | SecurityPermissionFlag.ControlPolicy)]
 			get
 			{
 				return this._fusionLog;
-			}
-		}
-
-		[SecurityCritical]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("BadImageFormat_FileName", this._fileName, typeof(string));
-			try
-			{
-				info.AddValue("BadImageFormat_FusionLog", this.FusionLog, typeof(string));
-			}
-			catch (SecurityException)
-			{
 			}
 		}
 

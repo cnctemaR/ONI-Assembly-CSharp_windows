@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Property)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Property)]
 	internal class NativePropertyAttribute : NativeMethodAttribute
 	{
 		public TargetType TargetType { get; set; }

@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Security;
-using Unity;
 
 namespace System.Runtime
 {
 	public static class ProfileOptimization
 	{
+		internal static void InternalSetProfileRoot(string directoryPath)
+		{
+		}
+
+		internal static void InternalStartProfile(string profile, IntPtr ptrNativeAssemblyLoadContext)
+		{
+		}
+
 		[SecurityCritical]
 		public static void SetProfileRoot(string directoryPath)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			ProfileOptimization.InternalSetProfileRoot(directoryPath);
 		}
 
 		[SecurityCritical]
 		public static void StartProfile(string profile)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			ProfileOptimization.InternalStartProfile(profile, IntPtr.Zero);
 		}
 	}
 }

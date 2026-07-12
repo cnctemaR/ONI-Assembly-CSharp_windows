@@ -2,13 +2,13 @@
 
 namespace System.Threading
 {
-	public struct AsyncLocalValueChangedArgs<T>
+	public readonly struct AsyncLocalValueChangedArgs<T>
 	{
-		public T PreviousValue { get; private set; }
+		public T PreviousValue { get; }
 
-		public T CurrentValue { get; private set; }
+		public T CurrentValue { get; }
 
-		public bool ThreadContextChanged { get; private set; }
+		public bool ThreadContextChanged { get; }
 
 		internal AsyncLocalValueChangedArgs(T previousValue, T currentValue, bool contextChanged)
 		{

@@ -8,12 +8,12 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	public sealed class ComputeShader : Object
 	{
-		[RequiredByNativeCode]
 		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[RequiredByNativeCode]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int FindKernel(string name);
 
@@ -111,6 +111,16 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_DispatchIndirectGraphicsBuffer(int kernelIndex, [NotNull("ArgumentNullException")] GraphicsBuffer argsBuffer, uint argsOffset);
 
+		public LocalKeywordSpace keywordSpace
+		{
+			get
+			{
+				LocalKeywordSpace localKeywordSpace;
+				this.get_keywordSpace_Injected(out localKeywordSpace);
+				return localKeywordSpace;
+			}
+		}
+
 		[FreeFunction("ComputeShaderScripting::EnableKeyword", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void EnableKeyword(string keyword);
@@ -122,6 +132,54 @@ namespace UnityEngine
 		[FreeFunction("ComputeShaderScripting::IsKeywordEnabled", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsKeywordEnabled(string keyword);
+
+		[FreeFunction("ComputeShaderScripting::EnableKeyword", HasExplicitThis = true)]
+		private void EnableLocalKeyword(LocalKeyword keyword)
+		{
+			this.EnableLocalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("ComputeShaderScripting::DisableKeyword", HasExplicitThis = true)]
+		private void DisableLocalKeyword(LocalKeyword keyword)
+		{
+			this.DisableLocalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("ComputeShaderScripting::SetKeyword", HasExplicitThis = true)]
+		private void SetLocalKeyword(LocalKeyword keyword, bool value)
+		{
+			this.SetLocalKeyword_Injected(ref keyword, value);
+		}
+
+		[FreeFunction("ComputeShaderScripting::IsKeywordEnabled", HasExplicitThis = true)]
+		private bool IsLocalKeywordEnabled(LocalKeyword keyword)
+		{
+			return this.IsLocalKeywordEnabled_Injected(ref keyword);
+		}
+
+		public void EnableKeyword(in LocalKeyword keyword)
+		{
+			this.EnableLocalKeyword(keyword);
+		}
+
+		public void DisableKeyword(in LocalKeyword keyword)
+		{
+			this.DisableLocalKeyword(keyword);
+		}
+
+		public void SetKeyword(in LocalKeyword keyword, bool value)
+		{
+			this.SetLocalKeyword(keyword, value);
+		}
+
+		public bool IsKeywordEnabled(in LocalKeyword keyword)
+		{
+			return this.IsLocalKeywordEnabled(keyword);
+		}
+
+		[FreeFunction("ComputeShaderScripting::IsSupported", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsSupported(int kernelIndex);
 
 		[FreeFunction("ComputeShaderScripting::GetShaderKeywords", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -140,6 +198,26 @@ namespace UnityEngine
 			set
 			{
 				this.SetShaderKeywords(value);
+			}
+		}
+
+		[FreeFunction("ComputeShaderScripting::GetEnabledKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern LocalKeyword[] GetEnabledKeywords();
+
+		[FreeFunction("ComputeShaderScripting::SetEnabledKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetEnabledKeywords(LocalKeyword[] keywords);
+
+		public LocalKeyword[] enabledKeywords
+		{
+			get
+			{
+				return this.GetEnabledKeywords();
+			}
+			set
+			{
+				this.SetEnabledKeywords(value);
 			}
 		}
 
@@ -279,6 +357,11 @@ namespace UnityEngine
 			{
 				throw new ObjectDisposedException("argsBuffer");
 			}
+			bool flag3 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal && !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag3)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
 			this.Internal_DispatchIndirect(kernelIndex, argsBuffer, argsOffset);
 		}
 
@@ -300,6 +383,11 @@ namespace UnityEngine
 			{
 				throw new ObjectDisposedException("argsBuffer");
 			}
+			bool flag3 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal && !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag3)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
 			this.Internal_DispatchIndirectGraphicsBuffer(kernelIndex, argsBuffer, argsOffset);
 		}
 
@@ -314,5 +402,20 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetMatrix_Injected(int nameID, ref Matrix4x4 val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_keywordSpace_Injected(out LocalKeywordSpace ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EnableLocalKeyword_Injected(ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DisableLocalKeyword_Injected(ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetLocalKeyword_Injected(ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool IsLocalKeywordEnabled_Injected(ref LocalKeyword keyword);
 	}
 }

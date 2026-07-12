@@ -11,7 +11,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.position;
 		vector.z = 0f;
 		GameObject gameObject = behaviour.controller.gameObject;
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
@@ -19,7 +19,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 		{
 			vector = SoundEvent.AudioHighlightListenerPosition(vector);
 		}
-		Worker component = behaviour.GetComponent<Worker>();
+		WorkerBase component = behaviour.GetComponent<WorkerBase>();
 		if (component == null)
 		{
 			string sound = GlobalAssets.GetSound("Building_Dmg_Metal", false);
@@ -29,7 +29,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 				return;
 			}
 		}
-		Workable workable = component.workable;
+		Workable workable = component.GetWorkable();
 		if (workable != null)
 		{
 			Building component2 = workable.GetComponent<Building>();

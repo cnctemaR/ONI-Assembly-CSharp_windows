@@ -829,7 +829,7 @@ namespace System.Data
 
 		internal DataColumnCollection()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataTable _table;

@@ -19,6 +19,12 @@ namespace UnityEngine
 			get;
 		}
 
+		public extern int warmedUpVariantCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern bool isWarmedUp
 		{
 			[NativeName("IsWarmedUp")]
@@ -27,13 +33,13 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool AddVariant(Shader shader, PassType passType, string[] keywords);
+		private extern bool AddVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool RemoveVariant(Shader shader, PassType passType, string[] keywords);
+		private extern bool RemoveVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ContainsVariant(Shader shader, PassType passType, string[] keywords);
+		private extern bool ContainsVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
 
 		[NativeName("ClearVariants")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -42,6 +48,10 @@ namespace UnityEngine
 		[NativeName("WarmupShaders")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void WarmUp();
+
+		[NativeName("WarmupShadersProgressively")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool WarmUpProgressively(int variantCount);
 
 		[NativeName("CreateFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]

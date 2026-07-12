@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum KeyContainerPermissionFlags
 	{

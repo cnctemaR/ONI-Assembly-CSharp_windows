@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine.Bindings;
 
@@ -46,13 +47,10 @@ namespace UnityEngine
 			return b2;
 		}
 
-		private static byte[] Byte2Hex(byte b, byte[] hexChars)
+		private static void Byte2Hex(byte b, byte[] hexChars, out byte byte0, out byte byte1)
 		{
-			return new byte[]
-			{
-				hexChars[b >> 4],
-				hexChars[(int)(b & 15)]
-			};
+			byte0 = hexChars[b >> 4];
+			byte1 = hexChars[(int)(b & 15)];
 		}
 
 		public static string URLEncode(string toEncode)
@@ -121,7 +119,11 @@ namespace UnityEngine
 						if (flag2)
 						{
 							memoryStream.WriteByte(escapeChar);
-							memoryStream.Write(WWWTranscoder.Byte2Hex(input[i], uppercase ? WWWTranscoder.ucHexChars : WWWTranscoder.lcHexChars), 0, 2);
+							byte b;
+							byte b2;
+							WWWTranscoder.Byte2Hex(input[i], uppercase ? WWWTranscoder.ucHexChars : WWWTranscoder.lcHexChars, out b, out b2);
+							memoryStream.WriteByte(b);
+							memoryStream.WriteByte(b2);
 						}
 						else
 						{
@@ -256,14 +258,36 @@ namespace UnityEngine
 			return WWWTranscoder.SevenBitClean(s, Encoding.UTF8);
 		}
 
-		public static bool SevenBitClean(string s, Encoding e)
+		public unsafe static bool SevenBitClean(string s, Encoding e)
 		{
-			return WWWTranscoder.SevenBitClean(e.GetBytes(s));
+			bool flag = string.IsNullOrEmpty(s);
+			bool flag2;
+			if (flag)
+			{
+				flag2 = true;
+			}
+			else
+			{
+				int num = s.Length * 2;
+				byte* ptr = stackalloc byte[(UIntPtr)num];
+				int bytes;
+				fixed (string text = s)
+				{
+					char* ptr2 = text;
+					if (ptr2 != null)
+					{
+						ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					bytes = e.GetBytes(ptr2, s.Length, ptr, num);
+				}
+				flag2 = WWWTranscoder.SevenBitClean(ptr, bytes);
+			}
+			return flag2;
 		}
 
-		public static bool SevenBitClean(byte[] input)
+		public unsafe static bool SevenBitClean(byte* input, int inputLength)
 		{
-			for (int i = 0; i < input.Length; i++)
+			for (int i = 0; i < inputLength; i++)
 			{
 				bool flag = input[i] < 32 || input[i] > 126;
 				if (flag)

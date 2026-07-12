@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 
 namespace MS.Internal.Xml.XPath
@@ -9,13 +8,13 @@ namespace MS.Internal.Xml.XPath
 		public XPathAncestorQuery(Query qyInput, string name, string prefix, XPathNodeType typeTest, bool matchSelf)
 			: base(qyInput, name, prefix, typeTest)
 		{
-			this.matchSelf = matchSelf;
+			this._matchSelf = matchSelf;
 		}
 
 		private XPathAncestorQuery(XPathAncestorQuery other)
 			: base(other)
 		{
-			this.matchSelf = other.matchSelf;
+			this._matchSelf = other._matchSelf;
 		}
 
 		public override object Evaluate(XPathNodeIterator context)
@@ -25,13 +24,13 @@ namespace MS.Internal.Xml.XPath
 			XPathNavigator xpathNavigator2;
 			while ((xpathNavigator2 = this.qyInput.Advance()) != null)
 			{
-				if (!this.matchSelf || !this.matches(xpathNavigator2) || base.Insert(this.outputBuffer, xpathNavigator2))
+				if (!this._matchSelf || !this.matches(xpathNavigator2) || Query.Insert(this.outputBuffer, xpathNavigator2))
 				{
 					if (xpathNavigator == null || !xpathNavigator.MoveTo(xpathNavigator2))
 					{
 						xpathNavigator = xpathNavigator2.Clone();
 					}
-					while (xpathNavigator.MoveToParent() && (!this.matches(xpathNavigator) || base.Insert(this.outputBuffer, xpathNavigator)))
+					while (xpathNavigator.MoveToParent() && (!this.matches(xpathNavigator) || Query.Insert(this.outputBuffer, xpathNavigator)))
 					{
 					}
 				}
@@ -60,25 +59,6 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			if (this.matchSelf)
-			{
-				w.WriteAttributeString("self", "yes");
-			}
-			if (base.NameTest)
-			{
-				w.WriteAttributeString("name", (base.Prefix.Length != 0) ? (base.Prefix + ":" + base.Name) : base.Name);
-			}
-			if (base.TypeTest != XPathNodeType.Element)
-			{
-				w.WriteAttributeString("nodeType", base.TypeTest.ToString());
-			}
-			this.qyInput.PrintQuery(w);
-			w.WriteEndElement();
-		}
-
-		private bool matchSelf;
+		private bool _matchSelf;
 	}
 }

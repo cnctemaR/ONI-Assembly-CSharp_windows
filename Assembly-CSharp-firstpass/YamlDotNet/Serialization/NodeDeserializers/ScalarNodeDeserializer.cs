@@ -155,7 +155,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			}
 			else
 			{
-				string[] array = value.Substring(i).Split(new char[] { ':' });
+				string[] array = value.Substring(i).Split(':', StringSplitOptions.None);
 				num = 0UL;
 				for (int j = 0; j < array.Length; j++)
 				{

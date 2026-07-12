@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
 {
@@ -19,17 +21,47 @@ namespace System.Data.SqlClient.SNI
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
+			return this.ReadInternal(buffer, offset, count, CancellationToken.None, false).GetAwaiter().GetResult();
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			this.WriteInternal(buffer, offset, count, CancellationToken.None, false).Wait();
+		}
+
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
+		{
+			return this.WriteInternal(buffer, offset, count, token, true);
+		}
+
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken token)
+		{
+			return this.ReadInternal(buffer, offset, count, token, true);
+		}
+
+		private async Task<int> ReadInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
+		{
 			int i = 0;
-			byte[] array = new byte[(count < 8) ? 8 : count];
+			byte[] packetData = new byte[(count < 8) ? 8 : count];
+			int num2;
 			if (this._encapsulate)
 			{
 				if (this._packetBytes == 0)
 				{
 					while (i < 8)
 					{
-						i += this._stream.Read(array, i, 8 - i);
+						int num = i;
+						if (async)
+						{
+							num2 = await this._stream.ReadAsync(packetData, i, 8 - i, token).ConfigureAwait(false);
+						}
+						else
+						{
+							num2 = this._stream.Read(packetData, i, 8 - i);
+						}
+						i = num + num2;
 					}
-					this._packetBytes = ((int)array[2] << 8) | (int)array[3];
+					this._packetBytes = ((int)packetData[2] << 8) | (int)packetData[3];
 					this._packetBytes -= 8;
 				}
 				if (count > this._packetBytes)
@@ -37,55 +69,84 @@ namespace System.Data.SqlClient.SNI
 					count = this._packetBytes;
 				}
 			}
-			i = this._stream.Read(array, 0, count);
+			if (async)
+			{
+				num2 = await this._stream.ReadAsync(packetData, 0, count, token).ConfigureAwait(false);
+			}
+			else
+			{
+				num2 = this._stream.Read(packetData, 0, count);
+			}
+			i = num2;
 			if (this._encapsulate)
 			{
 				this._packetBytes -= i;
 			}
-			Buffer.BlockCopy(array, 0, buffer, offset, i);
+			Buffer.BlockCopy(packetData, 0, buffer, offset, i);
 			return i;
 		}
 
-		public override void Write(byte[] buffer, int offset, int count)
+		private async Task WriteInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
 		{
-			int num = offset;
+			int currentCount = 0;
+			int currentOffset = offset;
 			while (count > 0)
 			{
-				int num2;
 				if (this._encapsulate)
 				{
 					if (count > 4088)
 					{
-						num2 = 4088;
+						currentCount = 4088;
 					}
 					else
 					{
-						num2 = count;
+						currentCount = count;
 					}
-					count -= num2;
-					byte[] array = new byte[8 + num2];
+					count -= currentCount;
+					byte[] array = new byte[8 + currentCount];
 					array[0] = 18;
 					array[1] = ((count > 0) ? 0 : 1);
-					array[2] = (byte)((num2 + 8) / 256);
-					array[3] = (byte)((num2 + 8) % 256);
+					array[2] = (byte)((currentCount + 8) / 256);
+					array[3] = (byte)((currentCount + 8) % 256);
 					array[4] = 0;
 					array[5] = 0;
 					array[6] = 0;
 					array[7] = 0;
 					for (int i = 8; i < array.Length; i++)
 					{
-						array[i] = buffer[num + (i - 8)];
+						array[i] = buffer[currentOffset + (i - 8)];
 					}
-					this._stream.Write(array, 0, array.Length);
+					if (async)
+					{
+						await this._stream.WriteAsync(array, 0, array.Length, token).ConfigureAwait(false);
+					}
+					else
+					{
+						this._stream.Write(array, 0, array.Length);
+					}
 				}
 				else
 				{
-					num2 = count;
+					currentCount = count;
 					count = 0;
-					this._stream.Write(buffer, num, num2);
+					if (async)
+					{
+						await this._stream.WriteAsync(buffer, currentOffset, currentCount, token).ConfigureAwait(false);
+					}
+					else
+					{
+						this._stream.Write(buffer, currentOffset, currentCount);
+					}
 				}
-				this._stream.Flush();
-				num += num2;
+				if (async)
+				{
+					await this._stream.FlushAsync().ConfigureAwait(false);
+				}
+				else
+				{
+					this._stream.Flush();
+				}
+				currentOffset += currentCount;
 			}
 		}
 

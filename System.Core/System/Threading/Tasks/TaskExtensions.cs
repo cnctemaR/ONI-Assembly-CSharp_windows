@@ -10,7 +10,19 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("task");
 			}
-			return Task.CreateUnwrapPromise<TaskExtensions.VoidResult>(task, false);
+			Task task2;
+			if (task.IsCompletedSuccessfully)
+			{
+				if ((task2 = task.Result) == null)
+				{
+					return Task.FromCanceled(new CancellationToken(true));
+				}
+			}
+			else
+			{
+				task2 = Task.CreateUnwrapPromise<VoidTaskResult>(task, false);
+			}
+			return task2;
 		}
 
 		public static Task<TResult> Unwrap<TResult>(this Task<Task<TResult>> task)
@@ -19,11 +31,19 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("task");
 			}
-			return Task.CreateUnwrapPromise<TResult>(task, false);
-		}
-
-		private struct VoidResult
-		{
+			Task<TResult> task2;
+			if (task.IsCompletedSuccessfully)
+			{
+				if ((task2 = task.Result) == null)
+				{
+					return Task.FromCanceled<TResult>(new CancellationToken(true));
+				}
+			}
+			else
+			{
+				task2 = Task.CreateUnwrapPromise<TResult>(task, false);
+			}
+			return task2;
 		}
 	}
 }

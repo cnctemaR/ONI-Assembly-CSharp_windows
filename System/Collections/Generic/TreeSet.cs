@@ -25,7 +25,7 @@ namespace System.Collections.Generic
 			bool flag = base.AddIfNotPresent(item);
 			if (!flag)
 			{
-				throw new ArgumentException(global::SR.Format("An item with the same key has already been added. Key: {0}", item));
+				throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", item));
 			}
 			return flag;
 		}

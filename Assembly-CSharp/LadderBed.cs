@@ -60,7 +60,7 @@ public class LadderBed : GameStateMachine<LadderBed, LadderBed.Instance, IStateM
 		private void OnMoverChanged(object obj)
 		{
 			Pickupable pickupable = obj as Pickupable;
-			if (pickupable != null && pickupable.gameObject != null && pickupable.KPrefabID.HasTag(GameTags.Minion) && pickupable.GetComponent<Navigator>().CurrentNavType == NavType.Ladder)
+			if (pickupable != null && pickupable.gameObject != null && pickupable.KPrefabID.HasTag(GameTags.BaseMinion) && pickupable.GetComponent<Navigator>().CurrentNavType == NavType.Ladder)
 			{
 				if (this.m_sleepable.worker == null)
 				{

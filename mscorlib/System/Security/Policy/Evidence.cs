@@ -4,9 +4,9 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
-using Mono.Security.Authenticode;
 using Unity;
 
 namespace System.Security.Policy
@@ -25,6 +25,18 @@ namespace System.Security.Policy
 			if (evidence != null)
 			{
 				this.Merge(evidence);
+			}
+		}
+
+		public Evidence(EvidenceBase[] hostEvidence, EvidenceBase[] assemblyEvidence)
+		{
+			if (hostEvidence != null)
+			{
+				this.HostEvidenceList.AddRange(hostEvidence);
+			}
+			if (assemblyEvidence != null)
+			{
+				this.AssemblyEvidenceList.AddRange(assemblyEvidence);
 			}
 		}
 
@@ -263,14 +275,13 @@ namespace System.Security.Policy
 			}
 			if (Evidence.IsAuthenticodePresent(a))
 			{
-				AuthenticodeDeformatter authenticodeDeformatter = new AuthenticodeDeformatter(a.Location);
-				if (authenticodeDeformatter.SigningCertificate != null)
+				try
 				{
-					X509Certificate x509Certificate = new X509Certificate(authenticodeDeformatter.SigningCertificate.RawData);
-					if (x509Certificate.GetHashCode() != 0)
-					{
-						evidence.AddHost(new Publisher(x509Certificate));
-					}
+					X509Certificate x509Certificate = X509Certificate.CreateFromSignedFile(a.Location);
+					evidence.AddHost(new Publisher(x509Certificate));
+				}
+				catch (CryptographicException)
+				{
 				}
 			}
 			if (a.GlobalAssemblyCache)
@@ -283,11 +294,6 @@ namespace System.Security.Policy
 				evidence = domainManager.HostSecurityManager.ProvideAssemblyEvidence(a, evidence);
 			}
 			return evidence;
-		}
-
-		public Evidence(EvidenceBase[] hostEvidence, EvidenceBase[] assemblyEvidence)
-		{
-			ThrowStub.ThrowNotSupportedException();
 		}
 
 		[ComVisible(false)]

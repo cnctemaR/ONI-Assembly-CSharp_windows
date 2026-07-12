@@ -54,7 +54,7 @@ namespace System.Data.Common
 		{
 			get
 			{
-				uint num = <PrivateImplementationDetails>.ComputeStringHash(property);
+				uint num = global::<PrivateImplementationDetails>.ComputeStringHash(property);
 				if (num <= 2477638934U)
 				{
 					if (num <= 1067318116U)

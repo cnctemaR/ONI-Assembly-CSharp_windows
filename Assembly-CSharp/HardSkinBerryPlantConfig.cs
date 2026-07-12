@@ -28,7 +28,20 @@ public class HardSkinBerryPlantConfig : IEntityConfig
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "HardSkinBerryPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.HARDSKINBERRYPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.HARDSKINBERRYPLANT.DESC, Assets.GetAnim("seed_ice_berry_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.HARDSKINBERRYPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds());
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text4 = "HardSkinBerryPlantSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.HARDSKINBERRYPLANT.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.HARDSKINBERRYPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_ice_berry_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.HARDSKINBERRYPLANT.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 1, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -37,7 +50,7 @@ public class HardSkinBerryPlantConfig : IEntityConfig
 				massConsumptionRate = 0.008333334f
 			}
 		});
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "HardSkinBerryPlant_preview", Assets.GetAnim("ice_berry_bush_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "HardSkinBerryPlant_preview", Assets.GetAnim("ice_berry_bush_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("meallice_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;

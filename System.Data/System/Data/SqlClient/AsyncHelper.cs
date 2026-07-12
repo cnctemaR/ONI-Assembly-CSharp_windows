@@ -9,17 +9,15 @@ namespace System.Data.SqlClient
 	{
 		internal static Task CreateContinuationTask(Task task, Action onSuccess, SqlInternalConnectionTds connectionToDoom = null, Action<Exception> onFailure = null)
 		{
-			AsyncHelper.<>c__DisplayClass0_0 CS$<>8__locals1 = new AsyncHelper.<>c__DisplayClass0_0();
-			CS$<>8__locals1.onSuccess = onSuccess;
 			if (task == null)
 			{
-				CS$<>8__locals1.onSuccess();
+				onSuccess();
 				return null;
 			}
 			TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
 			AsyncHelper.ContinueTask(task, completion, delegate
 			{
-				CS$<>8__locals1.onSuccess();
+				onSuccess();
 				completion.SetResult(null);
 			}, connectionToDoom, onFailure, null, null, null);
 			return completion.Task;

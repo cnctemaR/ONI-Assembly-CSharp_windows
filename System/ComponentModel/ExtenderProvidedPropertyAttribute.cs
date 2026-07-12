@@ -9,35 +9,17 @@ namespace System.ComponentModel
 		{
 			return new ExtenderProvidedPropertyAttribute
 			{
-				extenderProperty = extenderProperty,
-				receiverType = receiverType,
-				provider = provider
+				ExtenderProperty = extenderProperty,
+				ReceiverType = receiverType,
+				Provider = provider
 			};
 		}
 
-		public PropertyDescriptor ExtenderProperty
-		{
-			get
-			{
-				return this.extenderProperty;
-			}
-		}
+		public PropertyDescriptor ExtenderProperty { get; private set; }
 
-		public IExtenderProvider Provider
-		{
-			get
-			{
-				return this.provider;
-			}
-		}
+		public IExtenderProvider Provider { get; private set; }
 
-		public Type ReceiverType
-		{
-			get
-			{
-				return this.receiverType;
-			}
-		}
+		public Type ReceiverType { get; private set; }
 
 		public override bool Equals(object obj)
 		{
@@ -46,7 +28,7 @@ namespace System.ComponentModel
 				return true;
 			}
 			ExtenderProvidedPropertyAttribute extenderProvidedPropertyAttribute = obj as ExtenderProvidedPropertyAttribute;
-			return extenderProvidedPropertyAttribute != null && extenderProvidedPropertyAttribute.extenderProperty.Equals(this.extenderProperty) && extenderProvidedPropertyAttribute.provider.Equals(this.provider) && extenderProvidedPropertyAttribute.receiverType.Equals(this.receiverType);
+			return extenderProvidedPropertyAttribute != null && extenderProvidedPropertyAttribute.ExtenderProperty.Equals(this.ExtenderProperty) && extenderProvidedPropertyAttribute.Provider.Equals(this.Provider) && extenderProvidedPropertyAttribute.ReceiverType.Equals(this.ReceiverType);
 		}
 
 		public override int GetHashCode()
@@ -56,13 +38,7 @@ namespace System.ComponentModel
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.receiverType == null;
+			return this.ReceiverType == null;
 		}
-
-		private PropertyDescriptor extenderProperty;
-
-		private IExtenderProvider provider;
-
-		private Type receiverType;
 	}
 }

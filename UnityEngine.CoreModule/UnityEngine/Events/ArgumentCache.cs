@@ -97,8 +97,8 @@ namespace UnityEngine.Events
 		[FormerlySerializedAs("intArgument")]
 		private int m_IntArgument;
 
-		[FormerlySerializedAs("floatArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("floatArgument")]
 		private float m_FloatArgument;
 
 		[SerializeField]

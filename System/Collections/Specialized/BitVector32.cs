@@ -7,28 +7,28 @@ namespace System.Collections.Specialized
 	{
 		public BitVector32(int data)
 		{
-			this.data = (uint)data;
+			this._data = (uint)data;
 		}
 
 		public BitVector32(BitVector32 value)
 		{
-			this.data = value.data;
+			this._data = value._data;
 		}
 
 		public bool this[int bit]
 		{
 			get
 			{
-				return ((ulong)this.data & (ulong)((long)bit)) == (ulong)bit;
+				return ((ulong)this._data & (ulong)((long)bit)) == (ulong)bit;
 			}
 			set
 			{
 				if (value)
 				{
-					this.data |= (uint)bit;
+					this._data |= (uint)bit;
 					return;
 				}
-				this.data &= (uint)(~(uint)bit);
+				this._data &= (uint)(~(uint)bit);
 			}
 		}
 
@@ -36,13 +36,13 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return (int)((this.data & (uint)((uint)section.Mask << (int)section.Offset)) >> (int)section.Offset);
+				return (int)((this._data & (uint)((uint)section.Mask << (int)section.Offset)) >> (int)section.Offset);
 			}
 			set
 			{
 				value <<= (int)section.Offset;
 				int num = (65535 & (int)section.Mask) << (int)section.Offset;
-				this.data = (this.data & (uint)(~(uint)num)) | (uint)(value & num);
+				this._data = (this._data & (uint)(~(uint)num)) | (uint)(value & num);
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return (int)this.data;
+				return (int)this._data;
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace System.Collections.Specialized
 			}
 			if (previous == -2147483648)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Bit vector is full."));
+				throw new InvalidOperationException("Bit vector is full.");
 			}
 			return previous << 1;
 		}
@@ -115,19 +115,19 @@ namespace System.Collections.Specialized
 		{
 			if (maxValue < 1)
 			{
-				throw new ArgumentException(global::SR.GetString("Argument {0} should be larger than {1}.", new object[] { "maxValue", 0 }), "maxValue");
+				throw new ArgumentException(SR.Format("Argument {0} should be larger than {1}.", "maxValue", 1), "maxValue");
 			}
 			short num = priorOffset + BitVector32.CountBitsSet(priorMask);
 			if (num >= 32)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Bit vector is full."));
+				throw new InvalidOperationException("Bit vector is full.");
 			}
 			return new BitVector32.Section(BitVector32.CreateMaskFromHighValue(maxValue), num);
 		}
 
 		public override bool Equals(object o)
 		{
-			return o is BitVector32 && this.data == ((BitVector32)o).data;
+			return o is BitVector32 && this._data == ((BitVector32)o)._data;
 		}
 
 		public override int GetHashCode()
@@ -139,20 +139,20 @@ namespace System.Collections.Specialized
 		{
 			StringBuilder stringBuilder = new StringBuilder(45);
 			stringBuilder.Append("BitVector32{");
-			int num = (int)value.data;
+			int num = (int)value._data;
 			for (int i = 0; i < 32; i++)
 			{
 				if (((long)num & (long)((ulong)(-2147483648))) != 0L)
 				{
-					stringBuilder.Append("1");
+					stringBuilder.Append('1');
 				}
 				else
 				{
-					stringBuilder.Append("0");
+					stringBuilder.Append('0');
 				}
 				num <<= 1;
 			}
-			stringBuilder.Append("}");
+			stringBuilder.Append('}');
 			return stringBuilder.ToString();
 		}
 
@@ -161,21 +161,21 @@ namespace System.Collections.Specialized
 			return BitVector32.ToString(this);
 		}
 
-		private uint data;
+		private uint _data;
 
-		public struct Section
+		public readonly struct Section
 		{
 			internal Section(short mask, short offset)
 			{
-				this.mask = mask;
-				this.offset = offset;
+				this._mask = mask;
+				this._offset = offset;
 			}
 
 			public short Mask
 			{
 				get
 				{
-					return this.mask;
+					return this._mask;
 				}
 			}
 
@@ -183,7 +183,7 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.offset;
+					return this._offset;
 				}
 			}
 
@@ -194,7 +194,7 @@ namespace System.Collections.Specialized
 
 			public bool Equals(BitVector32.Section obj)
 			{
-				return obj.mask == this.mask && obj.offset == this.offset;
+				return obj._mask == this._mask && obj._offset == this._offset;
 			}
 
 			public static bool operator ==(BitVector32.Section a, BitVector32.Section b)
@@ -229,9 +229,9 @@ namespace System.Collections.Specialized
 				return BitVector32.Section.ToString(this);
 			}
 
-			private readonly short mask;
+			private readonly short _mask;
 
-			private readonly short offset;
+			private readonly short _offset;
 		}
 	}
 }

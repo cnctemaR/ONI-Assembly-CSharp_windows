@@ -6,7 +6,15 @@ public class CallAdultStates : GameStateMachine<CallAdultStates, CallAdultStates
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.pre;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.SLEEPING.NAME, CREATURES.STATUSITEMS.SLEEPING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<CallAdultStates, CallAdultStates.Instance, IStateMachineTarget, CallAdultStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.SLEEPING.NAME;
+		string text2 = CREATURES.STATUSITEMS.SLEEPING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.pre.QueueAnim("call_pre", false, null).OnAnimQueueComplete(this.loop);
 		this.loop.QueueAnim("call_loop", false, null).OnAnimQueueComplete(this.pst);
 		this.pst.QueueAnim("call_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);

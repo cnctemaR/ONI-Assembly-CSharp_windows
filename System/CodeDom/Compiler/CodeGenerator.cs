@@ -691,7 +691,7 @@ namespace System.CodeDom.Compiler
 			{
 				throw new ArgumentNullException("e");
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void GenerateFields(CodeTypeDeclaration e)
@@ -988,7 +988,7 @@ namespace System.CodeDom.Compiler
 			{
 				if (!(e is CodeLabeledStatement))
 				{
-					throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+					throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 				}
 				this.GenerateLabeledStatement((CodeLabeledStatement)e);
 			}
@@ -1080,8 +1080,7 @@ namespace System.CodeDom.Compiler
 
 		protected virtual void OutputFieldScopeModifier(MemberAttributes attributes)
 		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
 			{
 				this.Output.Write("new ");
 			}
@@ -1146,8 +1145,7 @@ namespace System.CodeDom.Compiler
 
 		protected virtual void OutputMemberScopeModifier(MemberAttributes attributes)
 		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
 			{
 				this.Output.Write("new ");
 			}
@@ -1166,12 +1164,14 @@ namespace System.CodeDom.Compiler
 				this.Output.Write("override ");
 				return;
 			default:
-				memberAttributes = attributes & MemberAttributes.AccessMask;
+			{
+				MemberAttributes memberAttributes = attributes & MemberAttributes.AccessMask;
 				if (memberAttributes == MemberAttributes.Family || memberAttributes == MemberAttributes.Public)
 				{
 					this.Output.Write("virtual ");
 				}
 				return;
+			}
 			}
 		}
 
@@ -1489,7 +1489,7 @@ namespace System.CodeDom.Compiler
 			}
 			if (!(e.Value is bool))
 			{
-				throw new ArgumentException(global::SR.Format("Invalid Primitive Type: {0}. Consider using CodeObjectCreateExpression.", e.Value.GetType().ToString()));
+				throw new ArgumentException(SR.Format("Invalid Primitive Type: {0}. Consider using CodeObjectCreateExpression.", e.Value.GetType().ToString()));
 			}
 			if ((bool)e.Value)
 			{
@@ -1546,7 +1546,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (e.Comment == null)
 			{
-				throw new ArgumentException(global::SR.Format("The 'Comment' property of the CodeCommentStatement '{0}' cannot be null.", "e"), "e");
+				throw new ArgumentException(SR.Format("The 'Comment' property of the CodeCommentStatement '{0}' cannot be null.", "e"), "e");
 			}
 			this.GenerateComment(e.Comment);
 		}
@@ -1643,7 +1643,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (!this.IsValidIdentifier(value))
 			{
-				throw new ArgumentException(global::SR.Format("Identifier '{0}' is not valid.", value));
+				throw new ArgumentException(SR.Format("Identifier '{0}' is not valid.", value));
 			}
 		}
 

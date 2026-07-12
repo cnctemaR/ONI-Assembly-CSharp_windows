@@ -11,22 +11,32 @@ namespace UnityEngine.Rendering
 	{
 		public JobHandle cullingJobsFence;
 
-		public Matrix4x4 cullingMatrix;
+		public Matrix4x4 localToWorldMatrix;
 
 		public unsafe Plane* cullingPlanes;
 
-		public unsafe BatchVisibility* batchVisibility;
+		public int cullingPlaneCount;
 
-		public unsafe int* visibleIndices;
+		public int receiverPlaneOffset;
 
-		public unsafe int* visibleIndicesY;
+		public int receiverPlaneCount;
 
-		public int cullingPlanesCount;
+		public unsafe CullingSplit* cullingSplits;
 
-		public int batchVisibilityCount;
+		public int cullingSplitCount;
 
-		public int visibleIndicesCount;
+		public BatchCullingViewType viewType;
 
-		public float nearPlane;
+		public BatchCullingProjectionType projectionType;
+
+		public BatchCullingFlags cullingFlags;
+
+		public ulong viewID;
+
+		public uint cullingLayerMask;
+
+		public ulong sceneCullingMask;
+
+		public unsafe BatchCullingOutputDrawCommands* drawCommands;
 	}
 }

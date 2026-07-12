@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 namespace Klei.AI
@@ -13,7 +14,7 @@ namespace Klei.AI
 			base.AddSicknessComponent(new CommonSickEffectSickness());
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
 			{
-				new AttributeModifier("BreathDelta", -1.1363636f, DUPLICANTS.DISEASES.SLIMESICKNESS.NAME, false, false, true),
+				new AttributeModifier("BreathDelta", DUPLICANTSTATS.STANDARD.Breath.BREATH_RATE * -1.25f, DUPLICANTS.DISEASES.SLIMESICKNESS.NAME, false, false, true),
 				new AttributeModifier("Athletics", -3f, DUPLICANTS.DISEASES.SLIMESICKNESS.NAME, false, false, true)
 			}));
 			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));

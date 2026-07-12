@@ -1,28 +1,22 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Globalization
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class DaylightTime
 	{
-		private DaylightTime()
-		{
-		}
-
 		public DaylightTime(DateTime start, DateTime end, TimeSpan delta)
 		{
-			this.m_start = start;
-			this.m_end = end;
-			this.m_delta = delta;
+			this._start = start;
+			this._end = end;
+			this._delta = delta;
 		}
 
 		public DateTime Start
 		{
 			get
 			{
-				return this.m_start;
+				return this._start;
 			}
 		}
 
@@ -30,7 +24,7 @@ namespace System.Globalization
 		{
 			get
 			{
-				return this.m_end;
+				return this._end;
 			}
 		}
 
@@ -38,14 +32,14 @@ namespace System.Globalization
 		{
 			get
 			{
-				return this.m_delta;
+				return this._delta;
 			}
 		}
 
-		internal DateTime m_start;
+		private readonly DateTime _start;
 
-		internal DateTime m_end;
+		private readonly DateTime _end;
 
-		internal TimeSpan m_delta;
+		private readonly TimeSpan _delta;
 	}
 }

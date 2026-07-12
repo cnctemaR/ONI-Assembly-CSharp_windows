@@ -9,47 +9,47 @@ namespace MS.Internal.Xml.Cache
 	{
 		public XPathDocumentNavigator(XPathNode[] pageCurrent, int idxCurrent, XPathNode[] pageParent, int idxParent)
 		{
-			this.pageCurrent = pageCurrent;
-			this.pageParent = pageParent;
-			this.idxCurrent = idxCurrent;
-			this.idxParent = idxParent;
+			this._pageCurrent = pageCurrent;
+			this._pageParent = pageParent;
+			this._idxCurrent = idxCurrent;
+			this._idxParent = idxParent;
 		}
 
 		public XPathDocumentNavigator(XPathDocumentNavigator nav)
-			: this(nav.pageCurrent, nav.idxCurrent, nav.pageParent, nav.idxParent)
+			: this(nav._pageCurrent, nav._idxCurrent, nav._pageParent, nav._idxParent)
 		{
-			this.atomizedLocalName = nav.atomizedLocalName;
+			this._atomizedLocalName = nav._atomizedLocalName;
 		}
 
 		public override string Value
 		{
 			get
 			{
-				string value = this.pageCurrent[this.idxCurrent].Value;
+				string value = this._pageCurrent[this._idxCurrent].Value;
 				if (value != null)
 				{
 					return value;
 				}
-				if (this.idxParent != 0)
+				if (this._idxParent != 0)
 				{
-					return this.pageParent[this.idxParent].Value;
+					return this._pageParent[this._idxParent].Value;
 				}
 				string text = string.Empty;
 				StringBuilder stringBuilder = null;
-				XPathNode[] array2;
-				XPathNode[] array = (array2 = this.pageCurrent);
-				int num2;
-				int num = (num2 = this.idxCurrent);
+				XPathNode[] pageCurrent;
+				XPathNode[] array = (pageCurrent = this._pageCurrent);
+				int idxCurrent;
+				int num = (idxCurrent = this._idxCurrent);
 				if (!XPathNodeHelper.GetNonDescendant(ref array, ref num))
 				{
 					array = null;
 					num = 0;
 				}
-				while (XPathNodeHelper.GetTextFollowing(ref array2, ref num2, array, num))
+				while (XPathNodeHelper.GetTextFollowing(ref pageCurrent, ref idxCurrent, array, num))
 				{
 					if (text.Length == 0)
 					{
-						text = array2[num2].Value;
+						text = pageCurrent[idxCurrent].Value;
 					}
 					else
 					{
@@ -58,7 +58,7 @@ namespace MS.Internal.Xml.Cache
 							stringBuilder = new StringBuilder();
 							stringBuilder.Append(text);
 						}
-						stringBuilder.Append(array2[num2].Value);
+						stringBuilder.Append(pageCurrent[idxCurrent].Value);
 					}
 				}
 				if (stringBuilder == null)
@@ -71,14 +71,14 @@ namespace MS.Internal.Xml.Cache
 
 		public override XPathNavigator Clone()
 		{
-			return new XPathDocumentNavigator(this.pageCurrent, this.idxCurrent, this.pageParent, this.idxParent);
+			return new XPathDocumentNavigator(this._pageCurrent, this._idxCurrent, this._pageParent, this._idxParent);
 		}
 
 		public override XPathNodeType NodeType
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].NodeType;
+				return this._pageCurrent[this._idxCurrent].NodeType;
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].LocalName;
+				return this._pageCurrent[this._idxCurrent].LocalName;
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].NamespaceUri;
+				return this._pageCurrent[this._idxCurrent].NamespaceUri;
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].Name;
+				return this._pageCurrent[this._idxCurrent].Name;
 			}
 		}
 
@@ -110,7 +110,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].Prefix;
+				return this._pageCurrent[this._idxCurrent].Prefix;
 			}
 		}
 
@@ -119,31 +119,31 @@ namespace MS.Internal.Xml.Cache
 			get
 			{
 				XPathNode[] array;
-				int parent;
-				if (this.idxParent != 0)
+				int num;
+				if (this._idxParent != 0)
 				{
-					array = this.pageParent;
-					parent = this.idxParent;
+					array = this._pageParent;
+					num = this._idxParent;
 				}
 				else
 				{
-					array = this.pageCurrent;
-					parent = this.idxCurrent;
+					array = this._pageCurrent;
+					num = this._idxCurrent;
 				}
 				for (;;)
 				{
-					XPathNodeType nodeType = array[parent].NodeType;
+					XPathNodeType nodeType = array[num].NodeType;
 					if (nodeType <= XPathNodeType.Element || nodeType == XPathNodeType.ProcessingInstruction)
 					{
 						break;
 					}
-					parent = array[parent].GetParent(out array);
-					if (parent == 0)
+					num = array[num].GetParent(out array);
+					if (num == 0)
 					{
 						goto Block_3;
 					}
 				}
-				return array[parent].BaseUri;
+				return array[num].BaseUri;
 				Block_3:
 				return string.Empty;
 			}
@@ -153,7 +153,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].AllowShortcutTag;
+				return this._pageCurrent[this._idxCurrent].AllowShortcutTag;
 			}
 		}
 
@@ -161,18 +161,18 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].Document.NameTable;
+				return this._pageCurrent[this._idxCurrent].Document.NameTable;
 			}
 		}
 
 		public override bool MoveToFirstAttribute()
 		{
-			XPathNode[] array = this.pageCurrent;
-			int num = this.idxCurrent;
-			if (XPathNodeHelper.GetFirstAttribute(ref this.pageCurrent, ref this.idxCurrent))
+			XPathNode[] pageCurrent = this._pageCurrent;
+			int idxCurrent = this._idxCurrent;
+			if (XPathNodeHelper.GetFirstAttribute(ref this._pageCurrent, ref this._idxCurrent))
 			{
-				this.pageParent = array;
-				this.idxParent = num;
+				this._pageParent = pageCurrent;
+				this._idxParent = idxCurrent;
 				return true;
 			}
 			return false;
@@ -180,29 +180,29 @@ namespace MS.Internal.Xml.Cache
 
 		public override bool MoveToNextAttribute()
 		{
-			return XPathNodeHelper.GetNextAttribute(ref this.pageCurrent, ref this.idxCurrent);
+			return XPathNodeHelper.GetNextAttribute(ref this._pageCurrent, ref this._idxCurrent);
 		}
 
 		public override bool HasAttributes
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].HasAttribute;
+				return this._pageCurrent[this._idxCurrent].HasAttribute;
 			}
 		}
 
 		public override bool MoveToAttribute(string localName, string namespaceURI)
 		{
-			XPathNode[] array = this.pageCurrent;
-			int num = this.idxCurrent;
-			if (localName != this.atomizedLocalName)
+			XPathNode[] pageCurrent = this._pageCurrent;
+			int idxCurrent = this._idxCurrent;
+			if (localName != this._atomizedLocalName)
 			{
-				this.atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
+				this._atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
 			}
-			if (XPathNodeHelper.GetAttribute(ref this.pageCurrent, ref this.idxCurrent, this.atomizedLocalName, namespaceURI))
+			if (XPathNodeHelper.GetAttribute(ref this._pageCurrent, ref this._idxCurrent, this._atomizedLocalName, namespaceURI))
 			{
-				this.pageParent = array;
-				this.idxParent = num;
+				this._pageParent = pageCurrent;
+				this._idxParent = idxCurrent;
 				return true;
 			}
 			return false;
@@ -214,20 +214,20 @@ namespace MS.Internal.Xml.Cache
 			int num;
 			if (namespaceScope == XPathNamespaceScope.Local)
 			{
-				num = XPathNodeHelper.GetLocalNamespaces(this.pageCurrent, this.idxCurrent, out array);
+				num = XPathNodeHelper.GetLocalNamespaces(this._pageCurrent, this._idxCurrent, out array);
 			}
 			else
 			{
-				num = XPathNodeHelper.GetInScopeNamespaces(this.pageCurrent, this.idxCurrent, out array);
+				num = XPathNodeHelper.GetInScopeNamespaces(this._pageCurrent, this._idxCurrent, out array);
 			}
 			while (num != 0)
 			{
 				if (namespaceScope != XPathNamespaceScope.ExcludeXml || !array[num].IsXmlNamespaceNode)
 				{
-					this.pageParent = this.pageCurrent;
-					this.idxParent = this.idxCurrent;
-					this.pageCurrent = array;
-					this.idxCurrent = num;
+					this._pageParent = this._pageCurrent;
+					this._idxParent = this._idxCurrent;
+					this._pageCurrent = array;
+					this._idxCurrent = num;
 					return true;
 				}
 				num = array[num].GetSibling(out array);
@@ -237,16 +237,16 @@ namespace MS.Internal.Xml.Cache
 
 		public override bool MoveToNextNamespace(XPathNamespaceScope scope)
 		{
-			XPathNode[] array = this.pageCurrent;
-			int sibling = this.idxCurrent;
-			if (array[sibling].NodeType != XPathNodeType.Namespace)
+			XPathNode[] pageCurrent = this._pageCurrent;
+			int num = this._idxCurrent;
+			if (pageCurrent[num].NodeType != XPathNodeType.Namespace)
 			{
 				return false;
 			}
 			for (;;)
 			{
-				sibling = array[sibling].GetSibling(out array);
-				if (sibling == 0)
+				num = pageCurrent[num].GetSibling(out pageCurrent);
+				if (num == 0)
 				{
 					break;
 				}
@@ -254,57 +254,57 @@ namespace MS.Internal.Xml.Cache
 				{
 					goto Block_3;
 				}
-				if (!array[sibling].IsXmlNamespaceNode)
+				if (!pageCurrent[num].IsXmlNamespaceNode)
 				{
 					goto IL_006A;
 				}
 			}
 			return false;
 			Block_3:
-			XPathNode[] array2;
-			if (scope == XPathNamespaceScope.Local && (array[sibling].GetParent(out array2) != this.idxParent || array2 != this.pageParent))
+			XPathNode[] array;
+			if (scope == XPathNamespaceScope.Local && (pageCurrent[num].GetParent(out array) != this._idxParent || array != this._pageParent))
 			{
 				return false;
 			}
 			IL_006A:
-			this.pageCurrent = array;
-			this.idxCurrent = sibling;
+			this._pageCurrent = pageCurrent;
+			this._idxCurrent = num;
 			return true;
 		}
 
 		public override bool MoveToNext()
 		{
-			return XPathNodeHelper.GetContentSibling(ref this.pageCurrent, ref this.idxCurrent);
+			return XPathNodeHelper.GetContentSibling(ref this._pageCurrent, ref this._idxCurrent);
 		}
 
 		public override bool MoveToPrevious()
 		{
-			return this.idxParent == 0 && XPathNodeHelper.GetPreviousContentSibling(ref this.pageCurrent, ref this.idxCurrent);
+			return this._idxParent == 0 && XPathNodeHelper.GetPreviousContentSibling(ref this._pageCurrent, ref this._idxCurrent);
 		}
 
 		public override bool MoveToFirstChild()
 		{
-			if (this.pageCurrent[this.idxCurrent].HasCollapsedText)
+			if (this._pageCurrent[this._idxCurrent].HasCollapsedText)
 			{
-				this.pageParent = this.pageCurrent;
-				this.idxParent = this.idxCurrent;
-				this.idxCurrent = this.pageCurrent[this.idxCurrent].Document.GetCollapsedTextNode(out this.pageCurrent);
+				this._pageParent = this._pageCurrent;
+				this._idxParent = this._idxCurrent;
+				this._idxCurrent = this._pageCurrent[this._idxCurrent].Document.GetCollapsedTextNode(out this._pageCurrent);
 				return true;
 			}
-			return XPathNodeHelper.GetContentChild(ref this.pageCurrent, ref this.idxCurrent);
+			return XPathNodeHelper.GetContentChild(ref this._pageCurrent, ref this._idxCurrent);
 		}
 
 		public override bool MoveToParent()
 		{
-			if (this.idxParent != 0)
+			if (this._idxParent != 0)
 			{
-				this.pageCurrent = this.pageParent;
-				this.idxCurrent = this.idxParent;
-				this.pageParent = null;
-				this.idxParent = 0;
+				this._pageCurrent = this._pageParent;
+				this._idxCurrent = this._idxParent;
+				this._pageParent = null;
+				this._idxParent = 0;
 				return true;
 			}
-			return XPathNodeHelper.GetParent(ref this.pageCurrent, ref this.idxCurrent);
+			return XPathNodeHelper.GetParent(ref this._pageCurrent, ref this._idxCurrent);
 		}
 
 		public override bool MoveTo(XPathNavigator other)
@@ -312,10 +312,10 @@ namespace MS.Internal.Xml.Cache
 			XPathDocumentNavigator xpathDocumentNavigator = other as XPathDocumentNavigator;
 			if (xpathDocumentNavigator != null)
 			{
-				this.pageCurrent = xpathDocumentNavigator.pageCurrent;
-				this.idxCurrent = xpathDocumentNavigator.idxCurrent;
-				this.pageParent = xpathDocumentNavigator.pageParent;
-				this.idxParent = xpathDocumentNavigator.idxParent;
+				this._pageCurrent = xpathDocumentNavigator._pageCurrent;
+				this._idxCurrent = xpathDocumentNavigator._idxCurrent;
+				this._pageParent = xpathDocumentNavigator._pageParent;
+				this._idxParent = xpathDocumentNavigator._idxParent;
 				return true;
 			}
 			return false;
@@ -324,13 +324,13 @@ namespace MS.Internal.Xml.Cache
 		public override bool MoveToId(string id)
 		{
 			XPathNode[] array;
-			int num = this.pageCurrent[this.idxCurrent].Document.LookupIdElement(id, out array);
+			int num = this._pageCurrent[this._idxCurrent].Document.LookupIdElement(id, out array);
 			if (num != 0)
 			{
-				this.pageCurrent = array;
-				this.idxCurrent = num;
-				this.pageParent = null;
-				this.idxParent = 0;
+				this._pageCurrent = array;
+				this._idxCurrent = num;
+				this._pageParent = null;
+				this._idxParent = 0;
 				return true;
 			}
 			return false;
@@ -339,86 +339,86 @@ namespace MS.Internal.Xml.Cache
 		public override bool IsSamePosition(XPathNavigator other)
 		{
 			XPathDocumentNavigator xpathDocumentNavigator = other as XPathDocumentNavigator;
-			return xpathDocumentNavigator != null && (this.idxCurrent == xpathDocumentNavigator.idxCurrent && this.pageCurrent == xpathDocumentNavigator.pageCurrent && this.idxParent == xpathDocumentNavigator.idxParent) && this.pageParent == xpathDocumentNavigator.pageParent;
+			return xpathDocumentNavigator != null && (this._idxCurrent == xpathDocumentNavigator._idxCurrent && this._pageCurrent == xpathDocumentNavigator._pageCurrent && this._idxParent == xpathDocumentNavigator._idxParent) && this._pageParent == xpathDocumentNavigator._pageParent;
 		}
 
 		public override bool HasChildren
 		{
 			get
 			{
-				return this.pageCurrent[this.idxCurrent].HasContentChild;
+				return this._pageCurrent[this._idxCurrent].HasContentChild;
 			}
 		}
 
 		public override void MoveToRoot()
 		{
-			if (this.idxParent != 0)
+			if (this._idxParent != 0)
 			{
-				this.pageParent = null;
-				this.idxParent = 0;
+				this._pageParent = null;
+				this._idxParent = 0;
 			}
-			this.idxCurrent = this.pageCurrent[this.idxCurrent].GetRoot(out this.pageCurrent);
+			this._idxCurrent = this._pageCurrent[this._idxCurrent].GetRoot(out this._pageCurrent);
 		}
 
 		public override bool MoveToChild(string localName, string namespaceURI)
 		{
-			if (localName != this.atomizedLocalName)
+			if (localName != this._atomizedLocalName)
 			{
-				this.atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
+				this._atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
 			}
-			return XPathNodeHelper.GetElementChild(ref this.pageCurrent, ref this.idxCurrent, this.atomizedLocalName, namespaceURI);
+			return XPathNodeHelper.GetElementChild(ref this._pageCurrent, ref this._idxCurrent, this._atomizedLocalName, namespaceURI);
 		}
 
 		public override bool MoveToNext(string localName, string namespaceURI)
 		{
-			if (localName != this.atomizedLocalName)
+			if (localName != this._atomizedLocalName)
 			{
-				this.atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
+				this._atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
 			}
-			return XPathNodeHelper.GetElementSibling(ref this.pageCurrent, ref this.idxCurrent, this.atomizedLocalName, namespaceURI);
+			return XPathNodeHelper.GetElementSibling(ref this._pageCurrent, ref this._idxCurrent, this._atomizedLocalName, namespaceURI);
 		}
 
 		public override bool MoveToChild(XPathNodeType type)
 		{
-			if (!this.pageCurrent[this.idxCurrent].HasCollapsedText)
+			if (!this._pageCurrent[this._idxCurrent].HasCollapsedText)
 			{
-				return XPathNodeHelper.GetContentChild(ref this.pageCurrent, ref this.idxCurrent, type);
+				return XPathNodeHelper.GetContentChild(ref this._pageCurrent, ref this._idxCurrent, type);
 			}
 			if (type != XPathNodeType.Text && type != XPathNodeType.All)
 			{
 				return false;
 			}
-			this.pageParent = this.pageCurrent;
-			this.idxParent = this.idxCurrent;
-			this.idxCurrent = this.pageCurrent[this.idxCurrent].Document.GetCollapsedTextNode(out this.pageCurrent);
+			this._pageParent = this._pageCurrent;
+			this._idxParent = this._idxCurrent;
+			this._idxCurrent = this._pageCurrent[this._idxCurrent].Document.GetCollapsedTextNode(out this._pageCurrent);
 			return true;
 		}
 
 		public override bool MoveToNext(XPathNodeType type)
 		{
-			return XPathNodeHelper.GetContentSibling(ref this.pageCurrent, ref this.idxCurrent, type);
+			return XPathNodeHelper.GetContentSibling(ref this._pageCurrent, ref this._idxCurrent, type);
 		}
 
 		public override bool MoveToFollowing(string localName, string namespaceURI, XPathNavigator end)
 		{
-			if (localName != this.atomizedLocalName)
+			if (localName != this._atomizedLocalName)
 			{
-				this.atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
+				this._atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
 			}
 			XPathNode[] array;
 			int followingEnd = this.GetFollowingEnd(end as XPathDocumentNavigator, false, out array);
-			if (this.idxParent == 0)
+			if (this._idxParent == 0)
 			{
-				return XPathNodeHelper.GetElementFollowing(ref this.pageCurrent, ref this.idxCurrent, array, followingEnd, this.atomizedLocalName, namespaceURI);
+				return XPathNodeHelper.GetElementFollowing(ref this._pageCurrent, ref this._idxCurrent, array, followingEnd, this._atomizedLocalName, namespaceURI);
 			}
-			if (!XPathNodeHelper.GetElementFollowing(ref this.pageParent, ref this.idxParent, array, followingEnd, this.atomizedLocalName, namespaceURI))
+			if (!XPathNodeHelper.GetElementFollowing(ref this._pageParent, ref this._idxParent, array, followingEnd, this._atomizedLocalName, namespaceURI))
 			{
 				return false;
 			}
-			this.pageCurrent = this.pageParent;
-			this.idxCurrent = this.idxParent;
-			this.pageParent = null;
-			this.idxParent = 0;
+			this._pageCurrent = this._pageParent;
+			this._idxCurrent = this._idxParent;
+			this._pageParent = null;
+			this._idxParent = 0;
 			return true;
 		}
 
@@ -429,15 +429,15 @@ namespace MS.Internal.Xml.Cache
 			int num;
 			if (type == XPathNodeType.Text || type == XPathNodeType.All)
 			{
-				if (this.pageCurrent[this.idxCurrent].HasCollapsedText)
+				if (this._pageCurrent[this._idxCurrent].HasCollapsedText)
 				{
-					if (xpathDocumentNavigator != null && this.idxCurrent == xpathDocumentNavigator.idxParent && this.pageCurrent == xpathDocumentNavigator.pageParent)
+					if (xpathDocumentNavigator != null && this._idxCurrent == xpathDocumentNavigator._idxParent && this._pageCurrent == xpathDocumentNavigator._pageParent)
 					{
 						return false;
 					}
-					this.pageParent = this.pageCurrent;
-					this.idxParent = this.idxCurrent;
-					this.idxCurrent = this.pageCurrent[this.idxCurrent].Document.GetCollapsedTextNode(out this.pageCurrent);
+					this._pageParent = this._pageCurrent;
+					this._idxParent = this._idxCurrent;
+					this._idxCurrent = this._pageCurrent[this._idxCurrent].Document.GetCollapsedTextNode(out this._pageCurrent);
 					return true;
 				}
 				else if (type == XPathNodeType.Text)
@@ -445,17 +445,17 @@ namespace MS.Internal.Xml.Cache
 					num = this.GetFollowingEnd(xpathDocumentNavigator, true, out array);
 					XPathNode[] array2;
 					int num2;
-					if (this.idxParent != 0)
+					if (this._idxParent != 0)
 					{
-						array2 = this.pageParent;
-						num2 = this.idxParent;
+						array2 = this._pageParent;
+						num2 = this._idxParent;
 					}
 					else
 					{
-						array2 = this.pageCurrent;
-						num2 = this.idxCurrent;
+						array2 = this._pageCurrent;
+						num2 = this._idxCurrent;
 					}
-					if (xpathDocumentNavigator != null && xpathDocumentNavigator.idxParent != 0 && num2 == num && array2 == array)
+					if (xpathDocumentNavigator != null && xpathDocumentNavigator._idxParent != 0 && num2 == num && array2 == array)
 					{
 						return false;
 					}
@@ -465,33 +465,33 @@ namespace MS.Internal.Xml.Cache
 					}
 					if (array2[num2].NodeType == XPathNodeType.Element)
 					{
-						this.idxCurrent = array2[num2].Document.GetCollapsedTextNode(out this.pageCurrent);
-						this.pageParent = array2;
-						this.idxParent = num2;
+						this._idxCurrent = array2[num2].Document.GetCollapsedTextNode(out this._pageCurrent);
+						this._pageParent = array2;
+						this._idxParent = num2;
 					}
 					else
 					{
-						this.pageCurrent = array2;
-						this.idxCurrent = num2;
-						this.pageParent = null;
-						this.idxParent = 0;
+						this._pageCurrent = array2;
+						this._idxCurrent = num2;
+						this._pageParent = null;
+						this._idxParent = 0;
 					}
 					return true;
 				}
 			}
 			num = this.GetFollowingEnd(xpathDocumentNavigator, false, out array);
-			if (this.idxParent == 0)
+			if (this._idxParent == 0)
 			{
-				return XPathNodeHelper.GetContentFollowing(ref this.pageCurrent, ref this.idxCurrent, array, num, type);
+				return XPathNodeHelper.GetContentFollowing(ref this._pageCurrent, ref this._idxCurrent, array, num, type);
 			}
-			if (!XPathNodeHelper.GetContentFollowing(ref this.pageParent, ref this.idxParent, array, num, type))
+			if (!XPathNodeHelper.GetContentFollowing(ref this._pageParent, ref this._idxParent, array, num, type))
 			{
 				return false;
 			}
-			this.pageCurrent = this.pageParent;
-			this.idxCurrent = this.idxParent;
-			this.pageParent = null;
-			this.idxParent = 0;
+			this._pageCurrent = this._pageParent;
+			this._idxCurrent = this._idxParent;
+			this._pageParent = null;
+			this._idxParent = 0;
 			return true;
 		}
 
@@ -528,8 +528,8 @@ namespace MS.Internal.Xml.Cache
 			XPathDocumentNavigator xpathDocumentNavigator = other as XPathDocumentNavigator;
 			if (xpathDocumentNavigator != null)
 			{
-				XPathDocument document = this.pageCurrent[this.idxCurrent].Document;
-				XPathDocument document2 = xpathDocumentNavigator.pageCurrent[xpathDocumentNavigator.idxCurrent].Document;
+				XPathDocument document = this._pageCurrent[this._idxCurrent].Document;
+				XPathDocument document2 = xpathDocumentNavigator._pageCurrent[xpathDocumentNavigator._idxCurrent].Document;
 				if (document == document2)
 				{
 					int num = this.GetPrimaryLocation();
@@ -558,24 +558,24 @@ namespace MS.Internal.Xml.Cache
 			XPathDocumentNavigator xpathDocumentNavigator = other as XPathDocumentNavigator;
 			if (xpathDocumentNavigator != null)
 			{
-				XPathNode[] array;
+				XPathNode[] pageParent;
 				int num;
-				if (xpathDocumentNavigator.idxParent != 0)
+				if (xpathDocumentNavigator._idxParent != 0)
 				{
-					array = xpathDocumentNavigator.pageParent;
-					num = xpathDocumentNavigator.idxParent;
+					pageParent = xpathDocumentNavigator._pageParent;
+					num = xpathDocumentNavigator._idxParent;
 				}
 				else
 				{
-					num = xpathDocumentNavigator.pageCurrent[xpathDocumentNavigator.idxCurrent].GetParent(out array);
+					num = xpathDocumentNavigator._pageCurrent[xpathDocumentNavigator._idxCurrent].GetParent(out pageParent);
 				}
 				while (num != 0)
 				{
-					if (num == this.idxCurrent && array == this.pageCurrent)
+					if (num == this._idxCurrent && pageParent == this._pageCurrent)
 					{
 						return true;
 					}
-					num = array[num].GetParent(out array);
+					num = pageParent[num].GetParent(out pageParent);
 				}
 			}
 			return false;
@@ -583,27 +583,27 @@ namespace MS.Internal.Xml.Cache
 
 		private int GetPrimaryLocation()
 		{
-			if (this.idxParent == 0)
+			if (this._idxParent == 0)
 			{
-				return XPathNodeHelper.GetLocation(this.pageCurrent, this.idxCurrent);
+				return XPathNodeHelper.GetLocation(this._pageCurrent, this._idxCurrent);
 			}
-			return XPathNodeHelper.GetLocation(this.pageParent, this.idxParent);
+			return XPathNodeHelper.GetLocation(this._pageParent, this._idxParent);
 		}
 
 		private int GetSecondaryLocation()
 		{
-			if (this.idxParent == 0)
+			if (this._idxParent == 0)
 			{
 				return int.MinValue;
 			}
-			XPathNodeType nodeType = this.pageCurrent[this.idxCurrent].NodeType;
+			XPathNodeType nodeType = this._pageCurrent[this._idxCurrent].NodeType;
 			if (nodeType == XPathNodeType.Attribute)
 			{
-				return XPathNodeHelper.GetLocation(this.pageCurrent, this.idxCurrent);
+				return XPathNodeHelper.GetLocation(this._pageCurrent, this._idxCurrent);
 			}
 			if (nodeType == XPathNodeType.Namespace)
 			{
-				return -2147483647 + XPathNodeHelper.GetLocation(this.pageCurrent, this.idxCurrent);
+				return -2147483647 + XPathNodeHelper.GetLocation(this._pageCurrent, this._idxCurrent);
 			}
 			return int.MaxValue;
 		}
@@ -614,11 +614,11 @@ namespace MS.Internal.Xml.Cache
 			{
 				char[] array = new char[16];
 				int num = 0;
-				array[num++] = XPathNavigator.NodeTypeLetter[(int)this.pageCurrent[this.idxCurrent].NodeType];
+				array[num++] = XPathNavigator.NodeTypeLetter[(int)this._pageCurrent[this._idxCurrent].NodeType];
 				int num2;
-				if (this.idxParent != 0)
+				if (this._idxParent != 0)
 				{
-					num2 = (this.pageParent[0].PageInfo.PageNumber - 1 << 16) | (this.idxParent - 1);
+					num2 = (this._pageParent[0].PageInfo.PageNumber - 1 << 16) | (this._idxParent - 1);
 					do
 					{
 						array[num++] = XPathNavigator.UniqueIdTbl[num2 & 31];
@@ -627,7 +627,7 @@ namespace MS.Internal.Xml.Cache
 					while (num2 != 0);
 					array[num++] = '0';
 				}
-				num2 = (this.pageCurrent[0].PageInfo.PageNumber - 1 << 16) | (this.idxCurrent - 1);
+				num2 = (this._pageCurrent[0].PageInfo.PageNumber - 1 << 16) | (this._idxCurrent - 1);
 				do
 				{
 					array[num++] = XPathNavigator.UniqueIdTbl[num2 & 31];
@@ -648,18 +648,18 @@ namespace MS.Internal.Xml.Cache
 
 		public bool HasLineInfo()
 		{
-			return this.pageCurrent[this.idxCurrent].Document.HasLineInfo;
+			return this._pageCurrent[this._idxCurrent].Document.HasLineInfo;
 		}
 
 		public int LineNumber
 		{
 			get
 			{
-				if (this.idxParent != 0 && this.NodeType == XPathNodeType.Text)
+				if (this._idxParent != 0 && this.NodeType == XPathNodeType.Text)
 				{
-					return this.pageParent[this.idxParent].LineNumber;
+					return this._pageParent[this._idxParent].LineNumber;
 				}
-				return this.pageCurrent[this.idxCurrent].LineNumber;
+				return this._pageCurrent[this._idxCurrent].LineNumber;
 			}
 		}
 
@@ -667,66 +667,61 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				if (this.idxParent != 0 && this.NodeType == XPathNodeType.Text)
+				if (this._idxParent != 0 && this.NodeType == XPathNodeType.Text)
 				{
-					return this.pageParent[this.idxParent].CollapsedLinePosition;
+					return this._pageParent[this._idxParent].CollapsedLinePosition;
 				}
-				return this.pageCurrent[this.idxCurrent].LinePosition;
+				return this._pageCurrent[this._idxCurrent].LinePosition;
 			}
 		}
 
 		public int GetPositionHashCode()
 		{
-			return this.idxCurrent ^ this.idxParent;
+			return this._idxCurrent ^ this._idxParent;
 		}
 
 		public bool IsElementMatch(string localName, string namespaceURI)
 		{
-			if (localName != this.atomizedLocalName)
+			if (localName != this._atomizedLocalName)
 			{
-				this.atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
+				this._atomizedLocalName = ((localName != null) ? this.NameTable.Get(localName) : null);
 			}
-			return this.idxParent == 0 && this.pageCurrent[this.idxCurrent].ElementMatch(this.atomizedLocalName, namespaceURI);
-		}
-
-		public bool IsContentKindMatch(XPathNodeType typ)
-		{
-			return ((1 << (int)this.pageCurrent[this.idxCurrent].NodeType) & XPathNavigator.GetContentKindMask(typ)) != 0;
+			return this._idxParent == 0 && this._pageCurrent[this._idxCurrent].ElementMatch(this._atomizedLocalName, namespaceURI);
 		}
 
 		public bool IsKindMatch(XPathNodeType typ)
 		{
-			return ((1 << (int)this.pageCurrent[this.idxCurrent].NodeType) & XPathNavigator.GetKindMask(typ)) != 0;
+			return ((1 << (int)this._pageCurrent[this._idxCurrent].NodeType) & XPathNavigator.GetKindMask(typ)) != 0;
 		}
 
 		private int GetFollowingEnd(XPathDocumentNavigator end, bool useParentOfVirtual, out XPathNode[] pageEnd)
 		{
-			if (end == null || this.pageCurrent[this.idxCurrent].Document != end.pageCurrent[end.idxCurrent].Document)
+			if (end == null || this._pageCurrent[this._idxCurrent].Document != end._pageCurrent[end._idxCurrent].Document)
 			{
 				pageEnd = null;
 				return 0;
 			}
-			if (end.idxParent == 0)
+			if (end._idxParent == 0)
 			{
-				pageEnd = end.pageCurrent;
-				return end.idxCurrent;
+				pageEnd = end._pageCurrent;
+				return end._idxCurrent;
 			}
-			pageEnd = end.pageParent;
+			pageEnd = end._pageParent;
 			if (!useParentOfVirtual)
 			{
-				return end.idxParent + 1;
+				return end._idxParent + 1;
 			}
-			return end.idxParent;
+			return end._idxParent;
 		}
 
-		private XPathNode[] pageCurrent;
+		private XPathNode[] _pageCurrent;
 
-		private XPathNode[] pageParent;
+		private XPathNode[] _pageParent;
 
-		private int idxCurrent;
+		private int _idxCurrent;
 
-		private int idxParent;
+		private int _idxParent;
 
-		private string atomizedLocalName;
+		private string _atomizedLocalName;
 	}
 }

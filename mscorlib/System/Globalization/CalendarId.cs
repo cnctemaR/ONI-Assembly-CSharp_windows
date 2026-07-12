@@ -4,7 +4,8 @@ namespace System.Globalization
 {
 	internal enum CalendarId : ushort
 	{
-		GREGORIAN = 1,
+		UNINITIALIZED_VALUE,
+		GREGORIAN,
 		GREGORIAN_US,
 		JAPAN,
 		TAIWAN,

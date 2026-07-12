@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FMODUnity
 {
@@ -68,7 +69,7 @@ namespace FMODUnity
 
 		private void UpdatePlayingStatus(bool force = false)
 		{
-			bool flag = StudioListener.DistanceToNearestListener(base.transform.position) <= this.MaxDistance;
+			bool flag = StudioListener.DistanceSquaredToNearestListener(base.transform.position) <= this.MaxDistance * this.MaxDistance;
 			if (force || flag != this.IsPlaying())
 			{
 				if (flag)
@@ -89,6 +90,16 @@ namespace FMODUnity
 				this.eventDescription.loadSampleData();
 			}
 			this.HandleGameEvent(EmitterGameEvent.ObjectStart);
+			if (this.NonRigidbodyVelocity && base.GetComponent<Rigidbody>())
+			{
+				Debug.LogWarning(string.Format("[FMOD] Non-Rigidbody Velocity is enabled on Emitter attached to GameObject \"{0}\", which also has a Rigidbody component attached - this will be disabled in favor of velocity from Rigidbody component.", base.name));
+				this.NonRigidbodyVelocity = false;
+			}
+			if (this.NonRigidbodyVelocity && base.GetComponent<Rigidbody2D>())
+			{
+				Debug.LogWarning(string.Format("[FMOD] Non-Rigidbody Velocity is enabled on Emitter attached to GameObject \"{0}\", which also has a Rigidbody2D component attached - this will be disabled in favor of velocity from Rigidbody2D component.", base.name));
+				this.NonRigidbodyVelocity = false;
+			}
 		}
 
 		private void OnApplicationQuit()
@@ -211,7 +222,7 @@ namespace FMODUnity
 					else
 					{
 						this.instance.set3DAttributes(base.gameObject.To3DAttributes());
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component);
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component, this.NonRigidbodyVelocity);
 					}
 				}
 			}
@@ -250,7 +261,10 @@ namespace FMODUnity
 			{
 				this.instance.stop(this.AllowFadeout ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
 				this.instance.release();
-				this.instance.clearHandle();
+				if (!this.AllowFadeout)
+				{
+					this.instance.clearHandle();
+				}
 			}
 		}
 
@@ -258,7 +272,8 @@ namespace FMODUnity
 		{
 			if (Settings.Instance.StopEventsOutsideMaxDistance && this.IsActive)
 			{
-				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.Name == name);
+				string findName = name;
+				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.Name == findName);
 				if (paramRef == null)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
@@ -280,7 +295,8 @@ namespace FMODUnity
 		{
 			if (Settings.Instance.StopEventsOutsideMaxDistance && this.IsActive)
 			{
-				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.ID.Equals(id));
+				PARAMETER_ID findId = id;
+				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.ID.Equals(findId));
 				if (paramRef == null)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
@@ -323,6 +339,9 @@ namespace FMODUnity
 		public bool TriggerOnce;
 
 		public bool Preload;
+
+		[FormerlySerializedAs("AllowNonRigidbodyDoppler")]
+		public bool NonRigidbodyVelocity;
 
 		public ParamRef[] Params = new ParamRef[0];
 

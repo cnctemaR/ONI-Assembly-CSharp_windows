@@ -55,7 +55,7 @@ namespace KMod
 			{
 				relative_root = relative_root ?? "";
 				relative_root = FileSystem.Normalize(relative_root);
-				array = relative_root.Split(new char[] { '/' });
+				array = relative_root.Split('/', StringSplitOptions.None);
 			}
 			else
 			{
@@ -63,7 +63,7 @@ namespace KMod
 			}
 			foreach (ZipEntry zipEntry in this.zipfile)
 			{
-				List<string> list = (from part in FileSystem.Normalize(zipEntry.FileName).Split(new char[] { '/' })
+				List<string> list = (from part in FileSystem.Normalize(zipEntry.FileName).Split('/', StringSplitOptions.None)
 					where !string.IsNullOrEmpty(part)
 					select part).ToList<string>();
 				if (this.IsSharedRoot(array, list))

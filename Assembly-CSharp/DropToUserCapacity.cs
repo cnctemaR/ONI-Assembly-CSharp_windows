@@ -60,7 +60,7 @@ public class DropToUserCapacity : Workable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage component = base.GetComponent<Storage>();
 		IUserControlledCapacity component2 = base.GetComponent<IUserControlledCapacity>();

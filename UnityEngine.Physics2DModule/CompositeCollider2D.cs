@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics2D/Public/CompositeCollider2D.h")]
 	[RequireComponent(typeof(Rigidbody2D))]
+	[NativeHeader("Modules/Physics2D/Public/CompositeCollider2D.h")]
 	public sealed class CompositeCollider2D : Collider2D
 	{
 		public extern CompositeCollider2D.GeometryType geometryType
@@ -18,6 +18,14 @@ namespace UnityEngine
 		}
 
 		public extern CompositeCollider2D.GenerationType generationType
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern bool useDelaunayMesh
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -96,7 +104,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetPathArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPathArray_Internal(int index, [NotNull("ArgumentNullException")] Vector2[] points);
+		private extern int GetPathArray_Internal(int index, [Unmarshalled] [NotNull("ArgumentNullException")] Vector2[] points);
 
 		public int GetPath(int index, List<Vector2> points)
 		{

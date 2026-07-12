@@ -6,7 +6,7 @@ namespace TUNING
 	{
 		public class SCOUTBOT
 		{
-			public const float CARRY_CAPACITY = 200f;
+			public static float CARRY_CAPACITY = DUPLICANTSTATS.STANDARD.BaseStats.CARRY_CAPACITY;
 
 			public static readonly float DIGGING = 1f;
 
@@ -23,7 +23,7 @@ namespace TUNING
 
 		public class MORBBOT
 		{
-			public const float CARRY_CAPACITY = 400f;
+			public static float CARRY_CAPACITY = DUPLICANTSTATS.STANDARD.BaseStats.CARRY_CAPACITY * 2f;
 
 			public const float DIGGING = 1f;
 
@@ -40,6 +40,15 @@ namespace TUNING
 			public const float BATTERY_CAPACITY = 180000f;
 
 			public const float DECONSTRUCTION_WORK_TIME = 10f;
+		}
+
+		public class FETCHDRONE
+		{
+			public static float CARRY_CAPACITY = DUPLICANTSTATS.STANDARD.BaseStats.CARRY_CAPACITY * 2f;
+
+			public static readonly float HIT_POINTS = 100f;
+
+			public const float BATTERY_DEPLETION_RATE = 30f;
 		}
 	}
 }

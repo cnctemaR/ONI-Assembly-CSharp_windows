@@ -23,7 +23,7 @@ namespace System.Net
 			{
 				if (this.m_connect != null)
 				{
-					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Connect", value }), "value");
+					throw new ArgumentException(SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Connect", value }), "value");
 				}
 				this.m_connect = value;
 			}
@@ -39,7 +39,7 @@ namespace System.Net
 			{
 				if (this.m_accept != null)
 				{
-					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Accept", value }), "value");
+					throw new ArgumentException(SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "Accept", value }), "value");
 				}
 				this.m_accept = value;
 			}
@@ -63,7 +63,7 @@ namespace System.Net
 			{
 				if (this.m_connect != null)
 				{
-					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "ConnectPatern", value }), "value");
+					throw new ArgumentException(SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "ConnectPatern", value }), "value");
 				}
 				if (value == ".*")
 				{
@@ -92,7 +92,7 @@ namespace System.Net
 			{
 				if (this.m_accept != null)
 				{
-					throw new ArgumentException(global::SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "AcceptPattern", value }), "value");
+					throw new ArgumentException(SR.GetString("The permission '{0}={1}' cannot be added. Add a separate Attribute statement.", new object[] { "AcceptPattern", value }), "value");
 				}
 				if (value == ".*")
 				{

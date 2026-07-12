@@ -8,7 +8,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_lowestBreakIteration;
+				return this._lowestBreakIteration;
 			}
 		}
 
@@ -16,11 +16,11 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				if (this.m_lowestBreakIteration == 2147483647)
+				if (this._lowestBreakIteration == 2147483647)
 				{
 					return null;
 				}
-				long num = (long)this.m_lowestBreakIteration;
+				long num = (long)this._lowestBreakIteration;
 				if (IntPtr.Size >= 8)
 				{
 					return new long?(num);
@@ -32,15 +32,15 @@ namespace System.Threading.Tasks
 		internal bool ShouldExitLoop(int CallerIteration)
 		{
 			int loopStateFlags = base.LoopStateFlags;
-			return loopStateFlags != ParallelLoopStateFlags.PLS_NONE && ((loopStateFlags & (ParallelLoopStateFlags.PLS_EXCEPTIONAL | ParallelLoopStateFlags.PLS_STOPPED | ParallelLoopStateFlags.PLS_CANCELED)) != 0 || ((loopStateFlags & ParallelLoopStateFlags.PLS_BROKEN) != 0 && CallerIteration > this.LowestBreakIteration));
+			return loopStateFlags != 0 && ((loopStateFlags & 13) != 0 || ((loopStateFlags & 2) != 0 && CallerIteration > this.LowestBreakIteration));
 		}
 
 		internal bool ShouldExitLoop()
 		{
 			int loopStateFlags = base.LoopStateFlags;
-			return loopStateFlags != ParallelLoopStateFlags.PLS_NONE && (loopStateFlags & (ParallelLoopStateFlags.PLS_EXCEPTIONAL | ParallelLoopStateFlags.PLS_CANCELED)) != 0;
+			return loopStateFlags != 0 && (loopStateFlags & 9) != 0;
 		}
 
-		internal volatile int m_lowestBreakIteration = int.MaxValue;
+		internal volatile int _lowestBreakIteration = int.MaxValue;
 	}
 }

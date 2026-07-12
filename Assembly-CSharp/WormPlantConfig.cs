@@ -36,7 +36,19 @@ public class WormPlantConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = WormPlantConfig.BaseWormPlant("WormPlant", global::STRINGS.CREATURES.SPECIES.WORMPLANT.NAME, global::STRINGS.CREATURES.SPECIES.WORMPLANT.DESC, "wormwood_kanim", WormPlantConfig.BASIC_DECOR, "WormBasicFruit");
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "WormPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.WORMPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.WORMPLANT.DESC, Assets.GetAnim("seed_wormwood_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 3, global::STRINGS.CREATURES.SPECIES.WORMPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds()), "WormPlant_preview", Assets.GetAnim("wormwood_kanim"), "place", 1, 2);
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text = "WormPlantSeed";
+		string text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.WORMPLANT.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.WORMPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_wormwood_kanim");
+		string text4 = "object";
+		int num = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text5 = global::STRINGS.CREATURES.SPECIES.WORMPLANT.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, productionType, text, text2, text3, anim, text4, num, list, receptacleDirection, default(Tag), 3, text5, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds), "WormPlant_preview", Assets.GetAnim("wormwood_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

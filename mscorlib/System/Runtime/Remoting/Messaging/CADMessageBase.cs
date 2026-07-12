@@ -230,7 +230,9 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				return (IntPtr)arg;
 			}
-			throw new NotSupportedException("Parameter of type " + arg.GetType() + " cannot be unmarshalled");
+			string text = "Parameter of type ";
+			Type type = arg.GetType();
+			throw new NotSupportedException(text + ((type != null) ? type.ToString() : null) + " cannot be unmarshalled");
 		}
 
 		internal object[] MarshalArguments(object[] arguments, ref ArrayList args)

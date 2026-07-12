@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -12,6 +14,7 @@ using Unity;
 
 namespace System.Data.SqlClient
 {
+	[TypeConverter(typeof(SqlParameter.SqlParameterConverter))]
 	public sealed class SqlParameter : DbParameter, IDbDataParameter, IDataParameter, ICloneable
 	{
 		public SqlParameter()
@@ -120,7 +123,8 @@ namespace System.Data.SqlClient
 				{
 					sqlCollation = (this._collation = new SqlCollation());
 				}
-				if ((value & (SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreNonSpace | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth | SqlCompareOptions.BinarySort | SqlCompareOptions.BinarySort2)) != value)
+				SqlCompareOptions sqlCompareOptions = SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreNonSpace | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth | SqlCompareOptions.BinarySort | SqlCompareOptions.BinarySort2;
+				if ((value & sqlCompareOptions) != value)
 				{
 					throw ADP.ArgumentOutOfRange("CompareInfo");
 				}
@@ -132,12 +136,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				string xmlSchemaCollectionDatabase = this._xmlSchemaCollectionDatabase;
-				if (xmlSchemaCollectionDatabase == null)
-				{
-					return ADP.StrEmpty;
-				}
-				return xmlSchemaCollectionDatabase;
+				return this._xmlSchemaCollectionDatabase ?? ADP.StrEmpty;
 			}
 			set
 			{
@@ -149,12 +148,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				string xmlSchemaCollectionOwningSchema = this._xmlSchemaCollectionOwningSchema;
-				if (xmlSchemaCollectionOwningSchema == null)
-				{
-					return ADP.StrEmpty;
-				}
-				return xmlSchemaCollectionOwningSchema;
+				return this._xmlSchemaCollectionOwningSchema ?? ADP.StrEmpty;
 			}
 			set
 			{
@@ -166,12 +160,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				string xmlSchemaCollectionName = this._xmlSchemaCollectionName;
-				if (xmlSchemaCollectionName == null)
-				{
-					return ADP.StrEmpty;
-				}
-				return xmlSchemaCollectionName;
+				return this._xmlSchemaCollectionName ?? ADP.StrEmpty;
 			}
 			set
 			{
@@ -236,14 +225,6 @@ namespace System.Data.SqlClient
 					throw ADP.ArgumentOutOfRange("LocaleId");
 				}
 				sqlCollation.LCID = value;
-			}
-		}
-
-		internal bool SizeInferred
-		{
-			get
-			{
-				return this._size == 0;
 			}
 		}
 
@@ -320,11 +301,15 @@ namespace System.Data.SqlClient
 			}
 			else if (SqlDbType.Udt == metaType.SqlDbType || (SqlDbType.Structured == metaType.SqlDbType && !string.IsNullOrEmpty(this.TypeName)))
 			{
+				string[] array;
 				if (SqlDbType.Udt == metaType.SqlDbType)
 				{
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					array = SqlParameter.ParseTypeName(this.UdtTypeName, true);
 				}
-				string[] array = SqlParameter.ParseTypeName(this.TypeName);
+				else
+				{
+					array = SqlParameter.ParseTypeName(this.TypeName, false);
+				}
 				if (1 == array.Length)
 				{
 					text3 = array[0];
@@ -361,7 +346,7 @@ namespace System.Data.SqlClient
 			{
 				this.GetActualFieldsAndProperties(out list, out smiMetaDataPropertyCollection, out peekAhead);
 			}
-			return new SmiParameterMetaData(metaType.SqlDbType, num2, b, actualScale, (long)num3, sqlCompareOptions, SqlDbType.Structured == metaType.SqlDbType, list, smiMetaDataPropertyCollection, this.ParameterNameFixed, text, text2, text3, this.Direction);
+			return new SmiParameterMetaData(metaType.SqlDbType, num2, b, actualScale, (long)num3, sqlCompareOptions, null, SqlDbType.Structured == metaType.SqlDbType, list, smiMetaDataPropertyCollection, this.ParameterNameFixed, text, text2, text3, this.Direction);
 		}
 
 		internal bool ParameterIsSqlType
@@ -380,12 +365,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				string parameterName = this._parameterName;
-				if (parameterName == null)
-				{
-					return ADP.StrEmpty;
-				}
-				return parameterName;
+				return this._parameterName ?? ADP.StrEmpty;
 			}
 			set
 			{
@@ -415,7 +395,8 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		public override byte Precision
+		[DefaultValue(0)]
+		public new byte Precision
 		{
 			get
 			{
@@ -458,7 +439,8 @@ namespace System.Data.SqlClient
 			return this._precision > 0;
 		}
 
-		public override byte Scale
+		[DefaultValue(0)]
+		public new byte Scale
 		{
 			get
 			{
@@ -499,6 +481,7 @@ namespace System.Data.SqlClient
 			return this._scale > 0;
 		}
 
+		[DbProviderSpecificTypeProperty(true)]
 		public SqlDbType SqlDbType
 		{
 			get
@@ -538,6 +521,10 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
+				if (this._udtLoadError != null)
+				{
+					throw this._udtLoadError;
+				}
 				if (this._value != null)
 				{
 					if (this._value == DBNull.Value)
@@ -573,16 +560,23 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		public string UdtTypeName
+		{
+			get
+			{
+				return this._udtTypeName ?? ADP.StrEmpty;
+			}
+			set
+			{
+				this._udtTypeName = value;
+			}
+		}
+
 		public string TypeName
 		{
 			get
 			{
-				string typeName = this._typeName;
-				if (typeName == null)
-				{
-					return ADP.StrEmpty;
-				}
-				return typeName;
+				return this._typeName ?? ADP.StrEmpty;
 			}
 			set
 			{
@@ -590,10 +584,15 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		[TypeConverter(typeof(StringConverter))]
 		public override object Value
 		{
 			get
 			{
+				if (this._udtLoadError != null)
+				{
+					throw this._udtLoadError;
+				}
 				if (this._value != null)
 				{
 					return this._value;
@@ -616,6 +615,7 @@ namespace System.Data.SqlClient
 				this._valueAsINullable = this._value as INullable;
 				this._isSqlParameterSqlType = this._valueAsINullable != null;
 				this._isNull = this._value == null || this._value == DBNull.Value || (this._isSqlParameterSqlType && this._valueAsINullable.IsNull);
+				this._udtLoadError = null;
 				this._actualSize = -1;
 			}
 		}
@@ -655,7 +655,7 @@ namespace System.Data.SqlClient
 				}
 				if (sqlDbType == SqlDbType.Variant)
 				{
-					metaType = MetaType.GetMetaTypeFromValue(coercedValue, true, false);
+					metaType = MetaType.GetMetaTypeFromValue(coercedValue, false);
 					sqlDbType = MetaType.GetSqlDataType((int)metaType.TDSType, 0U, 0).SqlDbType;
 					flag = true;
 				}
@@ -670,11 +670,11 @@ namespace System.Data.SqlClient
 					{
 						if (sqlDbType == SqlDbType.Binary)
 						{
-							goto IL_01E8;
+							goto IL_01E7;
 						}
 						if (sqlDbType != SqlDbType.Char)
 						{
-							goto IL_02BE;
+							goto IL_02B8;
 						}
 					}
 					else
@@ -687,10 +687,10 @@ namespace System.Data.SqlClient
 								{
 								case SqlDbType.Text:
 								case SqlDbType.VarChar:
-									goto IL_0175;
+									goto IL_0174;
 								case SqlDbType.Timestamp:
 								case SqlDbType.VarBinary:
-									goto IL_01E8;
+									goto IL_01E7;
 								case SqlDbType.TinyInt:
 								case SqlDbType.Variant:
 								case (SqlDbType)24:
@@ -698,25 +698,30 @@ namespace System.Data.SqlClient
 								case (SqlDbType)27:
 								case (SqlDbType)28:
 								case SqlDbType.Date:
-									goto IL_02BE;
+									goto IL_02B8;
 								case SqlDbType.Xml:
 									break;
 								case SqlDbType.Udt:
-									throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+									if (!this.IsNull)
+									{
+										num = SerializationHelperSql9.SizeInBytes(coercedValue);
+										goto IL_02B8;
+									}
+									goto IL_02B8;
 								case SqlDbType.Structured:
 									num = -1;
-									goto IL_02BE;
+									goto IL_02B8;
 								case SqlDbType.Time:
 									this._actualSize = (flag ? 5 : MetaType.GetTimeSizeFromScale(this.GetActualScale()));
-									goto IL_02BE;
+									goto IL_02B8;
 								case SqlDbType.DateTime2:
 									this._actualSize = 3 + (flag ? 5 : MetaType.GetTimeSizeFromScale(this.GetActualScale()));
-									goto IL_02BE;
+									goto IL_02B8;
 								case SqlDbType.DateTimeOffset:
 									this._actualSize = 5 + (flag ? 5 : MetaType.GetTimeSizeFromScale(this.GetActualScale()));
-									goto IL_02BE;
+									goto IL_02B8;
 								default:
-									goto IL_02BE;
+									goto IL_02B8;
 								}
 							}
 							num = ((!this._isNull && !this._coercedValueIsDataFeed) ? SqlParameter.StringSize(coercedValue, this._coercedValueIsSqlType) : 0);
@@ -727,21 +732,21 @@ namespace System.Data.SqlClient
 								this._actualSize = num;
 							}
 							this._actualSize <<= 1;
-							goto IL_02BE;
+							goto IL_02B8;
 						}
-						goto IL_01E8;
+						goto IL_01E7;
 					}
-					IL_0175:
+					IL_0174:
 					num = ((!this._isNull && !this._coercedValueIsDataFeed) ? SqlParameter.StringSize(coercedValue, this._coercedValueIsSqlType) : 0);
 					this._actualSize = (this.ShouldSerializeSize() ? this.Size : 0);
 					this._actualSize = ((this.ShouldSerializeSize() && this._actualSize <= num) ? this._actualSize : num);
 					if (this._actualSize == -1)
 					{
 						this._actualSize = num;
-						goto IL_02BE;
+						goto IL_02B8;
 					}
-					goto IL_02BE;
-					IL_01E8:
+					goto IL_02B8;
+					IL_01E7:
 					num = ((!this._isNull && !this._coercedValueIsDataFeed) ? SqlParameter.BinarySize(coercedValue, this._coercedValueIsSqlType) : 0);
 					this._actualSize = (this.ShouldSerializeSize() ? this.Size : 0);
 					this._actualSize = ((this.ShouldSerializeSize() && this._actualSize <= num) ? this._actualSize : num);
@@ -749,7 +754,7 @@ namespace System.Data.SqlClient
 					{
 						this._actualSize = num;
 					}
-					IL_02BE:
+					IL_02B8:
 					if (flag && num > 8000)
 					{
 						throw SQL.ParameterInvalidVariant(this.ParameterName);
@@ -757,6 +762,11 @@ namespace System.Data.SqlClient
 				}
 			}
 			return this._actualSize;
+		}
+
+		object ICloneable.Clone()
+		{
+			return new SqlParameter(this);
 		}
 
 		internal static object CoerceValue(object value, MetaType destinationType, out bool coercedToDataFeed, out bool typeChanged, bool allowStreaming = true)
@@ -914,6 +924,69 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		private void CloneHelper(SqlParameter destination)
+		{
+			destination._value = this._value;
+			destination._direction = this._direction;
+			destination._size = this._size;
+			destination._offset = this._offset;
+			destination._sourceColumn = this._sourceColumn;
+			destination._sourceVersion = this._sourceVersion;
+			destination._sourceColumnNullMapping = this._sourceColumnNullMapping;
+			destination._isNullable = this._isNullable;
+			destination._metaType = this._metaType;
+			destination._collation = this._collation;
+			destination._xmlSchemaCollectionDatabase = this._xmlSchemaCollectionDatabase;
+			destination._xmlSchemaCollectionOwningSchema = this._xmlSchemaCollectionOwningSchema;
+			destination._xmlSchemaCollectionName = this._xmlSchemaCollectionName;
+			destination._udtTypeName = this._udtTypeName;
+			destination._typeName = this._typeName;
+			destination._udtLoadError = this._udtLoadError;
+			destination._parameterName = this._parameterName;
+			destination._precision = this._precision;
+			destination._scale = this._scale;
+			destination._sqlBufferReturnValue = this._sqlBufferReturnValue;
+			destination._isSqlParameterSqlType = this._isSqlParameterSqlType;
+			destination._internalMetaType = this._internalMetaType;
+			destination.CoercedValue = this.CoercedValue;
+			destination._valueAsINullable = this._valueAsINullable;
+			destination._isNull = this._isNull;
+			destination._coercedValueIsDataFeed = this._coercedValueIsDataFeed;
+			destination._coercedValueIsSqlType = this._coercedValueIsSqlType;
+			destination._actualSize = this._actualSize;
+		}
+
+		public override DataRowVersion SourceVersion
+		{
+			get
+			{
+				DataRowVersion sourceVersion = this._sourceVersion;
+				if (sourceVersion == (DataRowVersion)0)
+				{
+					return DataRowVersion.Current;
+				}
+				return sourceVersion;
+			}
+			set
+			{
+				if (value <= DataRowVersion.Current)
+				{
+					if (value != DataRowVersion.Original && value != DataRowVersion.Current)
+					{
+						goto IL_0032;
+					}
+				}
+				else if (value != DataRowVersion.Proposed && value != DataRowVersion.Default)
+				{
+					goto IL_0032;
+				}
+				this._sourceVersion = value;
+				return;
+				IL_0032:
+				throw ADP.InvalidDataRowVersion(value);
+			}
+		}
+
 		internal byte GetActualPrecision()
 		{
 			if (!this.ShouldSerializePrecision())
@@ -951,8 +1024,8 @@ namespace System.Data.SqlClient
 			props = null;
 			peekAhead = null;
 			object coercedValue = this.GetCoercedValue();
-			DataTable dataTable;
-			if ((dataTable = coercedValue as DataTable) != null)
+			DataTable dataTable = coercedValue as DataTable;
+			if (dataTable != null)
 			{
 				if (dataTable.Columns.Count <= 0)
 				{
@@ -1098,9 +1171,11 @@ namespace System.Data.SqlClient
 								}
 								props[SmiPropertySelector.SortOrder] = new SmiOrderProperty(new List<SmiOrderProperty.SmiColumnOrder>(array6));
 							}
-							peekAhead = new ParameterPeekAheadValue();
-							peekAhead.Enumerator = enumerator;
-							peekAhead.FirstRecord = sqlDataRecord;
+							peekAhead = new ParameterPeekAheadValue
+							{
+								Enumerator = enumerator,
+								FirstRecord = sqlDataRecord
+							};
 							enumerator = null;
 							return;
 						}
@@ -1246,22 +1321,25 @@ namespace System.Data.SqlClient
 			}
 			if (this._value != null && DBNull.Value != this._value)
 			{
-				if (this._value is char)
+				Type type = this._value.GetType();
+				if (typeof(char) == type)
 				{
 					this._value = this._value.ToString();
+					type = typeof(string);
 				}
-				else if (this.Value is char[])
+				else if (typeof(char[]) == type)
 				{
 					this._value = new string((char[])this._value);
+					type = typeof(string);
 				}
-				return MetaType.GetMetaTypeFromValue(this._value, false, true);
+				return MetaType.GetMetaTypeFromType(type);
 			}
 			if (this._sqlBufferReturnValue != null)
 			{
 				Type typeFromStorageType = this._sqlBufferReturnValue.GetTypeFromStorageType(this._isSqlParameterSqlType);
 				if (null != typeFromStorageType)
 				{
-					return MetaType.GetMetaTypeFromType(typeFromStorageType, true);
+					return MetaType.GetMetaTypeFromType(typeFromStorageType);
 				}
 			}
 			return MetaType.GetDefaultMetaType();
@@ -1302,20 +1380,37 @@ namespace System.Data.SqlClient
 			this._isNull = this._sqlBufferReturnValue.IsNull;
 			this._coercedValueIsDataFeed = false;
 			this._coercedValueIsSqlType = false;
+			this._udtLoadError = null;
 			this._actualSize = -1;
+		}
+
+		internal void SetUdtLoadError(Exception e)
+		{
+			this._udtLoadError = e;
 		}
 
 		internal void Validate(int index, bool isCommandProc)
 		{
 			MetaType metaTypeOnly = this.GetMetaTypeOnly();
 			this._internalMetaType = metaTypeOnly;
-			if (ADP.IsDirection(this, ParameterDirection.Output) && !ADP.IsDirection(this, ParameterDirection.ReturnValue) && !metaTypeOnly.IsFixed && !this.ShouldSerializeSize() && (this._value == null || this._value == DBNull.Value) && this.SqlDbType != SqlDbType.Timestamp && this.SqlDbType != SqlDbType.Udt && this.SqlDbType != SqlDbType.Xml && !metaTypeOnly.IsVarTime)
+			if (ADP.IsDirection(this, ParameterDirection.Output) && !ADP.IsDirection(this, ParameterDirection.ReturnValue) && !metaTypeOnly.IsFixed && !this.ShouldSerializeSize() && (this._value == null || Convert.IsDBNull(this._value)) && this.SqlDbType != SqlDbType.Timestamp && this.SqlDbType != SqlDbType.Udt && this.SqlDbType != SqlDbType.Xml && !metaTypeOnly.IsVarTime)
 			{
 				throw ADP.UninitializedParameterSize(index, metaTypeOnly.ClassType);
 			}
 			if (metaTypeOnly.SqlDbType != SqlDbType.Udt && this.Direction != ParameterDirection.Output)
 			{
 				this.GetCoercedValue();
+			}
+			if (metaTypeOnly.SqlDbType == SqlDbType.Udt)
+			{
+				if (string.IsNullOrEmpty(this.UdtTypeName))
+				{
+					throw SQL.MustSetUdtTypeNameForUdtParams();
+				}
+			}
+			else if (!string.IsNullOrEmpty(this.UdtTypeName))
+			{
+				throw SQL.UnexpectedUdtTypeNameForNonUdtParams();
 			}
 			if (metaTypeOnly.SqlDbType == SqlDbType.Structured)
 			{
@@ -1506,90 +1601,23 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		internal static string[] ParseTypeName(string typeName)
+		internal static string[] ParseTypeName(string typeName, bool isUdtTypeName)
 		{
 			string[] array;
 			try
 			{
-				string text = "SqlParameter.TypeName is an invalid multipart name";
+				string text = (isUdtTypeName ? "SqlParameter.UdtTypeName is an invalid multipart name" : "SqlParameter.TypeName is an invalid multipart name");
 				array = MultipartIdentifier.ParseMultipartIdentifier(typeName, "[\"", "]\"", '.', 3, true, text, true);
 			}
 			catch (ArgumentException)
 			{
+				if (isUdtTypeName)
+				{
+					throw SQL.InvalidUdt3PartNameFormat();
+				}
 				throw SQL.InvalidParameterTypeNameFormat();
 			}
 			return array;
-		}
-
-		object ICloneable.Clone()
-		{
-			return new SqlParameter(this);
-		}
-
-		private void CloneHelper(SqlParameter destination)
-		{
-			this.CloneHelperCore(destination);
-			destination._metaType = this._metaType;
-			destination._collation = this._collation;
-			destination._xmlSchemaCollectionDatabase = this._xmlSchemaCollectionDatabase;
-			destination._xmlSchemaCollectionOwningSchema = this._xmlSchemaCollectionOwningSchema;
-			destination._xmlSchemaCollectionName = this._xmlSchemaCollectionName;
-			destination._typeName = this._typeName;
-			destination._parameterName = this._parameterName;
-			destination._precision = this._precision;
-			destination._scale = this._scale;
-			destination._sqlBufferReturnValue = this._sqlBufferReturnValue;
-			destination._isSqlParameterSqlType = this._isSqlParameterSqlType;
-			destination._internalMetaType = this._internalMetaType;
-			destination.CoercedValue = this.CoercedValue;
-			destination._valueAsINullable = this._valueAsINullable;
-			destination._isNull = this._isNull;
-			destination._coercedValueIsDataFeed = this._coercedValueIsDataFeed;
-			destination._coercedValueIsSqlType = this._coercedValueIsSqlType;
-			destination._actualSize = this._actualSize;
-		}
-
-		private void CloneHelperCore(SqlParameter destination)
-		{
-			destination._value = this._value;
-			destination._direction = this._direction;
-			destination._size = this._size;
-			destination._offset = this._offset;
-			destination._sourceColumn = this._sourceColumn;
-			destination._sourceVersion = this._sourceVersion;
-			destination._sourceColumnNullMapping = this._sourceColumnNullMapping;
-			destination._isNullable = this._isNullable;
-		}
-
-		public override DataRowVersion SourceVersion
-		{
-			get
-			{
-				DataRowVersion sourceVersion = this._sourceVersion;
-				if (sourceVersion == (DataRowVersion)0)
-				{
-					return DataRowVersion.Current;
-				}
-				return sourceVersion;
-			}
-			set
-			{
-				if (value <= DataRowVersion.Current)
-				{
-					if (value != DataRowVersion.Original && value != DataRowVersion.Current)
-					{
-						goto IL_0032;
-					}
-				}
-				else if (value != DataRowVersion.Proposed && value != DataRowVersion.Default)
-				{
-					goto IL_0032;
-				}
-				this._sourceVersion = value;
-				return;
-				IL_0032:
-				throw ADP.InvalidDataRowVersion(value);
-			}
 		}
 
 		private object CoercedValue
@@ -1794,19 +1822,8 @@ namespace System.Data.SqlClient
 			destination._sourceVersion = this._sourceVersion;
 			destination._sourceColumnNullMapping = this._sourceColumnNullMapping;
 			destination._isNullable = this._isNullable;
-		}
-
-		[MonoTODO]
-		public string UdtTypeName
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-			set
-			{
-				throw new NotImplementedException();
-			}
+			destination._parameterName = this._parameterName;
+			destination._isNull = this._isNull;
 		}
 
 		public bool ForceColumnEncryption
@@ -1814,13 +1831,13 @@ namespace System.Data.SqlClient
 			[CompilerGenerated]
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return default(bool);
 			}
 			[CompilerGenerated]
 			set
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -1834,7 +1851,11 @@ namespace System.Data.SqlClient
 
 		private string _xmlSchemaCollectionName;
 
+		private string _udtTypeName;
+
 		private string _typeName;
+
+		private Exception _udtLoadError;
 
 		private string _parameterName;
 
@@ -1879,5 +1900,144 @@ namespace System.Data.SqlClient
 		private bool _isNullable;
 
 		private object _coercedValue;
+
+		internal sealed class SqlParameterConverter : ExpandableObjectConverter
+		{
+			public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			{
+				return typeof(InstanceDescriptor) == destinationType || base.CanConvertTo(context, destinationType);
+			}
+
+			public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+			{
+				if (destinationType == null)
+				{
+					throw ADP.ArgumentNull("destinationType");
+				}
+				if (typeof(InstanceDescriptor) == destinationType && value is SqlParameter)
+				{
+					return this.ConvertToInstanceDescriptor(value as SqlParameter);
+				}
+				return base.ConvertTo(context, culture, value, destinationType);
+			}
+
+			private InstanceDescriptor ConvertToInstanceDescriptor(SqlParameter p)
+			{
+				int num = 0;
+				if (p.ShouldSerializeSqlDbType())
+				{
+					num |= 1;
+				}
+				if (p.ShouldSerializeSize())
+				{
+					num |= 2;
+				}
+				if (!string.IsNullOrEmpty(p.SourceColumn))
+				{
+					num |= 4;
+				}
+				if (p.Value != null)
+				{
+					num |= 8;
+				}
+				if (ParameterDirection.Input != p.Direction || p.IsNullable || p.ShouldSerializePrecision() || p.ShouldSerializeScale() || DataRowVersion.Current != p.SourceVersion)
+				{
+					num |= 16;
+				}
+				if (p.SourceColumnNullMapping || !string.IsNullOrEmpty(p.XmlSchemaCollectionDatabase) || !string.IsNullOrEmpty(p.XmlSchemaCollectionOwningSchema) || !string.IsNullOrEmpty(p.XmlSchemaCollectionName))
+				{
+					num |= 32;
+				}
+				Type[] array;
+				object[] array2;
+				switch (num)
+				{
+				case 0:
+				case 1:
+					array = new Type[]
+					{
+						typeof(string),
+						typeof(SqlDbType)
+					};
+					array2 = new object[] { p.ParameterName, p.SqlDbType };
+					break;
+				case 2:
+				case 3:
+					array = new Type[]
+					{
+						typeof(string),
+						typeof(SqlDbType),
+						typeof(int)
+					};
+					array2 = new object[] { p.ParameterName, p.SqlDbType, p.Size };
+					break;
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+					array = new Type[]
+					{
+						typeof(string),
+						typeof(SqlDbType),
+						typeof(int),
+						typeof(string)
+					};
+					array2 = new object[] { p.ParameterName, p.SqlDbType, p.Size, p.SourceColumn };
+					break;
+				case 8:
+					array = new Type[]
+					{
+						typeof(string),
+						typeof(object)
+					};
+					array2 = new object[] { p.ParameterName, p.Value };
+					break;
+				default:
+					if ((32 & num) == 0)
+					{
+						array = new Type[]
+						{
+							typeof(string),
+							typeof(SqlDbType),
+							typeof(int),
+							typeof(ParameterDirection),
+							typeof(bool),
+							typeof(byte),
+							typeof(byte),
+							typeof(string),
+							typeof(DataRowVersion),
+							typeof(object)
+						};
+						array2 = new object[] { p.ParameterName, p.SqlDbType, p.Size, p.Direction, p.IsNullable, p.PrecisionInternal, p.ScaleInternal, p.SourceColumn, p.SourceVersion, p.Value };
+					}
+					else
+					{
+						array = new Type[]
+						{
+							typeof(string),
+							typeof(SqlDbType),
+							typeof(int),
+							typeof(ParameterDirection),
+							typeof(byte),
+							typeof(byte),
+							typeof(string),
+							typeof(DataRowVersion),
+							typeof(bool),
+							typeof(object),
+							typeof(string),
+							typeof(string),
+							typeof(string)
+						};
+						array2 = new object[]
+						{
+							p.ParameterName, p.SqlDbType, p.Size, p.Direction, p.PrecisionInternal, p.ScaleInternal, p.SourceColumn, p.SourceVersion, p.SourceColumnNullMapping, p.Value,
+							p.XmlSchemaCollectionDatabase, p.XmlSchemaCollectionOwningSchema, p.XmlSchemaCollectionName
+						};
+					}
+					break;
+				}
+				return new InstanceDescriptor(typeof(SqlParameter).GetConstructor(array), array2);
+			}
+		}
 	}
 }

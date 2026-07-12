@@ -86,11 +86,11 @@ namespace System.Runtime.Serialization
 		[SecurityCritical]
 		internal object InternalGetValue(object obj)
 		{
-			RtFieldInfo rtFieldInfo = this.m_field as RtFieldInfo;
-			if (rtFieldInfo != null)
+			RtFieldInfo field = this.m_field;
+			if (field != null)
 			{
-				rtFieldInfo.CheckConsistency(obj);
-				return rtFieldInfo.UnsafeGetValue(obj);
+				field.CheckConsistency(obj);
+				return field.UnsafeGetValue(obj);
 			}
 			return this.m_field.GetValue(obj);
 		}
@@ -103,11 +103,11 @@ namespace System.Runtime.Serialization
 		[SecurityCritical]
 		internal void InternalSetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture)
 		{
-			RtFieldInfo rtFieldInfo = this.m_field as RtFieldInfo;
-			if (rtFieldInfo != null)
+			RtFieldInfo field = this.m_field;
+			if (field != null)
 			{
-				rtFieldInfo.CheckConsistency(obj);
-				rtFieldInfo.UnsafeSetValue(obj, value, invokeAttr, binder, culture);
+				field.CheckConsistency(obj);
+				field.UnsafeSetValue(obj, value, invokeAttr, binder, culture);
 				return;
 			}
 			this.m_field.SetValue(obj, value, invokeAttr, binder, culture);

@@ -356,15 +356,15 @@ namespace System.Dynamic
 			}
 		}
 
-		private static readonly MethodInfo ExpandoTryGetValue = typeof(RuntimeOps).GetMethod("ExpandoTryGetValue");
+		private static readonly MethodInfo s_expandoTryGetValue = typeof(RuntimeOps).GetMethod("ExpandoTryGetValue");
 
-		private static readonly MethodInfo ExpandoTrySetValue = typeof(RuntimeOps).GetMethod("ExpandoTrySetValue");
+		private static readonly MethodInfo s_expandoTrySetValue = typeof(RuntimeOps).GetMethod("ExpandoTrySetValue");
 
-		private static readonly MethodInfo ExpandoTryDeleteValue = typeof(RuntimeOps).GetMethod("ExpandoTryDeleteValue");
+		private static readonly MethodInfo s_expandoTryDeleteValue = typeof(RuntimeOps).GetMethod("ExpandoTryDeleteValue");
 
-		private static readonly MethodInfo ExpandoPromoteClass = typeof(RuntimeOps).GetMethod("ExpandoPromoteClass");
+		private static readonly MethodInfo s_expandoPromoteClass = typeof(RuntimeOps).GetMethod("ExpandoPromoteClass");
 
-		private static readonly MethodInfo ExpandoCheckVersion = typeof(RuntimeOps).GetMethod("ExpandoCheckVersion");
+		private static readonly MethodInfo s_expandoCheckVersion = typeof(RuntimeOps).GetMethod("ExpandoCheckVersion");
 
 		internal readonly object LockObject;
 
@@ -542,8 +542,8 @@ namespace System.Dynamic
 			private readonly ICollection<object> _collection;
 		}
 
-		[DebuggerDisplay("Count = {Count}")]
 		[DebuggerTypeProxy(typeof(ExpandoObject.ValueCollectionDebugView))]
+		[DebuggerDisplay("Count = {Count}")]
 		private class ValueCollection : ICollection<object>, IEnumerable<object>, IEnumerable
 		{
 			internal ValueCollection(ExpandoObject expando)
@@ -680,7 +680,7 @@ namespace System.Dynamic
 				ExpandoClass @class = this.Value.Class;
 				int valueIndex = @class.GetValueIndex(name, ignoreCase, this.Value);
 				ParameterExpression parameterExpression = Expression.Parameter(typeof(object), "value");
-				Expression expression = Expression.Call(ExpandoObject.ExpandoTryGetValue, new Expression[]
+				Expression expression = Expression.Call(ExpandoObject.s_expandoTryGetValue, new Expression[]
 				{
 					this.GetLimitedSelf(),
 					Expression.Constant(@class, typeof(object)),
@@ -717,7 +717,7 @@ namespace System.Dynamic
 				ExpandoClass expandoClass;
 				int num;
 				ExpandoClass classEnsureIndex = this.GetClassEnsureIndex(binder.Name, binder.IgnoreCase, this.Value, out expandoClass, out num);
-				return this.AddDynamicTestAndDefer(binder, expandoClass, classEnsureIndex, new DynamicMetaObject(Expression.Call(ExpandoObject.ExpandoTrySetValue, new Expression[]
+				return this.AddDynamicTestAndDefer(binder, expandoClass, classEnsureIndex, new DynamicMetaObject(Expression.Call(ExpandoObject.s_expandoTrySetValue, new Expression[]
 				{
 					this.GetLimitedSelf(),
 					Expression.Constant(expandoClass, typeof(object)),
@@ -732,7 +732,7 @@ namespace System.Dynamic
 			{
 				ContractUtils.RequiresNotNull(binder, "binder");
 				int valueIndex = this.Value.Class.GetValueIndex(binder.Name, binder.IgnoreCase, this.Value);
-				Expression expression = Expression.Call(ExpandoObject.ExpandoTryDeleteValue, this.GetLimitedSelf(), Expression.Constant(this.Value.Class, typeof(object)), Utils.Constant(valueIndex), Expression.Constant(binder.Name), Utils.Constant(binder.IgnoreCase));
+				Expression expression = Expression.Call(ExpandoObject.s_expandoTryDeleteValue, this.GetLimitedSelf(), Expression.Constant(this.Value.Class, typeof(object)), Utils.Constant(valueIndex), Expression.Constant(binder.Name), Utils.Constant(binder.IgnoreCase));
 				DynamicMetaObject dynamicMetaObject = binder.FallbackDeleteMember(this);
 				DynamicMetaObject dynamicMetaObject2 = new DynamicMetaObject(Expression.IfThen(Expression.Not(expression), dynamicMetaObject.Expression), dynamicMetaObject.Restrictions);
 				return this.AddDynamicTestAndDefer(binder, this.Value.Class, null, dynamicMetaObject2);
@@ -759,9 +759,9 @@ namespace System.Dynamic
 				Expression expression = succeeds.Expression;
 				if (originalClass != null)
 				{
-					expression = Expression.Block(Expression.Call(null, ExpandoObject.ExpandoPromoteClass, this.GetLimitedSelf(), Expression.Constant(originalClass, typeof(object)), Expression.Constant(klass, typeof(object))), succeeds.Expression);
+					expression = Expression.Block(Expression.Call(null, ExpandoObject.s_expandoPromoteClass, this.GetLimitedSelf(), Expression.Constant(originalClass, typeof(object)), Expression.Constant(klass, typeof(object))), succeeds.Expression);
 				}
-				return new DynamicMetaObject(Expression.Condition(Expression.Call(null, ExpandoObject.ExpandoCheckVersion, this.GetLimitedSelf(), Expression.Constant(originalClass ?? klass, typeof(object))), expression, binder.GetUpdateExpression(expression.Type)), this.GetRestrictions().Merge(succeeds.Restrictions));
+				return new DynamicMetaObject(Expression.Condition(Expression.Call(null, ExpandoObject.s_expandoCheckVersion, this.GetLimitedSelf(), Expression.Constant(originalClass ?? klass, typeof(object))), expression, binder.GetUpdateExpression(expression.Type)), this.GetRestrictions().Merge(succeeds.Restrictions));
 			}
 
 			private ExpandoClass GetClassEnsureIndex(string name, bool caseInsensitive, ExpandoObject obj, out ExpandoClass klass, out int index)

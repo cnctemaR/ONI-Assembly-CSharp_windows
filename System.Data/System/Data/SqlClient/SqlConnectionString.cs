@@ -97,6 +97,7 @@ namespace System.Data.SqlClient
 				throw ADP.InvalidConnectionOptionValue("attachdbfilename");
 			}
 			this.ValidateValueLength(this._attachDBFileName, 260, "attachdbfilename");
+			this._typeSystemAssemblyVersion = SqlConnectionString.constTypeSystemAsmVersion10;
 			if (this._userInstance && !string.IsNullOrEmpty(this._failoverPartner))
 			{
 				throw SQL.UserInstanceFailoverNotCompatible();
@@ -128,6 +129,7 @@ namespace System.Data.SqlClient
 					throw ADP.InvalidConnectionOptionValue("type system version");
 				}
 				this._typeSystemVersion = SqlConnectionString.TypeSystem.SQLServer2012;
+				this._typeSystemAssemblyVersion = SqlConnectionString.constTypeSystemAsmVersion11;
 			}
 			if (string.IsNullOrEmpty(text2))
 			{
@@ -449,6 +451,14 @@ namespace System.Data.SqlClient
 			}
 		}
 
+		internal Version TypeSystemAssemblyVersion
+		{
+			get
+			{
+				return this._typeSystemAssemblyVersion;
+			}
+		}
+
 		internal SqlConnectionString.TransactionBindingEnum TransactionBinding
 		{
 			get
@@ -636,9 +646,15 @@ namespace System.Data.SqlClient
 
 		private readonly string _workstationId;
 
+		private readonly SqlConnectionString.TransactionBindingEnum _transactionBinding;
+
 		private readonly SqlConnectionString.TypeSystem _typeSystemVersion;
 
-		private readonly SqlConnectionString.TransactionBindingEnum _transactionBinding;
+		private readonly Version _typeSystemAssemblyVersion;
+
+		private static readonly Version constTypeSystemAsmVersion10 = new Version("10.0.0.0");
+
+		private static readonly Version constTypeSystemAsmVersion11 = new Version("11.0.0.0");
 
 		internal static class DEFAULT
 		{

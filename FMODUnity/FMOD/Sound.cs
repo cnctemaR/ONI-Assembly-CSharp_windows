@@ -122,6 +122,17 @@ namespace FMOD
 			return Sound.FMOD5_Sound_GetOpenState(this.handle, out openstate, out percentbuffered, out starving, out diskbusy);
 		}
 
+		public RESULT readData(byte[] buffer)
+		{
+			return Sound.FMOD5_Sound_ReadData(this.handle, buffer, (uint)buffer.Length, IntPtr.Zero);
+		}
+
+		public RESULT readData(byte[] buffer, out uint read)
+		{
+			return Sound.FMOD5_Sound_ReadData(this.handle, buffer, (uint)buffer.Length, out read);
+		}
+
+		[Obsolete("Use Sound.readData(byte[], out uint) or Sound.readData(byte[]) instead.")]
 		public RESULT readData(IntPtr buffer, uint length, out uint read)
 		{
 			return Sound.FMOD5_Sound_ReadData(this.handle, buffer, length, out read);
@@ -311,6 +322,12 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Sound_GetOpenState(IntPtr sound, out OPENSTATE openstate, out uint percentbuffered, out bool starving, out bool diskbusy);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_Sound_ReadData(IntPtr sound, byte[] buffer, uint length, IntPtr zero);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_Sound_ReadData(IntPtr sound, byte[] buffer, uint length, out uint read);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Sound_ReadData(IntPtr sound, IntPtr buffer, uint length, out uint read);

@@ -7,14 +7,14 @@ namespace System.Collections.Generic
 	{
 		internal static bool TryGetCount<T>(IEnumerable<T> source, out int count)
 		{
-			ICollection<T> collection;
-			if ((collection = source as ICollection<T>) != null)
+			ICollection<T> collection = source as ICollection<T>;
+			if (collection != null)
 			{
 				count = collection.Count;
 				return true;
 			}
-			IIListProvider<T> iilistProvider;
-			if ((iilistProvider = source as IIListProvider<T>) != null)
+			IIListProvider<T> iilistProvider = source as IIListProvider<T>;
+			if (iilistProvider != null)
 			{
 				return (count = iilistProvider.GetCount(true)) >= 0;
 			}
@@ -24,8 +24,8 @@ namespace System.Collections.Generic
 
 		internal static void Copy<T>(IEnumerable<T> source, T[] array, int arrayIndex, int count)
 		{
-			ICollection<T> collection;
-			if ((collection = source as ICollection<T>) != null)
+			ICollection<T> collection = source as ICollection<T>;
+			if (collection != null)
 			{
 				collection.CopyTo(array, arrayIndex);
 				return;
@@ -43,8 +43,8 @@ namespace System.Collections.Generic
 
 		internal static T[] ToArray<T>(IEnumerable<T> source)
 		{
-			ICollection<T> collection;
-			if ((collection = source as ICollection<T>) == null)
+			ICollection<T> collection = source as ICollection<T>;
+			if (collection == null)
 			{
 				LargeArrayBuilder<T> largeArrayBuilder = new LargeArrayBuilder<T>(true);
 				largeArrayBuilder.AddRange(source);
@@ -62,8 +62,8 @@ namespace System.Collections.Generic
 
 		internal static T[] ToArray<T>(IEnumerable<T> source, out int length)
 		{
-			ICollection<T> collection;
-			if ((collection = source as ICollection<T>) != null)
+			ICollection<T> collection = source as ICollection<T>;
+			if (collection != null)
 			{
 				int count = collection.Count;
 				if (count != 0)

@@ -37,7 +37,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
-		float num = 2426.72f;
+		float num = 580f * (DUPLICANTSTATS.STANDARD.BaseStats.KCAL2JOULES / 1000f);
 		float num2 = 0.01f;
 		LiquidCooledFan liquidCooledFan = go.AddOrGet<LiquidCooledFan>();
 		liquidCooledFan.gasStorage = storage;

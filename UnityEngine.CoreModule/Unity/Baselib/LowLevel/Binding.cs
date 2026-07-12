@@ -5,24 +5,49 @@ using UnityEngine.Bindings;
 
 namespace Unity.Baselib.LowLevel
 {
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_NetworkAddress.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Socket.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Memory.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Timer.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_SourceLocation.gen.binding.h")]
 	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorCode.gen.binding.h")]
 	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_RegisteredNetwork.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_DynamicLibrary.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Thread.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_SourceLocation.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Socket.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_NetworkAddress.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Memory.gen.binding.h")]
 	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ThreadLocalStorage.gen.binding.h")]
 	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorState.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Timer.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_FileIO.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Thread.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_DynamicLibrary.gen.binding.h")]
 	internal static class Binding
 	{
 		[FreeFunction(IsThreadSafe = true)]
-		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_Open(byte* pathname, Binding.Baselib_ErrorState* errorState)
+		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_OpenUtf8(byte* pathnameUtf8, Binding.Baselib_ErrorState* errorState)
 		{
 			Binding.Baselib_DynamicLibrary_Handle baselib_DynamicLibrary_Handle;
-			Binding.Baselib_DynamicLibrary_Open_Injected(pathname, errorState, out baselib_DynamicLibrary_Handle);
+			Binding.Baselib_DynamicLibrary_OpenUtf8_Injected(pathnameUtf8, errorState, out baselib_DynamicLibrary_Handle);
+			return baselib_DynamicLibrary_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_OpenUtf16(char* pathnameUtf16, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_DynamicLibrary_Handle baselib_DynamicLibrary_Handle;
+			Binding.Baselib_DynamicLibrary_OpenUtf16_Injected(pathnameUtf16, errorState, out baselib_DynamicLibrary_Handle);
+			return baselib_DynamicLibrary_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_OpenProgramHandle(Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_DynamicLibrary_Handle baselib_DynamicLibrary_Handle;
+			Binding.Baselib_DynamicLibrary_OpenProgramHandle_Injected(errorState, out baselib_DynamicLibrary_Handle);
+			return baselib_DynamicLibrary_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_FromNativeHandle(ulong handle, uint type, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_DynamicLibrary_Handle baselib_DynamicLibrary_Handle;
+			Binding.Baselib_DynamicLibrary_FromNativeHandle_Injected(handle, type, errorState, out baselib_DynamicLibrary_Handle);
 			return baselib_DynamicLibrary_Handle;
 		}
 
@@ -41,6 +66,104 @@ namespace Unity.Baselib.LowLevel
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern uint Baselib_ErrorState_Explain(Binding.Baselib_ErrorState* errorState, byte* buffer, uint bufferLen, Binding.Baselib_ErrorState_ExplainVerbosity verbosity);
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static Binding.Baselib_FileIO_EventQueue Baselib_FileIO_EventQueue_Create()
+		{
+			Binding.Baselib_FileIO_EventQueue baselib_FileIO_EventQueue;
+			Binding.Baselib_FileIO_EventQueue_Create_Injected(out baselib_FileIO_EventQueue);
+			return baselib_FileIO_EventQueue;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_FileIO_EventQueue_Free(Binding.Baselib_FileIO_EventQueue eq)
+		{
+			Binding.Baselib_FileIO_EventQueue_Free_Injected(ref eq);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static ulong Baselib_FileIO_EventQueue_Dequeue(Binding.Baselib_FileIO_EventQueue eq, Binding.Baselib_FileIO_EventQueue_Result* results, ulong count, uint timeoutInMilliseconds)
+		{
+			return Binding.Baselib_FileIO_EventQueue_Dequeue_Injected(ref eq, results, count, timeoutInMilliseconds);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_FileIO_EventQueue_Shutdown(Binding.Baselib_FileIO_EventQueue eq, uint threadCount)
+		{
+			Binding.Baselib_FileIO_EventQueue_Shutdown_Injected(ref eq, threadCount);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_FileIO_AsyncFile Baselib_FileIO_AsyncOpen(Binding.Baselib_FileIO_EventQueue eq, byte* pathname, ulong userdata, Binding.Baselib_FileIO_Priority priority)
+		{
+			Binding.Baselib_FileIO_AsyncFile baselib_FileIO_AsyncFile;
+			Binding.Baselib_FileIO_AsyncOpen_Injected(ref eq, pathname, userdata, priority, out baselib_FileIO_AsyncFile);
+			return baselib_FileIO_AsyncFile;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_FileIO_AsyncRead(Binding.Baselib_FileIO_AsyncFile file, Binding.Baselib_FileIO_ReadRequest* requests, ulong count, ulong userdata, Binding.Baselib_FileIO_Priority priority)
+		{
+			Binding.Baselib_FileIO_AsyncRead_Injected(ref file, requests, count, userdata, priority);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_FileIO_AsyncClose(Binding.Baselib_FileIO_AsyncFile file)
+		{
+			Binding.Baselib_FileIO_AsyncClose_Injected(ref file);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_FileIO_SyncFile Baselib_FileIO_SyncOpen(byte* pathname, Binding.Baselib_FileIO_OpenFlags openFlags, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_FileIO_SyncFile baselib_FileIO_SyncFile;
+			Binding.Baselib_FileIO_SyncOpen_Injected(pathname, openFlags, errorState, out baselib_FileIO_SyncFile);
+			return baselib_FileIO_SyncFile;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static Binding.Baselib_FileIO_SyncFile Baselib_FileIO_SyncFileFromNativeHandle(ulong handle, uint type)
+		{
+			Binding.Baselib_FileIO_SyncFile baselib_FileIO_SyncFile;
+			Binding.Baselib_FileIO_SyncFileFromNativeHandle_Injected(handle, type, out baselib_FileIO_SyncFile);
+			return baselib_FileIO_SyncFile;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static ulong Baselib_FileIO_SyncRead(Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_FileIO_SyncRead_Injected(ref file, offset, buffer, size, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static ulong Baselib_FileIO_SyncWrite(Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_FileIO_SyncWrite_Injected(ref file, offset, buffer, size, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_FileIO_SyncFlush(Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_FileIO_SyncFlush_Injected(ref file, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_FileIO_SyncSetFileSize(Binding.Baselib_FileIO_SyncFile file, ulong size, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_FileIO_SyncSetFileSize_Injected(ref file, size, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static ulong Baselib_FileIO_SyncGetFileSize(Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_FileIO_SyncGetFileSize_Injected(ref file, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_FileIO_SyncClose(Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_FileIO_SyncClose_Injected(ref file, errorState);
+		}
 
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -335,13 +458,67 @@ namespace Unity.Baselib.LowLevel
 		public static extern double Baselib_Timer_GetTimeSinceStartupInSeconds();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_DynamicLibrary_Open_Injected(byte* pathname, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
+		private unsafe static extern void Baselib_DynamicLibrary_OpenUtf8_Injected(byte* pathnameUtf8, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_DynamicLibrary_OpenUtf16_Injected(char* pathnameUtf16, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_DynamicLibrary_OpenProgramHandle_Injected(Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_DynamicLibrary_FromNativeHandle_Injected(ulong handle, uint type, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern IntPtr Baselib_DynamicLibrary_GetFunction_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle, byte* functionName, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_DynamicLibrary_Close_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_FileIO_EventQueue_Create_Injected(out Binding.Baselib_FileIO_EventQueue ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_FileIO_EventQueue_Free_Injected(ref Binding.Baselib_FileIO_EventQueue eq);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern ulong Baselib_FileIO_EventQueue_Dequeue_Injected(ref Binding.Baselib_FileIO_EventQueue eq, Binding.Baselib_FileIO_EventQueue_Result* results, ulong count, uint timeoutInMilliseconds);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_FileIO_EventQueue_Shutdown_Injected(ref Binding.Baselib_FileIO_EventQueue eq, uint threadCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_AsyncOpen_Injected(ref Binding.Baselib_FileIO_EventQueue eq, byte* pathname, ulong userdata, Binding.Baselib_FileIO_Priority priority, out Binding.Baselib_FileIO_AsyncFile ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_AsyncRead_Injected(ref Binding.Baselib_FileIO_AsyncFile file, Binding.Baselib_FileIO_ReadRequest* requests, ulong count, ulong userdata, Binding.Baselib_FileIO_Priority priority);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_FileIO_AsyncClose_Injected(ref Binding.Baselib_FileIO_AsyncFile file);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_SyncOpen_Injected(byte* pathname, Binding.Baselib_FileIO_OpenFlags openFlags, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_FileIO_SyncFile ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_FileIO_SyncFileFromNativeHandle_Injected(ulong handle, uint type, out Binding.Baselib_FileIO_SyncFile ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern ulong Baselib_FileIO_SyncRead_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern ulong Baselib_FileIO_SyncWrite_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_SyncFlush_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_SyncSetFileSize_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong size, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern ulong Baselib_FileIO_SyncGetFileSize_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_FileIO_SyncClose_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_Memory_AllocatePages_Injected(ulong pageSize, ulong pageCount, ulong alignmentInMultipleOfPageSize, Binding.Baselib_Memory_PageState pageState, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Memory_PageAllocation ret);
@@ -451,6 +628,8 @@ namespace Unity.Baselib.LowLevel
 
 		public static readonly IntPtr Baselib_Thread_InvalidId = IntPtr.Zero;
 
+		public static readonly UIntPtr Baselib_Thread_MaxThreadNameLength = new UIntPtr(64U);
+
 		public const uint Baselib_TLS_MinimumGuaranteedSlots = 100U;
 
 		public const ulong Baselib_SecondsPerMinute = 60UL;
@@ -477,6 +656,8 @@ namespace Unity.Baselib.LowLevel
 
 		public const double Baselib_Timer_MinNumberOfNanosecondsPerTick = 0.01;
 
+		public const double Baselib_Timer_HighPrecisionTimerCrossThreadMontotonyTolerance_InNanoseconds = 100.0;
+
 		public static readonly Binding.Baselib_Memory_PageAllocation Baselib_Memory_PageAllocation_Invalid = default(Binding.Baselib_Memory_PageAllocation);
 
 		public static readonly Binding.Baselib_RegisteredNetwork_Socket_UDP Baselib_RegisteredNetwork_Socket_UDP_Invalid = default(Binding.Baselib_RegisteredNetwork_Socket_UDP);
@@ -487,6 +668,21 @@ namespace Unity.Baselib.LowLevel
 		};
 
 		public static readonly Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_Handle_Invalid = new Binding.Baselib_DynamicLibrary_Handle
+		{
+			handle = (IntPtr)(-1)
+		};
+
+		public static readonly Binding.Baselib_FileIO_EventQueue Baselib_FileIO_EventQueue_Invalid = new Binding.Baselib_FileIO_EventQueue
+		{
+			handle = (IntPtr)0
+		};
+
+		public static readonly Binding.Baselib_FileIO_AsyncFile Baselib_FileIO_AsyncFile_Invalid = new Binding.Baselib_FileIO_AsyncFile
+		{
+			handle = (IntPtr)0
+		};
+
+		public static readonly Binding.Baselib_FileIO_SyncFile Baselib_FileIO_SyncFile_Invalid = new Binding.Baselib_FileIO_SyncFile
 		{
 			handle = (IntPtr)(-1)
 		};
@@ -557,6 +753,94 @@ namespace Unity.Baselib.LowLevel
 		{
 			ErrorType,
 			ErrorType_SourceLocation_Explanation
+		}
+
+		public struct Baselib_FileIO_EventQueue
+		{
+			public IntPtr handle;
+		}
+
+		public struct Baselib_FileIO_AsyncFile
+		{
+			public IntPtr handle;
+		}
+
+		public struct Baselib_FileIO_SyncFile
+		{
+			public IntPtr handle;
+		}
+
+		public enum Baselib_FileIO_OpenFlags : uint
+		{
+			Read = 1U,
+			Write,
+			OpenAlways = 4U,
+			CreateAlways = 8U
+		}
+
+		public struct Baselib_FileIO_ReadRequest
+		{
+			public ulong offset;
+
+			public IntPtr buffer;
+
+			public ulong size;
+		}
+
+		public enum Baselib_FileIO_Priority
+		{
+			Normal,
+			High
+		}
+
+		public enum Baselib_FileIO_EventQueue_ResultType
+		{
+			Baselib_FileIO_EventQueue_Callback = 1,
+			Baselib_FileIO_EventQueue_OpenFile,
+			Baselib_FileIO_EventQueue_ReadFile,
+			Baselib_FileIO_EventQueue_CloseFile
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void EventQueueCallback(ulong arg0);
+
+		public struct Baselib_FileIO_EventQueue_Result_Callback
+		{
+			public IntPtr callback;
+		}
+
+		public struct Baselib_FileIO_EventQueue_Result_OpenFile
+		{
+			public ulong fileSize;
+		}
+
+		public struct Baselib_FileIO_EventQueue_Result_ReadFile
+		{
+			public ulong bytesTransferred;
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		public struct Baselib_FileIO_EventQueue_Result
+		{
+			[FieldOffset(0)]
+			public Binding.Baselib_FileIO_EventQueue_ResultType type;
+
+			[FieldOffset(8)]
+			public ulong userdata;
+
+			[FieldOffset(16)]
+			public Binding.Baselib_ErrorState errorState;
+
+			[FieldOffset(64)]
+			public Binding.Baselib_FileIO_EventQueue_Result_Callback callback;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(64)]
+			public Binding.Baselib_FileIO_EventQueue_Result_OpenFile openFile;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(64)]
+			public Binding.Baselib_FileIO_EventQueue_Result_ReadFile readFile;
 		}
 
 		public struct Baselib_Memory_PageSizeInfo
@@ -746,6 +1030,9 @@ namespace Unity.Baselib.LowLevel
 
 			[FieldOffset(19)]
 			public byte _padding;
+
+			[FieldOffset(20)]
+			public uint ipv6_scope_id;
 		}
 
 		public enum Baselib_NetworkAddress_AddressReuse

@@ -75,7 +75,7 @@ namespace System
 		{
 			if (end - start >= 65520)
 			{
-				throw new UriFormatException(global::SR.GetString("Invalid URI: The Uri string is too long."));
+				throw new UriFormatException(SR.GetString("Invalid URI: The Uri string is too long."));
 			}
 			int i = start;
 			int num = start;
@@ -102,7 +102,7 @@ namespace System
 						{
 							if (num3 == 1 || (int)num3 == end - i)
 							{
-								throw new UriFormatException(global::SR.GetString("Invalid URI: There is an invalid sequence in the string."));
+								throw new UriFormatException(SR.GetString("Invalid URI: There is an invalid sequence in the string."));
 							}
 							num3 += 1;
 						}
@@ -110,7 +110,7 @@ namespace System
 						short num4 = (short)Encoding.UTF8.GetBytes(ptr2 + i, (int)num3, ptr, 160);
 						if (num4 == 0)
 						{
-							throw new UriFormatException(global::SR.GetString("Invalid URI: There is an invalid sequence in the string."));
+							throw new UriFormatException(SR.GetString("Invalid URI: There is an invalid sequence in the string."));
 						}
 						i += (int)(num3 - 1);
 						for (num3 = 0; num3 < num4; num3 += 1)
@@ -390,9 +390,9 @@ namespace System
 						goto IL_0207;
 					}
 					Block_12:
-					throw new UriFormatException(global::SR.GetString("Invalid URI: There is an invalid sequence in the string."));
+					throw new UriFormatException(SR.GetString("Invalid URI: There is an invalid sequence in the string."));
 					Block_24:
-					throw new UriFormatException(global::SR.GetString("Invalid URI: There is an invalid sequence in the string."));
+					throw new UriFormatException(SR.GetString("Invalid URI: There is an invalid sequence in the string."));
 					Block_36:
 					b = 30;
 					char[] array5 = new char[dest.Length + (int)(b * 3)];

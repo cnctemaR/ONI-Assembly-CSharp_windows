@@ -171,7 +171,7 @@ namespace System.Linq.Expressions.Compiler
 			return result;
 		}
 
-		private static Expression MakeBlock(ArrayBuilder<Expression> expressions)
+		private static Expression MakeBlock(global::System.Collections.Generic.ArrayBuilder<Expression> expressions)
 		{
 			return new SpilledExpressionBlock(expressions.ToArray());
 		}
@@ -602,7 +602,7 @@ namespace System.Linq.Expressions.Compiler
 			case StackSpiller.RewriteAction.SpillStack:
 			{
 				bool flag = StackSpiller.IsRefInstance(listInitExpression.NewExpression);
-				ArrayBuilder<Expression> arrayBuilder = new ArrayBuilder<Expression>(count + 2 + (flag ? 1 : 0));
+				global::System.Collections.Generic.ArrayBuilder<Expression> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<Expression>(count + 2 + (flag ? 1 : 0));
 				ParameterExpression parameterExpression = this.MakeTemp(node.Type);
 				arrayBuilder.UncheckedAdd(new AssignBinaryExpression(parameterExpression, node));
 				ParameterExpression parameterExpression2 = parameterExpression;
@@ -659,7 +659,7 @@ namespace System.Linq.Expressions.Compiler
 			case StackSpiller.RewriteAction.SpillStack:
 			{
 				bool flag = StackSpiller.IsRefInstance(memberInitExpression.NewExpression);
-				ArrayBuilder<Expression> arrayBuilder = new ArrayBuilder<Expression>(count + 2 + (flag ? 1 : 0));
+				global::System.Collections.Generic.ArrayBuilder<Expression> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<Expression>(count + 2 + (flag ? 1 : 0));
 				ParameterExpression parameterExpression = this.MakeTemp(node.Type);
 				arrayBuilder.UncheckedAdd(new AssignBinaryExpression(parameterExpression, node));
 				ParameterExpression parameterExpression2 = parameterExpression;
@@ -1411,10 +1411,10 @@ namespace System.Linq.Expressions.Compiler
 						}
 					}
 				}
-				object obj = "$temp$";
+				string text = "$temp$";
 				int temp = this._temp;
 				this._temp = temp + 1;
-				parameterExpression = ParameterExpression.Make(type, obj + temp, false);
+				parameterExpression = ParameterExpression.Make(type, text + temp.ToString(), false);
 				this.Temps.Add(parameterExpression);
 				return this.UseTemp(parameterExpression);
 			}
@@ -1485,7 +1485,7 @@ namespace System.Linq.Expressions.Compiler
 			SpillStack = 3
 		}
 
-		private struct Result
+		private readonly struct Result
 		{
 			internal Result(StackSpiller.RewriteAction action, Expression node)
 			{

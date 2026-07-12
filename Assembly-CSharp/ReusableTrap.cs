@@ -361,7 +361,11 @@ public class ReusableTrap : GameStateMachine<ReusableTrap, ReusableTrap.Instance
 				this.WasLastCritterLarge = this.IsCapturingLargeCritter;
 				Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(base.smi.transform.GetPosition()), base.def.releaseCellOffset), Grid.SceneLayer.Creatures);
 				List<GameObject> list = new List<GameObject>();
-				this.storage.DropAll(false, false, default(Vector3), true, list);
+				Storage storage = this.storage;
+				bool flag = false;
+				bool flag2 = false;
+				List<GameObject> list2 = list;
+				storage.DropAll(flag, flag2, default(Vector3), true, list2);
 				foreach (GameObject gameObject in list)
 				{
 					gameObject.transform.SetPosition(vector);

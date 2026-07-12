@@ -97,7 +97,7 @@ namespace System.Net
 				{
 					if (this.m_Finished || this.m_CurrentIndex < 0)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException(SR.GetString("Enumeration has either not started or has already finished."));
 					}
 					return this.m_Chain.m_Cache[this.m_CurrentIndex];
 				}

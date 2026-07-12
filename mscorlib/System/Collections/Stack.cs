@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Collections
 {
 	[DebuggerTypeProxy(typeof(Stack.StackDebugView))]
-	[ComVisible(true)]
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class Stack : ICollection, IEnumerable, ICloneable
@@ -23,7 +20,7 @@ namespace System.Collections
 		{
 			if (initialCapacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCapacity", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialCapacity", "Non-negative number required.");
 			}
 			if (initialCapacity < 10)
 			{
@@ -119,20 +116,20 @@ namespace System.Collections
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (array.Length - index < this._size)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			int i = 0;
-			if (array is object[])
+			object[] array2 = array as object[];
+			if (array2 != null)
 			{
-				object[] array2 = (object[])array;
 				while (i < this._size)
 				{
 					array2[i + index] = this._array[this._size - i - 1];
@@ -156,7 +153,7 @@ namespace System.Collections
 		{
 			if (this._size == 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Stack empty."));
+				throw new InvalidOperationException("Stack empty.");
 			}
 			return this._array[this._size - 1];
 		}
@@ -165,7 +162,7 @@ namespace System.Collections
 		{
 			if (this._size == 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Stack empty."));
+				throw new InvalidOperationException("Stack empty.");
 			}
 			this._version++;
 			object[] array = this._array;
@@ -191,7 +188,6 @@ namespace System.Collections
 			this._version++;
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static Stack Synchronized(Stack stack)
 		{
 			if (stack == null)
@@ -203,6 +199,10 @@ namespace System.Collections
 
 		public virtual object[] ToArray()
 		{
+			if (this._size == 0)
+			{
+				return Array.Empty<object>();
+			}
 			object[] array = new object[this._size];
 			for (int i = 0; i < this._size; i++)
 			{
@@ -367,7 +367,7 @@ namespace System.Collections
 				this._stack = stack;
 				this._version = this._stack._version;
 				this._index = -2;
-				this.currentElement = null;
+				this._currentElement = null;
 			}
 
 			public object Clone()
@@ -379,7 +379,7 @@ namespace System.Collections
 			{
 				if (this._version != this._stack._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				if (this._index == -2)
 				{
@@ -387,7 +387,7 @@ namespace System.Collections
 					bool flag = this._index >= 0;
 					if (flag)
 					{
-						this.currentElement = this._stack._array[this._index];
+						this._currentElement = this._stack._array[this._index];
 					}
 					return flag;
 				}
@@ -400,10 +400,10 @@ namespace System.Collections
 				bool flag2 = num >= 0;
 				if (flag2)
 				{
-					this.currentElement = this._stack._array[this._index];
+					this._currentElement = this._stack._array[this._index];
 					return flag2;
 				}
-				this.currentElement = null;
+				this._currentElement = null;
 				return flag2;
 			}
 
@@ -413,13 +413,13 @@ namespace System.Collections
 				{
 					if (this._index == -2)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 					}
 					if (this._index == -1)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+						throw new InvalidOperationException("Enumeration already finished.");
 					}
-					return this.currentElement;
+					return this._currentElement;
 				}
 			}
 
@@ -427,10 +427,10 @@ namespace System.Collections
 			{
 				if (this._version != this._stack._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				this._index = -2;
-				this.currentElement = null;
+				this._currentElement = null;
 			}
 
 			private Stack _stack;
@@ -439,7 +439,7 @@ namespace System.Collections
 
 			private int _version;
 
-			private object currentElement;
+			private object _currentElement;
 		}
 
 		internal class StackDebugView
@@ -450,7 +450,7 @@ namespace System.Collections
 				{
 					throw new ArgumentNullException("stack");
 				}
-				this.stack = stack;
+				this._stack = stack;
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -458,11 +458,11 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.stack.ToArray();
+					return this._stack.ToArray();
 				}
 			}
 
-			private Stack stack;
+			private Stack _stack;
 		}
 	}
 }

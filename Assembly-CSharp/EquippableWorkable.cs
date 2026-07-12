@@ -69,7 +69,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (this.equippable.assignee != null)
 		{
@@ -83,7 +83,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		this.workTimeRemaining = this.GetWorkTime();
 		base.OnStopWork(worker);

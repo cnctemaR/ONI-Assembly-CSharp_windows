@@ -39,8 +39,8 @@ namespace System.Data.Odbc
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public OdbcParameter this[string parameterName]
 		{
 			get

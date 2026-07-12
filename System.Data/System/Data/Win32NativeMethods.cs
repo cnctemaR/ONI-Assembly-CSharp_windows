@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data.SqlClient;
+using System.Runtime.InteropServices;
 
 namespace System.Data
 {
@@ -6,7 +8,13 @@ namespace System.Data
 	{
 		internal static bool IsTokenRestrictedWrapper(IntPtr token)
 		{
-			throw new PlatformNotSupportedException("Win32NativeMethods.IsTokenRestrictedWrapper is not supported on non-Windows platforms");
+			bool flag;
+			uint num = SNINativeMethodWrapper.UnmanagedIsTokenRestricted(token, out flag);
+			if (num != 0U)
+			{
+				Marshal.ThrowExceptionForHR((int)num);
+			}
+			return flag;
 		}
 	}
 }

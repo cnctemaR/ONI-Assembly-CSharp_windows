@@ -141,8 +141,8 @@ namespace UnityEngine.Events
 			}
 		}
 
-		[SerializeField]
 		[FormerlySerializedAs("m_Listeners")]
+		[SerializeField]
 		private List<PersistentCall> m_Calls;
 	}
 }

@@ -2,7 +2,6 @@
 using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Security;
 using System.Text;
 using System.Threading;
 
@@ -25,11 +24,7 @@ namespace System.Linq.Expressions.Compiler
 		private AssemblyGen()
 		{
 			AssemblyName assemblyName = new AssemblyName("Snippets");
-			CustomAttributeBuilder[] array = new CustomAttributeBuilder[]
-			{
-				new CustomAttributeBuilder(typeof(SecurityTransparentAttribute).GetConstructor(Type.EmptyTypes), Array.Empty<object>())
-			};
-			AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run, array);
+			AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 			this._myModule = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
 		}
 

@@ -8,7 +8,7 @@ public class HugMinionStates : GameStateMachine<HugMinionStates, HugMinionStates
 	{
 		default_state = this.moving;
 		this.moving.MoveTo(new Func<HugMinionStates.Instance, int>(HugMinionStates.FindFlopLocation), this.waiting, this.behaviourcomplete, false);
-		this.waiting.Enter(delegate(HugMinionStates.Instance smi)
+		GameStateMachine<HugMinionStates, HugMinionStates.Instance, IStateMachineTarget, HugMinionStates.Def>.State state = this.waiting.Enter(delegate(HugMinionStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
 		}).ParamTransition<float>(this.timeout, this.behaviourcomplete, (HugMinionStates.Instance smi, float p) => p > 60f && !smi.GetSMI<HugMonitor.Instance>().IsHugging()).Update(delegate(HugMinionStates.Instance smi, float dt)
@@ -16,8 +16,15 @@ public class HugMinionStates : GameStateMachine<HugMinionStates, HugMinionStates
 			smi.sm.timeout.Delta(dt, smi);
 		}, UpdateRate.SIM_200ms, false)
 			.PlayAnim("waiting_pre")
-			.QueueAnim("waiting_loop", true, null)
-			.ToggleStatusItem(CREATURES.STATUSITEMS.HUGMINIONWAITING.NAME, CREATURES.STATUSITEMS.HUGMINIONWAITING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+			.QueueAnim("waiting_loop", true, null);
+		string text = CREATURES.STATUSITEMS.HUGMINIONWAITING.NAME;
+		string text2 = CREATURES.STATUSITEMS.HUGMINIONWAITING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsAHug, false);
 	}
 

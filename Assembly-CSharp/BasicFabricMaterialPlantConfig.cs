@@ -24,7 +24,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 		float num3 = 295.15f;
 		float num4 = 310.15f;
 		float num5 = 398.15f;
-		string id2 = BasicFabricConfig.ID;
+		string text3 = BasicFabricConfig.ID;
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[]
 		{
 			SimHashes.Oxygen,
@@ -32,7 +32,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide,
 			SimHashes.DirtyWater,
 			SimHashes.Water
-		}, false, 0f, 0.15f, id2, false, true, true, true, 2400f, 0f, 4600f, BasicFabricMaterialPlantConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.NAME);
+		}, false, 0f, 0.15f, text3, false, true, true, true, 2400f, 0f, 4600f, BasicFabricMaterialPlantConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -44,7 +44,19 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, BasicFabricMaterialPlantConfig.SEED_ID, global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.DESC, Assets.GetAnim("seed_swampreed_kanim"), "object", 1, new List<Tag> { GameTags.WaterSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 20, global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), BasicFabricMaterialPlantConfig.ID + "_preview", Assets.GetAnim("swampreed_kanim"), "place", 1, 3);
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string seed_ID = BasicFabricMaterialPlantConfig.SEED_ID;
+		string text4 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.NAME;
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_swampreed_kanim");
+		string text6 = "object";
+		int num6 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.WaterSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		text3 = global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, seed_ID, text4, text5, anim, text6, num6, list, receptacleDirection, default(Tag), 20, text3, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false, null), BasicFabricMaterialPlantConfig.ID + "_preview", Assets.GetAnim("swampreed_kanim"), "place", 1, 3);
 		SoundEventVolumeCache.instance.AddVolume("swampreed_kanim", "FabricPlant_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("swampreed_kanim", "FabricPlant_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

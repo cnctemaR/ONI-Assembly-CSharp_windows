@@ -5,7 +5,7 @@ namespace FMODUnity
 {
 	public class PlatformGroup : Platform
 	{
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -13,7 +13,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 		}
 

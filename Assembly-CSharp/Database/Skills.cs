@@ -172,7 +172,8 @@ namespace Database
 			this.Technicals2 = this.AddSkill(new Skill("Technicals2", DUPLICANTS.ROLES.POWER_TECHNICIAN.NAME, DUPLICANTS.ROLES.POWER_TECHNICIAN.DESCRIPTION, "", 1, "hat_role_technicals2", "skillbadge_role_technicals2", Db.Get().SkillGroups.Technicals.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseMachineryMedium,
-				Db.Get().SkillPerks.CanPowerTinker
+				Db.Get().SkillPerks.CanPowerTinker,
+				Db.Get().SkillPerks.CanCraftElectronics
 			}, new List<string> { this.Technicals1.Id }));
 			this.Engineering1 = this.AddSkill(new Skill("Engineering1", DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.NAME, DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.DESCRIPTION, "", 2, "hat_role_engineering1", "skillbadge_role_engineering1", Db.Get().SkillGroups.Technicals.Id, new List<SkillPerk>
 			{
@@ -190,7 +191,7 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseStrengthPlumber,
 				Db.Get().SkillPerks.CanDoPlumbing
 			}, new List<string> { this.Basekeeping1.Id }));
-			this.Pyrotechnics = this.AddSkill(new Skill("Pyrotechnics", DUPLICANTS.ROLES.PYROTECHNIC.NAME, DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION, "", 2, "hat_role_technicals2", "skillbadge_role_technicals2", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanMakeMissiles }, new List<string> { this.Basekeeping2.Id }));
+			this.Pyrotechnics = this.AddSkill(new Skill("Pyrotechnics", DUPLICANTS.ROLES.PYROTECHNIC.NAME, DUPLICANTS.ROLES.PYROTECHNIC.DESCRIPTION, "", 2, "hat_role_pyrotechnics", "skillbadge_role_technicals2", Db.Get().SkillGroups.Basekeeping.Id, new List<SkillPerk> { Db.Get().SkillPerks.CanMakeMissiles }, new List<string> { this.Basekeeping2.Id }));
 			if (DlcManager.IsExpansion1Active())
 			{
 				this.Astronauting1 = this.AddSkill(new Skill("Astronauting1", DUPLICANTS.ROLES.USELESSSKILL.NAME, DUPLICANTS.ROLES.USELESSSKILL.DESCRIPTION, "EXPANSION1_ID", 3, "hat_role_astronaut1", "skillbadge_role_astronaut1", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseAthleticsMedium }, new List<string>

@@ -137,12 +137,12 @@ namespace UnityEngine
 			}
 		}
 
-		internal extern Object drivenByObject
+		public extern Object drivenByObject
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			internal set;
 		}
 
 		internal extern DrivenTransformProperties drivenProperties

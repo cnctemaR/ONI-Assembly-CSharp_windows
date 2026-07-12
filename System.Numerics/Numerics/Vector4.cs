@@ -303,13 +303,13 @@ namespace System.Numerics
 			return -value;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public Vector4(float value)
 		{
 			this = new Vector4(value, value, value, value);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public Vector4(float x, float y, float z, float w)
 		{
 			this.W = w;
@@ -340,7 +340,7 @@ namespace System.Numerics
 			this.CopyTo(array, 0);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void CopyTo(float[] array, int index)
 		{
@@ -362,95 +362,93 @@ namespace System.Numerics
 			array[index + 3] = this.W;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		public bool Equals(Vector4 other)
 		{
 			return this.X == other.X && this.Y == other.Y && this.Z == other.Z && this.W == other.W;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Dot(Vector4 vector1, Vector4 vector2)
 		{
 			return vector1.X * vector2.X + vector1.Y * vector2.Y + vector1.Z * vector2.Z + vector1.W * vector2.W;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 Min(Vector4 value1, Vector4 value2)
 		{
 			return new Vector4((value1.X < value2.X) ? value1.X : value2.X, (value1.Y < value2.Y) ? value1.Y : value2.Y, (value1.Z < value2.Z) ? value1.Z : value2.Z, (value1.W < value2.W) ? value1.W : value2.W);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 Max(Vector4 value1, Vector4 value2)
 		{
 			return new Vector4((value1.X > value2.X) ? value1.X : value2.X, (value1.Y > value2.Y) ? value1.Y : value2.Y, (value1.Z > value2.Z) ? value1.Z : value2.Z, (value1.W > value2.W) ? value1.W : value2.W);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 Abs(Vector4 value)
 		{
 			return new Vector4(MathF.Abs(value.X), MathF.Abs(value.Y), MathF.Abs(value.Z), MathF.Abs(value.W));
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 SquareRoot(Vector4 value)
 		{
 			return new Vector4(MathF.Sqrt(value.X), MathF.Sqrt(value.Y), MathF.Sqrt(value.Z), MathF.Sqrt(value.W));
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator +(Vector4 left, Vector4 right)
 		{
 			return new Vector4(left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator -(Vector4 left, Vector4 right)
 		{
 			return new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator *(Vector4 left, Vector4 right)
 		{
 			return new Vector4(left.X * right.X, left.Y * right.Y, left.Z * right.Z, left.W * right.W);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator *(Vector4 left, float right)
 		{
 			return left * new Vector4(right);
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator *(float left, Vector4 right)
 		{
 			return new Vector4(left) * right;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator /(Vector4 left, Vector4 right)
 		{
 			return new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
 		}
 
-		[JitIntrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector4 operator /(Vector4 value1, float value2)
 		{
-			float num = 1f / value2;
-			return new Vector4(value1.X * num, value1.Y * num, value1.Z * num, value1.W * num);
+			return value1 / new Vector4(value2);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -459,7 +457,7 @@ namespace System.Numerics
 			return Vector4.Zero - value;
 		}
 
-		[JitIntrinsic]
+		[Intrinsic]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Vector4 left, Vector4 right)
 		{

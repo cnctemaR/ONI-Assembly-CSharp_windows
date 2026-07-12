@@ -18,7 +18,7 @@ namespace Database
 		{
 			if (AccessoryGuid.Guid != null)
 			{
-				string[] array = AccessoryGuid.Guid.Split(new char[] { '.' });
+				string[] array = AccessoryGuid.Guid.Split('.', StringSplitOptions.None);
 				if (array.Length != 0)
 				{
 					string symbol_name = array[array.Length - 1];

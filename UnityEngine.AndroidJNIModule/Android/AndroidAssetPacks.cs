@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Android
 {
-	[StaticAccessor("AndroidAssetPacksBindingsHelpers", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/AndroidJNI/Public/AndroidAssetPacksBindingsHelpers.h")]
+	[StaticAccessor("AndroidAssetPacksBindingsHelpers", StaticAccessorType.DoubleColon)]
 	public static class AndroidAssetPacks
 	{
 		public static bool coreUnityAssetPacksDownloaded

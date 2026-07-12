@@ -1352,7 +1352,7 @@ namespace System.Xml.Serialization
 				}
 				else
 				{
-					string text3 = ((num >= 0) ? ("[" + num + "]") : "[]");
+					string text3 = ((num >= 0) ? ("[" + num.ToString() + "]") : "[]");
 					this.w.WriteAttributeString("arrayType", "http://schemas.xmlsoap.org/soap/encoding/", this.GetQualifiedName(text, text2) + text3);
 				}
 				IEnumerator enumerator = ((IEnumerable)o).GetEnumerator();
@@ -1530,10 +1530,10 @@ namespace System.Xml.Serialization
 			int num;
 			if (this.usedPrefixes == null)
 			{
-				object obj = this.aliasBase;
+				string text = this.aliasBase;
 				num = this.tempNamespacePrefix + 1;
 				this.tempNamespacePrefix = num;
-				return obj + num;
+				return text + num.ToString();
 			}
 			Hashtable hashtable;
 			do
@@ -1543,7 +1543,7 @@ namespace System.Xml.Serialization
 				this.tempNamespacePrefix = num;
 			}
 			while (hashtable.ContainsKey(num));
-			return this.aliasBase + this.tempNamespacePrefix;
+			return this.aliasBase + this.tempNamespacePrefix.ToString();
 		}
 
 		private XmlWriter w;

@@ -29,13 +29,15 @@ public class AutoPlumberSideScreen : SideScreenContent
 
 	private void SpawnMinion()
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
+		MinionStartingStats minionStartingStats = new MinionStartingStats(false, null, null, true);
+		GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
+		GameObject gameObject = Util.KInstantiate(prefab, null, null);
+		gameObject.name = prefab.name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPos(Grid.PosToCell(this.building), CellAlignment.Bottom, Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		new MinionStartingStats(false, null, null, true).Apply(gameObject);
+		minionStartingStats.Apply(gameObject);
 	}
 
 	public override int GetSideScreenSortOrder()

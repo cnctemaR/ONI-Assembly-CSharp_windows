@@ -44,7 +44,8 @@ namespace TUNING
 			GameTags.RareMaterials,
 			GameTags.Other,
 			GameTags.StoryTraitResource,
-			GameTags.Dehydrated
+			GameTags.Dehydrated,
+			GameTags.ChargedPortableBattery
 		};
 
 		public static List<Tag> SPECIAL_STORAGE = new List<Tag>
@@ -55,6 +56,8 @@ namespace TUNING
 		};
 
 		public static List<Tag> STORAGE_LOCKERS_STANDARD = STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Union<Tag>(new List<Tag> { GameTags.Medicine }).ToList<Tag>();
+
+		public static List<Tag> POWER_BANKS = new List<Tag> { GameTags.ChargedPortableBattery };
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
 

@@ -9,7 +9,7 @@ namespace FMODUnity
 			Settings.AddPlatformTemplate<PlatformMobileHigh>("fd7c55dab0fce234b8c25f6ffca523c1");
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -17,7 +17,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override float Priority
+		internal override float Priority
 		{
 			get
 			{
@@ -25,7 +25,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override bool MatchesCurrentEnvironment
+		internal override bool MatchesCurrentEnvironment
 		{
 			get
 			{

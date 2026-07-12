@@ -55,9 +55,9 @@ namespace System.Reflection
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern MarshalAsAttribute get_retval_marshal(IntPtr handle);
 
-		internal static ParameterInfo GetReturnParameterInfo(MonoMethod method)
+		internal static ParameterInfo GetReturnParameterInfo(RuntimeMethodInfo method)
 		{
-			return ParameterInfo.New(MonoMethodInfo.GetReturnType(method.mhandle), method, MonoMethodInfo.get_retval_marshal(method.mhandle));
+			return RuntimeParameterInfo.New(MonoMethodInfo.GetReturnType(method.mhandle), method, MonoMethodInfo.get_retval_marshal(method.mhandle));
 		}
 
 		private Type parent;

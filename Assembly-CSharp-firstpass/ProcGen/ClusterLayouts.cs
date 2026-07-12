@@ -80,7 +80,7 @@ namespace ProcGen
 								}
 							}
 						}
-						if (clusterLayout.skip != ClusterLayout.Skip.Always && (clusterLayout.skip != ClusterLayout.Skip.EditorOnly || Application.isEditor) && (clusterLayout.requiredDlcIds == null || DlcManager.HasAllContentSubscribed(clusterLayout.requiredDlcIds)) && (clusterLayout.forbiddenDlcIds == null || !DlcManager.HasAnyContentSubscribed(clusterLayout.forbiddenDlcIds)))
+						if (clusterLayout.skip != ClusterLayout.Skip.Always && (clusterLayout.skip != ClusterLayout.Skip.EditorOnly || Application.isEditor) && (clusterLayout.requiredDlcIds == null || DlcManager.IsAllContentSubscribed(clusterLayout.requiredDlcIds)) && (clusterLayout.forbiddenDlcIds == null || !DlcManager.IsAnyContentSubscribed(clusterLayout.forbiddenDlcIds)))
 						{
 							string name = ClusterLayout.GetName(cluster_file.full_path, addPrefix);
 							clusterLayout.filePath = name;

@@ -1,24 +1,262 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 using System.Threading;
 using Mono.Globalization.Unicode;
 using Unity;
 
 namespace System.Globalization
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class CompareInfo : IDeserializationCallback
 	{
+		internal unsafe static int InvariantIndexOf(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			char* ptr = source;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = value;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			int num = CompareInfo.InvariantFindString(ptr + startIndex, count, ptr2, value.Length, ignoreCase, true);
+			if (num >= 0)
+			{
+				return num + startIndex;
+			}
+			return -1;
+		}
+
+		internal unsafe static int InvariantIndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+		{
+			fixed (char* reference = MemoryMarshal.GetReference<char>(source))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(value))
+				{
+					char* ptr2 = reference2;
+					return CompareInfo.InvariantFindString(ptr, source.Length, ptr2, value.Length, ignoreCase, true);
+				}
+			}
+		}
+
+		internal unsafe static int InvariantLastIndexOf(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			char* ptr = source;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = value;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			int num = CompareInfo.InvariantFindString(ptr + (startIndex - count + 1), count, ptr2, value.Length, ignoreCase, false);
+			if (num >= 0)
+			{
+				return num + startIndex - count + 1;
+			}
+			return -1;
+		}
+
+		private unsafe static int InvariantFindString(char* source, int sourceCount, char* value, int valueCount, bool ignoreCase, bool start)
+		{
+			if (valueCount == 0)
+			{
+				if (!start)
+				{
+					return sourceCount - 1;
+				}
+				return 0;
+			}
+			else
+			{
+				if (sourceCount < valueCount)
+				{
+					return -1;
+				}
+				if (start)
+				{
+					int num = sourceCount - valueCount;
+					if (ignoreCase)
+					{
+						char c = CompareInfo.InvariantToUpper(*value);
+						for (int i = 0; i <= num; i++)
+						{
+							if (CompareInfo.InvariantToUpper(source[i]) == c)
+							{
+								int j;
+								for (j = 1; j < valueCount; j++)
+								{
+									char c2 = CompareInfo.InvariantToUpper(source[i + j]);
+									char c3 = CompareInfo.InvariantToUpper(value[j]);
+									if (c2 != c3)
+									{
+										break;
+									}
+								}
+								if (j == valueCount)
+								{
+									return i;
+								}
+							}
+						}
+					}
+					else
+					{
+						char c4 = *value;
+						for (int i = 0; i <= num; i++)
+						{
+							if (source[i] == c4)
+							{
+								int j;
+								for (j = 1; j < valueCount; j++)
+								{
+									char c5 = source[i + j];
+									char c3 = value[j];
+									if (c5 != c3)
+									{
+										break;
+									}
+								}
+								if (j == valueCount)
+								{
+									return i;
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					int num = sourceCount - valueCount;
+					if (ignoreCase)
+					{
+						char c6 = CompareInfo.InvariantToUpper(*value);
+						for (int i = num; i >= 0; i--)
+						{
+							if (CompareInfo.InvariantToUpper(source[i]) == c6)
+							{
+								int j;
+								for (j = 1; j < valueCount; j++)
+								{
+									char c7 = CompareInfo.InvariantToUpper(source[i + j]);
+									char c3 = CompareInfo.InvariantToUpper(value[j]);
+									if (c7 != c3)
+									{
+										break;
+									}
+								}
+								if (j == valueCount)
+								{
+									return i;
+								}
+							}
+						}
+					}
+					else
+					{
+						char c8 = *value;
+						for (int i = num; i >= 0; i--)
+						{
+							if (source[i] == c8)
+							{
+								int j;
+								for (j = 1; j < valueCount; j++)
+								{
+									char c9 = source[i + j];
+									char c3 = value[j];
+									if (c9 != c3)
+									{
+										break;
+									}
+								}
+								if (j == valueCount)
+								{
+									return i;
+								}
+							}
+						}
+					}
+				}
+				return -1;
+			}
+		}
+
+		private static char InvariantToUpper(char c)
+		{
+			if (c - 'a' > '\u0019')
+			{
+				return c;
+			}
+			return c - ' ';
+		}
+
+		private unsafe SortKey InvariantCreateSortKey(string source, CompareOptions options)
+		{
+			if (source == null)
+			{
+				throw new ArgumentNullException("source");
+			}
+			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
+			{
+				throw new ArgumentException("Value of flags is invalid.", "options");
+			}
+			byte[] array;
+			if (source.Length == 0)
+			{
+				array = Array.Empty<byte>();
+			}
+			else
+			{
+				array = new byte[source.Length * 2];
+				fixed (string text = source)
+				{
+					char* ptr = text;
+					if (ptr != null)
+					{
+						ptr += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					byte[] array2;
+					byte* ptr2;
+					if ((array2 = array) == null || array2.Length == 0)
+					{
+						ptr2 = null;
+					}
+					else
+					{
+						ptr2 = &array2[0];
+					}
+					if ((options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) != CompareOptions.None)
+					{
+						short* ptr3 = (short*)ptr2;
+						for (int i = 0; i < source.Length; i++)
+						{
+							ptr3[i] = (short)CompareInfo.InvariantToUpper(source[i]);
+						}
+					}
+					else
+					{
+						Buffer.MemoryCopy((void*)ptr, (void*)ptr2, (long)array.Length, (long)array.Length);
+					}
+					array2 = null;
+				}
+			}
+			return new SortKey(this.Name, source, options, array);
+		}
+
 		internal CompareInfo(CultureInfo culture)
 		{
-			this.m_name = culture.m_name;
-			this.m_sortName = culture.SortName;
+			this.m_name = culture._name;
+			this.InitSort(culture);
 		}
 
 		public static CompareInfo GetCompareInfo(int culture, Assembly assembly)
@@ -29,7 +267,7 @@ namespace System.Globalization
 			}
 			if (assembly != typeof(object).Module.Assembly)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only mscorlib's assembly is valid."));
+				throw new ArgumentException("Only mscorlib's assembly is valid.");
 			}
 			return CompareInfo.GetCompareInfo(culture);
 		}
@@ -42,7 +280,7 @@ namespace System.Globalization
 			}
 			if (assembly != typeof(object).Module.Assembly)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only mscorlib's assembly is valid."));
+				throw new ArgumentException("Only mscorlib's assembly is valid.");
 			}
 			return CompareInfo.GetCompareInfo(name);
 		}
@@ -51,7 +289,7 @@ namespace System.Globalization
 		{
 			if (CultureData.IsCustomCultureId(culture))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Customized cultures cannot be passed by LCID, only by name.", new object[] { "culture" }));
+				throw new ArgumentException("Customized cultures cannot be passed by LCID, only by name.", "culture");
 			}
 			return CultureInfo.GetCultureInfo(culture).CompareInfo;
 		}
@@ -65,21 +303,31 @@ namespace System.Globalization
 			return CultureInfo.GetCultureInfo(name).CompareInfo;
 		}
 
-		[ComVisible(false)]
-		public static bool IsSortable(char ch)
+		public unsafe static bool IsSortable(char ch)
 		{
-			return CompareInfo.IsSortable(ch.ToString());
+			return GlobalizationMode.Invariant || CompareInfo.IsSortable(&ch, 1);
 		}
 
-		[SecuritySafeCritical]
-		[ComVisible(false)]
-		public static bool IsSortable(string text)
+		public unsafe static bool IsSortable(string text)
 		{
 			if (text == null)
 			{
 				throw new ArgumentNullException("text");
 			}
-			return text.Length != 0 && MSCompatUnicodeTable.IsSortable(text);
+			if (text.Length == 0)
+			{
+				return false;
+			}
+			if (GlobalizationMode.Invariant)
+			{
+				return true;
+			}
+			char* ptr = text;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return CompareInfo.IsSortable(ptr, text.Length);
 		}
 
 		[OnDeserializing]
@@ -88,19 +336,9 @@ namespace System.Globalization
 			this.m_name = null;
 		}
 
-		private void OnDeserialized()
+		void IDeserializationCallback.OnDeserialization(object sender)
 		{
-			CultureInfo cultureInfo;
-			if (this.m_name == null)
-			{
-				cultureInfo = CultureInfo.GetCultureInfo(this.culture);
-				this.m_name = cultureInfo.m_name;
-			}
-			else
-			{
-				cultureInfo = CultureInfo.GetCultureInfo(this.m_name);
-			}
-			this.m_sortName = cultureInfo.SortName;
+			this.OnDeserialized();
 		}
 
 		[OnDeserialized]
@@ -109,18 +347,23 @@ namespace System.Globalization
 			this.OnDeserialized();
 		}
 
+		private void OnDeserialized()
+		{
+			if (this.m_name == null)
+			{
+				CultureInfo cultureInfo = CultureInfo.GetCultureInfo(this.culture);
+				this.m_name = cultureInfo._name;
+				return;
+			}
+			this.InitSort(CultureInfo.GetCultureInfo(this.m_name));
+		}
+
 		[OnSerializing]
 		private void OnSerializing(StreamingContext ctx)
 		{
 			this.culture = CultureInfo.GetCultureInfo(this.Name).LCID;
 		}
 
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-			this.OnDeserialized();
-		}
-
-		[ComVisible(false)]
 		public virtual string Name
 		{
 			get
@@ -129,42 +372,8 @@ namespace System.Globalization
 				{
 					return this.m_name;
 				}
-				return this.m_sortName;
+				return this._sortName;
 			}
-		}
-
-		internal static int GetNativeCompareFlags(CompareOptions options)
-		{
-			int num = 134217728;
-			if ((options & CompareOptions.IgnoreCase) != CompareOptions.None)
-			{
-				num |= 1;
-			}
-			if ((options & CompareOptions.IgnoreKanaType) != CompareOptions.None)
-			{
-				num |= 65536;
-			}
-			if ((options & CompareOptions.IgnoreNonSpace) != CompareOptions.None)
-			{
-				num |= 2;
-			}
-			if ((options & CompareOptions.IgnoreSymbols) != CompareOptions.None)
-			{
-				num |= 4;
-			}
-			if ((options & CompareOptions.IgnoreWidth) != CompareOptions.None)
-			{
-				num |= 131072;
-			}
-			if ((options & CompareOptions.StringSort) != CompareOptions.None)
-			{
-				num |= 4096;
-			}
-			if (options == CompareOptions.Ordinal)
-			{
-				num = 1073741824;
-			}
-			return num;
 		}
 
 		public virtual int Compare(string string1, string string2)
@@ -172,7 +381,6 @@ namespace System.Globalization
 			return this.Compare(string1, string2, CompareOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int Compare(string string1, string string2, CompareOptions options)
 		{
 			if (options == CompareOptions.OrdinalIgnoreCase)
@@ -183,7 +391,7 @@ namespace System.Globalization
 			{
 				if (options != CompareOptions.Ordinal)
 				{
-					throw new ArgumentException(Environment.GetResourceString("CompareOption.Ordinal cannot be used with other options."), "options");
+					throw new ArgumentException("CompareOption.Ordinal cannot be used with other options.", "options");
 				}
 				return string.CompareOrdinal(string1, string2);
 			}
@@ -191,7 +399,7 @@ namespace System.Globalization
 			{
 				if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+					throw new ArgumentException("Value of flags is invalid.", "options");
 				}
 				if (string1 == null)
 				{
@@ -207,9 +415,79 @@ namespace System.Globalization
 					{
 						return 1;
 					}
-					return this.internal_compare_switch(string1, 0, string1.Length, string2, 0, string2.Length, options);
+					if (!GlobalizationMode.Invariant)
+					{
+						return this.internal_compare_switch(string1, 0, string1.Length, string2, 0, string2.Length, options);
+					}
+					if ((options & CompareOptions.IgnoreCase) != CompareOptions.None)
+					{
+						return CompareInfo.CompareOrdinalIgnoreCase(string1, string2);
+					}
+					return string.CompareOrdinal(string1, string2);
 				}
 			}
+		}
+
+		internal int Compare(ReadOnlySpan<char> string1, string string2, CompareOptions options)
+		{
+			if (options == CompareOptions.OrdinalIgnoreCase)
+			{
+				return CompareInfo.CompareOrdinalIgnoreCase(string1, string2.AsSpan());
+			}
+			if ((options & CompareOptions.Ordinal) != CompareOptions.None)
+			{
+				if (options != CompareOptions.Ordinal)
+				{
+					throw new ArgumentException("CompareOption.Ordinal cannot be used with other options.", "options");
+				}
+				return string.CompareOrdinal(string1, string2.AsSpan());
+			}
+			else
+			{
+				if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
+				{
+					throw new ArgumentException("Value of flags is invalid.", "options");
+				}
+				if (string2 == null)
+				{
+					return 1;
+				}
+				if (!GlobalizationMode.Invariant)
+				{
+					return this.CompareString(string1, string2, options);
+				}
+				if ((options & CompareOptions.IgnoreCase) == CompareOptions.None)
+				{
+					return string.CompareOrdinal(string1, string2.AsSpan());
+				}
+				return CompareInfo.CompareOrdinalIgnoreCase(string1, string2.AsSpan());
+			}
+		}
+
+		internal int CompareOptionNone(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
+		{
+			if (string1.Length == 0 || string2.Length == 0)
+			{
+				return string1.Length - string2.Length;
+			}
+			if (!GlobalizationMode.Invariant)
+			{
+				return this.CompareString(string1, string2, CompareOptions.None);
+			}
+			return string.CompareOrdinal(string1, string2);
+		}
+
+		internal int CompareOptionIgnoreCase(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2)
+		{
+			if (string1.Length == 0 || string2.Length == 0)
+			{
+				return string1.Length - string2.Length;
+			}
+			if (!GlobalizationMode.Invariant)
+			{
+				return this.CompareString(string1, string2, CompareOptions.IgnoreCase);
+			}
+			return CompareInfo.CompareOrdinalIgnoreCase(string1, string2);
 		}
 
 		public virtual int Compare(string string1, int offset1, int length1, string string2, int offset2, int length2)
@@ -227,7 +505,6 @@ namespace System.Globalization
 			return this.Compare(string1, offset1, string2, offset2, CompareOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int Compare(string string1, int offset1, int length1, string string2, int offset2, int length2, CompareOptions options)
 		{
 			if (options == CompareOptions.OrdinalIgnoreCase)
@@ -247,30 +524,30 @@ namespace System.Globalization
 			{
 				if (length1 < 0 || length2 < 0)
 				{
-					throw new ArgumentOutOfRangeException((length1 < 0) ? "length1" : "length2", Environment.GetResourceString("Positive number required."));
+					throw new ArgumentOutOfRangeException((length1 < 0) ? "length1" : "length2", "Positive number required.");
 				}
 				if (offset1 < 0 || offset2 < 0)
 				{
-					throw new ArgumentOutOfRangeException((offset1 < 0) ? "offset1" : "offset2", Environment.GetResourceString("Positive number required."));
+					throw new ArgumentOutOfRangeException((offset1 < 0) ? "offset1" : "offset2", "Positive number required.");
 				}
 				if (offset1 > ((string1 == null) ? 0 : string1.Length) - length1)
 				{
-					throw new ArgumentOutOfRangeException("string1", Environment.GetResourceString("Offset and length must refer to a position in the string."));
+					throw new ArgumentOutOfRangeException("string1", "Offset and length must refer to a position in the string.");
 				}
 				if (offset2 > ((string2 == null) ? 0 : string2.Length) - length2)
 				{
-					throw new ArgumentOutOfRangeException("string2", Environment.GetResourceString("Offset and length must refer to a position in the string."));
+					throw new ArgumentOutOfRangeException("string2", "Offset and length must refer to a position in the string.");
 				}
 				if ((options & CompareOptions.Ordinal) != CompareOptions.None)
 				{
 					if (options != CompareOptions.Ordinal)
 					{
-						throw new ArgumentException(Environment.GetResourceString("CompareOption.Ordinal cannot be used with other options."), "options");
+						throw new ArgumentException("CompareOption.Ordinal cannot be used with other options.", "options");
 					}
 				}
 				else if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+					throw new ArgumentException("Value of flags is invalid.", "options");
 				}
 				if (string1 == null)
 				{
@@ -286,40 +563,95 @@ namespace System.Globalization
 					{
 						return 1;
 					}
+					ReadOnlySpan<char> readOnlySpan = string1.AsSpan(offset1, length1);
+					ReadOnlySpan<char> readOnlySpan2 = string2.AsSpan(offset2, length2);
 					if (options == CompareOptions.Ordinal)
 					{
-						return CompareInfo.CompareOrdinal(string1, offset1, length1, string2, offset2, length2);
+						return string.CompareOrdinal(readOnlySpan, readOnlySpan2);
 					}
-					return this.internal_compare_switch(string1, offset1, length1, string2, offset2, length2, options);
+					if (!GlobalizationMode.Invariant)
+					{
+						return this.internal_compare_switch(string1, offset1, length1, string2, offset2, length2, options);
+					}
+					if ((options & CompareOptions.IgnoreCase) != CompareOptions.None)
+					{
+						return CompareInfo.CompareOrdinalIgnoreCase(readOnlySpan, readOnlySpan2);
+					}
+					return string.CompareOrdinal(readOnlySpan, readOnlySpan2);
 				}
 			}
 		}
 
-		[SecurityCritical]
-		private static int CompareOrdinal(string string1, int offset1, int length1, string string2, int offset2, int length2)
+		internal static int CompareOrdinalIgnoreCase(string strA, int indexA, int lengthA, string strB, int indexB, int lengthB)
 		{
-			int num = string.nativeCompareOrdinalEx(string1, offset1, string2, offset2, (length1 < length2) ? length1 : length2);
-			if (length1 == length2 || num != 0)
-			{
-				return num;
-			}
-			if (length1 <= length2)
-			{
-				return -1;
-			}
-			return 1;
+			return CompareInfo.CompareOrdinalIgnoreCase(strA.AsSpan(indexA, lengthA), strB.AsSpan(indexB, lengthB));
 		}
 
-		[SecuritySafeCritical]
+		internal unsafe static int CompareOrdinalIgnoreCase(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+		{
+			int num = Math.Min(strA.Length, strB.Length);
+			int num2 = num;
+			fixed (char* reference = MemoryMarshal.GetReference<char>(strA))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(strB))
+				{
+					char* ptr2 = reference2;
+					char* ptr3 = ptr;
+					char* ptr4 = ptr2;
+					char c = (GlobalizationMode.Invariant ? char.MaxValue : '\u007f');
+					while (num != 0 && *ptr3 <= c && *ptr4 <= c)
+					{
+						int num3 = (int)(*ptr3);
+						int num4 = (int)(*ptr4);
+						if (num3 == num4)
+						{
+							ptr3++;
+							ptr4++;
+							num--;
+						}
+						else
+						{
+							if (num3 - 97 <= 25)
+							{
+								num3 -= 32;
+							}
+							if (num4 - 97 <= 25)
+							{
+								num4 -= 32;
+							}
+							if (num3 != num4)
+							{
+								return num3 - num4;
+							}
+							ptr3++;
+							ptr4++;
+							num--;
+						}
+					}
+					if (num == 0)
+					{
+						return strA.Length - strB.Length;
+					}
+					num2 -= num;
+					return CompareInfo.CompareStringOrdinalIgnoreCase(ptr3, strA.Length - num2, ptr4, strB.Length - num2);
+				}
+			}
+		}
+
 		public virtual bool IsPrefix(string source, string prefix, CompareOptions options)
 		{
 			if (source == null || prefix == null)
 			{
-				throw new ArgumentNullException((source == null) ? "source" : "prefix", Environment.GetResourceString("String reference not set to an instance of a String."));
+				throw new ArgumentNullException((source == null) ? "source" : "prefix", "String reference not set to an instance of a String.");
 			}
 			if (prefix.Length == 0)
 			{
 				return true;
+			}
+			if (source.Length == 0)
+			{
+				return false;
 			}
 			if (options == CompareOptions.OrdinalIgnoreCase)
 			{
@@ -331,13 +663,18 @@ namespace System.Globalization
 			}
 			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+				throw new ArgumentException("Value of flags is invalid.", "options");
 			}
-			if (CompareInfo.UseManagedCollation)
+			if (GlobalizationMode.Invariant)
 			{
-				return this.GetCollator().IsPrefix(source, prefix, options);
+				return source.StartsWith(prefix, ((options & CompareOptions.IgnoreCase) != CompareOptions.None) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 			}
-			return source.Length >= prefix.Length && this.Compare(source, 0, prefix.Length, prefix, 0, prefix.Length, options) == 0;
+			return this.StartsWith(source, prefix, options);
+		}
+
+		internal bool IsPrefix(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
+		{
+			return this.StartsWith(source, prefix, options);
 		}
 
 		public virtual bool IsPrefix(string source, string prefix)
@@ -345,16 +682,19 @@ namespace System.Globalization
 			return this.IsPrefix(source, prefix, CompareOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		public virtual bool IsSuffix(string source, string suffix, CompareOptions options)
 		{
 			if (source == null || suffix == null)
 			{
-				throw new ArgumentNullException((source == null) ? "source" : "suffix", Environment.GetResourceString("String reference not set to an instance of a String."));
+				throw new ArgumentNullException((source == null) ? "source" : "suffix", "String reference not set to an instance of a String.");
 			}
 			if (suffix.Length == 0)
 			{
 				return true;
+			}
+			if (source.Length == 0)
+			{
+				return false;
 			}
 			if (options == CompareOptions.OrdinalIgnoreCase)
 			{
@@ -366,13 +706,18 @@ namespace System.Globalization
 			}
 			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+				throw new ArgumentException("Value of flags is invalid.", "options");
 			}
-			if (CompareInfo.UseManagedCollation)
+			if (GlobalizationMode.Invariant)
 			{
-				return this.GetCollator().IsSuffix(source, suffix, options);
+				return source.EndsWith(suffix, ((options & CompareOptions.IgnoreCase) != CompareOptions.None) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 			}
-			return source.Length >= suffix.Length && this.Compare(source, source.Length - suffix.Length, suffix.Length, suffix, 0, suffix.Length, options) == 0;
+			return this.EndsWith(source, suffix, options);
+		}
+
+		internal bool IsSuffix(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
+		{
+			return this.EndsWith(source, suffix, options);
 		}
 
 		public virtual bool IsSuffix(string source, string suffix)
@@ -462,7 +807,6 @@ namespace System.Globalization
 			return this.IndexOf(source, value, startIndex, count, CompareOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int IndexOf(string source, char value, int startIndex, int count, CompareOptions options)
 		{
 			if (source == null)
@@ -471,11 +815,15 @@ namespace System.Globalization
 			}
 			if (startIndex < 0 || startIndex > source.Length)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (count < 0 || startIndex > source.Length - count)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			if (source.Length == 0)
+			{
+				return -1;
 			}
 			if (options == CompareOptions.OrdinalIgnoreCase)
 			{
@@ -483,12 +831,15 @@ namespace System.Globalization
 			}
 			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None && options != CompareOptions.Ordinal)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+				throw new ArgumentException("Value of flags is invalid.", "options");
 			}
-			return this.internal_index_switch(source, startIndex, count, value, options, true);
+			if (GlobalizationMode.Invariant)
+			{
+				return this.IndexOfOrdinal(source, new string(value, 1), startIndex, count, (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) > CompareOptions.None);
+			}
+			return this.IndexOfCore(source, new string(value, 1), startIndex, count, options, null);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int IndexOf(string source, string value, int startIndex, int count, CompareOptions options)
 		{
 			if (source == null)
@@ -501,7 +852,7 @@ namespace System.Globalization
 			}
 			if (startIndex > source.Length)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (source.Length == 0)
 			{
@@ -515,22 +866,84 @@ namespace System.Globalization
 			{
 				if (startIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (count < 0 || startIndex > source.Length - count)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 				}
 				if (options == CompareOptions.OrdinalIgnoreCase)
 				{
-					return source.IndexOf(value, startIndex, count, StringComparison.OrdinalIgnoreCase);
+					return this.IndexOfOrdinal(source, value, startIndex, count, true);
 				}
 				if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None && options != CompareOptions.Ordinal)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+					throw new ArgumentException("Value of flags is invalid.", "options");
 				}
-				return this.internal_index_switch(source, startIndex, count, value, options, true);
+				if (GlobalizationMode.Invariant)
+				{
+					return this.IndexOfOrdinal(source, value, startIndex, count, (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) > CompareOptions.None);
+				}
+				return this.IndexOfCore(source, value, startIndex, count, options, null);
 			}
+		}
+
+		internal int IndexOfOrdinal(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+		{
+			return this.IndexOfOrdinalCore(source, value, ignoreCase);
+		}
+
+		internal int IndexOf(ReadOnlySpan<char> source, ReadOnlySpan<char> value, CompareOptions options)
+		{
+			return this.IndexOfCore(source, value, options, null);
+		}
+
+		internal unsafe int IndexOf(string source, string value, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+		{
+			*matchLengthPtr = 0;
+			if (source.Length == 0)
+			{
+				if (value.Length == 0)
+				{
+					return 0;
+				}
+				return -1;
+			}
+			else
+			{
+				if (startIndex >= source.Length)
+				{
+					return -1;
+				}
+				if (options == CompareOptions.OrdinalIgnoreCase)
+				{
+					int num = this.IndexOfOrdinal(source, value, startIndex, count, true);
+					if (num >= 0)
+					{
+						*matchLengthPtr = value.Length;
+					}
+					return num;
+				}
+				if (GlobalizationMode.Invariant)
+				{
+					int num2 = this.IndexOfOrdinal(source, value, startIndex, count, (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) > CompareOptions.None);
+					if (num2 >= 0)
+					{
+						*matchLengthPtr = value.Length;
+					}
+					return num2;
+				}
+				return this.IndexOfCore(source, value, startIndex, count, options, matchLengthPtr);
+			}
+		}
+
+		internal int IndexOfOrdinal(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			if (GlobalizationMode.Invariant)
+			{
+				return CompareInfo.InvariantIndexOf(source, value, startIndex, count, ignoreCase);
+			}
+			return CompareInfo.IndexOfOrdinalCore(source, value, startIndex, count, ignoreCase);
 		}
 
 		public virtual int LastIndexOf(string source, char value)
@@ -599,7 +1012,6 @@ namespace System.Globalization
 			return this.LastIndexOf(source, value, startIndex, count, CompareOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int LastIndexOf(string source, char value, int startIndex, int count, CompareOptions options)
 		{
 			if (source == null)
@@ -608,7 +1020,7 @@ namespace System.Globalization
 			}
 			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None && options != CompareOptions.Ordinal && options != CompareOptions.OrdinalIgnoreCase)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+				throw new ArgumentException("Value of flags is invalid.", "options");
 			}
 			if (source.Length == 0 && (startIndex == -1 || startIndex == 0))
 			{
@@ -616,7 +1028,7 @@ namespace System.Globalization
 			}
 			if (startIndex < 0 || startIndex > source.Length)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (startIndex == source.Length)
 			{
@@ -628,16 +1040,19 @@ namespace System.Globalization
 			}
 			if (count < 0 || startIndex - count + 1 < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 			}
 			if (options == CompareOptions.OrdinalIgnoreCase)
 			{
 				return source.LastIndexOf(value.ToString(), startIndex, count, StringComparison.OrdinalIgnoreCase);
 			}
-			return this.internal_index_switch(source, startIndex, count, value, options, false);
+			if (GlobalizationMode.Invariant)
+			{
+				return CompareInfo.InvariantLastIndexOf(source, new string(value, 1), startIndex, count, (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) > CompareOptions.None);
+			}
+			return this.LastIndexOfCore(source, value.ToString(), startIndex, count, options);
 		}
 
-		[SecuritySafeCritical]
 		public virtual int LastIndexOf(string source, string value, int startIndex, int count, CompareOptions options)
 		{
 			if (source == null)
@@ -650,7 +1065,7 @@ namespace System.Globalization
 			}
 			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None && options != CompareOptions.Ordinal && options != CompareOptions.OrdinalIgnoreCase)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
+				throw new ArgumentException("Value of flags is invalid.", "options");
 			}
 			if (source.Length == 0 && (startIndex == -1 || startIndex == 0))
 			{
@@ -664,7 +1079,7 @@ namespace System.Globalization
 			{
 				if (startIndex < 0 || startIndex > source.Length)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (startIndex == source.Length)
 				{
@@ -680,42 +1095,45 @@ namespace System.Globalization
 				}
 				if (count < 0 || startIndex - count + 1 < 0)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
 				}
 				if (options == CompareOptions.OrdinalIgnoreCase)
 				{
-					return source.LastIndexOf(value, startIndex, count, StringComparison.OrdinalIgnoreCase);
+					return this.LastIndexOfOrdinal(source, value, startIndex, count, true);
 				}
-				return this.internal_index_switch(source, startIndex, count, value, options, false);
+				if (GlobalizationMode.Invariant)
+				{
+					return CompareInfo.InvariantLastIndexOf(source, value, startIndex, count, (options & (CompareOptions.IgnoreCase | CompareOptions.OrdinalIgnoreCase)) > CompareOptions.None);
+				}
+				return this.LastIndexOfCore(source, value, startIndex, count, options);
 			}
+		}
+
+		internal int LastIndexOfOrdinal(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			if (GlobalizationMode.Invariant)
+			{
+				return CompareInfo.InvariantLastIndexOf(source, value, startIndex, count, ignoreCase);
+			}
+			return CompareInfo.LastIndexOfOrdinalCore(source, value, startIndex, count, ignoreCase);
 		}
 
 		public virtual SortKey GetSortKey(string source, CompareOptions options)
 		{
+			if (GlobalizationMode.Invariant)
+			{
+				return this.InvariantCreateSortKey(source, options);
+			}
 			return this.CreateSortKey(source, options);
 		}
 
 		public virtual SortKey GetSortKey(string source)
 		{
+			if (GlobalizationMode.Invariant)
+			{
+				return this.InvariantCreateSortKey(source, CompareOptions.None);
+			}
 			return this.CreateSortKey(source, CompareOptions.None);
-		}
-
-		[SecuritySafeCritical]
-		private SortKey CreateSortKey(string source, CompareOptions options)
-		{
-			if (source == null)
-			{
-				throw new ArgumentNullException("source");
-			}
-			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
-			}
-			if (string.IsNullOrEmpty(source))
-			{
-				source = "\0";
-			}
-			return this.CreateSortKeyCore(source, options);
 		}
 
 		public override bool Equals(object value)
@@ -727,6 +1145,53 @@ namespace System.Globalization
 		public override int GetHashCode()
 		{
 			return this.Name.GetHashCode();
+		}
+
+		internal unsafe static int GetIgnoreCaseHash(string source)
+		{
+			if (source.Length == 0)
+			{
+				return source.GetHashCode();
+			}
+			char[] array = null;
+			Span<char> span;
+			if (source.Length <= 255)
+			{
+				span = new Span<char>(stackalloc byte[(UIntPtr)510], 255);
+			}
+			else
+			{
+				span = (array = ArrayPool<char>.Shared.Rent(source.Length));
+			}
+			Span<char> span2 = span;
+			int num = source.AsSpan().ToUpperInvariant(span2);
+			int num2 = Marvin.ComputeHash32(MemoryMarshal.AsBytes<char>(span2.Slice(0, num)), Marvin.DefaultSeed);
+			if (array != null)
+			{
+				ArrayPool<char>.Shared.Return(array, false);
+			}
+			return num2;
+		}
+
+		internal int GetHashCodeOfString(string source, CompareOptions options)
+		{
+			if (source == null)
+			{
+				throw new ArgumentNullException("source");
+			}
+			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None)
+			{
+				throw new ArgumentException("Value of flags is invalid.", "options");
+			}
+			if (!GlobalizationMode.Invariant)
+			{
+				return this.GetHashCodeOfStringCore(source, options);
+			}
+			if ((options & CompareOptions.IgnoreCase) == CompareOptions.None)
+			{
+				return source.GetHashCode();
+			}
+			return CompareInfo.GetIgnoreCaseHash(source);
 		}
 
 		public virtual int GetHashCode(string source, CompareOptions options)
@@ -741,32 +1206,9 @@ namespace System.Globalization
 			}
 			if (options == CompareOptions.OrdinalIgnoreCase)
 			{
-				return TextInfo.GetHashCodeOrdinalIgnoreCase(source);
+				return CompareInfo.GetIgnoreCaseHash(source);
 			}
-			return this.GetHashCodeOfString(source, options, false, 0L);
-		}
-
-		internal int GetHashCodeOfString(string source, CompareOptions options)
-		{
-			return this.GetHashCodeOfString(source, options, false, 0L);
-		}
-
-		[SecuritySafeCritical]
-		internal int GetHashCodeOfString(string source, CompareOptions options, bool forceRandomizedHashing, long additionalEntropy)
-		{
-			if (source == null)
-			{
-				throw new ArgumentNullException("source");
-			}
-			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth)) != CompareOptions.None)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Value of flags is invalid."), "options");
-			}
-			if (source.Length == 0)
-			{
-				return 0;
-			}
-			return this.GetSortKey(source, options).GetHashCode();
+			return this.GetHashCodeOfString(source, options);
 		}
 
 		public override string ToString()
@@ -774,41 +1216,30 @@ namespace System.Globalization
 			return "CompareInfo - " + this.Name;
 		}
 
+		public SortVersion Version
+		{
+			get
+			{
+				if (this.m_SortVersion == null)
+				{
+					if (GlobalizationMode.Invariant)
+					{
+						this.m_SortVersion = new SortVersion(0, 127, new Guid(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127));
+					}
+					else
+					{
+						this.m_SortVersion = this.GetSortVersion();
+					}
+				}
+				return this.m_SortVersion;
+			}
+		}
+
 		public int LCID
 		{
 			get
 			{
 				return CultureInfo.GetCultureInfo(this.Name).LCID;
-			}
-		}
-
-		internal static bool IsLegacy20SortingBehaviorRequested
-		{
-			get
-			{
-				return CompareInfo.InternalSortVersion == 4096U;
-			}
-		}
-
-		private static uint InternalSortVersion
-		{
-			[SecuritySafeCritical]
-			get
-			{
-				return 393473U;
-			}
-		}
-
-		public SortVersion Version
-		{
-			[SecuritySafeCritical]
-			get
-			{
-				if (this.m_SortVersion == null)
-				{
-					this.m_SortVersion = new SortVersion(393473, new Guid("00000001-57ee-1e5c-00b4-d0000bb1e11e"));
-				}
-				return this.m_SortVersion;
 			}
 		}
 
@@ -825,7 +1256,7 @@ namespace System.Globalization
 			}
 		}
 
-		private SimpleCollator GetCollator()
+		private ISimpleCollator GetCollator()
 		{
 			if (this.collator != null)
 			{
@@ -833,15 +1264,15 @@ namespace System.Globalization
 			}
 			if (CompareInfo.collators == null)
 			{
-				Interlocked.CompareExchange<Dictionary<string, SimpleCollator>>(ref CompareInfo.collators, new Dictionary<string, SimpleCollator>(StringComparer.Ordinal), null);
+				Interlocked.CompareExchange<Dictionary<string, ISimpleCollator>>(ref CompareInfo.collators, new Dictionary<string, ISimpleCollator>(StringComparer.Ordinal), null);
 			}
-			Dictionary<string, SimpleCollator> dictionary = CompareInfo.collators;
+			Dictionary<string, ISimpleCollator> dictionary = CompareInfo.collators;
 			lock (dictionary)
 			{
-				if (!CompareInfo.collators.TryGetValue(this.m_sortName, out this.collator))
+				if (!CompareInfo.collators.TryGetValue(this._sortName, out this.collator))
 				{
 					this.collator = new SimpleCollator(CultureInfo.GetCultureInfo(this.m_name));
-					CompareInfo.collators[this.m_sortName] = this.collator;
+					CompareInfo.collators[this._sortName] = this.collator;
 				}
 			}
 			return this.collator;
@@ -853,42 +1284,34 @@ namespace System.Globalization
 			{
 				return this.GetCollator().GetSortKey(source, options);
 			}
-			SortKey sortKey = new SortKey(this.culture, source, options);
-			this.assign_sortkey(sortKey, source, options);
-			return sortKey;
-		}
-
-		private int internal_index_switch(string s, int sindex, int count, char c, CompareOptions opt, bool first)
-		{
-			if (opt == CompareOptions.Ordinal && first)
-			{
-				return s.IndexOfUnchecked(c, sindex, count);
-			}
-			if (!CompareInfo.UseManagedCollation)
-			{
-				return this.internal_index(s, sindex, count, c, opt, first);
-			}
-			return this.internal_index_managed(s, sindex, count, c, opt, first);
+			return new SortKey(this.culture, source, options);
 		}
 
 		private int internal_index_switch(string s1, int sindex, int count, string s2, CompareOptions opt, bool first)
 		{
-			if (opt == CompareOptions.Ordinal && first)
+			if (opt == CompareOptions.Ordinal)
 			{
+				if (!first)
+				{
+					return s1.LastIndexOfUnchecked(s2, sindex, count);
+				}
 				return s1.IndexOfUnchecked(s2, sindex, count);
 			}
-			if (!CompareInfo.UseManagedCollation)
+			else
 			{
-				return this.internal_index(s1, sindex, count, s2, opt, first);
+				if (!CompareInfo.UseManagedCollation)
+				{
+					return CompareInfo.internal_index(s1, sindex, count, s2, first);
+				}
+				return this.internal_index_managed(s1, sindex, count, s2, opt, first);
 			}
-			return this.internal_index_managed(s1, sindex, count, s2, opt, first);
 		}
 
 		private int internal_compare_switch(string str1, int offset1, int length1, string str2, int offset2, int length2, CompareOptions options)
 		{
 			if (!CompareInfo.UseManagedCollation)
 			{
-				return this.internal_compare(str1, offset1, length1, str2, offset2, length2, options);
+				return CompareInfo.internal_compare(str1, offset1, length1, str2, offset2, length2, options);
 			}
 			return this.internal_compare_managed(str1, offset1, length1, str2, offset2, length2, options);
 		}
@@ -917,16 +1340,192 @@ namespace System.Globalization
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void assign_sortkey(object key, string source, CompareOptions options);
+		private unsafe static extern int internal_compare_icall(char* str1, int length1, char* str2, int length2, CompareOptions options);
+
+		private unsafe static int internal_compare(string str1, int offset1, int length1, string str2, int offset2, int length2, CompareOptions options)
+		{
+			char* ptr = str1;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = str2;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return CompareInfo.internal_compare_icall(ptr + offset1, length1, ptr2 + offset2, length2, options);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int internal_compare(string str1, int offset1, int length1, string str2, int offset2, int length2, CompareOptions options);
+		private unsafe static extern int internal_index_icall(char* source, int sindex, int count, char* value, int value_length, bool first);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int internal_index(string source, int sindex, int count, char value, CompareOptions options, bool first);
+		private unsafe static int internal_index(string source, int sindex, int count, string value, bool first)
+		{
+			char* ptr = source;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			char* ptr2 = value;
+			if (ptr2 != null)
+			{
+				ptr2 += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return CompareInfo.internal_index_icall(ptr, sindex, count, ptr2, (value != null) ? value.Length : 0, first);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int internal_index(string source, int sindex, int count, string value, CompareOptions options, bool first);
+		private void InitSort(CultureInfo culture)
+		{
+			this._sortName = culture.SortName;
+		}
+
+		private unsafe static int CompareStringOrdinalIgnoreCase(char* pString1, int length1, char* pString2, int length2)
+		{
+			TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
+			int num = 0;
+			while (num < length1 && num < length2 && textInfo.ToUpper(*pString1) == textInfo.ToUpper(*pString2))
+			{
+				num++;
+				pString1++;
+				pString2++;
+			}
+			if (num >= length1)
+			{
+				if (num >= length2)
+				{
+					return 0;
+				}
+				return -1;
+			}
+			else
+			{
+				if (num >= length2)
+				{
+					return 1;
+				}
+				return (int)(textInfo.ToUpper(*pString1) - textInfo.ToUpper(*pString2));
+			}
+		}
+
+		internal static int IndexOfOrdinalCore(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			if (!ignoreCase)
+			{
+				return source.IndexOfUnchecked(value, startIndex, count);
+			}
+			return source.IndexOfUncheckedIgnoreCase(value, startIndex, count);
+		}
+
+		internal static int LastIndexOfOrdinalCore(string source, string value, int startIndex, int count, bool ignoreCase)
+		{
+			if (!ignoreCase)
+			{
+				return source.LastIndexOfUnchecked(value, startIndex, count);
+			}
+			return source.LastIndexOfUncheckedIgnoreCase(value, startIndex, count);
+		}
+
+		private int LastIndexOfCore(string source, string target, int startIndex, int count, CompareOptions options)
+		{
+			return this.internal_index_switch(source, startIndex, count, target, options, false);
+		}
+
+		private unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
+		{
+			if (matchLengthPtr != null)
+			{
+				throw new NotImplementedException();
+			}
+			return this.internal_index_switch(source, startIndex, count, target, options, true);
+		}
+
+		private unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr)
+		{
+			string text = new string(source);
+			string text2 = new string(target);
+			return this.IndexOfCore(text, text2, 0, text.Length, options, matchLengthPtr);
+		}
+
+		private int IndexOfOrdinalCore(ReadOnlySpan<char> source, ReadOnlySpan<char> value, bool ignoreCase)
+		{
+			string text = new string(source);
+			string text2 = new string(value);
+			if (!ignoreCase)
+			{
+				return text.IndexOfUnchecked(text2, 0, text.Length);
+			}
+			return text.IndexOfUncheckedIgnoreCase(text2, 0, text.Length);
+		}
+
+		private int CompareString(ReadOnlySpan<char> string1, string string2, CompareOptions options)
+		{
+			string text = new string(string1);
+			return this.internal_compare_switch(text, 0, text.Length, string2, 0, string2.Length, options);
+		}
+
+		private int CompareString(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2, CompareOptions options)
+		{
+			string text = new string(string1);
+			string text2 = new string(string2);
+			return this.internal_compare_switch(text, 0, text.Length, new string(text2), 0, text2.Length, options);
+		}
+
+		private unsafe static bool IsSortable(char* text, int length)
+		{
+			return MSCompatUnicodeTable.IsSortable(new string(text, 0, length));
+		}
+
+		private SortKey CreateSortKey(string source, CompareOptions options)
+		{
+			if (source == null)
+			{
+				throw new ArgumentNullException("source");
+			}
+			if ((options & ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort)) != CompareOptions.None)
+			{
+				throw new ArgumentException("Value of flags is invalid.", "options");
+			}
+			return this.CreateSortKeyCore(source, options);
+		}
+
+		private bool StartsWith(string source, string prefix, CompareOptions options)
+		{
+			if (CompareInfo.UseManagedCollation)
+			{
+				return this.GetCollator().IsPrefix(source, prefix, options);
+			}
+			return source.Length >= prefix.Length && this.Compare(source, 0, prefix.Length, prefix, 0, prefix.Length, options) == 0;
+		}
+
+		private bool StartsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
+		{
+			return this.StartsWith(new string(source), new string(prefix), options);
+		}
+
+		private bool EndsWith(string source, string suffix, CompareOptions options)
+		{
+			if (CompareInfo.UseManagedCollation)
+			{
+				return this.GetCollator().IsSuffix(source, suffix, options);
+			}
+			return source.Length >= suffix.Length && this.Compare(source, source.Length - suffix.Length, suffix.Length, suffix, 0, suffix.Length, options) == 0;
+		}
+
+		private bool EndsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
+		{
+			return this.EndsWith(new string(source), new string(suffix), options);
+		}
+
+		internal int GetHashCodeOfStringCore(string source, CompareOptions options)
+		{
+			return this.GetSortKey(source, options).GetHashCode();
+		}
+
+		private SortVersion GetSortVersion()
+		{
+			throw new NotImplementedException();
+		}
 
 		internal CompareInfo()
 		{
@@ -939,50 +1538,25 @@ namespace System.Globalization
 
 		private const CompareOptions ValidHashCodeOfStringMaskOffFlags = ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth);
 
+		private const CompareOptions ValidSortkeyCtorMaskOffFlags = ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.StringSort);
+
+		internal static readonly CompareInfo Invariant = CultureInfo.InvariantCulture.CompareInfo;
+
 		[OptionalField(VersionAdded = 2)]
 		private string m_name;
 
 		[NonSerialized]
-		private string m_sortName;
-
-		[OptionalField(VersionAdded = 1)]
-		private int win32LCID;
-
-		private int culture;
-
-		private const int LINGUISTIC_IGNORECASE = 16;
-
-		private const int NORM_IGNORECASE = 1;
-
-		private const int NORM_IGNOREKANATYPE = 65536;
-
-		private const int LINGUISTIC_IGNOREDIACRITIC = 32;
-
-		private const int NORM_IGNORENONSPACE = 2;
-
-		private const int NORM_IGNORESYMBOLS = 4;
-
-		private const int NORM_IGNOREWIDTH = 131072;
-
-		private const int SORT_STRINGSORT = 4096;
-
-		private const int COMPARE_OPTIONS_ORDINAL = 1073741824;
-
-		internal const int NORM_LINGUISTIC_CASING = 134217728;
-
-		private const int RESERVED_FIND_ASCII_STRING = 536870912;
-
-		private const int SORT_VERSION_WHIDBEY = 4096;
-
-		private const int SORT_VERSION_V4 = 393473;
+		private string _sortName;
 
 		[OptionalField(VersionAdded = 3)]
 		private SortVersion m_SortVersion;
 
-		[NonSerialized]
-		private SimpleCollator collator;
+		private int culture;
 
-		private static Dictionary<string, SimpleCollator> collators;
+		[NonSerialized]
+		private ISimpleCollator collator;
+
+		private static Dictionary<string, ISimpleCollator> collators;
 
 		private static bool managedCollation;
 

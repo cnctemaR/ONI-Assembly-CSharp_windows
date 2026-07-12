@@ -18,27 +18,94 @@ namespace System.Data.SqlClient
 	{
 		internal void PostReadAsyncForMars()
 		{
+			if (TdsParserStateObjectFactory.UseManagedSNI)
+			{
+				return;
+			}
+			IntPtr intPtr = IntPtr.Zero;
+			uint num = 0U;
+			this._pMarsPhysicalConObj.IncrementPendingCallbacks();
+			object sessionHandle = this._pMarsPhysicalConObj.SessionHandle;
+			intPtr = (IntPtr)this._pMarsPhysicalConObj.ReadAsync(out num, ref sessionHandle);
+			if (intPtr != IntPtr.Zero)
+			{
+				this._pMarsPhysicalConObj.ReleasePacket(intPtr);
+			}
+			if (997U != num)
+			{
+				this._physicalStateObj.AddError(this.ProcessSNIError(this._physicalStateObj));
+				this.ThrowExceptionAndWarning(this._physicalStateObj, false, false);
+			}
 		}
 
 		private void LoadSSPILibrary()
 		{
+			if (TdsParserStateObjectFactory.UseManagedSNI)
+			{
+				return;
+			}
+			if (!TdsParser.s_fSSPILoaded)
+			{
+				object obj = TdsParser.s_tdsParserLock;
+				lock (obj)
+				{
+					if (!TdsParser.s_fSSPILoaded)
+					{
+						uint num = 0U;
+						if (SNINativeMethodWrapper.SNISecInitPackage(ref num) != 0U)
+						{
+							this.SSPIError(SQLMessage.SSPIInitializeError(), "InitSSPIPackage");
+						}
+						TdsParser.s_maxSSPILength = num;
+						TdsParser.s_fSSPILoaded = true;
+					}
+				}
+			}
+			if (TdsParser.s_maxSSPILength > 2147483647U)
+			{
+				throw SQL.InvalidSSPIPacketSize();
+			}
 		}
 
 		private void WaitForSSLHandShakeToComplete(ref uint error)
 		{
+			if (TdsParserStateObjectFactory.UseManagedSNI)
+			{
+				return;
+			}
+			error = this._physicalStateObj.WaitForSSLHandShakeToComplete();
+			if (error != 0U)
+			{
+				this._physicalStateObj.AddError(this.ProcessSNIError(this._physicalStateObj));
+				this.ThrowExceptionAndWarning(this._physicalStateObj, false, false);
+			}
 		}
 
 		private SNIErrorDetails GetSniErrorDetails()
 		{
-			SNIError lastError = SNIProxy.Singleton.GetLastError();
-			SNIErrorDetails snierrorDetails;
-			snierrorDetails.sniErrorNumber = lastError.sniError;
-			snierrorDetails.errorMessage = lastError.errorMessage;
-			snierrorDetails.nativeError = lastError.nativeError;
-			snierrorDetails.provider = (int)lastError.provider;
-			snierrorDetails.lineNumber = lastError.lineNumber;
-			snierrorDetails.function = lastError.function;
-			snierrorDetails.exception = lastError.exception;
+			SNIErrorDetails snierrorDetails = default(SNIErrorDetails);
+			if (TdsParserStateObjectFactory.UseManagedSNI)
+			{
+				SNIError lastError = SNIProxy.Singleton.GetLastError();
+				snierrorDetails.sniErrorNumber = lastError.sniError;
+				snierrorDetails.errorMessage = lastError.errorMessage;
+				snierrorDetails.nativeError = lastError.nativeError;
+				snierrorDetails.provider = (int)lastError.provider;
+				snierrorDetails.lineNumber = lastError.lineNumber;
+				snierrorDetails.function = lastError.function;
+				snierrorDetails.exception = lastError.exception;
+			}
+			else
+			{
+				SNINativeMethodWrapper.SNI_Error sni_Error;
+				SNINativeMethodWrapper.SNIGetLastError(out sni_Error);
+				snierrorDetails.sniErrorNumber = sni_Error.sniError;
+				snierrorDetails.errorMessage = sni_Error.errorMessage;
+				snierrorDetails.nativeError = sni_Error.nativeError;
+				snierrorDetails.provider = (int)sni_Error.provider;
+				snierrorDetails.lineNumber = sni_Error.lineNumber;
+				snierrorDetails.function = sni_Error.function;
+			}
 			return snierrorDetails;
 		}
 
@@ -215,7 +282,7 @@ namespace System.Data.SqlClient
 			this._connHandler.TimeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.SendPreLoginHandshake);
 			this._connHandler.TimeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.ConsumePreLoginHandshake);
 			this._physicalStateObj.SniContext = SniContext.Snix_PreLogin;
-			if (this.ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out flag) == PreLoginHandshakeStatus.InstanceFailure)
+			if (this.ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out flag, out this._connHandler._fedAuthRequired) == PreLoginHandshakeStatus.InstanceFailure)
 			{
 				this._physicalStateObj.Dispose();
 				this._physicalStateObj.SniContext = SniContext.Snix_Connect;
@@ -227,7 +294,7 @@ namespace System.Data.SqlClient
 				}
 				this._physicalStateObj.SniGetConnectionId(ref this._connHandler._clientConnectionId);
 				this.SendPreLoginHandshake(array, encrypt);
-				if (this.ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out flag) == PreLoginHandshakeStatus.InstanceFailure)
+				if (this.ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out flag, out this._connHandler._fedAuthRequired) == PreLoginHandshakeStatus.InstanceFailure)
 				{
 					throw SQL.InstanceFailure();
 				}
@@ -308,10 +375,10 @@ namespace System.Data.SqlClient
 		private void SendPreLoginHandshake(byte[] instanceName, bool encrypt)
 		{
 			this._physicalStateObj._outputMessageType = 18;
-			int num = 31;
-			byte[] array = new byte[1054];
+			int num = 36;
+			byte[] array = new byte[1059];
 			int num2 = 0;
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 7; i++)
 			{
 				int num3 = 0;
 				this._physicalStateObj.WriteByte((byte)i);
@@ -401,6 +468,11 @@ namespace System.Data.SqlClient
 					num3 += num5;
 					break;
 				}
+				case 6:
+					array[num2++] = 1;
+					num++;
+					num3++;
+					break;
 				}
 				this._physicalStateObj.WriteByte((byte)((num3 & 65280) >> 8));
 				this._physicalStateObj.WriteByte((byte)(num3 & 255));
@@ -410,9 +482,10 @@ namespace System.Data.SqlClient
 			this._physicalStateObj.WritePacket(1, false);
 		}
 
-		private PreLoginHandshakeStatus ConsumePreLoginHandshake(bool encrypt, bool trustServerCert, bool integratedSecurity, out bool marsCapable)
+		private PreLoginHandshakeStatus ConsumePreLoginHandshake(bool encrypt, bool trustServerCert, bool integratedSecurity, out bool marsCapable, out bool fedAuthRequired)
 		{
 			marsCapable = this._fMARS;
+			fedAuthRequired = false;
 			bool flag = false;
 			if (!this._physicalStateObj.TryReadNetworkPacket())
 			{
@@ -500,7 +573,7 @@ namespace System.Data.SqlClient
 					if (this._encryptionOption == EncryptionOptions.ON || this._encryptionOption == EncryptionOptions.LOGIN)
 					{
 						uint num5 = 0U;
-						uint num6 = ((encrypt && !trustServerCert) ? 1U : 0U) | (flag ? 2U : 0U);
+						uint num6 = (((encrypt && !trustServerCert) || (this._connHandler._accessTokenInBytes != null && !trustServerCert)) ? 1U : 0U) | (flag ? 2U : 0U);
 						if (encrypt && !integratedSecurity)
 						{
 							num6 |= 16U;
@@ -542,6 +615,21 @@ namespace System.Data.SqlClient
 				case 5:
 					num += 4;
 					break;
+				case 6:
+				{
+					int num3 = ((int)array[num++] << 8) | (int)array[num++];
+					byte b13 = array[num++];
+					byte b14 = array[num++];
+					if (array[num3] != 0 && array[num3] != 1)
+					{
+						throw SQL.ParsingErrorValue(ParsingErrorState.FedAuthRequiredPreLoginResponseInvalidValue, (int)array[num3]);
+					}
+					if (this._connHandler.ConnectionOptions != null || this._connHandler._accessTokenInBytes != null)
+					{
+						fedAuthRequired = array[num3] == 1;
+					}
+					break;
+				}
 				default:
 					num += 4;
 					break;
@@ -987,7 +1075,7 @@ namespace System.Data.SqlClient
 				}
 				if (TdsParserState.Broken == this.State || this.State == TdsParserState.Closed)
 				{
-					goto IL_090C;
+					goto IL_0912;
 				}
 				if (!stateObj._accumulateInfoEvents && stateObj._pendingInfoEvents != null)
 				{
@@ -1197,7 +1285,7 @@ namespace System.Data.SqlClient
 							}
 							if (cmdHandler != null)
 							{
-								cmdHandler.OnReturnValue(sqlReturnValue);
+								cmdHandler.OnReturnValue(sqlReturnValue, stateObj);
 							}
 							break;
 						}
@@ -1418,7 +1506,7 @@ namespace System.Data.SqlClient
 				}
 				if ((!stateObj._pendingData || RunBehavior.ReturnImmediately == (RunBehavior.ReturnImmediately & runBehavior)) && (stateObj._pendingData || !stateObj._attentionSent || stateObj._attentionReceived))
 				{
-					goto IL_090C;
+					goto IL_0912;
 				}
 			}
 			return false;
@@ -1426,7 +1514,7 @@ namespace System.Data.SqlClient
 			this._state = TdsParserState.Broken;
 			this._connHandler.BreakConnection();
 			throw SQL.ParsingError();
-			IL_090C:
+			IL_0912:
 			if (!stateObj._pendingData && this.CurrentTransaction != null)
 			{
 				this.CurrentTransaction.Activate();
@@ -1753,7 +1841,6 @@ namespace System.Data.SqlClient
 
 		private bool TryProcessDone(SqlCommand cmd, SqlDataReader reader, ref RunBehavior run, TdsParserStateObject stateObj)
 		{
-			stateObj._syncOverAsync = true;
 			ushort num;
 			if (!stateObj.TryReadUInt16(out num))
 			{
@@ -2779,6 +2866,35 @@ namespace System.Data.SqlClient
 			}
 			stateObj._receivedColMetaData = true;
 			return true;
+		}
+
+		private void WriteUDTMetaData(object value, string database, string schema, string type, TdsParserStateObject stateObj)
+		{
+			if (string.IsNullOrEmpty(database))
+			{
+				stateObj.WriteByte(0);
+			}
+			else
+			{
+				stateObj.WriteByte((byte)database.Length);
+				this.WriteString(database, stateObj, true);
+			}
+			if (string.IsNullOrEmpty(schema))
+			{
+				stateObj.WriteByte(0);
+			}
+			else
+			{
+				stateObj.WriteByte((byte)schema.Length);
+				this.WriteString(schema, stateObj, true);
+			}
+			if (string.IsNullOrEmpty(type))
+			{
+				stateObj.WriteByte(0);
+				return;
+			}
+			stateObj.WriteByte((byte)type.Length);
+			this.WriteString(type, stateObj, true);
 		}
 
 		internal bool TryProcessTableName(int length, TdsParserStateObject stateObj, out MultiPartTableName[] multiPartTableNames)
@@ -3852,10 +3968,10 @@ namespace System.Data.SqlClient
 				this.WriteInt(0, stateObj);
 				return null;
 			}
-			MetaType metaType = MetaType.GetMetaTypeFromValue(value, true, true);
+			MetaType metaType = MetaType.GetMetaTypeFromValue(value, true);
 			if (108 == metaType.TDSType && 8 == length)
 			{
-				metaType = MetaType.GetMetaTypeFromValue(new SqlMoney((decimal)value), true, true);
+				metaType = MetaType.GetMetaTypeFromValue(new SqlMoney((decimal)value), true);
 			}
 			if (metaType.IsAnsiType)
 			{
@@ -3983,7 +4099,7 @@ namespace System.Data.SqlClient
 				this.WriteInt(0, stateObj);
 				return null;
 			}
-			MetaType metaTypeFromValue = MetaType.GetMetaTypeFromValue(value, true, true);
+			MetaType metaTypeFromValue = MetaType.GetMetaTypeFromValue(value, true);
 			int num = 0;
 			if (metaTypeFromValue.IsAnsiType)
 			{
@@ -4678,6 +4794,34 @@ namespace System.Data.SqlClient
 			return num;
 		}
 
+		internal int WriteFedAuthFeatureRequest(FederatedAuthenticationFeatureExtensionData fedAuthFeatureData, bool write)
+		{
+			int num = 0;
+			if (fedAuthFeatureData.libraryType == TdsEnums.FedAuthLibrary.SecurityToken)
+			{
+				num = 5 + fedAuthFeatureData.accessToken.Length;
+			}
+			int num2 = num + 5;
+			if (write)
+			{
+				this._physicalStateObj.WriteByte(2);
+				byte b = 0;
+				if (fedAuthFeatureData.libraryType == TdsEnums.FedAuthLibrary.SecurityToken)
+				{
+					b |= 2;
+				}
+				b |= (fedAuthFeatureData.fedAuthRequiredPreLoginResponse ? 1 : 0);
+				this.WriteInt(num, this._physicalStateObj);
+				this._physicalStateObj.WriteByte(b);
+				if (fedAuthFeatureData.libraryType == TdsEnums.FedAuthLibrary.SecurityToken)
+				{
+					this.WriteInt(fedAuthFeatureData.accessToken.Length, this._physicalStateObj);
+					this._physicalStateObj.WriteByteArray(fedAuthFeatureData.accessToken, fedAuthFeatureData.accessToken.Length, 0, true, null);
+				}
+			}
+			return num2;
+		}
+
 		internal int WriteGlobalTransactionsFeatureRequest(bool write)
 		{
 			int num = 5;
@@ -4689,64 +4833,90 @@ namespace System.Data.SqlClient
 			return num;
 		}
 
-		internal void TdsLogin(SqlLogin rec, TdsEnums.FeatureExtension requestedFeatures, SessionData recoverySessionData)
+		internal void TdsLogin(SqlLogin rec, TdsEnums.FeatureExtension requestedFeatures, SessionData recoverySessionData, FederatedAuthenticationFeatureExtensionData? fedAuthFeatureExtensionData)
 		{
 			this._physicalStateObj.SetTimeoutSeconds(rec.timeout);
 			this._connHandler.TimeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.LoginBegin);
 			this._connHandler.TimeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.ProcessConnectionAuth);
+			byte[] array = null;
+			byte[] array2 = null;
 			bool flag = requestedFeatures > TdsEnums.FeatureExtension.None;
-			string userName = rec.userName;
-			byte[] array = TdsParserStaticMethods.ObfuscatePassword(rec.password);
-			int num = array.Length;
+			string text;
+			int num;
+			if (rec.credential != null)
+			{
+				text = rec.credential.UserId;
+				num = rec.credential.Password.Length * 2;
+			}
+			else
+			{
+				text = rec.userName;
+				array = TdsParserStaticMethods.ObfuscatePassword(rec.password);
+				num = array.Length;
+			}
+			int num2;
+			if (rec.newSecurePassword != null)
+			{
+				num2 = rec.newSecurePassword.Length * 2;
+			}
+			else
+			{
+				array2 = TdsParserStaticMethods.ObfuscatePassword(rec.newPassword);
+				num2 = array2.Length;
+			}
 			this._physicalStateObj._outputMessageType = 16;
-			int num2 = 94;
-			string text = "Core .Net SqlClient Data Provider";
-			byte[] array2;
-			uint num3;
-			int num4;
+			int num3 = 94;
+			string text2 = "Core .Net SqlClient Data Provider";
+			byte[] array3;
+			uint num4;
+			int num5;
 			checked
 			{
-				num2 += (rec.hostName.Length + rec.applicationName.Length + rec.serverName.Length + text.Length + rec.language.Length + rec.database.Length + rec.attachDBFilename.Length) * 2;
+				num3 += (rec.hostName.Length + rec.applicationName.Length + rec.serverName.Length + text2.Length + rec.language.Length + rec.database.Length + rec.attachDBFilename.Length) * 2;
 				if (flag)
 				{
-					num2 += 4;
+					num3 += 4;
 				}
-				array2 = null;
-				num3 = 0U;
-				if (!rec.useSSPI)
+				array3 = null;
+				num4 = 0U;
+				if (!rec.useSSPI && !this._connHandler._federatedAuthenticationRequested)
 				{
-					num2 += userName.Length * 2 + num;
+					num3 += text.Length * 2 + num + num2;
 				}
 				else if (rec.useSSPI)
 				{
-					array2 = new byte[TdsParser.s_maxSSPILength];
-					num3 = TdsParser.s_maxSSPILength;
+					array3 = new byte[TdsParser.s_maxSSPILength];
+					num4 = TdsParser.s_maxSSPILength;
 					this._physicalStateObj.SniContext = SniContext.Snix_LoginSspi;
-					this.SSPIData(null, 0U, ref array2, ref num3);
-					if (num3 > 2147483647U)
+					this.SSPIData(null, 0U, ref array3, ref num4);
+					if (num4 > 2147483647U)
 					{
 						throw SQL.InvalidSSPIPacketSize();
 					}
 					this._physicalStateObj.SniContext = SniContext.Snix_Login;
-					num2 += (int)num3;
+					num3 += (int)num4;
 				}
-				num4 = num2;
+				num5 = num3;
 			}
 			if (flag)
 			{
 				if ((requestedFeatures & TdsEnums.FeatureExtension.SessionRecovery) != TdsEnums.FeatureExtension.None)
 				{
-					num2 += this.WriteSessionRecoveryFeatureRequest(recoverySessionData, false);
+					num3 += this.WriteSessionRecoveryFeatureRequest(recoverySessionData, false);
 				}
 				if ((requestedFeatures & TdsEnums.FeatureExtension.GlobalTransactions) != TdsEnums.FeatureExtension.None)
 				{
-					num2 += this.WriteGlobalTransactionsFeatureRequest(false);
+					num3 += this.WriteGlobalTransactionsFeatureRequest(false);
 				}
-				num2++;
+				if ((requestedFeatures & TdsEnums.FeatureExtension.FedAuth) != TdsEnums.FeatureExtension.None)
+				{
+					num3 += this.WriteFedAuthFeatureRequest(fedAuthFeatureExtensionData.Value, false);
+				}
+				num3++;
 			}
 			try
 			{
-				this.WriteInt(num2, this._physicalStateObj);
+				this.WriteInt(num3, this._physicalStateObj);
 				if (recoverySessionData == null)
 				{
 					this.WriteInt(1946157060, this._physicalStateObj);
@@ -4759,47 +4929,51 @@ namespace System.Data.SqlClient
 				this.WriteInt(100663296, this._physicalStateObj);
 				this.WriteInt(TdsParserStaticMethods.GetCurrentProcessIdForTdsLoginOnly(), this._physicalStateObj);
 				this.WriteInt(0, this._physicalStateObj);
-				int num5 = 0;
-				num5 |= 32;
-				num5 |= 64;
-				num5 |= 128;
-				num5 |= 256;
-				num5 |= 512;
+				int num6 = 0;
+				num6 |= 32;
+				num6 |= 64;
+				num6 |= 128;
+				num6 |= 256;
+				num6 |= 512;
 				if (rec.useReplication)
 				{
-					num5 |= 12288;
+					num6 |= 12288;
 				}
 				if (rec.useSSPI)
 				{
-					num5 |= 32768;
+					num6 |= 32768;
 				}
 				if (rec.readOnlyIntent)
 				{
-					num5 |= 2097152;
+					num6 |= 2097152;
+				}
+				if (!string.IsNullOrEmpty(rec.newPassword) || (rec.newSecurePassword != null && rec.newSecurePassword.Length != 0))
+				{
+					num6 |= 16777216;
 				}
 				if (rec.userInstance)
 				{
-					num5 |= 67108864;
+					num6 |= 67108864;
 				}
 				if (flag)
 				{
-					num5 |= 268435456;
+					num6 |= 268435456;
 				}
-				this.WriteInt(num5, this._physicalStateObj);
+				this.WriteInt(num6, this._physicalStateObj);
 				this.WriteInt(0, this._physicalStateObj);
 				this.WriteInt(0, this._physicalStateObj);
-				int num6 = 94;
-				this.WriteShort(num6, this._physicalStateObj);
+				int num7 = 94;
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.hostName.Length, this._physicalStateObj);
-				num6 += rec.hostName.Length * 2;
+				num7 += rec.hostName.Length * 2;
 				if (!rec.useSSPI)
 				{
-					this.WriteShort(num6, this._physicalStateObj);
-					this.WriteShort(userName.Length, this._physicalStateObj);
-					num6 += userName.Length * 2;
-					this.WriteShort(num6, this._physicalStateObj);
+					this.WriteShort(num7, this._physicalStateObj);
+					this.WriteShort(text.Length, this._physicalStateObj);
+					num7 += text.Length * 2;
+					this.WriteShort(num7, this._physicalStateObj);
 					this.WriteShort(num / 2, this._physicalStateObj);
-					num6 += num;
+					num7 += num;
 				}
 				else
 				{
@@ -4808,81 +4982,103 @@ namespace System.Data.SqlClient
 					this.WriteShort(0, this._physicalStateObj);
 					this.WriteShort(0, this._physicalStateObj);
 				}
-				this.WriteShort(num6, this._physicalStateObj);
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.applicationName.Length, this._physicalStateObj);
-				num6 += rec.applicationName.Length * 2;
-				this.WriteShort(num6, this._physicalStateObj);
+				num7 += rec.applicationName.Length * 2;
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.serverName.Length, this._physicalStateObj);
-				num6 += rec.serverName.Length * 2;
-				this.WriteShort(num6, this._physicalStateObj);
+				num7 += rec.serverName.Length * 2;
+				this.WriteShort(num7, this._physicalStateObj);
 				if (flag)
 				{
 					this.WriteShort(4, this._physicalStateObj);
-					num6 += 4;
+					num7 += 4;
 				}
 				else
 				{
 					this.WriteShort(0, this._physicalStateObj);
 				}
-				this.WriteShort(num6, this._physicalStateObj);
-				this.WriteShort(text.Length, this._physicalStateObj);
-				num6 += text.Length * 2;
-				this.WriteShort(num6, this._physicalStateObj);
+				this.WriteShort(num7, this._physicalStateObj);
+				this.WriteShort(text2.Length, this._physicalStateObj);
+				num7 += text2.Length * 2;
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.language.Length, this._physicalStateObj);
-				num6 += rec.language.Length * 2;
-				this.WriteShort(num6, this._physicalStateObj);
+				num7 += rec.language.Length * 2;
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.database.Length, this._physicalStateObj);
-				num6 += rec.database.Length * 2;
+				num7 += rec.database.Length * 2;
 				if (TdsParser.s_nicAddress == null)
 				{
 					TdsParser.s_nicAddress = TdsParserStaticMethods.GetNetworkPhysicalAddressForTdsLoginOnly();
 				}
 				this._physicalStateObj.WriteByteArray(TdsParser.s_nicAddress, TdsParser.s_nicAddress.Length, 0, true, null);
-				this.WriteShort(num6, this._physicalStateObj);
+				this.WriteShort(num7, this._physicalStateObj);
 				if (rec.useSSPI)
 				{
-					this.WriteShort((int)num3, this._physicalStateObj);
-					num6 += (int)num3;
+					this.WriteShort((int)num4, this._physicalStateObj);
+					num7 += (int)num4;
 				}
 				else
 				{
 					this.WriteShort(0, this._physicalStateObj);
 				}
-				this.WriteShort(num6, this._physicalStateObj);
+				this.WriteShort(num7, this._physicalStateObj);
 				this.WriteShort(rec.attachDBFilename.Length, this._physicalStateObj);
-				num6 += rec.attachDBFilename.Length * 2;
-				this.WriteShort(num6, this._physicalStateObj);
-				this.WriteShort(0, this._physicalStateObj);
+				num7 += rec.attachDBFilename.Length * 2;
+				this.WriteShort(num7, this._physicalStateObj);
+				this.WriteShort(num2 / 2, this._physicalStateObj);
 				this.WriteInt(0, this._physicalStateObj);
 				this.WriteString(rec.hostName, this._physicalStateObj, true);
 				if (!rec.useSSPI)
 				{
-					this.WriteString(userName, this._physicalStateObj, true);
-					this._physicalStateObj.WriteByteArray(array, num, 0, true, null);
+					this.WriteString(text, this._physicalStateObj, true);
+					if (rec.credential != null)
+					{
+						this._physicalStateObj.WriteSecureString(rec.credential.Password);
+					}
+					else
+					{
+						this._physicalStateObj.WriteByteArray(array, num, 0, true, null);
+					}
 				}
 				this.WriteString(rec.applicationName, this._physicalStateObj, true);
 				this.WriteString(rec.serverName, this._physicalStateObj, true);
 				if (flag)
 				{
-					this.WriteInt(num4, this._physicalStateObj);
+					this.WriteInt(num5, this._physicalStateObj);
 				}
-				this.WriteString(text, this._physicalStateObj, true);
+				this.WriteString(text2, this._physicalStateObj, true);
 				this.WriteString(rec.language, this._physicalStateObj, true);
 				this.WriteString(rec.database, this._physicalStateObj, true);
 				if (rec.useSSPI)
 				{
-					this._physicalStateObj.WriteByteArray(array2, (int)num3, 0, true, null);
+					this._physicalStateObj.WriteByteArray(array3, (int)num4, 0, true, null);
 				}
 				this.WriteString(rec.attachDBFilename, this._physicalStateObj, true);
+				if (!rec.useSSPI)
+				{
+					if (rec.newSecurePassword != null)
+					{
+						this._physicalStateObj.WriteSecureString(rec.newSecurePassword);
+					}
+					else
+					{
+						this._physicalStateObj.WriteByteArray(array2, num2, 0, true, null);
+					}
+				}
 				if (flag)
 				{
 					if ((requestedFeatures & TdsEnums.FeatureExtension.SessionRecovery) != TdsEnums.FeatureExtension.None)
 					{
-						num2 += this.WriteSessionRecoveryFeatureRequest(recoverySessionData, true);
+						num3 += this.WriteSessionRecoveryFeatureRequest(recoverySessionData, true);
 					}
 					if ((requestedFeatures & TdsEnums.FeatureExtension.GlobalTransactions) != TdsEnums.FeatureExtension.None)
 					{
 						this.WriteGlobalTransactionsFeatureRequest(true);
+					}
+					if ((requestedFeatures & TdsEnums.FeatureExtension.FedAuth) != TdsEnums.FeatureExtension.None)
+					{
+						this.WriteFedAuthFeatureRequest(fedAuthFeatureExtensionData.Value, true);
 					}
 					this._physicalStateObj.WriteByte(byte.MaxValue);
 				}
@@ -4897,6 +5093,7 @@ namespace System.Data.SqlClient
 				throw;
 			}
 			this._physicalStateObj.WritePacket(1, false);
+			this._physicalStateObj.ResetSecurePasswordsInformation();
 			this._physicalStateObj._pendingData = true;
 			this._physicalStateObj._messageStatus = 0;
 		}
@@ -5221,7 +5418,10 @@ namespace System.Data.SqlClient
 						this._connHandler.CheckEnlistedTransactionBinding();
 						stateObj.SetTimeoutSeconds(timeout);
 						stateObj.SniContext = SniContext.Snix_Execute;
-						this.WriteRPCBatchHeaders(stateObj, notificationRequest);
+						if (this._isYukon)
+						{
+							this.WriteRPCBatchHeaders(stateObj, notificationRequest);
+						}
 						stateObj._outputMessageType = 3;
 					}
 					Action<Exception> <>9__1;
@@ -5263,7 +5463,7 @@ namespace System.Data.SqlClient
 							}
 							else
 							{
-								if (!this._isKatmai && !internalMetaType.Is90Supported)
+								if ((!this._isYukon && !internalMetaType.Is80Supported) || (!this._isKatmai && !internalMetaType.Is90Supported))
 								{
 									throw ADP.VersionDoesNotSupportDataType(internalMetaType.TypeName);
 								}
@@ -5289,6 +5489,47 @@ namespace System.Data.SqlClient
 								}
 								this.WriteParameterName(sqlParameter.ParameterNameFixed, stateObj);
 								stateObj.WriteByte(sqlRPC.paramoptions[i]);
+								int num2 = (internalMetaType.IsSizeInCharacters ? (sqlParameter.GetParameterSize() * 2) : sqlParameter.GetParameterSize());
+								int num3;
+								if (internalMetaType.TDSType != 240)
+								{
+									num3 = sqlParameter.GetActualSize();
+								}
+								else
+								{
+									num3 = 0;
+								}
+								byte b = 0;
+								byte b2 = 0;
+								if (internalMetaType.SqlDbType == SqlDbType.Decimal)
+								{
+									b = sqlParameter.GetActualPrecision();
+									b2 = sqlParameter.GetActualScale();
+									if (b > 38)
+									{
+										throw SQL.PrecisionValueOutOfRange(b);
+									}
+									if (!flag3)
+									{
+										if (flag4)
+										{
+											obj = TdsParser.AdjustSqlDecimalScale((SqlDecimal)obj, (int)b2);
+											if (b != 0 && b < ((SqlDecimal)obj).Precision)
+											{
+												throw ADP.ParameterValueOutOfRange((SqlDecimal)obj);
+											}
+										}
+										else
+										{
+											obj = TdsParser.AdjustDecimalScale((decimal)obj, (int)b2);
+											SqlDecimal sqlDecimal = new SqlDecimal((decimal)obj);
+											if (b != 0 && b < sqlDecimal.Precision)
+											{
+												throw ADP.ParameterValueOutOfRange((decimal)obj);
+											}
+										}
+									}
+								}
 								stateObj.WriteByte(internalMetaType.NullableType);
 								if (internalMetaType.TDSType == 98)
 								{
@@ -5296,17 +5537,8 @@ namespace System.Data.SqlClient
 								}
 								else
 								{
-									int num2 = (internalMetaType.IsSizeInCharacters ? (sqlParameter.GetParameterSize() * 2) : sqlParameter.GetParameterSize());
-									int num3;
-									if (internalMetaType.TDSType != 240)
-									{
-										num3 = sqlParameter.GetActualSize();
-									}
-									else
-									{
-										num3 = 0;
-									}
 									int num4 = 0;
+									int num5 = 0;
 									if (internalMetaType.IsAnsiType)
 									{
 										if (!flag3 && !flag5)
@@ -5335,7 +5567,7 @@ namespace System.Data.SqlClient
 										}
 										else
 										{
-											int num5 = ((num2 > num4) ? num2 : num4);
+											num5 = ((num2 > num4) ? num2 : num4);
 											if (num5 == 0)
 											{
 												if (internalMetaType.IsNCharType)
@@ -5354,79 +5586,92 @@ namespace System.Data.SqlClient
 									{
 										this.WriteParameterVarLen(internalMetaType, 8, false, stateObj, false);
 									}
-									else
+									else if (internalMetaType.SqlDbType == SqlDbType.Udt)
 									{
-										if (internalMetaType.SqlDbType == SqlDbType.Udt)
-										{
-											throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
-										}
-										if (internalMetaType.IsPlp)
-										{
-											if (internalMetaType.SqlDbType != SqlDbType.Xml)
-											{
-												this.WriteShort(65535, stateObj);
-											}
-										}
-										else if (!internalMetaType.IsVarTime && internalMetaType.SqlDbType != SqlDbType.Date)
-										{
-											int num5 = ((num2 > num3) ? num2 : num3);
-											if (num5 == 0)
-											{
-												if (internalMetaType.IsNCharType)
-												{
-													num5 = 2;
-												}
-												else
-												{
-													num5 = 1;
-												}
-											}
-											this.WriteParameterVarLen(internalMetaType, num5, false, stateObj, false);
-										}
-									}
-									if (internalMetaType.SqlDbType == SqlDbType.Decimal)
-									{
-										byte actualPrecision = sqlParameter.GetActualPrecision();
-										byte actualScale = sqlParameter.GetActualScale();
-										if (actualPrecision > 38)
-										{
-											throw SQL.PrecisionValueOutOfRange(actualPrecision);
-										}
+										byte[] array = null;
+										Format format = Format.Native;
 										if (!flag3)
 										{
-											if (flag4)
+											array = this._connHandler.Connection.GetBytes(obj, out format, out num5);
+											num2 = array.Length;
+											if (num2 < 0 || (num2 >= 65535 && num5 != -1))
 											{
-												obj = TdsParser.AdjustSqlDecimalScale((SqlDecimal)obj, (int)actualScale);
-												if (actualPrecision != 0 && actualPrecision < ((SqlDecimal)obj).Precision)
-												{
-													throw ADP.ParameterValueOutOfRange((SqlDecimal)obj);
-												}
+												throw new IndexOutOfRangeException();
+											}
+										}
+										BitConverter.GetBytes((long)num2);
+										if (string.IsNullOrEmpty(sqlParameter.UdtTypeName))
+										{
+											throw SQL.MustSetUdtTypeNameForUdtParams();
+										}
+										string[] array2 = SqlParameter.ParseTypeName(sqlParameter.UdtTypeName, true);
+										if (!string.IsNullOrEmpty(array2[0]) && 255 < array2[0].Length)
+										{
+											throw ADP.ArgumentOutOfRange("names");
+										}
+										if (!string.IsNullOrEmpty(array2[1]) && 255 < array2[array2.Length - 2].Length)
+										{
+											throw ADP.ArgumentOutOfRange("names");
+										}
+										if (255 < array2[2].Length)
+										{
+											throw ADP.ArgumentOutOfRange("names");
+										}
+										this.WriteUDTMetaData(obj, array2[0], array2[1], array2[2], stateObj);
+										if (!flag3)
+										{
+											this.WriteUnsignedLong((ulong)((long)array.Length), stateObj);
+											if (array.Length != 0)
+											{
+												this.WriteInt(array.Length, stateObj);
+												stateObj.WriteByteArray(array, array.Length, 0, true, null);
+											}
+											this.WriteInt(0, stateObj);
+											goto IL_0CD6;
+										}
+										this.WriteUnsignedLong(ulong.MaxValue, stateObj);
+										goto IL_0CD6;
+									}
+									else if (internalMetaType.IsPlp)
+									{
+										if (internalMetaType.SqlDbType != SqlDbType.Xml)
+										{
+											this.WriteShort(65535, stateObj);
+										}
+									}
+									else if (!internalMetaType.IsVarTime && internalMetaType.SqlDbType != SqlDbType.Date)
+									{
+										num5 = ((num2 > num3) ? num2 : num3);
+										if (num5 == 0 && this._isYukon)
+										{
+											if (internalMetaType.IsNCharType)
+											{
+												num5 = 2;
 											}
 											else
 											{
-												obj = TdsParser.AdjustDecimalScale((decimal)obj, (int)actualScale);
-												SqlDecimal sqlDecimal = new SqlDecimal((decimal)obj);
-												if (actualPrecision != 0 && actualPrecision < sqlDecimal.Precision)
-												{
-													throw ADP.ParameterValueOutOfRange((decimal)obj);
-												}
+												num5 = 1;
 											}
 										}
-										if (actualPrecision == 0)
+										this.WriteParameterVarLen(internalMetaType, num5, false, stateObj, false);
+									}
+									if (internalMetaType.SqlDbType == SqlDbType.Decimal)
+									{
+										if (b == 0)
 										{
 											stateObj.WriteByte(29);
 										}
 										else
 										{
-											stateObj.WriteByte(actualPrecision);
+											stateObj.WriteByte(b);
 										}
-										stateObj.WriteByte(actualScale);
+										stateObj.WriteByte(b2);
 									}
 									else if (internalMetaType.IsVarTime)
 									{
 										stateObj.WriteByte(sqlParameter.GetActualScale());
 									}
-									if (internalMetaType.SqlDbType == SqlDbType.Xml)
+									if (this._isYukon && internalMetaType.SqlDbType == SqlDbType.Xml)
 									{
 										if ((sqlParameter.XmlSchemaCollectionDatabase != null && sqlParameter.XmlSchemaCollectionDatabase != ADP.StrEmpty) || (sqlParameter.XmlSchemaCollectionOwningSchema != null && sqlParameter.XmlSchemaCollectionOwningSchema != ADP.StrEmpty) || (sqlParameter.XmlSchemaCollectionName != null && sqlParameter.XmlSchemaCollectionName != ADP.StrEmpty))
 										{
@@ -5542,11 +5787,19 @@ namespace System.Data.SqlClient
 									}
 								}
 							}
+							IL_0CD6:
 							num6 = i;
 						}
 						if (ii < rpcArray.Length - 1)
 						{
-							stateObj.WriteByte(byte.MaxValue);
+							if (this._isYukon)
+							{
+								stateObj.WriteByte(byte.MaxValue);
+							}
+							else
+							{
+								stateObj.WriteByte(128);
+							}
 						}
 						num6 = ii;
 					}
@@ -5692,7 +5945,7 @@ namespace System.Data.SqlClient
 			else
 			{
 				obj = param.GetCoercedValue();
-				extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(smiParameterMetaData.SqlDbType, smiParameterMetaData.IsMultiValued, obj);
+				extendedClrTypeCode = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(smiParameterMetaData.SqlDbType, smiParameterMetaData.IsMultiValued, obj, null);
 			}
 			this.WriteSmiParameterMetaData(smiParameterMetaData, sendDefault, stateObj);
 			TdsParameterSetter tdsParameterSetter = new TdsParameterSetter(stateObj, smiParameterMetaData);
@@ -6010,18 +6263,20 @@ namespace System.Data.SqlClient
 						{
 						case SqlDbType.Xml:
 							stateObj.WriteByteArray(TdsParser.s_xmlMetadataSubstituteSequence, TdsParser.s_xmlMetadataSubstituteSequence.Length, 0, true, null);
-							goto IL_01A6;
+							goto IL_01AF;
 						case SqlDbType.Udt:
-							throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+							stateObj.WriteByte(165);
+							this.WriteTokenLength(165, sqlMetaData.length, stateObj);
+							goto IL_01AF;
 						case SqlDbType.Date:
 							stateObj.WriteByte(sqlMetaData.tdsType);
-							goto IL_01A6;
+							goto IL_01AF;
 						case SqlDbType.Time:
 						case SqlDbType.DateTime2:
 						case SqlDbType.DateTimeOffset:
 							stateObj.WriteByte(sqlMetaData.tdsType);
 							stateObj.WriteByte(sqlMetaData.scale);
-							goto IL_01A6;
+							goto IL_01AF;
 						}
 						stateObj.WriteByte(sqlMetaData.tdsType);
 						this.WriteTokenLength(sqlMetaData.tdsType, sqlMetaData.length, stateObj);
@@ -6038,7 +6293,7 @@ namespace System.Data.SqlClient
 						stateObj.WriteByte(sqlMetaData.precision);
 						stateObj.WriteByte(sqlMetaData.scale);
 					}
-					IL_01A6:
+					IL_01AF:
 					if (sqlMetaData.metaType.IsLong && !sqlMetaData.metaType.IsPlp)
 					{
 						this.WriteShort(sqlMetaData.tableName.Length, stateObj);
@@ -6499,32 +6754,32 @@ namespace System.Data.SqlClient
 					{
 						byte[] array = ((SqlGuid)value).ToByteArray();
 						stateObj.WriteByteArray(array, actualLength, 0, true, null);
-						goto IL_03CC;
+						goto IL_03C6;
 					}
 					case 37:
-						goto IL_03CC;
+						goto IL_03C6;
 					case 38:
 						if (type.FixedLength == 1)
 						{
 							stateObj.WriteByte(((SqlByte)value).Value);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						if (type.FixedLength == 2)
 						{
 							this.WriteShort((int)((SqlInt16)value).Value, stateObj);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						if (type.FixedLength == 4)
 						{
 							this.WriteInt(((SqlInt32)value).Value, stateObj);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						this.WriteLong(((SqlInt64)value).Value, stateObj);
-						goto IL_03CC;
+						goto IL_03C6;
 					default:
 						if (nullableType != 99)
 						{
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						goto IL_0292;
 					}
@@ -6537,28 +6792,28 @@ namespace System.Data.SqlClient
 						if (((SqlBoolean)value).Value)
 						{
 							stateObj.WriteByte(1);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						stateObj.WriteByte(0);
-						goto IL_03CC;
+						goto IL_03C6;
 					case 105:
 					case 106:
 					case 107:
-						goto IL_03CC;
+						goto IL_03C6;
 					case 108:
 						this.WriteSqlDecimal((SqlDecimal)value, stateObj);
-						goto IL_03CC;
+						goto IL_03C6;
 					case 109:
 						if (type.FixedLength == 4)
 						{
 							this.WriteFloat(((SqlSingle)value).Value, stateObj);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						this.WriteDouble(((SqlDouble)value).Value, stateObj);
-						goto IL_03CC;
+						goto IL_03C6;
 					case 110:
 						this.WriteSqlMoney((SqlMoney)value, type.FixedLength, stateObj);
-						goto IL_03CC;
+						goto IL_03C6;
 					case 111:
 					{
 						SqlDateTime sqlDateTime = (SqlDateTime)value;
@@ -6566,7 +6821,7 @@ namespace System.Data.SqlClient
 						{
 							this.WriteInt(sqlDateTime.DayTicks, stateObj);
 							this.WriteInt(sqlDateTime.TimeTicks, stateObj);
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						if (0 > sqlDateTime.DayTicks || sqlDateTime.DayTicks > 65535)
 						{
@@ -6574,12 +6829,12 @@ namespace System.Data.SqlClient
 						}
 						this.WriteShort(sqlDateTime.DayTicks, stateObj);
 						this.WriteShort(sqlDateTime.TimeTicks / SqlDateTime.SQLTicksPerMinute, stateObj);
-						goto IL_03CC;
+						goto IL_03C6;
 					}
 					default:
 						if (nullableType != 165)
 						{
-							goto IL_03CC;
+							goto IL_03C6;
 						}
 						break;
 					}
@@ -6593,7 +6848,7 @@ namespace System.Data.SqlClient
 				}
 				if (nullableType != 173)
 				{
-					goto IL_03CC;
+					goto IL_03C6;
 				}
 			}
 			else
@@ -6612,9 +6867,9 @@ namespace System.Data.SqlClient
 				case 241:
 					goto IL_0292;
 				case 240:
-					throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+					throw SQL.UDTUnexpectedResult(value.GetType().AssemblyQualifiedName);
 				default:
-					goto IL_03CC;
+					goto IL_03C6;
 				}
 			}
 			if (type.IsPlp)
@@ -6659,7 +6914,7 @@ namespace System.Data.SqlClient
 				return this.WriteCharArray(((SqlChars)value).Value, actualLength, offset, stateObj, false);
 			}
 			return this.WriteString(((SqlString)value).Value, actualLength, offset, stateObj, false);
-			IL_03CC:
+			IL_03C6:
 			return null;
 		}
 
@@ -6769,19 +7024,19 @@ namespace System.Data.SqlClient
 			do
 			{
 				int nRead = 0;
-				int readSize = 4096;
-				if (len > 0 && nWritten + readSize > len)
+				int num = 4096;
+				if (len > 0 && nWritten + num > len)
 				{
-					readSize = len - nWritten;
+					num = len - nWritten;
 				}
 				if (this._asyncWrite)
 				{
-					int num = await feed._source.ReadAsync(buff, 0, readSize).ConfigureAwait(false);
-					nRead = num;
+					int num2 = await feed._source.ReadAsync(buff, 0, num).ConfigureAwait(false);
+					nRead = num2;
 				}
 				else
 				{
-					nRead = feed._source.Read(buff, 0, readSize);
+					nRead = feed._source.Read(buff, 0, num);
 				}
 				if (nRead == 0)
 				{
@@ -7375,6 +7630,8 @@ namespace System.Data.SqlClient
 			byte b;
 			return stateObj.TryReadByte(out b) && (b == 0 || stateObj.TryReadString((int)b, out metaData.udtDatabaseName)) && stateObj.TryReadByte(out b) && (b == 0 || stateObj.TryReadString((int)b, out metaData.udtSchemaName)) && stateObj.TryReadByte(out b) && (b == 0 || stateObj.TryReadString((int)b, out metaData.udtTypeName)) && stateObj.TryReadUInt16(out num) && (num == 0 || stateObj.TryReadString((int)num, out metaData.udtAssemblyQualifiedName));
 		}
+
+		private static volatile bool s_fSSPILoaded = false;
 
 		internal TdsParserStateObject _physicalStateObj;
 

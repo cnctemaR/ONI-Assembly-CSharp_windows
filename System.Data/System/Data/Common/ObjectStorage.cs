@@ -372,7 +372,7 @@ namespace System.Data.Common
 					string text = xmlReader.GetAttribute("type", "http://www.w3.org/2001/XMLSchema-instance");
 					if (text != null && text.Length > 0)
 					{
-						string[] array = text.Split(new char[] { ':' });
+						string[] array = text.Split(':', StringSplitOptions.None);
 						if (array.Length == 2 && xmlReader.LookupNamespace(array[0]) == "http://www.w3.org/2001/XMLSchema")
 						{
 							text = array[1];
@@ -408,6 +408,7 @@ namespace System.Data.Common
 					{
 						throw ExceptionBuilder.CanNotDeserializeObjectType();
 					}
+					TypeLimiter.EnsureTypeIsAllowed(type, null);
 					if (!flag)
 					{
 						obj = Activator.CreateInstance(type, true);

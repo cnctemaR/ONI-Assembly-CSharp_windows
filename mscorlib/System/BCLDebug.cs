@@ -26,7 +26,7 @@ namespace System
 		}
 
 		[Conditional("_DEBUG")]
-		public static void Log(string switchName, LogLevel level, params object[] messages)
+		public static void Log(string switchName, BCLDebugLogLevel level, params object[] messages)
 		{
 		}
 

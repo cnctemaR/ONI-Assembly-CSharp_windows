@@ -32,10 +32,7 @@ namespace System.Data.ProviderBase
 			this._errorWait = 5000;
 			this._errorTimer = null;
 			this._objectList = new List<DbConnectionInternal>(this.MaxPoolSize);
-			if (ADP.IsPlatformNT5)
-			{
-				this._transactedConnectionPool = new DbConnectionPool.TransactedConnectionPool(this);
-			}
+			this._transactedConnectionPool = new DbConnectionPool.TransactedConnectionPool(this);
 			this._poolCreateRequest = new WaitCallback(this.PoolCreateRequest);
 			this._state = DbConnectionPool.State.Running;
 		}
@@ -257,7 +254,7 @@ namespace System.Data.ProviderBase
 
 		private Timer CreateCleanupTimer()
 		{
-			return new Timer(new TimerCallback(this.CleanupCallback), null, this._cleanupWait, this._cleanupWait);
+			return ADP.UnsafeCreateTimer(new TimerCallback(this.CleanupCallback), null, this._cleanupWait, this._cleanupWait);
 		}
 
 		private DbConnectionInternal CreateObject(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
@@ -765,7 +762,15 @@ namespace System.Data.ProviderBase
 							{
 								while (this.NeedToReplenish)
 								{
-									DbConnectionInternal dbConnectionInternal = this.CreateObject(null, null, null);
+									DbConnectionInternal dbConnectionInternal;
+									try
+									{
+										dbConnectionInternal = this.CreateObject(null, null, null);
+									}
+									catch
+									{
+										break;
+									}
 									if (dbConnectionInternal == null)
 									{
 										break;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 
 public class GameTags
 {
@@ -97,6 +98,10 @@ public class GameTags
 
 	public static readonly Tag Artifact = TagManager.Create("Artifact");
 
+	public static readonly Tag BionicUpgrade = TagManager.Create("BionicUpgrade");
+
+	public static readonly Tag BatterySaveMode = TagManager.Create("BatterySaveMode");
+
 	public static readonly Tag CharmedArtifact = TagManager.Create("CharmedArtifact");
 
 	public static readonly Tag TerrestrialArtifact = TagManager.Create("TerrestrialArtifact");
@@ -175,6 +180,10 @@ public class GameTags
 
 	public static readonly Tag MoltShell = TagManager.Create("MoltShell");
 
+	public static readonly Tag BaseMinion = TagManager.Create("BaseMinion");
+
+	public static readonly Tag Corpse = TagManager.Create("Corpse");
+
 	public static readonly Tag Alloy = TagManager.Create("Alloy");
 
 	public static readonly Tag Metal = TagManager.Create("Metal");
@@ -198,6 +207,8 @@ public class GameTags
 	public static readonly Tag DirtyWater = TagManager.Create("DirtyWater");
 
 	public static readonly Tag AnyWater = TagManager.Create("AnyWater");
+
+	public static readonly Tag LubricatingOil = TagManager.Create("LubricatingOil");
 
 	public static readonly Tag Algae = TagManager.Create("Algae");
 
@@ -243,6 +254,8 @@ public class GameTags
 
 	public static readonly Tag Unstable = TagManager.Create("Unstable");
 
+	public static readonly Tag Slippery = TagManager.Create("Slippery");
+
 	public static readonly Tag Sublimating = TagManager.Create("Sublimating");
 
 	public static readonly Tag HideFromSpawnTool = TagManager.Create("HideFromSpawnTool");
@@ -270,10 +283,6 @@ public class GameTags
 	public static readonly Tag IgnoreMaterialCategory = TagManager.Create("IgnoreMaterialCategory");
 
 	public static readonly Tag Oxidizer = TagManager.Create("Oxidizer");
-
-	public static readonly Tag Minion = TagManager.Create("Minion");
-
-	public static readonly Tag Corpse = TagManager.Create("Corpse");
 
 	public static readonly Tag RiverSource = TagManager.Create("RiverSource");
 
@@ -379,6 +388,10 @@ public class GameTags
 
 	public static readonly Tag Equipped = TagManager.Create("Equipped");
 
+	public static readonly Tag ChargedPortableBattery = TagManager.Create("ChargedPortableBattery");
+
+	public static readonly Tag EmptyPortableBattery = TagManager.Create("EmptyPortableBattery");
+
 	public static readonly Tag Entombed = TagManager.Create("Entombed");
 
 	public static readonly Tag Uprooted = TagManager.Create("Uprooted");
@@ -446,6 +459,8 @@ public class GameTags
 	public static readonly Tag PleasantConversation = TagManager.Create("PleasantConversation");
 
 	public static readonly Tag HasSuitTank = TagManager.Create("HasSuitTank");
+
+	public static readonly Tag HasAirtightSuit = TagManager.Create("HasAirtightSuit");
 
 	public static readonly Tag NoCreatureIdling = TagManager.Create("NoCreatureIdling");
 
@@ -620,7 +635,8 @@ public class GameTags
 		GameTags.Other,
 		GameTags.ManufacturedMaterial,
 		GameTags.CookingIngredient,
-		GameTags.RareMaterials
+		GameTags.RareMaterials,
+		GameTags.ChargedPortableBattery
 	};
 
 	public static TagSet MaterialBuildingElements = new TagSet
@@ -650,6 +666,14 @@ public class GameTags
 	public static TagSet DisplayAsUnits = new TagSet(GameTags.UnitCategories);
 
 	public static TagSet DisplayAsInformation = new TagSet();
+
+	public static Tag StartingMetalOre = new Tag("StartingMetalOre");
+
+	public static Tag StartingRefinedMetalOre = new Tag("StartingRefinedMetalOre");
+
+	public static Tag[] StartingMetalOres;
+
+	public static Tag[] StartingRefinedMetalOres = null;
 
 	public static class Worlds
 	{
@@ -878,6 +902,42 @@ public class GameTags
 		}
 	}
 
+	public static class StoragesIds
+	{
+		public static readonly Tag DefaultStorage = TagManager.Create("Storage");
+
+		public static readonly Tag BionicBatteryStorage = TagManager.Create("BionicBatteryStorage");
+
+		public static readonly Tag BionicUpgradeStorage = TagManager.Create("BionicUpgradeStorage");
+
+		public static readonly Tag BionicOxygenTankStorage = TagManager.Create("BionicOxygenTankStorage");
+	}
+
+	public static class Minions
+	{
+		public static class Models
+		{
+			public static string GetModelTooltipForTag(Tag modelTag)
+			{
+				if (modelTag == GameTags.Minions.Models.Bionic)
+				{
+					return DUPLICANTS.MODEL.BIONIC.NAME_TOOLTIP;
+				}
+				return "";
+			}
+
+			public static readonly Tag[] AllModels = new Tag[]
+			{
+				GameTags.Minions.Models.Standard,
+				GameTags.Minions.Models.Bionic
+			};
+
+			public static readonly Tag Standard = TagManager.Create("Minion", DUPLICANTS.MODEL.STANDARD.NAME);
+
+			public static readonly Tag Bionic = TagManager.Create("BionicMinion", DUPLICANTS.MODEL.BIONIC.NAME);
+		}
+	}
+
 	public static class Robots
 	{
 		public static class Models
@@ -887,6 +947,10 @@ public class GameTags
 			public static readonly Tag ScoutRover = TagManager.Create("ScoutRover");
 
 			public static readonly Tag MorbRover = TagManager.Create("MorbRover");
+
+			public static readonly Tag FetchDrone = TagManager.Create("FetchDrone");
+
+			public static readonly Tag RemoteWorker = TagManager.Create("RemoteWorker");
 		}
 
 		public static class Behaviours

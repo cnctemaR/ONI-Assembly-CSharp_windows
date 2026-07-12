@@ -84,7 +84,7 @@ namespace System.Xml.Serialization
 					}
 					else if (assembly != a)
 					{
-						text = a.FullName + ", " + DynamicAssemblies.nameToAssemblyMap.Count;
+						text = a.FullName + ", " + DynamicAssemblies.nameToAssemblyMap.Count.ToString();
 					}
 					if (text != null)
 					{

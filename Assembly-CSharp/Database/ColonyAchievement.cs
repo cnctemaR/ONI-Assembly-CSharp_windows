@@ -9,6 +9,24 @@ namespace Database
 	{
 		public EventReference victoryNISSnapshot { get; private set; }
 
+		public ColonyAchievement()
+		{
+			this.Id = "Disabled";
+			this.platformAchievementId = "Disabled";
+			this.Name = "Disabled";
+			this.description = "Disabled";
+			this.isVictoryCondition = false;
+			this.requirementChecklist = new List<ColonyAchievementRequirement>();
+			this.messageTitle = string.Empty;
+			this.messageBody = string.Empty;
+			this.shortVideoName = string.Empty;
+			this.loopVideoName = string.Empty;
+			this.platformAchievementId = string.Empty;
+			this.icon = string.Empty;
+			this.clusterTag = string.Empty;
+			this.Disabled = true;
+		}
+
 		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, EventReference victorySnapshot = default(EventReference), string icon = "", string[] dlcIds = null, string dlcIdFrom = null, string clusterTag = null)
 			: base(Id, Name)
 		{

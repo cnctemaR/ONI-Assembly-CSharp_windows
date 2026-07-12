@@ -4,15 +4,16 @@ using System.Runtime.InteropServices;
 using System.Security;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
+using UnityEngine.SceneManagement;
 using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
-	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
-	[NativeHeader("Runtime/GameCode/CloneObject.h")]
 	[RequiredByNativeCode(GenerateProxy = true)]
+	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
+	[NativeHeader("Runtime/GameCode/CloneObject.h")]
+	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
@@ -118,6 +119,72 @@ namespace UnityEngine
 			}
 		}
 
+		public static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, 1, null, ReadOnlySpan<Vector3>.Empty, ReadOnlySpan<Quaternion>.Empty);
+		}
+
+		public static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, Transform parent) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, 1, parent, ReadOnlySpan<Vector3>.Empty, ReadOnlySpan<Quaternion>.Empty);
+		}
+
+		public unsafe static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, Vector3 position, Quaternion rotation) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, 1, null, new ReadOnlySpan<Vector3>((void*)(&position), 1), new ReadOnlySpan<Quaternion>((void*)(&rotation), 1));
+		}
+
+		public unsafe static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, Transform parent, Vector3 position, Quaternion rotation) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, 1, parent, new ReadOnlySpan<Vector3>((void*)(&position), 1), new ReadOnlySpan<Quaternion>((void*)(&rotation), 1));
+		}
+
+		public static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, count, null, ReadOnlySpan<Vector3>.Empty, ReadOnlySpan<Quaternion>.Empty);
+		}
+
+		public static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count, Transform parent) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, count, parent, ReadOnlySpan<Vector3>.Empty, ReadOnlySpan<Quaternion>.Empty);
+		}
+
+		public unsafe static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count, Vector3 position, Quaternion rotation) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, count, null, new ReadOnlySpan<Vector3>((void*)(&position), 1), new ReadOnlySpan<Quaternion>((void*)(&rotation), 1));
+		}
+
+		public static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count, ReadOnlySpan<Vector3> positions, ReadOnlySpan<Quaternion> rotations) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, count, null, positions, rotations);
+		}
+
+		public unsafe static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count, Transform parent, Vector3 position, Quaternion rotation) where T : Object
+		{
+			return Object.InstantiateAsync<T>(original, count, parent, new ReadOnlySpan<Vector3>((void*)(&position), 1), new ReadOnlySpan<Quaternion>((void*)(&rotation), 1));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe static AsyncInstantiateOperation<T> InstantiateAsync<T>(T original, int count, Transform parent, ReadOnlySpan<Vector3> positions, ReadOnlySpan<Quaternion> rotations) where T : Object
+		{
+			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
+			bool flag = count <= 0;
+			if (flag)
+			{
+				throw new ArgumentException("Cannot call instantiate multiple with count less or equal to zero");
+			}
+			fixed (Vector3* pinnableReference = positions.GetPinnableReference())
+			{
+				Vector3* ptr = pinnableReference;
+				fixed (Quaternion* pinnableReference2 = rotations.GetPinnableReference())
+				{
+					Quaternion* ptr2 = pinnableReference2;
+					AsyncInstantiateOperation asyncInstantiateOperation = Object.Internal_InstantiateAsyncWithParent(original, count, parent, (IntPtr)((void*)ptr), positions.Length, (IntPtr)((void*)ptr2), rotations.Length);
+					return new AsyncInstantiateOperation<T>(asyncInstantiateOperation);
+				}
+			}
+		}
+
 		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
 		public static Object Instantiate(Object original, Vector3 position, Quaternion rotation)
 		{
@@ -164,6 +231,19 @@ namespace UnityEngine
 		{
 			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
 			Object @object = Object.Internal_CloneSingle(original);
+			bool flag = @object == null;
+			if (flag)
+			{
+				throw new UnityException("Instantiate failed because the clone was destroyed during creation. This can happen if DestroyImmediate is called in MonoBehaviour.Awake.");
+			}
+			return @object;
+		}
+
+		[TypeInferenceRule(TypeInferenceRules.TypeOfFirstArgument)]
+		public static Object Instantiate(Object original, Scene scene)
+		{
+			Object.CheckNullArgument(original, "The Object you want to instantiate is null.");
+			Object @object = Object.Internal_CloneSingleWithScene(original, scene);
 			bool flag = @object == null;
 			if (flag)
 			{
@@ -260,10 +340,20 @@ namespace UnityEngine
 			return Object.FindObjectsOfType(type, false);
 		}
 
-		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
 		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
+		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindObjectsOfType(Type type, bool includeInactive);
+
+		public static Object[] FindObjectsByType(Type type, FindObjectsSortMode sortMode)
+		{
+			return Object.FindObjectsByType(type, FindObjectsInactive.Exclude, sortMode);
+		}
+
+		[FreeFunction("UnityEngineObjectBindings::FindObjectsByType")]
+		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern Object[] FindObjectsByType(Type type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode);
 
 		[FreeFunction("GetSceneManager().DontDestroyOnLoad", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -283,15 +373,15 @@ namespace UnityEngine
 			Object.Destroy(obj, t);
 		}
 
-		[ExcludeFromDocs]
 		[Obsolete("use Object.Destroy instead.")]
+		[ExcludeFromDocs]
 		public static void DestroyObject(Object obj)
 		{
 			float num = 0f;
 			Object.Destroy(obj, num);
 		}
 
-		[Obsolete("warning use Object.FindObjectsOfType instead.")]
+		[Obsolete("warning use Object.FindObjectsByType instead.")]
 		public static Object[] FindSceneObjectsOfType(Type type)
 		{
 			return Object.FindObjectsOfType(type);
@@ -307,9 +397,19 @@ namespace UnityEngine
 			return Resources.ConvertObjects<T>(Object.FindObjectsOfType(typeof(T), false));
 		}
 
+		public static T[] FindObjectsByType<T>(FindObjectsSortMode sortMode) where T : Object
+		{
+			return Resources.ConvertObjects<T>(Object.FindObjectsByType(typeof(T), FindObjectsInactive.Exclude, sortMode));
+		}
+
 		public static T[] FindObjectsOfType<T>(bool includeInactive) where T : Object
 		{
 			return Resources.ConvertObjects<T>(Object.FindObjectsOfType(typeof(T), includeInactive));
+		}
+
+		public static T[] FindObjectsByType<T>(FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode) where T : Object
+		{
+			return Resources.ConvertObjects<T>(Object.FindObjectsByType(typeof(T), findObjectsInactive, sortMode));
 		}
 
 		public static T FindObjectOfType<T>() where T : Object
@@ -320,6 +420,26 @@ namespace UnityEngine
 		public static T FindObjectOfType<T>(bool includeInactive) where T : Object
 		{
 			return (T)((object)Object.FindObjectOfType(typeof(T), includeInactive));
+		}
+
+		public static T FindFirstObjectByType<T>() where T : Object
+		{
+			return (T)((object)Object.FindFirstObjectByType(typeof(T), FindObjectsInactive.Exclude));
+		}
+
+		public static T FindAnyObjectByType<T>() where T : Object
+		{
+			return (T)((object)Object.FindAnyObjectByType(typeof(T), FindObjectsInactive.Exclude));
+		}
+
+		public static T FindFirstObjectByType<T>(FindObjectsInactive findObjectsInactive) where T : Object
+		{
+			return (T)((object)Object.FindFirstObjectByType(typeof(T), findObjectsInactive));
+		}
+
+		public static T FindAnyObjectByType<T>(FindObjectsInactive findObjectsInactive) where T : Object
+		{
+			return (T)((object)Object.FindAnyObjectByType(typeof(T), findObjectsInactive));
 		}
 
 		[Obsolete("Please use Resources.FindObjectsOfTypeAll instead")]
@@ -354,6 +474,18 @@ namespace UnityEngine
 			return @object;
 		}
 
+		public static Object FindFirstObjectByType(Type type)
+		{
+			Object[] array = Object.FindObjectsByType(type, FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID);
+			return (array.Length != 0) ? array[0] : null;
+		}
+
+		public static Object FindAnyObjectByType(Type type)
+		{
+			Object[] array = Object.FindObjectsByType(type, FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+			return (array.Length != 0) ? array[0] : null;
+		}
+
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public static Object FindObjectOfType(Type type, bool includeInactive)
 		{
@@ -369,6 +501,18 @@ namespace UnityEngine
 				@object = null;
 			}
 			return @object;
+		}
+
+		public static Object FindFirstObjectByType(Type type, FindObjectsInactive findObjectsInactive)
+		{
+			Object[] array = Object.FindObjectsByType(type, findObjectsInactive, FindObjectsSortMode.InstanceID);
+			return (array.Length != 0) ? array[0] : null;
+		}
+
+		public static Object FindAnyObjectByType(Type type, FindObjectsInactive findObjectsInactive)
+		{
+			Object[] array = Object.FindObjectsByType(type, findObjectsInactive, FindObjectsSortMode.None);
+			return (array.Length != 0) ? array[0] : null;
 		}
 
 		public override string ToString()
@@ -394,13 +538,23 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CurrentThreadIsMainThread();
 
-		[FreeFunction("CloneObject")]
+		[NativeMethod(Name = "CloneObject", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object Internal_CloneSingle([NotNull("NullExceptionObject")] Object data);
+
+		[FreeFunction("CloneObjectToScene")]
+		private static Object Internal_CloneSingleWithScene([NotNull("ArgumentNullException")] Object data, Scene scene)
+		{
+			return Object.Internal_CloneSingleWithScene_Injected(data, ref scene);
+		}
 
 		[FreeFunction("CloneObject")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object Internal_CloneSingleWithParent([NotNull("NullExceptionObject")] Object data, [NotNull("NullExceptionObject")] Transform parent, bool worldPositionStays);
+
+		[FreeFunction("InstantiateAsyncObjects")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AsyncInstantiateOperation Internal_InstantiateAsyncWithParent([NotNull("NullExceptionObject")] Object original, int count, Transform parent, IntPtr positions, int positionsCount, IntPtr rotations, int rotationsCount);
 
 		[FreeFunction("InstantiateObject")]
 		private static Object Internal_InstantiateSingle([NotNull("NullExceptionObject")] Object data, Vector3 pos, Quaternion rot)
@@ -439,10 +593,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object FindObjectFromInstanceID(int instanceID);
 
-		[FreeFunction("UnityEngineObjectBindings::ForceLoadFromInstanceID")]
 		[VisibleToOtherModules]
+		[FreeFunction("UnityEngineObjectBindings::ForceLoadFromInstanceID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object ForceLoadFromInstanceID(int instanceID);
+
+		[FreeFunction("UnityEngineObjectBindings::MarkObjectDirty", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void MarkDirty();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Object Internal_CloneSingleWithScene_Injected(Object data, ref Scene scene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object Internal_InstantiateSingle_Injected(Object data, ref Vector3 pos, ref Quaternion rot);

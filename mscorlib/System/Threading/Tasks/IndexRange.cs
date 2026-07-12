@@ -6,12 +6,12 @@ namespace System.Threading.Tasks
 	[StructLayout(LayoutKind.Auto)]
 	internal struct IndexRange
 	{
-		internal long m_nFromInclusive;
+		internal long _nFromInclusive;
 
-		internal long m_nToExclusive;
+		internal long _nToExclusive;
 
-		internal volatile Shared<long> m_nSharedCurrentIndexOffset;
+		internal volatile Box<long> _nSharedCurrentIndexOffset;
 
-		internal int m_bRangeFinished;
+		internal int _bRangeFinished;
 	}
 }

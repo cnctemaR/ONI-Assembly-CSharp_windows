@@ -1,17 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class TypeListConverter : TypeConverter
 	{
 		protected TypeListConverter(Type[] types)
 		{
-			this.types = types;
+			this._types = types;
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -28,7 +25,7 @@ namespace System.ComponentModel
 		{
 			if (value is string)
 			{
-				foreach (Type type in this.types)
+				foreach (Type type in this._types)
 				{
 					if (value.Equals(type.FullName))
 					{
@@ -47,40 +44,32 @@ namespace System.ComponentModel
 			}
 			if (!(destinationType == typeof(string)))
 			{
-				if (destinationType == typeof(InstanceDescriptor) && value is Type)
-				{
-					MethodInfo method = typeof(Type).GetMethod("GetType", new Type[] { typeof(string) });
-					if (method != null)
-					{
-						return new InstanceDescriptor(method, new object[] { ((Type)value).AssemblyQualifiedName });
-					}
-				}
 				return base.ConvertTo(context, culture, value, destinationType);
 			}
 			if (value == null)
 			{
-				return global::SR.GetString("(none)");
+				return "(none)";
 			}
 			return ((Type)value).FullName;
 		}
 
 		public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			if (this.values == null)
+			if (this._values == null)
 			{
 				object[] array;
-				if (this.types != null)
+				if (this._types != null)
 				{
-					array = new object[this.types.Length];
-					Array.Copy(this.types, array, this.types.Length);
+					array = new object[this._types.Length];
+					Array.Copy(this._types, array, this._types.Length);
 				}
 				else
 				{
 					array = null;
 				}
-				this.values = new TypeConverter.StandardValuesCollection(array);
+				this._values = new TypeConverter.StandardValuesCollection(array);
 			}
-			return this.values;
+			return this._values;
 		}
 
 		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
@@ -93,8 +82,8 @@ namespace System.ComponentModel
 			return true;
 		}
 
-		private Type[] types;
+		private readonly Type[] _types;
 
-		private TypeConverter.StandardValuesCollection values;
+		private TypeConverter.StandardValuesCollection _values;
 	}
 }

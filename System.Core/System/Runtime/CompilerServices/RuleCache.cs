@@ -5,8 +5,8 @@ using System.Dynamic.Utils;
 
 namespace System.Runtime.CompilerServices
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[DebuggerStepThrough]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public class RuleCache<T> where T : class
 	{
 		internal RuleCache()
@@ -90,8 +90,8 @@ namespace System.Runtime.CompilerServices
 			else
 			{
 				array = new T[num];
+				Array.Copy(rules, 0, array, 0, 64);
 			}
-			Array.Copy(rules, 0, array, 0, 64);
 			array[64] = item;
 			Array.Copy(rules, 64, array, 65, num - 64 - 1);
 			return array;

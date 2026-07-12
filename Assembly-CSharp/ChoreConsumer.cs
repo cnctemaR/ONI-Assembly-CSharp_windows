@@ -10,11 +10,6 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/ChoreConsumer")]
 public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 {
-	public List<ChoreProvider> GetProviders()
-	{
-		return this.providers;
-	}
-
 	public ChoreConsumer.PreconditionSnapshot GetLastPreconditionSnapshot()
 	{
 		return this.preconditionSnapshot;
@@ -382,10 +377,10 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		if (!context.IsSuccess())
 		{
 			Chore.PreconditionInstance preconditionInstance = context.chore.GetPreconditions()[context.failedPreconditionId];
-			string text = preconditionInstance.description;
+			string text = preconditionInstance.condition.description;
 			if (string.IsNullOrEmpty(text))
 			{
-				text = preconditionInstance.id;
+				text = preconditionInstance.condition.id;
 			}
 			if (context.chore.driver != null)
 			{
@@ -572,7 +567,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	public const int PRIORITY_VERYHIGH = 5;
 
 	[MyCmpAdd]
-	public ChoreProvider choreProvider;
+	private ChoreProvider choreProvider;
 
 	[MyCmpAdd]
 	public ChoreDriver choreDriver;
@@ -580,11 +575,10 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	[MyCmpGet]
 	public Navigator navigator;
 
-	[MyCmpGet]
-	public MinionResume resume;
-
 	[MyCmpAdd]
 	private User user;
+
+	public bool prioritizeBrainIfNoChore;
 
 	public global::System.Action choreRulesChanged;
 

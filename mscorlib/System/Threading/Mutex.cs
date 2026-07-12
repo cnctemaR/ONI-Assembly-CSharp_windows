@@ -12,13 +12,33 @@ namespace System.Threading
 	public sealed class Mutex : WaitHandle
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern IntPtr CreateMutex_icall(bool initiallyOwned, char* name, int name_length, out bool created);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern IntPtr OpenMutex_icall(char* name, int name_length, MutexRights rights, out MonoIOError error);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ReleaseMutex_internal(IntPtr handle);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreateMutex_internal(bool initiallyOwned, string name, out bool created);
+		private unsafe static IntPtr CreateMutex_internal(bool initiallyOwned, string name, out bool created)
+		{
+			char* ptr = name;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return Mutex.CreateMutex_icall(initiallyOwned, ptr, (name != null) ? name.Length : 0, out created);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenMutex_internal(string name, MutexRights rights, out MonoIOError error);
+		private unsafe static IntPtr OpenMutex_internal(string name, MutexRights rights, out MonoIOError error)
+		{
+			char* ptr = name;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return Mutex.OpenMutex_icall(ptr, (name != null) ? name.Length : 0, rights, out error);
+		}
 
 		private Mutex(IntPtr handle)
 		{
@@ -54,8 +74,8 @@ namespace System.Threading
 			this.Handle = Mutex.CreateMutex_internal(initiallyOwned, name, out createdNew);
 		}
 
-		[MonoTODO("Use MutexSecurity in CreateMutex_internal")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[MonoTODO("Use MutexSecurity in CreateMutex_internal")]
 		public Mutex(bool initiallyOwned, string name, out bool createdNew, MutexSecurity mutexSecurity)
 		{
 			this.Handle = Mutex.CreateMutex_internal(initiallyOwned, name, out createdNew);

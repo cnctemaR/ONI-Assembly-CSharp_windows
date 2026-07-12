@@ -23,6 +23,6 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		internal new Hashtable _caps;
+		internal new readonly Hashtable _caps;
 	}
 }

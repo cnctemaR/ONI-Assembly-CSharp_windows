@@ -17,7 +17,7 @@ public class EmptyMilkSeparatorWorkable : Workable
 		this.synchronizeAnims = true;
 	}
 
-	public override void OnPendingCompleteWork(Worker worker)
+	public override void OnPendingCompleteWork(WorkerBase worker)
 	{
 		global::System.Action onWork_PST_Begins = this.OnWork_PST_Begins;
 		if (onWork_PST_Begins != null)

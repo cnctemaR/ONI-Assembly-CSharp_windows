@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Audio
 {
-	[StaticAccessor("AudioPlayableOutputBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[StaticAccessor("AudioPlayableOutputBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
 	[NativeHeader("Modules/Audio/Public/Director/AudioPlayableOutput.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableOutput.bindings.h")]

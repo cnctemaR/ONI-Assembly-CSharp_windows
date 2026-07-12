@@ -5,23 +5,7 @@ namespace System
 {
 	internal static class IPv4AddressHelper
 	{
-		internal unsafe static string ParseCanonicalName(string str, int start, int end, ref bool isLoopback)
-		{
-			byte* ptr = stackalloc byte[(UIntPtr)4];
-			isLoopback = IPv4AddressHelper.Parse(str, ptr, start, end);
-			return string.Concat(new object[]
-			{
-				*ptr,
-				".",
-				ptr[1],
-				".",
-				ptr[2],
-				".",
-				ptr[3]
-			});
-		}
-
-		internal unsafe static int ParseHostNumber(string str, int start, int end)
+		internal unsafe static int ParseHostNumber(ReadOnlySpan<char> str, int start, int end)
 		{
 			byte* ptr = stackalloc byte[(UIntPtr)4];
 			IPv4AddressHelper.ParseCanonical(str, ptr, start, end);
@@ -35,6 +19,23 @@ namespace System
 				return IPv4AddressHelper.IsValidCanonical(name, start, ref end, allowIPv6, notImplicitFile);
 			}
 			return IPv4AddressHelper.ParseNonCanonical(name, start, ref end, notImplicitFile) != -1L;
+		}
+
+		private unsafe static bool ParseCanonical(ReadOnlySpan<char> name, byte* numbers, int start, int end)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				byte b = 0;
+				char c;
+				while (start < end && (c = (char)(*name[start])) != '.' && c != ':')
+				{
+					b = b * 10 + (byte)(c - '0');
+					start++;
+				}
+				numbers[i] = b;
+				start++;
+			}
+			return *numbers == 127;
 		}
 
 		internal unsafe static bool IsValidCanonical(char* name, int start, ref int end, bool allowIPv6, bool notImplicitFile)
@@ -105,7 +106,7 @@ namespace System
 
 		internal unsafe static long ParseNonCanonical(char* name, int start, ref int end, bool notImplicitFile)
 		{
-			long[] array = new long[4];
+			long* ptr = stackalloc long[(UIntPtr)32];
 			long num = 0L;
 			bool flag = false;
 			int num2 = 0;
@@ -171,7 +172,7 @@ namespace System
 				{
 					return -1L;
 				}
-				array[num2] = num;
+				ptr[num2] = num;
 				num2++;
 				flag = false;
 			}
@@ -188,36 +189,54 @@ namespace System
 				}
 				end = i;
 			}
-			array[num2] = num;
+			ptr[num2] = num;
 			switch (num2)
 			{
 			case 0:
-				if (array[0] > (long)((ulong)(-1)))
+				if (*ptr > (long)((ulong)(-1)))
 				{
 					return -1L;
 				}
-				return array[0];
+				return *ptr;
 			case 1:
-				if (array[1] > 16777215L)
+				if (ptr[1] > 16777215L)
 				{
 					return -1L;
 				}
-				return (array[0] << 24) | (array[1] & 16777215L);
+				return (*ptr << 24) | (ptr[1] & 16777215L);
 			case 2:
-				if (array[2] > 65535L)
+				if (ptr[2] > 65535L)
 				{
 					return -1L;
 				}
-				return (array[0] << 24) | ((array[1] & 255L) << 16) | (array[2] & 65535L);
+				return (*ptr << 24) | ((ptr[1] & 255L) << 16) | (ptr[2] & 65535L);
 			case 3:
-				if (array[3] > 255L)
+				if (ptr[3] > 255L)
 				{
 					return -1L;
 				}
-				return (array[0] << 24) | ((array[1] & 255L) << 16) | ((array[2] & 255L) << 8) | (array[3] & 255L);
+				return (*ptr << 24) | ((ptr[1] & 255L) << 16) | ((ptr[2] & 255L) << 8) | (ptr[3] & 255L);
 			default:
 				return -1L;
 			}
+		}
+
+		internal unsafe static string ParseCanonicalName(string str, int start, int end, ref bool isLoopback)
+		{
+			byte* ptr = stackalloc byte[(UIntPtr)4];
+			isLoopback = IPv4AddressHelper.Parse(str, ptr, start, end);
+			Span<char> span = new Span<char>(stackalloc byte[(UIntPtr)30], 15);
+			int num = 0;
+			int num2;
+			for (int i = 0; i < 3; i++)
+			{
+				ptr[i].TryFormat(span.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+				int num3 = num + num2;
+				*span[num3] = '.';
+				num = num3 + 1;
+			}
+			ptr[3].TryFormat(span.Slice(num), out num2, default(ReadOnlySpan<char>), null);
+			return new string(span.Slice(0, num + num2));
 		}
 
 		private unsafe static bool Parse(string name, byte* numbers, int start, int end)
@@ -235,23 +254,6 @@ namespace System
 				numbers[1] = (byte)(num2 >> 16);
 				numbers[2] = (byte)(num2 >> 8);
 				numbers[3] = (byte)num2;
-			}
-			return *numbers == 127;
-		}
-
-		private unsafe static bool ParseCanonical(string name, byte* numbers, int start, int end)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				byte b = 0;
-				char c;
-				while (start < end && (c = name[start]) != '.' && c != ':')
-				{
-					b = b * 10 + (byte)(c - '0');
-					start++;
-				}
-				numbers[i] = b;
-				start++;
 			}
 			return *numbers == 127;
 		}

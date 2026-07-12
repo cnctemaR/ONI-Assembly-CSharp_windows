@@ -624,7 +624,9 @@ public class PermitItems
 		new PermitItems.ItemInfo("walls_dice_5", 545U, "ExteriorWall_dice_5"),
 		new PermitItems.ItemInfo("walls_dice_6", 546U, "ExteriorWall_dice_6"),
 		new PermitItems.ItemInfo("painting_art_r", 547U, "Canvas_Good16"),
-		new PermitItems.ItemInfo("painting_wide_art_o", 548U, "CanvasWide_Good13")
+		new PermitItems.ItemInfo("painting_wide_art_o", 548U, "CanvasWide_Good13"),
+		new PermitItems.ItemInfo("item_elegantbed_hatch", 549U, "permit_elegantbed_hatch"),
+		new PermitItems.ItemInfo("item_elegantbed_pipsqueak", 550U, "permit_elegantbed_pipsqueak")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);

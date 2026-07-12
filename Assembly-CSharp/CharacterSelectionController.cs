@@ -58,6 +58,7 @@ public class CharacterSelectionController : KModalScreen
 		{
 			CharacterContainer characterContainer = Util.KInstantiateUI<CharacterContainer>(this.containerPrefab.gameObject, this.containerParent, false);
 			characterContainer.SetController(this);
+			characterContainer.SetReshufflingState(true);
 			this.containers.Add(characterContainer);
 		}
 		for (int j = 0; j < this.numberOfCarePackageOptions; j++)

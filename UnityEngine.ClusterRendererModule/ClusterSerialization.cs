@@ -41,27 +41,27 @@ namespace UnityEngine
 			return ClusterSerialization.RestoreClusterInputStateInternal(buffer.GetUnsafePtr<byte>(), buffer.Length);
 		}
 
-		[FreeFunction("ClusterSerialization::SaveTimeManagerState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::SaveTimeManagerState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern int SaveTimeManagerStateInternal(void* intBuffer, int bufferSize);
 
-		[FreeFunction("ClusterSerialization::RestoreTimeManagerState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::RestoreTimeManagerState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern bool RestoreTimeManagerStateInternal(void* buffer, int bufferSize);
 
-		[FreeFunction("ClusterSerialization::SaveInputManagerState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::SaveInputManagerState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern int SaveInputManagerStateInternal(void* intBuffer, int bufferSize);
 
-		[FreeFunction("ClusterSerialization::RestoreInputManagerState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::RestoreInputManagerState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern bool RestoreInputManagerStateInternal(void* buffer, int bufferSize);
 
-		[FreeFunction("ClusterSerialization::SaveClusterInputState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::SaveClusterInputState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern int SaveClusterInputStateInternal(void* intBuffer, int bufferSize);
 
-		[FreeFunction("ClusterSerialization::RestoreClusterInputState", ThrowsException = true)]
+		[FreeFunction("ClusterSerialization::RestoreClusterInputState")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern bool RestoreClusterInputStateInternal(void* buffer, int bufferSize);
 	}

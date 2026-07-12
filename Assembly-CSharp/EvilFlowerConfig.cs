@@ -23,12 +23,25 @@ public class EvilFlowerConfig : IEntityConfig
 		EvilFlower evilFlower = gameObject.AddOrGet<EvilFlower>();
 		evilFlower.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		evilFlower.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "EvilFlowerSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.EVILFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.EVILFLOWER.DESC, Assets.GetAnim("seed_potted_evilflower_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 19, global::STRINGS.CREATURES.SPECIES.EVILFLOWER.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, "", false, null), "EvilFlower_preview", Assets.GetAnim("potted_evilflower_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "EvilFlowerSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.EVILFLOWER.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.EVILFLOWER.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_potted_evilflower_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.EVILFLOWER.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 19, text8, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, "", false, null), "EvilFlower_preview", Assets.GetAnim("potted_evilflower_kanim"), "place", 1, 1);
 		DiseaseDropper.Def def = gameObject.AddOrGetDef<DiseaseDropper.Def>();
 		def.diseaseIdx = Db.Get().Diseases.GetIndex("ZombieSpores");
 		def.emitFrequency = 1f;
 		def.averageEmitPerSecond = 1000;
 		def.singleEmitQuantity = 100000;
+		gameObject.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = "ZombieSpores";
 		return gameObject;
 	}
 

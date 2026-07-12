@@ -4,7 +4,7 @@ using System.Text;
 
 namespace System.Data.Odbc
 {
-	internal static class ODBC32
+	public static class ODBC32
 	{
 		internal static string RetcodeToString(ODBC32.RetCode retcode)
 		{

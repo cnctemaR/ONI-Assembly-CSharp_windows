@@ -118,11 +118,11 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, ICircuitConnected, IGame
 		if (this.HasAllTags(this.connectedTags))
 		{
 			Game.Instance.circuitManager.Connect(this);
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.JoulesAvailable, this);
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.BatteryJoulesAvailable, this);
 			return;
 		}
 		Game.Instance.circuitManager.Disconnect(this, false);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.JoulesAvailable, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.BatteryJoulesAvailable, false);
 	}
 
 	protected override void OnCleanUp()

@@ -8,7 +8,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_completed;
+				return this._completed;
 			}
 		}
 
@@ -16,12 +16,12 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_lowestBreakIteration;
+				return this._lowestBreakIteration;
 			}
 		}
 
-		internal bool m_completed;
+		internal bool _completed;
 
-		internal long? m_lowestBreakIteration;
+		internal long? _lowestBreakIteration;
 	}
 }

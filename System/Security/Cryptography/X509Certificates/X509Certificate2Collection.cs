@@ -124,6 +124,16 @@ namespace System.Security.Cryptography.X509Certificates
 			return null;
 		}
 
+		private string GetKeyIdentifier(X509Certificate2 x)
+		{
+			X509SubjectKeyIdentifierExtension x509SubjectKeyIdentifierExtension = x.Extensions["2.5.29.14"] as X509SubjectKeyIdentifierExtension;
+			if (x509SubjectKeyIdentifierExtension == null)
+			{
+				x509SubjectKeyIdentifierExtension = new X509SubjectKeyIdentifierExtension(x.PublicKey, X509SubjectKeyIdentifierHashAlgorithm.CapiSha1, false);
+			}
+			return x509SubjectKeyIdentifierExtension.SubjectKeyIdentifier;
+		}
+
 		[MonoTODO("Does not support X509FindType.FindByTemplateName, FindByApplicationPolicy and FindByCertificatePolicy")]
 		public X509Certificate2Collection Find(X509FindType findType, object findValue, bool validOnly)
 		{
@@ -281,14 +291,8 @@ namespace System.Security.Cryptography.X509Certificates
 					break;
 				}
 				case X509FindType.FindBySubjectKeyIdentifier:
-				{
-					X509SubjectKeyIdentifierExtension x509SubjectKeyIdentifierExtension = x509Certificate.Extensions["2.5.29.14"] as X509SubjectKeyIdentifierExtension;
-					if (x509SubjectKeyIdentifierExtension != null)
-					{
-						flag = string.Compare(text, x509SubjectKeyIdentifierExtension.SubjectKeyIdentifier, true, invariantCulture) == 0;
-					}
+					flag = string.Compare(text, this.GetKeyIdentifier(x509Certificate), true, invariantCulture) == 0;
 					break;
-				}
 				}
 				if (flag)
 				{
@@ -321,32 +325,28 @@ namespace System.Security.Cryptography.X509Certificates
 		[MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(byte[] rawData)
 		{
-			X509Certificate2 x509Certificate = new X509Certificate2();
-			x509Certificate.Import(rawData);
+			X509Certificate2 x509Certificate = new X509Certificate2(rawData);
 			this.Add(x509Certificate);
 		}
 
 		[MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
 		{
-			X509Certificate2 x509Certificate = new X509Certificate2();
-			x509Certificate.Import(rawData, password, keyStorageFlags);
+			X509Certificate2 x509Certificate = new X509Certificate2(rawData, password, keyStorageFlags);
 			this.Add(x509Certificate);
 		}
 
 		[MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(string fileName)
 		{
-			X509Certificate2 x509Certificate = new X509Certificate2();
-			x509Certificate.Import(fileName);
+			X509Certificate2 x509Certificate = new X509Certificate2(fileName);
 			this.Add(x509Certificate);
 		}
 
 		[MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
 		{
-			X509Certificate2 x509Certificate = new X509Certificate2();
-			x509Certificate.Import(fileName, password, keyStorageFlags);
+			X509Certificate2 x509Certificate = new X509Certificate2(fileName, password, keyStorageFlags);
 			this.Add(x509Certificate);
 		}
 

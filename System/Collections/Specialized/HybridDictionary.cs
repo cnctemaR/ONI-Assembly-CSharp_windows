@@ -48,7 +48,7 @@ namespace System.Collections.Specialized
 				}
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+					throw new ArgumentNullException("key");
 				}
 				return null;
 			}
@@ -231,7 +231,7 @@ namespace System.Collections.Specialized
 			}
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				throw new ArgumentNullException("key");
 			}
 			return false;
 		}
@@ -286,7 +286,7 @@ namespace System.Collections.Specialized
 			}
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				throw new ArgumentNullException("key");
 			}
 		}
 
@@ -300,6 +300,6 @@ namespace System.Collections.Specialized
 
 		private Hashtable hashtable;
 
-		private bool caseInsensitive;
+		private readonly bool caseInsensitive;
 	}
 }

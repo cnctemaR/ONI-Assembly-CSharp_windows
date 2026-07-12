@@ -59,7 +59,7 @@ public class Substance
 				primaryElement.Mass += mass;
 			}
 		}
-		primaryElement.InternalTemperature = temperature;
+		primaryElement.Temperature = temperature;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
 		gameObject.transform.SetPosition(position);
 		if (!manual_activation)

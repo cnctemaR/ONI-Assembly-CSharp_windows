@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	public interface IList : ICollection, IEnumerable
 	{
 		object this[int index] { get; set; }

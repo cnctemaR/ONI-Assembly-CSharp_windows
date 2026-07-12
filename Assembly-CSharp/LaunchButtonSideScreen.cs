@@ -104,6 +104,7 @@ public class LaunchButtonSideScreen : SideScreenContent
 		bool flag2 = this.rocketModule.CraftInterface.IsLaunchRequested();
 		bool flag3 = this.selectedPad.IsLogicInputConnected();
 		bool flag4 = (flag3 ? this.rocketModule.CraftInterface.CheckReadyForAutomatedLaunchCommand() : this.rocketModule.CraftInterface.CheckPreppedForLaunch());
+		bool flag5 = this.rocketModule.CraftInterface.HasTag(GameTags.RocketNotOnGround);
 		if (flag3)
 		{
 			this.launchButton.isInteractable = false;
@@ -136,27 +137,53 @@ public class LaunchButtonSideScreen : SideScreenContent
 			this.launchButton.GetComponentInChildren<LocText>().text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.LAUNCH_BUTTON;
 			this.launchButton.GetComponentInChildren<ToolTip>().toolTip = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.LAUNCH_BUTTON_NOT_READY_TOOLTIP;
 		}
-		if (this.rocketModule.CraftInterface.GetInteriorWorld() == null)
+		global::UnityEngine.Object interiorWorld = this.rocketModule.CraftInterface.GetInteriorWorld();
+		RoboPilotModule robotPilotModule = this.rocketModule.CraftInterface.GetRobotPilotModule();
+		PassengerRocketModule passengerModule = this.rocketModule.CraftInterface.GetPassengerModule();
+		if (!(interiorWorld != null))
 		{
-			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.STILL_PREPPING;
+			if (robotPilotModule != null)
+			{
+				if (!flag4)
+				{
+					this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.STILL_PREPPING;
+					return;
+				}
+				if (!flag2)
+				{
+					this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.READY_FOR_LAUNCH;
+					return;
+				}
+				if (!flag5)
+				{
+					this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.COUNTING_DOWN;
+					return;
+				}
+			}
+			else
+			{
+				this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.STILL_PREPPING;
+			}
 			return;
 		}
-		PassengerRocketModule component = this.rocketModule.GetComponent<PassengerRocketModule>();
 		List<RocketControlStation> worldItems = Components.RocketControlStations.GetWorldItems(this.rocketModule.CraftInterface.GetInteriorWorld().id, false);
 		RocketControlStationLaunchWorkable rocketControlStationLaunchWorkable = null;
 		if (worldItems != null && worldItems.Count > 0)
 		{
 			rocketControlStationLaunchWorkable = worldItems[0].GetComponent<RocketControlStationLaunchWorkable>();
 		}
-		if (component == null || rocketControlStationLaunchWorkable == null)
+		if (passengerModule == null || rocketControlStationLaunchWorkable == null || robotPilotModule == null)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.STILL_PREPPING;
 			return;
 		}
-		bool flag5 = component.CheckPassengersBoarded();
-		bool flag6 = !component.CheckExtraPassengers();
-		bool flag7 = rocketControlStationLaunchWorkable.worker != null;
-		bool flag8 = this.rocketModule.CraftInterface.HasTag(GameTags.RocketNotOnGround);
+		bool flag6 = passengerModule.CheckPassengersBoarded(robotPilotModule == null);
+		if (!flag6 && robotPilotModule != null)
+		{
+			flag6 |= !passengerModule.HasCrewAssigned();
+		}
+		bool flag7 = !passengerModule.CheckExtraPassengers();
+		bool flag8 = robotPilotModule != null || rocketControlStationLaunchWorkable.worker != null;
 		if (!flag4)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.STILL_PREPPING;
@@ -167,22 +194,22 @@ public class LaunchButtonSideScreen : SideScreenContent
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.READY_FOR_LAUNCH;
 			return;
 		}
-		if (!flag5)
+		if (!flag6)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.LOADING_CREW;
 			return;
 		}
-		if (!flag6)
+		if (!flag7)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.UNLOADING_PASSENGERS;
 			return;
 		}
-		if (!flag7)
+		if (!flag8)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.WAITING_FOR_PILOT;
 			return;
 		}
-		if (!flag8)
+		if (!flag5)
 		{
 			this.statusText.text = UI.UISIDESCREENS.LAUNCHPADSIDESCREEN.STATUS.COUNTING_DOWN;
 			return;

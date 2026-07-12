@@ -75,7 +75,7 @@ public static class SerializableOutfitData
 			{
 				string text;
 				string[] array;
-				keyValuePair.Deconstruct<string, string[]>(out text, out array);
+				keyValuePair.Deconstruct(out text, out array);
 				string text2 = text;
 				string[] array2 = array;
 				dictionary.Add(text2, new SerializableOutfitData.Version2.CustomTemplateOutfitEntry
@@ -89,7 +89,7 @@ public static class SerializableOutfitData
 			{
 				string text;
 				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary3;
-				keyValuePair2.Deconstruct<string, Dictionary<ClothingOutfitUtility.OutfitType, string>>(out text, out dictionary3);
+				keyValuePair2.Deconstruct(out text, out dictionary3);
 				string text3 = text;
 				Dictionary<ClothingOutfitUtility.OutfitType, string> dictionary4 = dictionary3;
 				Dictionary<string, string> dictionary5 = new Dictionary<string, string>();
@@ -97,7 +97,7 @@ public static class SerializableOutfitData
 				foreach (KeyValuePair<ClothingOutfitUtility.OutfitType, string> keyValuePair3 in dictionary4)
 				{
 					ClothingOutfitUtility.OutfitType outfitType;
-					keyValuePair3.Deconstruct<ClothingOutfitUtility.OutfitType, string>(out outfitType, out text);
+					keyValuePair3.Deconstruct(out outfitType, out text);
 					ClothingOutfitUtility.OutfitType outfitType2 = outfitType;
 					string text4 = text;
 					dictionary5.Add(Enum.GetName(typeof(ClothingOutfitUtility.OutfitType), outfitType2), text4);

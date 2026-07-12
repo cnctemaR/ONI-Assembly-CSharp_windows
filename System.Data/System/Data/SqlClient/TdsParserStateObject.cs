@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -324,7 +326,7 @@ namespace System.Data.SqlClient
 
 		internal abstract bool IsPacketEmpty(object readPacket);
 
-		internal abstract object ReadSyncOverAsync(int timeoutRemaining, bool isMarsOn, out uint error);
+		internal abstract object ReadSyncOverAsync(int timeoutRemaining, out uint error);
 
 		internal abstract object ReadAsync(out uint error, ref object handle);
 
@@ -611,17 +613,17 @@ namespace System.Data.SqlClient
 						int num = this._inBytesRead - this._inBytesUsed;
 						if (inBuff.Length < this._inBytesUsed + num || this._inBuff.Length < num)
 						{
-							throw SQL.InvalidInternalPacketSize(string.Concat(new object[]
+							throw SQL.InvalidInternalPacketSize(string.Concat(new string[]
 							{
 								SR.GetString("Invalid internal packet size:"),
 								" ",
-								inBuff.Length,
+								inBuff.Length.ToString(),
 								", ",
-								this._inBytesUsed,
+								this._inBytesUsed.ToString(),
 								", ",
-								num,
+								num.ToString(),
 								", ",
-								this._inBuff.Length
+								this._inBuff.Length.ToString()
 							}));
 						}
 						Buffer.BlockCopy(inBuff, this._inBytesUsed, this._inBuff, 0, num);
@@ -1166,7 +1168,7 @@ namespace System.Data.SqlClient
 				Interlocked.Increment(ref this._readingCount);
 				flag = true;
 				uint num;
-				obj = this.ReadSyncOverAsync(this.GetTimeoutRemaining(), false, out num);
+				obj = this.ReadSyncOverAsync(this.GetTimeoutRemaining(), out num);
 				Interlocked.Decrement(ref this._readingCount);
 				flag = false;
 				if (this._parser.MARSOn)
@@ -1307,7 +1309,7 @@ namespace System.Data.SqlClient
 			{
 				if (this._networkPacketTimeout == null)
 				{
-					this._networkPacketTimeout = new Timer(new TimerCallback(this.OnTimeout), null, -1, -1);
+					this._networkPacketTimeout = ADP.UnsafeCreateTimer(new TimerCallback(this.OnTimeout), null, -1, -1);
 				}
 				int timeoutRemaining = this.GetTimeoutRemaining();
 				if (timeoutRemaining > 0)
@@ -1449,7 +1451,7 @@ namespace System.Data.SqlClient
 							{
 								Interlocked.Increment(ref this._readingCount);
 								flag2 = true;
-								obj = this.ReadSyncOverAsync(stateObj.GetTimeoutRemaining(), this._parser.MARSOn, out error);
+								obj = this.ReadSyncOverAsync(stateObj.GetTimeoutRemaining(), out error);
 								Interlocked.Decrement(ref this._readingCount);
 								flag2 = false;
 								if (error == 0U)
@@ -1458,7 +1460,7 @@ namespace System.Data.SqlClient
 									return;
 								}
 								flag = true;
-								goto IL_013D;
+								goto IL_0132;
 							}
 							finally
 							{
@@ -1486,7 +1488,7 @@ namespace System.Data.SqlClient
 						}
 					}
 				}
-				IL_013D:
+				IL_0132:
 				if (flag)
 				{
 					this._parser.State = TdsParserState.Broken;
@@ -1549,6 +1551,32 @@ namespace System.Data.SqlClient
 				}
 				catch (ObjectDisposedException)
 				{
+				}
+			}
+		}
+
+		private void SetBufferSecureStrings()
+		{
+			if (this._securePasswords != null)
+			{
+				for (int i = 0; i < this._securePasswords.Length; i++)
+				{
+					if (this._securePasswords[i] != null)
+					{
+						IntPtr intPtr = IntPtr.Zero;
+						try
+						{
+							intPtr = Marshal.SecureStringToBSTR(this._securePasswords[i]);
+							byte[] array = new byte[this._securePasswords[i].Length * 2];
+							Marshal.Copy(intPtr, array, 0, this._securePasswords[i].Length * 2);
+							TdsParserStaticMethods.ObfuscatePassword(array);
+							array.CopyTo(this._outBuff, this._securePasswordOffsetsInBuffer[i]);
+						}
+						finally
+						{
+							Marshal.ZeroFreeBSTR(intPtr);
+						}
+					}
 				}
 			}
 		}
@@ -1701,6 +1729,24 @@ namespace System.Data.SqlClient
 			if (this._asyncWriteCount == 0 && writeCompletionSource != null)
 			{
 				writeCompletionSource.TrySetResult(null);
+			}
+		}
+
+		internal void WriteSecureString(SecureString secureString)
+		{
+			int num = ((this._securePasswords[0] != null) ? 1 : 0);
+			this._securePasswords[num] = secureString;
+			this._securePasswordOffsetsInBuffer[num] = this._outBytesUsed;
+			int num2 = secureString.Length * 2;
+			this._outBytesUsed += num2;
+		}
+
+		internal void ResetSecurePasswordsInformation()
+		{
+			for (int i = 0; i < this._securePasswords.Length; i++)
+			{
+				this._securePasswords[i] = null;
+				this._securePasswordOffsetsInBuffer[i] = 0;
 			}
 		}
 
@@ -2007,6 +2053,7 @@ namespace System.Data.SqlClient
 		private Task WriteSni(bool canAccumulate)
 		{
 			object resetWritePacket = this.GetResetWritePacket();
+			this.SetBufferSecureStrings();
 			this.SetPacketData(resetWritePacket, this._outBuff, this._outBytesUsed);
 			uint num;
 			Task task = this.SNIWritePacket(resetWritePacket, out num, canAccumulate, true);
@@ -2298,6 +2345,10 @@ namespace System.Data.SqlClient
 		internal bool _internalTimeout;
 
 		private readonly LastIOTimer _lastSuccessfulIOTimer;
+
+		private SecureString[] _securePasswords = new SecureString[2];
+
+		private int[] _securePasswordOffsetsInBuffer = new int[2];
 
 		private bool _cancelled;
 

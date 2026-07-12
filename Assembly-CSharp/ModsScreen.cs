@@ -175,17 +175,14 @@ public class ModsScreen : KModalScreen
 
 	private static string GetDlcName(string dlcId)
 	{
-		if (dlcId != null)
+		if (!(dlcId == "EXPANSION1_ID"))
 		{
-			if (dlcId == "EXPANSION1_ID")
-			{
-				return UI.DLC1.NAME_ITAL;
-			}
-			if (dlcId != null && dlcId.Length != 0)
+			if ((dlcId == null || dlcId.Length != 0) && dlcId != null)
 			{
 			}
+			return UI.VANILLA.NAME_ITAL;
 		}
-		return UI.VANILLA.NAME_ITAL;
+		return UI.DLC1.NAME_ITAL;
 	}
 
 	private void OnToggleClicked(MultiToggle toggle, Label mod)

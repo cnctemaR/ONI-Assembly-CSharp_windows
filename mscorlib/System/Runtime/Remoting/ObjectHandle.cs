@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting
 {
-	[ClassInterface(ClassInterfaceType.AutoDual)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDual)]
 	public class ObjectHandle : MarshalByRefObject, IObjectHandle
 	{
 		public ObjectHandle(object o)

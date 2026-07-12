@@ -120,8 +120,8 @@ namespace System.Threading
 			}
 		}
 
-		[SecurityCritical]
 		[HandleProcessCorruptedStateExceptions]
+		[SecurityCritical]
 		internal static void OnAsyncLocalContextChanged(ExecutionContext previous, ExecutionContext current)
 		{
 			List<IAsyncLocal> list = ((previous == null) ? null : previous._localChangeNotifications);
@@ -255,11 +255,16 @@ namespace System.Threading
 			ExecutionContext.Run(executionContext, callback, state, false);
 		}
 
-		[FriendAccessAllowed]
 		[SecurityCritical]
+		[FriendAccessAllowed]
 		internal static void Run(ExecutionContext executionContext, ContextCallback callback, object state, bool preserveSyncCtx)
 		{
 			ExecutionContext.RunInternal(executionContext, callback, state, preserveSyncCtx);
+		}
+
+		internal static void RunInternal(ExecutionContext executionContext, ContextCallback callback, object state)
+		{
+			ExecutionContext.RunInternal(executionContext, callback, state, false);
 		}
 
 		[SecurityCritical]
@@ -289,6 +294,45 @@ namespace System.Threading
 					executionContextSwitcher = ExecutionContext.SetExecutionContext(executionContext, preserveSyncCtx);
 				}
 				callback(state);
+			}
+			finally
+			{
+				executionContextSwitcher.Undo();
+			}
+		}
+
+		internal static void RunInternal<TState>(ExecutionContext executionContext, ContextCallback<TState> callback, ref TState state)
+		{
+			ExecutionContext.RunInternal<TState>(executionContext, callback, ref state, false);
+		}
+
+		[SecurityCritical]
+		[HandleProcessCorruptedStateExceptions]
+		internal static void RunInternal<TState>(ExecutionContext executionContext, ContextCallback<TState> callback, ref TState state, bool preserveSyncCtx)
+		{
+			if (!executionContext.IsPreAllocatedDefault)
+			{
+				executionContext.isNewCapture = false;
+			}
+			Thread currentThread = Thread.CurrentThread;
+			ExecutionContextSwitcher executionContextSwitcher = default(ExecutionContextSwitcher);
+			RuntimeHelpers.PrepareConstrainedRegions();
+			try
+			{
+				ExecutionContext.Reader executionContextReader = currentThread.GetExecutionContextReader();
+				if ((executionContextReader.IsNull || executionContextReader.IsDefaultFTContext(preserveSyncCtx)) && executionContext.IsDefaultFTContext(preserveSyncCtx) && executionContextReader.HasSameLocalValues(executionContext))
+				{
+					ExecutionContext.EstablishCopyOnWriteScope(currentThread, true, ref executionContextSwitcher);
+				}
+				else
+				{
+					if (executionContext.IsPreAllocatedDefault)
+					{
+						executionContext = new ExecutionContext();
+					}
+					executionContextSwitcher = ExecutionContext.SetExecutionContext(executionContext, preserveSyncCtx);
+				}
+				callback(ref state);
 			}
 			finally
 			{
@@ -416,8 +460,8 @@ namespace System.Threading
 			return ExecutionContext.Capture(ref stackCrawlMark, ExecutionContext.CaptureOptions.None);
 		}
 
-		[SecuritySafeCritical]
 		[FriendAccessAllowed]
+		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal static ExecutionContext FastCapture()
 		{
@@ -515,6 +559,8 @@ namespace System.Threading
 		private List<IAsyncLocal> _localChangeNotifications;
 
 		private static readonly ExecutionContext s_dummyDefaultEC = new ExecutionContext(true);
+
+		internal static readonly ExecutionContext Default = new ExecutionContext();
 
 		private enum Flags
 		{

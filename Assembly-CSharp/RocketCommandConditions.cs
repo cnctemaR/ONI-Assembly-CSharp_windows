@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class RocketCommandConditions : KMonoBehaviour
+public class RocketCommandConditions : CommandConditions
 {
 	protected override void OnSpawn()
 	{
@@ -34,8 +34,6 @@ public class RocketCommandConditions : KMonoBehaviour
 		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddModuleCondition(ProcessCondition.ProcessConditionType.RocketFlight, new ConditionFlightPathIsClear(base.gameObject, num));
 	}
 
-	public ConditionDestinationReachable reachable;
-
 	public ConditionHasAstronaut hasAstronaut;
 
 	public ConditionPilotOnBoard pilotOnBoard;
@@ -46,21 +44,5 @@ public class RocketCommandConditions : KMonoBehaviour
 
 	public ConditionHasAtmoSuit hasSuit;
 
-	public CargoBayIsEmpty cargoEmpty;
-
-	public ConditionHasMinimumMass destHasResources;
-
-	public ConditionAllModulesComplete allModulesComplete;
-
 	public ConditionHasControlStation hasControlStation;
-
-	public ConditionHasCargoBayForNoseconeHarvest HasCargoBayForNoseconeHarvest;
-
-	public ConditionHasEngine hasEngine;
-
-	public ConditionHasNosecone hasNosecone;
-
-	public ConditionOnLaunchPad onLaunchPad;
-
-	public ConditionFlightPathIsClear flightPathIsClear;
 }

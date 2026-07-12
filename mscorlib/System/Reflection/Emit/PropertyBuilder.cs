@@ -5,12 +5,32 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_PropertyBuilder))]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class PropertyBuilder : PropertyInfo, _PropertyBuilder
 	{
+		void _PropertyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _PropertyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal PropertyBuilder(TypeBuilder tb, string name, PropertyAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] returnModReq, Type[] returnModOpt, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
 		{
 			this.name = name;
@@ -27,7 +47,7 @@ namespace System.Reflection.Emit
 				Array.Copy(parameterTypes, this.parameters, this.parameters.Length);
 			}
 			this.typeb = tb;
-			this.table_idx = tb.get_next_table_index(this, 23, true);
+			this.table_idx = tb.get_next_table_index(this, 23, 1);
 		}
 
 		public override PropertyAttributes Attributes
@@ -197,26 +217,6 @@ namespace System.Reflection.Emit
 			{
 				return base.Module;
 			}
-		}
-
-		void _PropertyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _PropertyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		private Exception not_supported()

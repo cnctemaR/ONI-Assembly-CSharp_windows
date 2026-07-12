@@ -8,8 +8,9 @@ namespace UnityEngine
 {
 	[NativeHeader("Modules/UI/UIStructs.h")]
 	[NativeHeader("Modules/UI/Canvas.h")]
-	[RequireComponent(typeof(RectTransform))]
+	[NativeHeader("Modules/UI/CanvasManager.h")]
 	[NativeClass("UI::Canvas")]
+	[RequireComponent(typeof(RectTransform))]
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -59,6 +60,14 @@ namespace UnityEngine
 		}
 
 		public extern bool overridePixelPerfect
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern bool vertexColorAlwaysGammaSpace
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -158,6 +167,24 @@ namespace UnityEngine
 			}
 		}
 
+		public extern StandaloneRenderResize updateRectTransformForStandalone
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		internal static Action<int> externBeginRenderOverlays { get; set; }
+
+		internal static Action<int, int> externRenderOverlaysBefore { get; set; }
+
+		internal static Action<int> externEndRenderOverlays { get; set; }
+
+		[FreeFunction("UI::CanvasManager::SetExternalCanvasEnabled")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SetExternalCanvasEnabled(bool enabled);
+
 		[NativeProperty("Camera", false, TargetType.Function)]
 		public extern Camera worldCamera
 		{
@@ -176,8 +203,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("Setting normalizedSize via a int is not supported. Please use normalizedSortingGridSize", false)]
 		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
+		[Obsolete("Setting normalizedSize via a int is not supported. Please use normalizedSortingGridSize", false)]
 		public extern int sortingGridNormalizedSize
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -186,8 +213,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
 		[FreeFunction("UI::GetDefaultUIMaterial")]
+		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Material GetDefaultCanvasTextMaterial();
 
@@ -225,6 +252,36 @@ namespace UnityEngine
 			if (willRenderCanvases != null)
 			{
 				willRenderCanvases();
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void BeginRenderExtraOverlays(int displayIndex)
+		{
+			Action<int> externBeginRenderOverlays = Canvas.externBeginRenderOverlays;
+			if (externBeginRenderOverlays != null)
+			{
+				externBeginRenderOverlays(displayIndex);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void RenderExtraOverlaysBefore(int displayIndex, int sortingOrder)
+		{
+			Action<int, int> externRenderOverlaysBefore = Canvas.externRenderOverlaysBefore;
+			if (externRenderOverlaysBefore != null)
+			{
+				externRenderOverlaysBefore(displayIndex, sortingOrder);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void EndRenderExtraOverlays(int displayIndex)
+		{
+			Action<int> externEndRenderOverlays = Canvas.externEndRenderOverlays;
+			if (externEndRenderOverlays != null)
+			{
+				externEndRenderOverlays(displayIndex);
 			}
 		}
 

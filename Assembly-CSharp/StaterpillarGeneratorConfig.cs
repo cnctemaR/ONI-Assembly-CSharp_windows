@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class StaterpillarGeneratorConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -26,7 +26,7 @@ public class StaterpillarGeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 1600f;
-		buildingDef.GeneratorBaseCapacity = 5000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.Overheatable = false;

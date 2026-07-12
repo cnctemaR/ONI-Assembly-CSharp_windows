@@ -22,18 +22,9 @@ namespace System.Net
 		public bool KeepAlive { get; private set; }
 
 		public WebResponseStream(WebRequestStream request)
-			: base(request.Connection, request.Operation, request.InnerStream)
+			: base(request.Connection, request.Operation)
 		{
 			this.RequestStream = request;
-			request.InnerStream.ReadTimeout = this.ReadTimeout;
-		}
-
-		public override long Length
-		{
-			get
-			{
-				return (long)this.stream_length;
-			}
 		}
 
 		public override bool CanRead
@@ -52,11 +43,9 @@ namespace System.Net
 			}
 		}
 
-		private protected bool ChunkedRead { protected get; private set; }
+		private bool ChunkedRead { get; set; }
 
-		private protected MonoChunkStream ChunkStream { protected get; private set; }
-
-		public override async Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+		public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			if (buffer == null)
@@ -68,9 +57,9 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset");
 			}
-			if (size < 0 || num - offset < size)
+			if (count < 0 || num - offset < count)
 			{
-				throw new ArgumentOutOfRangeException("size");
+				throw new ArgumentOutOfRangeException("count");
 			}
 			if (Interlocked.CompareExchange(ref this.nestedRead, 1, 0) != 0)
 			{
@@ -84,20 +73,13 @@ namespace System.Net
 				{
 					break;
 				}
-				await webCompletionSource.WaitForCompletion(true).ConfigureAwait(false);
+				await webCompletionSource.WaitForCompletion().ConfigureAwait(false);
 			}
-			int oldBytes = 0;
 			int nbytes = 0;
 			Exception throwMe = null;
 			try
 			{
-				ValueTuple<int, int> valueTuple = await HttpWebRequest.RunWithTimeout<ValueTuple<int, int>>((CancellationToken ct) => this.ProcessRead(buffer, offset, size, ct), this.ReadTimeout, delegate
-				{
-					this.Operation.Abort();
-					this.InnerStream.Dispose();
-				}).ConfigureAwait(false);
-				oldBytes = valueTuple.Item1;
-				nbytes = valueTuple.Item2;
+				nbytes = await this.ProcessRead(buffer, offset, count, cancellationToken).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
@@ -114,165 +96,63 @@ namespace System.Net
 					this.nestedRead = 0;
 				}
 				this.closed = true;
-				base.Operation.CompleteResponseRead(false, throwMe);
+				base.Operation.Finish(false, throwMe);
 				throw throwMe;
 			}
 			obj = this.locker;
 			lock (obj)
 			{
-				this.pendingRead.TrySetCompleted();
+				completion.TrySetCompleted();
 				this.pendingRead = null;
 				this.nestedRead = 0;
 			}
-			if (this.totalRead >= this.contentLength && !this.nextReadCalled && !this.nextReadCalled)
-			{
-				this.nextReadCalled = true;
-				base.Operation.CompleteResponseRead(true, null);
-			}
-			return oldBytes + nbytes;
-		}
-
-		private async Task<ValueTuple<int, int>> ProcessRead(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
-		{
-			cancellationToken.ThrowIfCancellationRequested();
-			ValueTuple<int, int> valueTuple;
-			if (this.totalRead >= this.contentLength)
+			if (nbytes <= 0 && !this.read_eof)
 			{
 				this.read_eof = true;
-				this.contentLength = this.totalRead;
-				valueTuple = new ValueTuple<int, int>(0, 0);
-			}
-			else
-			{
-				int oldBytes = 0;
-				BufferOffsetSize bufferOffsetSize = this.readBuffer;
-				int num = ((bufferOffsetSize != null) ? bufferOffsetSize.Size : 0);
-				if (num > 0)
+				if (!this.nextReadCalled && !this.nextReadCalled)
 				{
-					int num2 = ((num > size) ? size : num);
-					Buffer.BlockCopy(this.readBuffer.Buffer, this.readBuffer.Offset, buffer, offset, num2);
-					this.readBuffer.Offset += num2;
-					this.readBuffer.Size -= num2;
-					offset += num2;
-					size -= num2;
-					this.totalRead += (long)num2;
-					if (this.totalRead >= this.contentLength)
-					{
-						this.contentLength = this.totalRead;
-						this.read_eof = true;
-					}
-					if (size == 0 || this.totalRead >= this.contentLength)
-					{
-						return new ValueTuple<int, int>(0, num2);
-					}
-					oldBytes = num2;
+					this.nextReadCalled = true;
+					base.Operation.Finish(true, null);
 				}
-				if (this.contentLength != 9223372036854775807L && this.contentLength - this.totalRead < (long)size)
-				{
-					size = (int)(this.contentLength - this.totalRead);
-				}
-				if (this.read_eof)
-				{
-					this.contentLength = this.totalRead;
-					valueTuple = new ValueTuple<int, int>(oldBytes, 0);
-				}
-				else
-				{
-					int num3 = await this.InnerReadAsync(buffer, offset, size, cancellationToken).ConfigureAwait(false);
-					if (num3 <= 0)
-					{
-						this.read_eof = true;
-						this.contentLength = this.totalRead;
-						valueTuple = new ValueTuple<int, int>(oldBytes, 0);
-					}
-					else
-					{
-						this.totalRead += (long)num3;
-						valueTuple = new ValueTuple<int, int>(oldBytes, num3);
-					}
-				}
-			}
-			return valueTuple;
-		}
-
-		internal async Task<int> InnerReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
-		{
-			base.Operation.ThrowIfDisposed(cancellationToken);
-			int nbytes = 0;
-			bool done = false;
-			if (!this.ChunkedRead || (!this.ChunkStream.DataAvailable && this.ChunkStream.WantMore))
-			{
-				int num = await base.InnerStream.ReadAsync(buffer, offset, size, cancellationToken).ConfigureAwait(false);
-				nbytes = num;
-				if (!this.ChunkedRead)
-				{
-					return nbytes;
-				}
-				done = nbytes == 0;
-			}
-			try
-			{
-				this.ChunkStream.WriteAndReadBack(buffer, offset, size, ref nbytes);
-				if (!done && nbytes == 0 && this.ChunkStream.WantMore)
-				{
-					int num = await this.EnsureReadAsync(buffer, offset, size, cancellationToken).ConfigureAwait(false);
-					nbytes = num;
-				}
-			}
-			catch (Exception ex)
-			{
-				if (ex is WebException || ex is OperationCanceledException)
-				{
-					throw;
-				}
-				throw new WebException("Invalid chunked data.", ex, WebExceptionStatus.ServerProtocolViolation, null);
-			}
-			if ((done || nbytes == 0) && this.ChunkStream.ChunkLeft != 0)
-			{
-				throw new WebException("Read error", null, WebExceptionStatus.ReceiveFailure, null);
 			}
 			return nbytes;
 		}
 
-		private async Task<int> EnsureReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+		private Task<int> ProcessRead(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
 		{
-			byte[] morebytes = null;
-			int nbytes = 0;
-			while (nbytes == 0 && this.ChunkStream.WantMore && !cancellationToken.IsCancellationRequested)
+			if (this.read_eof)
 			{
-				int num = this.ChunkStream.ChunkLeft;
-				if (num <= 0)
-				{
-					num = 1024;
-				}
-				else if (num > 16384)
-				{
-					num = 16384;
-				}
-				if (morebytes == null || morebytes.Length < num)
-				{
-					morebytes = new byte[num];
-				}
-				int num2 = await base.InnerStream.ReadAsync(morebytes, 0, num, cancellationToken).ConfigureAwait(false);
-				if (num2 <= 0)
-				{
-					return 0;
-				}
-				this.ChunkStream.Write(morebytes, 0, num2);
-				nbytes += this.ChunkStream.Read(buffer, offset + nbytes, size - nbytes);
+				return Task.FromResult<int>(0);
 			}
-			return nbytes;
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<int>(cancellationToken);
+			}
+			return HttpWebRequest.RunWithTimeout<int>((CancellationToken ct) => this.innerStream.ReadAsync(buffer, offset, size, ct), this.ReadTimeout, delegate
+			{
+				this.Operation.Abort();
+				this.innerStream.Dispose();
+			}, () => this.Operation.Aborted, cancellationToken);
+		}
+
+		protected override bool TryReadFromBufferedContent(byte[] buffer, int offset, int count, out int result)
+		{
+			if (this.bufferedEntireContent)
+			{
+				BufferedReadStream bufferedReadStream = this.innerStream as BufferedReadStream;
+				if (bufferedReadStream != null)
+				{
+					return bufferedReadStream.TryReadFromBuffer(buffer, offset, count, out result);
+				}
+			}
+			result = 0;
+			return false;
 		}
 
 		private bool CheckAuthHeader(string headerName)
 		{
 			string text = this.Headers[headerName];
 			return text != null && text.IndexOf("NTLM", StringComparison.Ordinal) != -1;
-		}
-
-		private bool IsNtlmAuth()
-		{
-			return (base.Request.Proxy != null && !base.Request.Proxy.IsBypassed(base.Request.Address) && this.CheckAuthHeader("Proxy-Authenticate")) || this.CheckAuthHeader("WWW-Authenticate");
 		}
 
 		private bool ExpectContent
@@ -283,209 +163,186 @@ namespace System.Net
 			}
 		}
 
-		private async Task Initialize(BufferOffsetSize buffer, CancellationToken cancellationToken)
+		private void Initialize(BufferOffsetSize buffer)
 		{
 			string text = this.Headers["Transfer-Encoding"];
 			bool flag = text != null && text.IndexOf("chunked", StringComparison.OrdinalIgnoreCase) != -1;
 			string text2 = this.Headers["Content-Length"];
+			long num;
 			if (!flag && !string.IsNullOrEmpty(text2))
 			{
-				if (!long.TryParse(text2, out this.contentLength))
+				if (!long.TryParse(text2, out num))
 				{
-					this.contentLength = long.MaxValue;
+					num = long.MaxValue;
 				}
 			}
 			else
 			{
-				this.contentLength = long.MaxValue;
+				num = long.MaxValue;
 			}
+			string text3 = null;
+			if (this.ExpectContent)
+			{
+				text3 = this.Headers["Transfer-Encoding"];
+			}
+			this.ChunkedRead = text3 != null && text3.IndexOf("chunked", StringComparison.OrdinalIgnoreCase) != -1;
 			if (this.Version == HttpVersion.Version11 && this.RequestStream.KeepAlive)
 			{
 				this.KeepAlive = true;
-				string text3 = this.Headers[base.ServicePoint.UsesProxy ? "Proxy-Connection" : "Connection"];
-				if (text3 != null)
+				string text4 = this.Headers[base.ServicePoint.UsesProxy ? "Proxy-Connection" : "Connection"];
+				if (text4 != null)
 				{
-					text3 = text3.ToLower();
-					this.KeepAlive = text3.IndexOf("keep-alive", StringComparison.Ordinal) != -1;
-					if (text3.IndexOf("close", StringComparison.Ordinal) != -1)
+					text4 = text4.ToLower();
+					this.KeepAlive = text4.IndexOf("keep-alive", StringComparison.Ordinal) != -1;
+					if (text4.IndexOf("close", StringComparison.Ordinal) != -1)
 					{
 						this.KeepAlive = false;
 					}
 				}
-			}
-			if (!int.TryParse(text2, out this.stream_length))
-			{
-				this.stream_length = -1;
-			}
-			string me = "WebResponseStream.Initialize()";
-			string text4 = null;
-			if (this.ExpectContent)
-			{
-				text4 = this.Headers["Transfer-Encoding"];
-			}
-			this.ChunkedRead = text4 != null && text4.IndexOf("chunked", StringComparison.OrdinalIgnoreCase) != -1;
-			if (!this.ChunkedRead)
-			{
-				this.readBuffer = buffer;
-				try
+				if (!this.ChunkedRead && num == 9223372036854775807L)
 				{
-					if (this.contentLength > 0L && (long)this.readBuffer.Size >= this.contentLength && !this.IsNtlmAuth())
-					{
-						await this.ReadAllAsync(false, cancellationToken).ConfigureAwait(false);
-					}
-					goto IL_02DD;
-				}
-				catch (Exception ex)
-				{
-					throw this.GetReadException(WebExceptionStatus.ReceiveFailure, ex, me);
+					this.KeepAlive = false;
 				}
 			}
-			if (this.ChunkStream == null)
+			Stream stream;
+			if (!this.ExpectContent || (!this.ChunkedRead && (long)buffer.Size >= num))
 			{
-				try
+				this.bufferedEntireContent = true;
+				this.innerStream = new BufferedReadStream(base.Operation, null, buffer);
+				stream = this.innerStream;
+			}
+			else if (buffer.Size > 0)
+			{
+				stream = new BufferedReadStream(base.Operation, this.RequestStream.InnerStream, buffer);
+			}
+			else
+			{
+				stream = this.RequestStream.InnerStream;
+			}
+			if (this.ChunkedRead)
+			{
+				this.innerStream = new MonoChunkStream(base.Operation, stream, this.Headers);
+			}
+			else if (!this.bufferedEntireContent)
+			{
+				if (num != 9223372036854775807L)
 				{
-					this.ChunkStream = new MonoChunkStream(buffer.Buffer, buffer.Offset, buffer.Offset + buffer.Size, this.Headers);
-					goto IL_02DD;
+					this.innerStream = new FixedSizeReadStream(base.Operation, stream, num);
 				}
-				catch (Exception ex2)
+				else
 				{
-					throw this.GetReadException(WebExceptionStatus.ServerProtocolViolation, ex2, me);
+					this.innerStream = new BufferedReadStream(base.Operation, stream, null);
 				}
 			}
-			this.ChunkStream.ResetBuffer();
-			try
+			string text5 = this.Headers["Content-Encoding"];
+			if (text5 == "gzip" && (base.Request.AutomaticDecompression & DecompressionMethods.GZip) != DecompressionMethods.None)
 			{
-				this.ChunkStream.Write(buffer.Buffer, buffer.Offset, buffer.Size);
+				this.innerStream = ContentDecodeStream.Create(base.Operation, this.innerStream, ContentDecodeStream.Mode.GZip);
+				this.Headers.Remove(HttpRequestHeader.ContentEncoding);
 			}
-			catch (Exception ex3)
+			else if (text5 == "deflate" && (base.Request.AutomaticDecompression & DecompressionMethods.Deflate) != DecompressionMethods.None)
 			{
-				throw this.GetReadException(WebExceptionStatus.ServerProtocolViolation, ex3, me);
+				this.innerStream = ContentDecodeStream.Create(base.Operation, this.innerStream, ContentDecodeStream.Mode.Deflate);
+				this.Headers.Remove(HttpRequestHeader.ContentEncoding);
 			}
-			IL_02DD:
 			if (!this.ExpectContent)
 			{
-				if (!this.closed && !this.nextReadCalled)
-				{
-					if (this.contentLength == 9223372036854775807L)
-					{
-						this.contentLength = 0L;
-					}
-					this.nextReadCalled = true;
-				}
-				base.Operation.CompleteResponseRead(true, null);
+				this.nextReadCalled = true;
+				base.Operation.Finish(true, null);
 			}
+		}
+
+		private async Task<byte[]> ReadAllAsyncInner(CancellationToken cancellationToken)
+		{
+			long maximumSize = (long)HttpWebRequest.DefaultMaximumErrorResponseLength << 16;
+			byte[] array;
+			using (MemoryStream ms = new MemoryStream())
+			{
+				while (ms.Position < maximumSize)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					byte[] buffer = new byte[16384];
+					int num = await this.ProcessRead(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+					if (num < 0)
+					{
+						throw new IOException();
+					}
+					if (num == 0)
+					{
+						break;
+					}
+					ms.Write(buffer, 0, num);
+					buffer = null;
+				}
+				array = ms.ToArray();
+			}
+			return array;
 		}
 
 		internal async Task ReadAllAsync(bool resending, CancellationToken cancellationToken)
 		{
-			if (this.read_eof || this.totalRead >= this.contentLength || this.nextReadCalled)
+			if (this.read_eof || this.bufferedEntireContent || this.nextReadCalled)
 			{
 				if (!this.nextReadCalled)
 				{
 					this.nextReadCalled = true;
-					base.Operation.CompleteResponseRead(true, null);
+					base.Operation.Finish(true, null);
 				}
 			}
 			else
 			{
-				Task timeoutTask = Task.Delay(this.ReadTimeout);
 				WebCompletionSource completion = new WebCompletionSource();
-				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter;
-				do
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-					WebCompletionSource webCompletionSource = Interlocked.CompareExchange<WebCompletionSource>(ref this.pendingRead, completion, null);
-					if (webCompletionSource == null)
-					{
-						goto IL_0136;
-					}
-					Task<bool> task = webCompletionSource.WaitForCompletion(true);
-					configuredTaskAwaiter = Task.WhenAny(new Task[] { task, timeoutTask }).ConfigureAwait(false).GetAwaiter();
-					if (!configuredTaskAwaiter.IsCompleted)
-					{
-						await configuredTaskAwaiter;
-						ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-						configuredTaskAwaiter = configuredTaskAwaiter2;
-						configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
-					}
-				}
-				while (configuredTaskAwaiter.GetResult() != timeoutTask);
-				throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
-				IL_0136:
-				cancellationToken.ThrowIfCancellationRequested();
+				CancellationTokenSource timeoutCts = new CancellationTokenSource();
 				try
 				{
-					if (this.totalRead >= this.contentLength)
+					Task timeoutTask = Task.Delay(this.ReadTimeout, timeoutCts.Token);
+					ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter;
+					do
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						WebCompletionSource webCompletionSource = Interlocked.CompareExchange<WebCompletionSource>(ref this.pendingRead, completion, null);
+						if (webCompletionSource == null)
+						{
+							goto IL_0147;
+						}
+						Task<object> task = webCompletionSource.WaitForCompletion();
+						configuredTaskAwaiter = Task.WhenAny(new Task[] { task, timeoutTask }).ConfigureAwait(false).GetAwaiter();
+						if (!configuredTaskAwaiter.IsCompleted)
+						{
+							await configuredTaskAwaiter;
+							ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
+							configuredTaskAwaiter = configuredTaskAwaiter2;
+							configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
+						}
+					}
+					while (configuredTaskAwaiter.GetResult() != timeoutTask);
+					throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
+					IL_0147:
+					timeoutTask = null;
+				}
+				finally
+				{
+					timeoutCts.Cancel();
+					timeoutCts.Dispose();
+				}
+				try
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					if (this.read_eof || this.bufferedEntireContent)
 					{
 						return;
 					}
-					byte[] b = null;
-					if (this.contentLength == 9223372036854775807L && !this.ChunkedRead)
+					if (resending && !this.KeepAlive)
 					{
-						if (resending)
-						{
-							this.Close();
-							return;
-						}
-						this.KeepAlive = false;
+						this.Close();
+						return;
 					}
-					if (this.contentLength == 9223372036854775807L)
-					{
-						MemoryStream ms = new MemoryStream();
-						BufferOffsetSize buffer = null;
-						if (this.readBuffer != null && this.readBuffer.Size > 0)
-						{
-							ms.Write(this.readBuffer.Buffer, this.readBuffer.Offset, this.readBuffer.Size);
-							this.readBuffer.Offset = 0;
-							this.readBuffer.Size = this.readBuffer.Buffer.Length;
-							if (this.readBuffer.Buffer.Length >= 8192)
-							{
-								buffer = this.readBuffer;
-							}
-						}
-						if (buffer == null)
-						{
-							buffer = new BufferOffsetSize(new byte[8192], false);
-						}
-						int read;
-						while ((read = await this.InnerReadAsync(buffer.Buffer, buffer.Offset, buffer.Size, cancellationToken)) != 0)
-						{
-							ms.Write(buffer.Buffer, buffer.Offset, read);
-						}
-						int new_size = (int)ms.Length;
-						this.contentLength = (long)new_size;
-						this.readBuffer = new BufferOffsetSize(ms.GetBuffer(), 0, new_size, false);
-						ms = null;
-						buffer = null;
-					}
-					else
-					{
-						int new_size = (int)(this.contentLength - this.totalRead);
-						b = new byte[new_size];
-						int readSize = 0;
-						if (this.readBuffer != null && this.readBuffer.Size > 0)
-						{
-							readSize = this.readBuffer.Size;
-							if (readSize > new_size)
-							{
-								readSize = new_size;
-							}
-							Buffer.BlockCopy(this.readBuffer.Buffer, this.readBuffer.Offset, b, 0, readSize);
-						}
-						int remaining = new_size - readSize;
-						int num = -1;
-						while (remaining > 0 && num != 0)
-						{
-							num = await this.InnerReadAsync(b, readSize, remaining, cancellationToken);
-							remaining -= num;
-							readSize += num;
-						}
-						this.readBuffer = new BufferOffsetSize(b, 0, new_size, false);
-					}
-					this.totalRead = 0L;
+					byte[] array = await this.ReadAllAsyncInner(cancellationToken).ConfigureAwait(false);
+					BufferOffsetSize bufferOffsetSize = new BufferOffsetSize(array, 0, array.Length, false);
+					this.innerStream = new BufferedReadStream(base.Operation, null, bufferOffsetSize);
+					this.bufferedEntireContent = true;
 					this.nextReadCalled = true;
 					completion.TrySetCompleted();
-					b = null;
 				}
 				catch (Exception ex)
 				{
@@ -496,11 +353,11 @@ namespace System.Net
 				{
 					this.pendingRead = null;
 				}
-				base.Operation.CompleteResponseRead(true, null);
+				base.Operation.Finish(true, null);
 			}
 		}
 
-		public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			return Task.FromException(new NotSupportedException("The stream does not support writing."));
 		}
@@ -510,15 +367,21 @@ namespace System.Net
 			if (!this.closed && !this.nextReadCalled)
 			{
 				this.nextReadCalled = true;
-				if (this.totalRead >= this.contentLength)
+				if (this.read_eof || this.bufferedEntireContent)
 				{
 					disposed = true;
-					base.Operation.CompleteResponseRead(true, null);
+					WebReadStream webReadStream = this.innerStream;
+					if (webReadStream != null)
+					{
+						webReadStream.Dispose();
+					}
+					this.innerStream = null;
+					base.Operation.Finish(true, null);
 					return;
 				}
 				this.closed = true;
 				disposed = true;
-				base.Operation.CompleteResponseRead(false, null);
+				base.Operation.Finish(false, null);
 			}
 		}
 
@@ -530,8 +393,8 @@ namespace System.Net
 			{
 				return new WebException(string.Format("Error getting response stream ({0}): {1}", where, status), status);
 			}
-			WebException ex;
-			if ((ex = error as WebException) != null)
+			WebException ex = error as WebException;
+			if (ex != null)
 			{
 				return ex;
 			}
@@ -550,7 +413,7 @@ namespace System.Net
 			for (;;)
 			{
 				base.Operation.ThrowIfClosedOrDisposed(cancellationToken);
-				int num = await base.InnerStream.ReadAsync(buffer.Buffer, buffer.Offset, buffer.Size, cancellationToken).ConfigureAwait(false);
+				int num = await this.RequestStream.InnerStream.ReadAsync(buffer.Buffer, buffer.Offset, buffer.Size, cancellationToken).ConfigureAwait(false);
 				if (num == 0)
 				{
 					break;
@@ -604,8 +467,7 @@ namespace System.Net
 			buffer.Offset = position;
 			try
 			{
-				base.Operation.ThrowIfDisposed(cancellationToken);
-				await this.Initialize(buffer, cancellationToken).ConfigureAwait(false);
+				this.Initialize(buffer);
 			}
 			catch (Exception ex2)
 			{
@@ -622,7 +484,7 @@ namespace System.Net
 			{
 				if (state != ReadState.None)
 				{
-					goto IL_00FA;
+					goto IL_00F2;
 				}
 				if (!WebConnection.ReadLine(buffer.Buffer, ref pos, buffer.Offset, ref text))
 				{
@@ -636,7 +498,7 @@ namespace System.Net
 				{
 					flag2 = false;
 					state = ReadState.Status;
-					string[] array = text.Split(new char[] { ' ' });
+					string[] array = text.Split(' ', StringSplitOptions.None);
 					if (array.Length < 2)
 					{
 						throw this.GetReadException(WebExceptionStatus.ServerProtocolViolation, null, "GetResponse");
@@ -664,19 +526,19 @@ namespace System.Net
 					{
 						return true;
 					}
-					goto IL_00FA;
+					goto IL_00F2;
 				}
-				IL_0287:
+				IL_027F:
 				if (!flag2 && !flag)
 				{
 					throw this.GetReadException(WebExceptionStatus.ServerProtocolViolation, null, "GetResponse");
 				}
 				continue;
-				IL_00FA:
+				IL_00F2:
 				flag2 = false;
 				if (state != ReadState.Status)
 				{
-					goto IL_0287;
+					goto IL_027F;
 				}
 				state = ReadState.Headers;
 				this.Headers = new WebHeaderCollection();
@@ -742,20 +604,16 @@ namespace System.Net
 				}
 				state = ReadState.None;
 				flag = true;
-				goto IL_0287;
+				goto IL_027F;
 			}
 			throw this.GetReadException(WebExceptionStatus.RequestCanceled, null, "GetResponse");
 		}
 
-		private BufferOffsetSize readBuffer;
-
-		private long contentLength;
-
-		private long totalRead;
+		private WebReadStream innerStream;
 
 		private bool nextReadCalled;
 
-		private int stream_length;
+		private bool bufferedEntireContent;
 
 		private WebCompletionSource pendingRead;
 

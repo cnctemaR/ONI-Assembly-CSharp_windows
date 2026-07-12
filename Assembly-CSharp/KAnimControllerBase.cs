@@ -670,7 +670,10 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	public void AddAnimOverrides(KAnimFile kanim_file, float priority = 0f)
 	{
-		global::Debug.Assert(kanim_file != null);
+		if (kanim_file == null)
+		{
+			global::Debug.LogError(string.Format("AddAnimOverrides tried to add a null override to {0} at position {1}", base.gameObject.name, base.transform.position));
+		}
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length != 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
@@ -688,7 +691,10 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	public void RemoveAnimOverrides(KAnimFile kanim_file)
 	{
-		global::Debug.Assert(kanim_file != null);
+		if (kanim_file == null)
+		{
+			global::Debug.LogError(string.Format("RemoveAnimOverrides tried to add a null override to {0} at position {1}", base.gameObject.name, base.transform.position));
+		}
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length != 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();

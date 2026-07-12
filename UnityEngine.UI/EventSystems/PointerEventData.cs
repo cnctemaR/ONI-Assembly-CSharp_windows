@@ -22,6 +22,8 @@ namespace UnityEngine.EventSystems
 
 		public bool eligibleForClick { get; set; }
 
+		public int displayIndex { get; set; }
+
 		public int pointerId { get; set; }
 
 		public Vector2 position { get; set; }
@@ -48,10 +50,33 @@ namespace UnityEngine.EventSystems
 
 		public PointerEventData.InputButton button { get; set; }
 
+		public float pressure { get; set; }
+
+		public float tangentialPressure { get; set; }
+
+		public float altitudeAngle { get; set; }
+
+		public float azimuthAngle { get; set; }
+
+		public float twist { get; set; }
+
+		public Vector2 tilt { get; set; }
+
+		public PenStatus penStatus { get; set; }
+
+		public Vector2 radius { get; set; }
+
+		public Vector2 radiusVariance { get; set; }
+
+		public bool fullyExited { get; set; }
+
+		public bool reentered { get; set; }
+
 		public PointerEventData(EventSystem eventSystem)
 			: base(eventSystem)
 		{
 			this.eligibleForClick = false;
+			this.displayIndex = 0;
 			this.pointerId = -1;
 			this.position = Vector2.zero;
 			this.delta = Vector2.zero;
@@ -62,6 +87,15 @@ namespace UnityEngine.EventSystems
 			this.useDragThreshold = true;
 			this.dragging = false;
 			this.button = PointerEventData.InputButton.Left;
+			this.pressure = 0f;
+			this.tangentialPressure = 0f;
+			this.altitudeAngle = 0f;
+			this.azimuthAngle = 0f;
+			this.twist = 0f;
+			this.tilt = new Vector2(0f, 0f);
+			this.penStatus = PenStatus.None;
+			this.radius = Vector2.zero;
+			this.radiusVariance = Vector2.zero;
 		}
 
 		public bool IsPointerMoving()
@@ -138,6 +172,17 @@ namespace UnityEngine.EventSystems
 			stringBuilder.AppendLine(this.pointerCurrentRaycast.ToString());
 			stringBuilder.AppendLine("<b>Press Raycast:</b>");
 			stringBuilder.AppendLine(this.pointerPressRaycast.ToString());
+			stringBuilder.AppendLine("<b>Display Index:</b>");
+			stringBuilder.AppendLine(this.displayIndex.ToString());
+			stringBuilder.AppendLine("<b>pressure</b>: " + this.pressure.ToString());
+			stringBuilder.AppendLine("<b>tangentialPressure</b>: " + this.tangentialPressure.ToString());
+			stringBuilder.AppendLine("<b>altitudeAngle</b>: " + this.altitudeAngle.ToString());
+			stringBuilder.AppendLine("<b>azimuthAngle</b>: " + this.azimuthAngle.ToString());
+			stringBuilder.AppendLine("<b>twist</b>: " + this.twist.ToString());
+			stringBuilder.AppendLine("<b>tilt</b>: " + this.tilt.ToString());
+			stringBuilder.AppendLine("<b>penStatus</b>: " + this.penStatus.ToString());
+			stringBuilder.AppendLine("<b>radius</b>: " + this.radius.ToString());
+			stringBuilder.AppendLine("<b>radiusVariance</b>: " + this.radiusVariance.ToString());
 			return stringBuilder.ToString();
 		}
 

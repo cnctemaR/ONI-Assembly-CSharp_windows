@@ -169,25 +169,25 @@ namespace System.Security.Permissions
 			string text = esd.Attribute("Read");
 			if (text != null)
 			{
-				string[] array = text.Split(new char[] { ';' });
+				string[] array = text.Split(';', StringSplitOptions.None);
 				this.AddPathList(FileIOPermissionAccess.Read, array);
 			}
 			text = esd.Attribute("Write");
 			if (text != null)
 			{
-				string[] array = text.Split(new char[] { ';' });
+				string[] array = text.Split(';', StringSplitOptions.None);
 				this.AddPathList(FileIOPermissionAccess.Write, array);
 			}
 			text = esd.Attribute("Append");
 			if (text != null)
 			{
-				string[] array = text.Split(new char[] { ';' });
+				string[] array = text.Split(';', StringSplitOptions.None);
 				this.AddPathList(FileIOPermissionAccess.Append, array);
 			}
 			text = esd.Attribute("PathDiscovery");
 			if (text != null)
 			{
-				string[] array = text.Split(new char[] { ';' });
+				string[] array = text.Split(';', StringSplitOptions.None);
 				this.AddPathList(FileIOPermissionAccess.PathDiscovery, array);
 			}
 		}
@@ -376,15 +376,15 @@ namespace System.Security.Permissions
 			return fileIOPermission2;
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("(2.0)")]
+		[ComVisible(false)]
 		public override bool Equals(object obj)
 		{
 			return false;
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("(2.0)")]
+		[ComVisible(false)]
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();

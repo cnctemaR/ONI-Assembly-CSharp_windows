@@ -13,18 +13,18 @@ namespace MS.Internal.Xml.XPath
 		protected ChildrenQuery(ChildrenQuery other)
 			: base(other)
 		{
-			this.iterator = Query.Clone(other.iterator);
+			this._iterator = Query.Clone(other._iterator);
 		}
 
 		public override void Reset()
 		{
-			this.iterator = XPathEmptyIterator.Instance;
+			this._iterator = XPathEmptyIterator.Instance;
 			base.Reset();
 		}
 
 		public override XPathNavigator Advance()
 		{
-			while (!this.iterator.MoveNext())
+			while (!this._iterator.MoveNext())
 			{
 				XPathNavigator xpathNavigator = this.qyInput.Advance();
 				if (xpathNavigator == null)
@@ -35,21 +35,21 @@ namespace MS.Internal.Xml.XPath
 				{
 					if (base.TypeTest == XPathNodeType.ProcessingInstruction)
 					{
-						this.iterator = new IteratorFilter(xpathNavigator.SelectChildren(base.TypeTest), base.Name);
+						this._iterator = new IteratorFilter(xpathNavigator.SelectChildren(base.TypeTest), base.Name);
 					}
 					else
 					{
-						this.iterator = xpathNavigator.SelectChildren(base.Name, base.Namespace);
+						this._iterator = xpathNavigator.SelectChildren(base.Name, base.Namespace);
 					}
 				}
 				else
 				{
-					this.iterator = xpathNavigator.SelectChildren(base.TypeTest);
+					this._iterator = xpathNavigator.SelectChildren(base.TypeTest);
 				}
 				this.position = 0;
 			}
 			this.position++;
-			this.currentNode = this.iterator.Current;
+			this.currentNode = this._iterator.Current;
 			return this.currentNode;
 		}
 
@@ -72,6 +72,6 @@ namespace MS.Internal.Xml.XPath
 			return new ChildrenQuery(this);
 		}
 
-		private XPathNodeIterator iterator = XPathEmptyIterator.Instance;
+		private XPathNodeIterator _iterator = XPathEmptyIterator.Instance;
 	}
 }

@@ -10,8 +10,8 @@ using System.Threading;
 namespace System
 {
 	[ComVisible(true)]
-	[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 	[SecurityPermission(SecurityAction.InheritanceDemand, Infrastructure = true)]
+	[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
 	public class AppDomainManager : MarshalByRefObject
 	{
 		public AppDomainManager()

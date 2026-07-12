@@ -62,6 +62,7 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
+		[RequiredMember]
 		internal unsafe static ProfilerRecorderHandle GetByName__Unmanaged(ProfilerCategory category, byte* name, int nameLen)
 		{
 			ProfilerRecorderHandle profilerRecorderHandle;
@@ -69,7 +70,7 @@ namespace Unity.Profiling.LowLevel.Unsafe
 			return profilerRecorderHandle;
 		}
 
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal unsafe static ProfilerRecorderHandle GetByName(ProfilerCategory category, char* name, int nameLen)
 		{
 			return ProfilerRecorderHandle.GetByName_Unsafe(category, name, nameLen);

@@ -25,8 +25,24 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		public DetectorNetwork.NetworkStates InitializeStates(DetectorNetwork parent)
 		{
 			base.DefaultState(this.poor);
-			this.poor.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, default(HashedString), 129022, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
-			this.good.ToggleStatusItem(BUILDING.STATUSITEMS.NETWORKQUALITY.NAME, BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, new Func<string, DetectorNetwork.Instance, string>(this.StringCallback), null, null).ParamTransition<float>(parent.networkQuality, this.poor, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
+			GameStateMachine<DetectorNetwork, DetectorNetwork.Instance, IStateMachineTarget, DetectorNetwork.Def>.State state = this.poor;
+			string text = BUILDING.STATUSITEMS.NETWORKQUALITY.NAME;
+			string text2 = BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP;
+			string text3 = "";
+			StatusItem.IconType iconType = StatusItem.IconType.Exclamation;
+			NotificationType notificationType = NotificationType.BadMinor;
+			bool flag = false;
+			Func<string, DetectorNetwork.Instance, string> func = new Func<string, DetectorNetwork.Instance, string>(this.StringCallback);
+			state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, func, null, null).ParamTransition<float>(parent.networkQuality, this.good, (DetectorNetwork.Instance smi, float p) => (double)p >= 0.8);
+			GameStateMachine<DetectorNetwork, DetectorNetwork.Instance, IStateMachineTarget, DetectorNetwork.Def>.State state2 = this.good;
+			string text4 = BUILDING.STATUSITEMS.NETWORKQUALITY.NAME;
+			string text5 = BUILDING.STATUSITEMS.NETWORKQUALITY.TOOLTIP;
+			string text6 = "";
+			StatusItem.IconType iconType2 = StatusItem.IconType.Info;
+			NotificationType notificationType2 = NotificationType.Neutral;
+			bool flag2 = false;
+			func = new Func<string, DetectorNetwork.Instance, string>(this.StringCallback);
+			state2.ToggleStatusItem(text4, text5, text6, iconType2, notificationType2, flag2, default(HashedString), 129022, func, null, null).ParamTransition<float>(parent.networkQuality, this.poor, (DetectorNetwork.Instance smi, float p) => (double)p < 0.8);
 			return this;
 		}
 

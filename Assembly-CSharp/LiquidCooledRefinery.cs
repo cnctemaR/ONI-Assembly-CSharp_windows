@@ -23,7 +23,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 		Game.Instance.liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Default);
 		Building component2 = base.GetComponent<Building>();
 		this.outputCell = component2.GetUtilityOutputCell();
-		this.workable.OnWorkTickActions = delegate(Worker worker, float dt)
+		this.workable.OnWorkTickActions = delegate(WorkerBase worker, float dt)
 		{
 			float percentComplete = this.workable.GetPercentComplete();
 			this.meter_metal.SetPositionPercent(percentComplete);

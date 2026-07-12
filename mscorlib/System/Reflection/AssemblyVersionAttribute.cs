@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-	[ComVisible(true)]
 	public sealed class AssemblyVersionAttribute : Attribute
 	{
 		public AssemblyVersionAttribute(string version)
 		{
-			this.m_version = version;
+			this.Version = version;
 		}
 
-		public string Version
-		{
-			get
-			{
-				return this.m_version;
-			}
-		}
-
-		private string m_version;
+		public string Version { get; }
 	}
 }

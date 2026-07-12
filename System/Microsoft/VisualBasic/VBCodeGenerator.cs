@@ -382,8 +382,7 @@ namespace Microsoft.VisualBasic
 
 		private void OutputVTableModifier(MemberAttributes attributes)
 		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
 			{
 				base.Output.Write("Shadows ");
 			}
@@ -411,17 +410,19 @@ namespace Microsoft.VisualBasic
 				base.Output.Write("Overrides ");
 				return;
 			default:
+			{
 				if (memberAttributes == MemberAttributes.Private)
 				{
 					base.Output.Write("Private ");
 					return;
 				}
-				memberAttributes = attributes & MemberAttributes.AccessMask;
-				if (memberAttributes == MemberAttributes.Assembly || memberAttributes == MemberAttributes.Family || memberAttributes == MemberAttributes.Public)
+				MemberAttributes memberAttributes2 = attributes & MemberAttributes.AccessMask;
+				if (memberAttributes2 == MemberAttributes.Assembly || memberAttributes2 == MemberAttributes.Family || memberAttributes2 == MemberAttributes.Public)
 				{
 					base.Output.Write("Overridable ");
 				}
 				break;
+			}
 			}
 		}
 

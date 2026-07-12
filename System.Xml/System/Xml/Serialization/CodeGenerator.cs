@@ -137,7 +137,7 @@ namespace System.Xml.Serialization
 			LocalBuilder localBuilder;
 			if (!this.TmpLocals.TryGetValue(type, out localBuilder))
 			{
-				localBuilder = this.DeclareLocal(type, "_tmp" + this.TmpLocals.Count);
+				localBuilder = this.DeclareLocal(type, "_tmp" + this.TmpLocals.Count.ToString());
 				this.TmpLocals.Add(type, localBuilder);
 			}
 			return localBuilder;

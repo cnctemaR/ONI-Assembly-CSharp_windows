@@ -369,26 +369,23 @@ namespace Klei.AI
 				if (this.gameplayEvent.affectedByDifficulty && this.difficultyLevel != null)
 				{
 					string id = this.difficultyLevel.id;
-					if (id != null)
+					if (!(id == "Infrequent"))
 					{
-						if (!(id == "Infrequent"))
+						if (!(id == "Intense"))
 						{
-							if (!(id == "Intense"))
+							if (id == "Doomed")
 							{
-								if (id == "Doomed")
-								{
-									num *= 0.5f;
-								}
-							}
-							else
-							{
-								num *= 1f;
+								num *= 0.5f;
 							}
 						}
 						else
 						{
 							num *= 1f;
 						}
+					}
+					else
+					{
+						num *= 1f;
 					}
 				}
 				return num;
@@ -400,18 +397,11 @@ namespace Klei.AI
 				if (this.gameplayEvent.affectedByDifficulty && this.difficultyLevel != null)
 				{
 					string id = this.difficultyLevel.id;
-					if (id != null)
+					if (!(id == "Infrequent"))
 					{
-						if (!(id == "Infrequent"))
+						if (!(id == "Intense"))
 						{
-							if (!(id == "Intense"))
-							{
-								if (id == "Doomed")
-								{
-									num *= 1f;
-								}
-							}
-							else
+							if (id == "Doomed")
 							{
 								num *= 1f;
 							}
@@ -420,6 +410,10 @@ namespace Klei.AI
 						{
 							num *= 1f;
 						}
+					}
+					else
+					{
+						num *= 1f;
 					}
 				}
 				return num;
@@ -432,26 +426,23 @@ namespace Klei.AI
 				if (this.gameplayEvent.affectedByDifficulty && this.difficultyLevel != null)
 				{
 					string id = this.difficultyLevel.id;
-					if (id != null)
+					if (!(id == "Infrequent"))
 					{
-						if (!(id == "Infrequent"))
+						if (!(id == "Intense"))
 						{
-							if (!(id == "Intense"))
+							if (id == "Doomed")
 							{
-								if (id == "Doomed")
-								{
-									num *= 0.5f;
-								}
-							}
-							else
-							{
-								num *= 0.8f;
+								num *= 0.5f;
 							}
 						}
 						else
 						{
-							num *= 1.5f;
+							num *= 0.8f;
 						}
+					}
+					else
+					{
+						num *= 1.5f;
 					}
 				}
 				return num;

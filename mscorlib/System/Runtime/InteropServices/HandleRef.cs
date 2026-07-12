@@ -2,20 +2,19 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
-	public struct HandleRef
+	public readonly struct HandleRef
 	{
 		public HandleRef(object wrapper, IntPtr handle)
 		{
-			this.m_wrapper = wrapper;
-			this.m_handle = handle;
+			this._wrapper = wrapper;
+			this._handle = handle;
 		}
 
 		public object Wrapper
 		{
 			get
 			{
-				return this.m_wrapper;
+				return this._wrapper;
 			}
 		}
 
@@ -23,22 +22,22 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this.m_handle;
+				return this._handle;
 			}
 		}
 
 		public static explicit operator IntPtr(HandleRef value)
 		{
-			return value.m_handle;
+			return value._handle;
 		}
 
 		public static IntPtr ToIntPtr(HandleRef value)
 		{
-			return value.m_handle;
+			return value._handle;
 		}
 
-		internal object m_wrapper;
+		private readonly object _wrapper;
 
-		internal IntPtr m_handle;
+		private readonly IntPtr _handle;
 	}
 }

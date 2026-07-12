@@ -25,20 +25,19 @@ public class BreathabilityDiagnostic : ColonyDiagnostic
 				while (enumerator.MoveNext())
 				{
 					MinionIdentity minionIdentity = enumerator.Current;
-					minionIdentity.GetComponent<OxygenBreather>().GetGasProvider();
 					SuffocationMonitor.Instance smi = minionIdentity.GetSMI<SuffocationMonitor.Instance>();
-					if (smi != null && smi.IsInsideState(smi.sm.nooxygen.suffocating))
+					if (smi != null && smi.IsInsideState(smi.sm.noOxygen.suffocating))
 					{
 						return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.DuplicantThreatening, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.SUFFOCATING, new global::Tuple<Vector3, GameObject>(smi.transform.position, smi.gameObject));
 					}
 				}
-				goto IL_00A7;
+				goto IL_009B;
 			}
-			goto IL_0099;
-			IL_00A7:
+			goto IL_008D;
+			IL_009B:
 			return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.BREATHABILITYDIAGNOSTIC.NORMAL, null);
 		}
-		IL_0099:
+		IL_008D:
 		return new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, base.NO_MINIONS, null);
 	}
 

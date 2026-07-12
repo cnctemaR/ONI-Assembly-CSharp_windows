@@ -63,7 +63,7 @@ namespace System.Linq.Expressions.Compiler
 			if (!curTypeInfo.TypeChain.TryGetValue(initialArg, out typeInfo))
 			{
 				typeInfo = new DelegateHelpers.TypeInfo();
-				if (initialArg.CanCache())
+				if (!initialArg.IsCollectible)
 				{
 					curTypeInfo.TypeChain[initialArg] = typeInfo;
 				}
@@ -264,7 +264,7 @@ namespace System.Linq.Expressions.Compiler
 		{
 			Type type = types[types.Length - 1];
 			Type[] array = types.RemoveLast<Type>();
-			TypeBuilder typeBuilder = AssemblyGen.DefineDelegateType("Delegate" + types.Length);
+			TypeBuilder typeBuilder = AssemblyGen.DefineDelegateType("Delegate" + types.Length.ToString());
 			typeBuilder.DefineConstructor(MethodAttributes.FamANDAssem | MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.RTSpecialName, CallingConventions.Standard, DelegateHelpers.s_delegateCtorSignature).SetImplementationFlags(MethodImplAttributes.CodeTypeMask);
 			typeBuilder.DefineMethod("Invoke", MethodAttributes.FamANDAssem | MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.VtableLayoutMask, type, array).SetImplementationFlags(MethodImplAttributes.CodeTypeMask);
 			return typeBuilder.CreateTypeInfo();

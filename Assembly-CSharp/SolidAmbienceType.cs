@@ -22,5 +22,6 @@ public enum SolidAmbienceType
 	Snow,
 	Magnesium,
 	Cinnabar,
+	Gunk,
 	NumTypes
 }

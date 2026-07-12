@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace System.Threading
 {
-	[DebuggerDisplay("Current Count = {m_currentCount}")]
 	[ComVisible(false)]
+	[DebuggerDisplay("Current Count = {m_currentCount}")]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class SemaphoreSlim : IDisposable
 	{
@@ -104,6 +104,10 @@ namespace System.Threading
 				throw new ArgumentOutOfRangeException("totalMilliSeconds", millisecondsTimeout, SemaphoreSlim.GetResourceString("The timeout must represent a value between -1 and Int32.MaxValue, inclusive."));
 			}
 			cancellationToken.ThrowIfCancellationRequested();
+			if (millisecondsTimeout == 0 && this.m_currentCount == 0)
+			{
+				return false;
+			}
 			uint num = 0U;
 			if (millisecondsTimeout != -1 && millisecondsTimeout > 0)
 			{
@@ -258,6 +262,10 @@ namespace System.Threading
 						this.m_waitHandle.Reset();
 					}
 					task = SemaphoreSlim.s_trueTask;
+				}
+				else if (millisecondsTimeout == 0)
+				{
+					task = SemaphoreSlim.s_falseTask;
 				}
 				else
 				{
@@ -457,6 +465,8 @@ namespace System.Threading
 		private SemaphoreSlim.TaskNode m_asyncTail;
 
 		private static readonly Task<bool> s_trueTask = new Task<bool>(false, true, (TaskCreationOptions)16384, default(CancellationToken));
+
+		private static readonly Task<bool> s_falseTask = new Task<bool>(false, false, (TaskCreationOptions)16384, default(CancellationToken));
 
 		private const int NO_MAXIMUM = 2147483647;
 

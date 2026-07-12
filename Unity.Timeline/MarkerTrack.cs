@@ -14,7 +14,8 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
-				if (!(this == base.timelineAsset.markerTrack))
+				TimelineAsset timelineAsset = base.timelineAsset;
+				if (!(this == ((timelineAsset != null) ? timelineAsset.markerTrack : null)))
 				{
 					return base.outputs;
 				}

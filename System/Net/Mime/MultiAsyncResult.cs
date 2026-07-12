@@ -3,19 +3,19 @@ using System.Threading;
 
 namespace System.Net.Mime
 {
-	internal class MultiAsyncResult : LazyAsyncResult
+	internal sealed class MultiAsyncResult : LazyAsyncResult
 	{
 		internal MultiAsyncResult(object context, AsyncCallback callback, object state)
 			: base(context, state, callback)
 		{
-			this.context = context;
+			this._context = context;
 		}
 
 		internal object Context
 		{
 			get
 			{
-				return this.context;
+				return this._context;
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace System.Net.Mime
 
 		private void Decrement()
 		{
-			if (Interlocked.Decrement(ref this.outstanding) == -1)
+			if (Interlocked.Decrement(ref this._outstanding) == -1)
 			{
 				base.InvokeCallback(base.Result);
 			}
@@ -45,7 +45,7 @@ namespace System.Net.Mime
 
 		private void Increment()
 		{
-			Interlocked.Increment(ref this.outstanding);
+			Interlocked.Increment(ref this._outstanding);
 		}
 
 		internal void CompleteSequence()
@@ -60,8 +60,8 @@ namespace System.Net.Mime
 			return multiAsyncResult.Result;
 		}
 
-		private int outstanding;
+		private readonly object _context;
 
-		private object context;
+		private int _outstanding;
 	}
 }

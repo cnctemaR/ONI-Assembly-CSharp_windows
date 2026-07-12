@@ -831,11 +831,6 @@ namespace System.Linq.Expressions
 			return new ArgumentException(Strings.SwitchValueTypeDoesNotMatchComparisonMethodParameter(p0, p1));
 		}
 
-		internal static Exception PdbGeneratorNeedsExpressionCompiler()
-		{
-			return new NotSupportedException(Strings.PdbGeneratorNeedsExpressionCompiler);
-		}
-
 		internal static Exception ArgumentOutOfRange(string paramName)
 		{
 			return new ArgumentOutOfRangeException(paramName);

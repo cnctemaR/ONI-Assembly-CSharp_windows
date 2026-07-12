@@ -198,7 +198,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer, ICircui
 	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
 		global::Debug.Assert(base.GetComponent<Battery>() == null);
-		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, canOverPower ? float.MaxValue : this.Capacity);
+		this.joulesAvailable = Mathf.Clamp(this.joulesAvailable + joulesAvailable, 0f, canOverPower ? float.MaxValue : this.Capacity);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, this.GetProperName(), null);
 		if (!Game.Instance.savedInfo.powerCreatedbyGeneratorType.ContainsKey(this.PrefabID()))
 		{

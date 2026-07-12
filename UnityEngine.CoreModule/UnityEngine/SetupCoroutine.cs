@@ -9,8 +9,8 @@ namespace UnityEngine
 	[RequiredByNativeCode]
 	internal class SetupCoroutine
 	{
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		public unsafe static void InvokeMoveNext(IEnumerator enumerator, IntPtr returnValueAddress)
 		{
 			bool flag = returnValueAddress == IntPtr.Zero;

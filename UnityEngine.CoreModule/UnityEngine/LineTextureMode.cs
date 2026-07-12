@@ -7,6 +7,7 @@ namespace UnityEngine
 		Stretch,
 		Tile,
 		DistributePerSegment,
-		RepeatPerSegment
+		RepeatPerSegment,
+		Static
 	}
 }

@@ -303,7 +303,7 @@ public class CodexEntryGenerator_Elements
 						float num3 = num2 * info.producedConversionRate;
 						foreach (Tag tag in info.consumedTags)
 						{
-							ElementUsage elementUsage = (value.IsConsumedTagAbleToBeEatenDirectly(tag) ? new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantConsumptionValuePerCycle)) : new ElementUsage(tag, num2, true));
+							ElementUsage elementUsage = (value.IsConsumedTagAbleToBeEatenDirectly(tag) ? new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle)) : new ElementUsage(tag, num2, true));
 							CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
 							conversionEntry.title = gameObject4.GetProperName();
 							conversionEntry.prefab = gameObject4;
@@ -504,7 +504,7 @@ public class CodexEntryGenerator_Elements
 			{
 				string text2;
 				float num2;
-				keyValuePair.Deconstruct<string, float>(out text2, out num2);
+				keyValuePair.Deconstruct(out text2, out num2);
 				string text3 = text2;
 				float num3 = num2;
 				conversionEntry5.outSet.Add(new ElementUsage(text3, num3, false));

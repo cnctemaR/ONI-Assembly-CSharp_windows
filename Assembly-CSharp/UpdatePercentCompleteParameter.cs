@@ -13,7 +13,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 	{
 		UpdatePercentCompleteParameter.Entry entry = new UpdatePercentCompleteParameter.Entry
 		{
-			worker = sound.transform.GetComponent<Worker>(),
+			worker = sound.transform.GetComponent<WorkerBase>(),
 			ev = sound.ev,
 			parameterId = sound.description.GetParameterId(base.parameter)
 		};
@@ -26,7 +26,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 		{
 			if (!(entry.worker == null))
 			{
-				Workable workable = entry.worker.workable;
+				Workable workable = entry.worker.GetWorkable();
 				if (!(workable == null))
 				{
 					float percentComplete = workable.GetPercentComplete();
@@ -53,7 +53,7 @@ internal class UpdatePercentCompleteParameter : LoopingSoundParameterUpdater
 
 	private struct Entry
 	{
-		public Worker worker;
+		public WorkerBase worker;
 
 		public EventInstance ev;
 

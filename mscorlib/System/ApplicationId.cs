@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Util;
 using System.Text;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public sealed class ApplicationId
 	{
-		internal ApplicationId()
-		{
-		}
-
 		public ApplicationId(byte[] publicKeyToken, string name, Version version, string processorArchitecture, string culture)
 		{
 			if (name == null)
@@ -21,7 +14,7 @@ namespace System
 			}
 			if (name.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("ApplicationId cannot have an empty string for the name."));
+				throw new ArgumentException("ApplicationId cannot have an empty string for the name.");
 			}
 			if (version == null)
 			{
@@ -31,87 +24,86 @@ namespace System
 			{
 				throw new ArgumentNullException("publicKeyToken");
 			}
-			this.m_publicKeyToken = new byte[publicKeyToken.Length];
-			Array.Copy(publicKeyToken, 0, this.m_publicKeyToken, 0, publicKeyToken.Length);
-			this.m_name = name;
-			this.m_version = version;
-			this.m_processorArchitecture = processorArchitecture;
-			this.m_culture = culture;
+			this._publicKeyToken = (byte[])publicKeyToken.Clone();
+			this.Name = name;
+			this.Version = version;
+			this.ProcessorArchitecture = processorArchitecture;
+			this.Culture = culture;
 		}
+
+		public string Culture { get; }
+
+		public string Name { get; }
+
+		public string ProcessorArchitecture { get; }
+
+		public Version Version { get; }
 
 		public byte[] PublicKeyToken
 		{
 			get
 			{
-				byte[] array = new byte[this.m_publicKeyToken.Length];
-				Array.Copy(this.m_publicKeyToken, 0, array, 0, this.m_publicKeyToken.Length);
-				return array;
-			}
-		}
-
-		public string Name
-		{
-			get
-			{
-				return this.m_name;
-			}
-		}
-
-		public Version Version
-		{
-			get
-			{
-				return this.m_version;
-			}
-		}
-
-		public string ProcessorArchitecture
-		{
-			get
-			{
-				return this.m_processorArchitecture;
-			}
-		}
-
-		public string Culture
-		{
-			get
-			{
-				return this.m_culture;
+				return (byte[])this._publicKeyToken.Clone();
 			}
 		}
 
 		public ApplicationId Copy()
 		{
-			return new ApplicationId(this.m_publicKeyToken, this.m_name, this.m_version, this.m_processorArchitecture, this.m_culture);
+			return new ApplicationId(this._publicKeyToken, this.Name, this.Version, this.ProcessorArchitecture, this.Culture);
 		}
 
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			stringBuilder.Append(this.m_name);
-			if (this.m_culture != null)
+			stringBuilder.Append(this.Name);
+			if (this.Culture != null)
 			{
 				stringBuilder.Append(", culture=\"");
-				stringBuilder.Append(this.m_culture);
-				stringBuilder.Append("\"");
+				stringBuilder.Append(this.Culture);
+				stringBuilder.Append('"');
 			}
 			stringBuilder.Append(", version=\"");
-			stringBuilder.Append(this.m_version.ToString());
-			stringBuilder.Append("\"");
-			if (this.m_publicKeyToken != null)
+			stringBuilder.Append(this.Version.ToString());
+			stringBuilder.Append('"');
+			if (this._publicKeyToken != null)
 			{
 				stringBuilder.Append(", publicKeyToken=\"");
-				stringBuilder.Append(Hex.EncodeHexString(this.m_publicKeyToken));
-				stringBuilder.Append("\"");
+				stringBuilder.Append(ApplicationId.EncodeHexString(this._publicKeyToken));
+				stringBuilder.Append('"');
 			}
-			if (this.m_processorArchitecture != null)
+			if (this.ProcessorArchitecture != null)
 			{
 				stringBuilder.Append(", processorArchitecture =\"");
-				stringBuilder.Append(this.m_processorArchitecture);
-				stringBuilder.Append("\"");
+				stringBuilder.Append(this.ProcessorArchitecture);
+				stringBuilder.Append('"');
 			}
 			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+		}
+
+		private static char HexDigit(int num)
+		{
+			return (char)((num < 10) ? (num + 48) : (num + 55));
+		}
+
+		private static string EncodeHexString(byte[] sArray)
+		{
+			string text = null;
+			if (sArray != null)
+			{
+				char[] array = new char[sArray.Length * 2];
+				int i = 0;
+				int num = 0;
+				while (i < sArray.Length)
+				{
+					int num2 = (sArray[i] & 240) >> 4;
+					array[num++] = ApplicationId.HexDigit(num2);
+					num2 = (int)(sArray[i] & 15);
+					array[num++] = ApplicationId.HexDigit(num2);
+					i++;
+				}
+				text = new string(array);
+			}
+			return text;
 		}
 
 		public override bool Equals(object o)
@@ -121,17 +113,17 @@ namespace System
 			{
 				return false;
 			}
-			if (!object.Equals(this.m_name, applicationId.m_name) || !object.Equals(this.m_version, applicationId.m_version) || !object.Equals(this.m_processorArchitecture, applicationId.m_processorArchitecture) || !object.Equals(this.m_culture, applicationId.m_culture))
+			if (!object.Equals(this.Name, applicationId.Name) || !object.Equals(this.Version, applicationId.Version) || !object.Equals(this.ProcessorArchitecture, applicationId.ProcessorArchitecture) || !object.Equals(this.Culture, applicationId.Culture))
 			{
 				return false;
 			}
-			if (this.m_publicKeyToken.Length != applicationId.m_publicKeyToken.Length)
+			if (this._publicKeyToken.Length != applicationId._publicKeyToken.Length)
 			{
 				return false;
 			}
-			for (int i = 0; i < this.m_publicKeyToken.Length; i++)
+			for (int i = 0; i < this._publicKeyToken.Length; i++)
 			{
-				if (this.m_publicKeyToken[i] != applicationId.m_publicKeyToken[i])
+				if (this._publicKeyToken[i] != applicationId._publicKeyToken[i])
 				{
 					return false;
 				}
@@ -141,17 +133,9 @@ namespace System
 
 		public override int GetHashCode()
 		{
-			return this.m_name.GetHashCode() ^ this.m_version.GetHashCode();
+			return this.Name.GetHashCode() ^ this.Version.GetHashCode();
 		}
 
-		private string m_name;
-
-		private Version m_version;
-
-		private string m_processorArchitecture;
-
-		private string m_culture;
-
-		internal byte[] m_publicKeyToken;
+		private readonly byte[] _publicKeyToken;
 	}
 }

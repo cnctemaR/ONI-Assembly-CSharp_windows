@@ -6,32 +6,36 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Runtime/Geometry/AABB.h")]
-	[NativeHeader("Runtime/Geometry/Ray.h")]
-	[NativeHeader("Runtime/Geometry/Intersection.h")]
-	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/Geometry/Intersection.h")]
 	[NativeClass("AABB")]
+	[NativeHeader("Runtime/Geometry/Ray.h")]
+	[NativeType(Header = "Runtime/Geometry/AABB.h")]
+	[NativeHeader("Runtime/Geometry/AABB.h")]
 	public struct Bounds : IEquatable<Bounds>, IFormattable
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Bounds(Vector3 center, Vector3 size)
 		{
 			this.m_Center = center;
 			this.m_Extents = size * 0.5f;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
 		{
 			return this.center.GetHashCode() ^ (this.extents.GetHashCode() << 2);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals(object other)
 		{
 			bool flag = !(other is Bounds);
 			return !flag && this.Equals((Bounds)other);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Bounds other)
 		{
 			return this.center.Equals(other.center) && this.extents.Equals(other.extents);
@@ -39,10 +43,12 @@ namespace UnityEngine
 
 		public Vector3 center
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Center;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Center = value;
@@ -51,10 +57,12 @@ namespace UnityEngine
 
 		public Vector3 size
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Extents * 2f;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Extents = value * 0.5f;
@@ -63,10 +71,12 @@ namespace UnityEngine
 
 		public Vector3 extents
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Extents;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Extents = value;
@@ -75,10 +85,12 @@ namespace UnityEngine
 
 		public Vector3 min
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.center - this.extents;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.SetMinMax(value, this.max);
@@ -87,37 +99,44 @@ namespace UnityEngine
 
 		public Vector3 max
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.center + this.extents;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.SetMinMax(this.min, value);
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Bounds lhs, Bounds rhs)
 		{
 			return lhs.center == rhs.center && lhs.extents == rhs.extents;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(Bounds lhs, Bounds rhs)
 		{
 			return !(lhs == rhs);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetMinMax(Vector3 min, Vector3 max)
 		{
 			this.extents = (max - min) * 0.5f;
 			this.center = min + this.extents;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Encapsulate(Vector3 point)
 		{
 			this.SetMinMax(Vector3.Min(this.min, point), Vector3.Max(this.max, point));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Encapsulate(Bounds bounds)
 		{
 			this.Encapsulate(bounds.center - bounds.extents);
@@ -130,43 +149,55 @@ namespace UnityEngine
 			this.extents += new Vector3(amount, amount, amount);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Expand(Vector3 amount)
 		{
 			this.extents += amount * 0.5f;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Intersects(Bounds bounds)
 		{
 			return this.min.x <= bounds.max.x && this.max.x >= bounds.min.x && this.min.y <= bounds.max.y && this.max.y >= bounds.min.y && this.min.z <= bounds.max.z && this.max.z >= bounds.min.z;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IntersectRay(Ray ray)
 		{
 			float num;
 			return Bounds.IntersectRayAABB(ray, this, out num);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IntersectRay(Ray ray, out float distance)
 		{
 			return Bounds.IntersectRayAABB(ray, this, out distance);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = string.IsNullOrEmpty(format);
 			if (flag)
 			{
-				format = "F1";
+				format = "F2";
+			}
+			bool flag2 = formatProvider == null;
+			if (flag2)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
 			return UnityString.Format("Center: {0}, Extents: {1}", new object[]
 			{

@@ -263,8 +263,7 @@ namespace System
 
 		private void InitHex(ulong value)
 		{
-			int defPrecision = this._defPrecision;
-			if (defPrecision == 10)
+			if (this._defPrecision == 10)
 			{
 				value = (ulong)((uint)value);
 			}

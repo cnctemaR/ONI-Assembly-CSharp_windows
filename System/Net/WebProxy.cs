@@ -258,7 +258,7 @@ namespace System.Net
 			{
 				return false;
 			}
-			string text = input.Scheme + "://" + input.Host + ((!input.IsDefaultPort) ? (":" + input.Port) : "");
+			string text = input.Scheme + "://" + input.Host + ((!input.IsDefaultPort) ? (":" + input.Port.ToString()) : "");
 			for (int i = 0; i < this._BypassList.Count; i++)
 			{
 				if (this._RegExBypassList[i].IsMatch(text))

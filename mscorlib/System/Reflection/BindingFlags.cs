@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum BindingFlags
 	{
 		Default = 0,
@@ -27,6 +24,7 @@ namespace System.Reflection
 		ExactBinding = 65536,
 		SuppressChangeType = 131072,
 		OptionalParamBinding = 262144,
-		IgnoreReturn = 16777216
+		IgnoreReturn = 16777216,
+		DoNotWrapExceptions = 33554432
 	}
 }

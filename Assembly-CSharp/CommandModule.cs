@@ -11,12 +11,12 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		base.OnPrefabInit();
 		this.rocketStats = new RocketStats(this);
-		this.conditions = base.GetComponent<RocketCommandConditions>();
+		this.conditions = base.GetComponent<CommandConditions>();
 	}
 
 	public void ReleaseAstronaut(bool fill_bladder)
 	{
-		if (this.releasingAstronaut)
+		if (this.releasingAstronaut || this.robotPilotControlled)
 		{
 			return;
 		}
@@ -50,12 +50,15 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		base.OnSpawn();
 		this.storage = base.GetComponent<Storage>();
-		this.assignable = base.GetComponent<Assignable>();
-		this.assignable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.CanAssignTo));
+		if (!this.robotPilotControlled)
+		{
+			this.assignable = base.GetComponent<Assignable>();
+			this.assignable.AddAssignPrecondition(new Func<MinionAssignablesProxy, bool>(this.CanAssignTo));
+			int num = Grid.PosToCell(base.gameObject);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnGantryChanged));
+			this.OnGantryChanged(null);
+		}
 		base.smi.StartSM();
-		int num = Grid.PosToCell(base.gameObject);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnGantryChanged));
-		this.OnGantryChanged(null);
 	}
 
 	private bool CanAssignTo(MinionAssignablesProxy worker)
@@ -112,13 +115,15 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 	public RocketStats rocketStats;
 
-	public RocketCommandConditions conditions;
+	public CommandConditions conditions;
 
 	private bool releasingAstronaut;
 
 	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
 	public Assignable assignable;
+
+	public bool robotPilotControlled;
 
 	private HandleVector<int>.Handle partitionerEntry;
 
@@ -145,6 +150,10 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 		public bool CheckStoredMinionIsAssignee()
 		{
+			if (base.smi.master.robotPilotControlled)
+			{
+				return true;
+			}
 			foreach (MinionStorage.Info info in base.GetComponent<MinionStorage>().GetStoredMinionInfo())
 			{
 				if (info.serializedMinion != null)

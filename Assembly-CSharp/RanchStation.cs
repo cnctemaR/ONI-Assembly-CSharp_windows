@@ -120,7 +120,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.TargetParameter targetParameter = rancherChore.smi.sm.rancher;
 			StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Parameter<GameObject>.Context context = targetParameter.GetContext(rancherChore.smi);
 			context.onDirty = (Action<RancherChore.RancherChoreStates.Instance>)Delegate.Combine(context.onDirty, new Action<RancherChore.RancherChoreStates.Instance>(this.OnRancherChanged));
-			this.rancher = targetParameter.Get<Worker>(rancherChore.smi);
+			this.rancher = targetParameter.Get<WorkerBase>(rancherChore.smi);
 			return rancherChore;
 		}
 
@@ -162,7 +162,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		private void OnRancherChanged(RancherChore.RancherChoreStates.Instance choreInstance)
 		{
-			this.rancher = choreInstance.sm.rancher.Get<Worker>(choreInstance);
+			this.rancher = choreInstance.sm.rancher.Get<WorkerBase>(choreInstance);
 			this.TriggerRanchStationNoLongerAvailable();
 		}
 
@@ -378,7 +378,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		private Room ranch;
 
-		private Worker rancher;
+		private WorkerBase rancher;
 
 		private BuildingComplete station;
 	}

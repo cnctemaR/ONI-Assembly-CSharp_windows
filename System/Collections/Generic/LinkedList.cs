@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class LinkedList<T> : ICollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{

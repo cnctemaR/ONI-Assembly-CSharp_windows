@@ -88,7 +88,8 @@ namespace UnityEngine
 			Box,
 			Pick,
 			Erase,
-			FloodFill
+			FloodFill,
+			Other
 		}
 
 		public enum RotationDirection

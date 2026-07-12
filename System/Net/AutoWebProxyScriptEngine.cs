@@ -42,27 +42,17 @@ namespace System.Net
 
 		public WebProxyData GetWebProxyData()
 		{
-			try
+			WebProxyData webProxyData;
+			if (AutoWebProxyScriptEngine.IsWindows())
 			{
-				WebProxyData webProxyData;
-				if (AutoWebProxyScriptEngine.IsWindows())
-				{
-					webProxyData = this.InitializeRegistryGlobalProxy();
-					if (webProxyData != null)
-					{
-						return webProxyData;
-					}
-				}
-				webProxyData = this.ReadEnvVariables();
+				webProxyData = this.InitializeRegistryGlobalProxy();
 				if (webProxyData != null)
 				{
 					return webProxyData;
 				}
 			}
-			catch (DllNotFoundException)
-			{
-			}
-			return new WebProxyData();
+			webProxyData = this.ReadEnvVariables();
+			return webProxyData ?? new WebProxyData();
 		}
 
 		private WebProxyData ReadEnvVariables()
@@ -141,11 +131,11 @@ namespace System.Net
 			bool flag = false;
 			ArrayList arrayList = new ArrayList();
 			string text2 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyServer", null);
-			string text3 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyOverride", null);
 			if (text2 == null)
 			{
 				return null;
 			}
+			string text3 = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyOverride", null);
 			if (text2.Contains("="))
 			{
 				foreach (string text4 in text2.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))

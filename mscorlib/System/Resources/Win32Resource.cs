@@ -59,7 +59,15 @@ namespace System.Resources
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { "Win32Resource (Kind=", this.ResourceType, ", Name=", this.name, ")" });
+			string[] array = new string[5];
+			array[0] = "Win32Resource (Kind=";
+			array[1] = this.ResourceType.ToString();
+			array[2] = ", Name=";
+			int num = 3;
+			NameOrId nameOrId = this.name;
+			array[num] = ((nameOrId != null) ? nameOrId.ToString() : null);
+			array[4] = ")";
+			return string.Concat(array);
 		}
 
 		private NameOrId type;

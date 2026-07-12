@@ -10,6 +10,7 @@ namespace System.Data.SqlClient
 		THREADID,
 		MARS,
 		TRACEID,
+		FEDAUTHREQUIRED,
 		NUMOPT,
 		LASTOPT = 255
 	}

@@ -22,7 +22,7 @@ namespace UnityEngine.Networking
 			this.Dispose();
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			bool flag = this.m_Ptr != IntPtr.Zero;
 			if (flag)

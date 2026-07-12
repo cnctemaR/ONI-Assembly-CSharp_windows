@@ -1537,7 +1537,7 @@ public class BuildingDef : Def
 		}
 		if (!this.Deprecated)
 		{
-			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds, this.POIUnlockable);
+			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds, this.ForbiddenDlcIds, this.POIUnlockable);
 		}
 	}
 
@@ -1624,10 +1624,12 @@ public class BuildingDef : Def
 
 	public bool IsValidDLC()
 	{
-		return SaveLoader.Instance.IsDlcListActiveForCurrentSave(this.RequiredDlcIds);
+		return SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(this.RequiredDlcIds, this.ForbiddenDlcIds);
 	}
 
 	public string[] RequiredDlcIds;
+
+	public string[] ForbiddenDlcIds;
 
 	public float EnergyConsumptionWhenActive;
 

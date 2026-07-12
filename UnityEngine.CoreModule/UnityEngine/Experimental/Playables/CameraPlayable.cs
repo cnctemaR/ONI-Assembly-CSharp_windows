@@ -6,10 +6,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
 	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{

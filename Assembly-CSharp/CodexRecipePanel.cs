@@ -126,14 +126,15 @@ public class CodexRecipePanel : CodexWidget<CodexRecipePanel>
 				ManagementMenu.Instance.codexScreen.ChangeArticle(UI.ExtractLinkID(Assets.GetPrefab(res.material).GetProperName()), false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			};
 		}
-		string text3 = this.complexRecipe.id.Substring(0, this.complexRecipe.id.IndexOf('_'));
+		DebugUtil.DevAssert(this.complexRecipe.fabricators.Count > 0, "Codex assumes there is at most one fabricator per recipe, refactor if needed", null);
+		string name = this.complexRecipe.fabricators[0].Name;
 		HierarchyReferences component3 = Util.KInstantiateUI(this.fabricatorPrefab, this.fabricatorContainer, true).GetComponent<HierarchyReferences>();
-		global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(text3, "ui", false);
+		global::Tuple<Sprite, Color> uisprite3 = Def.GetUISprite(name, "ui", false);
 		component3.GetReference<Image>("Icon").sprite = uisprite3.first;
 		component3.GetReference<Image>("Icon").color = uisprite3.second;
 		component3.GetReference<LocText>("Time").text = GameUtil.GetFormattedTime(this.complexRecipe.time, "F0");
 		component3.GetReference<LocText>("Time").color = Color.black;
-		GameObject fabricator = Assets.GetPrefab(text3.ToTag());
+		GameObject fabricator = Assets.GetPrefab(name.ToTag());
 		component3.GetReference<ToolTip>("Tooltip").toolTip = fabricator.GetProperName();
 		component3.GetReference<KButton>("Button").onClick += delegate
 		{

@@ -19,8 +19,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(false)]
 		[XmlAttribute("fixed")]
+		[DefaultValue(false)]
 		public virtual bool IsFixed
 		{
 			get

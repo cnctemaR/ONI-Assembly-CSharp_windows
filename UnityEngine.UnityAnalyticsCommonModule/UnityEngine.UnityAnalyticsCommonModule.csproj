@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F0D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.Analytics</RootNamespace>
+    <AssemblyName>UnityEngine.UnityAnalyticsCommonModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AnalyticsCommon.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UGSAnalyticsInternalTools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

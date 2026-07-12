@@ -97,7 +97,7 @@ public class BuildingHP : Workable
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		int num = (int)Db.Get().Attributes.Machinery.Lookup(worker).GetTotalValue();
 		int num2 = 10 + Math.Max(0, num * 10);

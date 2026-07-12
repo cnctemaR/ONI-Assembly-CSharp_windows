@@ -19,7 +19,7 @@ public class UIAnimationVoiceSoundEvent : SoundEvent
 		string soundPath = MinionVoice.ByObject(behaviour.controller).UnwrapOr(MinionVoice.Random(), string.Format("Couldn't find MinionVoice on UI {0}, falling back to random voice", behaviour.controller)).GetSoundPath(this.actualSoundName);
 		if (this.actualSoundName.Contains(":"))
 		{
-			float num = float.Parse(this.actualSoundName.Split(new char[] { ':' })[1]);
+			float num = float.Parse(this.actualSoundName.Split(':', StringSplitOptions.None)[1]);
 			if ((float)global::UnityEngine.Random.Range(0, 100) > num)
 			{
 				return;

@@ -322,13 +322,7 @@ namespace System.Xml.Serialization
 		private string GenerateVariableName(string prefix, string fullName)
 		{
 			this.nextReflectionVariableNumber++;
-			return string.Concat(new object[]
-			{
-				prefix,
-				this.nextReflectionVariableNumber,
-				"_",
-				CodeIdentifier.MakeValidInternal(fullName.Replace('.', '_'))
-			});
+			return prefix + this.nextReflectionVariableNumber.ToString() + "_" + CodeIdentifier.MakeValidInternal(fullName.Replace('.', '_'));
 		}
 
 		internal string GetReflectionVariable(string typeFullName, string memberName)

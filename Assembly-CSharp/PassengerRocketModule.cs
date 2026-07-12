@@ -111,15 +111,19 @@ public class PassengerRocketModule : KMonoBehaviour
 						minionIdentity.GetSMI<RocketPassengerMonitor.Instance>().ClearMoveTarget(num);
 					}
 				}
-				goto IL_0144;
+				goto IL_0148;
 			}
 		}
 		foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
 		{
-			minionIdentity2.GetSMI<RocketPassengerMonitor.Instance>().ClearMoveTarget(cell);
-			minionIdentity2.GetSMI<RocketPassengerMonitor.Instance>().ClearMoveTarget(num);
+			RocketPassengerMonitor.Instance smi = minionIdentity2.GetSMI<RocketPassengerMonitor.Instance>();
+			if (smi != null)
+			{
+				smi.ClearMoveTarget(cell);
+				smi.ClearMoveTarget(num);
+			}
 		}
-		IL_0144:
+		IL_0148:
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
 			this.RefreshAccessStatus(Components.LiveMinionIdentities[i], flag);
@@ -205,30 +209,38 @@ public class PassengerRocketModule : KMonoBehaviour
 		return new global::Tuple<int, int>(members.Count - num, members.Count);
 	}
 
-	public bool CheckPassengersBoarded()
+	public bool HasCrewAssigned()
+	{
+		return ((ICollection<IAssignableIdentity>)base.GetComponent<AssignmentGroupController>().GetMembers()).Count > 0;
+	}
+
+	public bool CheckPassengersBoarded(bool require_pilot = true)
 	{
 		ICollection<IAssignableIdentity> members = base.GetComponent<AssignmentGroupController>().GetMembers();
 		if (members.Count == 0)
 		{
 			return false;
 		}
-		bool flag = false;
-		foreach (IAssignableIdentity assignableIdentity in members)
+		if (require_pilot)
 		{
-			MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)assignableIdentity;
-			if (minionAssignablesProxy != null)
+			bool flag = false;
+			foreach (IAssignableIdentity assignableIdentity in members)
 			{
-				MinionResume component = minionAssignablesProxy.GetTargetGameObject().GetComponent<MinionResume>();
-				if (component != null && component.HasPerk(Db.Get().SkillPerks.CanUseRocketControlStation))
+				MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)assignableIdentity;
+				if (minionAssignablesProxy != null)
 				{
-					flag = true;
-					break;
+					MinionResume component = minionAssignablesProxy.GetTargetGameObject().GetComponent<MinionResume>();
+					if (component != null && component.HasPerk(Db.Get().SkillPerks.CanUseRocketControlStation))
+					{
+						flag = true;
+						break;
+					}
 				}
 			}
-		}
-		if (!flag)
-		{
-			return false;
+			if (!flag)
+			{
+				return false;
+			}
 		}
 		using (IEnumerator<IAssignableIdentity> enumerator = members.GetEnumerator())
 		{

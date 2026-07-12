@@ -181,10 +181,10 @@ namespace System.Xml.Xsl.Xslt
 
 		public string CreatePhantomNamespace()
 		{
-			object obj = "\0namespace";
+			string text = "\0namespace";
 			int num = this.phantomNsCounter;
 			this.phantomNsCounter = num + 1;
-			return obj + num;
+			return text + num.ToString();
 		}
 
 		public bool IsPhantomNamespace(string namespaceName)

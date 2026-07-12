@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AssetBundleRequest : ResourceRequest
 	{

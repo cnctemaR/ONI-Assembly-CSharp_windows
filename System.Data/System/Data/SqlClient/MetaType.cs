@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using Microsoft.SqlServer.Server;
@@ -277,180 +278,24 @@ namespace System.Data.SqlClient
 			return MetaType.MetaMaxNVarChar;
 		}
 
-		internal static MetaType GetMetaTypeFromType(Type dataType, bool streamAllowed = true)
+		internal static MetaType GetMetaTypeFromType(Type dataType)
 		{
-			if (dataType == typeof(byte[]))
-			{
-				return MetaType.MetaVarBinary;
-			}
-			if (dataType == typeof(Guid))
-			{
-				return MetaType.s_metaUniqueId;
-			}
-			if (dataType == typeof(object))
-			{
-				return MetaType.s_metaVariant;
-			}
-			if (dataType == typeof(SqlBinary))
-			{
-				return MetaType.MetaVarBinary;
-			}
-			if (dataType == typeof(SqlBoolean))
-			{
-				return MetaType.s_metaBit;
-			}
-			if (dataType == typeof(SqlByte))
-			{
-				return MetaType.s_metaTinyInt;
-			}
-			if (dataType == typeof(SqlBytes))
-			{
-				return MetaType.MetaVarBinary;
-			}
-			if (dataType == typeof(SqlChars))
-			{
-				return MetaType.MetaNVarChar;
-			}
-			if (dataType == typeof(SqlDateTime))
-			{
-				return MetaType.s_metaDateTime;
-			}
-			if (dataType == typeof(SqlDouble))
-			{
-				return MetaType.s_metaFloat;
-			}
-			if (dataType == typeof(SqlGuid))
-			{
-				return MetaType.s_metaUniqueId;
-			}
-			if (dataType == typeof(SqlInt16))
-			{
-				return MetaType.s_metaSmallInt;
-			}
-			if (dataType == typeof(SqlInt32))
-			{
-				return MetaType.s_metaInt;
-			}
-			if (dataType == typeof(SqlInt64))
-			{
-				return MetaType.s_metaBigInt;
-			}
-			if (dataType == typeof(SqlMoney))
-			{
-				return MetaType.s_metaMoney;
-			}
-			if (dataType == typeof(SqlDecimal))
-			{
-				return MetaType.MetaDecimal;
-			}
-			if (dataType == typeof(SqlSingle))
-			{
-				return MetaType.s_metaReal;
-			}
-			if (dataType == typeof(SqlXml))
-			{
-				return MetaType.MetaXml;
-			}
-			if (dataType == typeof(SqlString))
-			{
-				return MetaType.MetaNVarChar;
-			}
-			if (dataType == typeof(IEnumerable<DbDataRecord>))
-			{
-				return MetaType.s_metaTable;
-			}
-			if (dataType == typeof(TimeSpan))
-			{
-				return MetaType.MetaTime;
-			}
-			if (dataType == typeof(DateTimeOffset))
-			{
-				return MetaType.MetaDateTimeOffset;
-			}
-			if (dataType == typeof(DBNull))
-			{
-				throw ADP.InvalidDataType("DBNull");
-			}
-			if (dataType == typeof(bool))
-			{
-				return MetaType.s_metaBit;
-			}
-			if (dataType == typeof(char))
-			{
-				throw ADP.InvalidDataType("Char");
-			}
-			if (dataType == typeof(sbyte))
-			{
-				throw ADP.InvalidDataType("SByte");
-			}
-			if (dataType == typeof(byte))
-			{
-				return MetaType.s_metaTinyInt;
-			}
-			if (dataType == typeof(short))
-			{
-				return MetaType.s_metaSmallInt;
-			}
-			if (dataType == typeof(ushort))
-			{
-				throw ADP.InvalidDataType("UInt16");
-			}
-			if (dataType == typeof(int))
-			{
-				return MetaType.s_metaInt;
-			}
-			if (dataType == typeof(uint))
-			{
-				throw ADP.InvalidDataType("UInt32");
-			}
-			if (dataType == typeof(long))
-			{
-				return MetaType.s_metaBigInt;
-			}
-			if (dataType == typeof(ulong))
-			{
-				throw ADP.InvalidDataType("UInt64");
-			}
-			if (dataType == typeof(float))
-			{
-				return MetaType.s_metaReal;
-			}
-			if (dataType == typeof(double))
-			{
-				return MetaType.s_metaFloat;
-			}
-			if (dataType == typeof(decimal))
-			{
-				return MetaType.MetaDecimal;
-			}
-			if (dataType == typeof(DateTime))
-			{
-				return MetaType.s_metaDateTime;
-			}
-			if (dataType == typeof(string))
-			{
-				return MetaType.MetaNVarChar;
-			}
-			throw ADP.UnknownDataType(dataType);
+			return MetaType.GetMetaTypeFromValue(dataType, null, false, true);
 		}
 
-		internal static MetaType GetMetaTypeFromValue(object value, bool inferLen = true, bool streamAllowed = true)
+		internal static MetaType GetMetaTypeFromValue(object value, bool streamAllowed = true)
 		{
-			if (value == null)
-			{
-				throw ADP.InvalidDataType("null");
-			}
-			if (value is DBNull)
-			{
-				throw ADP.InvalidDataType("DBNull");
-			}
-			Type type = value.GetType();
-			switch (Convert.GetTypeCode(value))
+			return MetaType.GetMetaTypeFromValue(value.GetType(), value, true, streamAllowed);
+		}
+
+		private static MetaType GetMetaTypeFromValue(Type dataType, object value, bool inferLen, bool streamAllowed)
+		{
+			switch (Type.GetTypeCode(dataType))
 			{
 			case TypeCode.Empty:
-				throw ADP.InvalidDataType("Empty");
+				throw ADP.InvalidDataType(TypeCode.Empty);
 			case TypeCode.Object:
-				if (type == typeof(byte[]))
+				if (dataType == typeof(byte[]))
 				{
 					if (!inferLen || ((byte[])value).Length <= 8000)
 					{
@@ -460,75 +305,75 @@ namespace System.Data.SqlClient
 				}
 				else
 				{
-					if (type == typeof(Guid))
+					if (dataType == typeof(Guid))
 					{
 						return MetaType.s_metaUniqueId;
 					}
-					if (type == typeof(object))
+					if (dataType == typeof(object))
 					{
 						return MetaType.s_metaVariant;
 					}
-					if (type == typeof(SqlBinary))
+					if (dataType == typeof(SqlBinary))
 					{
 						return MetaType.MetaVarBinary;
 					}
-					if (type == typeof(SqlBoolean))
+					if (dataType == typeof(SqlBoolean))
 					{
 						return MetaType.s_metaBit;
 					}
-					if (type == typeof(SqlByte))
+					if (dataType == typeof(SqlByte))
 					{
 						return MetaType.s_metaTinyInt;
 					}
-					if (type == typeof(SqlBytes))
+					if (dataType == typeof(SqlBytes))
 					{
 						return MetaType.MetaVarBinary;
 					}
-					if (type == typeof(SqlChars))
+					if (dataType == typeof(SqlChars))
 					{
 						return MetaType.MetaNVarChar;
 					}
-					if (type == typeof(SqlDateTime))
+					if (dataType == typeof(SqlDateTime))
 					{
 						return MetaType.s_metaDateTime;
 					}
-					if (type == typeof(SqlDouble))
+					if (dataType == typeof(SqlDouble))
 					{
 						return MetaType.s_metaFloat;
 					}
-					if (type == typeof(SqlGuid))
+					if (dataType == typeof(SqlGuid))
 					{
 						return MetaType.s_metaUniqueId;
 					}
-					if (type == typeof(SqlInt16))
+					if (dataType == typeof(SqlInt16))
 					{
 						return MetaType.s_metaSmallInt;
 					}
-					if (type == typeof(SqlInt32))
+					if (dataType == typeof(SqlInt32))
 					{
 						return MetaType.s_metaInt;
 					}
-					if (type == typeof(SqlInt64))
+					if (dataType == typeof(SqlInt64))
 					{
 						return MetaType.s_metaBigInt;
 					}
-					if (type == typeof(SqlMoney))
+					if (dataType == typeof(SqlMoney))
 					{
 						return MetaType.s_metaMoney;
 					}
-					if (type == typeof(SqlDecimal))
+					if (dataType == typeof(SqlDecimal))
 					{
 						return MetaType.MetaDecimal;
 					}
-					if (type == typeof(SqlSingle))
+					if (dataType == typeof(SqlSingle))
 					{
 						return MetaType.s_metaReal;
 					}
-					if (type == typeof(SqlXml))
+					if (dataType == typeof(SqlXml))
 					{
 						return MetaType.MetaXml;
 					}
-					if (type == typeof(SqlString))
+					if (dataType == typeof(SqlString))
 					{
 						if (!inferLen || ((SqlString)value).IsNull)
 						{
@@ -538,57 +383,63 @@ namespace System.Data.SqlClient
 					}
 					else
 					{
-						if (type == typeof(IEnumerable<DbDataRecord>) || type == typeof(DataTable))
+						if (dataType == typeof(IEnumerable<DbDataRecord>) || dataType == typeof(DataTable))
 						{
 							return MetaType.s_metaTable;
 						}
-						if (type == typeof(TimeSpan))
+						if (dataType == typeof(TimeSpan))
 						{
 							return MetaType.MetaTime;
 						}
-						if (type == typeof(DateTimeOffset))
+						if (dataType == typeof(DateTimeOffset))
 						{
 							return MetaType.MetaDateTimeOffset;
 						}
+						if (SqlUdtInfo.TryGetFromType(dataType) != null)
+						{
+							return MetaType.MetaUdt;
+						}
 						if (streamAllowed)
 						{
-							if (value is Stream)
+							if (typeof(Stream).IsAssignableFrom(dataType))
 							{
 								return MetaType.MetaVarBinary;
 							}
-							if (value is TextReader)
+							if (typeof(TextReader).IsAssignableFrom(dataType))
 							{
 								return MetaType.MetaNVarChar;
 							}
-							if (value is XmlReader)
+							if (typeof(XmlReader).IsAssignableFrom(dataType))
 							{
 								return MetaType.MetaXml;
 							}
 						}
-						throw ADP.UnknownDataType(type);
+						throw ADP.UnknownDataType(dataType);
 					}
 				}
 				break;
+			case TypeCode.DBNull:
+				throw ADP.InvalidDataType(TypeCode.DBNull);
 			case TypeCode.Boolean:
 				return MetaType.s_metaBit;
 			case TypeCode.Char:
-				throw ADP.InvalidDataType("Char");
+				throw ADP.InvalidDataType(TypeCode.Char);
 			case TypeCode.SByte:
-				throw ADP.InvalidDataType("SByte");
+				throw ADP.InvalidDataType(TypeCode.SByte);
 			case TypeCode.Byte:
 				return MetaType.s_metaTinyInt;
 			case TypeCode.Int16:
 				return MetaType.s_metaSmallInt;
 			case TypeCode.UInt16:
-				throw ADP.InvalidDataType("UInt16");
+				throw ADP.InvalidDataType(TypeCode.UInt16);
 			case TypeCode.Int32:
 				return MetaType.s_metaInt;
 			case TypeCode.UInt32:
-				throw ADP.InvalidDataType("UInt32");
+				throw ADP.InvalidDataType(TypeCode.UInt32);
 			case TypeCode.Int64:
 				return MetaType.s_metaBigInt;
 			case TypeCode.UInt64:
-				throw ADP.InvalidDataType("UInt64");
+				throw ADP.InvalidDataType(TypeCode.UInt64);
 			case TypeCode.Single:
 				return MetaType.s_metaReal;
 			case TypeCode.Double:
@@ -604,7 +455,7 @@ namespace System.Data.SqlClient
 				}
 				return MetaType.PromoteStringType((string)value);
 			}
-			throw ADP.UnknownDataType(type);
+			throw ADP.UnknownDataTypeCode(dataType, Type.GetTypeCode(dataType));
 		}
 
 		internal static object GetNullSqlValue(Type sqlType)
@@ -762,6 +613,12 @@ namespace System.Data.SqlClient
 				obj = ((SqlXml)sqlVal).Value;
 			}
 			return obj;
+		}
+
+		[Conditional("DEBUG")]
+		private static void AssertIsUserDefinedTypeInstance(object sqlValue, string failedAssertMessage)
+		{
+			SqlUserDefinedTypeAttribute[] array = (SqlUserDefinedTypeAttribute[])sqlValue.GetType().GetCustomAttributes(typeof(SqlUserDefinedTypeAttribute), true);
 		}
 
 		internal static object GetSqlValueFromComVariant(object comVal)

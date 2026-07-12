@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class SingleConverter : BaseNumberConverter
 	{
 		internal override bool AllowHex
@@ -31,11 +29,6 @@ namespace System.ComponentModel
 		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
 			return float.Parse(value, NumberStyles.Float, formatInfo);
-		}
-
-		internal override object FromString(string value, CultureInfo culture)
-		{
-			return float.Parse(value, culture);
 		}
 
 		internal override string ToString(object value, NumberFormatInfo formatInfo)

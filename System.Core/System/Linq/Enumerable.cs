@@ -134,8 +134,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			Enumerable.AppendPrependIterator<TSource> appendPrependIterator;
-			if ((appendPrependIterator = source as Enumerable.AppendPrependIterator<TSource>) == null)
+			Enumerable.AppendPrependIterator<TSource> appendPrependIterator = source as Enumerable.AppendPrependIterator<TSource>;
+			if (appendPrependIterator == null)
 			{
 				return new Enumerable.AppendPrepend1Iterator<TSource>(source, element, true);
 			}
@@ -148,8 +148,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			Enumerable.AppendPrependIterator<TSource> appendPrependIterator;
-			if ((appendPrependIterator = source as Enumerable.AppendPrependIterator<TSource>) == null)
+			Enumerable.AppendPrependIterator<TSource> appendPrependIterator = source as Enumerable.AppendPrependIterator<TSource>;
+			if (appendPrependIterator == null)
 			{
 				return new Enumerable.AppendPrepend1Iterator<TSource>(source, element, false);
 			}
@@ -870,8 +870,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("second");
 			}
-			Enumerable.ConcatIterator<TSource> concatIterator;
-			if ((concatIterator = first as Enumerable.ConcatIterator<TSource>) == null)
+			Enumerable.ConcatIterator<TSource> concatIterator = first as Enumerable.ConcatIterator<TSource>;
+			if (concatIterator == null)
 			{
 				return new Enumerable.Concat2Iterator<TSource>(first, second);
 			}
@@ -880,8 +880,8 @@ namespace System.Linq
 
 		public static bool Contains<TSource>(this IEnumerable<TSource> source, TSource value)
 		{
-			ICollection<TSource> collection;
-			if ((collection = source as ICollection<TSource>) == null)
+			ICollection<TSource> collection = source as ICollection<TSource>;
+			if (collection == null)
 			{
 				return source.Contains(value, null);
 			}
@@ -890,17 +890,28 @@ namespace System.Linq
 
 		public static bool Contains<TSource>(this IEnumerable<TSource> source, TSource value, IEqualityComparer<TSource> comparer)
 		{
-			if (comparer == null)
-			{
-				comparer = EqualityComparer<TSource>.Default;
-			}
 			if (source == null)
 			{
 				throw Error.ArgumentNull("source");
 			}
-			foreach (TSource tsource in source)
+			if (comparer == null)
 			{
-				if (comparer.Equals(tsource, value))
+				using (IEnumerator<TSource> enumerator = source.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						TSource tsource = enumerator.Current;
+						if (EqualityComparer<TSource>.Default.Equals(tsource, value))
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+			}
+			foreach (TSource tsource2 in source)
+			{
+				if (comparer.Equals(tsource2, value))
 				{
 					return true;
 				}
@@ -914,18 +925,18 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			ICollection<TSource> collection;
-			if ((collection = source as ICollection<TSource>) != null)
+			ICollection<TSource> collection = source as ICollection<TSource>;
+			if (collection != null)
 			{
 				return collection.Count;
 			}
-			IIListProvider<TSource> iilistProvider;
-			if ((iilistProvider = source as IIListProvider<TSource>) != null)
+			IIListProvider<TSource> iilistProvider = source as IIListProvider<TSource>;
+			if (iilistProvider != null)
 			{
 				return iilistProvider.GetCount(false);
 			}
-			ICollection collection2;
-			if ((collection2 = source as ICollection) != null)
+			ICollection collection2 = source as ICollection;
+			if (collection2 != null)
 			{
 				return collection2.Count;
 			}
@@ -1045,8 +1056,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IPartition<TSource> partition;
-			if ((partition = source as IPartition<TSource>) != null)
+			IPartition<TSource> partition = source as IPartition<TSource>;
+			if (partition != null)
 			{
 				bool flag;
 				TSource tsource = partition.TryGetElementAt(index, out flag);
@@ -1057,8 +1068,8 @@ namespace System.Linq
 			}
 			else
 			{
-				IList<TSource> list;
-				if ((list = source as IList<TSource>) != null)
+				IList<TSource> list = source as IList<TSource>;
+				if (list != null)
 				{
 					return list[index];
 				}
@@ -1086,16 +1097,16 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IPartition<TSource> partition;
-			if ((partition = source as IPartition<TSource>) != null)
+			IPartition<TSource> partition = source as IPartition<TSource>;
+			if (partition != null)
 			{
 				bool flag;
 				return partition.TryGetElementAt(index, out flag);
 			}
 			if (index >= 0)
 			{
-				IList<TSource> list;
-				if ((list = source as IList<TSource>) != null)
+				IList<TSource> list = source as IList<TSource>;
+				if (list != null)
 				{
 					if (index < list.Count)
 					{
@@ -1215,13 +1226,13 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IPartition<TSource> partition;
-			if ((partition = source as IPartition<TSource>) != null)
+			IPartition<TSource> partition = source as IPartition<TSource>;
+			if (partition != null)
 			{
 				return partition.TryGetFirst(out found);
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				if (list.Count > 0)
 				{
@@ -1254,8 +1265,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("predicate");
 			}
-			OrderedEnumerable<TSource> orderedEnumerable;
-			if ((orderedEnumerable = source as OrderedEnumerable<TSource>) != null)
+			OrderedEnumerable<TSource> orderedEnumerable = source as OrderedEnumerable<TSource>;
+			if (orderedEnumerable != null)
 			{
 				return orderedEnumerable.TryGetFirst(predicate, out found);
 			}
@@ -1554,13 +1565,13 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IPartition<TSource> partition;
-			if ((partition = source as IPartition<TSource>) != null)
+			IPartition<TSource> partition = source as IPartition<TSource>;
+			if (partition != null)
 			{
 				return partition.TryGetLast(out found);
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				int count = list.Count;
 				if (count > 0)
@@ -1600,13 +1611,13 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("predicate");
 			}
-			OrderedEnumerable<TSource> orderedEnumerable;
-			if ((orderedEnumerable = source as OrderedEnumerable<TSource>) != null)
+			OrderedEnumerable<TSource> orderedEnumerable = source as OrderedEnumerable<TSource>;
+			if (orderedEnumerable != null)
 			{
 				return orderedEnumerable.TryGetLast(predicate, out found);
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				for (int i = list.Count - 1; i >= 0; i--)
 				{
@@ -3481,16 +3492,16 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("selector");
 			}
-			Enumerable.Iterator<TSource> iterator;
-			if ((iterator = source as Enumerable.Iterator<TSource>) != null)
+			Enumerable.Iterator<TSource> iterator = source as Enumerable.Iterator<TSource>;
+			if (iterator != null)
 			{
 				return iterator.Select<TResult>(selector);
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
-				TSource[] array;
-				if ((array = source as TSource[]) != null)
+				TSource[] array = source as TSource[];
+				if (array != null)
 				{
 					if (array.Length != 0)
 					{
@@ -3500,8 +3511,8 @@ namespace System.Linq
 				}
 				else
 				{
-					List<TSource> list2;
-					if ((list2 = source as List<TSource>) != null)
+					List<TSource> list2 = source as List<TSource>;
+					if (list2 != null)
 					{
 						return new Enumerable.SelectListIterator<TSource, TResult>(list2, selector);
 					}
@@ -3510,8 +3521,8 @@ namespace System.Linq
 			}
 			else
 			{
-				IPartition<TSource> partition;
-				if ((partition = source as IPartition<TSource>) == null)
+				IPartition<TSource> partition = source as IPartition<TSource>;
+				if (partition == null)
 				{
 					return new Enumerable.SelectEnumerableIterator<TSource, TResult>(source, selector);
 				}
@@ -3682,27 +3693,33 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("second");
 			}
-			ICollection<TSource> collection;
-			ICollection<TSource> collection2;
-			if ((collection = first as ICollection<TSource>) != null && (collection2 = second as ICollection<TSource>) != null)
+			ICollection<TSource> collection = first as ICollection<TSource>;
+			if (collection != null)
 			{
-				if (collection.Count != collection2.Count)
+				ICollection<TSource> collection2 = second as ICollection<TSource>;
+				if (collection2 != null)
 				{
-					return false;
-				}
-				IList<TSource> list;
-				IList<TSource> list2;
-				if ((list = collection as IList<TSource>) != null && (list2 = collection2 as IList<TSource>) != null)
-				{
-					int count = collection.Count;
-					for (int i = 0; i < count; i++)
+					if (collection.Count != collection2.Count)
 					{
-						if (!comparer.Equals(list[i], list2[i]))
+						return false;
+					}
+					IList<TSource> list = collection as IList<TSource>;
+					if (list != null)
+					{
+						IList<TSource> list2 = collection2 as IList<TSource>;
+						if (list2 != null)
 						{
-							return false;
+							int count = collection.Count;
+							for (int i = 0; i < count; i++)
+							{
+								if (!comparer.Equals(list[i], list2[i]))
+								{
+									return false;
+								}
+							}
+							return true;
 						}
 					}
-					return true;
 				}
 			}
 			bool flag;
@@ -3729,8 +3746,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				int count = list.Count;
 				if (count == 0)
@@ -3797,8 +3814,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				int count = list.Count;
 				if (count == 0)
@@ -3867,7 +3884,6 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IPartition<TSource> partition;
 			if (count <= 0)
 			{
 				if (source is Enumerable.Iterator<TSource> || source is IPartition<TSource>)
@@ -3876,12 +3892,16 @@ namespace System.Linq
 				}
 				count = 0;
 			}
-			else if ((partition = source as IPartition<TSource>) != null)
+			else
 			{
-				return partition.Skip(count);
+				IPartition<TSource> partition = source as IPartition<TSource>;
+				if (partition != null)
+				{
+					return partition.Skip(count);
+				}
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				return new Enumerable.ListPartition<TSource>(list, count, int.MaxValue);
 			}
@@ -3940,29 +3960,31 @@ namespace System.Linq
 
 		private static IEnumerable<TSource> SkipWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
 		{
-			using (IEnumerator<TSource> e = source.GetEnumerator())
+			checked
 			{
-				int index = -1;
-				while (e.MoveNext())
+				using (IEnumerator<TSource> e = source.GetEnumerator())
 				{
-					int num = index;
-					index = checked(num + 1);
-					TSource tsource = e.Current;
-					if (!predicate(tsource, index))
+					int num = -1;
+					while (e.MoveNext())
 					{
-						yield return tsource;
-						while (e.MoveNext())
+						num++;
+						TSource tsource = e.Current;
+						if (!predicate(tsource, num))
 						{
-							TSource tsource2 = e.Current;
-							yield return tsource2;
+							yield return tsource;
+							while (e.MoveNext())
+							{
+								TSource tsource2 = e.Current;
+								yield return tsource2;
+							}
+							yield break;
 						}
-						yield break;
 					}
 				}
+				IEnumerator<TSource> e = null;
+				yield break;
+				yield break;
 			}
-			IEnumerator<TSource> e = null;
-			yield break;
-			yield break;
 		}
 
 		public static IEnumerable<TSource> SkipLast<TSource>(this IEnumerable<TSource> source, int count)
@@ -4392,13 +4414,13 @@ namespace System.Linq
 			{
 				return EmptyPartition<TSource>.Instance;
 			}
-			IPartition<TSource> partition;
-			if ((partition = source as IPartition<TSource>) != null)
+			IPartition<TSource> partition = source as IPartition<TSource>;
+			if (partition != null)
 			{
 				return partition.Take(count);
 			}
-			IList<TSource> list;
-			if ((list = source as IList<TSource>) != null)
+			IList<TSource> list = source as IList<TSource>;
+			if (list != null)
 			{
 				return new Enumerable.ListPartition<TSource>(list, 0, count - 1);
 			}
@@ -4517,10 +4539,10 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IIListProvider<TSource> iilistProvider;
-			if ((iilistProvider = source as IIListProvider<TSource>) == null)
+			IIListProvider<TSource> iilistProvider = source as IIListProvider<TSource>;
+			if (iilistProvider == null)
 			{
-				return EnumerableHelpers.ToArray<TSource>(source);
+				return global::System.Collections.Generic.EnumerableHelpers.ToArray<TSource>(source);
 			}
 			return iilistProvider.ToArray();
 		}
@@ -4531,8 +4553,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("source");
 			}
-			IIListProvider<TSource> iilistProvider;
-			if ((iilistProvider = source as IIListProvider<TSource>) == null)
+			IIListProvider<TSource> iilistProvider = source as IIListProvider<TSource>;
+			if (iilistProvider == null)
 			{
 				return new List<TSource>(source);
 			}
@@ -4555,21 +4577,21 @@ namespace System.Linq
 				throw Error.ArgumentNull("keySelector");
 			}
 			int num = 0;
-			ICollection<TSource> collection;
-			if ((collection = source as ICollection<TSource>) != null)
+			ICollection<TSource> collection = source as ICollection<TSource>;
+			if (collection != null)
 			{
 				num = collection.Count;
 				if (num == 0)
 				{
 					return new Dictionary<TKey, TSource>(comparer);
 				}
-				TSource[] array;
-				if ((array = collection as TSource[]) != null)
+				TSource[] array = collection as TSource[];
+				if (array != null)
 				{
 					return Enumerable.ToDictionary<TSource, TKey>(array, keySelector, comparer);
 				}
-				List<TSource> list;
-				if ((list = collection as List<TSource>) != null)
+				List<TSource> list = collection as List<TSource>;
+				if (list != null)
 				{
 					return Enumerable.ToDictionary<TSource, TKey>(list, keySelector, comparer);
 				}
@@ -4622,21 +4644,21 @@ namespace System.Linq
 				throw Error.ArgumentNull("elementSelector");
 			}
 			int num = 0;
-			ICollection<TSource> collection;
-			if ((collection = source as ICollection<TSource>) != null)
+			ICollection<TSource> collection = source as ICollection<TSource>;
+			if (collection != null)
 			{
 				num = collection.Count;
 				if (num == 0)
 				{
 					return new Dictionary<TKey, TElement>(comparer);
 				}
-				TSource[] array;
-				if ((array = collection as TSource[]) != null)
+				TSource[] array = collection as TSource[];
+				if (array != null)
 				{
 					return Enumerable.ToDictionary<TSource, TKey, TElement>(array, keySelector, elementSelector, comparer);
 				}
-				List<TSource> list;
-				if ((list = collection as List<TSource>) != null)
+				List<TSource> list = collection as List<TSource>;
+				if (list != null)
 				{
 					return Enumerable.ToDictionary<TSource, TKey, TElement>(list, keySelector, elementSelector, comparer);
 				}
@@ -4698,8 +4720,8 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("second");
 			}
-			Enumerable.UnionIterator<TSource> unionIterator;
-			if ((unionIterator = first as Enumerable.UnionIterator<TSource>) == null || !Utilities.AreEqualityComparersEqual<TSource>(comparer, unionIterator._comparer))
+			Enumerable.UnionIterator<TSource> unionIterator = first as Enumerable.UnionIterator<TSource>;
+			if (unionIterator == null || !Utilities.AreEqualityComparersEqual<TSource>(comparer, unionIterator._comparer))
 			{
 				return new Enumerable.UnionIterator2<TSource>(first, second, comparer);
 			}
@@ -4716,13 +4738,13 @@ namespace System.Linq
 			{
 				throw Error.ArgumentNull("predicate");
 			}
-			Enumerable.Iterator<TSource> iterator;
-			if ((iterator = source as Enumerable.Iterator<TSource>) != null)
+			Enumerable.Iterator<TSource> iterator = source as Enumerable.Iterator<TSource>;
+			if (iterator != null)
 			{
 				return iterator.Where(predicate);
 			}
-			TSource[] array;
-			if ((array = source as TSource[]) != null)
+			TSource[] array = source as TSource[];
+			if (array != null)
 			{
 				if (array.Length != 0)
 				{
@@ -4732,8 +4754,8 @@ namespace System.Linq
 			}
 			else
 			{
-				List<TSource> list;
-				if ((list = source as List<TSource>) != null)
+				List<TSource> list = source as List<TSource>;
+				if (list != null)
 				{
 					return new Enumerable.WhereListIterator<TSource>(list, predicate);
 				}
@@ -4924,7 +4946,7 @@ namespace System.Linq
 
 			private TSource[] LazyToArray()
 			{
-				LargeArrayBuilder<TSource> largeArrayBuilder = new LargeArrayBuilder<TSource>(true);
+				global::System.Collections.Generic.LargeArrayBuilder<TSource> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TSource>(true);
 				if (!this._appending)
 				{
 					largeArrayBuilder.SlowAdd(this._item);
@@ -4955,7 +4977,7 @@ namespace System.Linq
 					array[0] = this._item;
 					num = 1;
 				}
-				EnumerableHelpers.Copy<TSource>(this._source, array, num, count - 1);
+				global::System.Collections.Generic.EnumerableHelpers.Copy<TSource>(this._source, array, num, count - 1);
 				if (this._appending)
 				{
 					array[array.Length - 1] = this._item;
@@ -4981,8 +5003,8 @@ namespace System.Linq
 
 			public override int GetCount(bool onlyIfCheap)
 			{
-				IIListProvider<TSource> iilistProvider;
-				if ((iilistProvider = this._source as IIListProvider<TSource>) != null)
+				IIListProvider<TSource> iilistProvider = this._source as IIListProvider<TSource>;
+				if (iilistProvider != null)
 				{
 					int count = iilistProvider.GetCount(onlyIfCheap);
 					if (count != -1)
@@ -5115,8 +5137,8 @@ namespace System.Linq
 					array[num] = singleLinkedNode.Item;
 					num++;
 				}
-				ICollection<TSource> collection;
-				if ((collection = this._source as ICollection<TSource>) != null)
+				ICollection<TSource> collection = this._source as ICollection<TSource>;
+				if (collection != null)
 				{
 					collection.CopyTo(array, num);
 				}
@@ -5160,8 +5182,8 @@ namespace System.Linq
 
 			public override int GetCount(bool onlyIfCheap)
 			{
-				IIListProvider<TSource> iilistProvider;
-				if ((iilistProvider = this._source as IIListProvider<TSource>) != null)
+				IIListProvider<TSource> iilistProvider = this._source as IIListProvider<TSource>;
+				if (iilistProvider != null)
 				{
 					int count = iilistProvider.GetCount(onlyIfCheap);
 					if (count != -1)
@@ -5213,7 +5235,7 @@ namespace System.Linq
 			public override int GetCount(bool onlyIfCheap)
 			{
 				int num;
-				if (!EnumerableHelpers.TryGetCount<TSource>(this._first, out num))
+				if (!global::System.Collections.Generic.EnumerableHelpers.TryGetCount<TSource>(this._first, out num))
 				{
 					if (onlyIfCheap)
 					{
@@ -5222,7 +5244,7 @@ namespace System.Linq
 					num = this._first.Count<TSource>();
 				}
 				int num2;
-				if (!EnumerableHelpers.TryGetCount<TSource>(this._second, out num2))
+				if (!global::System.Collections.Generic.EnumerableHelpers.TryGetCount<TSource>(this._second, out num2))
 				{
 					if (onlyIfCheap)
 					{
@@ -5255,12 +5277,12 @@ namespace System.Linq
 				if (flag)
 				{
 					Marker marker = sparseArrayBuilder.Markers.First();
-					EnumerableHelpers.Copy<TSource>(this._first, array, 0, marker.Count);
+					global::System.Collections.Generic.EnumerableHelpers.Copy<TSource>(this._first, array, 0, marker.Count);
 				}
 				if (flag2)
 				{
 					Marker marker2 = sparseArrayBuilder.Markers.Last();
-					EnumerableHelpers.Copy<TSource>(this._second, array, marker2.Index, marker2.Count);
+					global::System.Collections.Generic.EnumerableHelpers.Copy<TSource>(this._second, array, marker2.Index, marker2.Count);
 				}
 				return array;
 			}
@@ -5364,7 +5386,7 @@ namespace System.Linq
 			private TSource[] LazyToArray()
 			{
 				SparseArrayBuilder<TSource> sparseArrayBuilder = new SparseArrayBuilder<TSource>(true);
-				ArrayBuilder<int> arrayBuilder = default(ArrayBuilder<int>);
+				global::System.Collections.Generic.ArrayBuilder<int> arrayBuilder = default(global::System.Collections.Generic.ArrayBuilder<int>);
 				int num = 0;
 				for (;;)
 				{
@@ -5380,11 +5402,11 @@ namespace System.Linq
 					num++;
 				}
 				TSource[] array = sparseArrayBuilder.ToArray();
-				ArrayBuilder<Marker> markers = sparseArrayBuilder.Markers;
+				global::System.Collections.Generic.ArrayBuilder<Marker> markers = sparseArrayBuilder.Markers;
 				for (int i = 0; i < markers.Count; i++)
 				{
 					Marker marker = markers[i];
-					EnumerableHelpers.Copy<TSource>(this.GetEnumerable(arrayBuilder[i]), array, marker.Index, marker.Count);
+					global::System.Collections.Generic.EnumerableHelpers.Copy<TSource>(this.GetEnumerable(arrayBuilder[i]), array, marker.Index, marker.Count);
 				}
 				return array;
 			}
@@ -5589,8 +5611,8 @@ namespace System.Linq
 				}
 				else
 				{
-					IIListProvider<TSource> iilistProvider;
-					num = (((iilistProvider = this._source as IIListProvider<TSource>) != null) ? iilistProvider.GetCount(true) : (-1));
+					IIListProvider<TSource> iilistProvider = this._source as IIListProvider<TSource>;
+					num = ((iilistProvider != null) ? iilistProvider.GetCount(true) : (-1));
 				}
 				if (num != 0)
 				{
@@ -6114,7 +6136,7 @@ namespace System.Linq
 						int num = this.Limit - 1;
 						int num2 = (this.HasLimit ? 0 : int.MinValue);
 						int num3 = (this.HasLimit ? this.Limit : int.MaxValue);
-						LargeArrayBuilder<TSource> largeArrayBuilder = new LargeArrayBuilder<TSource>(num3);
+						global::System.Collections.Generic.LargeArrayBuilder<TSource> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TSource>(num3);
 						do
 						{
 							num--;
@@ -6198,12 +6220,12 @@ namespace System.Linq
 
 			public override bool MoveNext()
 			{
-				int num = this._state;
-				if (num != 1)
+				int state = this._state;
+				if (state != 1)
 				{
-					if (num == 2)
+					if (state == 2)
 					{
-						num = this._current + 1;
+						int num = this._current + 1;
 						this._current = num;
 						if (num != this._end)
 						{
@@ -6425,8 +6447,7 @@ namespace System.Linq
 					this.Dispose();
 					return false;
 				}
-				int state = this._state;
-				if (state == 1)
+				if (this._state == 1)
 				{
 					Buffer<TSource> buffer = new Buffer<TSource>(this._source);
 					this._buffer = buffer._items;
@@ -6465,30 +6486,27 @@ namespace System.Linq
 
 			public int GetCount(bool onlyIfCheap)
 			{
-				if (onlyIfCheap)
+				if (!onlyIfCheap)
 				{
-					IEnumerable<TSource> source = this._source;
-					if (source != null)
-					{
-						IIListProvider<TSource> iilistProvider;
-						if ((iilistProvider = source as IIListProvider<TSource>) != null)
-						{
-							return iilistProvider.GetCount(true);
-						}
-						ICollection<TSource> collection;
-						if ((collection = source as ICollection<TSource>) != null)
-						{
-							return collection.Count;
-						}
-						ICollection collection2;
-						if ((collection2 = source as ICollection) != null)
-						{
-							return collection2.Count;
-						}
-					}
+					return this._source.Count<TSource>();
+				}
+				IEnumerable<TSource> source = this._source;
+				IIListProvider<TSource> iilistProvider = source as IIListProvider<TSource>;
+				if (iilistProvider != null)
+				{
+					return iilistProvider.GetCount(true);
+				}
+				ICollection<TSource> collection = source as ICollection<TSource>;
+				if (collection != null)
+				{
+					return collection.Count;
+				}
+				ICollection collection2 = source as ICollection;
+				if (collection2 == null)
+				{
 					return -1;
 				}
-				return this._source.Count<TSource>();
+				return collection2.Count;
 			}
 
 			private readonly IEnumerable<TSource> _source;
@@ -6550,7 +6568,7 @@ namespace System.Linq
 
 			public TResult[] ToArray()
 			{
-				LargeArrayBuilder<TResult> largeArrayBuilder = new LargeArrayBuilder<TResult>(true);
+				global::System.Collections.Generic.LargeArrayBuilder<TResult> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TResult>(true);
 				foreach (TSource tsource in this._source)
 				{
 					largeArrayBuilder.Add(this._selector(tsource));
@@ -7078,7 +7096,7 @@ namespace System.Linq
 
 			private TResult[] LazyToArray()
 			{
-				LargeArrayBuilder<TResult> largeArrayBuilder = new LargeArrayBuilder<TResult>(true);
+				global::System.Collections.Generic.LargeArrayBuilder<TResult> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TResult>(true);
 				foreach (TSource tsource in this._source)
 				{
 					largeArrayBuilder.Add(this._selector(tsource));
@@ -7398,7 +7416,7 @@ namespace System.Linq
 			public TResult[] ToArray()
 			{
 				SparseArrayBuilder<TResult> sparseArrayBuilder = new SparseArrayBuilder<TResult>(true);
-				ArrayBuilder<IEnumerable<TResult>> arrayBuilder = default(ArrayBuilder<IEnumerable<TResult>>);
+				global::System.Collections.Generic.ArrayBuilder<IEnumerable<TResult>> arrayBuilder = default(global::System.Collections.Generic.ArrayBuilder<IEnumerable<TResult>>);
 				foreach (TSource tsource in this._source)
 				{
 					IEnumerable<TResult> enumerable = this._selector(tsource);
@@ -7408,11 +7426,11 @@ namespace System.Linq
 					}
 				}
 				TResult[] array = sparseArrayBuilder.ToArray();
-				ArrayBuilder<Marker> markers = sparseArrayBuilder.Markers;
+				global::System.Collections.Generic.ArrayBuilder<Marker> markers = sparseArrayBuilder.Markers;
 				for (int i = 0; i < markers.Count; i++)
 				{
 					Marker marker = markers[i];
-					EnumerableHelpers.Copy<TResult>(arrayBuilder[i], array, marker.Index, marker.Count);
+					global::System.Collections.Generic.EnumerableHelpers.Copy<TResult>(arrayBuilder[i], array, marker.Index, marker.Count);
 				}
 				return array;
 			}
@@ -7722,7 +7740,7 @@ namespace System.Linq
 
 			public TSource[] ToArray()
 			{
-				LargeArrayBuilder<TSource> largeArrayBuilder = new LargeArrayBuilder<TSource>(true);
+				global::System.Collections.Generic.LargeArrayBuilder<TSource> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TSource>(true);
 				foreach (TSource tsource in this._source)
 				{
 					if (this._predicate(tsource))
@@ -7818,7 +7836,7 @@ namespace System.Linq
 
 			public TSource[] ToArray()
 			{
-				LargeArrayBuilder<TSource> largeArrayBuilder = new LargeArrayBuilder<TSource>(this._source.Length);
+				global::System.Collections.Generic.LargeArrayBuilder<TSource> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TSource>(this._source.Length);
 				foreach (TSource tsource in this._source)
 				{
 					if (this._predicate(tsource))
@@ -7921,7 +7939,7 @@ namespace System.Linq
 
 			public TSource[] ToArray()
 			{
-				LargeArrayBuilder<TSource> largeArrayBuilder = new LargeArrayBuilder<TSource>(this._source.Count);
+				global::System.Collections.Generic.LargeArrayBuilder<TSource> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TSource>(this._source.Count);
 				for (int i = 0; i < this._source.Count; i++)
 				{
 					TSource tsource = this._source[i];
@@ -8021,7 +8039,7 @@ namespace System.Linq
 
 			public TResult[] ToArray()
 			{
-				LargeArrayBuilder<TResult> largeArrayBuilder = new LargeArrayBuilder<TResult>(this._source.Length);
+				global::System.Collections.Generic.LargeArrayBuilder<TResult> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TResult>(this._source.Length);
 				foreach (TSource tsource in this._source)
 				{
 					if (this._predicate(tsource))
@@ -8123,7 +8141,7 @@ namespace System.Linq
 
 			public TResult[] ToArray()
 			{
-				LargeArrayBuilder<TResult> largeArrayBuilder = new LargeArrayBuilder<TResult>(this._source.Count);
+				global::System.Collections.Generic.LargeArrayBuilder<TResult> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TResult>(this._source.Count);
 				for (int i = 0; i < this._source.Count; i++)
 				{
 					TSource tsource = this._source[i];
@@ -8238,7 +8256,7 @@ namespace System.Linq
 
 			public TResult[] ToArray()
 			{
-				LargeArrayBuilder<TResult> largeArrayBuilder = new LargeArrayBuilder<TResult>(true);
+				global::System.Collections.Generic.LargeArrayBuilder<TResult> largeArrayBuilder = new global::System.Collections.Generic.LargeArrayBuilder<TResult>(true);
 				foreach (TSource tsource in this._source)
 				{
 					if (this._predicate(tsource))

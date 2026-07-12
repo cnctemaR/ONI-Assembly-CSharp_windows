@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB598}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F12}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestAssetBundleModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -19,20 +19,24 @@
     <Compile Include="UnityWebRequestAssetBundle.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB567}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EDE}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB59A}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713F14}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

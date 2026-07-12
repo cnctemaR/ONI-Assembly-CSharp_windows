@@ -555,8 +555,10 @@ namespace UnityEngine.Timeline
 		{
 			double num = double.MaxValue;
 			double num2 = double.MinValue;
-			foreach (IMarker marker in this.GetMarkers())
+			int count = this.m_Markers.Count;
+			for (int i = 0; i < this.m_Markers.Count; i++)
 			{
+				IMarker marker = this.m_Markers[i];
 				if (marker is INotification)
 				{
 					if (marker.time < num)
@@ -584,8 +586,17 @@ namespace UnityEngine.Timeline
 		private Playable CreateNotificationsPlayable(PlayableGraph graph, Playable mixerPlayable, GameObject go, Playable timelinePlayable)
 		{
 			TrackAsset.s_BuildData.markerList.Clear();
-			this.GatherNotificiations(TrackAsset.s_BuildData.markerList);
-			ScriptPlayable<TimeNotificationBehaviour> scriptPlayable = NotificationUtilities.CreateNotificationsPlayable(graph, TrackAsset.s_BuildData.markerList, go);
+			this.GatherNotifications(TrackAsset.s_BuildData.markerList);
+			PlayableDirector playableDirector;
+			ScriptPlayable<TimeNotificationBehaviour> scriptPlayable;
+			if (go.TryGetComponent<PlayableDirector>(out playableDirector))
+			{
+				scriptPlayable = NotificationUtilities.CreateNotificationsPlayable(graph, TrackAsset.s_BuildData.markerList, playableDirector);
+			}
+			else
+			{
+				scriptPlayable = NotificationUtilities.CreateNotificationsPlayable(graph, TrackAsset.s_BuildData.markerList, this.timelineAsset);
+			}
 			if (scriptPlayable.IsValid<ScriptPlayable<TimeNotificationBehaviour>>())
 			{
 				scriptPlayable.GetBehaviour().timeSource = timelinePlayable;
@@ -603,9 +614,9 @@ namespace UnityEngine.Timeline
 		{
 			this.UpdateDuration();
 			Playable playable = Playable.Null;
-			if (this.CanCompileClipsRecursive())
+			if (this.CanCreateMixerRecursive())
 			{
-				playable = this.OnCreateClipPlayableGraph(graph, go, tree);
+				playable = this.CreateMixerPlayableGraph(graph, go, tree);
 			}
 			Playable playable2 = this.CreateNotificationsPlayable(graph, playable, go, timelinePlayable);
 			TrackAsset.s_BuildData.Clear();
@@ -646,7 +657,7 @@ namespace UnityEngine.Timeline
 
 		private void GatherCompilableTracks(IList<TrackAsset> tracks)
 		{
-			if (!this.muted && this.CanCompileClips())
+			if (!this.muted && this.CanCreateTrackMixer())
 			{
 				tracks.Add(this);
 			}
@@ -659,7 +670,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		private void GatherNotificiations(List<IMarker> markers)
+		private void GatherNotifications(List<IMarker> markers)
 		{
 			if (!this.muted && this.CanCompileNotifications())
 			{
@@ -669,12 +680,12 @@ namespace UnityEngine.Timeline
 			{
 				if (trackAsset != null)
 				{
-					trackAsset.GatherNotificiations(markers);
+					trackAsset.GatherNotifications(markers);
 				}
 			}
 		}
 
-		internal virtual Playable OnCreateClipPlayableGraph(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
+		internal virtual Playable CreateMixerPlayableGraph(PlayableGraph graph, GameObject go, IntervalTree<RuntimeElement> tree)
 		{
 			if (tree == null)
 			{
@@ -839,6 +850,8 @@ namespace UnityEngine.Timeline
 
 		internal virtual void GetEvaluationTime(out double outStart, out double outDuration)
 		{
+			outStart = 0.0;
+			outDuration = 1.0;
 			outStart = double.PositiveInfinity;
 			double num = double.NegativeInfinity;
 			if (this.hasCurves)
@@ -1009,8 +1022,10 @@ namespace UnityEngine.Timeline
 				return 0.0;
 			}
 			double num = 0.0;
-			foreach (IMarker marker in this.GetMarkers())
+			int count = this.m_Markers.Count;
+			for (int i = 0; i < count; i++)
 			{
+				IMarker marker = this.m_Markers[i];
 				if (marker is INotification)
 				{
 					num = Math.Max(num, marker.time);
@@ -1024,13 +1039,18 @@ namespace UnityEngine.Timeline
 			return this.hasClips || this.hasCurves;
 		}
 
+		public virtual bool CanCreateTrackMixer()
+		{
+			return this.CanCompileClips();
+		}
+
 		internal bool IsCompilable()
 		{
 			if (typeof(GroupTrack).IsAssignableFrom(base.GetType()))
 			{
 				return false;
 			}
-			bool flag = !this.mutedInHierarchy && (this.CanCompileClips() || this.CanCompileNotifications());
+			bool flag = !this.mutedInHierarchy && (this.CanCreateTrackMixer() || this.CanCompileNotifications());
 			if (!flag)
 			{
 				using (IEnumerator<TrackAsset> enumerator = this.GetChildTracks().GetEnumerator())
@@ -1105,9 +1125,9 @@ namespace UnityEngine.Timeline
 			return this.supportsNotifications && this.m_Markers.HasNotifications();
 		}
 
-		private bool CanCompileClipsRecursive()
+		private bool CanCreateMixerRecursive()
 		{
-			if (this.CanCompileClips())
+			if (this.CanCreateTrackMixer())
 			{
 				return true;
 			}
@@ -1115,7 +1135,7 @@ namespace UnityEngine.Timeline
 			{
 				while (enumerator.MoveNext())
 				{
-					if (enumerator.Current.CanCompileClipsRecursive())
+					if (enumerator.Current.CanCreateMixerRecursive())
 					{
 						return true;
 					}

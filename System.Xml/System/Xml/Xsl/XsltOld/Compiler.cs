@@ -630,7 +630,7 @@ namespace System.Xml.Xsl.XsltOld
 
 		private static string GenerateUniqueClassName()
 		{
-			return "ScriptClass_" + Interlocked.Increment(ref Compiler.scriptClassCounter);
+			return "ScriptClass_" + Interlocked.Increment(ref Compiler.scriptClassCounter).ToString();
 		}
 
 		internal void AddScript(string source, ScriptingLanguage lang, string ns, string fileName, int lineNumber)

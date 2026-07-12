@@ -84,8 +84,8 @@ namespace System.Data
 			}
 		}
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue(false)]
+		[RefreshProperties(RefreshProperties.All)]
 		public bool ApplyDefaultSort
 		{
 			get

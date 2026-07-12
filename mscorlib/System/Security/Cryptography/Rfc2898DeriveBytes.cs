@@ -1,30 +1,43 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Buffers;
 using System.Text;
+using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
-	[ComVisible(true)]
 	public class Rfc2898DeriveBytes : DeriveBytes
 	{
-		public Rfc2898DeriveBytes(string password, int saltSize)
-			: this(password, saltSize, 1000)
+		public HashAlgorithmName HashAlgorithm { get; }
+
+		public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations)
+			: this(password, salt, iterations, HashAlgorithmName.SHA1)
 		{
 		}
 
-		[SecuritySafeCritical]
-		public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
+		public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations, HashAlgorithmName hashAlgorithm)
 		{
-			if (saltSize < 0)
+			if (salt == null)
 			{
-				throw new ArgumentOutOfRangeException("saltSize", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentNullException("salt");
 			}
-			byte[] array = new byte[saltSize];
-			Utils.StaticRandomNumberGenerator.GetBytes(array);
-			this.Salt = array;
-			this.IterationCount = iterations;
-			this.m_password = new UTF8Encoding(false).GetBytes(password);
-			this.m_hmacsha1 = new HMACSHA1(this.m_password);
+			if (salt.Length < 8)
+			{
+				throw new ArgumentException("Salt is not at least eight bytes.", "salt");
+			}
+			if (iterations <= 0)
+			{
+				throw new ArgumentOutOfRangeException("iterations", "Positive number required.");
+			}
+			if (password == null)
+			{
+				throw new NullReferenceException();
+			}
+			this._salt = salt.CloneByteArray();
+			this._iterations = (uint)iterations;
+			this._password = password.CloneByteArray();
+			this.HashAlgorithm = hashAlgorithm;
+			this._hmac = this.OpenHmac();
+			this._blockSize = this._hmac.HashSize >> 3;
 			this.Initialize();
 		}
 
@@ -34,17 +47,45 @@ namespace System.Security.Cryptography
 		}
 
 		public Rfc2898DeriveBytes(string password, byte[] salt, int iterations)
-			: this(new UTF8Encoding(false).GetBytes(password), salt, iterations)
+			: this(password, salt, iterations, HashAlgorithmName.SHA1)
 		{
 		}
 
-		[SecuritySafeCritical]
-		public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations)
+		public Rfc2898DeriveBytes(string password, byte[] salt, int iterations, HashAlgorithmName hashAlgorithm)
+			: this(Encoding.UTF8.GetBytes(password), salt, iterations, hashAlgorithm)
 		{
-			this.Salt = salt;
-			this.IterationCount = iterations;
-			this.m_password = password;
-			this.m_hmacsha1 = new HMACSHA1(password);
+		}
+
+		public Rfc2898DeriveBytes(string password, int saltSize)
+			: this(password, saltSize, 1000)
+		{
+		}
+
+		public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
+			: this(password, saltSize, iterations, HashAlgorithmName.SHA1)
+		{
+		}
+
+		public Rfc2898DeriveBytes(string password, int saltSize, int iterations, HashAlgorithmName hashAlgorithm)
+		{
+			if (saltSize < 0)
+			{
+				throw new ArgumentOutOfRangeException("saltSize", "Non-negative number required.");
+			}
+			if (saltSize < 8)
+			{
+				throw new ArgumentException("Salt is not at least eight bytes.", "saltSize");
+			}
+			if (iterations <= 0)
+			{
+				throw new ArgumentOutOfRangeException("iterations", "Positive number required.");
+			}
+			this._salt = Helpers.GenerateRandom(saltSize);
+			this._iterations = (uint)iterations;
+			this._password = Encoding.UTF8.GetBytes(password);
+			this.HashAlgorithm = hashAlgorithm;
+			this._hmac = this.OpenHmac();
+			this._blockSize = this._hmac.HashSize >> 3;
 			this.Initialize();
 		}
 
@@ -52,15 +93,15 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return (int)this.m_iterations;
+				return (int)this._iterations;
 			}
 			set
 			{
 				if (value <= 0)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Positive number required."));
+					throw new ArgumentOutOfRangeException("value", "Positive number required.");
 				}
-				this.m_iterations = (uint)value;
+				this._iterations = (uint)value;
 				this.Initialize();
 			}
 		}
@@ -69,7 +110,7 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return (byte[])this.m_salt.Clone();
+				return this._salt.CloneByteArray();
 			}
 			set
 			{
@@ -79,50 +120,80 @@ namespace System.Security.Cryptography
 				}
 				if (value.Length < 8)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Salt is not at least eight bytes."));
+					throw new ArgumentException("Salt is not at least eight bytes.");
 				}
-				this.m_salt = (byte[])value.Clone();
+				this._salt = value.CloneByteArray();
 				this.Initialize();
 			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (this._hmac != null)
+				{
+					this._hmac.Dispose();
+					this._hmac = null;
+				}
+				if (this._buffer != null)
+				{
+					Array.Clear(this._buffer, 0, this._buffer.Length);
+				}
+				if (this._password != null)
+				{
+					Array.Clear(this._password, 0, this._password.Length);
+				}
+				if (this._salt != null)
+				{
+					Array.Clear(this._salt, 0, this._salt.Length);
+				}
+			}
+			base.Dispose(disposing);
 		}
 
 		public override byte[] GetBytes(int cb)
 		{
 			if (cb <= 0)
 			{
-				throw new ArgumentOutOfRangeException("cb", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("cb", "Positive number required.");
 			}
 			byte[] array = new byte[cb];
 			int i = 0;
-			int num = this.m_endIndex - this.m_startIndex;
+			int num = this._endIndex - this._startIndex;
 			if (num > 0)
 			{
 				if (cb < num)
 				{
-					Buffer.InternalBlockCopy(this.m_buffer, this.m_startIndex, array, 0, cb);
-					this.m_startIndex += cb;
+					Buffer.BlockCopy(this._buffer, this._startIndex, array, 0, cb);
+					this._startIndex += cb;
 					return array;
 				}
-				Buffer.InternalBlockCopy(this.m_buffer, this.m_startIndex, array, 0, num);
-				this.m_startIndex = (this.m_endIndex = 0);
+				Buffer.BlockCopy(this._buffer, this._startIndex, array, 0, num);
+				this._startIndex = (this._endIndex = 0);
 				i += num;
 			}
 			while (i < cb)
 			{
 				byte[] array2 = this.Func();
 				int num2 = cb - i;
-				if (num2 <= 20)
+				if (num2 <= this._blockSize)
 				{
-					Buffer.InternalBlockCopy(array2, 0, array, i, num2);
+					Buffer.BlockCopy(array2, 0, array, i, num2);
 					i += num2;
-					Buffer.InternalBlockCopy(array2, num2, this.m_buffer, this.m_startIndex, 20 - num2);
-					this.m_endIndex += 20 - num2;
+					Buffer.BlockCopy(array2, num2, this._buffer, this._startIndex, this._blockSize - num2);
+					this._endIndex += this._blockSize - num2;
 					return array;
 				}
-				Buffer.InternalBlockCopy(array2, 0, array, i, 20);
-				i += 20;
+				Buffer.BlockCopy(array2, 0, array, i, this._blockSize);
+				i += this._blockSize;
 			}
 			return array;
+		}
+
+		public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
+		{
+			throw new PlatformNotSupportedException();
 		}
 
 		public override void Reset()
@@ -130,91 +201,104 @@ namespace System.Security.Cryptography
 			this.Initialize();
 		}
 
-		protected override void Dispose(bool disposing)
+		private HMAC OpenHmac()
 		{
-			base.Dispose(disposing);
-			if (disposing)
+			HashAlgorithmName hashAlgorithm = this.HashAlgorithm;
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
 			{
-				if (this.m_hmacsha1 != null)
-				{
-					((IDisposable)this.m_hmacsha1).Dispose();
-				}
-				if (this.m_buffer != null)
-				{
-					Array.Clear(this.m_buffer, 0, this.m_buffer.Length);
-				}
-				if (this.m_salt != null)
-				{
-					Array.Clear(this.m_salt, 0, this.m_salt.Length);
-				}
+				throw new CryptographicException("The hash algorithm name cannot be null or empty.");
 			}
+			if (hashAlgorithm == HashAlgorithmName.SHA1)
+			{
+				return new HMACSHA1(this._password);
+			}
+			if (hashAlgorithm == HashAlgorithmName.SHA256)
+			{
+				return new HMACSHA256(this._password);
+			}
+			if (hashAlgorithm == HashAlgorithmName.SHA384)
+			{
+				return new HMACSHA384(this._password);
+			}
+			if (hashAlgorithm == HashAlgorithmName.SHA512)
+			{
+				return new HMACSHA512(this._password);
+			}
+			throw new CryptographicException(SR.Format("'{0}' is not a known hash algorithm.", hashAlgorithm.Name));
 		}
 
 		private void Initialize()
 		{
-			if (this.m_buffer != null)
+			if (this._buffer != null)
 			{
-				Array.Clear(this.m_buffer, 0, this.m_buffer.Length);
+				Array.Clear(this._buffer, 0, this._buffer.Length);
 			}
-			this.m_buffer = new byte[20];
-			this.m_block = 1U;
-			this.m_startIndex = (this.m_endIndex = 0);
+			this._buffer = new byte[this._blockSize];
+			this._block = 1U;
+			this._startIndex = (this._endIndex = 0);
 		}
 
 		private byte[] Func()
 		{
-			byte[] array = Utils.Int(this.m_block);
-			this.m_hmacsha1.TransformBlock(this.m_salt, 0, this.m_salt.Length, null, 0);
-			this.m_hmacsha1.TransformBlock(array, 0, array.Length, null, 0);
-			this.m_hmacsha1.TransformFinalBlock(EmptyArray<byte>.Value, 0, 0);
-			byte[] array2 = this.m_hmacsha1.HashValue;
-			this.m_hmacsha1.Initialize();
-			byte[] array3 = array2;
-			int num = 2;
-			while ((long)num <= (long)((ulong)this.m_iterations))
+			byte[] array = new byte[this._salt.Length + 4];
+			Buffer.BlockCopy(this._salt, 0, array, 0, this._salt.Length);
+			Helpers.WriteInt(this._block, array, this._salt.Length);
+			byte[] array2 = ArrayPool<byte>.Shared.Rent(this._blockSize);
+			byte[] array5;
+			try
 			{
-				this.m_hmacsha1.TransformBlock(array2, 0, array2.Length, null, 0);
-				this.m_hmacsha1.TransformFinalBlock(EmptyArray<byte>.Value, 0, 0);
-				array2 = this.m_hmacsha1.HashValue;
-				for (int i = 0; i < 20; i++)
+				Span<byte> span = new Span<byte>(array2, 0, this._blockSize);
+				int num;
+				if (!this._hmac.TryComputeHash(array, span, out num) || num != this._blockSize)
 				{
-					byte[] array4 = array3;
-					int num2 = i;
-					array4[num2] ^= array2[i];
+					throw new CryptographicException();
 				}
-				this.m_hmacsha1.Initialize();
-				num++;
+				byte[] array3 = new byte[this._blockSize];
+				span.CopyTo(array3);
+				int num2 = 2;
+				while ((long)num2 <= (long)((ulong)this._iterations))
+				{
+					if (!this._hmac.TryComputeHash(span, span, out num) || num != this._blockSize)
+					{
+						throw new CryptographicException();
+					}
+					for (int i = 0; i < this._blockSize; i++)
+					{
+						byte[] array4 = array3;
+						int num3 = i;
+						array4[num3] ^= array2[i];
+					}
+					num2++;
+				}
+				this._block += 1U;
+				array5 = array3;
 			}
-			this.m_block += 1U;
-			return array3;
-		}
-
-		[SecuritySafeCritical]
-		public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV)
-		{
-			if (keySize < 0)
+			finally
 			{
-				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+				Array.Clear(array2, 0, this._blockSize);
+				ArrayPool<byte>.Shared.Return(array2, false);
 			}
-			throw new NotSupportedException("CspParameters are not supported by Mono");
+			return array5;
 		}
 
-		private byte[] m_buffer;
+		private const int MinimumSaltSize = 8;
 
-		private byte[] m_salt;
+		private readonly byte[] _password;
 
-		private HMACSHA1 m_hmacsha1;
+		private byte[] _salt;
 
-		private byte[] m_password;
+		private uint _iterations;
 
-		private uint m_iterations;
+		private HMAC _hmac;
 
-		private uint m_block;
+		private int _blockSize;
 
-		private int m_startIndex;
+		private byte[] _buffer;
 
-		private int m_endIndex;
+		private uint _block;
 
-		private const int BlockSize = 20;
+		private int _startIndex;
+
+		private int _endIndex;
 	}
 }

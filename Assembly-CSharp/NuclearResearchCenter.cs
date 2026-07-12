@@ -208,9 +208,9 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 
 		private static bool CanPreemptCB(Chore.Precondition.Context context)
 		{
-			Worker component = context.chore.driver.GetComponent<Worker>();
+			WorkerBase component = context.chore.driver.GetComponent<WorkerBase>();
 			float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(component).Evaluate();
-			Worker worker = context.consumerState.worker;
+			WorkerBase worker = context.consumerState.worker;
 			float num2 = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
 			TechInstance activeResearch = Research.Instance.GetActiveResearch();
 			if (activeResearch != null)

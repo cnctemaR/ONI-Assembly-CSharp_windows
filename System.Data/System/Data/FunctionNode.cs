@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SqlTypes;
+using System.Runtime.CompilerServices;
 
 namespace System.Data
 {
@@ -10,6 +11,7 @@ namespace System.Data
 		internal FunctionNode(DataTable table, string name)
 			: base(table)
 		{
+			this._capturedLimiter = TypeLimiter.Capture();
 			this._name = name;
 			for (int i = 0; i < FunctionNode.s_funcs.Length; i++)
 			{
@@ -228,6 +230,7 @@ namespace System.Data
 			{
 				throw ExprException.InvalidType(text);
 			}
+			TypeLimiter.EnsureTypeIsAllowed(type2, this._capturedLimiter);
 			return type2;
 		}
 
@@ -307,21 +310,20 @@ namespace System.Data
 						{
 							return new Guid((string)argumentValues[0]);
 						}
-						if (!ExpressionNode.IsFloatSql(storageType2) || !ExpressionNode.IsIntegerSql(storageType))
+						if (ExpressionNode.IsFloatSql(storageType2) && ExpressionNode.IsIntegerSql(storageType))
 						{
-							return SqlConvert.ChangeType2(argumentValues[0], storageType, type, base.FormatProvider);
-						}
-						if (StorageType.Single == storageType2)
-						{
-							return SqlConvert.ChangeType2((float)SqlConvert.ChangeType2(argumentValues[0], StorageType.Single, typeof(float), base.FormatProvider), storageType, type, base.FormatProvider);
-						}
-						if (StorageType.Double == storageType2)
-						{
-							return SqlConvert.ChangeType2((double)SqlConvert.ChangeType2(argumentValues[0], StorageType.Double, typeof(double), base.FormatProvider), storageType, type, base.FormatProvider);
-						}
-						if (StorageType.Decimal == storageType2)
-						{
-							return SqlConvert.ChangeType2((decimal)SqlConvert.ChangeType2(argumentValues[0], StorageType.Decimal, typeof(decimal), base.FormatProvider), storageType, type, base.FormatProvider);
+							if (StorageType.Single == storageType2)
+							{
+								return SqlConvert.ChangeType2((float)SqlConvert.ChangeType2(argumentValues[0], StorageType.Single, typeof(float), base.FormatProvider), storageType, type, base.FormatProvider);
+							}
+							if (StorageType.Double == storageType2)
+							{
+								return SqlConvert.ChangeType2((double)SqlConvert.ChangeType2(argumentValues[0], StorageType.Double, typeof(double), base.FormatProvider), storageType, type, base.FormatProvider);
+							}
+							if (StorageType.Decimal == storageType2)
+							{
+								return SqlConvert.ChangeType2((decimal)SqlConvert.ChangeType2(argumentValues[0], StorageType.Decimal, typeof(decimal), base.FormatProvider), storageType, type, base.FormatProvider);
+							}
 						}
 						return SqlConvert.ChangeType2(argumentValues[0], storageType, type, base.FormatProvider);
 					}
@@ -506,6 +508,9 @@ namespace System.Data
 		internal const int initialCapacity = 1;
 
 		internal ExpressionNode[] _arguments;
+
+		[Nullable(2)]
+		private readonly TypeLimiter _capturedLimiter;
 
 		private static readonly Function[] s_funcs = new Function[]
 		{

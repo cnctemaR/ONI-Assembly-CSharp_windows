@@ -245,7 +245,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		}
 		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
 		{
-			float num = RationTracker.Get().CountRationsByFoodType(this.info.id, inventory, true);
+			float num = WorldResourceAmountTracker<RationTracker>.Get().CountAmountForItemWithID(this.info.id, inventory, true);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
 		}
 		float amount2 = inventory.GetAmount(this.info.id.ToTag(), false);

@@ -28,12 +28,25 @@ public class BulbPlantConfig : IEntityConfig
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "BulbPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.DESC, Assets.GetAnim("seed_potted_bulb_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 12, global::STRINGS.CREATURES.SPECIES.BULBPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, "", false, null), "BulbPlant_preview", Assets.GetAnim("potted_bulb_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "BulbPlantSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BULBPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_potted_bulb_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.BULBPLANT.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 12, text8, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, null, "", false, null), "BulbPlant_preview", Assets.GetAnim("potted_bulb_kanim"), "place", 1, 1);
 		DiseaseDropper.Def def = gameObject.AddOrGetDef<DiseaseDropper.Def>();
 		def.diseaseIdx = Db.Get().Diseases.GetIndex(Db.Get().Diseases.PollenGerms.id);
 		def.singleEmitQuantity = 0;
 		def.averageEmitPerSecond = 5000;
 		def.emitFrequency = 5f;
+		gameObject.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = "PollenGerms";
 		return gameObject;
 	}
 

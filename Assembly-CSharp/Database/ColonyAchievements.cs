@@ -36,7 +36,7 @@ namespace Database
 				}, COLONY_ACHIEVEMENTS.STUDY_ARTIFACTS.MESSAGE_TITLE, COLONY_ACHIEVEMENTS.STUDY_ARTIFACTS.MESSAGE_BODY, "victoryShorts/Artifact", "victoryLoops/Artifact_loop", new Action<KMonoBehaviour>(ArtifactSequence.Start), AudioMixerSnapshots.Get().VictoryNISGenericSnapshot, "cosmic_archaeology", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null);
 				base.Add(this.CollectedArtifacts);
 			}
-			if (DlcManager.GetOwnedDLCIds().Contains("DLC2_ID"))
+			if (DlcManager.IsContentSubscribed("DLC2_ID"))
 			{
 				this.ActivateGeothermalPlant = base.Add(new ColonyAchievement("ActivatedGeothermalPlant", "WINCONDITION_GEOPLANT", COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.NAME, COLONY_ACHIEVEMENTS.ACTIVATEGEOTHERMALPLANT.DESCRIPTION, true, new List<ColonyAchievementRequirement>
 				{
@@ -211,55 +211,145 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "job_suitability", null, null, null));
 			if (DlcManager.IsExpansion1Active())
 			{
-				this.FirstTeleport = base.Add(new ColonyAchievement("FirstTeleport", "FIRST_TELEPORT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new TeleportDuplicant(),
-					new DefrostDuplicant()
-				}, "", "", "", "", null, default(EventReference), "first_teleport_of_call", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.SoftLaunch = base.Add(new ColonyAchievement("SoftLaunch", "SOFT_LAUNCH", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new BuildALaunchPad()
-				}, "", "", "", "", null, default(EventReference), "soft_launch", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.GMOOK = base.Add(new ColonyAchievement("GMOOK", "GMO_OK", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new AnalyzeSeed(BasicFabricMaterialPlantConfig.ID),
-					new AnalyzeSeed("BasicSingleHarvestPlant"),
-					new AnalyzeSeed("GasGrass"),
-					new AnalyzeSeed("MushroomPlant"),
-					new AnalyzeSeed("PrickleFlower"),
-					new AnalyzeSeed("SaltPlant"),
-					new AnalyzeSeed(SeaLettuceConfig.ID),
-					new AnalyzeSeed("SpiceVine"),
-					new AnalyzeSeed("SwampHarvestPlant"),
-					new AnalyzeSeed(SwampLilyConfig.ID),
-					new AnalyzeSeed("WormPlant"),
-					new AnalyzeSeed("ColdWheat"),
-					new AnalyzeSeed("BeanPlant")
-				}, "", "", "", "", null, default(EventReference), "gmo_ok", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.MineTheGap = base.Add(new ColonyAchievement("MineTheGap", "MINE_THE_GAP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new HarvestAmountFromSpacePOI(1000000f)
-				}, "", "", "", "", null, default(EventReference), "mine_the_gap", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.LandedOnAllWorlds = base.Add(new ColonyAchievement("LandedOnAllWorlds", "LANDED_ON_ALL_WORLDS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new LandOnAllWorlds()
-				}, "", "", "", "", null, default(EventReference), "land_on_all_worlds", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.RadicalTrip = base.Add(new ColonyAchievement("RadicalTrip", "RADICAL_TRIP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, 10), false, new List<ColonyAchievementRequirement>
-				{
-					new RadBoltTravelDistance(10000)
-				}, "", "", "", "", null, default(EventReference), "radical_trip", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.SweeterThanHoney = base.Add(new ColonyAchievement("SweeterThanHoney", "SWEETER_THAN_HONEY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
-				{
-					new HarvestAHiveWithoutBeingStung()
-				}, "", "", "", "", null, default(EventReference), "sweeter_than_honey", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.SurviveInARocket = base.Add(new ColonyAchievement("SurviveInARocket", "SURVIVE_IN_A_ROCKET", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET_DESCRIPTION, 10, 25), false, new List<ColonyAchievementRequirement>
-				{
-					new SurviveARocketWithMinimumMorale(25f, 10)
-				}, "", "", "", "", null, default(EventReference), "survive_a_rocket", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
-				this.RunAReactor = base.Add(new ColonyAchievement("RunAReactor", "REACTOR_USAGE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE_DESCRIPTION, 5), false, new List<ColonyAchievementRequirement>
-				{
-					new RunReactorForXDays(5)
-				}, "", "", "", "", null, default(EventReference), "thats_rad", DlcManager.AVAILABLE_EXPANSION1_ONLY, "EXPANSION1_ID", null));
+				string text = "FirstTeleport";
+				string text2 = "FIRST_TELEPORT";
+				string text3 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT;
+				string text4 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT_DESCRIPTION;
+				bool flag = false;
+				List<ColonyAchievementRequirement> list = new List<ColonyAchievementRequirement>();
+				list.Add(new TeleportDuplicant());
+				list.Add(new DefrostDuplicant());
+				string text5 = "";
+				string text6 = "";
+				string text7 = "";
+				string text8 = "";
+				Action<KMonoBehaviour> action = null;
+				string[] array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.FirstTeleport = base.Add(new ColonyAchievement(text, text2, text3, text4, flag, list, text5, text6, text7, text8, action, default(EventReference), "first_teleport_of_call", array, "EXPANSION1_ID", null));
+				string text9 = "SoftLaunch";
+				string text10 = "SOFT_LAUNCH";
+				string text11 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH;
+				string text12 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH_DESCRIPTION;
+				bool flag2 = false;
+				List<ColonyAchievementRequirement> list2 = new List<ColonyAchievementRequirement>();
+				list2.Add(new BuildALaunchPad());
+				string text13 = "";
+				string text14 = "";
+				string text15 = "";
+				string text16 = "";
+				Action<KMonoBehaviour> action2 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.SoftLaunch = base.Add(new ColonyAchievement(text9, text10, text11, text12, flag2, list2, text13, text14, text15, text16, action2, default(EventReference), "soft_launch", array, "EXPANSION1_ID", null));
+				string text17 = "GMOOK";
+				string text18 = "GMO_OK";
+				string text19 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK;
+				string text20 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK_DESCRIPTION;
+				bool flag3 = false;
+				List<ColonyAchievementRequirement> list3 = new List<ColonyAchievementRequirement>();
+				list3.Add(new AnalyzeSeed(BasicFabricMaterialPlantConfig.ID));
+				list3.Add(new AnalyzeSeed("BasicSingleHarvestPlant"));
+				list3.Add(new AnalyzeSeed("GasGrass"));
+				list3.Add(new AnalyzeSeed("MushroomPlant"));
+				list3.Add(new AnalyzeSeed("PrickleFlower"));
+				list3.Add(new AnalyzeSeed("SaltPlant"));
+				list3.Add(new AnalyzeSeed(SeaLettuceConfig.ID));
+				list3.Add(new AnalyzeSeed("SpiceVine"));
+				list3.Add(new AnalyzeSeed("SwampHarvestPlant"));
+				list3.Add(new AnalyzeSeed(SwampLilyConfig.ID));
+				list3.Add(new AnalyzeSeed("WormPlant"));
+				list3.Add(new AnalyzeSeed("ColdWheat"));
+				list3.Add(new AnalyzeSeed("BeanPlant"));
+				string text21 = "";
+				string text22 = "";
+				string text23 = "";
+				string text24 = "";
+				Action<KMonoBehaviour> action3 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.GMOOK = base.Add(new ColonyAchievement(text17, text18, text19, text20, flag3, list3, text21, text22, text23, text24, action3, default(EventReference), "gmo_ok", array, "EXPANSION1_ID", null));
+				string text25 = "MineTheGap";
+				string text26 = "MINE_THE_GAP";
+				string text27 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP;
+				string text28 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP_DESCRIPTION;
+				bool flag4 = false;
+				List<ColonyAchievementRequirement> list4 = new List<ColonyAchievementRequirement>();
+				list4.Add(new HarvestAmountFromSpacePOI(1000000f));
+				string text29 = "";
+				string text30 = "";
+				string text31 = "";
+				string text32 = "";
+				Action<KMonoBehaviour> action4 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.MineTheGap = base.Add(new ColonyAchievement(text25, text26, text27, text28, flag4, list4, text29, text30, text31, text32, action4, default(EventReference), "mine_the_gap", array, "EXPANSION1_ID", null));
+				string text33 = "LandedOnAllWorlds";
+				string text34 = "LANDED_ON_ALL_WORLDS";
+				string text35 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS;
+				string text36 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS_DESCRIPTION;
+				bool flag5 = false;
+				List<ColonyAchievementRequirement> list5 = new List<ColonyAchievementRequirement>();
+				list5.Add(new LandOnAllWorlds());
+				string text37 = "";
+				string text38 = "";
+				string text39 = "";
+				string text40 = "";
+				Action<KMonoBehaviour> action5 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.LandedOnAllWorlds = base.Add(new ColonyAchievement(text33, text34, text35, text36, flag5, list5, text37, text38, text39, text40, action5, default(EventReference), "land_on_all_worlds", array, "EXPANSION1_ID", null));
+				string text41 = "RadicalTrip";
+				string text42 = "RADICAL_TRIP";
+				string text43 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP;
+				string text44 = string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, 10);
+				bool flag6 = false;
+				List<ColonyAchievementRequirement> list6 = new List<ColonyAchievementRequirement>();
+				list6.Add(new RadBoltTravelDistance(10000));
+				string text45 = "";
+				string text46 = "";
+				string text47 = "";
+				string text48 = "";
+				Action<KMonoBehaviour> action6 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.RadicalTrip = base.Add(new ColonyAchievement(text41, text42, text43, text44, flag6, list6, text45, text46, text47, text48, action6, default(EventReference), "radical_trip", array, "EXPANSION1_ID", null));
+				string text49 = "SweeterThanHoney";
+				string text50 = "SWEETER_THAN_HONEY";
+				string text51 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY;
+				string text52 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY_DESCRIPTION;
+				bool flag7 = false;
+				List<ColonyAchievementRequirement> list7 = new List<ColonyAchievementRequirement>();
+				list7.Add(new HarvestAHiveWithoutBeingStung());
+				string text53 = "";
+				string text54 = "";
+				string text55 = "";
+				string text56 = "";
+				Action<KMonoBehaviour> action7 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.SweeterThanHoney = base.Add(new ColonyAchievement(text49, text50, text51, text52, flag7, list7, text53, text54, text55, text56, action7, default(EventReference), "sweeter_than_honey", array, "EXPANSION1_ID", null));
+				string text57 = "SurviveInARocket";
+				string text58 = "SURVIVE_IN_A_ROCKET";
+				string text59 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET;
+				string text60 = string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET_DESCRIPTION, 10, 25);
+				bool flag8 = false;
+				List<ColonyAchievementRequirement> list8 = new List<ColonyAchievementRequirement>();
+				list8.Add(new SurviveARocketWithMinimumMorale(25f, 10));
+				string text61 = "";
+				string text62 = "";
+				string text63 = "";
+				string text64 = "";
+				Action<KMonoBehaviour> action8 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.SurviveInARocket = base.Add(new ColonyAchievement(text57, text58, text59, text60, flag8, list8, text61, text62, text63, text64, action8, default(EventReference), "survive_a_rocket", array, "EXPANSION1_ID", null));
+				string text65 = "RunAReactor";
+				string text66 = "REACTOR_USAGE";
+				string text67 = COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE;
+				string text68 = string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE_DESCRIPTION, 5);
+				bool flag9 = false;
+				List<ColonyAchievementRequirement> list9 = new List<ColonyAchievementRequirement>();
+				list9.Add(new RunReactorForXDays(5));
+				string text69 = "";
+				string text70 = "";
+				string text71 = "";
+				string text72 = "";
+				Action<KMonoBehaviour> action9 = null;
+				array = DlcManager.AVAILABLE_EXPANSION1_ONLY;
+				this.RunAReactor = base.Add(new ColonyAchievement(text65, text66, text67, text68, flag9, list9, text69, text70, text71, text72, action9, default(EventReference), "thats_rad", array, "EXPANSION1_ID", null));
 			}
 		}
 

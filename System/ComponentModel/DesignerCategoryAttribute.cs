@@ -7,33 +7,15 @@ namespace System.ComponentModel
 	{
 		public DesignerCategoryAttribute()
 		{
-			this.category = string.Empty;
+			this.Category = string.Empty;
 		}
 
 		public DesignerCategoryAttribute(string category)
 		{
-			this.category = category;
+			this.Category = category;
 		}
 
-		public string Category
-		{
-			get
-			{
-				return this.category;
-			}
-		}
-
-		public override object TypeId
-		{
-			get
-			{
-				if (this.typeId == null)
-				{
-					this.typeId = base.GetType().FullName + this.Category;
-				}
-				return this.typeId;
-			}
-		}
+		public string Category { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -42,22 +24,26 @@ namespace System.ComponentModel
 				return true;
 			}
 			DesignerCategoryAttribute designerCategoryAttribute = obj as DesignerCategoryAttribute;
-			return designerCategoryAttribute != null && designerCategoryAttribute.category == this.category;
+			return designerCategoryAttribute != null && designerCategoryAttribute.Category == this.Category;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.category.GetHashCode();
+			return this.Category.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.category.Equals(DesignerCategoryAttribute.Default.Category);
+			return this.Category.Equals(DesignerCategoryAttribute.Default.Category);
 		}
 
-		private string category;
-
-		private string typeId;
+		public override object TypeId
+		{
+			get
+			{
+				return base.GetType().FullName + this.Category;
+			}
+		}
 
 		public static readonly DesignerCategoryAttribute Component = new DesignerCategoryAttribute("Component");
 

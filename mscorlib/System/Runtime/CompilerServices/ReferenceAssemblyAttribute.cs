@@ -12,17 +12,9 @@ namespace System.Runtime.CompilerServices
 
 		public ReferenceAssemblyAttribute(string description)
 		{
-			this._description = description;
+			this.Description = description;
 		}
 
-		public string Description
-		{
-			get
-			{
-				return this._description;
-			}
-		}
-
-		private string _description;
+		public string Description { get; }
 	}
 }

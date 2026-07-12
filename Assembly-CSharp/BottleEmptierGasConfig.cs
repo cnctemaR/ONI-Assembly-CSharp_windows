@@ -33,6 +33,7 @@ public class BottleEmptierGasConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.capacityKg = 200f;
+		storage.gunTargetOffset = new Vector2(0f, 2f);
 		go.AddOrGet<TreeFilterable>();
 		BottleEmptier bottleEmptier = go.AddOrGet<BottleEmptier>();
 		bottleEmptier.isGasEmptier = true;

@@ -39,15 +39,15 @@ namespace System.Net.Mime
 
 		internal static string DecodeHeaderValue(string value)
 		{
-			if (value == null || value.Length == 0)
+			if (string.IsNullOrEmpty(value))
 			{
 				return string.Empty;
 			}
 			string text = string.Empty;
-			string[] array = value.Split(new char[] { '\r', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			string[] array = value.Split(MimeBasePart.s_headerValueSplitChars, StringSplitOptions.RemoveEmptyEntries);
 			for (int i = 0; i < array.Length; i++)
 			{
-				string[] array2 = array[i].Split(new char[] { '?' });
+				string[] array2 = array[i].Split(MimeBasePart.s_questionMarkSplitChars);
 				if (array2.Length != 5 || array2[0] != "=" || array2[4] != "=")
 				{
 					return value;
@@ -64,11 +64,11 @@ namespace System.Net.Mime
 
 		internal static Encoding DecodeEncoding(string value)
 		{
-			if (value == null || value.Length == 0)
+			if (string.IsNullOrEmpty(value))
 			{
 				return null;
 			}
-			string[] array = value.Split(new char[] { '?', '\r', '\n' });
+			string[] array = value.Split(MimeBasePart.s_decodeEncodingSplitChars);
 			if (array.Length < 5 || array[0] != "=" || array[4] != "=")
 			{
 				return null;
@@ -85,26 +85,6 @@ namespace System.Net.Mime
 			foreach (char c in value)
 			{
 				if (c > '\u007f')
-				{
-					return false;
-				}
-				if (!permitCROrLF && (c == '\r' || c == '\n'))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		internal static bool IsAnsi(string value, bool permitCROrLF)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			foreach (char c in value)
-			{
-				if (c > 'ÿ')
 				{
 					return false;
 				}
@@ -154,20 +134,20 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.headers == null)
+				if (this._headers == null)
 				{
-					this.headers = new HeaderCollection();
+					this._headers = new HeaderCollection();
 				}
-				if (this.contentType == null)
+				if (this._contentType == null)
 				{
-					this.contentType = new ContentType();
+					this._contentType = new ContentType();
 				}
-				this.contentType.PersistIfNeeded(this.headers, false);
-				if (this.contentDisposition != null)
+				this._contentType.PersistIfNeeded(this._headers, false);
+				if (this._contentDisposition != null)
 				{
-					this.contentDisposition.PersistIfNeeded(this.headers, false);
+					this._contentDisposition.PersistIfNeeded(this._headers, false);
 				}
-				return this.headers;
+				return this._headers;
 			}
 		}
 
@@ -175,11 +155,12 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.contentType == null)
+				ContentType contentType;
+				if ((contentType = this._contentType) == null)
 				{
-					this.contentType = new ContentType();
+					contentType = (this._contentType = new ContentType());
 				}
-				return this.contentType;
+				return contentType;
 			}
 			set
 			{
@@ -187,19 +168,19 @@ namespace System.Net.Mime
 				{
 					throw new ArgumentNullException("value");
 				}
-				this.contentType = value;
-				this.contentType.PersistIfNeeded((HeaderCollection)this.Headers, true);
+				this._contentType = value;
+				this._contentType.PersistIfNeeded((HeaderCollection)this.Headers, true);
 			}
 		}
 
 		internal void PrepareHeaders(bool allowUnicode)
 		{
-			this.contentType.PersistIfNeeded((HeaderCollection)this.Headers, false);
-			this.headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this.contentType.Encode(allowUnicode));
-			if (this.contentDisposition != null)
+			this._contentType.PersistIfNeeded((HeaderCollection)this.Headers, false);
+			this._headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this._contentType.Encode(allowUnicode));
+			if (this._contentDisposition != null)
 			{
-				this.contentDisposition.PersistIfNeeded((HeaderCollection)this.Headers, false);
-				this.headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this.contentDisposition.Encode(allowUnicode));
+				this._contentDisposition.PersistIfNeeded((HeaderCollection)this.Headers, false);
+				this._headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this._contentDisposition.Encode(allowUnicode));
 			}
 		}
 
@@ -222,11 +203,11 @@ namespace System.Net.Mime
 			LazyAsyncResult lazyAsyncResult = asyncResult as MimeBasePart.MimePartAsyncResult;
 			if (lazyAsyncResult == null || lazyAsyncResult.AsyncObject != this)
 			{
-				throw new ArgumentException(global::SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
+				throw new ArgumentException("The IAsyncResult object was not returned from the corresponding asynchronous method on this class.", "asyncResult");
 			}
 			if (lazyAsyncResult.EndCalled)
 			{
-				throw new InvalidOperationException(global::SR.GetString("{0} can only be called once for each asynchronous operation.", new object[] { "EndSend" }));
+				throw new InvalidOperationException(SR.Format("{0} can only be called once for each asynchronous operation.", "EndSend"));
 			}
 			lazyAsyncResult.InternalWaitForCompletion();
 			lazyAsyncResult.EndCalled = true;
@@ -236,13 +217,19 @@ namespace System.Net.Mime
 			}
 		}
 
-		protected ContentType contentType;
+		internal const string DefaultCharSet = "utf-8";
 
-		protected ContentDisposition contentDisposition;
+		private static readonly char[] s_decodeEncodingSplitChars = new char[] { '?', '\r', '\n' };
 
-		private HeaderCollection headers;
+		protected ContentType _contentType;
 
-		internal const string defaultCharSet = "utf-8";
+		protected ContentDisposition _contentDisposition;
+
+		private HeaderCollection _headers;
+
+		private static readonly char[] s_headerValueSplitChars = new char[] { '\r', '\n', ' ' };
+
+		private static readonly char[] s_questionMarkSplitChars = new char[] { '?' };
 
 		internal class MimePartAsyncResult : LazyAsyncResult
 		{

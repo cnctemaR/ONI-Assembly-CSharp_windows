@@ -8,7 +8,7 @@ namespace System.Net
 		{
 			get
 			{
-				return new NotImplementedException(global::SR.GetString("This method is not implemented by this class."));
+				return new NotImplementedException(SR.GetString("This method is not implemented by this class."));
 			}
 		}
 
@@ -16,7 +16,15 @@ namespace System.Net
 		{
 			get
 			{
-				return new NotImplementedException(global::SR.GetString("This property is not implemented by this class."));
+				return new NotImplementedException(SR.GetString("This property is not implemented by this class."));
+			}
+		}
+
+		internal static WebException TimeoutException
+		{
+			get
+			{
+				return new WebException("The operation has timed out.");
 			}
 		}
 
@@ -24,7 +32,7 @@ namespace System.Net
 		{
 			get
 			{
-				return new NotSupportedException(global::SR.GetString("This method is not supported by this class."));
+				return new NotSupportedException(SR.GetString("This method is not supported by this class."));
 			}
 		}
 
@@ -32,7 +40,7 @@ namespace System.Net
 		{
 			get
 			{
-				return new NotSupportedException(global::SR.GetString("This property is not supported by this class."));
+				return new NotSupportedException(SR.GetString("This property is not supported by this class."));
 			}
 		}
 

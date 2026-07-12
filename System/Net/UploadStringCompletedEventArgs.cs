@@ -9,7 +9,7 @@ namespace System.Net
 		internal UploadStringCompletedEventArgs(string result, Exception exception, bool cancelled, object userToken)
 			: base(exception, cancelled, userToken)
 		{
-			this.m_Result = result;
+			this._result = result;
 		}
 
 		public string Result
@@ -17,7 +17,7 @@ namespace System.Net
 			get
 			{
 				base.RaiseExceptionIfNecessary();
-				return this.m_Result;
+				return this._result;
 			}
 		}
 
@@ -26,6 +26,6 @@ namespace System.Net
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private string m_Result;
+		private readonly string _result;
 	}
 }

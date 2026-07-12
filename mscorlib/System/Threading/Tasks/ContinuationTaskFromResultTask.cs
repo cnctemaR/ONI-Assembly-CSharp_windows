@@ -4,11 +4,10 @@ namespace System.Threading.Tasks
 {
 	internal sealed class ContinuationTaskFromResultTask<TAntecedentResult> : Task
 	{
-		public ContinuationTaskFromResultTask(Task<TAntecedentResult> antecedent, Delegate action, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, ref StackCrawlMark stackMark)
+		public ContinuationTaskFromResultTask(Task<TAntecedentResult> antecedent, Delegate action, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions)
 			: base(action, state, Task.InternalCurrentIfAttached(creationOptions), default(CancellationToken), creationOptions, internalOptions, null)
 		{
 			this.m_antecedent = antecedent;
-			base.PossiblyCaptureContext(ref stackMark);
 		}
 
 		internal override void InnerInvoke()

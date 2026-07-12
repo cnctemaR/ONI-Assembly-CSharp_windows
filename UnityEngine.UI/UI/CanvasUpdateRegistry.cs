@@ -158,7 +158,7 @@ namespace UnityEngine.UI
 
 		private bool InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
 		{
-			return !this.m_LayoutRebuildQueue.Contains(element) && this.m_LayoutRebuildQueue.AddUnique(element);
+			return !this.m_LayoutRebuildQueue.Contains(element) && this.m_LayoutRebuildQueue.AddUnique(element, true);
 		}
 
 		public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
@@ -178,13 +178,19 @@ namespace UnityEngine.UI
 				Debug.LogError(string.Format("Trying to add {0} for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", element));
 				return false;
 			}
-			return this.m_GraphicRebuildQueue.AddUnique(element);
+			return this.m_GraphicRebuildQueue.AddUnique(element, true);
 		}
 
 		public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
 		{
 			CanvasUpdateRegistry.instance.InternalUnRegisterCanvasElementForLayoutRebuild(element);
 			CanvasUpdateRegistry.instance.InternalUnRegisterCanvasElementForGraphicRebuild(element);
+		}
+
+		public static void DisableCanvasElementForRebuild(ICanvasElement element)
+		{
+			CanvasUpdateRegistry.instance.InternalDisableCanvasElementForLayoutRebuild(element);
+			CanvasUpdateRegistry.instance.InternalDisableCanvasElementForGraphicRebuild(element);
 		}
 
 		private void InternalUnRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
@@ -207,6 +213,28 @@ namespace UnityEngine.UI
 			}
 			element.GraphicUpdateComplete();
 			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);
+		}
+
+		private void InternalDisableCanvasElementForLayoutRebuild(ICanvasElement element)
+		{
+			if (this.m_PerformingLayoutUpdate)
+			{
+				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
+				return;
+			}
+			element.LayoutComplete();
+			CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.DisableItem(element);
+		}
+
+		private void InternalDisableCanvasElementForGraphicRebuild(ICanvasElement element)
+		{
+			if (this.m_PerformingGraphicUpdate)
+			{
+				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
+				return;
+			}
+			element.GraphicUpdateComplete();
+			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.DisableItem(element);
 		}
 
 		public static bool IsRebuildingLayout()

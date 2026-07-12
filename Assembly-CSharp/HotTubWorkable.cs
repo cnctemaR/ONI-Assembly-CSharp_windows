@@ -21,20 +21,20 @@ public class HotTubWorkable : Workable, IWorkerPrioritizable
 		base.SetWorkTime(90f);
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
 		Workable.AnimInfo anim = base.GetAnim(worker);
 		anim.smi = new HotTubWorkerStateMachine.StatesInstance(worker);
 		return anim;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.faceLeft = global::UnityEngine.Random.value > 0.5f;
 		worker.GetComponent<Effects>().Add("HotTubRelaxing", false);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		worker.GetComponent<Effects>().Remove("HotTubRelaxing");
 	}
@@ -44,7 +44,7 @@ public class HotTubWorkable : Workable, IWorkerPrioritizable
 		return base.transform.GetPosition() + (this.faceLeft ? Vector3.left : Vector3.right);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
 		if (!string.IsNullOrEmpty(this.hotTub.trackingEffect))
@@ -58,7 +58,7 @@ public class HotTubWorkable : Workable, IWorkerPrioritizable
 		component.Add("WarmTouch", true).timeRemaining = 1800f;
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.hotTub.basePriority;
 		Effects component = worker.GetComponent<Effects>();

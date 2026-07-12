@@ -9,10 +9,10 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
 		base.smi = new TakeMedicineChore.StatesInstance(this);
-		base.AddPrecondition(ChorePreconditions.instance.CanPickup, this.pickupable);
-		base.AddPrecondition(TakeMedicineChore.CanCure, this);
-		base.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotARobot, this);
+		this.AddPrecondition(ChorePreconditions.instance.CanPickup, this.pickupable);
+		this.AddPrecondition(TakeMedicineChore.CanCure, this);
+		this.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -68,7 +68,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleTag(GameTags.TakingMedicine).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
 			{
 				MedicinalPillWorkable medicinalPillWorkable = this.chunk.Get<MedicinalPillWorkable>(smi);
-				this.eater.Get<Worker>(smi).StartWork(new Worker.StartWorkInfo(medicinalPillWorkable));
+				this.eater.Get<WorkerBase>(smi).StartWork(new WorkerBase.StartWorkInfo(medicinalPillWorkable));
 			}, (TakeMedicineChore.StatesInstance smi) => this.chunk.Get<MedicinalPill>(smi) != null, null, null);
 		}
 

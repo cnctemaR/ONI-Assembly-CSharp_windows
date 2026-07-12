@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security;
 using System.Text;
 
@@ -80,7 +81,7 @@ namespace System.Globalization
 			EncodingInfo[] array = new EncodingInfo[EncodingTable.lastCodePageItem];
 			for (int i = 0; i < EncodingTable.lastCodePageItem; i++)
 			{
-				array[i] = new EncodingInfo((int)EncodingTable.codePageDataPtr[i].codePage, CodePageDataItem.CreateString(EncodingTable.codePageDataPtr[i].Names, 0U), Environment.GetResourceString("Globalization.cp_" + EncodingTable.codePageDataPtr[i].codePage));
+				array[i] = new EncodingInfo((int)EncodingTable.codePageDataPtr[i].codePage, CodePageDataItem.CreateString(EncodingTable.codePageDataPtr[i].Names, 0U), Environment.GetResourceString("Globalization.cp_" + EncodingTable.codePageDataPtr[i].codePage.ToString()));
 			}
 			return array;
 		}
@@ -91,35 +92,48 @@ namespace System.Globalization
 			{
 				throw new ArgumentNullException("name");
 			}
-			object obj = EncodingTable.hashByName[name];
-			if (obj != null)
+			object syncRoot = ((ICollection)EncodingTable.hashByName).SyncRoot;
+			int num2;
+			lock (syncRoot)
 			{
-				return (int)obj;
+				int num;
+				if (EncodingTable.hashByName.TryGetValue(name, out num))
+				{
+					num2 = num;
+				}
+				else
+				{
+					num = EncodingTable.internalGetCodePageFromName(name);
+					EncodingTable.hashByName[name] = num;
+					num2 = num;
+				}
 			}
-			int num = EncodingTable.internalGetCodePageFromName(name);
-			EncodingTable.hashByName[name] = num;
-			return num;
+			return num2;
 		}
 
 		[SecuritySafeCritical]
 		internal static CodePageDataItem GetCodePageDataItem(int codepage)
 		{
-			CodePageDataItem codePageDataItem = (CodePageDataItem)EncodingTable.hashByCodePage[codepage];
-			if (codePageDataItem != null)
+			object syncRoot = ((ICollection)EncodingTable.hashByCodePage).SyncRoot;
+			lock (syncRoot)
 			{
-				return codePageDataItem;
-			}
-			int num = 0;
-			int codePage;
-			while ((codePage = (int)EncodingTable.codePageDataPtr[num].codePage) != 0)
-			{
-				if (codePage == codepage)
+				CodePageDataItem codePageDataItem;
+				if (EncodingTable.hashByCodePage.TryGetValue(codepage, out codePageDataItem))
 				{
-					codePageDataItem = new CodePageDataItem(num);
-					EncodingTable.hashByCodePage[codepage] = codePageDataItem;
 					return codePageDataItem;
 				}
-				num++;
+				int num = 0;
+				int codePage;
+				while ((codePage = (int)EncodingTable.codePageDataPtr[num].codePage) != 0)
+				{
+					if (codePage == codepage)
+					{
+						codePageDataItem = new CodePageDataItem(num);
+						EncodingTable.hashByCodePage[codepage] = codePageDataItem;
+						return codePageDataItem;
+					}
+					num++;
+				}
 			}
 			return null;
 		}
@@ -539,6 +553,8 @@ namespace System.Globalization
 			EncodingTable.MapCodePageDataItem(437, 1252, "IBM437", 0U),
 			EncodingTable.MapCodePageDataItem(500, 1252, "IBM500", 0U),
 			EncodingTable.MapCodePageDataItem(708, 1256, "ASMO-708", 514U),
+			EncodingTable.MapCodePageDataItem(737, 1253, "ibm737", 0U),
+			EncodingTable.MapCodePageDataItem(775, 1257, "ibm775", 0U),
 			EncodingTable.MapCodePageDataItem(850, 1252, "ibm850", 0U),
 			EncodingTable.MapCodePageDataItem(852, 1250, "ibm852", 514U),
 			EncodingTable.MapCodePageDataItem(855, 1252, "IBM855", 0U),
@@ -663,8 +679,8 @@ namespace System.Globalization
 
 		private static volatile int lastCodePageItem;
 
-		private static Hashtable hashByName = Hashtable.Synchronized(new Hashtable(StringComparer.OrdinalIgnoreCase));
+		private static Dictionary<string, int> hashByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-		private static Hashtable hashByCodePage = Hashtable.Synchronized(new Hashtable());
+		private static Dictionary<int, CodePageDataItem> hashByCodePage = new Dictionary<int, CodePageDataItem>();
 	}
 }

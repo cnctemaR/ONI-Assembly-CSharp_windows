@@ -122,7 +122,7 @@ namespace System.Linq.Expressions.Compiler
 
 		private readonly Dictionary<BoundConstants.TypedConstant, LocalBuilder> _cache = new Dictionary<BoundConstants.TypedConstant, LocalBuilder>();
 
-		private struct TypedConstant : IEquatable<BoundConstants.TypedConstant>
+		private readonly struct TypedConstant : IEquatable<BoundConstants.TypedConstant>
 		{
 			internal TypedConstant(object value, Type type)
 			{

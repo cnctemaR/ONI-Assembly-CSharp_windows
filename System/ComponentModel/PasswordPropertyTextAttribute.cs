@@ -12,20 +12,14 @@ namespace System.ComponentModel
 
 		public PasswordPropertyTextAttribute(bool password)
 		{
-			this._password = password;
+			this.Password = password;
 		}
 
-		public bool Password
-		{
-			get
-			{
-				return this._password;
-			}
-		}
+		public bool Password { get; }
 
 		public override bool Equals(object o)
 		{
-			return o is PasswordPropertyTextAttribute && ((PasswordPropertyTextAttribute)o).Password == this._password;
+			return o is PasswordPropertyTextAttribute && ((PasswordPropertyTextAttribute)o).Password == this.Password;
 		}
 
 		public override int GetHashCode()
@@ -43,7 +37,5 @@ namespace System.ComponentModel
 		public static readonly PasswordPropertyTextAttribute No = new PasswordPropertyTextAttribute(false);
 
 		public static readonly PasswordPropertyTextAttribute Default = PasswordPropertyTextAttribute.No;
-
-		private bool _password;
 	}
 }

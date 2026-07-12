@@ -220,8 +220,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		private Object[] LoadAll(Type type)
 		{
 			return null;
@@ -234,8 +234,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public T[] LoadAll<T>() where T : Object
 		{
 			return null;
@@ -440,8 +440,14 @@ namespace UnityEngine
 		private extern AssetBundleRequest LoadAssetAsync_Internal(string name, Type type);
 
 		[NativeMethod("Unload")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Unload(bool unloadAllLoadedObjects);
+
+		[NativeMethod("UnloadAsync")]
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern AssetBundleUnloadOperation UnloadAsync(bool unloadAllLoadedObjects);
 
 		[NativeMethod("GetAllAssetNames")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -466,8 +472,8 @@ namespace UnityEngine
 			return AssetBundle.RecompressAssetBundleAsync_Internal(inputPath, outputPath, method, expectedCRC, priority);
 		}
 
-		[NativeThrows]
 		[FreeFunction("RecompressAssetBundleAsync_Internal")]
+		[NativeThrows]
 		internal static AssetBundleRecompressOperation RecompressAssetBundleAsync_Internal(string inputPath, string outputPath, BuildCompression method, uint expectedCRC, ThreadPriority priority)
 		{
 			return AssetBundle.RecompressAssetBundleAsync_Internal_Injected(inputPath, outputPath, ref method, expectedCRC, priority);

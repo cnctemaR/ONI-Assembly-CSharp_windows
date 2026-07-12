@@ -7,6 +7,7 @@ namespace System.Data.SqlClient
 		NotSpecified,
 		SqlPassword,
 		ActiveDirectoryPassword,
-		ActiveDirectoryIntegrated
+		ActiveDirectoryIntegrated,
+		ActiveDirectoryInteractive
 	}
 }

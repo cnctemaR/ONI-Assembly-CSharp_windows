@@ -1,25 +1,22 @@
 ﻿using System;
 using System.Collections;
+using Unity;
 
 namespace System.Security.Cryptography
 {
 	public sealed class OidEnumerator : IEnumerator
 	{
-		private OidEnumerator()
-		{
-		}
-
 		internal OidEnumerator(OidCollection oids)
 		{
-			this.m_oids = oids;
-			this.m_current = -1;
+			this._oids = oids;
+			this._current = -1;
 		}
 
 		public Oid Current
 		{
 			get
 			{
-				return this.m_oids[this.m_current];
+				return this._oids[this._current];
 			}
 		}
 
@@ -27,27 +24,32 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_oids[this.m_current];
+				return this.Current;
 			}
 		}
 
 		public bool MoveNext()
 		{
-			if (this.m_current == this.m_oids.Count - 1)
+			if (this._current >= this._oids.Count - 1)
 			{
 				return false;
 			}
-			this.m_current++;
+			this._current++;
 			return true;
 		}
 
 		public void Reset()
 		{
-			this.m_current = -1;
+			this._current = -1;
 		}
 
-		private OidCollection m_oids;
+		internal OidEnumerator()
+		{
+			global::Unity.ThrowStub.ThrowNotSupportedException();
+		}
 
-		private int m_current;
+		private readonly OidCollection _oids;
+
+		private int _current;
 	}
 }

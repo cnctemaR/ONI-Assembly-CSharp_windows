@@ -7,7 +7,7 @@ namespace System.Xml.Xsl.Qil
 		public QilParameter(QilNodeType nodeType, QilNode defaultValue, QilNode name, XmlQueryType xmlType)
 			: base(nodeType, defaultValue)
 		{
-			this.name = name;
+			this._name = name;
 			this.xmlType = xmlType;
 		}
 
@@ -31,7 +31,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				return this.name;
+				return this._name;
 			}
 			set
 			{
@@ -44,7 +44,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				this.name = value;
+				this._name = value;
 			}
 		}
 
@@ -64,14 +64,14 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return (QilName)this.name;
+				return (QilName)this._name;
 			}
 			set
 			{
-				this.name = value;
+				this._name = value;
 			}
 		}
 
-		private QilNode name;
+		private QilNode _name;
 	}
 }

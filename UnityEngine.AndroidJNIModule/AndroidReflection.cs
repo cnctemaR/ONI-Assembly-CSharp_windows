@@ -114,21 +114,21 @@ namespace UnityEngine
 			return AndroidJNISafe.CallStaticStringMethod(AndroidReflection.s_ReflectionHelperClass, AndroidReflection.s_ReflectionHelperGetFieldSignature, array);
 		}
 
-		public static IntPtr NewProxyInstance(IntPtr delegateHandle, IntPtr interfaze)
+		public static IntPtr NewProxyInstance(IntPtr player, IntPtr delegateHandle, IntPtr interfaze)
 		{
-			jvalue[] array = new jvalue[2];
-			array[0].j = delegateHandle.ToInt64();
-			array[1].l = interfaze;
+			jvalue[] array = new jvalue[3];
+			array[0].l = player;
+			array[1].j = delegateHandle.ToInt64();
+			array[2].l = interfaze;
 			return AndroidJNISafe.CallStaticObjectMethod(AndroidReflection.s_ReflectionHelperClass, AndroidReflection.s_ReflectionHelperNewProxyInstance, array);
 		}
 
-		public static void SetNativeExceptionOnProxy(IntPtr proxy, Exception e, bool methodNotFound)
+		internal static IntPtr CreateInvocationError(Exception ex, bool methodNotFound)
 		{
-			jvalue[] array = new jvalue[3];
-			array[0].l = proxy;
-			array[1].j = GCHandle.ToIntPtr(GCHandle.Alloc(e)).ToInt64();
-			array[2].z = methodNotFound;
-			AndroidJNISafe.CallStaticVoidMethod(AndroidReflection.s_ReflectionHelperClass, AndroidReflection.s_ReflectionHelperSetNativeExceptionOnProxy, array);
+			jvalue[] array = new jvalue[2];
+			array[0].j = GCHandle.ToIntPtr(GCHandle.Alloc(ex)).ToInt64();
+			array[1].z = methodNotFound;
+			return AndroidJNISafe.CallStaticObjectMethod(AndroidReflection.s_ReflectionHelperClass, AndroidReflection.s_ReflectionHelperCeateInvocationError, array);
 		}
 
 		private const string RELECTION_HELPER_CLASS_NAME = "com/unity3d/player/ReflectionHelper";
@@ -143,9 +143,9 @@ namespace UnityEngine
 
 		private static readonly IntPtr s_ReflectionHelperGetFieldSignature = AndroidReflection.GetStaticMethodID("com/unity3d/player/ReflectionHelper", "getFieldSignature", "(Ljava/lang/reflect/Field;)Ljava/lang/String;");
 
-		private static readonly IntPtr s_ReflectionHelperNewProxyInstance = AndroidReflection.GetStaticMethodID("com/unity3d/player/ReflectionHelper", "newProxyInstance", "(JLjava/lang/Class;)Ljava/lang/Object;");
+		private static readonly IntPtr s_ReflectionHelperNewProxyInstance = AndroidReflection.GetStaticMethodID("com/unity3d/player/ReflectionHelper", "newProxyInstance", "(Lcom/unity3d/player/UnityPlayer;JLjava/lang/Class;)Ljava/lang/Object;");
 
-		private static readonly IntPtr s_ReflectionHelperSetNativeExceptionOnProxy = AndroidReflection.GetStaticMethodID("com/unity3d/player/ReflectionHelper", "setNativeExceptionOnProxy", "(Ljava/lang/Object;JZ)V");
+		private static readonly IntPtr s_ReflectionHelperCeateInvocationError = AndroidReflection.GetStaticMethodID("com/unity3d/player/ReflectionHelper", "createInvocationError", "(JZ)Ljava/lang/Object;");
 
 		private static readonly IntPtr s_FieldGetDeclaringClass = AndroidReflection.GetMethodID("java/lang/reflect/Field", "getDeclaringClass", "()Ljava/lang/Class;");
 	}

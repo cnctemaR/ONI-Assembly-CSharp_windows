@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 using UnityEngine.Events;
 using UnityEngine.Internal;
@@ -8,15 +10,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
-	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	public class SceneManager
 	{
 		public static extern int sceneCount
 		{
-			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
-			[NativeMethod("GetSceneCount")]
 			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
+			[NativeMethod("GetSceneCount")]
+			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern int loadedSceneCount
+		{
+			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
+			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
+			[NativeMethod("GetLoadedSceneCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -30,6 +41,12 @@ namespace UnityEngine.SceneManagement
 		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		internal static bool CanSetAsActiveScene(Scene scene)
+		{
+			return SceneManager.CanSetAsActiveScene_Injected(ref scene);
+		}
+
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetActiveScene()
 		{
 			Scene scene;
@@ -37,8 +54,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static bool SetActiveScene(Scene scene)
 		{
 			return SceneManager.SetActiveScene_Injected(ref scene);
@@ -65,8 +82,8 @@ namespace UnityEngine.SceneManagement
 			return SceneManagerAPI.ActiveAPI.GetSceneByBuildIndex(buildIndex);
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		public static Scene GetSceneAt(int index)
 		{
 			Scene scene;
@@ -83,8 +100,8 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		private static bool UnloadSceneInternal(Scene scene, UnloadSceneOptions options)
 		{
 			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
@@ -140,6 +157,27 @@ namespace UnityEngine.SceneManagement
 		public static void MoveGameObjectToScene([NotNull("ArgumentNullException")] GameObject go, Scene scene)
 		{
 			SceneManager.MoveGameObjectToScene_Injected(go, ref scene);
+		}
+
+		[NativeThrows]
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		private static void MoveGameObjectsToSceneByInstanceId(IntPtr instanceIds, int instanceCount, Scene scene)
+		{
+			SceneManager.MoveGameObjectsToSceneByInstanceId_Injected(instanceIds, instanceCount, ref scene);
+		}
+
+		public static void MoveGameObjectsToScene(NativeArray<int> instanceIDs, Scene scene)
+		{
+			bool flag = !instanceIDs.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "instanceIDs");
+			}
+			bool flag2 = instanceIDs.Length == 0;
+			if (!flag2)
+			{
+				SceneManager.MoveGameObjectsToSceneByInstanceId((IntPtr)instanceIDs.GetUnsafeReadOnlyPtr<int>(), instanceIDs.Length, scene);
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -335,6 +373,9 @@ namespace UnityEngine.SceneManagement
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CanSetAsActiveScene_Injected(ref Scene scene);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetActiveScene_Injected(out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -363,6 +404,9 @@ namespace UnityEngine.SceneManagement
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void MoveGameObjectToScene_Injected(GameObject go, ref Scene scene);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MoveGameObjectsToSceneByInstanceId_Injected(IntPtr instanceIds, int instanceCount, ref Scene scene);
 
 		internal static bool s_AllowLoadScene = true;
 	}

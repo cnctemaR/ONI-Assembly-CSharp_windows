@@ -1,6 +1,6 @@
 ﻿using System;
+using Unity.Profiling.Memory;
 using UnityEngine;
-using UnityEngine.Profiling.Memory.Experimental;
 
 namespace Unity.MemoryProfiler
 {
@@ -11,10 +11,9 @@ namespace Unity.MemoryProfiler
 			MetadataInjector.DefaultCollectorInjected = 1;
 		}
 
-		public override void CollectMetadata(MetaData data)
+		public override void CollectMetadata(MemorySnapshotMetadata data)
 		{
-			data.content = "Project name: " + Application.productName;
-			data.platform = string.Empty;
+			data.Description = "Project name: " + Application.productName;
 		}
 	}
 }

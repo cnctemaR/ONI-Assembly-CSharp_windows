@@ -16,15 +16,6 @@ namespace Mono.Net.Security.Private
 			return (string h, X509Certificate c, X509Chain ch, MonoSslPolicyErrors e) => callback(h, c, ch, (SslPolicyErrors)e);
 		}
 
-		internal static MonoLocalCertificateSelectionCallback PublicToMono(LocalCertificateSelectionCallback callback)
-		{
-			if (callback == null)
-			{
-				return null;
-			}
-			return (string t, X509CertificateCollection lc, X509Certificate rc, string[] ai) => callback(null, t, lc, rc, ai);
-		}
-
 		internal static MonoRemoteCertificateValidationCallback InternalToMono(RemoteCertValidationCallback callback)
 		{
 			if (callback == null)
@@ -52,15 +43,6 @@ namespace Mono.Net.Security.Private
 			return (string t, X509CertificateCollection lc, X509Certificate rc, string[] ai) => callback(t, lc, rc, ai);
 		}
 
-		internal static RemoteCertificateValidationCallback MonoToPublic(MonoRemoteCertificateValidationCallback callback)
-		{
-			if (callback == null)
-			{
-				return null;
-			}
-			return (object t, X509Certificate c, X509Chain ch, SslPolicyErrors e) => callback(null, c, ch, (MonoSslPolicyErrors)e);
-		}
-
 		internal static LocalCertificateSelectionCallback MonoToPublic(MonoLocalCertificateSelectionCallback callback)
 		{
 			if (callback == null)
@@ -86,6 +68,24 @@ namespace Mono.Net.Security.Private
 				return null;
 			}
 			return (string t, X509CertificateCollection lc, X509Certificate rc, string[] ai) => callback(t, lc, rc, ai);
+		}
+
+		internal static ServerCertificateSelectionCallback MonoToPublic(MonoServerCertificateSelectionCallback callback)
+		{
+			if (callback == null)
+			{
+				return null;
+			}
+			return (object s, string h) => callback(s, h);
+		}
+
+		internal static MonoServerCertificateSelectionCallback PublicToMono(ServerCertificateSelectionCallback callback)
+		{
+			if (callback == null)
+			{
+				return null;
+			}
+			return (object s, string h) => callback(s, h);
 		}
 	}
 }

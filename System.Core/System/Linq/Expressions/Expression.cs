@@ -23,7 +23,7 @@ namespace System.Linq.Expressions
 			TypeUtils.ValidateType(right.Type, "right", true, true);
 			if (!TypeUtils.AreReferenceAssignable(left.Type, right.Type))
 			{
-				throw Error.ExpressionTypeDoesNotMatchAssignment(right.Type, left.Type);
+				throw global::System.Linq.Expressions.Error.ExpressionTypeDoesNotMatchAssignment(right.Type, left.Type);
 			}
 			return new AssignBinaryExpression(left, right);
 		}
@@ -58,7 +58,7 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = method.GetParametersCached();
 			if (parametersCached.Length != 2)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(method, "method");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, "method");
 			}
 			if (Expression.ParameterIsAssignable(parametersCached[0], left.Type) && Expression.ParameterIsAssignable(parametersCached[1], right.Type))
 			{
@@ -68,7 +68,7 @@ namespace System.Linq.Expressions
 			}
 			if (!left.Type.IsNullableType() || !right.Type.IsNullableType() || !Expression.ParameterIsAssignable(parametersCached[0], left.Type.GetNonNullableType()) || !Expression.ParameterIsAssignable(parametersCached[1], right.Type.GetNonNullableType()) || !method.ReturnType.IsValueType || method.ReturnType.IsNullableType())
 			{
-				throw Error.OperandTypesDoNotMatchParameters(binaryType, method.Name);
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(binaryType, method.Name);
 			}
 			if (method.ReturnType != typeof(bool) || liftToNull)
 			{
@@ -84,7 +84,7 @@ namespace System.Linq.Expressions
 			{
 				if (!TypeUtils.AreReferenceAssignable(left.Type, binaryExpression.Type))
 				{
-					throw Error.UserDefinedOpMustHaveValidReturnType(binaryType, binaryExpression.Method.Name);
+					throw global::System.Linq.Expressions.Error.UserDefinedOpMustHaveValidReturnType(binaryType, binaryExpression.Method.Name);
 				}
 			}
 			else
@@ -105,7 +105,7 @@ namespace System.Linq.Expressions
 				Expression.ValidateParamswithOperandsOrThrow(parametersCached[1].ParameterType, right.Type, binaryType, name);
 				return userDefinedBinaryOperator;
 			}
-			throw Error.BinaryOperatorNotDefined(binaryType, left.Type, right.Type);
+			throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(binaryType, left.Type, right.Type);
 		}
 
 		private static BinaryExpression GetUserDefinedAssignOperatorOrThrow(ExpressionType binaryType, string name, Expression left, Expression right, LambdaExpression conversion, bool liftToNull)
@@ -115,7 +115,7 @@ namespace System.Linq.Expressions
 			{
 				if (!TypeUtils.AreReferenceAssignable(left.Type, binaryExpression.Type))
 				{
-					throw Error.UserDefinedOpMustHaveValidReturnType(binaryType, binaryExpression.Method.Name);
+					throw global::System.Linq.Expressions.Error.UserDefinedOpMustHaveValidReturnType(binaryType, binaryExpression.Method.Name);
 				}
 			}
 			else
@@ -162,7 +162,7 @@ namespace System.Linq.Expressions
 		{
 			if (paramType.IsNullableType() && !operandType.IsNullableType())
 			{
-				throw Error.OperandTypesDoNotMatchParameters(exprType, name);
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(exprType, name);
 			}
 		}
 
@@ -171,11 +171,11 @@ namespace System.Linq.Expressions
 			Expression.ValidateMethodInfo(method, "method");
 			if (!method.IsStatic)
 			{
-				throw Error.UserDefinedOperatorMustBeStatic(method, "method");
+				throw global::System.Linq.Expressions.Error.UserDefinedOperatorMustBeStatic(method, "method");
 			}
 			if (method.ReturnType == typeof(void))
 			{
-				throw Error.UserDefinedOperatorMustNotBeVoid(method, "method");
+				throw global::System.Linq.Expressions.Error.UserDefinedOperatorMustNotBeVoid(method, "method");
 			}
 		}
 
@@ -183,7 +183,7 @@ namespace System.Linq.Expressions
 		{
 			if (method.ContainsGenericParameters)
 			{
-				throw method.IsGenericMethodDefinition ? Error.MethodIsGeneric(method, paramName) : Error.MethodContainsGenericParameters(method, paramName);
+				throw method.IsGenericMethodDefinition ? global::System.Linq.Expressions.Error.MethodIsGeneric(method, paramName) : global::System.Linq.Expressions.Error.MethodContainsGenericParameters(method, paramName);
 			}
 		}
 
@@ -208,23 +208,23 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = method.GetParametersCached();
 			if (parametersCached.Length != 2)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(method, "method");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, "method");
 			}
 			if (!Expression.ParameterIsAssignable(parametersCached[0], left) && (!left.IsNullableType() || !Expression.ParameterIsAssignable(parametersCached[0], left.GetNonNullableType())))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(nodeType, method.Name);
 			}
 			if (!Expression.ParameterIsAssignable(parametersCached[1], right) && (!right.IsNullableType() || !Expression.ParameterIsAssignable(parametersCached[1], right.GetNonNullableType())))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(nodeType, method.Name);
 			}
 			if (parametersCached[0].ParameterType != parametersCached[1].ParameterType)
 			{
-				throw Error.UserDefinedOpMustHaveConsistentTypes(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.UserDefinedOpMustHaveConsistentTypes(nodeType, method.Name);
 			}
 			if (method.ReturnType != parametersCached[0].ParameterType)
 			{
-				throw Error.UserDefinedOpMustHaveConsistentTypes(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.UserDefinedOpMustHaveConsistentTypes(nodeType, method.Name);
 			}
 			if (Expression.IsValidLiftedConditionalLogicalOperator(left, right, parametersCached))
 			{
@@ -233,13 +233,13 @@ namespace System.Linq.Expressions
 			Type declaringType = method.DeclaringType;
 			if (declaringType == null)
 			{
-				throw Error.LogicalOperatorMustHaveBooleanOperators(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.LogicalOperatorMustHaveBooleanOperators(nodeType, method.Name);
 			}
 			MethodInfo booleanOperator = TypeUtils.GetBooleanOperator(declaringType, "op_True");
 			MethodInfo booleanOperator2 = TypeUtils.GetBooleanOperator(declaringType, "op_False");
 			if (booleanOperator == null || booleanOperator.ReturnType != typeof(bool) || booleanOperator2 == null || booleanOperator2.ReturnType != typeof(bool))
 			{
-				throw Error.LogicalOperatorMustHaveBooleanOperators(nodeType, method.Name);
+				throw global::System.Linq.Expressions.Error.LogicalOperatorMustHaveBooleanOperators(nodeType, method.Name);
 			}
 			Expression.VerifyOpTrueFalse(nodeType, left, booleanOperator2, "method");
 			Expression.VerifyOpTrueFalse(nodeType, left, booleanOperator, "method");
@@ -250,11 +250,11 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = opTrue.GetParametersCached();
 			if (parametersCached.Length != 1)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(opTrue, paramName);
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(opTrue, paramName);
 			}
 			if (!Expression.ParameterIsAssignable(parametersCached[0], left) && (!left.IsNullableType() || !Expression.ParameterIsAssignable(parametersCached[0], left.GetNonNullableType())))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(nodeType, opTrue.Name);
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(nodeType, opTrue.Name);
 			}
 		}
 
@@ -356,7 +356,7 @@ namespace System.Linq.Expressions
 			case ExpressionType.SubtractAssignChecked:
 				return Expression.SubtractAssignChecked(left, right, method, conversion);
 			}
-			throw Error.UnhandledBinary(binaryType, "binaryType");
+			throw global::System.Linq.Expressions.Error.UnhandledBinary(binaryType, "binaryType");
 		}
 
 		public static BinaryExpression Equal(Expression left, Expression right)
@@ -383,7 +383,7 @@ namespace System.Linq.Expressions
 			{
 				return new LogicalBinaryExpression(ExpressionType.Equal, left, right);
 			}
-			throw Error.ReferenceEqualityNotDefined(left.Type, right.Type);
+			throw global::System.Linq.Expressions.Error.ReferenceEqualityNotDefined(left.Type, right.Type);
 		}
 
 		public static BinaryExpression NotEqual(Expression left, Expression right)
@@ -410,7 +410,7 @@ namespace System.Linq.Expressions
 			{
 				return new LogicalBinaryExpression(ExpressionType.NotEqual, left, right);
 			}
-			throw Error.ReferenceEqualityNotDefined(left.Type, right.Type);
+			throw global::System.Linq.Expressions.Error.ReferenceEqualityNotDefined(left.Type, right.Type);
 		}
 
 		private static BinaryExpression GetEqualityComparisonOperator(ExpressionType binaryType, string opName, Expression left, Expression right, bool liftToNull)
@@ -432,7 +432,7 @@ namespace System.Linq.Expressions
 				}
 				if (!TypeUtils.HasBuiltInEqualityOperator(left.Type, right.Type) && !Expression.IsNullComparison(left, right))
 				{
-					throw Error.BinaryOperatorNotDefined(binaryType, left.Type, right.Type);
+					throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(binaryType, left.Type, right.Type);
 				}
 				if (left.Type.IsNullableType() && liftToNull)
 				{
@@ -552,7 +552,7 @@ namespace System.Linq.Expressions
 				Type type = ((left.Type.IsNullableType() && TypeUtils.AreEquivalent(method.ReturnType, left.Type.GetNonNullableType())) ? left.Type : method.ReturnType);
 				return new MethodBinaryExpression(ExpressionType.AndAlso, left, right, type, method);
 			}
-			throw Error.BinaryOperatorNotDefined(ExpressionType.AndAlso, left.Type, right.Type);
+			throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(ExpressionType.AndAlso, left.Type, right.Type);
 		}
 
 		public static BinaryExpression OrElse(Expression left, Expression right)
@@ -588,7 +588,7 @@ namespace System.Linq.Expressions
 				Type type = ((left.Type.IsNullableType() && method.ReturnType == left.Type.GetNonNullableType()) ? left.Type : method.ReturnType);
 				return new MethodBinaryExpression(ExpressionType.OrElse, left, right, type, method);
 			}
-			throw Error.BinaryOperatorNotDefined(ExpressionType.OrElse, left.Type, right.Type);
+			throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(ExpressionType.OrElse, left.Type, right.Type);
 		}
 
 		public static BinaryExpression Coalesce(Expression left, Expression right)
@@ -607,25 +607,25 @@ namespace System.Linq.Expressions
 			}
 			if (left.Type.IsValueType && !left.Type.IsNullableType())
 			{
-				throw Error.CoalesceUsedOnNonNullType();
+				throw global::System.Linq.Expressions.Error.CoalesceUsedOnNonNullType();
 			}
 			MethodInfo invokeMethod = conversion.Type.GetInvokeMethod();
 			if (invokeMethod.ReturnType == typeof(void))
 			{
-				throw Error.UserDefinedOperatorMustNotBeVoid(conversion, "conversion");
+				throw global::System.Linq.Expressions.Error.UserDefinedOperatorMustNotBeVoid(conversion, "conversion");
 			}
 			ParameterInfo[] parametersCached = invokeMethod.GetParametersCached();
 			if (parametersCached.Length != 1)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(conversion, "conversion");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(conversion, "conversion");
 			}
 			if (!TypeUtils.AreEquivalent(invokeMethod.ReturnType, right.Type))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(ExpressionType.Coalesce, conversion.ToString());
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(ExpressionType.Coalesce, conversion.ToString());
 			}
 			if (!Expression.ParameterIsAssignable(parametersCached[0], left.Type.GetNonNullableType()) && !Expression.ParameterIsAssignable(parametersCached[0], left.Type))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(ExpressionType.Coalesce, conversion.ToString());
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(ExpressionType.Coalesce, conversion.ToString());
 			}
 			return new CoalesceConversionBinaryExpression(left, right, conversion);
 		}
@@ -635,7 +635,7 @@ namespace System.Linq.Expressions
 			Type nonNullableType = left.GetNonNullableType();
 			if (left.IsValueType && !left.IsNullableType())
 			{
-				throw Error.CoalesceUsedOnNonNullType();
+				throw global::System.Linq.Expressions.Error.CoalesceUsedOnNonNullType();
 			}
 			if (left.IsNullableType() && right.IsImplicitlyConvertibleTo(nonNullableType))
 			{
@@ -649,7 +649,7 @@ namespace System.Linq.Expressions
 			{
 				return right;
 			}
-			throw Error.ArgumentTypesMustMatch();
+			throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 		}
 
 		public static BinaryExpression Add(Expression left, Expression right)
@@ -697,7 +697,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.AddAssign, left, right, left.Type);
 		}
@@ -708,15 +708,15 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = invokeMethod.GetParametersCached();
 			if (parametersCached.Length != 1)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(conversion, "conversion");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(conversion, "conversion");
 			}
 			if (!TypeUtils.AreEquivalent(invokeMethod.ReturnType, left.Type))
 			{
-				throw Error.OperandTypesDoNotMatchParameters(nodeType, conversion.ToString());
+				throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(nodeType, conversion.ToString());
 			}
 			if (!TypeUtils.AreEquivalent(parametersCached[0].ParameterType, method.ReturnType))
 			{
-				throw Error.OverloadOperatorTypeDoesNotMatchConversionType(nodeType, conversion.ToString());
+				throw global::System.Linq.Expressions.Error.OverloadOperatorTypeDoesNotMatchConversionType(nodeType, conversion.ToString());
 			}
 		}
 
@@ -745,7 +745,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.AddAssignChecked, left, right, left.Type);
 		}
@@ -815,7 +815,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.SubtractAssign, left, right, left.Type);
 		}
@@ -845,7 +845,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.SubtractAssignChecked, left, right, left.Type);
 		}
@@ -915,7 +915,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.DivideAssign, left, right, left.Type);
 		}
@@ -965,7 +965,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.ModuloAssign, left, right, left.Type);
 		}
@@ -1015,7 +1015,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.MultiplyAssign, left, right, left.Type);
 		}
@@ -1045,7 +1045,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.MultiplyAssignChecked, left, right, left.Type);
 		}
@@ -1130,7 +1130,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			Type resultTypeOfShift = Expression.GetResultTypeOfShift(left.Type, right.Type);
 			return new SimpleBinaryExpression(ExpressionType.LeftShiftAssign, left, right, resultTypeOfShift);
@@ -1182,7 +1182,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			Type resultTypeOfShift = Expression.GetResultTypeOfShift(left.Type, right.Type);
 			return new SimpleBinaryExpression(ExpressionType.RightShiftAssign, left, right, resultTypeOfShift);
@@ -1233,7 +1233,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.AndAssign, left, right, left.Type);
 		}
@@ -1283,7 +1283,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.OrAssign, left, right, left.Type);
 		}
@@ -1333,7 +1333,7 @@ namespace System.Linq.Expressions
 			}
 			if (conversion != null)
 			{
-				throw Error.ConversionIsNotSupportedForArithmeticTypes();
+				throw global::System.Linq.Expressions.Error.ConversionIsNotSupportedForArithmeticTypes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.ExclusiveOrAssign, left, right, left.Type);
 		}
@@ -1349,11 +1349,25 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(right, "right");
 			if (method == null)
 			{
-				method = CachedReflectionInfo.Math_Pow_Double_Double;
-				if (method == null)
+				if (!(left.Type == right.Type) || !left.Type.IsArithmetic())
 				{
-					throw Error.BinaryOperatorNotDefined(ExpressionType.Power, left.Type, right.Type);
+					string text = "op_Exponent";
+					BinaryExpression binaryExpression = Expression.GetUserDefinedBinaryOperator(ExpressionType.Power, text, left, right, true);
+					if (binaryExpression == null)
+					{
+						text = "op_Exponentiation";
+						binaryExpression = Expression.GetUserDefinedBinaryOperator(ExpressionType.Power, text, left, right, true);
+						if (binaryExpression == null)
+						{
+							throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(ExpressionType.Power, left.Type, right.Type);
+						}
+					}
+					ParameterInfo[] parametersCached = binaryExpression.Method.GetParametersCached();
+					Expression.ValidateParamswithOperandsOrThrow(parametersCached[0].ParameterType, left.Type, ExpressionType.Power, text);
+					Expression.ValidateParamswithOperandsOrThrow(parametersCached[1].ParameterType, right.Type, ExpressionType.Power, text);
+					return binaryExpression;
 				}
+				method = CachedReflectionInfo.Math_Pow_Double_Double;
 			}
 			return Expression.GetMethodBasedBinaryOperator(ExpressionType.Power, left, right, method, true);
 		}
@@ -1378,7 +1392,7 @@ namespace System.Linq.Expressions
 				method = CachedReflectionInfo.Math_Pow_Double_Double;
 				if (method == null)
 				{
-					throw Error.BinaryOperatorNotDefined(ExpressionType.PowerAssign, left.Type, right.Type);
+					throw global::System.Linq.Expressions.Error.BinaryOperatorNotDefined(ExpressionType.PowerAssign, left.Type, right.Type);
 				}
 			}
 			return Expression.GetMethodBasedAssignOperator(ExpressionType.PowerAssign, left, right, method, conversion, true);
@@ -1390,16 +1404,16 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(index, "index");
 			if (index.Type != typeof(int))
 			{
-				throw Error.ArgumentMustBeArrayIndexType("index");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeArrayIndexType("index");
 			}
 			Type type = array.Type;
 			if (!type.IsArray)
 			{
-				throw Error.ArgumentMustBeArray("array");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeArray("array");
 			}
 			if (type.GetArrayRank() != 1)
 			{
-				throw Error.IncorrectNumberOfIndexes();
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfIndexes();
 			}
 			return new SimpleBinaryExpression(ExpressionType.ArrayIndex, array, index, type.GetElementType());
 		}
@@ -1513,7 +1527,7 @@ namespace System.Linq.Expressions
 				{
 					if (type != typeof(void))
 					{
-						throw Error.ArgumentTypesMustMatch();
+						throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 					}
 					return new ScopeWithType(variables, expressions, type);
 				}
@@ -1522,7 +1536,7 @@ namespace System.Linq.Expressions
 					Expression expression = expressions.Last<Expression>();
 					if (type != typeof(void) && !TypeUtils.AreReferenceAssignable(type, expression.Type))
 					{
-						throw Error.ArgumentTypesMustMatch();
+						throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 					}
 					if (!TypeUtils.AreEquivalent(type, expression.Type))
 					{
@@ -1554,11 +1568,11 @@ namespace System.Linq.Expressions
 					ContractUtils.RequiresNotNull(parameterExpression, collectionName, i);
 					if (parameterExpression.IsByRef)
 					{
-						throw Error.VariableMustNotBeByRef(parameterExpression, parameterExpression.Type, collectionName, i);
+						throw global::System.Linq.Expressions.Error.VariableMustNotBeByRef(parameterExpression, parameterExpression.Type, collectionName, i);
 					}
 					if (!hashSet.Add(parameterExpression))
 					{
-						throw Error.DuplicateVariable(parameterExpression, collectionName, i);
+						throw global::System.Linq.Expressions.Error.DuplicateVariable(parameterExpression, collectionName, i);
 					}
 				}
 			}
@@ -1615,7 +1629,7 @@ namespace System.Linq.Expressions
 			}
 			else if (variable.IsByRef)
 			{
-				throw Error.VariableMustNotBeByRef(variable, variable.Type, "variable");
+				throw global::System.Linq.Expressions.Error.VariableMustNotBeByRef(variable, variable.Type, "variable");
 			}
 			ExpressionUtils.RequiresCanRead(body, "body");
 			if (filter != null)
@@ -1623,7 +1637,7 @@ namespace System.Linq.Expressions
 				ExpressionUtils.RequiresCanRead(filter, "filter");
 				if (filter.Type != typeof(bool))
 				{
-					throw Error.ArgumentMustBeBoolean("filter");
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeBoolean("filter");
 				}
 			}
 			return new CatchBlock(type, variable, body, filter);
@@ -1636,11 +1650,11 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(ifFalse, "ifFalse");
 			if (test.Type != typeof(bool))
 			{
-				throw Error.ArgumentMustBeBoolean("test");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeBoolean("test");
 			}
 			if (!TypeUtils.AreEquivalent(ifTrue.Type, ifFalse.Type))
 			{
-				throw Error.ArgumentTypesMustMatch();
+				throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 			}
 			return ConditionalExpression.Make(test, ifTrue, ifFalse, ifTrue.Type);
 		}
@@ -1653,11 +1667,11 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(type, "type");
 			if (test.Type != typeof(bool))
 			{
-				throw Error.ArgumentMustBeBoolean("test");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeBoolean("test");
 			}
 			if (type != typeof(void) && (!TypeUtils.AreReferenceAssignable(type, ifTrue.Type) || !TypeUtils.AreReferenceAssignable(type, ifFalse.Type)))
 			{
-				throw Error.ArgumentTypesMustMatch();
+				throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 			}
 			return ConditionalExpression.Make(test, ifTrue, ifFalse, type);
 		}
@@ -1704,7 +1718,7 @@ namespace System.Linq.Expressions
 					return new TypedConstantExpression(value, type);
 				}
 			}
-			throw Error.ArgumentTypesMustMatch();
+			throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 		}
 
 		public static DebugInfoExpression DebugInfo(SymbolDocumentInfo document, int startLine, int startColumn, int endLine, int endColumn)
@@ -1728,27 +1742,27 @@ namespace System.Linq.Expressions
 		{
 			if (startLine < 1)
 			{
-				throw Error.OutOfRange("startLine", 1);
+				throw global::System.Linq.Expressions.Error.OutOfRange("startLine", 1);
 			}
 			if (startColumn < 1)
 			{
-				throw Error.OutOfRange("startColumn", 1);
+				throw global::System.Linq.Expressions.Error.OutOfRange("startColumn", 1);
 			}
 			if (endLine < 1)
 			{
-				throw Error.OutOfRange("endLine", 1);
+				throw global::System.Linq.Expressions.Error.OutOfRange("endLine", 1);
 			}
 			if (endColumn < 1)
 			{
-				throw Error.OutOfRange("endColumn", 1);
+				throw global::System.Linq.Expressions.Error.OutOfRange("endColumn", 1);
 			}
 			if (startLine > endLine)
 			{
-				throw Error.StartEndMustBeOrdered();
+				throw global::System.Linq.Expressions.Error.StartEndMustBeOrdered();
 			}
 			if (startLine == endLine && startColumn > endColumn)
 			{
-				throw Error.StartEndMustBeOrdered();
+				throw global::System.Linq.Expressions.Error.StartEndMustBeOrdered();
 			}
 		}
 
@@ -1786,21 +1800,21 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = addMethod.GetParametersCached();
 			if (parametersCached.Length == 0)
 			{
-				throw Error.ElementInitializerMethodWithZeroArgs(paramName);
+				throw global::System.Linq.Expressions.Error.ElementInitializerMethodWithZeroArgs(paramName);
 			}
 			if (!addMethod.Name.Equals("Add", StringComparison.OrdinalIgnoreCase))
 			{
-				throw Error.ElementInitializerMethodNotAdd(paramName);
+				throw global::System.Linq.Expressions.Error.ElementInitializerMethodNotAdd(paramName);
 			}
 			if (addMethod.IsStatic)
 			{
-				throw Error.ElementInitializerMethodStatic(paramName);
+				throw global::System.Linq.Expressions.Error.ElementInitializerMethodStatic(paramName);
 			}
 			foreach (ParameterInfo parameterInfo in parametersCached)
 			{
 				if (parameterInfo.ParameterType.IsByRef)
 				{
-					throw Error.ElementInitializerMethodNoRefOutParam(parameterInfo.Name, addMethod.Name, paramName);
+					throw global::System.Linq.Expressions.Error.ElementInitializerMethodNoRefOutParam(parameterInfo.Name, addMethod.Name, paramName);
 				}
 			}
 		}
@@ -1828,7 +1842,7 @@ namespace System.Linq.Expressions
 				{
 					return extensionInfo.NodeType;
 				}
-				throw Error.ExtensionNodeMustOverrideProperty("Expression.NodeType");
+				throw global::System.Linq.Expressions.Error.ExtensionNodeMustOverrideProperty("Expression.NodeType");
 			}
 		}
 
@@ -1841,7 +1855,7 @@ namespace System.Linq.Expressions
 				{
 					return extensionInfo.Type;
 				}
-				throw Error.ExtensionNodeMustOverrideProperty("Expression.Type");
+				throw global::System.Linq.Expressions.Error.ExtensionNodeMustOverrideProperty("Expression.Type");
 			}
 		}
 
@@ -1857,7 +1871,7 @@ namespace System.Linq.Expressions
 		{
 			if (this.CanReduce)
 			{
-				throw Error.ReducibleMustOverrideReduce();
+				throw global::System.Linq.Expressions.Error.ReducibleMustOverrideReduce();
 			}
 			return this;
 		}
@@ -1866,7 +1880,7 @@ namespace System.Linq.Expressions
 		{
 			if (!this.CanReduce)
 			{
-				throw Error.MustBeReducible();
+				throw global::System.Linq.Expressions.Error.MustBeReducible();
 			}
 			return visitor.Visit(this.ReduceAndCheck());
 		}
@@ -1880,16 +1894,16 @@ namespace System.Linq.Expressions
 		{
 			if (!this.CanReduce)
 			{
-				throw Error.MustBeReducible();
+				throw global::System.Linq.Expressions.Error.MustBeReducible();
 			}
 			Expression expression = this.Reduce();
 			if (expression == null || expression == this)
 			{
-				throw Error.MustReduceToDifferent();
+				throw global::System.Linq.Expressions.Error.MustReduceToDifferent();
 			}
 			if (!TypeUtils.AreReferenceAssignable(this.Type, expression.Type))
 			{
-				throw Error.ReducedNotCompatible();
+				throw global::System.Linq.Expressions.Error.ReducedNotCompatible();
 			}
 			return expression;
 		}
@@ -1976,7 +1990,7 @@ namespace System.Linq.Expressions
 					}
 				}
 			}
-			throw Error.ExpressionMustBeWriteable(paramName);
+			throw global::System.Linq.Expressions.Error.ExpressionMustBeWriteable(paramName);
 		}
 
 		public static DynamicExpression Dynamic(CallSiteBinder binder, Type returnType, IEnumerable<Expression> arguments)
@@ -2122,7 +2136,7 @@ namespace System.Linq.Expressions
 			{
 				if (target.Type != typeof(void))
 				{
-					throw Error.LabelMustBeVoidOrHaveExpression("target");
+					throw global::System.Linq.Expressions.Error.LabelMustBeVoidOrHaveExpression("target");
 				}
 				if (type != null)
 				{
@@ -2141,7 +2155,7 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(value, paramName);
 			if (expectedType != typeof(void) && !TypeUtils.AreReferenceAssignable(expectedType, value.Type) && !Expression.TryQuote(expectedType, ref value))
 			{
-				throw Error.ExpressionTypeDoesNotMatchLabel(value.Type, expectedType);
+				throw global::System.Linq.Expressions.Error.ExpressionTypeDoesNotMatchLabel(value.Type, expectedType);
 			}
 		}
 
@@ -2165,19 +2179,19 @@ namespace System.Linq.Expressions
 			Type type = array.Type;
 			if (!type.IsArray)
 			{
-				throw Error.ArgumentMustBeArray("array");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeArray("array");
 			}
 			ReadOnlyCollection<Expression> readOnlyCollection = indexes.ToReadOnly<Expression>();
 			if (type.GetArrayRank() != readOnlyCollection.Count)
 			{
-				throw Error.IncorrectNumberOfIndexes();
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfIndexes();
 			}
 			foreach (Expression expression in readOnlyCollection)
 			{
 				ExpressionUtils.RequiresCanRead(expression, "indexes");
 				if (expression.Type != typeof(int))
 				{
-					throw Error.ArgumentMustBeArrayIndexType("indexes");
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeArrayIndexType("indexes");
 				}
 			}
 			return new IndexExpression(array, null, readOnlyCollection);
@@ -2206,9 +2220,9 @@ namespace System.Linq.Expressions
 			}
 			if (arguments == null || arguments.Length == 0)
 			{
-				throw Error.InstancePropertyWithoutParameterNotDefinedForType(propertyName, type);
+				throw global::System.Linq.Expressions.Error.InstancePropertyWithoutParameterNotDefinedForType(propertyName, type);
 			}
-			throw Error.InstancePropertyWithSpecifiedParametersNotDefinedForType(propertyName, Expression.GetArgTypesString(arguments), type, "propertyName");
+			throw global::System.Linq.Expressions.Error.InstancePropertyWithSpecifiedParametersNotDefinedForType(propertyName, Expression.GetArgTypesString(arguments), type, "propertyName");
 		}
 
 		private static string GetArgTypesString(Expression[] arguments)
@@ -2238,7 +2252,7 @@ namespace System.Linq.Expressions
 				{
 					if (!(propertyInfo == null))
 					{
-						throw Error.PropertyWithMoreThanOneMatch(propertyName, type);
+						throw global::System.Linq.Expressions.Error.PropertyWithMoreThanOneMatch(propertyName, type);
 					}
 					propertyInfo = propertyInfo2;
 				}
@@ -2311,11 +2325,11 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(indexer, paramName);
 			if (indexer.PropertyType.IsByRef)
 			{
-				throw Error.PropertyCannotHaveRefType(paramName);
+				throw global::System.Linq.Expressions.Error.PropertyCannotHaveRefType(paramName);
 			}
 			if (indexer.PropertyType == typeof(void))
 			{
-				throw Error.PropertyTypeCannotBeVoid(paramName);
+				throw global::System.Linq.Expressions.Error.PropertyTypeCannotBeVoid(paramName);
 			}
 			ParameterInfo[] array = null;
 			MethodInfo getMethod = indexer.GetGetMethod(true);
@@ -2323,7 +2337,7 @@ namespace System.Linq.Expressions
 			{
 				if (getMethod.ReturnType != indexer.PropertyType)
 				{
-					throw Error.PropertyTypeMustMatchGetter(paramName);
+					throw global::System.Linq.Expressions.Error.PropertyTypeMustMatchGetter(paramName);
 				}
 				array = getMethod.GetParametersCached();
 				Expression.ValidateAccessor(instance, getMethod, array, ref argList, paramName);
@@ -2334,20 +2348,20 @@ namespace System.Linq.Expressions
 				ParameterInfo[] parametersCached = setMethod.GetParametersCached();
 				if (parametersCached.Length == 0)
 				{
-					throw Error.SetterHasNoParams(paramName);
+					throw global::System.Linq.Expressions.Error.SetterHasNoParams(paramName);
 				}
 				Type parameterType = parametersCached[parametersCached.Length - 1].ParameterType;
 				if (parameterType.IsByRef)
 				{
-					throw Error.PropertyCannotHaveRefType(paramName);
+					throw global::System.Linq.Expressions.Error.PropertyCannotHaveRefType(paramName);
 				}
 				if (setMethod.ReturnType != typeof(void))
 				{
-					throw Error.SetterMustBeVoid(paramName);
+					throw global::System.Linq.Expressions.Error.SetterMustBeVoid(paramName);
 				}
 				if (indexer.PropertyType != parameterType)
 				{
-					throw Error.PropertyTypeMustMatchSetter(paramName);
+					throw global::System.Linq.Expressions.Error.PropertyTypeMustMatchSetter(paramName);
 				}
 				if (!(getMethod != null))
 				{
@@ -2356,17 +2370,17 @@ namespace System.Linq.Expressions
 				}
 				if (getMethod.IsStatic ^ setMethod.IsStatic)
 				{
-					throw Error.BothAccessorsMustBeStatic(paramName);
+					throw global::System.Linq.Expressions.Error.BothAccessorsMustBeStatic(paramName);
 				}
 				if (array.Length != parametersCached.Length - 1)
 				{
-					throw Error.IndexesOfSetGetMustMatch(paramName);
+					throw global::System.Linq.Expressions.Error.IndexesOfSetGetMustMatch(paramName);
 				}
 				for (int i = 0; i < array.Length; i++)
 				{
 					if (array[i].ParameterType != parametersCached[i].ParameterType)
 					{
-						throw Error.IndexesOfSetGetMustMatch(paramName);
+						throw global::System.Linq.Expressions.Error.IndexesOfSetGetMustMatch(paramName);
 					}
 				}
 				return;
@@ -2375,7 +2389,7 @@ namespace System.Linq.Expressions
 			{
 				if (getMethod == null)
 				{
-					throw Error.PropertyDoesNotHaveAccessor(indexer, paramName);
+					throw global::System.Linq.Expressions.Error.PropertyDoesNotHaveAccessor(indexer, paramName);
 				}
 				return;
 			}
@@ -2387,20 +2401,20 @@ namespace System.Linq.Expressions
 			Expression.ValidateMethodInfo(method, "method");
 			if ((method.CallingConvention & CallingConventions.VarArgs) != (CallingConventions)0)
 			{
-				throw Error.AccessorsCannotHaveVarArgs(paramName);
+				throw global::System.Linq.Expressions.Error.AccessorsCannotHaveVarArgs(paramName);
 			}
 			if (method.IsStatic)
 			{
 				if (instance != null)
 				{
-					throw Error.OnlyStaticPropertiesHaveNullInstance("instance");
+					throw global::System.Linq.Expressions.Error.OnlyStaticPropertiesHaveNullInstance("instance");
 				}
 			}
 			else
 			{
 				if (instance == null)
 				{
-					throw Error.OnlyStaticPropertiesHaveNullInstance("instance");
+					throw global::System.Linq.Expressions.Error.OnlyStaticPropertiesHaveNullInstance("instance");
 				}
 				ExpressionUtils.RequiresCanRead(instance, "instance");
 				Expression.ValidateCallInstanceType(instance.Type, method);
@@ -2414,7 +2428,7 @@ namespace System.Linq.Expressions
 			{
 				if (indexes.Length != arguments.Count)
 				{
-					throw Error.IncorrectNumberOfMethodCallArguments(method, paramName);
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, paramName);
 				}
 				Expression[] array = null;
 				int i = 0;
@@ -2427,12 +2441,12 @@ namespace System.Linq.Expressions
 					Type parameterType = parameterInfo.ParameterType;
 					if (parameterType.IsByRef)
 					{
-						throw Error.AccessorsCannotHaveByRefArgs("indexes", i);
+						throw global::System.Linq.Expressions.Error.AccessorsCannotHaveByRefArgs("indexes", i);
 					}
 					TypeUtils.ValidateType(parameterType, "indexes", i);
 					if (!TypeUtils.AreReferenceAssignable(parameterType, expression.Type) && !Expression.TryQuote(parameterType, ref expression))
 					{
-						throw Error.ExpressionTypeDoesNotMatchMethodParameter(expression.Type, parameterType, method, "arguments", i);
+						throw global::System.Linq.Expressions.Error.ExpressionTypeDoesNotMatchMethodParameter(expression.Type, parameterType, method, "arguments", i);
 					}
 					if (array == null && expression != arguments[i])
 					{
@@ -2456,7 +2470,7 @@ namespace System.Linq.Expressions
 			}
 			else if (arguments.Count > 0)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(method, paramName);
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, paramName);
 			}
 		}
 
@@ -2570,7 +2584,7 @@ namespace System.Linq.Expressions
 				Type type2 = TypeUtils.FindGenericType(typeof(Expression<>), expression.Type);
 				if (type2 == null)
 				{
-					throw Error.ExpressionTypeNotInvocable(expression.Type, "expression");
+					throw global::System.Linq.Expressions.Error.ExpressionTypeNotInvocable(expression.Type, "expression");
 				}
 				type = type2.GetGenericArguments()[0];
 			}
@@ -2617,21 +2631,17 @@ namespace System.Linq.Expressions
 			{
 				cacheDict = (Expression.s_lambdaFactories = new CacheDict<Type, Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>>(50));
 			}
-			MethodInfo methodInfo = null;
 			Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression> func;
 			if (!cacheDict.TryGetValue(delegateType, out func))
 			{
-				methodInfo = typeof(Expression<>).MakeGenericType(new Type[] { delegateType }).GetMethod("Create", BindingFlags.Static | BindingFlags.NonPublic);
-				if (delegateType.CanCache())
+				MethodInfo method = typeof(Expression<>).MakeGenericType(new Type[] { delegateType }).GetMethod("Create", BindingFlags.Static | BindingFlags.NonPublic);
+				if (delegateType.IsCollectible)
 				{
-					func = (cacheDict[delegateType] = (Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>)methodInfo.CreateDelegate(typeof(Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>)));
+					return (LambdaExpression)method.Invoke(null, new object[] { body, name, tailCall, parameters });
 				}
+				func = (cacheDict[delegateType] = (Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>)method.CreateDelegate(typeof(Func<Expression, string, bool, ReadOnlyCollection<ParameterExpression>, LambdaExpression>)));
 			}
-			if (func != null)
-			{
-				return func(body, name, tailCall, parameters);
-			}
-			return (LambdaExpression)methodInfo.Invoke(null, new object[] { body, name, tailCall, parameters });
+			return func(body, name, tailCall, parameters);
 		}
 
 		public static Expression<TDelegate> Lambda<TDelegate>(Expression body, params ParameterExpression[] parameters)
@@ -2727,7 +2737,7 @@ namespace System.Linq.Expressions
 					array[i] = (parameterExpression.IsByRef ? parameterExpression.Type.MakeByRefType() : parameterExpression.Type);
 					if (!hashSet.Add(parameterExpression))
 					{
-						throw Error.DuplicateVariable(parameterExpression, "parameters", i);
+						throw global::System.Linq.Expressions.Error.DuplicateVariable(parameterExpression, "parameters", i);
 					}
 				}
 			}
@@ -2755,7 +2765,7 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(body, "body");
 			if (!typeof(MulticastDelegate).IsAssignableFrom(delegateType) || delegateType == typeof(MulticastDelegate))
 			{
-				throw Error.LambdaTypeMustBeDerivedFromSystemDelegate(paramName);
+				throw global::System.Linq.Expressions.Error.LambdaTypeMustBeDerivedFromSystemDelegate(paramName);
 			}
 			TypeUtils.ValidateType(delegateType, "delegateType", true, true);
 			CacheDict<Type, MethodInfo> cacheDict = Expression.s_lambdaDelegateCache;
@@ -2763,7 +2773,7 @@ namespace System.Linq.Expressions
 			if (!cacheDict.TryGetValue(delegateType, out invokeMethod))
 			{
 				invokeMethod = delegateType.GetInvokeMethod();
-				if (delegateType.CanCache())
+				if (!delegateType.IsCollectible)
 				{
 					cacheDict[delegateType] = invokeMethod;
 				}
@@ -2773,7 +2783,7 @@ namespace System.Linq.Expressions
 			{
 				if (parametersCached.Length != parameters.Count)
 				{
-					throw Error.IncorrectNumberOfLambdaDeclarationParameters();
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfLambdaDeclarationParameters();
 				}
 				HashSet<ParameterExpression> hashSet = new HashSet<ParameterExpression>();
 				int i = 0;
@@ -2788,28 +2798,28 @@ namespace System.Linq.Expressions
 					{
 						if (!type.IsByRef)
 						{
-							throw Error.ParameterExpressionNotValidAsDelegate(parameterExpression.Type.MakeByRefType(), type);
+							throw global::System.Linq.Expressions.Error.ParameterExpressionNotValidAsDelegate(parameterExpression.Type.MakeByRefType(), type);
 						}
 						type = type.GetElementType();
 					}
 					if (!TypeUtils.AreReferenceAssignable(parameterExpression.Type, type))
 					{
-						throw Error.ParameterExpressionNotValidAsDelegate(parameterExpression.Type, type);
+						throw global::System.Linq.Expressions.Error.ParameterExpressionNotValidAsDelegate(parameterExpression.Type, type);
 					}
 					if (!hashSet.Add(parameterExpression))
 					{
-						throw Error.DuplicateVariable(parameterExpression, "parameters", i);
+						throw global::System.Linq.Expressions.Error.DuplicateVariable(parameterExpression, "parameters", i);
 					}
 					i++;
 				}
 			}
 			else if (parameters.Count > 0)
 			{
-				throw Error.IncorrectNumberOfLambdaDeclarationParameters();
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfLambdaDeclarationParameters();
 			}
 			if (invokeMethod.ReturnType != typeof(void) && !TypeUtils.AreReferenceAssignable(invokeMethod.ReturnType, body.Type) && !Expression.TryQuote(invokeMethod.ReturnType, ref body))
 			{
-				throw Error.ExpressionTypeDoesNotMatchReturn(body.Type, invokeMethod.ReturnType);
+				throw global::System.Linq.Expressions.Error.ExpressionTypeDoesNotMatchReturn(body.Type, invokeMethod.ReturnType);
 			}
 		}
 
@@ -2846,12 +2856,12 @@ namespace System.Linq.Expressions
 			}
 			if (tryGetFuncActionArgsResult == Expression.TryGetFuncActionArgsResult.ByRef)
 			{
-				throw Error.TypeMustNotBeByRef("typeArgs");
+				throw global::System.Linq.Expressions.Error.TypeMustNotBeByRef("typeArgs");
 			}
 			Type funcType = DelegateHelpers.GetFuncType(typeArgs);
 			if (funcType == null)
 			{
-				throw Error.IncorrectNumberOfTypeArgsForFunc("typeArgs");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfTypeArgsForFunc("typeArgs");
 			}
 			return funcType;
 		}
@@ -2877,12 +2887,12 @@ namespace System.Linq.Expressions
 			}
 			if (tryGetFuncActionArgsResult == Expression.TryGetFuncActionArgsResult.ByRef)
 			{
-				throw Error.TypeMustNotBeByRef("typeArgs");
+				throw global::System.Linq.Expressions.Error.TypeMustNotBeByRef("typeArgs");
 			}
 			Type actionType = DelegateHelpers.GetActionType(typeArgs);
 			if (actionType == null)
 			{
-				throw Error.IncorrectNumberOfTypeArgsForAction("typeArgs");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfTypeArgsForAction("typeArgs");
 			}
 			return actionType;
 		}
@@ -2975,7 +2985,7 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(body, "body");
 			if (@continue != null && @continue.Type != typeof(void))
 			{
-				throw Error.LabelTypeMustBeVoid("continue");
+				throw global::System.Linq.Expressions.Error.LabelTypeMustBeVoid("continue");
 			}
 			return new LoopExpression(body, @break, @continue);
 		}
@@ -2988,7 +2998,7 @@ namespace System.Linq.Expressions
 			Expression.ValidateSettableFieldOrPropertyMember(member, out type);
 			if (!type.IsAssignableFrom(expression.Type))
 			{
-				throw Error.ArgumentTypesMustMatch();
+				throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 			}
 			return new MemberAssignment(member, expression);
 		}
@@ -3006,34 +3016,29 @@ namespace System.Linq.Expressions
 			Type declaringType = member.DeclaringType;
 			if (declaringType == null)
 			{
-				throw Error.NotAMemberOfAnyType(member, "member");
+				throw global::System.Linq.Expressions.Error.NotAMemberOfAnyType(member, "member");
 			}
 			TypeUtils.ValidateType(declaringType, null);
-			if (member != null)
+			PropertyInfo propertyInfo = member as PropertyInfo;
+			if (propertyInfo == null)
 			{
-				PropertyInfo propertyInfo;
-				if ((propertyInfo = member as PropertyInfo) == null)
+				FieldInfo fieldInfo = member as FieldInfo;
+				if (fieldInfo == null)
 				{
-					FieldInfo fieldInfo;
-					if ((fieldInfo = member as FieldInfo) != null)
-					{
-						FieldInfo fieldInfo2 = fieldInfo;
-						memberType = fieldInfo2.FieldType;
-						return;
-					}
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeFieldInfoOrPropertyInfo("member");
 				}
-				else
-				{
-					PropertyInfo propertyInfo2 = propertyInfo;
-					if (!propertyInfo2.CanWrite)
-					{
-						throw Error.PropertyDoesNotHaveSetter(propertyInfo2, "member");
-					}
-					memberType = propertyInfo2.PropertyType;
-					return;
-				}
+				memberType = fieldInfo.FieldType;
+				return;
 			}
-			throw Error.ArgumentMustBeFieldInfoOrPropertyInfo("member");
+			else
+			{
+				if (!propertyInfo.CanWrite)
+				{
+					throw global::System.Linq.Expressions.Error.PropertyDoesNotHaveSetter(propertyInfo, "member");
+				}
+				memberType = propertyInfo.PropertyType;
+				return;
+			}
 		}
 
 		public static MemberExpression Field(Expression expression, FieldInfo field)
@@ -3043,19 +3048,19 @@ namespace System.Linq.Expressions
 			{
 				if (expression != null)
 				{
-					throw Error.OnlyStaticFieldsHaveNullInstance("expression");
+					throw global::System.Linq.Expressions.Error.OnlyStaticFieldsHaveNullInstance("expression");
 				}
 			}
 			else
 			{
 				if (expression == null)
 				{
-					throw Error.OnlyStaticFieldsHaveNullInstance("field");
+					throw global::System.Linq.Expressions.Error.OnlyStaticFieldsHaveNullInstance("field");
 				}
 				ExpressionUtils.RequiresCanRead(expression, "expression");
 				if (!TypeUtils.AreReferenceAssignable(field.DeclaringType, expression.Type))
 				{
-					throw Error.FieldInfoNotDefinedForType(field.DeclaringType, field.Name, expression.Type);
+					throw global::System.Linq.Expressions.Error.FieldInfoNotDefinedForType(field.DeclaringType, field.Name, expression.Type);
 				}
 			}
 			return MemberExpression.Make(expression, field);
@@ -3068,7 +3073,7 @@ namespace System.Linq.Expressions
 			FieldInfo fieldInfo = expression.Type.GetField(fieldName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy) ?? expression.Type.GetField(fieldName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			if (fieldInfo == null)
 			{
-				throw Error.InstanceFieldNotDefinedForType(fieldName, expression.Type);
+				throw global::System.Linq.Expressions.Error.InstanceFieldNotDefinedForType(fieldName, expression.Type);
 			}
 			return Expression.Field(expression, fieldInfo);
 		}
@@ -3079,7 +3084,7 @@ namespace System.Linq.Expressions
 			FieldInfo fieldInfo = type.GetField(fieldName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy) ?? type.GetField(fieldName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			if (fieldInfo == null)
 			{
-				throw Error.FieldNotDefinedForType(fieldName, type);
+				throw global::System.Linq.Expressions.Error.FieldNotDefinedForType(fieldName, type);
 			}
 			return Expression.Field(expression, fieldInfo);
 		}
@@ -3091,7 +3096,7 @@ namespace System.Linq.Expressions
 			PropertyInfo propertyInfo = expression.Type.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy) ?? expression.Type.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			if (propertyInfo == null)
 			{
-				throw Error.InstancePropertyNotDefinedForType(propertyName, expression.Type, "propertyName");
+				throw global::System.Linq.Expressions.Error.InstancePropertyNotDefinedForType(propertyName, expression.Type, "propertyName");
 			}
 			return Expression.Property(expression, propertyInfo);
 		}
@@ -3103,7 +3108,7 @@ namespace System.Linq.Expressions
 			PropertyInfo propertyInfo = type.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy) ?? type.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			if (propertyInfo == null)
 			{
-				throw Error.PropertyNotDefinedForType(propertyName, type, "propertyName");
+				throw global::System.Linq.Expressions.Error.PropertyNotDefinedForType(propertyName, type, "propertyName");
 			}
 			return Expression.Property(expression, propertyInfo);
 		}
@@ -3117,34 +3122,34 @@ namespace System.Linq.Expressions
 				methodInfo = property.GetSetMethod(true);
 				if (methodInfo == null)
 				{
-					throw Error.PropertyDoesNotHaveAccessor(property, "property");
+					throw global::System.Linq.Expressions.Error.PropertyDoesNotHaveAccessor(property, "property");
 				}
 				if (methodInfo.GetParametersCached().Length != 1)
 				{
-					throw Error.IncorrectNumberOfMethodCallArguments(methodInfo, "property");
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(methodInfo, "property");
 				}
 			}
 			else if (methodInfo.GetParametersCached().Length != 0)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(methodInfo, "property");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(methodInfo, "property");
 			}
 			if (methodInfo.IsStatic)
 			{
 				if (expression != null)
 				{
-					throw Error.OnlyStaticPropertiesHaveNullInstance("expression");
+					throw global::System.Linq.Expressions.Error.OnlyStaticPropertiesHaveNullInstance("expression");
 				}
 			}
 			else
 			{
 				if (expression == null)
 				{
-					throw Error.OnlyStaticPropertiesHaveNullInstance("property");
+					throw global::System.Linq.Expressions.Error.OnlyStaticPropertiesHaveNullInstance("property");
 				}
 				ExpressionUtils.RequiresCanRead(expression, "expression");
 				if (!TypeUtils.IsValidInstanceType(property, expression.Type))
 				{
-					throw Error.PropertyNotDefinedForType(property, expression.Type, "property");
+					throw global::System.Linq.Expressions.Error.PropertyNotDefinedForType(property, expression.Type, "property");
 				}
 			}
 			Expression.ValidateMethodInfo(methodInfo, "property");
@@ -3177,7 +3182,7 @@ namespace System.Linq.Expressions
 					}
 				}
 			}
-			throw Error.MethodNotPropertyAccessor(mi.DeclaringType, mi.Name, paramName, index);
+			throw global::System.Linq.Expressions.Error.MethodNotPropertyAccessor(mi.DeclaringType, mi.Name, paramName, index);
 		}
 
 		private static bool CheckMethod(MethodInfo method, MethodInfo propertyMethod)
@@ -3213,7 +3218,7 @@ namespace System.Linq.Expressions
 			{
 				return Expression.Field(expression, fieldInfo);
 			}
-			throw Error.NotAMemberOfType(propertyOrFieldName, expression.Type, "propertyOrFieldName");
+			throw global::System.Linq.Expressions.Error.NotAMemberOfType(propertyOrFieldName, expression.Type, "propertyOrFieldName");
 		}
 
 		public static MemberExpression MakeMemberAccess(Expression expression, MemberInfo member)
@@ -3229,7 +3234,7 @@ namespace System.Linq.Expressions
 			{
 				return Expression.Property(expression, propertyInfo);
 			}
-			throw Error.MemberNotFieldOrProperty(member, "member");
+			throw global::System.Linq.Expressions.Error.MemberNotFieldOrProperty(member, "member");
 		}
 
 		public static MemberInitExpression MemberInit(NewExpression newExpression, params MemberBinding[] bindings)
@@ -3278,7 +3283,7 @@ namespace System.Linq.Expressions
 		{
 			if (!typeof(IEnumerable).IsAssignableFrom(listType))
 			{
-				throw Error.TypeNotIEnumerable(listType, listTypeParamName);
+				throw global::System.Linq.Expressions.Error.TypeNotIEnumerable(listType, listTypeParamName);
 			}
 			int i = 0;
 			int count = initializers.Count;
@@ -3323,34 +3328,29 @@ namespace System.Linq.Expressions
 			Type declaringType = member.DeclaringType;
 			if (declaringType == null)
 			{
-				throw Error.NotAMemberOfAnyType(member, "member");
+				throw global::System.Linq.Expressions.Error.NotAMemberOfAnyType(member, "member");
 			}
 			TypeUtils.ValidateType(declaringType, null, true, true);
-			if (member != null)
+			PropertyInfo propertyInfo = member as PropertyInfo;
+			if (propertyInfo == null)
 			{
-				PropertyInfo propertyInfo;
-				if ((propertyInfo = member as PropertyInfo) == null)
+				FieldInfo fieldInfo = member as FieldInfo;
+				if (fieldInfo == null)
 				{
-					FieldInfo fieldInfo;
-					if ((fieldInfo = member as FieldInfo) != null)
-					{
-						FieldInfo fieldInfo2 = fieldInfo;
-						memberType = fieldInfo2.FieldType;
-						return;
-					}
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeFieldInfoOrPropertyInfo("member");
 				}
-				else
-				{
-					PropertyInfo propertyInfo2 = propertyInfo;
-					if (!propertyInfo2.CanRead)
-					{
-						throw Error.PropertyDoesNotHaveGetter(propertyInfo2, "member");
-					}
-					memberType = propertyInfo2.PropertyType;
-					return;
-				}
+				memberType = fieldInfo.FieldType;
+				return;
 			}
-			throw Error.ArgumentMustBeFieldInfoOrPropertyInfo("member");
+			else
+			{
+				if (!propertyInfo.CanRead)
+				{
+					throw global::System.Linq.Expressions.Error.PropertyDoesNotHaveGetter(propertyInfo, "member");
+				}
+				memberType = propertyInfo.PropertyType;
+				return;
+			}
 		}
 
 		private static void ValidateMemberInitArgs(Type type, ReadOnlyCollection<MemberBinding> bindings)
@@ -3364,7 +3364,7 @@ namespace System.Linq.Expressions
 				memberBinding.ValidateAsDefinedHere(i);
 				if (!memberBinding.Member.DeclaringType.IsAssignableFrom(type))
 				{
-					throw Error.NotAMemberOfType(memberBinding.Member.Name, type, "bindings", i);
+					throw global::System.Linq.Expressions.Error.NotAMemberOfType(memberBinding.Member.Name, type, "bindings", i);
 				}
 				i++;
 			}
@@ -3601,14 +3601,14 @@ namespace System.Linq.Expressions
 			{
 				if (instance != null)
 				{
-					throw Error.OnlyStaticMethodsHaveNullInstance();
+					throw global::System.Linq.Expressions.Error.OnlyStaticMethodsHaveNullInstance();
 				}
 			}
 			else
 			{
 				if (instance == null)
 				{
-					throw Error.OnlyStaticMethodsHaveNullInstance();
+					throw global::System.Linq.Expressions.Error.OnlyStaticMethodsHaveNullInstance();
 				}
 				ExpressionUtils.RequiresCanRead(instance, "instance");
 				Expression.ValidateCallInstanceType(instance.Type, method);
@@ -3619,7 +3619,7 @@ namespace System.Linq.Expressions
 		{
 			if (!TypeUtils.IsValidInstanceType(method, instanceType))
 			{
-				throw Error.InstanceAndMethodTypeMismatch(method, method.DeclaringType, instanceType);
+				throw global::System.Linq.Expressions.Error.InstanceAndMethodTypeMismatch(method, method.DeclaringType, instanceType);
 			}
 		}
 
@@ -3675,15 +3675,15 @@ namespace System.Linq.Expressions
 			{
 				if (typeArgs != null && typeArgs.Length != 0)
 				{
-					throw Error.GenericMethodWithArgsDoesNotExistOnType(methodName, type);
+					throw global::System.Linq.Expressions.Error.GenericMethodWithArgsDoesNotExistOnType(methodName, type);
 				}
-				throw Error.MethodWithArgsDoesNotExistOnType(methodName, type);
+				throw global::System.Linq.Expressions.Error.MethodWithArgsDoesNotExistOnType(methodName, type);
 			}
 			else
 			{
 				if (num > 1)
 				{
-					throw Error.MethodWithMoreThanOneMatch(methodName, type);
+					throw global::System.Linq.Expressions.Error.MethodWithMoreThanOneMatch(methodName, type);
 				}
 				return methodInfo;
 			}
@@ -3742,12 +3742,12 @@ namespace System.Linq.Expressions
 			Type type = array.Type;
 			if (!type.IsArray)
 			{
-				throw Error.ArgumentMustBeArray("array");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeArray("array");
 			}
 			ReadOnlyCollection<Expression> readOnlyCollection = indexes.ToReadOnly<Expression>();
 			if (type.GetArrayRank() != readOnlyCollection.Count)
 			{
-				throw Error.IncorrectNumberOfIndexes();
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfIndexes();
 			}
 			int i = 0;
 			int count = readOnlyCollection.Count;
@@ -3757,7 +3757,7 @@ namespace System.Linq.Expressions
 				ExpressionUtils.RequiresCanRead(expression, "indexes", i);
 				if (expression.Type != typeof(int))
 				{
-					throw Error.ArgumentMustBeArrayIndexType("indexes", i);
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeArrayIndexType("indexes", i);
 				}
 				i++;
 			}
@@ -3776,7 +3776,7 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(initializers, "initializers");
 			if (type == typeof(void))
 			{
-				throw Error.ArgumentCannotBeOfTypeVoid("type");
+				throw global::System.Linq.Expressions.Error.ArgumentCannotBeOfTypeVoid("type");
 			}
 			TypeUtils.ValidateType(type, "type");
 			ReadOnlyCollection<Expression> readOnlyCollection = initializers.ToReadOnly<Expression>();
@@ -3791,7 +3791,7 @@ namespace System.Linq.Expressions
 				{
 					if (!Expression.TryQuote(type, ref expression))
 					{
-						throw Error.ExpressionTypeCannotInitializeArrayType(expression.Type, type);
+						throw global::System.Linq.Expressions.Error.ExpressionTypeCannotInitializeArrayType(expression.Type, type);
 					}
 					if (array == null)
 					{
@@ -3826,14 +3826,14 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(bounds, "bounds");
 			if (type == typeof(void))
 			{
-				throw Error.ArgumentCannotBeOfTypeVoid("type");
+				throw global::System.Linq.Expressions.Error.ArgumentCannotBeOfTypeVoid("type");
 			}
 			TypeUtils.ValidateType(type, "type");
 			ReadOnlyCollection<Expression> readOnlyCollection = bounds.ToReadOnly<Expression>();
 			int count = readOnlyCollection.Count;
 			if (count <= 0)
 			{
-				throw Error.BoundsCannotBeLessThanOne("bounds");
+				throw global::System.Linq.Expressions.Error.BoundsCannotBeLessThanOne("bounds");
 			}
 			for (int i = 0; i < count; i++)
 			{
@@ -3841,7 +3841,7 @@ namespace System.Linq.Expressions
 				ExpressionUtils.RequiresCanRead(expression, "bounds", i);
 				if (!expression.Type.IsInteger())
 				{
-					throw Error.ArgumentMustBeInteger("bounds", i);
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeInteger("bounds", i);
 				}
 			}
 			Type type2;
@@ -3899,7 +3899,7 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(type, "type");
 			if (type == typeof(void))
 			{
-				throw Error.ArgumentCannotBeOfTypeVoid("type");
+				throw global::System.Linq.Expressions.Error.ArgumentCannotBeOfTypeVoid("type");
 			}
 			TypeUtils.ValidateType(type, "type");
 			if (type.IsValueType)
@@ -3909,7 +3909,7 @@ namespace System.Linq.Expressions
 			ConstructorInfo constructorInfo = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SingleOrDefault<ConstructorInfo>((ConstructorInfo c) => c.GetParametersCached().Length == 0);
 			if (constructorInfo == null)
 			{
-				throw Error.TypeMissingDefaultConstructor(type, "type");
+				throw global::System.Linq.Expressions.Error.TypeMissingDefaultConstructor(type, "type");
 			}
 			return Expression.New(constructorInfo);
 		}
@@ -3921,11 +3921,11 @@ namespace System.Linq.Expressions
 			{
 				if (arguments.Count != parametersCached.Length)
 				{
-					throw Error.IncorrectNumberOfConstructorArguments();
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfConstructorArguments();
 				}
 				if (arguments.Count != members.Count)
 				{
-					throw Error.IncorrectNumberOfArgumentsForMembers();
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfArgumentsForMembers();
 				}
 				Expression[] array = null;
 				MemberInfo[] array2 = null;
@@ -3939,13 +3939,13 @@ namespace System.Linq.Expressions
 					ContractUtils.RequiresNotNull(memberInfo, "members", i);
 					if (!TypeUtils.AreEquivalent(memberInfo.DeclaringType, constructor.DeclaringType))
 					{
-						throw Error.ArgumentMemberNotDeclOnType(memberInfo.Name, constructor.DeclaringType.Name, "members", i);
+						throw global::System.Linq.Expressions.Error.ArgumentMemberNotDeclOnType(memberInfo.Name, constructor.DeclaringType.Name, "members", i);
 					}
 					Type type;
 					Expression.ValidateAnonymousTypeMember(ref memberInfo, out type, "members", i);
 					if (!TypeUtils.AreReferenceAssignable(type, expression.Type) && !Expression.TryQuote(type, ref expression))
 					{
-						throw Error.ArgumentTypeDoesNotMatchMember(expression.Type, type, "arguments", i);
+						throw global::System.Linq.Expressions.Error.ArgumentTypeDoesNotMatchMember(expression.Type, type, "arguments", i);
 					}
 					Type type2 = parametersCached[i].ParameterType;
 					if (type2.IsByRef)
@@ -3954,7 +3954,7 @@ namespace System.Linq.Expressions
 					}
 					if (!TypeUtils.AreReferenceAssignable(type2, expression.Type) && !Expression.TryQuote(type2, ref expression))
 					{
-						throw Error.ExpressionTypeDoesNotMatchConstructorParameter(expression.Type, type2, "arguments", i);
+						throw global::System.Linq.Expressions.Error.ExpressionTypeDoesNotMatchConstructorParameter(expression.Type, type2, "arguments", i);
 					}
 					if (array == null && expression != arguments[i])
 					{
@@ -3996,11 +3996,11 @@ namespace System.Linq.Expressions
 			{
 				if (arguments != null && arguments.Count > 0)
 				{
-					throw Error.IncorrectNumberOfConstructorArguments();
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfConstructorArguments();
 				}
 				if (members != null && members.Count > 0)
 				{
-					throw Error.IncorrectNumberOfMembersForGivenConstructor();
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfMembersForGivenConstructor();
 				}
 			}
 		}
@@ -4012,7 +4012,7 @@ namespace System.Linq.Expressions
 			{
 				if (fieldInfo.IsStatic)
 				{
-					throw Error.ArgumentMustBeInstanceMember(paramName, index);
+					throw global::System.Linq.Expressions.Error.ArgumentMustBeInstanceMember(paramName, index);
 				}
 				memberType = fieldInfo.FieldType;
 				return;
@@ -4024,11 +4024,11 @@ namespace System.Linq.Expressions
 				{
 					if (!propertyInfo.CanRead)
 					{
-						throw Error.PropertyDoesNotHaveGetter(propertyInfo, paramName, index);
+						throw global::System.Linq.Expressions.Error.PropertyDoesNotHaveGetter(propertyInfo, paramName, index);
 					}
 					if (propertyInfo.GetGetMethod().IsStatic)
 					{
-						throw Error.ArgumentMustBeInstanceMember(paramName, index);
+						throw global::System.Linq.Expressions.Error.ArgumentMustBeInstanceMember(paramName, index);
 					}
 					memberType = propertyInfo.PropertyType;
 					return;
@@ -4038,11 +4038,11 @@ namespace System.Linq.Expressions
 					MethodInfo methodInfo = member as MethodInfo;
 					if (!(methodInfo != null))
 					{
-						throw Error.ArgumentMustBeFieldInfoOrPropertyInfoOrMethod(paramName, index);
+						throw global::System.Linq.Expressions.Error.ArgumentMustBeFieldInfoOrPropertyInfoOrMethod(paramName, index);
 					}
 					if (methodInfo.IsStatic)
 					{
-						throw Error.ArgumentMustBeInstanceMember(paramName, index);
+						throw global::System.Linq.Expressions.Error.ArgumentMustBeInstanceMember(paramName, index);
 					}
 					PropertyInfo property = Expression.GetProperty(methodInfo, paramName, index);
 					member = property;
@@ -4056,7 +4056,7 @@ namespace System.Linq.Expressions
 		{
 			if (constructor.IsStatic)
 			{
-				throw Error.NonStaticConstructorRequired(paramName);
+				throw global::System.Linq.Expressions.Error.NonStaticConstructorRequired(paramName);
 			}
 		}
 
@@ -4093,7 +4093,7 @@ namespace System.Linq.Expressions
 			TypeUtils.ValidateType(type, "type", allowByRef, false);
 			if (type == typeof(void))
 			{
-				throw Error.ArgumentCannotBeOfTypeVoid("type");
+				throw global::System.Linq.Expressions.Error.ArgumentCannotBeOfTypeVoid("type");
 			}
 		}
 
@@ -4157,7 +4157,7 @@ namespace System.Linq.Expressions
 			ExpressionUtils.RequiresCanRead(switchValue, "switchValue");
 			if (switchValue.Type == typeof(void))
 			{
-				throw Error.ArgumentCannotBeOfTypeVoid("switchValue");
+				throw global::System.Linq.Expressions.Error.ArgumentCannotBeOfTypeVoid("switchValue");
 			}
 			ReadOnlyCollection<SwitchCase> readOnlyCollection = cases.ToReadOnly<SwitchCase>();
 			ContractUtils.RequiresNotNullItems<SwitchCase>(readOnlyCollection, "cases");
@@ -4185,7 +4185,7 @@ namespace System.Linq.Expressions
 				ParameterInfo[] parametersCached = comparison.GetParametersCached();
 				if (parametersCached.Length != 2)
 				{
-					throw Error.IncorrectNumberOfMethodCallArguments(comparison, "comparison");
+					throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(comparison, "comparison");
 				}
 				ParameterInfo parameterInfo = parametersCached[0];
 				bool flag2 = false;
@@ -4194,7 +4194,7 @@ namespace System.Linq.Expressions
 					flag2 = Expression.ParameterIsAssignable(parameterInfo, switchValue.Type.GetNonNullableType());
 					if (!flag2)
 					{
-						throw Error.SwitchValueTypeDoesNotMatchComparisonMethodParameter(switchValue.Type, parameterInfo.ParameterType);
+						throw global::System.Linq.Expressions.Error.SwitchValueTypeDoesNotMatchComparisonMethodParameter(switchValue.Type, parameterInfo.ParameterType);
 					}
 				}
 				ParameterInfo parameterInfo2 = parametersCached[1];
@@ -4211,20 +4211,20 @@ namespace System.Linq.Expressions
 						{
 							if (!type3.IsNullableType())
 							{
-								throw Error.TestValueTypeDoesNotMatchComparisonMethodParameter(type3, parameterInfo2.ParameterType);
+								throw global::System.Linq.Expressions.Error.TestValueTypeDoesNotMatchComparisonMethodParameter(type3, parameterInfo2.ParameterType);
 							}
 							type3 = type3.GetNonNullableType();
 						}
 						if (!Expression.ParameterIsAssignable(parameterInfo2, type3))
 						{
-							throw Error.TestValueTypeDoesNotMatchComparisonMethodParameter(type3, parameterInfo2.ParameterType);
+							throw global::System.Linq.Expressions.Error.TestValueTypeDoesNotMatchComparisonMethodParameter(type3, parameterInfo2.ParameterType);
 						}
 						i++;
 					}
 				}
 				if (comparison.ReturnType != typeof(bool))
 				{
-					throw Error.EqualityMustReturnBoolean(comparison, "comparison");
+					throw global::System.Linq.Expressions.Error.EqualityMustReturnBoolean(comparison, "comparison");
 				}
 			}
 			else if (readOnlyCollection.Count != 0)
@@ -4240,7 +4240,7 @@ namespace System.Linq.Expressions
 					{
 						if (!TypeUtils.AreEquivalent(expression.Type, switchCase2.TestValues[j].Type))
 						{
-							throw Error.AllTestValuesMustHaveSameType("cases");
+							throw global::System.Linq.Expressions.Error.AllTestValuesMustHaveSameType("cases");
 						}
 						j++;
 					}
@@ -4251,7 +4251,7 @@ namespace System.Linq.Expressions
 			{
 				if (type2 != typeof(void))
 				{
-					throw Error.DefaultBodyMustBeSupplied("defaultBody");
+					throw global::System.Linq.Expressions.Error.DefaultBodyMustBeSupplied("defaultBody");
 				}
 			}
 			else
@@ -4267,12 +4267,12 @@ namespace System.Linq.Expressions
 			{
 				if (resultType != typeof(void) && !TypeUtils.AreReferenceAssignable(resultType, @case.Type))
 				{
-					throw Error.ArgumentTypesMustMatch(parameterName);
+					throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch(parameterName);
 				}
 			}
 			else if (!TypeUtils.AreEquivalent(resultType, @case.Type))
 			{
-				throw Error.AllCaseBodiesMustHaveSameType(parameterName);
+				throw global::System.Linq.Expressions.Error.AllCaseBodiesMustHaveSameType(parameterName);
 			}
 		}
 
@@ -4326,7 +4326,7 @@ namespace System.Linq.Expressions
 			{
 				if (@finally != null || readOnlyCollection.Count > 0)
 				{
-					throw Error.FaultCannotHaveCatchOrFinally("fault");
+					throw global::System.Linq.Expressions.Error.FaultCannotHaveCatchOrFinally("fault");
 				}
 				ExpressionUtils.RequiresCanRead(fault, "fault");
 			}
@@ -4336,7 +4336,7 @@ namespace System.Linq.Expressions
 			}
 			else if (readOnlyCollection.Count == 0)
 			{
-				throw Error.TryMustHaveCatchFinallyOrFault();
+				throw global::System.Linq.Expressions.Error.TryMustHaveCatchFinallyOrFault();
 			}
 			return new TryExpression(type ?? body.Type, body, @finally, fault, readOnlyCollection);
 		}
@@ -4351,7 +4351,7 @@ namespace System.Linq.Expressions
 				}
 				if (!TypeUtils.AreReferenceAssignable(type, tryBody.Type))
 				{
-					throw Error.ArgumentTypesMustMatch();
+					throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 				}
 				using (IEnumerator<CatchBlock> enumerator = handlers.GetEnumerator())
 				{
@@ -4360,7 +4360,7 @@ namespace System.Linq.Expressions
 						CatchBlock catchBlock = enumerator.Current;
 						if (!TypeUtils.AreReferenceAssignable(type, catchBlock.Body.Type))
 						{
-							throw Error.ArgumentTypesMustMatch();
+							throw global::System.Linq.Expressions.Error.ArgumentTypesMustMatch();
 						}
 					}
 					return;
@@ -4374,7 +4374,7 @@ namespace System.Linq.Expressions
 					{
 						if (enumerator.Current.Body.Type != typeof(void))
 						{
-							throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
+							throw global::System.Linq.Expressions.Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
 						}
 					}
 					return;
@@ -4387,7 +4387,7 @@ namespace System.Linq.Expressions
 				{
 					if (!TypeUtils.AreEquivalent(enumerator.Current.Body.Type, type))
 					{
-						throw Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
+						throw global::System.Linq.Expressions.Error.BodyOfCatchMustHaveSameTypeAsBodyOfTry();
 					}
 				}
 			}
@@ -4399,7 +4399,7 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(type, "type");
 			if (type.IsByRef)
 			{
-				throw Error.TypeMustNotBeByRef("type");
+				throw global::System.Linq.Expressions.Error.TypeMustNotBeByRef("type");
 			}
 			return new TypeBinaryExpression(expression, type, ExpressionType.TypeIs);
 		}
@@ -4410,7 +4410,7 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(type, "type");
 			if (type.IsByRef)
 			{
-				throw Error.TypeMustNotBeByRef("type");
+				throw global::System.Linq.Expressions.Error.TypeMustNotBeByRef("type");
 			}
 			return new TypeBinaryExpression(expression, type, ExpressionType.TypeEqual);
 		}
@@ -4507,7 +4507,7 @@ namespace System.Linq.Expressions
 					return Expression.IsFalse(operand, method);
 				}
 			}
-			throw Error.UnhandledUnary(unaryType, "unaryType");
+			throw global::System.Linq.Expressions.Error.UnhandledUnary(unaryType, "unaryType");
 		}
 
 		private static UnaryExpression GetUserDefinedUnaryOperatorOrThrow(ExpressionType unaryType, string name, Expression operand)
@@ -4518,7 +4518,7 @@ namespace System.Linq.Expressions
 				Expression.ValidateParamswithOperandsOrThrow(userDefinedUnaryOperator.Method.GetParametersCached()[0].ParameterType, operand.Type, unaryType, name);
 				return userDefinedUnaryOperator;
 			}
-			throw Error.UnaryOperatorNotDefined(unaryType, operand.Type);
+			throw global::System.Linq.Expressions.Error.UnaryOperatorNotDefined(unaryType, operand.Type);
 		}
 
 		private static UnaryExpression GetUserDefinedUnaryOperator(ExpressionType unaryType, string name, Expression operand)
@@ -4549,7 +4549,7 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = method.GetParametersCached();
 			if (parametersCached.Length != 1)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(method, "method");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, "method");
 			}
 			if (Expression.ParameterIsAssignable(parametersCached[0], operand.Type))
 			{
@@ -4560,7 +4560,7 @@ namespace System.Linq.Expressions
 			{
 				return new UnaryExpression(unaryType, operand, method.ReturnType.GetNullableType(), method);
 			}
-			throw Error.OperandTypesDoNotMatchParameters(unaryType, method.Name);
+			throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(unaryType, method.Name);
 		}
 
 		private static UnaryExpression GetUserDefinedCoercionOrThrow(ExpressionType coercionType, Expression expression, Type convertToType)
@@ -4570,7 +4570,7 @@ namespace System.Linq.Expressions
 			{
 				return userDefinedCoercion;
 			}
-			throw Error.CoercionOperatorNotDefined(expression.Type, convertToType);
+			throw global::System.Linq.Expressions.Error.CoercionOperatorNotDefined(expression.Type, convertToType);
 		}
 
 		private static UnaryExpression GetUserDefinedCoercion(ExpressionType coercionType, Expression expression, Type convertToType)
@@ -4589,7 +4589,7 @@ namespace System.Linq.Expressions
 			ParameterInfo[] parametersCached = method.GetParametersCached();
 			if (parametersCached.Length != 1)
 			{
-				throw Error.IncorrectNumberOfMethodCallArguments(method, "method");
+				throw global::System.Linq.Expressions.Error.IncorrectNumberOfMethodCallArguments(method, "method");
 			}
 			if (Expression.ParameterIsAssignable(parametersCached[0], operand.Type) && TypeUtils.AreEquivalent(method.ReturnType, convertToType))
 			{
@@ -4599,7 +4599,7 @@ namespace System.Linq.Expressions
 			{
 				return new UnaryExpression(unaryType, operand, convertToType, method);
 			}
-			throw Error.OperandTypesDoNotMatchParameters(unaryType, method.Name);
+			throw global::System.Linq.Expressions.Error.OperandTypesDoNotMatchParameters(unaryType, method.Name);
 		}
 
 		public static UnaryExpression Negate(Expression expression)
@@ -4747,7 +4747,7 @@ namespace System.Linq.Expressions
 			TypeUtils.ValidateType(type, "type");
 			if (type.IsValueType && !type.IsNullableType())
 			{
-				throw Error.IncorrectTypeForTypeAs(type, "type");
+				throw global::System.Linq.Expressions.Error.IncorrectTypeForTypeAs(type, "type");
 			}
 			return new UnaryExpression(ExpressionType.TypeAs, expression, type, null);
 		}
@@ -4758,11 +4758,11 @@ namespace System.Linq.Expressions
 			ContractUtils.RequiresNotNull(type, "type");
 			if (!expression.Type.IsInterface && expression.Type != typeof(object))
 			{
-				throw Error.InvalidUnboxType("expression");
+				throw global::System.Linq.Expressions.Error.InvalidUnboxType("expression");
 			}
 			if (!type.IsValueType)
 			{
-				throw Error.InvalidUnboxType("type");
+				throw global::System.Linq.Expressions.Error.InvalidUnboxType("type");
 			}
 			TypeUtils.ValidateType(type, "type");
 			return new UnaryExpression(ExpressionType.Unbox, expression, type, null);
@@ -4823,9 +4823,9 @@ namespace System.Linq.Expressions
 			}
 			if (!array.Type.IsArray || !typeof(Array).IsAssignableFrom(array.Type))
 			{
-				throw Error.ArgumentMustBeArray("array");
+				throw global::System.Linq.Expressions.Error.ArgumentMustBeArray("array");
 			}
-			throw Error.ArgumentMustBeSingleDimensionalArrayType("array");
+			throw global::System.Linq.Expressions.Error.ArgumentMustBeSingleDimensionalArrayType("array");
 		}
 
 		public static UnaryExpression Quote(Expression expression)
@@ -4834,7 +4834,7 @@ namespace System.Linq.Expressions
 			LambdaExpression lambdaExpression = expression as LambdaExpression;
 			if (lambdaExpression == null)
 			{
-				throw Error.QuotedExpressionMustBeLambda("expression");
+				throw global::System.Linq.Expressions.Error.QuotedExpressionMustBeLambda("expression");
 			}
 			return new UnaryExpression(ExpressionType.Quote, lambdaExpression, lambdaExpression.PublicType, null);
 		}
@@ -4863,7 +4863,7 @@ namespace System.Linq.Expressions
 				ExpressionUtils.RequiresCanRead(value, "value");
 				if (value.Type.IsValueType)
 				{
-					throw Error.ArgumentMustNotHaveValueType("value");
+					throw global::System.Linq.Expressions.Error.ArgumentMustNotHaveValueType("value");
 				}
 			}
 			return new UnaryExpression(ExpressionType.Throw, value, type, null);
@@ -4975,7 +4975,7 @@ namespace System.Linq.Expressions
 			}
 			if (!TypeUtils.AreReferenceAssignable(expression.Type, unaryExpression.Type))
 			{
-				throw Error.UserDefinedOpMustHaveValidReturnType(kind, method.Name);
+				throw global::System.Linq.Expressions.Error.UserDefinedOpMustHaveValidReturnType(kind, method.Name);
 			}
 			return unaryExpression;
 		}

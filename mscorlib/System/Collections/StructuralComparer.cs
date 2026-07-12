@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace System.Collections
 {
 	[Serializable]
-	internal class StructuralComparer : IComparer
+	internal sealed class StructuralComparer : IComparer
 	{
 		public int Compare(object x, object y)
 		{
@@ -26,7 +27,7 @@ namespace System.Collections
 				{
 					return structuralComparable.CompareTo(y, this);
 				}
-				return Comparer.Default.Compare(x, y);
+				return Comparer<object>.Default.Compare(x, y);
 			}
 		}
 	}

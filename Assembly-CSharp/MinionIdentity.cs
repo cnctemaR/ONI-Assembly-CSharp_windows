@@ -75,12 +75,30 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 				this.personalityResourceId = personalityFromNameStringKey.Id;
 			}
 		}
+		if (!this.model.IsValid)
+		{
+			Personality personalityFromNameStringKey2 = Db.Get().Personalities.GetPersonalityFromNameStringKey(this.nameStringKey);
+			if (personalityFromNameStringKey2 != null)
+			{
+				this.model = personalityFromNameStringKey2.model;
+			}
+		}
 		if (this.addToIdentityList)
 		{
 			Components.MinionIdentities.Add(this);
+			if (!Components.MinionIdentitiesByModel.ContainsKey(this.model))
+			{
+				Components.MinionIdentitiesByModel[this.model] = new Components.Cmps<MinionIdentity>();
+			}
+			Components.MinionIdentitiesByModel[this.model].Add(this);
 			if (!base.gameObject.HasTag(GameTags.Dead))
 			{
 				Components.LiveMinionIdentities.Add(this);
+				if (!Components.LiveMinionIdentitiesByModel.ContainsKey(this.model))
+				{
+					Components.LiveMinionIdentitiesByModel[this.model] = new Components.Cmps<MinionIdentity>();
+				}
+				Components.LiveMinionIdentitiesByModel[this.model].Add(this);
 				Game.Instance.Trigger(2144209314, this);
 			}
 		}
@@ -90,7 +108,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			Accessorizer component3 = base.gameObject.GetComponent<Accessorizer>();
 			if (component3 != null)
 			{
-				string text = HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.HeadShape).symbol.hash).Replace("headshape", "cheek");
+				string text = HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol.hash).Replace("mouth", "cheek");
 				component2.AddSymbolOverride("snapto_cheek", Assets.GetAnim("head_swap_kanim").GetData().build.GetSymbol(text), 1);
 				component2.AddSymbolOverride("snapto_hair_always", component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol, 1);
 				component2.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
@@ -205,7 +223,15 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			}
 		}
 		Components.MinionIdentities.Remove(this);
+		if (Components.MinionIdentitiesByModel.ContainsKey(this.model))
+		{
+			Components.MinionIdentitiesByModel[this.model].Remove(this);
+		}
 		Components.LiveMinionIdentities.Remove(this);
+		if (Components.LiveMinionIdentitiesByModel.ContainsKey(this.model))
+		{
+			Components.LiveMinionIdentitiesByModel[this.model].Remove(this);
+		}
 		Game.Instance.Trigger(2144209314, this);
 	}
 
@@ -221,6 +247,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		this.GetSoleOwner().UnassignAll();
 		this.GetEquipment().UnequipAll();
 		Components.LiveMinionIdentities.Remove(this);
+		if (Components.LiveMinionIdentitiesByModel.ContainsKey(this.model))
+		{
+			Components.LiveMinionIdentitiesByModel[this.model].Remove(this);
+		}
 		Game.Instance.Trigger(-1523247426, this);
 		Game.Instance.Trigger(2144209314, this);
 	}
@@ -324,17 +354,17 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		SettingLevel currentQualitySetting3 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.CalorieBurn);
 		if (currentQualitySetting3.id == "VeryHard")
 		{
-			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -1666.6666f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.VERYHARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_SECOND * 1f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.VERYHARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 			return;
 		}
 		if (currentQualitySetting3.id == "Hard")
 		{
-			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -833.3333f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.HARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_SECOND * 0.5f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.HARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 			return;
 		}
 		if (currentQualitySetting3.id == "Easy")
 		{
-			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, 833.3333f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.EASY.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, DUPLICANTSTATS.STANDARD.BaseStats.CALORIES_BURNED_PER_SECOND * -0.5f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.EASY.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 			return;
 		}
 		if (currentQualitySetting3.id == "Disabled")
@@ -343,14 +373,43 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 	}
 
+	public static float GetCalorieBurnMultiplier()
+	{
+		float num = 1f;
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.CalorieBurn);
+		if (currentQualitySetting.id == "VeryHard")
+		{
+			num = 2f;
+		}
+		else if (currentQualitySetting.id == "Hard")
+		{
+			num = 1.5f;
+		}
+		else if (currentQualitySetting.id == "Easy")
+		{
+			num = 0.5f;
+		}
+		else if (currentQualitySetting.id == "Disabled")
+		{
+			num = 0f;
+		}
+		return num;
+	}
+
 	public const string HairAlwaysSymbol = "snapto_hair_always";
 
 	[MyCmpReq]
 	private KSelectable selectable;
 
+	[MyCmpReq]
+	public Modifiers modifiers;
+
 	public int femaleVoiceCount;
 
 	public int maleVoiceCount;
+
+	[Serialize]
+	public Tag model;
 
 	[Serialize]
 	private new string name;
@@ -398,10 +457,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	{
 		public NameList(TextAsset file)
 		{
-			string[] array = file.text.Replace("  ", " ").Replace("\r\n", "\n").Split(new char[] { '\n' });
+			string[] array = file.text.Replace("  ", " ").Replace("\r\n", "\n").Split('\n', StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
-				string[] array2 = array[i].Split(new char[] { ' ' });
+				string[] array2 = array[i].Split(' ', StringSplitOptions.None);
 				if (array2[array2.Length - 1] != "" && array2[array2.Length - 1] != null)
 				{
 					this.names.Add(array2[array2.Length - 1]);

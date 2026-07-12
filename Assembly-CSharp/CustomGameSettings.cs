@@ -88,7 +88,7 @@ public class CustomGameSettings : KMonoBehaviour
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			SettingConfig value = keyValuePair.Value;
-			if (SaveLoader.Instance.IsDlcListActiveForCurrentSave(value.required_content) && !this.CurrentQualityLevelsBySetting.ContainsKey(value.id))
+			if (SaveLoader.Instance.IsAllDlcActiveForCurrentSave(value.required_content) && !this.CurrentQualityLevelsBySetting.ContainsKey(value.id))
 			{
 				if (value.missing_content_default != "")
 				{
@@ -151,6 +151,7 @@ public class CustomGameSettings : KMonoBehaviour
 		action3(CustomMixingSettingsConfigs.CarrotQuarryMixing);
 		action3(CustomMixingSettingsConfigs.SugarWoodsMixing);
 		action3(CustomMixingSettingsConfigs.CeresAsteroidMixing);
+		action3(CustomMixingSettingsConfigs.DLC3Mixing);
 		foreach (Story story in Db.Get().Stories.GetStoriesSortedByCoordinateOrder())
 		{
 			int num = ((story.kleiUseOnlyCoordinateOrder == -1) ? (-1) : 3);
@@ -291,7 +292,7 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.CurrentQualityLevelsBySetting[setting_id] = this.QualitySettings[setting_id].GetDefaultLevelId();
 		}
-		string text = (DlcManager.HasAllContentSubscribed(settingConfig.required_content) ? this.CurrentQualityLevelsBySetting[setting_id] : settingConfig.GetDefaultLevelId());
+		string text = (DlcManager.IsAllContentSubscribed(settingConfig.required_content) ? this.CurrentQualityLevelsBySetting[setting_id] : settingConfig.GetDefaultLevelId());
 		return this.QualitySettings[setting_id].GetLevel(text);
 	}
 
@@ -422,7 +423,7 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.currentStoryLevelsBySetting[settingId] = this.StorySettings[settingId].GetDefaultLevelId();
 		}
-		string text = (DlcManager.HasAllContentSubscribed(settingConfig.required_content) ? this.currentStoryLevelsBySetting[settingId] : settingConfig.GetDefaultLevelId());
+		string text = (DlcManager.IsAllContentSubscribed(settingConfig.required_content) ? this.currentStoryLevelsBySetting[settingId] : settingConfig.GetDefaultLevelId());
 		return this.StorySettings[settingId].GetLevel(text);
 	}
 
@@ -554,7 +555,7 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.CurrentMixingLevelsBySetting[settingId] = this.MixingSettings[settingId].GetDefaultLevelId();
 		}
-		string text = (DlcManager.HasAllContentSubscribed(settingConfig.required_content) ? this.CurrentMixingLevelsBySetting[settingId] : settingConfig.GetDefaultLevelId());
+		string text = (DlcManager.IsAllContentSubscribed(settingConfig.required_content) ? this.CurrentMixingLevelsBySetting[settingId] : settingConfig.GetDefaultLevelId());
 		return this.MixingSettings[settingId].GetLevel(text);
 	}
 
@@ -772,7 +773,7 @@ public class CustomGameSettings : KMonoBehaviour
 		List<CustomGameSettings.MetricSettingsData> list = new List<CustomGameSettings.MetricSettingsData>();
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentMixingLevelsBySetting)
 		{
-			if (DlcManager.HasAllContentSubscribed(this.MixingSettings[keyValuePair.Key].required_content))
+			if (DlcManager.IsAllContentSubscribed(this.MixingSettings[keyValuePair.Key].required_content))
 			{
 				list.Add(new CustomGameSettings.MetricSettingsData
 				{

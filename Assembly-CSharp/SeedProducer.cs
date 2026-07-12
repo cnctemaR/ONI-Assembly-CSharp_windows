@@ -92,7 +92,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 		{
-			Worker completed_by = base.GetComponent<Harvestable>().completed_by;
+			WorkerBase completed_by = base.GetComponent<Harvestable>().completed_by;
 			float num = 0.1f;
 			if (completed_by != null)
 			{

@@ -4,9 +4,9 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[ComVisible(true)]
 	[Guid("007D8A14-FDF3-363E-9A0B-FEC0618260A2")]
 	[TypeLibImportClass(typeof(MethodBuilder))]
+	[ComVisible(true)]
 	[CLSCompliant(false)]
 	public interface _MethodBuilder
 	{

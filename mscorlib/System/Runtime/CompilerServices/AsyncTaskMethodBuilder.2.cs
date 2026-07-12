@@ -98,7 +98,7 @@ namespace System.Runtime.CompilerServices
 			Task<TResult> task = this.m_task;
 			if (task == null)
 			{
-				this.m_task = this.GetTaskForResult(result);
+				this.m_task = AsyncTaskMethodBuilder<TResult>.GetTaskForResult(result);
 				return;
 			}
 			if (AsyncCausalityTracer.LoggingOn)
@@ -157,7 +157,7 @@ namespace System.Runtime.CompilerServices
 		}
 
 		[SecuritySafeCritical]
-		private Task<TResult> GetTaskForResult(TResult result)
+		internal static Task<TResult> GetTaskForResult(TResult result)
 		{
 			if (default(TResult) != null)
 			{
@@ -173,7 +173,7 @@ namespace System.Runtime.CompilerServices
 						return JitHelpers.UnsafeCast<Task<TResult>>(AsyncTaskCache.Int32Tasks[num - -1]);
 					}
 				}
-				else if ((typeof(TResult) == typeof(uint) && (uint)((object)result) == 0U) || (typeof(TResult) == typeof(byte) && (byte)((object)result) == 0) || (typeof(TResult) == typeof(sbyte) && (sbyte)((object)result) == 0) || (typeof(TResult) == typeof(char) && (char)((object)result) == '\0') || (typeof(TResult) == typeof(decimal) && 0m == (decimal)((object)result)) || (typeof(TResult) == typeof(long) && (long)((object)result) == 0L) || (typeof(TResult) == typeof(ulong) && (ulong)((object)result) == 0UL) || (typeof(TResult) == typeof(short) && (short)((object)result) == 0) || (typeof(TResult) == typeof(ushort) && (ushort)((object)result) == 0) || (typeof(TResult) == typeof(IntPtr) && (IntPtr)0 == (IntPtr)((object)result)) || (typeof(TResult) == typeof(UIntPtr) && (UIntPtr)0 == (UIntPtr)((object)result)))
+				else if ((typeof(TResult) == typeof(uint) && (uint)((object)result) == 0U) || (typeof(TResult) == typeof(byte) && (byte)((object)result) == 0) || (typeof(TResult) == typeof(sbyte) && (sbyte)((object)result) == 0) || (typeof(TResult) == typeof(char) && (char)((object)result) == '\0') || (typeof(TResult) == typeof(long) && (long)((object)result) == 0L) || (typeof(TResult) == typeof(ulong) && (ulong)((object)result) == 0UL) || (typeof(TResult) == typeof(short) && (short)((object)result) == 0) || (typeof(TResult) == typeof(ushort) && (ushort)((object)result) == 0) || (typeof(TResult) == typeof(IntPtr) && (IntPtr)0 == (IntPtr)((object)result)) || (typeof(TResult) == typeof(UIntPtr) && (UIntPtr)0 == (UIntPtr)((object)result)))
 				{
 					return AsyncTaskMethodBuilder<TResult>.s_defaultResultTask;
 				}

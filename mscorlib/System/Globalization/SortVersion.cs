@@ -32,7 +32,7 @@ namespace System.Globalization
 			this.m_NlsVersion = nlsVersion;
 			if (customVersion == Guid.Empty)
 			{
-				byte b = (byte)((uint)effectiveId >> 24);
+				byte b = (byte)(effectiveId >> 24);
 				byte b2 = (byte)((effectiveId & 16711680) >> 16);
 				byte b3 = (byte)((effectiveId & 65280) >> 8);
 				byte b4 = (byte)(effectiveId & 255);

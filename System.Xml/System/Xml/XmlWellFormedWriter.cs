@@ -139,15 +139,21 @@ namespace System.Xml
 					int num;
 					if (pubid != null && (num = this.xmlCharType.IsPublicId(pubid)) >= 0)
 					{
-						throw new ArgumentException(Res.GetString("'{0}', hexadecimal value {1}, is an invalid character.", XmlException.BuildCharExceptionArgs(pubid, num)), "pubid");
+						string text = "'{0}', hexadecimal value {1}, is an invalid character.";
+						object[] array = XmlException.BuildCharExceptionArgs(pubid, num);
+						throw new ArgumentException(Res.GetString(text, array), "pubid");
 					}
 					if (sysid != null && (num = this.xmlCharType.IsOnlyCharData(sysid)) >= 0)
 					{
-						throw new ArgumentException(Res.GetString("'{0}', hexadecimal value {1}, is an invalid character.", XmlException.BuildCharExceptionArgs(sysid, num)), "sysid");
+						string text2 = "'{0}', hexadecimal value {1}, is an invalid character.";
+						object[] array = XmlException.BuildCharExceptionArgs(sysid, num);
+						throw new ArgumentException(Res.GetString(text2, array), "sysid");
 					}
 					if (subset != null && (num = this.xmlCharType.IsOnlyCharData(subset)) >= 0)
 					{
-						throw new ArgumentException(Res.GetString("'{0}', hexadecimal value {1}, is an invalid character.", XmlException.BuildCharExceptionArgs(subset, num)), "subset");
+						string text3 = "'{0}', hexadecimal value {1}, is an invalid character.";
+						object[] array = XmlException.BuildCharExceptionArgs(subset, num);
+						throw new ArgumentException(Res.GetString(text3, array), "subset");
 					}
 				}
 				this.writer.WriteDocType(name, pubid, sysid, subset);
@@ -1766,12 +1772,15 @@ namespace System.Xml
 		private static Exception InvalidCharsException(string name, int badCharIndex)
 		{
 			string[] array = XmlException.BuildCharExceptionArgs(name, badCharIndex);
-			return new ArgumentException(Res.GetString("Invalid name character in '{0}'. The '{1}' character, hexadecimal value {2}, cannot be included in a name.", new string[]
+			string[] array2 = new string[]
 			{
 				name,
 				array[0],
 				array[1]
-			}));
+			};
+			string text = "Invalid name character in '{0}'. The '{1}' character, hexadecimal value {2}, cannot be included in a name.";
+			object[] array3 = array2;
+			return new ArgumentException(Res.GetString(text, array3));
 		}
 
 		private void ThrowInvalidStateTransition(XmlWellFormedWriter.Token token, XmlWellFormedWriter.State currentState)
@@ -2459,12 +2468,12 @@ namespace System.Xml
 		{
 			try
 			{
-				string value;
 				switch (this.specAttr)
 				{
 				case XmlWellFormedWriter.SpecialAttribute.DefaultXmlns:
-					value = this.attrValueCache.StringValue;
-					if (this.PushNamespaceExplicit(string.Empty, value))
+				{
+					string text = this.attrValueCache.StringValue;
+					if (this.PushNamespaceExplicit(string.Empty, text))
 					{
 						if (this.rawWriter != null)
 						{
@@ -2476,7 +2485,7 @@ namespace System.Xml
 							}
 							else
 							{
-								await this.rawWriter.WriteNamespaceDeclarationAsync(string.Empty, value).ConfigureAwait(false);
+								await this.rawWriter.WriteNamespaceDeclarationAsync(string.Empty, text).ConfigureAwait(false);
 							}
 						}
 						else
@@ -2488,17 +2497,19 @@ namespace System.Xml
 					}
 					this.curDeclPrefix = null;
 					break;
+				}
 				case XmlWellFormedWriter.SpecialAttribute.PrefixedXmlns:
-					value = this.attrValueCache.StringValue;
-					if (value.Length == 0)
+				{
+					string text = this.attrValueCache.StringValue;
+					if (text.Length == 0)
 					{
 						throw new ArgumentException(Res.GetString("Cannot use a prefix with an empty namespace."));
 					}
-					if (value == "http://www.w3.org/2000/xmlns/" || (value == "http://www.w3.org/XML/1998/namespace" && this.curDeclPrefix != "xml"))
+					if (text == "http://www.w3.org/2000/xmlns/" || (text == "http://www.w3.org/XML/1998/namespace" && this.curDeclPrefix != "xml"))
 					{
 						throw new ArgumentException(Res.GetString("Cannot bind to the reserved namespace."));
 					}
-					if (this.PushNamespaceExplicit(this.curDeclPrefix, value))
+					if (this.PushNamespaceExplicit(this.curDeclPrefix, text))
 					{
 						if (this.rawWriter != null)
 						{
@@ -2510,7 +2521,7 @@ namespace System.Xml
 							}
 							else
 							{
-								await this.rawWriter.WriteNamespaceDeclarationAsync(this.curDeclPrefix, value).ConfigureAwait(false);
+								await this.rawWriter.WriteNamespaceDeclarationAsync(this.curDeclPrefix, text).ConfigureAwait(false);
 							}
 						}
 						else
@@ -2522,18 +2533,20 @@ namespace System.Xml
 					}
 					this.curDeclPrefix = null;
 					break;
+				}
 				case XmlWellFormedWriter.SpecialAttribute.XmlSpace:
+				{
 					this.attrValueCache.Trim();
-					value = this.attrValueCache.StringValue;
-					if (value == "default")
+					string text = this.attrValueCache.StringValue;
+					if (text == "default")
 					{
 						this.elemScopeStack[this.elemTop].xmlSpace = XmlSpace.Default;
 					}
 					else
 					{
-						if (!(value == "preserve"))
+						if (!(text == "preserve"))
 						{
-							throw new ArgumentException(Res.GetString("'{0}' is an invalid xml:space value.", new object[] { value }));
+							throw new ArgumentException(Res.GetString("'{0}' is an invalid xml:space value.", new object[] { text }));
 						}
 						this.elemScopeStack[this.elemTop].xmlSpace = XmlSpace.Preserve;
 					}
@@ -2541,17 +2554,19 @@ namespace System.Xml
 					await this.attrValueCache.ReplayAsync(this.writer).ConfigureAwait(false);
 					await this.writer.WriteEndAttributeAsync().ConfigureAwait(false);
 					break;
+				}
 				case XmlWellFormedWriter.SpecialAttribute.XmlLang:
-					value = this.attrValueCache.StringValue;
-					this.elemScopeStack[this.elemTop].xmlLang = value;
+				{
+					string text = this.attrValueCache.StringValue;
+					this.elemScopeStack[this.elemTop].xmlLang = text;
 					await this.writer.WriteStartAttributeAsync("xml", "lang", "http://www.w3.org/XML/1998/namespace").ConfigureAwait(false);
 					await this.attrValueCache.ReplayAsync(this.writer).ConfigureAwait(false);
 					await this.writer.WriteEndAttributeAsync().ConfigureAwait(false);
 					break;
 				}
+				}
 				this.specAttr = XmlWellFormedWriter.SpecialAttribute.No;
 				this.attrValueCache.Clear();
-				value = null;
 			}
 			catch
 			{
@@ -2985,34 +3000,33 @@ namespace System.Xml
 				}
 				this.CheckNCName(localName);
 				await this.AdvanceStateAsync(XmlWellFormedWriter.Token.Text).ConfigureAwait(false);
-				string prefix = string.Empty;
+				string text = string.Empty;
 				if (ns != null && ns.Length != 0)
 				{
-					prefix = this.LookupPrefix(ns);
-					if (prefix == null)
+					text = this.LookupPrefix(ns);
+					if (text == null)
 					{
 						if (this.currentState != XmlWellFormedWriter.State.Attribute)
 						{
 							throw new ArgumentException(Res.GetString("The '{0}' namespace is not defined.", new object[] { ns }));
 						}
-						prefix = this.GeneratePrefix();
-						this.PushNamespaceImplicit(prefix, ns);
+						text = this.GeneratePrefix();
+						this.PushNamespaceImplicit(text, ns);
 					}
 				}
 				if (this.SaveAttrValue || this.rawWriter == null)
 				{
-					if (prefix.Length != 0)
+					if (text.Length != 0)
 					{
-						await this.WriteStringAsync(prefix).ConfigureAwait(false);
+						await this.WriteStringAsync(text).ConfigureAwait(false);
 						await this.WriteStringAsync(":").ConfigureAwait(false);
 					}
 					await this.WriteStringAsync(localName).ConfigureAwait(false);
 				}
 				else
 				{
-					await this.rawWriter.WriteQualifiedNameAsync(prefix, localName, ns).ConfigureAwait(false);
+					await this.rawWriter.WriteQualifiedNameAsync(text, localName, ns).ConfigureAwait(false);
 				}
-				prefix = null;
 			}
 			catch
 			{
@@ -4442,7 +4456,6 @@ namespace System.Xml
 							await writer.WriteStringAsync((string)item.data).ConfigureAwait(false);
 							break;
 						}
-						item = null;
 					}
 				}
 			}

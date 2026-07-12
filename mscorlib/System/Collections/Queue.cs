@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Queue.QueueDebugView))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class Queue : ICollection, IEnumerable, ICloneable
 	{
@@ -26,11 +23,11 @@ namespace System.Collections
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("capacity", "Non-negative number required.");
 			}
 			if ((double)growFactor < 1.0 || (double)growFactor > 10.0)
 			{
-				throw new ArgumentOutOfRangeException("growFactor", Environment.GetResourceString("Queue grow factor must be between {0} and {1}.", new object[] { 1, 10 }));
+				throw new ArgumentOutOfRangeException("growFactor", SR.Format("Queue grow factor must be between {0} and {1}.", 1, 10));
 			}
 			this._array = new object[capacity];
 			this._head = 0;
@@ -98,18 +95,21 @@ namespace System.Collections
 
 		public virtual void Clear()
 		{
-			if (this._head < this._tail)
+			if (this._size != 0)
 			{
-				Array.Clear(this._array, this._head, this._size);
-			}
-			else
-			{
-				Array.Clear(this._array, this._head, this._array.Length - this._head);
-				Array.Clear(this._array, 0, this._tail);
+				if (this._head < this._tail)
+				{
+					Array.Clear(this._array, this._head, this._size);
+				}
+				else
+				{
+					Array.Clear(this._array, this._head, this._array.Length - this._head);
+					Array.Clear(this._array, 0, this._tail);
+				}
+				this._size = 0;
 			}
 			this._head = 0;
 			this._tail = 0;
-			this._size = 0;
 			this._version++;
 		}
 
@@ -121,15 +121,15 @@ namespace System.Collections
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (array.Length - index < this._size)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			int num = this._size;
 			if (num == 0)
@@ -171,7 +171,7 @@ namespace System.Collections
 		{
 			if (this.Count == 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Queue empty."));
+				throw new InvalidOperationException("Queue empty.");
 			}
 			object obj = this._array[this._head];
 			this._array[this._head] = null;
@@ -185,12 +185,11 @@ namespace System.Collections
 		{
 			if (this.Count == 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Queue empty."));
+				throw new InvalidOperationException("Queue empty.");
 			}
 			return this._array[this._head];
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static Queue Synchronized(Queue queue)
 		{
 			if (queue == null)
@@ -229,11 +228,11 @@ namespace System.Collections
 
 		public virtual object[] ToArray()
 		{
-			object[] array = new object[this._size];
 			if (this._size == 0)
 			{
-				return array;
+				return Array.Empty<object>();
 			}
+			object[] array = new object[this._size];
 			if (this._head < this._tail)
 			{
 				Array.Copy(this._array, this._head, array, 0, this._size);
@@ -297,7 +296,7 @@ namespace System.Collections
 			internal SynchronizedQueue(Queue q)
 			{
 				this._q = q;
-				this.root = this._q.SyncRoot;
+				this._root = this._q.SyncRoot;
 			}
 
 			public override bool IsSynchronized
@@ -312,7 +311,7 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.root;
+					return this._root;
 				}
 			}
 
@@ -320,9 +319,9 @@ namespace System.Collections
 			{
 				get
 				{
-					object obj = this.root;
+					object root = this._root;
 					int count;
-					lock (obj)
+					lock (root)
 					{
 						count = this._q.Count;
 					}
@@ -332,8 +331,8 @@ namespace System.Collections
 
 			public override void Clear()
 			{
-				object obj = this.root;
-				lock (obj)
+				object root = this._root;
+				lock (root)
 				{
 					this._q.Clear();
 				}
@@ -341,20 +340,20 @@ namespace System.Collections
 
 			public override object Clone()
 			{
-				object obj = this.root;
-				object obj2;
-				lock (obj)
+				object root = this._root;
+				object obj;
+				lock (root)
 				{
-					obj2 = new Queue.SynchronizedQueue((Queue)this._q.Clone());
+					obj = new Queue.SynchronizedQueue((Queue)this._q.Clone());
 				}
-				return obj2;
+				return obj;
 			}
 
 			public override bool Contains(object obj)
 			{
-				object obj2 = this.root;
+				object root = this._root;
 				bool flag2;
-				lock (obj2)
+				lock (root)
 				{
 					flag2 = this._q.Contains(obj);
 				}
@@ -363,8 +362,8 @@ namespace System.Collections
 
 			public override void CopyTo(Array array, int arrayIndex)
 			{
-				object obj = this.root;
-				lock (obj)
+				object root = this._root;
+				lock (root)
 				{
 					this._q.CopyTo(array, arrayIndex);
 				}
@@ -372,8 +371,8 @@ namespace System.Collections
 
 			public override void Enqueue(object value)
 			{
-				object obj = this.root;
-				lock (obj)
+				object root = this._root;
+				lock (root)
 				{
 					this._q.Enqueue(value);
 				}
@@ -381,20 +380,20 @@ namespace System.Collections
 
 			public override object Dequeue()
 			{
-				object obj = this.root;
-				object obj2;
-				lock (obj)
+				object root = this._root;
+				object obj;
+				lock (root)
 				{
-					obj2 = this._q.Dequeue();
+					obj = this._q.Dequeue();
 				}
-				return obj2;
+				return obj;
 			}
 
 			public override IEnumerator GetEnumerator()
 			{
-				object obj = this.root;
+				object root = this._root;
 				IEnumerator enumerator;
-				lock (obj)
+				lock (root)
 				{
 					enumerator = this._q.GetEnumerator();
 				}
@@ -403,20 +402,20 @@ namespace System.Collections
 
 			public override object Peek()
 			{
-				object obj = this.root;
-				object obj2;
-				lock (obj)
+				object root = this._root;
+				object obj;
+				lock (root)
 				{
-					obj2 = this._q.Peek();
+					obj = this._q.Peek();
 				}
-				return obj2;
+				return obj;
 			}
 
 			public override object[] ToArray()
 			{
-				object obj = this.root;
+				object root = this._root;
 				object[] array;
-				lock (obj)
+				lock (root)
 				{
 					array = this._q.ToArray();
 				}
@@ -425,8 +424,8 @@ namespace System.Collections
 
 			public override void TrimToSize()
 			{
-				object obj = this.root;
-				lock (obj)
+				object root = this._root;
+				lock (root)
 				{
 					this._q.TrimToSize();
 				}
@@ -434,7 +433,7 @@ namespace System.Collections
 
 			private Queue _q;
 
-			private object root;
+			private object _root;
 		}
 
 		[Serializable]
@@ -445,7 +444,7 @@ namespace System.Collections
 				this._q = q;
 				this._version = this._q._version;
 				this._index = 0;
-				this.currentElement = this._q._array;
+				this._currentElement = this._q._array;
 				if (this._q._size == 0)
 				{
 					this._index = -1;
@@ -461,14 +460,14 @@ namespace System.Collections
 			{
 				if (this._version != this._q._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				if (this._index < 0)
 				{
-					this.currentElement = this._q._array;
+					this._currentElement = this._q._array;
 					return false;
 				}
-				this.currentElement = this._q.GetElement(this._index);
+				this._currentElement = this._q.GetElement(this._index);
 				this._index++;
 				if (this._index == this._q._size)
 				{
@@ -481,15 +480,15 @@ namespace System.Collections
 			{
 				get
 				{
-					if (this.currentElement != this._q._array)
+					if (this._currentElement != this._q._array)
 					{
-						return this.currentElement;
+						return this._currentElement;
 					}
 					if (this._index == 0)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
 					}
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					throw new InvalidOperationException("Enumeration already finished.");
 				}
 			}
 
@@ -497,7 +496,7 @@ namespace System.Collections
 			{
 				if (this._version != this._q._version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				if (this._q._size == 0)
 				{
@@ -507,7 +506,7 @@ namespace System.Collections
 				{
 					this._index = 0;
 				}
-				this.currentElement = this._q._array;
+				this._currentElement = this._q._array;
 			}
 
 			private Queue _q;
@@ -516,7 +515,7 @@ namespace System.Collections
 
 			private int _version;
 
-			private object currentElement;
+			private object _currentElement;
 		}
 
 		internal class QueueDebugView
@@ -527,7 +526,7 @@ namespace System.Collections
 				{
 					throw new ArgumentNullException("queue");
 				}
-				this.queue = queue;
+				this._queue = queue;
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -535,11 +534,11 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.queue.ToArray();
+					return this._queue.ToArray();
 				}
 			}
 
-			private Queue queue;
+			private Queue _queue;
 		}
 	}
 }

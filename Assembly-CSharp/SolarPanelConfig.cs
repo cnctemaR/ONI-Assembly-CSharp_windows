@@ -35,6 +35,9 @@ public class SolarPanelConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
 	}

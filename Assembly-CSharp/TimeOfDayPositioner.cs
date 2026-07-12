@@ -1,15 +1,30 @@
 ﻿using System;
 using UnityEngine;
 
-[AddComponentMenu("KMonoBehaviour/scripts/TimeOfDayPositioner")]
 public class TimeOfDayPositioner : KMonoBehaviour
 {
-	private void Update()
+	public void SetTargetTimetable(GameObject TimetableRow)
 	{
-		float num = GameClock.Instance.GetCurrentCycleAsPercentage() * this.targetRect.rect.width;
-		(base.transform as RectTransform).anchoredPosition = this.targetRect.anchoredPosition + new Vector2(Mathf.Round(num), 0f);
+		if (TimetableRow == null)
+		{
+			this.targetRect = null;
+			base.transform.SetParent(null);
+			return;
+		}
+		RectTransform rectTransform = TimetableRow.GetComponent<HierarchyReferences>().GetReference<RectTransform>("BlockContainer").rectTransform();
+		this.targetRect = rectTransform;
+		base.transform.SetParent(this.targetRect.transform);
 	}
 
-	[SerializeField]
+	private void Update()
+	{
+		if (base.transform.parent != this.targetRect.transform)
+		{
+			base.transform.parent = this.targetRect.transform;
+		}
+		float num = GameClock.Instance.GetCurrentCycleAsPercentage() * this.targetRect.rect.width;
+		(base.transform as RectTransform).anchoredPosition = new Vector2(Mathf.Round(num), 0f);
+	}
+
 	private RectTransform targetRect;
 }

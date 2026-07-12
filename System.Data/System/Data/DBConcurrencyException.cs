@@ -30,10 +30,15 @@ namespace System.Data
 			this._dataRows = dataRows;
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		public override void GetObjectData(SerializationInfo si, StreamingContext context)
+		private DBConcurrencyException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
-			base.GetObjectData(si, context);
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
 		}
 
 		public DataRow Row

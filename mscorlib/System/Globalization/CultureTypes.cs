@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Globalization
 {
 	[Flags]
-	[ComVisible(true)]
-	[Serializable]
 	public enum CultureTypes
 	{
 		NeutralCultures = 1,

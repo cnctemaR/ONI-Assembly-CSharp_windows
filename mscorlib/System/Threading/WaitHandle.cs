@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Contexts;
 using System.Security;
-using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Threading
@@ -40,7 +39,6 @@ namespace System.Threading
 				return WaitHandle.InvalidHandle;
 			}
 			[SecurityCritical]
-			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
 				if (value == WaitHandle.InvalidHandle)
@@ -61,9 +59,8 @@ namespace System.Threading
 
 		public SafeWaitHandle SafeWaitHandle
 		{
-			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 			[SecurityCritical]
-			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 			get
 			{
 				if (this.safeWaitHandle == null)
@@ -74,7 +71,6 @@ namespace System.Threading
 			}
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			[SecurityCritical]
-			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
 				RuntimeHelpers.PrepareConstrainedRegions();
@@ -366,6 +362,10 @@ namespace System.Threading
 			{
 				throw new InvalidOperationException(Environment.GetResourceString("The WaitHandle cannot be signaled because it would exceed its maximum count."));
 			}
+			if (299 == num)
+			{
+				throw new ApplicationException("Attempt to release mutex not owned by caller");
+			}
 			return num == 0;
 		}
 
@@ -400,6 +400,42 @@ namespace System.Threading
 			GC.SuppressFinalize(this);
 		}
 
+		private unsafe static int WaitOneNative(SafeHandle waitableSafeHandle, uint millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
+		{
+			bool flag = false;
+			SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+			int num;
+			try
+			{
+				waitableSafeHandle.DangerousAddRef(ref flag);
+				if (exitContext)
+				{
+					SynchronizationAttribute.ExitContext();
+				}
+				if (synchronizationContext != null && synchronizationContext.IsWaitNotificationRequired())
+				{
+					num = synchronizationContext.Wait(new IntPtr[] { waitableSafeHandle.DangerousGetHandle() }, false, (int)millisecondsTimeout);
+				}
+				else
+				{
+					IntPtr intPtr = waitableSafeHandle.DangerousGetHandle();
+					num = WaitHandle.Wait_internal(&intPtr, 1, false, (int)millisecondsTimeout);
+				}
+			}
+			finally
+			{
+				if (flag)
+				{
+					waitableSafeHandle.DangerousRelease();
+				}
+				if (exitContext)
+				{
+					SynchronizationAttribute.EnterContext();
+				}
+			}
+			return num;
+		}
+
 		private unsafe static int WaitMultiple(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext, bool WaitAll)
 		{
 			if (waitHandles.Length > 64)
@@ -407,6 +443,7 @@ namespace System.Threading
 				return int.MaxValue;
 			}
 			int num = -1;
+			SynchronizationContext synchronizationContext = SynchronizationContext.Current;
 			int num2;
 			try
 			{
@@ -426,22 +463,34 @@ namespace System.Threading
 						num = i;
 					}
 				}
-				IntPtr* ptr;
-				checked
+				if (synchronizationContext != null && synchronizationContext.IsWaitNotificationRequired())
 				{
-					ptr = stackalloc IntPtr[unchecked((UIntPtr)waitHandles.Length) * (UIntPtr)sizeof(IntPtr)];
+					IntPtr[] array = new IntPtr[waitHandles.Length];
+					for (int j = 0; j < waitHandles.Length; j++)
+					{
+						array[j] = waitHandles[j].SafeWaitHandle.DangerousGetHandle();
+					}
+					num2 = synchronizationContext.Wait(array, false, millisecondsTimeout);
 				}
-				for (int j = 0; j < waitHandles.Length; j++)
+				else
 				{
-					ptr[j] = waitHandles[j].SafeWaitHandle.DangerousGetHandle();
+					IntPtr* ptr;
+					checked
+					{
+						ptr = stackalloc IntPtr[unchecked((UIntPtr)waitHandles.Length) * (UIntPtr)sizeof(IntPtr)];
+					}
+					for (int k = 0; k < waitHandles.Length; k++)
+					{
+						ptr[k] = waitHandles[k].SafeWaitHandle.DangerousGetHandle();
+					}
+					num2 = WaitHandle.Wait_internal(ptr, waitHandles.Length, WaitAll, millisecondsTimeout);
 				}
-				num2 = WaitHandle.Wait_internal(ptr, waitHandles.Length, WaitAll, millisecondsTimeout);
 			}
 			finally
 			{
-				for (int k = num; k >= 0; k--)
+				for (int l = num; l >= 0; l--)
 				{
-					waitHandles[k].SafeWaitHandle.DangerousRelease();
+					waitHandles[l].SafeWaitHandle.DangerousRelease();
 				}
 				if (exitContext)
 				{
@@ -451,36 +500,8 @@ namespace System.Threading
 			return num2;
 		}
 
-		private unsafe static int WaitOneNative(SafeHandle waitableSafeHandle, uint millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
-		{
-			bool flag = false;
-			int num;
-			try
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				waitableSafeHandle.DangerousAddRef(ref flag);
-				IntPtr intPtr = waitableSafeHandle.DangerousGetHandle();
-				num = WaitHandle.Wait_internal(&intPtr, 1, false, (int)millisecondsTimeout);
-			}
-			finally
-			{
-				if (flag)
-				{
-					waitableSafeHandle.DangerousRelease();
-				}
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-			}
-			return num;
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern int Wait_internal(IntPtr* handles, int numHandles, bool waitAll, int ms);
+		internal unsafe static extern int Wait_internal(IntPtr* handles, int numHandles, bool waitAll, int ms);
 
 		private static int SignalAndWaitOne(SafeWaitHandle waitHandleToSignal, SafeWaitHandle waitHandleToWaitOn, int millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
 		{
@@ -510,6 +531,16 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int SignalAndWait_Internal(IntPtr toSignal, IntPtr toWaitOn, int ms);
 
+		internal static int ToTimeoutMilliseconds(TimeSpan timeout)
+		{
+			long num = (long)timeout.TotalMilliseconds;
+			if (num < -1L || num > 2147483647L)
+			{
+				throw new ArgumentOutOfRangeException("timeout", "Number must be either non-negative and less than or equal to Int32.MaxValue or -1.");
+			}
+			return (int)num;
+		}
+
 		public const int WaitTimeout = 258;
 
 		private const int MAX_WAITHANDLES = 64;
@@ -528,6 +559,8 @@ namespace System.Threading
 		private const int WAIT_FAILED = 2147483647;
 
 		private const int ERROR_TOO_MANY_POSTS = 298;
+
+		private const int ERROR_NOT_OWNED_BY_CALLER = 299;
 
 		protected static readonly IntPtr InvalidHandle = (IntPtr)(-1);
 

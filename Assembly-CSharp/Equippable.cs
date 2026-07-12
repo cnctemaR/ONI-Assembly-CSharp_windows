@@ -43,6 +43,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 
 	protected override void OnSpawn()
 	{
+		Components.AssignableItems.Add(this);
 		if (this.isEquipped)
 		{
 			if (this.assignee != null && this.assignee is MinionIdentity)

@@ -39,7 +39,7 @@ public class MinionUIPortrait : IEntityConfig
 			Assets.GetAnim("anim_react_wave_shy_kanim")
 		};
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
-		MinionConfig.ConfigureSymbols(gameObject, false);
+		BaseMinionConfig.ConfigureSymbols(gameObject, false);
 		return gameObject;
 	}
 

@@ -20,7 +20,13 @@ namespace System.Resources
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void Init()
 		{
-			this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
+			try
+			{
+				this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
+			}
+			catch
+			{
+			}
 		}
 
 		protected ResourceManager()
@@ -71,10 +77,16 @@ namespace System.Resources
 			this.BaseNameField = baseName;
 			this.SetAppXConfiguration();
 			this.CommonAssemblyInit();
-			this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
-			if (assembly == typeof(object).Assembly && this.m_callingAssembly != assembly)
+			try
 			{
-				this.m_callingAssembly = null;
+				this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
+				if (assembly == typeof(object).Assembly && this.m_callingAssembly != assembly)
+				{
+					this.m_callingAssembly = null;
+				}
+			}
+			catch
+			{
 			}
 		}
 
@@ -101,10 +113,16 @@ namespace System.Resources
 			}
 			this._userResourceSet = usingResourceSet;
 			this.CommonAssemblyInit();
-			this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
-			if (assembly == typeof(object).Assembly && this.m_callingAssembly != assembly)
+			try
 			{
-				this.m_callingAssembly = null;
+				this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
+				if (assembly == typeof(object).Assembly && this.m_callingAssembly != assembly)
+				{
+					this.m_callingAssembly = null;
+				}
+			}
+			catch
+			{
 			}
 		}
 
@@ -124,10 +142,16 @@ namespace System.Resources
 			this.BaseNameField = resourceSource.Name;
 			this.SetAppXConfiguration();
 			this.CommonAssemblyInit();
-			this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
-			if (this.MainAssembly == typeof(object).Assembly && this.m_callingAssembly != this.MainAssembly)
+			try
 			{
-				this.m_callingAssembly = null;
+				this.m_callingAssembly = (RuntimeAssembly)Assembly.GetCallingAssembly();
+				if (this.MainAssembly == typeof(object).Assembly && this.m_callingAssembly != this.MainAssembly)
+				{
+					this.m_callingAssembly = null;
+				}
+			}
+			catch
+			{
 			}
 		}
 
@@ -139,8 +163,8 @@ namespace System.Resources
 			this._lastUsedResourceCache = null;
 		}
 
-		[OnDeserialized]
 		[SecuritySafeCritical]
+		[OnDeserialized]
 		private void OnDeserialized(StreamingContext ctx)
 		{
 			this._resourceSets = new Dictionary<string, ResourceSet>();

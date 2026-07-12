@@ -7,9 +7,9 @@ using UnityEngine.Bindings;
 
 namespace Unity.Burst.LowLevel
 {
-	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	[StaticAccessor("BurstCompilerService::Get()", StaticAccessorType.Arrow)]
 	[NativeHeader("Runtime/Burst/Burst.h")]
+	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	internal static class BurstCompilerService
 	{
 		[NativeMethod("Initialize")]
@@ -20,11 +20,11 @@ namespace Unity.Burst.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetDisassembly(MethodInfo m, string compilerOptions);
 
-		[FreeFunction]
+		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int CompileAsyncDelegateMethod(object delegateMethod, string compilerOptions);
 
-		[FreeFunction]
+		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* GetAsyncCompiledAsyncDelegateMethod(int userID);
 
@@ -53,6 +53,10 @@ namespace Unity.Burst.LowLevel
 		[FreeFunction("DefaultBurstLogCallback", true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Log(void* userData, BurstCompilerService.BurstLogType logType, byte* message, byte* filename, int lineNumber);
+
+		[FreeFunction("DefaultBurstRuntimeLogCallback", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void RuntimeLog(void* userData, BurstCompilerService.BurstLogType logType, byte* message, byte* filename, int lineNumber);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool LoadBurstLibrary(string fullPathToLibBurstGenerated);

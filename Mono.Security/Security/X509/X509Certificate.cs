@@ -332,18 +332,18 @@ namespace Mono.Security.X509
 						{
 							if (num != 601591448U)
 							{
-								goto IL_021C;
+								goto IL_022D;
 							}
 							if (!(signaturealgo == "1.2.840.113549.1.1.5"))
 							{
-								goto IL_021C;
+								goto IL_022D;
 							}
 						}
 						else
 						{
 							if (!(signaturealgo == "1.2.840.10040.4.3"))
 							{
-								goto IL_021C;
+								goto IL_022D;
 							}
 							ASN1 asn = new ASN1(this.signature);
 							if (asn == null || asn.Count != 2)
@@ -368,21 +368,21 @@ namespace Mono.Security.X509
 						{
 							if (num != 719034781U)
 							{
-								goto IL_021C;
+								goto IL_022D;
 							}
 							if (!(signaturealgo == "1.2.840.113549.1.1.2"))
 							{
-								goto IL_021C;
+								goto IL_022D;
 							}
 						}
 						else if (!(signaturealgo == "1.2.840.113549.1.1.3"))
 						{
-							goto IL_021C;
+							goto IL_022D;
 						}
 					}
 					else if (!(signaturealgo == "1.2.840.113549.1.1.4"))
 					{
-						goto IL_021C;
+						goto IL_022D;
 					}
 				}
 				else if (num <= 2477476687U)
@@ -391,16 +391,16 @@ namespace Mono.Security.X509
 					{
 						if (num != 2477476687U)
 						{
-							goto IL_021C;
+							goto IL_022D;
 						}
 						if (!(signaturealgo == "1.2.840.113549.1.1.11"))
 						{
-							goto IL_021C;
+							goto IL_022D;
 						}
 					}
 					else if (!(signaturealgo == "1.3.14.3.2.29"))
 					{
-						goto IL_021C;
+						goto IL_022D;
 					}
 				}
 				else if (num != 2494254306U)
@@ -409,24 +409,24 @@ namespace Mono.Security.X509
 					{
 						if (num != 3493391575U)
 						{
-							goto IL_021C;
+							goto IL_022D;
 						}
 						if (!(signaturealgo == "1.3.36.3.3.1.2"))
 						{
-							goto IL_021C;
+							goto IL_022D;
 						}
 					}
 					else if (!(signaturealgo == "1.2.840.113549.1.1.13"))
 					{
-						goto IL_021C;
+						goto IL_022D;
 					}
 				}
 				else if (!(signaturealgo == "1.2.840.113549.1.1.12"))
 				{
-					goto IL_021C;
+					goto IL_022D;
 				}
 				return (byte[])this.signature.Clone();
-				IL_021C:
+				IL_022D:
 				throw new CryptographicException("Unsupported hash algorithm: " + this.m_signaturealgo);
 			}
 		}
@@ -657,9 +657,11 @@ namespace Mono.Security.X509
 
 		private DSA _dsa;
 
-		private const string OID_DSA = "1.2.840.10040.4.1";
+		internal const string OID_DSA = "1.2.840.10040.4.1";
 
-		private const string OID_RSA = "1.2.840.113549.1.1.1";
+		internal const string OID_RSA = "1.2.840.113549.1.1.1";
+
+		internal const string OID_ECC = "1.2.840.10045.2.1";
 
 		private int version;
 

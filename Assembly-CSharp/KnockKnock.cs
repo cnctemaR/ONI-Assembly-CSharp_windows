@@ -8,7 +8,7 @@ public class KnockKnock : Activatable
 		this.showProgressBar = false;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (!this.doorAnswered)
 		{

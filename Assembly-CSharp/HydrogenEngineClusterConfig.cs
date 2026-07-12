@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class HydrogenEngineClusterConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -31,7 +31,7 @@ public class HydrogenEngineClusterConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.GeneratorWattageRating = 600f;
-		buildingDef.GeneratorBaseCapacity = 40000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.RequiresPowerOutput = false;
 		buildingDef.CanMove = true;

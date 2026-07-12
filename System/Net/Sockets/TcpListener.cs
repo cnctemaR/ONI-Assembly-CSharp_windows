@@ -96,7 +96,7 @@ namespace System.Net.Sockets
 			{
 				if (this.m_Active)
 				{
-					throw new InvalidOperationException(global::SR.GetString("The TcpListener must not be listening before performing this operation."));
+					throw new InvalidOperationException(SR.GetString("The TcpListener must not be listening before performing this operation."));
 				}
 				this.m_ServerSocket.ExclusiveAddressUse = value;
 				this.m_ExclusiveAddressUse = value;
@@ -107,7 +107,7 @@ namespace System.Net.Sockets
 		{
 			if (this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The TcpListener must not be listening before performing this operation."));
+				throw new InvalidOperationException(SR.GetString("The TcpListener must not be listening before performing this operation."));
 			}
 			if (allowed)
 			{
@@ -131,7 +131,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (this.m_ServerSocket == null)
 			{
-				throw new InvalidOperationException(global::SR.GetString("The socket handle is not valid."));
+				throw new InvalidOperationException(SR.GetString("The socket handle is not valid."));
 			}
 			if (this.m_Active)
 			{
@@ -173,7 +173,7 @@ namespace System.Net.Sockets
 		{
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+				throw new InvalidOperationException(SR.GetString("Not listening. You must call the Start() method before calling this method."));
 			}
 			return this.m_ServerSocket.Poll(0, SelectMode.SelectRead);
 		}
@@ -183,7 +183,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+				throw new InvalidOperationException(SR.GetString("Not listening. You must call the Start() method before calling this method."));
 			}
 			Socket socket = this.m_ServerSocket.Accept();
 			bool on2 = Logging.On;
@@ -195,7 +195,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+				throw new InvalidOperationException(SR.GetString("Not listening. You must call the Start() method before calling this method."));
 			}
 			TcpClient tcpClient = new TcpClient(this.m_ServerSocket.Accept());
 			bool on2 = Logging.On;
@@ -208,7 +208,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+				throw new InvalidOperationException(SR.GetString("Not listening. You must call the Start() method before calling this method."));
 			}
 			IAsyncResult asyncResult = this.m_ServerSocket.BeginAccept(callback, state);
 			bool on2 = Logging.On;
@@ -226,7 +226,7 @@ namespace System.Net.Sockets
 			object obj = ((socketAsyncResult == null) ? null : socketAsyncResult.socket);
 			if (obj == null)
 			{
-				throw new ArgumentException(global::SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
+				throw new ArgumentException(SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
 			}
 			Socket socket = obj.EndAccept(asyncResult);
 			bool on2 = Logging.On;
@@ -239,7 +239,7 @@ namespace System.Net.Sockets
 			bool on = Logging.On;
 			if (!this.m_Active)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Not listening. You must call the Start() method before calling this method."));
+				throw new InvalidOperationException(SR.GetString("Not listening. You must call the Start() method before calling this method."));
 			}
 			IAsyncResult asyncResult = this.m_ServerSocket.BeginAccept(callback, state);
 			bool on2 = Logging.On;
@@ -257,7 +257,7 @@ namespace System.Net.Sockets
 			object obj = ((socketAsyncResult == null) ? null : socketAsyncResult.socket);
 			if (obj == null)
 			{
-				throw new ArgumentException(global::SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
+				throw new ArgumentException(SR.GetString("The IAsyncResult object was not returned from the corresponding asynchronous method on this class."), "asyncResult");
 			}
 			Socket socket = obj.EndAccept(asyncResult);
 			bool on2 = Logging.On;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Mono.Interop;
 
 namespace System.Globalization
 {
@@ -11,6 +12,22 @@ namespace System.Globalization
 	[StructLayout(LayoutKind.Sequential)]
 	public class CultureInfo : ICloneable, IFormatProvider
 	{
+		internal CultureData _cultureData
+		{
+			get
+			{
+				return this.m_cultureData;
+			}
+		}
+
+		internal bool _isInherited
+		{
+			get
+			{
+				return this.m_isInherited;
+			}
+		}
+
 		public static CultureInfo InvariantCulture
 		{
 			get
@@ -49,6 +66,10 @@ namespace System.Globalization
 			{
 				return CultureInfo.default_current_culture;
 			}
+			if (GlobalizationMode.Invariant)
+			{
+				return CultureInfo.InvariantCulture;
+			}
 			string current_locale_name = CultureInfo.get_current_locale_name();
 			CultureInfo cultureInfo = null;
 			if (current_locale_name != null)
@@ -84,6 +105,14 @@ namespace System.Globalization
 			get
 			{
 				return this.territory;
+			}
+		}
+
+		internal string _name
+		{
+			get
+			{
+				return this.m_name;
 			}
 		}
 
@@ -951,8 +980,16 @@ namespace System.Globalization
 					this.Construct();
 				}
 				this.CheckNeutral();
-				DateTimeFormatInfo dateTimeFormatInfo = new DateTimeFormatInfo(this.m_cultureData, this.Calendar);
-				dateTimeFormatInfo.m_isReadOnly = this.m_isReadOnly;
+				DateTimeFormatInfo dateTimeFormatInfo;
+				if (GlobalizationMode.Invariant)
+				{
+					dateTimeFormatInfo = new DateTimeFormatInfo();
+				}
+				else
+				{
+					dateTimeFormatInfo = new DateTimeFormatInfo(this.m_cultureData, this.Calendar);
+				}
+				dateTimeFormatInfo._isReadOnly = this.m_isReadOnly;
 				Thread.MemoryBarrier();
 				this.dateTimeInfo = dateTimeFormatInfo;
 				return this.dateTimeInfo;
@@ -1139,7 +1176,7 @@ namespace System.Globalization
 				this.ConstructInvariant(read_only);
 				return;
 			}
-			if (!this.construct_internal_locale_from_name(name.ToLowerInvariant()))
+			if (!this.ConstructLocaleFromName(name.ToLowerInvariant()))
 			{
 				throw CultureInfo.CreateNotFoundException(name);
 			}
@@ -1282,19 +1319,9 @@ namespace System.Globalization
 			string text = name;
 			name = name.ToLowerInvariant();
 			CultureInfo cultureInfo = new CultureInfo();
-			if (!cultureInfo.construct_internal_locale_from_name(name))
+			if (!cultureInfo.ConstructLocaleFromName(name))
 			{
-				int num = name.Length - 1;
-				if (num > 0)
-				{
-					while ((num = name.LastIndexOf('-', num - 1)) > 0 && !cultureInfo.construct_internal_locale_from_name(name.Substring(0, num)))
-					{
-					}
-				}
-				if (num <= 0)
-				{
-					throw CultureInfo.CreateNotFoundException(text);
-				}
+				throw CultureInfo.CreateNotFoundException(text);
 			}
 			if (cultureInfo.IsNeutralCulture)
 			{
@@ -1304,9 +1331,9 @@ namespace System.Globalization
 			CultureInfo cultureInfo2 = cultureInfo;
 			string name2 = cultureInfo.m_name;
 			bool flag = false;
-			int num2 = cultureInfo.datetime_index;
+			int num = cultureInfo.datetime_index;
 			int calendarType = cultureInfo.CalendarType;
-			int num3 = cultureInfo.number_index;
+			int num2 = cultureInfo.number_index;
 			string text2 = cultureInfo.iso2lang;
 			int ansi = textInfoData.ansi;
 			int oem = textInfoData.oem;
@@ -1314,8 +1341,28 @@ namespace System.Globalization
 			int ebcdic = textInfoData.ebcdic;
 			bool right_to_left = textInfoData.right_to_left;
 			char list_sep = (char)textInfoData.list_sep;
-			cultureInfo2.m_cultureData = CultureData.GetCultureData(name2, flag, num2, calendarType, num3, text2, ansi, oem, mac, ebcdic, right_to_left, list_sep.ToString());
+			cultureInfo2.m_cultureData = CultureData.GetCultureData(name2, flag, num, calendarType, num2, text2, ansi, oem, mac, ebcdic, right_to_left, list_sep.ToString());
 			return cultureInfo;
+		}
+
+		private bool ConstructLocaleFromName(string name)
+		{
+			if (this.construct_internal_locale_from_name(name))
+			{
+				return true;
+			}
+			int num = name.Length - 1;
+			if (num > 0)
+			{
+				while ((num = name.LastIndexOf('-', num - 1)) > 0)
+				{
+					if (this.construct_internal_locale_from_name(name.Substring(0, num)))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		private static CultureInfo CreateSpecificCultureFromNeutral(string name)
@@ -2705,7 +2752,7 @@ namespace System.Globalization
 				text = "System.Globalization.HijriCalendar";
 				break;
 			default:
-				throw new NotImplementedException("Unknown calendar type: " + calendarType);
+				throw new NotImplementedException("Unknown calendar type: " + calendarType.ToString());
 			}
 			Type type = Type.GetType(text, false);
 			if (type == null)
@@ -2766,6 +2813,42 @@ namespace System.Globalization
 			{
 				return CultureInfo.ConstructCurrentCulture();
 			}
+		}
+
+		[DllImport("__Internal")]
+		private static extern void InitializeUserPreferredCultureInfoInAppX(CultureInfo.OnCultureInfoChangedDelegate onCultureInfoChangedInAppX);
+
+		[DllImport("__Internal")]
+		private static extern void SetUserPreferredCultureInfoInAppX([MarshalAs(UnmanagedType.LPWStr)] string name);
+
+		[MonoPInvokeCallback(typeof(CultureInfo.OnCultureInfoChangedDelegate))]
+		private static void OnCultureInfoChangedInAppX([MarshalAs(UnmanagedType.LPWStr)] string language)
+		{
+			if (language != null)
+			{
+				CultureInfo.s_UserPreferredCultureInfoInAppX = new CultureInfo(language);
+				return;
+			}
+			CultureInfo.s_UserPreferredCultureInfoInAppX = null;
+		}
+
+		internal static CultureInfo GetCultureInfoForUserPreferredLanguageInAppX()
+		{
+			if (CultureInfo.s_UserPreferredCultureInfoInAppX == null)
+			{
+				CultureInfo.InitializeUserPreferredCultureInfoInAppX(new CultureInfo.OnCultureInfoChangedDelegate(CultureInfo.OnCultureInfoChangedInAppX));
+			}
+			return CultureInfo.s_UserPreferredCultureInfoInAppX;
+		}
+
+		internal static void SetCultureInfoForUserPreferredLanguageInAppX(CultureInfo cultureInfo)
+		{
+			if (CultureInfo.s_UserPreferredCultureInfoInAppX == null)
+			{
+				CultureInfo.InitializeUserPreferredCultureInfoInAppX(new CultureInfo.OnCultureInfoChangedDelegate(CultureInfo.OnCultureInfoChangedInAppX));
+			}
+			CultureInfo.SetUserPreferredCultureInfoInAppX(cultureInfo.Name);
+			CultureInfo.s_UserPreferredCultureInfoInAppX = cultureInfo;
 		}
 
 		internal static void CheckDomainSafetyObject(object obj, object container)
@@ -2892,6 +2975,8 @@ namespace System.Globalization
 
 		private const int CalendarTypeBits = 8;
 
+		internal const int LOCALE_INVARIANT = 127;
+
 		private const string MSG_READONLY = "This instance is read only";
 
 		private static volatile CultureInfo s_DefaultThreadCurrentUICulture;
@@ -2901,6 +2986,8 @@ namespace System.Globalization
 		private static Dictionary<int, CultureInfo> shared_by_number;
 
 		private static Dictionary<string, CultureInfo> shared_by_name;
+
+		private static CultureInfo s_UserPreferredCultureInfoInAppX;
 
 		internal static readonly bool IsTaiwanSku;
 
@@ -2918,5 +3005,7 @@ namespace System.Globalization
 
 			public byte list_sep;
 		}
+
+		private delegate void OnCultureInfoChangedDelegate([MarshalAs(UnmanagedType.LPWStr)] string language);
 	}
 }

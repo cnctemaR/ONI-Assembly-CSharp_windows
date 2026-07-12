@@ -73,6 +73,7 @@ public class SaveScreen : KModalScreen
 		try
 		{
 			SaveLoader.Instance.Save(filename, false, true);
+			PauseScreen.Instance.OnSaveComplete();
 			this.Deactivate();
 		}
 		catch (IOException ex)

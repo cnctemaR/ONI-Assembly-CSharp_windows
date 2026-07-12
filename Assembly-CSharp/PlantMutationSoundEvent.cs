@@ -11,7 +11,7 @@ public class PlantMutationSoundEvent : SoundEvent
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 		MutantPlant component = behaviour.controller.gameObject.GetComponent<MutantPlant>();
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 position = behaviour.position;
 		if (component != null)
 		{
 			for (int i = 0; i < component.GetSoundEvents().Count; i++)

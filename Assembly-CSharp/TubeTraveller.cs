@@ -14,7 +14,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		this.modifiers.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_BLADDER, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
 		this.modifiers.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
 		this.modifiers.Add(new AttributeModifier(Db.Get().Attributes.ScoldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCOLDING, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
-		this.waxSpeedBoostModifier = new AttributeModifier(Db.Get().Attributes.TransitTubeTravelSpeed.Id, 4.5f, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true);
+		this.waxSpeedBoostModifier = new AttributeModifier(Db.Get().Attributes.TransitTubeTravelSpeed.Id, DUPLICANTSTATS.STANDARD.BaseStats.TRANSIT_TUBE_TRAVEL_SPEED * 0.25f, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true);
 		this.immunities.Add(Db.Get().effects.Get("SoakingWet"));
 		this.immunities.Add(Db.Get().effects.Get("WetFeet"));
 		this.immunities.Add(Db.Get().effects.Get("PoppedEarDrums"));

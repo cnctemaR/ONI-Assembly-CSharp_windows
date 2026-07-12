@@ -22,9 +22,7 @@ namespace System.Data
 			Marshal.Copy(new byte[length], 0, ptr, length);
 		}
 
-		internal static IntPtr GetProcAddress(IntPtr HModule, string funcName)
-		{
-			throw new PlatformNotSupportedException("SafeNativeMethods.GetProcAddress is not supported on non-Windows platforms");
-		}
+		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Ansi, SetLastError = true, ThrowOnUnmappableChar = true)]
+		internal static extern IntPtr GetProcAddress(IntPtr HModule, [MarshalAs(UnmanagedType.LPStr)] [In] string funcName);
 	}
 }

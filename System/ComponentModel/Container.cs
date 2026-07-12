@@ -191,7 +191,7 @@ namespace System.ComponentModel
 					ISite site = this.sites[i];
 					if (site != null && site.Name != null && string.Equals(site.Name, name, StringComparison.OrdinalIgnoreCase) && site.Component != component && ((InheritanceAttribute)TypeDescriptor.GetAttributes(site.Component)[typeof(InheritanceAttribute)]).InheritanceLevel != InheritanceLevel.InheritedReadOnly)
 					{
-						throw new ArgumentException(global::SR.GetString("Duplicate component name '{0}'.  Component names must be unique and case-insensitive.", new object[] { name }));
+						throw new ArgumentException(SR.GetString("Duplicate component name '{0}'.  Component names must be unique and case-insensitive.", new object[] { name }));
 					}
 				}
 			}

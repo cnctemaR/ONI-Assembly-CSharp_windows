@@ -11,25 +11,25 @@ namespace UnityEngine.Android
 			get
 			{
 				Dictionary<string, AndroidAssetPackInfo> assetPackInfos = this.m_AssetPackInfos;
-				bool flag3;
+				bool flag4;
 				lock (assetPackInfos)
 				{
 					foreach (AndroidAssetPackInfo androidAssetPackInfo in this.m_AssetPackInfos.Values)
 					{
-						bool flag = androidAssetPackInfo == null;
-						if (flag)
-						{
-							return true;
-						}
-						bool flag2 = androidAssetPackInfo.status != AndroidAssetPackStatus.Canceled && androidAssetPackInfo.status != AndroidAssetPackStatus.Completed && androidAssetPackInfo.status != AndroidAssetPackStatus.Failed && androidAssetPackInfo.status > AndroidAssetPackStatus.Unknown;
+						bool flag2 = androidAssetPackInfo == null;
 						if (flag2)
 						{
 							return true;
 						}
+						bool flag3 = androidAssetPackInfo.status != AndroidAssetPackStatus.Canceled && androidAssetPackInfo.status != AndroidAssetPackStatus.Completed && androidAssetPackInfo.status != AndroidAssetPackStatus.Failed && androidAssetPackInfo.status > AndroidAssetPackStatus.Unknown;
+						if (flag3)
+						{
+							return true;
+						}
 					}
-					flag3 = false;
+					flag4 = false;
 				}
-				return flag3;
+				return flag4;
 			}
 		}
 
@@ -46,32 +46,33 @@ namespace UnityEngine.Android
 			get
 			{
 				Dictionary<string, AndroidAssetPackInfo> assetPackInfos = this.m_AssetPackInfos;
-				float num3;
+				float num4;
 				lock (assetPackInfos)
 				{
 					float num = 0f;
 					float num2 = 0f;
 					foreach (AndroidAssetPackInfo androidAssetPackInfo in this.m_AssetPackInfos.Values)
 					{
-						bool flag = androidAssetPackInfo == null;
-						if (!flag)
+						bool flag2 = androidAssetPackInfo == null;
+						if (!flag2)
 						{
-							bool flag2 = androidAssetPackInfo.status == AndroidAssetPackStatus.Canceled || androidAssetPackInfo.status == AndroidAssetPackStatus.Completed || androidAssetPackInfo.status == AndroidAssetPackStatus.Failed || androidAssetPackInfo.status == AndroidAssetPackStatus.Unknown;
-							if (flag2)
+							bool flag3 = androidAssetPackInfo.status == AndroidAssetPackStatus.Canceled || androidAssetPackInfo.status == AndroidAssetPackStatus.Completed || androidAssetPackInfo.status == AndroidAssetPackStatus.Failed || androidAssetPackInfo.status == AndroidAssetPackStatus.Unknown;
+							if (flag3)
 							{
 								num += 1f;
 								num2 += 1f;
 							}
 							else
 							{
-								num += androidAssetPackInfo.bytesDownloaded / androidAssetPackInfo.size;
+								double num3 = androidAssetPackInfo.bytesDownloaded / androidAssetPackInfo.size;
+								num += (float)num3;
 								num2 += androidAssetPackInfo.transferProgress;
 							}
 						}
 					}
-					num3 = Mathf.Clamp((num * 0.8f + num2 * 0.2f) / (float)this.m_AssetPackInfos.Count, 0f, 1f);
+					num4 = Mathf.Clamp((num * 0.8f + num2 * 0.2f) / (float)this.m_AssetPackInfos.Count, 0f, 1f);
 				}
-				return num3;
+				return num4;
 			}
 		}
 
@@ -86,11 +87,11 @@ namespace UnityEngine.Android
 					List<string> list = new List<string>();
 					foreach (AndroidAssetPackInfo androidAssetPackInfo in this.m_AssetPackInfos.Values)
 					{
-						bool flag = androidAssetPackInfo == null;
-						if (!flag)
+						bool flag2 = androidAssetPackInfo == null;
+						if (!flag2)
 						{
-							bool flag2 = androidAssetPackInfo.status == AndroidAssetPackStatus.Completed;
-							if (flag2)
+							bool flag3 = androidAssetPackInfo.status == AndroidAssetPackStatus.Completed;
+							if (flag3)
 							{
 								list.Add(androidAssetPackInfo.name);
 							}
@@ -114,15 +115,15 @@ namespace UnityEngine.Android
 					foreach (KeyValuePair<string, AndroidAssetPackInfo> keyValuePair in this.m_AssetPackInfos)
 					{
 						AndroidAssetPackInfo value = keyValuePair.Value;
-						bool flag = value == null;
-						if (flag)
+						bool flag2 = value == null;
+						if (flag2)
 						{
 							list.Add(keyValuePair.Key);
 						}
 						else
 						{
-							bool flag2 = value.status == AndroidAssetPackStatus.Canceled || value.status == AndroidAssetPackStatus.Failed || value.status == AndroidAssetPackStatus.Unknown;
-							if (flag2)
+							bool flag3 = value.status == AndroidAssetPackStatus.Canceled || value.status == AndroidAssetPackStatus.Failed || value.status == AndroidAssetPackStatus.Unknown;
+							if (flag3)
 							{
 								list.Add(value.name);
 							}

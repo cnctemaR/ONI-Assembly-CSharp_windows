@@ -327,7 +327,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 		list.Add(msg);
 		string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
-		foreach (string text3 in stack_trace.Split(new char[] { '\n' }))
+		foreach (string text3 in stack_trace.Split('\n', StringSplitOptions.None))
 		{
 			if (list.Count >= 5)
 			{
@@ -492,7 +492,7 @@ public class KCrashReporter : MonoBehaviour
 		byte[] array2;
 		using (MemoryStream memoryStream = new MemoryStream())
 		{
-			using (ZipArchive zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+			using (ZipArchive zipArchive = new ZipArchive(memoryStream, 1, true))
 			{
 				if (files != null)
 				{
@@ -728,7 +728,7 @@ public class KCrashReporter : MonoBehaviour
 
 		public string sku = "";
 
-		public int build = 626616;
+		public int build = 642443;
 
 		public string callstack = "";
 

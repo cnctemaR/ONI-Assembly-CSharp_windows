@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class AccessViolationException : SystemException
 	{
 		public AccessViolationException()
-			: base(Environment.GetResourceString("Attempted to read or write protected memory. This is often an indication that other memory is corrupt."))
+			: base("Attempted to read or write protected memory. This is often an indication that other memory is corrupt.")
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public AccessViolationException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public AccessViolationException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		protected AccessViolationException(SerializationInfo info, StreamingContext context)

@@ -148,9 +148,26 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 	{
 		base.CollectChores(consumer_state, succeeded, failed_contexts);
 		this.clearableManager.CollectChores(this.fetches, consumer_state, succeeded, failed_contexts);
-		for (int i = 0; i < this.fetches.Count; i++)
+		int num = CPUBudget.coreCount * 4;
+		if (this.fetches.Count > num)
 		{
-			this.fetches[i].chore.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded, failed_contexts, false);
+			GlobalChoreProvider.batch_fetch_collector.Reset(this);
+			int coreCount = CPUBudget.coreCount;
+			int num2 = Math.Min(16, this.fetches.Count / coreCount);
+			for (int i = 0; i < this.fetches.Count; i += num2)
+			{
+				GlobalChoreProvider.batch_fetch_collector.Add(new GlobalChoreProvider.FetchChoreCollectTask(i, Math.Min(i + num2, this.fetches.Count), consumer_state));
+			}
+			GlobalJobManager.Run(GlobalChoreProvider.batch_fetch_collector);
+			for (int j = 0; j < coreCount; j++)
+			{
+				GlobalChoreProvider.batch_fetch_collector.GetWorkItem(j).Finish(succeeded, failed_contexts);
+			}
+			return;
+		}
+		for (int k = 0; k < this.fetches.Count; k++)
+		{
+			this.fetches[k].chore.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded, failed_contexts, false);
 		}
 	}
 
@@ -220,6 +237,8 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 
 	private HashSet<Tag> storageFetchableTags = new HashSet<Tag>();
 
+	private static WorkItemCollection<GlobalChoreProvider.FetchChoreCollectTask, GlobalChoreProvider> batch_fetch_collector = new WorkItemCollection<GlobalChoreProvider.FetchChoreCollectTask, GlobalChoreProvider>();
+
 	public struct Fetch
 	{
 		public bool IsBetterThan(GlobalChoreProvider.Fetch fetch)
@@ -263,6 +282,63 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		public PrioritySetting priority;
 
 		public Storage.FetchCategory category;
+	}
+
+	private struct FetchChoreCollectTask : IWorkItem<GlobalChoreProvider>
+	{
+		public FetchChoreCollectTask(int start, int end, ChoreConsumerState consumer_state)
+		{
+			this.start = start;
+			this.end = end;
+			this.consumer_state = consumer_state;
+			this.succeeded = ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.Allocate();
+			this.failed = ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.Allocate();
+			this.incomplete = ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.Allocate();
+		}
+
+		public void Run(GlobalChoreProvider context)
+		{
+			for (int i = this.start; i < this.end; i++)
+			{
+				context.fetches[i].chore.CollectChoresFromGlobalChoreProvider(this.consumer_state, this.succeeded, this.incomplete, this.failed, false);
+			}
+		}
+
+		public void Finish(List<Chore.Precondition.Context> combined_succeeded, List<Chore.Precondition.Context> combined_failed)
+		{
+			combined_succeeded.AddRange(this.succeeded);
+			this.succeeded.Clear();
+			this.succeeded.Recycle();
+			combined_failed.AddRange(this.failed);
+			this.failed.Clear();
+			this.failed.Recycle();
+			foreach (Chore.Precondition.Context context in this.incomplete)
+			{
+				context.FinishPreconditions();
+				if (context.IsSuccess())
+				{
+					combined_succeeded.Add(context);
+				}
+				else
+				{
+					combined_failed.Add(context);
+				}
+			}
+			this.incomplete.Clear();
+			this.incomplete.Recycle();
+		}
+
+		private int start;
+
+		private int end;
+
+		private ChoreConsumerState consumer_state;
+
+		public ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.PooledList succeeded;
+
+		public ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.PooledList failed;
+
+		public ListPool<Chore.Precondition.Context, GlobalChoreProvider.FetchChoreCollectTask>.PooledList incomplete;
 	}
 
 	private class FetchComparer : IComparer<GlobalChoreProvider.Fetch>

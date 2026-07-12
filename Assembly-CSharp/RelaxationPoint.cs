@@ -50,7 +50,7 @@ public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
 		base.SetWorkTime(float.PositiveInfinity);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		if (this.roomTracker != null && this.roomTracker.room != null && this.roomTracker.room.roomType == Db.Get().RoomTypes.MassageClinic)
@@ -64,7 +64,7 @@ public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
 		base.GetComponent<Operational>().SetActive(true, false);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (Db.Get().Amounts.Stress.Lookup(worker.gameObject).value <= this.stopStressingValue)
 		{
@@ -74,7 +74,7 @@ public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
 		return false;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		worker.GetComponent<Effects>().Remove(RelaxationPoint.stressReductionEffect);
 		worker.GetComponent<Effects>().Remove(RelaxationPoint.roomStressReductionEffect);
@@ -82,12 +82,12 @@ public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
 		base.OnStopWork(worker);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

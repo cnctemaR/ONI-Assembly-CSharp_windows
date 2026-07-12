@@ -54,7 +54,7 @@ public class Breakable : Workable
 		return string.Format(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP, text);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.secondsPerTenPercentDamage = 2f;
@@ -65,7 +65,7 @@ public class Breakable : Workable
 		this.elapsedDamageTime = 0f;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.elapsedDamageTime >= this.secondsPerTenPercentDamage)
 		{
@@ -81,7 +81,7 @@ public class Breakable : Workable
 		return this.hp.HitPoints <= 0;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.AngerDamage, false);
@@ -92,7 +92,7 @@ public class Breakable : Workable
 		}
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

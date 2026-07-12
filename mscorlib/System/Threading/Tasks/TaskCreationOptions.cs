@@ -3,7 +3,6 @@
 namespace System.Threading.Tasks
 {
 	[Flags]
-	[Serializable]
 	public enum TaskCreationOptions
 	{
 		None = 0,

@@ -1,24 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using MS.Internal.Xml.Linq.ComponentModel;
 
 namespace System.Xml.Linq
 {
-	[TypeDescriptionProvider(typeof(XTypeDescriptionProvider<XAttribute>))]
 	public class XAttribute : XObject
 	{
 		public static IEnumerable<XAttribute> EmptySequence
 		{
 			get
 			{
-				if (XAttribute.emptySequence == null)
-				{
-					XAttribute.emptySequence = new XAttribute[0];
-				}
-				return XAttribute.emptySequence;
+				return Array.Empty<XAttribute>();
 			}
 		}
 
@@ -136,7 +129,7 @@ namespace System.Xml.Linq
 		{
 			if (this.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+				throw new InvalidOperationException("The parent is missing.");
 			}
 			((XElement)this.parent).RemoveAttribute(this);
 		}
@@ -184,7 +177,7 @@ namespace System.Xml.Linq
 			{
 				throw new ArgumentNullException("attribute");
 			}
-			return XmlConvert.ToBoolean(attribute.value.ToLower(CultureInfo.InvariantCulture));
+			return XmlConvert.ToBoolean(attribute.value.ToLowerInvariant());
 		}
 
 		[CLSCompliant(false)]
@@ -194,7 +187,7 @@ namespace System.Xml.Linq
 			{
 				return null;
 			}
-			return new bool?(XmlConvert.ToBoolean(attribute.value.ToLower(CultureInfo.InvariantCulture)));
+			return new bool?(XmlConvert.ToBoolean(attribute.value.ToLowerInvariant()));
 		}
 
 		[CLSCompliant(false)]
@@ -451,29 +444,29 @@ namespace System.Xml.Linq
 			{
 				if (value.Length == 0)
 				{
-					throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationPrefixed", new object[] { name.LocalName }));
+					throw new ArgumentException(global::SR.Format("The prefix '{0}' cannot be bound to the empty namespace name.", name.LocalName));
 				}
 				if (value == "http://www.w3.org/XML/1998/namespace")
 				{
 					if (name.LocalName != "xml")
 					{
-						throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXml"));
+						throw new ArgumentException("The prefix 'xml' is bound to the namespace name 'http://www.w3.org/XML/1998/namespace'. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 					}
 				}
 				else
 				{
 					if (value == "http://www.w3.org/2000/xmlns/")
 					{
-						throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXmlns"));
+						throw new ArgumentException("The prefix 'xmlns' is bound to the namespace name 'http://www.w3.org/2000/xmlns/'. It must not be declared. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 					}
 					string localName = name.LocalName;
 					if (localName == "xml")
 					{
-						throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXml"));
+						throw new ArgumentException("The prefix 'xml' is bound to the namespace name 'http://www.w3.org/XML/1998/namespace'. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 					}
 					if (localName == "xmlns")
 					{
-						throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXmlns"));
+						throw new ArgumentException("The prefix 'xmlns' is bound to the namespace name 'http://www.w3.org/2000/xmlns/'. It must not be declared. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 					}
 				}
 			}
@@ -481,16 +474,14 @@ namespace System.Xml.Linq
 			{
 				if (value == "http://www.w3.org/XML/1998/namespace")
 				{
-					throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXml"));
+					throw new ArgumentException("The prefix 'xml' is bound to the namespace name 'http://www.w3.org/XML/1998/namespace'. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 				}
 				if (value == "http://www.w3.org/2000/xmlns/")
 				{
-					throw new ArgumentException(Res.GetString("Argument_NamespaceDeclarationXmlns"));
+					throw new ArgumentException("The prefix 'xmlns' is bound to the namespace name 'http://www.w3.org/2000/xmlns/'. It must not be declared. Other prefixes must not be bound to this namespace name, and it must not be declared as the default namespace.");
 				}
 			}
 		}
-
-		private static IEnumerable<XAttribute> emptySequence;
 
 		internal XAttribute next;
 

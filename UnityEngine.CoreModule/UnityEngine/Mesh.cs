@@ -13,8 +13,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+	[RequiredByNativeCode]
+	[ExcludeFromPreset]
 	public sealed class Mesh : Object
 	{
 		[FreeFunction("MeshScripting::CreateMesh")]
@@ -42,7 +43,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern uint GetTotalIndexCount();
 
-		[FreeFunction(Name = "MeshScripting::SetIndexBufferParams", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::SetIndexBufferParams", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetIndexBufferParams(int indexCount, IndexFormat format);
 
@@ -60,7 +61,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "MeshScripting::SetVertexBufferParamsFromArray", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVertexBufferParamsFromArray(int vertexCount, params VertexAttributeDescriptor[] attributes);
+		private extern void SetVertexBufferParamsFromArray(int vertexCount, [Unmarshalled] params VertexAttributeDescriptor[] attributes);
 
 		[FreeFunction(Name = "MeshScripting::InternalSetVertexBufferData", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -76,7 +77,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributesArray([NotNull("ArgumentNullException")] VertexAttributeDescriptor[] attributes);
+		private extern int GetVertexAttributesArray([Unmarshalled] [NotNull("ArgumentNullException")] VertexAttributeDescriptor[] attributes);
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -158,6 +159,14 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern VertexAttributeFormat GetVertexAttributeFormat(VertexAttribute attr);
 
+		[FreeFunction(Name = "MeshScripting::GetChannelStream", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetVertexAttributeStream(VertexAttribute attr);
+
+		[FreeFunction(Name = "MeshScripting::GetChannelOffset", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetVertexAttributeOffset(VertexAttribute attr);
+
 		[FreeFunction(Name = "SetMeshComponentFromArrayFromScript", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
@@ -181,14 +190,50 @@ namespace UnityEngine
 			get;
 		}
 
-		[FreeFunction(Name = "MeshScripting::GetNativeVertexBufferPtr", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetVertexBufferStride", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetVertexBufferStride(int stream);
+
 		[NativeThrows]
+		[FreeFunction(Name = "MeshScripting::GetNativeVertexBufferPtr", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetNativeVertexBufferPtr(int index);
 
 		[FreeFunction(Name = "MeshScripting::GetNativeIndexBufferPtr", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetNativeIndexBufferPtr();
+
+		[FreeFunction(Name = "MeshScripting::GetVertexBufferPtr", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer GetVertexBufferImpl(int index);
+
+		[FreeFunction(Name = "MeshScripting::GetIndexBufferPtr", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer GetIndexBufferImpl();
+
+		[FreeFunction(Name = "MeshScripting::GetBoneWeightBufferPtr", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer GetBoneWeightBufferImpl(int bonesPerVertex);
+
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeBufferPtr", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern GraphicsBuffer GetBlendShapeBufferImpl(int layout);
+
+		public extern GraphicsBuffer.Target vertexBufferTarget
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern GraphicsBuffer.Target indexBufferTarget
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		public extern int blendShapeCount
 		{
@@ -205,7 +250,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetBlendShapeName(int shapeIndex);
 
-		[FreeFunction(Name = "MeshScripting::GetBlendShapeIndex", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeIndex", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetBlendShapeIndex(string blendShapeName);
 
@@ -219,11 +264,19 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "GetBlendShapeFrameVerticesFromScript", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
+		public extern void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, [Unmarshalled] Vector3[] deltaVertices, [Unmarshalled] Vector3[] deltaNormals, [Unmarshalled] Vector3[] deltaTangents);
 
 		[FreeFunction(Name = "AddBlendShapeFrameFromScript", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void AddBlendShapeFrame(string shapeName, float frameWeight, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
+		public extern void AddBlendShapeFrame(string shapeName, float frameWeight, [Unmarshalled] Vector3[] deltaVertices, [Unmarshalled] Vector3[] deltaNormals, [Unmarshalled] Vector3[] deltaTangents);
+
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeOffset", HasExplicitThis = true)]
+		private BlendShape GetBlendShapeOffsetInternal(int index)
+		{
+			BlendShape blendShape;
+			this.GetBlendShapeOffsetInternal_Injected(index, out blendShape);
+			return blendShape;
+		}
 
 		[NativeMethod("HasBoneWeights")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -242,8 +295,8 @@ namespace UnityEngine
 			this.InternalSetBoneWeights((IntPtr)bonesPerVertex.GetUnsafeReadOnlyPtr<byte>(), bonesPerVertex.Length, (IntPtr)weights.GetUnsafeReadOnlyPtr<BoneWeight1>(), weights.Length);
 		}
 
-		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
 		[SecurityCritical]
+		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetBoneWeights(IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize);
 
@@ -262,18 +315,25 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetAllBoneWeightsArraySize();
 
+		[NativeMethod("GetBoneWeightBufferDimension")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetBoneWeightBufferLayoutInternal();
+
 		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArray", HasExplicitThis = true)]
 		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetAllBoneWeightsArray();
 
-		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
 		[SecurityCritical]
+		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetBonesPerVertexArray();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetBindposeCount();
+		public extern int bindposeCount
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		[NativeName("BindPosesFromScript")]
 		public extern Matrix4x4[] bindposes
@@ -283,6 +343,16 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		public unsafe NativeArray<Matrix4x4> GetBindposes()
+		{
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>((void*)this.GetBindposesArray(), this.bindposeCount, Allocator.None);
+		}
+
+		[SecurityCritical]
+		[FreeFunction(Name = "MeshScripting::GetBindposesArray", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetBindposesArray();
 
 		[FreeFunction(Name = "MeshScripting::ExtractBoneWeightsIntoArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1393,6 +1463,119 @@ namespace UnityEngine
 			data.ApplyToMeshesAndDispose(NoAllocHelpers.ExtractArrayFromListT<Mesh>(meshes), flags);
 		}
 
+		public GraphicsBuffer GetVertexBuffer(int index)
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			return this.GetVertexBufferImpl(index);
+		}
+
+		public GraphicsBuffer GetIndexBuffer()
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			return this.GetIndexBufferImpl();
+		}
+
+		public GraphicsBuffer GetBoneWeightBuffer(SkinWeights layout)
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			bool flag2 = layout == SkinWeights.None;
+			GraphicsBuffer graphicsBuffer;
+			if (flag2)
+			{
+				Debug.LogError(string.Format("Only possible to access bone weights buffer for values: {0}, {1}, {2} and {3}.", new object[]
+				{
+					SkinWeights.OneBone,
+					SkinWeights.TwoBones,
+					SkinWeights.FourBones,
+					SkinWeights.Unlimited
+				}));
+				graphicsBuffer = null;
+			}
+			else
+			{
+				GraphicsBuffer boneWeightBufferImpl = this.GetBoneWeightBufferImpl((int)layout);
+				graphicsBuffer = boneWeightBufferImpl;
+			}
+			return graphicsBuffer;
+		}
+
+		public GraphicsBuffer GetBlendShapeBuffer(BlendShapeBufferLayout layout)
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			bool flag2 = !SystemInfo.supportsComputeShaders;
+			GraphicsBuffer graphicsBuffer;
+			if (flag2)
+			{
+				Debug.LogError("Only possible to access Blend Shape buffer on platforms that supports compute shaders.");
+				graphicsBuffer = null;
+			}
+			else
+			{
+				GraphicsBuffer blendShapeBufferImpl = this.GetBlendShapeBufferImpl((int)layout);
+				graphicsBuffer = blendShapeBufferImpl;
+			}
+			return graphicsBuffer;
+		}
+
+		public GraphicsBuffer GetBlendShapeBuffer()
+		{
+			bool flag = this == null;
+			if (flag)
+			{
+				throw new NullReferenceException();
+			}
+			bool flag2 = !SystemInfo.supportsComputeShaders;
+			GraphicsBuffer graphicsBuffer;
+			if (flag2)
+			{
+				Debug.LogError("Only possible to access Blend Shape buffer on platforms that supports compute shaders.");
+				graphicsBuffer = null;
+			}
+			else
+			{
+				GraphicsBuffer blendShapeBufferImpl = this.GetBlendShapeBufferImpl(0);
+				graphicsBuffer = blendShapeBufferImpl;
+			}
+			return graphicsBuffer;
+		}
+
+		public BlendShapeBufferRange GetBlendShapeBufferRange(int blendShapeIndex)
+		{
+			bool flag = blendShapeIndex >= this.blendShapeCount || blendShapeIndex < 0;
+			BlendShapeBufferRange blendShapeBufferRange;
+			if (flag)
+			{
+				Debug.LogError("Incorrect index used to get blend shape buffer range");
+				blendShapeBufferRange = default(BlendShapeBufferRange);
+			}
+			else
+			{
+				BlendShape blendShapeOffsetInternal = this.GetBlendShapeOffsetInternal(blendShapeIndex);
+				blendShapeBufferRange = new BlendShapeBufferRange
+				{
+					startIndex = blendShapeOffsetInternal.firstVertex,
+					endIndex = blendShapeOffsetInternal.firstVertex + blendShapeOffsetInternal.vertexCount - 1U
+				};
+			}
+			return blendShapeBufferRange;
+		}
+
 		private void PrintErrorCantAccessIndices()
 		{
 			Debug.LogError(string.Format("Not allowed to access triangles/indices on mesh '{0}' (isReadable is false; Read/Write must be enabled in import settings)", base.name));
@@ -1931,7 +2114,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("bindposes", "The result bindposes list cannot be null.");
 			}
-			NoAllocHelpers.EnsureListElemCount<Matrix4x4>(bindposes, this.GetBindposeCount());
+			NoAllocHelpers.EnsureListElemCount<Matrix4x4>(bindposes, this.bindposeCount);
 			this.GetBindposesNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(bindposes));
 		}
 
@@ -1959,6 +2142,14 @@ namespace UnityEngine
 			set
 			{
 				this.SetBoneWeightsImpl(value);
+			}
+		}
+
+		public SkinWeights skinWeightBufferLayout
+		{
+			get
+			{
+				return (SkinWeights)this.GetBoneWeightBufferLayoutInternal();
 			}
 		}
 
@@ -2156,6 +2347,9 @@ namespace UnityEngine
 		private extern void GetVertexAttribute_Injected(int index, out VertexAttributeDescriptor ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void GetBlendShapeOffsetInternal_Injected(int index, out BlendShape ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetSubMesh_Injected(int index, ref SubMeshDescriptor desc, MeshUpdateFlags flags = MeshUpdateFlags.Default);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2185,6 +2379,14 @@ namespace UnityEngine
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexAttributeStream(IntPtr self, VertexAttribute attr);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexAttributeOffset(IntPtr self, VertexAttribute attr);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern int GetVertexCount(IntPtr self);
 
 			[NativeMethod(IsThreadSafe = true)]
@@ -2198,6 +2400,10 @@ namespace UnityEngine
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern ulong GetVertexDataSize(IntPtr self, int stream);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexBufferStride(IntPtr self, int stream);
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2241,9 +2447,9 @@ namespace UnityEngine
 
 			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetVertexBufferParamsFromArray(IntPtr self, int vertexCount, params VertexAttributeDescriptor[] attributes);
+			private static extern void SetVertexBufferParamsFromArray(IntPtr self, int vertexCount, [Unmarshalled] params VertexAttributeDescriptor[] attributes);
 
-			[NativeMethod(IsThreadSafe = true)]
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern void SetIndexBufferParamsImpl(IntPtr self, int indexCount, IndexFormat indexFormat);
 
@@ -2273,6 +2479,11 @@ namespace UnityEngine
 				}
 			}
 
+			public int GetVertexBufferStride(int stream)
+			{
+				return Mesh.MeshData.GetVertexBufferStride(this.m_Ptr, stream);
+			}
+
 			public bool HasVertexAttribute(VertexAttribute attr)
 			{
 				return Mesh.MeshData.HasVertexAttribute(this.m_Ptr, attr);
@@ -2286,6 +2497,16 @@ namespace UnityEngine
 			public VertexAttributeFormat GetVertexAttributeFormat(VertexAttribute attr)
 			{
 				return Mesh.MeshData.GetVertexAttributeFormat(this.m_Ptr, attr);
+			}
+
+			public int GetVertexAttributeStream(VertexAttribute attr)
+			{
+				return Mesh.MeshData.GetVertexAttributeStream(this.m_Ptr, attr);
+			}
+
+			public int GetVertexAttributeOffset(VertexAttribute attr)
+			{
+				return Mesh.MeshData.GetVertexAttributeOffset(this.m_Ptr, attr);
 			}
 
 			public void GetVertices(NativeArray<Vector3> outVertices)
@@ -2531,6 +2752,7 @@ namespace UnityEngine
 
 			public unsafe void Dispose()
 			{
+				UnsafeUtility.LeakErase((IntPtr)((void*)this.m_Ptrs), LeakCategory.MeshDataArray);
 				bool flag = this.m_Length != 0;
 				if (flag)
 				{
@@ -2588,6 +2810,7 @@ namespace UnityEngine
 				int num = UnsafeUtility.SizeOf<IntPtr>();
 				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
 				Mesh.MeshDataArray.AcquireReadOnlyMeshData(mesh, this.m_Ptrs);
+				UnsafeUtility.LeakRecord((IntPtr)((void*)this.m_Ptrs), LeakCategory.MeshDataArray, 0);
 			}
 
 			internal unsafe MeshDataArray(Mesh[] meshes, int meshesCount, bool checkReadWrite = true)
@@ -2636,7 +2859,7 @@ namespace UnityEngine
 			}
 
 			[NativeDisableUnsafePtrRestriction]
-			private unsafe IntPtr* m_Ptrs;
+			internal unsafe IntPtr* m_Ptrs;
 
 			internal int m_Length;
 		}

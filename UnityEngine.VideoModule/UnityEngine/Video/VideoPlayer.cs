@@ -19,6 +19,14 @@ namespace UnityEngine.Video
 			set;
 		}
 
+		public extern VideoTimeUpdateMode timeUpdateMode
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		[NativeName("VideoUrl")]
 		public extern string url
 		{
@@ -43,6 +51,13 @@ namespace UnityEngine.Video
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public extern bool canSetTimeUpdateMode
+		{
+			[NativeName("CanSetTimeUpdateMode")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		[NativeHeader("Runtime/Camera/Camera.h")]
@@ -225,6 +240,7 @@ namespace UnityEngine.Video
 			set;
 		}
 
+		[Obsolete("VideoPlayer.canSetTimeSource is deprecated. Use canSetTimeUpdateMode instead. (UnityUpgradable) -> canSetTimeUpdateMode")]
 		public extern bool canSetTimeSource
 		{
 			[NativeName("CanSetTimeSource")]
@@ -232,6 +248,7 @@ namespace UnityEngine.Video
 			get;
 		}
 
+		[Obsolete("VideoPlayer.timeSource is deprecated. Use timeUpdateMode instead. (UnityUpgradable) -> timeUpdateMode")]
 		public extern VideoTimeSource timeSource
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

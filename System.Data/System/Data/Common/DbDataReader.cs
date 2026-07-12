@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.Common
 {
-	public abstract class DbDataReader : MarshalByRefObject, IDataReader, IDisposable, IDataRecord, IEnumerable
+	public abstract class DbDataReader : MarshalByRefObject, IDataReader, IDisposable, IDataRecord, IEnumerable, IAsyncDisposable
 	{
 		public abstract int Depth { get; }
 
@@ -261,6 +261,27 @@ namespace System.Data.Common
 				task = Task.FromException<bool>(ex);
 			}
 			return task;
+		}
+
+		public virtual Task CloseAsync()
+		{
+			Task task;
+			try
+			{
+				this.Close();
+				task = Task.CompletedTask;
+			}
+			catch (Exception ex)
+			{
+				task = Task.FromException(ex);
+			}
+			return task;
+		}
+
+		public virtual ValueTask DisposeAsync()
+		{
+			this.Dispose();
+			return default(ValueTask);
 		}
 	}
 }

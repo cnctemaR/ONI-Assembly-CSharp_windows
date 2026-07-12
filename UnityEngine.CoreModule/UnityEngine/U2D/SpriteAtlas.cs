@@ -44,9 +44,9 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetSpritesScripting(Sprite[] sprites);
+		private extern int GetSpritesScripting([Unmarshalled] Sprite[] sprites);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetSpritesWithNameScripting(Sprite[] sprites, string name);
+		private extern int GetSpritesWithNameScripting([Unmarshalled] Sprite[] sprites, string name);
 	}
 }

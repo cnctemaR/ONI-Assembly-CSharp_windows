@@ -1,30 +1,28 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System
 {
 	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
-	[ComVisible(true)]
 	[Serializable]
 	public sealed class AttributeUsageAttribute : Attribute
 	{
 		public AttributeUsageAttribute(AttributeTargets validOn)
 		{
-			this.m_attributeTarget = validOn;
+			this._attributeTarget = validOn;
 		}
 
 		internal AttributeUsageAttribute(AttributeTargets validOn, bool allowMultiple, bool inherited)
 		{
-			this.m_attributeTarget = validOn;
-			this.m_allowMultiple = allowMultiple;
-			this.m_inherited = inherited;
+			this._attributeTarget = validOn;
+			this._allowMultiple = allowMultiple;
+			this._inherited = inherited;
 		}
 
 		public AttributeTargets ValidOn
 		{
 			get
 			{
-				return this.m_attributeTarget;
+				return this._attributeTarget;
 			}
 		}
 
@@ -32,11 +30,11 @@ namespace System
 		{
 			get
 			{
-				return this.m_allowMultiple;
+				return this._allowMultiple;
 			}
 			set
 			{
-				this.m_allowMultiple = value;
+				this._allowMultiple = value;
 			}
 		}
 
@@ -44,19 +42,19 @@ namespace System
 		{
 			get
 			{
-				return this.m_inherited;
+				return this._inherited;
 			}
 			set
 			{
-				this.m_inherited = value;
+				this._inherited = value;
 			}
 		}
 
-		internal AttributeTargets m_attributeTarget = AttributeTargets.All;
+		private AttributeTargets _attributeTarget = AttributeTargets.All;
 
-		internal bool m_allowMultiple;
+		private bool _allowMultiple;
 
-		internal bool m_inherited = true;
+		private bool _inherited = true;
 
 		internal static AttributeUsageAttribute Default = new AttributeUsageAttribute(AttributeTargets.All);
 	}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -10,19 +9,19 @@ namespace MS.Internal.Xml.XPath
 		public MergeFilterQuery(Query input, Query child)
 			: base(input)
 		{
-			this.child = child;
+			this._child = child;
 		}
 
 		private MergeFilterQuery(MergeFilterQuery other)
 			: base(other)
 		{
-			this.child = Query.Clone(other.child);
+			this._child = Query.Clone(other._child);
 		}
 
 		public override void SetXsltContext(XsltContext xsltContext)
 		{
 			base.SetXsltContext(xsltContext);
-			this.child.SetXsltContext(xsltContext);
+			this._child.SetXsltContext(xsltContext);
 		}
 
 		public override object Evaluate(XPathNodeIterator nodeIterator)
@@ -30,11 +29,11 @@ namespace MS.Internal.Xml.XPath
 			base.Evaluate(nodeIterator);
 			while (this.input.Advance() != null)
 			{
-				this.child.Evaluate(this.input);
+				this._child.Evaluate(this.input);
 				XPathNavigator xpathNavigator;
-				while ((xpathNavigator = this.child.Advance()) != null)
+				while ((xpathNavigator = this._child.Advance()) != null)
 				{
-					base.Insert(this.outputBuffer, xpathNavigator);
+					Query.Insert(this.outputBuffer, xpathNavigator);
 				}
 			}
 			return this;
@@ -42,7 +41,7 @@ namespace MS.Internal.Xml.XPath
 
 		public override XPathNavigator MatchNode(XPathNavigator current)
 		{
-			XPathNavigator xpathNavigator = this.child.MatchNode(current);
+			XPathNavigator xpathNavigator = this._child.MatchNode(current);
 			if (xpathNavigator == null)
 			{
 				return null;
@@ -68,14 +67,6 @@ namespace MS.Internal.Xml.XPath
 			return new MergeFilterQuery(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			this.input.PrintQuery(w);
-			this.child.PrintQuery(w);
-			w.WriteEndElement();
-		}
-
-		private Query child;
+		private Query _child;
 	}
 }

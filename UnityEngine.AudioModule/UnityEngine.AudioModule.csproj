@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB568}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EDF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.AudioModule</RootNamespace>
     <AssemblyName>UnityEngine.AudioModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -38,6 +38,7 @@
     <Compile Include="UnityEngine\AudioSpeakerMode.cs" />
     <Compile Include="UnityEngine\AudioVelocityUpdateMode.cs" />
     <Compile Include="UnityEngine\Audio\AudioClipPlayable.cs" />
+    <Compile Include="UnityEngine\Audio\AudioManagerTestProxy.cs" />
     <Compile Include="UnityEngine\Audio\AudioMixer.cs" />
     <Compile Include="UnityEngine\Audio\AudioMixerGroup.cs" />
     <Compile Include="UnityEngine\Audio\AudioMixerPlayable.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="UnityEngine\Audio\AudioPlayableOutput.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioClipExtensionsInternal.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioSampleProvider.cs" />
+    <Compile Include="UnityEngine\Experimental\Audio\AudioSampleProviderExtensionsInternal.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioSourceExtensionsInternal.cs" />
     <Compile Include="UnityEngine\FFTWindow.cs" />
     <Compile Include="UnityEngine\Microphone.cs" />
@@ -60,16 +62,18 @@
     <Compile Include="Unity\Audio\IValidatable.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB582}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Core" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

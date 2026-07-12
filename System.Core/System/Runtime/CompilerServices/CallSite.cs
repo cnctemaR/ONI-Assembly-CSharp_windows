@@ -34,22 +34,18 @@ namespace System.Runtime.CompilerServices
 			{
 				cacheDict = (CallSite.s_siteCtors = new CacheDict<Type, Func<CallSiteBinder, CallSite>>(100));
 			}
-			MethodInfo methodInfo = null;
 			Func<CallSiteBinder, CallSite> func;
 			if (!cacheDict.TryGetValue(delegateType, out func))
 			{
-				methodInfo = typeof(CallSite<>).MakeGenericType(new Type[] { delegateType }).GetMethod("Create");
-				if (delegateType.CanCache())
+				MethodInfo method = typeof(CallSite<>).MakeGenericType(new Type[] { delegateType }).GetMethod("Create");
+				if (delegateType.IsCollectible)
 				{
-					func = (Func<CallSiteBinder, CallSite>)methodInfo.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
-					cacheDict.Add(delegateType, func);
+					return (CallSite)method.Invoke(null, new object[] { binder });
 				}
+				func = (Func<CallSiteBinder, CallSite>)method.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
+				cacheDict.Add(delegateType, func);
 			}
-			if (func != null)
-			{
-				return func(binder);
-			}
-			return (CallSite)methodInfo.Invoke(null, new object[] { binder });
+			return func(binder);
 		}
 
 		internal CallSite()

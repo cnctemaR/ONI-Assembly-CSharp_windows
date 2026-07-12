@@ -1,66 +1,56 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
+using System.Collections.Generic;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class EventDescriptorCollection : ICollection, IEnumerable, IList
 	{
 		public EventDescriptorCollection(EventDescriptor[] events)
 		{
-			this.events = events;
 			if (events == null)
 			{
-				this.events = new EventDescriptor[0];
-				this.eventCount = 0;
+				this._events = Array.Empty<EventDescriptor>();
 			}
 			else
 			{
-				this.eventCount = this.events.Length;
+				this._events = events;
+				this.Count = events.Length;
 			}
-			this.eventsOwned = true;
+			this._eventsOwned = true;
 		}
 
 		public EventDescriptorCollection(EventDescriptor[] events, bool readOnly)
 			: this(events)
 		{
-			this.readOnly = readOnly;
+			this._readOnly = readOnly;
 		}
 
 		private EventDescriptorCollection(EventDescriptor[] events, int eventCount, string[] namedSort, IComparer comparer)
 		{
-			this.eventsOwned = false;
+			this._eventsOwned = false;
 			if (namedSort != null)
 			{
-				this.namedSort = (string[])namedSort.Clone();
+				this._namedSort = (string[])namedSort.Clone();
 			}
-			this.comparer = comparer;
-			this.events = events;
-			this.eventCount = eventCount;
-			this.needSort = true;
+			this._comparer = comparer;
+			this._events = events;
+			this.Count = eventCount;
+			this._needSort = true;
 		}
 
-		public int Count
-		{
-			get
-			{
-				return this.eventCount;
-			}
-		}
+		public int Count { get; private set; }
 
 		public virtual EventDescriptor this[int index]
 		{
 			get
 			{
-				if (index >= this.eventCount)
+				if (index >= this.Count)
 				{
 					throw new IndexOutOfRangeException();
 				}
 				this.EnsureEventsOwned();
-				return this.events[index];
+				return this._events[index];
 			}
 		}
 
@@ -74,25 +64,25 @@ namespace System.ComponentModel
 
 		public int Add(EventDescriptor value)
 		{
-			if (this.readOnly)
+			if (this._readOnly)
 			{
 				throw new NotSupportedException();
 			}
-			this.EnsureSize(this.eventCount + 1);
-			EventDescriptor[] array = this.events;
-			int num = this.eventCount;
-			this.eventCount = num + 1;
-			array[num] = value;
-			return this.eventCount - 1;
+			this.EnsureSize(this.Count + 1);
+			EventDescriptor[] events = this._events;
+			int count = this.Count;
+			this.Count = count + 1;
+			events[count] = value;
+			return this.Count - 1;
 		}
 
 		public void Clear()
 		{
-			if (this.readOnly)
+			if (this._readOnly)
 			{
 				throw new NotSupportedException();
 			}
-			this.eventCount = 0;
+			this.Count = 0;
 		}
 
 		public bool Contains(EventDescriptor value)
@@ -103,44 +93,44 @@ namespace System.ComponentModel
 		void ICollection.CopyTo(Array array, int index)
 		{
 			this.EnsureEventsOwned();
-			Array.Copy(this.events, 0, array, index, this.Count);
+			Array.Copy(this._events, 0, array, index, this.Count);
 		}
 
 		private void EnsureEventsOwned()
 		{
-			if (!this.eventsOwned)
+			if (!this._eventsOwned)
 			{
-				this.eventsOwned = true;
-				if (this.events != null)
+				this._eventsOwned = true;
+				if (this._events != null)
 				{
 					EventDescriptor[] array = new EventDescriptor[this.Count];
-					Array.Copy(this.events, 0, array, 0, this.Count);
-					this.events = array;
+					Array.Copy(this._events, 0, array, 0, this.Count);
+					this._events = array;
 				}
 			}
-			if (this.needSort)
+			if (this._needSort)
 			{
-				this.needSort = false;
-				this.InternalSort(this.namedSort);
+				this._needSort = false;
+				this.InternalSort(this._namedSort);
 			}
 		}
 
 		private void EnsureSize(int sizeNeeded)
 		{
-			if (sizeNeeded <= this.events.Length)
+			if (sizeNeeded <= this._events.Length)
 			{
 				return;
 			}
-			if (this.events == null || this.events.Length == 0)
+			if (this._events.Length == 0)
 			{
-				this.eventCount = 0;
-				this.events = new EventDescriptor[sizeNeeded];
+				this.Count = 0;
+				this._events = new EventDescriptor[sizeNeeded];
 				return;
 			}
 			this.EnsureEventsOwned();
-			EventDescriptor[] array = new EventDescriptor[Math.Max(sizeNeeded, this.events.Length * 2)];
-			Array.Copy(this.events, 0, array, 0, this.eventCount);
-			this.events = array;
+			EventDescriptor[] array = new EventDescriptor[Math.Max(sizeNeeded, this._events.Length * 2)];
+			Array.Copy(this._events, 0, array, 0, this.Count);
+			this._events = array;
 		}
 
 		public virtual EventDescriptor Find(string name, bool ignoreCase)
@@ -150,9 +140,9 @@ namespace System.ComponentModel
 			{
 				for (int i = 0; i < this.Count; i++)
 				{
-					if (string.Equals(this.events[i].Name, name, StringComparison.OrdinalIgnoreCase))
+					if (string.Equals(this._events[i].Name, name, StringComparison.OrdinalIgnoreCase))
 					{
-						eventDescriptor = this.events[i];
+						eventDescriptor = this._events[i];
 						break;
 					}
 				}
@@ -161,9 +151,9 @@ namespace System.ComponentModel
 			{
 				for (int j = 0; j < this.Count; j++)
 				{
-					if (string.Equals(this.events[j].Name, name, StringComparison.Ordinal))
+					if (string.Equals(this._events[j].Name, name, StringComparison.Ordinal))
 					{
-						eventDescriptor = this.events[j];
+						eventDescriptor = this._events[j];
 						break;
 					}
 				}
@@ -173,27 +163,28 @@ namespace System.ComponentModel
 
 		public int IndexOf(EventDescriptor value)
 		{
-			return Array.IndexOf<EventDescriptor>(this.events, value, 0, this.eventCount);
+			return Array.IndexOf<EventDescriptor>(this._events, value, 0, this.Count);
 		}
 
 		public void Insert(int index, EventDescriptor value)
 		{
-			if (this.readOnly)
+			if (this._readOnly)
 			{
 				throw new NotSupportedException();
 			}
-			this.EnsureSize(this.eventCount + 1);
-			if (index < this.eventCount)
+			this.EnsureSize(this.Count + 1);
+			if (index < this.Count)
 			{
-				Array.Copy(this.events, index, this.events, index + 1, this.eventCount - index);
+				Array.Copy(this._events, index, this._events, index + 1, this.Count - index);
 			}
-			this.events[index] = value;
-			this.eventCount++;
+			this._events[index] = value;
+			int count = this.Count;
+			this.Count = count + 1;
 		}
 
 		public void Remove(EventDescriptor value)
 		{
-			if (this.readOnly)
+			if (this._readOnly)
 			{
 				throw new NotSupportedException();
 			}
@@ -206,77 +197,78 @@ namespace System.ComponentModel
 
 		public void RemoveAt(int index)
 		{
-			if (this.readOnly)
+			if (this._readOnly)
 			{
 				throw new NotSupportedException();
 			}
-			if (index < this.eventCount - 1)
+			if (index < this.Count - 1)
 			{
-				Array.Copy(this.events, index + 1, this.events, index, this.eventCount - index - 1);
+				Array.Copy(this._events, index + 1, this._events, index, this.Count - index - 1);
 			}
-			this.events[this.eventCount - 1] = null;
-			this.eventCount--;
+			this._events[this.Count - 1] = null;
+			int count = this.Count;
+			this.Count = count - 1;
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			if (this.events.Length == this.eventCount)
+			if (this._events.Length == this.Count)
 			{
-				return this.events.GetEnumerator();
+				return this._events.GetEnumerator();
 			}
-			return new ArraySubsetEnumerator(this.events, this.eventCount);
+			return new EventDescriptorCollection.ArraySubsetEnumerator(this._events, this.Count);
 		}
 
 		public virtual EventDescriptorCollection Sort()
 		{
-			return new EventDescriptorCollection(this.events, this.eventCount, this.namedSort, this.comparer);
+			return new EventDescriptorCollection(this._events, this.Count, this._namedSort, this._comparer);
 		}
 
 		public virtual EventDescriptorCollection Sort(string[] names)
 		{
-			return new EventDescriptorCollection(this.events, this.eventCount, names, this.comparer);
+			return new EventDescriptorCollection(this._events, this.Count, names, this._comparer);
 		}
 
 		public virtual EventDescriptorCollection Sort(string[] names, IComparer comparer)
 		{
-			return new EventDescriptorCollection(this.events, this.eventCount, names, comparer);
+			return new EventDescriptorCollection(this._events, this.Count, names, comparer);
 		}
 
 		public virtual EventDescriptorCollection Sort(IComparer comparer)
 		{
-			return new EventDescriptorCollection(this.events, this.eventCount, this.namedSort, comparer);
+			return new EventDescriptorCollection(this._events, this.Count, this._namedSort, comparer);
 		}
 
 		protected void InternalSort(string[] names)
 		{
-			if (this.events == null || this.events.Length == 0)
+			if (this._events.Length == 0)
 			{
 				return;
 			}
-			this.InternalSort(this.comparer);
+			this.InternalSort(this._comparer);
 			if (names != null && names.Length != 0)
 			{
-				ArrayList arrayList = new ArrayList(this.events);
+				List<EventDescriptor> list = new List<EventDescriptor>(this._events);
 				int num = 0;
-				int num2 = this.events.Length;
+				int num2 = this._events.Length;
 				for (int i = 0; i < names.Length; i++)
 				{
 					for (int j = 0; j < num2; j++)
 					{
-						EventDescriptor eventDescriptor = (EventDescriptor)arrayList[j];
+						EventDescriptor eventDescriptor = list[j];
 						if (eventDescriptor != null && eventDescriptor.Name.Equals(names[i]))
 						{
-							this.events[num++] = eventDescriptor;
-							arrayList[j] = null;
+							this._events[num++] = eventDescriptor;
+							list[j] = null;
 							break;
 						}
 					}
 				}
 				for (int k = 0; k < num2; k++)
 				{
-					if (arrayList[k] != null)
+					if (list[k] != null)
 					{
-						this.events[num++] = (EventDescriptor)arrayList[k];
+						this._events[num++] = list[k];
 					}
 				}
 			}
@@ -289,15 +281,7 @@ namespace System.ComponentModel
 				TypeDescriptor.SortDescriptorArray(this);
 				return;
 			}
-			Array.Sort(this.events, sorter);
-		}
-
-		int ICollection.Count
-		{
-			get
-			{
-				return this.Count;
-			}
+			Array.Sort(this._events, sorter);
 		}
 
 		bool ICollection.IsSynchronized
@@ -316,6 +300,14 @@ namespace System.ComponentModel
 			}
 		}
 
+		int ICollection.Count
+		{
+			get
+			{
+				return this.Count;
+			}
+		}
+
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.GetEnumerator();
@@ -329,16 +321,16 @@ namespace System.ComponentModel
 			}
 			set
 			{
-				if (this.readOnly)
+				if (this._readOnly)
 				{
 					throw new NotSupportedException();
 				}
-				if (index >= this.eventCount)
+				if (index >= this.Count)
 				{
 					throw new IndexOutOfRangeException();
 				}
 				this.EnsureEventsOwned();
-				this.events[index] = (EventDescriptor)value;
+				this._events[index] = (EventDescriptor)value;
 			}
 		}
 
@@ -347,14 +339,14 @@ namespace System.ComponentModel
 			return this.Add((EventDescriptor)value);
 		}
 
-		void IList.Clear()
-		{
-			this.Clear();
-		}
-
 		bool IList.Contains(object value)
 		{
 			return this.Contains((EventDescriptor)value);
+		}
+
+		void IList.Clear()
+		{
+			this.Clear();
 		}
 
 		int IList.IndexOf(object value)
@@ -381,7 +373,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.readOnly;
+				return this._readOnly;
 			}
 		}
 
@@ -389,24 +381,65 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.readOnly;
+				return this._readOnly;
 			}
 		}
 
-		private EventDescriptor[] events;
+		private EventDescriptor[] _events;
 
-		private string[] namedSort;
+		private string[] _namedSort;
 
-		private IComparer comparer;
+		private readonly IComparer _comparer;
 
-		private bool eventsOwned = true;
+		private bool _eventsOwned;
 
-		private bool needSort;
+		private bool _needSort;
 
-		private int eventCount;
-
-		private bool readOnly;
+		private readonly bool _readOnly;
 
 		public static readonly EventDescriptorCollection Empty = new EventDescriptorCollection(null, true);
+
+		private class ArraySubsetEnumerator : IEnumerator
+		{
+			public ArraySubsetEnumerator(Array array, int count)
+			{
+				this._array = array;
+				this._total = count;
+				this._current = -1;
+			}
+
+			public bool MoveNext()
+			{
+				if (this._current < this._total - 1)
+				{
+					this._current++;
+					return true;
+				}
+				return false;
+			}
+
+			public void Reset()
+			{
+				this._current = -1;
+			}
+
+			public object Current
+			{
+				get
+				{
+					if (this._current == -1)
+					{
+						throw new InvalidOperationException();
+					}
+					return this._array.GetValue(this._current);
+				}
+			}
+
+			private readonly Array _array;
+
+			private readonly int _total;
+
+			private int _current;
+		}
 	}
 }

@@ -7,8 +7,8 @@ namespace UnityEngine
 {
 	public sealed class Security
 	{
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This was an internal method which is no longer used", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static Assembly LoadAndVerifyAssembly(byte[] assemblyData, string authorizationKey)
 		{
 			return null;
@@ -30,7 +30,7 @@ namespace UnityEngine
 		}
 
 		[Obsolete("Security.PrefetchSocketPolicy is no longer supported, since the Unity Web Player is no longer supported by Unity.", true)]
-		public static bool PrefetchSocketPolicy(string ip, int atPort, [UnityEngine.Internal.DefaultValue("3000")] int timeout)
+		public static bool PrefetchSocketPolicy(string ip, int atPort, [DefaultValue("3000")] int timeout)
 		{
 			return false;
 		}

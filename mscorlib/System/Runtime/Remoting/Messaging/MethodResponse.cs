@@ -445,7 +445,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			if (null == this._methodBase)
 			{
-				return "__method_" + index;
+				return "__method_" + index.ToString();
 			}
 			if (this._inArgInfo == null)
 			{

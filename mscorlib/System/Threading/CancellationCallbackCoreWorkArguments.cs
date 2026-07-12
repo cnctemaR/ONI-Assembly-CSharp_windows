@@ -6,12 +6,12 @@ namespace System.Threading
 	{
 		public CancellationCallbackCoreWorkArguments(SparselyPopulatedArrayFragment<CancellationCallbackInfo> currArrayFragment, int currArrayIndex)
 		{
-			this.m_currArrayFragment = currArrayFragment;
-			this.m_currArrayIndex = currArrayIndex;
+			this._currArrayFragment = currArrayFragment;
+			this._currArrayIndex = currArrayIndex;
 		}
 
-		internal SparselyPopulatedArrayFragment<CancellationCallbackInfo> m_currArrayFragment;
+		internal SparselyPopulatedArrayFragment<CancellationCallbackInfo> _currArrayFragment;
 
-		internal int m_currArrayIndex;
+		internal int _currArrayIndex;
 	}
 }

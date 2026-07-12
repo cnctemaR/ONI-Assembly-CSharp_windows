@@ -5,7 +5,6 @@ using System.IO.Pipes;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
 {
@@ -15,8 +14,6 @@ namespace System.Data.SqlClient.SNI
 		{
 			this._targetServer = serverName;
 			this._callbackObject = callbackObject;
-			this._writeScheduler = new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler;
-			this._writeTaskFactory = new TaskFactory(this._writeScheduler);
 			try
 			{
 				this._pipeStream = new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.WriteThrough | PipeOptions.Asynchronous);
@@ -111,8 +108,7 @@ namespace System.Data.SqlClient.SNI
 				packet = null;
 				try
 				{
-					packet = new SNIPacket(null);
-					packet.Allocate(this._bufferSize);
+					packet = new SNIPacket(this._bufferSize);
 					packet.ReadFromStream(this._stream);
 					if (packet.Length == 0)
 					{
@@ -135,24 +131,20 @@ namespace System.Data.SqlClient.SNI
 
 		public override uint ReceiveAsync(ref SNIPacket packet)
 		{
+			packet = new SNIPacket(this._bufferSize);
 			uint num;
-			lock (this)
+			try
 			{
-				packet = new SNIPacket(null);
-				packet.Allocate(this._bufferSize);
-				try
-				{
-					packet.ReadFromStreamAsync(this._stream, this._receiveCallback);
-					num = 997U;
-				}
-				catch (ObjectDisposedException ex)
-				{
-					num = this.ReportErrorAndReleasePacket(packet, ex);
-				}
-				catch (IOException ex2)
-				{
-					num = this.ReportErrorAndReleasePacket(packet, ex2);
-				}
+				packet.ReadFromStreamAsync(this._stream, this._receiveCallback);
+				num = 997U;
+			}
+			catch (ObjectDisposedException ex)
+			{
+				num = this.ReportErrorAndReleasePacket(packet, ex);
+			}
+			catch (IOException ex2)
+			{
+				num = this.ReportErrorAndReleasePacket(packet, ex2);
 			}
 			return num;
 		}
@@ -179,39 +171,10 @@ namespace System.Data.SqlClient.SNI
 			return num;
 		}
 
-		public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
+		public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
 		{
-			SNIPacket packet2 = packet;
-			this._writeTaskFactory.StartNew(delegate
-			{
-				try
-				{
-					SNINpHandle <>4__this = this;
-					lock (<>4__this)
-					{
-						packet.WriteToStream(this._stream);
-					}
-				}
-				catch (Exception ex)
-				{
-					SNICommon.ReportSNIError(SNIProviders.NP_PROV, 35U, ex);
-					if (callback != null)
-					{
-						callback(packet, 1U);
-					}
-					else
-					{
-						this._sendCallback(packet, 1U);
-					}
-					return;
-				}
-				if (callback != null)
-				{
-					callback(packet, 0U);
-					return;
-				}
-				this._sendCallback(packet, 0U);
-			});
+			SNIAsyncCallback sniasyncCallback = callback ?? this._sendCallback;
+			packet.WriteToStreamAsync(this._stream, sniasyncCallback, SNIProviders.NP_PROV, disposePacketAfterSendAsync);
 			return 997U;
 		}
 
@@ -285,10 +248,6 @@ namespace System.Data.SqlClient.SNI
 		private readonly string _targetServer;
 
 		private readonly object _callbackObject;
-
-		private readonly TaskScheduler _writeScheduler;
-
-		private readonly TaskFactory _writeTaskFactory;
 
 		private Stream _stream;
 

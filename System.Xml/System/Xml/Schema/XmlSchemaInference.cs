@@ -1611,18 +1611,19 @@ namespace System.Xml.Schema
 				switch (c)
 				{
 				case '+':
+				{
 					flag2 = true;
 					num++;
 					if (num == s.Length)
 					{
 						return 262144;
 					}
-					c = s[num];
-					if (c == '.')
+					char c2 = s[num];
+					if (c2 == '.')
 					{
 						goto IL_0100;
 					}
-					if (c == 'P')
+					if (c2 == 'P')
 					{
 						goto IL_030B;
 					}
@@ -1630,25 +1631,27 @@ namespace System.Xml.Schema
 					{
 						return 262144;
 					}
-					goto IL_0742;
+					goto IL_072A;
+				}
 				case ',':
 				case '/':
 					return 262144;
 				case '-':
+				{
 					flag = true;
 					num++;
 					if (num == s.Length)
 					{
 						return 262144;
 					}
-					c = s[num];
-					if (c == '.')
+					char c2 = s[num];
+					if (c2 == '.')
 					{
 						goto IL_0100;
 					}
-					if (c != 'I')
+					if (c2 != 'I')
 					{
-						if (c == 'P')
+						if (c2 == 'P')
 						{
 							goto IL_030B;
 						}
@@ -1656,9 +1659,10 @@ namespace System.Xml.Schema
 						{
 							return 262144;
 						}
-						goto IL_0742;
+						goto IL_072A;
 					}
 					break;
+				}
 				case '.':
 					goto IL_0100;
 				case '0':
@@ -1671,7 +1675,7 @@ namespace System.Xml.Schema
 				case '7':
 				case '8':
 				case '9':
-					goto IL_0742;
+					goto IL_072A;
 				default:
 					if (c != 'I')
 					{
@@ -1705,8 +1709,8 @@ namespace System.Xml.Schema
 				}
 				else
 				{
-					c = s[num];
-					if (c != 'E' && c != 'e')
+					char c2 = s[num];
+					if (c2 != 'E' && c2 != 'e')
 					{
 						if (s[num] < '0' || s[num] > '9')
 						{
@@ -1719,8 +1723,8 @@ namespace System.Xml.Schema
 							{
 								break;
 							}
-							c = s[num];
-							if (c == 'E' || c == 'e')
+							c2 = s[num];
+							if (c2 == 'E' || c2 == 'e')
 							{
 								goto IL_01AC;
 							}
@@ -1737,8 +1741,8 @@ namespace System.Xml.Schema
 					{
 						return 262144;
 					}
-					c = s[num];
-					if (c != '+' && c != '-')
+					c2 = s[num];
+					if (c2 != '+' && c2 != '-')
 					{
 						if (s[num] < '0' || s[num] > '9')
 						{
@@ -1771,7 +1775,7 @@ namespace System.Xml.Schema
 					}
 					return 268288;
 				}
-				IL_0742:
+				IL_072A:
 				num++;
 				if (num == s.Length)
 				{
@@ -1788,12 +1792,12 @@ namespace System.Xml.Schema
 				}
 				else
 				{
-					c = s[num];
-					if (c == '.')
+					char c2 = s[num];
+					if (c2 == '.')
 					{
 						goto IL_0100;
 					}
-					if (c == 'E' || c == 'e')
+					if (c2 == 'E' || c2 == 'e')
 					{
 						bNeedsRangeCheck = true;
 						return 268288;
@@ -1814,20 +1818,20 @@ namespace System.Xml.Schema
 					}
 					else
 					{
-						c = s[num];
-						if (c <= ':')
+						c2 = s[num];
+						if (c2 <= ':')
 						{
-							if (c == '.')
+							if (c2 == '.')
 							{
 								goto IL_0100;
 							}
-							if (c == ':')
+							if (c2 == ':')
 							{
 								flag4 = true;
-								goto IL_0CA4;
+								goto IL_0C8C;
 							}
 						}
-						else if (c == 'E' || c == 'e')
+						else if (c2 == 'E' || c2 == 'e')
 						{
 							bNeedsRangeCheck = true;
 							return 268288;
@@ -1848,12 +1852,12 @@ namespace System.Xml.Schema
 						}
 						else
 						{
-							c = s[num];
-							if (c == '.')
+							c2 = s[num];
+							if (c2 == '.')
 							{
 								goto IL_0100;
 							}
-							if (c == 'E' || c == 'e')
+							if (c2 == 'E' || c2 == 'e')
 							{
 								bNeedsRangeCheck = true;
 								return 268288;
@@ -1869,21 +1873,21 @@ namespace System.Xml.Schema
 								{
 									break;
 								}
-								c = s[num];
-								if (c <= '.')
+								c2 = s[num];
+								if (c2 <= '.')
 								{
-									if (c == '-')
+									if (c2 == '-')
 									{
-										goto IL_090A;
+										goto IL_08F2;
 									}
-									if (c == '.')
+									if (c2 == '.')
 									{
 										goto IL_0100;
 									}
 								}
-								else if (c == 'E' || c == 'e')
+								else if (c2 == 'E' || c2 == 'e')
 								{
-									goto IL_090E;
+									goto IL_08F6;
 								}
 								if (s[num] < '0' || s[num] > '9')
 								{
@@ -1896,7 +1900,7 @@ namespace System.Xml.Schema
 								return 269994;
 							}
 							return 270334;
-							IL_090A:
+							IL_08F2:
 							flag3 = true;
 							num++;
 							if (num == s.Length)
@@ -1922,15 +1926,15 @@ namespace System.Xml.Schema
 								bNeedsRangeCheck = true;
 								return 393216;
 							}
-							c = s[num];
-							if (c <= '-')
+							c2 = s[num];
+							if (c2 <= '-')
 							{
-								if (c == '+')
+								if (c2 == '+')
 								{
 									flag5 = true;
-									goto IL_0AF0;
+									goto IL_0AD8;
 								}
-								if (c == '-')
+								if (c2 == '-')
 								{
 									num++;
 									if (num == s.Length)
@@ -1955,24 +1959,24 @@ namespace System.Xml.Schema
 									{
 										return XmlSchemaInference.DateTime(s, flag3, flag4);
 									}
-									c = s[num];
-									if (c <= ':')
+									c2 = s[num];
+									if (c2 <= ':')
 									{
-										if (c == '+' || c == '-')
+										if (c2 == '+' || c2 == '-')
 										{
-											goto IL_0AF0;
+											goto IL_0AD8;
 										}
-										if (c == ':')
+										if (c2 == ':')
 										{
 											flag5 = true;
-											goto IL_0B80;
+											goto IL_0B68;
 										}
 									}
-									else if (c != 'T')
+									else if (c2 != 'T')
 									{
-										if (c == 'Z' || c == 'z')
+										if (c2 == 'Z' || c2 == 'z')
 										{
-											goto IL_0AC4;
+											goto IL_0AAC;
 										}
 									}
 									else
@@ -2005,22 +2009,22 @@ namespace System.Xml.Schema
 										{
 											return 262144;
 										}
-										goto IL_0CA4;
+										goto IL_0C8C;
 									}
 									return 262144;
 								}
 							}
-							else if (c == 'Z' || c == 'z')
+							else if (c2 == 'Z' || c2 == 'z')
 							{
 								flag5 = true;
-								goto IL_0AC4;
+								goto IL_0AAC;
 							}
 							return 262144;
-							IL_090E:
+							IL_08F6:
 							bNeedsRangeCheck = true;
 							return 268288;
 						}
-						IL_0AC4:
+						IL_0AAC:
 						num++;
 						if (num != s.Length)
 						{
@@ -2032,7 +2036,7 @@ namespace System.Xml.Schema
 							return 393216;
 						}
 						return XmlSchemaInference.DateTime(s, flag3, flag4);
-						IL_0AF0:
+						IL_0AD8:
 						num++;
 						if (num == s.Length)
 						{
@@ -2060,7 +2064,7 @@ namespace System.Xml.Schema
 						{
 							return 262144;
 						}
-						IL_0B80:
+						IL_0B68:
 						num++;
 						if (num == s.Length)
 						{
@@ -2090,7 +2094,7 @@ namespace System.Xml.Schema
 							return 393216;
 						}
 						return XmlSchemaInference.DateTime(s, flag3, flag4);
-						IL_0CA4:
+						IL_0C8C:
 						num++;
 						if (num == s.Length)
 						{
@@ -2141,12 +2145,12 @@ namespace System.Xml.Schema
 						{
 							return XmlSchemaInference.DateTime(s, flag3, flag4);
 						}
-						c = s[num];
-						switch (c)
+						c2 = s[num];
+						switch (c2)
 						{
 						case '+':
 						case '-':
-							goto IL_0AF0;
+							goto IL_0AD8;
 						case ',':
 							break;
 						case '.':
@@ -2166,17 +2170,17 @@ namespace System.Xml.Schema
 								{
 									break;
 								}
-								c = s[num];
-								if (c <= '-')
+								c2 = s[num];
+								if (c2 <= '-')
 								{
-									if (c == '+' || c == '-')
+									if (c2 == '+' || c2 == '-')
 									{
-										goto IL_0AF0;
+										goto IL_0AD8;
 									}
 								}
-								else if (c == 'Z' || c == 'z')
+								else if (c2 == 'Z' || c2 == 'z')
 								{
-									goto IL_0AC4;
+									goto IL_0AAC;
 								}
 								if (s[num] < '0' || s[num] > '9')
 								{
@@ -2185,9 +2189,9 @@ namespace System.Xml.Schema
 							}
 							return XmlSchemaInference.DateTime(s, flag3, flag4);
 						default:
-							if (c == 'Z' || c == 'z')
+							if (c2 == 'Z' || c2 == 'z')
 							{
-								goto IL_0AC4;
+								goto IL_0AAC;
 							}
 							break;
 						}
@@ -2217,8 +2221,7 @@ namespace System.Xml.Schema
 			{
 				return 262144;
 			}
-			c = s[num];
-			if (c != 'T')
+			if (s[num] != 'T')
 			{
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2231,18 +2234,18 @@ namespace System.Xml.Schema
 					{
 						break;
 					}
-					c = s[num];
-					if (c == 'D')
+					char c2 = s[num];
+					if (c2 == 'D')
 					{
-						goto IL_04CD;
+						goto IL_04BD;
 					}
-					if (c == 'M')
+					if (c2 == 'M')
 					{
-						goto IL_043F;
+						goto IL_0437;
 					}
-					if (c == 'Y')
+					if (c2 == 'Y')
 					{
-						goto IL_03A8;
+						goto IL_03A4;
 					}
 					if (s[num] < '0' || s[num] > '9')
 					{
@@ -2250,17 +2253,16 @@ namespace System.Xml.Schema
 					}
 				}
 				return 262144;
-				IL_03A8:
+				IL_03A4:
 				num++;
 				if (num == s.Length)
 				{
 					bNeedsRangeCheck = true;
 					return 270336;
 				}
-				c = s[num];
-				if (c == 'T')
+				if (s[num] == 'T')
 				{
-					goto IL_04FC;
+					goto IL_04E8;
 				}
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2273,14 +2275,14 @@ namespace System.Xml.Schema
 					{
 						break;
 					}
-					c = s[num];
-					if (c == 'D')
+					char c2 = s[num];
+					if (c2 == 'D')
 					{
-						goto IL_04CD;
+						goto IL_04BD;
 					}
-					if (c == 'M')
+					if (c2 == 'M')
 					{
-						goto IL_043F;
+						goto IL_0437;
 					}
 					if (s[num] < '0' || s[num] > '9')
 					{
@@ -2288,17 +2290,16 @@ namespace System.Xml.Schema
 					}
 				}
 				return 262144;
-				IL_043F:
+				IL_0437:
 				num++;
 				if (num == s.Length)
 				{
 					bNeedsRangeCheck = true;
 					return 270336;
 				}
-				c = s[num];
-				if (c == 'T')
+				if (s[num] == 'T')
 				{
-					goto IL_04FC;
+					goto IL_04E8;
 				}
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2311,10 +2312,9 @@ namespace System.Xml.Schema
 					{
 						break;
 					}
-					c = s[num];
-					if (c == 'D')
+					if (s[num] == 'D')
 					{
-						goto IL_04CD;
+						goto IL_04BD;
 					}
 					if (s[num] < '0' || s[num] > '9')
 					{
@@ -2322,20 +2322,19 @@ namespace System.Xml.Schema
 					}
 				}
 				return 262144;
-				IL_04CD:
+				IL_04BD:
 				num++;
 				if (num == s.Length)
 				{
 					bNeedsRangeCheck = true;
 					return 270336;
 				}
-				c = s[num];
-				if (c != 'T')
+				if (s[num] != 'T')
 				{
 					return 262144;
 				}
 			}
-			IL_04FC:
+			IL_04E8:
 			num++;
 			if (num == s.Length)
 			{
@@ -2352,27 +2351,27 @@ namespace System.Xml.Schema
 				{
 					break;
 				}
-				c = s[num];
-				if (c <= 'H')
+				char c2 = s[num];
+				if (c2 <= 'H')
 				{
-					if (c == '.')
+					if (c2 == '.')
 					{
-						goto IL_06A8;
+						goto IL_0694;
 					}
-					if (c == 'H')
+					if (c2 == 'H')
 					{
-						goto IL_0597;
+						goto IL_0583;
 					}
 				}
 				else
 				{
-					if (c == 'M')
+					if (c2 == 'M')
 					{
-						goto IL_0624;
+						goto IL_0610;
 					}
-					if (c == 'S')
+					if (c2 == 'S')
 					{
-						goto IL_0723;
+						goto IL_070B;
 					}
 				}
 				if (s[num] < '0' || s[num] > '9')
@@ -2381,7 +2380,7 @@ namespace System.Xml.Schema
 				}
 			}
 			return 262144;
-			IL_0597:
+			IL_0583:
 			num++;
 			if (num == s.Length)
 			{
@@ -2399,18 +2398,18 @@ namespace System.Xml.Schema
 				{
 					break;
 				}
-				c = s[num];
-				if (c == '.')
+				char c2 = s[num];
+				if (c2 == '.')
 				{
-					goto IL_06A8;
+					goto IL_0694;
 				}
-				if (c == 'M')
+				if (c2 == 'M')
 				{
-					goto IL_0624;
+					goto IL_0610;
 				}
-				if (c == 'S')
+				if (c2 == 'S')
 				{
-					goto IL_0723;
+					goto IL_070B;
 				}
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2418,7 +2417,7 @@ namespace System.Xml.Schema
 				}
 			}
 			return 262144;
-			IL_0624:
+			IL_0610:
 			num++;
 			if (num == s.Length)
 			{
@@ -2436,14 +2435,14 @@ namespace System.Xml.Schema
 				{
 					break;
 				}
-				c = s[num];
-				if (c == '.')
+				char c2 = s[num];
+				if (c2 == '.')
 				{
-					goto IL_06A8;
+					goto IL_0694;
 				}
-				if (c == 'S')
+				if (c2 == 'S')
 				{
-					goto IL_0723;
+					goto IL_070B;
 				}
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2451,7 +2450,7 @@ namespace System.Xml.Schema
 				}
 			}
 			return 262144;
-			IL_06A8:
+			IL_0694:
 			num++;
 			if (num == s.Length)
 			{
@@ -2469,10 +2468,9 @@ namespace System.Xml.Schema
 				{
 					break;
 				}
-				c = s[num];
-				if (c == 'S')
+				if (s[num] == 'S')
 				{
-					goto IL_0723;
+					goto IL_070B;
 				}
 				if (s[num] < '0' || s[num] > '9')
 				{
@@ -2480,7 +2478,7 @@ namespace System.Xml.Schema
 				}
 			}
 			return 262144;
-			IL_0723:
+			IL_070B:
 			num++;
 			if (num == s.Length)
 			{

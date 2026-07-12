@@ -7,7 +7,7 @@ namespace FMOD
 	{
 		public static RESULT System_Create(out FMOD.System system)
 		{
-			return Factory.FMOD5_System_Create(out system.handle, 131591U);
+			return Factory.FMOD5_System_Create(out system.handle, 131619U);
 		}
 
 		[DllImport("fmodstudio")]

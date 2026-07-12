@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security;
+using Internal.Runtime.Augments;
+using Internal.Threading.Tasks.Tracing;
 
 namespace System.Threading.Tasks
 {
@@ -8,30 +9,27 @@ namespace System.Threading.Tasks
 	{
 		internal ThreadPoolTaskScheduler()
 		{
-			int id = base.Id;
 		}
 
-		private static void LongRunningThreadWork(object obj)
-		{
-			(obj as Task).ExecuteEntry(false);
-		}
-
-		[SecurityCritical]
 		protected internal override void QueueTask(Task task)
 		{
+			if (TaskTrace.Enabled)
+			{
+				Task internalCurrent = Task.InternalCurrent;
+				Task parent = task.m_parent;
+				TaskTrace.TaskScheduled(base.Id, (internalCurrent == null) ? 0 : internalCurrent.Id, task.Id, (parent == null) ? 0 : parent.Id, (int)task.Options);
+			}
 			if ((task.Options & TaskCreationOptions.LongRunning) != TaskCreationOptions.None)
 			{
-				new Thread(ThreadPoolTaskScheduler.s_longRunningThreadWork)
-				{
-					IsBackground = true
-				}.Start(task);
+				RuntimeThread runtimeThread = RuntimeThread.Create(ThreadPoolTaskScheduler.s_longRunningThreadWork, 0);
+				runtimeThread.IsBackground = true;
+				runtimeThread.Start(task);
 				return;
 			}
 			bool flag = (task.Options & TaskCreationOptions.PreferFairness) > TaskCreationOptions.None;
 			ThreadPool.UnsafeQueueCustomWorkItem(task, flag);
 		}
 
-		[SecurityCritical]
 		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
 		{
 			if (taskWasPreviouslyQueued && !ThreadPool.TryPopCustomWorkItem(task))
@@ -53,13 +51,11 @@ namespace System.Threading.Tasks
 			return flag;
 		}
 
-		[SecurityCritical]
 		protected internal override bool TryDequeue(Task task)
 		{
 			return ThreadPool.TryPopCustomWorkItem(task);
 		}
 
-		[SecurityCritical]
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
 			return this.FilterTasksFromWorkItems(ThreadPool.GetQueuedWorkItems());
@@ -92,6 +88,9 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		private static readonly ParameterizedThreadStart s_longRunningThreadWork = new ParameterizedThreadStart(ThreadPoolTaskScheduler.LongRunningThreadWork);
+		private static readonly ParameterizedThreadStart s_longRunningThreadWork = delegate(object s)
+		{
+			((Task)s).ExecuteEntry(false);
+		};
 	}
 }

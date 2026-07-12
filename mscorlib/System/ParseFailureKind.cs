@@ -8,6 +8,9 @@ namespace System
 		ArgumentNull,
 		Format,
 		FormatWithParameter,
+		FormatWithOriginalDateTime,
+		FormatWithFormatSpecifier,
+		FormatWithOriginalDateTimeAndParameter,
 		FormatBadDateTimeCalendar
 	}
 }

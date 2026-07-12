@@ -12,25 +12,13 @@ namespace System.ComponentModel
 
 		public DataObjectMethodAttribute(DataObjectMethodType methodType, bool isDefault)
 		{
-			this._methodType = methodType;
-			this._isDefault = isDefault;
+			this.MethodType = methodType;
+			this.IsDefault = isDefault;
 		}
 
-		public bool IsDefault
-		{
-			get
-			{
-				return this._isDefault;
-			}
-		}
+		public bool IsDefault { get; }
 
-		public DataObjectMethodType MethodType
-		{
-			get
-			{
-				return this._methodType;
-			}
-		}
+		public DataObjectMethodType MethodType { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -44,8 +32,7 @@ namespace System.ComponentModel
 
 		public override int GetHashCode()
 		{
-			int methodType = (int)this._methodType;
-			return methodType.GetHashCode() ^ this._isDefault.GetHashCode();
+			return ((int)this.MethodType).GetHashCode() ^ this.IsDefault.GetHashCode();
 		}
 
 		public override bool Match(object obj)
@@ -57,9 +44,5 @@ namespace System.ComponentModel
 			DataObjectMethodAttribute dataObjectMethodAttribute = obj as DataObjectMethodAttribute;
 			return dataObjectMethodAttribute != null && dataObjectMethodAttribute.MethodType == this.MethodType;
 		}
-
-		private bool _isDefault;
-
-		private DataObjectMethodType _methodType;
 	}
 }

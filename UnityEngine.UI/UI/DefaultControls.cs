@@ -29,7 +29,10 @@ namespace UnityEngine.UI
 		private static void SetDefaultTextValues(Text lbl)
 		{
 			lbl.color = DefaultControls.s_TextColor;
-			lbl.AssignDefaultFont();
+			if (lbl.font == null)
+			{
+				lbl.AssignDefaultFont();
+			}
 		}
 
 		private static void SetDefaultColorTransitionValues(Selectable slider)
@@ -77,12 +80,12 @@ namespace UnityEngine.UI
 
 		public static GameObject CreateButton(DefaultControls.Resources resources)
 		{
-			GameObject gameObject = DefaultControls.CreateUIElementRoot("Button", DefaultControls.s_ThickElementSize, new Type[]
+			GameObject gameObject = DefaultControls.CreateUIElementRoot("Button (Legacy)", DefaultControls.s_ThickElementSize, new Type[]
 			{
 				typeof(Image),
 				typeof(Button)
 			});
-			GameObject gameObject2 = DefaultControls.CreateUIObject("Text", gameObject, new Type[] { typeof(Text) });
+			GameObject gameObject2 = DefaultControls.CreateUIObject("Text (Legacy)", gameObject, new Type[] { typeof(Text) });
 			Image component = gameObject.GetComponent<Image>();
 			component.sprite = resources.standard;
 			component.type = Image.Type.Sliced;
@@ -101,7 +104,7 @@ namespace UnityEngine.UI
 
 		public static GameObject CreateText(DefaultControls.Resources resources)
 		{
-			GameObject gameObject = DefaultControls.CreateUIElementRoot("Text", DefaultControls.s_ThickElementSize, new Type[] { typeof(Text) });
+			GameObject gameObject = DefaultControls.CreateUIElementRoot("Text (Legacy)", DefaultControls.s_ThickElementSize, new Type[] { typeof(Text) });
 			Text component = gameObject.GetComponent<Text>();
 			component.text = "New Text";
 			DefaultControls.SetDefaultTextValues(component);
@@ -231,13 +234,13 @@ namespace UnityEngine.UI
 
 		public static GameObject CreateInputField(DefaultControls.Resources resources)
 		{
-			GameObject gameObject = DefaultControls.CreateUIElementRoot("InputField", DefaultControls.s_ThickElementSize, new Type[]
+			GameObject gameObject = DefaultControls.CreateUIElementRoot("InputField (Legacy)", DefaultControls.s_ThickElementSize, new Type[]
 			{
 				typeof(Image),
 				typeof(InputField)
 			});
 			GameObject gameObject2 = DefaultControls.CreateUIObject("Placeholder", gameObject, new Type[] { typeof(Text) });
-			GameObject gameObject3 = DefaultControls.CreateUIObject("Text", gameObject, new Type[] { typeof(Text) });
+			GameObject gameObject3 = DefaultControls.CreateUIObject("Text (Legacy)", gameObject, new Type[] { typeof(Text) });
 			Image component = gameObject.GetComponent<Image>();
 			component.sprite = resources.inputField;
 			component.type = Image.Type.Sliced;
@@ -273,7 +276,7 @@ namespace UnityEngine.UI
 
 		public static GameObject CreateDropdown(DefaultControls.Resources resources)
 		{
-			GameObject gameObject = DefaultControls.CreateUIElementRoot("Dropdown", DefaultControls.s_ThickElementSize, new Type[]
+			GameObject gameObject = DefaultControls.CreateUIElementRoot("Dropdown (Legacy)", DefaultControls.s_ThickElementSize, new Type[]
 			{
 				typeof(Image),
 				typeof(Dropdown)

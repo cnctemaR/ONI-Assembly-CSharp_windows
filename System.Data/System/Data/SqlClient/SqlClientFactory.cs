@@ -63,7 +63,7 @@ namespace System.Data.SqlClient
 
 		object IServiceProvider.GetService(Type serviceType)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 			return null;
 		}
 

@@ -23,12 +23,7 @@ namespace System.ComponentModel
 		}
 
 		public InvalidEnumArgumentException(string argumentName, int invalidValue, Type enumClass)
-			: base(global::SR.GetString("The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.", new object[]
-			{
-				argumentName,
-				invalidValue.ToString(CultureInfo.CurrentCulture),
-				enumClass.Name
-			}), argumentName)
+			: base(SR.Format("The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.", argumentName, invalidValue.ToString(CultureInfo.CurrentCulture), enumClass.Name), argumentName)
 		{
 		}
 

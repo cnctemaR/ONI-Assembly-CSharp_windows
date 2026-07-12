@@ -33,7 +33,8 @@ public class EspressoMachineConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 20f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
@@ -54,6 +55,15 @@ public class EspressoMachineConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Recommended;
+		component.prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		EspressoMachineWorkable component = go.GetComponent<EspressoMachineWorkable>();
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_espresso_machine_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_espresso_machine_kanim") });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/LightmapSettings.h")]
 	[StaticAccessor("GetLightmapSettings()")]
+	[NativeHeader("Runtime/Graphics/LightmapSettings.h")]
 	public sealed class LightmapSettings : Object
 	{
 		private LightmapSettings()
@@ -19,6 +19,7 @@ namespace UnityEngine
 			get;
 			[FreeFunction(ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[param: Unmarshalled]
 			set;
 		}
 
@@ -35,8 +36,8 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[NativeName("SetLightProbes")]
 			[FreeFunction]
+			[NativeName("SetLightProbes")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

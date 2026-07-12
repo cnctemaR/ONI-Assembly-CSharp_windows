@@ -242,11 +242,11 @@ namespace System.Net
 				{
 					if (this.m_index < 0 || this.m_index >= this.m_count)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException(SR.GetString("Enumeration has either not started or has already finished."));
 					}
 					if (this.m_version != this.m_cookies.m_version)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 					}
 					return this.m_cookies[this.m_index];
 				}
@@ -256,7 +256,7 @@ namespace System.Net
 			{
 				if (this.m_version != this.m_cookies.m_version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 				}
 				int num = this.m_index + 1;
 				this.m_index = num;

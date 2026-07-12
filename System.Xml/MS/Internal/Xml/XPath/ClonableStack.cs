@@ -9,11 +9,6 @@ namespace MS.Internal.Xml.XPath
 		{
 		}
 
-		public ClonableStack(int capacity)
-			: base(capacity)
-		{
-		}
-
 		private ClonableStack(IEnumerable<T> collection)
 			: base(collection)
 		{

@@ -16,17 +16,17 @@ namespace FMOD
 
 		public int numoutputbuffers;
 
-		public DSP_CREATECALLBACK create;
+		public DSP_CREATE_CALLBACK create;
 
-		public DSP_RELEASECALLBACK release;
+		public DSP_RELEASE_CALLBACK release;
 
-		public DSP_RESETCALLBACK reset;
+		public DSP_RESET_CALLBACK reset;
 
-		public DSP_READCALLBACK read;
+		public DSP_READ_CALLBACK read;
 
 		public DSP_PROCESS_CALLBACK process;
 
-		public DSP_SETPOSITIONCALLBACK setposition;
+		public DSP_SETPOSITION_CALLBACK setposition;
 
 		public int numparameters;
 

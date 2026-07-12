@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Sql;
 using System.Data.SqlTypes;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Text;
@@ -598,7 +599,12 @@ namespace System.Data.SqlClient
 			return rowsAffected;
 		}
 
-		private IAsyncResult BeginExecuteNonQuery(AsyncCallback callback, object stateObject)
+		public IAsyncResult BeginExecuteNonQuery()
+		{
+			return this.BeginExecuteNonQuery(null, null);
+		}
+
+		public IAsyncResult BeginExecuteNonQuery(AsyncCallback callback, object stateObject)
 		{
 			this._pendingCancel = false;
 			this.ValidateAsyncCommand();
@@ -719,7 +725,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		private int EndExecuteNonQuery(IAsyncResult asyncResult)
+		public int EndExecuteNonQuery(IAsyncResult asyncResult)
 		{
 			Exception exception = ((Task)asyncResult).Exception;
 			if (exception != null)
@@ -818,7 +824,7 @@ namespace System.Data.SqlClient
 			this.ValidateCommand(flag, methodName);
 			this.CheckNotificationStateAndAutoEnlist();
 			Task task = null;
-			if (CommandType.Text == this.CommandType && this.GetParameterCount(this._parameters) == 0)
+			if (!this.BatchRPCMode && CommandType.Text == this.CommandType && this.GetParameterCount(this._parameters) == 0)
 			{
 				if (statistics != null)
 				{
@@ -886,7 +892,12 @@ namespace System.Data.SqlClient
 			return xmlReader;
 		}
 
-		private IAsyncResult BeginExecuteXmlReader(AsyncCallback callback, object stateObject)
+		public IAsyncResult BeginExecuteXmlReader()
+		{
+			return this.BeginExecuteXmlReader(null, null);
+		}
+
+		public IAsyncResult BeginExecuteXmlReader(AsyncCallback callback, object stateObject)
 		{
 			this._pendingCancel = false;
 			this.ValidateAsyncCommand();
@@ -955,7 +966,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		private XmlReader EndExecuteXmlReader(IAsyncResult asyncResult)
+		public XmlReader EndExecuteXmlReader(IAsyncResult asyncResult)
 		{
 			Exception exception = ((Task)asyncResult).Exception;
 			if (exception != null)
@@ -1078,7 +1089,7 @@ namespace System.Data.SqlClient
 			return sqlDataReader;
 		}
 
-		internal SqlDataReader EndExecuteReader(IAsyncResult asyncResult)
+		public SqlDataReader EndExecuteReader(IAsyncResult asyncResult)
 		{
 			Exception exception = ((Task)asyncResult).Exception;
 			if (exception != null)
@@ -1641,32 +1652,62 @@ namespace System.Data.SqlClient
 							sqlParameter.ScaleInternal = (byte)((short)sqlDataReader[array2[6]] & 255);
 							sqlParameter.PrecisionInternal = (byte)((short)sqlDataReader[array2[5]] & 255);
 						}
+						if (SqlDbType.Udt == sqlParameter.SqlDbType)
+						{
+							string text;
+							if (flag)
+							{
+								text = (string)sqlDataReader[array2[9]];
+							}
+							else
+							{
+								text = (string)sqlDataReader[array2[13]];
+							}
+							SqlParameter sqlParameter2 = sqlParameter;
+							string[] array3 = new string[5];
+							int num2 = 0;
+							object obj3 = sqlDataReader[array2[7]];
+							array3[num2] = ((obj3 != null) ? obj3.ToString() : null);
+							array3[1] = ".";
+							int num3 = 2;
+							object obj4 = sqlDataReader[array2[8]];
+							array3[num3] = ((obj4 != null) ? obj4.ToString() : null);
+							array3[3] = ".";
+							array3[4] = text;
+							sqlParameter2.UdtTypeName = string.Concat(array3);
+						}
 						if (SqlDbType.Structured == sqlParameter.SqlDbType)
 						{
-							sqlParameter.TypeName = string.Concat(new object[]
-							{
-								sqlDataReader[array2[7]],
-								".",
-								sqlDataReader[array2[8]],
-								".",
-								sqlDataReader[array2[9]]
-							});
+							SqlParameter sqlParameter3 = sqlParameter;
+							string[] array4 = new string[5];
+							int num4 = 0;
+							object obj5 = sqlDataReader[array2[7]];
+							array4[num4] = ((obj5 != null) ? obj5.ToString() : null);
+							array4[1] = ".";
+							int num5 = 2;
+							object obj6 = sqlDataReader[array2[8]];
+							array4[num5] = ((obj6 != null) ? obj6.ToString() : null);
+							array4[3] = ".";
+							int num6 = 4;
+							object obj7 = sqlDataReader[array2[9]];
+							array4[num6] = ((obj7 != null) ? obj7.ToString() : null);
+							sqlParameter3.TypeName = string.Concat(array4);
 						}
 						if (SqlDbType.Xml == sqlParameter.SqlDbType)
 						{
-							object obj3 = sqlDataReader[array2[10]];
-							sqlParameter.XmlSchemaCollectionDatabase = (ADP.IsNull(obj3) ? string.Empty : ((string)obj3));
-							obj3 = sqlDataReader[array2[11]];
-							sqlParameter.XmlSchemaCollectionOwningSchema = (ADP.IsNull(obj3) ? string.Empty : ((string)obj3));
-							obj3 = sqlDataReader[array2[12]];
-							sqlParameter.XmlSchemaCollectionName = (ADP.IsNull(obj3) ? string.Empty : ((string)obj3));
+							object obj8 = sqlDataReader[array2[10]];
+							sqlParameter.XmlSchemaCollectionDatabase = (ADP.IsNull(obj8) ? string.Empty : ((string)obj8));
+							obj8 = sqlDataReader[array2[11]];
+							sqlParameter.XmlSchemaCollectionOwningSchema = (ADP.IsNull(obj8) ? string.Empty : ((string)obj8));
+							obj8 = sqlDataReader[array2[12]];
+							sqlParameter.XmlSchemaCollectionName = (ADP.IsNull(obj8) ? string.Empty : ((string)obj8));
 						}
 						if (MetaType._IsVarTime(sqlParameter.SqlDbType))
 						{
-							object obj4 = sqlDataReader[array2[14]];
-							if (obj4 is int)
+							object obj9 = sqlDataReader[array2[14]];
+							if (obj9 is int)
 							{
-								sqlParameter.ScaleInternal = (byte)((int)obj4 & 255);
+								sqlParameter.ScaleInternal = (byte)((int)obj9 & 255);
 							}
 						}
 						list.Add(sqlParameter);
@@ -1693,9 +1734,9 @@ namespace System.Data.SqlClient
 					throw ADP.NoStoredProcedureExists(this.CommandText);
 				}
 				this.Parameters.Clear();
-				foreach (SqlParameter sqlParameter2 in list)
+				foreach (SqlParameter sqlParameter4 in list)
 				{
-					this._parameters.Add(sqlParameter2);
+					this._parameters.Add(sqlParameter4);
 				}
 				return;
 			}
@@ -1935,7 +1976,11 @@ namespace System.Data.SqlClient
 				}
 				this.GetStateObject(null);
 				Task task3;
-				if (CommandType.Text == this.CommandType && this.GetParameterCount(this._parameters) == 0)
+				if (this.BatchRPCMode)
+				{
+					task3 = this._stateObj.Parser.TdsExecuteRPC(this._SqlRPCBatchArray, timeout, flag, this.Notification, this._stateObj, CommandType.StoredProcedure == this.CommandType, !asyncWrite, null, 0, 0);
+				}
+				else if (CommandType.Text == this.CommandType && this.GetParameterCount(this._parameters) == 0)
 				{
 					string text = this.GetCommandText(cmdBehavior) + this.GetResetOptionsString(cmdBehavior);
 					task3 = this._stateObj.Parser.TdsExecuteSQLBatch(text, timeout, this.Notification, this._stateObj, !asyncWrite, false);
@@ -2298,7 +2343,7 @@ namespace System.Data.SqlClient
 			}
 		}
 
-		internal void OnReturnValue(SqlReturnValue rec)
+		internal void OnReturnValue(SqlReturnValue rec, TdsParserStateObject stateObj)
 		{
 			if (this._inPrepare)
 			{
@@ -2315,6 +2360,32 @@ namespace System.Data.SqlClient
 			if (parameterForOutputValueExtraction != null)
 			{
 				object value = parameterForOutputValueExtraction.Value;
+				if (SqlDbType.Udt == parameterForOutputValueExtraction.SqlDbType)
+				{
+					try
+					{
+						this.Connection.CheckGetExtendedUDTInfo(rec, true);
+						object obj;
+						if (rec.value.IsNull)
+						{
+							obj = DBNull.Value;
+						}
+						else
+						{
+							obj = rec.value.ByteArray;
+						}
+						parameterForOutputValueExtraction.Value = this.Connection.GetUdtValue(obj, rec, false);
+					}
+					catch (FileNotFoundException ex)
+					{
+						parameterForOutputValueExtraction.SetUdtLoadError(ex);
+					}
+					catch (FileLoadException ex2)
+					{
+						parameterForOutputValueExtraction.SetUdtLoadError(ex2);
+					}
+					return;
+				}
 				parameterForOutputValueExtraction.SetSqlBuffer(rec.value);
 				MetaType metaTypeFromSqlDbType = MetaType.GetMetaTypeFromSqlDbType(rec.type, false);
 				if (rec.type == SqlDbType.Decimal)
@@ -2586,16 +2657,21 @@ namespace System.Data.SqlClient
 					stringBuilder.Append(" ");
 					if (metaType.SqlDbType == SqlDbType.Udt)
 					{
-						throw ADP.DbTypeNotSupported(SqlDbType.Udt.ToString());
+						string udtTypeName = sqlParameter.UdtTypeName;
+						if (string.IsNullOrEmpty(udtTypeName))
+						{
+							throw SQL.MustSetUdtTypeNameForUdtParams();
+						}
+						stringBuilder.Append(this.ParseAndQuoteIdentifier(udtTypeName, true));
 					}
-					if (metaType.SqlDbType == SqlDbType.Structured)
+					else if (metaType.SqlDbType == SqlDbType.Structured)
 					{
 						string typeName = sqlParameter.TypeName;
 						if (string.IsNullOrEmpty(typeName))
 						{
 							throw SQL.MustSetTypeNameForParam(metaType.TypeName, sqlParameter.ParameterNameFixed);
 						}
-						stringBuilder.Append(this.ParseAndQuoteIdentifier(typeName));
+						stringBuilder.Append(this.ParseAndQuoteIdentifier(typeName, false));
 						stringBuilder.Append(" READONLY");
 					}
 					else
@@ -2678,9 +2754,9 @@ namespace System.Data.SqlClient
 			return stringBuilder.ToString();
 		}
 
-		private string ParseAndQuoteIdentifier(string identifier)
+		private string ParseAndQuoteIdentifier(string identifier, bool isUdtTypeName)
 		{
-			string[] array = SqlParameter.ParseTypeName(identifier);
+			string[] array = SqlParameter.ParseTypeName(identifier, isUdtTypeName);
 			StringBuilder stringBuilder = new StringBuilder();
 			for (int i = 0; i < array.Length; i++)
 			{
@@ -2947,18 +3023,6 @@ namespace System.Data.SqlClient
 		}
 
 		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public IAsyncResult BeginExecuteNonQuery()
-		{
-			return this.BeginExecuteNonQuery(null, null);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public IAsyncResult BeginExecuteXmlReader()
-		{
-			return this.BeginExecuteXmlReader(null, null);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public IAsyncResult BeginExecuteReader()
 		{
 			return this.BeginExecuteReader(CommandBehavior.Default, null, null);
@@ -3009,14 +3073,14 @@ namespace System.Data.SqlClient
 
 		public SqlCommand(string cmdText, SqlConnection connection, SqlTransaction transaction, SqlCommandColumnEncryptionSetting columnEncryptionSetting)
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		public SqlCommandColumnEncryptionSetting ColumnEncryptionSetting
 		{
 			get
 			{
-				ThrowStub.ThrowNotSupportedException();
+				global::Unity.ThrowStub.ThrowNotSupportedException();
 				return SqlCommandColumnEncryptionSetting.UseConnectionSetting;
 			}
 		}

@@ -9,7 +9,15 @@ public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingSta
 	{
 		default_state = this.eating;
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
-		this.eating.ToggleStatusItem(CREATURES.STATUSITEMS.HIVE_DIGESTING.NAME, CREATURES.STATUSITEMS.HIVE_DIGESTING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).DefaultState(this.eating.pre).Enter(delegate(HiveEatingStates.Instance smi)
+		GameStateMachine<HiveEatingStates, HiveEatingStates.Instance, IStateMachineTarget, HiveEatingStates.Def>.State state = this.eating;
+		string text = CREATURES.STATUSITEMS.HIVE_DIGESTING.NAME;
+		string text2 = CREATURES.STATUSITEMS.HIVE_DIGESTING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).DefaultState(this.eating.pre).Enter(delegate(HiveEatingStates.Instance smi)
 		{
 			smi.TurnOn();
 		})

@@ -13,12 +13,12 @@ namespace MS.Internal.Xml.XPath
 		private AttributeQuery(AttributeQuery other)
 			: base(other)
 		{
-			this.onAttribute = other.onAttribute;
+			this._onAttribute = other._onAttribute;
 		}
 
 		public override void Reset()
 		{
-			this.onAttribute = false;
+			this._onAttribute = false;
 			base.Reset();
 		}
 
@@ -26,7 +26,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			for (;;)
 			{
-				if (!this.onAttribute)
+				if (!this._onAttribute)
 				{
 					this.currentNode = this.qyInput.Advance();
 					if (this.currentNode == null)
@@ -35,13 +35,13 @@ namespace MS.Internal.Xml.XPath
 					}
 					this.position = 0;
 					this.currentNode = this.currentNode.Clone();
-					this.onAttribute = this.currentNode.MoveToFirstAttribute();
+					this._onAttribute = this.currentNode.MoveToFirstAttribute();
 				}
 				else
 				{
-					this.onAttribute = this.currentNode.MoveToNextAttribute();
+					this._onAttribute = this.currentNode.MoveToNextAttribute();
 				}
-				if (this.onAttribute && this.matches(this.currentNode))
+				if (this._onAttribute && this.matches(this.currentNode))
 				{
 					goto Block_3;
 				}
@@ -70,6 +70,6 @@ namespace MS.Internal.Xml.XPath
 			return new AttributeQuery(this);
 		}
 
-		private bool onAttribute;
+		private bool _onAttribute;
 	}
 }

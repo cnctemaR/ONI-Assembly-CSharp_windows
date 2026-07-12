@@ -228,7 +228,7 @@ namespace System.Resources
 			try
 			{
 				string tempFileName = Path.GetTempFileName();
-				File.SetAttributes(tempFileName, FileAttributes.NotContentIndexed | FileAttributes.Temporary);
+				File.SetAttributes(tempFileName, FileAttributes.Temporary | FileAttributes.NotContentIndexed);
 				stream = new FileStream(tempFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.Read, 4096, FileOptions.DeleteOnClose | FileOptions.SequentialScan);
 			}
 			catch (UnauthorizedAccessException)

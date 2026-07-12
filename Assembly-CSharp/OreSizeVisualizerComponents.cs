@@ -10,6 +10,18 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		return handle;
 	}
 
+	public static HashedString GetAnimForMass(float mass)
+	{
+		for (int i = 0; i < OreSizeVisualizerComponents.MassTiers.Length; i++)
+		{
+			if (mass <= OreSizeVisualizerComponents.MassTiers[i].massRequired)
+			{
+				return OreSizeVisualizerComponents.MassTiers[i].animName;
+			}
+		}
+		return HashedString.Invalid;
+	}
+
 	protected override void OnPrefabInit(HandleVector<int>.Handle handle)
 	{
 		Action<object> action = delegate(object ev_data)

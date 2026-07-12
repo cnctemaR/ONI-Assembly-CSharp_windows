@@ -27,7 +27,7 @@ namespace System.Net.Sockets
 		protected override bool ReleaseHandle()
 		{
 			int num = 0;
-			Socket.Blocking_internal(this.handle, false, out num);
+			Socket.Blocking_icall(this.handle, false, out num);
 			if (this.blocking_threads != null)
 			{
 				List<Thread> list = this.blocking_threads;
@@ -68,7 +68,7 @@ namespace System.Net.Sockets
 					}
 				}
 			}
-			Socket.Close_internal(this.handle, out num);
+			Socket.Close_icall(this.handle, out num);
 			return num == 0;
 		}
 

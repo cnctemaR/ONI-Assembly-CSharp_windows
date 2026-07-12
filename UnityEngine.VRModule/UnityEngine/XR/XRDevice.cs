@@ -18,7 +18,7 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceSwapChain()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DeviceRefreshRate")]
 		public static extern float refreshRate
 		{
@@ -54,8 +54,8 @@ namespace UnityEngine.XR
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[NativeName("SetProjectionZoomFactor")]
 			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+			[NativeName("SetProjectionZoomFactor")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -71,12 +71,6 @@ namespace UnityEngine.XR
 			{
 				XRDevice.deviceLoaded(loadedDeviceName);
 			}
-		}
-
-		// Note: this type is marked as 'beforefieldinit'.
-		static XRDevice()
-		{
-			XRDevice.deviceLoaded = null;
 		}
 	}
 }

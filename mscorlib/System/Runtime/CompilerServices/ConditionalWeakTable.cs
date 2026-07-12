@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading;
 
 namespace System.Runtime.CompilerServices
 {
-	public sealed class ConditionalWeakTable<TKey, TValue> where TKey : class where TValue : class
+	public sealed class ConditionalWeakTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable where TKey : class where TValue : class
 	{
 		public ConditionalWeakTable()
 		{
@@ -114,6 +115,58 @@ namespace System.Runtime.CompilerServices
 			this.data = array;
 		}
 
+		public void AddOrUpdate(TKey key, TValue value)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("Null key", "key");
+			}
+			object @lock = this._lock;
+			lock (@lock)
+			{
+				if ((float)this.size >= (float)this.data.Length * 0.7f)
+				{
+					this.Rehash();
+				}
+				int num = this.data.Length;
+				int num2 = -1;
+				int num4;
+				int num3 = (num4 = (RuntimeHelpers.GetHashCode(key) & int.MaxValue) % num);
+				for (;;)
+				{
+					object key2 = this.data[num4].key;
+					if (key2 == null)
+					{
+						break;
+					}
+					if (key2 == GC.EPHEMERON_TOMBSTONE && num2 == -1)
+					{
+						num2 = num4;
+					}
+					else if (key2 == key)
+					{
+						num2 = num4;
+					}
+					if (++num4 == num)
+					{
+						num4 = 0;
+					}
+					if (num4 == num3)
+					{
+						goto IL_00BA;
+					}
+				}
+				if (num2 == -1)
+				{
+					num2 = num4;
+				}
+				IL_00BA:
+				this.data[num2].key = key;
+				this.data[num2].value = value;
+				this.size++;
+			}
+		}
+
 		public void Add(TKey key, TValue value)
 		{
 			if (key == null)
@@ -204,7 +257,6 @@ namespace System.Runtime.CompilerServices
 				}
 				this.data[num3].key = GC.EPHEMERON_TOMBSTONE;
 				this.data[num3].value = null;
-				this.size--;
 				return true;
 				Block_5:
 				Block_7:;
@@ -278,8 +330,6 @@ namespace System.Runtime.CompilerServices
 			return tvalue;
 		}
 
-		[FriendAccessAllowed]
-		[SecuritySafeCritical]
 		internal TKey FindEquivalentKeyUnsafe(TKey key, out TValue value)
 		{
 			object @lock = this._lock;
@@ -300,14 +350,14 @@ namespace System.Runtime.CompilerServices
 		}
 
 		[SecuritySafeCritical]
-		internal void Clear()
+		public void Clear()
 		{
 			object @lock = this._lock;
 			lock (@lock)
 			{
 				for (int i = 0; i < this.data.Length; i++)
 				{
-					this.data[i].key = GC.EPHEMERON_TOMBSTONE;
+					this.data[i].key = null;
 					this.data[i].value = null;
 				}
 				this.size = 0;
@@ -360,6 +410,32 @@ namespace System.Runtime.CompilerServices
 			}
 		}
 
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+		{
+			object @lock = this._lock;
+			IEnumerator<KeyValuePair<TKey, TValue>> enumerator;
+			lock (@lock)
+			{
+				IEnumerator<KeyValuePair<TKey, TValue>> enumerator2;
+				if (this.size != 0)
+				{
+					enumerator = new ConditionalWeakTable<TKey, TValue>.Enumerator(this);
+					enumerator2 = enumerator;
+				}
+				else
+				{
+					enumerator2 = ((IEnumerable<KeyValuePair<TKey, TValue>>)Array.Empty<KeyValuePair<TKey, TValue>>()).GetEnumerator();
+				}
+				enumerator = enumerator2;
+			}
+			return enumerator;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<KeyValuePair<TKey, TValue>>)this).GetEnumerator();
+		}
+
 		private const int INITIAL_SIZE = 13;
 
 		private const float LOAD_FACTOR = 0.7f;
@@ -375,5 +451,83 @@ namespace System.Runtime.CompilerServices
 		private int size;
 
 		public delegate TValue CreateValueCallback(TKey key);
+
+		private sealed class Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDisposable, IEnumerator
+		{
+			public Enumerator(ConditionalWeakTable<TKey, TValue> table)
+			{
+				this._table = table;
+				this._currentIndex = -1;
+			}
+
+			~Enumerator()
+			{
+				this.Dispose();
+			}
+
+			public void Dispose()
+			{
+				if (Interlocked.Exchange<ConditionalWeakTable<TKey, TValue>>(ref this._table, null) != null)
+				{
+					this._current = default(KeyValuePair<TKey, TValue>);
+					GC.SuppressFinalize(this);
+				}
+			}
+
+			public bool MoveNext()
+			{
+				ConditionalWeakTable<TKey, TValue> table = this._table;
+				if (table != null)
+				{
+					object @lock = table._lock;
+					lock (@lock)
+					{
+						object ephemeron_TOMBSTONE = GC.EPHEMERON_TOMBSTONE;
+						while (this._currentIndex < table.data.Length - 1)
+						{
+							this._currentIndex++;
+							Ephemeron ephemeron = table.data[this._currentIndex];
+							if (ephemeron.key != null && ephemeron.key != ephemeron_TOMBSTONE)
+							{
+								this._current = new KeyValuePair<TKey, TValue>((TKey)((object)ephemeron.key), (TValue)((object)ephemeron.value));
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+				return false;
+			}
+
+			public KeyValuePair<TKey, TValue> Current
+			{
+				get
+				{
+					if (this._currentIndex < 0)
+					{
+						ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen();
+					}
+					return this._current;
+				}
+			}
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					return this.Current;
+				}
+			}
+
+			public void Reset()
+			{
+			}
+
+			private ConditionalWeakTable<TKey, TValue> _table;
+
+			private int _currentIndex = -1;
+
+			private KeyValuePair<TKey, TValue> _current;
+		}
 	}
 }

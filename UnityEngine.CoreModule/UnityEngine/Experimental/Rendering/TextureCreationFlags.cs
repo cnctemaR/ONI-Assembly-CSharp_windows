@@ -7,6 +7,9 @@ namespace UnityEngine.Experimental.Rendering
 	{
 		None = 0,
 		MipChain = 1,
-		Crunch = 64
+		DontInitializePixels = 4,
+		Crunch = 64,
+		DontUploadUponCreate = 1024,
+		IgnoreMipmapLimit = 2048
 	}
 }

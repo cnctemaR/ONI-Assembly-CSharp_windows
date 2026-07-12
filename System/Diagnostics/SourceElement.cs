@@ -86,7 +86,7 @@ namespace System.Diagnostics
 			base.DeserializeElement(reader, serializeCollectionKey);
 			if (!string.IsNullOrEmpty(this.SwitchName) && !string.IsNullOrEmpty(this.SwitchValue))
 			{
-				throw new ConfigurationErrorsException(global::SR.GetString("'switchValue' and 'switchName' cannot both be specified on source '{0}'.", new object[] { this.Name }));
+				throw new ConfigurationErrorsException(SR.GetString("'switchValue' and 'switchName' cannot both be specified on source '{0}'.", new object[] { this.Name }));
 			}
 		}
 

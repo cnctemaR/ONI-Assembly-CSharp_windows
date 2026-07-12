@@ -91,7 +91,7 @@ public class Repairable : Workable
 		this.OnRefreshUserMenu(null);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		Operational component = base.GetComponent<Operational>();
@@ -103,7 +103,7 @@ public class Repairable : Workable
 		this.timeSpentRepairing = 0f;
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		float num = Mathf.Sqrt(base.GetComponent<PrimaryElement>().Mass);
 		float num2 = ((this.expectedRepairTime < 0f) ? num : this.expectedRepairTime) * 0.1f;
@@ -126,7 +126,7 @@ public class Repairable : Workable
 		return false;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		Operational component = base.GetComponent<Operational>();
@@ -136,7 +136,7 @@ public class Repairable : Workable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Operational component = base.GetComponent<Operational>();
 		if (component != null)
@@ -250,13 +250,17 @@ public class Repairable : Workable
 			{
 				base.smi.master.transform.GetComponent<Prioritizable>().RemoveRef();
 				List<GameObject> list = new List<GameObject>();
-				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true, list);
+				Storage storageProxy = base.smi.master.storageProxy;
+				bool flag = false;
+				bool flag2 = false;
+				List<GameObject> list2 = list;
+				storageProxy.DropAll(flag, flag2, default(Vector3), true, list2);
 				GameObject gameObject = base.smi.sm.worker.Get(base.smi);
 				if (gameObject != null)
 				{
 					foreach (GameObject gameObject2 in list)
 					{
-						gameObject2.Trigger(580035959, gameObject.GetComponent<Worker>());
+						gameObject2.Trigger(580035959, gameObject.GetComponent<WorkerBase>());
 					}
 				}
 				base.smi.sm.worker.Set(null, base.smi);

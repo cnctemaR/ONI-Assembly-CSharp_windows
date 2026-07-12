@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security;
 
 namespace System.Text
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class UTF7Encoding : Encoding
 	{
@@ -18,38 +15,38 @@ namespace System.Text
 		public UTF7Encoding(bool allowOptionals)
 			: base(65000)
 		{
-			this.m_allowOptionals = allowOptionals;
+			this._allowOptionals = allowOptionals;
 			this.MakeTables();
 		}
 
 		private void MakeTables()
 		{
-			this.base64Bytes = new byte[64];
+			this._base64Bytes = new byte[64];
 			for (int i = 0; i < 64; i++)
 			{
-				this.base64Bytes[i] = (byte)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i];
+				this._base64Bytes[i] = (byte)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i];
 			}
-			this.base64Values = new sbyte[128];
+			this._base64Values = new sbyte[128];
 			for (int j = 0; j < 128; j++)
 			{
-				this.base64Values[j] = -1;
+				this._base64Values[j] = -1;
 			}
 			for (int k = 0; k < 64; k++)
 			{
-				this.base64Values[(int)this.base64Bytes[k]] = (sbyte)k;
+				this._base64Values[(int)this._base64Bytes[k]] = (sbyte)k;
 			}
-			this.directEncode = new bool[128];
+			this._directEncode = new bool[128];
 			int num = "\t\n\r '(),-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".Length;
 			for (int l = 0; l < num; l++)
 			{
-				this.directEncode[(int)"\t\n\r '(),-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[l]] = true;
+				this._directEncode[(int)"\t\n\r '(),-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[l]] = true;
 			}
-			if (this.m_allowOptionals)
+			if (this._allowOptionals)
 			{
 				num = "!\"#$%&*;<=>@[]^_`{|}".Length;
 				for (int m = 0; m < num; m++)
 				{
-					this.directEncode[(int)"!\"#$%&*;<=>@[]^_`{|}"[m]] = true;
+					this._directEncode[(int)"!\"#$%&*;<=>@[]^_`{|}"[m]] = true;
 				}
 			}
 		}
@@ -60,52 +57,32 @@ namespace System.Text
 			this.decoderFallback = new UTF7Encoding.DecoderUTF7Fallback();
 		}
 
-		[OnDeserializing]
-		private void OnDeserializing(StreamingContext ctx)
-		{
-			base.OnDeserializing();
-		}
-
-		[OnDeserialized]
-		private void OnDeserialized(StreamingContext ctx)
-		{
-			base.OnDeserialized();
-			if (this.m_deserializedFromEverett)
-			{
-				this.m_allowOptionals = this.directEncode[(int)"!\"#$%&*;<=>@[]^_`{|}"[0]];
-			}
-			this.MakeTables();
-		}
-
-		[ComVisible(false)]
 		public override bool Equals(object value)
 		{
 			UTF7Encoding utf7Encoding = value as UTF7Encoding;
-			return utf7Encoding != null && (this.m_allowOptionals == utf7Encoding.m_allowOptionals && base.EncoderFallback.Equals(utf7Encoding.EncoderFallback)) && base.DecoderFallback.Equals(utf7Encoding.DecoderFallback);
+			return utf7Encoding != null && (this._allowOptionals == utf7Encoding._allowOptionals && base.EncoderFallback.Equals(utf7Encoding.EncoderFallback)) && base.DecoderFallback.Equals(utf7Encoding.DecoderFallback);
 		}
 
-		[ComVisible(false)]
 		public override int GetHashCode()
 		{
 			return this.CodePage + base.EncoderFallback.GetHashCode() + base.DecoderFallback.GetHashCode();
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetByteCount(char[] chars, int index, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (chars.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
-			if (chars.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -121,8 +98,6 @@ namespace System.Text
 			return this.GetByteCount(ptr + index, count, null);
 		}
 
-		[SecuritySafeCritical]
-		[ComVisible(false)]
 		public unsafe override int GetByteCount(string s)
 		{
 			if (s == null)
@@ -137,93 +112,74 @@ namespace System.Text
 			return this.GetByteCount(ptr, s.Length, null);
 		}
 
-		[ComVisible(false)]
-		[SecurityCritical]
 		[CLSCompliant(false)]
 		public unsafe override int GetByteCount(char* chars, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetByteCount(chars, count, null);
 		}
 
-		[ComVisible(false)]
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (s == null || bytes == null)
 			{
-				throw new ArgumentNullException((s == null) ? "s" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((s == null) ? "s" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (s.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("s", Environment.GetResourceString("Index and count must refer to a location within the string."));
+				throw new ArgumentOutOfRangeException("s", "Index and count must refer to a location within the string.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr = s;
 			if (ptr != null)
 			{
 				ptr += RuntimeHelpers.OffsetToStringData / 2;
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (chars == null || bytes == null)
 			{
-				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", "Array cannot be null.");
 			}
 			if (charIndex < 0 || charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", "Non-negative number required.");
 			}
 			if (chars.Length - charIndex < charCount)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("chars", "Index and count must refer to a location within the buffer.");
 			}
 			if (byteIndex < 0 || byteIndex > bytes.Length)
 			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("byteIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (chars.Length == 0)
+			if (charCount == 0)
 			{
 				return 0;
 			}
 			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
 			char* ptr;
 			if (chars == null || chars.Length == 0)
 			{
@@ -233,51 +189,42 @@ namespace System.Text
 			{
 				ptr = &chars[0];
 			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
+			fixed (byte* reference = MemoryMarshal.GetReference<byte>(bytes))
 			{
-				ptr2 = null;
+				byte* ptr2 = reference;
+				return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
-		[ComVisible(false)]
 		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetBytes(chars, charCount, bytes, byteCount, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetCharCount(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return 0;
 			}
@@ -293,50 +240,43 @@ namespace System.Text
 			return this.GetCharCount(ptr + index, count, null);
 		}
 
-		[SecurityCritical]
 		[CLSCompliant(false)]
-		[ComVisible(false)]
 		public unsafe override int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			return this.GetCharCount(bytes, count, null);
 		}
 
-		[SecuritySafeCritical]
 		public unsafe override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (byteIndex < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", "Non-negative number required.");
 			}
 			if (bytes.Length - byteIndex < byteCount)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
 			if (charIndex < 0 || charIndex > chars.Length)
 			{
-				throw new ArgumentOutOfRangeException("charIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("charIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (bytes.Length == 0)
+			if (byteCount == 0)
 			{
 				return 0;
 			}
 			int num = chars.Length - charIndex;
-			if (chars.Length == 0)
-			{
-				chars = new char[1];
-			}
 			byte* ptr;
 			if (bytes == null || bytes.Length == 0)
 			{
@@ -346,52 +286,42 @@ namespace System.Text
 			{
 				ptr = &bytes[0];
 			}
-			char[] array;
-			char* ptr2;
-			if ((array = chars) == null || array.Length == 0)
+			fixed (char* reference = MemoryMarshal.GetReference<char>(chars))
 			{
-				ptr2 = null;
+				char* ptr2 = reference;
+				return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 		}
 
-		[ComVisible(false)]
-		[SecurityCritical]
 		[CLSCompliant(false)]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)
 			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", "Array cannot be null.");
 			}
 			if (charCount < 0 || byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", "Non-negative number required.");
 			}
 			return this.GetChars(bytes, byteCount, chars, charCount, null);
 		}
 
-		[ComVisible(false)]
-		[SecuritySafeCritical]
 		public unsafe override string GetString(byte[] bytes, int index, int count)
 		{
 			if (bytes == null)
 			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("bytes", "Array cannot be null.");
 			}
 			if (index < 0 || count < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non-negative number required.");
 			}
 			if (bytes.Length - index < count)
 			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("bytes", "Index and count must refer to a location within the buffer.");
 			}
-			if (bytes.Length == 0)
+			if (count == 0)
 			{
 				return string.Empty;
 			}
@@ -407,13 +337,11 @@ namespace System.Text
 			return string.CreateStringFromEncoding(ptr + index, count, this);
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetByteCount(char* chars, int count, EncoderNLS baseEncoder)
 		{
 			return this.GetBytes(chars, count, null, 0, baseEncoder);
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS baseEncoder)
 		{
 			UTF7Encoding.Encoder encoder = (UTF7Encoding.Encoder)baseEncoder;
@@ -427,7 +355,7 @@ namespace System.Text
 				while (i >= 6)
 				{
 					i -= 6;
-					if (!encodingByteBuffer.AddByte(this.base64Bytes[(num >> i) & 63]))
+					if (!encodingByteBuffer.AddByte(this._base64Bytes[(num >> i) & 63]))
 					{
 						base.ThrowBytesOverflow(encoder, encodingByteBuffer.Count == 0);
 					}
@@ -436,13 +364,13 @@ namespace System.Text
 			while (encodingByteBuffer.MoreData)
 			{
 				char c = encodingByteBuffer.GetNextChar();
-				if (c < '\u0080' && this.directEncode[(int)c])
+				if (c < '\u0080' && this._directEncode[(int)c])
 				{
 					if (i >= 0)
 					{
 						if (i > 0)
 						{
-							if (!encodingByteBuffer.AddByte(this.base64Bytes[(num << 6 - i) & 63]))
+							if (!encodingByteBuffer.AddByte(this._base64Bytes[(num << 6 - i) & 63]))
 							{
 								break;
 							}
@@ -481,7 +409,7 @@ namespace System.Text
 					while (i >= 6)
 					{
 						i -= 6;
-						if (!encodingByteBuffer.AddByte(this.base64Bytes[(num >> i) & 63]))
+						if (!encodingByteBuffer.AddByte(this._base64Bytes[(num >> i) & 63]))
 						{
 							i += 6;
 							c = encodingByteBuffer.GetNextChar();
@@ -496,7 +424,7 @@ namespace System.Text
 			}
 			if (i >= 0 && (encoder == null || encoder.MustFlush))
 			{
-				if (i > 0 && encodingByteBuffer.AddByte(this.base64Bytes[(num << 6 - i) & 63]))
+				if (i > 0 && encodingByteBuffer.AddByte(this._base64Bytes[(num << 6 - i) & 63]))
 				{
 					i = 0;
 				}
@@ -514,18 +442,16 @@ namespace System.Text
 			{
 				encoder.bits = num;
 				encoder.bitCount = i;
-				encoder.m_charsUsed = encodingByteBuffer.CharsUsed;
+				encoder._charsUsed = encodingByteBuffer.CharsUsed;
 			}
 			return encodingByteBuffer.Count;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
 		{
 			return this.GetChars(bytes, count, null, 0, baseDecoder);
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS baseDecoder)
 		{
 			UTF7Encoding.Decoder decoder = (UTF7Encoding.Decoder)baseDecoder;
@@ -554,7 +480,7 @@ namespace System.Text
 				if (num2 >= 0)
 				{
 					sbyte b;
-					if (nextByte < 128 && (b = this.base64Values[(int)nextByte]) >= 0)
+					if (nextByte < 128 && (b = this._base64Values[(int)nextByte]) >= 0)
 					{
 						flag = false;
 						num = (num << 6) | (int)((byte)b);
@@ -633,7 +559,7 @@ namespace System.Text
 					decoder.bitCount = num2;
 					decoder.firstByte = flag;
 				}
-				decoder.m_bytesUsed = encodingCharBuffer.BytesUsed;
+				decoder._bytesUsed = encodingCharBuffer.BytesUsed;
 			}
 			return encodingCharBuffer.Count;
 		}
@@ -652,12 +578,12 @@ namespace System.Text
 		{
 			if (charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("charCount", "Non-negative number required.");
 			}
 			long num = (long)charCount * 3L + 2L;
 			if (num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("charCount", "Too many characters. The resulting number of bytes is larger than what can be returned as an int.");
 			}
 			return (int)num;
 		}
@@ -666,7 +592,7 @@ namespace System.Text
 		{
 			if (byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("byteCount", "Non-negative number required.");
 			}
 			int num = byteCount;
 			if (num == 0)
@@ -682,48 +608,24 @@ namespace System.Text
 
 		private const string optionalChars = "!\"#$%&*;<=>@[]^_`{|}";
 
-		private byte[] base64Bytes;
+		internal static readonly UTF7Encoding s_default = new UTF7Encoding();
 
-		private sbyte[] base64Values;
+		private byte[] _base64Bytes;
 
-		private bool[] directEncode;
+		private sbyte[] _base64Values;
 
-		[OptionalField(VersionAdded = 2)]
-		private bool m_allowOptionals;
+		private bool[] _directEncode;
+
+		private bool _allowOptionals;
 
 		private const int UTF7_CODEPAGE = 65000;
 
 		[Serializable]
-		private class Decoder : DecoderNLS, ISerializable
+		private sealed class Decoder : DecoderNLS
 		{
 			public Decoder(UTF7Encoding encoding)
 				: base(encoding)
 			{
-			}
-
-			internal Decoder(SerializationInfo info, StreamingContext context)
-			{
-				if (info == null)
-				{
-					throw new ArgumentNullException("info");
-				}
-				this.bits = (int)info.GetValue("bits", typeof(int));
-				this.bitCount = (int)info.GetValue("bitCount", typeof(int));
-				this.firstByte = (bool)info.GetValue("firstByte", typeof(bool));
-				this.m_encoding = (Encoding)info.GetValue("encoding", typeof(Encoding));
-			}
-
-			[SecurityCritical]
-			void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				if (info == null)
-				{
-					throw new ArgumentNullException("info");
-				}
-				info.AddValue("encoding", this.m_encoding);
-				info.AddValue("bits", this.bits);
-				info.AddValue("bitCount", this.bitCount);
-				info.AddValue("firstByte", this.firstByte);
 			}
 
 			public override void Reset()
@@ -731,9 +633,9 @@ namespace System.Text
 				this.bits = 0;
 				this.bitCount = -1;
 				this.firstByte = false;
-				if (this.m_fallbackBuffer != null)
+				if (this._fallbackBuffer != null)
 				{
-					this.m_fallbackBuffer.Reset();
+					this._fallbackBuffer.Reset();
 				}
 			}
 
@@ -753,43 +655,20 @@ namespace System.Text
 		}
 
 		[Serializable]
-		private class Encoder : EncoderNLS, ISerializable
+		private sealed class Encoder : EncoderNLS
 		{
 			public Encoder(UTF7Encoding encoding)
 				: base(encoding)
 			{
 			}
 
-			internal Encoder(SerializationInfo info, StreamingContext context)
-			{
-				if (info == null)
-				{
-					throw new ArgumentNullException("info");
-				}
-				this.bits = (int)info.GetValue("bits", typeof(int));
-				this.bitCount = (int)info.GetValue("bitCount", typeof(int));
-				this.m_encoding = (Encoding)info.GetValue("encoding", typeof(Encoding));
-			}
-
-			[SecurityCritical]
-			void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				if (info == null)
-				{
-					throw new ArgumentNullException("info");
-				}
-				info.AddValue("encoding", this.m_encoding);
-				info.AddValue("bits", this.bits);
-				info.AddValue("bitCount", this.bitCount);
-			}
-
 			public override void Reset()
 			{
 				this.bitCount = -1;
 				this.bits = 0;
-				if (this.m_fallbackBuffer != null)
+				if (this._fallbackBuffer != null)
 				{
-					this.m_fallbackBuffer.Reset();
+					this._fallbackBuffer.Reset();
 				}
 			}
 
@@ -807,7 +686,7 @@ namespace System.Text
 		}
 
 		[Serializable]
-		internal sealed class DecoderUTF7Fallback : DecoderFallback
+		private sealed class DecoderUTF7Fallback : DecoderFallback
 		{
 			public override DecoderFallbackBuffer CreateFallbackBuffer()
 			{
@@ -833,7 +712,7 @@ namespace System.Text
 			}
 		}
 
-		internal sealed class DecoderUTF7FallbackBuffer : DecoderFallbackBuffer
+		private sealed class DecoderUTF7FallbackBuffer : DecoderFallbackBuffer
 		{
 			public DecoderUTF7FallbackBuffer(UTF7Encoding.DecoderUTF7Fallback fallback)
 			{
@@ -882,19 +761,17 @@ namespace System.Text
 				}
 			}
 
-			[SecuritySafeCritical]
 			public override void Reset()
 			{
 				this.iCount = -1;
 				this.byteStart = null;
 			}
 
-			[SecurityCritical]
 			internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
 			{
 				if (bytes.Length != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points."));
+					throw new ArgumentException("String contains invalid Unicode code points.");
 				}
 				if (bytes[0] != 0)
 				{

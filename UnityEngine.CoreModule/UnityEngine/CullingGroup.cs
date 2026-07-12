@@ -71,7 +71,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBoundingSpheres(BoundingSphere[] array);
+		public extern void SetBoundingSpheres([Unmarshalled] BoundingSphere[] array);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetBoundingSphereCount(int count);
@@ -103,21 +103,21 @@ namespace UnityEngine
 		[FreeFunction("CullingGroup_Bindings::QueryIndices", HasExplicitThis = true)]
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, int[] result, int firstIndex);
+		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, [Unmarshalled] int[] result, int firstIndex);
 
 		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsVisible(int index);
 
-		[NativeThrows]
 		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetDistance(int index);
 
 		[FreeFunction("CullingGroup_Bindings::SetBoundingDistances", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBoundingDistances(float[] distances);
+		public extern void SetBoundingDistances([Unmarshalled] float[] distances);
 
 		[FreeFunction("CullingGroup_Bindings::SetDistanceReferencePoint", HasExplicitThis = true)]
 		private void SetDistanceReferencePoint_InternalVector3(Vector3 point)

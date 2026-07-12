@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -83,7 +84,7 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			rect.GetComponents(typeof(ILayoutController), list);
 			LayoutRebuilder.StripDisabledBehavioursFromList(list);
 			if (list.Count > 0)
@@ -118,7 +119,7 @@ namespace UnityEngine.UI
 					this.PerformLayoutControl(rect.GetChild(k) as RectTransform, action);
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		private void PerformLayoutCalculation(RectTransform rect, UnityAction<Component> action)
@@ -127,10 +128,11 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			rect.GetComponents(typeof(ILayoutElement), list);
 			LayoutRebuilder.StripDisabledBehavioursFromList(list);
-			if (list.Count > 0 || rect.GetComponent(typeof(ILayoutGroup)))
+			Component component;
+			if (list.Count > 0 || rect.TryGetComponent(typeof(ILayoutGroup), out component))
 			{
 				for (int i = 0; i < rect.childCount; i++)
 				{
@@ -141,7 +143,7 @@ namespace UnityEngine.UI
 					action(list[j]);
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		public static void MarkLayoutForRebuild(RectTransform rect)
@@ -150,7 +152,7 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			bool flag = true;
 			RectTransform rectTransform = rect;
 			RectTransform rectTransform2 = rectTransform.parent as RectTransform;
@@ -172,11 +174,11 @@ namespace UnityEngine.UI
 			}
 			if (rectTransform == rect && !LayoutRebuilder.ValidController(rectTransform, list))
 			{
-				ListPool<Component>.Release(list);
+				CollectionPool<List<Component>, Component>.Release(list);
 				return;
 			}
 			LayoutRebuilder.MarkLayoutRootForRebuild(rectTransform);
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		private static bool ValidController(RectTransform layoutRoot, List<Component> comps)
@@ -241,9 +243,9 @@ namespace UnityEngine.UI
 
 		private int m_CachedHashFromTransform;
 
-		private static ObjectPool<LayoutRebuilder> s_Rebuilders = new ObjectPool<LayoutRebuilder>(null, delegate(LayoutRebuilder x)
+		private static ObjectPool<LayoutRebuilder> s_Rebuilders = new ObjectPool<LayoutRebuilder>(() => new LayoutRebuilder(), null, delegate(LayoutRebuilder x)
 		{
 			x.Clear();
-		});
+		}, null, true, 10, 10000);
 	}
 }

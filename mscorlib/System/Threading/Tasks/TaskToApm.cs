@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace System.Threading.Tasks
 {
@@ -51,7 +50,7 @@ namespace System.Threading.Tasks
 			}
 			if (task == null)
 			{
-				__Error.WrongAsyncResult();
+				throw new ArgumentNullException();
 			}
 			task.GetAwaiter().GetResult();
 		}
@@ -70,7 +69,7 @@ namespace System.Threading.Tasks
 			}
 			if (task == null)
 			{
-				__Error.WrongAsyncResult();
+				throw new ArgumentNullException();
 			}
 			return task.GetAwaiter().GetResult();
 		}
@@ -88,15 +87,15 @@ namespace System.Threading.Tasks
 			internal TaskWrapperAsyncResult(Task task, object state, bool completedSynchronously)
 			{
 				this.Task = task;
-				this.m_state = state;
-				this.m_completedSynchronously = completedSynchronously;
+				this._state = state;
+				this._completedSynchronously = completedSynchronously;
 			}
 
 			object IAsyncResult.AsyncState
 			{
 				get
 				{
-					return this.m_state;
+					return this._state;
 				}
 			}
 
@@ -104,7 +103,7 @@ namespace System.Threading.Tasks
 			{
 				get
 				{
-					return this.m_completedSynchronously;
+					return this._completedSynchronously;
 				}
 			}
 
@@ -126,9 +125,9 @@ namespace System.Threading.Tasks
 
 			internal readonly Task Task;
 
-			private readonly object m_state;
+			private readonly object _state;
 
-			private readonly bool m_completedSynchronously;
+			private readonly bool _completedSynchronously;
 		}
 	}
 }

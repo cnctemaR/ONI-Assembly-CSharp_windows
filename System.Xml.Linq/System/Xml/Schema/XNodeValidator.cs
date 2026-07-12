@@ -31,23 +31,23 @@ namespace System.Xml.Schema
 						source = ((XDocument)source).Root;
 						if (source == null)
 						{
-							throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingRoot"));
+							throw new InvalidOperationException(global::SR.Format("The root element is missing.", Array.Empty<object>()));
 						}
 						xmlSchemaValidationFlags |= XmlSchemaValidationFlags.ProcessIdentityConstraints;
-						goto IL_008F;
+						goto IL_0090;
 					}
 				}
 				else if (!((XAttribute)source).IsNamespaceDeclaration)
 				{
 					if (source.Parent == null)
 					{
-						throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+						throw new InvalidOperationException(global::SR.Format("The parent is missing.", Array.Empty<object>()));
 					}
-					goto IL_008F;
+					goto IL_0090;
 				}
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_BadNodeType", new object[] { nodeType }));
+				throw new InvalidOperationException(global::SR.Format("This operation is not valid on a node of type {0}.", nodeType));
 			}
-			IL_008F:
+			IL_0090:
 			this.namespaceManager = new XmlNamespaceManager(this.schemas.NameTable);
 			this.PushAncestorsAndSelf(source.Parent);
 			this.validator = new XmlSchemaValidator(this.schemas.NameTable, this.schemas, this.namespaceManager, xmlSchemaValidationFlags);

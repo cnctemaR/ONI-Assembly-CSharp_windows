@@ -9,7 +9,7 @@ public class BuildingChoresPanel : TargetPanel
 	public override bool IsValidForTarget(GameObject target)
 	{
 		KPrefabID component = target.GetComponent<KPrefabID>();
-		return component != null && component.HasTag(GameTags.HasChores) && !component.IsPrefabID(GameTags.Minion);
+		return component != null && component.HasTag(GameTags.HasChores) && !component.HasTag(GameTags.BaseMinion);
 	}
 
 	protected override void OnPrefabInit()

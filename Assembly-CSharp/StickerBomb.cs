@@ -33,7 +33,7 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 	{
 		if (this.stickerName.IsNullOrWhiteSpace() && !this.stickerType.IsNullOrWhiteSpace())
 		{
-			string[] array = this.stickerType.Split(new char[] { '_' });
+			string[] array = this.stickerType.Split('_', StringSplitOptions.None);
 			if (array.Length == 2)
 			{
 				this.stickerName = array[1];

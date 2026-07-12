@@ -385,38 +385,33 @@ namespace YamlDotNet.Core
 			Mark mark = this.cursor.Mark();
 			this.Skip();
 			string text = this.ScanDirectiveName(mark);
-			if (text != null)
+			Token token;
+			if (!(text == "YAML"))
 			{
-				Token token;
-				if (!(text == "YAML"))
+				if (!(text == "TAG"))
 				{
-					if (!(text == "TAG"))
-					{
-						goto IL_004D;
-					}
-					token = this.ScanTagDirectiveValue(mark);
+					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
 				}
-				else
-				{
-					token = this.ScanVersionDirectiveValue(mark);
-				}
-				while (this.analyzer.IsWhite(0))
-				{
-					this.Skip();
-				}
-				this.ProcessComment();
-				if (!this.analyzer.IsBreakOrZero(0))
-				{
-					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
-				}
-				if (this.analyzer.IsBreak(0))
-				{
-					this.SkipLine();
-				}
-				return token;
+				token = this.ScanTagDirectiveValue(mark);
 			}
-			IL_004D:
-			throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
+			else
+			{
+				token = this.ScanVersionDirectiveValue(mark);
+			}
+			while (this.analyzer.IsWhite(0))
+			{
+				this.Skip();
+			}
+			this.ProcessComment();
+			if (!this.analyzer.IsBreakOrZero(0))
+			{
+				throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
+			}
+			if (this.analyzer.IsBreak(0))
+			{
+				this.SkipLine();
+			}
+			return token;
 		}
 
 		private void FetchDocumentIndicator(bool isStartToken)

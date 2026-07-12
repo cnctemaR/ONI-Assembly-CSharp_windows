@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Security;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Internal.Threading.Tasks.Tracing;
 
 namespace System.Runtime.CompilerServices
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-	public struct TaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion
+	public readonly struct TaskAwaiter : ICriticalNotifyCompletion, INotifyCompletion, ITaskAwaiter
 	{
 		internal TaskAwaiter(Task task)
 		{
@@ -36,11 +36,13 @@ namespace System.Runtime.CompilerServices
 			TaskAwaiter.OnCompletedInternal(this.m_task, continuation, true, false);
 		}
 
+		[StackTraceHidden]
 		public void GetResult()
 		{
 			TaskAwaiter.ValidateEnd(this.m_task);
 		}
 
+		[StackTraceHidden]
 		internal static void ValidateEnd(Task task)
 		{
 			if (task.IsWaitNotificationEnabledOrNotRanToCompletion)
@@ -49,6 +51,7 @@ namespace System.Runtime.CompilerServices
 			}
 		}
 
+		[StackTraceHidden]
 		private static void HandleNonSuccessAndDebuggerNotification(Task task)
 		{
 			if (!task.IsCompleted)
@@ -56,12 +59,13 @@ namespace System.Runtime.CompilerServices
 				task.InternalWait(-1, default(CancellationToken));
 			}
 			task.NotifyDebuggerOfWaitCompletionIfNecessary();
-			if (!task.IsRanToCompletion)
+			if (!task.IsCompletedSuccessfully)
 			{
 				TaskAwaiter.ThrowForNonSuccess(task);
 			}
 		}
 
+		[StackTraceHidden]
 		private static void ThrowForNonSuccess(Task task)
 		{
 			TaskStatus status = task.Status;
@@ -87,34 +91,34 @@ namespace System.Runtime.CompilerServices
 			throw task.Exception;
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal static void OnCompletedInternal(Task task, Action continuation, bool continueOnCapturedContext, bool flowExecutionContext)
 		{
 			if (continuation == null)
 			{
 				throw new ArgumentNullException("continuation");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			task.SetContinuationForAwait(continuation, continueOnCapturedContext, flowExecutionContext, ref stackCrawlMark);
+			if (TaskTrace.Enabled)
+			{
+				continuation = TaskAwaiter.OutputWaitEtwEvents(task, continuation);
+			}
+			task.SetContinuationForAwait(continuation, continueOnCapturedContext, flowExecutionContext);
 		}
 
 		private static Action OutputWaitEtwEvents(Task task, Action continuation)
 		{
-			if (Task.s_asyncDebuggingEnabled)
+			Task internalCurrent = Task.InternalCurrent;
+			TaskTrace.TaskWaitBegin_Asynchronous((internalCurrent != null) ? internalCurrent.m_taskScheduler.Id : TaskScheduler.Default.Id, (internalCurrent != null) ? internalCurrent.Id : 0, task.Id);
+			return delegate
 			{
-				Task.AddToActiveTasks(task);
-			}
-			return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, delegate
-			{
-				if (Task.s_asyncDebuggingEnabled)
+				if (TaskTrace.Enabled)
 				{
-					Task.RemoveFromActiveTasks(task.Id);
+					Task internalCurrent2 = Task.InternalCurrent;
+					TaskTrace.TaskWaitEnd((internalCurrent2 != null) ? internalCurrent2.m_taskScheduler.Id : TaskScheduler.Default.Id, (internalCurrent2 != null) ? internalCurrent2.Id : 0, task.Id);
 				}
 				continuation();
-			}, null);
+			};
 		}
 
-		private readonly Task m_task;
+		internal readonly Task m_task;
 	}
 }

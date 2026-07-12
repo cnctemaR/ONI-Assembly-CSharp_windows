@@ -7,7 +7,7 @@ namespace System.Diagnostics.Tracing
 	public class EventSourceException : Exception
 	{
 		public EventSourceException()
-			: base(Environment.GetResourceString("An error occurred when writing to a listener."))
+			: base("An error occurred when writing to a listener.")
 		{
 		}
 
@@ -27,7 +27,7 @@ namespace System.Diagnostics.Tracing
 		}
 
 		internal EventSourceException(Exception innerException)
-			: base(Environment.GetResourceString("An error occurred when writing to a listener."), innerException)
+			: base("An error occurred when writing to a listener.", innerException)
 		{
 		}
 	}

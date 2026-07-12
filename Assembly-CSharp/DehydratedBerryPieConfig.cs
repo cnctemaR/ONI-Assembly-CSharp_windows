@@ -21,7 +21,7 @@ public class DehydratedBerryPieConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		KAnimFile anim = Assets.GetAnim("dehydrated_food_berry_pie_kanim");
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedBerryPieConfig.ID.Name, ITEMS.FOOD.BERRYPIE.DEHYDRATED.NAME, ITEMS.FOOD.BERRYPIE.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedBerryPieConfig.ID.Name, global::STRINGS.ITEMS.FOOD.BERRYPIE.DEHYDRATED.NAME, global::STRINGS.ITEMS.FOOD.BERRYPIE.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
 		EntityTemplates.ExtendEntityToDehydratedFoodPackage(gameObject, FOOD.FOOD_TYPES.BERRY_PIE);
 		return gameObject;
 	}

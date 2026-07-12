@@ -435,11 +435,19 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 
 	public void Sim4000ms(float dt)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		this.RefreshCharts();
 	}
 
 	public void Sim1000ms(float dt)
 	{
+		if (this.isHiddenButActive)
+		{
+			return;
+		}
 		this.RefreshRows();
 	}
 

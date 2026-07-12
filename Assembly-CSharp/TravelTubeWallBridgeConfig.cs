@@ -39,7 +39,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
-		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_3;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.PENALTY_3;
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();

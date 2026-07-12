@@ -52,7 +52,7 @@ namespace System.CodeDom.Compiler
 				CodeValidator.ValidateCodeDirective((CodeDirective)e);
 				return;
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void ValidateTypeMember(CodeTypeMember e)
@@ -94,7 +94,7 @@ namespace System.CodeDom.Compiler
 				this.ValidateTypeDeclaration((CodeTypeDeclaration)e);
 				return;
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void ValidateCodeCompileUnit(CodeCompileUnit e)
@@ -485,7 +485,7 @@ namespace System.CodeDom.Compiler
 				this.ValidateLabeledStatement((CodeLabeledStatement)e);
 				return;
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void ValidateStatements(CodeStatementCollection stmts)
@@ -674,7 +674,7 @@ namespace System.CodeDom.Compiler
 			}
 			if (num != e.TypeArguments.Count && e.TypeArguments.Count != 0)
 			{
-				throw new ArgumentException(global::SR.Format("The total arity specified in '{0}' does not match the number of TypeArguments supplied.  There were '{1}' TypeArguments supplied.", baseType, e.TypeArguments.Count));
+				throw new ArgumentException(SR.Format("The total arity specified in '{0}' does not match the number of TypeArguments supplied.  There were '{1}' TypeArguments supplied.", baseType, e.TypeArguments.Count));
 			}
 		}
 
@@ -682,7 +682,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (!CodeGenerator.IsValidLanguageIndependentTypeName(typeName))
 			{
-				throw new ArgumentException(global::SR.Format("The type name:\"{0}\" on the property:\"{1}\" of type:\"{2}\" is not a valid language-independent type name.", typeName, propertyName, e.GetType().FullName), "typeName");
+				throw new ArgumentException(SR.Format("The type name:\"{0}\" on the property:\"{1}\" of type:\"{2}\" is not a valid language-independent type name.", typeName, propertyName, e.GetType().FullName), "typeName");
 			}
 		}
 
@@ -690,7 +690,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (!CodeGenerator.IsValidLanguageIndependentIdentifier(identifier))
 			{
-				throw new ArgumentException(global::SR.Format("The identifier:\"{0}\" on the property:\"{1}\" of type:\"{2}\" is not a valid language-independent identifier name. Check to see if CodeGenerator.IsValidLanguageIndependentIdentifier allows the identifier name.", identifier, propertyName, e.GetType().FullName), "identifier");
+				throw new ArgumentException(SR.Format("The identifier:\"{0}\" on the property:\"{1}\" of type:\"{2}\" is not a valid language-independent identifier name. Check to see if CodeGenerator.IsValidLanguageIndependentIdentifier allows the identifier name.", identifier, propertyName, e.GetType().FullName), "identifier");
 			}
 		}
 
@@ -825,7 +825,7 @@ namespace System.CodeDom.Compiler
 			{
 				throw new ArgumentNullException("e");
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private void ValidateArrayCreateExpression(CodeArrayCreateExpression e)
@@ -1015,14 +1015,14 @@ namespace System.CodeDom.Compiler
 				CodeValidator.ValidateRegionDirective((CodeRegionDirective)e);
 				return;
 			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
+			throw new ArgumentException(SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
 		}
 
 		private static void ValidateChecksumPragma(CodeChecksumPragma e)
 		{
 			if (e.FileName.IndexOfAny(Path.GetInvalidPathChars()) != -1)
 			{
-				throw new ArgumentException(global::SR.Format("The CodeChecksumPragma file name '{0}' contains invalid path characters.", e.FileName));
+				throw new ArgumentException(SR.Format("The CodeChecksumPragma file name '{0}' contains invalid path characters.", e.FileName));
 			}
 		}
 
@@ -1030,7 +1030,7 @@ namespace System.CodeDom.Compiler
 		{
 			if (e.RegionText.IndexOfAny(CodeValidator.s_newLineChars) != -1)
 			{
-				throw new ArgumentException(global::SR.Format("The region directive '{0}' contains invalid characters.  RegionText cannot contain any new line characters.", e.RegionText));
+				throw new ArgumentException(SR.Format("The region directive '{0}' contains invalid characters.  RegionText cannot contain any new line characters.", e.RegionText));
 			}
 		}
 

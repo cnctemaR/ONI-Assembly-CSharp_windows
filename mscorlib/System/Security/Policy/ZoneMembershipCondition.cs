@@ -89,7 +89,7 @@ namespace System.Security.Policy
 
 		public override string ToString()
 		{
-			return "Zone - " + this.zone;
+			return "Zone - " + this.zone.ToString();
 		}
 
 		public SecurityElement ToXml()

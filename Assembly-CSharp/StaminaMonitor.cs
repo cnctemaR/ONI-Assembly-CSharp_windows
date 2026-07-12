@@ -65,7 +65,7 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 		public bool IsSleeping()
 		{
 			bool flag = false;
-			if (this.WantsToSleep() && this.choreDriver.GetComponent<Worker>().workable != null)
+			if (this.WantsToSleep() && this.choreDriver.GetComponent<WorkerBase>().GetWorkable() != null)
 			{
 				flag = true;
 			}

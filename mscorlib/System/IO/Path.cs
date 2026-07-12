@@ -216,6 +216,11 @@ namespace System.IO
 			return Path.CleanPath(text);
 		}
 
+		public static ReadOnlySpan<char> GetDirectoryName(ReadOnlySpan<char> path)
+		{
+			return Path.GetDirectoryName(path.ToString()).AsSpan();
+		}
+
 		public static string GetExtension(string path)
 		{
 			if (path == null)
@@ -277,8 +282,7 @@ namespace System.IO
 			int fullPathName = Path.GetFullPathName(path, 260, stringBuilder, ref zero);
 			if (fullPathName == 0)
 			{
-				int lastWin32Error = Marshal.GetLastWin32Error();
-				throw new IOException("Windows API call to GetFullPathName failed, Windows error code: " + lastWin32Error);
+				throw new IOException("Windows API call to GetFullPathName failed, Windows error code: " + Marshal.GetLastWin32Error().ToString());
 			}
 			if (fullPathName > 260)
 			{
@@ -540,6 +544,16 @@ namespace System.IO
 			return 0 <= num && num < path.Length - 1;
 		}
 
+		public unsafe static bool IsPathRooted(ReadOnlySpan<char> path)
+		{
+			if (path.Length == 0)
+			{
+				return false;
+			}
+			char c = (char)(*path[0]);
+			return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar || (!Path.dirEqualsVolume && path.Length > 1 && *path[1] == (ushort)Path.VolumeSeparatorChar);
+		}
+
 		public static bool IsPathRooted(string path)
 		{
 			if (path == null || path.Length == 0)
@@ -550,8 +564,7 @@ namespace System.IO
 			{
 				throw new ArgumentException("Illegal characters in path.");
 			}
-			char c = path[0];
-			return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar || (!Path.dirEqualsVolume && path.Length > 1 && path[1] == Path.VolumeSeparatorChar);
+			return Path.IsPathRooted(path.AsSpan());
 		}
 
 		public static char[] GetInvalidFileNameChars()
@@ -682,9 +695,9 @@ namespace System.IO
 			{
 				if (Environment.IsRunningOnWindows)
 				{
-					array[i] = array[i].TrimEnd(Array.Empty<char>());
+					array[i] = array[i].TrimEnd();
 				}
-				if (!(array[i] == ".") && (i == 0 || array[i].Length != 0))
+				if (((flag && i == 2) || !(array[i] == ".")) && (i == 0 || array[i].Length != 0))
 				{
 					if (array[i] == "..")
 					{
@@ -957,6 +970,417 @@ namespace System.IO
 				return path1 + Path.DirectorySeparatorCharAsString + path2;
 			}
 			return path1 + path2;
+		}
+
+		public unsafe static ReadOnlySpan<char> GetFileName(ReadOnlySpan<char> path)
+		{
+			int length = Path.GetPathRoot(new string(path)).Length;
+			int num = path.Length;
+			while (--num >= 0)
+			{
+				if (num < length || Path.IsDirectorySeparator((char)(*path[num])))
+				{
+					return path.Slice(num + 1, path.Length - num - 1);
+				}
+			}
+			return path;
+		}
+
+		public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2)
+		{
+			if (path1.Length == 0)
+			{
+				return new string(path2);
+			}
+			if (path2.Length == 0)
+			{
+				return new string(path1);
+			}
+			return Path.JoinInternal(path1, path2);
+		}
+
+		public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3)
+		{
+			if (path1.Length == 0)
+			{
+				return Path.Join(path2, path3);
+			}
+			if (path2.Length == 0)
+			{
+				return Path.Join(path1, path3);
+			}
+			if (path3.Length == 0)
+			{
+				return Path.Join(path1, path2);
+			}
+			return Path.JoinInternal(path1, path2, path3);
+		}
+
+		public unsafe static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten)
+		{
+			charsWritten = 0;
+			if (path1.Length == 0 && path2.Length == 0)
+			{
+				return true;
+			}
+			if (path1.Length == 0 || path2.Length == 0)
+			{
+				ref ReadOnlySpan<char> ptr = (ref path1.Length == 0 ? ref path2 : ref path1);
+				if (destination.Length < ptr.Length)
+				{
+					return false;
+				}
+				ptr.CopyTo(destination);
+				charsWritten = ptr.Length;
+				return true;
+			}
+			else
+			{
+				bool flag = !PathInternal.EndsInDirectorySeparator(path1) && !PathInternal.StartsWithDirectorySeparator(path2);
+				int num = path1.Length + path2.Length + (flag ? 1 : 0);
+				if (destination.Length < num)
+				{
+					return false;
+				}
+				path1.CopyTo(destination);
+				if (flag)
+				{
+					*destination[path1.Length] = Path.DirectorySeparatorChar;
+				}
+				path2.CopyTo(destination.Slice(path1.Length + (flag ? 1 : 0)));
+				charsWritten = num;
+				return true;
+			}
+		}
+
+		public unsafe static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, ReadOnlySpan<char> path3, Span<char> destination, out int charsWritten)
+		{
+			charsWritten = 0;
+			if (path1.Length == 0 && path2.Length == 0 && path3.Length == 0)
+			{
+				return true;
+			}
+			if (path1.Length == 0)
+			{
+				return Path.TryJoin(path2, path3, destination, out charsWritten);
+			}
+			if (path2.Length == 0)
+			{
+				return Path.TryJoin(path1, path3, destination, out charsWritten);
+			}
+			if (path3.Length == 0)
+			{
+				return Path.TryJoin(path1, path2, destination, out charsWritten);
+			}
+			int num = ((PathInternal.EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2)) ? 0 : 1);
+			bool flag = !PathInternal.EndsInDirectorySeparator(path2) && !PathInternal.StartsWithDirectorySeparator(path3);
+			if (flag)
+			{
+				num++;
+			}
+			int num2 = path1.Length + path2.Length + path3.Length + num;
+			if (destination.Length < num2)
+			{
+				return false;
+			}
+			Path.TryJoin(path1, path2, destination, out charsWritten);
+			if (flag)
+			{
+				int num3 = charsWritten;
+				charsWritten = num3 + 1;
+				*destination[num3] = Path.DirectorySeparatorChar;
+			}
+			path3.CopyTo(destination.Slice(charsWritten));
+			charsWritten += path3.Length;
+			return true;
+		}
+
+		private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
+		{
+			bool flag = PathInternal.IsDirectorySeparator((char)(*first[first.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*second[0]));
+			fixed (char* reference = MemoryMarshal.GetReference<char>(first))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(second))
+				{
+					char* ptr2 = reference2;
+					return string.Create<ValueTuple<IntPtr, int, IntPtr, int, bool>>(first.Length + second.Length + (flag ? 0 : 1), new ValueTuple<IntPtr, int, IntPtr, int, bool>((IntPtr)((void*)ptr), first.Length, (IntPtr)((void*)ptr2), second.Length, flag), delegate(Span<char> destination, [TupleElementNames(new string[] { "First", "FirstLength", "Second", "SecondLength", "HasSeparator" })] ValueTuple<IntPtr, int, IntPtr, int, bool> state)
+					{
+						Span<char> span = new Span<char>((void*)state.Item1, state.Item2);
+						span.CopyTo(destination);
+						if (!state.Item5)
+						{
+							*destination[state.Item2] = '\\';
+						}
+						span = new Span<char>((void*)state.Item3, state.Item4);
+						span.CopyTo(destination.Slice(state.Item2 + (state.Item5 ? 0 : 1)));
+					});
+				}
+			}
+		}
+
+		private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
+		{
+			bool flag = PathInternal.IsDirectorySeparator((char)(*first[first.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*second[0]));
+			bool flag2 = PathInternal.IsDirectorySeparator((char)(*second[second.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*third[0]));
+			fixed (char* reference = MemoryMarshal.GetReference<char>(first))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(second))
+				{
+					char* ptr2 = reference2;
+					fixed (char* reference3 = MemoryMarshal.GetReference<char>(third))
+					{
+						char* ptr3 = reference3;
+						return string.Create<ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, bool, ValueTuple<bool>>>(first.Length + second.Length + third.Length + (flag ? 0 : 1) + (flag2 ? 0 : 1), new ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, bool, ValueTuple<bool>>((IntPtr)((void*)ptr), first.Length, (IntPtr)((void*)ptr2), second.Length, (IntPtr)((void*)ptr3), third.Length, flag, new ValueTuple<bool>(flag2)), delegate(Span<char> destination, [TupleElementNames(new string[] { "First", "FirstLength", "Second", "SecondLength", "Third", "ThirdLength", "FirstHasSeparator", "ThirdHasSeparator", null })] ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, bool, ValueTuple<bool>> state)
+						{
+							Span<char> span = new Span<char>((void*)state.Item1, state.Item2);
+							span.CopyTo(destination);
+							if (!state.Item7)
+							{
+								*destination[state.Item2] = '\\';
+							}
+							span = new Span<char>((void*)state.Item3, state.Item4);
+							span.CopyTo(destination.Slice(state.Item2 + (state.Item7 ? 0 : 1)));
+							if (!state.Rest.Item1)
+							{
+								*destination[destination.Length - state.Item6 - 1] = '\\';
+							}
+							span = new Span<char>((void*)state.Item5, state.Item6);
+							span.CopyTo(destination.Slice(destination.Length - state.Item6));
+						});
+					}
+				}
+			}
+		}
+
+		private unsafe static string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third, ReadOnlySpan<char> fourth)
+		{
+			bool flag = PathInternal.IsDirectorySeparator((char)(*first[first.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*second[0]));
+			bool flag2 = PathInternal.IsDirectorySeparator((char)(*second[second.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*third[0]));
+			bool flag3 = PathInternal.IsDirectorySeparator((char)(*third[third.Length - 1])) || PathInternal.IsDirectorySeparator((char)(*fourth[0]));
+			fixed (char* reference = MemoryMarshal.GetReference<char>(first))
+			{
+				char* ptr = reference;
+				fixed (char* reference2 = MemoryMarshal.GetReference<char>(second))
+				{
+					char* ptr2 = reference2;
+					fixed (char* reference3 = MemoryMarshal.GetReference<char>(third))
+					{
+						char* ptr3 = reference3;
+						fixed (char* reference4 = MemoryMarshal.GetReference<char>(fourth))
+						{
+							char* ptr4 = reference4;
+							return string.Create<ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, IntPtr, ValueTuple<int, bool, bool, bool>>>(first.Length + second.Length + third.Length + fourth.Length + (flag ? 0 : 1) + (flag2 ? 0 : 1) + (flag3 ? 0 : 1), new ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, IntPtr, ValueTuple<int, bool, bool, bool>>((IntPtr)((void*)ptr), first.Length, (IntPtr)((void*)ptr2), second.Length, (IntPtr)((void*)ptr3), third.Length, (IntPtr)((void*)ptr4), new ValueTuple<int, bool, bool, bool>(fourth.Length, flag, flag2, flag3)), delegate(Span<char> destination, [TupleElementNames(new string[]
+							{
+								"First", "FirstLength", "Second", "SecondLength", "Third", "ThirdLength", "Fourth", "FourthLength", "FirstHasSeparator", "ThirdHasSeparator",
+								"FourthHasSeparator", null, null, null, null
+							})] ValueTuple<IntPtr, int, IntPtr, int, IntPtr, int, IntPtr, ValueTuple<int, bool, bool, bool>> state)
+							{
+								Span<char> span = new Span<char>((void*)state.Item1, state.Item2);
+								span.CopyTo(destination);
+								if (!state.Rest.Item2)
+								{
+									*destination[state.Item2] = '\\';
+								}
+								span = new Span<char>((void*)state.Item3, state.Item4);
+								span.CopyTo(destination.Slice(state.Item2 + (state.Rest.Item2 ? 0 : 1)));
+								if (!state.Rest.Item3)
+								{
+									*destination[state.Item2 + state.Item4 + (state.Rest.Item2 ? 0 : 1)] = '\\';
+								}
+								span = new Span<char>((void*)state.Item5, state.Item6);
+								span.CopyTo(destination.Slice(state.Item2 + state.Item4 + (state.Rest.Item2 ? 0 : 1) + (state.Rest.Item3 ? 0 : 1)));
+								if (!state.Rest.Item4)
+								{
+									*destination[destination.Length - state.Rest.Item1 - 1] = '\\';
+								}
+								span = new Span<char>((void*)state.Item7, state.Rest.Item1);
+								span.CopyTo(destination.Slice(destination.Length - state.Rest.Item1));
+							});
+						}
+					}
+				}
+			}
+		}
+
+		public static ReadOnlySpan<char> GetExtension(ReadOnlySpan<char> path)
+		{
+			return Path.GetExtension(path.ToString()).AsSpan();
+		}
+
+		public static ReadOnlySpan<char> GetFileNameWithoutExtension(ReadOnlySpan<char> path)
+		{
+			return Path.GetFileNameWithoutExtension(path.ToString()).AsSpan();
+		}
+
+		public static ReadOnlySpan<char> GetPathRoot(ReadOnlySpan<char> path)
+		{
+			return Path.GetPathRoot(path.ToString()).AsSpan();
+		}
+
+		public static bool HasExtension(ReadOnlySpan<char> path)
+		{
+			return Path.HasExtension(path.ToString());
+		}
+
+		public static string GetRelativePath(string relativeTo, string path)
+		{
+			return Path.GetRelativePath(relativeTo, path, Path.StringComparison);
+		}
+
+		private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
+		{
+			if (string.IsNullOrEmpty(relativeTo))
+			{
+				throw new ArgumentNullException("relativeTo");
+			}
+			if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
+			{
+				throw new ArgumentNullException("path");
+			}
+			relativeTo = Path.GetFullPath(relativeTo);
+			path = Path.GetFullPath(path);
+			if (!PathInternal.AreRootsEqual(relativeTo, path, comparisonType))
+			{
+				return path;
+			}
+			int num = PathInternal.GetCommonPathLength(relativeTo, path, comparisonType == StringComparison.OrdinalIgnoreCase);
+			if (num == 0)
+			{
+				return path;
+			}
+			int num2 = relativeTo.Length;
+			if (PathInternal.EndsInDirectorySeparator(relativeTo.AsSpan()))
+			{
+				num2--;
+			}
+			bool flag = PathInternal.EndsInDirectorySeparator(path.AsSpan());
+			int num3 = path.Length;
+			if (flag)
+			{
+				num3--;
+			}
+			if (num2 == num3 && num >= num2)
+			{
+				return ".";
+			}
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(Math.Max(relativeTo.Length, path.Length));
+			if (num < num2)
+			{
+				stringBuilder.Append("..");
+				for (int i = num + 1; i < num2; i++)
+				{
+					if (PathInternal.IsDirectorySeparator(relativeTo[i]))
+					{
+						stringBuilder.Append(Path.DirectorySeparatorChar);
+						stringBuilder.Append("..");
+					}
+				}
+			}
+			else if (PathInternal.IsDirectorySeparator(path[num]))
+			{
+				num++;
+			}
+			int num4 = num3 - num;
+			if (flag)
+			{
+				num4++;
+			}
+			if (num4 > 0)
+			{
+				if (stringBuilder.Length > 0)
+				{
+					stringBuilder.Append(Path.DirectorySeparatorChar);
+				}
+				stringBuilder.Append(path, num, num4);
+			}
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+		}
+
+		internal static StringComparison StringComparison
+		{
+			get
+			{
+				if (!Path.IsCaseSensitive)
+				{
+					return StringComparison.OrdinalIgnoreCase;
+				}
+				return StringComparison.Ordinal;
+			}
+		}
+
+		internal static bool IsCaseSensitive
+		{
+			get
+			{
+				return !Path.IsWindows;
+			}
+		}
+
+		private static bool IsWindows
+		{
+			get
+			{
+				PlatformID platform = Environment.OSVersion.Platform;
+				return platform == PlatformID.Win32S || platform == PlatformID.Win32Windows || platform == PlatformID.Win32NT || platform == PlatformID.WinCE;
+			}
+		}
+
+		public static bool IsPathFullyQualified(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			return Path.IsPathFullyQualified(path.AsSpan());
+		}
+
+		public static bool IsPathFullyQualified(ReadOnlySpan<char> path)
+		{
+			return !PathInternal.IsPartiallyQualified(path);
+		}
+
+		public static string GetFullPath(string path, string basePath)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (basePath == null)
+			{
+				throw new ArgumentNullException("basePath");
+			}
+			if (!Path.IsPathFullyQualified(basePath))
+			{
+				throw new ArgumentException("Basepath argument is not fully qualified.", "basePath");
+			}
+			if (basePath.Contains('\0') || path.Contains('\0'))
+			{
+				throw new ArgumentException("Illegal characters in path '{0}'.");
+			}
+			if (Path.IsPathFullyQualified(path))
+			{
+				return Path.GetFullPath(path);
+			}
+			return Path.GetFullPath(Path.CombineInternal(basePath, path));
+		}
+
+		private static string CombineInternal(string first, string second)
+		{
+			if (string.IsNullOrEmpty(first))
+			{
+				return second;
+			}
+			if (string.IsNullOrEmpty(second))
+			{
+				return first;
+			}
+			if (Path.IsPathRooted(second.AsSpan()))
+			{
+				return second;
+			}
+			return Path.JoinInternal(first.AsSpan(), second.AsSpan());
 		}
 
 		[Obsolete("see GetInvalidPathChars and GetInvalidFileNameChars methods.")]

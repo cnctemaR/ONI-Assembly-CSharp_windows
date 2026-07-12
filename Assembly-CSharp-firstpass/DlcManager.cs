@@ -30,21 +30,6 @@ public class DlcManager
 		return dlcId == null || dlcId == "";
 	}
 
-	public static bool IsVanillaId(string[] dlcIds)
-	{
-		return dlcIds == null || (dlcIds.Length == 1 && dlcIds[0] == "");
-	}
-
-	public static bool IsValidForVanilla(string[] dlcIds)
-	{
-		return dlcIds == null || Array.IndexOf<string>(dlcIds, "") != -1;
-	}
-
-	public static bool IsExpansion1Id(string dlcId)
-	{
-		return dlcId == "EXPANSION1_ID";
-	}
-
 	public static string GetContentBundleName(string dlcId)
 	{
 		if (dlcId == "EXPANSION1_ID")
@@ -61,7 +46,7 @@ public class DlcManager
 
 	public static bool IsDlcId(string dlcId)
 	{
-		return !string.IsNullOrWhiteSpace(dlcId) && (dlcId == "EXPANSION1_ID" || DlcManager.DLC_PACKS.ContainsKey(dlcId));
+		return !DlcManager.IsVanillaId(dlcId) && (dlcId == "EXPANSION1_ID" || DlcManager.DLC_PACKS.ContainsKey(dlcId));
 	}
 
 	public static string GetDlcTitle(string dlcId)
@@ -142,16 +127,13 @@ public class DlcManager
 
 	public static string GetContentDirectoryName(string dlcId)
 	{
-		if (dlcId != null)
+		if (dlcId != null && dlcId.Length == 0)
 		{
-			if (dlcId != null && dlcId.Length == 0)
-			{
-				return "";
-			}
-			if (dlcId == "EXPANSION1_ID")
-			{
-				return "expansion1";
-			}
+			return "";
+		}
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "expansion1";
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
@@ -164,26 +146,23 @@ public class DlcManager
 
 	public static string GetDlcIdFromContentDirectory(string contentDirectory)
 	{
-		if (contentDirectory != null)
+		if (contentDirectory != null && contentDirectory.Length == 0)
 		{
-			if (contentDirectory != null && contentDirectory.Length == 0)
-			{
-				return "";
-			}
-			if (contentDirectory == "expansion1")
-			{
-				return "EXPANSION1_ID";
-			}
+			return "";
 		}
-		foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
+		if (!(contentDirectory == "expansion1"))
 		{
-			if (keyValuePair.Value.directory == contentDirectory)
+			foreach (KeyValuePair<string, DlcManager.DlcInfo> keyValuePair in DlcManager.DLC_PACKS)
 			{
-				return keyValuePair.Key;
+				if (keyValuePair.Value.directory == contentDirectory)
+				{
+					return keyValuePair.Key;
+				}
 			}
+			global::Debug.LogError("No dlcId matches content directory '" + contentDirectory + "'");
+			return null;
 		}
-		global::Debug.LogError("No dlcId matches content directory '" + contentDirectory + "'");
-		return null;
+		return "EXPANSION1_ID";
 	}
 
 	public static void ToggleDLC(string id)
@@ -202,8 +181,12 @@ public class DlcManager
 		return DlcManager.CheckPlatformSubscription(dlcId) && DlcManager.IsContentSettingEnabled(dlcId);
 	}
 
-	public static bool HasAllContentSubscribed(List<string> dlcIds)
+	public static bool IsAllContentSubscribed(List<string> dlcIds)
 	{
+		if (dlcIds == null)
+		{
+			return true;
+		}
 		using (List<string>.Enumerator enumerator = dlcIds.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
@@ -217,8 +200,12 @@ public class DlcManager
 		return true;
 	}
 
-	public static bool HasAllContentSubscribed(string[] dlcIds)
+	public static bool IsAllContentSubscribed(string[] dlcIds)
 	{
+		if (dlcIds == null)
+		{
+			return true;
+		}
 		for (int i = 0; i < dlcIds.Length; i++)
 		{
 			if (!DlcManager.IsContentSubscribed(dlcIds[i]))
@@ -229,8 +216,12 @@ public class DlcManager
 		return true;
 	}
 
-	public static bool HasAnyContentSubscribed(string[] dlcIds)
+	public static bool IsAnyContentSubscribed(string[] dlcIds)
 	{
+		if (dlcIds == null)
+		{
+			return false;
+		}
 		for (int i = 0; i < dlcIds.Length; i++)
 		{
 			if (DlcManager.IsContentSubscribed(dlcIds[i]))
@@ -243,6 +234,10 @@ public class DlcManager
 
 	public static bool IsDlcListValidForCurrentContent(string[] dlcIds)
 	{
+		if (dlcIds == null || dlcIds.Length == 0)
+		{
+			return true;
+		}
 		if (DlcManager.GetHighestActiveDlcId() == "" && dlcIds.Contains(""))
 		{
 			return true;
@@ -257,6 +252,39 @@ public class DlcManager
 		return false;
 	}
 
+	public static bool IsCorrectDlcSubscribed(string[] required, string[] forbidden)
+	{
+		return DlcManager.IsAllContentSubscribed(required) && !DlcManager.IsAnyContentSubscribed(forbidden);
+	}
+
+	public static void ConvertAvailableToRequireAndForbidden(string[] dlcIds, out string[] requiredDlcIds, out string[] forbiddenDlcIds)
+	{
+		requiredDlcIds = null;
+		forbiddenDlcIds = null;
+		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_EXPANSION1_ONLY))
+		{
+			requiredDlcIds = DlcManager.EXPANSION1;
+			return;
+		}
+		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_VANILLA_ONLY))
+		{
+			forbiddenDlcIds = DlcManager.EXPANSION1;
+			return;
+		}
+		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_DLC_2))
+		{
+			requiredDlcIds = DlcManager.DLC2;
+			return;
+		}
+		if (dlcIds.SequenceEqual<string>(DlcManager.AVAILABLE_ALL_VERSIONS))
+		{
+			requiredDlcIds = null;
+			forbiddenDlcIds = null;
+			return;
+		}
+		DebugUtil.DevLogError("ConvertAvailableToRequireAndForbidden received a list it did not recognize: " + (',' + dlcIds));
+	}
+
 	public static string GetHighestActiveDlcId()
 	{
 		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
@@ -266,15 +294,6 @@ public class DlcManager
 			{
 				return text;
 			}
-		}
-		return "";
-	}
-
-	private static string GetInstalledDlcId()
-	{
-		if (DlcManager.CheckPlatformSubscription("EXPANSION1_ID"))
-		{
-			return "EXPANSION1_ID";
 		}
 		return "";
 	}
@@ -396,16 +415,13 @@ public class DlcManager
 
 	public static string GetContentLetter(string dlcId)
 	{
-		if (dlcId != null)
+		if (dlcId != null && dlcId.Length == 0)
 		{
-			if (dlcId != null && dlcId.Length == 0)
-			{
-				return "V";
-			}
-			if (dlcId == "EXPANSION1_ID")
-			{
-				return "S";
-			}
+			return "V";
+		}
+		if (dlcId == "EXPANSION1_ID")
+		{
+			return "S";
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
@@ -489,11 +505,6 @@ public class DlcManager
 		return !DlcManager.IsExpansion1Active();
 	}
 
-	public static bool IsExpansion1Installed()
-	{
-		return DlcManager.CheckPlatformSubscription("EXPANSION1_ID");
-	}
-
 	public static bool IsExpansion1Active()
 	{
 		return DlcManager.IsContentSubscribed("EXPANSION1_ID");
@@ -526,6 +537,58 @@ public class DlcManager
 		return false;
 	}
 
+	[Obsolete]
+	public static bool IsExpansion1Installed()
+	{
+		return DlcManager.CheckPlatformSubscription("EXPANSION1_ID");
+	}
+
+	[Obsolete]
+	public static bool IsVanillaId(string[] dlcIds)
+	{
+		return dlcIds == null || (dlcIds.Length == 1 && dlcIds[0] == "");
+	}
+
+	[Obsolete]
+	public static bool IsValidForVanilla(string[] dlcIds)
+	{
+		return dlcIds == null || Array.IndexOf<string>(dlcIds, "") != -1;
+	}
+
+	[Obsolete]
+	public static bool IsExpansion1Id(string dlcId)
+	{
+		return dlcId == "EXPANSION1_ID";
+	}
+
+	[Obsolete]
+	private static string GetInstalledDlcId()
+	{
+		if (DlcManager.CheckPlatformSubscription("EXPANSION1_ID"))
+		{
+			return "EXPANSION1_ID";
+		}
+		return "";
+	}
+
+	[Obsolete("Use IsAllContentSubscribed")]
+	public static bool HasAllContentSubscribed(List<string> dlcIds)
+	{
+		return DlcManager.IsAllContentSubscribed(dlcIds);
+	}
+
+	[Obsolete("Use IsAllContentSubscribed")]
+	public static bool HasAllContentSubscribed(string[] dlcIds)
+	{
+		return DlcManager.IsAllContentSubscribed(dlcIds);
+	}
+
+	[Obsolete("Use IsAnyContentSubscribed")]
+	public static bool HasAnyContentSubscribed(string[] dlcIds)
+	{
+		return DlcManager.IsAnyContentSubscribed(dlcIds);
+	}
+
 	[ThreadStatic]
 	public static readonly bool IsMainThread = true;
 
@@ -535,7 +598,13 @@ public class DlcManager
 
 	public const string DLC2_ID = "DLC2_ID";
 
-	public static readonly string[] AVAILABLE_DLC_2 = new string[] { "DLC2_ID" };
+	public const string DLC3_ID = "DLC3_ID";
+
+	public static readonly string[] EXPANSION1 = new string[] { "EXPANSION1_ID" };
+
+	public static readonly string[] DLC2 = new string[] { "DLC2_ID" };
+
+	public static readonly string[] DLC3 = new string[] { "DLC3_ID" };
 
 	public const string EXPANSION1_VERIFICATION_FILE_NAME = "expansion1_bundle";
 
@@ -547,15 +616,23 @@ public class DlcManager
 
 	public static readonly string[] AVAILABLE_EXPANSION1_ONLY = new string[] { "EXPANSION1_ID" };
 
+	public static readonly string[] AVAILABLE_DLC_2 = new string[] { "DLC2_ID" };
+
 	public static readonly string[] AVAILABLE_ALL_VERSIONS = new string[] { "", "EXPANSION1_ID" };
 
 	public static List<string> RELEASE_ORDER = new List<string> { "", "EXPANSION1_ID" };
 
-	public static Dictionary<string, DlcManager.DlcInfo> DLC_PACKS = new Dictionary<string, DlcManager.DlcInfo> { 
+	public static Dictionary<string, DlcManager.DlcInfo> DLC_PACKS = new Dictionary<string, DlcManager.DlcInfo>
 	{
-		"DLC2_ID",
-		new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f))
-	} };
+		{
+			"DLC2_ID",
+			new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f))
+		},
+		{
+			"DLC3_ID",
+			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(1f, 0.26666668f, 0.003921569f))
+		}
+	};
 
 	private static List<string> released = null;
 

@@ -12,7 +12,12 @@ namespace Unity.Profiling
 	{
 		public ProfilerCategory(string categoryName)
 		{
-			this.m_CategoryId = ProfilerUnsafeUtility.GetCategoryByName(categoryName);
+			this.m_CategoryId = ProfilerUnsafeUtility.CreateCategory(categoryName, ProfilerCategoryColor.Scripts);
+		}
+
+		public ProfilerCategory(string categoryName, ProfilerCategoryColor color)
+		{
+			this.m_CategoryId = ProfilerUnsafeUtility.CreateCategory(categoryName, color);
 		}
 
 		internal ProfilerCategory(ushort category)
@@ -71,6 +76,14 @@ namespace Unity.Profiling
 			get
 			{
 				return new ProfilerCategory(5);
+			}
+		}
+
+		public static ProfilerCategory Physics2D
+		{
+			get
+			{
+				return new ProfilerCategory(33);
 			}
 		}
 
@@ -170,6 +183,14 @@ namespace Unity.Profiling
 			}
 		}
 
+		public static ProfilerCategory FileIO
+		{
+			get
+			{
+				return new ProfilerCategory(25);
+			}
+		}
+
 		public static ProfilerCategory Internal
 		{
 			get
@@ -183,6 +204,14 @@ namespace Unity.Profiling
 			get
 			{
 				return new ProfilerCategory(ushort.MaxValue);
+			}
+		}
+
+		internal static ProfilerCategory GPU
+		{
+			get
+			{
+				return new ProfilerCategory(32);
 			}
 		}
 

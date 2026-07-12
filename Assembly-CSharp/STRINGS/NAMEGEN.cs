@@ -1104,7 +1104,7 @@ namespace STRINGS
 
 			public class ROOTS
 			{
-				public static LocString GENERIC = "Sol\nLun\nOrb\nCosm\nGlob\nStar\nZolt\nTakar\nBeep\nBoop\nZap\nZow\nGrav\nAb\nAd\nAr\nAshk\nBan\nBubbl\nBurt\nCamil\nCatal\nDevon\nEll\nFrank\nGoss\nHar\nHass\nJean\nJosh\nLeir\nLia\nLind\nMav\nMar\nMax\nMeep\nMim\nNail\nNik\nNis\nOtt\nRen\nRow\nRub\nStink\nTrav\nTurn\n";
+				public static LocString GENERIC = "Sol\nLun\nOrb\nCosm\nGlob\nStar\nZolt\nTakar\nBeep\nBoop\nZap\nZow\nGrav\nAb\nAd\nAr\nAshk\nBan\nBubbl\nBurt\nCamil\nCatal\nDevon\nEll\nFrank\nGoss\nHar\nHass\nJean\nJosh\nLeir\nLia\nLind\nMav\nMar\nMax\nMeep\nMim\nNail\nNik\nNis\nOtt\nRen\nRow\nRub\nStink\nTrav\nTurn\nJorg\nPei\nStev\nQui\nAmar\nFreyj\nGizm\nEdw\nChip\n";
 
 				public static LocString FOREST = "Veget\nLeaf\nWood\nTopiar\nTimber\nShrub\nHerb\nGrow\nVerd\nSylv\nAbund\nArbor\nTwig\nCanop\nPerenn\nLush\nRoot\nSap\nCultiv\nBark\n";
 
@@ -1118,17 +1118,17 @@ namespace STRINGS
 
 				public static LocString TUNDRA = "Brr'\nSnow\nTundr\nBlizz\nFreez\nChill\nFrig\nFroid\nCold\nFrost\n";
 
-				public static LocString CERES = "Wintr\nPolar\nSubzer\nImpass\nGlac\nBlust\nShivrr\n";
+				public static LocString CERES = "Wintr\nPolar\nSubzer\nImpass\nGlac\nBlust\nGelid\nCryo\nIcicl\nSlush\nSleet\nHail\nShivrr\n";
 
-				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nObsid\nLav\nMelt\nHot\nChar\n";
+				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nObsid\nLav\nMelt\nHot\nSweltr\nBlist\nFlam\nTherm\nCombust\nCauter\nTorch\nStok\nChar\n";
 
 				public static LocString SWAMP = "Goop\nMud\nMuck\nGross\nStink\nSmell\nYuck\nReek\nBlag\nSogg\nDripp\nUgh\nPustul\nIck\nCurd\nSlop\nPhlegm\nGurg\nSmear\nOoz\n";
 
 				public static LocString MOO = "Moom\nGas\nUdder\nHeffer\nBelch\nCalf\nCud\nGass\nMethan\nBull\n";
 
-				public static LocString WATER = "Wat\nDamp\nMoist\nDrench\nAytch Tew\nHydr\nFlood\nIrrig\nSoaker\nAqu\n";
+				public static LocString WATER = "Wat\nDamp\nMoist\nDrench\nAytch Tew\nHydr\nFlood\nIrrig\nSoaker\nDrip\nBath\nSplash\nLiqu\nHumid\nPuddl\nBuoy\nAqu\n";
 
-				public static LocString RADIOACTIVE = "Rad\nContam\nHazard\nGlow\nTox\nIrrad\nRadioact\nAtom\nZap\nRay\n";
+				public static LocString RADIOACTIVE = "Rad\nContam\nHazard\nGlow\nTox\nIrrad\nRadioact\nAtom\nZap\nNucl\nFusion\nRay\n";
 
 				public static LocString REGOLITH = "Filt\nRegol\nSiev\nSift\nMeteor\nSand\nRock\nDust\nSedim\nSilt\n";
 			}

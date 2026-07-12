@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace System.ComponentModel
 {
@@ -7,61 +8,49 @@ namespace System.ComponentModel
 	{
 		public EditorAttribute()
 		{
-			this.typeName = string.Empty;
-			this.baseTypeName = string.Empty;
+			this.EditorTypeName = string.Empty;
+			this.EditorBaseTypeName = string.Empty;
 		}
 
 		public EditorAttribute(string typeName, string baseTypeName)
 		{
-			typeName.ToUpperInvariant();
-			this.typeName = typeName;
-			this.baseTypeName = baseTypeName;
+			typeName.ToUpper(CultureInfo.InvariantCulture);
+			this.EditorTypeName = typeName;
+			this.EditorBaseTypeName = baseTypeName;
 		}
 
 		public EditorAttribute(string typeName, Type baseType)
 		{
-			typeName.ToUpperInvariant();
-			this.typeName = typeName;
-			this.baseTypeName = baseType.AssemblyQualifiedName;
+			typeName.ToUpper(CultureInfo.InvariantCulture);
+			this.EditorTypeName = typeName;
+			this.EditorBaseTypeName = baseType.AssemblyQualifiedName;
 		}
 
 		public EditorAttribute(Type type, Type baseType)
 		{
-			this.typeName = type.AssemblyQualifiedName;
-			this.baseTypeName = baseType.AssemblyQualifiedName;
+			this.EditorTypeName = type.AssemblyQualifiedName;
+			this.EditorBaseTypeName = baseType.AssemblyQualifiedName;
 		}
 
-		public string EditorBaseTypeName
-		{
-			get
-			{
-				return this.baseTypeName;
-			}
-		}
+		public string EditorBaseTypeName { get; }
 
-		public string EditorTypeName
-		{
-			get
-			{
-				return this.typeName;
-			}
-		}
+		public string EditorTypeName { get; }
 
 		public override object TypeId
 		{
 			get
 			{
-				if (this.typeId == null)
+				if (this._typeId == null)
 				{
-					string text = this.baseTypeName;
+					string text = this.EditorBaseTypeName;
 					int num = text.IndexOf(',');
 					if (num != -1)
 					{
 						text = text.Substring(0, num);
 					}
-					this.typeId = base.GetType().FullName + text;
+					this._typeId = base.GetType().FullName + text;
 				}
-				return this.typeId;
+				return this._typeId;
 			}
 		}
 
@@ -72,7 +61,7 @@ namespace System.ComponentModel
 				return true;
 			}
 			EditorAttribute editorAttribute = obj as EditorAttribute;
-			return editorAttribute != null && editorAttribute.typeName == this.typeName && editorAttribute.baseTypeName == this.baseTypeName;
+			return editorAttribute != null && editorAttribute.EditorTypeName == this.EditorTypeName && editorAttribute.EditorBaseTypeName == this.EditorBaseTypeName;
 		}
 
 		public override int GetHashCode()
@@ -80,10 +69,6 @@ namespace System.ComponentModel
 			return base.GetHashCode();
 		}
 
-		private string baseTypeName;
-
-		private string typeName;
-
-		private string typeId;
+		private string _typeId;
 	}
 }

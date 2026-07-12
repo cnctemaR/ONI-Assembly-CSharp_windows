@@ -446,8 +446,7 @@ namespace System.Data.Common
 				return SqlChars.Null;
 			}
 			Type type = value.GetType();
-			StorageType storageType = DataStorage.GetStorageType(type);
-			if (storageType == StorageType.SqlChars)
+			if (DataStorage.GetStorageType(type) == StorageType.SqlChars)
 			{
 				return (SqlChars)value;
 			}
@@ -461,8 +460,7 @@ namespace System.Data.Common
 				return SqlBytes.Null;
 			}
 			Type type = value.GetType();
-			StorageType storageType = DataStorage.GetStorageType(type);
-			if (storageType == StorageType.SqlBytes)
+			if (DataStorage.GetStorageType(type) == StorageType.SqlBytes)
 			{
 				return (SqlBytes)value;
 			}

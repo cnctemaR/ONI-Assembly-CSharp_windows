@@ -221,7 +221,8 @@ namespace System.Xml.Serialization
 							codeAttributeDeclaration2.Arguments.Add(new CodeAttributeArgument(new CodeTypeOfExpression(arrayMapping.TypeDesc.FullName)));
 							this.includeMetadata.Add(codeAttributeDeclaration2);
 							hashtable.Add(arrayMapping.TypeDesc.FullName, string.Empty);
-							this.EnsureTypesExported(arrayMapping.Elements, arrayMapping.Namespace);
+							Accessor[] elements = arrayMapping.Elements;
+							this.EnsureTypesExported(elements, arrayMapping.Namespace);
 						}
 					}
 				}

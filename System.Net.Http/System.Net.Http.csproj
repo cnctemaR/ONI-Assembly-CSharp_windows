@@ -1,0 +1,102 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713ECD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Net.Http</RootNamespace>
+    <AssemblyName>System.Net.Http</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="ByteArrayContent.cs" />
+    <Compile Include="CancellationHelper.cs" />
+    <Compile Include="ClientCertificateOption.cs" />
+    <Compile Include="ConnectHelper.cs" />
+    <Compile Include="DelegatingHandler.cs" />
+    <Compile Include="FormUrlEncodedContent.cs" />
+    <Compile Include="Headers\AuthenticationHeaderValue.cs" />
+    <Compile Include="Headers\CacheControlHeaderValue.cs" />
+    <Compile Include="Headers\CollectionExtensions.cs" />
+    <Compile Include="Headers\CollectionParser.cs" />
+    <Compile Include="Headers\ContentDispositionHeaderValue.cs" />
+    <Compile Include="Headers\ContentRangeHeaderValue.cs" />
+    <Compile Include="Headers\ElementTryParser.cs" />
+    <Compile Include="Headers\EntityTagHeaderValue.cs" />
+    <Compile Include="Headers\HashCodeCalculator.cs" />
+    <Compile Include="Headers\HeaderInfo.cs" />
+    <Compile Include="Headers\HttpContentHeaders.cs" />
+    <Compile Include="Headers\HttpHeaderKind.cs" />
+    <Compile Include="Headers\HttpHeaders.cs" />
+    <Compile Include="Headers\HttpHeaderValueCollection.cs" />
+    <Compile Include="Headers\HttpRequestHeaders.cs" />
+    <Compile Include="Headers\HttpResponseHeaders.cs" />
+    <Compile Include="Headers\Lexer.cs" />
+    <Compile Include="Headers\MediaTypeHeaderValue.cs" />
+    <Compile Include="Headers\MediaTypeWithQualityHeaderValue.cs" />
+    <Compile Include="Headers\NameValueHeaderValue.cs" />
+    <Compile Include="Headers\NameValueWithParametersHeaderValue.cs" />
+    <Compile Include="Headers\Parser.cs" />
+    <Compile Include="Headers\ProductHeaderValue.cs" />
+    <Compile Include="Headers\ProductInfoHeaderValue.cs" />
+    <Compile Include="Headers\QualityValue.cs" />
+    <Compile Include="Headers\RangeConditionHeaderValue.cs" />
+    <Compile Include="Headers\RangeHeaderValue.cs" />
+    <Compile Include="Headers\RangeItemHeaderValue.cs" />
+    <Compile Include="Headers\RetryConditionHeaderValue.cs" />
+    <Compile Include="Headers\StringWithQualityHeaderValue.cs" />
+    <Compile Include="Headers\Token.cs" />
+    <Compile Include="Headers\TransferCodingHeaderValue.cs" />
+    <Compile Include="Headers\TransferCodingWithQualityHeaderValue.cs" />
+    <Compile Include="Headers\TryParseDelegate.cs" />
+    <Compile Include="Headers\TryParseListDelegate.cs" />
+    <Compile Include="Headers\ViaHeaderValue.cs" />
+    <Compile Include="Headers\WarningHeaderValue.cs" />
+    <Compile Include="HttpClient.cs" />
+    <Compile Include="HttpClientHandler.cs" />
+    <Compile Include="HttpCompletionOption.cs" />
+    <Compile Include="HttpContent.cs" />
+    <Compile Include="HttpMessageHandler.cs" />
+    <Compile Include="HttpMessageInvoker.cs" />
+    <Compile Include="HttpMethod.cs" />
+    <Compile Include="HttpRequestException.cs" />
+    <Compile Include="HttpRequestMessage.cs" />
+    <Compile Include="HttpResponseMessage.cs" />
+    <Compile Include="HttpUtilities.cs" />
+    <Compile Include="IMonoHttpClientHandler.cs" />
+    <Compile Include="MessageProcessingHandler.cs" />
+    <Compile Include="MonoWebRequestHandler.cs" />
+    <Compile Include="MultipartContent.cs" />
+    <Compile Include="MultipartFormDataContent.cs" />
+    <Compile Include="PlatformHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadOnlyMemoryContent.cs" />
+    <Compile Include="StreamContent.cs" />
+    <Compile Include="StringContent.cs" />
+    <Compile Include="Unity\ThrowStub.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EBF}</Project>
+      <Name>Mono.Security</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC5}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

@@ -54,18 +54,50 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public ShadowObjectsFilter objectsFilter
+		{
+			get
+			{
+				return this.m_ObjectsFilter;
+			}
+			set
+			{
+				this.m_ObjectsFilter = value;
+			}
+		}
+
+		public BatchCullingProjectionType projectionType
+		{
+			get
+			{
+				return this.m_ProjectionType;
+			}
+			set
+			{
+				this.m_ProjectionType = value;
+			}
+		}
+
+		[Obsolete("ShadowDrawingSettings(CullingResults, int) is deprecated. Use ShadowDrawingSettings(CullingResults, int, BatchCullingProjectionType) instead.")]
 		public ShadowDrawingSettings(CullingResults cullingResults, int lightIndex)
+		{
+			this = new ShadowDrawingSettings(cullingResults, lightIndex, BatchCullingProjectionType.Unknown);
+		}
+
+		public ShadowDrawingSettings(CullingResults cullingResults, int lightIndex, BatchCullingProjectionType projectionType)
 		{
 			this.m_CullingResults = cullingResults;
 			this.m_LightIndex = lightIndex;
 			this.m_UseRenderingLayerMaskTest = 0;
 			this.m_SplitData = default(ShadowSplitData);
 			this.m_SplitData.shadowCascadeBlendCullingFactor = 1f;
+			this.m_ObjectsFilter = ShadowObjectsFilter.AllObjects;
+			this.m_ProjectionType = projectionType;
 		}
 
 		public bool Equals(ShadowDrawingSettings other)
 		{
-			return this.m_CullingResults.Equals(other.m_CullingResults) && this.m_LightIndex == other.m_LightIndex && this.m_SplitData.Equals(other.m_SplitData) && this.m_UseRenderingLayerMaskTest.Equals(other.m_UseRenderingLayerMaskTest);
+			return this.m_CullingResults.Equals(other.m_CullingResults) && this.m_LightIndex == other.m_LightIndex && this.m_SplitData.Equals(other.m_SplitData) && this.m_UseRenderingLayerMaskTest.Equals(other.m_UseRenderingLayerMaskTest) && this.m_ObjectsFilter.Equals(other.m_ObjectsFilter);
 		}
 
 		public override bool Equals(object obj)
@@ -79,7 +111,8 @@ namespace UnityEngine.Rendering
 			int num = this.m_CullingResults.GetHashCode();
 			num = (num * 397) ^ this.m_LightIndex;
 			num = (num * 397) ^ this.m_UseRenderingLayerMaskTest;
-			return (num * 397) ^ this.m_SplitData.GetHashCode();
+			num = (num * 397) ^ this.m_SplitData.GetHashCode();
+			return (num * 397) ^ (int)this.m_ObjectsFilter;
 		}
 
 		public static bool operator ==(ShadowDrawingSettings left, ShadowDrawingSettings right)
@@ -99,5 +132,9 @@ namespace UnityEngine.Rendering
 		private int m_UseRenderingLayerMaskTest;
 
 		private ShadowSplitData m_SplitData;
+
+		private ShadowObjectsFilter m_ObjectsFilter;
+
+		private BatchCullingProjectionType m_ProjectionType;
 	}
 }

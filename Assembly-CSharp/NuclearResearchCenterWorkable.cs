@@ -24,7 +24,7 @@ public class NuclearResearchCenterWorkable : Workable
 		base.SetWorkTime(float.PositiveInfinity);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		float num = dt / this.nrc.timePerPoint;
 		if (Game.Instance.FastWorkersModeActive)
@@ -44,18 +44,18 @@ public class NuclearResearchCenterWorkable : Workable
 		return this.radiationStorage.IsEmpty() || activeResearch == null || activeResearch.PercentageCompleteResearchType("nuclear") >= 1f;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this.nrc);
 	}
 
-	protected override void OnAbortWork(Worker worker)
+	protected override void OnAbortWork(WorkerBase worker)
 	{
 		base.OnAbortWork(worker);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ComplexFabricatorResearching, this.nrc);
@@ -76,7 +76,7 @@ public class NuclearResearchCenterWorkable : Workable
 		return num / num2;
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}

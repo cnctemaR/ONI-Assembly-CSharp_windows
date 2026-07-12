@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
@@ -9,6 +10,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotABionic, null);
 	}
 
 	public class StatesInstance : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.GameInstance
@@ -18,8 +20,8 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		{
 			base.sm.recoverer.Set(recoverer, base.smi, false);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
-			float num = 3f;
-			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
+			float recover_BREATH_DELTA = DUPLICANTSTATS.STANDARD.BaseStats.RECOVER_BREATH_DELTA;
+			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, recover_BREATH_DELTA, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
 		}
 
 		public void CreateLocator()

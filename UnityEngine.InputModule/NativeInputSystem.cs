@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Input
 {
-	[NativeHeader("Modules/Input/Private/InputInternal.h")]
 	[NativeHeader("Modules/Input/Private/InputModuleBindings.h")]
+	[NativeHeader("Modules/Input/Private/InputInternal.h")]
 	internal class NativeInputSystem
 	{
 		public static Action<int, string> onDeviceDiscovered
@@ -75,12 +75,14 @@ namespace UnityEngineInternal.Input
 			set;
 		} = false;
 
+		[NativeProperty(IsThreadSafe = true)]
 		public static extern double currentTime
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		[NativeProperty(IsThreadSafe = true)]
 		public static extern double currentTimeOffsetToRealtimeSinceStartup
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -96,6 +98,7 @@ namespace UnityEngineInternal.Input
 			NativeInputSystem.QueueInputEvent((IntPtr)UnsafeUtility.AddressOf<TInputEvent>(ref inputEvent));
 		}
 
+		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void QueueInputEvent(IntPtr inputEvent);
 
@@ -108,9 +111,21 @@ namespace UnityEngineInternal.Input
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Update(NativeInputUpdateType updateType);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern ulong GetBackgroundEventBufferSize();
+
 		[Obsolete("This is not needed any longer.")]
 		public static void SetUpdateMask(NativeInputUpdateType mask)
 		{
+		}
+
+		[NativeProperty("AllowInputDeviceCreationFromEvents")]
+		internal static extern bool allowInputDeviceCreationFromEvents
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public static NativeUpdateCallback onUpdate;

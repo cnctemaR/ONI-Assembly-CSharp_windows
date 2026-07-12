@@ -13,39 +13,24 @@ namespace System.ComponentModel
 
 		public ToolboxItemFilterAttribute(string filterString, ToolboxItemFilterType filterType)
 		{
-			if (filterString == null)
-			{
-				filterString = string.Empty;
-			}
-			this.filterString = filterString;
-			this.filterType = filterType;
+			this.FilterString = filterString ?? string.Empty;
+			this.FilterType = filterType;
 		}
 
-		public string FilterString
-		{
-			get
-			{
-				return this.filterString;
-			}
-		}
+		public string FilterString { get; }
 
-		public ToolboxItemFilterType FilterType
-		{
-			get
-			{
-				return this.filterType;
-			}
-		}
+		public ToolboxItemFilterType FilterType { get; }
 
 		public override object TypeId
 		{
 			get
 			{
-				if (this.typeId == null)
+				string text;
+				if ((text = this._typeId) == null)
 				{
-					this.typeId = base.GetType().FullName + this.filterString;
+					text = (this._typeId = base.GetType().FullName + this.FilterString);
 				}
-				return this.typeId;
+				return text;
 			}
 		}
 
@@ -61,7 +46,7 @@ namespace System.ComponentModel
 
 		public override int GetHashCode()
 		{
-			return this.filterString.GetHashCode();
+			return this.FilterString.GetHashCode();
 		}
 
 		public override bool Match(object obj)
@@ -72,13 +57,9 @@ namespace System.ComponentModel
 
 		public override string ToString()
 		{
-			return this.filterString + "," + Enum.GetName(typeof(ToolboxItemFilterType), this.filterType);
+			return this.FilterString + "," + Enum.GetName(typeof(ToolboxItemFilterType), this.FilterType);
 		}
 
-		private ToolboxItemFilterType filterType;
-
-		private string filterString;
-
-		private string typeId;
+		private string _typeId;
 	}
 }

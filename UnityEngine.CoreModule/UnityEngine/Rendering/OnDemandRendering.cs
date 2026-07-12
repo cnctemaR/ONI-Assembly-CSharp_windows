@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
@@ -32,27 +34,24 @@ namespace UnityEngine.Rendering
 			frameInterval = OnDemandRendering.renderFrameInterval;
 		}
 
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern float GetEffectiveRenderFrameRate();
+
 		public static int effectiveRenderFrameRate
 		{
 			get
 			{
-				bool flag = QualitySettings.vSyncCount > 0;
+				float effectiveRenderFrameRate = OnDemandRendering.GetEffectiveRenderFrameRate();
+				bool flag = (double)effectiveRenderFrameRate <= 0.0;
 				int num;
 				if (flag)
 				{
-					num = Screen.currentResolution.refreshRate / QualitySettings.vSyncCount / OnDemandRendering.renderFrameInterval;
+					num = (int)effectiveRenderFrameRate;
 				}
 				else
 				{
-					bool flag2 = Application.targetFrameRate <= 0;
-					if (flag2)
-					{
-						num = Application.targetFrameRate;
-					}
-					else
-					{
-						num = Application.targetFrameRate / OnDemandRendering.renderFrameInterval;
-					}
+					num = (int)(effectiveRenderFrameRate + 0.5f);
 				}
 				return num;
 			}

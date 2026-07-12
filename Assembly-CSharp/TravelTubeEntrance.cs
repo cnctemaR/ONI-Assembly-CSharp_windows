@@ -573,7 +573,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			this.workLayer = Grid.SceneLayer.BuildingUse;
 		}
 
-		protected override void OnStartWork(Worker worker)
+		protected override void OnStartWork(WorkerBase worker)
 		{
 			base.SetWorkTime(1f);
 		}

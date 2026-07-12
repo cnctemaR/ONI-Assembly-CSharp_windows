@@ -316,17 +316,20 @@ namespace System.Resources
 			{
 				stringBuilder.Append(publicKeyToken[i].ToString("x", CultureInfo.InvariantCulture));
 			}
-			text = text + ", PublicKeyToken=" + stringBuilder;
-			string text2 = this._mediator.NeutralResourcesCulture.Name;
-			if (text2.Length == 0)
+			string text2 = text;
+			string text3 = ", PublicKeyToken=";
+			StringBuilder stringBuilder2 = stringBuilder;
+			text = text2 + text3 + ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
+			string text4 = this._mediator.NeutralResourcesCulture.Name;
+			if (text4.Length == 0)
 			{
-				text2 = "<invariant>";
+				text4 = "<invariant>";
 			}
 			throw new MissingSatelliteAssemblyException(Environment.GetResourceString("The satellite assembly named \"{1}\" for fallback culture \"{0}\" either could not be found or could not be loaded. This is generally a setup problem. Please consider reinstalling or repairing the application.", new object[]
 			{
 				this._mediator.NeutralResourcesCulture,
 				text
-			}), text2);
+			}), text4);
 		}
 
 		[SecurityCritical]

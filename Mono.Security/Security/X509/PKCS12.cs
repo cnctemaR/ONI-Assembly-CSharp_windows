@@ -531,26 +531,34 @@ namespace Mono.Security.X509
 		private void AddPrivateKey(PKCS8.PrivateKeyInfo pki)
 		{
 			byte[] privateKey = pki.PrivateKey;
-			byte b = privateKey[0];
-			if (b != 2)
+			try
 			{
-				if (b != 48)
+				string algorithm = pki.Algorithm;
+				if (!(algorithm == "1.2.840.113549.1.1.1"))
 				{
-					Array.Clear(privateKey, 0, privateKey.Length);
-					throw new CryptographicException("Unknown private key format");
+					if (!(algorithm == "1.2.840.10040.4.1"))
+					{
+						if (!(algorithm == "1.2.840.10045.2.1"))
+						{
+						}
+						throw new CryptographicException("Unknown private key format");
+					}
+					bool flag;
+					DSAParameters existingParameters = this.GetExistingParameters(out flag);
+					if (flag)
+					{
+						this._keyBags.Add(PKCS8.PrivateKeyInfo.DecodeDSA(privateKey, existingParameters));
+					}
 				}
-				this._keyBags.Add(PKCS8.PrivateKeyInfo.DecodeRSA(privateKey));
+				else
+				{
+					this._keyBags.Add(PKCS8.PrivateKeyInfo.DecodeRSA(privateKey));
+				}
 			}
-			else
+			finally
 			{
-				bool flag;
-				DSAParameters existingParameters = this.GetExistingParameters(out flag);
-				if (flag)
-				{
-					this._keyBags.Add(PKCS8.PrivateKeyInfo.DecodeDSA(privateKey, existingParameters));
-				}
+				Array.Clear(privateKey, 0, privateKey.Length);
 			}
-			Array.Clear(privateKey, 0, privateKey.Length);
 		}
 
 		private void ReadSafeBag(ASN1 safeBag)

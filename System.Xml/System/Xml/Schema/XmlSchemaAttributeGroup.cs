@@ -18,8 +18,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("attribute", typeof(XmlSchemaAttribute))]
 		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroupRef))]
+		[XmlElement("attribute", typeof(XmlSchemaAttribute))]
 		public XmlSchemaObjectCollection Attributes
 		{
 			get

@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class DeepfryerConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -66,10 +66,10 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("FriesCarrot", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		FriesCarrotConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array, array2), array, array2, this.GetDlcIds())
+		FriesCarrotConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array, array2), array, array2, this.GetRequiredDlcIds())
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.FRIESCARROT.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.FRIESCARROT.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Deepfryer" },
 			sortOrder = 100
@@ -83,10 +83,10 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("DeepFriedNosh", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		FriesCarrotConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array3, array4), array3, array4, this.GetDlcIds())
+		FriesCarrotConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array3, array4), array3, array4, this.GetRequiredDlcIds())
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.DEEPFRIEDNOSH.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.DEEPFRIEDNOSH.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Deepfryer" },
 			sortOrder = 200
@@ -101,10 +101,10 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("DeepFriedFish", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		DeepFriedFishConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array5, array6), array5, array6, this.GetDlcIds())
+		DeepFriedFishConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array5, array6), array5, array6, this.GetRequiredDlcIds())
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.DEEPFRIEDFISH.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.DEEPFRIEDFISH.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Deepfryer" },
 			sortOrder = 300
@@ -119,10 +119,10 @@ public class DeepfryerConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("DeepFriedShellfish", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		DeepFriedShellfishConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array7, array8), array7, array8, this.GetDlcIds())
+		DeepFriedShellfishConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Deepfryer", array7, array8), array7, array8, this.GetRequiredDlcIds())
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
-			description = ITEMS.FOOD.DEEPFRIEDSHELLFISH.RECIPEDESC,
+			description = global::STRINGS.ITEMS.FOOD.DEEPFRIEDSHELLFISH.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Deepfryer" },
 			sortOrder = 300

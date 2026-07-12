@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -15,21 +16,30 @@ namespace Mono.Net.Security
 {
 	internal abstract class MobileAuthenticatedStream : AuthenticatedStream, IMonoSslStream, IDisposable
 	{
-		public MobileAuthenticatedStream(Stream innerStream, bool leaveInnerStreamOpen, SslStream owner, MonoTlsSettings settings, MonoTlsProvider provider)
+		public MobileAuthenticatedStream(Stream innerStream, bool leaveInnerStreamOpen, SslStream owner, MonoTlsSettings settings, MobileTlsProvider provider)
 			: base(innerStream, leaveInnerStreamOpen)
 		{
 			this.SslStream = owner;
 			this.Settings = settings;
 			this.Provider = provider;
-			this.readBuffer = new BufferOffsetSize2(16834);
+			this.readBuffer = new BufferOffsetSize2(16500);
 			this.writeBuffer = new BufferOffsetSize2(16384);
+			this.operation = MobileAuthenticatedStream.Operation.None;
 		}
 
 		public SslStream SslStream { get; }
 
 		public MonoTlsSettings Settings { get; }
 
-		public MonoTlsProvider Provider { get; }
+		public MobileTlsProvider Provider { get; }
+
+		MonoTlsProvider IMonoSslStream.Provider
+		{
+			get
+			{
+				return this.Provider;
+			}
+		}
 
 		internal bool HasContext
 		{
@@ -38,6 +48,8 @@ namespace Mono.Net.Security
 				return this.xobileTlsContext != null;
 			}
 		}
+
+		internal string TargetHost { get; private set; }
 
 		internal void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
 		{
@@ -57,20 +69,36 @@ namespace Mono.Net.Security
 
 		internal static Exception GetSSPIException(Exception e)
 		{
-			if (e is OperationCanceledException || e is IOException || e is ObjectDisposedException || e is AuthenticationException)
+			if (e is OperationCanceledException || e is IOException || e is ObjectDisposedException || e is AuthenticationException || e is NotSupportedException)
 			{
 				return e;
 			}
-			return new AuthenticationException("A call to SSPI failed, see inner exception.", e);
+			return new AuthenticationException("Authentication failed, see inner exception.", e);
 		}
 
 		internal static Exception GetIOException(Exception e, string message)
 		{
-			if (e is OperationCanceledException || e is IOException || e is ObjectDisposedException || e is AuthenticationException)
+			if (e is OperationCanceledException || e is IOException || e is ObjectDisposedException || e is AuthenticationException || e is NotSupportedException)
 			{
 				return e;
 			}
 			return new IOException(message, e);
+		}
+
+		internal static Exception GetRenegotiationException(string message)
+		{
+			TlsException ex = new TlsException(AlertDescription.NoRenegotiation, message);
+			return new AuthenticationException("Authentication failed, see inner exception.", ex);
+		}
+
+		internal static Exception GetInternalError()
+		{
+			throw new InvalidOperationException("Internal error.");
+		}
+
+		internal static Exception GetInvalidNestedCallException()
+		{
+			throw new InvalidOperationException("Invalid nested call.");
 		}
 
 		internal ExceptionDispatchInfo SetException(Exception e)
@@ -79,82 +107,82 @@ namespace Mono.Net.Security
 			return Interlocked.CompareExchange<ExceptionDispatchInfo>(ref this.lastException, exceptionDispatchInfo, null) ?? exceptionDispatchInfo;
 		}
 
-		private SslProtocols DefaultProtocols
-		{
-			get
-			{
-				return SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
-			}
-		}
-
-		public void AuthenticateAsClient(string targetHost)
-		{
-			this.AuthenticateAsClient(targetHost, new X509CertificateCollection(), this.DefaultProtocols, false);
-		}
-
 		public void AuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
 		{
-			this.ProcessAuthentication(true, false, targetHost, enabledSslProtocols, null, clientCertificates, false).Wait();
-		}
-
-		public IAsyncResult BeginAuthenticateAsClient(string targetHost, AsyncCallback asyncCallback, object asyncState)
-		{
-			return this.BeginAuthenticateAsClient(targetHost, new X509CertificateCollection(), this.DefaultProtocols, false, asyncCallback, asyncState);
-		}
-
-		public IAsyncResult BeginAuthenticateAsClient(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
-		{
-			return TaskToApm.Begin(this.ProcessAuthentication(false, false, targetHost, enabledSslProtocols, null, clientCertificates, false), asyncCallback, asyncState);
-		}
-
-		public void EndAuthenticateAsClient(IAsyncResult asyncResult)
-		{
-			TaskToApm.End(asyncResult);
-		}
-
-		public void AuthenticateAsServer(X509Certificate serverCertificate)
-		{
-			this.AuthenticateAsServer(serverCertificate, false, this.DefaultProtocols, false);
+			MonoSslClientAuthenticationOptions monoSslClientAuthenticationOptions = new MonoSslClientAuthenticationOptions
+			{
+				TargetHost = targetHost,
+				ClientCertificates = clientCertificates,
+				EnabledSslProtocols = enabledSslProtocols,
+				CertificateRevocationCheckMode = (checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck),
+				EncryptionPolicy = EncryptionPolicy.RequireEncryption
+			};
+			Task task = this.ProcessAuthentication(true, monoSslClientAuthenticationOptions, CancellationToken.None);
+			try
+			{
+				task.Wait();
+			}
+			catch (Exception ex)
+			{
+				throw HttpWebRequest.FlattenException(ex);
+			}
 		}
 
 		public void AuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
 		{
-			this.ProcessAuthentication(true, true, string.Empty, enabledSslProtocols, serverCertificate, null, clientCertificateRequired).Wait();
-		}
-
-		public IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, AsyncCallback asyncCallback, object asyncState)
-		{
-			return this.BeginAuthenticateAsServer(serverCertificate, false, this.DefaultProtocols, false, asyncCallback, asyncState);
-		}
-
-		public IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, AsyncCallback asyncCallback, object asyncState)
-		{
-			return TaskToApm.Begin(this.ProcessAuthentication(false, true, string.Empty, enabledSslProtocols, serverCertificate, null, clientCertificateRequired), asyncCallback, asyncState);
-		}
-
-		public void EndAuthenticateAsServer(IAsyncResult asyncResult)
-		{
-			TaskToApm.End(asyncResult);
-		}
-
-		public Task AuthenticateAsClientAsync(string targetHost)
-		{
-			return this.ProcessAuthentication(false, false, targetHost, this.DefaultProtocols, null, null, false);
+			MonoSslServerAuthenticationOptions monoSslServerAuthenticationOptions = new MonoSslServerAuthenticationOptions
+			{
+				ServerCertificate = serverCertificate,
+				ClientCertificateRequired = clientCertificateRequired,
+				EnabledSslProtocols = enabledSslProtocols,
+				CertificateRevocationCheckMode = (checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck),
+				EncryptionPolicy = EncryptionPolicy.RequireEncryption
+			};
+			Task task = this.ProcessAuthentication(true, monoSslServerAuthenticationOptions, CancellationToken.None);
+			try
+			{
+				task.Wait();
+			}
+			catch (Exception ex)
+			{
+				throw HttpWebRequest.FlattenException(ex);
+			}
 		}
 
 		public Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
 		{
-			return this.ProcessAuthentication(false, false, targetHost, enabledSslProtocols, null, clientCertificates, false);
+			MonoSslClientAuthenticationOptions monoSslClientAuthenticationOptions = new MonoSslClientAuthenticationOptions
+			{
+				TargetHost = targetHost,
+				ClientCertificates = clientCertificates,
+				EnabledSslProtocols = enabledSslProtocols,
+				CertificateRevocationCheckMode = (checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck),
+				EncryptionPolicy = EncryptionPolicy.RequireEncryption
+			};
+			return this.ProcessAuthentication(false, monoSslClientAuthenticationOptions, CancellationToken.None);
 		}
 
-		public Task AuthenticateAsServerAsync(X509Certificate serverCertificate)
+		public Task AuthenticateAsClientAsync(IMonoSslClientAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken)
 		{
-			return this.AuthenticateAsServerAsync(serverCertificate, false, this.DefaultProtocols, false);
+			return this.ProcessAuthentication(false, (MonoSslClientAuthenticationOptions)sslClientAuthenticationOptions, cancellationToken);
 		}
 
 		public Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
 		{
-			return this.ProcessAuthentication(false, true, string.Empty, enabledSslProtocols, serverCertificate, null, clientCertificateRequired);
+			MonoSslServerAuthenticationOptions monoSslServerAuthenticationOptions = new MonoSslServerAuthenticationOptions
+			{
+				ServerCertificate = serverCertificate,
+				ClientCertificateRequired = clientCertificateRequired,
+				EnabledSslProtocols = enabledSslProtocols,
+				CertificateRevocationCheckMode = (checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck),
+				EncryptionPolicy = EncryptionPolicy.RequireEncryption
+			};
+			return this.ProcessAuthentication(false, monoSslServerAuthenticationOptions, CancellationToken.None);
+		}
+
+		public Task AuthenticateAsServerAsync(IMonoSslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken)
+		{
+			return this.ProcessAuthentication(false, (MonoSslServerAuthenticationOptions)sslServerAuthenticationOptions, cancellationToken);
 		}
 
 		public Task ShutdownAsync()
@@ -171,25 +199,26 @@ namespace Mono.Net.Security
 			}
 		}
 
-		private async Task ProcessAuthentication(bool runSynchronously, bool serverMode, string targetHost, SslProtocols enabledProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool clientCertRequired)
+		private async Task ProcessAuthentication(bool runSynchronously, MonoSslAuthenticationOptions options, CancellationToken cancellationToken)
 		{
-			if (serverMode)
+			if (options.ServerMode)
 			{
-				if (serverCertificate == null)
+				if (options.ServerCertificate == null && options.ServerCertSelectionDelegate == null)
 				{
-					throw new ArgumentException("serverCertificate");
+					throw new ArgumentException("ServerCertificate");
 				}
 			}
 			else
 			{
-				if (targetHost == null)
+				if (options.TargetHost == null)
 				{
-					throw new ArgumentException("targetHost");
+					throw new ArgumentException("TargetHost");
 				}
-				if (targetHost.Length == 0)
+				if (options.TargetHost.Length == 0)
 				{
-					targetHost = "?" + Interlocked.Increment(ref MobileAuthenticatedStream.uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
+					options.TargetHost = "?" + Interlocked.Increment(ref MobileAuthenticatedStream.uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
 				}
+				this.TargetHost = options.TargetHost;
 			}
 			if (this.lastException != null)
 			{
@@ -198,15 +227,15 @@ namespace Mono.Net.Security
 			AsyncHandshakeRequest asyncHandshakeRequest = new AsyncHandshakeRequest(this, runSynchronously);
 			if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncHandshakeRequest, asyncHandshakeRequest, null) != null)
 			{
-				throw new InvalidOperationException("Invalid nested call.");
+				throw MobileAuthenticatedStream.GetInvalidNestedCallException();
 			}
 			if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncReadRequest, asyncHandshakeRequest, null) != null)
 			{
-				throw new InvalidOperationException("Invalid nested call.");
+				throw MobileAuthenticatedStream.GetInvalidNestedCallException();
 			}
 			if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncWriteRequest, asyncHandshakeRequest, null) != null)
 			{
-				throw new InvalidOperationException("Invalid nested call.");
+				throw MobileAuthenticatedStream.GetInvalidNestedCallException();
 			}
 			AsyncProtocolResult asyncProtocolResult;
 			try
@@ -220,11 +249,11 @@ namespace Mono.Net.Security
 					}
 					this.readBuffer.Reset();
 					this.writeBuffer.Reset();
-					this.xobileTlsContext = this.CreateContext(serverMode, targetHost, enabledProtocols, serverCertificate, clientCertificates, clientCertRequired);
+					this.xobileTlsContext = this.CreateContext(options);
 				}
 				try
 				{
-					asyncProtocolResult = await asyncHandshakeRequest.StartOperation(CancellationToken.None).ConfigureAwait(false);
+					asyncProtocolResult = await asyncHandshakeRequest.StartOperation(cancellationToken).ConfigureAwait(false);
 				}
 				catch (Exception ex)
 				{
@@ -259,39 +288,12 @@ namespace Mono.Net.Security
 			}
 		}
 
-		protected abstract MobileTlsContext CreateContext(bool serverMode, string targetHost, SslProtocols enabledProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool askForClientCert);
-
-		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-		{
-			AsyncReadRequest asyncReadRequest = new AsyncReadRequest(this, false, buffer, offset, count);
-			return TaskToApm.Begin(this.StartOperation(MobileAuthenticatedStream.OperationType.Read, asyncReadRequest, CancellationToken.None), asyncCallback, asyncState);
-		}
-
-		public override int EndRead(IAsyncResult asyncResult)
-		{
-			return TaskToApm.End<int>(asyncResult);
-		}
-
-		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-		{
-			AsyncWriteRequest asyncWriteRequest = new AsyncWriteRequest(this, false, buffer, offset, count);
-			return TaskToApm.Begin(this.StartOperation(MobileAuthenticatedStream.OperationType.Write, asyncWriteRequest, CancellationToken.None), asyncCallback, asyncState);
-		}
-
-		public override void EndWrite(IAsyncResult asyncResult)
-		{
-			TaskToApm.End(asyncResult);
-		}
+		protected abstract MobileTlsContext CreateContext(MonoSslAuthenticationOptions options);
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
 			AsyncReadRequest asyncReadRequest = new AsyncReadRequest(this, true, buffer, offset, count);
 			return this.StartOperation(MobileAuthenticatedStream.OperationType.Read, asyncReadRequest, CancellationToken.None).Result;
-		}
-
-		public void Write(byte[] buffer)
-		{
-			this.Write(buffer, 0, buffer.Length);
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)
@@ -312,6 +314,21 @@ namespace Mono.Net.Security
 			return this.StartOperation(MobileAuthenticatedStream.OperationType.Write, asyncWriteRequest, cancellationToken);
 		}
 
+		public bool CanRenegotiate
+		{
+			get
+			{
+				this.CheckThrow(true, false);
+				return this.xobileTlsContext != null && this.xobileTlsContext.CanRenegotiate;
+			}
+		}
+
+		public Task RenegotiateAsync(CancellationToken cancellationToken)
+		{
+			AsyncRenegotiateRequest asyncRenegotiateRequest = new AsyncRenegotiateRequest(this);
+			return this.StartOperation(MobileAuthenticatedStream.OperationType.Renegotiate, asyncRenegotiateRequest, cancellationToken);
+		}
+
 		private async Task<int> StartOperation(MobileAuthenticatedStream.OperationType type, AsyncProtocolRequest asyncRequest, CancellationToken cancellationToken)
 		{
 			this.CheckThrow(true, type > MobileAuthenticatedStream.OperationType.Read);
@@ -319,12 +336,27 @@ namespace Mono.Net.Security
 			{
 				if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncReadRequest, asyncRequest, null) != null)
 				{
-					throw new InvalidOperationException("Invalid nested call.");
+					throw MobileAuthenticatedStream.GetInvalidNestedCallException();
+				}
+			}
+			else if (type == MobileAuthenticatedStream.OperationType.Renegotiate)
+			{
+				if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncHandshakeRequest, asyncRequest, null) != null)
+				{
+					throw MobileAuthenticatedStream.GetInvalidNestedCallException();
+				}
+				if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncReadRequest, asyncRequest, null) != null)
+				{
+					throw MobileAuthenticatedStream.GetInvalidNestedCallException();
+				}
+				if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncWriteRequest, asyncRequest, null) != null)
+				{
+					throw MobileAuthenticatedStream.GetInvalidNestedCallException();
 				}
 			}
 			else if (Interlocked.CompareExchange<AsyncProtocolRequest>(ref this.asyncWriteRequest, asyncRequest, null) != null)
 			{
-				throw new InvalidOperationException("Invalid nested call.");
+				throw MobileAuthenticatedStream.GetInvalidNestedCallException();
 			}
 			AsyncProtocolResult asyncProtocolResult;
 			try
@@ -359,6 +391,14 @@ namespace Mono.Net.Security
 						this.readBuffer.Reset();
 						this.asyncReadRequest = null;
 					}
+					else if (type == MobileAuthenticatedStream.OperationType.Renegotiate)
+					{
+						this.readBuffer.Reset();
+						this.writeBuffer.Reset();
+						this.asyncHandshakeRequest = null;
+						this.asyncReadRequest = null;
+						this.asyncWriteRequest = null;
+					}
 					else
 					{
 						this.writeBuffer.Reset();
@@ -382,7 +422,12 @@ namespace Mono.Net.Security
 		}
 
 		[Conditional("MONO_TLS_DEBUG")]
-		protected internal void Debug(string message, params object[] args)
+		protected internal void Debug(string format, params object[] args)
+		{
+		}
+
+		[Conditional("MONO_TLS_DEBUG")]
+		protected internal void Debug(string message)
 		{
 		}
 
@@ -431,7 +476,31 @@ namespace Mono.Net.Security
 			bool flag;
 			try
 			{
-				AsyncProtocolRequest asyncProtocolRequest = this.asyncHandshakeRequest ?? this.asyncWriteRequest;
+				AsyncProtocolRequest asyncProtocolRequest;
+				switch (this.operation)
+				{
+				case MobileAuthenticatedStream.Operation.Handshake:
+				case MobileAuthenticatedStream.Operation.Renegotiate:
+					asyncProtocolRequest = this.asyncHandshakeRequest;
+					goto IL_0057;
+				case MobileAuthenticatedStream.Operation.Read:
+					asyncProtocolRequest = this.asyncReadRequest;
+					if (this.xobileTlsContext.PendingRenegotiation())
+					{
+						goto IL_0057;
+					}
+					goto IL_0057;
+				case MobileAuthenticatedStream.Operation.Write:
+				case MobileAuthenticatedStream.Operation.Close:
+					asyncProtocolRequest = this.asyncWriteRequest;
+					goto IL_0057;
+				}
+				throw MobileAuthenticatedStream.GetInternalError();
+				IL_0057:
+				if (asyncProtocolRequest == null && this.operation != MobileAuthenticatedStream.Operation.Close)
+				{
+					throw MobileAuthenticatedStream.GetInternalError();
+				}
 				flag = this.InternalWrite(asyncProtocolRequest, this.writeBuffer, buffer, offset, size);
 			}
 			catch (Exception ex)
@@ -528,70 +597,122 @@ namespace Mono.Net.Security
 			}
 		}
 
-		internal AsyncOperationStatus ProcessHandshake(AsyncOperationStatus status)
+		internal AsyncOperationStatus ProcessHandshake(AsyncOperationStatus status, bool renegotiate)
 		{
 			object obj = this.ioLock;
 			AsyncOperationStatus asyncOperationStatus;
 			lock (obj)
 			{
-				if (status == AsyncOperationStatus.Initialize)
+				switch (this.operation)
 				{
-					this.xobileTlsContext.StartHandshake();
-					asyncOperationStatus = AsyncOperationStatus.Continue;
+				case MobileAuthenticatedStream.Operation.None:
+					if (renegotiate)
+					{
+						throw MobileAuthenticatedStream.GetInternalError();
+					}
+					this.operation = MobileAuthenticatedStream.Operation.Handshake;
+					break;
+				case MobileAuthenticatedStream.Operation.Handshake:
+				case MobileAuthenticatedStream.Operation.Renegotiate:
+					break;
+				case MobileAuthenticatedStream.Operation.Authenticated:
+					if (!renegotiate)
+					{
+						throw MobileAuthenticatedStream.GetInternalError();
+					}
+					this.operation = MobileAuthenticatedStream.Operation.Renegotiate;
+					break;
+				default:
+					throw MobileAuthenticatedStream.GetInternalError();
 				}
-				else
+				switch (status)
 				{
-					if (status == AsyncOperationStatus.ReadDone)
+				case AsyncOperationStatus.Initialize:
+					if (renegotiate)
 					{
-						throw new IOException("Authentication failed because the remote party has closed the transport stream.");
+						this.xobileTlsContext.Renegotiate();
 					}
-					if (status != AsyncOperationStatus.Continue)
+					else
 					{
-						throw new InvalidOperationException();
+						this.xobileTlsContext.StartHandshake();
 					}
+					asyncOperationStatus = AsyncOperationStatus.Continue;
+					break;
+				case AsyncOperationStatus.Continue:
+				{
 					AsyncOperationStatus asyncOperationStatus2 = AsyncOperationStatus.Continue;
-					if (this.xobileTlsContext.ProcessHandshake())
+					try
 					{
-						this.xobileTlsContext.FinishHandshake();
-						asyncOperationStatus2 = AsyncOperationStatus.Complete;
+						if (this.xobileTlsContext.ProcessHandshake())
+						{
+							this.xobileTlsContext.FinishHandshake();
+							this.operation = MobileAuthenticatedStream.Operation.Authenticated;
+							asyncOperationStatus2 = AsyncOperationStatus.Complete;
+						}
+					}
+					catch (Exception ex)
+					{
+						this.SetException(MobileAuthenticatedStream.GetSSPIException(ex));
+						base.Dispose();
+						throw;
 					}
 					if (this.lastException != null)
 					{
 						this.lastException.Throw();
 					}
 					asyncOperationStatus = asyncOperationStatus2;
+					break;
+				}
+				case AsyncOperationStatus.ReadDone:
+					throw new IOException("Authentication failed because the remote party has closed the transport stream.");
+				default:
+					throw new InvalidOperationException();
 				}
 			}
 			return asyncOperationStatus;
 		}
 
+		[return: TupleElementNames(new string[] { "ret", "wantMore" })]
 		internal ValueTuple<int, bool> ProcessRead(BufferOffsetSize userBuffer)
 		{
 			object obj = this.ioLock;
 			ValueTuple<int, bool> valueTuple2;
 			lock (obj)
 			{
+				if (this.operation != MobileAuthenticatedStream.Operation.Authenticated)
+				{
+					throw MobileAuthenticatedStream.GetInternalError();
+				}
+				this.operation = MobileAuthenticatedStream.Operation.Read;
 				ValueTuple<int, bool> valueTuple = this.xobileTlsContext.Read(userBuffer.Buffer, userBuffer.Offset, userBuffer.Size);
 				if (this.lastException != null)
 				{
 					this.lastException.Throw();
 				}
+				this.operation = MobileAuthenticatedStream.Operation.Authenticated;
 				valueTuple2 = valueTuple;
 			}
 			return valueTuple2;
 		}
 
+		[return: TupleElementNames(new string[] { "ret", "wantMore" })]
 		internal ValueTuple<int, bool> ProcessWrite(BufferOffsetSize userBuffer)
 		{
 			object obj = this.ioLock;
 			ValueTuple<int, bool> valueTuple2;
 			lock (obj)
 			{
+				if (this.operation != MobileAuthenticatedStream.Operation.Authenticated)
+				{
+					throw MobileAuthenticatedStream.GetInternalError();
+				}
+				this.operation = MobileAuthenticatedStream.Operation.Write;
 				ValueTuple<int, bool> valueTuple = this.xobileTlsContext.Write(userBuffer.Buffer, userBuffer.Offset, userBuffer.Size);
 				if (this.lastException != null)
 				{
 					this.lastException.Throw();
 				}
+				this.operation = MobileAuthenticatedStream.Operation.Authenticated;
 				valueTuple2 = valueTuple;
 			}
 			return valueTuple2;
@@ -603,8 +724,14 @@ namespace Mono.Net.Security
 			AsyncOperationStatus asyncOperationStatus;
 			lock (obj)
 			{
+				if (this.operation != MobileAuthenticatedStream.Operation.Authenticated)
+				{
+					throw MobileAuthenticatedStream.GetInternalError();
+				}
+				this.operation = MobileAuthenticatedStream.Operation.Close;
 				this.xobileTlsContext.Shutdown();
 				this.shutdown = true;
+				this.operation = MobileAuthenticatedStream.Operation.Authenticated;
 				asyncOperationStatus = AsyncOperationStatus.Complete;
 			}
 			return asyncOperationStatus;
@@ -665,7 +792,7 @@ namespace Mono.Net.Security
 				object obj = this.ioLock;
 				lock (obj)
 				{
-					this.lastException = ExceptionDispatchInfo.Capture(new ObjectDisposedException("MobileAuthenticatedStream"));
+					this.SetException(new ObjectDisposedException("MobileAuthenticatedStream"));
 					if (this.xobileTlsContext != null)
 					{
 						this.xobileTlsContext.Dispose();
@@ -950,7 +1077,24 @@ namespace Mono.Net.Security
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.CheckThrow(true, false);
+				MonoTlsConnectionInfo connectionInfo = this.GetConnectionInfo();
+				if (connectionInfo == null)
+				{
+					return 0;
+				}
+				switch (connectionInfo.CipherAlgorithmType)
+				{
+				case Mono.Security.Interface.CipherAlgorithmType.None:
+				case Mono.Security.Interface.CipherAlgorithmType.Aes128:
+				case Mono.Security.Interface.CipherAlgorithmType.AesGcm128:
+					return 128;
+				case Mono.Security.Interface.CipherAlgorithmType.Aes256:
+				case Mono.Security.Interface.CipherAlgorithmType.AesGcm256:
+					return 256;
+				default:
+					throw new ArgumentOutOfRangeException("CipherAlgorithmType");
+				}
 			}
 		}
 
@@ -958,7 +1102,35 @@ namespace Mono.Net.Security
 		{
 			get
 			{
-				throw new NotImplementedException();
+				this.CheckThrow(true, false);
+				MonoTlsConnectionInfo connectionInfo = this.GetConnectionInfo();
+				if (connectionInfo == null)
+				{
+					return 0;
+				}
+				Mono.Security.Interface.HashAlgorithmType hashAlgorithmType = connectionInfo.HashAlgorithmType;
+				switch (hashAlgorithmType)
+				{
+				case Mono.Security.Interface.HashAlgorithmType.Md5:
+					break;
+				case Mono.Security.Interface.HashAlgorithmType.Sha1:
+					return 160;
+				case Mono.Security.Interface.HashAlgorithmType.Sha224:
+					return 224;
+				case Mono.Security.Interface.HashAlgorithmType.Sha256:
+					return 256;
+				case Mono.Security.Interface.HashAlgorithmType.Sha384:
+					return 384;
+				case Mono.Security.Interface.HashAlgorithmType.Sha512:
+					return 512;
+				default:
+					if (hashAlgorithmType != Mono.Security.Interface.HashAlgorithmType.Md5Sha1)
+					{
+						throw new ArgumentOutOfRangeException("HashAlgorithmType");
+					}
+					break;
+				}
+				return 128;
 			}
 		}
 
@@ -966,7 +1138,7 @@ namespace Mono.Net.Security
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return 0;
 			}
 		}
 
@@ -998,16 +1170,30 @@ namespace Mono.Net.Security
 
 		private bool shutdown;
 
+		private MobileAuthenticatedStream.Operation operation;
+
 		private static int uniqueNameInteger = 123;
 
 		private static int nextId;
 
 		internal readonly int ID = ++MobileAuthenticatedStream.nextId;
 
+		private enum Operation
+		{
+			None,
+			Handshake,
+			Authenticated,
+			Renegotiate,
+			Read,
+			Write,
+			Close
+		}
+
 		private enum OperationType
 		{
 			Read,
 			Write,
+			Renegotiate,
 			Shutdown
 		}
 	}

@@ -4,13 +4,14 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Text;
+using System.Threading.Tasks;
 using Mono.Security;
 
 namespace System.IO
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class BinaryWriter : IDisposable
+	public class BinaryWriter : IDisposable, IAsyncDisposable
 	{
 		protected BinaryWriter()
 		{
@@ -93,6 +94,42 @@ namespace System.IO
 			return this.OutStream.Seek((long)offset, origin);
 		}
 
+		public virtual void Write(ReadOnlySpan<byte> buffer)
+		{
+			this.Write(buffer.ToArray());
+		}
+
+		public virtual void Write(ReadOnlySpan<char> buffer)
+		{
+			this.Write(buffer.ToArray());
+		}
+
+		public virtual ValueTask DisposeAsync()
+		{
+			ValueTask valueTask;
+			try
+			{
+				if (base.GetType() == typeof(BinaryWriter))
+				{
+					if (this._leaveOpen)
+					{
+						return new ValueTask(this.OutStream.FlushAsync());
+					}
+					this.OutStream.Close();
+				}
+				else
+				{
+					this.Dispose();
+				}
+				valueTask = default(ValueTask);
+			}
+			catch (Exception ex)
+			{
+				valueTask = new ValueTask(Task.FromException(ex));
+			}
+			return valueTask;
+		}
+
 		public virtual void Write(bool value)
 		{
 			this._buffer[0] = (value ? 1 : 0);
@@ -170,7 +207,7 @@ namespace System.IO
 
 		public virtual void Write(decimal value)
 		{
-			decimal.GetBytes(value, this._buffer);
+			decimal.GetBytes(in value, this._buffer);
 			this.OutStream.Write(this._buffer, 0, 16);
 		}
 

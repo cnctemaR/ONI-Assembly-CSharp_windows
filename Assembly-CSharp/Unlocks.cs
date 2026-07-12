@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
@@ -84,42 +85,47 @@ public class Unlocks : KMonoBehaviour
 		foreach (Unlocks.MetaUnlockCategory metaUnlockCategory in this.MetaUnlockCategories)
 		{
 			string metaCollectionID = metaUnlockCategory.metaCollectionID;
-			string mesaCollectionID = metaUnlockCategory.mesaCollectionID;
+			Unlocks.<>c__DisplayClass14_0 CS$<>8__locals1;
+			CS$<>8__locals1.mesaCollectionID = metaUnlockCategory.mesaCollectionID;
 			int mesaUnlockCount = metaUnlockCategory.mesaUnlockCount;
-			int num = 0;
-			bool flag = false;
+			CS$<>8__locals1.count = 0;
+			CS$<>8__locals1.isCollectionReplaced = false;
 			if (SaveLoader.Instance != null)
 			{
-				foreach (ClusterLayout.ClusterUnlock clusterUnlock in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
+				foreach (LoreCollectionOverride loreCollectionOverride in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
 				{
-					if (clusterUnlock.id == mesaCollectionID)
+					if (this.<EvalMetaCategories>g__EvaluateCollection|14_0(loreCollectionOverride, ref CS$<>8__locals1))
 					{
-						foreach (string text in this.lockCollections[clusterUnlock.collection])
+						break;
+					}
+				}
+				foreach (string text in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
+				{
+					DlcMixingSettings cachedDlcMixingSettings = SettingsCache.GetCachedDlcMixingSettings(text);
+					if (cachedDlcMixingSettings != null)
+					{
+						foreach (LoreCollectionOverride loreCollectionOverride2 in cachedDlcMixingSettings.globalLoreUnlocks)
 						{
-							if (this.IsUnlocked(text))
+							if (this.<EvalMetaCategories>g__EvaluateCollection|14_0(loreCollectionOverride2, ref CS$<>8__locals1))
 							{
-								num++;
+								break;
 							}
-						}
-						if (clusterUnlock.orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
-						{
-							flag = true;
-							break;
 						}
 					}
 				}
 			}
-			if (!flag)
+			if (!CS$<>8__locals1.isCollectionReplaced)
 			{
-				foreach (string text2 in this.lockCollections[mesaCollectionID])
+				foreach (string text2 in this.lockCollections[CS$<>8__locals1.mesaCollectionID])
 				{
 					if (this.IsUnlocked(text2))
 					{
-						num++;
+						int count = CS$<>8__locals1.count;
+						CS$<>8__locals1.count = count + 1;
 					}
 				}
 			}
-			if (num >= mesaUnlockCount)
+			if (CS$<>8__locals1.count >= mesaUnlockCount)
 			{
 				this.UnlockNext(metaCollectionID, false);
 			}
@@ -219,19 +225,19 @@ public class Unlocks : KMonoBehaviour
 		}
 	}
 
-	private string GetNextClusterUnlock(string collectionID, out ClusterLayout.ClusterUnlock.OrderRule orderRule, bool randomize)
+	private string GetNextClusterUnlock(string collectionID, out LoreCollectionOverride.OrderRule orderRule, bool randomize)
 	{
-		foreach (ClusterLayout.ClusterUnlock clusterUnlock in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
+		foreach (LoreCollectionOverride loreCollectionOverride in SaveLoader.Instance.ClusterLayout.clusterUnlocks)
 		{
-			if (!(clusterUnlock.id != collectionID))
+			if (!(loreCollectionOverride.id != collectionID))
 			{
 				if (!this.lockCollections.ContainsKey(collectionID))
 				{
 					DebugUtil.DevLogError("Lore collection '" + collectionID + "' is missing");
-					orderRule = ClusterLayout.ClusterUnlock.OrderRule.Invalid;
+					orderRule = LoreCollectionOverride.OrderRule.Invalid;
 					return null;
 				}
-				string[] array = this.lockCollections[clusterUnlock.collection];
+				string[] array = this.lockCollections[loreCollectionOverride.collection];
 				if (randomize)
 				{
 					array.Shuffle<string>();
@@ -240,18 +246,61 @@ public class Unlocks : KMonoBehaviour
 				{
 					if (!this.IsUnlocked(text))
 					{
-						orderRule = clusterUnlock.orderRule;
+						orderRule = loreCollectionOverride.orderRule;
 						return text;
 					}
 				}
-				if (clusterUnlock.orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
+				if (loreCollectionOverride.orderRule == LoreCollectionOverride.OrderRule.Replace)
 				{
-					orderRule = clusterUnlock.orderRule;
+					orderRule = loreCollectionOverride.orderRule;
 					return null;
 				}
 			}
 		}
-		orderRule = ClusterLayout.ClusterUnlock.OrderRule.Invalid;
+		orderRule = LoreCollectionOverride.OrderRule.Invalid;
+		return null;
+	}
+
+	private string GetNextGlobalDlcUnlock(string collectionID, out LoreCollectionOverride.OrderRule orderRule, bool randomize)
+	{
+		foreach (string text in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
+		{
+			DlcMixingSettings cachedDlcMixingSettings = SettingsCache.GetCachedDlcMixingSettings(text);
+			if (cachedDlcMixingSettings != null)
+			{
+				foreach (LoreCollectionOverride loreCollectionOverride in cachedDlcMixingSettings.globalLoreUnlocks)
+				{
+					if (!(loreCollectionOverride.id != collectionID))
+					{
+						if (!this.lockCollections.ContainsKey(collectionID))
+						{
+							DebugUtil.DevLogError("Lore collection '" + collectionID + "' is missing");
+							orderRule = LoreCollectionOverride.OrderRule.Invalid;
+							return null;
+						}
+						string[] array = this.lockCollections[loreCollectionOverride.collection];
+						if (randomize)
+						{
+							array.Shuffle<string>();
+						}
+						foreach (string text2 in array)
+						{
+							if (!this.IsUnlocked(text2))
+							{
+								orderRule = loreCollectionOverride.orderRule;
+								return text2;
+							}
+						}
+						if (loreCollectionOverride.orderRule == LoreCollectionOverride.OrderRule.Replace)
+						{
+							orderRule = loreCollectionOverride.orderRule;
+							return null;
+						}
+					}
+				}
+			}
+		}
+		orderRule = LoreCollectionOverride.OrderRule.Invalid;
 		return null;
 	}
 
@@ -259,14 +308,21 @@ public class Unlocks : KMonoBehaviour
 	{
 		if (SaveLoader.Instance != null)
 		{
-			ClusterLayout.ClusterUnlock.OrderRule orderRule;
-			string nextClusterUnlock = this.GetNextClusterUnlock(collectionID, out orderRule, randomize);
-			if (nextClusterUnlock != null && (orderRule == ClusterLayout.ClusterUnlock.OrderRule.Prepend || orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace))
+			LoreCollectionOverride.OrderRule orderRule;
+			string text = this.GetNextClusterUnlock(collectionID, out orderRule, randomize);
+			if (text != null && (orderRule == LoreCollectionOverride.OrderRule.Prepend || orderRule == LoreCollectionOverride.OrderRule.Replace))
 			{
-				this.Unlock(nextClusterUnlock, true);
-				return nextClusterUnlock;
+				this.Unlock(text, true);
+				return text;
 			}
-			if (orderRule == ClusterLayout.ClusterUnlock.OrderRule.Replace)
+			LoreCollectionOverride.OrderRule orderRule2;
+			text = this.GetNextGlobalDlcUnlock(collectionID, out orderRule2, randomize);
+			if (text != null && (orderRule2 == LoreCollectionOverride.OrderRule.Prepend || orderRule2 == LoreCollectionOverride.OrderRule.Replace))
+			{
+				this.Unlock(text, true);
+				return text;
+			}
+			if (orderRule == LoreCollectionOverride.OrderRule.Replace || orderRule2 == LoreCollectionOverride.OrderRule.Replace)
 			{
 				return null;
 			}
@@ -276,26 +332,32 @@ public class Unlocks : KMonoBehaviour
 		{
 			array.Shuffle<string>();
 		}
-		foreach (string text in array)
+		foreach (string text2 in array)
 		{
-			if (string.IsNullOrEmpty(text))
+			if (string.IsNullOrEmpty(text2))
 			{
 				DebugUtil.DevAssertArgs(false, new object[] { "Found null/empty string in Unlocks collection: ", collectionID });
 			}
-			else if (!this.IsUnlocked(text))
+			else if (!this.IsUnlocked(text2))
 			{
-				this.Unlock(text, true);
-				return text;
+				this.Unlock(text2, true);
+				return text2;
 			}
 		}
 		if (SaveLoader.Instance != null)
 		{
-			ClusterLayout.ClusterUnlock.OrderRule orderRule2;
-			string nextClusterUnlock2 = this.GetNextClusterUnlock(collectionID, out orderRule2, randomize);
-			if (nextClusterUnlock2 != null && orderRule2 == ClusterLayout.ClusterUnlock.OrderRule.Append)
+			LoreCollectionOverride.OrderRule orderRule3;
+			string text3 = this.GetNextClusterUnlock(collectionID, out orderRule3, randomize);
+			if (text3 != null && orderRule3 == LoreCollectionOverride.OrderRule.Append)
 			{
-				this.Unlock(nextClusterUnlock2, true);
-				return nextClusterUnlock2;
+				this.Unlock(text3, true);
+				return text3;
+			}
+			text3 = this.GetNextGlobalDlcUnlock(collectionID, out orderRule3, randomize);
+			if (text3 != null && orderRule3 == LoreCollectionOverride.OrderRule.Append)
+			{
+				this.Unlock(text3, true);
+				return text3;
 			}
 		}
 		return null;
@@ -452,6 +514,28 @@ public class Unlocks : KMonoBehaviour
 		}
 	}
 
+	[CompilerGenerated]
+	private bool <EvalMetaCategories>g__EvaluateCollection|14_0(LoreCollectionOverride loreUnlock, ref Unlocks.<>c__DisplayClass14_0 A_2)
+	{
+		if (loreUnlock.id == A_2.mesaCollectionID)
+		{
+			foreach (string text in this.lockCollections[loreUnlock.collection])
+			{
+				if (this.IsUnlocked(text))
+				{
+					int count = A_2.count;
+					A_2.count = count + 1;
+				}
+			}
+			if (loreUnlock.orderRule == LoreCollectionOverride.OrderRule.Replace)
+			{
+				A_2.isCollectionReplaced = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private const int FILE_IO_RETRY_ATTEMPTS = 5;
 
 	private List<string> unlocked = new List<string>();
@@ -477,6 +561,10 @@ public class Unlocks : KMonoBehaviour
 			new string[] { "email_newbaby", "email_cerestourism1", "email_cerestourism2", "email_voicemail", "email_expelled" }
 		},
 		{
+			"dlc3emails",
+			new string[] { "email_ulti" }
+		},
+		{
 			"journals",
 			new string[]
 			{
@@ -485,6 +573,10 @@ public class Unlocks : KMonoBehaviour
 				"journal_cleanup", "journal_A046_4", "journal_B327_4", "journal_revisitednumbers", "journal_B556_4", "journal_B835_5", "journal_elliesbirthday2", "journal_B111_1", "journal_revisitednumbers2", "journal_timemusings",
 				"journal_evil", "journal_timesorder", "journal_inspace", "journal_mysteryaward", "journal_courier"
 			}
+		},
+		{
+			"dlc3journals",
+			new string[] { "journal_potatobattery1", "journal_potatobattery2", "journal_potatobattery3" }
 		},
 		{
 			"researchnotes",
@@ -498,6 +590,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dlc2researchnotes",
 			new string[] { "notes_cleanup" }
+		},
+		{
+			"dlc3researchnotes",
+			new string[] { "notes_talkshow", "notes_remoteworkstation" }
 		},
 		{
 			"dimensionallore",

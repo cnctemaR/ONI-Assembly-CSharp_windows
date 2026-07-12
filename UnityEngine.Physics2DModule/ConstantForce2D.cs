@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics2D/ConstantForce2D.h")]
 	[RequireComponent(typeof(Rigidbody2D))]
+	[NativeHeader("Modules/Physics2D/ConstantForce2D.h")]
 	public sealed class ConstantForce2D : PhysicsUpdateBehaviour2D
 	{
 		public Vector2 force

@@ -35,6 +35,7 @@ public class WattsonMessage : KScreen
 
 	private IEnumerator ExpandPanel()
 	{
+		this.button.isInteractable = false;
 		if (CustomGameSettings.Instance.GetSettingsCoordinate().StartsWith("KF23"))
 		{
 			this.dialog.rectTransform().rotation = Quaternion.Euler(0f, 0f, -90f);
@@ -61,6 +62,7 @@ public class WattsonMessage : KScreen
 			}
 			initialOrientation = default(Quaternion);
 		}
+		this.button.isInteractable = true;
 		yield return null;
 		yield break;
 	}

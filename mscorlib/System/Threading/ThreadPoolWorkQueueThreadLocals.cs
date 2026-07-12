@@ -52,8 +52,8 @@ namespace System.Threading
 			}
 		}
 
-		[ThreadStatic]
 		[SecurityCritical]
+		[ThreadStatic]
 		public static ThreadPoolWorkQueueThreadLocals threadLocals;
 
 		public readonly ThreadPoolWorkQueue workQueue;

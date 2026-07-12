@@ -77,27 +77,31 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public List<int> GetWorldIDsSorted()
 	{
-		this.m_worldContainers.Sort((WorldContainer a, WorldContainer b) => a.DiscoveryTimestamp.CompareTo(b.DiscoveryTimestamp));
+		ListPool<WorldContainer, ClusterManager>.PooledList pooledList = ListPool<WorldContainer, ClusterManager>.Allocate(this.m_worldContainers);
+		pooledList.Sort((WorldContainer a, WorldContainer b) => a.DiscoveryTimestamp.CompareTo(b.DiscoveryTimestamp));
 		this._worldIDs.Clear();
-		foreach (WorldContainer worldContainer in this.m_worldContainers)
+		foreach (WorldContainer worldContainer in pooledList)
 		{
 			this._worldIDs.Add(worldContainer.id);
 		}
+		pooledList.Recycle();
 		return this._worldIDs;
 	}
 
 	public List<int> GetDiscoveredAsteroidIDsSorted()
 	{
-		this.m_worldContainers.Sort((WorldContainer a, WorldContainer b) => a.DiscoveryTimestamp.CompareTo(b.DiscoveryTimestamp));
-		List<int> list = new List<int>();
-		for (int i = 0; i < this.m_worldContainers.Count; i++)
+		ListPool<WorldContainer, ClusterManager>.PooledList pooledList = ListPool<WorldContainer, ClusterManager>.Allocate(this.m_worldContainers);
+		pooledList.Sort((WorldContainer a, WorldContainer b) => a.DiscoveryTimestamp.CompareTo(b.DiscoveryTimestamp));
+		this._discoveredAsteroidIds.Clear();
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			if (this.m_worldContainers[i].IsDiscovered && !this.m_worldContainers[i].IsModuleInterior)
+			if (pooledList[i].IsDiscovered && !this.m_worldContainers[i].IsModuleInterior)
 			{
-				list.Add(this.m_worldContainers[i].id);
+				this._discoveredAsteroidIds.Add(pooledList[i].id);
 			}
 		}
-		return list;
+		pooledList.Recycle();
+		return this._discoveredAsteroidIds;
 	}
 
 	public WorldContainer GetStartWorld()
@@ -321,7 +325,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		float num = 0f;
 		foreach (WorldContainer worldContainer in this.m_worldContainers)
 		{
-			RationTracker.Get().CountRations(null, worldContainer.worldInventory, true);
+			WorldResourceAmountTracker<RationTracker>.Get().CountAmount(null, worldContainer.worldInventory, true);
 		}
 		return num;
 	}
@@ -710,6 +714,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private MigrationEventArgs critterMigrationEvArg = new MigrationEventArgs();
 
 	private List<int> _worldIDs = new List<int>();
+
+	private List<int> _discoveredAsteroidIds = new List<int>();
 
 	public enum RocketStatesForAudio
 	{

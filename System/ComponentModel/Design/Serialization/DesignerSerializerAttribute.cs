@@ -7,60 +7,44 @@ namespace System.ComponentModel.Design.Serialization
 	{
 		public DesignerSerializerAttribute(Type serializerType, Type baseSerializerType)
 		{
-			this.serializerTypeName = serializerType.AssemblyQualifiedName;
-			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
+			this.SerializerTypeName = serializerType.AssemblyQualifiedName;
+			this.SerializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
 		}
 
 		public DesignerSerializerAttribute(string serializerTypeName, Type baseSerializerType)
 		{
-			this.serializerTypeName = serializerTypeName;
-			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
+			this.SerializerTypeName = serializerTypeName;
+			this.SerializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
 		}
 
 		public DesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName)
 		{
-			this.serializerTypeName = serializerTypeName;
-			this.serializerBaseTypeName = baseSerializerTypeName;
+			this.SerializerTypeName = serializerTypeName;
+			this.SerializerBaseTypeName = baseSerializerTypeName;
 		}
 
-		public string SerializerTypeName
-		{
-			get
-			{
-				return this.serializerTypeName;
-			}
-		}
+		public string SerializerTypeName { get; }
 
-		public string SerializerBaseTypeName
-		{
-			get
-			{
-				return this.serializerBaseTypeName;
-			}
-		}
+		public string SerializerBaseTypeName { get; }
 
 		public override object TypeId
 		{
 			get
 			{
-				if (this.typeId == null)
+				if (this._typeId == null)
 				{
-					string text = this.serializerBaseTypeName;
+					string text = this.SerializerBaseTypeName;
 					int num = text.IndexOf(',');
 					if (num != -1)
 					{
 						text = text.Substring(0, num);
 					}
-					this.typeId = base.GetType().FullName + text;
+					this._typeId = base.GetType().FullName + text;
 				}
-				return this.typeId;
+				return this._typeId;
 			}
 		}
 
-		private string serializerTypeName;
-
-		private string serializerBaseTypeName;
-
-		private string typeId;
+		private string _typeId;
 	}
 }

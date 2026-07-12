@@ -291,8 +291,58 @@ namespace UnityEngine
 			get;
 		}
 
+		public Vector2 totalForce
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_totalForce_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_totalForce_Injected(ref value);
+			}
+		}
+
+		public extern float totalTorque
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public LayerMask excludeLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_excludeLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_excludeLayers_Injected(ref value);
+			}
+		}
+
+		public LayerMask includeLayers
+		{
+			get
+			{
+				LayerMask layerMask;
+				this.get_includeLayers_Injected(out layerMask);
+				return layerMask;
+			}
+			set
+			{
+				this.set_includeLayers_Injected(ref value);
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsTouching([NotNull("ArgumentNullException")] [Writable] Collider2D collider);
+		public extern bool IsTouching([Writable] [NotNull("ArgumentNullException")] Collider2D collider);
 
 		public bool IsTouching([Writable] Collider2D collider, ContactFilter2D contactFilter)
 		{
@@ -448,7 +498,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("OverlapColliderArray_Binding")]
-		private int OverlapColliderArray_Internal(ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] Collider2D[] results)
+		private int OverlapColliderArray_Internal(ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] [Unmarshalled] Collider2D[] results)
 		{
 			return this.OverlapColliderArray_Internal_Injected(ref contactFilter, results);
 		}
@@ -511,7 +561,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetAttachedCollidersArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAttachedCollidersArray_Internal([NotNull("ArgumentNullException")] Collider2D[] results);
+		private extern int GetAttachedCollidersArray_Internal([NotNull("ArgumentNullException")] [Unmarshalled] Collider2D[] results);
 
 		public int GetAttachedColliders(List<Collider2D> results)
 		{
@@ -534,7 +584,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastArray_Binding")]
-		private int CastArray_Internal(Vector2 direction, float distance, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
+		private int CastArray_Internal(Vector2 direction, float distance, [Unmarshalled] [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.CastArray_Internal_Injected(ref direction, distance, results);
 		}
@@ -562,7 +612,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastFilteredArray_Binding")]
-		private int CastFilteredArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
+		private int CastFilteredArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] [Unmarshalled] RaycastHit2D[] results)
 		{
 			return this.CastFilteredArray_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}
@@ -577,6 +627,15 @@ namespace UnityEngine
 		{
 			return this.CastFilteredList_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}
+
+		public int GetShapes(PhysicsShapeGroup2D physicsShapeGroup)
+		{
+			return this.GetShapes_Internal(ref physicsShapeGroup.m_GroupState);
+		}
+
+		[NativeMethod("GetShapes_Binding")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetShapes_Internal(ref PhysicsShapeGroup2D.GroupState physicsShapeGroupState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_position_Injected(out Vector2 ret);
@@ -607,6 +666,24 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_worldCenterOfMass_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_totalForce_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_totalForce_Injected(ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_excludeLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_excludeLayers_Injected(ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_includeLayers_Injected(out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_includeLayers_Injected(ref LayerMask value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool IsTouching_OtherColliderWithFilter_Internal_Injected([Writable] Collider2D collider, ref ContactFilter2D contactFilter);

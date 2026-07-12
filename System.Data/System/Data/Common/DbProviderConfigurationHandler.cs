@@ -38,8 +38,7 @@ namespace System.Data.Common
 					XmlNode xmlNode = (XmlNode)obj2;
 					if (!HandlerBase.IsIgnorableAlsoCheckForNonElement(xmlNode))
 					{
-						string name = xmlNode.Name;
-						if (!(name == "settings"))
+						if (!(xmlNode.Name == "settings"))
 						{
 							throw ADP.ConfigUnrecognizedElement(xmlNode);
 						}

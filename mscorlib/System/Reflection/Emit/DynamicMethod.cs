@@ -75,7 +75,7 @@ namespace System.Reflection.Emit
 				{
 					if (parameterTypes[i] == null)
 					{
-						throw new ArgumentException("Parameter " + i + " is null", "parameterTypes");
+						throw new ArgumentException("Parameter " + i.ToString() + " is null", "parameterTypes");
 					}
 				}
 			}
@@ -102,36 +102,40 @@ namespace System.Reflection.Emit
 
 		private void CreateDynMethod()
 		{
-			if (this.mhandle.Value == IntPtr.Zero)
+			lock (this)
 			{
-				if (this.ilgen == null || this.ilgen.ILOffset == 0)
+				if (this.mhandle.Value == IntPtr.Zero)
 				{
-					throw new InvalidOperationException("Method '" + this.name + "' does not have a method body.");
-				}
-				this.ilgen.label_fixup(this);
-				try
-				{
-					this.creating = true;
-					if (this.refs != null)
+					if (this.ilgen == null || this.ilgen.ILOffset == 0)
 					{
-						for (int i = 0; i < this.refs.Length; i++)
+						throw new InvalidOperationException("Method '" + this.name + "' does not have a method body.");
+					}
+					this.ilgen.label_fixup(this);
+					try
+					{
+						this.creating = true;
+						if (this.refs != null)
 						{
-							if (this.refs[i] is DynamicMethod)
+							for (int i = 0; i < this.refs.Length; i++)
 							{
-								DynamicMethod dynamicMethod = (DynamicMethod)this.refs[i];
-								if (!dynamicMethod.creating)
+								if (this.refs[i] is DynamicMethod)
 								{
-									dynamicMethod.CreateDynMethod();
+									DynamicMethod dynamicMethod = (DynamicMethod)this.refs[i];
+									if (!dynamicMethod.creating)
+									{
+										dynamicMethod.CreateDynMethod();
+									}
 								}
 							}
 						}
 					}
+					finally
+					{
+						this.creating = false;
+					}
+					DynamicMethod.create_dynamic_method(this);
+					this.ilgen = null;
 				}
-				finally
-				{
-					this.creating = false;
-				}
-				DynamicMethod.create_dynamic_method(this);
 			}
 		}
 
@@ -254,7 +258,10 @@ namespace System.Reflection.Emit
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
+				ParameterInfo[] array2 = array;
+				int num = i;
+				ParameterBuilder[] array3 = this.pinfo;
+				array2[num] = RuntimeParameterInfo.New((array3 != null) ? array3[i + 1] : null, this.parameters[i], this, i + 1);
 			}
 			return array;
 		}
@@ -282,9 +289,9 @@ namespace System.Reflection.Emit
 				this.CreateDynMethod();
 				if (this.method == null)
 				{
-					this.method = new MonoMethod(this.mhandle);
+					this.method = new RuntimeMethodInfo(this.mhandle);
 				}
-				obj2 = this.method.Invoke(obj, parameters);
+				obj2 = this.method.Invoke(obj, invokeAttr, binder, parameters, culture);
 			}
 			catch (MethodAccessException ex)
 			{
@@ -475,7 +482,7 @@ namespace System.Reflection.Emit
 
 		private Delegate deleg;
 
-		private MonoMethod method;
+		private RuntimeMethodInfo method;
 
 		private ParameterBuilder[] pinfo;
 
@@ -483,7 +490,7 @@ namespace System.Reflection.Emit
 
 		private DynamicILInfo il_info;
 
-		private class AnonHostModuleHolder
+		private static class AnonHostModuleHolder
 		{
 			static AnonHostModuleHolder()
 			{
@@ -500,7 +507,7 @@ namespace System.Reflection.Emit
 				}
 			}
 
-			public static Module anon_host_module;
+			public static readonly Module anon_host_module;
 		}
 	}
 }

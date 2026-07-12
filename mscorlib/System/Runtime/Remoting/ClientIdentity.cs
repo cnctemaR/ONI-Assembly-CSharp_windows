@@ -15,7 +15,8 @@ namespace System.Runtime.Remoting
 		{
 			get
 			{
-				return (MarshalByRefObject)this._proxyReference.Target;
+				WeakReference proxyReference = this._proxyReference;
+				return (MarshalByRefObject)((proxyReference != null) ? proxyReference.Target : null);
 			}
 			set
 			{

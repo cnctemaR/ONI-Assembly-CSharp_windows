@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713F04}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.TextCore</RootNamespace>
+    <AssemblyName>UnityEngine.TextCoreFontEngineModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="FaceInfo.cs" />
+    <Compile Include="Glyph.cs" />
+    <Compile Include="GlyphClassDefinitionType.cs" />
+    <Compile Include="GlyphMetrics.cs" />
+    <Compile Include="GlyphRect.cs" />
+    <Compile Include="LowLevel\AlternateSubstitutionRecord.cs" />
+    <Compile Include="LowLevel\ChainingContextualSubstitutionRecord.cs" />
+    <Compile Include="LowLevel\ContextualSubstitutionRecord.cs" />
+    <Compile Include="LowLevel\FontEngine.cs" />
+    <Compile Include="LowLevel\FontEngineError.cs" />
+    <Compile Include="LowLevel\FontEngineUtilities.cs" />
+    <Compile Include="LowLevel\FontFeatureLookupFlags.cs" />
+    <Compile Include="LowLevel\FontReference.cs" />
+    <Compile Include="LowLevel\GlyphAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\GlyphAnchorPoint.cs" />
+    <Compile Include="LowLevel\GlyphIDSequence.cs" />
+    <Compile Include="LowLevel\GlyphLoadFlags.cs" />
+    <Compile Include="LowLevel\GlyphMarshallingStruct.cs" />
+    <Compile Include="LowLevel\GlyphPackingMode.cs" />
+    <Compile Include="LowLevel\GlyphPairAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\GlyphRasterModes.cs" />
+    <Compile Include="LowLevel\GlyphRenderMode.cs" />
+    <Compile Include="LowLevel\GlyphValueRecord.cs" />
+    <Compile Include="LowLevel\LigatureSubstitutionRecord.cs" />
+    <Compile Include="LowLevel\MarkPositionAdjustment.cs" />
+    <Compile Include="LowLevel\MarkToBaseAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\MarkToMarkAdjustmentRecord.cs" />
+    <Compile Include="LowLevel\MultipleSubstitutionRecord.cs" />
+    <Compile Include="LowLevel\OpenTypeFeature.cs" />
+    <Compile Include="LowLevel\OpenTypeLayoutFeature.cs" />
+    <Compile Include="LowLevel\OpenTypeLayoutLanguage.cs" />
+    <Compile Include="LowLevel\OpenTypeLayoutLookup.cs" />
+    <Compile Include="LowLevel\OpenTypeLayoutScript.cs" />
+    <Compile Include="LowLevel\OpenTypeLayoutTable.cs" />
+    <Compile Include="LowLevel\OTL_Feature.cs" />
+    <Compile Include="LowLevel\OTL_Language.cs" />
+    <Compile Include="LowLevel\OTL_Lookup.cs" />
+    <Compile Include="LowLevel\OTL_LookupType.cs" />
+    <Compile Include="LowLevel\OTL_Script.cs" />
+    <Compile Include="LowLevel\OTL_Table.cs" />
+    <Compile Include="LowLevel\OTL_TableType.cs" />
+    <Compile Include="LowLevel\SequenceLookupRecord.cs" />
+    <Compile Include="LowLevel\SingleSubstitutionRecord.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC1}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713EFC}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713F06}</Project>
+      <Name>UnityEngine.TextRenderingModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

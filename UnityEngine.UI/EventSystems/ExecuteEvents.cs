@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.UI;
+using UnityEngine.Pool;
 
 namespace UnityEngine.EventSystems
 {
@@ -13,6 +13,11 @@ namespace UnityEngine.EventSystems
 				throw new ArgumentException(string.Format("Invalid type: {0} passed to event expecting {1}", data.GetType(), typeof(T)));
 			}
 			return data as T;
+		}
+
+		private static void Execute(IPointerMoveHandler handler, BaseEventData eventData)
+		{
+			handler.OnPointerMove(ExecuteEvents.ValidateEventData<PointerEventData>(eventData));
 		}
 
 		private static void Execute(IPointerEnterHandler handler, BaseEventData eventData)
@@ -98,6 +103,14 @@ namespace UnityEngine.EventSystems
 		private static void Execute(ICancelHandler handler, BaseEventData eventData)
 		{
 			handler.OnCancel(eventData);
+		}
+
+		public static ExecuteEvents.EventFunction<IPointerMoveHandler> pointerMoveHandler
+		{
+			get
+			{
+				return ExecuteEvents.s_PointerMoveHandler;
+			}
 		}
 
 		public static ExecuteEvents.EventFunction<IPointerEnterHandler> pointerEnterHandler
@@ -253,7 +266,7 @@ namespace UnityEngine.EventSystems
 
 		public static bool Execute<T>(GameObject target, BaseEventData eventData, ExecuteEvents.EventFunction<T> functor) where T : IEventSystemHandler
 		{
-			List<IEventSystemHandler> list = ExecuteEvents.s_HandlerListPool.Get();
+			List<IEventSystemHandler> list = CollectionPool<List<IEventSystemHandler>, IEventSystemHandler>.Get();
 			ExecuteEvents.GetEventList<T>(target, list);
 			int count = list.Count;
 			int i = 0;
@@ -268,13 +281,13 @@ namespace UnityEngine.EventSystems
 				{
 					IEventSystemHandler eventSystemHandler = list[i];
 					Debug.LogException(new Exception(string.Format("Type {0} expected {1} received.", typeof(T).Name, eventSystemHandler.GetType().Name), ex));
-					goto IL_007D;
+					goto IL_0078;
 				}
-				goto IL_006B;
-				IL_007D:
+				goto IL_0066;
+				IL_0078:
 				i++;
 				continue;
-				IL_006B:
+				IL_0066:
 				try
 				{
 					functor(t, eventData);
@@ -283,10 +296,10 @@ namespace UnityEngine.EventSystems
 				{
 					Debug.LogException(ex2);
 				}
-				goto IL_007D;
+				goto IL_0078;
 			}
 			int count2 = list.Count;
-			ExecuteEvents.s_HandlerListPool.Release(list);
+			CollectionPool<List<IEventSystemHandler>, IEventSystemHandler>.Release(list);
 			return count2 > 0;
 		}
 
@@ -325,7 +338,7 @@ namespace UnityEngine.EventSystems
 			{
 				return;
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			go.GetComponents<Component>(list);
 			int count = list.Count;
 			for (int i = 0; i < count; i++)
@@ -335,15 +348,15 @@ namespace UnityEngine.EventSystems
 					results.Add(list[i] as IEventSystemHandler);
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 		}
 
 		public static bool CanHandleEvent<T>(GameObject go) where T : IEventSystemHandler
 		{
-			List<IEventSystemHandler> list = ExecuteEvents.s_HandlerListPool.Get();
+			List<IEventSystemHandler> list = CollectionPool<List<IEventSystemHandler>, IEventSystemHandler>.Get();
 			ExecuteEvents.GetEventList<T>(go, list);
 			int count = list.Count;
-			ExecuteEvents.s_HandlerListPool.Release(list);
+			CollectionPool<List<IEventSystemHandler>, IEventSystemHandler>.Release(list);
 			return count != 0;
 		}
 
@@ -364,6 +377,8 @@ namespace UnityEngine.EventSystems
 			}
 			return null;
 		}
+
+		private static readonly ExecuteEvents.EventFunction<IPointerMoveHandler> s_PointerMoveHandler = new ExecuteEvents.EventFunction<IPointerMoveHandler>(ExecuteEvents.Execute);
 
 		private static readonly ExecuteEvents.EventFunction<IPointerEnterHandler> s_PointerEnterHandler = new ExecuteEvents.EventFunction<IPointerEnterHandler>(ExecuteEvents.Execute);
 
@@ -398,11 +413,6 @@ namespace UnityEngine.EventSystems
 		private static readonly ExecuteEvents.EventFunction<ISubmitHandler> s_SubmitHandler = new ExecuteEvents.EventFunction<ISubmitHandler>(ExecuteEvents.Execute);
 
 		private static readonly ExecuteEvents.EventFunction<ICancelHandler> s_CancelHandler = new ExecuteEvents.EventFunction<ICancelHandler>(ExecuteEvents.Execute);
-
-		private static readonly ObjectPool<List<IEventSystemHandler>> s_HandlerListPool = new ObjectPool<List<IEventSystemHandler>>(null, delegate(List<IEventSystemHandler> l)
-		{
-			l.Clear();
-		});
 
 		private static readonly List<Transform> s_InternalTransformList = new List<Transform>(30);
 

@@ -1704,8 +1704,8 @@ namespace System.Linq.Expressions.Compiler
 		private void EmitMemberAssignment(MemberAssignment binding, Type objectType)
 		{
 			this.EmitExpression(binding.Expression);
-			FieldInfo fieldInfo;
-			if ((fieldInfo = binding.Member as FieldInfo) != null)
+			FieldInfo fieldInfo = binding.Member as FieldInfo;
+			if (fieldInfo != null)
 			{
 				this._ilg.Emit(OpCodes.Stfld, fieldInfo);
 				return;
@@ -1839,8 +1839,8 @@ namespace System.Linq.Expressions.Compiler
 
 		private static Type GetMemberType(MemberInfo member)
 		{
-			FieldInfo fieldInfo;
-			if ((fieldInfo = member as FieldInfo) == null)
+			FieldInfo fieldInfo = member as FieldInfo;
+			if (fieldInfo == null)
 			{
 				return (member as PropertyInfo).PropertyType;
 			}
@@ -2307,7 +2307,7 @@ namespace System.Linq.Expressions.Compiler
 
 		private static string GetUniqueMethodName()
 		{
-			return "<ExpressionCompilerImplementationDetails>{" + Interlocked.Increment(ref LambdaCompiler.s_counter) + "}lambda_method";
+			return "<ExpressionCompilerImplementationDetails>{" + Interlocked.Increment(ref LambdaCompiler.s_counter).ToString() + "}lambda_method";
 		}
 
 		private void EmitLambdaBody()
@@ -3266,7 +3266,7 @@ namespace System.Linq.Expressions.Compiler
 				return false;
 			}
 			List<ElementInit> list = new List<ElementInit>(num);
-			ArrayBuilder<SwitchCase> arrayBuilder = new ArrayBuilder<SwitchCase>(node.Cases.Count);
+			global::System.Collections.Generic.ArrayBuilder<SwitchCase> arrayBuilder = new global::System.Collections.Generic.ArrayBuilder<SwitchCase>(node.Cases.Count);
 			int num2 = -1;
 			MethodInfo dictionaryOfStringInt32_Add_String_Int = CachedReflectionInfo.DictionaryOfStringInt32_Add_String_Int32;
 			int i = 0;
@@ -3805,6 +3805,7 @@ namespace System.Linq.Expressions.Compiler
 
 		internal static Delegate Compile(LambdaExpression lambda)
 		{
+			lambda.ValidateArgumentCount();
 			LambdaCompiler lambdaCompiler = new LambdaCompiler(LambdaCompiler.AnalyzeLambda(ref lambda), lambda);
 			lambdaCompiler.EmitLambdaBody();
 			return lambdaCompiler.CreateDelegate();
@@ -3853,13 +3854,7 @@ namespace System.Linq.Expressions.Compiler
 
 		private FieldBuilder CreateStaticField(string name, Type type)
 		{
-			return this._typeBuilder.DefineField(string.Concat(new object[]
-			{
-				"<ExpressionCompilerImplementationDetails>{",
-				Interlocked.Increment(ref LambdaCompiler.s_counter),
-				"}",
-				name
-			}), type, FieldAttributes.Private | FieldAttributes.Static);
+			return this._typeBuilder.DefineField("<ExpressionCompilerImplementationDetails>{" + Interlocked.Increment(ref LambdaCompiler.s_counter).ToString() + "}" + name, type, FieldAttributes.Private | FieldAttributes.Static);
 		}
 
 		private MemberExpression CreateLazyInitializedField<T>(string name)

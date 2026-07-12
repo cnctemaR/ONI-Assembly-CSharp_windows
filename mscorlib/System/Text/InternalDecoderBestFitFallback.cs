@@ -7,8 +7,7 @@ namespace System.Text
 	{
 		internal InternalDecoderBestFitFallback(Encoding encoding)
 		{
-			this.encoding = encoding;
-			this.bIsMicrosoftBestFitFallback = true;
+			this._encoding = encoding;
 		}
 
 		public override DecoderFallbackBuffer CreateFallbackBuffer()
@@ -27,18 +26,18 @@ namespace System.Text
 		public override bool Equals(object value)
 		{
 			InternalDecoderBestFitFallback internalDecoderBestFitFallback = value as InternalDecoderBestFitFallback;
-			return internalDecoderBestFitFallback != null && this.encoding.CodePage == internalDecoderBestFitFallback.encoding.CodePage;
+			return internalDecoderBestFitFallback != null && this._encoding.CodePage == internalDecoderBestFitFallback._encoding.CodePage;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.encoding.CodePage;
+			return this._encoding.CodePage;
 		}
 
-		internal Encoding encoding;
+		internal Encoding _encoding;
 
-		internal char[] arrayBestFit;
+		internal char[] _arrayBestFit;
 
-		internal char cReplacement = '?';
+		internal char _cReplacement = '?';
 	}
 }

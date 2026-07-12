@@ -86,13 +86,13 @@ namespace UnityEngine.UI
 			matEntry2.colorMask = colorWriteMask;
 			matEntry2.useAlphaClip = operation != StencilOp.Keep && writeMask > 0;
 			matEntry2.customMat.name = string.Format("Stencil Id:{0}, Op:{1}, Comp:{2}, WriteMask:{3}, ReadMask:{4}, ColorMask:{5} AlphaClip:{6} ({7})", new object[] { stencilID, operation, compareFunction, writeMask, readMask, colorWriteMask, matEntry2.useAlphaClip, baseMat.name });
-			matEntry2.customMat.SetInt("_Stencil", stencilID);
-			matEntry2.customMat.SetInt("_StencilOp", (int)operation);
-			matEntry2.customMat.SetInt("_StencilComp", (int)compareFunction);
-			matEntry2.customMat.SetInt("_StencilReadMask", readMask);
-			matEntry2.customMat.SetInt("_StencilWriteMask", writeMask);
-			matEntry2.customMat.SetInt("_ColorMask", (int)colorWriteMask);
-			matEntry2.customMat.SetInt("_UseUIAlphaClip", matEntry2.useAlphaClip ? 1 : 0);
+			matEntry2.customMat.SetFloat("_Stencil", (float)stencilID);
+			matEntry2.customMat.SetFloat("_StencilOp", (float)operation);
+			matEntry2.customMat.SetFloat("_StencilComp", (float)compareFunction);
+			matEntry2.customMat.SetFloat("_StencilReadMask", (float)readMask);
+			matEntry2.customMat.SetFloat("_StencilWriteMask", (float)writeMask);
+			matEntry2.customMat.SetFloat("_ColorMask", (float)colorWriteMask);
+			matEntry2.customMat.SetFloat("_UseUIAlphaClip", matEntry2.useAlphaClip ? 1f : 0f);
 			if (matEntry2.useAlphaClip)
 			{
 				matEntry2.customMat.EnableKeyword("UNITY_UI_ALPHACLIP");

@@ -8,7 +8,7 @@ namespace TUNING
 	{
 		public static string GetMaterialString(string materialCategory)
 		{
-			string[] array = materialCategory.Split(new char[] { '&' });
+			string[] array = materialCategory.Split('&', StringSplitOptions.None);
 			string text;
 			if (array.Length == 1)
 			{

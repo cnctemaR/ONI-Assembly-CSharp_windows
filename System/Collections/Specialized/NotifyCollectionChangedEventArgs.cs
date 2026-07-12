@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace System.Collections.Specialized
 {
-	[TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
 	public class NotifyCollectionChangedEventArgs : EventArgs
 	{
 		public NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action)
 		{
 			if (action != NotifyCollectionChangedAction.Reset)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Reset }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Reset), "action");
 			}
 			this.InitializeAdd(action, null, -1);
 		}
@@ -19,7 +17,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Add && action != NotifyCollectionChangedAction.Remove && action != NotifyCollectionChangedAction.Reset)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor only supports either a Reset, Add, or Remove action."), "action");
+				throw new ArgumentException("Constructor only supports either a Reset, Add, or Remove action.", "action");
 			}
 			if (action != NotifyCollectionChangedAction.Reset)
 			{
@@ -28,7 +26,7 @@ namespace System.Collections.Specialized
 			}
 			if (changedItem != null)
 			{
-				throw new ArgumentException(global::SR.GetString("Reset action must be initialized with no changed items."), "action");
+				throw new ArgumentException("Reset action must be initialized with no changed items.", "action");
 			}
 			this.InitializeAdd(action, null, -1);
 		}
@@ -37,7 +35,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Add && action != NotifyCollectionChangedAction.Remove && action != NotifyCollectionChangedAction.Reset)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor only supports either a Reset, Add, or Remove action."), "action");
+				throw new ArgumentException("Constructor only supports either a Reset, Add, or Remove action.", "action");
 			}
 			if (action != NotifyCollectionChangedAction.Reset)
 			{
@@ -46,11 +44,11 @@ namespace System.Collections.Specialized
 			}
 			if (changedItem != null)
 			{
-				throw new ArgumentException(global::SR.GetString("Reset action must be initialized with no changed items."), "action");
+				throw new ArgumentException("Reset action must be initialized with no changed items.", "action");
 			}
 			if (index != -1)
 			{
-				throw new ArgumentException(global::SR.GetString("Reset action must be initialized with index -1."), "action");
+				throw new ArgumentException("Reset action must be initialized with index -1.", "action");
 			}
 			this.InitializeAdd(action, null, -1);
 		}
@@ -59,13 +57,13 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Add && action != NotifyCollectionChangedAction.Remove && action != NotifyCollectionChangedAction.Reset)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor only supports either a Reset, Add, or Remove action."), "action");
+				throw new ArgumentException("Constructor only supports either a Reset, Add, or Remove action.", "action");
 			}
 			if (action == NotifyCollectionChangedAction.Reset)
 			{
 				if (changedItems != null)
 				{
-					throw new ArgumentException(global::SR.GetString("Reset action must be initialized with no changed items."), "action");
+					throw new ArgumentException("Reset action must be initialized with no changed items.", "action");
 				}
 				this.InitializeAdd(action, null, -1);
 				return;
@@ -85,17 +83,17 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Add && action != NotifyCollectionChangedAction.Remove && action != NotifyCollectionChangedAction.Reset)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor only supports either a Reset, Add, or Remove action."), "action");
+				throw new ArgumentException("Constructor only supports either a Reset, Add, or Remove action.", "action");
 			}
 			if (action == NotifyCollectionChangedAction.Reset)
 			{
 				if (changedItems != null)
 				{
-					throw new ArgumentException(global::SR.GetString("Reset action must be initialized with no changed items."), "action");
+					throw new ArgumentException("Reset action must be initialized with no changed items.", "action");
 				}
 				if (startingIndex != -1)
 				{
-					throw new ArgumentException(global::SR.GetString("Reset action must be initialized with index -1."), "action");
+					throw new ArgumentException("Reset action must be initialized with index -1.", "action");
 				}
 				this.InitializeAdd(action, null, -1);
 				return;
@@ -108,7 +106,7 @@ namespace System.Collections.Specialized
 				}
 				if (startingIndex < -1)
 				{
-					throw new ArgumentException(global::SR.GetString("Index cannot be negative."), "startingIndex");
+					throw new ArgumentException("Index cannot be negative.", "startingIndex");
 				}
 				this.InitializeAddOrRemove(action, changedItems, startingIndex);
 				return;
@@ -119,7 +117,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Replace)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Replace }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Replace), "action");
 			}
 			this.InitializeMoveOrReplace(action, new object[] { newItem }, new object[] { oldItem }, -1, -1);
 		}
@@ -128,7 +126,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Replace)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Replace }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Replace), "action");
 			}
 			this.InitializeMoveOrReplace(action, new object[] { newItem }, new object[] { oldItem }, index, index);
 		}
@@ -137,7 +135,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Replace)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Replace }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Replace), "action");
 			}
 			if (newItems == null)
 			{
@@ -154,7 +152,7 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Replace)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Replace }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Replace), "action");
 			}
 			if (newItems == null)
 			{
@@ -171,11 +169,11 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Move)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Move }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Move), "action");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("Index cannot be negative."), "index");
+				throw new ArgumentException("Index cannot be negative.", "index");
 			}
 			object[] array = new object[] { changedItem };
 			this.InitializeMoveOrReplace(action, array, array, index, oldIndex);
@@ -185,11 +183,11 @@ namespace System.Collections.Specialized
 		{
 			if (action != NotifyCollectionChangedAction.Move)
 			{
-				throw new ArgumentException(global::SR.GetString("Constructor supports only the '{0}' action.", new object[] { NotifyCollectionChangedAction.Move }), "action");
+				throw new ArgumentException(SR.Format("Constructor supports only the '{0}' action.", NotifyCollectionChangedAction.Move), "action");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("Index cannot be negative."), "index");
+				throw new ArgumentException("Index cannot be negative.", "index");
 			}
 			this.InitializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
 		}
@@ -197,8 +195,8 @@ namespace System.Collections.Specialized
 		internal NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action, IList newItems, IList oldItems, int newIndex, int oldIndex)
 		{
 			this._action = action;
-			this._newItems = ((newItems == null) ? null : ArrayList.ReadOnly(newItems));
-			this._oldItems = ((oldItems == null) ? null : ArrayList.ReadOnly(oldItems));
+			this._newItems = ((newItems == null) ? null : new ReadOnlyList(newItems));
+			this._oldItems = ((oldItems == null) ? null : new ReadOnlyList(oldItems));
 			this._newStartingIndex = newIndex;
 			this._oldStartingIndex = oldIndex;
 		}
@@ -219,14 +217,14 @@ namespace System.Collections.Specialized
 		private void InitializeAdd(NotifyCollectionChangedAction action, IList newItems, int newStartingIndex)
 		{
 			this._action = action;
-			this._newItems = ((newItems == null) ? null : ArrayList.ReadOnly(newItems));
+			this._newItems = ((newItems == null) ? null : new ReadOnlyList(newItems));
 			this._newStartingIndex = newStartingIndex;
 		}
 
 		private void InitializeRemove(NotifyCollectionChangedAction action, IList oldItems, int oldStartingIndex)
 		{
 			this._action = action;
-			this._oldItems = ((oldItems == null) ? null : ArrayList.ReadOnly(oldItems));
+			this._oldItems = ((oldItems == null) ? null : new ReadOnlyList(oldItems));
 			this._oldStartingIndex = oldStartingIndex;
 		}
 

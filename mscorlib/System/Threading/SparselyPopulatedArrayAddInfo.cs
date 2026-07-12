@@ -6,15 +6,15 @@ namespace System.Threading
 	{
 		internal SparselyPopulatedArrayAddInfo(SparselyPopulatedArrayFragment<T> source, int index)
 		{
-			this.m_source = source;
-			this.m_index = index;
+			this._source = source;
+			this._index = index;
 		}
 
 		internal SparselyPopulatedArrayFragment<T> Source
 		{
 			get
 			{
-				return this.m_source;
+				return this._source;
 			}
 		}
 
@@ -22,12 +22,12 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_index;
+				return this._index;
 			}
 		}
 
-		private SparselyPopulatedArrayFragment<T> m_source;
+		private SparselyPopulatedArrayFragment<T> _source;
 
-		private int m_index;
+		private int _index;
 	}
 }

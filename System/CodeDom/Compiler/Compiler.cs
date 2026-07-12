@@ -82,8 +82,8 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		[ConfigurationProperty("warningLevel", DefaultValue = "0")]
 		[IntegerValidator(MinValue = 0, MaxValue = 4)]
+		[ConfigurationProperty("warningLevel", DefaultValue = "0")]
 		public int WarningLevel
 		{
 			get

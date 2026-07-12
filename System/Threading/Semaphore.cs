@@ -25,19 +25,19 @@ namespace System.Threading
 		{
 			if (initialCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCount", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialCount", SR.GetString("Non-negative number required."));
 			}
 			if (maximumCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("maximumCount", global::SR.GetString("Positive number required."));
+				throw new ArgumentOutOfRangeException("maximumCount", SR.GetString("Positive number required."));
 			}
 			if (initialCount > maximumCount)
 			{
-				throw new ArgumentException(global::SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
+				throw new ArgumentException(SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
 			}
 			if (name != null && 260 < name.Length)
 			{
-				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+				throw new ArgumentException(SR.GetString("The name can be no more than 260 characters in length."));
 			}
 			int num;
 			SafeWaitHandle safeWaitHandle = new SafeWaitHandle(Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out num), true);
@@ -45,7 +45,7 @@ namespace System.Threading
 			{
 				if (name != null && name.Length != 0 && 6 == num)
 				{
-					throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+					throw new WaitHandleCannotBeOpenedException(SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
 				}
 				InternalResources.WinIOError(num, "");
 			}
@@ -63,19 +63,19 @@ namespace System.Threading
 		{
 			if (initialCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCount", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialCount", SR.GetString("Non-negative number required."));
 			}
 			if (maximumCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("maximumCount", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("maximumCount", SR.GetString("Non-negative number required."));
 			}
 			if (initialCount > maximumCount)
 			{
-				throw new ArgumentException(global::SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
+				throw new ArgumentException(SR.GetString("The initial count for the semaphore must be greater than or equal to zero and less than the maximum count."));
 			}
 			if (name != null && 260 < name.Length)
 			{
-				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+				throw new ArgumentException(SR.GetString("The name can be no more than 260 characters in length."));
 			}
 			int num;
 			SafeWaitHandle safeWaitHandle = new SafeWaitHandle(Semaphore.CreateSemaphore_internal(initialCount, maximumCount, name, out num), true);
@@ -83,7 +83,7 @@ namespace System.Threading
 			{
 				if (name != null && name.Length != 0 && 6 == num)
 				{
-					throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+					throw new WaitHandleCannotBeOpenedException(SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
 				}
 				InternalResources.WinIOError(num, "");
 			}
@@ -114,7 +114,7 @@ namespace System.Threading
 				InternalResources.WinIOError(3, string.Empty);
 				return semaphore;
 			case Semaphore.OpenExistingResult.NameInvalid:
-				throw new WaitHandleCannotBeOpenedException(global::SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
+				throw new WaitHandleCannotBeOpenedException(SR.GetString("A WaitHandle with system-wide name '{0}' cannot be created. A WaitHandle of a different type might have the same name.", new object[] { name }));
 			default:
 				return semaphore;
 			}
@@ -141,11 +141,11 @@ namespace System.Threading
 			}
 			if (name.Length == 0)
 			{
-				throw new ArgumentException(global::SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "name" }), "name");
+				throw new ArgumentException(SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "name" }), "name");
 			}
 			if (name != null && 260 < name.Length)
 			{
-				throw new ArgumentException(global::SR.GetString("The name can be no more than 260 characters in length."));
+				throw new ArgumentException(SR.GetString("The name can be no more than 260 characters in length."));
 			}
 			result = null;
 			int num;
@@ -182,7 +182,7 @@ namespace System.Threading
 		{
 			if (releaseCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("releaseCount", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("releaseCount", SR.GetString("Non-negative number required."));
 			}
 			int num;
 			if (!Semaphore.ReleaseSemaphore_internal(base.SafeWaitHandle.DangerousGetHandle(), releaseCount, out num))
@@ -206,14 +206,34 @@ namespace System.Threading
 			semaphoreSecurity.Persist(base.SafeWaitHandle);
 		}
 
+		internal unsafe static IntPtr CreateSemaphore_internal(int initialCount, int maximumCount, string name, out int errorCode)
+		{
+			char* ptr = name;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return Semaphore.CreateSemaphore_icall(initialCount, maximumCount, ptr, (name != null) ? name.Length : 0, out errorCode);
+		}
+
+		private unsafe static IntPtr OpenSemaphore_internal(string name, SemaphoreRights rights, out int errorCode)
+		{
+			char* ptr = name;
+			if (ptr != null)
+			{
+				ptr += RuntimeHelpers.OffsetToStringData / 2;
+			}
+			return Semaphore.OpenSemaphore_icall(ptr, (name != null) ? name.Length : 0, rights, out errorCode);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr CreateSemaphore_internal(int initialCount, int maximumCount, string name, out int errorCode);
+		private unsafe static extern IntPtr CreateSemaphore_icall(int initialCount, int maximumCount, char* name, int name_length, out int errorCode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern IntPtr OpenSemaphore_icall(char* name, int name_length, SemaphoreRights rights, out int errorCode);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool ReleaseSemaphore_internal(IntPtr handle, int releaseCount, out int previousCount);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenSemaphore_internal(string name, SemaphoreRights rights, out int errorCode);
 
 		private const int MAX_PATH = 260;
 

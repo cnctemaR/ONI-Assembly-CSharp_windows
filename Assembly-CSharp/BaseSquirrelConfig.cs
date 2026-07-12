@@ -17,7 +17,7 @@ public static class BaseSquirrelConfig
 		{
 			text = "DreckoBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1, true, false, 283.15f, 313.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, "Meat", 1, true, false, 283.15f, 313.15f, 228.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -83,13 +83,16 @@ public static class BaseSquirrelConfig
 
 	public static Diet.Info[] BasicDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
+		HashSet<Tag> hashSet = new HashSet<Tag>();
+		hashSet.Add("ForestTree");
+		hashSet.Add(BasicFabricMaterialPlantConfig.ID);
+		if (DlcManager.IsContentSubscribed("DLC2_ID"))
+		{
+			hashSet.Add("SpaceTree");
+		}
 		return new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag>
-			{
-				"ForestTree",
-				BasicFabricMaterialPlantConfig.ID
-			}, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true, false)
+			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatPlantDirectly, false, null)
 		};
 	}
 

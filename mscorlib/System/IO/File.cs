@@ -1,33 +1,39 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.AccessControl;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	public static class File
 	{
-		public static void AppendAllText(string path, string contents)
+		public static StreamReader OpenText(string path)
 		{
-			using (TextWriter textWriter = new StreamWriter(path, true))
+			if (path == null)
 			{
-				textWriter.Write(contents);
+				throw new ArgumentNullException("path");
 			}
+			return new StreamReader(path);
 		}
 
-		public static void AppendAllText(string path, string contents, Encoding encoding)
+		public static StreamWriter CreateText(string path)
 		{
-			using (TextWriter textWriter = new StreamWriter(path, true, encoding))
+			if (path == null)
 			{
-				textWriter.Write(contents);
+				throw new ArgumentNullException("path");
 			}
+			return new StreamWriter(path, false);
 		}
 
 		public static StreamWriter AppendText(string path)
 		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
 			return new StreamWriter(path, true);
 		}
 
@@ -40,74 +46,26 @@ namespace System.IO
 		{
 			if (sourceFileName == null)
 			{
-				throw new ArgumentNullException("sourceFileName");
+				throw new ArgumentNullException("sourceFileName", "File name cannot be null.");
 			}
 			if (destFileName == null)
 			{
-				throw new ArgumentNullException("destFileName");
+				throw new ArgumentNullException("destFileName", "File name cannot be null.");
 			}
 			if (sourceFileName.Length == 0)
 			{
-				throw new ArgumentException("An empty file name is not valid.", "sourceFileName");
-			}
-			if (sourceFileName.Trim().Length == 0 || sourceFileName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("The file name is not valid.");
+				throw new ArgumentException("Empty file name is not legal.", "sourceFileName");
 			}
 			if (destFileName.Length == 0)
 			{
-				throw new ArgumentException("An empty file name is not valid.", "destFileName");
+				throw new ArgumentException("Empty file name is not legal.", "destFileName");
 			}
-			if (destFileName.Trim().Length == 0 || destFileName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("The file name is not valid.");
-			}
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(sourceFileName, out monoIOError))
-			{
-				throw new FileNotFoundException(Locale.GetText("{0} does not exist", new object[] { sourceFileName }), sourceFileName);
-			}
-			if ((File.GetAttributes(sourceFileName) & FileAttributes.Directory) == FileAttributes.Directory)
-			{
-				throw new ArgumentException(Locale.GetText("{0} is a directory", new object[] { sourceFileName }));
-			}
-			if (MonoIO.Exists(destFileName, out monoIOError))
-			{
-				if ((File.GetAttributes(destFileName) & FileAttributes.Directory) == FileAttributes.Directory)
-				{
-					throw new ArgumentException(Locale.GetText("{0} is a directory", new object[] { destFileName }));
-				}
-				if (!overwrite)
-				{
-					throw new IOException(Locale.GetText("{0} already exists", new object[] { destFileName }));
-				}
-			}
-			string directoryName = Path.GetDirectoryName(destFileName);
-			if (directoryName != string.Empty && !Directory.Exists(directoryName))
-			{
-				throw new DirectoryNotFoundException(Locale.GetText("Destination directory not found: {0}", new object[] { directoryName }));
-			}
-			if (!MonoIO.CopyFile(sourceFileName, destFileName, overwrite, out monoIOError))
-			{
-				throw MonoIO.GetException(Locale.GetText("{0}\" or \"{1}", new object[] { sourceFileName, destFileName }), monoIOError);
-			}
-		}
-
-		internal static string InternalCopy(string sourceFileName, string destFileName, bool overwrite, bool checkHost)
-		{
-			string fullPathInternal = Path.GetFullPathInternal(sourceFileName);
-			string fullPathInternal2 = Path.GetFullPathInternal(destFileName);
-			MonoIOError monoIOError;
-			if (!MonoIO.CopyFile(fullPathInternal, fullPathInternal2, overwrite, out monoIOError))
-			{
-				throw MonoIO.GetException(Locale.GetText("{0}\" or \"{1}", new object[] { sourceFileName, destFileName }), monoIOError);
-			}
-			return fullPathInternal2;
+			FileSystem.CopyFile(Path.GetFullPath(sourceFileName), Path.GetFullPath(destFileName), overwrite);
 		}
 
 		public static FileStream Create(string path)
 		{
-			return File.Create(path, 8192);
+			return File.Create(path, 4096);
 		}
 
 		public static FileStream Create(string path, int bufferSize)
@@ -115,192 +73,59 @@ namespace System.IO
 			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize);
 		}
 
-		[MonoLimitation("FileOptions are ignored")]
 		public static FileStream Create(string path, int bufferSize, FileOptions options)
 		{
 			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);
 		}
 
-		[MonoLimitation("FileOptions and FileSecurity are ignored")]
-		public static FileStream Create(string path, int bufferSize, FileOptions options, FileSecurity fileSecurity)
-		{
-			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);
-		}
-
-		public static StreamWriter CreateText(string path)
-		{
-			return new StreamWriter(path, false);
-		}
-
 		public static void Delete(string path)
 		{
-			Path.Validate(path);
-			if (Directory.Exists(path))
+			if (path == null)
 			{
-				throw new UnauthorizedAccessException(Locale.GetText("{0} is a directory", new object[] { path }));
+				throw new ArgumentNullException("path");
 			}
-			string directoryName = Path.GetDirectoryName(path);
-			if (directoryName != string.Empty && !Directory.Exists(directoryName))
-			{
-				throw new DirectoryNotFoundException(Locale.GetText("Could not find a part of the path \"{0}\".", new object[] { path }));
-			}
-			MonoIOError monoIOError;
-			if (!MonoIO.DeleteFile(path, out monoIOError) && monoIOError != MonoIOError.ERROR_FILE_NOT_FOUND)
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
+			FileSystem.DeleteFile(Path.GetFullPath(path));
 		}
 
 		public static bool Exists(string path)
 		{
-			MonoIOError monoIOError;
-			return !string.IsNullOrWhiteSpace(path) && path.IndexOfAny(Path.InvalidPathChars) < 0 && SecurityManager.CheckElevatedPermissions() && MonoIO.ExistsFile(path, out monoIOError);
-		}
-
-		public static FileSecurity GetAccessControl(string path)
-		{
-			return File.GetAccessControl(path, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
-		}
-
-		public static FileSecurity GetAccessControl(string path, AccessControlSections includeSections)
-		{
-			return new FileSecurity(path, includeSections);
-		}
-
-		public static FileAttributes GetAttributes(string path)
-		{
-			Path.Validate(path);
-			MonoIOError monoIOError;
-			FileAttributes fileAttributes = MonoIO.GetFileAttributes(path, out monoIOError);
-			if (monoIOError != MonoIOError.ERROR_SUCCESS)
+			try
 			{
-				throw MonoIO.GetException(path, monoIOError);
+				if (path == null)
+				{
+					return false;
+				}
+				if (path.Length == 0)
+				{
+					return false;
+				}
+				path = Path.GetFullPath(path);
+				if (path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]))
+				{
+					return false;
+				}
+				return FileSystem.FileExists(path);
 			}
-			return fileAttributes;
-		}
-
-		public static DateTime GetCreationTime(string path)
-		{
-			Path.Validate(path);
-			MonoIOStat monoIOStat;
-			MonoIOError monoIOError;
-			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
+			catch (ArgumentException)
 			{
-				return DateTime.FromFileTime(monoIOStat.CreationTime);
 			}
-			if (monoIOError == MonoIOError.ERROR_PATH_NOT_FOUND || monoIOError == MonoIOError.ERROR_FILE_NOT_FOUND)
+			catch (IOException)
 			{
-				return File.DefaultLocalFileTime;
 			}
-			throw new IOException(path);
-		}
-
-		public static DateTime GetCreationTimeUtc(string path)
-		{
-			return File.GetCreationTime(path).ToUniversalTime();
-		}
-
-		public static DateTime GetLastAccessTime(string path)
-		{
-			Path.Validate(path);
-			MonoIOStat monoIOStat;
-			MonoIOError monoIOError;
-			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
+			catch (UnauthorizedAccessException)
 			{
-				return DateTime.FromFileTime(monoIOStat.LastAccessTime);
 			}
-			if (monoIOError == MonoIOError.ERROR_PATH_NOT_FOUND || monoIOError == MonoIOError.ERROR_FILE_NOT_FOUND)
-			{
-				return File.DefaultLocalFileTime;
-			}
-			throw new IOException(path);
-		}
-
-		public static DateTime GetLastAccessTimeUtc(string path)
-		{
-			return File.GetLastAccessTime(path).ToUniversalTime();
-		}
-
-		public static DateTime GetLastWriteTime(string path)
-		{
-			Path.Validate(path);
-			MonoIOStat monoIOStat;
-			MonoIOError monoIOError;
-			if (MonoIO.GetFileStat(path, out monoIOStat, out monoIOError))
-			{
-				return DateTime.FromFileTime(monoIOStat.LastWriteTime);
-			}
-			if (monoIOError == MonoIOError.ERROR_PATH_NOT_FOUND || monoIOError == MonoIOError.ERROR_FILE_NOT_FOUND)
-			{
-				return File.DefaultLocalFileTime;
-			}
-			throw new IOException(path);
-		}
-
-		public static DateTime GetLastWriteTimeUtc(string path)
-		{
-			return File.GetLastWriteTime(path).ToUniversalTime();
-		}
-
-		public static void Move(string sourceFileName, string destFileName)
-		{
-			if (sourceFileName == null)
-			{
-				throw new ArgumentNullException("sourceFileName");
-			}
-			if (destFileName == null)
-			{
-				throw new ArgumentNullException("destFileName");
-			}
-			if (sourceFileName.Length == 0)
-			{
-				throw new ArgumentException("An empty file name is not valid.", "sourceFileName");
-			}
-			if (sourceFileName.Trim().Length == 0 || sourceFileName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("The file name is not valid.");
-			}
-			if (destFileName.Length == 0)
-			{
-				throw new ArgumentException("An empty file name is not valid.", "destFileName");
-			}
-			if (destFileName.Trim().Length == 0 || destFileName.IndexOfAny(Path.InvalidPathChars) != -1)
-			{
-				throw new ArgumentException("The file name is not valid.");
-			}
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(sourceFileName, out monoIOError))
-			{
-				throw new FileNotFoundException(Locale.GetText("{0} does not exist", new object[] { sourceFileName }), sourceFileName);
-			}
-			string directoryName = Path.GetDirectoryName(destFileName);
-			if (directoryName != string.Empty && !Directory.Exists(directoryName))
-			{
-				throw new DirectoryNotFoundException(Locale.GetText("Could not find a part of the path."));
-			}
-			if (MonoIO.MoveFile(sourceFileName, destFileName, out monoIOError))
-			{
-				return;
-			}
-			if (monoIOError == MonoIOError.ERROR_ALREADY_EXISTS)
-			{
-				throw MonoIO.GetException(monoIOError);
-			}
-			if (monoIOError == MonoIOError.ERROR_SHARING_VIOLATION)
-			{
-				throw MonoIO.GetException(sourceFileName, monoIOError);
-			}
-			throw MonoIO.GetException(monoIOError);
+			return false;
 		}
 
 		public static FileStream Open(string path, FileMode mode)
 		{
-			return new FileStream(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.None);
+			return File.Open(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.None);
 		}
 
 		public static FileStream Open(string path, FileMode mode, FileAccess access)
 		{
-			return new FileStream(path, mode, access, FileShare.None);
+			return File.Open(path, mode, access, FileShare.None);
 		}
 
 		public static FileStream Open(string path, FileMode mode, FileAccess access, FileShare share)
@@ -308,19 +133,497 @@ namespace System.IO
 			return new FileStream(path, mode, access, share);
 		}
 
+		internal static DateTimeOffset GetUtcDateTimeOffset(DateTime dateTime)
+		{
+			if (dateTime.Kind == DateTimeKind.Unspecified)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+			}
+			return dateTime.ToUniversalTime();
+		}
+
+		public static void SetCreationTime(string path, DateTime creationTime)
+		{
+			FileSystem.SetCreationTime(Path.GetFullPath(path), creationTime, false);
+		}
+
+		public static void SetCreationTimeUtc(string path, DateTime creationTimeUtc)
+		{
+			FileSystem.SetCreationTime(Path.GetFullPath(path), File.GetUtcDateTimeOffset(creationTimeUtc), false);
+		}
+
+		public static DateTime GetCreationTime(string path)
+		{
+			return FileSystem.GetCreationTime(Path.GetFullPath(path)).LocalDateTime;
+		}
+
+		public static DateTime GetCreationTimeUtc(string path)
+		{
+			return FileSystem.GetCreationTime(Path.GetFullPath(path)).UtcDateTime;
+		}
+
+		public static void SetLastAccessTime(string path, DateTime lastAccessTime)
+		{
+			FileSystem.SetLastAccessTime(Path.GetFullPath(path), lastAccessTime, false);
+		}
+
+		public static void SetLastAccessTimeUtc(string path, DateTime lastAccessTimeUtc)
+		{
+			FileSystem.SetLastAccessTime(Path.GetFullPath(path), File.GetUtcDateTimeOffset(lastAccessTimeUtc), false);
+		}
+
+		public static DateTime GetLastAccessTime(string path)
+		{
+			return FileSystem.GetLastAccessTime(Path.GetFullPath(path)).LocalDateTime;
+		}
+
+		public static DateTime GetLastAccessTimeUtc(string path)
+		{
+			return FileSystem.GetLastAccessTime(Path.GetFullPath(path)).UtcDateTime;
+		}
+
+		public static void SetLastWriteTime(string path, DateTime lastWriteTime)
+		{
+			FileSystem.SetLastWriteTime(Path.GetFullPath(path), lastWriteTime, false);
+		}
+
+		public static void SetLastWriteTimeUtc(string path, DateTime lastWriteTimeUtc)
+		{
+			FileSystem.SetLastWriteTime(Path.GetFullPath(path), File.GetUtcDateTimeOffset(lastWriteTimeUtc), false);
+		}
+
+		public static DateTime GetLastWriteTime(string path)
+		{
+			return FileSystem.GetLastWriteTime(Path.GetFullPath(path)).LocalDateTime;
+		}
+
+		public static DateTime GetLastWriteTimeUtc(string path)
+		{
+			return FileSystem.GetLastWriteTime(Path.GetFullPath(path)).UtcDateTime;
+		}
+
+		public static FileAttributes GetAttributes(string path)
+		{
+			return FileSystem.GetAttributes(Path.GetFullPath(path));
+		}
+
+		public static void SetAttributes(string path, FileAttributes fileAttributes)
+		{
+			if ((fileAttributes & (FileAttributes)(-2147483648)) == (FileAttributes)0)
+			{
+				FileSystem.SetAttributes(Path.GetFullPath(path), fileAttributes);
+				return;
+			}
+			Path.Validate(path);
+			MonoIOError monoIOError;
+			if (!MonoIO.SetFileAttributes(path, fileAttributes, out monoIOError))
+			{
+				throw MonoIO.GetException(path, monoIOError);
+			}
+		}
+
 		public static FileStream OpenRead(string path)
 		{
 			return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
 		}
 
-		public static StreamReader OpenText(string path)
-		{
-			return new StreamReader(path);
-		}
-
 		public static FileStream OpenWrite(string path)
 		{
 			return new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+		}
+
+		public static string ReadAllText(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return File.InternalReadAllText(path, Encoding.UTF8);
+		}
+
+		public static string ReadAllText(string path, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return File.InternalReadAllText(path, encoding);
+		}
+
+		private static string InternalReadAllText(string path, Encoding encoding)
+		{
+			string text;
+			using (StreamReader streamReader = new StreamReader(path, encoding, true))
+			{
+				text = streamReader.ReadToEnd();
+			}
+			return text;
+		}
+
+		public static void WriteAllText(string path, string contents)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			using (StreamWriter streamWriter = new StreamWriter(path))
+			{
+				streamWriter.Write(contents);
+			}
+		}
+
+		public static void WriteAllText(string path, string contents, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			using (StreamWriter streamWriter = new StreamWriter(path, false, encoding))
+			{
+				streamWriter.Write(contents);
+			}
+		}
+
+		public static byte[] ReadAllBytes(string path)
+		{
+			byte[] array;
+			using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1))
+			{
+				long length = fileStream.Length;
+				if (length > 2147483647L)
+				{
+					throw new IOException("The file is too long. This operation is currently limited to supporting files less than 2 gigabytes in size.");
+				}
+				if (length == 0L)
+				{
+					array = File.ReadAllBytesUnknownLength(fileStream);
+				}
+				else
+				{
+					int num = 0;
+					int i = (int)length;
+					byte[] array2 = new byte[i];
+					while (i > 0)
+					{
+						int num2 = fileStream.Read(array2, num, i);
+						if (num2 == 0)
+						{
+							throw Error.GetEndOfFile();
+						}
+						num += num2;
+						i -= num2;
+					}
+					array = array2;
+				}
+			}
+			return array;
+		}
+
+		private unsafe static byte[] ReadAllBytesUnknownLength(FileStream fs)
+		{
+			byte[] array = null;
+			Span<byte> span = new Span<byte>(stackalloc byte[(UIntPtr)512], 512);
+			byte[] array3;
+			try
+			{
+				int num = 0;
+				for (;;)
+				{
+					if (num == span.Length)
+					{
+						uint num2 = (uint)(span.Length * 2);
+						if (num2 > 2147483591U)
+						{
+							num2 = (uint)Math.Max(2147483591, span.Length + 1);
+						}
+						byte[] array2 = ArrayPool<byte>.Shared.Rent((int)num2);
+						span.CopyTo(array2);
+						if (array != null)
+						{
+							ArrayPool<byte>.Shared.Return(array, false);
+						}
+						span = (array = array2);
+					}
+					int num3 = fs.Read(span.Slice(num));
+					if (num3 == 0)
+					{
+						break;
+					}
+					num += num3;
+				}
+				array3 = span.Slice(0, num).ToArray();
+			}
+			finally
+			{
+				if (array != null)
+				{
+					ArrayPool<byte>.Shared.Return(array, false);
+				}
+			}
+			return array3;
+		}
+
+		public static void WriteAllBytes(string path, byte[] bytes)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path", "Path cannot be null.");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (bytes == null)
+			{
+				throw new ArgumentNullException("bytes");
+			}
+			File.InternalWriteAllBytes(path, bytes);
+		}
+
+		private static void InternalWriteAllBytes(string path, byte[] bytes)
+		{
+			using (FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read))
+			{
+				fileStream.Write(bytes, 0, bytes.Length);
+			}
+		}
+
+		public static string[] ReadAllLines(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return File.InternalReadAllLines(path, Encoding.UTF8);
+		}
+
+		public static string[] ReadAllLines(string path, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return File.InternalReadAllLines(path, encoding);
+		}
+
+		private static string[] InternalReadAllLines(string path, Encoding encoding)
+		{
+			List<string> list = new List<string>();
+			using (StreamReader streamReader = new StreamReader(path, encoding))
+			{
+				string text;
+				while ((text = streamReader.ReadLine()) != null)
+				{
+					list.Add(text);
+				}
+			}
+			return list.ToArray();
+		}
+
+		public static IEnumerable<string> ReadLines(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return ReadLinesIterator.CreateIterator(path, Encoding.UTF8);
+		}
+
+		public static IEnumerable<string> ReadLines(string path, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			return ReadLinesIterator.CreateIterator(path, encoding);
+		}
+
+		public static void WriteAllLines(string path, string[] contents)
+		{
+			File.WriteAllLines(path, contents);
+		}
+
+		public static void WriteAllLines(string path, IEnumerable<string> contents)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			File.InternalWriteAllLines(new StreamWriter(path), contents);
+		}
+
+		public static void WriteAllLines(string path, string[] contents, Encoding encoding)
+		{
+			File.WriteAllLines(path, contents, encoding);
+		}
+
+		public static void WriteAllLines(string path, IEnumerable<string> contents, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			File.InternalWriteAllLines(new StreamWriter(path, false, encoding), contents);
+		}
+
+		private static void InternalWriteAllLines(TextWriter writer, IEnumerable<string> contents)
+		{
+			try
+			{
+				foreach (string text in contents)
+				{
+					writer.WriteLine(text);
+				}
+			}
+			finally
+			{
+				if (writer != null)
+				{
+					((IDisposable)writer).Dispose();
+				}
+			}
+		}
+
+		public static void AppendAllText(string path, string contents)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			using (StreamWriter streamWriter = new StreamWriter(path, true))
+			{
+				streamWriter.Write(contents);
+			}
+		}
+
+		public static void AppendAllText(string path, string contents, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			using (StreamWriter streamWriter = new StreamWriter(path, true, encoding))
+			{
+				streamWriter.Write(contents);
+			}
+		}
+
+		public static void AppendAllLines(string path, IEnumerable<string> contents)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			File.InternalWriteAllLines(new StreamWriter(path, true), contents);
+		}
+
+		public static void AppendAllLines(string path, IEnumerable<string> contents, Encoding encoding)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			File.InternalWriteAllLines(new StreamWriter(path, true, encoding), contents);
 		}
 
 		public static void Replace(string sourceFileName, string destinationFileName, string destinationBackupFileName)
@@ -338,66 +641,492 @@ namespace System.IO
 			{
 				throw new ArgumentNullException("destinationFileName");
 			}
-			if (sourceFileName.Trim().Length == 0 || sourceFileName.IndexOfAny(Path.InvalidPathChars) != -1)
+			FileSystem.ReplaceFile(Path.GetFullPath(sourceFileName), Path.GetFullPath(destinationFileName), (destinationBackupFileName != null) ? Path.GetFullPath(destinationBackupFileName) : null, ignoreMetadataErrors);
+		}
+
+		public static void Move(string sourceFileName, string destFileName)
+		{
+			if (sourceFileName == null)
 			{
-				throw new ArgumentException("sourceFileName");
+				throw new ArgumentNullException("sourceFileName", "File name cannot be null.");
 			}
-			if (destinationFileName.Trim().Length == 0 || destinationFileName.IndexOfAny(Path.InvalidPathChars) != -1)
+			if (destFileName == null)
 			{
-				throw new ArgumentException("destinationFileName");
+				throw new ArgumentNullException("destFileName", "File name cannot be null.");
+			}
+			if (sourceFileName.Length == 0)
+			{
+				throw new ArgumentException("Empty file name is not legal.", "sourceFileName");
+			}
+			if (destFileName.Length == 0)
+			{
+				throw new ArgumentException("Empty file name is not legal.", "destFileName");
 			}
 			string fullPath = Path.GetFullPath(sourceFileName);
-			string fullPath2 = Path.GetFullPath(destinationFileName);
-			MonoIOError monoIOError;
-			if (MonoIO.ExistsDirectory(fullPath, out monoIOError))
+			string fullPath2 = Path.GetFullPath(destFileName);
+			if (!FileSystem.FileExists(fullPath))
 			{
-				throw new IOException(Locale.GetText("{0} is a directory", new object[] { sourceFileName }));
+				throw new FileNotFoundException(SR.Format("Could not find file '{0}'.", fullPath), fullPath);
 			}
-			if (MonoIO.ExistsDirectory(fullPath2, out monoIOError))
+			FileSystem.MoveFile(fullPath, fullPath2);
+		}
+
+		public static void Encrypt(string path)
+		{
+			if (path == null)
 			{
-				throw new IOException(Locale.GetText("{0} is a directory", new object[] { destinationFileName }));
+				throw new ArgumentNullException("path");
 			}
-			if (!File.Exists(fullPath))
+			throw new PlatformNotSupportedException("File encryption is not supported on this platform.");
+		}
+
+		public static void Decrypt(string path)
+		{
+			if (path == null)
 			{
-				throw new FileNotFoundException(Locale.GetText("{0} does not exist", new object[] { sourceFileName }), sourceFileName);
+				throw new ArgumentNullException("path");
 			}
-			if (!File.Exists(fullPath2))
+			throw new PlatformNotSupportedException("File encryption is not supported on this platform.");
+		}
+
+		private static Encoding UTF8NoBOM
+		{
+			get
 			{
-				throw new FileNotFoundException(Locale.GetText("{0} does not exist", new object[] { destinationFileName }), destinationFileName);
-			}
-			if (fullPath == fullPath2)
-			{
-				throw new IOException(Locale.GetText("Source and destination arguments are the same file."));
-			}
-			string text = null;
-			if (destinationBackupFileName != null)
-			{
-				if (destinationBackupFileName.Trim().Length == 0 || destinationBackupFileName.IndexOfAny(Path.InvalidPathChars) != -1)
+				Encoding encoding;
+				if ((encoding = File.s_UTF8NoBOM) == null)
 				{
-					throw new ArgumentException("destinationBackupFileName");
+					encoding = (File.s_UTF8NoBOM = new UTF8Encoding(false, true));
 				}
-				text = Path.GetFullPath(destinationBackupFileName);
-				if (MonoIO.ExistsDirectory(text, out monoIOError))
-				{
-					throw new IOException(Locale.GetText("{0} is a directory", new object[] { destinationBackupFileName }));
-				}
-				if (fullPath == text)
-				{
-					throw new IOException(Locale.GetText("Source and backup arguments are the same file."));
-				}
-				if (fullPath2 == text)
-				{
-					throw new IOException(Locale.GetText("Destination and backup arguments are the same file."));
-				}
+				return encoding;
 			}
-			if ((File.GetAttributes(fullPath2) & FileAttributes.ReadOnly) != (FileAttributes)0)
+		}
+
+		private static StreamReader AsyncStreamReader(string path, Encoding encoding)
+		{
+			return new StreamReader(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan), encoding, true);
+		}
+
+		private static StreamWriter AsyncStreamWriter(string path, Encoding encoding, bool append)
+		{
+			return new StreamWriter(new FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan), encoding);
+		}
+
+		public static Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.ReadAllTextAsync(path, Encoding.UTF8, cancellationToken);
+		}
+
+		public static Task<string> ReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
 			{
-				throw MonoIO.GetException(MonoIOError.ERROR_ACCESS_DENIED);
+				throw new ArgumentNullException("path");
 			}
-			if (!MonoIO.ReplaceFile(fullPath, fullPath2, text, ignoreMetadataErrors, out monoIOError))
+			if (encoding == null)
 			{
-				throw MonoIO.GetException(monoIOError);
+				throw new ArgumentNullException("encoding");
 			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return File.InternalReadAllTextAsync(path, encoding, cancellationToken);
+			}
+			return Task.FromCanceled<string>(cancellationToken);
+		}
+
+		private static async Task<string> InternalReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+		{
+			char[] buffer = null;
+			StreamReader sr = File.AsyncStreamReader(path, encoding);
+			string text;
+			try
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				buffer = ArrayPool<char>.Shared.Rent(sr.CurrentEncoding.GetMaxCharCount(4096));
+				StringBuilder sb = new StringBuilder();
+				for (;;)
+				{
+					int num = await sr.ReadAsync(new Memory<char>(buffer), cancellationToken).ConfigureAwait(false);
+					if (num == 0)
+					{
+						break;
+					}
+					sb.Append(buffer, 0, num);
+				}
+				text = sb.ToString();
+			}
+			finally
+			{
+				sr.Dispose();
+				if (buffer != null)
+				{
+					ArrayPool<char>.Shared.Return(buffer, false);
+				}
+			}
+			return text;
+		}
+
+		public static Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.WriteAllTextAsync(path, contents, File.UTF8NoBOM, cancellationToken);
+		}
+
+		public static Task WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			if (string.IsNullOrEmpty(contents))
+			{
+				new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read).Dispose();
+				return Task.CompletedTask;
+			}
+			return File.InternalWriteAllTextAsync(File.AsyncStreamWriter(path, encoding, false), contents, cancellationToken);
+		}
+
+		public static Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<byte[]>(cancellationToken);
+			}
+			FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1, FileOptions.Asynchronous | FileOptions.SequentialScan);
+			bool flag = false;
+			Task<byte[]> task;
+			try
+			{
+				long length = fileStream.Length;
+				if (length > 2147483647L)
+				{
+					task = Task.FromException<byte[]>(new IOException("The file is too long. This operation is currently limited to supporting files less than 2 gigabytes in size."));
+				}
+				else
+				{
+					flag = true;
+					task = ((length > 0L) ? File.InternalReadAllBytesAsync(fileStream, (int)length, cancellationToken) : File.InternalReadAllBytesUnknownLengthAsync(fileStream, cancellationToken));
+				}
+			}
+			finally
+			{
+				if (!flag)
+				{
+					fileStream.Dispose();
+				}
+			}
+			return task;
+		}
+
+		private static async Task<byte[]> InternalReadAllBytesAsync(FileStream fs, int count, CancellationToken cancellationToken)
+		{
+			byte[] array;
+			try
+			{
+				int index = 0;
+				byte[] bytes = new byte[count];
+				for (;;)
+				{
+					int num = await fs.ReadAsync(new Memory<byte>(bytes, index, count - index), cancellationToken).ConfigureAwait(false);
+					if (num == 0)
+					{
+						break;
+					}
+					index += num;
+					if (index >= count)
+					{
+						goto Block_3;
+					}
+				}
+				throw Error.GetEndOfFile();
+				Block_3:
+				array = bytes;
+			}
+			finally
+			{
+				if (fs != null)
+				{
+					((IDisposable)fs).Dispose();
+				}
+			}
+			return array;
+		}
+
+		private static async Task<byte[]> InternalReadAllBytesUnknownLengthAsync(FileStream fs, CancellationToken cancellationToken)
+		{
+			byte[] rentedArray = ArrayPool<byte>.Shared.Rent(512);
+			byte[] array2;
+			try
+			{
+				int bytesRead = 0;
+				for (;;)
+				{
+					if (bytesRead == rentedArray.Length)
+					{
+						uint num = (uint)(rentedArray.Length * 2);
+						if (num > 2147483591U)
+						{
+							num = (uint)Math.Max(2147483591, rentedArray.Length + 1);
+						}
+						byte[] array = ArrayPool<byte>.Shared.Rent((int)num);
+						Buffer.BlockCopy(rentedArray, 0, array, 0, bytesRead);
+						ArrayPool<byte>.Shared.Return(rentedArray, false);
+						rentedArray = array;
+					}
+					int num2 = await fs.ReadAsync(rentedArray.AsMemory<byte>(bytesRead), cancellationToken).ConfigureAwait(false);
+					if (num2 == 0)
+					{
+						break;
+					}
+					bytesRead += num2;
+				}
+				array2 = rentedArray.AsSpan<byte>(0, bytesRead).ToArray();
+			}
+			finally
+			{
+				fs.Dispose();
+				ArrayPool<byte>.Shared.Return(rentedArray, false);
+			}
+			return array2;
+		}
+
+		public static Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path", "Path cannot be null.");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (bytes == null)
+			{
+				throw new ArgumentNullException("bytes");
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return File.InternalWriteAllBytesAsync(path, bytes, cancellationToken);
+			}
+			return Task.FromCanceled(cancellationToken);
+		}
+
+		private static async Task InternalWriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+		{
+			using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan))
+			{
+				await fs.WriteAsync(new ReadOnlyMemory<byte>(bytes), cancellationToken).ConfigureAwait(false);
+				await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
+			}
+			FileStream fs = null;
+		}
+
+		public static Task<string[]> ReadAllLinesAsync(string path, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.ReadAllLinesAsync(path, Encoding.UTF8, cancellationToken);
+		}
+
+		public static Task<string[]> ReadAllLinesAsync(string path, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return File.InternalReadAllLinesAsync(path, encoding, cancellationToken);
+			}
+			return Task.FromCanceled<string[]>(cancellationToken);
+		}
+
+		private static async Task<string[]> InternalReadAllLinesAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+		{
+			string[] array;
+			using (StreamReader sr = File.AsyncStreamReader(path, encoding))
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				List<string> lines = new List<string>();
+				string text;
+				while ((text = await sr.ReadLineAsync().ConfigureAwait(false)) != null)
+				{
+					lines.Add(text);
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+				array = lines.ToArray();
+			}
+			return array;
+		}
+
+		public static Task WriteAllLinesAsync(string path, IEnumerable<string> contents, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.WriteAllLinesAsync(path, contents, File.UTF8NoBOM, cancellationToken);
+		}
+
+		public static Task WriteAllLinesAsync(string path, IEnumerable<string> contents, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return File.InternalWriteAllLinesAsync(File.AsyncStreamWriter(path, encoding, false), contents, cancellationToken);
+			}
+			return Task.FromCanceled(cancellationToken);
+		}
+
+		private static async Task InternalWriteAllLinesAsync(TextWriter writer, IEnumerable<string> contents, CancellationToken cancellationToken)
+		{
+			using (writer)
+			{
+				foreach (string text in contents)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					await writer.WriteLineAsync(text).ConfigureAwait(false);
+				}
+				IEnumerator<string> enumerator = null;
+				cancellationToken.ThrowIfCancellationRequested();
+				await writer.FlushAsync().ConfigureAwait(false);
+			}
+			TextWriter textWriter = null;
+		}
+
+		private static async Task InternalWriteAllTextAsync(StreamWriter sw, string contents, CancellationToken cancellationToken)
+		{
+			char[] buffer = null;
+			try
+			{
+				buffer = ArrayPool<char>.Shared.Rent(4096);
+				int count = contents.Length;
+				int batchSize;
+				for (int index = 0; index < count; index += batchSize)
+				{
+					batchSize = Math.Min(4096, count - index);
+					contents.CopyTo(index, buffer, 0, batchSize);
+					await sw.WriteAsync(new ReadOnlyMemory<char>(buffer, 0, batchSize), cancellationToken).ConfigureAwait(false);
+				}
+				cancellationToken.ThrowIfCancellationRequested();
+				await sw.FlushAsync().ConfigureAwait(false);
+			}
+			finally
+			{
+				sw.Dispose();
+				if (buffer != null)
+				{
+					ArrayPool<char>.Shared.Return(buffer, false);
+				}
+			}
+		}
+
+		public static Task AppendAllTextAsync(string path, string contents, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.AppendAllTextAsync(path, contents, File.UTF8NoBOM, cancellationToken);
+		}
+
+		public static Task AppendAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			if (string.IsNullOrEmpty(contents))
+			{
+				new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read).Dispose();
+				return Task.CompletedTask;
+			}
+			return File.InternalWriteAllTextAsync(File.AsyncStreamWriter(path, encoding, true), contents, cancellationToken);
+		}
+
+		public static Task AppendAllLinesAsync(string path, IEnumerable<string> contents, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return File.AppendAllLinesAsync(path, contents, File.UTF8NoBOM, cancellationToken);
+		}
+
+		public static Task AppendAllLinesAsync(string path, IEnumerable<string> contents, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (contents == null)
+			{
+				throw new ArgumentNullException("contents");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (path.Length == 0)
+			{
+				throw new ArgumentException("Empty path name is not legal.", "path");
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return File.InternalWriteAllLinesAsync(File.AsyncStreamWriter(path, encoding, true), contents, cancellationToken);
+			}
+			return Task.FromCanceled(cancellationToken);
+		}
+
+		public static FileStream Create(string path, int bufferSize, FileOptions options, FileSecurity fileSecurity)
+		{
+			return new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);
+		}
+
+		public static FileSecurity GetAccessControl(string path)
+		{
+			return File.GetAccessControl(path, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+		}
+
+		public static FileSecurity GetAccessControl(string path, AccessControlSections includeSections)
+		{
+			return new FileSecurity(path, includeSections);
 		}
 
 		public static void SetAccessControl(string path, FileSecurity fileSecurity)
@@ -409,327 +1138,10 @@ namespace System.IO
 			fileSecurity.PersistModifications(path);
 		}
 
-		public static void SetAttributes(string path, FileAttributes fileAttributes)
-		{
-			Path.Validate(path);
-			MonoIOError monoIOError;
-			if (!MonoIO.SetFileAttributes(path, fileAttributes, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-		}
+		private const int MaxByteArrayLength = 2147483591;
 
-		public static void SetCreationTime(string path, DateTime creationTime)
-		{
-			Path.Validate(path);
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(path, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-			if (!MonoIO.SetCreationTime(path, creationTime, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-		}
+		private static Encoding s_UTF8NoBOM;
 
-		public static void SetCreationTimeUtc(string path, DateTime creationTimeUtc)
-		{
-			File.SetCreationTime(path, creationTimeUtc.ToLocalTime());
-		}
-
-		public static void SetLastAccessTime(string path, DateTime lastAccessTime)
-		{
-			Path.Validate(path);
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(path, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-			if (!MonoIO.SetLastAccessTime(path, lastAccessTime, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-		}
-
-		public static void SetLastAccessTimeUtc(string path, DateTime lastAccessTimeUtc)
-		{
-			File.SetLastAccessTime(path, lastAccessTimeUtc.ToLocalTime());
-		}
-
-		public static void SetLastWriteTime(string path, DateTime lastWriteTime)
-		{
-			Path.Validate(path);
-			MonoIOError monoIOError;
-			if (!MonoIO.Exists(path, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-			if (!MonoIO.SetLastWriteTime(path, lastWriteTime, out monoIOError))
-			{
-				throw MonoIO.GetException(path, monoIOError);
-			}
-		}
-
-		public static void SetLastWriteTimeUtc(string path, DateTime lastWriteTimeUtc)
-		{
-			File.SetLastWriteTime(path, lastWriteTimeUtc.ToLocalTime());
-		}
-
-		public static byte[] ReadAllBytes(string path)
-		{
-			byte[] array2;
-			using (FileStream fileStream = File.OpenRead(path))
-			{
-				long length = fileStream.Length;
-				if (length > 2147483647L)
-				{
-					throw new IOException("Reading more than 2GB with this call is not supported");
-				}
-				int num = 0;
-				int i = (int)length;
-				byte[] array = new byte[length];
-				while (i > 0)
-				{
-					int num2 = fileStream.Read(array, num, i);
-					if (num2 == 0)
-					{
-						throw new IOException("Unexpected end of stream");
-					}
-					num += num2;
-					i -= num2;
-				}
-				array2 = array;
-			}
-			return array2;
-		}
-
-		public static string[] ReadAllLines(string path)
-		{
-			string[] array;
-			using (StreamReader streamReader = File.OpenText(path))
-			{
-				array = File.ReadAllLines(streamReader);
-			}
-			return array;
-		}
-
-		public static string[] ReadAllLines(string path, Encoding encoding)
-		{
-			string[] array;
-			using (StreamReader streamReader = new StreamReader(path, encoding))
-			{
-				array = File.ReadAllLines(streamReader);
-			}
-			return array;
-		}
-
-		private static string[] ReadAllLines(StreamReader reader)
-		{
-			List<string> list = new List<string>();
-			while (!reader.EndOfStream)
-			{
-				list.Add(reader.ReadLine());
-			}
-			return list.ToArray();
-		}
-
-		public static string ReadAllText(string path)
-		{
-			string text;
-			using (StreamReader streamReader = new StreamReader(path))
-			{
-				text = streamReader.ReadToEnd();
-			}
-			return text;
-		}
-
-		public static string ReadAllText(string path, Encoding encoding)
-		{
-			string text;
-			using (StreamReader streamReader = new StreamReader(path, encoding))
-			{
-				text = streamReader.ReadToEnd();
-			}
-			return text;
-		}
-
-		public static void WriteAllBytes(string path, byte[] bytes)
-		{
-			using (Stream stream = File.Create(path))
-			{
-				stream.Write(bytes, 0, bytes.Length);
-			}
-		}
-
-		public static void WriteAllLines(string path, string[] contents)
-		{
-			using (StreamWriter streamWriter = new StreamWriter(path))
-			{
-				File.WriteAllLines(streamWriter, contents);
-			}
-		}
-
-		public static void WriteAllLines(string path, string[] contents, Encoding encoding)
-		{
-			using (StreamWriter streamWriter = new StreamWriter(path, false, encoding))
-			{
-				File.WriteAllLines(streamWriter, contents);
-			}
-		}
-
-		private static void WriteAllLines(StreamWriter writer, string[] contents)
-		{
-			foreach (string text in contents)
-			{
-				writer.WriteLine(text);
-			}
-		}
-
-		public static void WriteAllText(string path, string contents)
-		{
-			File.WriteAllText(path, contents, EncodingHelper.UTF8Unmarked);
-		}
-
-		public static void WriteAllText(string path, string contents, Encoding encoding)
-		{
-			using (StreamWriter streamWriter = new StreamWriter(path, false, encoding))
-			{
-				streamWriter.Write(contents);
-			}
-		}
-
-		private static DateTime DefaultLocalFileTime
-		{
-			get
-			{
-				if (File.defaultLocalFileTime == null)
-				{
-					File.defaultLocalFileTime = new DateTime?(new DateTime(1601, 1, 1).ToLocalTime());
-				}
-				return File.defaultLocalFileTime.Value;
-			}
-		}
-
-		[MonoLimitation("File encryption isn't supported (even on NTFS).")]
-		public static void Encrypt(string path)
-		{
-			throw new NotSupportedException(Locale.GetText("File encryption isn't supported on any file system."));
-		}
-
-		[MonoLimitation("File encryption isn't supported (even on NTFS).")]
-		public static void Decrypt(string path)
-		{
-			throw new NotSupportedException(Locale.GetText("File encryption isn't supported on any file system."));
-		}
-
-		public static IEnumerable<string> ReadLines(string path)
-		{
-			return File.ReadLines(File.OpenText(path));
-		}
-
-		public static IEnumerable<string> ReadLines(string path, Encoding encoding)
-		{
-			return File.ReadLines(new StreamReader(path, encoding));
-		}
-
-		private static IEnumerable<string> ReadLines(StreamReader reader)
-		{
-			using (reader)
-			{
-				string s;
-				while ((s = reader.ReadLine()) != null)
-				{
-					yield return s;
-				}
-				s = null;
-			}
-			StreamReader streamReader = null;
-			yield break;
-			yield break;
-		}
-
-		public static void AppendAllLines(string path, IEnumerable<string> contents)
-		{
-			Path.Validate(path);
-			if (contents == null)
-			{
-				return;
-			}
-			using (TextWriter textWriter = new StreamWriter(path, true))
-			{
-				foreach (string text in contents)
-				{
-					textWriter.WriteLine(text);
-				}
-			}
-		}
-
-		public static void AppendAllLines(string path, IEnumerable<string> contents, Encoding encoding)
-		{
-			Path.Validate(path);
-			if (contents == null)
-			{
-				return;
-			}
-			using (TextWriter textWriter = new StreamWriter(path, true, encoding))
-			{
-				foreach (string text in contents)
-				{
-					textWriter.WriteLine(text);
-				}
-			}
-		}
-
-		public static void WriteAllLines(string path, IEnumerable<string> contents)
-		{
-			Path.Validate(path);
-			if (contents == null)
-			{
-				return;
-			}
-			using (TextWriter textWriter = new StreamWriter(path, false))
-			{
-				foreach (string text in contents)
-				{
-					textWriter.WriteLine(text);
-				}
-			}
-		}
-
-		public static void WriteAllLines(string path, IEnumerable<string> contents, Encoding encoding)
-		{
-			Path.Validate(path);
-			if (contents == null)
-			{
-				return;
-			}
-			using (TextWriter textWriter = new StreamWriter(path, false, encoding))
-			{
-				foreach (string text in contents)
-				{
-					textWriter.WriteLine(text);
-				}
-			}
-		}
-
-		internal static int FillAttributeInfo(string path, ref MonoIOStat data, bool tryagain, bool returnErrorOnNotFound)
-		{
-			if (tryagain)
-			{
-				throw new NotImplementedException();
-			}
-			MonoIOError monoIOError;
-			MonoIO.GetFileStat(path, out data, out monoIOError);
-			if (!returnErrorOnNotFound && (monoIOError == MonoIOError.ERROR_FILE_NOT_FOUND || monoIOError == MonoIOError.ERROR_PATH_NOT_FOUND || monoIOError == MonoIOError.ERROR_NOT_READY))
-			{
-				data = default(MonoIOStat);
-				data.fileAttributes = (FileAttributes)(-1);
-				return 0;
-			}
-			return (int)monoIOError;
-		}
-
-		private static DateTime? defaultLocalFileTime;
+		internal const int DefaultBufferSize = 4096;
 	}
 }

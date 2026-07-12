@@ -38,6 +38,22 @@ public class ConsumablesTableScreen : TableScreen
 				DebugUtil.DevLogErrorFormat("Prefab tagged Medicine does not have MedicinalPill component: {0}", new object[] { prefabsWithTag[j] });
 			}
 		}
+		if (SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"))
+		{
+			List<GameObject> prefabsWithTag2 = Assets.GetPrefabsWithTag(GameTags.ChargedPortableBattery);
+			for (int k = 0; k < prefabsWithTag.Count; k++)
+			{
+				Electrobank component2 = prefabsWithTag2[k].GetComponent<Electrobank>();
+				if (component2)
+				{
+					list.Add(component2);
+				}
+				else
+				{
+					DebugUtil.DevLogErrorFormat("Prefab tagged ChargedPortableBattery does not have Electrobank component: {0}", new object[] { prefabsWithTag2[k] });
+				}
+			}
+		}
 		list.Sort(delegate(IConsumableUIItem a, IConsumableUIItem b)
 		{
 			int num2 = a.MajorOrder.CompareTo(b.MajorOrder);
@@ -53,13 +69,13 @@ public class ConsumablesTableScreen : TableScreen
 		List<ConsumableInfoTableColumn> list4 = new List<ConsumableInfoTableColumn>();
 		base.StartScrollableContent("consumableScroller");
 		int num = 0;
-		for (int k = 0; k < list.Count; k++)
+		for (int l = 0; l < list.Count; l++)
 		{
-			if (list[k].Display)
+			if (list[l].Display)
 			{
-				if (list[k].MajorOrder != num && k != 0)
+				if (list[l].MajorOrder != num && l != 0)
 				{
-					string text = "QualityDivider_" + list[k].MajorOrder.ToString();
+					string text = "QualityDivider_" + list[l].MajorOrder.ToString();
 					ConsumableInfoTableColumn[] quality_group_columns = list4.ToArray();
 					DividerColumn dividerColumn = new DividerColumn(delegate
 					{
@@ -68,9 +84,9 @@ public class ConsumablesTableScreen : TableScreen
 							return true;
 						}
 						ConsumableInfoTableColumn[] quality_group_columns2 = quality_group_columns;
-						for (int l = 0; l < quality_group_columns2.Length; l++)
+						for (int m = 0; m < quality_group_columns2.Length; m++)
 						{
-							if (quality_group_columns2[l].isRevealed)
+							if (quality_group_columns2[m].isRevealed)
 							{
 								return true;
 							}
@@ -81,9 +97,9 @@ public class ConsumablesTableScreen : TableScreen
 					base.RegisterColumn(text, dividerColumn);
 					list4.Clear();
 				}
-				ConsumableInfoTableColumn consumableInfoTableColumn = this.AddConsumableInfoColumn(list[k].ConsumableId, list[k], new Action<IAssignableIdentity, GameObject>(this.on_load_consumable_info), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_consumable_info), new Action<GameObject>(this.on_click_consumable_info), new Action<GameObject, TableScreen.ResultValues>(this.set_value_consumable_info), new Comparison<IAssignableIdentity>(this.compare_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_consumable_info));
+				ConsumableInfoTableColumn consumableInfoTableColumn = this.AddConsumableInfoColumn(list[l].ConsumableId, list[l], new Action<IAssignableIdentity, GameObject>(this.on_load_consumable_info), new Func<IAssignableIdentity, GameObject, TableScreen.ResultValues>(this.get_value_consumable_info), new Action<GameObject>(this.on_click_consumable_info), new Action<GameObject, TableScreen.ResultValues>(this.set_value_consumable_info), new Comparison<IAssignableIdentity>(this.compare_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_consumable_info), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_consumable_info));
 				list2.Add(consumableInfoTableColumn);
-				num = list[k].MajorOrder;
+				num = list[l].MajorOrder;
 				list4.Add(consumableInfoTableColumn);
 			}
 		}
@@ -560,6 +576,14 @@ public class ConsumablesTableScreen : TableScreen
 			break;
 		case TableRow.RowType.Minion:
 		case TableRow.RowType.StoredMinon:
+		{
+			MinionIdentity minionIdentity = minion as MinionIdentity;
+			ConsumableConsumer consumableConsumer = null;
+			if (minionIdentity != null)
+			{
+				consumableConsumer = minionIdentity.GetComponent<ConsumableConsumer>();
+			}
+			bool flag = false;
 			switch (this.get_value_consumable_info(minion, widget_go))
 			{
 			case TableScreen.ResultValues.False:
@@ -571,14 +595,21 @@ public class ConsumablesTableScreen : TableScreen
 			case TableScreen.ResultValues.ConditionalGroup:
 				component.ChangeState(2);
 				break;
+			case TableScreen.ResultValues.NotApplicable:
+				flag = consumableConsumer != null && consumableConsumer.dietaryRestrictionTagSet.Contains(consumable_info.ConsumableId);
+				break;
 			}
-			if (foodInfo != null && minion as MinionIdentity != null)
+			if (flag)
 			{
-				Graphic graphic = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
-				Color color = new Color(0.72156864f, 0.44313726f, 0.5803922f, Mathf.Max((float)foodInfo.Quality - Db.Get().Attributes.FoodExpectation.Lookup(minion as MinionIdentity).GetTotalValue() + 1f, 0f) * 0.25f);
-				graphic.color = color;
+				component.ChangeState(3);
+				(widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image).color = Color.clear;
+			}
+			else if (foodInfo != null && minion as MinionIdentity != null)
+			{
+				(widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image).color = new Color(0.72156864f, 0.44313726f, 0.5803922f, Mathf.Max((float)foodInfo.Quality - Db.Get().Attributes.FoodExpectation.Lookup(minion as MinionIdentity).GetTotalValue() + 1f, 0f) * 0.25f);
 			}
 			break;
+		}
 		}
 		this.refresh_scrollers();
 	}
@@ -658,7 +689,15 @@ public class ConsumablesTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion as MinionIdentity != null)
 			{
-				resultValues = (((MinionIdentity)minion).GetComponent<ConsumableConsumer>().IsPermitted(consumable_info.ConsumableId) ? TableScreen.ResultValues.True : TableScreen.ResultValues.False);
+				ConsumableConsumer component = ((MinionIdentity)minion).GetComponent<ConsumableConsumer>();
+				if (component.IsDietRestricted(consumable_info.ConsumableId))
+				{
+					resultValues = TableScreen.ResultValues.NotApplicable;
+				}
+				else
+				{
+					resultValues = (component.IsPermitted(consumable_info.ConsumableId) ? TableScreen.ResultValues.True : TableScreen.ResultValues.False);
+				}
 			}
 			else
 			{
@@ -725,4 +764,7 @@ public class ConsumablesTableScreen : TableScreen
 	}
 
 	private const int CONSUMABLE_COLUMNS_BEFORE_SCROLL = 12;
+
+	[SerializeField]
+	private GameObject horizontalScrollBar;
 }

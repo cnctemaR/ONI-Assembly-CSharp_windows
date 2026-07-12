@@ -20,7 +20,7 @@ public class ToiletWorkableClean : Workable
 		this.workingPstFailed = new HashedString[] { ToiletWorkableClean.PST_ANIM };
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		this.timesCleaned++;
 		base.OnCompleteWork(worker);

@@ -20,7 +20,6 @@ namespace System.Security.Permissions
 			}
 			set
 			{
-				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 
@@ -33,7 +32,6 @@ namespace System.Security.Permissions
 			}
 			set
 			{
-				global::Unity.ThrowStub.ThrowNotSupportedException();
 			}
 		}
 

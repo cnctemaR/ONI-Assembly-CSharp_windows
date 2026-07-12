@@ -51,7 +51,7 @@ namespace TUNING
 
 		public const int CEILINGLIGHT_LUX = 1800;
 
-		public const int SUNLAMP_LUX = 40000;
+		public static readonly int SUNLAMP_LUX = (int)((float)BeachChairConfig.TAN_LUX * 4f);
 
 		public const float SUNLAMP_RANGE = 16f;
 

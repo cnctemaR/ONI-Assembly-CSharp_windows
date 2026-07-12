@@ -4,32 +4,31 @@ using System.Runtime.Serialization;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class ExternalException : SystemException
 	{
 		public ExternalException()
-			: base(Environment.GetResourceString("External component has thrown an exception."))
+			: base("External component has thrown an exception.")
 		{
-			base.SetErrorCode(-2147467259);
+			base.HResult = -2147467259;
 		}
 
 		public ExternalException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147467259);
+			base.HResult = -2147467259;
 		}
 
 		public ExternalException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2147467259);
+			base.HResult = -2147467259;
 		}
 
 		public ExternalException(string message, int errorCode)
 			: base(message)
 		{
-			base.SetErrorCode(errorCode);
+			base.HResult = errorCode;
 		}
 
 		protected ExternalException(SerializationInfo info, StreamingContext context)

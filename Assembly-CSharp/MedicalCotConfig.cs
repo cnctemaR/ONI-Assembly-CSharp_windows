@@ -49,7 +49,9 @@ public class MedicalCotConfig : IBuildingConfig
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Hospital.Id;
 		roomTracker.requirement = RoomTracker.Requirement.CustomRecommended;
 		roomTracker.customStatusItemID = Db.Get().BuildingStatusItems.ClinicOutsideHospital.Id;
-		go.AddOrGet<Sleepable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_sick_kanim") };
+		Sleepable sleepable = go.AddOrGet<Sleepable>();
+		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_sick_kanim") };
+		sleepable.isNormalBed = false;
 		DoctorChoreWorkable doctorChoreWorkable = go.AddOrGet<DoctorChoreWorkable>();
 		doctorChoreWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
 		doctorChoreWorkable.workTime = 45f;

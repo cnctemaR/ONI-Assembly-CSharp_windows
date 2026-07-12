@@ -42,6 +42,13 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		}
 		this.archetypeDropDown.Initialize(list, new Action<IListableOption, object>(this.OnArchetypeEntryClick), new Func<IListableOption, IListableOption, object, int>(this.archetypeDropDownSort), new Action<DropDownEntry, object>(this.archetypeDropEntryRefreshAction), false, null);
 		this.archetypeDropDown.CustomizeEmptyRow(Strings.Get("STRINGS.UI.CHARACTERCONTAINER_NOARCHETYPESELECTED"), this.noArchetypeIcon);
+		List<IListableOption> list2 = new List<IListableOption>
+		{
+			new CharacterContainer.MinionModelOption(DUPLICANTS.MODEL.STANDARD.NAME, new List<Tag> { GameTags.Minions.Models.Standard }, Assets.GetSprite("ui_duplicant_minion_selection")),
+			new CharacterContainer.MinionModelOption(DUPLICANTS.MODEL.BIONIC.NAME, new List<Tag> { GameTags.Minions.Models.Bionic }, Assets.GetSprite("ui_duplicant_bionicminion_selection"))
+		};
+		this.modelDropDown.Initialize(list2, new Action<IListableOption, object>(this.OnModelEntryClick), new Func<IListableOption, IListableOption, object, int>(this.modelDropDownSort), new Action<DropDownEntry, object>(this.modelDropEntryRefreshAction), true, null);
+		this.modelDropDown.CustomizeEmptyRow(UI.CHARACTERCONTAINER_ALL_MODELS, Assets.GetSprite(this.allModelSprite));
 		base.StartCoroutine(this.DelayedGeneration());
 	}
 
@@ -148,7 +155,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		int num = 0;
 		do
 		{
-			this.stats = new MinionStartingStats(is_starter, guaranteedAptitudeID, null, false);
+			this.stats = new MinionStartingStats(this.permittedModels, is_starter, guaranteedAptitudeID, null, false);
 			num++;
 		}
 		while (this.IsCharacterInvalid() && num < 20);
@@ -175,11 +182,11 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	{
 		if (this.animController == null)
 		{
-			this.animController = Util.KInstantiateUI(Assets.GetPrefab(new Tag("MinionSelectPreview")), this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
+			this.animController = Util.KInstantiateUI(Assets.GetPrefab(GameTags.MinionSelectPreview), this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
 			this.animController.gameObject.SetActive(true);
 			this.animController.animScale = this.baseCharacterScale;
 		}
-		MinionConfig.ConfigureSymbols(this.animController.gameObject, true);
+		BaseMinionConfig.ConfigureSymbols(this.animController.gameObject, true);
 		this.stats.ApplyTraits(this.animController.gameObject);
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
@@ -232,6 +239,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		});
 		this.traitEntries.Clear();
 		this.characterNameTitle.SetTitle(this.stats.Name);
+		this.traitHeaderLabel.SetText((this.stats.personality.model == GameTags.Minions.Models.Bionic) ? UI.CHARACTERCONTAINER_TRAITS_TITLE_BIONIC : UI.CHARACTERCONTAINER_TRAITS_TITLE);
 		for (int i = 1; i < this.stats.Traits.Count; i++)
 		{
 			Trait trait = this.stats.Traits[i];
@@ -556,6 +564,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	{
 		this.reshuffleButton.gameObject.SetActive(enable);
 		this.archetypeDropDown.gameObject.SetActive(enable);
+		this.modelDropDown.transform.parent.gameObject.SetActive(enable && SaveLoader.Instance.IsDLCActiveForCurrentSave("DLC3_ID"));
 	}
 
 	public void Reshuffle(bool is_starter)
@@ -597,7 +606,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private bool IsCharacterInvalid()
 	{
-		return CharacterContainer.containers.Find((CharacterContainer container) => container != null && container.stats != null && container != this && container.stats.personality.Id == this.stats.personality.Id && container.stats.IsValid) != null || (SaveLoader.Instance != null && DlcManager.IsDlcId(this.stats.personality.requiredDlcId) && !SaveLoader.Instance.GameInfo.dlcIds.Contains(this.stats.personality.requiredDlcId)) || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.personalityResourceId == this.stats.personality.Id);
+		return CharacterContainer.containers.Find((CharacterContainer container) => container != null && container.stats != null && container != this && container.stats.personality.Id == this.stats.personality.Id && container.stats.IsValid) != null || (SaveLoader.Instance != null && DlcManager.IsDlcId(this.stats.personality.requiredDlcId) && !SaveLoader.Instance.GameInfo.dlcIds.Contains(this.stats.personality.requiredDlcId)) || (this.stats.personality.model != GameTags.Minions.Models.Bionic && Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.personalityResourceId == this.stats.personality.Id));
 	}
 
 	public string GetValueColor(bool isPositive)
@@ -726,6 +735,38 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		}
 	}
 
+	private void OnModelEntryClick(IListableOption listItem, object data)
+	{
+		if (listItem == null)
+		{
+			this.permittedModels = this.allMinionModels;
+			this.selectedModelIcon.sprite = Assets.GetSprite(this.allModelSprite);
+			this.Reshuffle(true);
+			return;
+		}
+		CharacterContainer.MinionModelOption minionModelOption = listItem as CharacterContainer.MinionModelOption;
+		if (minionModelOption != null)
+		{
+			this.permittedModels = minionModelOption.permittedModels;
+			this.selectedModelIcon.sprite = minionModelOption.sprite;
+			this.Reshuffle(true);
+		}
+	}
+
+	private int modelDropDownSort(IListableOption a, IListableOption b, object targetData)
+	{
+		return a.GetProperName().CompareTo(b.GetProperName());
+	}
+
+	private void modelDropEntryRefreshAction(DropDownEntry entry, object targetData)
+	{
+		if (entry.entryData != null)
+		{
+			CharacterContainer.MinionModelOption minionModelOption = entry.entryData as CharacterContainer.MinionModelOption;
+			entry.image.sprite = minionModelOption.sprite;
+		}
+	}
+
 	[SerializeField]
 	private GameObject contentBody;
 
@@ -737,6 +778,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	[SerializeField]
 	private LocText characterJob;
+
+	[SerializeField]
+	private LocText traitHeaderLabel;
 
 	public GameObject selectedBorder;
 
@@ -804,10 +848,24 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 	private LocText description;
 
 	[SerializeField]
+	private Image selectedModelIcon;
+
+	[SerializeField]
+	private DropDown modelDropDown;
+
+	private List<Tag> permittedModels = new List<Tag>
+	{
+		GameTags.Minions.Models.Standard,
+		GameTags.Minions.Models.Bionic
+	};
+
+	[SerializeField]
 	private KToggle selectButton;
 
 	[SerializeField]
 	private KBatchedAnimController fxAnim;
+
+	private string allModelSprite = "ui_duplicant_any_selection";
 
 	private MinionStartingStats stats;
 
@@ -858,6 +916,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		}
 	};
 
+	private List<Tag> allMinionModels = new List<Tag>
+	{
+		GameTags.Minions.Models.Standard,
+		GameTags.Minions.Models.Bionic
+	};
+
 	private static readonly HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
 
 	public float baseCharacterScale = 0.38f;
@@ -868,5 +932,26 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		public string professionName;
 
 		public Sprite iconImg;
+	}
+
+	private class MinionModelOption : IListableOption
+	{
+		public MinionModelOption(string name, List<Tag> permittedModels, Sprite sprite)
+		{
+			this.properName = name;
+			this.permittedModels = permittedModels;
+			this.sprite = sprite;
+		}
+
+		public string GetProperName()
+		{
+			return this.properName;
+		}
+
+		private string properName;
+
+		public List<Tag> permittedModels;
+
+		public Sprite sprite;
 	}
 }

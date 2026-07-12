@@ -24,7 +24,7 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 
 	private static void GetCarpetFeet(SteppedInMonitor.Instance smi)
 	{
-		if (!smi.effects.HasEffect("SoakingWet") && !smi.effects.HasEffect("WetFeet"))
+		if (!smi.effects.HasEffect("SoakingWet") && !smi.effects.HasEffect("WetFeet") && smi.IsEffectAllowed("CarpetFeet"))
 		{
 			smi.effects.Add("CarpetFeet", true);
 		}
@@ -37,11 +37,7 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 
 	private static void GetWetFeet(SteppedInMonitor.Instance smi)
 	{
-		if (!smi.effects.HasEffect("CarpetFeet"))
-		{
-			smi.effects.Remove("CarpetFeet");
-		}
-		if (!smi.effects.HasEffect("SoakingWet"))
+		if (!smi.effects.HasEffect("SoakingWet") && smi.IsEffectAllowed("WetFeet"))
 		{
 			smi.effects.Add("WetFeet", true);
 		}
@@ -54,15 +50,14 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 
 	private static void GetSoaked(SteppedInMonitor.Instance smi)
 	{
-		if (!smi.effects.HasEffect("CarpetFeet"))
-		{
-			smi.effects.Remove("CarpetFeet");
-		}
 		if (smi.effects.HasEffect("WetFeet"))
 		{
 			smi.effects.Remove("WetFeet");
 		}
-		smi.effects.Add("SoakingWet", true);
+		if (smi.IsEffectAllowed("SoakingWet"))
+		{
+			smi.effects.Add("SoakingWet", true);
+		}
 	}
 
 	private static bool IsOnCarpet(SteppedInMonitor.Instance smi)
@@ -88,6 +83,12 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid;
 	}
 
+	public const string CARPET_EFFECT_NAME = "CarpetFeet";
+
+	public const string WET_FEET_EFFECT_NAME = "WetFeet";
+
+	public const string SOAK_EFFECT_NAME = "SoakingWet";
+
 	public GameStateMachine<SteppedInMonitor, SteppedInMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public GameStateMachine<SteppedInMonitor, SteppedInMonitor.Instance, IStateMachineTarget, object>.State carpetedFloor;
@@ -98,10 +99,34 @@ public class SteppedInMonitor : GameStateMachine<SteppedInMonitor, SteppedInMoni
 
 	public new class Instance : GameStateMachine<SteppedInMonitor, SteppedInMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
+		public string[] effectsAllowed { get; private set; }
+
 		public Instance(IStateMachineTarget master)
+			: this(master, new string[] { "CarpetFeet", "WetFeet", "SoakingWet" })
+		{
+		}
+
+		public Instance(IStateMachineTarget master, string[] effectsAllowed)
 			: base(master)
 		{
 			this.effects = base.GetComponent<Effects>();
+			this.effectsAllowed = effectsAllowed;
+		}
+
+		public bool IsEffectAllowed(string effectName)
+		{
+			if (this.effectsAllowed == null || this.effectsAllowed.Length == 0)
+			{
+				return false;
+			}
+			for (int i = 0; i < this.effectsAllowed.Length; i++)
+			{
+				if (this.effectsAllowed[i] == effectName)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public Effects effects;

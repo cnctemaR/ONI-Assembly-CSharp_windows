@@ -17,7 +17,7 @@ namespace System.Data
 				this.errorList = new ArrayList();
 				for (int i = 0; i < num; i++)
 				{
-					this.errorList.Add(info.GetValue(this.KEY_ARRAYVALUES + i, typeof(string)));
+					this.errorList.Add(info.GetValue(this.KEY_ARRAYVALUES + i.ToString(), typeof(string)));
 				}
 				return;
 			}
@@ -66,7 +66,7 @@ namespace System.Data
 				info.AddValue(this.KEY_ARRAYCOUNT, this.errorList.Count);
 				for (int i = 0; i < this.errorList.Count; i++)
 				{
-					info.AddValue(this.KEY_ARRAYVALUES + i, this.errorList[i].ToString());
+					info.AddValue(this.KEY_ARRAYVALUES + i.ToString(), this.errorList[i].ToString());
 				}
 				return;
 			}

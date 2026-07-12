@@ -19,14 +19,21 @@ public class SpaceTreeBranchConfig : IEntityConfig
 		string text3 = global::STRINGS.CREATURES.SPECIES.SPACETREE.DESC;
 		float num = 8f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("syrup_tree_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, new List<Tag>
+		KAnimFile anim = Assets.GetAnim("syrup_tree_kanim");
+		string text4 = "idle_empty";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.BuildingFront;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = tier;
+		List<Tag> list = new List<Tag>
 		{
 			GameTags.HideFromSpawnTool,
 			GameTags.PlantBranch
-		}, 255f);
-		string text4 = "SpaceTreeBranchOriginal";
-		string text5 = global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 173.15f, 198.15f, 258.15f, 293.15f, null, false, 0f, 0.15f, null, true, true, false, true, 12000f, 0f, 12200f, text4, text5);
+		};
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 255f);
+		string text5 = "SpaceTreeBranchOriginal";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME;
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 173.15f, 198.15f, 258.15f, 293.15f, null, false, 0f, 0.15f, null, true, true, false, true, 12000f, 0f, 12200f, text5, text6);
 		WiltCondition component = gameObject.GetComponent<WiltCondition>();
 		component.WiltDelay = 0f;
 		component.RecoveryDelay = 0f;
@@ -34,7 +41,7 @@ public class SpaceTreeBranchConfig : IEntityConfig
 		if (gameObject.GetComponent<Traits>() == null)
 		{
 			gameObject.AddOrGet<Traits>();
-			component2.initialTraits.Add(text4);
+			component2.initialTraits.Add(text5);
 		}
 		KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
 		Crop.CropVal cropVal = new Crop.CropVal("WoodLog", 2700f, 75, true);
@@ -42,8 +49,8 @@ public class SpaceTreeBranchConfig : IEntityConfig
 		component2.initialAttributes.Add(Db.Get().PlantAttributes.YieldAmount.Id);
 		component2.initialAmounts.Add(Db.Get().Amounts.Maturity.Id);
 		Trait trait = Db.Get().traits.Get(component2.initialTraits[0]);
-		trait.Add(new AttributeModifier(Db.Get().PlantAttributes.YieldAmount.Id, (float)cropVal.numProduced, text5, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Maturity.maxAttribute.Id, cropVal.cropDuration / 600f, text5, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().PlantAttributes.YieldAmount.Id, (float)cropVal.numProduced, text6, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Maturity.maxAttribute.Id, cropVal.cropDuration / 600f, text6, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().PlantAttributes.MinLightLux.Id, 300f, global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME, false, false, true));
 		component2.initialAttributes.Add(Db.Get().PlantAttributes.MinLightLux.Id);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(false);

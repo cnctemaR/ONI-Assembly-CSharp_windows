@@ -8,9 +8,9 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new RescueIncapacitatedChore.StatesInstance(this);
-		base.runUntilComplete = true;
-		base.AddPrecondition(ChorePreconditions.instance.NotChoreCreator, incapacitatedDuplicant.gameObject);
-		base.AddPrecondition(RescueIncapacitatedChore.CanReachIncapacitated, incapacitatedDuplicant);
+		this.runUntilComplete = true;
+		this.AddPrecondition(ChorePreconditions.instance.NotChoreCreator, incapacitatedDuplicant.gameObject);
+		this.AddPrecondition(RescueIncapacitatedChore.CanReachIncapacitated, incapacitatedDuplicant);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -84,7 +84,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 					smi.GoTo(this.holding.ditch);
 				});
 				GameObject gameObject = this.rescuer.Get(smi).gameObject;
-				if (!gameObject.IsNullOrDestroyed() && gameObject.HasTag(GameTags.Minion))
+				if (!gameObject.IsNullOrDestroyed() && gameObject.HasTag(GameTags.BaseMinion))
 				{
 					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
@@ -93,7 +93,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			}).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				GameObject gameObject2 = this.rescuer.Get(smi).gameObject;
-				if (!gameObject2.IsNullOrDestroyed() && gameObject2.HasTag(GameTags.Minion))
+				if (!gameObject2.IsNullOrDestroyed() && gameObject2.HasTag(GameTags.BaseMinion))
 				{
 					KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);

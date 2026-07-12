@@ -19,7 +19,7 @@ public class DevGeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 100000f;
-		buildingDef.GeneratorBaseCapacity = 200000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerOutput = true;
 		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.ViewMode = OverlayModes.Power.ID;

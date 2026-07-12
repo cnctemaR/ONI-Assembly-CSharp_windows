@@ -9,6 +9,7 @@ namespace System.Transactions
 	public sealed class DependentTransaction : Transaction, ISerializable
 	{
 		internal DependentTransaction(Transaction parent, DependentCloneOption option)
+			: base(parent.IsolationLevel)
 		{
 		}
 

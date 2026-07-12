@@ -153,6 +153,7 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexConversionPanel)] = this.prefabConversionPanel;
 		this.ContentPrefabs[typeof(CodexCollapsibleHeader)] = this.prefabCollapsibleHeader;
 		this.ContentPrefabs[typeof(CodexCritterLifecycleWidget)] = this.prefabCritterLifecycleWidget;
+		this.ContentPrefabs[typeof(CodexElementCategoryList)] = this.prefabElementCategoryList;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -162,26 +163,7 @@ public class CodexScreen : KScreen
 		input = input.ToLower();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
-			bool flag = false;
-			string[] dlcIds = keyValuePair.Value.GetDlcIds();
-			for (int i = 0; i < dlcIds.Length; i++)
-			{
-				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(dlcIds[i]))
-				{
-					flag = true;
-					break;
-				}
-			}
-			string[] forbiddenDLCs = keyValuePair.Value.GetForbiddenDLCs();
-			for (int j = 0; j < forbiddenDLCs.Length; j++)
-			{
-				if (SaveLoader.Instance.IsDLCActiveForCurrentSave(forbiddenDLCs[j]))
-				{
-					flag = false;
-					break;
-				}
-			}
-			if (flag)
+			if (SaveLoader.Instance.IsCorrectDlcActiveForCurrentSave(keyValuePair.Value.GetDlcIds(), keyValuePair.Value.GetForbiddenDLCs()))
 			{
 				if (input == "")
 				{
@@ -846,6 +828,9 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private GameObject prefabCritterLifecycleWidget;
+
+	[SerializeField]
+	private GameObject prefabElementCategoryList;
 
 	[Header("Text Styles")]
 	[SerializeField]

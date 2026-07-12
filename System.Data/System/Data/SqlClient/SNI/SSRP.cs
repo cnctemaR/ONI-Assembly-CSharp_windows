@@ -24,7 +24,7 @@ namespace System.Data.SqlClient.SNI
 			{
 				throw new SocketException();
 			}
-			string[] array3 = Encoding.ASCII.GetString(array2, 3, array2.Length - 3).Split(new char[] { ';' });
+			string[] array3 = Encoding.ASCII.GetString(array2, 3, array2.Length - 3).Split(';', StringSplitOptions.None);
 			int num = Array.IndexOf<string>(array3, "tcp");
 			if (num < 0 || num == array3.Length - 1)
 			{

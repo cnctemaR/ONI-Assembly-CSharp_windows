@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -108,7 +106,17 @@ namespace System.Net.WebSockets
 			return this._webSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
 		}
 
+		public ValueTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+		{
+			return this._webSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
+		}
+
 		public Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken)
+		{
+			return this._webSocket.ReceiveAsync(buffer, cancellationToken);
+		}
+
+		public ValueTask<ValueWebSocketReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
 		{
 			return this._webSocket.ReceiveAsync(buffer, cancellationToken);
 		}
@@ -123,60 +131,23 @@ namespace System.Net.WebSockets
 			return this._webSocket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
 		}
 
-		public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
+		public Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
 		{
-			using (cancellationToken.Register(delegate(object s)
-			{
-				((WebSocketHandle)s).Abort();
-			}, this))
-			{
-				try
-				{
-					Socket socket = await this.ConnectSocketAsync(uri.Host, uri.Port, cancellationToken).ConfigureAwait(false);
-					Stream stream = new NetworkStream(socket, true);
-					if (uri.Scheme == "wss")
-					{
-						SslStream sslStream = new SslStream(stream);
-						await sslStream.AuthenticateAsClientAsync(uri.Host, options.ClientCertificates, SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, false).ConfigureAwait(false);
-						stream = sslStream;
-						sslStream = null;
-					}
-					KeyValuePair<string, string> secKeyAndSecWebSocketAccept = WebSocketHandle.CreateSecKeyAndSecWebSocketAccept();
-					byte[] array = WebSocketHandle.BuildRequestHeader(uri, options, secKeyAndSecWebSocketAccept.Key);
-					await stream.WriteAsync(array, 0, array.Length, cancellationToken).ConfigureAwait(false);
-					string text = await this.ParseAndValidateConnectResponseAsync(stream, options, secKeyAndSecWebSocketAccept.Value, cancellationToken).ConfigureAwait(false);
-					this._webSocket = WebSocket.CreateClientWebSocket(stream, text, options.ReceiveBufferSize, options.SendBufferSize, options.KeepAliveInterval, false, options.Buffer.GetValueOrDefault());
-					if (this._state == WebSocketState.Aborted)
-					{
-						this._webSocket.Abort();
-					}
-					else if (this._state == WebSocketState.Closed)
-					{
-						this._webSocket.Dispose();
-					}
-					stream = null;
-					secKeyAndSecWebSocketAccept = default(KeyValuePair<string, string>);
-				}
-				catch (Exception ex)
-				{
-					if (this._state < WebSocketState.Closed)
-					{
-						this._state = WebSocketState.Closed;
-					}
-					this.Abort();
-					if (ex is WebSocketException)
-					{
-						throw;
-					}
-					throw new WebSocketException("Unable to connect to the remote server", ex);
-				}
-			}
+			WebSocketHandle.<ConnectAsyncCore>d__26 <ConnectAsyncCore>d__;
+			<ConnectAsyncCore>d__.<>4__this = this;
+			<ConnectAsyncCore>d__.uri = uri;
+			<ConnectAsyncCore>d__.cancellationToken = cancellationToken;
+			<ConnectAsyncCore>d__.options = options;
+			<ConnectAsyncCore>d__.<>t__builder = AsyncTaskMethodBuilder.Create();
+			<ConnectAsyncCore>d__.<>1__state = -1;
+			<ConnectAsyncCore>d__.<>t__builder.Start<WebSocketHandle.<ConnectAsyncCore>d__26>(ref <ConnectAsyncCore>d__);
+			return <ConnectAsyncCore>d__.<>t__builder.Task;
 		}
 
 		private async Task<Socket> ConnectSocketAsync(string host, int port, CancellationToken cancellationToken)
 		{
 			IPAddress[] array = await Dns.GetHostAddressesAsync(host).ConfigureAwait(false);
-			ExceptionDispatchInfo lastException = null;
+			ExceptionDispatchInfo exceptionDispatchInfo = null;
 			foreach (IPAddress ipaddress in array)
 			{
 				Socket socket = new Socket(ipaddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -218,12 +189,11 @@ namespace System.Net.WebSockets
 				catch (Exception ex2)
 				{
 					socket.Dispose();
-					lastException = ExceptionDispatchInfo.Capture(ex2);
+					exceptionDispatchInfo = ExceptionDispatchInfo.Capture(ex2);
 				}
 				socket = null;
 			}
 			IPAddress[] array2 = null;
-			ExceptionDispatchInfo exceptionDispatchInfo = lastException;
 			if (exceptionDispatchInfo != null)
 			{
 				exceptionDispatchInfo.Throw();
@@ -311,7 +281,7 @@ namespace System.Net.WebSockets
 			string text = await WebSocketHandle.ReadResponseHeaderLineAsync(stream, cancellationToken).ConfigureAwait(false);
 			if (string.IsNullOrEmpty(text))
 			{
-				throw new WebSocketException(global::SR.Format("Unable to connect to the remote server", Array.Empty<object>()));
+				throw new WebSocketException(SR.Format("Unable to connect to the remote server", Array.Empty<object>()));
 			}
 			if (!text.StartsWith("HTTP/1.1 ", StringComparison.Ordinal) || text.Length < "HTTP/1.1 101".Length)
 			{
@@ -325,27 +295,27 @@ namespace System.Net.WebSockets
 			bool foundConnection = false;
 			bool foundSecWebSocketAccept = false;
 			string subprotocol = null;
-			string line;
-			while (!string.IsNullOrEmpty(line = await WebSocketHandle.ReadResponseHeaderLineAsync(stream, cancellationToken).ConfigureAwait(false)))
+			string text2;
+			while (!string.IsNullOrEmpty(text2 = await WebSocketHandle.ReadResponseHeaderLineAsync(stream, cancellationToken).ConfigureAwait(false)))
 			{
-				int num = line.IndexOf(':');
+				int num = text2.IndexOf(':');
 				if (num == -1)
 				{
 					throw new WebSocketException(WebSocketError.HeaderError);
 				}
-				string text2 = line.SubstringTrim(0, num);
-				string headerValue = line.SubstringTrim(num + 1);
-				WebSocketHandle.ValidateAndTrackHeader("Connection", "Upgrade", text2, headerValue, ref foundConnection);
-				WebSocketHandle.ValidateAndTrackHeader("Upgrade", "websocket", text2, headerValue, ref foundUpgrade);
-				WebSocketHandle.ValidateAndTrackHeader("Sec-WebSocket-Accept", expectedSecWebSocketAccept, text2, headerValue, ref foundSecWebSocketAccept);
-				if (string.Equals("Sec-WebSocket-Protocol", text2, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(headerValue))
+				string text3 = text2.SubstringTrim(0, num);
+				string headerValue = text2.SubstringTrim(num + 1);
+				WebSocketHandle.ValidateAndTrackHeader("Connection", "Upgrade", text3, headerValue, ref foundConnection);
+				WebSocketHandle.ValidateAndTrackHeader("Upgrade", "websocket", text3, headerValue, ref foundUpgrade);
+				WebSocketHandle.ValidateAndTrackHeader("Sec-WebSocket-Accept", expectedSecWebSocketAccept, text3, headerValue, ref foundSecWebSocketAccept);
+				if (string.Equals("Sec-WebSocket-Protocol", text3, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(headerValue))
 				{
-					string text3 = options.RequestedSubProtocols.Find((string requested) => string.Equals(requested, headerValue, StringComparison.OrdinalIgnoreCase));
-					if (text3 == null || subprotocol != null)
+					string text4 = options.RequestedSubProtocols.Find((string requested) => string.Equals(requested, headerValue, StringComparison.OrdinalIgnoreCase));
+					if (text4 == null || subprotocol != null)
 					{
-						throw new WebSocketException(WebSocketError.UnsupportedProtocol, global::SR.Format("The WebSocket client request requested '{0}' protocol(s), but server is only accepting '{1}' protocol(s).", string.Join(", ", options.RequestedSubProtocols), subprotocol));
+						throw new WebSocketException(WebSocketError.UnsupportedProtocol, SR.Format("The WebSocket client request requested '{0}' protocol(s), but server is only accepting '{1}' protocol(s).", string.Join(", ", options.RequestedSubProtocols), subprotocol));
 					}
-					subprotocol = text3;
+					subprotocol = text4;
 				}
 			}
 			if (!foundUpgrade || !foundConnection || !foundSecWebSocketAccept)
@@ -364,7 +334,7 @@ namespace System.Net.WebSockets
 				{
 					if (!string.Equals(targetHeaderValue, foundHeaderValue, StringComparison.OrdinalIgnoreCase))
 					{
-						throw new WebSocketException(global::SR.Format("The '{0}' header value '{1}' is invalid.", targetHeaderName, foundHeaderValue));
+						throw new WebSocketException(SR.Format("The '{0}' header value '{1}' is invalid.", targetHeaderName, foundHeaderValue));
 					}
 					foundHeader = true;
 					return;
@@ -372,7 +342,7 @@ namespace System.Net.WebSockets
 			}
 			else if (flag)
 			{
-				throw new WebSocketException(global::SR.Format("Unable to connect to the remote server", Array.Empty<object>()));
+				throw new WebSocketException(SR.Format("Unable to connect to the remote server", Array.Empty<object>()));
 			}
 		}
 

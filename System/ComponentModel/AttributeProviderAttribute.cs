@@ -11,7 +11,7 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("typeName");
 			}
-			this._typeName = typeName;
+			this.TypeName = typeName;
 		}
 
 		public AttributeProviderAttribute(string typeName, string propertyName)
@@ -24,8 +24,8 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("propertyName");
 			}
-			this._typeName = typeName;
-			this._propertyName = propertyName;
+			this.TypeName = typeName;
+			this.PropertyName = propertyName;
 		}
 
 		public AttributeProviderAttribute(Type type)
@@ -34,27 +34,11 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("type");
 			}
-			this._typeName = type.AssemblyQualifiedName;
+			this.TypeName = type.AssemblyQualifiedName;
 		}
 
-		public string TypeName
-		{
-			get
-			{
-				return this._typeName;
-			}
-		}
+		public string TypeName { get; }
 
-		public string PropertyName
-		{
-			get
-			{
-				return this._propertyName;
-			}
-		}
-
-		private string _typeName;
-
-		private string _propertyName;
+		public string PropertyName { get; }
 	}
 }

@@ -269,6 +269,14 @@ namespace Database
 				str = str.Replace("{durability}", GameUtil.GetFormattedPercent(component6.GetDurability() * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
+			this.BionicExplorerBooster = this.CreateStatusItem("BionicExplorerBooster", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.BionicExplorerBooster.resolveStringCallback = delegate(string str, object data)
+			{
+				BionicUpgrade_ExplorerBooster.Instance instance = (BionicUpgrade_ExplorerBooster.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance.Progress * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.BionicExplorerBoosterReady = this.CreateStatusItem("BionicExplorerBoosterReady", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
 			this.StoredItemDurability = this.CreateStatusItem("StoredItemDurability", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.StoredItemDurability.resolveStringCallback = delegate(string str, object data)
 			{
@@ -398,5 +406,9 @@ namespace Database
 		public StatusItem MoveStorageUnreachable;
 
 		public StatusItem GrowingBranches;
+
+		public StatusItem BionicExplorerBooster;
+
+		public StatusItem BionicExplorerBoosterReady;
 	}
 }

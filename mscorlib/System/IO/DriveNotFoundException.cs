@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class DriveNotFoundException : IOException
 	{
 		public DriveNotFoundException()
-			: base(Environment.GetResourceString("Attempted to access a drive that is not available."))
+			: base("Could not find the drive. The drive might not be ready or might not be mapped.")
 		{
-			base.SetErrorCode(-2147024893);
+			base.HResult = -2147024893;
 		}
 
 		public DriveNotFoundException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147024893);
+			base.HResult = -2147024893;
 		}
 
 		public DriveNotFoundException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024893);
+			base.HResult = -2147024893;
 		}
 
 		protected DriveNotFoundException(SerializationInfo info, StreamingContext context)

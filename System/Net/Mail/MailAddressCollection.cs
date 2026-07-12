@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 
@@ -8,42 +9,75 @@ namespace System.Net.Mail
 	{
 		public void Add(string addresses)
 		{
-			foreach (string text in addresses.Split(new char[] { ',' }))
+			if (addresses == null)
 			{
-				base.Add(new MailAddress(text));
+				throw new ArgumentNullException("addresses");
 			}
-		}
-
-		protected override void InsertItem(int index, MailAddress item)
-		{
-			if (item == null)
+			if (addresses == string.Empty)
 			{
-				throw new ArgumentNullException();
+				throw new ArgumentException(SR.Format("The parameter '{0}' cannot be an empty string.", "addresses"), "addresses");
 			}
-			base.InsertItem(index, item);
+			this.ParseValue(addresses);
 		}
 
 		protected override void SetItem(int index, MailAddress item)
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("item");
 			}
 			base.SetItem(index, item);
 		}
 
+		protected override void InsertItem(int index, MailAddress item)
+		{
+			if (item == null)
+			{
+				throw new ArgumentNullException("item");
+			}
+			base.InsertItem(index, item);
+		}
+
+		internal void ParseValue(string addresses)
+		{
+			IList<MailAddress> list = MailAddressParser.ParseMultipleAddresses(addresses);
+			for (int i = 0; i < list.Count; i++)
+			{
+				base.Add(list[i]);
+			}
+		}
+
 		public override string ToString()
 		{
+			bool flag = true;
 			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < base.Count; i++)
+			foreach (MailAddress mailAddress in this)
 			{
-				if (i > 0)
+				if (!flag)
 				{
 					stringBuilder.Append(", ");
 				}
-				stringBuilder.Append(base[i].ToString());
+				stringBuilder.Append(mailAddress.ToString());
+				flag = false;
 			}
 			return stringBuilder.ToString();
+		}
+
+		internal string Encode(int charsConsumed, bool allowUnicode)
+		{
+			string text = string.Empty;
+			foreach (MailAddress mailAddress in this)
+			{
+				if (string.IsNullOrEmpty(text))
+				{
+					text = mailAddress.Encode(charsConsumed, allowUnicode);
+				}
+				else
+				{
+					text = text + ", " + mailAddress.Encode(1, allowUnicode);
+				}
+			}
+			return text;
 		}
 	}
 }

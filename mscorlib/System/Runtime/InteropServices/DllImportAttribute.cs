@@ -4,8 +4,8 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class DllImportAttribute : Attribute
 	{
 		[SecurityCritical]
@@ -19,7 +19,7 @@ namespace System.Runtime.InteropServices
 			int metadataToken = method.MetadataToken;
 			PInvokeAttributes pinvokeAttributes = PInvokeAttributes.CharSetNotSpec;
 			string text2;
-			((MonoMethod)method).GetPInvoke(out pinvokeAttributes, out text2, out text);
+			method.GetPInvoke(out pinvokeAttributes, out text2, out text);
 			CharSet charSet = CharSet.None;
 			switch (pinvokeAttributes & PInvokeAttributes.CharSetMask)
 			{

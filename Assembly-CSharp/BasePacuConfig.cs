@@ -11,7 +11,14 @@ public static class BasePacuConfig
 	{
 		float num = 200f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, (warnLowTemp + warnHighTemp) / 2f);
+		KAnimFile anim = Assets.GetAnim(anim_file);
+		string text = "idle_loop";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = tier;
+		float num4 = (warnLowTemp + warnHighTemp) / 2f;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, anim, text, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, null, num4);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.SwimmingCreature, false);
 		component.AddTag(GameTags.Creatures.Swimmer, false);
@@ -63,7 +70,7 @@ public static class BasePacuConfig
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Algae.CreateTag());
 		List<Diet.Info> list = new List<Diet.Info>();
-		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false, false));
+		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null));
 		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
 		Diet diet = new Diet(list.ToArray());
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
@@ -80,8 +87,8 @@ public static class BasePacuConfig
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);
 		}
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		int num2 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Pacu"];
-		pickupable.sortOrder = num2;
+		int num5 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Pacu"];
+		pickupable.sortOrder = num5;
 		return gameObject;
 	}
 
@@ -99,7 +106,7 @@ public static class BasePacuConfig
 					list.Add(new Diet.Info(new HashSet<Tag>
 					{
 						new Tag(gameObject.GetComponent<KPrefabID>().PrefabID())
-					}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false, false));
+					}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null));
 				}
 			}
 		}

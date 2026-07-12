@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Runtime.CompilerServices
 {
-	public struct YieldAwaitable
+	public readonly struct YieldAwaitable
 	{
 		public YieldAwaitable.YieldAwaiter GetAwaiter()
 		{
@@ -14,7 +14,7 @@ namespace System.Runtime.CompilerServices
 		}
 
 		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
-		public struct YieldAwaiter : ICriticalNotifyCompletion, INotifyCompletion
+		public readonly struct YieldAwaiter : ICriticalNotifyCompletion, INotifyCompletion
 		{
 			public bool IsCompleted
 			{

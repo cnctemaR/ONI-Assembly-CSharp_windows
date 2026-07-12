@@ -245,6 +245,10 @@ public class Pickupable : Workable, IHasSortOrder
 			base.gameObject.DeleteObject();
 			return;
 		}
+		if (base.GetComponent<Health>() != null)
+		{
+			this.handleFallerComponents = false;
+		}
 		this.UpdateCachedCell(num);
 		new ReachabilityMonitor.Instance(this).StartSM();
 		this.fetchable_monitor = new FetchableMonitor.Instance(this);
@@ -334,6 +338,16 @@ public class Pickupable : Workable, IHasSortOrder
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.worldPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.storedPartitionerEntry);
+		base.Unsubscribe<Pickupable>(856640610, Pickupable.OnStoreDelegate, false);
+		base.Unsubscribe<Pickupable>(1188683690, Pickupable.OnLandedDelegate, false);
+		base.Unsubscribe<Pickupable>(1807976145, Pickupable.OnOreSizeChangedDelegate, false);
+		base.Unsubscribe<Pickupable>(-1432940121, Pickupable.OnReachableChangedDelegate, false);
+		base.Unsubscribe<Pickupable>(-778359855, Pickupable.RefreshStorageTagsDelegate, false);
+		base.Unsubscribe<Pickupable>(580035959, Pickupable.OnWorkableEntombOffset, false);
+		if (base.isSpawned)
+		{
+			base.Unsubscribe<Pickupable>(-1582839653, Pickupable.OnTagsChangedDelegate, false);
+		}
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
@@ -345,10 +359,10 @@ public class Pickupable : Workable, IHasSortOrder
 	private void SetWorkableOffset(object data)
 	{
 		CellOffset cellOffset = CellOffset.none;
-		Worker worker = data as Worker;
-		if (worker != null)
+		WorkerBase workerBase = data as WorkerBase;
+		if (workerBase != null)
 		{
-			int num = Grid.PosToCell(worker);
+			int num = Grid.PosToCell(workerBase);
 			int num2 = Grid.PosToCell(this);
 			cellOffset = (Grid.IsValidCell(num) ? Grid.GetCellOffsetDirection(num2, num) : CellOffset.none);
 		}
@@ -706,7 +720,7 @@ public class Pickupable : Workable, IHasSortOrder
 				if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)
 				{
 					this.lastCarrier = this.storage.GetComponent<KBatchedAnimController>();
-					if (this.lastCarrier != null && this.lastCarrier.HasTag(GameTags.Minion))
+					if (this.lastCarrier != null && this.lastCarrier.HasTag(GameTags.BaseMinion))
 					{
 						this.lastCarrier.AddAnimOverrides(this.carryAnimOverride, 0f);
 					}
@@ -768,9 +782,9 @@ public class Pickupable : Workable, IHasSortOrder
 		return this.cachedCell;
 	}
 
-	public override Workable.AnimInfo GetAnim(Worker worker)
+	public override Workable.AnimInfo GetAnim(WorkerBase worker)
 	{
-		if (this.useGunforPickup && worker.usesMultiTool)
+		if (this.useGunforPickup && worker.UsesMultiTool())
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
 			anim.smi = new MultitoolController.Instance(this, worker, "pickup", Assets.GetPrefab(EffectConfigs.OreAbsorbId));
@@ -779,10 +793,10 @@ public class Pickupable : Workable, IHasSortOrder
 		return base.GetAnim(worker);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		Storage component = worker.GetComponent<Storage>();
-		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
+		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.GetStartWorkInfo();
 		float amount = pickupableStartWorkInfo.amount;
 		if (!(this != null))
 		{
@@ -793,14 +807,14 @@ public class Pickupable : Workable, IHasSortOrder
 		if (pickupable != null)
 		{
 			component.Store(pickupable.gameObject, false, false, true, false);
-			worker.workCompleteData = pickupable;
+			worker.SetWorkCompleteData(pickupable);
 			pickupableStartWorkInfo.setResultCb(pickupable.gameObject);
 			return;
 		}
 		pickupableStartWorkInfo.setResultCb(null);
 	}
 
-	public override bool InstantlyFinish(Worker worker)
+	public override bool InstantlyFinish(WorkerBase worker)
 	{
 		return false;
 	}
@@ -829,7 +843,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void AddFaller(Vector2 initial_velocity)
 	{
-		if (base.GetComponent<Health>() != null)
+		if (!this.handleFallerComponents)
 		{
 			return;
 		}
@@ -841,7 +855,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void RemoveFaller()
 	{
-		if (base.GetComponent<Health>() != null)
+		if (!this.handleFallerComponents)
 		{
 			return;
 		}
@@ -1050,6 +1064,8 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private FetchableMonitor.Instance fetchable_monitor;
 
+	public bool handleFallerComponents = true;
+
 	private LoggerFSSF log;
 
 	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
@@ -1117,7 +1133,7 @@ public class Pickupable : Workable, IHasSortOrder
 		public int ticket;
 	}
 
-	public class PickupableStartWorkInfo : Worker.StartWorkInfo
+	public class PickupableStartWorkInfo : WorkerBase.StartWorkInfo
 	{
 		public float amount { get; private set; }
 

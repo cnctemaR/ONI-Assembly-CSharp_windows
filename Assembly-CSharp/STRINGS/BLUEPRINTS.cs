@@ -635,5 +635,19 @@ namespace STRINGS
 
 			public static LocString DESC = "Southwest of <i>what</i>, Duplicants aren't sure. But they like it.";
 		}
+
+		public class PERMIT_ELEGANTBED_HATCH
+		{
+			public static LocString NAME = UI.FormatAsLink("Hatch Bed", "LUXURYBED");
+
+			public static LocString DESC = "It is extremely unlikely to close while someone is inside.";
+		}
+
+		public class PERMIT_ELEGANTBED_PIPSQUEAK
+		{
+			public static LocString NAME = UI.FormatAsLink("Pipsqueak Bed", "LUXURYBED");
+
+			public static LocString DESC = "Perfect for side sleepers and little spoons.";
+		}
 	}
 }

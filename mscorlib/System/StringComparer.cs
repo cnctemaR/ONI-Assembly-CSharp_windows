@@ -2,11 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string>, IEqualityComparer<string>
 	{
@@ -14,7 +12,7 @@ namespace System
 		{
 			get
 			{
-				return StringComparer._invariantCulture;
+				return StringComparer.s_invariantCulture;
 			}
 		}
 
@@ -22,7 +20,7 @@ namespace System
 		{
 			get
 			{
-				return StringComparer._invariantCultureIgnoreCase;
+				return StringComparer.s_invariantCultureIgnoreCase;
 			}
 		}
 
@@ -30,7 +28,7 @@ namespace System
 		{
 			get
 			{
-				return new CultureAwareComparer(CultureInfo.CurrentCulture, false);
+				return new CultureAwareComparer(CultureInfo.CurrentCulture, CompareOptions.None);
 			}
 		}
 
@@ -38,7 +36,7 @@ namespace System
 		{
 			get
 			{
-				return new CultureAwareComparer(CultureInfo.CurrentCulture, true);
+				return new CultureAwareComparer(CultureInfo.CurrentCulture, CompareOptions.IgnoreCase);
 			}
 		}
 
@@ -46,7 +44,7 @@ namespace System
 		{
 			get
 			{
-				return StringComparer._ordinal;
+				return StringComparer.s_ordinal;
 			}
 		}
 
@@ -54,7 +52,28 @@ namespace System
 		{
 			get
 			{
-				return StringComparer._ordinalIgnoreCase;
+				return StringComparer.s_ordinalIgnoreCase;
+			}
+		}
+
+		public static StringComparer FromComparison(StringComparison comparisonType)
+		{
+			switch (comparisonType)
+			{
+			case StringComparison.CurrentCulture:
+				return StringComparer.CurrentCulture;
+			case StringComparison.CurrentCultureIgnoreCase:
+				return StringComparer.CurrentCultureIgnoreCase;
+			case StringComparison.InvariantCulture:
+				return StringComparer.InvariantCulture;
+			case StringComparison.InvariantCultureIgnoreCase:
+				return StringComparer.InvariantCultureIgnoreCase;
+			case StringComparison.Ordinal:
+				return StringComparer.Ordinal;
+			case StringComparison.OrdinalIgnoreCase:
+				return StringComparer.OrdinalIgnoreCase;
+			default:
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 			}
 		}
 
@@ -64,7 +83,16 @@ namespace System
 			{
 				throw new ArgumentNullException("culture");
 			}
-			return new CultureAwareComparer(culture, ignoreCase);
+			return new CultureAwareComparer(culture, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+		}
+
+		public static StringComparer Create(CultureInfo culture, CompareOptions options)
+		{
+			if (culture == null)
+			{
+				throw new ArgumentException("culture");
+			}
+			return new CultureAwareComparer(culture, options);
 		}
 
 		public int Compare(object x, object y)
@@ -95,7 +123,7 @@ namespace System
 			{
 				return comparable.CompareTo(y);
 			}
-			throw new ArgumentException(Environment.GetResourceString("At least one object must implement IComparable."));
+			throw new ArgumentException("At least one object must implement IComparable.");
 		}
 
 		public bool Equals(object x, object y)
@@ -140,12 +168,12 @@ namespace System
 
 		public abstract int GetHashCode(string obj);
 
-		private static readonly StringComparer _invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, false);
+		private static readonly CultureAwareComparer s_invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.None);
 
-		private static readonly StringComparer _invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, true);
+		private static readonly CultureAwareComparer s_invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
 
-		private static readonly StringComparer _ordinal = new OrdinalComparer(false);
+		private static readonly OrdinalCaseSensitiveComparer s_ordinal = new OrdinalCaseSensitiveComparer();
 
-		private static readonly StringComparer _ordinalIgnoreCase = new OrdinalComparer(true);
+		private static readonly OrdinalIgnoreCaseComparer s_ordinalIgnoreCase = new OrdinalIgnoreCaseComparer();
 	}
 }

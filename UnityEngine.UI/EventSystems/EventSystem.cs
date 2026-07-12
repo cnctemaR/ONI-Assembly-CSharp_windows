@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 
 namespace UnityEngine.EventSystems
 {
@@ -212,6 +214,17 @@ namespace UnityEngine.EventSystems
 			{
 				return lhs.distance.CompareTo(rhs.distance);
 			}
+			if (lhs.sortingGroupID != SortingGroup.invalidSortingGroupID && rhs.sortingGroupID != SortingGroup.invalidSortingGroupID)
+			{
+				if (lhs.sortingGroupID != rhs.sortingGroupID)
+				{
+					return lhs.sortingGroupID.CompareTo(rhs.sortingGroupID);
+				}
+				if (lhs.sortingGroupOrder != rhs.sortingGroupOrder)
+				{
+					return rhs.sortingGroupOrder.CompareTo(lhs.sortingGroupOrder);
+				}
+			}
 			return lhs.index.CompareTo(rhs.index);
 		}
 
@@ -241,14 +254,111 @@ namespace UnityEngine.EventSystems
 			return this.m_CurrentInputModule != null && this.m_CurrentInputModule.IsPointerOverGameObject(pointerId);
 		}
 
+		private bool isUIToolkitActiveEventSystem
+		{
+			get
+			{
+				return EventSystem.s_UIToolkitOverride.activeEventSystem == this || EventSystem.s_UIToolkitOverride.activeEventSystem == null;
+			}
+		}
+
+		private bool sendUIToolkitEvents
+		{
+			get
+			{
+				return EventSystem.s_UIToolkitOverride.sendEvents && this.isUIToolkitActiveEventSystem;
+			}
+		}
+
+		private bool createUIToolkitPanelGameObjectsOnStart
+		{
+			get
+			{
+				return EventSystem.s_UIToolkitOverride.createPanelGameObjectsOnStart && this.isUIToolkitActiveEventSystem;
+			}
+		}
+
+		public static void SetUITookitEventSystemOverride(EventSystem activeEventSystem, bool sendEvents = true, bool createPanelGameObjectsOnStart = true)
+		{
+			UIElementsRuntimeUtility.UnregisterEventSystem(UIElementsRuntimeUtility.activeEventSystem);
+			EventSystem.s_UIToolkitOverride = new EventSystem.UIToolkitOverrideConfig
+			{
+				activeEventSystem = activeEventSystem,
+				sendEvents = sendEvents,
+				createPanelGameObjectsOnStart = createPanelGameObjectsOnStart
+			};
+			if (sendEvents && ((activeEventSystem != null) ? activeEventSystem : EventSystem.current).isActiveAndEnabled)
+			{
+				UIElementsRuntimeUtility.RegisterEventSystem(activeEventSystem);
+			}
+		}
+
+		private void StartTrackingUIToolkitPanels()
+		{
+			if (this.createUIToolkitPanelGameObjectsOnStart)
+			{
+				foreach (Panel panel in UIElementsRuntimeUtility.GetSortedPlayerPanels())
+				{
+					BaseRuntimePanel baseRuntimePanel = (BaseRuntimePanel)panel;
+					this.CreateUIToolkitPanelGameObject(baseRuntimePanel);
+				}
+				UIElementsRuntimeUtility.onCreatePanel += this.CreateUIToolkitPanelGameObject;
+				this.m_IsTrackingUIToolkitPanels = true;
+			}
+		}
+
+		private void StopTrackingUIToolkitPanels()
+		{
+			if (this.m_IsTrackingUIToolkitPanels)
+			{
+				UIElementsRuntimeUtility.onCreatePanel -= this.CreateUIToolkitPanelGameObject;
+				this.m_IsTrackingUIToolkitPanels = false;
+			}
+		}
+
+		private void CreateUIToolkitPanelGameObject(BaseRuntimePanel panel)
+		{
+			if (panel.selectableGameObject == null)
+			{
+				GameObject go = new GameObject(panel.name, new Type[]
+				{
+					typeof(PanelEventHandler),
+					typeof(PanelRaycaster)
+				});
+				go.transform.SetParent(base.transform);
+				panel.selectableGameObject = go;
+				panel.destroyed += delegate
+				{
+					Object.DestroyImmediate(go);
+				};
+			}
+		}
+
+		protected override void Start()
+		{
+			base.Start();
+			this.m_Started = true;
+			this.StartTrackingUIToolkitPanels();
+		}
+
 		protected override void OnEnable()
 		{
 			base.OnEnable();
 			EventSystem.m_EventSystems.Add(this);
+			if (this.m_Started && !this.m_IsTrackingUIToolkitPanels)
+			{
+				this.StartTrackingUIToolkitPanels();
+			}
+			if (this.sendUIToolkitEvents)
+			{
+				UIElementsRuntimeUtility.RegisterEventSystem(this);
+			}
 		}
 
 		protected override void OnDisable()
 		{
+			this.StopTrackingUIToolkitPanels();
+			UIElementsRuntimeUtility.UnregisterEventSystem(this);
 			if (this.m_CurrentInputModule != null)
 			{
 				this.m_CurrentInputModule.DeactivateModule();
@@ -380,5 +490,25 @@ namespace UnityEngine.EventSystems
 		private BaseEventData m_DummyData;
 
 		private static readonly Comparison<RaycastResult> s_RaycastComparer = new Comparison<RaycastResult>(EventSystem.RaycastComparer);
+
+		private static EventSystem.UIToolkitOverrideConfig s_UIToolkitOverride = new EventSystem.UIToolkitOverrideConfig
+		{
+			activeEventSystem = null,
+			sendEvents = true,
+			createPanelGameObjectsOnStart = true
+		};
+
+		private bool m_Started;
+
+		private bool m_IsTrackingUIToolkitPanels;
+
+		private struct UIToolkitOverrideConfig
+		{
+			public EventSystem activeEventSystem;
+
+			public bool sendEvents;
+
+			public bool createPanelGameObjectsOnStart;
+		}
 	}
 }

@@ -58,7 +58,7 @@ public class GameAudioSheets : AudioSheets
 		else if (type == "SoundEvent" || type == "LoopingSoundEvent")
 		{
 			bool flag2 = type == "LoopingSoundEvent";
-			string[] array = sound_name.Split(new char[] { ':' });
+			string[] array = sound_name.Split(':', StringSplitOptions.None);
 			sound_name = array[0];
 			soundEvent = new SoundEvent(file_name, sound_name, frame, true, flag2, min_interval, false);
 			for (int i = 1; i < array.Length; i++)

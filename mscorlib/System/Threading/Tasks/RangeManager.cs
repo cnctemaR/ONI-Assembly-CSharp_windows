@@ -6,8 +6,8 @@ namespace System.Threading.Tasks
 	{
 		internal RangeManager(long nFromInclusive, long nToExclusive, long nStep, int nNumExpectedWorkers)
 		{
-			this.m_nCurrentIndexRangeToAssign = 0;
-			this.m_nStep = nStep;
+			this._nCurrentIndexRangeToAssign = 0;
+			this._nStep = nStep;
 			if (nNumExpectedWorkers == 1)
 			{
 				nNumExpectedWorkers = 2;
@@ -26,34 +26,34 @@ namespace System.Threading.Tasks
 			}
 			long num4 = (long)num2;
 			this._use32BitCurrentIndex = IntPtr.Size == 4 && num4 <= 2147483647L;
-			this.m_indexRanges = new IndexRange[num3];
+			this._indexRanges = new IndexRange[num3];
 			long num5 = nFromInclusive;
 			for (int i = 0; i < num3; i++)
 			{
-				this.m_indexRanges[i].m_nFromInclusive = num5;
-				this.m_indexRanges[i].m_nSharedCurrentIndexOffset = null;
-				this.m_indexRanges[i].m_bRangeFinished = 0;
+				this._indexRanges[i]._nFromInclusive = num5;
+				this._indexRanges[i]._nSharedCurrentIndexOffset = null;
+				this._indexRanges[i]._bRangeFinished = 0;
 				num5 += num4;
 				if (num5 < num5 - num4 || num5 > nToExclusive)
 				{
 					num5 = nToExclusive;
 				}
-				this.m_indexRanges[i].m_nToExclusive = num5;
+				this._indexRanges[i]._nToExclusive = num5;
 			}
 		}
 
 		internal RangeWorker RegisterNewWorker()
 		{
-			int num = (Interlocked.Increment(ref this.m_nCurrentIndexRangeToAssign) - 1) % this.m_indexRanges.Length;
-			return new RangeWorker(this.m_indexRanges, num, this.m_nStep, this._use32BitCurrentIndex);
+			int num = (Interlocked.Increment(ref this._nCurrentIndexRangeToAssign) - 1) % this._indexRanges.Length;
+			return new RangeWorker(this._indexRanges, num, this._nStep, this._use32BitCurrentIndex);
 		}
 
-		internal readonly IndexRange[] m_indexRanges;
+		internal readonly IndexRange[] _indexRanges;
 
 		internal readonly bool _use32BitCurrentIndex;
 
-		internal int m_nCurrentIndexRangeToAssign;
+		internal int _nCurrentIndexRangeToAssign;
 
-		internal long m_nStep;
+		internal long _nStep;
 	}
 }

@@ -128,5 +128,20 @@ namespace System.Security.Cryptography
 		{
 			throw new NotSupportedException(global::SR.GetString("Method not supported. Derived class must override."));
 		}
+
+		public virtual byte[] ExportECPrivateKey()
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual bool TryExportECPrivateKey(Span<byte> destination, out int bytesWritten)
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual void ImportECPrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
+		{
+			throw new PlatformNotSupportedException();
+		}
 	}
 }

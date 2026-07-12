@@ -32,7 +32,7 @@ namespace STRINGS
 					" DLC Content"
 				});
 
-				public static LocString DLC_CONTENT = "\n\n<i>{0}</i> DLC Content";
+				public static LocString DLC_CONTENT = "\n<i>{0}</i> DLC Content";
 			}
 		}
 
@@ -224,6 +224,246 @@ namespace STRINGS
 
 				public static LocString DESC = "Enables access to the " + UI.FormatAsOverlay("Conveyor Overlay") + ".";
 			}
+
+			public class DISPOSABLE_ELECTROBANK_ORGANIC
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Organic Power Bank" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Organic Power Banks",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.CRAFTINGTABLE.NAME
+				});
+			}
+
+			public class DISPOSABLE_ELECTROBANK_URANIUM_ORE
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Nuclear Power Bank" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Nuclear Power Banks",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.CRAFTINGTABLE.NAME
+				});
+			}
+
+			public class ELECTROBANK
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Eco Power Bank" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Eco Power Banks",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class PILOTINGBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Rocketry Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Rocketry Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class CONSTRUCTIONBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Building Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Building Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class EXCAVATIONBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Digging Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Digging Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class EXPLORERBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Dowsing Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Dowsing Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class MACHINERYBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Operating Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Operating Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class ATHLETICSBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Athletics Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Athletics Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class SCIENCEBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Researching Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Researching Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class COOKINGBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Cooking Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Cooking Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class MEDICINEBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Doctoring Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Doctoring Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class STRENGTHBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Strength Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Strength Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class CREATIVITYBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Decorating Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Decorating Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class AGRICULTUREBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Farming Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Farming Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
+
+			public class HUSBANDRYBOOSTER
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Ranching Booster" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Ranching Boosters",
+					UI.PST_KEYWORD,
+					" for Bionic Duplicants at the ",
+					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME
+				});
+			}
 		}
 
 		public class TREES
@@ -357,14 +597,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Flow Redirection", "FLOWREDIRECTION");
 
-				public static LocString DESC = "Balance on irrigated concave platforms for a " + UI.FormatAsLink("Morale", "MORALE") + " boost.";
+				public static LocString DESC = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " management for " + UI.FormatAsLink("Morale", "MORALE") + " and industry.";
 			}
 
 			public class LIQUIDDISTRIBUTION
 			{
 				public static LocString NAME = UI.FormatAsLink("Liquid Distribution", "LIQUIDDISTRIBUTION");
 
-				public static LocString DESC = "Internal rocket hookups for liquid resources.";
+				public static LocString DESC = "Advanced fittings ensure that " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " resources get where they need to go.";
 			}
 
 			public class TEMPERATUREMODULATION
@@ -392,7 +632,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Gas Distribution", "GASDISTRIBUTION");
 
-				public static LocString DESC = "Internal rocket hookups for gas resources.";
+				public static LocString DESC = "Design building hookups to get " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources circulating properly.";
 			}
 
 			public class LIQUIDTEMPERATURE
@@ -1044,6 +1284,20 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Advanced Gas Flow", "SPACEGAS");
 
 				public static LocString DESC = UI.FormatAsLink("Gas", "ELEMENTS_GASSES") + " engines and transportation for rockets.";
+			}
+
+			public class DATASCIENCE
+			{
+				public static LocString NAME = UI.FormatAsLink("Data Science", "DATASCIENCE");
+
+				public static LocString DESC = "The science of making the data work for my Duplicants, instead of the other way around.";
+			}
+
+			public class DATASCIENCEBASEGAME
+			{
+				public static LocString NAME = UI.FormatAsLink("Data Science", "DATASCIENCEBASEGAME");
+
+				public static LocString DESC = "The science of making the data work for my Duplicants, instead of the other way around.";
 			}
 		}
 	}

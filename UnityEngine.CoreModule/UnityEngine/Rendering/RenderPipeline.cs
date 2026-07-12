@@ -7,13 +7,23 @@ namespace UnityEngine.Rendering
 	{
 		protected abstract void Render(ScriptableRenderContext context, Camera[] cameras);
 
-		protected virtual void ProcessRenderRequests(ScriptableRenderContext context, Camera camera, List<Camera.RenderRequest> renderRequests)
+		protected virtual void ProcessRenderRequests<RequestData>(ScriptableRenderContext context, Camera camera, RequestData renderRequest)
 		{
+		}
+
+		protected internal virtual bool IsRenderRequestSupported<RequestData>(Camera camera, RequestData data)
+		{
+			return false;
 		}
 
 		protected static void BeginFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 		{
-			RenderPipelineManager.BeginFrameRendering(context, cameras);
+			RenderPipelineManager.BeginContextRendering(context, new List<Camera>(cameras));
+		}
+
+		protected static void BeginContextRendering(ScriptableRenderContext context, List<Camera> cameras)
+		{
+			RenderPipelineManager.BeginContextRendering(context, cameras);
 		}
 
 		protected static void BeginCameraRendering(ScriptableRenderContext context, Camera camera)
@@ -21,9 +31,14 @@ namespace UnityEngine.Rendering
 			RenderPipelineManager.BeginCameraRendering(context, camera);
 		}
 
+		protected static void EndContextRendering(ScriptableRenderContext context, List<Camera> cameras)
+		{
+			RenderPipelineManager.EndContextRendering(context, cameras);
+		}
+
 		protected static void EndFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 		{
-			RenderPipelineManager.EndFrameRendering(context, cameras);
+			RenderPipelineManager.EndContextRendering(context, new List<Camera>(cameras));
 		}
 
 		protected static void EndCameraRendering(ScriptableRenderContext context, Camera camera)
@@ -31,7 +46,12 @@ namespace UnityEngine.Rendering
 			RenderPipelineManager.EndCameraRendering(context, camera);
 		}
 
-		internal void InternalRender(ScriptableRenderContext context, Camera[] cameras)
+		protected virtual void Render(ScriptableRenderContext context, List<Camera> cameras)
+		{
+			this.Render(context, cameras.ToArray());
+		}
+
+		internal void InternalRender(ScriptableRenderContext context, List<Camera> cameras)
 		{
 			bool disposed = this.disposed;
 			if (disposed)
@@ -41,14 +61,35 @@ namespace UnityEngine.Rendering
 			this.Render(context, cameras);
 		}
 
-		internal void InternalRenderWithRequests(ScriptableRenderContext context, Camera[] cameras, List<Camera.RenderRequest> renderRequests)
+		internal void InternalProcessRenderRequests<RequestData>(ScriptableRenderContext context, Camera camera, RequestData renderRequest)
 		{
 			bool disposed = this.disposed;
 			if (disposed)
 			{
 				throw new ObjectDisposedException(string.Format("{0} has been disposed. Do not call Render on disposed a RenderPipeline.", this));
 			}
-			this.ProcessRenderRequests(context, (cameras == null || cameras.Length == 0) ? null : cameras[0], renderRequests);
+			this.ProcessRenderRequests<RequestData>(context, camera, renderRequest);
+		}
+
+		public static bool SupportsRenderRequest<RequestData>(Camera camera, RequestData data)
+		{
+			bool flag = false;
+			bool flag2 = GraphicsSettings.currentRenderPipeline != null;
+			if (flag2)
+			{
+				bool flag3 = RenderPipelineManager.currentPipeline == null;
+				if (flag3)
+				{
+					RenderPipelineManager.PrepareRenderPipeline(GraphicsSettings.currentRenderPipeline);
+				}
+				flag = RenderPipelineManager.currentPipeline.IsRenderRequestSupported<RequestData>(camera, data);
+			}
+			return flag;
+		}
+
+		public static void SubmitRenderRequest<RequestData>(Camera camera, RequestData data)
+		{
+			camera.SubmitRenderRequest<RequestData>(data);
 		}
 
 		public bool disposed { get; private set; }
@@ -62,6 +103,25 @@ namespace UnityEngine.Rendering
 
 		protected virtual void Dispose(bool disposing)
 		{
+		}
+
+		public virtual RenderPipelineGlobalSettings defaultSettings
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		public class StandardRequest
+		{
+			public RenderTexture destination = null;
+
+			public int mipLevel = 0;
+
+			public CubemapFace face = CubemapFace.Unknown;
+
+			public int slice = 0;
 		}
 	}
 }

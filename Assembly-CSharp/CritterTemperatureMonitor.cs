@@ -110,6 +110,7 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 			this.occupyArea = master.GetComponent<OccupyArea>();
 			this.primaryElement = master.GetComponent<PrimaryElement>();
 			this.temperature = Db.Get().Amounts.CritterTemperature.Lookup(base.gameObject);
+			this.pickupable = master.GetComponent<Pickupable>();
 		}
 
 		public void ResetDamageCooldown()
@@ -134,7 +135,7 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 			float temperatureExternal = this.GetTemperatureExternal();
 			float temperatureInternal = this.GetTemperatureInternal();
 			StateMachine.BaseState baseState;
-			if (base.gameObject.HasTag(GameTags.Dead))
+			if (this.pickupable.KPrefabID.HasTag(GameTags.Dead))
 			{
 				baseState = base.sm.dead;
 			}
@@ -163,7 +164,7 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 
 		public bool IsEntirelyInVaccum()
 		{
-			int num = Grid.PosToCell(base.gameObject);
+			int cachedCell = this.pickupable.cachedCell;
 			bool flag;
 			if (this.occupyArea != null)
 			{
@@ -172,8 +173,8 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 				{
 					if (!base.def.isBammoth || this.occupyArea.OccupiedCellsOffsets[i].x == 0)
 					{
-						int num2 = Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i]);
-						if (!Grid.IsValidCell(num2) || !Grid.Element[num2].IsVacuum)
+						int num = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
+						if (!Grid.IsValidCell(num) || !Grid.Element[num].IsVacuum)
 						{
 							flag = false;
 							break;
@@ -183,7 +184,7 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 			}
 			else
 			{
-				flag = !Grid.IsValidCell(num) || Grid.Element[num].IsVacuum;
+				flag = !Grid.IsValidCell(cachedCell) || Grid.Element[cachedCell].IsVacuum;
 			}
 			return flag;
 		}
@@ -195,29 +196,29 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 
 		public float GetTemperatureExternal()
 		{
-			int num = Grid.PosToCell(base.gameObject);
+			int cachedCell = this.pickupable.cachedCell;
 			if (this.occupyArea != null)
 			{
-				float num2 = 0f;
-				int num3 = 0;
+				float num = 0f;
+				int num2 = 0;
 				for (int i = 0; i < this.occupyArea.OccupiedCellsOffsets.Length; i++)
 				{
 					if (!base.def.isBammoth || this.occupyArea.OccupiedCellsOffsets[i].x == 0)
 					{
-						int num4 = Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i]);
-						if (Grid.IsValidCell(num4))
+						int num3 = Grid.OffsetCell(cachedCell, this.occupyArea.OccupiedCellsOffsets[i]);
+						if (Grid.IsValidCell(num3))
 						{
-							bool flag = Grid.Element[num4].id == SimHashes.Vacuum || Grid.Element[num4].id == SimHashes.Void;
-							num3++;
-							num2 += (flag ? this.GetTemperatureInternal() : Grid.Temperature[num4]);
+							bool flag = Grid.Element[num3].id == SimHashes.Vacuum || Grid.Element[num3].id == SimHashes.Void;
+							num2++;
+							num += (flag ? this.GetTemperatureInternal() : Grid.Temperature[num3]);
 						}
 					}
 				}
-				return num2 / (float)Mathf.Max(1, num3);
+				return num / (float)Mathf.Max(1, num2);
 			}
-			if (Grid.Element[num].id != SimHashes.Vacuum && Grid.Element[num].id != SimHashes.Void)
+			if (Grid.Element[cachedCell].id != SimHashes.Vacuum && Grid.Element[cachedCell].id != SimHashes.Void)
 			{
-				return Grid.Temperature[num];
+				return Grid.Temperature[cachedCell];
 			}
 			return this.GetTemperatureInternal();
 		}
@@ -229,6 +230,8 @@ public class CritterTemperatureMonitor : GameStateMachine<CritterTemperatureMoni
 		public OccupyArea occupyArea;
 
 		public PrimaryElement primaryElement;
+
+		public Pickupable pickupable;
 
 		public float secondsUntilDamage;
 

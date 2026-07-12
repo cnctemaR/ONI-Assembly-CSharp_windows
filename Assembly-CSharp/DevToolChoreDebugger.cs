@@ -78,7 +78,7 @@ public class DevToolChoreDebugger : DevTool
 		Chore chore = context.chore;
 		if (!context.IsSuccess())
 		{
-			text = context.chore.GetPreconditions()[context.failedPreconditionId].id;
+			text = context.chore.GetPreconditions()[context.failedPreconditionId].condition.id;
 		}
 		string text2 = "";
 		if (chore.driver != null)

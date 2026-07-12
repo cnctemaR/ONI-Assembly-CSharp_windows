@@ -7,16 +7,23 @@ namespace System.Net
 {
 	public class ServicePoint
 	{
-		internal ServicePoint(Uri uri, int connectionLimit, int maxIdleTime)
+		internal ServicePoint(ServicePointManager.SPKey key, Uri uri, int connectionLimit, int maxIdleTime)
 		{
 			this.sendContinue = true;
 			this.hostE = new object();
+			this.connectionLeaseTimeout = -1;
+			this.receiveBufferSize = -1;
 			base..ctor();
+			this.Key = key;
 			this.uri = uri;
+			this.connectionLimit = connectionLimit;
+			this.maxIdleTime = maxIdleTime;
 			this.Scheduler = new ServicePointScheduler(this, connectionLimit, maxIdleTime);
 		}
 
-		internal ServicePointScheduler Scheduler { get; }
+		internal ServicePointManager.SPKey Key { get; }
+
+		private ServicePointScheduler Scheduler { get; set; }
 
 		public Uri Address
 		{
@@ -24,11 +31,6 @@ namespace System.Net
 			{
 				return this.uri;
 			}
-		}
-
-		private static Exception GetMustImplement()
-		{
-			return new NotImplementedException();
 		}
 
 		public BindIPEndPoint BindIPEndPointDelegate
@@ -43,16 +45,19 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
 		public int ConnectionLeaseTimeout
 		{
 			get
 			{
-				throw ServicePoint.GetMustImplement();
+				return this.connectionLeaseTimeout;
 			}
 			set
 			{
-				throw ServicePoint.GetMustImplement();
+				if (value < -1)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
+				this.connectionLeaseTimeout = value;
 			}
 		}
 
@@ -60,11 +65,15 @@ namespace System.Net
 		{
 			get
 			{
-				return this.Scheduler.ConnectionLimit;
+				return this.connectionLimit;
 			}
 			set
 			{
-				this.Scheduler.ConnectionLimit = value;
+				this.connectionLimit = value;
+				if (!this.disposed)
+				{
+					this.Scheduler.ConnectionLimit = value;
+				}
 			}
 		}
 
@@ -80,7 +89,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.Scheduler.CurrentConnections;
+				if (!this.disposed)
+				{
+					return this.Scheduler.CurrentConnections;
+				}
+				return 0;
 			}
 		}
 
@@ -88,6 +101,10 @@ namespace System.Net
 		{
 			get
 			{
+				if (this.disposed)
+				{
+					return DateTime.MinValue;
+				}
 				return this.Scheduler.IdleSince.ToLocalTime();
 			}
 		}
@@ -96,11 +113,15 @@ namespace System.Net
 		{
 			get
 			{
-				return this.Scheduler.MaxIdleTime;
+				return this.maxIdleTime;
 			}
 			set
 			{
-				this.Scheduler.MaxIdleTime = value;
+				this.maxIdleTime = value;
+				if (!this.disposed)
+				{
+					this.Scheduler.MaxIdleTime = value;
+				}
 			}
 		}
 
@@ -112,16 +133,19 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
 		public int ReceiveBufferSize
 		{
 			get
 			{
-				throw ServicePoint.GetMustImplement();
+				return this.receiveBufferSize;
 			}
 			set
 			{
-				throw ServicePoint.GetMustImplement();
+				if (value < -1)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
+				this.receiveBufferSize = value;
 			}
 		}
 
@@ -301,6 +325,10 @@ namespace System.Net
 		{
 			lock (this)
 			{
+				if (this.disposed)
+				{
+					throw new ObjectDisposedException(typeof(ServicePoint).FullName);
+				}
 				this.Scheduler.SendRequest(operation, groupName);
 			}
 		}
@@ -310,9 +338,22 @@ namespace System.Net
 			bool flag2;
 			lock (this)
 			{
-				flag2 = this.Scheduler.CloseConnectionGroup(connectionGroupName);
+				if (this.disposed)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					flag2 = this.Scheduler.CloseConnectionGroup(connectionGroupName);
+				}
 			}
 			return flag2;
+		}
+
+		internal void FreeServicePoint()
+		{
+			this.disposed = true;
+			this.Scheduler = null;
 		}
 
 		public X509Certificate Certificate
@@ -400,11 +441,6 @@ namespace System.Net
 			}
 		}
 
-		internal Socket GetConnection(PooledStream PooledStream, object owner, bool async, out IPAddress address, ref Socket abortSocket, ref Socket abortSocket6)
-		{
-			throw new NotImplementedException();
-		}
-
 		internal ServicePoint()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();
@@ -435,6 +471,16 @@ namespace System.Net
 		private int tcp_keepalive_time;
 
 		private int tcp_keepalive_interval;
+
+		private bool disposed;
+
+		private int connectionLeaseTimeout;
+
+		private int receiveBufferSize;
+
+		private int connectionLimit;
+
+		private int maxIdleTime;
 
 		private object m_ServerCertificateOrBytes;
 

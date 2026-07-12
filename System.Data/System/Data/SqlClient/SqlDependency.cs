@@ -438,7 +438,8 @@ namespace System.Data.SqlClient
 					{
 						throw SQL.SqlDependencyNoMatchingServerDatabaseStart();
 					}
-					databaseServicePair2 = (SqlDependency.DatabaseServicePair)list.ToArray()[0];
+					object[] array = list.ToArray();
+					databaseServicePair2 = (SqlDependency.DatabaseServicePair)array[0];
 					string text3 = SqlDependency.FixupServiceOrDatabaseName(databaseServicePair2.Database);
 					string text4 = SqlDependency.FixupServiceOrDatabaseName(databaseServicePair2.Service);
 					text2 = "Service=" + text4 + ";Local Database=" + text3;

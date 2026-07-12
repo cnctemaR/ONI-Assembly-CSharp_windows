@@ -144,7 +144,7 @@ namespace System.Xml.Serialization
 
 		internal static string GetTempAssemblyName(AssemblyName parent, string ns)
 		{
-			return parent.Name + ".XmlSerializers" + ((ns == null || ns.Length == 0) ? "" : ("." + ns.GetHashCode()));
+			return parent.Name + ".XmlSerializers" + ((ns == null || ns.Length == 0) ? "" : ("." + ns.GetHashCode().ToString()));
 		}
 
 		internal Assembly Compile(Assembly parent, string ns, XmlSerializerCompilerParameters xmlParameters, Evidence evidence)

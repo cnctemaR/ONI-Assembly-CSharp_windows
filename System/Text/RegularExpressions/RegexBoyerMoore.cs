@@ -5,20 +5,20 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class RegexBoyerMoore
 	{
-		internal RegexBoyerMoore(string pattern, bool caseInsensitive, bool rightToLeft, CultureInfo culture)
+		public RegexBoyerMoore(string pattern, bool caseInsensitive, bool rightToLeft, CultureInfo culture)
 		{
 			if (caseInsensitive)
 			{
-				StringBuilder stringBuilder = new StringBuilder(pattern.Length);
+				StringBuilder stringBuilder = StringBuilderCache.Acquire(pattern.Length);
 				for (int i = 0; i < pattern.Length; i++)
 				{
-					stringBuilder.Append(char.ToLower(pattern[i], culture));
+					stringBuilder.Append(culture.TextInfo.ToLower(pattern[i]));
 				}
-				pattern = stringBuilder.ToString();
+				pattern = StringBuilderCache.GetStringAndRelease(stringBuilder);
 			}
-			this._pattern = pattern;
-			this._rightToLeft = rightToLeft;
-			this._caseInsensitive = caseInsensitive;
+			this.Pattern = pattern;
+			this.RightToLeft = rightToLeft;
+			this.CaseInsensitive = caseInsensitive;
 			this._culture = culture;
 			int num;
 			int num2;
@@ -35,10 +35,10 @@ namespace System.Text.RegularExpressions
 				num2 = 0;
 				num3 = -1;
 			}
-			this._positive = new int[pattern.Length];
+			this.Positive = new int[pattern.Length];
 			int num4 = num2;
 			char c = pattern[num4];
-			this._positive[num4] = num3;
+			this.Positive[num4] = num3;
 			num4 -= num3;
 			while (num4 != num)
 			{
@@ -55,70 +55,70 @@ namespace System.Text.RegularExpressions
 						num6 -= num3;
 						num5 -= num3;
 					}
-					if (this._positive[num5] == 0)
+					if (this.Positive[num5] == 0)
 					{
-						this._positive[num5] = num5 - num6;
+						this.Positive[num5] = num5 - num6;
 					}
 					num4 -= num3;
 				}
 			}
 			for (int num5 = num2 - num3; num5 != num; num5 -= num3)
 			{
-				if (this._positive[num5] == 0)
+				if (this.Positive[num5] == 0)
 				{
-					this._positive[num5] = num3;
+					this.Positive[num5] = num3;
 				}
 			}
-			this._negativeASCII = new int[128];
+			this.NegativeASCII = new int[128];
 			for (int j = 0; j < 128; j++)
 			{
-				this._negativeASCII[j] = num2 - num;
+				this.NegativeASCII[j] = num2 - num;
 			}
-			this._lowASCII = 127;
-			this._highASCII = 0;
+			this.LowASCII = 127;
+			this.HighASCII = 0;
 			for (num4 = num2; num4 != num; num4 -= num3)
 			{
 				c = pattern[num4];
 				if (c < '\u0080')
 				{
-					if (this._lowASCII > (int)c)
+					if (this.LowASCII > (int)c)
 					{
-						this._lowASCII = (int)c;
+						this.LowASCII = (int)c;
 					}
-					if (this._highASCII < (int)c)
+					if (this.HighASCII < (int)c)
 					{
-						this._highASCII = (int)c;
+						this.HighASCII = (int)c;
 					}
-					if (this._negativeASCII[(int)c] == num2 - num)
+					if (this.NegativeASCII[(int)c] == num2 - num)
 					{
-						this._negativeASCII[(int)c] = num2 - num4;
+						this.NegativeASCII[(int)c] = num2 - num4;
 					}
 				}
 				else
 				{
 					int num7 = (int)(c >> 8);
 					int num8 = (int)(c & 'ÿ');
-					if (this._negativeUnicode == null)
+					if (this.NegativeUnicode == null)
 					{
-						this._negativeUnicode = new int[256][];
+						this.NegativeUnicode = new int[256][];
 					}
-					if (this._negativeUnicode[num7] == null)
+					if (this.NegativeUnicode[num7] == null)
 					{
 						int[] array = new int[256];
-						for (int k = 0; k < 256; k++)
+						for (int k = 0; k < array.Length; k++)
 						{
 							array[k] = num2 - num;
 						}
 						if (num7 == 0)
 						{
-							Array.Copy(this._negativeASCII, array, 128);
-							this._negativeASCII = array;
+							Array.Copy(this.NegativeASCII, 0, array, 0, 128);
+							this.NegativeASCII = array;
 						}
-						this._negativeUnicode[num7] = array;
+						this.NegativeUnicode[num7] = array;
 					}
-					if (this._negativeUnicode[num7][num8] == num2 - num)
+					if (this.NegativeUnicode[num7][num8] == num2 - num)
 					{
-						this._negativeUnicode[num7][num8] = num2 - num4;
+						this.NegativeUnicode[num7][num8] = num2 - num4;
 					}
 				}
 			}
@@ -126,18 +126,18 @@ namespace System.Text.RegularExpressions
 
 		private bool MatchPattern(string text, int index)
 		{
-			if (!this._caseInsensitive)
+			if (!this.CaseInsensitive)
 			{
-				return string.CompareOrdinal(this._pattern, 0, text, index, this._pattern.Length) == 0;
+				return string.CompareOrdinal(this.Pattern, 0, text, index, this.Pattern.Length) == 0;
 			}
-			if (text.Length - index < this._pattern.Length)
+			if (text.Length - index < this.Pattern.Length)
 			{
 				return false;
 			}
 			TextInfo textInfo = this._culture.TextInfo;
-			for (int i = 0; i < this._pattern.Length; i++)
+			for (int i = 0; i < this.Pattern.Length; i++)
 			{
-				if (textInfo.ToLower(text[index + i]) != this._pattern[i])
+				if (textInfo.ToLower(text[index + i]) != this.Pattern[i])
 				{
 					return false;
 				}
@@ -145,46 +145,46 @@ namespace System.Text.RegularExpressions
 			return true;
 		}
 
-		internal bool IsMatch(string text, int index, int beglimit, int endlimit)
+		public bool IsMatch(string text, int index, int beglimit, int endlimit)
 		{
-			if (!this._rightToLeft)
+			if (!this.RightToLeft)
 			{
-				return index >= beglimit && endlimit - index >= this._pattern.Length && this.MatchPattern(text, index);
+				return index >= beglimit && endlimit - index >= this.Pattern.Length && this.MatchPattern(text, index);
 			}
-			return index <= endlimit && index - beglimit >= this._pattern.Length && this.MatchPattern(text, index - this._pattern.Length);
+			return index <= endlimit && index - beglimit >= this.Pattern.Length && this.MatchPattern(text, index - this.Pattern.Length);
 		}
 
-		internal int Scan(string text, int index, int beglimit, int endlimit)
+		public int Scan(string text, int index, int beglimit, int endlimit)
 		{
 			int num;
 			int num2;
 			int num3;
 			int num4;
 			int num5;
-			if (!this._rightToLeft)
+			if (!this.RightToLeft)
 			{
-				num = this._pattern.Length;
-				num2 = this._pattern.Length - 1;
+				num = this.Pattern.Length;
+				num2 = this.Pattern.Length - 1;
 				num3 = 0;
 				num4 = index + num - 1;
 				num5 = 1;
 			}
 			else
 			{
-				num = -this._pattern.Length;
+				num = -this.Pattern.Length;
 				num2 = 0;
 				num3 = -num - 1;
 				num4 = index + num;
 				num5 = -1;
 			}
-			char c = this._pattern[num2];
-			IL_005F:
+			char c = this.Pattern[num2];
+			IL_0058:
 			while (num4 < endlimit && num4 >= beglimit)
 			{
 				char c2 = text[num4];
-				if (this._caseInsensitive)
+				if (this.CaseInsensitive)
 				{
-					c2 = char.ToLower(c2, this._culture);
+					c2 = this._culture.TextInfo.ToLower(c2);
 				}
 				if (c2 != c)
 				{
@@ -192,9 +192,9 @@ namespace System.Text.RegularExpressions
 					int[] array;
 					if (c2 < '\u0080')
 					{
-						num6 = this._negativeASCII[(int)c2];
+						num6 = this.NegativeASCII[(int)c2];
 					}
-					else if (this._negativeUnicode != null && (array = this._negativeUnicode[(int)(c2 >> 8)]) != null)
+					else if (this.NegativeUnicode != null && (array = this.NegativeUnicode[(int)(c2 >> 8)]) != null)
 					{
 						num6 = array[(int)(c2 & 'ÿ')];
 					}
@@ -213,36 +213,36 @@ namespace System.Text.RegularExpressions
 						num8 -= num5;
 						num7 -= num5;
 						c2 = text[num7];
-						if (this._caseInsensitive)
+						if (this.CaseInsensitive)
 						{
-							c2 = char.ToLower(c2, this._culture);
+							c2 = this._culture.TextInfo.ToLower(c2);
 						}
-						if (c2 != this._pattern[num8])
+						if (c2 != this.Pattern[num8])
 						{
-							int num6 = this._positive[num8];
+							int num6 = this.Positive[num8];
 							if ((c2 & 'ﾀ') == '\0')
 							{
-								num7 = num8 - num2 + this._negativeASCII[(int)c2];
+								num7 = num8 - num2 + this.NegativeASCII[(int)c2];
 							}
 							else
 							{
 								int[] array;
-								if (this._negativeUnicode == null || (array = this._negativeUnicode[(int)(c2 >> 8)]) == null)
+								if (this.NegativeUnicode == null || (array = this.NegativeUnicode[(int)(c2 >> 8)]) == null)
 								{
 									num4 += num6;
-									goto IL_005F;
+									goto IL_0058;
 								}
 								num7 = num8 - num2 + array[(int)(c2 & 'ÿ')];
 							}
-							if (this._rightToLeft ? (num7 < num6) : (num7 > num6))
+							if (this.RightToLeft ? (num7 < num6) : (num7 > num6))
 							{
 								num6 = num7;
 							}
 							num4 += num6;
-							goto IL_005F;
+							goto IL_0058;
 						}
 					}
-					if (!this._rightToLeft)
+					if (!this.RightToLeft)
 					{
 						return num7;
 					}
@@ -252,29 +252,22 @@ namespace System.Text.RegularExpressions
 			return -1;
 		}
 
-		public override string ToString()
-		{
-			return this._pattern;
-		}
+		public readonly int[] Positive;
 
-		internal int[] _positive;
+		public readonly int[] NegativeASCII;
 
-		internal int[] _negativeASCII;
+		public readonly int[][] NegativeUnicode;
 
-		internal int[][] _negativeUnicode;
+		public readonly string Pattern;
 
-		internal string _pattern;
+		public readonly int LowASCII;
 
-		internal int _lowASCII;
+		public readonly int HighASCII;
 
-		internal int _highASCII;
+		public readonly bool RightToLeft;
 
-		internal bool _rightToLeft;
+		public readonly bool CaseInsensitive;
 
-		internal bool _caseInsensitive;
-
-		internal CultureInfo _culture;
-
-		internal const int infinite = 2147483647;
+		private readonly CultureInfo _culture;
 	}
 }

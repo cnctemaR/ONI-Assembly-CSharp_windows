@@ -51,11 +51,11 @@ namespace System.ComponentModel
 		{
 			if (this.Error != null)
 			{
-				throw new TargetInvocationException(global::SR.GetString("An exception occurred during the operation, making the result invalid.  Check InnerException for exception details."), this.Error);
+				throw new TargetInvocationException(SR.GetString("An exception occurred during the operation, making the result invalid.  Check InnerException for exception details."), this.Error);
 			}
 			if (this.Cancelled)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Operation has been cancelled."));
+				throw new InvalidOperationException(SR.GetString("Operation has been cancelled."));
 			}
 		}
 

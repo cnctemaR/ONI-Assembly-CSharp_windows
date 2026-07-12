@@ -28,6 +28,20 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This bot will shut down permanently when its biofuel runs out";
 			}
+
+			public class INTERNALELECTROBANK
+			{
+				public static LocString NAME = "Power Bank";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"When this bot's ",
+					UI.PRE_KEYWORD,
+					"Power Bank",
+					UI.PST_KEYWORD,
+					" runs out, it will stop working until a fully charged one is delivered"
+				});
+			}
 		}
 
 		public class ATTRIBUTES
@@ -85,6 +99,15 @@ namespace STRINGS
 				public static LocString DESC = "RIP {0}\n\n{0}'s battery has been depleted and cannot be recharged";
 
 				public static LocString TOOLTIP = "RIP {0}\n\n{0}'s battery has been depleted and cannot be recharged";
+			}
+
+			public class DEADBATTERYFLYDO
+			{
+				public static LocString NAME = "Shut Down";
+
+				public static LocString DESC = "{0}'s battery has been depleted\n\n{0} will resume function when a new battery has been delivered";
+
+				public static LocString TOOLTIP = "{0}'s battery has been depleted\n\n{0} will resume function when a new battery has been delivered";
 			}
 
 			public class DUSTBINFULL
@@ -174,6 +197,13 @@ namespace STRINGS
 					UI.FormatAsLink("Sweepy Dock", "SWEEPBOTSTATION"),
 					"."
 				});
+			}
+
+			public class FLYDO
+			{
+				public static LocString NAME = "Flydo";
+
+				public static LocString DESC = "A programmable delivery robot.\n\nPicks up " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " objects for delivery to selected destinations.";
 			}
 		}
 	}

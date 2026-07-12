@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 using System.Threading;
 
 namespace System.Text
@@ -21,15 +20,15 @@ namespace System.Text
 
 		public InternalDecoderBestFitFallbackBuffer(InternalDecoderBestFitFallback fallback)
 		{
-			this.oFallback = fallback;
-			if (this.oFallback.arrayBestFit == null)
+			this._oFallback = fallback;
+			if (this._oFallback._arrayBestFit == null)
 			{
 				object internalSyncObject = InternalDecoderBestFitFallbackBuffer.InternalSyncObject;
 				lock (internalSyncObject)
 				{
-					if (this.oFallback.arrayBestFit == null)
+					if (this._oFallback._arrayBestFit == null)
 					{
-						this.oFallback.arrayBestFit = fallback.encoding.GetBestFitBytesToUnicodeData();
+						this._oFallback._arrayBestFit = fallback._encoding.GetBestFitBytesToUnicodeData();
 					}
 				}
 			}
@@ -37,59 +36,57 @@ namespace System.Text
 
 		public override bool Fallback(byte[] bytesUnknown, int index)
 		{
-			this.cBestFit = this.TryBestFit(bytesUnknown);
-			if (this.cBestFit == '\0')
+			this._cBestFit = this.TryBestFit(bytesUnknown);
+			if (this._cBestFit == '\0')
 			{
-				this.cBestFit = this.oFallback.cReplacement;
+				this._cBestFit = this._oFallback._cReplacement;
 			}
-			this.iCount = (this.iSize = 1);
+			this._iCount = (this._iSize = 1);
 			return true;
 		}
 
 		public override char GetNextChar()
 		{
-			this.iCount--;
-			if (this.iCount < 0)
+			this._iCount--;
+			if (this._iCount < 0)
 			{
 				return '\0';
 			}
-			if (this.iCount == 2147483647)
+			if (this._iCount == 2147483647)
 			{
-				this.iCount = -1;
+				this._iCount = -1;
 				return '\0';
 			}
-			return this.cBestFit;
+			return this._cBestFit;
 		}
 
 		public override bool MovePrevious()
 		{
-			if (this.iCount >= 0)
+			if (this._iCount >= 0)
 			{
-				this.iCount++;
+				this._iCount++;
 			}
-			return this.iCount >= 0 && this.iCount <= this.iSize;
+			return this._iCount >= 0 && this._iCount <= this._iSize;
 		}
 
 		public override int Remaining
 		{
 			get
 			{
-				if (this.iCount <= 0)
+				if (this._iCount <= 0)
 				{
 					return 0;
 				}
-				return this.iCount;
+				return this._iCount;
 			}
 		}
 
-		[SecuritySafeCritical]
 		public override void Reset()
 		{
-			this.iCount = -1;
+			this._iCount = -1;
 			this.byteStart = null;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
 		{
 			return 1;
@@ -98,7 +95,7 @@ namespace System.Text
 		private char TryBestFit(byte[] bytesCheck)
 		{
 			int num = 0;
-			int num2 = this.oFallback.arrayBestFit.Length;
+			int num2 = this._oFallback._arrayBestFit.Length;
 			if (num2 == 0)
 			{
 				return '\0';
@@ -116,7 +113,7 @@ namespace System.Text
 			{
 				c = (char)(((int)bytesCheck[0] << 8) + (int)bytesCheck[1]);
 			}
-			if (c < this.oFallback.arrayBestFit[0] || c > this.oFallback.arrayBestFit[num2 - 2])
+			if (c < this._oFallback._arrayBestFit[0] || c > this._oFallback._arrayBestFit[num2 - 2])
 			{
 				return '\0';
 			}
@@ -124,10 +121,10 @@ namespace System.Text
 			while ((num3 = num2 - num) > 6)
 			{
 				int i = (num3 / 2 + num) & 65534;
-				char c2 = this.oFallback.arrayBestFit[i];
+				char c2 = this._oFallback._arrayBestFit[i];
 				if (c2 == c)
 				{
-					return this.oFallback.arrayBestFit[i + 1];
+					return this._oFallback._arrayBestFit[i + 1];
 				}
 				if (c2 < c)
 				{
@@ -140,21 +137,21 @@ namespace System.Text
 			}
 			for (int i = num; i < num2; i += 2)
 			{
-				if (this.oFallback.arrayBestFit[i] == c)
+				if (this._oFallback._arrayBestFit[i] == c)
 				{
-					return this.oFallback.arrayBestFit[i + 1];
+					return this._oFallback._arrayBestFit[i + 1];
 				}
 			}
 			return '\0';
 		}
 
-		internal char cBestFit;
+		private char _cBestFit;
 
-		internal int iCount = -1;
+		private int _iCount = -1;
 
-		internal int iSize;
+		private int _iSize;
 
-		private InternalDecoderBestFitFallback oFallback;
+		private InternalDecoderBestFitFallback _oFallback;
 
 		private static object s_InternalSyncObject;
 	}

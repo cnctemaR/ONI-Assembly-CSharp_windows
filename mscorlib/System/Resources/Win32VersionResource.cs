@@ -34,15 +34,15 @@ namespace System.Resources
 		{
 			get
 			{
-				return string.Concat(new object[]
+				return string.Concat(new string[]
 				{
-					this.file_version >> 48,
+					(this.file_version >> 48).ToString(),
 					".",
-					(this.file_version >> 32) & 65535L,
+					((this.file_version >> 32) & 65535L).ToString(),
 					".",
-					(this.file_version >> 16) & 65535L,
+					((this.file_version >> 16) & 65535L).ToString(),
 					".",
-					this.file_version & 65535L
+					(this.file_version & 65535L).ToString()
 				});
 			}
 			set
@@ -50,7 +50,7 @@ namespace System.Resources
 				long[] array = new long[4];
 				if (value != null)
 				{
-					string[] array2 = value.Split(new char[] { '.' });
+					string[] array2 = value.Split('.', StringSplitOptions.None);
 					try
 					{
 						for (int i = 0; i < array2.Length; i++)
@@ -163,7 +163,7 @@ namespace System.Resources
 					value = " ";
 				}
 				long[] array = new long[4];
-				string[] array2 = value.Split(new char[] { '.' });
+				string[] array2 = value.Split('.', StringSplitOptions.None);
 				try
 				{
 					for (int i = 0; i < array2.Length; i++)
@@ -231,7 +231,7 @@ namespace System.Resources
 					value = " ";
 				}
 				long[] array = new long[4];
-				string[] array2 = value.Split(new char[] { '.' });
+				string[] array2 = value.Split('.', StringSplitOptions.None);
 				try
 				{
 					for (int i = 0; i < array2.Length; i++)

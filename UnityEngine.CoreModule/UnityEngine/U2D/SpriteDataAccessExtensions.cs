@@ -66,7 +66,7 @@ namespace UnityEngine.U2D
 		public static NativeArray<Matrix4x4> GetBindPoses(this Sprite sprite)
 		{
 			SpriteChannelInfo bindPoseInfo = SpriteDataAccessExtensions.GetBindPoseInfo(sprite);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>(bindPoseInfo.buffer, bindPoseInfo.count, Allocator.Invalid);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>(bindPoseInfo.buffer, bindPoseInfo.count, Allocator.None);
 		}
 
 		public static void SetBindPoses(this Sprite sprite, NativeArray<Matrix4x4> src)

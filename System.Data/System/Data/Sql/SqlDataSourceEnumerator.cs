@@ -36,17 +36,17 @@ namespace System.Data.Sql
 			string text2 = null;
 			string text3 = null;
 			string text4 = null;
-			string[] array = serverInstances.Split(new char[1]);
+			string[] array = serverInstances.Split('\0', StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
-				string text5 = array[i].Trim(new char[1]);
+				string text5 = array[i].Trim('\0');
 				if (text5.Length != 0)
 				{
-					foreach (string text6 in text5.Split(new char[] { ';' }))
+					foreach (string text6 in text5.Split(';', StringSplitOptions.None))
 					{
 						if (text == null)
 						{
-							foreach (string text7 in text6.Split(new char[] { '\\' }))
+							foreach (string text7 in text6.Split('\\', StringSplitOptions.None))
 							{
 								if (text == null)
 								{

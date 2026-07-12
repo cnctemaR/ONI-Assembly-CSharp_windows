@@ -16,12 +16,12 @@ namespace System.Xml.Linq
 			XNode xnode = x as XNode;
 			if (xnode == null && x != null)
 			{
-				throw new ArgumentException(Res.GetString("Argument_MustBeDerivedFrom", new object[] { typeof(XNode) }), "x");
+				throw new ArgumentException(global::SR.Format("The argument must be derived from {0}.", typeof(XNode)), "x");
 			}
 			XNode xnode2 = y as XNode;
 			if (xnode2 == null && y != null)
 			{
-				throw new ArgumentException(Res.GetString("Argument_MustBeDerivedFrom", new object[] { typeof(XNode) }), "y");
+				throw new ArgumentException(global::SR.Format("The argument must be derived from {0}.", typeof(XNode)), "y");
 			}
 			return this.Compare(xnode, xnode2);
 		}

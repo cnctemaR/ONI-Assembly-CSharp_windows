@@ -83,12 +83,12 @@ namespace System.Xml.Xsl.Runtime
 			string text2 = null;
 			if (query.Length != 0)
 			{
-				string[] array = query.Substring(1).Split(new char[] { '&' });
+				string[] array = query.Substring(1).Split('&', StringSplitOptions.None);
 				int i = 0;
 				while (i < array.Length)
 				{
 					string text3 = array[i];
-					string[] array2 = text3.Split(new char[] { '=' });
+					string[] array2 = text3.Split('=', StringSplitOptions.None);
 					if (array2.Length != 2)
 					{
 						if (!throwOnError)
@@ -117,11 +117,11 @@ namespace System.Xml.Xsl.Runtime
 									{
 										if (num != 399689514U)
 										{
-											goto IL_02BB;
+											goto IL_02AB;
 										}
 										if (!(text4 == "IGNOREKANATYPE"))
 										{
-											goto IL_02BB;
+											goto IL_02AB;
 										}
 										num2 = 8;
 									}
@@ -129,7 +129,7 @@ namespace System.Xml.Xsl.Runtime
 									{
 										if (!(text4 == "UPPERFIRST"))
 										{
-											goto IL_02BB;
+											goto IL_02AB;
 										}
 										num2 = 4096;
 									}
@@ -138,11 +138,11 @@ namespace System.Xml.Xsl.Runtime
 								{
 									if (num != 1153929311U)
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									if (!(text4 == "IGNORECASE"))
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									num2 = 1;
 								}
@@ -150,7 +150,7 @@ namespace System.Xml.Xsl.Runtime
 								{
 									if (!(text4 == "IGNOREWIDTH"))
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									num2 = 16;
 								}
@@ -161,11 +161,11 @@ namespace System.Xml.Xsl.Runtime
 								{
 									if (num != 1618186332U)
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									if (!(text4 == "IGNORENONSPACE"))
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									num2 = 2;
 								}
@@ -173,7 +173,7 @@ namespace System.Xml.Xsl.Runtime
 								{
 									if (!(text4 == "DESCENDINGORDER"))
 									{
-										goto IL_02BB;
+										goto IL_02AB;
 									}
 									num2 = 16384;
 								}
@@ -182,11 +182,11 @@ namespace System.Xml.Xsl.Runtime
 							{
 								if (num != 3407466425U)
 								{
-									goto IL_02BB;
+									goto IL_02AB;
 								}
 								if (!(text4 == "EMPTYGREATEST"))
 								{
-									goto IL_02BB;
+									goto IL_02AB;
 								}
 								num2 = 8192;
 							}
@@ -194,19 +194,19 @@ namespace System.Xml.Xsl.Runtime
 							{
 								if (!(text4 == "IGNORESYMBOLS"))
 								{
-									goto IL_02BB;
+									goto IL_02AB;
 								}
 								num2 = 4;
 							}
 							if (text5 == "0" || text5 == "FALSE")
 							{
 								options.SetFlag(num2, false);
-								goto IL_034E;
+								goto IL_033E;
 							}
 							if (text5 == "1" || text5 == "TRUE")
 							{
 								options.SetFlag(num2, true);
-								goto IL_034E;
+								goto IL_033E;
 							}
 							if (!throwOnError)
 							{
@@ -217,14 +217,14 @@ namespace System.Xml.Xsl.Runtime
 								array2[0],
 								array2[1]
 							});
-							IL_02BB:
+							IL_02AB:
 							if (!throwOnError)
 							{
 								return null;
 							}
 							throw new XslTransformException("Unsupported option '{0}' in collation.", new string[] { array2[0] });
 						}
-						IL_034E:
+						IL_033E:
 						i++;
 					}
 				}
@@ -252,13 +252,13 @@ namespace System.Xml.Xsl.Runtime
 							{
 								if (text2 == "trad")
 								{
-									goto IL_05EE;
+									goto IL_05DE;
 								}
 							}
 						}
 						else if (text2 == "dict")
 						{
-							goto IL_05EE;
+							goto IL_05DE;
 						}
 					}
 					else if (num != 1339334217U)
@@ -270,9 +270,9 @@ namespace System.Xml.Xsl.Runtime
 								if (langID == 1031)
 								{
 									cultureInfo = new CultureInfo(66567);
-									goto IL_05EE;
+									goto IL_05DE;
 								}
-								goto IL_05EE;
+								goto IL_05DE;
 							}
 						}
 					}
@@ -281,9 +281,9 @@ namespace System.Xml.Xsl.Runtime
 						if (langID == 1041 || langID == 1042)
 						{
 							cultureInfo = new CultureInfo(XmlCollation.MakeLCID(cultureInfo.LCID, 1));
-							goto IL_05EE;
+							goto IL_05DE;
 						}
-						goto IL_05EE;
+						goto IL_05DE;
 					}
 				}
 				else if (num <= 3314303423U)
@@ -297,9 +297,9 @@ namespace System.Xml.Xsl.Runtime
 								if (langID == 1028)
 								{
 									cultureInfo = new CultureInfo(197636);
-									goto IL_05EE;
+									goto IL_05DE;
 								}
-								goto IL_05EE;
+								goto IL_05DE;
 							}
 						}
 					}
@@ -308,9 +308,9 @@ namespace System.Xml.Xsl.Runtime
 						if (langID == 1038)
 						{
 							cultureInfo = new CultureInfo(66574);
-							goto IL_05EE;
+							goto IL_05DE;
 						}
-						goto IL_05EE;
+						goto IL_05DE;
 					}
 				}
 				else if (num != 3629878817U)
@@ -321,7 +321,7 @@ namespace System.Xml.Xsl.Runtime
 						{
 							if (text2 == "pron")
 							{
-								goto IL_05EE;
+								goto IL_05DE;
 							}
 						}
 					}
@@ -330,9 +330,9 @@ namespace System.Xml.Xsl.Runtime
 						if (langID == 1079)
 						{
 							cultureInfo = new CultureInfo(66615);
-							goto IL_05EE;
+							goto IL_05DE;
 						}
-						goto IL_05EE;
+						goto IL_05DE;
 					}
 				}
 				else if (text2 == "strk")
@@ -340,9 +340,9 @@ namespace System.Xml.Xsl.Runtime
 					if (langID == 2052 || langID == 3076 || langID == 4100 || langID == 5124)
 					{
 						cultureInfo = new CultureInfo(XmlCollation.MakeLCID(cultureInfo.LCID, 2));
-						goto IL_05EE;
+						goto IL_05DE;
 					}
-					goto IL_05EE;
+					goto IL_05DE;
 				}
 				if (!throwOnError)
 				{
@@ -350,7 +350,7 @@ namespace System.Xml.Xsl.Runtime
 				}
 				throw new XslTransformException("Unsupported sort option '{0}' in collation.", new string[] { text2 });
 			}
-			IL_05EE:
+			IL_05DE:
 			return new XmlCollation(cultureInfo, options);
 		}
 

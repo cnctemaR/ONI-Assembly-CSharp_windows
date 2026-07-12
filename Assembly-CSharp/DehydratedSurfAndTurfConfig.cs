@@ -21,7 +21,7 @@ public class DehydratedSurfAndTurfConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		KAnimFile anim = Assets.GetAnim("dehydrated_food_surf_and_turf_kanim");
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedSurfAndTurfConfig.ID.Name, ITEMS.FOOD.SURFANDTURF.DEHYDRATED.NAME, ITEMS.FOOD.SURFANDTURF.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(DehydratedSurfAndTurfConfig.ID.Name, global::STRINGS.ITEMS.FOOD.SURFANDTURF.DEHYDRATED.NAME, global::STRINGS.ITEMS.FOOD.SURFANDTURF.DEHYDRATED.DESC, 1f, true, anim, "idle", Grid.SceneLayer.BuildingFront, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Polypropylene, null);
 		EntityTemplates.ExtendEntityToDehydratedFoodPackage(gameObject, FOOD.FOOD_TYPES.SURF_AND_TURF);
 		return gameObject;
 	}

@@ -16,6 +16,26 @@ namespace System.Reflection.Emit
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class ConstructorBuilder : ConstructorInfo, _ConstructorBuilder
 	{
+		void _ConstructorBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ConstructorBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal ConstructorBuilder(TypeBuilder tb, MethodAttributes attributes, CallingConventions callingConvention, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
 		{
 			this.init_locals = true;
@@ -37,7 +57,7 @@ namespace System.Reflection.Emit
 			this.type = tb;
 			this.paramModReq = paramModReq;
 			this.paramModOpt = paramModOpt;
-			this.table_idx = this.get_next_table_index(this, 6, true);
+			this.table_idx = this.get_next_table_index(this, 6, 1);
 			((ModuleBuilder)tb.Module).RegisterToken(this, this.GetToken().Token);
 		}
 
@@ -93,7 +113,10 @@ namespace System.Reflection.Emit
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
+				ParameterInfo[] array2 = array;
+				int num = i;
+				ParameterBuilder[] array3 = this.pinfo;
+				array2[num] = RuntimeParameterInfo.New((array3 != null) ? array3[i + 1] : null, this.parameters[i], this, i + 1);
 			}
 			return array;
 		}
@@ -409,9 +432,9 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal override int get_next_table_index(object obj, int table, bool inc)
+		internal override int get_next_table_index(object obj, int table, int count)
 		{
-			return this.type.get_next_table_index(obj, table, inc);
+			return this.type.get_next_table_index(obj, table, count);
 		}
 
 		private void RejectIfCreated()
@@ -435,26 +458,6 @@ namespace System.Reflection.Emit
 		private Exception not_created()
 		{
 			return new NotSupportedException("The type is not yet created.");
-		}
-
-		void _ConstructorBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ConstructorBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal ConstructorBuilder()

@@ -8,8 +8,6 @@ using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDual)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class Delegate : ICloneable, ISerializable
@@ -61,6 +59,11 @@ namespace System
 			{
 				return this.m_target;
 			}
+		}
+
+		internal IntPtr GetNativeFunctionPointer()
+		{
+			return this.method_ptr;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -195,7 +198,7 @@ namespace System
 				{
 					if (throwOnBindFailure)
 					{
-						throw new ArgumentException("method argument length mismatch");
+						throw new TargetParameterCountException("Parameter count mismatch.");
 					}
 					return null;
 				}
@@ -331,7 +334,7 @@ namespace System
 			Type type2 = target;
 			while (type2 != null)
 			{
-				MethodInfo methodInfo3 = type2.GetMethod(method, bindingFlags, null, array, EmptyArray<ParameterModifier>.Value);
+				MethodInfo methodInfo3 = type2.GetMethod(method, bindingFlags, null, array, Array.Empty<ParameterModifier>());
 				if (methodInfo3 != null && Delegate.return_type_match(methodInfo.ReturnType, methodInfo3.ReturnType))
 				{
 					methodInfo2 = methodInfo3;
@@ -504,7 +507,7 @@ namespace System
 			{
 				if (!this.method_is_virtual)
 				{
-					this.method_info = (MethodInfo)MethodBase.GetMethodFromHandleNoGenericCheck(new RuntimeMethodHandle(this.method));
+					this.method_info = (MethodInfo)RuntimeMethodInfo.GetMethodFromHandleNoGenericCheck(new RuntimeMethodHandle(this.method));
 				}
 				else
 				{
@@ -537,11 +540,7 @@ namespace System
 			}
 			if (a.GetType() != b.GetType())
 			{
-				throw new ArgumentException(Locale.GetText("Incompatible Delegate Types. First is {0} second is {1}.", new object[]
-				{
-					a.GetType().FullName,
-					b.GetType().FullName
-				}));
+				throw new ArgumentException(string.Format("Incompatible Delegate Types. First is {0} second is {1}.", a.GetType().FullName, b.GetType().FullName));
 			}
 			return a.CombineImpl(b);
 		}
@@ -578,11 +577,7 @@ namespace System
 			}
 			if (source.GetType() != value.GetType())
 			{
-				throw new ArgumentException(Locale.GetText("Incompatible Delegate Types. First is {0} second is {1}.", new object[]
-				{
-					source.GetType().FullName,
-					value.GetType().FullName
-				}));
+				throw new ArgumentException(string.Format("Incompatible Delegate Types. First is {0} second is {1}.", source.GetType().FullName, value.GetType().FullName));
 			}
 			return source.RemoveImpl(value);
 		}
@@ -646,6 +641,10 @@ namespace System
 		private IntPtr extra_arg;
 
 		private IntPtr method_code;
+
+		private IntPtr interp_method;
+
+		private IntPtr interp_invoke_impl;
 
 		private MethodInfo method_info;
 

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class BaseNumberConverter : TypeConverter
 	{
+		internal BaseNumberConverter()
+		{
+		}
+
 		internal virtual bool AllowHex
 		{
 			get
@@ -21,17 +23,6 @@ namespace System.ComponentModel
 
 		internal abstract object FromString(string value, NumberFormatInfo formatInfo);
 
-		internal abstract object FromString(string value, CultureInfo culture);
-
-		internal virtual Exception FromStringError(string failedText, Exception innerException)
-		{
-			return new Exception(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
-			{
-				failedText,
-				this.TargetType.Name
-			}), innerException);
-		}
-
 		internal abstract string ToString(object value, NumberFormatInfo formatInfo);
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -41,16 +32,17 @@ namespace System.ComponentModel
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
+			string text = value as string;
+			if (text != null)
 			{
-				string text = ((string)value).Trim();
+				text = text.Trim();
 				try
 				{
 					if (this.AllowHex && text[0] == '#')
 					{
 						return this.FromString(text.Substring(1), 16);
 					}
-					if ((this.AllowHex && text.StartsWith("0x")) || text.StartsWith("0X") || text.StartsWith("&h") || text.StartsWith("&H"))
+					if ((this.AllowHex && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) || text.StartsWith("&h", StringComparison.OrdinalIgnoreCase))
 					{
 						return this.FromString(text.Substring(2), 16);
 					}
@@ -63,7 +55,7 @@ namespace System.ComponentModel
 				}
 				catch (Exception ex)
 				{
-					throw this.FromStringError(text, ex);
+					throw new ArgumentException(SR.Format("{0} is not a valid value for {1}.", text, this.TargetType.Name), "value", ex);
 				}
 			}
 			return base.ConvertFrom(context, culture, value);
@@ -91,9 +83,9 @@ namespace System.ComponentModel
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type t)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return base.CanConvertTo(context, t) || t.IsPrimitive;
+			return base.CanConvertTo(context, destinationType) || destinationType.IsPrimitive;
 		}
 	}
 }

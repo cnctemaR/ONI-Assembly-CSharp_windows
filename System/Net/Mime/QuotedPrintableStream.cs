@@ -13,24 +13,25 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentOutOfRangeException("lineLength");
 			}
-			this.lineLength = lineLength;
+			this._lineLength = lineLength;
 		}
 
 		internal QuotedPrintableStream(Stream stream, bool encodeCRLF)
-			: this(stream, EncodedStreamFactory.DefaultMaxLineLength)
+			: this(stream, 70)
 		{
-			this.encodeCRLF = encodeCRLF;
+			this._encodeCRLF = encodeCRLF;
 		}
 
 		private QuotedPrintableStream.ReadStateInfo ReadState
 		{
 			get
 			{
-				if (this.readState == null)
+				QuotedPrintableStream.ReadStateInfo readStateInfo;
+				if ((readStateInfo = this._readState) == null)
 				{
-					this.readState = new QuotedPrintableStream.ReadStateInfo();
+					readStateInfo = (this._readState = new QuotedPrintableStream.ReadStateInfo());
 				}
-				return this.readState;
+				return readStateInfo;
 			}
 		}
 
@@ -38,11 +39,12 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				if (this.writeState == null)
+				WriteStateInfoBase writeStateInfoBase;
+				if ((writeStateInfoBase = this._writeState) == null)
 				{
-					this.writeState = new WriteStateInfoBase(1024, null, null, this.lineLength);
+					writeStateInfoBase = (this._writeState = new WriteStateInfoBase(1024, null, null, this._lineLength));
 				}
-				return this.writeState;
+				return writeStateInfoBase;
 			}
 		}
 
@@ -73,103 +75,99 @@ namespace System.Net.Mime
 
 		public unsafe int DecodeBytes(byte[] buffer, int offset, int count)
 		{
-			fixed (byte[] array = buffer)
+			byte* ptr;
+			if (buffer == null || buffer.Length == 0)
 			{
-				byte* ptr;
-				if (buffer == null || array.Length == 0)
+				ptr = null;
+			}
+			else
+			{
+				ptr = &buffer[0];
+			}
+			byte* ptr2 = ptr + offset;
+			byte* ptr3 = ptr2;
+			byte* ptr4 = ptr2;
+			byte* ptr5 = ptr2 + count;
+			if (this.ReadState.IsEscaped)
+			{
+				if (this.ReadState.Byte == -1)
 				{
-					ptr = null;
+					if (count == 1)
+					{
+						this.ReadState.Byte = (short)(*ptr3);
+						return 0;
+					}
+					if (*ptr3 != 13 || ptr3[1] != 10)
+					{
+						byte b = QuotedPrintableStream.s_hexDecodeMap[(int)(*ptr3)];
+						byte b2 = QuotedPrintableStream.s_hexDecodeMap[(int)ptr3[1]];
+						if (b == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b));
+						}
+						if (b2 == 255)
+						{
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b2));
+						}
+						*(ptr4++) = (byte)(((int)b << 4) + (int)b2);
+					}
+					ptr3 += 2;
 				}
 				else
 				{
-					ptr = &array[0];
-				}
-				byte* ptr2 = ptr + offset;
-				byte* ptr3 = ptr2;
-				byte* ptr4 = ptr2;
-				byte* ptr5 = ptr2 + count;
-				if (this.ReadState.IsEscaped)
-				{
-					if (this.ReadState.Byte == -1)
+					if (this.ReadState.Byte != 13 || *ptr3 != 10)
 					{
-						if (count == 1)
+						byte b3 = QuotedPrintableStream.s_hexDecodeMap[(int)this.ReadState.Byte];
+						byte b4 = QuotedPrintableStream.s_hexDecodeMap[(int)(*ptr3)];
+						if (b3 == 255)
 						{
-							this.ReadState.Byte = (short)(*ptr3);
-							return 0;
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b3));
 						}
-						if (*ptr3 != 13 || ptr3[1] != 10)
+						if (b4 == 255)
 						{
-							byte b = QuotedPrintableStream.hexDecodeMap[(int)(*ptr3)];
-							byte b2 = QuotedPrintableStream.hexDecodeMap[(int)ptr3[1]];
-							if (b == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b }));
-							}
-							if (b2 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b2 }));
-							}
-							*(ptr4++) = (byte)(((int)b << 4) + (int)b2);
+							throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b4));
 						}
-						ptr3 += 2;
+						*(ptr4++) = (byte)(((int)b3 << 4) + (int)b4);
 					}
-					else
-					{
-						if (this.ReadState.Byte != 13 || *ptr3 != 10)
-						{
-							byte b3 = QuotedPrintableStream.hexDecodeMap[(int)this.ReadState.Byte];
-							byte b4 = QuotedPrintableStream.hexDecodeMap[(int)(*ptr3)];
-							if (b3 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b3 }));
-							}
-							if (b4 == 255)
-							{
-								throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b4 }));
-							}
-							*(ptr4++) = (byte)(((int)b3 << 4) + (int)b4);
-						}
-						ptr3++;
-					}
-					this.ReadState.IsEscaped = false;
-					this.ReadState.Byte = -1;
+					ptr3++;
 				}
-				while (ptr3 < ptr5)
-				{
-					if (*ptr3 == 61)
-					{
-						long num = (long)(ptr5 - ptr3);
-						if (num != 1L)
-						{
-							if (num != 2L)
-							{
-								if (ptr3[1] != 13 || ptr3[2] != 10)
-								{
-									byte b5 = QuotedPrintableStream.hexDecodeMap[(int)ptr3[1]];
-									byte b6 = QuotedPrintableStream.hexDecodeMap[(int)ptr3[2]];
-									if (b5 == 255)
-									{
-										throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b5 }));
-									}
-									if (b6 == 255)
-									{
-										throw new FormatException(global::SR.GetString("Invalid hex digit '{0}'.", new object[] { b6 }));
-									}
-									*(ptr4++) = (byte)(((int)b5 << 4) + (int)b6);
-								}
-								ptr3 += 3;
-								continue;
-							}
-							this.ReadState.Byte = (short)ptr3[1];
-						}
-						this.ReadState.IsEscaped = true;
-						break;
-					}
-					*(ptr4++) = *(ptr3++);
-				}
-				count = (int)((long)(ptr4 - ptr2));
+				this.ReadState.IsEscaped = false;
+				this.ReadState.Byte = -1;
 			}
-			return count;
+			while (ptr3 < ptr5)
+			{
+				if (*ptr3 == 61)
+				{
+					long num = (long)(ptr5 - ptr3);
+					if (num != 1L)
+					{
+						if (num != 2L)
+						{
+							if (ptr3[1] != 13 || ptr3[2] != 10)
+							{
+								byte b5 = QuotedPrintableStream.s_hexDecodeMap[(int)ptr3[1]];
+								byte b6 = QuotedPrintableStream.s_hexDecodeMap[(int)ptr3[2]];
+								if (b5 == 255)
+								{
+									throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b5));
+								}
+								if (b6 == 255)
+								{
+									throw new FormatException(SR.Format("Invalid hex digit '{0}'.", b6));
+								}
+								*(ptr4++) = (byte)(((int)b5 << 4) + (int)b6);
+							}
+							ptr3 += 3;
+							continue;
+						}
+						this.ReadState.Byte = (short)ptr3[1];
+					}
+					this.ReadState.IsEscaped = true;
+					break;
+				}
+				*(ptr4++) = *(ptr3++);
+			}
+			return (int)((long)(ptr4 - ptr2));
 		}
 
 		public int EncodeBytes(byte[] buffer, int offset, int count)
@@ -177,7 +175,7 @@ namespace System.Net.Mime
 			int i;
 			for (i = offset; i < count + offset; i++)
 			{
-				if ((this.lineLength != -1 && this.WriteState.CurrentLineLength + 3 + 2 >= this.lineLength && (buffer[i] == 32 || buffer[i] == 9 || buffer[i] == 13 || buffer[i] == 10)) || this.writeState.CurrentLineLength + 3 + 2 >= EncodedStreamFactory.DefaultMaxLineLength)
+				if ((this._lineLength != -1 && this.WriteState.CurrentLineLength + 3 + 2 >= this._lineLength && (buffer[i] == 32 || buffer[i] == 9 || buffer[i] == 13 || buffer[i] == 10)) || this._writeState.CurrentLineLength + 3 + 2 >= 70)
 				{
 					if (this.WriteState.Buffer.Length - this.WriteState.Length < 3)
 					{
@@ -188,12 +186,12 @@ namespace System.Net.Mime
 				}
 				if (buffer[i] == 13 && i + 1 < count + offset && buffer[i + 1] == 10)
 				{
-					if (this.WriteState.Buffer.Length - this.WriteState.Length < (this.encodeCRLF ? 6 : 2))
+					if (this.WriteState.Buffer.Length - this.WriteState.Length < (this._encodeCRLF ? 6 : 2))
 					{
 						return i - offset;
 					}
 					i++;
-					if (this.encodeCRLF)
+					if (this._encodeCRLF)
 					{
 						this.WriteState.Append(new byte[] { 61, 48, 68, 61, 48, 65 });
 					}
@@ -209,8 +207,8 @@ namespace System.Net.Mime
 						return i - offset;
 					}
 					this.WriteState.Append(61);
-					this.WriteState.Append(QuotedPrintableStream.hexEncodeMap[buffer[i] >> 4]);
-					this.WriteState.Append(QuotedPrintableStream.hexEncodeMap[(int)(buffer[i] & 15)]);
+					this.WriteState.Append(QuotedPrintableStream.s_hexEncodeMap[buffer[i] >> 4]);
+					this.WriteState.Append(QuotedPrintableStream.s_hexEncodeMap[(int)(buffer[i] & 15)]);
 				}
 				else
 				{
@@ -225,8 +223,8 @@ namespace System.Net.Mime
 							return i - offset;
 						}
 						this.WriteState.Append(61);
-						this.WriteState.Append(QuotedPrintableStream.hexEncodeMap[buffer[i] >> 4]);
-						this.WriteState.Append(QuotedPrintableStream.hexEncodeMap[(int)(buffer[i] & 15)]);
+						this.WriteState.Append(QuotedPrintableStream.s_hexEncodeMap[buffer[i] >> 4]);
+						this.WriteState.Append(QuotedPrintableStream.s_hexEncodeMap[(int)(buffer[i] & 15)]);
 					}
 					else
 					{
@@ -260,7 +258,7 @@ namespace System.Net.Mime
 
 		private void FlushInternal()
 		{
-			if (this.writeState != null && this.writeState.Length > 0)
+			if (this._writeState != null && this._writeState.Length > 0)
 			{
 				base.Write(this.WriteState.Buffer, 0, this.WriteState.Length);
 				this.WriteState.BufferFlushed();
@@ -293,17 +291,17 @@ namespace System.Net.Mime
 			}
 		}
 
-		private bool encodeCRLF;
+		private bool _encodeCRLF;
 
-		private const int sizeOfSoftCRLF = 3;
+		private const int SizeOfSoftCRLF = 3;
 
-		private const int sizeOfEncodedChar = 3;
+		private const int SizeOfEncodedChar = 3;
 
-		private const int sizeOfEncodedCRLF = 6;
+		private const int SizeOfEncodedCRLF = 6;
 
-		private const int sizeOfNonEncodedCRLF = 2;
+		private const int SizeOfNonEncodedCRLF = 2;
 
-		private static byte[] hexDecodeMap = new byte[]
+		private static readonly byte[] s_hexDecodeMap = new byte[]
 		{
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue,
@@ -333,64 +331,40 @@ namespace System.Net.Mime
 			byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue
 		};
 
-		private static byte[] hexEncodeMap = new byte[]
+		private static readonly byte[] s_hexEncodeMap = new byte[]
 		{
 			48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
 			65, 66, 67, 68, 69, 70
 		};
 
-		private int lineLength;
+		private int _lineLength;
 
-		private QuotedPrintableStream.ReadStateInfo readState;
+		private QuotedPrintableStream.ReadStateInfo _readState;
 
-		private WriteStateInfoBase writeState;
+		private WriteStateInfoBase _writeState;
 
-		private class ReadStateInfo
+		private sealed class ReadStateInfo
 		{
-			internal bool IsEscaped
-			{
-				get
-				{
-					return this.isEscaped;
-				}
-				set
-				{
-					this.isEscaped = value;
-				}
-			}
+			internal bool IsEscaped { get; set; }
 
-			internal short Byte
-			{
-				get
-				{
-					return this.b1;
-				}
-				set
-				{
-					this.b1 = value;
-				}
-			}
-
-			private bool isEscaped;
-
-			private short b1 = -1;
+			internal short Byte { get; set; } = -1;
 		}
 
-		private class WriteAsyncResult : LazyAsyncResult
+		private sealed class WriteAsyncResult : LazyAsyncResult
 		{
 			internal WriteAsyncResult(QuotedPrintableStream parent, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 				: base(null, state, callback)
 			{
-				this.parent = parent;
-				this.buffer = buffer;
-				this.offset = offset;
-				this.count = count;
+				this._parent = parent;
+				this._buffer = buffer;
+				this._offset = offset;
+				this._count = count;
 			}
 
 			private void CompleteWrite(IAsyncResult result)
 			{
-				this.parent.BaseStream.EndWrite(result);
-				this.parent.WriteState.BufferFlushed();
+				this._parent.BaseStream.EndWrite(result);
+				this._parent.WriteState.BufferFlushed();
 			}
 
 			internal static void End(IAsyncResult result)
@@ -419,12 +393,12 @@ namespace System.Net.Mime
 			{
 				for (;;)
 				{
-					this.written += this.parent.EncodeBytes(this.buffer, this.offset + this.written, this.count - this.written);
-					if (this.written >= this.count)
+					this._written += this._parent.EncodeBytes(this._buffer, this._offset + this._written, this._count - this._written);
+					if (this._written >= this._count)
 					{
 						break;
 					}
-					IAsyncResult asyncResult = this.parent.BaseStream.BeginWrite(this.parent.WriteState.Buffer, 0, this.parent.WriteState.Length, QuotedPrintableStream.WriteAsyncResult.onWrite, this);
+					IAsyncResult asyncResult = this._parent.BaseStream.BeginWrite(this._parent.WriteState.Buffer, 0, this._parent.WriteState.Length, QuotedPrintableStream.WriteAsyncResult.s_onWrite, this);
 					if (!asyncResult.CompletedSynchronously)
 					{
 						return;
@@ -434,17 +408,17 @@ namespace System.Net.Mime
 				base.InvokeCallback();
 			}
 
-			private QuotedPrintableStream parent;
+			private readonly QuotedPrintableStream _parent;
 
-			private byte[] buffer;
+			private readonly byte[] _buffer;
 
-			private int offset;
+			private readonly int _offset;
 
-			private int count;
+			private readonly int _count;
 
-			private static AsyncCallback onWrite = new AsyncCallback(QuotedPrintableStream.WriteAsyncResult.OnWrite);
+			private static readonly AsyncCallback s_onWrite = new AsyncCallback(QuotedPrintableStream.WriteAsyncResult.OnWrite);
 
-			private int written;
+			private int _written;
 		}
 	}
 }

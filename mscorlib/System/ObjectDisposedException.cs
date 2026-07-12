@@ -1,67 +1,39 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class ObjectDisposedException : InvalidOperationException
 	{
 		private ObjectDisposedException()
-			: this(null, Environment.GetResourceString("Cannot access a disposed object."))
+			: this(null, "Cannot access a disposed object.")
 		{
 		}
 
 		public ObjectDisposedException(string objectName)
-			: this(objectName, Environment.GetResourceString("Cannot access a disposed object."))
+			: this(objectName, "Cannot access a disposed object.")
 		{
 		}
 
 		public ObjectDisposedException(string objectName, string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146232798);
-			this.objectName = objectName;
+			base.HResult = -2146232798;
+			this._objectName = objectName;
 		}
 
 		public ObjectDisposedException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146232798);
-		}
-
-		public override string Message
-		{
-			get
-			{
-				string text = this.ObjectName;
-				if (text == null || text.Length == 0)
-				{
-					return base.Message;
-				}
-				string resourceString = Environment.GetResourceString("Object name: '{0}'.", new object[] { text });
-				return base.Message + Environment.NewLine + resourceString;
-			}
-		}
-
-		public string ObjectName
-		{
-			get
-			{
-				if (this.objectName == null && !CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
-				{
-					return string.Empty;
-				}
-				return this.objectName;
-			}
+			base.HResult = -2146232798;
 		}
 
 		protected ObjectDisposedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this.objectName = info.GetString("ObjectName");
+			this._objectName = info.GetString("ObjectName");
 		}
 
 		[SecurityCritical]
@@ -71,6 +43,32 @@ namespace System
 			info.AddValue("ObjectName", this.ObjectName, typeof(string));
 		}
 
-		private string objectName;
+		public override string Message
+		{
+			get
+			{
+				string objectName = this.ObjectName;
+				if (objectName == null || objectName.Length == 0)
+				{
+					return base.Message;
+				}
+				string text = SR.Format("Object name: '{0}'.", objectName);
+				return base.Message + Environment.NewLine + text;
+			}
+		}
+
+		public string ObjectName
+		{
+			get
+			{
+				if (this._objectName == null)
+				{
+					return string.Empty;
+				}
+				return this._objectName;
+			}
+		}
+
+		private string _objectName;
 	}
 }

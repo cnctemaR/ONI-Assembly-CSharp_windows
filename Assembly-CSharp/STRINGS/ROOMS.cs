@@ -32,6 +32,11 @@ namespace STRINGS
 				public static LocString NAME = "Washroom";
 			}
 
+			public class BIONIC
+			{
+				public static LocString NAME = "Workshop";
+			}
+
 			public class HOSPITAL
 			{
 				public static LocString NAME = "Medical";
@@ -82,6 +87,17 @@ namespace STRINGS
 				public static LocString EFFECT = "- Morale bonus";
 
 				public static LocString TOOLTIP = "Using a toilet in an enclosed room will improve Duplicants' Morale";
+			}
+
+			public class BIONICUPKEEP
+			{
+				public static LocString NAME = "Workshop";
+
+				public static LocString DESCRIPTION = "Where Bionic Duplicants can get the specialized care they need.\n\nUsing a " + BUILDINGS.PREFABS.GUNKEMPTIER.NAME + " in a Workshop will improve Bionic Duplicants' Morale.";
+
+				public static LocString EFFECT = "- Morale bonus";
+
+				public static LocString TOOLTIP = "Using a gunk extractor in a Workshop will improve Bionic Duplicants' Morale";
 			}
 
 			public class PLUMBEDBATHROOM
@@ -187,11 +203,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Power Plant";
 
-				public static LocString DESCRIPTION = "The perfect place for Duplicants to flex their Electrical Engineering skills.\n\nGenerators built within a Power Plant can be tuned up using power control stations to improve their power production.";
+				public static LocString DESCRIPTION = "The perfect place for Duplicants to flex their Electrical Engineering skills.\n\nHeavy-duty generators built within a Power Plant can be tuned up using microchips from power control stations to improve their " + UI.FormatAsLink("Power", "POWER") + " power production.";
 
-				public static LocString EFFECT = "- Enables Power Control Station use";
+				public static LocString EFFECT = "- Enables " + ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME + " tune-ups on heavy-duty generators";
 
-				public static LocString TOOLTIP = "Generators built within a Power Plant can be tuned up using Power Control Stations to improve their power production";
+				public static LocString TOOLTIP = "Heavy-duty generators built in a Power Plant can be tuned up using microchips from Power Control Stations to improve their Power production";
 			}
 
 			public class MACHINE_SHOP
@@ -281,6 +297,17 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Duplicants relieve even more stress when using the toilet in a Private Bathroom than in a Latrine";
 			}
+
+			public class BIONIC_UPKEEP
+			{
+				public static LocString NAME = "Workshop";
+
+				public static LocString DESCRIPTION = "A spa of sorts, for Duplicants who were built different.\n\nBionic Duplicants who access bionic service stations in a Workshop will get a nice little Morale boost.";
+
+				public static LocString EFFECT = "- Morale bonus";
+
+				public static LocString TOOLTIP = "Bionic Duplicants get a Morale boost when using bionic service stations in a Workshop";
+			}
 		}
 
 		public class CRITERIA
@@ -305,6 +332,8 @@ namespace STRINGS
 			public static class DECORATION
 			{
 				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECORATION.NAME;
 			}
 
 			public class CEILING_HEIGHT
@@ -312,6 +341,8 @@ namespace STRINGS
 				public static LocString NAME = "Minimum height: {0} tiles";
 
 				public static LocString DESCRIPTION = "Must have a ceiling height of at least {0} tiles";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.CEILING_HEIGHT.NAME;
 			}
 
 			public class MINIMUM_SIZE
@@ -319,6 +350,8 @@ namespace STRINGS
 				public static LocString NAME = "Minimum size: {0} tiles";
 
 				public static LocString DESCRIPTION = "Must have an area of at least {0} tiles";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MINIMUM_SIZE.NAME;
 			}
 
 			public class MAXIMUM_SIZE
@@ -326,11 +359,15 @@ namespace STRINGS
 				public static LocString NAME = "Maximum size: {0} tiles";
 
 				public static LocString DESCRIPTION = "Must have an area no larger than {0} tiles";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MAXIMUM_SIZE.NAME;
 			}
 
 			public class INDUSTRIALMACHINERY
 			{
 				public static LocString NAME = UI.FormatAsLink("Industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.INDUSTRIALMACHINERY.NAME;
 			}
 
 			public class HAS_BED
@@ -338,6 +375,8 @@ namespace STRINGS
 				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires at least one Cot or Comfy Bed";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.HAS_BED.NAME;
 			}
 
 			public class HAS_LUXURY_BED
@@ -345,6 +384,8 @@ namespace STRINGS
 				public static LocString NAME = "One or more " + UI.FormatAsLink("Comfy Beds", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Requires at least one Comfy Bed";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.HAS_LUXURY_BED.NAME;
 			}
 
 			public class LUXURYBEDTYPE
@@ -352,6 +393,8 @@ namespace STRINGS
 				public static LocString NAME = "Single " + UI.FormatAsLink("Comfy Bed", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Must have no more than one Comfy Bed";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.LUXURYBEDTYPE.NAME;
 			}
 
 			public class BED_SINGLE
@@ -359,6 +402,8 @@ namespace STRINGS
 				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Must have no more than one Cot or Comfy Bed";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BED_SINGLE.NAME;
 			}
 
 			public class IS_BACKWALLED
@@ -366,6 +411,8 @@ namespace STRINGS
 				public static LocString NAME = "Has backwall tiles";
 
 				public static LocString DESCRIPTION = "Must be covered in backwall tiles";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.IS_BACKWALLED.NAME;
 			}
 
 			public class NO_COTS
@@ -373,6 +420,8 @@ namespace STRINGS
 				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "BED");
 
 				public static LocString DESCRIPTION = "Room cannot contain a Cot";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_COTS.NAME;
 			}
 
 			public class NO_LUXURY_BEDS
@@ -380,6 +429,8 @@ namespace STRINGS
 				public static LocString NAME = "No " + UI.FormatAsLink("Comfy Beds", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Room cannot contain a Comfy Bed";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_LUXURY_BEDS.NAME;
 			}
 
 			public class BEDTYPE
@@ -387,6 +438,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires two or more Cots or Comfy Beds";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BEDTYPE.NAME;
 			}
 
 			public class BUILDING_DECOR_POSITIVE
@@ -394,6 +447,8 @@ namespace STRINGS
 				public static LocString NAME = "Positive " + UI.FormatAsLink("decor", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
 
 				public static LocString DESCRIPTION = "Requires at least one building with positive decor";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BUILDING_DECOR_POSITIVE.NAME;
 			}
 
 			public class DECORATIVE_ITEM
@@ -401,6 +456,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION") + " ({0})";
 
 				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECORATIVE_ITEM.NAME;
 			}
 
 			public class DECOR20
@@ -411,11 +468,14 @@ namespace STRINGS
 					string text = "Requires a decorative item with a minimum Decor value of ";
 					int amount = BUILDINGS.DECOR.BONUS.TIER3.amount;
 					ROOMS.CRITERIA.DECOR20.DESCRIPTION = text + amount.ToString();
+					ROOMS.CRITERIA.DECOR20.CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DECOR20.NAME;
 				}
 
 				public static LocString NAME = UI.FormatAsLink("Fancy decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
 
 				public static LocString DESCRIPTION;
+
+				public static LocString CONFLICT_DESCRIPTION;
 			}
 
 			public class CLINIC
@@ -423,13 +483,17 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Medical equipment", "BUILDCATEGORYREQUIREMENTCLASSCLINIC");
 
 				public static LocString DESCRIPTION = "Requires one or more Sick Bays or Disease Clinics";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.CLINIC.NAME;
 			}
 
-			public class POWERSTATION
+			public class POWERPLANT
 			{
-				public static LocString NAME = UI.FormatAsLink("Power Control Station", "POWERCONTROLSTATION");
+				public static LocString NAME = UI.FormatAsLink("Heavy-Duty Generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE") + "\n    • Two or more " + UI.FormatAsLink("Power Buildings", "BUILDCATEGORYREQUIREMENTCLASSPOWERBUILDING");
 
-				public static LocString DESCRIPTION = "Requires a single Power Control Station";
+				public static LocString DESCRIPTION = "Requires a Heavy-Duty Generator and two or more Power Buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = "Heavy-Duty Generator and two or more Power buildings";
 			}
 
 			public class FARMSTATIONTYPE
@@ -437,6 +501,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Farm Station", "FARMSTATION");
 
 				public static LocString DESCRIPTION = "Requires a single Farm Station";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FARMSTATIONTYPE.NAME;
 			}
 
 			public class CREATURERELOCATOR
@@ -444,6 +510,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Critter relocator", "BUILDCATEGORYREQUIREMENTCLASSCREATURERELOCATOR");
 
 				public static LocString DESCRIPTION = "Requires a single Critter Drop-Off or Fish Release";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.CREATURERELOCATOR.NAME;
 			}
 
 			public class CREATURE_FEEDER
@@ -451,6 +519,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Critter Feeder", "CREATUREFEEDER");
 
 				public static LocString DESCRIPTION = "Requires a single Critter Feeder";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.CREATURE_FEEDER.NAME;
 			}
 
 			public class RANCHSTATIONTYPE
@@ -458,6 +528,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Ranching building", "BUILDCATEGORYREQUIREMENTCLASSRANCHSTATIONTYPE");
 
 				public static LocString DESCRIPTION = "Requires a single Grooming Station, Critter Condo, Critter Fountain, Shearing Station or Milking Station";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.RANCHSTATIONTYPE.NAME;
 			}
 
 			public class SPICESTATION
@@ -465,6 +537,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Spice Grinder", "SPICEGRINDER");
 
 				public static LocString DESCRIPTION = "Requires a single Spice Grinder";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.SPICESTATION.NAME;
 			}
 
 			public class COOKTOP
@@ -472,6 +546,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Cooking station", "BUILDCATEGORYREQUIREMENTCLASSCOOKTOP");
 
 				public static LocString DESCRIPTION = "Requires a single Electric Grill or Gas Range";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.COOKTOP.NAME;
 			}
 
 			public class REFRIGERATOR
@@ -479,6 +555,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Refrigerator", "REFRIGERATOR");
 
 				public static LocString DESCRIPTION = "Requires a single Refrigerator";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.REFRIGERATOR.NAME;
 			}
 
 			public class RECBUILDING
@@ -486,6 +564,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Recreational building", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more recreational buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.RECBUILDING.NAME;
 			}
 
 			public class PARK
@@ -493,6 +573,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Park Sign", "PARKSIGN");
 
 				public static LocString DESCRIPTION = "Requires one or more Park Signs";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.PARK.NAME;
 			}
 
 			public class MACHINESHOPTYPE
@@ -500,6 +582,8 @@ namespace STRINGS
 				public static LocString NAME = "Mechanics Station";
 
 				public static LocString DESCRIPTION = "Requires requires one or more Mechanics Stations";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MACHINESHOPTYPE.NAME;
 			}
 
 			public class FOOD_BOX
@@ -507,6 +591,8 @@ namespace STRINGS
 				public static LocString NAME = "Food storage";
 
 				public static LocString DESCRIPTION = "Requires one or more Ration Boxes or Refrigerators";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FOOD_BOX.NAME;
 			}
 
 			public class LIGHTSOURCE
@@ -514,6 +600,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Light source", "BUILDCATEGORYREQUIREMENTCLASSLIGHTSOURCE");
 
 				public static LocString DESCRIPTION = "Requires one or more light sources";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.LIGHTSOURCE.NAME;
 			}
 
 			public class DESTRESSINGBUILDING
@@ -521,6 +609,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("De-Stressing Building", "MASSAGETABLE");
 
 				public static LocString DESCRIPTION = "Requires one or more De-Stressing buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.DESTRESSINGBUILDING.NAME;
 			}
 
 			public class MASSAGE_TABLE
@@ -528,6 +618,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Massage Table", "MASSAGETABLE");
 
 				public static LocString DESCRIPTION = "Requires one or more Massage Tables";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MASSAGE_TABLE.NAME;
 			}
 
 			public class MESSTABLE
@@ -535,6 +627,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Mess Table", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Requires a single Mess Table";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MESSTABLE.NAME;
 			}
 
 			public class NO_MESS_STATION
@@ -542,6 +636,8 @@ namespace STRINGS
 				public static LocString NAME = "No " + UI.FormatAsLink("Mess Table", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Cannot contain a Mess Table";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_MESS_STATION.NAME;
 			}
 
 			public class MESS_STATION_MULTIPLE
@@ -549,6 +645,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Mess Tables", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Requires two or more Mess Tables";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.MESS_STATION_MULTIPLE.NAME;
 			}
 
 			public class RESEARCH_STATION
@@ -556,6 +654,35 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Research station", "BUILDCATEGORYREQUIREMENTCLASSRESEARCH_STATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Research Stations or Super Computers";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.RESEARCH_STATION.NAME;
+			}
+
+			public class BIONICUPKEEP
+			{
+				public static LocString NAME = UI.FormatAsLink("Bionic service station", "BUILDCATEGORYREQUIREMENTCLASSBIONICUPKEEP");
+
+				public static LocString DESCRIPTION = "Requires at least one Lubrication Station and one Gunk Extractor";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BIONICUPKEEP.NAME;
+			}
+
+			public class BIONIC_GUNKEMPTIER
+			{
+				public static LocString NAME = UI.FormatAsLink("Gunk Extractor", "BUILDCATEGORYREQUIREMENTCLASSBIONIC_GUNKEMPTIER");
+
+				public static LocString DESCRIPTION = "Requires one or more Gunk Extractors";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BIONIC_GUNKEMPTIER.NAME;
+			}
+
+			public class BIONIC_LUBRICATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Lubrication Station", "BUILDCATEGORYREQUIREMENTCLASSBIONIC_LUBRICATION");
+
+				public static LocString DESCRIPTION = "Requires one or more Lubrication Stations";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.BIONIC_LUBRICATION.NAME;
 			}
 
 			public class TOILETTYPE
@@ -563,6 +690,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Toilet", "BUILDCATEGORYREQUIREMENTCLASSTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Outhouses or Lavatories";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.TOILETTYPE.NAME;
 			}
 
 			public class FLUSHTOILETTYPE
@@ -570,6 +699,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Flush Toilet", "BUILDCATEGORYREQUIREMENTCLASSFLUSHTOILETTYPE");
 
 				public static LocString DESCRIPTION = "Requires one or more Lavatories";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.FLUSHTOILETTYPE.NAME;
 			}
 
 			public class NO_OUTHOUSES
@@ -577,6 +708,8 @@ namespace STRINGS
 				public static LocString NAME = "No " + UI.FormatAsLink("Outhouses", "OUTHOUSE");
 
 				public static LocString DESCRIPTION = "Cannot contain basic Outhouses";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_OUTHOUSES.NAME;
 			}
 
 			public class WASHSTATION
@@ -584,6 +717,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Wash Basins, Sinks, Hand Sanitizers, or Showers";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WASHSTATION.NAME;
 			}
 
 			public class ADVANCEDWASHSTATION
@@ -591,6 +726,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Plumbed wash station", "BUILDCATEGORYREQUIREMENTCLASSWASHSTATION");
 
 				public static LocString DESCRIPTION = "Requires one or more Sinks, Hand Sanitizers, or Showers";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.ADVANCEDWASHSTATION.NAME;
 			}
 
 			public class NO_INDUSTRIAL_MACHINERY
@@ -598,6 +735,8 @@ namespace STRINGS
 				public static LocString NAME = "No " + UI.FormatAsLink("industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
 
 				public static LocString DESCRIPTION = "Cannot contain any building labeled Industrial Machinery";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.NAME;
 			}
 
 			public class WILDANIMAL
@@ -605,6 +744,8 @@ namespace STRINGS
 				public static LocString NAME = "Wildlife";
 
 				public static LocString DESCRIPTION = "Requires at least one wild critter";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WILDANIMAL.NAME;
 			}
 
 			public class WILDANIMALS
@@ -612,6 +753,8 @@ namespace STRINGS
 				public static LocString NAME = "More wildlife";
 
 				public static LocString DESCRIPTION = "Requires two or more wild critters";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WILDANIMALS.NAME;
 			}
 
 			public class WILDPLANT
@@ -619,6 +762,8 @@ namespace STRINGS
 				public static LocString NAME = "Two wild plants";
 
 				public static LocString DESCRIPTION = "Requires two or more wild plants";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WILDPLANT.NAME;
 			}
 
 			public class WILDPLANTS
@@ -626,6 +771,8 @@ namespace STRINGS
 				public static LocString NAME = "Four wild plants";
 
 				public static LocString DESCRIPTION = "Requires four or more wild plants";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WILDPLANTS.NAME;
 			}
 
 			public class SCIENCEBUILDING
@@ -633,6 +780,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Science building", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more science buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.SCIENCEBUILDING.NAME;
 			}
 
 			public class SCIENCE_BUILDINGS
@@ -640,6 +789,8 @@ namespace STRINGS
 				public static LocString NAME = "Two " + UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires two or more science buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.SCIENCE_BUILDINGS.NAME;
 			}
 
 			public class ROCKETINTERIOR
@@ -647,6 +798,8 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Rocket interior", "BUILDCATEGORYREQUIREMENTCLASSROCKETINTERIOR");
 
 				public static LocString DESCRIPTION = "Must be built inside a rocket";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.ROCKETINTERIOR.NAME;
 			}
 
 			public class WARMINGSTATION
@@ -654,6 +807,44 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Warming station", "BUILDCATEGORYREQUIREMENTCLASSWARMINGSTATION");
 
 				public static LocString DESCRIPTION = "Raises the ambient temperature";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WARMINGSTATION.NAME;
+			}
+
+			public class GENERATORTYPE
+			{
+				public static LocString NAME = UI.FormatAsLink("Generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+
+				public static LocString DESCRIPTION = "Generates electrical power";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.GENERATORTYPE.NAME;
+			}
+
+			public class HEAVYDUTYGENERATORTYPE
+			{
+				public static LocString NAME = UI.FormatAsLink("Heavy-duty generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+
+				public static LocString DESCRIPTION = "For big power needs";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.HEAVYDUTYGENERATORTYPE.NAME;
+			}
+
+			public class LIGHTDUTYGENERATORTYPE
+			{
+				public static LocString NAME = UI.FormatAsLink("Basic generator", "BUILDCATEGORYREQUIREMENTCLASSGENERATORTYPE");
+
+				public static LocString DESCRIPTION = "For regular power needs";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.LIGHTDUTYGENERATORTYPE.NAME;
+			}
+
+			public class POWERBUILDING
+			{
+				public static LocString NAME = UI.FormatAsLink("Power building", "BUILDCATEGORYREQUIREMENTCLASSPOWERBUILDING");
+
+				public static LocString DESCRIPTION = "Power buildings";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.POWERBUILDING.NAME;
 			}
 		}
 

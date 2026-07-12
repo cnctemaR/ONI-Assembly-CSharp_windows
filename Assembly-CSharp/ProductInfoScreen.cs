@@ -470,7 +470,6 @@ public class ProductInfoScreen : KScreen
 		RoomConstraints.ConstraintTags.MessTable,
 		RoomConstraints.ConstraintTags.NatureReserve,
 		RoomConstraints.ConstraintTags.Park,
-		RoomConstraints.ConstraintTags.PowerStation,
 		RoomConstraints.ConstraintTags.SpiceStation,
 		RoomConstraints.ConstraintTags.DeStressingBuilding,
 		RoomConstraints.ConstraintTags.Decor20,

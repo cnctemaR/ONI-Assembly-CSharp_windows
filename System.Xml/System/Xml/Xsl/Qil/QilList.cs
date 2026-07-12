@@ -7,7 +7,7 @@ namespace System.Xml.Xsl.Qil
 		public QilList(QilNodeType nodeType)
 			: base(nodeType)
 		{
-			this.members = new QilNode[4];
+			this._members = new QilNode[4];
 			this.xmlType = null;
 		}
 
@@ -18,21 +18,21 @@ namespace System.Xml.Xsl.Qil
 				if (this.xmlType == null)
 				{
 					XmlQueryType xmlQueryType = XmlQueryTypeFactory.Empty;
-					if (this.count > 0)
+					if (this._count > 0)
 					{
 						if (this.nodeType == QilNodeType.Sequence)
 						{
-							for (int i = 0; i < this.count; i++)
+							for (int i = 0; i < this._count; i++)
 							{
-								xmlQueryType = XmlQueryTypeFactory.Sequence(xmlQueryType, this.members[i].XmlType);
+								xmlQueryType = XmlQueryTypeFactory.Sequence(xmlQueryType, this._members[i].XmlType);
 							}
 						}
 						else if (this.nodeType == QilNodeType.BranchList)
 						{
-							xmlQueryType = this.members[0].XmlType;
-							for (int j = 1; j < this.count; j++)
+							xmlQueryType = this._members[0].XmlType;
+							for (int j = 1; j < this._count; j++)
 							{
-								xmlQueryType = XmlQueryTypeFactory.Choice(xmlQueryType, this.members[j].XmlType);
+								xmlQueryType = XmlQueryTypeFactory.Choice(xmlQueryType, this._members[j].XmlType);
 							}
 						}
 					}
@@ -45,7 +45,7 @@ namespace System.Xml.Xsl.Qil
 		public override QilNode ShallowClone(QilFactory f)
 		{
 			QilList qilList = (QilList)base.MemberwiseClone();
-			qilList.members = (QilNode[])this.members.Clone();
+			qilList._members = (QilNode[])this._members.Clone();
 			return qilList;
 		}
 
@@ -53,7 +53,7 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.count;
+				return this._count;
 			}
 		}
 
@@ -61,17 +61,17 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				if (index >= 0 && index < this.count)
+				if (index >= 0 && index < this._count)
 				{
-					return this.members[index];
+					return this._members[index];
 				}
 				throw new IndexOutOfRangeException();
 			}
 			set
 			{
-				if (index >= 0 && index < this.count)
+				if (index >= 0 && index < this._count)
 				{
-					this.members[index] = value;
+					this._members[index] = value;
 					this.xmlType = null;
 					return;
 				}
@@ -81,42 +81,42 @@ namespace System.Xml.Xsl.Qil
 
 		public override void Insert(int index, QilNode node)
 		{
-			if (index < 0 || index > this.count)
+			if (index < 0 || index > this._count)
 			{
 				throw new IndexOutOfRangeException();
 			}
-			if (this.count == this.members.Length)
+			if (this._count == this._members.Length)
 			{
-				QilNode[] array = new QilNode[this.count * 2];
-				Array.Copy(this.members, array, this.count);
-				this.members = array;
+				QilNode[] array = new QilNode[this._count * 2];
+				Array.Copy(this._members, array, this._count);
+				this._members = array;
 			}
-			if (index < this.count)
+			if (index < this._count)
 			{
-				Array.Copy(this.members, index, this.members, index + 1, this.count - index);
+				Array.Copy(this._members, index, this._members, index + 1, this._count - index);
 			}
-			this.count++;
-			this.members[index] = node;
+			this._count++;
+			this._members[index] = node;
 			this.xmlType = null;
 		}
 
 		public override void RemoveAt(int index)
 		{
-			if (index < 0 || index >= this.count)
+			if (index < 0 || index >= this._count)
 			{
 				throw new IndexOutOfRangeException();
 			}
-			this.count--;
-			if (index < this.count)
+			this._count--;
+			if (index < this._count)
 			{
-				Array.Copy(this.members, index + 1, this.members, index, this.count - index);
+				Array.Copy(this._members, index + 1, this._members, index, this._count - index);
 			}
-			this.members[this.count] = null;
+			this._members[this._count] = null;
 			this.xmlType = null;
 		}
 
-		private int count;
+		private int _count;
 
-		private QilNode[] members;
+		private QilNode[] _members;
 	}
 }

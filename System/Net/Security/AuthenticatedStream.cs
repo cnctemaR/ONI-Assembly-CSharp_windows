@@ -13,7 +13,7 @@ namespace System.Net.Security
 			}
 			if (!innerStream.CanRead || !innerStream.CanWrite)
 			{
-				throw new ArgumentException(global::SR.GetString("The stream has to be read/write."), "innerStream");
+				throw new ArgumentException(SR.GetString("The stream has to be read/write."), "innerStream");
 			}
 			this._InnerStream = innerStream;
 			this._LeaveStreamOpen = leaveInnerStreamOpen;

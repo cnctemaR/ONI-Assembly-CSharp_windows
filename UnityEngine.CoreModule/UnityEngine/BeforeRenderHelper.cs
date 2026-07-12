@@ -22,8 +22,8 @@ namespace UnityEngine
 				int num = 0;
 				while (num < BeforeRenderHelper.s_OrderBlocks.Count && BeforeRenderHelper.s_OrderBlocks[num].order <= updateOrder)
 				{
-					bool flag = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
-					if (flag)
+					bool flag2 = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
+					if (flag2)
 					{
 						BeforeRenderHelper.OrderBlock orderBlock = BeforeRenderHelper.s_OrderBlocks[num];
 						orderBlock.callback = (UnityAction)Delegate.Combine(orderBlock.callback, callback);
@@ -48,14 +48,14 @@ namespace UnityEngine
 				int num = 0;
 				while (num < BeforeRenderHelper.s_OrderBlocks.Count && BeforeRenderHelper.s_OrderBlocks[num].order <= updateOrder)
 				{
-					bool flag = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
-					if (flag)
+					bool flag2 = BeforeRenderHelper.s_OrderBlocks[num].order == updateOrder;
+					if (flag2)
 					{
 						BeforeRenderHelper.OrderBlock orderBlock = BeforeRenderHelper.s_OrderBlocks[num];
 						orderBlock.callback = (UnityAction)Delegate.Remove(orderBlock.callback, callback);
 						BeforeRenderHelper.s_OrderBlocks[num] = orderBlock;
-						bool flag2 = orderBlock.callback == null;
-						if (flag2)
+						bool flag3 = orderBlock.callback == null;
+						if (flag3)
 						{
 							BeforeRenderHelper.s_OrderBlocks.RemoveAt(num);
 						}
@@ -74,8 +74,8 @@ namespace UnityEngine
 				for (int i = 0; i < BeforeRenderHelper.s_OrderBlocks.Count; i++)
 				{
 					UnityAction callback = BeforeRenderHelper.s_OrderBlocks[i].callback;
-					bool flag = callback != null;
-					if (flag)
+					bool flag2 = callback != null;
+					if (flag2)
 					{
 						callback();
 					}

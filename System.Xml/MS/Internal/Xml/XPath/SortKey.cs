@@ -7,21 +7,21 @@ namespace MS.Internal.Xml.XPath
 	{
 		public SortKey(int numKeys, int originalPosition, XPathNavigator node)
 		{
-			this.numKeys = numKeys;
-			this.keys = new object[numKeys];
-			this.originalPosition = originalPosition;
-			this.node = node;
+			this._numKeys = numKeys;
+			this._keys = new object[numKeys];
+			this._originalPosition = originalPosition;
+			this._node = node;
 		}
 
 		public object this[int index]
 		{
 			get
 			{
-				return this.keys[index];
+				return this._keys[index];
 			}
 			set
 			{
-				this.keys[index] = value;
+				this._keys[index] = value;
 			}
 		}
 
@@ -29,7 +29,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.numKeys;
+				return this._numKeys;
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.originalPosition;
+				return this._originalPosition;
 			}
 		}
 
@@ -45,16 +45,16 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.node;
+				return this._node;
 			}
 		}
 
-		private int numKeys;
+		private int _numKeys;
 
-		private object[] keys;
+		private object[] _keys;
 
-		private int originalPosition;
+		private int _originalPosition;
 
-		private XPathNavigator node;
+		private XPathNavigator _node;
 	}
 }

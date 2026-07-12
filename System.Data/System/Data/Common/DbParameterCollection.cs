@@ -6,13 +6,13 @@ namespace System.Data.Common
 {
 	public abstract class DbParameterCollection : MarshalByRefObject, IDataParameterCollection, IList, ICollection, IEnumerable
 	{
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public abstract int Count { get; }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual bool IsFixedSize
 		{
 			get
@@ -22,8 +22,8 @@ namespace System.Data.Common
 		}
 
 		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public virtual bool IsReadOnly
 		{
 			get
@@ -32,8 +32,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public virtual bool IsSynchronized
 		{
@@ -43,9 +43,9 @@ namespace System.Data.Common
 			}
 		}
 
-		[Browsable(false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Browsable(false)]
 		public abstract object SyncRoot { get; }
 
 		object IList.this[int index]

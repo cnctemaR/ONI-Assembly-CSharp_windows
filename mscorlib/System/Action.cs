@@ -2,5 +2,5 @@
 
 namespace System
 {
-	public delegate void Action<in T>(T obj);
+	public delegate void Action();
 }

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Flags]
-	[Serializable]
 	public enum MethodAttributes
 	{
 		MemberAccessMask = 7,
@@ -29,8 +26,8 @@ namespace System.Reflection
 		PinvokeImpl = 8192,
 		UnmanagedExport = 8,
 		RTSpecialName = 4096,
-		ReservedMask = 53248,
 		HasSecurity = 16384,
-		RequireSecObject = 32768
+		RequireSecObject = 32768,
+		ReservedMask = 53248
 	}
 }

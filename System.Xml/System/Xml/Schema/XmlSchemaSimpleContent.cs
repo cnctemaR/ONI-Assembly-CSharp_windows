@@ -5,8 +5,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaSimpleContent : XmlSchemaContentModel
 	{
-		[XmlElement("extension", typeof(XmlSchemaSimpleContentExtension))]
 		[XmlElement("restriction", typeof(XmlSchemaSimpleContentRestriction))]
+		[XmlElement("extension", typeof(XmlSchemaSimpleContentExtension))]
 		public override XmlSchemaContent Content
 		{
 			get

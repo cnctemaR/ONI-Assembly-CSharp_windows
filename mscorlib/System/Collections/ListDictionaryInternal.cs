@@ -12,7 +12,7 @@ namespace System.Collections
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+					throw new ArgumentNullException("key", "Key cannot be null.");
 				}
 				for (ListDictionaryInternal.DictionaryNode next = this.head; next != null; next = next.next)
 				{
@@ -27,15 +27,7 @@ namespace System.Collections
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
-				}
-				if (!key.GetType().IsSerializable)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Argument passed in is not serializable."), "key");
-				}
-				if (value != null && !value.GetType().IsSerializable)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Argument passed in is not serializable."), "value");
+					throw new ArgumentNullException("key", "Key cannot be null.");
 				}
 				this.version++;
 				ListDictionaryInternal.DictionaryNode dictionaryNode = null;
@@ -129,15 +121,7 @@ namespace System.Collections
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
-			}
-			if (!key.GetType().IsSerializable)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Argument passed in is not serializable."), "key");
-			}
-			if (value != null && !value.GetType().IsSerializable)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Argument passed in is not serializable."), "value");
+				throw new ArgumentNullException("key", "Key cannot be null.");
 			}
 			this.version++;
 			ListDictionaryInternal.DictionaryNode dictionaryNode = null;
@@ -146,7 +130,7 @@ namespace System.Collections
 			{
 				if (next.key.Equals(key))
 				{
-					throw new ArgumentException(Environment.GetResourceString("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", new object[] { next.key, key }));
+					throw new ArgumentException(SR.Format("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", next.key, key));
 				}
 				dictionaryNode = next;
 			}
@@ -180,7 +164,7 @@ namespace System.Collections
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				throw new ArgumentNullException("key", "Key cannot be null.");
 			}
 			for (ListDictionaryInternal.DictionaryNode next = this.head; next != null; next = next.next)
 			{
@@ -200,15 +184,15 @@ namespace System.Collections
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (array.Length - index < this.Count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."), "index");
+				throw new ArgumentException("Index was out of range. Must be non-negative and less than the size of the collection.", "index");
 			}
 			for (ListDictionaryInternal.DictionaryNode next = this.head; next != null; next = next.next)
 			{
@@ -231,7 +215,7 @@ namespace System.Collections
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				throw new ArgumentNullException("key", "Key cannot be null.");
 			}
 			this.version++;
 			ListDictionaryInternal.DictionaryNode dictionaryNode = null;
@@ -289,7 +273,7 @@ namespace System.Collections
 				{
 					if (this.current == null)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
 					return new DictionaryEntry(this.current.key, this.current.value);
 				}
@@ -301,7 +285,7 @@ namespace System.Collections
 				{
 					if (this.current == null)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
 					return this.current.key;
 				}
@@ -313,7 +297,7 @@ namespace System.Collections
 				{
 					if (this.current == null)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
 					return this.current.value;
 				}
@@ -323,7 +307,7 @@ namespace System.Collections
 			{
 				if (this.version != this.list.version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				if (this.start)
 				{
@@ -341,7 +325,7 @@ namespace System.Collections
 			{
 				if (this.version != this.list.version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 				this.start = true;
 				this.current = null;
@@ -372,15 +356,15 @@ namespace System.Collections
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 				}
 				if (index < 0)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 				}
 				if (array.Length - index < this.list.Count)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."), "index");
+					throw new ArgumentException("Index was out of range. Must be non-negative and less than the size of the collection.", "index");
 				}
 				for (ListDictionaryInternal.DictionaryNode dictionaryNode = this.list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
 				{
@@ -444,7 +428,7 @@ namespace System.Collections
 					{
 						if (this.current == null)
 						{
-							throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+							throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 						}
 						if (!this.isKeys)
 						{
@@ -458,7 +442,7 @@ namespace System.Collections
 				{
 					if (this.version != this.list.version)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
 					if (this.start)
 					{
@@ -476,7 +460,7 @@ namespace System.Collections
 				{
 					if (this.version != this.list.version)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
 					this.start = true;
 					this.current = null;

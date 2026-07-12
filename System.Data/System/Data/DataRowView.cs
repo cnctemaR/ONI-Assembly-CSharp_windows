@@ -321,7 +321,7 @@ namespace System.Data
 
 		internal DataRowView()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private readonly DataView _dataView;

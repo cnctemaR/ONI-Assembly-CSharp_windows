@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 
 namespace System
 {
+	[Serializable]
 	public abstract class Array : ICollection, IEnumerable, IList, IStructuralComparable, IStructuralEquatable, ICloneable
 	{
 		public static Array CreateInstance(Type elementType, params long[] lengths)
@@ -431,7 +433,7 @@ namespace System
 			}
 			if (comparer == null)
 			{
-				comparer = LowLevelComparer.Default;
+				comparer = Comparer.Default;
 			}
 			int i = index;
 			int num = index + length - 1;
@@ -537,7 +539,7 @@ namespace System
 			{
 				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			return ArraySortHelper<T>.BinarySearch(array, index, length, value, comparer);
+			return ArraySortHelper<T>.Default.BinarySearch(array, index, length, value, comparer);
 		}
 
 		public static int IndexOf(Array array, object value)
@@ -829,21 +831,14 @@ namespace System
 			{
 				throw new RankException("Only single dimension arrays are supported here.");
 			}
-			int i = index;
-			int num = index + length - 1;
 			object[] array2 = array as object[];
 			if (array2 != null)
 			{
-				while (i < num)
-				{
-					object obj = array2[i];
-					array2[i] = array2[num];
-					array2[num] = obj;
-					i++;
-					num--;
-				}
+				Array.Reverse<object>(array2, index, length);
 				return;
 			}
+			int i = index;
+			int num = index + length - 1;
 			while (i < num)
 			{
 				object value = array.GetValue(i);
@@ -877,16 +872,21 @@ namespace System
 			{
 				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			int i = index;
-			int num = index + length - 1;
-			while (i < num)
+			if (length <= 1)
 			{
-				T t = array[i];
-				array[i] = array[num];
-				array[num] = t;
-				i++;
-				num--;
+				return;
 			}
+			ref T ptr = ref Unsafe.Add<T>(Unsafe.As<byte, T>(array.GetRawSzArrayData()), index);
+			ref T ptr2 = ref Unsafe.Add<T>(Unsafe.Add<T>(ref ptr, length), -1);
+			do
+			{
+				T t = ptr;
+				ptr = ptr2;
+				ptr2 = t;
+				ptr = Unsafe.Add<T>(ref ptr, 1);
+				ptr2 = Unsafe.Add<T>(ref ptr2, -1);
+			}
+			while (Unsafe.IsAddressLessThan<T>(ref ptr, ref ptr2));
 		}
 
 		public void SetValue(object value, long index)
@@ -1070,7 +1070,7 @@ namespace System
 			}
 			if (length > 1)
 			{
-				ArraySortHelper<T>.Sort(array, index, length, comparer);
+				ArraySortHelper<T>.Default.Sort(array, index, length, comparer);
 			}
 		}
 
@@ -1382,6 +1382,12 @@ namespace System
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal ref byte GetRawSzArrayData()
+		{
+			return ref Unsafe.As<Array.RawData>(this).Data;
+		}
+
 		internal IEnumerator<T> InternalArray__IEnumerable_GetEnumerator<T>()
 		{
 			if (this.Length == 0)
@@ -1410,7 +1416,7 @@ namespace System
 		{
 			if (this.Rank > 1)
 			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
+				throw new RankException("Only single dimension arrays are supported.");
 			}
 			int length = this.Length;
 			for (int i = 0; i < length; i++)
@@ -1467,7 +1473,7 @@ namespace System
 		{
 			if (this.Rank > 1)
 			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
+				throw new RankException("Only single dimension arrays are supported.");
 			}
 			int length = this.Length;
 			for (int i = 0; i < length; i++)
@@ -1516,10 +1522,22 @@ namespace System
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetGenericValueImpl<T>(int pos, out T value);
+		private static extern void GetGenericValue_icall<T>(ref Array self, int pos, out T value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetGenericValueImpl<T>(int pos, ref T value);
+		private static extern void SetGenericValue_icall<T>(ref Array self, int pos, ref T value);
+
+		internal void GetGenericValueImpl<T>(int pos, out T value)
+		{
+			Array array = this;
+			Array.GetGenericValue_icall<T>(ref array, pos, out value);
+		}
+
+		internal void SetGenericValueImpl<T>(int pos, ref T value)
+		{
+			Array array = this;
+			Array.SetGenericValue_icall<T>(ref array, pos, ref value);
+		}
 
 		public int Length
 		{
@@ -1587,7 +1605,7 @@ namespace System
 			int lowerBound = this.GetLowerBound(0);
 			if (index < lowerBound || index > this.GetUpperBound(0))
 			{
-				throw new IndexOutOfRangeException(Locale.GetText("Index has to be between upper and lower bound of the array."));
+				throw new IndexOutOfRangeException("Index has to be between upper and lower bound of the array.");
 			}
 			if (base.GetType().GetElementType().IsPointer)
 			{
@@ -1617,7 +1635,7 @@ namespace System
 			int lowerBound = this.GetLowerBound(0);
 			if (index < lowerBound || index > this.GetUpperBound(0))
 			{
-				throw new IndexOutOfRangeException(Locale.GetText("Index has to be >= lower bound and <= upper bound of the array."));
+				throw new IndexOutOfRangeException("Index has to be >= lower bound and <= upper bound of the array.");
 			}
 			if (base.GetType().GetElementType().IsPointer)
 			{
@@ -1731,21 +1749,21 @@ namespace System
 			}
 			if (lengths.Length < 1)
 			{
-				throw new ArgumentException(Locale.GetText("Arrays must contain >= 1 elements."));
+				throw new ArgumentException("Arrays must contain >= 1 elements.");
 			}
 			if (lengths.Length != lowerBounds.Length)
 			{
-				throw new ArgumentException(Locale.GetText("Arrays must be of same size."));
+				throw new ArgumentException("Arrays must be of same size.");
 			}
 			for (int i = 0; i < lowerBounds.Length; i++)
 			{
 				if (lengths[i] < 0)
 				{
-					throw new ArgumentOutOfRangeException("lengths", Locale.GetText("Each value has to be >= 0."));
+					throw new ArgumentOutOfRangeException("lengths", "Each value has to be >= 0.");
 				}
 				if ((long)lowerBounds[i] + (long)lengths[i] > 2147483647L)
 				{
-					throw new ArgumentOutOfRangeException("lengths", Locale.GetText("Length + bound must not exceed Int32.MaxValue."));
+					throw new ArgumentOutOfRangeException("lengths", "Length + bound must not exceed Int32.MaxValue.");
 				}
 			}
 			if (lengths.Length > 255)
@@ -1809,7 +1827,7 @@ namespace System
 			}
 			if (length < 0)
 			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
+				throw new ArgumentOutOfRangeException("length", "Value has to be >= 0.");
 			}
 			if (sourceArray.Rank != destinationArray.Rank)
 			{
@@ -1817,11 +1835,11 @@ namespace System
 			}
 			if (sourceIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("sourceIndex", Locale.GetText("Value has to be >= 0."));
+				throw new ArgumentOutOfRangeException("sourceIndex", "Value has to be >= 0.");
 			}
 			if (destinationIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("destinationIndex", Locale.GetText("Value has to be >= 0."));
+				throw new ArgumentOutOfRangeException("destinationIndex", "Value has to be >= 0.");
 			}
 			if (Array.FastCopy(sourceArray, sourceIndex, destinationArray, destinationIndex, length))
 			{
@@ -1839,15 +1857,20 @@ namespace System
 			}
 			if (num2 > destinationArray.Length - length)
 			{
-				throw new ArgumentException("Destination array was not long enough. Check destIndex and length, and the array's lower bounds", string.Empty);
+				throw new ArgumentException("Destination array was not long enough. Check destIndex and length, and the array's lower bounds", "destinationArray");
 			}
 			Type elementType = sourceArray.GetType().GetElementType();
 			Type elementType2 = destinationArray.GetType().GetElementType();
+			bool isValueType = elementType2.IsValueType;
 			if (sourceArray != destinationArray || num > num2)
 			{
 				for (int i = 0; i < length; i++)
 				{
 					object valueImpl = sourceArray.GetValueImpl(num + i);
+					if (valueImpl == null && isValueType)
+					{
+						throw new InvalidCastException();
+					}
 					try
 					{
 						destinationArray.SetValueImpl(valueImpl, num2 + i);
@@ -1856,7 +1879,7 @@ namespace System
 					{
 						throw Array.CreateArrayTypeMismatchException();
 					}
-					catch
+					catch (InvalidCastException)
 					{
 						if (Array.CanAssignArrayElement(elementType, elementType2))
 						{
@@ -1889,7 +1912,7 @@ namespace System
 			}
 		}
 
-		private static Exception CreateArrayTypeMismatchException()
+		private static ArrayTypeMismatchException CreateArrayTypeMismatchException()
 		{
 			return new ArrayTypeMismatchException();
 		}
@@ -2023,6 +2046,16 @@ namespace System
 			private int _index;
 
 			private int _endIndex;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		private class RawData
+		{
+			public IntPtr Bounds;
+
+			public IntPtr Count;
+
+			public byte Data;
 		}
 
 		internal struct InternalEnumerator<T> : IEnumerator<T>, IDisposable, IEnumerator
@@ -2194,7 +2227,7 @@ namespace System
 				}
 				try
 				{
-					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(this.keys.Length));
+					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(this.keys.Length));
 				}
 				catch (IndexOutOfRangeException)
 				{
@@ -2404,7 +2437,7 @@ namespace System
 				}
 				try
 				{
-					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(this.keys.Length));
+					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(this.keys.Length));
 				}
 				catch (IndexOutOfRangeException)
 				{

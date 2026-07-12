@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Util;
@@ -275,5 +276,193 @@ namespace System.Security.Cryptography
 		public abstract RSAParameters ExportParameters(bool includePrivateParameters);
 
 		public abstract void ImportParameters(RSAParameters parameters);
+
+		public static RSA Create(int keySizeInBits)
+		{
+			RSA rsa = RSA.Create();
+			RSA rsa2;
+			try
+			{
+				rsa.KeySize = keySizeInBits;
+				rsa2 = rsa;
+			}
+			catch
+			{
+				rsa.Dispose();
+				throw;
+			}
+			return rsa2;
+		}
+
+		public static RSA Create(RSAParameters parameters)
+		{
+			RSA rsa = RSA.Create();
+			RSA rsa2;
+			try
+			{
+				rsa.ImportParameters(parameters);
+				rsa2 = rsa;
+			}
+			catch
+			{
+				rsa.Dispose();
+				throw;
+			}
+			return rsa2;
+		}
+
+		public virtual bool TryDecrypt(ReadOnlySpan<byte> data, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten)
+		{
+			byte[] array = this.Decrypt(data.ToArray(), padding);
+			if (destination.Length >= array.Length)
+			{
+				new ReadOnlySpan<byte>(array).CopyTo(destination);
+				bytesWritten = array.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		public virtual bool TryEncrypt(ReadOnlySpan<byte> data, Span<byte> destination, RSAEncryptionPadding padding, out int bytesWritten)
+		{
+			byte[] array = this.Encrypt(data.ToArray(), padding);
+			if (destination.Length >= array.Length)
+			{
+				new ReadOnlySpan<byte>(array).CopyTo(destination);
+				bytesWritten = array.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		protected virtual bool TryHashData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
+		{
+			byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
+			byte[] array2;
+			try
+			{
+				data.CopyTo(array);
+				array2 = this.HashData(array, 0, data.Length, hashAlgorithm);
+			}
+			finally
+			{
+				Array.Clear(array, 0, data.Length);
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
+			if (destination.Length >= array2.Length)
+			{
+				new ReadOnlySpan<byte>(array2).CopyTo(destination);
+				bytesWritten = array2.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		public virtual bool TrySignHash(ReadOnlySpan<byte> hash, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten)
+		{
+			byte[] array = this.SignHash(hash.ToArray(), hashAlgorithm, padding);
+			if (destination.Length >= array.Length)
+			{
+				new ReadOnlySpan<byte>(array).CopyTo(destination);
+				bytesWritten = array.Length;
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		public virtual bool TrySignData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding, out int bytesWritten)
+		{
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw RSA.HashAlgorithmNameNullOrEmpty();
+			}
+			if (padding == null)
+			{
+				throw new ArgumentNullException("padding");
+			}
+			int num;
+			if (this.TryHashData(data, destination, hashAlgorithm, out num) && this.TrySignHash(destination.Slice(0, num), destination, hashAlgorithm, padding, out bytesWritten))
+			{
+				return true;
+			}
+			bytesWritten = 0;
+			return false;
+		}
+
+		public virtual bool VerifyData(ReadOnlySpan<byte> data, ReadOnlySpan<byte> signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw RSA.HashAlgorithmNameNullOrEmpty();
+			}
+			if (padding == null)
+			{
+				throw new ArgumentNullException("padding");
+			}
+			int num = 256;
+			checked
+			{
+				bool flag;
+				for (;;)
+				{
+					int num2 = 0;
+					byte[] array = ArrayPool<byte>.Shared.Rent(num);
+					try
+					{
+						if (this.TryHashData(data, array, hashAlgorithm, out num2))
+						{
+							flag = this.VerifyHash(new ReadOnlySpan<byte>(array, 0, num2), signature, hashAlgorithm, padding);
+							break;
+						}
+					}
+					finally
+					{
+						Array.Clear(array, 0, num2);
+						ArrayPool<byte>.Shared.Return(array, false);
+					}
+					num *= 2;
+				}
+				return flag;
+			}
+		}
+
+		public virtual bool VerifyHash(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
+		{
+			return this.VerifyHash(hash.ToArray(), signature.ToArray(), hashAlgorithm, padding);
+		}
+
+		public virtual byte[] ExportRSAPrivateKey()
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual byte[] ExportRSAPublicKey()
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual void ImportRSAPrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual bool TryExportRSAPrivateKey(Span<byte> destination, out int bytesWritten)
+		{
+			throw new PlatformNotSupportedException();
+		}
+
+		public virtual bool TryExportRSAPublicKey(Span<byte> destination, out int bytesWritten)
+		{
+			throw new PlatformNotSupportedException();
+		}
 	}
 }

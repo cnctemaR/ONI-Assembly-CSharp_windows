@@ -25,7 +25,7 @@ public static class ReflectionUtil
 	public static List<Type> CollectTypesInNamespace(string namespaceName, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)
 	{
 		List<Type> list = new List<Type>();
-		string[] array = namespaceName.Split(new char[] { '.' });
+		string[] array = namespaceName.Split('.', StringSplitOptions.None);
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 		for (int i = 0; i < assemblies.Length; i++)
 		{
@@ -33,7 +33,7 @@ public static class ReflectionUtil
 			{
 				if (!string.IsNullOrWhiteSpace(type.Namespace))
 				{
-					string[] array2 = type.Namespace.Split(new char[] { '.' });
+					string[] array2 = type.Namespace.Split('.', StringSplitOptions.None);
 					if (array2.Length >= array.Length)
 					{
 						bool flag = true;

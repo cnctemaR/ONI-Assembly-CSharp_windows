@@ -61,7 +61,8 @@ public class CreatureFeederConfig : IBuildingConfig
 			GameTags.Creatures.Species.StaterpillarSpecies,
 			GameTags.Creatures.Species.DivergentSpecies,
 			GameTags.Creatures.Species.DeerSpecies,
-			GameTags.Creatures.Species.BellySpecies
+			GameTags.Creatures.Species.BellySpecies,
+			GameTags.Creatures.Species.SealSpecies
 		}))
 		{
 			list.Add(keyValuePair.Key);

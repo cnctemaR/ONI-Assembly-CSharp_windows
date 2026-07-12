@@ -1,48 +1,128 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace System
 {
-	[ComVisible(true)]
-	public static class Nullable
+	[NonVersionable]
+	[Serializable]
+	public struct Nullable<T> where T : struct
 	{
-		public static int Compare<T>(T? n1, T? n2) where T : struct
+		[NonVersionable]
+		public Nullable(T value)
 		{
-			if (n1.has_value)
+			this.value = value;
+			this.hasValue = true;
+		}
+
+		public bool HasValue
+		{
+			[NonVersionable]
+			get
 			{
-				if (!n2.has_value)
-				{
-					return 1;
-				}
-				return Comparer<T>.Default.Compare(n1.value, n2.value);
-			}
-			else
-			{
-				if (!n2.has_value)
-				{
-					return 0;
-				}
-				return -1;
+				return this.hasValue;
 			}
 		}
 
-		public static bool Equals<T>(T? n1, T? n2) where T : struct
+		public T Value
 		{
-			return n1.has_value == n2.has_value && (!n1.has_value || EqualityComparer<T>.Default.Equals(n1.value, n2.value));
+			get
+			{
+				if (!this.hasValue)
+				{
+					ThrowHelper.ThrowInvalidOperationException_InvalidOperation_NoValue();
+				}
+				return this.value;
+			}
 		}
 
-		public static Type GetUnderlyingType(Type nullableType)
+		[NonVersionable]
+		public T GetValueOrDefault()
 		{
-			if (nullableType == null)
+			return this.value;
+		}
+
+		[NonVersionable]
+		public T GetValueOrDefault(T defaultValue)
+		{
+			if (!this.hasValue)
 			{
-				throw new ArgumentNullException("nullableType");
+				return defaultValue;
 			}
-			if (!nullableType.IsGenericType || nullableType.IsGenericTypeDefinition || !(nullableType.GetGenericTypeDefinition() == typeof(Nullable<>)))
+			return this.value;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (!this.hasValue)
+			{
+				return other == null;
+			}
+			return other != null && this.value.Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			if (!this.hasValue)
+			{
+				return 0;
+			}
+			return this.value.GetHashCode();
+		}
+
+		public override string ToString()
+		{
+			if (!this.hasValue)
+			{
+				return "";
+			}
+			return this.value.ToString();
+		}
+
+		[NonVersionable]
+		public static implicit operator T?(T value)
+		{
+			return new T?(value);
+		}
+
+		[NonVersionable]
+		public static explicit operator T(T? value)
+		{
+			return value.Value;
+		}
+
+		private static object Box(T? o)
+		{
+			if (!o.hasValue)
 			{
 				return null;
 			}
-			return nullableType.GetGenericArguments()[0];
+			return o.value;
 		}
+
+		private static T? Unbox(object o)
+		{
+			if (o == null)
+			{
+				return null;
+			}
+			return new T?((T)((object)o));
+		}
+
+		private static T? UnboxExact(object o)
+		{
+			if (o == null)
+			{
+				return null;
+			}
+			if (o.GetType() != typeof(T))
+			{
+				throw new InvalidCastException();
+			}
+			return new T?((T)((object)o));
+		}
+
+		private readonly bool hasValue;
+
+		internal T value;
 	}
 }

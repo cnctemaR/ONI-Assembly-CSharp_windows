@@ -70,7 +70,7 @@ namespace ProcGenGame
 				foreach (string text2 in CustomGameSettings.Instance.GetCurrentDlcMixingIds())
 				{
 					DlcMixingSettings cachedDlcMixingSettings = SettingsCache.GetCachedDlcMixingSettings(text2);
-					if (this.clusterLayout.poiPlacements != null)
+					if (cachedDlcMixingSettings != null && this.clusterLayout.poiPlacements != null)
 					{
 						this.clusterLayout.poiPlacements.AddRange(cachedDlcMixingSettings.spacePois);
 					}

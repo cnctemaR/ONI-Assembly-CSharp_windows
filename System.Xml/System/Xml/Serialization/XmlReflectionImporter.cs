@@ -1036,10 +1036,12 @@ namespace System.Xml.Serialization
 				Type[] genericArguments2 = type.GetGenericArguments();
 				for (int i = 0; i < genericArguments.Length; i++)
 				{
-					string text2 = "{" + genericArguments[i] + "}";
-					if (text.Contains(text2))
+					string text2 = "{";
+					Type type2 = genericArguments[i];
+					string text3 = text2 + ((type2 != null) ? type2.ToString() : null) + "}";
+					if (text.Contains(text3))
 					{
-						text = text.Replace(text2, this.XsdTypeName(genericArguments2[i]));
+						text = text.Replace(text3, this.XsdTypeName(genericArguments2[i]));
 						if (text.IndexOf('{') < 0)
 						{
 							break;
@@ -1116,10 +1118,10 @@ namespace System.Xml.Serialization
 			else
 			{
 				text = defaultNs;
-				object obj = "Choice";
+				string text3 = "Choice";
 				int num = this.choiceNum;
 				this.choiceNum = num + 1;
-				text2 = obj + num;
+				text2 = text3 + num.ToString();
 			}
 			if (text2 == null)
 			{
@@ -1133,17 +1135,17 @@ namespace System.Xml.Serialization
 			{
 				text = defaultNs;
 			}
-			string text3;
-			text2 = (text3 = (flag ? ("ArrayOf" + CodeIdentifier.MakePascal(text2)) : text2));
+			string text4;
+			text2 = (text4 = (flag ? ("ArrayOf" + CodeIdentifier.MakePascal(text2)) : text2));
 			int num2 = 1;
-			TypeMapping typeMapping2 = (TypeMapping)this.types[text3, text];
+			TypeMapping typeMapping2 = (TypeMapping)this.types[text4, text];
 			while (typeMapping2 != null && (!(typeMapping2 is ArrayMapping) || !AccessorMapping.ElementsMatch(((ArrayMapping)typeMapping2).Elements, mapping.Elements)))
 			{
-				text3 = text2 + num2.ToString(CultureInfo.InvariantCulture);
-				typeMapping2 = (TypeMapping)this.types[text3, text];
+				text4 = text2 + num2.ToString(CultureInfo.InvariantCulture);
+				typeMapping2 = (TypeMapping)this.types[text4, text];
 				num2++;
 			}
-			mapping.TypeName = text3;
+			mapping.TypeName = text4;
 			mapping.Namespace = text;
 		}
 

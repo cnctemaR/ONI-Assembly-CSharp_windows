@@ -87,10 +87,8 @@ namespace System.Net
 				}
 				return;
 			}
-			this.m_Buffer[4] = (byte)ipAddress.m_Address;
-			this.m_Buffer[5] = (byte)(ipAddress.m_Address >> 8);
-			this.m_Buffer[6] = (byte)(ipAddress.m_Address >> 16);
-			this.m_Buffer[7] = (byte)(ipAddress.m_Address >> 24);
+			int num;
+			ipAddress.TryWriteBytes(this.m_Buffer.AsSpan<byte>(4), out num);
 		}
 
 		internal SocketAddress(IPAddress ipaddress, int port)

@@ -30,7 +30,19 @@ public class LeafyPlantConfig : IEntityConfig
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "LeafyPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.DESC, Assets.GetAnim("seed_potted_leafy_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 12, global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.6f, null, "", false, null), "LeafyPlant_preview", Assets.GetAnim("potted_leafy_kanim"), "place", 1, 1);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		string text4 = "LeafyPlantSeed";
+		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.NAME;
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_potted_leafy_kanim");
+		string text7 = "object";
+		int num2 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.DecorSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		string text8 = global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.DOMESTICATEDDESC;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 12, text8, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.6f, null, "", false, null), "LeafyPlant_preview", Assets.GetAnim("potted_leafy_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

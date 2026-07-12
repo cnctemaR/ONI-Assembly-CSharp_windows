@@ -89,8 +89,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				SqlBytesCharsState state = this._state;
-				if (state == SqlBytesCharsState.Stream)
+				if (this._state == SqlBytesCharsState.Stream)
 				{
 					return -1L;
 				}
@@ -256,8 +255,7 @@ namespace System.Data.SqlTypes
 			}
 			if (count != 0)
 			{
-				SqlBytesCharsState state = this._state;
-				if (state == SqlBytesCharsState.Stream)
+				if (this._state == SqlBytesCharsState.Stream)
 				{
 					if (this._stream.Position != offset)
 					{

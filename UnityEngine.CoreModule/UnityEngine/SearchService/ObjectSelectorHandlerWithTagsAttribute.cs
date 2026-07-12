@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SearchService
 {
+	[Obsolete("ObjectSelectorHandlerWithTagsAttribute has been deprecated. Use SearchContextAttribute instead.", true)]
 	[AttributeUsage(AttributeTargets.Field)]
 	public class ObjectSelectorHandlerWithTagsAttribute : Attribute
 	{

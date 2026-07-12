@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class MultilineStringConverter : TypeConverter
 	{
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -15,7 +13,7 @@ namespace System.ComponentModel
 			}
 			if (destinationType == typeof(string) && value is string)
 			{
-				return global::SR.GetString("(Text)");
+				return "(Text)";
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}

@@ -558,7 +558,7 @@ namespace System.Runtime.Remoting
 		private void ReadInteropXml(SmallXmlParser.IAttrList attrs, bool isElement)
 		{
 			Type type = Type.GetType(this.GetNotNull(attrs, "clr"));
-			string[] array = this.GetNotNull(attrs, "xml").Split(new char[] { ',' });
+			string[] array = this.GetNotNull(attrs, "xml").Split(',', StringSplitOptions.None);
 			string text = array[0].Trim();
 			string text2 = ((array.Length != 0) ? array[1].Trim() : null);
 			if (isElement)

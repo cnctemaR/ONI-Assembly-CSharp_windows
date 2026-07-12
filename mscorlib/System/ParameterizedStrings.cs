@@ -46,7 +46,7 @@ namespace System
 						switch (c)
 						{
 						case '!':
-							goto IL_0529;
+							goto IL_0533;
 						case '"':
 						case '#':
 						case '$':
@@ -68,10 +68,10 @@ namespace System
 						case 'L':
 						case 'M':
 						case 'N':
-							goto IL_0678;
+							goto IL_0682;
 						case '%':
 							stringBuilder.Append('%');
-							goto IL_0683;
+							goto IL_068D;
 						case '&':
 						case '*':
 						case '+':
@@ -86,7 +86,7 @@ namespace System
 						case '\'':
 							stack.Push((int)format[pos + 1]);
 							pos += 2;
-							goto IL_0683;
+							goto IL_068D;
 						case '0':
 						case '1':
 						case '2':
@@ -100,21 +100,21 @@ namespace System
 						case ':':
 							break;
 						case ';':
-							goto IL_0655;
+							goto IL_065F;
 						case '?':
 							flag = true;
-							goto IL_0683;
+							goto IL_068D;
 						case 'P':
 						{
 							pos++;
 							int num;
 							ParameterizedStrings.GetDynamicOrStaticVariables(format[pos], ref dynamicVars, ref staticVars, out num)[num] = stack.Pop();
-							goto IL_0683;
+							goto IL_068D;
 						}
 						default:
 							if (c != 'X')
 							{
-								goto IL_0678;
+								goto IL_0682;
 							}
 							break;
 						}
@@ -137,39 +137,39 @@ namespace System
 						case 'n':
 						case 'q':
 						case 'r':
-							goto IL_0678;
+							goto IL_0682;
 						case 'c':
 							stringBuilder.Append((char)stack.Pop().Int32);
-							goto IL_0683;
+							goto IL_068D;
 						case 'd':
 							stringBuilder.Append(stack.Pop().Int32);
-							goto IL_0683;
+							goto IL_068D;
 						case 'e':
-							goto IL_0655;
+							goto IL_065F;
 						case 'g':
 						{
 							pos++;
 							int num2;
 							ParameterizedStrings.FormatParam[] dynamicOrStaticVariables = ParameterizedStrings.GetDynamicOrStaticVariables(format[pos], ref dynamicVars, ref staticVars, out num2);
 							stack.Push(dynamicOrStaticVariables[num2]);
-							goto IL_0683;
+							goto IL_068D;
 						}
 						case 'i':
 							args[0] = 1 + args[0].Int32;
 							args[1] = 1 + args[1].Int32;
-							goto IL_0683;
+							goto IL_068D;
 						case 'l':
 							stack.Push(stack.Pop().String.Length);
-							goto IL_0683;
+							goto IL_068D;
 						case 'o':
 							break;
 						case 'p':
 							pos++;
 							stack.Push(args[(int)(format[pos] - '1')]);
-							goto IL_0683;
+							goto IL_068D;
 						case 's':
 							stringBuilder.Append(stack.Pop().String);
-							goto IL_0683;
+							goto IL_068D;
 						case 't':
 						{
 							bool flag2 = ParameterizedStrings.AsBool(stack.Pop().Int32);
@@ -198,7 +198,7 @@ namespace System
 								return stringBuilder.ToString();
 							}
 							flag = false;
-							goto IL_0683;
+							goto IL_068D;
 						}
 						default:
 							switch (c)
@@ -208,7 +208,7 @@ namespace System
 							case 'y':
 							case 'z':
 							case '}':
-								goto IL_0678;
+								goto IL_0682;
 							case '{':
 							{
 								pos++;
@@ -219,14 +219,14 @@ namespace System
 									pos++;
 								}
 								stack.Push(num3);
-								goto IL_0683;
+								goto IL_068D;
 							}
 							case '|':
 								goto IL_03B3;
 							case '~':
-								goto IL_0529;
+								goto IL_0533;
 							default:
-								goto IL_0678;
+								goto IL_0682;
 							}
 							break;
 						}
@@ -250,17 +250,17 @@ namespace System
 						text3 = text3.Remove(1, 1);
 					}
 					stringBuilder.Append(ParameterizedStrings.FormatPrintF(text3, stack.Pop().Object));
-					goto IL_0683;
+					goto IL_068D;
 					IL_03B3:
 					int @int = stack.Pop().Int32;
 					int int2 = stack.Pop().Int32;
-					c = format[pos];
+					char c3 = format[pos];
 					int num4;
-					if (c <= 'A')
+					if (c3 <= 'A')
 					{
-						if (c != '&')
+						if (c3 != '&')
 						{
-							switch (c)
+							switch (c3)
 							{
 							case '*':
 								num4 = int2 * @int;
@@ -270,7 +270,7 @@ namespace System
 								break;
 							case ',':
 							case '.':
-								goto IL_0514;
+								goto IL_051E;
 							case '-':
 								num4 = int2 - @int;
 								break;
@@ -278,7 +278,7 @@ namespace System
 								num4 = int2 / @int;
 								break;
 							default:
-								switch (c)
+								switch (c3)
 								{
 								case '<':
 									num4 = ParameterizedStrings.AsInt(int2 < @int);
@@ -291,12 +291,12 @@ namespace System
 									break;
 								case '?':
 								case '@':
-									goto IL_0514;
+									goto IL_051E;
 								case 'A':
 									num4 = ParameterizedStrings.AsInt(ParameterizedStrings.AsBool(int2) && ParameterizedStrings.AsBool(@int));
 									break;
 								default:
-									goto IL_0514;
+									goto IL_051E;
 								}
 								break;
 							}
@@ -306,13 +306,13 @@ namespace System
 							num4 = int2 & @int;
 						}
 					}
-					else if (c <= '^')
+					else if (c3 <= '^')
 					{
-						if (c != 'O')
+						if (c3 != 'O')
 						{
-							if (c != '^')
+							if (c3 != '^')
 							{
-								goto IL_0514;
+								goto IL_051E;
 							}
 							num4 = int2 ^ @int;
 						}
@@ -321,11 +321,11 @@ namespace System
 							num4 = ParameterizedStrings.AsInt(ParameterizedStrings.AsBool(int2) || ParameterizedStrings.AsBool(@int));
 						}
 					}
-					else if (c != 'm')
+					else if (c3 != 'm')
 					{
-						if (c != '|')
+						if (c3 != '|')
 						{
-							goto IL_0514;
+							goto IL_051E;
 						}
 						num4 = int2 | @int;
 					}
@@ -333,24 +333,24 @@ namespace System
 					{
 						num4 = int2 % @int;
 					}
-					IL_0517:
+					IL_0521:
 					stack.Push(num4);
-					goto IL_0683;
-					IL_0514:
+					goto IL_068D;
+					IL_051E:
 					num4 = 0;
-					goto IL_0517;
-					IL_0529:
+					goto IL_0521;
+					IL_0533:
 					int int3 = stack.Pop().Int32;
 					stack.Push((format[pos] == '!') ? ParameterizedStrings.AsInt(!ParameterizedStrings.AsBool(int3)) : (~int3));
-					goto IL_0683;
-					IL_0655:
+					goto IL_068D;
+					IL_065F:
 					stack.Push(ParameterizedStrings.AsInt(format[pos] == ';'));
 					return stringBuilder.ToString();
-					IL_0678:
+					IL_0682:
 					throw new InvalidOperationException("Terminfo database contains invalid values");
 				}
 				stringBuilder.Append(format[pos]);
-				IL_0683:
+				IL_068D:
 				pos++;
 			}
 			stack.Push(1);

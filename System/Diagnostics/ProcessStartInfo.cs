@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
@@ -38,10 +39,22 @@ namespace System.Diagnostics
 			this.arguments = arguments;
 		}
 
+		public Collection<string> ArgumentList
+		{
+			get
+			{
+				if (this._argumentList == null)
+				{
+					this._argumentList = new Collection<string>();
+				}
+				return this._argumentList;
+			}
+		}
+
 		[NotifyParentProperty(true)]
-		[MonitoringDescription("The verb to apply to the document specified by the FileName property.")]
 		[TypeConverter("System.Diagnostics.Design.VerbConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[DefaultValue("")]
+		[MonitoringDescription("The verb to apply to the document specified by the FileName property.")]
 		public string Verb
 		{
 			get
@@ -58,11 +71,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[NotifyParentProperty(true)]
-		[MonitoringDescription("Command line arguments that will be passed to the application specified by the FileName property.")]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[DefaultValue("")]
 		[SettingsBindable(true)]
+		[MonitoringDescription("Command line arguments that will be passed to the application specified by the FileName property.")]
+		[DefaultValue("")]
+		[NotifyParentProperty(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Arguments
 		{
 			get
@@ -79,9 +92,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[NotifyParentProperty(true)]
-		[MonitoringDescription("Whether to start the process without creating a new window to contain it.")]
 		[DefaultValue(false)]
+		[MonitoringDescription("Whether to start the process without creating a new window to contain it.")]
+		[NotifyParentProperty(true)]
 		public bool CreateNoWindow
 		{
 			get
@@ -94,8 +107,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[NotifyParentProperty(true)]
 		[MonitoringDescription("Set of environment variables that apply to this process and child processes.")]
+		[NotifyParentProperty(true)]
 		[DefaultValue(null)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor("System.Diagnostics.Design.StringDictionaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
@@ -119,9 +132,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[DefaultValue(null)]
 		[NotifyParentProperty(true)]
+		[DefaultValue(null)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IDictionary<string, string> Environment
 		{
 			get
@@ -134,9 +147,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[NotifyParentProperty(true)]
-		[DefaultValue(false)]
 		[MonitoringDescription("Whether the process command input is read from the Process instance's StandardInput member.")]
+		[DefaultValue(false)]
+		[NotifyParentProperty(true)]
 		public bool RedirectStandardInput
 		{
 			get
@@ -149,9 +162,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[DefaultValue(false)]
 		[NotifyParentProperty(true)]
 		[MonitoringDescription("Whether the process output is written to the Process instance's StandardOutput member.")]
-		[DefaultValue(false)]
 		public bool RedirectStandardOutput
 		{
 			get
@@ -164,9 +177,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[NotifyParentProperty(true)]
-		[MonitoringDescription("Whether the process's error output is written to the Process instance's StandardError member.")]
 		[DefaultValue(false)]
+		[MonitoringDescription("Whether the process's error output is written to the Process instance's StandardError member.")]
+		[NotifyParentProperty(true)]
 		public bool RedirectStandardError
 		{
 			get
@@ -203,9 +216,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[NotifyParentProperty(true)]
 		[MonitoringDescription("Whether to use the operating system shell to start the process.")]
 		[DefaultValue(true)]
-		[NotifyParentProperty(true)]
 		public bool UseShellExecute
 		{
 			get
@@ -291,12 +304,12 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue("")]
-		[Editor("System.Diagnostics.Design.StartFileNameEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[MonitoringDescription("The name of the application, document or URL to start.")]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[NotifyParentProperty(true)]
 		[SettingsBindable(true)]
+		[NotifyParentProperty(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[MonitoringDescription("The name of the application, document or URL to start.")]
+		[Editor("System.Diagnostics.Design.StartFileNameEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[DefaultValue("")]
 		public string FileName
 		{
 			get
@@ -313,12 +326,12 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[NotifyParentProperty(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[SettingsBindable(true)]
 		[MonitoringDescription("The initial working directory for the process.")]
 		[DefaultValue("")]
-		[SettingsBindable(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[NotifyParentProperty(true)]
+		[Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string WorkingDirectory
 		{
 			get
@@ -335,9 +348,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue(false)]
 		[MonitoringDescription("Whether to show an error dialog to the user if there is an error.")]
 		[NotifyParentProperty(true)]
+		[DefaultValue(false)]
 		public bool ErrorDialog
 		{
 			get
@@ -350,8 +363,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public IntPtr ErrorDialogParentHandle
 		{
 			get
@@ -390,6 +403,8 @@ namespace System.Diagnostics
 				return this.environmentVariables != null;
 			}
 		}
+
+		public Encoding StandardInputEncoding { get; set; }
 
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -480,8 +495,10 @@ namespace System.Diagnostics
 
 		internal StringDictionary environmentVariables;
 
-		private IDictionary<string, string> environment;
-
 		private static readonly string[] empty = new string[0];
+
+		private Collection<string> _argumentList;
+
+		private IDictionary<string, string> environment;
 	}
 }

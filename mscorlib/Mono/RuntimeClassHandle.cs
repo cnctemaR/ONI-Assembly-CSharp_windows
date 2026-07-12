@@ -40,12 +40,17 @@ namespace Mono
 
 		public static bool operator ==(RuntimeClassHandle left, object right)
 		{
-			return right != null && right is RuntimeClassHandle && left.Equals((RuntimeClassHandle)right);
+			if (right != null && right is RuntimeClassHandle)
+			{
+				RuntimeClassHandle runtimeClassHandle = (RuntimeClassHandle)right;
+				return left.Equals(runtimeClassHandle);
+			}
+			return false;
 		}
 
 		public static bool operator !=(RuntimeClassHandle left, object right)
 		{
-			return right == null || !(right is RuntimeClassHandle) || !left.Equals((RuntimeClassHandle)right);
+			return !(left == right);
 		}
 
 		public static bool operator ==(object left, RuntimeClassHandle right)
@@ -55,7 +60,7 @@ namespace Mono
 
 		public static bool operator !=(object left, RuntimeClassHandle right)
 		{
-			return left == null || !(left is RuntimeClassHandle) || !((RuntimeClassHandle)left).Equals(right);
+			return !(left == right);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
@@ -47,11 +49,11 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				if (XNode.documentOrderComparer == null)
+				if (XNode.s_documentOrderComparer == null)
 				{
-					XNode.documentOrderComparer = new XNodeDocumentOrderComparer();
+					XNode.s_documentOrderComparer = new XNodeDocumentOrderComparer();
 				}
-				return XNode.documentOrderComparer;
+				return XNode.s_documentOrderComparer;
 			}
 		}
 
@@ -59,11 +61,11 @@ namespace System.Xml.Linq
 		{
 			get
 			{
-				if (XNode.equalityComparer == null)
+				if (XNode.s_equalityComparer == null)
 				{
-					XNode.equalityComparer = new XNodeEqualityComparer();
+					XNode.s_equalityComparer = new XNodeEqualityComparer();
 				}
-				return XNode.equalityComparer;
+				return XNode.s_equalityComparer;
 			}
 		}
 
@@ -71,7 +73,7 @@ namespace System.Xml.Linq
 		{
 			if (this.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+				throw new InvalidOperationException("The parent is missing.");
 			}
 			new Inserter(this.parent, this).Add(content);
 		}
@@ -85,7 +87,7 @@ namespace System.Xml.Linq
 		{
 			if (this.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+				throw new InvalidOperationException("The parent is missing.");
 			}
 			XNode xnode = (XNode)this.parent.content;
 			while (xnode.next != this)
@@ -149,7 +151,7 @@ namespace System.Xml.Linq
 				}
 				if (xnode != xnode2)
 				{
-					throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingAncestor"));
+					throw new InvalidOperationException("A common ancestor is missing.");
 				}
 				if (num < 0)
 				{
@@ -185,7 +187,7 @@ namespace System.Xml.Linq
 			}
 			else if (n1.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingAncestor"));
+				throw new InvalidOperationException("A common ancestor is missing.");
 			}
 			XNode xnode3 = (XNode)n1.parent.content;
 			for (;;)
@@ -290,7 +292,7 @@ namespace System.Xml.Linq
 			}
 			if (reader.ReadState != ReadState.Interactive)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExpectedInteractive"));
+				throw new InvalidOperationException("The XmlReader state should be Interactive.");
 			}
 			switch (reader.NodeType)
 			{
@@ -309,14 +311,73 @@ namespace System.Xml.Linq
 			case XmlNodeType.DocumentType:
 				return new XDocumentType(reader);
 			}
-			throw new InvalidOperationException(Res.GetString("InvalidOperation_UnexpectedNodeType", new object[] { reader.NodeType }));
+			throw new InvalidOperationException(global::SR.Format("The XmlReader should not be on a node of type {0}.", reader.NodeType));
+		}
+
+		public static Task<XNode> ReadFromAsync(XmlReader reader, CancellationToken cancellationToken)
+		{
+			if (reader == null)
+			{
+				throw new ArgumentNullException("reader");
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<XNode>(cancellationToken);
+			}
+			return XNode.ReadFromAsyncInternal(reader, cancellationToken);
+		}
+
+		private static async Task<XNode> ReadFromAsyncInternal(XmlReader reader, CancellationToken cancellationToken)
+		{
+			if (reader.ReadState != ReadState.Interactive)
+			{
+				throw new InvalidOperationException("The XmlReader state should be Interactive.");
+			}
+			XNode ret;
+			switch (reader.NodeType)
+			{
+			case XmlNodeType.Element:
+				return await XElement.CreateAsync(reader, cancellationToken).ConfigureAwait(false);
+			case XmlNodeType.Text:
+			case XmlNodeType.Whitespace:
+			case XmlNodeType.SignificantWhitespace:
+				ret = new XText(reader.Value);
+				goto IL_01E7;
+			case XmlNodeType.CDATA:
+				ret = new XCData(reader.Value);
+				goto IL_01E7;
+			case XmlNodeType.ProcessingInstruction:
+			{
+				string name = reader.Name;
+				string value = reader.Value;
+				ret = new XProcessingInstruction(name, value);
+				goto IL_01E7;
+			}
+			case XmlNodeType.Comment:
+				ret = new XComment(reader.Value);
+				goto IL_01E7;
+			case XmlNodeType.DocumentType:
+			{
+				string name2 = reader.Name;
+				string attribute = reader.GetAttribute("PUBLIC");
+				string attribute2 = reader.GetAttribute("SYSTEM");
+				string value2 = reader.Value;
+				ret = new XDocumentType(name2, attribute, attribute2, value2);
+				goto IL_01E7;
+			}
+			}
+			throw new InvalidOperationException(global::SR.Format("The XmlReader should not be on a node of type {0}.", reader.NodeType));
+			IL_01E7:
+			cancellationToken.ThrowIfCancellationRequested();
+			await reader.ReadAsync().ConfigureAwait(false);
+			return ret;
 		}
 
 		public void Remove()
 		{
 			if (this.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+				throw new InvalidOperationException("The parent is missing.");
 			}
 			this.parent.RemoveNode(this);
 		}
@@ -325,7 +386,7 @@ namespace System.Xml.Linq
 		{
 			if (this.parent == null)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_MissingParent"));
+				throw new InvalidOperationException("The parent is missing.");
 			}
 			XContainer parent = this.parent;
 			XNode xnode = (XNode)this.parent.content;
@@ -340,7 +401,7 @@ namespace System.Xml.Linq
 			this.parent.RemoveNode(this);
 			if (xnode != null && xnode.parent != parent)
 			{
-				throw new InvalidOperationException(Res.GetString("InvalidOperation_ExternalCode"));
+				throw new InvalidOperationException("This operation was corrupted by external code.");
 			}
 			new Inserter(parent, xnode).Add(content);
 		}
@@ -366,6 +427,8 @@ namespace System.Xml.Linq
 		}
 
 		public abstract void WriteTo(XmlWriter writer);
+
+		public abstract Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken);
 
 		internal virtual void AppendText(StringBuilder sb)
 		{
@@ -437,7 +500,6 @@ namespace System.Xml.Linq
 			}
 			xmlReaderSettings.DtdProcessing = DtdProcessing.Parse;
 			xmlReaderSettings.MaxCharactersFromEntities = 10000000L;
-			xmlReaderSettings.XmlResolver = null;
 			return xmlReaderSettings;
 		}
 
@@ -491,9 +553,9 @@ namespace System.Xml.Linq
 			return text;
 		}
 
-		private static XNodeDocumentOrderComparer documentOrderComparer;
+		private static XNodeDocumentOrderComparer s_documentOrderComparer;
 
-		private static XNodeEqualityComparer equalityComparer;
+		private static XNodeEqualityComparer s_equalityComparer;
 
 		internal XNode next;
 	}

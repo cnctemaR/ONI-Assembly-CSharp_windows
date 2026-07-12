@@ -8,9 +8,9 @@ using UnityEngineInternal;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Utilities/BitUtility.h")]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeHeader("Runtime/Math/FloatConversion.h")]
 	[NativeHeader("Runtime/Math/PerlinNoise.h")]
-	[Il2CppEagerStaticClassConstruction]
 	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
 	public struct Mathf
 	{
@@ -53,6 +53,10 @@ namespace UnityEngine
 		[FreeFunction("PerlinNoise::NoiseNormalized", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float PerlinNoise(float x, float y);
+
+		[FreeFunction("PerlinNoise::NoiseNormalized", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float PerlinNoise1D(float x);
 
 		public static float Sin(float f)
 		{
@@ -279,6 +283,7 @@ namespace UnityEngine
 			return (int)Math.Round((double)f);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Sign(float f)
 		{
 			return (f >= 0f) ? 1f : (-1f);
@@ -596,6 +601,182 @@ namespace UnityEngine
 			return (long)(BitConverter.ToUInt64(array, 0) & 9223372036854775807UL);
 		}
 
+		internal static float ClampToFloat(double value)
+		{
+			bool flag = double.IsPositiveInfinity(value);
+			float num;
+			if (flag)
+			{
+				num = float.PositiveInfinity;
+			}
+			else
+			{
+				bool flag2 = double.IsNegativeInfinity(value);
+				if (flag2)
+				{
+					num = float.NegativeInfinity;
+				}
+				else
+				{
+					bool flag3 = value < -3.4028234663852886E+38;
+					if (flag3)
+					{
+						num = float.MinValue;
+					}
+					else
+					{
+						bool flag4 = value > 3.4028234663852886E+38;
+						if (flag4)
+						{
+							num = float.MaxValue;
+						}
+						else
+						{
+							num = (float)value;
+						}
+					}
+				}
+			}
+			return num;
+		}
+
+		internal static int ClampToInt(long value)
+		{
+			bool flag = value < -2147483648L;
+			int num;
+			if (flag)
+			{
+				num = int.MinValue;
+			}
+			else
+			{
+				bool flag2 = value > 2147483647L;
+				if (flag2)
+				{
+					num = int.MaxValue;
+				}
+				else
+				{
+					num = (int)value;
+				}
+			}
+			return num;
+		}
+
+		internal static uint ClampToUInt(long value)
+		{
+			bool flag = value < 0L;
+			uint num;
+			if (flag)
+			{
+				num = 0U;
+			}
+			else
+			{
+				bool flag2 = value > (long)((ulong)(-1));
+				if (flag2)
+				{
+					num = uint.MaxValue;
+				}
+				else
+				{
+					num = (uint)value;
+				}
+			}
+			return num;
+		}
+
+		internal static float RoundToMultipleOf(float value, float roundingValue)
+		{
+			bool flag = roundingValue == 0f;
+			float num;
+			if (flag)
+			{
+				num = value;
+			}
+			else
+			{
+				num = Mathf.Round(value / roundingValue) * roundingValue;
+			}
+			return num;
+		}
+
+		internal static float GetClosestPowerOfTen(float positiveNumber)
+		{
+			bool flag = positiveNumber <= 0f;
+			float num;
+			if (flag)
+			{
+				num = 1f;
+			}
+			else
+			{
+				num = Mathf.Pow(10f, (float)Mathf.RoundToInt(Mathf.Log10(positiveNumber)));
+			}
+			return num;
+		}
+
+		internal static int GetNumberOfDecimalsForMinimumDifference(float minDifference)
+		{
+			return Mathf.Clamp(-Mathf.FloorToInt(Mathf.Log10(Mathf.Abs(minDifference))), 0, 15);
+		}
+
+		internal static int GetNumberOfDecimalsForMinimumDifference(double minDifference)
+		{
+			return (int)Math.Max(0.0, -Math.Floor(Math.Log10(Math.Abs(minDifference))));
+		}
+
+		internal static float RoundBasedOnMinimumDifference(float valueToRound, float minDifference)
+		{
+			bool flag = minDifference == 0f;
+			float num;
+			if (flag)
+			{
+				num = Mathf.DiscardLeastSignificantDecimal(valueToRound);
+			}
+			else
+			{
+				num = (float)Math.Round((double)valueToRound, Mathf.GetNumberOfDecimalsForMinimumDifference(minDifference), MidpointRounding.AwayFromZero);
+			}
+			return num;
+		}
+
+		internal static double RoundBasedOnMinimumDifference(double valueToRound, double minDifference)
+		{
+			bool flag = minDifference == 0.0;
+			double num;
+			if (flag)
+			{
+				num = Mathf.DiscardLeastSignificantDecimal(valueToRound);
+			}
+			else
+			{
+				num = Math.Round(valueToRound, Mathf.GetNumberOfDecimalsForMinimumDifference(minDifference), MidpointRounding.AwayFromZero);
+			}
+			return num;
+		}
+
+		internal static float DiscardLeastSignificantDecimal(float v)
+		{
+			int num = Mathf.Clamp((int)(5f - Mathf.Log10(Mathf.Abs(v))), 0, 15);
+			return (float)Math.Round((double)v, num, MidpointRounding.AwayFromZero);
+		}
+
+		internal static double DiscardLeastSignificantDecimal(double v)
+		{
+			int num = Math.Max(0, (int)(5.0 - Math.Log10(Math.Abs(v))));
+			double num2;
+			try
+			{
+				num2 = Math.Round(v, num);
+			}
+			catch (ArgumentOutOfRangeException)
+			{
+				num2 = 0.0;
+			}
+			return num2;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CorrelatedColorTemperatureToRGB_Injected(float kelvin, out Color ret);
 
@@ -608,6 +789,8 @@ namespace UnityEngine
 		public const float Deg2Rad = 0.017453292f;
 
 		public const float Rad2Deg = 57.29578f;
+
+		internal const int kMaxDecimals = 15;
 
 		public static readonly float Epsilon = (MathfInternal.IsFlushToZeroEnabled ? MathfInternal.FloatMinNormal : MathfInternal.FloatMinDenormal);
 	}

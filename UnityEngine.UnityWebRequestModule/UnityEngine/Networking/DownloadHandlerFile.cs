@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
@@ -33,6 +34,11 @@ namespace UnityEngine.Networking
 		public DownloadHandlerFile(string path, bool append)
 		{
 			this.InternalCreateVFS(path, append);
+		}
+
+		protected override NativeArray<byte> GetNativeData()
+		{
+			throw new NotSupportedException("Raw data access is not supported");
 		}
 
 		protected override byte[] GetData()

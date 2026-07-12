@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Security.Permissions;
 using System.Threading;
 using Unity;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public sealed class AsyncOperation
 	{
 		private AsyncOperation(object userSuppliedState, SynchronizationContext syncContext)
 		{
-			this.userSuppliedState = userSuppliedState;
-			this.syncContext = syncContext;
-			this.alreadyCompleted = false;
-			this.syncContext.OperationStarted();
+			this._userSuppliedState = userSuppliedState;
+			this._syncContext = syncContext;
+			this._alreadyCompleted = false;
+			this._syncContext.OperationStarted();
 		}
 
 		~AsyncOperation()
 		{
-			if (!this.alreadyCompleted && this.syncContext != null)
+			if (!this._alreadyCompleted && this._syncContext != null)
 			{
-				this.syncContext.OperationCompleted();
+				this._syncContext.OperationCompleted();
 			}
 		}
 
@@ -28,7 +26,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.userSuppliedState;
+				return this._userSuppliedState;
 			}
 		}
 
@@ -36,47 +34,56 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.syncContext;
+				return this._syncContext;
 			}
 		}
 
 		public void Post(SendOrPostCallback d, object arg)
 		{
-			this.VerifyNotCompleted();
-			this.VerifyDelegateNotNull(d);
-			this.syncContext.Post(d, arg);
+			this.PostCore(d, arg, false);
 		}
 
 		public void PostOperationCompleted(SendOrPostCallback d, object arg)
 		{
-			this.Post(d, arg);
+			this.PostCore(d, arg, true);
 			this.OperationCompletedCore();
 		}
 
 		public void OperationCompleted()
 		{
 			this.VerifyNotCompleted();
+			this._alreadyCompleted = true;
 			this.OperationCompletedCore();
+		}
+
+		private void PostCore(SendOrPostCallback d, object arg, bool markCompleted)
+		{
+			this.VerifyNotCompleted();
+			this.VerifyDelegateNotNull(d);
+			if (markCompleted)
+			{
+				this._alreadyCompleted = true;
+			}
+			this._syncContext.Post(d, arg);
 		}
 
 		private void OperationCompletedCore()
 		{
 			try
 			{
-				this.syncContext.OperationCompleted();
+				this._syncContext.OperationCompleted();
 			}
 			finally
 			{
-				this.alreadyCompleted = true;
 				GC.SuppressFinalize(this);
 			}
 		}
 
 		private void VerifyNotCompleted()
 		{
-			if (this.alreadyCompleted)
+			if (this._alreadyCompleted)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This operation has already had OperationCompleted called on it and further calls are illegal."));
+				throw new InvalidOperationException("This operation has already had OperationCompleted called on it and further calls are illegal.");
 			}
 		}
 
@@ -84,7 +91,7 @@ namespace System.ComponentModel
 		{
 			if (d == null)
 			{
-				throw new ArgumentNullException(global::SR.GetString("A non-null SendOrPostCallback must be supplied."), "d");
+				throw new ArgumentNullException("d", "A non-null SendOrPostCallback must be supplied.");
 			}
 		}
 
@@ -98,10 +105,10 @@ namespace System.ComponentModel
 			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
-		private SynchronizationContext syncContext;
+		private readonly SynchronizationContext _syncContext;
 
-		private object userSuppliedState;
+		private readonly object _userSuppliedState;
 
-		private bool alreadyCompleted;
+		private bool _alreadyCompleted;
 	}
 }

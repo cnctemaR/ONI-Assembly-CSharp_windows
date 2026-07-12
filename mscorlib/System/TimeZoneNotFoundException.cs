@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace System
 {
-	[TypeForwardedFrom("System.Core, Version=3.5.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089")]
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[TypeForwardedFrom("System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
 	[Serializable]
 	public class TimeZoneNotFoundException : Exception
 	{
+		public TimeZoneNotFoundException()
+		{
+		}
+
 		public TimeZoneNotFoundException(string message)
 			: base(message)
 		{
@@ -22,10 +24,6 @@ namespace System
 
 		protected TimeZoneNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
-		{
-		}
-
-		public TimeZoneNotFoundException()
 		{
 		}
 	}

@@ -293,7 +293,7 @@ namespace System.Runtime.Serialization
 		[Conditional("SER_LOGGING")]
 		private void DumpValueTypeFixup(object obj, FieldInfo[] intermediateFields, FieldInfo memberToFix, object value)
 		{
-			StringBuilder stringBuilder = new StringBuilder("  " + obj);
+			StringBuilder stringBuilder = new StringBuilder("  " + ((obj != null) ? obj.ToString() : null));
 			if (intermediateFields != null)
 			{
 				for (int i = 0; i < intermediateFields.Length; i++)
@@ -301,7 +301,7 @@ namespace System.Runtime.Serialization
 					stringBuilder.Append("." + intermediateFields[i].Name);
 				}
 			}
-			stringBuilder.Append(string.Concat(new object[] { ".", memberToFix.Name, "=", value }));
+			stringBuilder.Append("." + memberToFix.Name + "=" + ((value != null) ? value.ToString() : null));
 		}
 
 		[SecurityCritical]

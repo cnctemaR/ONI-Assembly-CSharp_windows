@@ -49,8 +49,8 @@ namespace System.Security.Policy
 			{
 				if (hostEnumerator.Current is Site)
 				{
-					string[] array = this._site.Split(new char[] { '.' });
-					string[] array2 = (hostEnumerator.Current as Site).origin_site.Split(new char[] { '.' });
+					string[] array = this._site.Split('.', StringSplitOptions.None);
+					string[] array2 = (hostEnumerator.Current as Site).origin_site.Split('.', StringSplitOptions.None);
 					int i = array.Length - 1;
 					int num = array2.Length - 1;
 					while (i >= 0)

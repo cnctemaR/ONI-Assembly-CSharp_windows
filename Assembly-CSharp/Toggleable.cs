@@ -27,7 +27,7 @@ public class Toggleable : Workable
 		return this.targets.Count - 1;
 	}
 
-	public IToggleHandler GetToggleHandlerForWorker(Worker worker)
+	public IToggleHandler GetToggleHandlerForWorker(WorkerBase worker)
 	{
 		int targetForWorker = this.GetTargetForWorker(worker);
 		if (targetForWorker != -1)
@@ -37,7 +37,7 @@ public class Toggleable : Workable
 		return null;
 	}
 
-	private int GetTargetForWorker(Worker worker)
+	private int GetTargetForWorker(WorkerBase worker)
 	{
 		for (int i = 0; i < this.targets.Count; i++)
 		{
@@ -49,7 +49,7 @@ public class Toggleable : Workable
 		return -1;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		int targetForWorker = this.GetTargetForWorker(worker);
 		if (targetForWorker != -1 && this.targets[targetForWorker].Key != null)

@@ -23,53 +23,73 @@ namespace System.Globalization
 			this.m_minYear = this.m_EraInfo[0].minEraYear;
 		}
 
-		internal int GetGregorianYear(int year, int era)
+		private int GetYearOffset(int year, int era, bool throwOnError)
 		{
 			if (year < 0)
 			{
-				throw new ArgumentOutOfRangeException("year", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (era == 0)
-			{
-				era = this.m_Cal.CurrentEraValue;
-			}
-			int i = 0;
-			while (i < this.m_EraInfo.Length)
-			{
-				if (era == this.m_EraInfo[i].era)
+				if (throwOnError)
 				{
-					if (year < this.m_EraInfo[i].minEraYear || year > this.m_EraInfo[i].maxEraYear)
+					throw new ArgumentOutOfRangeException("year", "Non-negative number required.");
+				}
+				return -1;
+			}
+			else
+			{
+				if (era == 0)
+				{
+					era = this.m_Cal.CurrentEraValue;
+				}
+				int i = 0;
+				while (i < this.m_EraInfo.Length)
+				{
+					if (era == this.m_EraInfo[i].era)
 					{
-						throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), this.m_EraInfo[i].minEraYear, this.m_EraInfo[i].maxEraYear));
+						if (year >= this.m_EraInfo[i].minEraYear)
+						{
+							if (year <= this.m_EraInfo[i].maxEraYear)
+							{
+								return this.m_EraInfo[i].yearOffset;
+							}
+							if (!AppContextSwitches.EnforceJapaneseEraYearRanges)
+							{
+								int num = year - this.m_EraInfo[i].maxEraYear;
+								for (int j = i - 1; j >= 0; j--)
+								{
+									if (num <= this.m_EraInfo[j].maxEraYear)
+									{
+										return this.m_EraInfo[i].yearOffset;
+									}
+									num -= this.m_EraInfo[j].maxEraYear;
+								}
+							}
+						}
+						if (throwOnError)
+						{
+							throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, "Valid values are between {0} and {1}, inclusive.", this.m_EraInfo[i].minEraYear, this.m_EraInfo[i].maxEraYear));
+						}
+						break;
 					}
-					return this.m_EraInfo[i].yearOffset + year;
+					else
+					{
+						i++;
+					}
 				}
-				else
+				if (throwOnError)
 				{
-					i++;
+					throw new ArgumentOutOfRangeException("era", "Era value was not valid.");
 				}
+				return -1;
 			}
-			throw new ArgumentOutOfRangeException("era", Environment.GetResourceString("Era value was not valid."));
+		}
+
+		internal int GetGregorianYear(int year, int era)
+		{
+			return this.GetYearOffset(year, era, true) + year;
 		}
 
 		internal bool IsValidYear(int year, int era)
 		{
-			if (year < 0)
-			{
-				return false;
-			}
-			if (era == 0)
-			{
-				era = this.m_Cal.CurrentEraValue;
-			}
-			for (int i = 0; i < this.m_EraInfo.Length; i++)
-			{
-				if (era == this.m_EraInfo[i].era)
-				{
-					return year >= this.m_EraInfo[i].minEraYear && year <= this.m_EraInfo[i].maxEraYear;
-				}
-			}
-			return false;
+			return this.GetYearOffset(year, era, false) >= 0;
 		}
 
 		internal virtual int GetDatePart(long ticks, int part)

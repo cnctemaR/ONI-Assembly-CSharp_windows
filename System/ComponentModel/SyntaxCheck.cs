@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public static class SyntaxCheck
 	{
 		public static bool CheckMachineName(string value)

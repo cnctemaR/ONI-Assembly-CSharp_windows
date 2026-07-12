@@ -4,7 +4,7 @@ using System.Globalization;
 namespace System
 {
 	[Serializable]
-	internal sealed class OrdinalComparer : StringComparer
+	public class OrdinalComparer : StringComparer
 	{
 		internal OrdinalComparer(bool ignoreCase)
 		{
@@ -53,11 +53,11 @@ namespace System
 		{
 			if (obj == null)
 			{
-				throw new ArgumentNullException("obj");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
 			}
 			if (this._ignoreCase)
 			{
-				return TextInfo.GetHashCodeOrdinalIgnoreCase(obj);
+				return CompareInfo.GetIgnoreCaseHash(obj);
 			}
 			return obj.GetHashCode();
 		}
@@ -78,6 +78,6 @@ namespace System
 			return ~hashCode;
 		}
 
-		private bool _ignoreCase;
+		private readonly bool _ignoreCase;
 	}
 }

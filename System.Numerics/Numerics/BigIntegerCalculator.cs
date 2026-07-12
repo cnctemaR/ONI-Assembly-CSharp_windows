@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Numerics
 {
@@ -21,7 +20,6 @@ namespace System.Numerics
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Add(uint[] left, uint[] right)
 		{
 			uint[] array = new uint[left.Length + 1];
@@ -59,7 +57,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void Add(uint* left, int leftLength, uint* right, int rightLength, uint* bits, int bitsLength)
 		{
 			int i = 0;
@@ -81,7 +78,6 @@ namespace System.Numerics
 			bits[i] = (uint)num;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void AddSelf(uint* left, int leftLength, uint* right, int rightLength)
 		{
 			int i = 0;
@@ -117,7 +113,6 @@ namespace System.Numerics
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Subtract(uint[] left, uint[] right)
 		{
 			uint[] array = new uint[left.Length];
@@ -161,7 +156,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void Subtract(uint* left, int leftLength, uint* right, int rightLength, uint* bits, int bitsLength)
 		{
 			int i = 0;
@@ -182,7 +176,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void SubtractSelf(uint* left, int leftLength, uint* right, int rightLength)
 		{
 			int i = 0;
@@ -227,7 +220,6 @@ namespace System.Numerics
 			return 0;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static int Compare(uint* left, int leftLength, uint* right, int rightLength)
 		{
 			if (leftLength < rightLength)
@@ -291,7 +283,6 @@ namespace System.Numerics
 			return (uint)num;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Divide(uint[] left, uint[] right, out uint[] remainder)
 		{
 			uint[] array = BigIntegerCalculator.CreateCopy(left);
@@ -315,7 +306,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Divide(uint[] left, uint[] right)
 		{
 			uint[] array = BigIntegerCalculator.CreateCopy(left);
@@ -338,7 +328,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Remainder(uint[] left, uint[] right)
 		{
 			uint[] array = BigIntegerCalculator.CreateCopy(left);
@@ -355,7 +344,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void Divide(uint* left, int leftLength, uint* right, int rightLength, uint* bits, int bitsLength)
 		{
 			uint num = right[rightLength - 1];
@@ -405,7 +393,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static uint AddDivisor(uint* left, int leftLength, uint* right, int rightLength)
 		{
 			ulong num = 0UL;
@@ -418,7 +405,6 @@ namespace System.Numerics
 			return (uint)num;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static uint SubtractDivisor(uint* left, int leftLength, uint* right, int rightLength, ulong q)
 		{
 			ulong num = 0UL;
@@ -947,7 +933,6 @@ namespace System.Numerics
 			return length;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Square(uint[] value)
 		{
 			uint[] array = new uint[value.Length + value.Length];
@@ -978,7 +963,6 @@ namespace System.Numerics
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void Square(uint* value, int valueLength, uint* bits, int bitsLength)
 		{
 			if (valueLength < BigIntegerCalculator.SquareThreshold)
@@ -1069,7 +1053,6 @@ namespace System.Numerics
 			return array;
 		}
 
-		[SecuritySafeCritical]
 		public unsafe static uint[] Multiply(uint[] left, uint[] right)
 		{
 			uint[] array = new uint[left.Length + right.Length];
@@ -1113,7 +1096,6 @@ namespace System.Numerics
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void Multiply(uint* left, int leftLength, uint* right, int rightLength, uint* bits, int bitsLength)
 		{
 			if (rightLength < BigIntegerCalculator.MultiplyThreshold)
@@ -1203,7 +1185,6 @@ namespace System.Numerics
 			array3 = null;
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static void SubtractCore(uint* left, int leftLength, uint* right, int rightLength, uint* core, int coreLength)
 		{
 			int i = 0;
@@ -1255,7 +1236,6 @@ namespace System.Numerics
 				Array.Copy(value, 0, this._bits, 0, this._length);
 			}
 
-			[SecuritySafeCritical]
 			public unsafe void MultiplySelf(ref BigIntegerCalculator.BitsBuffer value, ref BigIntegerCalculator.BitsBuffer temp)
 			{
 				uint[] array;
@@ -1302,7 +1282,6 @@ namespace System.Numerics
 				this.Apply(ref temp, this._length + value._length);
 			}
 
-			[SecuritySafeCritical]
 			public unsafe void SquareSelf(ref BigIntegerCalculator.BitsBuffer temp)
 			{
 				uint[] array;
@@ -1336,7 +1315,6 @@ namespace System.Numerics
 				this._length = reducer.Reduce(this._bits, this._length);
 			}
 
-			[SecuritySafeCritical]
 			public unsafe void Reduce(uint[] modulus)
 			{
 				if (this._length >= modulus.Length)
@@ -1369,7 +1347,6 @@ namespace System.Numerics
 				}
 			}
 
-			[SecuritySafeCritical]
 			public unsafe void Reduce(ref BigIntegerCalculator.BitsBuffer modulus)
 			{
 				if (this._length >= modulus._length)
@@ -1462,7 +1439,7 @@ namespace System.Numerics
 			private int _length;
 		}
 
-		internal struct FastReducer
+		internal readonly struct FastReducer
 		{
 			public FastReducer(uint[] modulus)
 			{
@@ -1486,7 +1463,6 @@ namespace System.Numerics
 				return BigIntegerCalculator.FastReducer.SubMod(value, length, this._q2, num2, this._modulus, this._modulus.Length + 1);
 			}
 
-			[SecuritySafeCritical]
 			private unsafe static int DivMul(uint[] left, int leftLength, uint[] right, int rightLength, uint[] bits, int k)
 			{
 				Array.Clear(bits, 0, bits.Length);
@@ -1544,7 +1520,6 @@ namespace System.Numerics
 				return 0;
 			}
 
-			[SecuritySafeCritical]
 			private unsafe static int SubMod(uint[] left, int leftLength, uint[] right, int rightLength, uint[] modulus, int k)
 			{
 				if (leftLength > k)

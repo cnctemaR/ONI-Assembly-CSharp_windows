@@ -106,7 +106,7 @@ namespace System.Runtime.CompilerServices
 				ParameterExpression[] array = new ParameterExpression[parametersCached.Length - 1];
 				for (int i = 0; i < array.Length; i++)
 				{
-					array[i] = Expression.Parameter(parametersCached[i + 1].ParameterType, "$arg" + i);
+					array[i] = Expression.Parameter(parametersCached[i + 1].ParameterType, "$arg" + i.ToString());
 				}
 				this.Parameters = new TrueReadOnlyCollection<ParameterExpression>(array);
 				this.ReturnLabel = Expression.Label(invokeMethod.GetReturnType());

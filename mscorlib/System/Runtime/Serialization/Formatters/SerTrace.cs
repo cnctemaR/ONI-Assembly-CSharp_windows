@@ -18,7 +18,9 @@ namespace System.Runtime.Serialization.Formatters
 				messages[0] = messages[0].GetType().Name + " ";
 				return;
 			}
-			messages[0] = messages[0] + " ";
+			int num = 0;
+			object obj = messages[0];
+			messages[num] = ((obj != null) ? obj.ToString() : null) + " ";
 		}
 	}
 }

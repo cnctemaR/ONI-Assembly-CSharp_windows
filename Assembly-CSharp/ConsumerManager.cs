@@ -22,6 +22,32 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public List<Tag> StandardDuplicantDietaryRestrictions
+	{
+		get
+		{
+			List<Tag> list = new List<Tag>();
+			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.ChargedPortableBattery))
+			{
+				list.Add(gameObject.PrefabID());
+			}
+			return list;
+		}
+	}
+
+	public List<Tag> BionicDuplicantDietaryRestrictions
+	{
+		get
+		{
+			List<Tag> list = new List<Tag>();
+			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Edible))
+			{
+				list.Add(gameObject.PrefabID());
+			}
+			return list;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

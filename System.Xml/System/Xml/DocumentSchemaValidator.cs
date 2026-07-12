@@ -53,14 +53,14 @@ namespace System.Xml
 							xmlSchemaObject = nodeToValidate.SchemaInfo.SchemaAttribute;
 							if (xmlSchemaObject != null)
 							{
-								goto IL_010E;
+								goto IL_010F;
 							}
 							xmlSchemaObject = this.FindSchemaInfo(nodeToValidate as XmlAttribute);
 							if (xmlSchemaObject == null)
 							{
 								throw new XmlSchemaValidationException("Schema information could not be found for the node passed into Validate. The node may be invalid in its current position. Navigate to the ancestor that has schema information, then call Validate again.", null, nodeToValidate);
 							}
-							goto IL_010E;
+							goto IL_010F;
 						}
 					}
 				}
@@ -73,29 +73,29 @@ namespace System.Xml
 						if (!schemaElement.RefName.IsEmpty)
 						{
 							xmlSchemaObject = this.schemas.GlobalElements[schemaElement.QualifiedName];
-							goto IL_010E;
+							goto IL_010F;
 						}
 						xmlSchemaObject = schemaElement;
-						goto IL_010E;
+						goto IL_010F;
 					}
 					else
 					{
 						xmlSchemaObject = xmlSchemaInfo.SchemaType;
 						if (xmlSchemaObject != null)
 						{
-							goto IL_010E;
+							goto IL_010F;
 						}
 						if (nodeToValidate.ParentNode.NodeType == XmlNodeType.Document)
 						{
 							nodeToValidate = nodeToValidate.ParentNode;
-							goto IL_010E;
+							goto IL_010F;
 						}
 						xmlSchemaObject = this.FindSchemaInfo(nodeToValidate as XmlElement);
 						if (xmlSchemaObject == null)
 						{
 							throw new XmlSchemaValidationException("Schema information could not be found for the node passed into Validate. The node may be invalid in its current position. Navigate to the ancestor that has schema information, then call Validate again.", null, nodeToValidate);
 						}
-						goto IL_010E;
+						goto IL_010F;
 					}
 				}
 			}
@@ -104,15 +104,15 @@ namespace System.Xml
 				if (nodeType == XmlNodeType.Document)
 				{
 					xmlSchemaValidationFlags |= XmlSchemaValidationFlags.ProcessIdentityConstraints;
-					goto IL_010E;
+					goto IL_010F;
 				}
 				if (nodeType == XmlNodeType.DocumentFragment)
 				{
-					goto IL_010E;
+					goto IL_010F;
 				}
 			}
 			throw new InvalidOperationException(Res.GetString("Validate method can be called only on nodes of type Document, DocumentFragment, Element, or Attribute.", null));
-			IL_010E:
+			IL_010F:
 			this.isValid = true;
 			this.CreateValidator(xmlSchemaObject, xmlSchemaValidationFlags);
 			if (this.psviAugmentation)
@@ -279,7 +279,9 @@ namespace System.Xml
 				this.validator.ValidateWhitespace(this.nodeValueGetter);
 				return;
 			}
-			throw new InvalidOperationException(Res.GetString("Unexpected XmlNodeType: '{0}'.", new string[] { this.currentNode.NodeType.ToString() }));
+			string text = "Unexpected XmlNodeType: '{0}'.";
+			object[] array = new string[] { this.currentNode.NodeType.ToString() };
+			throw new InvalidOperationException(Res.GetString(text, array));
 		}
 
 		private void ValidateElement()
@@ -638,7 +640,9 @@ namespace System.Xml
 				xmlNode = xmlNode.NextSibling;
 				continue;
 				IL_009C:
-				throw new InvalidOperationException(Res.GetString("Unexpected XmlNodeType: '{0}'.", new string[] { this.currentNode.NodeType.ToString() }));
+				string text = "Unexpected XmlNodeType: '{0}'.";
+				object[] array = new string[] { this.currentNode.NodeType.ToString() };
+				throw new InvalidOperationException(Res.GetString(text, array));
 			}
 		}
 

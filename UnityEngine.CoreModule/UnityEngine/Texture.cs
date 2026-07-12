@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
+	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[UsedByNativeCode]
 	public class Texture : Object
 	{
@@ -16,8 +16,19 @@ namespace UnityEngine
 		{
 		}
 
-		[NativeProperty("GlobalMasterTextureLimit")]
+		[NativeProperty("ActiveGlobalMipmapLimit")]
+		[Obsolete("masterTextureLimit has been deprecated. Use globalMipmapLimit instead (UnityUpgradable) -> globalMipmapLimit", false)]
 		public static extern int masterTextureLimit
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[Obsolete("globalMipmapLimit is not supported. Use QualitySettings.globalTextureMipmapLimit or Mipmap Limit Groups instead.", false)]
+		[NativeProperty("ActiveGlobalMipmapLimit")]
+		public static extern int globalMipmapLimit
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -98,6 +109,13 @@ namespace UnityEngine
 			}
 		}
 
+		internal extern bool isNativeTexture
+		{
+			[NativeName("IsNativeTexture")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public virtual extern bool isReadable
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -163,7 +181,7 @@ namespace UnityEngine
 
 		public Vector2 texelSize
 		{
-			[NativeName("GetNpotTexelSize")]
+			[NativeName("GetTexelSize")]
 			get
 			{
 				Vector2 vector;
@@ -200,6 +218,18 @@ namespace UnityEngine
 			get
 			{
 				return (this.Internal_GetActiveTextureColorSpace() == 0) ? ColorSpace.Linear : ColorSpace.Gamma;
+			}
+		}
+
+		[NativeMethod("GetStoredColorSpace")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern TextureColorSpace Internal_GetStoredColorSpace();
+
+		public bool isDataSRGB
+		{
+			get
+			{
+				return this.Internal_GetStoredColorSpace() == TextureColorSpace.sRGB;
 			}
 		}
 
@@ -315,10 +345,20 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetPixelDataSize(int mipLevel, int element = 0);
+		internal extern ulong GetPixelDataSize(int mipLevel, int element = 0);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetPixelDataOffset(int mipLevel, int element = 0);
+		internal extern ulong GetPixelDataOffset(int mipLevel, int element = 0);
+
+		internal TextureColorSpace GetTextureColorSpace(bool linear)
+		{
+			return linear ? TextureColorSpace.Linear : TextureColorSpace.sRGB;
+		}
+
+		internal TextureColorSpace GetTextureColorSpace(GraphicsFormat format)
+		{
+			return this.GetTextureColorSpace(!GraphicsFormatUtility.IsSRGBFormat(format));
+		}
 
 		internal bool ValidateFormat(RenderTextureFormat format)
 		{
@@ -346,10 +386,10 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag3 = GraphicsFormatUtility.IsCompressedTextureFormat(format) && GraphicsFormatUtility.CanDecompressFormat(GraphicsFormatUtility.GetGraphicsFormat(format, false));
+				bool flag3 = GraphicsFormatUtility.IsCompressedFormat(format) && GraphicsFormatUtility.CanDecompressFormat(GraphicsFormatUtility.GetGraphicsFormat(format, false));
 				if (flag3)
 				{
-					Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format), this);
+					Debug.LogWarning(string.Format("'{0}' is not supported on this platform. Decompressing texture. Use 'SystemInfo.SupportsTextureFormat' C# API to check format support.", format.ToString()), this);
 					flag2 = true;
 				}
 				else
@@ -363,16 +403,25 @@ namespace UnityEngine
 
 		internal bool ValidateFormat(GraphicsFormat format, FormatUsage usage)
 		{
-			bool flag = SystemInfo.IsFormatSupported(format, usage);
+			bool flag = usage != FormatUsage.Render && (format == GraphicsFormat.ShadowAuto || format == GraphicsFormat.DepthAuto);
 			bool flag2;
 			if (flag)
 			{
-				flag2 = true;
+				Debug.LogWarning(string.Format("'{0}' is not allowed because it is an auto format and not an exact format. Use GraphicsFormatUtility.GetDepthStencilFormat to get an exact depth/stencil format.", format.ToString()), this);
+				flag2 = false;
 			}
 			else
 			{
-				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
-				flag2 = false;
+				bool flag3 = SystemInfo.IsFormatSupported(format, usage);
+				if (flag3)
+				{
+					flag2 = true;
+				}
+				else
+				{
+					Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
+					flag2 = false;
+				}
 			}
 			return flag2;
 		}
@@ -380,6 +429,11 @@ namespace UnityEngine
 		internal UnityException CreateNonReadableException(Texture t)
 		{
 			return new UnityException(string.Format("Texture '{0}' is not readable, the texture memory can not be accessed from scripts. You can make the texture readable in the Texture Import Settings.", t.name));
+		}
+
+		internal UnityException CreateNativeArrayLengthOverflowException()
+		{
+			return new UnityException("Failed to create NativeArray, length exceeds the allowed maximum of Int32.MaxValue. Use a larger type as template argument to reduce the array length.");
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

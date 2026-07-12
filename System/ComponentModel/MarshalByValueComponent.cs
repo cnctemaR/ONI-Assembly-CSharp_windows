@@ -1,13 +1,11 @@
 ﻿using System;
 using System.ComponentModel.Design;
-using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
-	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
 	[TypeConverter(typeof(ComponentConverter))]
 	[DesignerCategory("Component")]
+	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
 	public class MarshalByValueComponent : IComponent, IDisposable, IServiceProvider
 	{
 		~MarshalByValueComponent()
@@ -19,11 +17,11 @@ namespace System.ComponentModel
 		{
 			add
 			{
-				this.Events.AddHandler(MarshalByValueComponent.EventDisposed, value);
+				this.Events.AddHandler(MarshalByValueComponent.s_eventDisposed, value);
 			}
 			remove
 			{
-				this.Events.RemoveHandler(MarshalByValueComponent.EventDisposed, value);
+				this.Events.RemoveHandler(MarshalByValueComponent.s_eventDisposed, value);
 			}
 		}
 
@@ -31,11 +29,12 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.events == null)
+				EventHandlerList eventHandlerList;
+				if ((eventHandlerList = this._events) == null)
 				{
-					this.events = new EventHandlerList();
+					eventHandlerList = (this._events = new EventHandlerList());
 				}
-				return this.events;
+				return eventHandlerList;
 			}
 		}
 
@@ -45,11 +44,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.site;
+				return this._site;
 			}
 			set
 			{
-				this.site = value;
+				this._site = value;
 			}
 		}
 
@@ -65,17 +64,20 @@ namespace System.ComponentModel
 			{
 				lock (this)
 				{
-					if (this.site != null && this.site.Container != null)
+					ISite site = this._site;
+					if (site != null)
 					{
-						this.site.Container.Remove(this);
-					}
-					if (this.events != null)
-					{
-						EventHandler eventHandler = (EventHandler)this.events[MarshalByValueComponent.EventDisposed];
-						if (eventHandler != null)
+						IContainer container = site.Container;
+						if (container != null)
 						{
-							eventHandler(this, EventArgs.Empty);
+							container.Remove(this);
 						}
+					}
+					EventHandlerList events = this._events;
+					EventHandler eventHandler = (EventHandler)((events != null) ? events[MarshalByValueComponent.s_eventDisposed] : null);
+					if (eventHandler != null)
+					{
+						eventHandler(this, EventArgs.Empty);
 					}
 				}
 			}
@@ -87,22 +89,23 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				ISite site = this.site;
-				if (site != null)
+				ISite site = this._site;
+				if (site == null)
 				{
-					return site.Container;
+					return null;
 				}
-				return null;
+				return site.Container;
 			}
 		}
 
 		public virtual object GetService(Type service)
 		{
-			if (this.site != null)
+			ISite site = this._site;
+			if (site == null)
 			{
-				return this.site.GetService(service);
+				return null;
 			}
-			return null;
+			return site.GetService(service);
 		}
 
 		[Browsable(false)]
@@ -111,14 +114,14 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				ISite site = this.site;
+				ISite site = this._site;
 				return site != null && site.DesignMode;
 			}
 		}
 
 		public override string ToString()
 		{
-			ISite site = this.site;
+			ISite site = this._site;
 			if (site != null)
 			{
 				return site.Name + " [" + base.GetType().FullName + "]";
@@ -126,10 +129,10 @@ namespace System.ComponentModel
 			return base.GetType().FullName;
 		}
 
-		private static readonly object EventDisposed = new object();
+		private static readonly object s_eventDisposed = new object();
 
-		private ISite site;
+		private ISite _site;
 
-		private EventHandlerList events;
+		private EventHandlerList _events;
 	}
 }

@@ -10,7 +10,14 @@ public static class BaseOilFloaterConfig
 	{
 		float num = 50f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, (warnLowTemp + warnHighTemp) / 2f);
+		KAnimFile anim = Assets.GetAnim(anim_file);
+		string text = "idle_loop";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
+		int num2 = 1;
+		int num3 = 1;
+		EffectorValues effectorValues = tier;
+		float num4 = (warnLowTemp + warnHighTemp) / 2f;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, null, num4);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Hoverer, false);
 		gameObject.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
@@ -22,8 +29,8 @@ public static class BaseOilFloaterConfig
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
-		int num2 = CREATURES.SORTING.CRITTER_ORDER["Oilfloater"];
-		pickupable.sortOrder = num2;
+		int num5 = CREATURES.SORTING.CRITTER_ORDER["Oilfloater"];
+		pickupable.sortOrder = num5;
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
@@ -31,10 +38,10 @@ public static class BaseOilFloaterConfig
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
-		string text = "OilFloater_intake_air";
+		string text2 = "OilFloater_intake_air";
 		if (is_baby)
 		{
-			text = "OilFloaterBaby_intake_air";
+			text2 = "OilFloaterBaby_intake_air";
 		}
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
@@ -51,7 +58,7 @@ public static class BaseOilFloaterConfig
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new InhaleStates.Def
 			{
-				inhaleSound = text
+				inhaleSound = text2
 			}, true, -1)
 			.Add(new DrinkMilkStates.Def(), true, -1)
 			.Add(new SameSpotPoopStates.Def(), true, -1)
@@ -60,12 +67,12 @@ public static class BaseOilFloaterConfig
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.OilFloaterSpecies, symbolOverridePrefix);
-		string text2 = "OilFloater_move_LP";
+		string text3 = "OilFloater_move_LP";
 		if (is_baby)
 		{
-			text2 = "OilFloaterBaby_move_LP";
+			text3 = "OilFloaterBaby_move_LP";
 		}
-		gameObject.AddOrGet<OilFloaterMovementSound>().sound = text2;
+		gameObject.AddOrGet<OilFloaterMovementSound>().sound = text3;
 		return gameObject;
 	}
 
@@ -73,7 +80,7 @@ public static class BaseOilFloaterConfig
 	{
 		Diet diet = new Diet(new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false, false)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
 		});
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;

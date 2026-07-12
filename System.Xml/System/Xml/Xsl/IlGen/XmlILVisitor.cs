@@ -90,11 +90,15 @@ namespace System.Xml.Xsl.IlGen
 				else
 				{
 					this.helper.LoadQueryRuntime();
-					this.helper.Emit(OpCodes.Ldstr, Res.GetString("Supplied XsltArgumentList does not contain a parameter with local name '{0}' and namespace '{1}'.", new string[]
+					GenerateHelper generateHelper = this.helper;
+					OpCode ldstr = OpCodes.Ldstr;
+					string text = "Supplied XsltArgumentList does not contain a parameter with local name '{0}' and namespace '{1}'.";
+					object[] array = new string[]
 					{
 						qilParameter.Name.LocalName,
 						qilParameter.Name.NamespaceUri
-					}));
+					};
+					generateHelper.Emit(ldstr, Res.GetString(text, array));
 					this.helper.Call(XmlILMethods.ThrowException);
 				}
 				this.EndNestedIterator(qilIterator);

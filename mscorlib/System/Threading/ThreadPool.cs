@@ -4,15 +4,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public static class ThreadPool
 	{
 		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public static bool SetMaxThreads(int workerThreads, int completionPortThreads)
 		{
 			return ThreadPool.SetMaxThreadsNative(workerThreads, completionPortThreads);
@@ -25,7 +22,6 @@ namespace System.Threading
 		}
 
 		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public static bool SetMinThreads(int workerThreads, int completionPortThreads)
 		{
 			return ThreadPool.SetMinThreadsNative(workerThreads, completionPortThreads);
@@ -175,7 +171,7 @@ namespace System.Threading
 		public static bool QueueUserWorkItem(WaitCallback callBack, object state)
 		{
 			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return ThreadPool.QueueUserWorkItemHelper(callBack, state, ref stackCrawlMark, true);
+			return ThreadPool.QueueUserWorkItemHelper(callBack, state, ref stackCrawlMark, true, true);
 		}
 
 		[SecuritySafeCritical]
@@ -183,7 +179,7 @@ namespace System.Threading
 		public static bool QueueUserWorkItem(WaitCallback callBack)
 		{
 			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return ThreadPool.QueueUserWorkItemHelper(callBack, null, ref stackCrawlMark, true);
+			return ThreadPool.QueueUserWorkItemHelper(callBack, null, ref stackCrawlMark, true, true);
 		}
 
 		[SecurityCritical]
@@ -191,11 +187,37 @@ namespace System.Threading
 		public static bool UnsafeQueueUserWorkItem(WaitCallback callBack, object state)
 		{
 			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return ThreadPool.QueueUserWorkItemHelper(callBack, state, ref stackCrawlMark, false);
+			return ThreadPool.QueueUserWorkItemHelper(callBack, state, ref stackCrawlMark, false, true);
+		}
+
+		public static bool QueueUserWorkItem<TState>(Action<TState> callBack, TState state, bool preferLocal)
+		{
+			if (callBack == null)
+			{
+				throw new ArgumentNullException("callBack");
+			}
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return ThreadPool.QueueUserWorkItemHelper(delegate(object x)
+			{
+				callBack((TState)((object)x));
+			}, state, ref stackCrawlMark, true, !preferLocal);
+		}
+
+		public static bool UnsafeQueueUserWorkItem<TState>(Action<TState> callBack, TState state, bool preferLocal)
+		{
+			if (callBack == null)
+			{
+				throw new ArgumentNullException("callBack");
+			}
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return ThreadPool.QueueUserWorkItemHelper(delegate(object x)
+			{
+				callBack((TState)((object)x));
+			}, state, ref stackCrawlMark, false, !preferLocal);
 		}
 
 		[SecurityCritical]
-		private static bool QueueUserWorkItemHelper(WaitCallback callBack, object state, ref StackCrawlMark stackMark, bool compressStack)
+		private static bool QueueUserWorkItemHelper(WaitCallback callBack, object state, ref StackCrawlMark stackMark, bool compressStack, bool forceGlobal = true)
 		{
 			bool flag = true;
 			if (callBack != null)
@@ -208,7 +230,7 @@ namespace System.Threading
 				finally
 				{
 					QueueUserWorkItemCallback queueUserWorkItemCallback = new QueueUserWorkItemCallback(callBack, state, compressStack, ref stackMark);
-					ThreadPoolGlobals.workQueue.Enqueue(queueUserWorkItemCallback, true);
+					ThreadPoolGlobals.workQueue.Enqueue(queueUserWorkItemCallback, forceGlobal);
 					flag = true;
 				}
 			}
@@ -269,18 +291,18 @@ namespace System.Threading
 				ThreadPoolWorkQueue.QueueSegment segment;
 				for (segment = globalQueueTail; segment != null; segment = segment.Next)
 				{
-					IThreadPoolWorkItem[] items2 = segment.nodes;
+					IThreadPoolWorkItem[] items = segment.nodes;
 					int num;
-					for (int j = 0; j < items2.Length; j = num + 1)
+					for (int j = 0; j < items.Length; j = num + 1)
 					{
-						IThreadPoolWorkItem threadPoolWorkItem2 = items2[j];
+						IThreadPoolWorkItem threadPoolWorkItem2 = items[j];
 						if (threadPoolWorkItem2 != null)
 						{
 							yield return threadPoolWorkItem2;
 						}
 						num = j;
 					}
-					items2 = null;
+					items = null;
 				}
 				segment = null;
 			}
@@ -349,7 +371,7 @@ namespace System.Threading
 		[CLSCompliant(false)]
 		public unsafe static bool UnsafeQueueNativeOverlapped(NativeOverlapped* overlapped)
 		{
-			return ThreadPool.PostQueuedCompletionStatus(overlapped);
+			throw new NotImplementedException("");
 		}
 
 		[SecurityCritical]
@@ -393,10 +415,7 @@ namespace System.Threading
 		[SecuritySafeCritical]
 		internal static void NotifyWorkItemProgress()
 		{
-			if (!ThreadPoolGlobals.vmTpInitialized)
-			{
-				ThreadPool.InitializeVMTp(ref ThreadPoolGlobals.enableWorkerTracking);
-			}
+			ThreadPool.EnsureVMInitialized();
 			ThreadPool.NotifyWorkItemProgressNative();
 		}
 
@@ -406,22 +425,26 @@ namespace System.Threading
 
 		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool IsThreadPoolHosted();
+		internal static extern void NotifyWorkItemQueued();
+
+		[SecurityCritical]
+		internal static bool IsThreadPoolHosted()
+		{
+			return false;
+		}
 
 		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InitializeVMTp(ref bool enableWorkerTracking);
 
-		[SecuritySafeCritical]
 		[Obsolete("ThreadPool.BindHandle(IntPtr) has been deprecated.  Please use ThreadPool.BindHandle(SafeHandle) instead.", false)]
-		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		[SecuritySafeCritical]
 		public static bool BindHandle(IntPtr osHandle)
 		{
 			return ThreadPool.BindIOCompletionCallbackNative(osHandle);
 		}
 
 		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public static bool BindHandle(SafeHandle osHandle)
 		{
 			if (osHandle == null)
@@ -448,7 +471,17 @@ namespace System.Threading
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool BindIOCompletionCallbackNative(IntPtr fileHandle);
+		private static bool BindIOCompletionCallbackNative(IntPtr fileHandle)
+		{
+			return true;
+		}
+
+		internal static bool IsThreadPoolThread
+		{
+			get
+			{
+				return Thread.CurrentThread.IsThreadPoolThread;
+			}
+		}
 	}
 }

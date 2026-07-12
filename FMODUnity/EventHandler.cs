@@ -1,9 +1,10 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace FMODUnity
 {
-	public abstract class EventHandler : MonoBehaviour
+	public abstract class EventHandler : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 	{
 		protected virtual void Start()
 		{
@@ -79,22 +80,42 @@ namespace FMODUnity
 
 		private void OnMouseEnter()
 		{
-			this.HandleGameEvent(EmitterGameEvent.MouseEnter);
+			this.HandleGameEvent(EmitterGameEvent.ObjectMouseEnter);
 		}
 
 		private void OnMouseExit()
 		{
-			this.HandleGameEvent(EmitterGameEvent.MouseExit);
+			this.HandleGameEvent(EmitterGameEvent.ObjectMouseExit);
 		}
 
 		private void OnMouseDown()
 		{
-			this.HandleGameEvent(EmitterGameEvent.MouseDown);
+			this.HandleGameEvent(EmitterGameEvent.ObjectMouseDown);
 		}
 
 		private void OnMouseUp()
 		{
-			this.HandleGameEvent(EmitterGameEvent.MouseUp);
+			this.HandleGameEvent(EmitterGameEvent.ObjectMouseUp);
+		}
+
+		public void OnPointerEnter(PointerEventData eventData)
+		{
+			this.HandleGameEvent(EmitterGameEvent.UIMouseEnter);
+		}
+
+		public void OnPointerExit(PointerEventData eventData)
+		{
+			this.HandleGameEvent(EmitterGameEvent.UIMouseExit);
+		}
+
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			this.HandleGameEvent(EmitterGameEvent.UIMouseDown);
+		}
+
+		public void OnPointerUp(PointerEventData eventData)
+		{
+			this.HandleGameEvent(EmitterGameEvent.UIMouseUp);
 		}
 
 		protected abstract void HandleGameEvent(EmitterGameEvent gameEvent);

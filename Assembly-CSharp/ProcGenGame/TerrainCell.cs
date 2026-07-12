@@ -286,24 +286,7 @@ namespace ProcGenGame
 				break;
 			}
 			hashSet.UnionWith(featureCenterPoints);
-			if (featureCenterPoints.Count == 0)
-			{
-				global::Debug.LogWarning(string.Concat(new string[]
-				{
-					"Room has no centerpoints. Terrain Cell [ shape: ",
-					shape.ToString(),
-					" size: ",
-					this.finalSize.ToString(),
-					"] [",
-					this.node.NodeId.ToString(),
-					" ",
-					this.node.type,
-					" ",
-					this.node.position.ToString(),
-					"]"
-				}));
-			}
-			else if (bordersWidths != null && bordersWidths.Count > 0 && bordersWidths[0] > 0)
+			if (featureCenterPoints.Count != 0 && bordersWidths != null && bordersWidths.Count > 0 && bordersWidths[0] > 0)
 			{
 				int num = 0;
 				while (num < bordersWidths.Count && bordersWidths[num] > 0)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using Mono.Security.Interface;
@@ -17,8 +18,11 @@ namespace Mono.Unity
 			{
 				return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_1;
 			}
-			protocols.HasFlag(SslProtocols.Tls12);
-			return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_2;
+			if (protocols.HasFlag(SslProtocols.Tls12))
+			{
+				return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_2;
+			}
+			return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_0;
 		}
 
 		public static UnityTls.unitytls_protocol GetMaxProtocol(SslProtocols protocols)
@@ -31,8 +35,11 @@ namespace Mono.Unity
 			{
 				return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_1;
 			}
-			protocols.HasFlag(SslProtocols.Tls);
-			return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_0;
+			if (protocols.HasFlag(SslProtocols.Tls))
+			{
+				return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_0;
+			}
+			return UnityTls.unitytls_protocol.UNITYTLS_PROTOCOL_TLS_1_2;
 		}
 
 		public static TlsProtocols ConvertProtocolVersion(UnityTls.unitytls_protocol protocol)
@@ -113,26 +120,26 @@ namespace Mono.Unity
 			return defaultAlert;
 		}
 
-		public static MonoSslPolicyErrors VerifyResultToPolicyErrror(UnityTls.unitytls_x509verify_result verifyResult)
+		public static SslPolicyErrors VerifyResultToPolicyErrror(UnityTls.unitytls_x509verify_result verifyResult)
 		{
 			if (verifyResult == UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_SUCCESS)
 			{
-				return MonoSslPolicyErrors.None;
+				return SslPolicyErrors.None;
 			}
 			if (verifyResult == (UnityTls.unitytls_x509verify_result)4294967295U)
 			{
-				return MonoSslPolicyErrors.RemoteCertificateChainErrors;
+				return SslPolicyErrors.RemoteCertificateChainErrors;
 			}
-			MonoSslPolicyErrors monoSslPolicyErrors = MonoSslPolicyErrors.None;
+			SslPolicyErrors sslPolicyErrors = SslPolicyErrors.None;
 			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH))
 			{
-				monoSslPolicyErrors |= MonoSslPolicyErrors.RemoteCertificateNameMismatch;
+				sslPolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
 			}
 			if (verifyResult != UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH)
 			{
-				monoSslPolicyErrors |= MonoSslPolicyErrors.RemoteCertificateChainErrors;
+				sslPolicyErrors |= SslPolicyErrors.RemoteCertificateChainErrors;
 			}
-			return monoSslPolicyErrors;
+			return sslPolicyErrors;
 		}
 
 		public static X509ChainStatusFlags VerifyResultToChainStatus(UnityTls.unitytls_x509verify_result verifyResult)

@@ -7,7 +7,7 @@ namespace System.Threading.Tasks
 	public class TaskSchedulerException : Exception
 	{
 		public TaskSchedulerException()
-			: base(Environment.GetResourceString("An exception was thrown by a TaskScheduler."))
+			: base("An exception was thrown by a TaskScheduler.")
 		{
 		}
 
@@ -17,7 +17,7 @@ namespace System.Threading.Tasks
 		}
 
 		public TaskSchedulerException(Exception innerException)
-			: base(Environment.GetResourceString("An exception was thrown by a TaskScheduler."), innerException)
+			: base("An exception was thrown by a TaskScheduler.", innerException)
 		{
 		}
 

@@ -33,7 +33,7 @@ namespace System.Configuration
 			MethodInfo method = type.GetMethod("Parse", new Type[] { typeof(string) });
 			if (method == null)
 			{
-				throw new InvalidOperationException("Type " + type + " does not have a Parse method");
+				throw new InvalidOperationException("Type " + ((type != null) ? type.ToString() : null) + " does not have a Parse method");
 			}
 			object obj = null;
 			try

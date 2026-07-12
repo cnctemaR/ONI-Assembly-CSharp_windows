@@ -9,14 +9,11 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Contexts;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
-using System.Security.Permissions;
 using System.Security.Principal;
+using Internal.Runtime.Augments;
 
 namespace System.Threading
 {
-	[ComDefaultInterface(typeof(_Thread))]
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Thread : CriticalFinalizerObject, _Thread
 	{
@@ -78,7 +75,6 @@ namespace System.Threading
 			this.SetStartHelper(start, maxStackSize);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public void Start()
 		{
@@ -86,7 +82,6 @@ namespace System.Threading
 			this.Start(ref stackCrawlMark);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public void Start(object parameter)
 		{
@@ -108,8 +103,8 @@ namespace System.Threading
 				ExecutionContext executionContext = ExecutionContext.Capture(ref stackMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx);
 				threadHelper.SetExecutionContextHelper(executionContext);
 			}
-			IPrincipal principal = null;
-			this.StartInternal(principal, ref stackMark);
+			object obj = null;
+			this.StartInternal(obj, ref stackMark);
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -132,8 +127,8 @@ namespace System.Threading
 
 		public ExecutionContext ExecutionContext
 		{
-			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 			[SecuritySafeCritical]
+			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 			get
 			{
 				ExecutionContext executionContext;
@@ -149,8 +144,8 @@ namespace System.Threading
 			}
 		}
 
-		[SecurityCritical]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[SecurityCritical]
 		internal ExecutionContext GetMutableExecutionContext()
 		{
 			if (this.m_ExecutionContext == null)
@@ -183,21 +178,18 @@ namespace System.Threading
 		}
 
 		[Obsolete("Thread.SetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
-		[SecurityCritical]
 		public void SetCompressedStack(CompressedStack stack)
 		{
 			throw new InvalidOperationException(Environment.GetResourceString("Use CompressedStack.(Capture/Run) or ExecutionContext.(Capture/Run) APIs instead."));
 		}
 
-		[Obsolete("Thread.GetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
 		[SecurityCritical]
+		[Obsolete("Thread.GetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
 		public CompressedStack GetCompressedStack()
 		{
 			throw new InvalidOperationException(Environment.GetResourceString("Use CompressedStack.(Capture/Run) or ExecutionContext.(Capture/Run) APIs instead."));
 		}
 
-		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public static void ResetAbort()
 		{
 			Thread currentThread = Thread.CurrentThread;
@@ -209,14 +201,11 @@ namespace System.Threading
 			currentThread.ClearAbortReason();
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ResetAbortNative();
 
 		[Obsolete("Thread.Suspend has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
 		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Suspend()
 		{
 			this.SuspendInternal();
@@ -228,7 +217,6 @@ namespace System.Threading
 
 		[SecuritySafeCritical]
 		[Obsolete("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Resume()
 		{
 			this.ResumeInternal();
@@ -238,14 +226,11 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ResumeInternal();
 
-		[SecuritySafeCritical]
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Interrupt()
 		{
 			this.InterruptInternal();
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InterruptInternal();
 
@@ -256,35 +241,26 @@ namespace System.Threading
 			{
 				return (ThreadPriority)this.GetPriorityNative();
 			}
-			[SecuritySafeCritical]
-			[HostProtection(SecurityAction.LinkDemand, SelfAffectingThreading = true)]
 			set
 			{
 				this.SetPriorityNative((int)value);
 			}
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetPriorityNative();
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetPriorityNative(int priority);
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool JoinInternal(int millisecondsTimeout);
 
-		[SecuritySafeCritical]
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		public void Join()
 		{
 			this.JoinInternal(-1);
 		}
 
-		[SecuritySafeCritical]
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		public bool Join(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < -1)
@@ -294,7 +270,6 @@ namespace System.Threading
 			return this.JoinInternal(millisecondsTimeout);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		public bool Join(TimeSpan timeout)
 		{
 			long num = (long)timeout.TotalMilliseconds;
@@ -305,7 +280,6 @@ namespace System.Threading
 			return this.Join((int)num);
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SleepInternal(int millisecondsTimeout);
 
@@ -329,16 +303,9 @@ namespace System.Threading
 			Thread.Sleep((int)num);
 		}
 
-		[SecurityCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[SuppressUnmanagedCodeSecurity]
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool YieldInternal();
 
-		[SecuritySafeCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 		public static bool Yield()
 		{
 			return Thread.YieldInternal();
@@ -357,31 +324,26 @@ namespace System.Threading
 			this.SetStart(new ParameterizedThreadStart(threadHelper.ThreadStart), maxStackSize);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static LocalDataStoreSlot AllocateDataSlot()
 		{
 			return Thread.LocalDataStoreManager.AllocateDataSlot();
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static LocalDataStoreSlot AllocateNamedDataSlot(string name)
 		{
 			return Thread.LocalDataStoreManager.AllocateNamedDataSlot(name);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static LocalDataStoreSlot GetNamedDataSlot(string name)
 		{
 			return Thread.LocalDataStoreManager.GetNamedDataSlot(name);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static void FreeNamedDataSlot(string name)
 		{
 			Thread.LocalDataStoreManager.FreeNamedDataSlot(name);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static object GetData(LocalDataStoreSlot slot)
 		{
 			LocalDataStoreHolder localDataStoreHolder = Thread.s_LocalDataStore;
@@ -393,7 +355,6 @@ namespace System.Threading
 			return localDataStoreHolder.Store.GetData(slot);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, SharedState = true, ExternalThreading = true)]
 		public static void SetData(LocalDataStoreSlot slot, object data)
 		{
 			LocalDataStoreHolder localDataStoreHolder = Thread.s_LocalDataStore;
@@ -409,10 +370,12 @@ namespace System.Threading
 		{
 			get
 			{
+				if (AppDomain.IsAppXModel())
+				{
+					return CultureInfo.GetCultureInfoForUserPreferredLanguageInAppX() ?? this.GetCurrentUICultureNoAppX();
+				}
 				return this.GetCurrentUICultureNoAppX();
 			}
-			[SecuritySafeCritical]
-			[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 			set
 			{
 				if (value == null)
@@ -420,6 +383,11 @@ namespace System.Threading
 					throw new ArgumentNullException("value");
 				}
 				CultureInfo.VerifyCultureName(value, true);
+				if (AppDomain.IsAppXModel())
+				{
+					CultureInfo.SetCultureInfoForUserPreferredLanguageInAppX(value);
+					return;
+				}
 				if (Thread.m_CurrentUICulture == null && Thread.m_CurrentCulture == null)
 				{
 					Thread.nativeInitCultureAccessors();
@@ -455,6 +423,10 @@ namespace System.Threading
 		{
 			get
 			{
+				if (AppDomain.IsAppXModel())
+				{
+					return CultureInfo.GetCultureInfoForUserPreferredLanguageInAppX() ?? this.GetCurrentCultureNoAppX();
+				}
 				return this.GetCurrentCultureNoAppX();
 			}
 			[SecuritySafeCritical]
@@ -463,6 +435,11 @@ namespace System.Threading
 				if (value == null)
 				{
 					throw new ArgumentNullException("value");
+				}
+				if (AppDomain.IsAppXModel())
+				{
+					CultureInfo.SetCultureInfoForUserPreferredLanguageInAppX(value);
+					return;
 				}
 				if (Thread.m_CurrentCulture == null && Thread.m_CurrentUICulture == null)
 				{
@@ -501,7 +478,6 @@ namespace System.Threading
 			Thread.m_CurrentUICulture = CultureInfo.ConstructCurrentUICulture();
 		}
 
-		[SecuritySafeCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void MemoryBarrier();
 
@@ -552,20 +528,19 @@ namespace System.Threading
 			}
 		}
 
-		public static Context CurrentContext
-		{
-			[SecurityPermission(SecurityAction.LinkDemand, Infrastructure = true)]
-			get
-			{
-				return AppDomain.InternalGetContext();
-			}
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern byte[] ByteArrayToRootDomain(byte[] arr);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern byte[] ByteArrayToCurrentDomain(byte[] arr);
+
+		public static Context CurrentContext
+		{
+			get
+			{
+				return AppDomain.InternalGetContext();
+			}
+		}
 
 		private static void DeserializePrincipal(Thread th)
 		{
@@ -670,6 +645,11 @@ namespace System.Threading
 			get
 			{
 				Thread currentThread = Thread.CurrentThread;
+				IPrincipal principal = currentThread.GetExecutionContextReader().LogicalCallContext.Principal;
+				if (principal != null)
+				{
+					return principal;
+				}
 				if (currentThread.principal_version != currentThread.Internal._serialized_principal_version)
 				{
 					currentThread.principal = null;
@@ -693,10 +673,10 @@ namespace System.Threading
 				currentThread.principal_version = currentThread.Internal._serialized_principal_version;
 				return currentThread.principal;
 			}
-			[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 			set
 			{
 				Thread currentThread = Thread.CurrentThread;
+				currentThread.GetMutableExecutionContext().LogicalCallContext.Principal = value;
 				if (value != Thread.GetDomain().DefaultPrincipal)
 				{
 					currentThread.Internal._serialized_principal_version++;
@@ -718,8 +698,20 @@ namespace System.Threading
 			}
 		}
 
+		public static AppDomain GetDomain()
+		{
+			return AppDomain.CurrentDomain;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Thread GetCurrentThread();
+		private static extern void GetCurrentThread_icall(ref Thread thread);
+
+		private static Thread GetCurrentThread()
+		{
+			Thread thread = null;
+			Thread.GetCurrentThread_icall(ref thread);
+			return thread;
+		}
 
 		public static Thread CurrentThread
 		{
@@ -743,16 +735,11 @@ namespace System.Threading
 			}
 		}
 
-		public static AppDomain GetDomain()
-		{
-			return AppDomain.CurrentDomain;
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetDomainID();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr Thread_internal(MulticastDelegate start);
+		private extern bool Thread_internal(MulticastDelegate start);
 
 		private Thread(InternalThread it)
 		{
@@ -830,7 +817,20 @@ namespace System.Threading
 		private static extern string GetName_internal(InternalThread thread);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetName_internal(InternalThread thread, string name);
+		private unsafe static extern void SetName_icall(InternalThread thread, char* name, int nameLength);
+
+		private unsafe static void SetName_internal(InternalThread thread, string name)
+		{
+			fixed (string text = name)
+			{
+				char* ptr = text;
+				if (ptr != null)
+				{
+					ptr += RuntimeHelpers.OffsetToStringData / 2;
+				}
+				Thread.SetName_icall(thread, ptr, (name != null) ? name.Length : 0);
+			}
+		}
 
 		public string Name
 		{
@@ -855,13 +855,11 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Abort_internal(InternalThread thread, object stateInfo);
 
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Abort()
 		{
 			Thread.Abort_internal(this.Internal, null);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Abort(object stateInfo)
 		{
 			Thread.Abort_internal(this.Internal, stateInfo);
@@ -898,10 +896,10 @@ namespace System.Threading
 			}
 		}
 
-		private void StartInternal(IPrincipal principal, ref StackCrawlMark stackMark)
+		private void StartInternal(object principal, ref StackCrawlMark stackMark)
 		{
 			this.Internal._serialized_principal = Thread.CurrentThread.Internal._serialized_principal;
-			if (this.Thread_internal(this.m_Delegate) == IntPtr.Zero)
+			if (!this.Thread_internal(this.m_Delegate))
 			{
 				throw new SystemException("Thread creation failed.");
 			}
@@ -1128,6 +1126,11 @@ namespace System.Threading
 			return state;
 		}
 
+		public static int GetCurrentProcessorId()
+		{
+			return RuntimeThread.GetCurrentProcessorId();
+		}
+
 		private static LocalDataStoreMgr s_LocalDataStoreMgr;
 
 		[ThreadStatic]
@@ -1149,10 +1152,6 @@ namespace System.Threading
 
 		private object pending_exception;
 
-		private IPrincipal principal;
-
-		private int principal_version;
-
 		[ThreadStatic]
 		private static Thread current_thread;
 
@@ -1161,5 +1160,9 @@ namespace System.Threading
 		private ExecutionContext m_ExecutionContext;
 
 		private bool m_ExecutionContextBelongsToOuterScope;
+
+		private IPrincipal principal;
+
+		private int principal_version;
 	}
 }

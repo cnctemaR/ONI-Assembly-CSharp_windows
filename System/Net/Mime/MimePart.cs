@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Mail;
+using System.Runtime.ExceptionServices;
 
 namespace System.Net.Mime
 {
@@ -12,9 +13,9 @@ namespace System.Net.Mime
 
 		public void Dispose()
 		{
-			if (this.stream != null)
+			if (this._stream != null)
 			{
-				this.stream.Close();
+				this._stream.Close();
 			}
 		}
 
@@ -22,7 +23,7 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.stream;
+				return this._stream;
 			}
 		}
 
@@ -30,17 +31,17 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.contentDisposition;
+				return this._contentDisposition;
 			}
 			set
 			{
-				this.contentDisposition = value;
+				this._contentDisposition = value;
 				if (value == null)
 				{
 					((HeaderCollection)base.Headers).InternalRemove(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition));
 					return;
 				}
-				this.contentDisposition.PersistIfNeeded((HeaderCollection)base.Headers, true);
+				this._contentDisposition.PersistIfNeeded((HeaderCollection)base.Headers, true);
 			}
 		}
 
@@ -89,7 +90,7 @@ namespace System.Net.Mime
 					base.Headers[MailHeaderInfo.GetString(MailHeaderID.ContentTransferEncoding)] = "8bit";
 					return;
 				}
-				throw new NotSupportedException(global::SR.GetString("The MIME transfer encoding '{0}' is not supported.", new object[] { value }));
+				throw new NotSupportedException(SR.Format("The MIME transfer encoding '{0}' is not supported.", value));
 			}
 		}
 
@@ -99,15 +100,15 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("stream");
 			}
-			if (this.streamSet)
+			if (this._streamSet)
 			{
-				this.stream.Close();
-				this.stream = null;
-				this.streamSet = false;
+				this._stream.Close();
+				this._stream = null;
+				this._streamSet = false;
 			}
-			this.stream = stream;
-			this.streamSet = true;
-			this.streamUsedOnce = false;
+			this._stream = stream;
+			this._streamSet = true;
+			this._streamUsedOnce = false;
 			this.TransferEncoding = TransferEncoding.Base64;
 		}
 
@@ -119,7 +120,7 @@ namespace System.Net.Mime
 			}
 			if (mimeType != null && mimeType != string.Empty)
 			{
-				this.contentType = new ContentType(mimeType);
+				this._contentType = new ContentType(mimeType);
 			}
 			if (name != null && name != string.Empty)
 			{
@@ -134,22 +135,22 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("stream");
 			}
-			this.contentType = contentType;
+			this._contentType = contentType;
 			this.SetContent(stream);
 		}
 
 		internal void Complete(IAsyncResult result, Exception e)
 		{
 			MimePart.MimePartContext mimePartContext = (MimePart.MimePartContext)result.AsyncState;
-			if (mimePartContext.completed)
+			if (mimePartContext._completed)
 			{
-				throw e;
+				ExceptionDispatchInfo.Throw(e);
 			}
 			try
 			{
-				if (mimePartContext.outputStream != null)
+				if (mimePartContext._outputStream != null)
 				{
-					mimePartContext.outputStream.Close();
+					mimePartContext._outputStream.Close();
 				}
 			}
 			catch (Exception ex)
@@ -159,8 +160,8 @@ namespace System.Net.Mime
 					e = ex;
 				}
 			}
-			mimePartContext.completed = true;
-			mimePartContext.result.InvokeCallback(e);
+			mimePartContext._completed = true;
+			mimePartContext._result.InvokeCallback(e);
 		}
 
 		internal void ReadCallback(IAsyncResult result)
@@ -169,7 +170,7 @@ namespace System.Net.Mime
 			{
 				return;
 			}
-			((MimePart.MimePartContext)result.AsyncState).completedSynchronously = false;
+			((MimePart.MimePartContext)result.AsyncState)._completedSynchronously = false;
 			try
 			{
 				this.ReadCallbackHandler(result);
@@ -183,10 +184,10 @@ namespace System.Net.Mime
 		internal void ReadCallbackHandler(IAsyncResult result)
 		{
 			MimePart.MimePartContext mimePartContext = (MimePart.MimePartContext)result.AsyncState;
-			mimePartContext.bytesLeft = this.Stream.EndRead(result);
-			if (mimePartContext.bytesLeft > 0)
+			mimePartContext._bytesLeft = this.Stream.EndRead(result);
+			if (mimePartContext._bytesLeft > 0)
 			{
-				IAsyncResult asyncResult = mimePartContext.outputStream.BeginWrite(mimePartContext.buffer, 0, mimePartContext.bytesLeft, this.writeCallback, mimePartContext);
+				IAsyncResult asyncResult = mimePartContext._outputStream.BeginWrite(mimePartContext._buffer, 0, mimePartContext._bytesLeft, this._writeCallback, mimePartContext);
 				if (asyncResult.CompletedSynchronously)
 				{
 					this.WriteCallbackHandler(asyncResult);
@@ -205,7 +206,7 @@ namespace System.Net.Mime
 			{
 				return;
 			}
-			((MimePart.MimePartContext)result.AsyncState).completedSynchronously = false;
+			((MimePart.MimePartContext)result.AsyncState)._completedSynchronously = false;
 			try
 			{
 				this.WriteCallbackHandler(result);
@@ -219,8 +220,8 @@ namespace System.Net.Mime
 		internal void WriteCallbackHandler(IAsyncResult result)
 		{
 			MimePart.MimePartContext mimePartContext = (MimePart.MimePartContext)result.AsyncState;
-			mimePartContext.outputStream.EndWrite(result);
-			IAsyncResult asyncResult = this.Stream.BeginRead(mimePartContext.buffer, 0, mimePartContext.buffer.Length, this.readCallback, mimePartContext);
+			mimePartContext._outputStream.EndWrite(result);
+			IAsyncResult asyncResult = this.Stream.BeginRead(mimePartContext._buffer, 0, mimePartContext._buffer.Length, this._readCallback, mimePartContext);
 			if (asyncResult.CompletedSynchronously)
 			{
 				this.ReadCallbackHandler(asyncResult);
@@ -248,11 +249,11 @@ namespace System.Net.Mime
 		internal void ContentStreamCallbackHandler(IAsyncResult result)
 		{
 			MimePart.MimePartContext mimePartContext = (MimePart.MimePartContext)result.AsyncState;
-			Stream stream = mimePartContext.writer.EndGetContentStream(result);
-			mimePartContext.outputStream = this.GetEncodedStream(stream);
-			this.readCallback = new AsyncCallback(this.ReadCallback);
-			this.writeCallback = new AsyncCallback(this.WriteCallback);
-			IAsyncResult asyncResult = this.Stream.BeginRead(mimePartContext.buffer, 0, mimePartContext.buffer.Length, this.readCallback, mimePartContext);
+			Stream stream = mimePartContext._writer.EndGetContentStream(result);
+			mimePartContext._outputStream = this.GetEncodedStream(stream);
+			this._readCallback = new AsyncCallback(this.ReadCallback);
+			this._writeCallback = new AsyncCallback(this.WriteCallback);
+			IAsyncResult asyncResult = this.Stream.BeginRead(mimePartContext._buffer, 0, mimePartContext._buffer.Length, this._readCallback, mimePartContext);
 			if (asyncResult.CompletedSynchronously)
 			{
 				this.ReadCallbackHandler(asyncResult);
@@ -265,7 +266,7 @@ namespace System.Net.Mime
 			{
 				return;
 			}
-			((MimePart.MimePartContext)result.AsyncState).completedSynchronously = false;
+			((MimePart.MimePartContext)result.AsyncState)._completedSynchronously = false;
 			try
 			{
 				this.ContentStreamCallbackHandler(result);
@@ -283,7 +284,7 @@ namespace System.Net.Mime
 			MimeBasePart.MimePartAsyncResult mimePartAsyncResult = new MimeBasePart.MimePartAsyncResult(this, state, callback);
 			MimePart.MimePartContext mimePartContext = new MimePart.MimePartContext(writer, mimePartAsyncResult);
 			this.ResetStream();
-			this.streamUsedOnce = true;
+			this._streamUsedOnce = true;
 			IAsyncResult asyncResult = writer.BeginGetContentStream(new AsyncCallback(this.ContentStreamCallback), mimePartContext);
 			if (asyncResult.CompletedSynchronously)
 			{
@@ -302,7 +303,7 @@ namespace System.Net.Mime
 				Stream stream = writer.GetContentStream();
 				stream = this.GetEncodedStream(stream);
 				this.ResetStream();
-				this.streamUsedOnce = true;
+				this._streamUsedOnce = true;
 				int num;
 				while ((num = this.Stream.Read(array, 0, 17408)) > 0)
 				{
@@ -314,28 +315,28 @@ namespace System.Net.Mime
 
 		internal void ResetStream()
 		{
-			if (!this.streamUsedOnce)
+			if (!this._streamUsedOnce)
 			{
 				return;
 			}
 			if (this.Stream.CanSeek)
 			{
 				this.Stream.Seek(0L, SeekOrigin.Begin);
-				this.streamUsedOnce = false;
+				this._streamUsedOnce = false;
 				return;
 			}
-			throw new InvalidOperationException(global::SR.GetString("One of the streams has already been used and can't be reset to the origin."));
+			throw new InvalidOperationException("One of the streams has already been used and can't be reset to the origin.");
 		}
 
-		private Stream stream;
+		private Stream _stream;
 
-		private bool streamSet;
+		private bool _streamSet;
 
-		private bool streamUsedOnce;
+		private bool _streamUsedOnce;
 
-		private AsyncCallback readCallback;
+		private AsyncCallback _readCallback;
 
-		private AsyncCallback writeCallback;
+		private AsyncCallback _writeCallback;
 
 		private const int maxBufferSize = 17408;
 
@@ -343,24 +344,24 @@ namespace System.Net.Mime
 		{
 			internal MimePartContext(BaseWriter writer, LazyAsyncResult result)
 			{
-				this.writer = writer;
-				this.result = result;
-				this.buffer = new byte[17408];
+				this._writer = writer;
+				this._result = result;
+				this._buffer = new byte[17408];
 			}
 
-			internal Stream outputStream;
+			internal Stream _outputStream;
 
-			internal LazyAsyncResult result;
+			internal LazyAsyncResult _result;
 
-			internal int bytesLeft;
+			internal int _bytesLeft;
 
-			internal BaseWriter writer;
+			internal BaseWriter _writer;
 
-			internal byte[] buffer;
+			internal byte[] _buffer;
 
-			internal bool completed;
+			internal bool _completed;
 
-			internal bool completedSynchronously = true;
+			internal bool _completedSynchronously = true;
 		}
 	}
 }

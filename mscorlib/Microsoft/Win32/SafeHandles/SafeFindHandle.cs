@@ -5,7 +5,7 @@ using System.Security;
 namespace Microsoft.Win32.SafeHandles
 {
 	[SecurityCritical]
-	internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
+	internal class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
 	{
 		[SecurityCritical]
 		internal SafeFindHandle()

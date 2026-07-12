@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Serialization;
 using UnityEngine.Sprites;
 using UnityEngine.U2D;
@@ -25,6 +27,7 @@ namespace UnityEngine.UI
 						this.m_SkipLayoutUpdate = this.m_Sprite.rect.size.Equals(value ? value.rect.size : Vector2.zero);
 						this.m_SkipMaterialUpdate = this.m_Sprite.texture == (value ? value.texture : null);
 						this.m_Sprite = value;
+						this.<set_sprite>g__ResetAlphaHitThresholdIfNeeded|11_0();
 						this.SetAllDirty();
 						this.TrackSprite();
 						return;
@@ -35,6 +38,7 @@ namespace UnityEngine.UI
 					this.m_SkipLayoutUpdate = value.rect.size == Vector2.zero;
 					this.m_SkipMaterialUpdate = value.texture == null;
 					this.m_Sprite = value;
+					this.<set_sprite>g__ResetAlphaHitThresholdIfNeeded|11_0();
 					this.SetAllDirty();
 					this.TrackSprite();
 				}
@@ -202,6 +206,10 @@ namespace UnityEngine.UI
 			}
 			set
 			{
+				if (this.sprite != null && (GraphicsFormatUtility.IsCrunchFormat(this.sprite.texture.format) || !this.sprite.texture.isReadable))
+				{
+					throw new InvalidOperationException("alphaHitTestMinimumThreshold should not be modified on a texture not readeable or not using Crunch Compression.");
+				}
 				this.m_AlphaHitTestMinimumThreshold = value;
 			}
 		}
@@ -576,7 +584,10 @@ namespace UnityEngine.UI
 					if (this.m_FillCenter || j != 1 || k != 1)
 					{
 						int num4 = k + 1;
-						Image.AddQuad(toFill, new Vector2(Image.s_VertScratch[j].x, Image.s_VertScratch[k].y), new Vector2(Image.s_VertScratch[num3].x, Image.s_VertScratch[num4].y), this.color, new Vector2(Image.s_UVScratch[j].x, Image.s_UVScratch[k].y), new Vector2(Image.s_UVScratch[num3].x, Image.s_UVScratch[num4].y));
+						if (Image.s_VertScratch[num3].x - Image.s_VertScratch[j].x > 0f && Image.s_VertScratch[num4].y - Image.s_VertScratch[k].y > 0f)
+						{
+							Image.AddQuad(toFill, new Vector2(Image.s_VertScratch[j].x, Image.s_VertScratch[k].y), new Vector2(Image.s_VertScratch[num3].x, Image.s_VertScratch[num4].y), this.color, new Vector2(Image.s_UVScratch[j].x, Image.s_UVScratch[k].y), new Vector2(Image.s_UVScratch[num3].x, Image.s_UVScratch[num4].y));
+						}
 					}
 				}
 			}
@@ -622,7 +633,7 @@ namespace UnityEngine.UI
 			{
 				num2 = num4 - y;
 			}
-			if (this.activeSprite != null && (this.hasBorder || this.activeSprite.packed || this.activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
+			if (this.activeSprite != null && (this.hasBorder || this.activeSprite.packed || (this.activeSprite.texture != null && this.activeSprite.texture.wrapMode != TextureWrapMode.Repeat)))
 			{
 				long num5;
 				long num6;
@@ -1202,12 +1213,15 @@ namespace UnityEngine.UI
 				return false;
 			}
 			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+			if (this.m_PreserveAspect)
+			{
+				this.PreserveSpriteAspectRatio(ref pixelAdjustedRect, new Vector2((float)this.activeSprite.texture.width, (float)this.activeSprite.texture.height));
+			}
 			vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
 			vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
 			vector = this.MapCoordinate(vector, pixelAdjustedRect);
-			Rect textureRect = this.activeSprite.textureRect;
-			float num = (textureRect.x + vector.x) / (float)this.activeSprite.texture.width;
-			float num2 = (textureRect.y + vector.y) / (float)this.activeSprite.texture.height;
+			float num = vector.x / (float)this.activeSprite.texture.width;
+			float num2 = vector.y / (float)this.activeSprite.texture.height;
 			bool flag;
 			try
 			{
@@ -1226,7 +1240,7 @@ namespace UnityEngine.UI
 			Rect rect2 = this.activeSprite.rect;
 			if (this.type == Image.Type.Simple || this.type == Image.Type.Filled)
 			{
-				return new Vector2(local.x * rect2.width / rect.width, local.y * rect2.height / rect.height);
+				return new Vector2(rect2.position.x + local.x * rect2.width / rect.width, rect2.position.y + local.y * rect2.height / rect.height);
 			}
 			Vector4 border = this.activeSprite.border;
 			Vector4 adjustedBorders = this.GetAdjustedBorders(border / this.pixelsPerUnit, rect);
@@ -1257,7 +1271,7 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			return local;
+			return local + rect2.position;
 		}
 
 		private static void RebuildImage(SpriteAtlas spriteAtlas)
@@ -1292,6 +1306,23 @@ namespace UnityEngine.UI
 		{
 			this.SetMaterialDirty();
 			this.SetVerticesDirty();
+			base.SetRaycastDirty();
+		}
+
+		[CompilerGenerated]
+		private void <set_sprite>g__ResetAlphaHitThresholdIfNeeded|11_0()
+		{
+			if (!this.<set_sprite>g__SpriteSupportsAlphaHitTest|11_1() && this.m_AlphaHitTestMinimumThreshold > 0f)
+			{
+				Debug.LogWarning("Sprite was changed for one not readable or with Crunch Compression. Resetting the AlphaHitThreshold to 0.", this);
+				this.m_AlphaHitTestMinimumThreshold = 0f;
+			}
+		}
+
+		[CompilerGenerated]
+		private bool <set_sprite>g__SpriteSupportsAlphaHitTest|11_1()
+		{
+			return this.m_Sprite != null && this.m_Sprite.texture != null && !GraphicsFormatUtility.IsCrunchFormat(this.m_Sprite.texture.format) && this.m_Sprite.texture.isReadable;
 		}
 
 		protected static Material s_ETC1DefaultUI = null;

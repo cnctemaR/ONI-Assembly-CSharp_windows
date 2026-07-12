@@ -732,11 +732,6 @@ namespace System.Xml.Xsl.Qil
 			return XmlQueryTypeFactory.StringX;
 		}
 
-		public XmlQueryType CheckDeepCopy(QilUnary node)
-		{
-			return node.XmlType;
-		}
-
 		public XmlQueryType CheckTypeAssert(QilTargetType node)
 		{
 			return node.TargetType;

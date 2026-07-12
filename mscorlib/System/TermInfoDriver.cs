@@ -114,72 +114,78 @@ namespace System
 			{
 				if (!this.inited)
 				{
-					this.inited = true;
-					if (!ConsoleDriver.IsConsole)
+					try
 					{
-						throw new IOException("Not a tty.");
-					}
-					ConsoleDriver.SetEcho(false);
-					string text = null;
-					this.keypadXmit = this.reader.Get(TermInfoStrings.KeypadXmit);
-					this.keypadLocal = this.reader.Get(TermInfoStrings.KeypadLocal);
-					if (this.keypadXmit != null)
-					{
-						this.WriteConsole(this.keypadXmit);
-						if (this.keypadLocal != null)
+						if (!ConsoleDriver.IsConsole)
 						{
-							text += this.keypadLocal;
+							throw new IOException("Not a tty.");
+						}
+						ConsoleDriver.SetEcho(false);
+						string text = null;
+						this.keypadXmit = this.reader.Get(TermInfoStrings.KeypadXmit);
+						this.keypadLocal = this.reader.Get(TermInfoStrings.KeypadLocal);
+						if (this.keypadXmit != null)
+						{
+							this.WriteConsole(this.keypadXmit);
+							if (this.keypadLocal != null)
+							{
+								text += this.keypadLocal;
+							}
+						}
+						this.origPair = this.reader.Get(TermInfoStrings.OrigPair);
+						this.origColors = this.reader.Get(TermInfoStrings.OrigColors);
+						this.setfgcolor = this.reader.Get(TermInfoStrings.SetAForeground);
+						this.setbgcolor = this.reader.Get(TermInfoStrings.SetABackground);
+						this.maxColors = this.reader.Get(TermInfoNumbers.MaxColors);
+						this.maxColors = Math.Max(Math.Min(this.maxColors, 16), 1);
+						string text2 = ((this.origColors == null) ? this.origPair : this.origColors);
+						if (text2 != null)
+						{
+							text += text2;
+						}
+						if (!ConsoleDriver.TtySetup(this.keypadXmit, text, out this.control_characters, out TermInfoDriver.native_terminal_size))
+						{
+							this.control_characters = new byte[17];
+							TermInfoDriver.native_terminal_size = null;
+						}
+						this.stdin = new StreamReader(Console.OpenStandardInput(0), Console.InputEncoding);
+						this.clear = this.reader.Get(TermInfoStrings.ClearScreen);
+						this.bell = this.reader.Get(TermInfoStrings.Bell);
+						if (this.clear == null)
+						{
+							this.clear = this.reader.Get(TermInfoStrings.CursorHome);
+							this.clear += this.reader.Get(TermInfoStrings.ClrEos);
+						}
+						this.csrVisible = this.reader.Get(TermInfoStrings.CursorNormal);
+						if (this.csrVisible == null)
+						{
+							this.csrVisible = this.reader.Get(TermInfoStrings.CursorVisible);
+						}
+						this.csrInvisible = this.reader.Get(TermInfoStrings.CursorInvisible);
+						if (this.term == "cygwin" || this.term == "linux" || (this.term != null && this.term.StartsWith("xterm")) || this.term == "rxvt" || this.term == "dtterm")
+						{
+							this.titleFormat = "\u001b]0;{0}\a";
+						}
+						else if (this.term == "iris-ansi")
+						{
+							this.titleFormat = "\u001bP1.y{0}\u001b\\";
+						}
+						else if (this.term == "sun-cmd")
+						{
+							this.titleFormat = "\u001b]l{0}\u001b\\";
+						}
+						this.cursorAddress = this.reader.Get(TermInfoStrings.CursorAddress);
+						this.GetCursorPosition();
+						if (this.noGetPosition)
+						{
+							this.WriteConsole(this.clear);
+							this.cursorLeft = 0;
+							this.cursorTop = 0;
 						}
 					}
-					this.origPair = this.reader.Get(TermInfoStrings.OrigPair);
-					this.origColors = this.reader.Get(TermInfoStrings.OrigColors);
-					this.setfgcolor = this.reader.Get(TermInfoStrings.SetAForeground);
-					this.setbgcolor = this.reader.Get(TermInfoStrings.SetABackground);
-					this.maxColors = this.reader.Get(TermInfoNumbers.MaxColors);
-					this.maxColors = Math.Max(Math.Min(this.maxColors, 16), 1);
-					string text2 = ((this.origColors == null) ? this.origPair : this.origColors);
-					if (text2 != null)
+					finally
 					{
-						text += text2;
-					}
-					if (!ConsoleDriver.TtySetup(this.keypadXmit, text, out this.control_characters, out TermInfoDriver.native_terminal_size))
-					{
-						this.control_characters = new byte[17];
-						TermInfoDriver.native_terminal_size = null;
-					}
-					this.stdin = new StreamReader(Console.OpenStandardInput(0), Console.InputEncoding);
-					this.clear = this.reader.Get(TermInfoStrings.ClearScreen);
-					this.bell = this.reader.Get(TermInfoStrings.Bell);
-					if (this.clear == null)
-					{
-						this.clear = this.reader.Get(TermInfoStrings.CursorHome);
-						this.clear += this.reader.Get(TermInfoStrings.ClrEos);
-					}
-					this.csrVisible = this.reader.Get(TermInfoStrings.CursorNormal);
-					if (this.csrVisible == null)
-					{
-						this.csrVisible = this.reader.Get(TermInfoStrings.CursorVisible);
-					}
-					this.csrInvisible = this.reader.Get(TermInfoStrings.CursorInvisible);
-					if (this.term == "cygwin" || this.term == "linux" || (this.term != null && this.term.StartsWith("xterm")) || this.term == "rxvt" || this.term == "dtterm")
-					{
-						this.titleFormat = "\u001b]0;{0}\a";
-					}
-					else if (this.term == "iris-ansi")
-					{
-						this.titleFormat = "\u001bP1.y{0}\u001b\\";
-					}
-					else if (this.term == "sun-cmd")
-					{
-						this.titleFormat = "\u001b]l{0}\u001b\\";
-					}
-					this.cursorAddress = this.reader.Get(TermInfoStrings.CursorAddress);
-					this.GetCursorPosition();
-					if (this.noGetPosition)
-					{
-						this.WriteConsole(this.clear);
-						this.cursorLeft = 0;
-						this.cursorTop = 0;
+						this.inited = true;
 					}
 				}
 			}
@@ -280,6 +286,10 @@ namespace System
 
 		private void ChangeColor(string format, ConsoleColor color)
 		{
+			if (string.IsNullOrEmpty(format))
+			{
+				return;
+			}
 			if ((color & (ConsoleColor)(-16)) != ConsoleColor.Black)
 			{
 				throw new ArgumentException("Invalid Console Color");

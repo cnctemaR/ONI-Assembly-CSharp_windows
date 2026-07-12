@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
 
 		public virtual void Add(IPAddressInformation address)
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		internal void InternalAdd(IPAddressInformation address)
@@ -67,12 +67,12 @@ namespace System.Net.NetworkInformation
 
 		public virtual bool Remove(IPAddressInformation address)
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		public virtual void Clear()
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		private Collection<IPAddressInformation> addresses = new Collection<IPAddressInformation>();

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.Threading
 {
 	[DebuggerDisplay("Initial Count={InitialCount}, Current Count={CurrentCount}")]
-	[ComVisible(false)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class CountdownEvent : IDisposable
 	{
 		public CountdownEvent(int initialCount)
@@ -16,12 +12,12 @@ namespace System.Threading
 			{
 				throw new ArgumentOutOfRangeException("initialCount");
 			}
-			this.m_initialCount = initialCount;
-			this.m_currentCount = initialCount;
-			this.m_event = new ManualResetEventSlim();
+			this._initialCount = initialCount;
+			this._currentCount = initialCount;
+			this._event = new ManualResetEventSlim();
 			if (initialCount == 0)
 			{
-				this.m_event.Set();
+				this._event.Set();
 			}
 		}
 
@@ -29,7 +25,7 @@ namespace System.Threading
 		{
 			get
 			{
-				int currentCount = this.m_currentCount;
+				int currentCount = this._currentCount;
 				if (currentCount >= 0)
 				{
 					return currentCount;
@@ -42,7 +38,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_initialCount;
+				return this._initialCount;
 			}
 		}
 
@@ -50,7 +46,7 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.m_currentCount <= 0;
+				return this._currentCount <= 0;
 			}
 		}
 
@@ -59,7 +55,7 @@ namespace System.Threading
 			get
 			{
 				this.ThrowIfDisposed();
-				return this.m_event.WaitHandle;
+				return this._event.WaitHandle;
 			}
 		}
 
@@ -73,27 +69,27 @@ namespace System.Threading
 		{
 			if (disposing)
 			{
-				this.m_event.Dispose();
-				this.m_disposed = true;
+				this._event.Dispose();
+				this._disposed = true;
 			}
 		}
 
 		public bool Signal()
 		{
 			this.ThrowIfDisposed();
-			if (this.m_currentCount <= 0)
+			if (this._currentCount <= 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Invalid attempt made to decrement the event's count below zero."));
+				throw new InvalidOperationException("Invalid attempt made to decrement the event's count below zero.");
 			}
-			int num = Interlocked.Decrement(ref this.m_currentCount);
+			int num = Interlocked.Decrement(ref this._currentCount);
 			if (num == 0)
 			{
-				this.m_event.Set();
+				this._event.Set();
 				return true;
 			}
 			if (num < 0)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Invalid attempt made to decrement the event's count below zero."));
+				throw new InvalidOperationException("Invalid attempt made to decrement the event's count below zero.");
 			}
 			return false;
 		}
@@ -109,22 +105,22 @@ namespace System.Threading
 			int currentCount;
 			for (;;)
 			{
-				currentCount = this.m_currentCount;
+				currentCount = this._currentCount;
 				if (currentCount < signalCount)
 				{
 					break;
 				}
-				if (Interlocked.CompareExchange(ref this.m_currentCount, currentCount - signalCount, currentCount) == currentCount)
+				if (Interlocked.CompareExchange(ref this._currentCount, currentCount - signalCount, currentCount) == currentCount)
 				{
-					goto IL_0055;
+					goto IL_0050;
 				}
 				spinWait.SpinOnce();
 			}
-			throw new InvalidOperationException(Environment.GetResourceString("Invalid attempt made to decrement the event's count below zero."));
-			IL_0055:
+			throw new InvalidOperationException("Invalid attempt made to decrement the event's count below zero.");
+			IL_0050:
 			if (currentCount == signalCount)
 			{
-				this.m_event.Set();
+				this._event.Set();
 				return true;
 			}
 			return false;
@@ -144,7 +140,7 @@ namespace System.Threading
 		{
 			if (!this.TryAddCount(signalCount))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("The event is already signaled and cannot be incremented."));
+				throw new InvalidOperationException("The event is already signaled and cannot be incremented.");
 			}
 		}
 
@@ -158,7 +154,7 @@ namespace System.Threading
 			SpinWait spinWait = default(SpinWait);
 			for (;;)
 			{
-				int currentCount = this.m_currentCount;
+				int currentCount = this._currentCount;
 				if (currentCount <= 0)
 				{
 					break;
@@ -167,7 +163,7 @@ namespace System.Threading
 				{
 					goto Block_3;
 				}
-				if (Interlocked.CompareExchange(ref this.m_currentCount, currentCount + signalCount, currentCount) == currentCount)
+				if (Interlocked.CompareExchange(ref this._currentCount, currentCount + signalCount, currentCount) == currentCount)
 				{
 					return true;
 				}
@@ -175,12 +171,12 @@ namespace System.Threading
 			}
 			return false;
 			Block_3:
-			throw new InvalidOperationException(Environment.GetResourceString("The increment operation would cause the CurrentCount to overflow."));
+			throw new InvalidOperationException("The increment operation would cause the CurrentCount to overflow.");
 		}
 
 		public void Reset()
 		{
-			this.Reset(this.m_initialCount);
+			this.Reset(this._initialCount);
 		}
 
 		public void Reset(int count)
@@ -190,14 +186,14 @@ namespace System.Threading
 			{
 				throw new ArgumentOutOfRangeException("count");
 			}
-			this.m_currentCount = count;
-			this.m_initialCount = count;
+			this._currentCount = count;
+			this._initialCount = count;
 			if (count == 0)
 			{
-				this.m_event.Set();
+				this._event.Set();
 				return;
 			}
-			this.m_event.Reset();
+			this._event.Reset();
 		}
 
 		public void Wait()
@@ -246,25 +242,25 @@ namespace System.Threading
 			bool flag = this.IsSet;
 			if (!flag)
 			{
-				flag = this.m_event.Wait(millisecondsTimeout, cancellationToken);
+				flag = this._event.Wait(millisecondsTimeout, cancellationToken);
 			}
 			return flag;
 		}
 
 		private void ThrowIfDisposed()
 		{
-			if (this.m_disposed)
+			if (this._disposed)
 			{
 				throw new ObjectDisposedException("CountdownEvent");
 			}
 		}
 
-		private int m_initialCount;
+		private int _initialCount;
 
-		private volatile int m_currentCount;
+		private volatile int _currentCount;
 
-		private ManualResetEventSlim m_event;
+		private ManualResetEventSlim _event;
 
-		private volatile bool m_disposed;
+		private volatile bool _disposed;
 	}
 }

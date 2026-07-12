@@ -69,7 +69,7 @@ namespace System.Net
 			{
 				query = query.Substring(1);
 			}
-			foreach (string text in query.Split(new char[] { '&' }))
+			foreach (string text in query.Split('&', StringSplitOptions.None))
 			{
 				int num = text.IndexOf('=');
 				if (num == -1)
@@ -118,13 +118,13 @@ namespace System.Net
 			return scheme == "nntp";
 		}
 
-		internal void FinishInitialization()
+		internal bool FinishInitialization()
 		{
 			string text = this.UserHostName;
 			if (this.version > HttpVersion.Version10 && (text == null || text.Length == 0))
 			{
 				this.context.ErrorMessage = "Invalid host name";
-				return;
+				return true;
 			}
 			Uri uri = null;
 			string pathAndQuery;
@@ -153,7 +153,7 @@ namespace System.Net
 			if (!Uri.TryCreate(text2 + pathAndQuery, UriKind.Absolute, out this.url))
 			{
 				this.context.ErrorMessage = WebUtility.HtmlEncode("Invalid url: " + text2 + pathAndQuery);
-				return;
+				return true;
 			}
 			this.CreateQueryString(this.url.Query);
 			this.url = HttpListenerRequestUriBuilder.GetRequestUri(this.raw_url, this.url.Scheme, this.url.Authority, this.url.LocalPath, this.url.Query);
@@ -164,18 +164,19 @@ namespace System.Net
 				if (text3 != null && !this.is_chunked)
 				{
 					this.context.Connection.SendError(null, 501);
-					return;
+					return false;
 				}
 			}
 			if (!this.is_chunked && !this.cl_set && (string.Compare(this.method, "POST", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(this.method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
 			{
 				this.context.Connection.SendError(null, 411);
-				return;
+				return false;
 			}
 			if (string.Compare(this.Headers["Expect"], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
 			{
 				this.context.Connection.GetResponseStream().InternalWrite(HttpListenerRequest._100continue, 0, HttpListenerRequest._100continue.Length);
 			}
+			return true;
 		}
 
 		internal static string Unquote(string str)
@@ -204,7 +205,7 @@ namespace System.Net
 			this.headers.SetInternal(text, text2);
 			if (text3 == "accept-language")
 			{
-				this.user_languages = text2.Split(new char[] { ',' });
+				this.user_languages = text2.Split(',', StringSplitOptions.None);
 				return;
 			}
 			if (!(text3 == "accept"))
@@ -217,7 +218,7 @@ namespace System.Net
 						{
 							return;
 						}
-						goto IL_0155;
+						goto IL_0142;
 					}
 				}
 				else
@@ -248,7 +249,7 @@ namespace System.Net
 					this.referrer = new Uri("http://someone.is.screwing.with.the.headers.com/");
 					return;
 				}
-				IL_0155:
+				IL_0142:
 				if (this.cookies == null)
 				{
 					this.cookies = new CookieCollection();
@@ -322,7 +323,7 @@ namespace System.Net
 				}
 				return;
 			}
-			this.accept_types = text2.Split(new char[] { ',' });
+			this.accept_types = text2.Split(',', StringSplitOptions.None);
 		}
 
 		internal bool FlushInput()

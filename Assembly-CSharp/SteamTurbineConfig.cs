@@ -25,7 +25,7 @@ public class SteamTurbineConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 1f);
 		buildingDef.GeneratorWattageRating = 2000f;
-		buildingDef.GeneratorBaseCapacity = 2000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.Entombable = true;
 		buildingDef.IsFoundation = false;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;

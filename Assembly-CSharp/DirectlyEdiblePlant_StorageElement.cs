@@ -61,6 +61,11 @@ public class DirectlyEdiblePlant_StorageElement : KMonoBehaviour, IPlantConsumpt
 		return this.edibleCellOffsets;
 	}
 
+	public Diet.Info.FoodType GetDietFoodType()
+	{
+		return Diet.Info.FoodType.EatPlantStorage;
+	}
+
 	public CellOffset[] edibleCellOffsets;
 
 	public Tag tagToConsume = Tag.Invalid;

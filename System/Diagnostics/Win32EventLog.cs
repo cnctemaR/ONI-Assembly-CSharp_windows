@@ -665,7 +665,7 @@ namespace System.Diagnostics
 				string text = registryKey.GetValue(valueName) as string;
 				if (text != null)
 				{
-					return text.Split(new char[] { ';' });
+					return text.Split(';', StringSplitOptions.None);
 				}
 			}
 			return new string[0];

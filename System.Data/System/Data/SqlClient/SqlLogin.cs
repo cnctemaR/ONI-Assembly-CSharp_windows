@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security;
 
 namespace System.Data.SqlClient
 {
@@ -26,10 +27,16 @@ namespace System.Data.SqlClient
 
 		internal bool useReplication;
 
+		internal string newPassword = "";
+
 		internal bool useSSPI;
 
 		internal int packetSize = 8000;
 
 		internal bool readOnlyIntent;
+
+		internal SqlCredential credential;
+
+		internal SecureString newSecurePassword;
 	}
 }

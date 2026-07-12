@@ -14,7 +14,13 @@ public abstract class AssignableSlotInstance
 	}
 
 	public AssignableSlotInstance(Assignables assignables, AssignableSlot slot)
+		: this(slot.Id, assignables, slot)
 	{
+	}
+
+	public AssignableSlotInstance(string id, Assignables assignables, AssignableSlot slot)
+	{
+		this.ID = id;
 		this.slot = slot;
 		this.assignables = assignables;
 	}
@@ -58,6 +64,8 @@ public abstract class AssignableSlotInstance
 	{
 		return this.unassigning;
 	}
+
+	public string ID;
 
 	public AssignableSlot slot;
 

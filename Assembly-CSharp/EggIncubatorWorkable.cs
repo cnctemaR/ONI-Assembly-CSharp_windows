@@ -19,7 +19,7 @@ public class EggIncubatorWorkable : Workable
 		this.skillExperienceMultiplier = SKILLS.BARELY_EVER_EXPERIENCE;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		EggIncubator component = base.GetComponent<EggIncubator>();
 		if (component && component.Occupant)

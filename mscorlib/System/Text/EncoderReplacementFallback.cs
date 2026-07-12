@@ -1,13 +1,31 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace System.Text
 {
 	[Serializable]
-	public sealed class EncoderReplacementFallback : EncoderFallback
+	public sealed class EncoderReplacementFallback : EncoderFallback, ISerializable
 	{
 		public EncoderReplacementFallback()
 			: this("?")
 		{
+		}
+
+		internal EncoderReplacementFallback(SerializationInfo info, StreamingContext context)
+		{
+			try
+			{
+				this._strDefault = info.GetString("strDefault");
+			}
+			catch
+			{
+				this._strDefault = info.GetString("_strDefault");
+			}
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			info.AddValue("strDefault", this._strDefault);
 		}
 
 		public EncoderReplacementFallback(string replacement)
@@ -46,16 +64,16 @@ namespace System.Text
 			}
 			if (flag)
 			{
-				throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points.", new object[] { "replacement" }));
+				throw new ArgumentException(SR.Format("String contains invalid Unicode code points.", "replacement"));
 			}
-			this.strDefault = replacement;
+			this._strDefault = replacement;
 		}
 
 		public string DefaultString
 		{
 			get
 			{
-				return this.strDefault;
+				return this._strDefault;
 			}
 		}
 
@@ -68,21 +86,21 @@ namespace System.Text
 		{
 			get
 			{
-				return this.strDefault.Length;
+				return this._strDefault.Length;
 			}
 		}
 
 		public override bool Equals(object value)
 		{
 			EncoderReplacementFallback encoderReplacementFallback = value as EncoderReplacementFallback;
-			return encoderReplacementFallback != null && this.strDefault == encoderReplacementFallback.strDefault;
+			return encoderReplacementFallback != null && this._strDefault == encoderReplacementFallback._strDefault;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.strDefault.GetHashCode();
+			return this._strDefault.GetHashCode();
 		}
 
-		private string strDefault;
+		private string _strDefault;
 	}
 }

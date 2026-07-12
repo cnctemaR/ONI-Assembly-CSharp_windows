@@ -18,7 +18,7 @@ namespace MS.Internal.Xml.XPath
 		public XPathDescendantIterator(XPathDescendantIterator it)
 			: base(it)
 		{
-			this.level = it.level;
+			this._level = it._level;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -41,18 +41,18 @@ namespace MS.Internal.Xml.XPath
 			{
 				if (!this.nav.MoveToFirstChild())
 				{
-					while (this.level != 0)
+					while (this._level != 0)
 					{
 						if (this.nav.MoveToNext())
 						{
 							goto IL_0078;
 						}
 						this.nav.MoveToParent();
-						this.level--;
+						this._level--;
 					}
 					break;
 				}
-				this.level++;
+				this._level++;
 				IL_0078:
 				if (this.Matches)
 				{
@@ -65,6 +65,6 @@ namespace MS.Internal.Xml.XPath
 			return true;
 		}
 
-		private int level;
+		private int _level;
 	}
 }

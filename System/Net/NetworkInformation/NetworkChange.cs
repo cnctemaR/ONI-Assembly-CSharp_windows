@@ -68,6 +68,10 @@ namespace System.Net.NetworkInformation
 			{
 				return;
 			}
+			if (NetworkChange.IsWindows)
+			{
+				throw new PlatformNotSupportedException("NetworkInformation.NetworkChange is not supported on the current platform.");
+			}
 			try
 			{
 				NetworkChange.networkChange = new MacNetworkChange();
@@ -75,6 +79,15 @@ namespace System.Net.NetworkInformation
 			catch
 			{
 				NetworkChange.networkChange = new LinuxNetworkChange();
+			}
+		}
+
+		private static bool IsWindows
+		{
+			get
+			{
+				PlatformID platform = Environment.OSVersion.Platform;
+				return platform == PlatformID.Win32S || platform == PlatformID.Win32Windows || platform == PlatformID.Win32NT || platform == PlatformID.WinCE;
 			}
 		}
 

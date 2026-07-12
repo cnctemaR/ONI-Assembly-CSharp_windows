@@ -25,7 +25,7 @@ public class MorbRoverMakerWorkable : Workable
 		base.OnSpawn();
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 	}

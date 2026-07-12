@@ -1,0 +1,35 @@
+﻿using System;
+
+namespace UnityEngine.UIElements
+{
+	internal class VisualElementFocusChangeTarget : FocusChangeDirection
+	{
+		public static VisualElementFocusChangeTarget GetPooled(Focusable target)
+		{
+			VisualElementFocusChangeTarget visualElementFocusChangeTarget = VisualElementFocusChangeTarget.Pool.Get();
+			visualElementFocusChangeTarget.target = target;
+			return visualElementFocusChangeTarget;
+		}
+
+		protected override void Dispose()
+		{
+			this.target = null;
+			VisualElementFocusChangeTarget.Pool.Release(this);
+		}
+
+		internal override void ApplyTo(FocusController focusController, Focusable f)
+		{
+			focusController.selectedTextElement = null;
+			f.Focus();
+		}
+
+		public VisualElementFocusChangeTarget()
+			: base(FocusChangeDirection.unspecified)
+		{
+		}
+
+		public Focusable target { get; private set; }
+
+		private static readonly ObjectPool<VisualElementFocusChangeTarget> Pool = new ObjectPool<VisualElementFocusChangeTarget>(() => new VisualElementFocusChangeTarget(), 100);
+	}
+}

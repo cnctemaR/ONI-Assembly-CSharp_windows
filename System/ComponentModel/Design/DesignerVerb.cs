@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text.RegularExpressions;
 
 namespace System.ComponentModel.Design
 {
-	[ComVisible(true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	public class DesignerVerb : MenuCommand
 	{
 		public DesignerVerb(string text, EventHandler handler)

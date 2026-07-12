@@ -12,9 +12,9 @@ namespace System.Net.WebSockets
 {
 	internal sealed class ManagedWebSocket : WebSocket
 	{
-		public static ManagedWebSocket CreateFromConnectedStream(Stream stream, bool isServer, string subprotocol, TimeSpan keepAliveInterval, int receiveBufferSize, ArraySegment<byte>? receiveBuffer = null)
+		public static ManagedWebSocket CreateFromConnectedStream(Stream stream, bool isServer, string subprotocol, TimeSpan keepAliveInterval)
 		{
-			return new ManagedWebSocket(stream, isServer, subprotocol, keepAliveInterval, receiveBufferSize, receiveBuffer);
+			return new ManagedWebSocket(stream, isServer, subprotocol, keepAliveInterval);
 		}
 
 		private object StateUpdateLock
@@ -33,20 +33,12 @@ namespace System.Net.WebSockets
 			}
 		}
 
-		private ManagedWebSocket(Stream stream, bool isServer, string subprotocol, TimeSpan keepAliveInterval, int receiveBufferSize, ArraySegment<byte>? receiveBuffer)
+		private ManagedWebSocket(Stream stream, bool isServer, string subprotocol, TimeSpan keepAliveInterval)
 		{
 			this._stream = stream;
 			this._isServer = isServer;
 			this._subprotocol = subprotocol;
-			if (receiveBuffer != null && receiveBuffer.GetValueOrDefault().Array != null && receiveBuffer.GetValueOrDefault().Offset == 0 && receiveBuffer.GetValueOrDefault().Count == receiveBuffer.GetValueOrDefault().Array.Length && receiveBuffer.GetValueOrDefault().Count >= 14)
-			{
-				this._receiveBuffer = receiveBuffer.Value.Array;
-			}
-			else
-			{
-				this._receiveBufferFromPool = true;
-				this._receiveBuffer = ArrayPool<byte>.Shared.Rent(Math.Max(receiveBufferSize, 14));
-			}
+			this._receiveBuffer = new byte[125];
 			this._abortSource.Token.Register(delegate(object s)
 			{
 				ManagedWebSocket managedWebSocket = (ManagedWebSocket)s;
@@ -93,12 +85,6 @@ namespace System.Net.WebSockets
 				{
 					stream.Dispose();
 				}
-				if (this._receiveBufferFromPool)
-				{
-					byte[] receiveBuffer = this._receiveBuffer;
-					this._receiveBuffer = null;
-					ArrayPool<byte>.Shared.Return(receiveBuffer, false);
-				}
 				if (this._state < WebSocketState.Aborted)
 				{
 					this._state = WebSocketState.Closed;
@@ -142,23 +128,30 @@ namespace System.Net.WebSockets
 		{
 			if (messageType != WebSocketMessageType.Text && messageType != WebSocketMessageType.Binary)
 			{
-				throw new ArgumentException(global::SR.Format("The message type '{0}' is not allowed for the '{1}' operation. Valid message types are: '{2}, {3}'. To close the WebSocket, use the '{4}' operation instead. ", new object[] { "Close", "SendAsync", "Binary", "Text", "CloseOutputAsync" }), "messageType");
+				throw new ArgumentException(SR.Format("The message type '{0}' is not allowed for the '{1}' operation. Valid message types are: '{2}, {3}'. To close the WebSocket, use the '{4}' operation instead. ", new object[] { "Close", "SendAsync", "Binary", "Text", "CloseOutputAsync" }), "messageType");
 			}
 			WebSocketValidate.ValidateArraySegment(buffer, "buffer");
+			return this.SendPrivateAsync(buffer, messageType, endOfMessage, cancellationToken).AsTask();
+		}
+
+		private ValueTask SendPrivateAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+		{
+			if (messageType != WebSocketMessageType.Text && messageType != WebSocketMessageType.Binary)
+			{
+				throw new ArgumentException(SR.Format("The message type '{0}' is not allowed for the '{1}' operation. Valid message types are: '{2}, {3}'. To close the WebSocket, use the '{4}' operation instead. ", new object[] { "Close", "SendAsync", "Binary", "Text", "CloseOutputAsync" }), "messageType");
+			}
 			try
 			{
 				WebSocketValidate.ThrowIfInvalidState(this._state, this._disposed, ManagedWebSocket.s_validSendStates);
-				this.ThrowIfOperationInProgress(this._lastSendAsync, "SendAsync");
 			}
 			catch (Exception ex)
 			{
-				return Task.FromException(ex);
+				return new ValueTask(Task.FromException(ex));
 			}
 			ManagedWebSocket.MessageOpcode messageOpcode = (this._lastSendWasFragment ? ManagedWebSocket.MessageOpcode.Continuation : ((messageType == WebSocketMessageType.Binary) ? ManagedWebSocket.MessageOpcode.Binary : ManagedWebSocket.MessageOpcode.Text));
-			Task task = this.SendFrameAsync(messageOpcode, endOfMessage, buffer, cancellationToken);
+			ValueTask valueTask = this.SendFrameAsync(messageOpcode, endOfMessage, buffer, cancellationToken);
 			this._lastSendWasFragment = !endOfMessage;
-			this._lastSendAsync = task;
-			return task;
+			return valueTask;
 		}
 
 		public override Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken)
@@ -171,8 +164,8 @@ namespace System.Net.WebSockets
 				object receiveAsyncLock = this.ReceiveAsyncLock;
 				lock (receiveAsyncLock)
 				{
-					this.ThrowIfOperationInProgress(this._lastReceiveAsync, "ReceiveAsync");
-					Task<WebSocketReceiveResult> task = this.ReceiveAsyncPrivate(buffer, cancellationToken);
+					this.ThrowIfOperationInProgress(this._lastReceiveAsync.IsCompleted, "ReceiveAsync");
+					Task<WebSocketReceiveResult> task = this.ReceiveAsyncPrivate<ManagedWebSocket.WebSocketReceiveResultGetter, WebSocketReceiveResult>(buffer, cancellationToken, default(ManagedWebSocket.WebSocketReceiveResultGetter)).AsTask();
 					this._lastReceiveAsync = task;
 					task2 = task;
 				}
@@ -218,86 +211,90 @@ namespace System.Net.WebSockets
 			this.Dispose();
 		}
 
-		private Task SendFrameAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ArraySegment<byte> payloadBuffer, CancellationToken cancellationToken)
+		private ValueTask SendFrameAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer, CancellationToken cancellationToken)
 		{
 			if (!cancellationToken.CanBeCanceled && this._sendFrameAsyncLock.Wait(0))
 			{
 				return this.SendFrameLockAcquiredNonCancelableAsync(opcode, endOfMessage, payloadBuffer);
 			}
-			return this.SendFrameFallbackAsync(opcode, endOfMessage, payloadBuffer, cancellationToken);
+			return new ValueTask(this.SendFrameFallbackAsync(opcode, endOfMessage, payloadBuffer, cancellationToken));
 		}
 
-		private Task SendFrameLockAcquiredNonCancelableAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ArraySegment<byte> payloadBuffer)
+		private ValueTask SendFrameLockAcquiredNonCancelableAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer)
 		{
-			Task task = null;
+			ValueTask valueTask = default(ValueTask);
 			bool flag = true;
 			try
 			{
-				int num = this.WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer);
-				task = this._stream.WriteAsync(this._sendBuffer, 0, num, CancellationToken.None);
-				if (task.IsCompleted)
+				int num = this.WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer.Span);
+				valueTask = this._stream.WriteAsync(new ReadOnlyMemory<byte>(this._sendBuffer, 0, num), default(CancellationToken));
+				if (valueTask.IsCompleted)
 				{
-					return task;
+					return valueTask;
 				}
 				flag = false;
 			}
 			catch (Exception ex)
 			{
-				return Task.FromException((this._state == WebSocketState.Aborted) ? ManagedWebSocket.CreateOperationCanceledException(ex, default(CancellationToken)) : new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex));
+				return new ValueTask(Task.FromException((ex is OperationCanceledException) ? ex : ((this._state == WebSocketState.Aborted) ? ManagedWebSocket.CreateOperationCanceledException(ex, default(CancellationToken)) : new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex))));
 			}
 			finally
 			{
 				if (flag)
 				{
-					this._sendFrameAsyncLock.Release();
 					this.ReleaseSendBuffer();
+					this._sendFrameAsyncLock.Release();
 				}
 			}
-			return task.ContinueWith(delegate(Task t, object s)
-			{
-				ManagedWebSocket managedWebSocket = (ManagedWebSocket)s;
-				managedWebSocket._sendFrameAsyncLock.Release();
-				managedWebSocket.ReleaseSendBuffer();
-				try
-				{
-					t.GetAwaiter().GetResult();
-				}
-				catch (Exception ex2)
-				{
-					throw (managedWebSocket._state == WebSocketState.Aborted) ? ManagedWebSocket.CreateOperationCanceledException(ex2, default(CancellationToken)) : new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex2);
-				}
-			}, this, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+			return new ValueTask(this.WaitForWriteTaskAsync(valueTask));
 		}
 
-		private async Task SendFrameFallbackAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ArraySegment<byte> payloadBuffer, CancellationToken cancellationToken)
+		private async Task WaitForWriteTaskAsync(ValueTask writeTask)
+		{
+			try
+			{
+				await writeTask.ConfigureAwait(false);
+			}
+			catch (Exception ex) when (!(ex is OperationCanceledException))
+			{
+				throw (this._state == WebSocketState.Aborted) ? ManagedWebSocket.CreateOperationCanceledException(ex, default(CancellationToken)) : new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex);
+			}
+			finally
+			{
+				this.ReleaseSendBuffer();
+				this._sendFrameAsyncLock.Release();
+			}
+		}
+
+		private async Task SendFrameFallbackAsync(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer, CancellationToken cancellationToken)
 		{
 			await this._sendFrameAsyncLock.WaitAsync().ConfigureAwait(false);
 			try
 			{
-				int num = this.WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer);
+				int num = this.WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer.Span);
 				using (cancellationToken.Register(delegate(object s)
 				{
 					((ManagedWebSocket)s).Abort();
 				}, this))
 				{
-					await this._stream.WriteAsync(this._sendBuffer, 0, num, cancellationToken).ConfigureAwait(false);
+					await this._stream.WriteAsync(new ReadOnlyMemory<byte>(this._sendBuffer, 0, num), cancellationToken).ConfigureAwait(false);
 				}
 				CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (!(ex is OperationCanceledException))
 			{
 				throw (this._state == WebSocketState.Aborted) ? ManagedWebSocket.CreateOperationCanceledException(ex, cancellationToken) : new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex);
 			}
 			finally
 			{
-				this._sendFrameAsyncLock.Release();
 				this.ReleaseSendBuffer();
+				this._sendFrameAsyncLock.Release();
 			}
 		}
 
-		private int WriteFrameToSendBuffer(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ArraySegment<byte> payloadBuffer)
+		private int WriteFrameToSendBuffer(ManagedWebSocket.MessageOpcode opcode, bool endOfMessage, ReadOnlySpan<byte> payloadBuffer)
 		{
-			this.AllocateSendBuffer(payloadBuffer.Count + 14);
+			this.AllocateSendBuffer(payloadBuffer.Length + 14);
 			int? num = null;
 			int num2;
 			if (this._isServer)
@@ -309,33 +306,35 @@ namespace System.Net.WebSockets
 				num = new int?(ManagedWebSocket.WriteHeader(opcode, this._sendBuffer, payloadBuffer, endOfMessage, true));
 				num2 = num.GetValueOrDefault() + 4;
 			}
-			if (payloadBuffer.Count > 0)
+			if (payloadBuffer.Length > 0)
 			{
-				Buffer.BlockCopy(payloadBuffer.Array, payloadBuffer.Offset, this._sendBuffer, num2, payloadBuffer.Count);
+				payloadBuffer.CopyTo(new Span<byte>(this._sendBuffer, num2, payloadBuffer.Length));
 				if (num != null)
 				{
-					ManagedWebSocket.ApplyMask(this._sendBuffer, num2, this._sendBuffer, num.Value, 0, (long)payloadBuffer.Count);
+					ManagedWebSocket.ApplyMask(new Span<byte>(this._sendBuffer, num2, payloadBuffer.Length), this._sendBuffer, num.Value, 0);
 				}
 			}
-			return num2 + payloadBuffer.Count;
+			return num2 + payloadBuffer.Length;
 		}
 
 		private void SendKeepAliveFrameAsync()
 		{
 			if (this._sendFrameAsyncLock.Wait(0))
 			{
-				Task task = this.SendFrameLockAcquiredNonCancelableAsync(ManagedWebSocket.MessageOpcode.Ping, true, new ArraySegment<byte>(Array.Empty<byte>()));
-				if (!task.IsCompletedSuccessfully)
+				ValueTask valueTask = this.SendFrameLockAcquiredNonCancelableAsync(ManagedWebSocket.MessageOpcode.Ping, true, Memory<byte>.Empty);
+				if (valueTask.IsCompletedSuccessfully)
 				{
-					task.ContinueWith(delegate(Task p)
-					{
-						AggregateException exception = p.Exception;
-					}, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion | TaskContinuationOptions.NotOnCanceled | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+					valueTask.GetAwaiter().GetResult();
+					return;
 				}
+				valueTask.AsTask().ContinueWith(delegate(Task p)
+				{
+					AggregateException exception = p.Exception;
+				}, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion | TaskContinuationOptions.NotOnCanceled | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 			}
 		}
 
-		private static int WriteHeader(ManagedWebSocket.MessageOpcode opcode, byte[] sendBuffer, ArraySegment<byte> payload, bool endOfMessage, bool useMask)
+		private static int WriteHeader(ManagedWebSocket.MessageOpcode opcode, byte[] sendBuffer, ReadOnlySpan<byte> payload, bool endOfMessage, bool useMask)
 		{
 			sendBuffer[0] = (byte)opcode;
 			if (endOfMessage)
@@ -344,22 +343,22 @@ namespace System.Net.WebSockets
 				sendBuffer[num] |= 128;
 			}
 			int num2;
-			if (payload.Count <= 125)
+			if (payload.Length <= 125)
 			{
-				sendBuffer[1] = (byte)payload.Count;
+				sendBuffer[1] = (byte)payload.Length;
 				num2 = 2;
 			}
-			else if (payload.Count <= 65535)
+			else if (payload.Length <= 65535)
 			{
 				sendBuffer[1] = 126;
-				sendBuffer[2] = (byte)(payload.Count / 256);
-				sendBuffer[3] = (byte)payload.Count;
+				sendBuffer[2] = (byte)(payload.Length / 256);
+				sendBuffer[3] = (byte)payload.Length;
 				num2 = 4;
 			}
 			else
 			{
 				sendBuffer[1] = 127;
-				int num3 = payload.Count;
+				int num3 = payload.Length;
 				for (int i = 9; i >= 2; i--)
 				{
 					sendBuffer[i] = (byte)num3;
@@ -381,98 +380,20 @@ namespace System.Net.WebSockets
 			ManagedWebSocket.s_random.GetBytes(buffer, offset, 4);
 		}
 
-		private async Task<WebSocketReceiveResult> ReceiveAsyncPrivate(ArraySegment<byte> payloadBuffer, CancellationToken cancellationToken)
+		private ValueTask<TWebSocketReceiveResult> ReceiveAsyncPrivate<TWebSocketReceiveResultGetter, TWebSocketReceiveResult>(Memory<byte> payloadBuffer, CancellationToken cancellationToken, TWebSocketReceiveResultGetter resultGetter = default(TWebSocketReceiveResultGetter)) where TWebSocketReceiveResultGetter : struct, ManagedWebSocket.IWebSocketReceiveResultGetter<TWebSocketReceiveResult>
 		{
-			WebSocketReceiveResult webSocketReceiveResult;
-			using (cancellationToken.Register(delegate(object s)
-			{
-				((ManagedWebSocket)s).Abort();
-			}, this))
-			{
-				try
-				{
-					ManagedWebSocket.MessageHeader header;
-					for (;;)
-					{
-						header = this._lastReceiveHeader;
-						if (header.PayloadLength == 0L)
-						{
-							if (this._receiveBufferCount < (this._isServer ? 10 : 14))
-							{
-								if (this._receiveBufferCount < 2)
-								{
-									await this.EnsureBufferContainsAsync(2, cancellationToken, true).ConfigureAwait(false);
-								}
-								long num = (long)(this._receiveBuffer[this._receiveBufferOffset + 1] & 127);
-								if (this._isServer || num > 125L)
-								{
-									await this.EnsureBufferContainsAsync(2 + (this._isServer ? 4 : 0) + ((num <= 125L) ? 0 : ((num == 126L) ? 2 : 8)), cancellationToken, true).ConfigureAwait(false);
-								}
-							}
-							if (!this.TryParseMessageHeaderFromReceiveBuffer(out header))
-							{
-								await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, cancellationToken, null).ConfigureAwait(false);
-							}
-							this._receivedMaskOffsetOffset = 0;
-						}
-						if (header.Opcode != ManagedWebSocket.MessageOpcode.Ping && header.Opcode != ManagedWebSocket.MessageOpcode.Pong)
-						{
-							break;
-						}
-						await this.HandleReceivedPingPongAsync(header, cancellationToken).ConfigureAwait(false);
-					}
-					if (header.Opcode == ManagedWebSocket.MessageOpcode.Close)
-					{
-						webSocketReceiveResult = await this.HandleReceivedCloseAsync(header, cancellationToken).ConfigureAwait(false);
-					}
-					else
-					{
-						if (header.Opcode == ManagedWebSocket.MessageOpcode.Continuation)
-						{
-							header.Opcode = this._lastReceiveHeader.Opcode;
-						}
-						int bytesToRead = (int)Math.Min((long)payloadBuffer.Count, header.PayloadLength);
-						if (bytesToRead == 0)
-						{
-							this._lastReceiveHeader = header;
-							webSocketReceiveResult = new WebSocketReceiveResult(0, (header.Opcode == ManagedWebSocket.MessageOpcode.Text) ? WebSocketMessageType.Text : WebSocketMessageType.Binary, header.PayloadLength == 0L && header.Fin);
-						}
-						else
-						{
-							if (this._receiveBufferCount == 0)
-							{
-								await this.EnsureBufferContainsAsync(1, cancellationToken, false).ConfigureAwait(false);
-							}
-							int bytesToCopy = Math.Min(bytesToRead, this._receiveBufferCount);
-							if (this._isServer)
-							{
-								this._receivedMaskOffsetOffset = ManagedWebSocket.ApplyMask(this._receiveBuffer, this._receiveBufferOffset, header.Mask, this._receivedMaskOffsetOffset, (long)bytesToCopy);
-							}
-							Buffer.BlockCopy(this._receiveBuffer, this._receiveBufferOffset, payloadBuffer.Array, payloadBuffer.Offset, bytesToCopy);
-							this.ConsumeFromBuffer(bytesToCopy);
-							header.PayloadLength -= (long)bytesToCopy;
-							if (header.Opcode == ManagedWebSocket.MessageOpcode.Text && !ManagedWebSocket.TryValidateUtf8(new ArraySegment<byte>(payloadBuffer.Array, payloadBuffer.Offset, bytesToCopy), header.Fin && header.PayloadLength == 0L, this._utf8TextState))
-							{
-								await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.InvalidPayloadData, WebSocketError.Faulted, cancellationToken, null).ConfigureAwait(false);
-							}
-							this._lastReceiveHeader = header;
-							webSocketReceiveResult = new WebSocketReceiveResult(bytesToCopy, (header.Opcode == ManagedWebSocket.MessageOpcode.Text) ? WebSocketMessageType.Text : WebSocketMessageType.Binary, bytesToCopy == 0 || (header.Fin && header.PayloadLength == 0L));
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					if (this._state == WebSocketState.Aborted)
-					{
-						throw new OperationCanceledException("Aborted", ex);
-					}
-					throw new WebSocketException(WebSocketError.ConnectionClosedPrematurely, ex);
-				}
-			}
-			return webSocketReceiveResult;
+			ManagedWebSocket.<ReceiveAsyncPrivate>d__61<TWebSocketReceiveResultGetter, TWebSocketReceiveResult> <ReceiveAsyncPrivate>d__;
+			<ReceiveAsyncPrivate>d__.<>4__this = this;
+			<ReceiveAsyncPrivate>d__.payloadBuffer = payloadBuffer;
+			<ReceiveAsyncPrivate>d__.cancellationToken = cancellationToken;
+			<ReceiveAsyncPrivate>d__.resultGetter = resultGetter;
+			<ReceiveAsyncPrivate>d__.<>t__builder = AsyncValueTaskMethodBuilder<TWebSocketReceiveResult>.Create();
+			<ReceiveAsyncPrivate>d__.<>1__state = -1;
+			<ReceiveAsyncPrivate>d__.<>t__builder.Start<ManagedWebSocket.<ReceiveAsyncPrivate>d__61<TWebSocketReceiveResultGetter, TWebSocketReceiveResult>>(ref <ReceiveAsyncPrivate>d__);
+			return <ReceiveAsyncPrivate>d__.<>t__builder.Task;
 		}
 
-		private async Task<WebSocketReceiveResult> HandleReceivedCloseAsync(ManagedWebSocket.MessageHeader header, CancellationToken cancellationToken)
+		private unsafe async Task HandleReceivedCloseAsync(ManagedWebSocket.MessageHeader header, CancellationToken cancellationToken)
 		{
 			object stateUpdateLock = this.StateUpdateLock;
 			lock (stateUpdateLock)
@@ -487,7 +408,7 @@ namespace System.Net.WebSockets
 			string closeStatusDescription = string.Empty;
 			if (header.PayloadLength == 1L)
 			{
-				await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, cancellationToken, null).ConfigureAwait(false);
+				await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, null).ConfigureAwait(false);
 			}
 			else if (header.PayloadLength >= 2L)
 			{
@@ -497,19 +418,19 @@ namespace System.Net.WebSockets
 				}
 				if (this._isServer)
 				{
-					ManagedWebSocket.ApplyMask(this._receiveBuffer, this._receiveBufferOffset, header.Mask, 0, header.PayloadLength);
+					ManagedWebSocket.ApplyMask(this._receiveBuffer.Span.Slice(this._receiveBufferOffset, (int)header.PayloadLength), header.Mask, 0);
 				}
-				closeStatus = (WebSocketCloseStatus)(((int)this._receiveBuffer[this._receiveBufferOffset] << 8) | (int)this._receiveBuffer[this._receiveBufferOffset + 1]);
+				closeStatus = (WebSocketCloseStatus)(((int)(*this._receiveBuffer.Span[this._receiveBufferOffset]) << 8) | (int)(*this._receiveBuffer.Span[this._receiveBufferOffset + 1]));
 				if (!ManagedWebSocket.IsValidCloseStatus(closeStatus))
 				{
-					await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, cancellationToken, null).ConfigureAwait(false);
+					await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, null).ConfigureAwait(false);
 				}
 				if (header.PayloadLength > 2L)
 				{
 					int num = 0;
 					try
 					{
-						closeStatusDescription = ManagedWebSocket.s_textEncoding.GetString(this._receiveBuffer, this._receiveBufferOffset + 2, (int)header.PayloadLength - 2);
+						closeStatusDescription = ManagedWebSocket.s_textEncoding.GetString(this._receiveBuffer.Span.Slice(this._receiveBufferOffset + 2, (int)header.PayloadLength - 2));
 					}
 					catch (DecoderFallbackException stateUpdateLock)
 					{
@@ -517,14 +438,43 @@ namespace System.Net.WebSockets
 					}
 					if (num == 1)
 					{
-						await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, cancellationToken, (DecoderFallbackException)stateUpdateLock).ConfigureAwait(false);
+						await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.ProtocolError, WebSocketError.Faulted, (DecoderFallbackException)stateUpdateLock).ConfigureAwait(false);
 					}
 				}
 				this.ConsumeFromBuffer((int)header.PayloadLength);
 			}
 			this._closeStatus = new WebSocketCloseStatus?(closeStatus);
 			this._closeStatusDescription = closeStatusDescription;
-			return new WebSocketReceiveResult(0, WebSocketMessageType.Close, true, new WebSocketCloseStatus?(closeStatus), closeStatusDescription);
+			if (!this._isServer && this._sentCloseFrame)
+			{
+				await this.WaitForServerToCloseConnectionAsync(cancellationToken).ConfigureAwait(false);
+			}
+		}
+
+		private async Task WaitForServerToCloseConnectionAsync(CancellationToken cancellationToken)
+		{
+			ValueTask<int> valueTask = this._stream.ReadAsync(this._receiveBuffer, cancellationToken);
+			if (!valueTask.IsCompletedSuccessfully)
+			{
+				using (CancellationTokenSource finalCts = new CancellationTokenSource(1000))
+				{
+					using (finalCts.Token.Register(delegate(object s)
+					{
+						((ManagedWebSocket)s).Abort();
+					}, this))
+					{
+						try
+						{
+							await valueTask.ConfigureAwait(false);
+						}
+						catch
+						{
+						}
+					}
+					CancellationTokenRegistration cancellationTokenRegistration = default(CancellationTokenRegistration);
+				}
+				CancellationTokenSource finalCts = null;
+			}
 		}
 
 		private async Task HandleReceivedPingPongAsync(ManagedWebSocket.MessageHeader header, CancellationToken cancellationToken)
@@ -537,9 +487,9 @@ namespace System.Net.WebSockets
 			{
 				if (this._isServer)
 				{
-					ManagedWebSocket.ApplyMask(this._receiveBuffer, this._receiveBufferOffset, header.Mask, 0, header.PayloadLength);
+					ManagedWebSocket.ApplyMask(this._receiveBuffer.Span.Slice(this._receiveBufferOffset, (int)header.PayloadLength), header.Mask, 0);
 				}
-				await this.SendFrameAsync(ManagedWebSocket.MessageOpcode.Pong, true, new ArraySegment<byte>(this._receiveBuffer, this._receiveBufferOffset, (int)header.PayloadLength), cancellationToken).ConfigureAwait(false);
+				await this.SendFrameAsync(ManagedWebSocket.MessageOpcode.Pong, true, this._receiveBuffer.Slice(this._receiveBufferOffset, (int)header.PayloadLength), default(CancellationToken)).ConfigureAwait(false);
 			}
 			if (header.PayloadLength > 0L)
 			{
@@ -552,28 +502,29 @@ namespace System.Net.WebSockets
 			return closeStatus >= WebSocketCloseStatus.NormalClosure && closeStatus < (WebSocketCloseStatus)5000 && (closeStatus >= (WebSocketCloseStatus)3000 || (closeStatus - WebSocketCloseStatus.NormalClosure <= 3 || closeStatus - WebSocketCloseStatus.InvalidPayloadData <= 4));
 		}
 
-		private async Task CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus closeStatus, WebSocketError error, CancellationToken cancellationToken, Exception innerException = null)
+		private async Task CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus closeStatus, WebSocketError error, Exception innerException = null)
 		{
 			if (!this._sentCloseFrame)
 			{
-				await this.CloseOutputAsync(closeStatus, string.Empty, cancellationToken).ConfigureAwait(false);
+				await this.CloseOutputAsync(closeStatus, string.Empty, default(CancellationToken)).ConfigureAwait(false);
 			}
 			this._receiveBufferCount = 0;
 			throw new WebSocketException(error, innerException);
 		}
 
-		private bool TryParseMessageHeaderFromReceiveBuffer(out ManagedWebSocket.MessageHeader resultHeader)
+		private unsafe bool TryParseMessageHeaderFromReceiveBuffer(out ManagedWebSocket.MessageHeader resultHeader)
 		{
 			ManagedWebSocket.MessageHeader messageHeader = default(ManagedWebSocket.MessageHeader);
-			messageHeader.Fin = (this._receiveBuffer[this._receiveBufferOffset] & 128) > 0;
-			bool flag = (this._receiveBuffer[this._receiveBufferOffset] & 112) > 0;
-			messageHeader.Opcode = (ManagedWebSocket.MessageOpcode)(this._receiveBuffer[this._receiveBufferOffset] & 15);
-			bool flag2 = (this._receiveBuffer[this._receiveBufferOffset + 1] & 128) > 0;
-			messageHeader.PayloadLength = (long)(this._receiveBuffer[this._receiveBufferOffset + 1] & 127);
+			Span<byte> span = this._receiveBuffer.Span;
+			messageHeader.Fin = (*span[this._receiveBufferOffset] & 128) > 0;
+			bool flag = (*span[this._receiveBufferOffset] & 112) > 0;
+			messageHeader.Opcode = (ManagedWebSocket.MessageOpcode)(*span[this._receiveBufferOffset] & 15);
+			bool flag2 = (*span[this._receiveBufferOffset + 1] & 128) > 0;
+			messageHeader.PayloadLength = (long)(*span[this._receiveBufferOffset + 1] & 127);
 			this.ConsumeFromBuffer(2);
 			if (messageHeader.PayloadLength == 126L)
 			{
-				messageHeader.PayloadLength = (long)(((int)this._receiveBuffer[this._receiveBufferOffset] << 8) | (int)this._receiveBuffer[this._receiveBufferOffset + 1]);
+				messageHeader.PayloadLength = (long)(((int)(*span[this._receiveBufferOffset]) << 8) | (int)(*span[this._receiveBufferOffset + 1]));
 				this.ConsumeFromBuffer(2);
 			}
 			else if (messageHeader.PayloadLength == 127L)
@@ -581,7 +532,7 @@ namespace System.Net.WebSockets
 				messageHeader.PayloadLength = 0L;
 				for (int i = 0; i < 8; i++)
 				{
-					messageHeader.PayloadLength = (messageHeader.PayloadLength << 8) | (long)((ulong)this._receiveBuffer[this._receiveBufferOffset + i]);
+					messageHeader.PayloadLength = (messageHeader.PayloadLength << 8) | (long)((ulong)(*span[this._receiveBufferOffset + i]));
 				}
 				this.ConsumeFromBuffer(8);
 			}
@@ -592,7 +543,7 @@ namespace System.Net.WebSockets
 				{
 					flag3 = true;
 				}
-				messageHeader.Mask = ManagedWebSocket.CombineMaskBytes(this._receiveBuffer, this._receiveBufferOffset);
+				messageHeader.Mask = ManagedWebSocket.CombineMaskBytes(span, this._receiveBufferOffset);
 				this.ConsumeFromBuffer(4);
 			}
 			switch (messageHeader.Opcode)
@@ -601,29 +552,29 @@ namespace System.Net.WebSockets
 				if (this._lastReceiveHeader.Fin)
 				{
 					flag3 = true;
-					goto IL_01B8;
+					goto IL_01CD;
 				}
-				goto IL_01B8;
+				goto IL_01CD;
 			case ManagedWebSocket.MessageOpcode.Text:
 			case ManagedWebSocket.MessageOpcode.Binary:
 				if (!this._lastReceiveHeader.Fin)
 				{
 					flag3 = true;
-					goto IL_01B8;
+					goto IL_01CD;
 				}
-				goto IL_01B8;
+				goto IL_01CD;
 			case ManagedWebSocket.MessageOpcode.Close:
 			case ManagedWebSocket.MessageOpcode.Ping:
 			case ManagedWebSocket.MessageOpcode.Pong:
 				if (messageHeader.PayloadLength > 125L || !messageHeader.Fin)
 				{
 					flag3 = true;
-					goto IL_01B8;
+					goto IL_01CD;
 				}
-				goto IL_01B8;
+				goto IL_01CD;
 			}
 			flag3 = true;
-			IL_01B8:
+			IL_01CD:
 			resultHeader = messageHeader;
 			return !flag3;
 		}
@@ -641,7 +592,7 @@ namespace System.Net.WebSockets
 				while (!this._receivedCloseFrame)
 				{
 					obj = this.ReceiveAsyncLock;
-					Task<WebSocketReceiveResult> task;
+					Task task;
 					lock (obj)
 					{
 						if (this._receivedCloseFrame)
@@ -649,10 +600,7 @@ namespace System.Net.WebSockets
 							break;
 						}
 						task = this._lastReceiveAsync;
-						if (task == null || (task.Status == TaskStatus.RanToCompletion && task.Result.MessageType != WebSocketMessageType.Close))
-						{
-							task = (this._lastReceiveAsync = this.ReceiveAsyncPrivate(new ArraySegment<byte>(closeBuffer), cancellationToken));
-						}
+						task = (this._lastReceiveAsync = this.ValidateAndReceiveAsync(task, closeBuffer, cancellationToken));
 					}
 					await task.ConfigureAwait(false);
 				}
@@ -691,7 +639,7 @@ namespace System.Net.WebSockets
 				ushort num2 = (ushort)closeStatus;
 				buffer[0] = (byte)(num2 >> 8);
 				buffer[1] = (byte)(num2 & 255);
-				await this.SendFrameAsync(ManagedWebSocket.MessageOpcode.Close, true, new ArraySegment<byte>(buffer, 0, num), cancellationToken).ConfigureAwait(false);
+				await this.SendFrameAsync(ManagedWebSocket.MessageOpcode.Close, true, new Memory<byte>(buffer, 0, num), cancellationToken).ConfigureAwait(false);
 			}
 			finally
 			{
@@ -709,6 +657,10 @@ namespace System.Net.WebSockets
 					this._state = WebSocketState.CloseSent;
 				}
 			}
+			if (!this._isServer && this._receivedCloseFrame)
+			{
+				await this.WaitForServerToCloseConnectionAsync(cancellationToken).ConfigureAwait(false);
+			}
 		}
 
 		private void ConsumeFromBuffer(int count)
@@ -723,26 +675,31 @@ namespace System.Net.WebSockets
 			{
 				if (this._receiveBufferCount > 0)
 				{
-					Buffer.BlockCopy(this._receiveBuffer, this._receiveBufferOffset, this._receiveBuffer, 0, this._receiveBufferCount);
+					this._receiveBuffer.Span.Slice(this._receiveBufferOffset, this._receiveBufferCount).CopyTo(this._receiveBuffer.Span);
 				}
 				this._receiveBufferOffset = 0;
 				while (this._receiveBufferCount < minimumRequiredBytes)
 				{
-					int num = await this._stream.ReadAsync(this._receiveBuffer, this._receiveBufferCount, this._receiveBuffer.Length - this._receiveBufferCount, cancellationToken).ConfigureAwait(false);
-					this._receiveBufferCount += num;
-					if (num == 0)
+					int num = await this._stream.ReadAsync(this._receiveBuffer.Slice(this._receiveBufferCount, this._receiveBuffer.Length - this._receiveBufferCount), cancellationToken).ConfigureAwait(false);
+					if (num <= 0)
 					{
-						if (this._disposed)
-						{
-							throw new ObjectDisposedException("WebSocket");
-						}
-						if (throwOnPrematureClosure)
-						{
-							throw new WebSocketException(WebSocketError.ConnectionClosedPrematurely);
-						}
+						this.ThrowIfEOFUnexpected(throwOnPrematureClosure);
 						break;
 					}
+					this._receiveBufferCount += num;
 				}
+			}
+		}
+
+		private void ThrowIfEOFUnexpected(bool throwOnPrematureClosure)
+		{
+			if (this._disposed)
+			{
+				throw new ObjectDisposedException("WebSocket");
+			}
+			if (throwOnPrematureClosure)
+			{
+				throw new WebSocketException(WebSocketError.ConnectionClosedPrematurely);
 			}
 		}
 
@@ -761,51 +718,43 @@ namespace System.Net.WebSockets
 			}
 		}
 
-		private static int CombineMaskBytes(byte[] buffer, int maskOffset)
+		private static int CombineMaskBytes(Span<byte> buffer, int maskOffset)
 		{
-			return BitConverter.ToInt32(buffer, maskOffset);
+			return BitConverter.ToInt32(buffer.Slice(maskOffset));
 		}
 
-		private static int ApplyMask(byte[] toMask, int toMaskOffset, byte[] mask, int maskOffset, int maskOffsetIndex, long count)
+		private static int ApplyMask(Span<byte> toMask, byte[] mask, int maskOffset, int maskOffsetIndex)
 		{
-			return ManagedWebSocket.ApplyMask(toMask, toMaskOffset, ManagedWebSocket.CombineMaskBytes(mask, maskOffset), maskOffsetIndex, count);
+			return ManagedWebSocket.ApplyMask(toMask, ManagedWebSocket.CombineMaskBytes(mask, maskOffset), maskOffsetIndex);
 		}
 
-		private unsafe static int ApplyMask(byte[] toMask, int toMaskOffset, int mask, int maskIndex, long count)
+		private unsafe static int ApplyMask(Span<byte> toMask, int mask, int maskIndex)
 		{
 			int num = maskIndex * 8;
 			int num2 = (int)(((uint)mask >> num) | (uint)((uint)mask << 32 - num));
-			if (count > 0L)
+			int i = toMask.Length;
+			if (i > 0)
 			{
-				fixed (byte[] array = toMask)
+				fixed (byte* reference = MemoryMarshal.GetReference<byte>(toMask))
 				{
-					byte* ptr;
-					if (toMask == null || array.Length == 0)
+					byte* ptr = reference;
+					if (ptr % 4L == null)
 					{
-						ptr = null;
-					}
-					else
-					{
-						ptr = &array[0];
-					}
-					byte* ptr2 = ptr + toMaskOffset;
-					if (ptr2 % 4L == null)
-					{
-						while (count >= 4L)
+						while (i >= 4)
 						{
-							count -= 4L;
-							*(int*)ptr2 ^= num2;
-							ptr2 += 4;
+							i -= 4;
+							*(int*)ptr ^= num2;
+							ptr += 4;
 						}
 					}
-					if (count > 0L)
+					if (i > 0)
 					{
-						byte* ptr3 = (byte*)(&mask);
-						byte* ptr4 = ptr2 + count;
-						while (ptr2 < ptr4)
+						byte* ptr2 = (byte*)(&mask);
+						byte* ptr3 = ptr + i;
+						while (ptr < ptr3)
 						{
-							byte* ptr5 = ptr2++;
-							*ptr5 ^= ptr3[maskIndex];
+							byte* ptr4 = ptr++;
+							*ptr4 ^= ptr2[maskIndex];
 							maskIndex = (maskIndex + 1) & 3;
 						}
 					}
@@ -814,13 +763,18 @@ namespace System.Net.WebSockets
 			return maskIndex;
 		}
 
-		private void ThrowIfOperationInProgress(Task operationTask, [CallerMemberName] string methodName = null)
+		private void ThrowIfOperationInProgress(bool operationCompleted, [CallerMemberName] string methodName = null)
 		{
-			if (operationTask != null && !operationTask.IsCompleted)
+			if (!operationCompleted)
 			{
 				this.Abort();
-				throw new InvalidOperationException(global::SR.Format("There is already one outstanding '{0}' call for this WebSocket instance. ReceiveAsync and SendAsync can be called simultaneously, but at most one outstanding operation for each of them is allowed at the same time.", methodName));
+				this.ThrowOperationInProgress(methodName);
 			}
+		}
+
+		private void ThrowOperationInProgress(string methodName)
+		{
+			throw new InvalidOperationException(SR.Format("There is already one outstanding '{0}' call for this WebSocket instance. ReceiveAsync and SendAsync can be called simultaneously, but at most one outstanding operation for each of them is allowed at the same time.", methodName));
 		}
 
 		private static Exception CreateOperationCanceledException(Exception innerException, CancellationToken cancellationToken = default(CancellationToken))
@@ -828,15 +782,15 @@ namespace System.Net.WebSockets
 			return new OperationCanceledException(new OperationCanceledException().Message, innerException, cancellationToken);
 		}
 
-		private static bool TryValidateUtf8(ArraySegment<byte> arraySegment, bool endOfMessage, ManagedWebSocket.Utf8MessageState state)
+		private unsafe static bool TryValidateUtf8(Span<byte> span, bool endOfMessage, ManagedWebSocket.Utf8MessageState state)
 		{
-			int i = arraySegment.Offset;
-			while (i < arraySegment.Offset + arraySegment.Count)
+			int i = 0;
+			while (i < span.Length)
 			{
 				if (!state.SequenceInProgress)
 				{
 					state.SequenceInProgress = true;
-					byte b = arraySegment.Array[i];
+					byte b = *span[i];
 					i++;
 					if ((b & 128) == 0)
 					{
@@ -874,9 +828,9 @@ namespace System.Net.WebSockets
 						}
 					}
 				}
-				while (state.AdditionalBytesExpected > 0 && i < arraySegment.Offset + arraySegment.Count)
+				while (state.AdditionalBytesExpected > 0 && i < span.Length)
 				{
-					byte b2 = arraySegment.Array[i];
+					byte b2 = *span[i];
 					if ((b2 & 192) != 128)
 					{
 						return false;
@@ -903,6 +857,24 @@ namespace System.Net.WebSockets
 				}
 			}
 			return !endOfMessage || !state.SequenceInProgress;
+		}
+
+		private Task ValidateAndReceiveAsync(Task receiveTask, byte[] buffer, CancellationToken cancellationToken)
+		{
+			if (receiveTask != null)
+			{
+				if (receiveTask.Status != TaskStatus.RanToCompletion)
+				{
+					return receiveTask;
+				}
+				Task<WebSocketReceiveResult> task = receiveTask as Task<WebSocketReceiveResult>;
+				if (task != null && task.Result.MessageType == WebSocketMessageType.Close)
+				{
+					return receiveTask;
+				}
+			}
+			receiveTask = this.ReceiveAsyncPrivate<ManagedWebSocket.WebSocketReceiveResultGetter, WebSocketReceiveResult>(new ArraySegment<byte>(buffer), cancellationToken, default(ManagedWebSocket.WebSocketReceiveResultGetter)).AsTask();
+			return receiveTask;
 		}
 
 		private static readonly RandomNumberGenerator s_random = RandomNumberGenerator.Create();
@@ -934,7 +906,9 @@ namespace System.Net.WebSockets
 			WebSocketState.CloseSent
 		};
 
-		private const int MaxMessageHeaderLength = 14;
+		private static readonly Task<WebSocketReceiveResult> s_cachedCloseTask = Task.FromResult<WebSocketReceiveResult>(new WebSocketReceiveResult(0, WebSocketMessageType.Close, true));
+
+		internal const int MaxMessageHeaderLength = 14;
 
 		private const int MaxControlPayloadLength = 125;
 
@@ -950,9 +924,7 @@ namespace System.Net.WebSockets
 
 		private readonly CancellationTokenSource _abortSource = new CancellationTokenSource();
 
-		private byte[] _receiveBuffer;
-
-		private readonly bool _receiveBufferFromPool;
+		private Memory<byte> _receiveBuffer;
 
 		private readonly ManagedWebSocket.Utf8MessageState _utf8TextState = new ManagedWebSocket.Utf8MessageState();
 
@@ -986,9 +958,7 @@ namespace System.Net.WebSockets
 
 		private bool _lastSendWasFragment;
 
-		private Task _lastSendAsync;
-
-		private Task<WebSocketReceiveResult> _lastReceiveAsync;
+		private Task _lastReceiveAsync = Task.CompletedTask;
 
 		private sealed class Utf8MessageState
 		{
@@ -1021,6 +991,19 @@ namespace System.Net.WebSockets
 			internal long PayloadLength;
 
 			internal int Mask;
+		}
+
+		private interface IWebSocketReceiveResultGetter<TResult>
+		{
+			TResult GetResult(int count, WebSocketMessageType messageType, bool endOfMessage, WebSocketCloseStatus? closeStatus, string closeDescription);
+		}
+
+		private readonly struct WebSocketReceiveResultGetter : ManagedWebSocket.IWebSocketReceiveResultGetter<WebSocketReceiveResult>
+		{
+			public WebSocketReceiveResult GetResult(int count, WebSocketMessageType messageType, bool endOfMessage, WebSocketCloseStatus? closeStatus, string closeDescription)
+			{
+				return new WebSocketReceiveResult(count, messageType, endOfMessage, closeStatus, closeDescription);
+			}
 		}
 	}
 }

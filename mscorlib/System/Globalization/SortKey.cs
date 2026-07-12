@@ -58,6 +58,13 @@ namespace System.Globalization
 			this.lcid = lcid;
 			this.source = source;
 			this.options = opt;
+			int length = source.Length;
+			byte[] array = new byte[length];
+			for (int i = 0; i < length; i++)
+			{
+				array[i] = (byte)source[i];
+			}
+			this.key = array;
 		}
 
 		internal SortKey(int lcid, string source, byte[] buffer, CompareOptions opt, int lv1Length, int lv2Length, int lv3Length, int kanaSmallLength, int markTypeLength, int katakanaLength, int kanaWidthLength, int identLength)
@@ -66,6 +73,11 @@ namespace System.Globalization
 			this.source = source;
 			this.key = buffer;
 			this.options = opt;
+		}
+
+		internal SortKey(string localeName, string str, CompareOptions options, byte[] keyData)
+		{
+			throw new NotImplementedException();
 		}
 
 		public virtual string OriginalString
@@ -106,7 +118,15 @@ namespace System.Globalization
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { "SortKey - ", this.lcid, ", ", this.options, ", ", this.source });
+			return string.Concat(new string[]
+			{
+				"SortKey - ",
+				this.lcid.ToString(),
+				", ",
+				this.options.ToString(),
+				", ",
+				this.source
+			});
 		}
 
 		internal SortKey()

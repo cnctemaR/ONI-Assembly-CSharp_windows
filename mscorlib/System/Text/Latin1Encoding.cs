@@ -27,14 +27,13 @@ namespace System.Text
 			info.AddValue("CodePageEncoding+dataItem", null);
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetByteCount(char* chars, int charCount, EncoderNLS encoder)
 		{
 			char c = '\0';
 			EncoderReplacementFallback encoderReplacementFallback;
 			if (encoder != null)
 			{
-				c = encoder.charLeftOver;
+				c = encoder._charLeftOver;
 				encoderReplacementFallback = encoder.Fallback as EncoderReplacementFallback;
 			}
 			else
@@ -56,7 +55,9 @@ namespace System.Text
 			{
 				encoderFallbackBuffer = encoder.FallbackBuffer;
 				encoderFallbackBuffer.InternalInitialize(chars, ptr, encoder, false);
-				encoderFallbackBuffer.InternalFallback(c, ref chars);
+				char* ptr2 = chars;
+				encoderFallbackBuffer.InternalFallback(c, ref ptr2);
+				chars = ptr2;
 			}
 			char c2;
 			while ((c2 = ((encoderFallbackBuffer == null) ? '\0' : encoderFallbackBuffer.InternalGetNextChar())) != '\0' || chars < ptr)
@@ -80,7 +81,9 @@ namespace System.Text
 						}
 						encoderFallbackBuffer.InternalInitialize(ptr - charCount, ptr, encoder, false);
 					}
-					encoderFallbackBuffer.InternalFallback(c2, ref chars);
+					char* ptr2 = chars;
+					encoderFallbackBuffer.InternalFallback(c2, ref ptr2);
+					chars = ptr2;
 				}
 				else
 				{
@@ -90,14 +93,13 @@ namespace System.Text
 			return num;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
 		{
 			char c = '\0';
 			EncoderReplacementFallback encoderReplacementFallback;
 			if (encoder != null)
 			{
-				c = encoder.charLeftOver;
+				c = encoder._charLeftOver;
 				encoderReplacementFallback = encoder.Fallback as EncoderReplacementFallback;
 			}
 			else
@@ -140,8 +142,8 @@ namespace System.Text
 					}
 					if (encoder != null)
 					{
-						encoder.charLeftOver = '\0';
-						encoder.m_charsUsed = (int)((long)(chars - ptr3));
+						encoder._charLeftOver = '\0';
+						encoder._charsUsed = (int)((long)(chars - ptr3));
 					}
 					return (int)((long)(bytes - ptr2));
 				}
@@ -152,7 +154,9 @@ namespace System.Text
 			{
 				encoderFallbackBuffer = encoder.FallbackBuffer;
 				encoderFallbackBuffer.InternalInitialize(chars, ptr, encoder, true);
-				encoderFallbackBuffer.InternalFallback(c, ref chars);
+				char* ptr5 = chars;
+				encoderFallbackBuffer.InternalFallback(c, ref ptr5);
+				chars = ptr5;
 				if ((long)encoderFallbackBuffer.Remaining > (long)(ptr4 - bytes))
 				{
 					base.ThrowBytesOverflow(encoder, true);
@@ -180,7 +184,9 @@ namespace System.Text
 						}
 						encoderFallbackBuffer.InternalInitialize(ptr - charCount, ptr, encoder, true);
 					}
-					encoderFallbackBuffer.InternalFallback(c4, ref chars);
+					char* ptr5 = chars;
+					encoderFallbackBuffer.InternalFallback(c4, ref ptr5);
+					chars = ptr5;
 					if ((long)encoderFallbackBuffer.Remaining > (long)(ptr4 - bytes))
 					{
 						chars--;
@@ -208,20 +214,18 @@ namespace System.Text
 			{
 				if (encoderFallbackBuffer != null && !encoderFallbackBuffer.bUsedEncoder)
 				{
-					encoder.charLeftOver = '\0';
+					encoder._charLeftOver = '\0';
 				}
-				encoder.m_charsUsed = (int)((long)(chars - ptr3));
+				encoder._charsUsed = (int)((long)(chars - ptr3));
 			}
 			return (int)((long)(bytes - ptr2));
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetCharCount(byte* bytes, int count, DecoderNLS decoder)
 		{
 			return count;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS decoder)
 		{
 			if (charCount < byteCount)
@@ -238,7 +242,7 @@ namespace System.Text
 			}
 			if (decoder != null)
 			{
-				decoder.m_bytesUsed = byteCount;
+				decoder._bytesUsed = byteCount;
 			}
 			return byteCount;
 		}
@@ -247,7 +251,7 @@ namespace System.Text
 		{
 			if (charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("charCount", "Non-negative number required.");
 			}
 			long num = (long)charCount + 1L;
 			if (base.EncoderFallback.MaxCharCount > 1)
@@ -256,7 +260,7 @@ namespace System.Text
 			}
 			if (num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("charCount", "Too many characters. The resulting number of bytes is larger than what can be returned as an int.");
 			}
 			return (int)num;
 		}
@@ -265,7 +269,7 @@ namespace System.Text
 		{
 			if (byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("byteCount", "Non-negative number required.");
 			}
 			long num = (long)byteCount;
 			if (base.DecoderFallback.MaxCharCount > 1)
@@ -274,7 +278,7 @@ namespace System.Text
 			}
 			if (num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Too many bytes. The resulting number of chars is larger than what can be returned as an int."));
+				throw new ArgumentOutOfRangeException("byteCount", "Too many bytes. The resulting number of chars is larger than what can be returned as an int.");
 			}
 			return (int)num;
 		}
@@ -296,6 +300,8 @@ namespace System.Text
 		{
 			return Latin1Encoding.arrayCharBestFit;
 		}
+
+		internal static readonly Latin1Encoding s_default = new Latin1Encoding();
 
 		private static readonly char[] arrayCharBestFit = new char[]
 		{

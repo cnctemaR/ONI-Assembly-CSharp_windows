@@ -1,39 +1,33 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class StreamWriter : TextWriter
 	{
 		private void CheckAsyncTaskInProgress()
 		{
-			Task asyncWriteTask = this._asyncWriteTask;
-			if (asyncWriteTask != null && !asyncWriteTask.IsCompleted)
+			if (!this._asyncWriteTask.IsCompleted)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("The stream is currently in use by a previous operation on the stream."));
+				StreamWriter.ThrowAsyncIOInProgress();
 			}
 		}
 
-		internal static Encoding UTF8NoBOM
+		private static void ThrowAsyncIOInProgress()
 		{
-			[FriendAccessAllowed]
+			throw new InvalidOperationException("The stream is currently in use by a previous operation on the stream.");
+		}
+
+		private static Encoding UTF8NoBOM
+		{
 			get
 			{
-				if (StreamWriter._UTF8NoBOM == null)
-				{
-					Encoding encoding = new UTF8Encoding(false, true);
-					Thread.MemoryBarrier();
-					StreamWriter._UTF8NoBOM = encoding;
-				}
-				return StreamWriter._UTF8NoBOM;
+				return EncodingHelper.UTF8Unmarked;
 			}
 		}
 
@@ -66,11 +60,11 @@ namespace System.IO
 			}
 			if (!stream.CanWrite)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Stream was not writable."));
+				throw new ArgumentException("Stream was not writable.");
 			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("bufferSize", "Positive number required.");
 			}
 			this.Init(stream, encoding, bufferSize, leaveOpen);
 		}
@@ -90,15 +84,7 @@ namespace System.IO
 		{
 		}
 
-		[SecuritySafeCritical]
 		public StreamWriter(string path, bool append, Encoding encoding, int bufferSize)
-			: this(path, append, encoding, bufferSize, true)
-		{
-		}
-
-		[SecurityCritical]
-		internal StreamWriter(string path, bool append, Encoding encoding, int bufferSize, bool checkHost)
-			: base(null)
 		{
 			if (path == null)
 			{
@@ -110,41 +96,33 @@ namespace System.IO
 			}
 			if (path.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Empty path name is not legal."));
+				throw new ArgumentException("Empty path name is not legal.");
 			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("bufferSize", "Positive number required.");
 			}
-			Stream stream = StreamWriter.CreateFile(path, append, checkHost);
+			Stream stream = new FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.SequentialScan);
 			this.Init(stream, encoding, bufferSize, false);
 		}
 
-		[SecuritySafeCritical]
 		private void Init(Stream streamArg, Encoding encodingArg, int bufferSize, bool shouldLeaveOpen)
 		{
-			this.stream = streamArg;
-			this.encoding = encodingArg;
-			this.encoder = this.encoding.GetEncoder();
+			this._stream = streamArg;
+			this._encoding = encodingArg;
+			this._encoder = this._encoding.GetEncoder();
 			if (bufferSize < 128)
 			{
 				bufferSize = 128;
 			}
-			this.charBuffer = new char[bufferSize];
-			this.byteBuffer = new byte[this.encoding.GetMaxByteCount(bufferSize)];
-			this.charLen = bufferSize;
-			if (this.stream.CanSeek && this.stream.Position > 0L)
+			this._charBuffer = new char[bufferSize];
+			this._byteBuffer = new byte[this._encoding.GetMaxByteCount(bufferSize)];
+			this._charLen = bufferSize;
+			if (this._stream.CanSeek && this._stream.Position > 0L)
 			{
-				this.haveWrittenPreamble = true;
+				this._haveWrittenPreamble = true;
 			}
-			this.closable = !shouldLeaveOpen;
-		}
-
-		[SecurityCritical]
-		private static Stream CreateFile(string path, bool append, bool checkHost)
-		{
-			FileMode fileMode = (append ? FileMode.Append : FileMode.Create);
-			return new FileStream(path, fileMode, FileAccess.Write, FileShare.Read, 4096, FileOptions.SequentialScan, Path.GetFileName(path), false, false, checkHost);
+			this._closable = !shouldLeaveOpen;
 		}
 
 		public override void Close()
@@ -157,43 +135,82 @@ namespace System.IO
 		{
 			try
 			{
-				if (this.stream != null)
+				if (this._stream != null && disposing)
 				{
-					if (!disposing)
-					{
-						if (this.LeaveOpen)
-						{
-							Stream stream = this.stream;
-						}
-					}
-					else
-					{
-						this.CheckAsyncTaskInProgress();
-						this.Flush(true, true);
-					}
+					this.CheckAsyncTaskInProgress();
+					this.Flush(true, true);
 				}
 			}
 			finally
 			{
-				if (!this.LeaveOpen && this.stream != null)
+				if (!this.LeaveOpen && this._stream != null)
 				{
 					try
 					{
 						if (disposing)
 						{
-							this.stream.Close();
+							this._stream.Close();
 						}
 					}
 					finally
 					{
-						this.stream = null;
-						this.byteBuffer = null;
-						this.charBuffer = null;
-						this.encoding = null;
-						this.encoder = null;
-						this.charLen = 0;
+						this._stream = null;
+						this._byteBuffer = null;
+						this._charBuffer = null;
+						this._encoding = null;
+						this._encoder = null;
+						this._charLen = 0;
 						base.Dispose(disposing);
 					}
+				}
+			}
+		}
+
+		public override ValueTask DisposeAsync()
+		{
+			if (!(base.GetType() != typeof(StreamWriter)))
+			{
+				return this.DisposeAsyncCore();
+			}
+			return base.DisposeAsync();
+		}
+
+		private async ValueTask DisposeAsyncCore()
+		{
+			try
+			{
+				if (this._stream != null)
+				{
+					await this.FlushAsync().ConfigureAwait(false);
+				}
+			}
+			finally
+			{
+				this.CloseStreamFromDispose(true);
+			}
+			GC.SuppressFinalize(this);
+		}
+
+		private void CloseStreamFromDispose(bool disposing)
+		{
+			if (!this.LeaveOpen && this._stream != null)
+			{
+				try
+				{
+					if (disposing)
+					{
+						this._stream.Close();
+					}
+				}
+				finally
+				{
+					this._stream = null;
+					this._byteBuffer = null;
+					this._charBuffer = null;
+					this._encoding = null;
+					this._encoder = null;
+					this._charLen = 0;
+					base.Dispose(disposing);
 				}
 			}
 		}
@@ -206,32 +223,32 @@ namespace System.IO
 
 		private void Flush(bool flushStream, bool flushEncoder)
 		{
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
-			if (this.charPos == 0 && ((!flushStream && !flushEncoder) || CompatibilitySwitches.IsAppEarlierThanWindowsPhone8))
+			if (this._charPos == 0 && !flushStream && !flushEncoder)
 			{
 				return;
 			}
-			if (!this.haveWrittenPreamble)
+			if (!this._haveWrittenPreamble)
 			{
-				this.haveWrittenPreamble = true;
-				byte[] preamble = this.encoding.GetPreamble();
-				if (preamble.Length != 0)
+				this._haveWrittenPreamble = true;
+				ReadOnlySpan<byte> preamble = this._encoding.Preamble;
+				if (preamble.Length > 0)
 				{
-					this.stream.Write(preamble, 0, preamble.Length);
+					this._stream.Write(preamble);
 				}
 			}
-			int bytes = this.encoder.GetBytes(this.charBuffer, 0, this.charPos, this.byteBuffer, 0, flushEncoder);
-			this.charPos = 0;
+			int bytes = this._encoder.GetBytes(this._charBuffer, 0, this._charPos, this._byteBuffer, 0, flushEncoder);
+			this._charPos = 0;
 			if (bytes > 0)
 			{
-				this.stream.Write(this.byteBuffer, 0, bytes);
+				this._stream.Write(this._byteBuffer, 0, bytes);
 			}
 			if (flushStream)
 			{
-				this.stream.Flush();
+				this._stream.Flush();
 			}
 		}
 
@@ -239,12 +256,12 @@ namespace System.IO
 		{
 			get
 			{
-				return this.autoFlush;
+				return this._autoFlush;
 			}
 			set
 			{
 				this.CheckAsyncTaskInProgress();
-				this.autoFlush = value;
+				this._autoFlush = value;
 				if (value)
 				{
 					this.Flush(true, false);
@@ -256,7 +273,7 @@ namespace System.IO
 		{
 			get
 			{
-				return this.stream;
+				return this._stream;
 			}
 		}
 
@@ -264,7 +281,7 @@ namespace System.IO
 		{
 			get
 			{
-				return !this.closable;
+				return !this._closable;
 			}
 		}
 
@@ -272,7 +289,7 @@ namespace System.IO
 		{
 			set
 			{
-				this.haveWrittenPreamble = value;
+				this._haveWrittenPreamble = value;
 			}
 		}
 
@@ -280,140 +297,168 @@ namespace System.IO
 		{
 			get
 			{
-				return this.encoding;
+				return this._encoding;
 			}
 		}
 
 		public override void Write(char value)
 		{
 			this.CheckAsyncTaskInProgress();
-			if (this.charPos == this.charLen)
+			if (this._charPos == this._charLen)
 			{
 				this.Flush(false, false);
 			}
-			this.charBuffer[this.charPos] = value;
-			this.charPos++;
-			if (this.autoFlush)
+			this._charBuffer[this._charPos] = value;
+			this._charPos++;
+			if (this._autoFlush)
 			{
 				this.Flush(true, false);
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public override void Write(char[] buffer)
 		{
-			if (buffer == null)
-			{
-				return;
-			}
-			this.CheckAsyncTaskInProgress();
-			int num = 0;
-			int num2;
-			for (int i = buffer.Length; i > 0; i -= num2)
-			{
-				if (this.charPos == this.charLen)
-				{
-					this.Flush(false, false);
-				}
-				num2 = this.charLen - this.charPos;
-				if (num2 > i)
-				{
-					num2 = i;
-				}
-				Buffer.InternalBlockCopy(buffer, num * 2, this.charBuffer, this.charPos * 2, num2 * 2);
-				this.charPos += num2;
-				num += num2;
-			}
-			if (this.autoFlush)
-			{
-				this.Flush(true, false);
-			}
+			this.WriteSpan(buffer, false);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public override void Write(char[] buffer, int index, int count)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			this.CheckAsyncTaskInProgress();
-			while (count > 0)
+			this.WriteSpan(buffer.AsSpan<char>(index, count), false);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public override void Write(ReadOnlySpan<char> buffer)
+		{
+			if (base.GetType() == typeof(StreamWriter))
 			{
-				if (this.charPos == this.charLen)
-				{
-					this.Flush(false, false);
-				}
-				int num = this.charLen - this.charPos;
-				if (num > count)
-				{
-					num = count;
-				}
-				Buffer.InternalBlockCopy(buffer, index * 2, this.charBuffer, this.charPos * 2, num * 2);
-				this.charPos += num;
-				index += num;
-				count -= num;
+				this.WriteSpan(buffer, false);
+				return;
 			}
-			if (this.autoFlush)
+			base.Write(buffer);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe void WriteSpan(ReadOnlySpan<char> buffer, bool appendNewLine)
+		{
+			this.CheckAsyncTaskInProgress();
+			if (buffer.Length <= 4 && buffer.Length <= this._charLen - this._charPos)
+			{
+				for (int i = 0; i < buffer.Length; i++)
+				{
+					char[] charBuffer = this._charBuffer;
+					int charPos = this._charPos;
+					this._charPos = charPos + 1;
+					charBuffer[charPos] = *buffer[i];
+				}
+			}
+			else
+			{
+				char[] charBuffer2 = this._charBuffer;
+				if (charBuffer2 == null)
+				{
+					throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
+				}
+				fixed (char* reference = MemoryMarshal.GetReference<char>(buffer))
+				{
+					char* ptr = reference;
+					fixed (char* ptr2 = &charBuffer2[0])
+					{
+						char* ptr3 = ptr2;
+						char* ptr4 = ptr;
+						int j = buffer.Length;
+						int num = this._charPos;
+						while (j > 0)
+						{
+							if (num == charBuffer2.Length)
+							{
+								this.Flush(false, false);
+								num = 0;
+							}
+							int num2 = Math.Min(charBuffer2.Length - num, j);
+							int num3 = num2 * 2;
+							Buffer.MemoryCopy((void*)ptr4, (void*)(ptr3 + num), (long)num3, (long)num3);
+							this._charPos += num2;
+							num += num2;
+							ptr4 += num2;
+							j -= num2;
+						}
+					}
+				}
+			}
+			if (appendNewLine)
+			{
+				char[] coreNewLine = this.CoreNewLine;
+				for (int k = 0; k < coreNewLine.Length; k++)
+				{
+					if (this._charPos == this._charLen)
+					{
+						this.Flush(false, false);
+					}
+					this._charBuffer[this._charPos] = coreNewLine[k];
+					this._charPos++;
+				}
+			}
+			if (this._autoFlush)
 			{
 				this.Flush(true, false);
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public override void Write(string value)
 		{
-			if (value != null)
-			{
-				this.CheckAsyncTaskInProgress();
-				int i = value.Length;
-				int num = 0;
-				while (i > 0)
-				{
-					if (this.charPos == this.charLen)
-					{
-						this.Flush(false, false);
-					}
-					int num2 = this.charLen - this.charPos;
-					if (num2 > i)
-					{
-						num2 = i;
-					}
-					value.CopyTo(num, this.charBuffer, this.charPos, num2);
-					this.charPos += num2;
-					num += num2;
-					i -= num2;
-				}
-				if (this.autoFlush)
-				{
-					this.Flush(true, false);
-				}
-			}
+			this.WriteSpan(value, false);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public override void WriteLine(string value)
+		{
+			this.CheckAsyncTaskInProgress();
+			this.WriteSpan(value, true);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public override void WriteLine(ReadOnlySpan<char> value)
+		{
+			if (base.GetType() == typeof(StreamWriter))
+			{
+				this.CheckAsyncTaskInProgress();
+				this.WriteSpan(value, true);
+				return;
+			}
+			base.WriteLine(value);
+		}
+
 		public override Task WriteAsync(char value)
 		{
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteAsync(value);
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, false);
 			this._asyncWriteTask = task;
 			return task;
 		}
@@ -422,7 +467,7 @@ namespace System.IO
 		{
 			if (charPos == charLen)
 			{
-				await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+				await _this.FlushAsyncInternal(false, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 				charPos = 0;
 			}
 			charBuffer[charPos] = value;
@@ -433,7 +478,7 @@ namespace System.IO
 				{
 					if (charPos == charLen)
 					{
-						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 						charPos = 0;
 					}
 					charBuffer[charPos] = coreNewLine[i];
@@ -442,32 +487,30 @@ namespace System.IO
 			}
 			if (autoFlush)
 			{
-				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 				charPos = 0;
 			}
 			_this.CharPos_Prop = charPos;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteAsync(string value)
 		{
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteAsync(value);
 			}
-			if (value != null)
+			if (value == null)
 			{
-				if (this.stream == null)
-				{
-					__Error.WriterClosed();
-				}
-				this.CheckAsyncTaskInProgress();
-				Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
-				this._asyncWriteTask = task;
-				return task;
+				return Task.CompletedTask;
 			}
-			return Task.CompletedTask;
+			if (this._stream == null)
+			{
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
+			}
+			this.CheckAsyncTaskInProgress();
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, false);
+			this._asyncWriteTask = task;
+			return task;
 		}
 
 		private static async Task WriteAsyncInternal(StreamWriter _this, string value, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine)
@@ -478,7 +521,7 @@ namespace System.IO
 			{
 				if (charPos == charLen)
 				{
-					await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+					await _this.FlushAsyncInternal(false, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 					charPos = 0;
 				}
 				int num = charLen - charPos;
@@ -497,7 +540,7 @@ namespace System.IO
 				{
 					if (charPos == charLen)
 					{
-						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 						charPos = 0;
 					}
 					charBuffer[charPos] = coreNewLine[i];
@@ -506,64 +549,77 @@ namespace System.IO
 			}
 			if (autoFlush)
 			{
-				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos, default(CancellationToken)).ConfigureAwait(false);
 				charPos = 0;
 			}
 			_this.CharPos_Prop = charPos;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteAsync(char[] buffer, int index, int count)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteAsync(buffer, index, count);
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, buffer, index, count, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, false);
+			Task task = StreamWriter.WriteAsyncInternal(this, new ReadOnlyMemory<char>(buffer, index, count), this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, false, default(CancellationToken));
 			this._asyncWriteTask = task;
 			return task;
 		}
 
-		private static async Task WriteAsyncInternal(StreamWriter _this, char[] buffer, int index, int count, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine)
+		public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			while (count > 0)
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteAsync(buffer, cancellationToken);
+			}
+			if (this._stream == null)
+			{
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
+			}
+			this.CheckAsyncTaskInProgress();
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			Task task = StreamWriter.WriteAsyncInternal(this, buffer, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, false, cancellationToken);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
+		private static async Task WriteAsyncInternal(StreamWriter _this, ReadOnlyMemory<char> source, char[] charBuffer, int charPos, int charLen, char[] coreNewLine, bool autoFlush, bool appendNewLine, CancellationToken cancellationToken)
+		{
+			int num;
+			for (int copied = 0; copied < source.Length; copied += num)
 			{
 				if (charPos == charLen)
 				{
-					await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+					await _this.FlushAsyncInternal(false, false, charBuffer, charPos, cancellationToken).ConfigureAwait(false);
 					charPos = 0;
 				}
-				int num = charLen - charPos;
-				if (num > count)
-				{
-					num = count;
-				}
-				Buffer.InternalBlockCopy(buffer, index * 2, charBuffer, charPos * 2, num * 2);
+				num = Math.Min(charLen - charPos, source.Length - copied);
+				source.Span.Slice(copied, num).CopyTo(new Span<char>(charBuffer, charPos, num));
 				charPos += num;
-				index += num;
-				count -= num;
 			}
 			if (appendNewLine)
 			{
@@ -571,7 +627,7 @@ namespace System.IO
 				{
 					if (charPos == charLen)
 					{
-						await _this.FlushAsyncInternal(false, false, charBuffer, charPos).ConfigureAwait(false);
+						await _this.FlushAsyncInternal(false, false, charBuffer, charPos, cancellationToken).ConfigureAwait(false);
 						charPos = 0;
 					}
 					charBuffer[charPos] = coreNewLine[i];
@@ -580,114 +636,128 @@ namespace System.IO
 			}
 			if (autoFlush)
 			{
-				await _this.FlushAsyncInternal(true, false, charBuffer, charPos).ConfigureAwait(false);
+				await _this.FlushAsyncInternal(true, false, charBuffer, charPos, cancellationToken).ConfigureAwait(false);
 				charPos = 0;
 			}
 			_this.CharPos_Prop = charPos;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteLineAsync()
 		{
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteLineAsync();
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, null, 0, 0, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			Task task = StreamWriter.WriteAsyncInternal(this, ReadOnlyMemory<char>.Empty, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, true, default(CancellationToken));
 			this._asyncWriteTask = task;
 			return task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteLineAsync(char value)
 		{
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteLineAsync(value);
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, value, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, true);
 			this._asyncWriteTask = task;
 			return task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteLineAsync(string value)
 		{
+			if (value == null)
+			{
+				return this.WriteLineAsync();
+			}
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteLineAsync(value);
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, value ?? "", this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			Task task = StreamWriter.WriteAsyncInternal(this, value, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, true);
 			this._asyncWriteTask = task;
 			return task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task WriteLineAsync(char[] buffer, int index, int count)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.WriteLineAsync(buffer, index, count);
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = StreamWriter.WriteAsyncInternal(this, buffer, index, count, this.charBuffer, this.charPos, this.charLen, this.CoreNewLine, this.autoFlush, true);
+			Task task = StreamWriter.WriteAsyncInternal(this, new ReadOnlyMemory<char>(buffer, index, count), this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, true, default(CancellationToken));
 			this._asyncWriteTask = task;
 			return task;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (base.GetType() != typeof(StreamWriter))
+			{
+				return base.WriteLineAsync(buffer, cancellationToken);
+			}
+			if (this._stream == null)
+			{
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
+			}
+			this.CheckAsyncTaskInProgress();
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
+			Task task = StreamWriter.WriteAsyncInternal(this, buffer, this._charBuffer, this._charPos, this._charLen, this.CoreNewLine, this._autoFlush, true, cancellationToken);
+			this._asyncWriteTask = task;
+			return task;
+		}
+
 		public override Task FlushAsync()
 		{
 			if (base.GetType() != typeof(StreamWriter))
 			{
 				return base.FlushAsync();
 			}
-			if (this.stream == null)
+			if (this._stream == null)
 			{
-				__Error.WriterClosed();
+				throw new ObjectDisposedException(null, "Can not write to a closed TextWriter.");
 			}
 			this.CheckAsyncTaskInProgress();
-			Task task = this.FlushAsyncInternal(true, true, this.charBuffer, this.charPos);
+			Task task = this.FlushAsyncInternal(true, true, this._charBuffer, this._charPos, default(CancellationToken));
 			this._asyncWriteTask = task;
 			return task;
 		}
@@ -696,7 +766,7 @@ namespace System.IO
 		{
 			set
 			{
-				this.charPos = value;
+				this._charPos = value;
 			}
 		}
 
@@ -704,22 +774,26 @@ namespace System.IO
 		{
 			set
 			{
-				this.haveWrittenPreamble = value;
+				this._haveWrittenPreamble = value;
 			}
 		}
 
-		private Task FlushAsyncInternal(bool flushStream, bool flushEncoder, char[] sCharBuffer, int sCharPos)
+		private Task FlushAsyncInternal(bool flushStream, bool flushEncoder, char[] sCharBuffer, int sCharPos, CancellationToken cancellationToken = default(CancellationToken))
 		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
 			if (sCharPos == 0 && !flushStream && !flushEncoder)
 			{
 				return Task.CompletedTask;
 			}
-			Task task = StreamWriter.FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, this.haveWrittenPreamble, this.encoding, this.encoder, this.byteBuffer, this.stream);
-			this.charPos = 0;
+			Task task = StreamWriter.FlushAsyncInternal(this, flushStream, flushEncoder, sCharBuffer, sCharPos, this._haveWrittenPreamble, this._encoding, this._encoder, this._byteBuffer, this._stream, cancellationToken);
+			this._charPos = 0;
 			return task;
 		}
 
-		private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder, char[] charBuffer, int charPos, bool haveWrittenPreamble, Encoding encoding, Encoder encoder, byte[] byteBuffer, Stream stream)
+		private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder, char[] charBuffer, int charPos, bool haveWrittenPreamble, Encoding encoding, Encoder encoder, byte[] byteBuffer, Stream stream, CancellationToken cancellationToken)
 		{
 			if (!haveWrittenPreamble)
 			{
@@ -727,17 +801,17 @@ namespace System.IO
 				byte[] preamble = encoding.GetPreamble();
 				if (preamble.Length != 0)
 				{
-					await stream.WriteAsync(preamble, 0, preamble.Length).ConfigureAwait(false);
+					await stream.WriteAsync(new ReadOnlyMemory<byte>(preamble), cancellationToken).ConfigureAwait(false);
 				}
 			}
 			int bytes = encoder.GetBytes(charBuffer, 0, charPos, byteBuffer, 0, flushEncoder);
 			if (bytes > 0)
 			{
-				await stream.WriteAsync(byteBuffer, 0, bytes).ConfigureAwait(false);
+				await stream.WriteAsync(new ReadOnlyMemory<byte>(byteBuffer, 0, bytes), cancellationToken).ConfigureAwait(false);
 			}
 			if (flushStream)
 			{
-				await stream.FlushAsync().ConfigureAwait(false);
+				await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -749,31 +823,28 @@ namespace System.IO
 
 		private const int DontCopyOnWriteLineThreshold = 512;
 
-		public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, new UTF8Encoding(false, true), 128, true);
+		public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, StreamWriter.UTF8NoBOM, 128, true);
 
-		private Stream stream;
+		private Stream _stream;
 
-		private Encoding encoding;
+		private Encoding _encoding;
 
-		private Encoder encoder;
+		private Encoder _encoder;
 
-		private byte[] byteBuffer;
+		private byte[] _byteBuffer;
 
-		private char[] charBuffer;
+		private char[] _charBuffer;
 
-		private int charPos;
+		private int _charPos;
 
-		private int charLen;
+		private int _charLen;
 
-		private bool autoFlush;
+		private bool _autoFlush;
 
-		private bool haveWrittenPreamble;
+		private bool _haveWrittenPreamble;
 
-		private bool closable;
+		private bool _closable;
 
-		[NonSerialized]
-		private volatile Task _asyncWriteTask;
-
-		private static volatile Encoding _UTF8NoBOM;
+		private Task _asyncWriteTask = Task.CompletedTask;
 	}
 }

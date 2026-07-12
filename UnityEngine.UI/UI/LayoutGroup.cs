@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -57,7 +58,7 @@ namespace UnityEngine.UI
 		public virtual void CalculateLayoutInputHorizontal()
 		{
 			this.m_RectChildren.Clear();
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			for (int i = 0; i < this.rectTransform.childCount; i++)
 			{
 				RectTransform rectTransform = this.rectTransform.GetChild(i) as RectTransform;
@@ -81,7 +82,7 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 			this.m_Tracker.Clear();
 		}
 

@@ -758,7 +758,7 @@ namespace System.Data.SqlTypes
 			byte[] array;
 			if (this.FBinarySort())
 			{
-				array = SqlString.s_unicodeEncoding.GetBytes(this.m_value.TrimEnd(Array.Empty<char>()));
+				array = SqlString.s_unicodeEncoding.GetBytes(this.m_value.TrimEnd());
 			}
 			else
 			{
@@ -775,7 +775,7 @@ namespace System.Data.SqlTypes
 					compareInfo = CultureInfo.InvariantCulture.CompareInfo;
 					compareOptions = CompareOptions.None;
 				}
-				array = compareInfo.GetSortKey(this.m_value.TrimEnd(Array.Empty<char>()), compareOptions).KeyData;
+				array = compareInfo.GetSortKey(this.m_value.TrimEnd(), compareOptions).KeyData;
 			}
 			return SqlBinary.HashByteArray(array, array.Length);
 		}

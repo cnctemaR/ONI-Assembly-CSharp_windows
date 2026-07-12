@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections.Concurrent;
 using System.Configuration;
 using System.Net.Configuration;
 using System.Net.Security;
@@ -306,46 +306,55 @@ namespace System.Net
 				}
 			}
 			address = new Uri(address.Scheme + "://" + address.Authority);
-			ServicePoint servicePoint = null;
 			ServicePointManager.SPKey spkey = new ServicePointManager.SPKey(uri, flag ? address : null, flag2);
-			HybridDictionary hybridDictionary = ServicePointManager.servicePoints;
-			lock (hybridDictionary)
+			ConcurrentDictionary<ServicePointManager.SPKey, ServicePoint> concurrentDictionary = ServicePointManager.servicePoints;
+			ServicePoint servicePoint2;
+			lock (concurrentDictionary)
 			{
-				servicePoint = ServicePointManager.servicePoints[spkey] as ServicePoint;
-				if (servicePoint != null)
+				ServicePoint servicePoint;
+				if (ServicePointManager.servicePoints.TryGetValue(spkey, out servicePoint))
 				{
-					return servicePoint;
+					servicePoint2 = servicePoint;
 				}
-				if (ServicePointManager.maxServicePoints > 0 && ServicePointManager.servicePoints.Count >= ServicePointManager.maxServicePoints)
+				else
 				{
-					throw new InvalidOperationException("maximum number of service points reached");
+					if (ServicePointManager.maxServicePoints > 0 && ServicePointManager.servicePoints.Count >= ServicePointManager.maxServicePoints)
+					{
+						throw new InvalidOperationException("maximum number of service points reached");
+					}
+					string text = address.ToString();
+					int maxConnections = (int)ServicePointManager.manager.GetMaxConnections(text);
+					servicePoint = new ServicePoint(spkey, address, maxConnections, ServicePointManager.maxServicePointIdleTime);
+					servicePoint.Expect100Continue = ServicePointManager.expectContinue;
+					servicePoint.UseNagleAlgorithm = ServicePointManager.useNagle;
+					servicePoint.UsesProxy = flag;
+					servicePoint.UseConnect = flag2;
+					servicePoint.SetTcpKeepAlive(ServicePointManager.tcp_keepalive, ServicePointManager.tcp_keepalive_time, ServicePointManager.tcp_keepalive_interval);
+					servicePoint2 = ServicePointManager.servicePoints.GetOrAdd(spkey, servicePoint);
 				}
-				string text = address.ToString();
-				int maxConnections = (int)ServicePointManager.manager.GetMaxConnections(text);
-				servicePoint = new ServicePoint(address, maxConnections, ServicePointManager.maxServicePointIdleTime);
-				servicePoint.Expect100Continue = ServicePointManager.expectContinue;
-				servicePoint.UseNagleAlgorithm = ServicePointManager.useNagle;
-				servicePoint.UsesProxy = flag;
-				servicePoint.UseConnect = flag2;
-				servicePoint.SetTcpKeepAlive(ServicePointManager.tcp_keepalive, ServicePointManager.tcp_keepalive_time, ServicePointManager.tcp_keepalive_interval);
-				ServicePointManager.servicePoints.Add(spkey, servicePoint);
 			}
-			return servicePoint;
+			return servicePoint2;
 		}
 
 		internal static void CloseConnectionGroup(string connectionGroupName)
 		{
-			HybridDictionary hybridDictionary = ServicePointManager.servicePoints;
-			lock (hybridDictionary)
+			ConcurrentDictionary<ServicePointManager.SPKey, ServicePoint> concurrentDictionary = ServicePointManager.servicePoints;
+			lock (concurrentDictionary)
 			{
-				foreach (object obj in ServicePointManager.servicePoints.Values)
+				foreach (ServicePoint servicePoint in ServicePointManager.servicePoints.Values)
 				{
-					((ServicePoint)obj).CloseConnectionGroup(connectionGroupName);
+					servicePoint.CloseConnectionGroup(connectionGroupName);
 				}
 			}
 		}
 
-		private static HybridDictionary servicePoints = new HybridDictionary();
+		internal static void RemoveServicePoint(ServicePoint sp)
+		{
+			ServicePoint servicePoint;
+			ServicePointManager.servicePoints.TryRemove(sp.Key, out servicePoint);
+		}
+
+		private static ConcurrentDictionary<ServicePointManager.SPKey, ServicePoint> servicePoints = new ConcurrentDictionary<ServicePointManager.SPKey, ServicePoint>();
 
 		private static ICertificatePolicy policy;
 
@@ -359,7 +368,7 @@ namespace System.Net
 
 		private static bool _checkCRL = false;
 
-		private static SecurityProtocolType _securityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+		private static SecurityProtocolType _securityProtocol = SecurityProtocolType.SystemDefault;
 
 		private static bool expectContinue = true;
 
@@ -381,7 +390,7 @@ namespace System.Net
 
 		private static ConnectionManagementData manager;
 
-		private class SPKey
+		internal class SPKey
 		{
 			public SPKey(Uri uri, Uri proxy, bool use_connect)
 			{

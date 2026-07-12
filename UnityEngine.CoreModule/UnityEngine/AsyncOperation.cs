@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/AsyncOperation.h")]
 	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Misc/AsyncOperation.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{

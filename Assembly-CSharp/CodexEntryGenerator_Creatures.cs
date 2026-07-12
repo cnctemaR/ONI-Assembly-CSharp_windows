@@ -317,7 +317,14 @@ public class CodexEntryGenerator_Creatures
 								float num4 = num3 * info.producedConversionRate;
 								if (flag)
 								{
-									list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantConsumptionValuePerCycle), info.producedElement, num4, true, null, creature));
+									if (info.foodType == Diet.Info.FoodType.EatPlantDirectly)
+									{
+										list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle), info.producedElement, num4, true, null, creature));
+									}
+									else if (info.foodType == Diet.Info.FoodType.EatPlantStorage)
+									{
+										list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantStorageConsumptionValuePerCycle), info.producedElement, num4, true, null, creature));
+									}
 								}
 								else
 								{
@@ -345,7 +352,7 @@ public class CodexEntryGenerator_Creatures
 	}
 
 	[CompilerGenerated]
-	internal static void <GenerateEntries>g__AddEntry|6_0(string entryId, CodexEntry entry, string parentEntryId, ref CodexEntryGenerator_Creatures.<>c__DisplayClass6_0 A_3)
+	internal static void <GenerateEntries>g__AddEntry|6_0(string entryId, CodexEntry entry, string parentEntryId = "CREATURES", ref CodexEntryGenerator_Creatures.<>c__DisplayClass6_0 A_3)
 	{
 		if (entry == null)
 		{

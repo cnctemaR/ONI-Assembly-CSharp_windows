@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F381C01D-59CA-473C-ADAC-E0E7468BB545}</ProjectGuid>
+    <ProjectGuid>{2FF64792-16FA-4225-8439-01E811713EB7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FMODUnity</RootNamespace>
     <AssemblyName>FMODUnity</AssemblyName>
@@ -60,12 +60,15 @@
     <Compile Include="FMOD\DSPCONNECTION_TYPE.cs" />
     <Compile Include="FMOD\DSP_ALLOC_FUNC.cs" />
     <Compile Include="FMOD\DSP_BUFFER_ARRAY.cs" />
+    <Compile Include="FMOD\DSP_CALLBACK.cs" />
+    <Compile Include="FMOD\DSP_CALLBACK_TYPE.cs" />
     <Compile Include="FMOD\DSP_CHANNELMIX.cs" />
     <Compile Include="FMOD\DSP_CHANNELMIX_OUTPUT.cs" />
     <Compile Include="FMOD\DSP_CHORUS.cs" />
     <Compile Include="FMOD\DSP_COMPRESSOR.cs" />
     <Compile Include="FMOD\DSP_CONVOLUTION_REVERB.cs" />
-    <Compile Include="FMOD\DSP_CREATECALLBACK.cs" />
+    <Compile Include="FMOD\DSP_CREATE_CALLBACK.cs" />
+    <Compile Include="FMOD\DSP_DATA_PARAMETER_INFO.cs" />
     <Compile Include="FMOD\DSP_DELAY.cs" />
     <Compile Include="FMOD\DSP_DESCRIPTION.cs" />
     <Compile Include="FMOD\DSP_DFT_FFTREAL_FUNC.cs" />
@@ -139,18 +142,18 @@
     <Compile Include="FMOD\DSP_PITCHSHIFT.cs" />
     <Compile Include="FMOD\DSP_PROCESS_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_PROCESS_OPERATION.cs" />
-    <Compile Include="FMOD\DSP_READCALLBACK.cs" />
+    <Compile Include="FMOD\DSP_READ_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_REALLOC_FUNC.cs" />
-    <Compile Include="FMOD\DSP_RELEASECALLBACK.cs" />
+    <Compile Include="FMOD\DSP_RELEASE_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_RESAMPLER.cs" />
-    <Compile Include="FMOD\DSP_RESETCALLBACK.cs" />
+    <Compile Include="FMOD\DSP_RESET_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_RETURN.cs" />
     <Compile Include="FMOD\DSP_SEND.cs" />
     <Compile Include="FMOD\DSP_SETPARAM_BOOL_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_SETPARAM_DATA_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_SETPARAM_FLOAT_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_SETPARAM_INT_CALLBACK.cs" />
-    <Compile Include="FMOD\DSP_SETPOSITIONCALLBACK.cs" />
+    <Compile Include="FMOD\DSP_SETPOSITION_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_SFXREVERB.cs" />
     <Compile Include="FMOD\DSP_SHOULDIPROCESS_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_STATE.cs" />
@@ -298,6 +301,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeManager.cs" />
     <Compile Include="RuntimeUtils.cs" />
+    <Compile Include="ScreenPosition.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="STOP_MODE.cs" />
     <Compile Include="StudioBankLoader.cs" />
@@ -310,44 +314,49 @@
     <Compile Include="ThreadAffinityGroup.cs" />
     <Compile Include="ThreadType.cs" />
     <Compile Include="TriStateBool.cs" />
+    <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
     <Compile Include="VCANotFoundException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB54F}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC0}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB552}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC5}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB554}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EC8}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Timeline\Unity.Timeline.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB561}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713ED8}</Project>
       <Name>Unity.Timeline</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56C}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE4}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB56E}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EE6}</Project>
       <Name>UnityEngine.DirectorModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB576}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EEE}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB57D}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EF6}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{F381C01D-59CA-473C-ADAC-E0E7468BB57E}</Project>
+      <Project>{2FF64792-16FA-4225-8439-01E811713EF7}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
+      <Project>{2FF64792-16FA-4225-8439-01E811713F09}</Project>
+      <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

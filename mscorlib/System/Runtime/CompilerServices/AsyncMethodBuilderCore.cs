@@ -10,6 +10,28 @@ namespace System.Runtime.CompilerServices
 {
 	internal struct AsyncMethodBuilderCore
 	{
+		[DebuggerStepThrough]
+		[SecuritySafeCritical]
+		internal static void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
+		{
+			if (stateMachine == null)
+			{
+				throw new ArgumentNullException("stateMachine");
+			}
+			Thread currentThread = Thread.CurrentThread;
+			ExecutionContextSwitcher executionContextSwitcher = default(ExecutionContextSwitcher);
+			RuntimeHelpers.PrepareConstrainedRegions();
+			try
+			{
+				ExecutionContext.EstablishCopyOnWriteScope(ref executionContextSwitcher);
+				stateMachine.MoveNext();
+			}
+			finally
+			{
+				executionContextSwitcher.Undo();
+			}
+		}
+
 		public void SetStateMachine(IAsyncStateMachine stateMachine)
 		{
 			if (stateMachine == null)

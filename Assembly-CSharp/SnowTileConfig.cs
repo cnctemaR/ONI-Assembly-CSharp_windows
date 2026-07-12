@@ -54,9 +54,9 @@ public class SnowTileConfig : IBuildingConfig
 		component.prefabSpawnFn += this.BuildingComplete_OnSpawn;
 	}
 
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_DLC_2;
+		return DlcManager.DLC2;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

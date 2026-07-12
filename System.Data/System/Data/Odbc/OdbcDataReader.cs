@@ -2002,7 +2002,7 @@ namespace System.Data.Odbc
 
 		internal OdbcDataReader()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private OdbcCommand _command;

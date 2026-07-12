@@ -19,6 +19,10 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UpdateAllSortingGroups();
 
+		[StaticAccessor("SortingGroup", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern SortingGroup GetSortingGroupByIndex(int index);
+
 		public extern string sortingLayerName
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -43,6 +47,14 @@ namespace UnityEngine.Rendering
 			set;
 		}
 
+		public extern bool sortAtRoot
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		internal extern int sortingGroupID
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -56,6 +68,12 @@ namespace UnityEngine.Rendering
 		}
 
 		internal extern int index
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		internal extern uint sortingKey
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;

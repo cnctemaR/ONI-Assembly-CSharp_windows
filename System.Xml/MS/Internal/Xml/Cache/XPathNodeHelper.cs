@@ -246,42 +246,6 @@ namespace MS.Internal.Xml.Cache
 			return false;
 		}
 
-		public static bool GetPreviousElementSibling(ref XPathNode[] pageNode, ref int idxNode, string localName, string namespaceName)
-		{
-			XPathNode[] array = pageNode;
-			int num = idxNode;
-			if (array[num].NodeType != XPathNodeType.Attribute)
-			{
-				while (XPathNodeHelper.GetPreviousContentSibling(ref array, ref num))
-				{
-					if (array[num].ElementMatch(localName, namespaceName))
-					{
-						pageNode = array;
-						idxNode = num;
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		public static bool GetPreviousContentSibling(ref XPathNode[] pageNode, ref int idxNode, XPathNodeType typ)
-		{
-			XPathNode[] array = pageNode;
-			int num = idxNode;
-			int contentKindMask = XPathNavigator.GetContentKindMask(typ);
-			while (XPathNodeHelper.GetPreviousContentSibling(ref array, ref num))
-			{
-				if (((1 << (int)array[num].NodeType) & contentKindMask) != 0)
-				{
-					pageNode = array;
-					idxNode = num;
-					return true;
-				}
-			}
-			return false;
-		}
-
 		public static bool GetAttribute(ref XPathNode[] pageNode, ref int idxNode, string localName, string namespaceName)
 		{
 			XPathNode[] array = pageNode;
@@ -302,24 +266,6 @@ namespace MS.Internal.Xml.Cache
 				return true;
 			}
 			return false;
-		}
-
-		public static bool GetFollowing(ref XPathNode[] pageNode, ref int idxNode)
-		{
-			XPathNode[] array = pageNode;
-			int num = idxNode;
-			while (++num >= array[0].PageInfo.NodeCount)
-			{
-				array = array[0].PageInfo.NextPage;
-				num = 0;
-				if (array == null)
-				{
-					return false;
-				}
-			}
-			pageNode = array;
-			idxNode = num;
-			return true;
 		}
 
 		public static bool GetElementFollowing(ref XPathNode[] pageCurrent, ref int idxCurrent, XPathNode[] pageEnd, int idxEnd, string localName, string namespaceName)

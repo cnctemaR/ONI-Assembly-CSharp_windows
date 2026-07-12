@@ -26,7 +26,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				return this.binding;
+				return this._binding;
 			}
 			set
 			{
@@ -34,7 +34,7 @@ namespace System.Xml.Xsl.Qil
 				{
 					throw new IndexOutOfRangeException();
 				}
-				this.binding = value;
+				this._binding = value;
 			}
 		}
 
@@ -42,14 +42,14 @@ namespace System.Xml.Xsl.Qil
 		{
 			get
 			{
-				return this.binding;
+				return this._binding;
 			}
 			set
 			{
-				this.binding = value;
+				this._binding = value;
 			}
 		}
 
-		private QilNode binding;
+		private QilNode _binding;
 	}
 }

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(SortedList.SortedListDebugView))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class SortedList : IDictionary, ICollection, IEnumerable, ICloneable
 	{
@@ -20,8 +18,8 @@ namespace System.Collections
 
 		private void Init()
 		{
-			this.keys = SortedList.emptyArray;
-			this.values = SortedList.emptyArray;
+			this.keys = Array.Empty<object>();
+			this.values = Array.Empty<object>();
 			this._size = 0;
 			this.comparer = new Comparer(CultureInfo.CurrentCulture);
 		}
@@ -30,7 +28,7 @@ namespace System.Collections
 		{
 			if (initialCapacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialCapacity", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialCapacity", "Non-negative number required.");
 			}
 			this.keys = new object[initialCapacity];
 			this.values = new object[initialCapacity];
@@ -62,11 +60,15 @@ namespace System.Collections
 		{
 			if (d == null)
 			{
-				throw new ArgumentNullException("d", Environment.GetResourceString("Dictionary cannot be null."));
+				throw new ArgumentNullException("d", "Dictionary cannot be null.");
 			}
 			d.Keys.CopyTo(this.keys, 0);
 			d.Values.CopyTo(this.values, 0);
-			Array.Sort(this.keys, this.values, comparer);
+			Array.Sort(this.keys, comparer);
+			for (int i = 0; i < this.keys.Length; i++)
+			{
+				this.values[i] = d[this.keys[i]];
+			}
 			this._size = d.Count;
 		}
 
@@ -74,16 +76,12 @@ namespace System.Collections
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				throw new ArgumentNullException("key", "Key cannot be null.");
 			}
 			int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
 			if (num >= 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", new object[]
-				{
-					this.GetKey(num),
-					key
-				}));
+				throw new ArgumentException(SR.Format("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", this.GetKey(num), key));
 			}
 			this.Insert(~num, key, value);
 		}
@@ -98,7 +96,7 @@ namespace System.Collections
 			{
 				if (value < this.Count)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 				}
 				if (value != this.keys.Length)
 				{
@@ -115,8 +113,8 @@ namespace System.Collections
 						this.values = array2;
 						return;
 					}
-					this.keys = SortedList.emptyArray;
-					this.values = SortedList.emptyArray;
+					this.keys = Array.Empty<object>();
+					this.values = Array.Empty<object>();
 				}
 			}
 		}
@@ -219,19 +217,19 @@ namespace System.Collections
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("array", "Array cannot be null.");
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 			}
 			if (arrayIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("arrayIndex", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("arrayIndex", "Non-negative number required.");
 			}
 			if (array.Length - arrayIndex < this.Count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
+				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
 			}
 			for (int i = 0; i < this.Count; i++)
 			{
@@ -268,7 +266,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			return this.values[index];
 		}
@@ -287,7 +285,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			return this.keys[index];
 		}
@@ -325,7 +323,7 @@ namespace System.Collections
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+					throw new ArgumentNullException("key", "Key cannot be null.");
 				}
 				int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
 				if (num >= 0)
@@ -342,7 +340,7 @@ namespace System.Collections
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				throw new ArgumentNullException("key", "Key cannot be null.");
 			}
 			int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
 			if (num < 0)
@@ -378,7 +376,7 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			this._size--;
 			if (index < this._size)
@@ -404,13 +402,12 @@ namespace System.Collections
 		{
 			if (index < 0 || index >= this.Count)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			this.values[index] = value;
 			this.version++;
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static SortedList Synchronized(SortedList list)
 		{
 			if (list == null)
@@ -444,7 +441,7 @@ namespace System.Collections
 
 		private const int _defaultCapacity = 16;
 
-		private static object[] emptyArray = EmptyArray<object>.Value;
+		internal const int MaxArrayLength = 2146435071;
 
 		[Serializable]
 		private class SyncSortedList : SortedList
@@ -667,7 +664,7 @@ namespace System.Collections
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+					throw new ArgumentNullException("key", "Key cannot be null.");
 				}
 				object root = this._root;
 				int num;
@@ -740,13 +737,13 @@ namespace System.Collections
 		{
 			internal SortedListEnumerator(SortedList sortedList, int index, int count, int getObjRetType)
 			{
-				this.sortedList = sortedList;
-				this.index = index;
-				this.startIndex = index;
-				this.endIndex = index + count;
-				this.version = sortedList.version;
-				this.getObjectRetType = getObjRetType;
-				this.current = false;
+				this._sortedList = sortedList;
+				this._index = index;
+				this._startIndex = index;
+				this._endIndex = index + count;
+				this._version = sortedList.version;
+				this._getObjectRetType = getObjRetType;
+				this._current = false;
 			}
 
 			public object Clone()
@@ -758,35 +755,35 @@ namespace System.Collections
 			{
 				get
 				{
-					if (this.version != this.sortedList.version)
+					if (this._version != this._sortedList.version)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
-					if (!this.current)
+					if (!this._current)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return this.key;
+					return this._key;
 				}
 			}
 
 			public virtual bool MoveNext()
 			{
-				if (this.version != this.sortedList.version)
+				if (this._version != this._sortedList.version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				if (this.index < this.endIndex)
+				if (this._index < this._endIndex)
 				{
-					this.key = this.sortedList.keys[this.index];
-					this.value = this.sortedList.values[this.index];
-					this.index++;
-					this.current = true;
+					this._key = this._sortedList.keys[this._index];
+					this._value = this._sortedList.values[this._index];
+					this._index++;
+					this._current = true;
 					return true;
 				}
-				this.key = null;
-				this.value = null;
-				this.current = false;
+				this._key = null;
+				this._value = null;
+				this._current = false;
 				return false;
 			}
 
@@ -794,15 +791,15 @@ namespace System.Collections
 			{
 				get
 				{
-					if (this.version != this.sortedList.version)
+					if (this._version != this._sortedList.version)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
-					if (!this.current)
+					if (!this._current)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return new DictionaryEntry(this.key, this.value);
+					return new DictionaryEntry(this._key, this._value);
 				}
 			}
 
@@ -810,19 +807,19 @@ namespace System.Collections
 			{
 				get
 				{
-					if (!this.current)
+					if (!this._current)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					if (this.getObjectRetType == 1)
+					if (this._getObjectRetType == 1)
 					{
-						return this.key;
+						return this._key;
 					}
-					if (this.getObjectRetType == 2)
+					if (this._getObjectRetType == 2)
 					{
-						return this.value;
+						return this._value;
 					}
-					return new DictionaryEntry(this.key, this.value);
+					return new DictionaryEntry(this._key, this._value);
 				}
 			}
 
@@ -830,47 +827,47 @@ namespace System.Collections
 			{
 				get
 				{
-					if (this.version != this.sortedList.version)
+					if (this._version != this._sortedList.version)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 					}
-					if (!this.current)
+					if (!this._current)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
 					}
-					return this.value;
+					return this._value;
 				}
 			}
 
 			public virtual void Reset()
 			{
-				if (this.version != this.sortedList.version)
+				if (this._version != this._sortedList.version)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
-				this.index = this.startIndex;
-				this.current = false;
-				this.key = null;
-				this.value = null;
+				this._index = this._startIndex;
+				this._current = false;
+				this._key = null;
+				this._value = null;
 			}
 
-			private SortedList sortedList;
+			private SortedList _sortedList;
 
-			private object key;
+			private object _key;
 
-			private object value;
+			private object _value;
 
-			private int index;
+			private int _index;
 
-			private int startIndex;
+			private int _startIndex;
 
-			private int endIndex;
+			private int _endIndex;
 
-			private int version;
+			private int _version;
 
-			private bool current;
+			private bool _current;
 
-			private int getObjectRetType;
+			private int _getObjectRetType;
 
 			internal const int Keys = 1;
 
@@ -879,6 +876,7 @@ namespace System.Collections
 			internal const int DictEntry = 3;
 		}
 
+		[TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
 		[Serializable]
 		private class KeyList : IList, ICollection, IEnumerable
 		{
@@ -929,12 +927,12 @@ namespace System.Collections
 
 			public virtual int Add(object key)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual bool Contains(object key)
@@ -946,14 +944,14 @@ namespace System.Collections
 			{
 				if (array != null && array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 				}
 				Array.Copy(this.sortedList.keys, 0, array, arrayIndex, this.sortedList.Count);
 			}
 
 			public virtual void Insert(int index, object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual object this[int index]
@@ -964,7 +962,7 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("Mutating a key collection derived from a dictionary is not allowed."));
+					throw new NotSupportedException("Mutating a key collection derived from a dictionary is not allowed.");
 				}
 			}
 
@@ -977,7 +975,7 @@ namespace System.Collections
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+					throw new ArgumentNullException("key", "Key cannot be null.");
 				}
 				int num = Array.BinarySearch(this.sortedList.keys, 0, this.sortedList.Count, key, this.sortedList.comparer);
 				if (num >= 0)
@@ -989,17 +987,18 @@ namespace System.Collections
 
 			public virtual void Remove(object key)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			private SortedList sortedList;
 		}
 
+		[TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
 		[Serializable]
 		private class ValueList : IList, ICollection, IEnumerable
 		{
@@ -1050,12 +1049,12 @@ namespace System.Collections
 
 			public virtual int Add(object key)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual bool Contains(object value)
@@ -1067,14 +1066,14 @@ namespace System.Collections
 			{
 				if (array != null && array.Rank != 1)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
 				}
 				Array.Copy(this.sortedList.values, 0, array, arrayIndex, this.sortedList.Count);
 			}
 
 			public virtual void Insert(int index, object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual object this[int index]
@@ -1085,7 +1084,7 @@ namespace System.Collections
 				}
 				set
 				{
-					throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+					throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 				}
 			}
 
@@ -1101,12 +1100,12 @@ namespace System.Collections
 
 			public virtual void Remove(object value)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			public virtual void RemoveAt(int index)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
+				throw new NotSupportedException("This operation is not supported on SortedList nested types because they require modifying the original SortedList.");
 			}
 
 			private SortedList sortedList;
@@ -1120,7 +1119,7 @@ namespace System.Collections
 				{
 					throw new ArgumentNullException("sortedList");
 				}
-				this.sortedList = sortedList;
+				this._sortedList = sortedList;
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -1128,11 +1127,11 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.sortedList.ToKeyValuePairsArray();
+					return this._sortedList.ToKeyValuePairsArray();
 				}
 			}
 
-			private SortedList sortedList;
+			private SortedList _sortedList;
 		}
 	}
 }

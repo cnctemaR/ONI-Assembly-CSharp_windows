@@ -3,13 +3,13 @@
 namespace System
 {
 	[Serializable]
-	public struct ConsoleKeyInfo
+	public readonly struct ConsoleKeyInfo
 	{
 		public ConsoleKeyInfo(char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
 		{
 			if (key < (ConsoleKey)0 || key > (ConsoleKey)255)
 			{
-				throw new ArgumentOutOfRangeException("key", Environment.GetResourceString("Console key values must be between 0 and 255."));
+				throw new ArgumentOutOfRangeException("key", "Console key values must be between 0 and 255 inclusive.");
 			}
 			this._keyChar = keyChar;
 			this._key = key;
@@ -74,13 +74,13 @@ namespace System
 
 		public override int GetHashCode()
 		{
-			return (int)((ConsoleModifiers)this._keyChar | this._mods);
+			return (int)((ConsoleKey)this._keyChar | ((int)this._key << 16) | (ConsoleKey)((int)this._mods << 24));
 		}
 
-		private char _keyChar;
+		private readonly char _keyChar;
 
-		private ConsoleKey _key;
+		private readonly ConsoleKey _key;
 
-		private ConsoleModifiers _mods;
+		private readonly ConsoleModifiers _mods;
 	}
 }

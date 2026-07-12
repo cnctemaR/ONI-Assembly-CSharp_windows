@@ -278,8 +278,7 @@ namespace System.Data.Odbc
 			}
 			else
 			{
-				DbType dbType = typeMap._dbType;
-				if (dbType == DbType.Byte)
+				if (typeMap._dbType == DbType.Byte)
 				{
 					return TypeMap.s_smallInt;
 				}

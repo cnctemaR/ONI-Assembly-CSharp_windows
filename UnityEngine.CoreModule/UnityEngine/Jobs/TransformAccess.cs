@@ -106,6 +106,42 @@ namespace UnityEngine.Jobs
 			}
 		}
 
+		public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			TransformAccess.SetPositionAndRotation_Internal(ref this, ref position, ref rotation);
+		}
+
+		public void SetLocalPositionAndRotation(Vector3 localPosition, Quaternion localRotation)
+		{
+			TransformAccess.SetLocalPositionAndRotation_Internal(ref this, ref localPosition, ref localRotation);
+		}
+
+		public void GetPositionAndRotation(out Vector3 position, out Quaternion rotation)
+		{
+			TransformAccess.GetPositionAndRotation_Internal(ref this, out position, out rotation);
+		}
+
+		public void GetLocalPositionAndRotation(out Vector3 localPosition, out Quaternion localRotation)
+		{
+			TransformAccess.GetLocalPositionAndRotation_Internal(ref this, out localPosition, out localRotation);
+		}
+
+		[NativeMethod(Name = "TransformAccessBindings::SetPositionAndRotation", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPositionAndRotation_Internal(ref TransformAccess access, ref Vector3 position, ref Quaternion rotation);
+
+		[NativeMethod(Name = "TransformAccessBindings::SetLocalPositionAndRotation", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLocalPositionAndRotation_Internal(ref TransformAccess access, ref Vector3 localPosition, ref Quaternion localRotation);
+
+		[NativeMethod(Name = "TransformAccessBindings::GetPositionAndRotation", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPositionAndRotation_Internal(ref TransformAccess access, out Vector3 position, out Quaternion rotation);
+
+		[NativeMethod(Name = "TransformAccessBindings::GetLocalPositionAndRotation", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLocalPositionAndRotation_Internal(ref TransformAccess access, out Vector3 localPosition, out Quaternion localRotation);
+
 		[NativeMethod(Name = "TransformAccessBindings::GetPosition", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetPosition(ref TransformAccess access, out Vector3 p);
@@ -155,7 +191,7 @@ namespace UnityEngine.Jobs
 		private static extern void GetWorldToLocalMatrix(ref TransformAccess access, out Matrix4x4 m);
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void CheckHierarchyValid()
 		{
 			bool flag = !this.isValid;
@@ -166,19 +202,19 @@ namespace UnityEngine.Jobs
 		}
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void MarkReadWrite()
 		{
 		}
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal void MarkReadOnly()
 		{
 		}
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-		[MethodImpl((MethodImplOptions)256)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void CheckWriteAccess()
 		{
 		}

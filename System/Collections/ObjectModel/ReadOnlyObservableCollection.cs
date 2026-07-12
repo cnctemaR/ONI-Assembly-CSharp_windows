@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace System.Collections.ObjectModel
 {
-	[TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35")]
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(global::System.Collections.Generic.CollectionDebugView<>))]
 	[Serializable]
 	public class ReadOnlyObservableCollection<T> : ReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
 	{

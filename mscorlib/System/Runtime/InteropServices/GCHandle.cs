@@ -4,13 +4,12 @@ using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
-	[MonoTODO("Struct should be [StructLayout(LayoutKind.Sequential)] but will need to be reordered for that.")]
 	[ComVisible(true)]
 	public struct GCHandle
 	{
 		private GCHandle(IntPtr h)
 		{
-			this.handle = (int)h;
+			this.handle = h;
 		}
 
 		private GCHandle(object obj)
@@ -24,14 +23,14 @@ namespace System.Runtime.InteropServices
 			{
 				type = GCHandleType.Normal;
 			}
-			this.handle = GCHandle.GetTargetHandle(value, 0, type);
+			this.handle = GCHandle.GetTargetHandle(value, IntPtr.Zero, type);
 		}
 
 		public bool IsAllocated
 		{
 			get
 			{
-				return this.handle != 0;
+				return this.handle != IntPtr.Zero;
 			}
 		}
 
@@ -41,7 +40,7 @@ namespace System.Runtime.InteropServices
 			{
 				if (!this.IsAllocated)
 				{
-					throw new InvalidOperationException(Locale.GetText("Handle is not allocated"));
+					throw new InvalidOperationException("Handle is not allocated");
 				}
 				return GCHandle.GetTarget(this.handle);
 			}
@@ -77,10 +76,10 @@ namespace System.Runtime.InteropServices
 
 		public void Free()
 		{
-			int num = this.handle;
-			if (num != 0 && Interlocked.CompareExchange(ref this.handle, 0, num) == num)
+			IntPtr intPtr = this.handle;
+			if (intPtr != IntPtr.Zero && Interlocked.CompareExchange(ref this.handle, IntPtr.Zero, intPtr) == intPtr)
 			{
-				GCHandle.FreeHandle(num);
+				GCHandle.FreeHandle(intPtr);
 				return;
 			}
 			throw new InvalidOperationException("Handle is not initialized.");
@@ -88,7 +87,7 @@ namespace System.Runtime.InteropServices
 
 		public static explicit operator IntPtr(GCHandle value)
 		{
-			return (IntPtr)value.handle;
+			return value.handle;
 		}
 
 		public static explicit operator GCHandle(IntPtr value)
@@ -97,7 +96,7 @@ namespace System.Runtime.InteropServices
 			{
 				throw new InvalidOperationException("GCHandle value cannot be zero");
 			}
-			if (!GCHandle.CheckCurrentDomain((int)value))
+			if (!GCHandle.CheckCurrentDomain(value))
 			{
 				throw new ArgumentException("GCHandle value belongs to a different domain");
 			}
@@ -105,19 +104,19 @@ namespace System.Runtime.InteropServices
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CheckCurrentDomain(int handle);
+		private static extern bool CheckCurrentDomain(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern object GetTarget(int handle);
+		private static extern object GetTarget(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetTargetHandle(object obj, int handle, GCHandleType type);
+		private static extern IntPtr GetTargetHandle(object obj, IntPtr handle, GCHandleType type);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void FreeHandle(int handle);
+		private static extern void FreeHandle(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetAddrOfPinnedObject(int handle);
+		private static extern IntPtr GetAddrOfPinnedObject(IntPtr handle);
 
 		public static bool operator ==(GCHandle a, GCHandle b)
 		{
@@ -149,6 +148,6 @@ namespace System.Runtime.InteropServices
 			return (IntPtr)value;
 		}
 
-		private int handle;
+		private IntPtr handle;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using TUNING;
 using UnityEngine;
 
 public class AttackChore : Chore<AttackChore.StatesInstance>
@@ -23,7 +24,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		Workable component = base.smi.sm.attackTarget.Get(base.smi).gameObject.GetComponent<Workable>();
 		if (component)
 		{
-			return MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1].Replace("_loop", "");
+			return MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<WorkerBase>(), "hit")[1].Replace("_loop", "");
 		}
 		return "hit";
 	}
@@ -119,9 +120,9 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				smi.master.Fail("target lost");
 			}).Enter(delegate(AttackChore.StatesInstance smi)
 			{
-				smi.master.GetComponent<Weapon>().Configure(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
+				smi.master.GetComponent<Weapon>().Configure(DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.MIN_DAMAGE_PER_HIT, DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.MAX_DAMAGE_PER_HIT, DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.DAMAGE_TYPE, DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.TARGET_TYPE, DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.MAX_HITS, DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.AREA_OF_EFFECT_RADIUS);
 			});
-			this.approachtarget.InitializeStates(this.attacker, this.attackTarget, this.attack, null, MinionConfig.ATTACK_OFFSETS, NavigationTactics.Range_3_ProhibitOverlap).Enter(delegate(AttackChore.StatesInstance smi)
+			this.approachtarget.InitializeStates(this.attacker, this.attackTarget, this.attack, null, BaseMinionConfig.ATTACK_OFFSETS, NavigationTactics.Range_3_ProhibitOverlap).Enter(delegate(AttackChore.StatesInstance smi)
 			{
 				smi.master.CleanUpMultitool();
 				smi.master.Trigger(1039067354, this.attackTarget.Get(smi));
@@ -136,11 +137,11 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				this.attackTarget.Get(smi).Subscribe(1088554450, new Action<object>(smi.master.OnTargetMoved));
 				if (this.attackTarget != null && smi.master.multiTool == null)
 				{
-					smi.master.multiTool = new MultitoolController.Instance(this.attackTarget.Get(smi).GetComponent<Workable>(), smi.master.GetComponent<Worker>(), "attack", Assets.GetPrefab(EffectConfigs.AttackSplashId));
+					smi.master.multiTool = new MultitoolController.Instance(this.attackTarget.Get(smi).GetComponent<Workable>(), smi.master.GetComponent<WorkerBase>(), "attack", Assets.GetPrefab(EffectConfigs.AttackSplashId));
 					smi.master.multiTool.StartSM();
 				}
 				this.attackTarget.Get(smi).Subscribe(1969584890, new Action<object>(smi.master.OnTargetDestroyed));
-				smi.ScheduleGoTo(0.5f, this.success);
+				smi.ScheduleGoTo(1f / DUPLICANTSTATS.STANDARD.Combat.BasicWeapon.ATTACKS_PER_SECOND, this.success);
 			}).Update(delegate(AttackChore.StatesInstance smi, float dt)
 			{
 				if (smi.master.multiTool != null)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
@@ -90,6 +91,13 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				component2.ForceAddSkillPoint();
 				num2++;
 			}
+			if (component.HasTag(GameTags.Minions.Models.Bionic))
+			{
+				GameScheduler.Instance.Schedule("BonusBatteryDelivery", 5f, delegate(object data)
+				{
+					base.Trigger(1982288670, null);
+				}, null, null);
+			}
 		}
 		base.smi.sm.closePortal.Trigger(base.smi);
 	}
@@ -133,6 +141,30 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			float num = Mathf.Clamp01(1f - timeRemaining / totalWaitTime);
 			base.master.meter.SetPositionPercent(num);
 		}
+
+		public IEnumerator SpawnExtraPowerBanks()
+		{
+			int cellTarget = Grid.OffsetCell(Grid.PosToCell(base.gameObject), 1, 2);
+			int count = 5;
+			int num;
+			for (int i = 0; i < count; i = num + 1)
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.POPFX.EXTRA_POWERBANKS_BIONIC, base.gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("SandboxTool_Spawner", false));
+				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("DisposableElectrobank_BasicSingleHarvestPlant"), Grid.CellToPosCBC(cellTarget, Grid.SceneLayer.Front) - Vector3.right / 2f);
+				gameObject.SetActive(true);
+				Vector2 vector = new Vector2((-2.5f + 5f * ((float)i / 5f)) / 2f, 2f);
+				if (GameComps.Fallers.Has(gameObject))
+				{
+					GameComps.Fallers.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, vector);
+				yield return new WaitForSeconds(0.25f);
+				num = i;
+			}
+			yield return 0;
+			yield break;
+		}
 	}
 
 	public class States : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>
@@ -141,7 +173,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			default_state = this.idle;
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-			this.root.OnSignal(this.idlePortal, this.resetToIdle);
+			this.root.OnSignal(this.idlePortal, this.resetToIdle).EventTransition(GameHashes.BonusTelepadDelivery, this.bonusDelivery.pre, null);
 			this.resetToIdle.GoTo(this.idle);
 			this.idle.Enter(delegate(Telepad.StatesInstance smi)
 			{
@@ -170,6 +202,12 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			{
 				smi.master.meter.SetPositionPercent(0f);
 			}).PlayAnims((Telepad.StatesInstance smi) => Telepad.States.workingAnims, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
+			this.bonusDelivery.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.bonusDelivery.loop);
+			this.bonusDelivery.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleAction("SpawnBonusDelivery", 1f, delegate(Telepad.StatesInstance smi)
+			{
+				smi.master.StartCoroutine(smi.SpawnExtraPowerBanks());
+			}).ScheduleGoTo(3f, this.bonusDelivery.pst);
+			this.bonusDelivery.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.idle);
 		}
 
 		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal openPortal;
@@ -190,6 +228,17 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State unoperational;
 
+		public Telepad.States.BonusDeliveryStates bonusDelivery;
+
 		private static readonly HashedString[] workingAnims = new HashedString[] { "working_loop", "working_pst" };
+
+		public class BonusDeliveryStates : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State
+		{
+			public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State pre;
+
+			public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State loop;
+
+			public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State pst;
+		}
 	}
 }

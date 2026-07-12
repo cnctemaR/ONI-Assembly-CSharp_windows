@@ -7,30 +7,30 @@ namespace System.Xml.Linq
 	{
 		public XHashtable(XHashtable<TValue>.ExtractKeyDelegate extractKey, int capacity)
 		{
-			this.state = new XHashtable<TValue>.XHashtableState(extractKey, capacity);
+			this._state = new XHashtable<TValue>.XHashtableState(extractKey, capacity);
 		}
 
 		public bool TryGetValue(string key, int index, int count, out TValue value)
 		{
-			return this.state.TryGetValue(key, index, count, out value);
+			return this._state.TryGetValue(key, index, count, out value);
 		}
 
 		public TValue Add(TValue value)
 		{
 			TValue tvalue;
-			while (!this.state.TryAdd(value, out tvalue))
+			while (!this._state.TryAdd(value, out tvalue))
 			{
 				lock (this)
 				{
-					XHashtable<TValue>.XHashtableState xhashtableState = this.state.Resize();
+					XHashtable<TValue>.XHashtableState xhashtableState = this._state.Resize();
 					Thread.MemoryBarrier();
-					this.state = xhashtableState;
+					this._state = xhashtableState;
 				}
 			}
 			return tvalue;
 		}
 
-		private XHashtable<TValue>.XHashtableState state;
+		private XHashtable<TValue>.XHashtableState _state;
 
 		private const int StartingHash = 352654597;
 
@@ -40,60 +40,60 @@ namespace System.Xml.Linq
 		{
 			public XHashtableState(XHashtable<TValue>.ExtractKeyDelegate extractKey, int capacity)
 			{
-				this.buckets = new int[capacity];
-				this.entries = new XHashtable<TValue>.XHashtableState.Entry[capacity];
-				this.extractKey = extractKey;
+				this._buckets = new int[capacity];
+				this._entries = new XHashtable<TValue>.XHashtableState.Entry[capacity];
+				this._extractKey = extractKey;
 			}
 
 			public XHashtable<TValue>.XHashtableState Resize()
 			{
-				if (this.numEntries < this.buckets.Length)
+				if (this._numEntries < this._buckets.Length)
 				{
 					return this;
 				}
 				int num = 0;
-				for (int i = 0; i < this.buckets.Length; i++)
+				for (int i = 0; i < this._buckets.Length; i++)
 				{
-					int j = this.buckets[i];
+					int j = this._buckets[i];
 					if (j == 0)
 					{
-						j = Interlocked.CompareExchange(ref this.buckets[i], -1, 0);
+						j = Interlocked.CompareExchange(ref this._buckets[i], -1, 0);
 					}
 					while (j > 0)
 					{
-						if (this.extractKey(this.entries[j].Value) != null)
+						if (this._extractKey(this._entries[j].Value) != null)
 						{
 							num++;
 						}
-						if (this.entries[j].Next == 0)
+						if (this._entries[j].Next == 0)
 						{
-							j = Interlocked.CompareExchange(ref this.entries[j].Next, -1, 0);
+							j = Interlocked.CompareExchange(ref this._entries[j].Next, -1, 0);
 						}
 						else
 						{
-							j = this.entries[j].Next;
+							j = this._entries[j].Next;
 						}
 					}
 				}
-				if (num < this.buckets.Length / 2)
+				if (num < this._buckets.Length / 2)
 				{
-					num = this.buckets.Length;
+					num = this._buckets.Length;
 				}
 				else
 				{
-					num = this.buckets.Length * 2;
+					num = this._buckets.Length * 2;
 					if (num < 0)
 					{
 						throw new OverflowException();
 					}
 				}
-				XHashtable<TValue>.XHashtableState xhashtableState = new XHashtable<TValue>.XHashtableState(this.extractKey, num);
-				for (int k = 0; k < this.buckets.Length; k++)
+				XHashtable<TValue>.XHashtableState xhashtableState = new XHashtable<TValue>.XHashtableState(this._extractKey, num);
+				for (int k = 0; k < this._buckets.Length; k++)
 				{
-					for (int l = this.buckets[k]; l > 0; l = this.entries[l].Next)
+					for (int l = this._buckets[k]; l > 0; l = this._entries[l].Next)
 					{
 						TValue tvalue;
-						xhashtableState.TryAdd(this.entries[l].Value, out tvalue);
+						xhashtableState.TryAdd(this._entries[l].Value, out tvalue);
 					}
 				}
 				return xhashtableState;
@@ -105,7 +105,7 @@ namespace System.Xml.Linq
 				int num2 = 0;
 				if (this.FindEntry(num, key, index, count, ref num2))
 				{
-					value = this.entries[num2].Value;
+					value = this._entries[num2].Value;
 					return true;
 				}
 				value = default(TValue);
@@ -115,37 +115,37 @@ namespace System.Xml.Linq
 			public bool TryAdd(TValue value, out TValue newValue)
 			{
 				newValue = value;
-				string text = this.extractKey(value);
+				string text = this._extractKey(value);
 				if (text == null)
 				{
 					return true;
 				}
 				int num = XHashtable<TValue>.XHashtableState.ComputeHashCode(text, 0, text.Length);
-				int num2 = Interlocked.Increment(ref this.numEntries);
-				if (num2 < 0 || num2 >= this.buckets.Length)
+				int num2 = Interlocked.Increment(ref this._numEntries);
+				if (num2 < 0 || num2 >= this._buckets.Length)
 				{
 					return false;
 				}
-				this.entries[num2].Value = value;
-				this.entries[num2].HashCode = num;
+				this._entries[num2].Value = value;
+				this._entries[num2].HashCode = num;
 				Thread.MemoryBarrier();
 				int num3 = 0;
 				while (!this.FindEntry(num, text, 0, text.Length, ref num3))
 				{
 					if (num3 == 0)
 					{
-						num3 = Interlocked.CompareExchange(ref this.buckets[num & (this.buckets.Length - 1)], num2, 0);
+						num3 = Interlocked.CompareExchange(ref this._buckets[num & (this._buckets.Length - 1)], num2, 0);
 					}
 					else
 					{
-						num3 = Interlocked.CompareExchange(ref this.entries[num3].Next, num2, 0);
+						num3 = Interlocked.CompareExchange(ref this._entries[num3].Next, num2, 0);
 					}
 					if (num3 <= 0)
 					{
 						return num3 == 0;
 					}
 				}
-				newValue = this.entries[num3].Value;
+				newValue = this._entries[num3].Value;
 				return true;
 			}
 
@@ -155,7 +155,7 @@ namespace System.Xml.Linq
 				int i;
 				if (num == 0)
 				{
-					i = this.buckets[hashCode & (this.buckets.Length - 1)];
+					i = this._buckets[hashCode & (this._buckets.Length - 1)];
 				}
 				else
 				{
@@ -163,21 +163,21 @@ namespace System.Xml.Linq
 				}
 				while (i > 0)
 				{
-					if (this.entries[i].HashCode == hashCode)
+					if (this._entries[i].HashCode == hashCode)
 					{
-						string text = this.extractKey(this.entries[i].Value);
+						string text = this._extractKey(this._entries[i].Value);
 						if (text == null)
 						{
-							if (this.entries[i].Next > 0)
+							if (this._entries[i].Next > 0)
 							{
-								this.entries[i].Value = default(TValue);
-								i = this.entries[i].Next;
+								this._entries[i].Value = default(TValue);
+								i = this._entries[i].Next;
 								if (num == 0)
 								{
-									this.buckets[hashCode & (this.buckets.Length - 1)] = i;
+									this._buckets[hashCode & (this._buckets.Length - 1)] = i;
 									continue;
 								}
-								this.entries[num].Next = i;
+								this._entries[num].Next = i;
 								continue;
 							}
 						}
@@ -188,7 +188,7 @@ namespace System.Xml.Linq
 						}
 					}
 					num = i;
-					i = this.entries[i].Next;
+					i = this._entries[i].Next;
 				}
 				entryIndex = num;
 				return false;
@@ -208,13 +208,13 @@ namespace System.Xml.Linq
 				return num & int.MaxValue;
 			}
 
-			private int[] buckets;
+			private int[] _buckets;
 
-			private XHashtable<TValue>.XHashtableState.Entry[] entries;
+			private XHashtable<TValue>.XHashtableState.Entry[] _entries;
 
-			private int numEntries;
+			private int _numEntries;
 
-			private XHashtable<TValue>.ExtractKeyDelegate extractKey;
+			private XHashtable<TValue>.ExtractKeyDelegate _extractKey;
 
 			private const int EndOfList = 0;
 

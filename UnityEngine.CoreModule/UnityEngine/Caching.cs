@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GetCachingManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Misc/CachingManager.h")]
+	[StaticAccessor("GetCachingManager()", StaticAccessorType.Dot)]
 	public sealed class Caching
 	{
 		public static extern bool compressionEnabled
@@ -266,8 +266,8 @@ namespace UnityEngine
 		}
 
 		[NativeName("Caching_GetCacheHandleAt")]
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static Cache GetCacheAt(int cacheIndex)
 		{
 			Cache cache;
@@ -275,8 +275,8 @@ namespace UnityEngine
 			return cache;
 		}
 
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_GetCacheHandleByPath")]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		public static Cache GetCacheByPath(string cachePath)
 		{
@@ -310,9 +310,9 @@ namespace UnityEngine
 			Caching.MoveCacheBefore_Injected(ref src, ref dst);
 		}
 
-		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
+		[NativeName("Caching_MoveCacheAfterByHandle")]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
 			Caching.MoveCacheAfter_Injected(ref src, ref dst);
@@ -346,8 +346,8 @@ namespace UnityEngine
 				Caching.get_currentCacheForWriting_Injected(out cache);
 				return cache;
 			}
-			[NativeThrows]
 			[NativeName("Caching_SetCurrentCacheByHandle")]
+			[NativeThrows]
 			set
 			{
 				Caching.set_currentCacheForWriting_Injected(ref value);

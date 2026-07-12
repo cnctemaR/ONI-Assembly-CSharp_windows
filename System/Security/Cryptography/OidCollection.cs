@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
+using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,19 +9,21 @@ namespace System.Security.Cryptography
 	{
 		public OidCollection()
 		{
-			this.m_list = new ArrayList();
+			this._list = new List<Oid>();
 		}
 
 		public int Add(Oid oid)
 		{
-			return this.m_list.Add(oid);
+			int count = this._list.Count;
+			this._list.Add(oid);
+			return count;
 		}
 
 		public Oid this[int index]
 		{
 			get
 			{
-				return this.m_list[index] as Oid;
+				return this._list[index];
 			}
 		}
 
@@ -28,14 +31,13 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				string text = X509Utils.FindOidInfoWithFallback(2U, oid, OidGroup.All);
+				string text = OidLookup.ToOid(oid, OidGroup.All, false);
 				if (text == null)
 				{
 					text = oid;
 				}
-				foreach (object obj in this.m_list)
+				foreach (Oid oid2 in this._list)
 				{
-					Oid oid2 = (Oid)obj;
 					if (oid2.Value == text)
 					{
 						return oid2;
@@ -49,7 +51,7 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_list.Count;
+				return this._list.Count;
 			}
 		}
 
@@ -60,7 +62,7 @@ namespace System.Security.Cryptography
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return new OidEnumerator(this);
+			return this.GetEnumerator();
 		}
 
 		void ICollection.CopyTo(Array array, int index)
@@ -71,15 +73,15 @@ namespace System.Security.Cryptography
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(global::SR.GetString("Only single dimensional arrays are supported for the requested action."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
 			if (index < 0 || index >= array.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
 			if (index + this.Count > array.Length)
 			{
-				throw new ArgumentException(global::SR.GetString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			for (int i = 0; i < this.Count; i++)
 			{
@@ -90,7 +92,15 @@ namespace System.Security.Cryptography
 
 		public void CopyTo(Oid[] array, int index)
 		{
-			((ICollection)this).CopyTo(array, index);
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || index >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			this._list.CopyTo(array, index);
 		}
 
 		public bool IsSynchronized
@@ -109,6 +119,6 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		private ArrayList m_list;
+		private readonly List<Oid> _list;
 	}
 }

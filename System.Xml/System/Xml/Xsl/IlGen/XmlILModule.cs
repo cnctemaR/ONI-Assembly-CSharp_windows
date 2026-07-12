@@ -91,7 +91,7 @@ namespace System.Xml.Xsl.IlGen
 			while (this.methods[name] != null)
 			{
 				num++;
-				name = string.Concat(new object[] { text, " (", num, ")" });
+				name = text + " (" + num.ToString() + ")";
 			}
 			if (!flag)
 			{
@@ -224,7 +224,7 @@ namespace System.Xml.Xsl.IlGen
 			Interlocked.Increment(ref XmlILModule.AssemblyId);
 			return new AssemblyName
 			{
-				Name = "System.Xml.Xsl.CompiledQuery." + XmlILModule.AssemblyId
+				Name = "System.Xml.Xsl.CompiledQuery." + XmlILModule.AssemblyId.ToString()
 			};
 		}
 

@@ -8,23 +8,46 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
+using System.Security.Policy;
+using System.Threading;
 using Mono.Security;
 using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ComDefaultInterface(typeof(_AssemblyBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_AssemblyBuilder))]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AssemblyBuilder : Assembly, _AssemblyBuilder
 	{
+		void _AssemblyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void basic_init(AssemblyBuilder ab);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void UpdateNativeCustomAttributes(AssemblyBuilder ab);
 
+		[PreserveDependency("RuntimeResolve", "System.Reflection.Emit.ModuleBuilder")]
 		internal AssemblyBuilder(AssemblyName n, string directory, AssemblyBuilderAccess access, bool corlib_internal)
 		{
 			this.pekind = PEFileKinds.Dll;
@@ -71,7 +94,7 @@ namespace System.Reflection.Emit
 				byte[] publicKey = n.GetPublicKey();
 				if (publicKey != null && publicKey.Length != 0)
 				{
-					this.sn = new StrongName(publicKey);
+					this.sn = new Mono.Security.StrongName(publicKey);
 				}
 			}
 			if (this.sn != null)
@@ -101,6 +124,14 @@ namespace System.Reflection.Emit
 			}
 		}
 
+		public override string EscapedCodeBase
+		{
+			get
+			{
+				return RuntimeAssembly.GetCodeBase(this, true);
+			}
+		}
+
 		public override MethodInfo EntryPoint
 		{
 			get
@@ -121,16 +152,15 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return base.ImageRuntimeVersion;
+				return RuntimeAssembly.InternalImageRuntimeVersion(this);
 			}
 		}
 
-		[MonoTODO]
 		public override bool ReflectionOnly
 		{
 			get
 			{
-				return base.ReflectionOnly;
+				return this.access == 6U;
 			}
 		}
 
@@ -688,7 +718,7 @@ namespace System.Reflection.Emit
 			{
 				foreach (ModuleBuilder moduleBuilder2 in this.modules)
 				{
-					if (moduleBuilder2.FullyQualifiedName == assemblyFileName)
+					if (moduleBuilder2.FileName == assemblyFileName)
 					{
 						moduleBuilder = moduleBuilder2;
 					}
@@ -877,7 +907,7 @@ namespace System.Reflection.Emit
 
 		private string create_assembly_version(string version)
 		{
-			string[] array = version.Split(new char[] { '.' });
+			string[] array = version.Split('.', StringSplitOptions.None);
 			int[] array2 = new int[4];
 			if (array.Length < 0 || array.Length > 4)
 			{
@@ -917,15 +947,15 @@ namespace System.Reflection.Emit
 					}
 				}
 			}
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
-				array2[0],
+				array2[0].ToString(),
 				".",
-				array2[1],
+				array2[1].ToString(),
 				".",
-				array2[2],
+				array2[2].ToString(),
 				".",
-				array2[3]
+				array2[3].ToString()
 			});
 		}
 
@@ -941,26 +971,6 @@ namespace System.Reflection.Emit
 		internal Type MakeGenericType(Type gtd, Type[] typeArguments)
 		{
 			return new TypeBuilderInstantiation(gtd, typeArguments);
-		}
-
-		void _AssemblyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		public override Type GetType(string name, bool throwOnError, bool ignoreCase)
@@ -1049,14 +1059,18 @@ namespace System.Reflection.Emit
 			return this.GetModules(getResourceModules);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public override Assembly GetSatelliteAssembly(CultureInfo culture)
 		{
-			return base.GetSatelliteAssembly(culture, null, true);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return base.GetSatelliteAssembly(culture, null, true, ref stackCrawlMark);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public override Assembly GetSatelliteAssembly(CultureInfo culture, Version version)
 		{
-			return base.GetSatelliteAssembly(culture, version, true);
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
+			return base.GetSatelliteAssembly(culture, version, true, ref stackCrawlMark);
 		}
 
 		public override Module ManifestModule
@@ -1093,33 +1107,76 @@ namespace System.Reflection.Emit
 			return base.GetHashCode();
 		}
 
+		public override string ToString()
+		{
+			if (this.assemblyName != null)
+			{
+				return this.assemblyName;
+			}
+			this.assemblyName = this.FullName;
+			return this.assemblyName;
+		}
+
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
-			return base.IsDefined(attributeType, inherit);
+			return MonoCustomAttrs.IsDefined(this, attributeType, inherit);
 		}
 
 		public override object[] GetCustomAttributes(bool inherit)
 		{
-			return base.GetCustomAttributes(inherit);
+			return MonoCustomAttrs.GetCustomAttributes(this, inherit);
 		}
 
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return base.GetCustomAttributes(attributeType, inherit);
+			return MonoCustomAttrs.GetCustomAttributes(this, attributeType, inherit);
 		}
 
 		public override string FullName
 		{
 			get
 			{
-				return base.FullName;
+				return RuntimeAssembly.get_fullname(this);
 			}
+		}
+
+		internal override IntPtr MonoAssembly
+		{
+			get
+			{
+				return this._mono_assembly;
+			}
+		}
+
+		public override Evidence Evidence
+		{
+			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true)]
+			get
+			{
+				return this.UnprotectedGetEvidence();
+			}
+		}
+
+		internal override Evidence UnprotectedGetEvidence()
+		{
+			if (this._evidence == null)
+			{
+				lock (this)
+				{
+					this._evidence = Evidence.GetDefaultHostEvidence(this);
+				}
+			}
+			return this._evidence;
 		}
 
 		internal AssemblyBuilder()
 		{
 			ThrowStub.ThrowNotSupportedException();
 		}
+
+		internal IntPtr _mono_assembly;
+
+		internal Evidence _evidence;
 
 		private UIntPtr dynamic_assembly;
 
@@ -1171,6 +1228,18 @@ namespace System.Reflection.Emit
 
 		private byte[] pktoken;
 
+		internal PermissionSet _minimum;
+
+		internal PermissionSet _optional;
+
+		internal PermissionSet _refuse;
+
+		internal PermissionSet _granted;
+
+		internal PermissionSet _denied;
+
+		private string assemblyName;
+
 		internal Type corlib_object_type;
 
 		internal Type corlib_value_type;
@@ -1187,7 +1256,7 @@ namespace System.Reflection.Emit
 
 		private bool is_module_only;
 
-		private StrongName sn;
+		private Mono.Security.StrongName sn;
 
 		private NativeResourceType native_resource;
 

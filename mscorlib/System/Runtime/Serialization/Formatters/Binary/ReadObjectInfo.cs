@@ -142,11 +142,21 @@ namespace System.Runtime.Serialization.Formatters.Binary
 			}
 			if (this.isSi)
 			{
-				throw new SerializationException(Environment.GetResourceString("MemberInfo cannot be obtained for ISerialized Object '{0}'.", new object[] { this.objectType + " " + name }));
+				string text = "MemberInfo cannot be obtained for ISerialized Object '{0}'.";
+				object[] array = new object[1];
+				int num = 0;
+				Type type = this.objectType;
+				array[num] = ((type != null) ? type.ToString() : null) + " " + name;
+				throw new SerializationException(Environment.GetResourceString(text, array));
 			}
 			if (this.cache.memberInfos == null)
 			{
-				throw new SerializationException(Environment.GetResourceString("No MemberInfo for Object {0}.", new object[] { this.objectType + " " + name }));
+				string text2 = "No MemberInfo for Object {0}.";
+				object[] array2 = new object[1];
+				int num2 = 0;
+				Type type2 = this.objectType;
+				array2[num2] = ((type2 != null) ? type2.ToString() : null) + " " + name;
+				throw new SerializationException(Environment.GetResourceString(text2, array2));
 			}
 			if (this.Position(name) != -1)
 			{
@@ -173,7 +183,12 @@ namespace System.Runtime.Serialization.Formatters.Binary
 			}
 			if (type == null)
 			{
-				throw new SerializationException(Environment.GetResourceString("Types not available for ISerializable object '{0}'.", new object[] { this.objectType + " " + name }));
+				string text = "Types not available for ISerializable object '{0}'.";
+				object[] array = new object[1];
+				int num2 = 0;
+				Type type2 = this.objectType;
+				array[num2] = ((type2 != null) ? type2.ToString() : null) + " " + name;
+				throw new SerializationException(Environment.GetResourceString(text, array));
 			}
 			return type;
 		}

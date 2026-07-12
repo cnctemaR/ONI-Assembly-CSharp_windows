@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Video
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Modules/Video/Public/VideoClip.h")]
+	[RequiredByNativeCode]
 	public sealed class VideoClip : Object
 	{
 		private VideoClip()

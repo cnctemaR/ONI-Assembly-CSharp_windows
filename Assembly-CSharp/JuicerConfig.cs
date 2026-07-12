@@ -33,7 +33,8 @@ public class JuicerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(RoomConstraints.ConstraintTags.RecBuilding, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardFabricatorStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
@@ -86,6 +87,15 @@ public class JuicerConfig : IBuildingConfig
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Recommended;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
+		component.prefabInitFn += this.OnInit;
+	}
+
+	private void OnInit(GameObject go)
+	{
+		JuicerWorkable component = go.GetComponent<JuicerWorkable>();
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_juicer_kanim") };
+		component.workerTypeOverrideAnims.Add(MinionConfig.ID, array);
+		component.workerTypeOverrideAnims.Add(BionicMinionConfig.ID, new KAnimFile[] { Assets.GetAnim("anim_bionic_interacts_juicer_kanim") });
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

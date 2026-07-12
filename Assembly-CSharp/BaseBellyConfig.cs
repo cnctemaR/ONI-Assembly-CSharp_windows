@@ -83,13 +83,20 @@ public static class BaseBellyConfig
 		return gameObject;
 	}
 
-	public static List<Diet.Info> BasicDiet(Tag foodTag, Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
+	public static Diet.Info BasicDiet(Tag foodTag, Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
-		HashSet<Tag> hashSet = new HashSet<Tag>();
-		hashSet.Add(foodTag);
+		return new Diet.Info(new HashSet<Tag> { foodTag }, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatPlantDirectly, true, null);
+	}
+
+	public static List<Diet.Info> StandardDiets()
+	{
 		return new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, true, true)
+			BaseBellyConfig.BasicDiet("CarrotPlant", "IceBellyPoop", BellyTuning.CALORIES_PER_UNIT_EATEN / BellyTuning.CONSUMABLE_PLANT_MATURITY_LEVELS, 67.474f / BellyTuning.CONSUMABLE_PLANT_MATURITY_LEVELS, BellyTuning.GERM_ID_EMMITED_ON_POOP, 1000f),
+			new Diet.Info(new HashSet<Tag> { CarrotConfig.ID }, "IceBellyPoop", BellyTuning.CALORIES_PER_UNIT_EATEN / 1f, 67.474f, BellyTuning.GERM_ID_EMMITED_ON_POOP, 1000f, false, Diet.Info.FoodType.EatSolid, true, null),
+			new Diet.Info(new HashSet<Tag> { "FriesCarrot" }, "IceBellyPoop", FOOD.FOOD_TYPES.FRIES_CARROT.CaloriesPerUnit / 0.75928f, 120.01f, BellyTuning.GERM_ID_EMMITED_ON_POOP, 1000f, false, Diet.Info.FoodType.EatSolid, true, null),
+			BaseBellyConfig.BasicDiet("BeanPlant", "IceBellyPoop", BellyTuning.CALORIES_PER_UNIT_EATEN / BellyTuning.CONSUMABLE_PLANT_MATURITY_LEVELS / 0.744f, 67.474f / BellyTuning.CONSUMABLE_PLANT_MATURITY_LEVELS / 0.744f, BellyTuning.GERM_ID_EMMITED_ON_POOP, 1000f),
+			new Diet.Info(new HashSet<Tag> { "BeanPlantSeed" }, "IceBellyPoop", 1100000f, 18.570995f, BellyTuning.GERM_ID_EMMITED_ON_POOP, 1000f, false, Diet.Info.FoodType.EatSolid, true, null)
 		};
 	}
 

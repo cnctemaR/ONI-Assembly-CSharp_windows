@@ -11,6 +11,26 @@ namespace System.Reflection.Emit
 	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class EnumBuilder : TypeInfo, _EnumBuilder
 	{
+		void _EnumBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EnumBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		internal EnumBuilder(ModuleBuilder mb, string name, TypeAttributes visibility, Type underlyingType)
 		{
 			this._tb = new TypeBuilder(mb, name, visibility | TypeAttributes.Sealed, typeof(Enum), null, PackingSize.Unspecified, 0, null);
@@ -372,26 +392,6 @@ namespace System.Reflection.Emit
 			return new NotSupportedException("The invoked member is not supported in a dynamic module.");
 		}
 
-		void _EnumBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EnumBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		internal override bool IsUserType
 		{
 			get
@@ -411,6 +411,14 @@ namespace System.Reflection.Emit
 		public override bool IsAssignableFrom(TypeInfo typeInfo)
 		{
 			return base.IsAssignableFrom(typeInfo);
+		}
+
+		public override bool IsTypeDefinition
+		{
+			get
+			{
+				return true;
+			}
 		}
 
 		internal EnumBuilder()

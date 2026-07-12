@@ -1,23 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
+using Unity;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComDefaultInterface(typeof(_MemberInfo))]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[Serializable]
 	public abstract class MemberInfo : ICustomAttributeProvider, _MemberInfo
 	{
-		internal virtual bool CacheEquals(object o)
-		{
-			throw new NotImplementedException();
-		}
-
 		public abstract MemberTypes MemberType { get; }
 
 		public abstract string Name { get; }
@@ -25,6 +15,30 @@ namespace System.Reflection
 		public abstract Type DeclaringType { get; }
 
 		public abstract Type ReflectedType { get; }
+
+		public virtual Module Module
+		{
+			get
+			{
+				Type type = this as Type;
+				if (type != null)
+				{
+					return type.Module;
+				}
+				throw NotImplemented.ByDesign;
+			}
+		}
+
+		public virtual bool HasSameMetadataDefinitionAs(MemberInfo other)
+		{
+			throw NotImplemented.ByDesign;
+		}
+
+		public abstract bool IsDefined(Type attributeType, bool inherit);
+
+		public abstract object[] GetCustomAttributes(bool inherit);
+
+		public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
 
 		public virtual IEnumerable<CustomAttributeData> CustomAttributes
 		{
@@ -34,33 +48,27 @@ namespace System.Reflection
 			}
 		}
 
-		public abstract object[] GetCustomAttributes(bool inherit);
-
-		public abstract object[] GetCustomAttributes(Type attributeType, bool inherit);
-
-		public abstract bool IsDefined(Type attributeType, bool inherit);
-
 		public virtual IList<CustomAttributeData> GetCustomAttributesData()
 		{
-			throw new NotImplementedException();
+			throw NotImplemented.ByDesign;
 		}
 
-		public virtual extern int MetadataToken
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		public virtual Module Module
+		public virtual int MetadataToken
 		{
 			get
 			{
-				if (this is Type)
-				{
-					return ((Type)this).Module;
-				}
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 
 		public static bool operator ==(MemberInfo left, MemberInfo right)
@@ -107,39 +115,44 @@ namespace System.Reflection
 			return !(left == right);
 		}
 
-		public override bool Equals(object obj)
-		{
-			return base.Equals(obj);
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		Type _MemberInfo.GetType()
-		{
-			return base.GetType();
-		}
-
-		void _MemberInfo.GetTypeInfoCount(out uint pcTInfo)
+		internal virtual bool CacheEquals(object o)
 		{
 			throw new NotImplementedException();
 		}
 
-		void _MemberInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		internal bool HasSameMetadataDefinitionAsCore<TOther>(MemberInfo other) where TOther : MemberInfo
 		{
-			throw new NotImplementedException();
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			return other is TOther && this.MetadataToken == other.MetadataToken && this.Module.Equals(other.Module);
 		}
 
 		void _MemberInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		Type _MemberInfo.GetType()
+		{
+			ThrowStub.ThrowNotSupportedException();
+			return null;
+		}
+
+		void _MemberInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			ThrowStub.ThrowNotSupportedException();
+		}
+
+		void _MemberInfo.GetTypeInfoCount(out uint pcTInfo)
+		{
+			ThrowStub.ThrowNotSupportedException();
 		}
 
 		void _MemberInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
 		{
-			throw new NotImplementedException();
+			ThrowStub.ThrowNotSupportedException();
 		}
 	}
 }

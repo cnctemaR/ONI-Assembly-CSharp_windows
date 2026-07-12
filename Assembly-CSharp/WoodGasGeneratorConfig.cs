@@ -20,7 +20,7 @@ public class WoodGasGeneratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 300f;
-		buildingDef.GeneratorBaseCapacity = 20000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 1));
@@ -35,6 +35,9 @@ public class WoodGasGeneratorConfig : IBuildingConfig
 	{
 		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);

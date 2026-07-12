@@ -66,7 +66,7 @@ public class Artable : Workable
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (string.IsNullOrEmpty(this.userChosenTargetStage))
 		{

@@ -7,8 +7,8 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Export/Random/Random.bindings.h")]
 	public static class Random
 	{
-		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		[NativeMethod("SetSeed")]
+		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void InitState(int seed);
 
@@ -105,8 +105,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
 		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
+		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
 		public static extern int seed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

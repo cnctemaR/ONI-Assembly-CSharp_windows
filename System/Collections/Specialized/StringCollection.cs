@@ -166,6 +166,6 @@ namespace System.Collections.Specialized
 			return this.data.GetEnumerator();
 		}
 
-		private ArrayList data = new ArrayList();
+		private readonly ArrayList data = new ArrayList();
 	}
 }

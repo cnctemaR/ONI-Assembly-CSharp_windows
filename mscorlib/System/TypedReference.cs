@@ -2,17 +2,19 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 
 namespace System
 {
 	[CLSCompliant(false)]
 	[ComVisible(true)]
-	public struct TypedReference
+	[NonVersionable]
+	public ref struct TypedReference
 	{
 		[CLSCompliant(false)]
 		[SecurityCritical]
-		public static TypedReference MakeTypedReference(object target, FieldInfo[] flds)
+		public unsafe static TypedReference MakeTypedReference(object target, FieldInfo[] flds)
 		{
 			if (target == null)
 			{
@@ -24,7 +26,7 @@ namespace System
 			}
 			if (flds.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Array must not be of length zero."));
+				throw new ArgumentException(Environment.GetResourceString("Array must not be of length zero."), "flds");
 			}
 			IntPtr[] array = new IntPtr[flds.Length];
 			RuntimeType runtimeType = (RuntimeType)target.GetType();
@@ -55,12 +57,13 @@ namespace System
 				array[i] = runtimeFieldInfo.FieldHandle.Value;
 				runtimeType = runtimeType2;
 			}
-			return TypedReference.MakeTypedReferenceInternal(target, flds);
+			TypedReference typedReference = default(TypedReference);
+			TypedReference.InternalMakeTypedReference((void*)(&typedReference), target, array, runtimeType);
+			return typedReference;
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern TypedReference MakeTypedReferenceInternal(object target, FieldInfo[] fields);
+		private unsafe static extern void InternalMakeTypedReference(void* result, object target, IntPtr[] flds, RuntimeType lastFieldType);
 
 		public override int GetHashCode()
 		{
@@ -82,7 +85,6 @@ namespace System
 			return TypedReference.InternalToObject((void*)(&value));
 		}
 
-		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern object InternalToObject(void* value);
 
@@ -90,7 +92,7 @@ namespace System
 		{
 			get
 			{
-				return this.Value.IsNull() && this.Type.IsNull();
+				return this.Value == IntPtr.Zero && this.Type == IntPtr.Zero;
 			}
 		}
 

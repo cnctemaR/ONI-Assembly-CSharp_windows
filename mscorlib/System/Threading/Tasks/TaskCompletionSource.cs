@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.ExceptionServices;
-using System.Security.Permissions;
 
 namespace System.Threading.Tasks
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class TaskCompletionSource<TResult>
 	{
 		public TaskCompletionSource()
 		{
-			this.m_task = new Task<TResult>();
+			this._task = new Task<TResult>();
 		}
 
 		public TaskCompletionSource(TaskCreationOptions creationOptions)
@@ -25,21 +22,21 @@ namespace System.Threading.Tasks
 
 		public TaskCompletionSource(object state, TaskCreationOptions creationOptions)
 		{
-			this.m_task = new Task<TResult>(state, creationOptions);
+			this._task = new Task<TResult>(state, creationOptions);
 		}
 
 		public Task<TResult> Task
 		{
 			get
 			{
-				return this.m_task;
+				return this._task;
 			}
 		}
 
 		private void SpinUntilCompleted()
 		{
 			SpinWait spinWait = default(SpinWait);
-			while (!this.m_task.IsCompleted)
+			while (!this._task.IsCompleted)
 			{
 				spinWait.SpinOnce();
 			}
@@ -49,10 +46,10 @@ namespace System.Threading.Tasks
 		{
 			if (exception == null)
 			{
-				throw new ArgumentNullException("exception");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 			}
-			bool flag = this.m_task.TrySetException(exception);
-			if (!flag && !this.m_task.IsCompleted)
+			bool flag = this._task.TrySetException(exception);
+			if (!flag && !this._task.IsCompleted)
 			{
 				this.SpinUntilCompleted();
 			}
@@ -63,33 +60,23 @@ namespace System.Threading.Tasks
 		{
 			if (exceptions == null)
 			{
-				throw new ArgumentNullException("exceptions");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exceptions);
 			}
 			List<Exception> list = new List<Exception>();
 			foreach (Exception ex in exceptions)
 			{
 				if (ex == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The exceptions collection included at least one null element."), "exceptions");
+					ThrowHelper.ThrowArgumentException(ExceptionResource.TaskCompletionSourceT_TrySetException_NullException, ExceptionArgument.exceptions);
 				}
 				list.Add(ex);
 			}
 			if (list.Count == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The exceptions collection was empty."), "exceptions");
+				ThrowHelper.ThrowArgumentException(ExceptionResource.TaskCompletionSourceT_TrySetException_NoExceptions, ExceptionArgument.exceptions);
 			}
-			bool flag = this.m_task.TrySetException(list);
-			if (!flag && !this.m_task.IsCompleted)
-			{
-				this.SpinUntilCompleted();
-			}
-			return flag;
-		}
-
-		internal bool TrySetException(IEnumerable<ExceptionDispatchInfo> exceptions)
-		{
-			bool flag = this.m_task.TrySetException(exceptions);
-			if (!flag && !this.m_task.IsCompleted)
+			bool flag = this._task.TrySetException(list);
+			if (!flag && !this._task.IsCompleted)
 			{
 				this.SpinUntilCompleted();
 			}
@@ -100,11 +87,11 @@ namespace System.Threading.Tasks
 		{
 			if (exception == null)
 			{
-				throw new ArgumentNullException("exception");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 			}
 			if (!this.TrySetException(exception))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("An attempt was made to transition a task to a final state when it had already completed."));
+				ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
 			}
 		}
 
@@ -112,14 +99,14 @@ namespace System.Threading.Tasks
 		{
 			if (!this.TrySetException(exceptions))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("An attempt was made to transition a task to a final state when it had already completed."));
+				ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
 			}
 		}
 
 		public bool TrySetResult(TResult result)
 		{
-			bool flag = this.m_task.TrySetResult(result);
-			if (!flag && !this.m_task.IsCompleted)
+			bool flag = this._task.TrySetResult(result);
+			if (!flag)
 			{
 				this.SpinUntilCompleted();
 			}
@@ -130,7 +117,7 @@ namespace System.Threading.Tasks
 		{
 			if (!this.TrySetResult(result))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("An attempt was made to transition a task to a final state when it had already completed."));
+				ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
 			}
 		}
 
@@ -141,8 +128,8 @@ namespace System.Threading.Tasks
 
 		public bool TrySetCanceled(CancellationToken cancellationToken)
 		{
-			bool flag = this.m_task.TrySetCanceled(cancellationToken);
-			if (!flag && !this.m_task.IsCompleted)
+			bool flag = this._task.TrySetCanceled(cancellationToken);
+			if (!flag && !this._task.IsCompleted)
 			{
 				this.SpinUntilCompleted();
 			}
@@ -153,10 +140,10 @@ namespace System.Threading.Tasks
 		{
 			if (!this.TrySetCanceled())
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("An attempt was made to transition a task to a final state when it had already completed."));
+				ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
 			}
 		}
 
-		private readonly Task<TResult> m_task;
+		private readonly Task<TResult> _task;
 	}
 }

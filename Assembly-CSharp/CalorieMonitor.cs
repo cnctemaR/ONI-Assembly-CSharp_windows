@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using TUNING;
 
 public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance>
 {
@@ -64,17 +65,17 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 
 		public bool IsHungry()
 		{
-			return this.GetCalories0to1() < 0.825f;
+			return this.GetCalories0to1() < DUPLICANTSTATS.STANDARD.BaseStats.HUNGRY_THRESHOLD;
 		}
 
 		public bool IsStarving()
 		{
-			return this.GetCalories0to1() < 0.25f;
+			return this.GetCalories0to1() < DUPLICANTSTATS.STANDARD.BaseStats.STARVING_THRESHOLD;
 		}
 
 		public bool IsSatisfied()
 		{
-			return this.GetCalories0to1() > 0.95f;
+			return this.GetCalories0to1() > DUPLICANTSTATS.STANDARD.BaseStats.SATISFIED_THRESHOLD;
 		}
 
 		public bool IsEating()

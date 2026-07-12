@@ -42,26 +42,28 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		return base.smi.HasTag(GameTags.Usable);
 	}
 
-	private void Flush(Worker worker)
+	private void Flush(WorkerBase worker)
 	{
+		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
 		ListPool<GameObject, Storage>.PooledList pooledList = ListPool<GameObject, Storage>.Allocate();
 		this.storage.Find(FlushToilet.WaterTag, pooledList);
 		float num = 0f;
 		float num2 = this.massConsumedPerUse;
 		foreach (GameObject gameObject in pooledList)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			float num3 = Mathf.Min(component.Mass, num2);
-			component.Mass -= num3;
+			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			float num3 = Mathf.Min(component2.Mass, num2);
+			component2.Mass -= num3;
 			num2 -= num3;
-			num += num3 * component.Temperature;
+			num += num3 * component2.Temperature;
 		}
 		pooledList.Recycle();
-		float num4 = this.massEmittedPerUse - this.massConsumedPerUse;
-		num += num4 * this.newPeeTemperature;
-		float num5 = num / this.massEmittedPerUse;
+		float lastAmountOfWasteMassRemovedFromDupe = component.lastAmountOfWasteMassRemovedFromDupe;
+		num += lastAmountOfWasteMassRemovedFromDupe * this.newPeeTemperature;
+		float num4 = this.massConsumedPerUse + lastAmountOfWasteMassRemovedFromDupe;
+		float num5 = num / num4;
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
-		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num5, index, this.diseasePerFlush, false, true);
+		this.storage.AddLiquid(component.lastElementRemovedFromDupe, num4, num5, index, this.diseasePerFlush, false, true);
 		if (worker != null)
 		{
 			worker.GetComponent<PrimaryElement>().AddDisease(index, this.diseaseOnDupePerFlush, "FlushToilet.Flush");
@@ -193,7 +195,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			base.master.fillMeter.SetPositionPercent(0f);
 			base.master.contaminationMeter.SetPositionPercent(1f);
 			base.smi.ShowFillMeter();
-			Worker worker = base.master.GetComponent<ToiletWorkableUse>().worker;
+			WorkerBase worker = base.master.GetComponent<ToiletWorkableUse>().worker;
 			base.master.Flush(worker);
 		}
 
@@ -208,7 +210,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (!(component == null) && component.ElementID == SimHashes.DirtyWater && component.Mass > 0f)
+				if (!(component == null) && (component.ElementID == SimHashes.DirtyWater || component.ElementID == GunkMonitor.GunkElement) && component.Mass > 0f)
 				{
 					return true;
 				}

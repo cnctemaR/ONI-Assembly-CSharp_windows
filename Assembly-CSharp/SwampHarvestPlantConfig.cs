@@ -24,13 +24,13 @@ public class SwampHarvestPlantConfig : IEntityConfig
 		float num3 = 283.15f;
 		float num4 = 303.15f;
 		float num5 = 398.15f;
-		string id = SwampFruitConfig.ID;
+		string text4 = SwampFruitConfig.ID;
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, id, true, true, true, true, 2400f, 0f, 4600f, "SwampHarvestPlantOriginal", gameObject.PrefabID().Name);
+		}, true, 0f, 0.15f, text4, true, true, true, true, 2400f, 0f, 4600f, "SwampHarvestPlantOriginal", gameObject.PrefabID().Name);
 		gameObject.AddOrGet<IlluminationVulnerable>().SetPrefersDarkness(true);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
@@ -42,7 +42,20 @@ public class SwampHarvestPlantConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<LoopingSounds>();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SwampHarvestPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SWAMPHARVESTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SWAMPHARVESTPLANT.DESC, Assets.GetAnim("seed_swampcrop_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.SWAMPHARVESTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds()), "SwampHarvestPlant_preview", Assets.GetAnim("swampcrop_kanim"), "place", 1, 2);
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text5 = "SwampHarvestPlantSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.SWAMPHARVESTPLANT.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.SWAMPHARVESTPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_swampcrop_kanim");
+		string text8 = "object";
+		int num6 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		text4 = global::STRINGS.CREATURES.SPECIES.SWAMPHARVESTPLANT.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 2, text4, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds), "SwampHarvestPlant_preview", Assets.GetAnim("swampcrop_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

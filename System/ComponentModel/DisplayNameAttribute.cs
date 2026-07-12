@@ -12,7 +12,7 @@ namespace System.ComponentModel
 
 		public DisplayNameAttribute(string displayName)
 		{
-			this._displayName = displayName;
+			this.DisplayNameValue = displayName;
 		}
 
 		public virtual string DisplayName
@@ -23,17 +23,7 @@ namespace System.ComponentModel
 			}
 		}
 
-		protected string DisplayNameValue
-		{
-			get
-			{
-				return this._displayName;
-			}
-			set
-			{
-				this._displayName = value;
-			}
-		}
+		protected string DisplayNameValue { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -56,7 +46,5 @@ namespace System.ComponentModel
 		}
 
 		public static readonly DisplayNameAttribute Default = new DisplayNameAttribute();
-
-		private string _displayName;
 	}
 }

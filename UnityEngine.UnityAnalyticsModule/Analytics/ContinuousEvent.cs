@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Analytics
 {
 	[ExcludeFromDocs]
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
 	[NativeHeader("Modules/UnityAnalytics/ContinuousEvent/Manager.h")]
+	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
+	[RequiredByNativeCode]
 	public class ContinuousEvent
 	{
 		public static AnalyticsResult RegisterCollector<T>(string metricName, Func<T> del) where T : struct, IComparable<T>, IEquatable<T>

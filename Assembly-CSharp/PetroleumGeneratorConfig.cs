@@ -20,7 +20,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array2, array3, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
 		buildingDef.GeneratorWattageRating = 2000f;
-		buildingDef.GeneratorBaseCapacity = 2000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.ExhaustKilowattsWhenActive = 4f;
 		buildingDef.SelfHeatKilowattsWhenActive = 16f;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
@@ -37,6 +37,9 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 	{
 		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Storage>();
 		BuildingDef def = go.GetComponent<Building>().Def;

@@ -19,41 +19,41 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			base.SetPrioritizable(target.GetComponent<Prioritizable>());
 		}
-		base.AddPrecondition(ChorePreconditions.instance.IsNotTransferArm, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotTransferArm, null);
 		if (!allow_in_red_alert)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+			this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		}
 		if (schedule_block != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, schedule_block);
+			this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, schedule_block);
 		}
 		else if (!ignore_schedule_block)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+			this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		}
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, base.smi.sm.workable.Get<WorkableType>(base.smi));
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, base.smi.sm.workable.Get<WorkableType>(base.smi));
 		Operational component = target.GetComponent<Operational>();
 		if (only_when_operational && component != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
+			this.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		}
 		if (only_when_operational)
 		{
 			Deconstructable component2 = target.GetComponent<Deconstructable>();
 			if (component2 != null)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
+				this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
 			}
 			BuildingEnabledButton component3 = target.GetComponent<BuildingEnabledButton>();
 			if (component3 != null)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
+				this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
 			}
 		}
 		if (!ignore_building_assignment && base.smi.sm.workable.Get(base.smi).GetComponent<Assignable>() != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, base.smi.sm.workable.Get<Assignable>(base.smi));
+			this.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, base.smi.sm.workable.Get<Assignable>(base.smi));
 		}
 		WorkableType workableType = target as WorkableType;
 		if (workableType != null)
@@ -61,11 +61,11 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 			if (!string.IsNullOrEmpty(workableType.requiredSkillPerk))
 			{
 				HashedString hashedString = workableType.requiredSkillPerk;
-				base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, hashedString);
+				this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, hashedString);
 			}
 			if (workableType.requireMinionToWork)
 			{
-				base.AddPrecondition(ChorePreconditions.instance.IsMinion, null);
+				this.AddPrecondition(ChorePreconditions.instance.IsMinion, null);
 			}
 		}
 	}
@@ -78,10 +78,10 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 
 	public override bool IsValid()
 	{
-		WorkableType workableType = base.target as WorkableType;
+		WorkableType workableType = this.target as WorkableType;
 		if (workableType != null)
 		{
-			return base.provider != null && Grid.IsWorldValidCell(workableType.GetCell());
+			return this.provider != null && Grid.IsWorldValidCell(workableType.GetCell());
 		}
 		return base.IsValid();
 	}
@@ -118,7 +118,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			return false;
 		}
-		if (workable.worker != null && (workable.worker.state == Worker.State.PendingCompletion || workable.worker.state == Worker.State.Completing))
+		if (workable.worker != null && (workable.worker.GetState() == WorkerBase.State.PendingCompletion || workable.worker.GetState() == WorkerBase.State.Completing))
 		{
 			return false;
 		}

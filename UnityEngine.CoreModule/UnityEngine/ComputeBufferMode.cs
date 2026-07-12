@@ -8,7 +8,9 @@ namespace UnityEngine
 	{
 		Immutable,
 		Dynamic,
+		[Obsolete("ComputeBufferMode.Circular is deprecated (legacy mode)")]
 		Circular,
+		[Obsolete("ComputeBufferMode.StreamOut is deprecated (internal use only)")]
 		StreamOut,
 		SubUpdates
 	}

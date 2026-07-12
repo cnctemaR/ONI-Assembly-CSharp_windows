@@ -8,21 +8,21 @@ namespace MS.Internal.Xml.Cache
 	{
 		public XPathNodeInfoTable()
 		{
-			this.hashTable = new XPathNodeInfoAtom[32];
-			this.sizeTable = 0;
+			this._hashTable = new XPathNodeInfoAtom[32];
+			this._sizeTable = 0;
 		}
 
 		public XPathNodeInfoAtom Create(string localName, string namespaceUri, string prefix, string baseUri, XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar, XPathDocument doc, int lineNumBase, int linePosBase)
 		{
 			XPathNodeInfoAtom xpathNodeInfoAtom;
-			if (this.infoCached == null)
+			if (this._infoCached == null)
 			{
 				xpathNodeInfoAtom = new XPathNodeInfoAtom(localName, namespaceUri, prefix, baseUri, pageParent, pageSibling, pageSimilar, doc, lineNumBase, linePosBase);
 			}
 			else
 			{
-				xpathNodeInfoAtom = this.infoCached;
-				this.infoCached = xpathNodeInfoAtom.Next;
+				xpathNodeInfoAtom = this._infoCached;
+				this._infoCached = xpathNodeInfoAtom.Next;
 				xpathNodeInfoAtom.Init(localName, namespaceUri, prefix, baseUri, pageParent, pageSibling, pageSimilar, doc, lineNumBase, linePosBase);
 			}
 			return this.Atomize(xpathNodeInfoAtom);
@@ -30,20 +30,20 @@ namespace MS.Internal.Xml.Cache
 
 		private XPathNodeInfoAtom Atomize(XPathNodeInfoAtom info)
 		{
-			for (XPathNodeInfoAtom xpathNodeInfoAtom = this.hashTable[info.GetHashCode() & (this.hashTable.Length - 1)]; xpathNodeInfoAtom != null; xpathNodeInfoAtom = xpathNodeInfoAtom.Next)
+			for (XPathNodeInfoAtom xpathNodeInfoAtom = this._hashTable[info.GetHashCode() & (this._hashTable.Length - 1)]; xpathNodeInfoAtom != null; xpathNodeInfoAtom = xpathNodeInfoAtom.Next)
 			{
 				if (info.Equals(xpathNodeInfoAtom))
 				{
-					info.Next = this.infoCached;
-					this.infoCached = info;
+					info.Next = this._infoCached;
+					this._infoCached = info;
 					return xpathNodeInfoAtom;
 				}
 			}
-			if (this.sizeTable >= this.hashTable.Length)
+			if (this._sizeTable >= this._hashTable.Length)
 			{
-				XPathNodeInfoAtom[] array = this.hashTable;
-				this.hashTable = new XPathNodeInfoAtom[array.Length * 2];
-				foreach (XPathNodeInfoAtom xpathNodeInfoAtom in array)
+				XPathNodeInfoAtom[] hashTable = this._hashTable;
+				this._hashTable = new XPathNodeInfoAtom[hashTable.Length * 2];
+				foreach (XPathNodeInfoAtom xpathNodeInfoAtom in hashTable)
 				{
 					while (xpathNodeInfoAtom != null)
 					{
@@ -59,21 +59,21 @@ namespace MS.Internal.Xml.Cache
 
 		private void AddInfo(XPathNodeInfoAtom info)
 		{
-			int num = info.GetHashCode() & (this.hashTable.Length - 1);
-			info.Next = this.hashTable[num];
-			this.hashTable[num] = info;
-			this.sizeTable++;
+			int num = info.GetHashCode() & (this._hashTable.Length - 1);
+			info.Next = this._hashTable[num];
+			this._hashTable[num] = info;
+			this._sizeTable++;
 		}
 
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < this.hashTable.Length; i++)
+			for (int i = 0; i < this._hashTable.Length; i++)
 			{
 				stringBuilder.AppendFormat("{0,4}: ", i);
-				for (XPathNodeInfoAtom xpathNodeInfoAtom = this.hashTable[i]; xpathNodeInfoAtom != null; xpathNodeInfoAtom = xpathNodeInfoAtom.Next)
+				for (XPathNodeInfoAtom xpathNodeInfoAtom = this._hashTable[i]; xpathNodeInfoAtom != null; xpathNodeInfoAtom = xpathNodeInfoAtom.Next)
 				{
-					if (xpathNodeInfoAtom != this.hashTable[i])
+					if (xpathNodeInfoAtom != this._hashTable[i])
 					{
 						stringBuilder.Append("\n      ");
 					}
@@ -84,11 +84,11 @@ namespace MS.Internal.Xml.Cache
 			return stringBuilder.ToString();
 		}
 
-		private XPathNodeInfoAtom[] hashTable;
+		private XPathNodeInfoAtom[] _hashTable;
 
-		private int sizeTable;
+		private int _sizeTable;
 
-		private XPathNodeInfoAtom infoCached;
+		private XPathNodeInfoAtom _infoCached;
 
 		private const int DefaultTableSize = 32;
 	}

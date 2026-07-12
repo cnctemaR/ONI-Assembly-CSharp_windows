@@ -400,7 +400,9 @@ namespace System.Xml
 			}
 			if (num == 0 || name.Length - 1 == num)
 			{
-				throw new ArgumentException(Res.GetString("The '{0}' character, hexadecimal value {1}, cannot be included in a name.", XmlException.BuildCharExceptionArgs(':', '\0')), "name");
+				string text = "The '{0}' character, hexadecimal value {1}, cannot be included in a name.";
+				object[] array = XmlException.BuildCharExceptionArgs(':', '\0');
+				throw new ArgumentException(Res.GetString(text, array), "name");
 			}
 			prefix = name.Substring(0, num);
 			num++;

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ListSortDescriptionCollection : IList, ICollection, IEnumerable
 	{
 		public ListSortDescriptionCollection()
@@ -17,7 +15,7 @@ namespace System.ComponentModel
 			{
 				for (int i = 0; i < sorts.Length; i++)
 				{
-					this.sorts.Add(sorts[i]);
+					this._sorts.Add(sorts[i]);
 				}
 			}
 		}
@@ -26,11 +24,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return (ListSortDescription)this.sorts[index];
+				return (ListSortDescription)this._sorts[index];
 			}
 			set
 			{
-				throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+				throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 			}
 		}
 
@@ -58,50 +56,50 @@ namespace System.ComponentModel
 			}
 			set
 			{
-				throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+				throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 			}
 		}
 
 		int IList.Add(object value)
 		{
-			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 		}
 
 		void IList.Clear()
 		{
-			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 		}
 
 		public bool Contains(object value)
 		{
-			return ((IList)this.sorts).Contains(value);
+			return ((IList)this._sorts).Contains(value);
 		}
 
 		public int IndexOf(object value)
 		{
-			return ((IList)this.sorts).IndexOf(value);
+			return ((IList)this._sorts).IndexOf(value);
 		}
 
 		void IList.Insert(int index, object value)
 		{
-			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 		}
 
 		void IList.Remove(object value)
 		{
-			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 		}
 
 		void IList.RemoveAt(int index)
 		{
-			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			throw new InvalidOperationException("Once a ListSortDescriptionCollection has been created it can't be modified.");
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.sorts.Count;
+				return this._sorts.Count;
 			}
 		}
 
@@ -123,14 +121,14 @@ namespace System.ComponentModel
 
 		public void CopyTo(Array array, int index)
 		{
-			this.sorts.CopyTo(array, index);
+			this._sorts.CopyTo(array, index);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.sorts.GetEnumerator();
+			return this._sorts.GetEnumerator();
 		}
 
-		private ArrayList sorts = new ArrayList();
+		private ArrayList _sorts = new ArrayList();
 	}
 }

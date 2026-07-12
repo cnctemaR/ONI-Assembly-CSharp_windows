@@ -8,7 +8,15 @@ public class MoltStates : GameStateMachine<MoltStates, MoltStates.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.moltpre;
-		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.MOLTING.NAME, CREATURES.STATUSITEMS.MOLTING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
+		GameStateMachine<MoltStates, MoltStates.Instance, IStateMachineTarget, MoltStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.MOLTING.NAME;
+		string text2 = CREATURES.STATUSITEMS.MOLTING.TOOLTIP;
+		string text3 = "";
+		StatusItem.IconType iconType = StatusItem.IconType.Info;
+		NotificationType notificationType = NotificationType.Neutral;
+		bool flag = false;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.moltpre.Enter(new StateMachine<MoltStates, MoltStates.Instance, IStateMachineTarget, MoltStates.Def>.State.Callback(MoltStates.Molt)).QueueAnim("lay_egg_pre", false, null).OnAnimQueueComplete(this.moltpst);
 		this.moltpst.QueueAnim("lay_egg_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.ScalesGrown, false);

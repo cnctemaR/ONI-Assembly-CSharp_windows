@@ -164,19 +164,27 @@ namespace System.IO.Compression
 						{
 							zip64Block._startDiskNumber = new int?(binaryReader.ReadInt32());
 						}
-						if (zip64Block._uncompressedSize < 0L)
+						long? num2 = zip64Block._uncompressedSize;
+						long num3 = 0L;
+						if ((num2.GetValueOrDefault() < num3) & (num2 != null))
 						{
 							throw new InvalidDataException("Uncompressed Size cannot be held in an Int64.");
 						}
-						if (zip64Block._compressedSize < 0L)
+						num2 = zip64Block._compressedSize;
+						num3 = 0L;
+						if ((num2.GetValueOrDefault() < num3) & (num2 != null))
 						{
 							throw new InvalidDataException("Compressed Size cannot be held in an Int64.");
 						}
-						if (zip64Block._localHeaderOffset < 0L)
+						num2 = zip64Block._localHeaderOffset;
+						num3 = 0L;
+						if ((num2.GetValueOrDefault() < num3) & (num2 != null))
 						{
 							throw new InvalidDataException("Local Header Offset cannot be held in an Int64.");
 						}
-						if (zip64Block._startDiskNumber < 0)
+						int? startDiskNumber = zip64Block._startDiskNumber;
+						int num4 = 0;
+						if ((startDiskNumber.GetValueOrDefault() < num4) & (startDiskNumber != null))
 						{
 							throw new InvalidDataException("Start Disk Number cannot be held in an Int64.");
 						}

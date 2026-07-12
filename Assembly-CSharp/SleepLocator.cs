@@ -13,7 +13,7 @@ public class SleepLocator : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreateEntity(SleepLocator.ID, SleepLocator.ID, false);
 		gameObject.AddTag(GameTags.NotConversationTopic);
 		gameObject.AddOrGet<Approachable>();
-		gameObject.AddOrGet<Sleepable>();
+		gameObject.AddOrGet<Sleepable>().isNormalBed = false;
 		return gameObject;
 	}
 

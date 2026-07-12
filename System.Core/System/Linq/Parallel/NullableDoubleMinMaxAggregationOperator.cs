@@ -30,8 +30,17 @@ namespace System.Linq.Parallel
 						while (enumerator.MoveNext())
 						{
 							double? num3 = enumerator.Current;
-							if (num3 != null && (num2 == null || num3 < num2 || double.IsNaN(num3.GetValueOrDefault())))
+							if (num3 != null)
 							{
+								if (num2 != null)
+								{
+									double? num4 = num3;
+									double? num5 = num2;
+									if (!((num4.GetValueOrDefault() < num5.GetValueOrDefault()) & ((num4 != null) & (num5 != null))) && !double.IsNaN(num3.GetValueOrDefault()))
+									{
+										continue;
+									}
+								}
 								num2 = num3;
 							}
 						}
@@ -40,10 +49,19 @@ namespace System.Linq.Parallel
 					{
 						while (enumerator.MoveNext())
 						{
-							double? num4 = enumerator.Current;
-							if (num4 != null && (num2 == null || num4 > num2 || double.IsNaN(num2.GetValueOrDefault())))
+							double? num6 = enumerator.Current;
+							if (num6 != null)
 							{
-								num2 = num4;
+								if (num2 != null)
+								{
+									double? num5 = num6;
+									double? num4 = num2;
+									if (!((num5.GetValueOrDefault() > num4.GetValueOrDefault()) & ((num5 != null) & (num4 != null))) && !double.IsNaN(num2.GetValueOrDefault()))
+									{
+										continue;
+									}
+								}
+								num2 = num6;
 							}
 						}
 					}
@@ -85,24 +103,42 @@ namespace System.Linq.Parallel
 							{
 								CancellationState.ThrowIfCanceled(this._cancellationToken);
 							}
-							if (num2 != null && (currentElement == null || num2 < currentElement || double.IsNaN(num2.GetValueOrDefault())))
+							if (num2 != null)
 							{
+								if (currentElement != null)
+								{
+									double? num3 = num2;
+									double? num4 = currentElement;
+									if (!((num3.GetValueOrDefault() < num4.GetValueOrDefault()) & ((num3 != null) & (num4 != null))) && !double.IsNaN(num2.GetValueOrDefault()))
+									{
+										continue;
+									}
+								}
 								currentElement = num2;
 							}
 						}
 					}
 					else
 					{
-						double? num3 = null;
-						while (source.MoveNext(ref num3, ref tkey))
+						double? num5 = null;
+						while (source.MoveNext(ref num5, ref tkey))
 						{
 							if ((num++ & 63) == 0)
 							{
 								CancellationState.ThrowIfCanceled(this._cancellationToken);
 							}
-							if (num3 != null && (currentElement == null || num3 > currentElement || double.IsNaN(currentElement.GetValueOrDefault())))
+							if (num5 != null)
 							{
-								currentElement = num3;
+								if (currentElement != null)
+								{
+									double? num4 = num5;
+									double? num3 = currentElement;
+									if (!((num4.GetValueOrDefault() > num3.GetValueOrDefault()) & ((num4 != null) & (num3 != null))) && !double.IsNaN(currentElement.GetValueOrDefault()))
+									{
+										continue;
+									}
+								}
+								currentElement = num5;
 							}
 						}
 					}

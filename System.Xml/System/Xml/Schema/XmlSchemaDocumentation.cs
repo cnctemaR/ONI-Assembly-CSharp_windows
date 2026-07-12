@@ -31,8 +31,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlText]
 		[XmlAnyElement]
+		[XmlText]
 		public XmlNode[] Markup
 		{
 			get

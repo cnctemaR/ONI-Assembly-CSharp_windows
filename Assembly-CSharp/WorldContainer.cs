@@ -176,6 +176,37 @@ public class WorldContainer : KMonoBehaviour
 
 	public int ParentWorldId { get; private set; }
 
+	public ICollection<int> GetChildWorldIds()
+	{
+		return this.m_childWorlds;
+	}
+
+	private void OnWorldRemoved(object data)
+	{
+		int num = ((data is int) ? ((int)data) : 255);
+		if (num != 255)
+		{
+			this.m_childWorlds.Remove(num);
+		}
+	}
+
+	private void OnWorldParentChanged(object data)
+	{
+		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
+		if (e == null)
+		{
+			return;
+		}
+		if (e.world.ParentWorldId == this.id)
+		{
+			this.m_childWorlds.Add(e.world.id);
+		}
+		if (e.lastParentId == this.ParentWorldId)
+		{
+			this.m_childWorlds.Remove(e.world.id);
+		}
+	}
+
 	public Quadrant[] GetQuadrantOfCell(int cell, int depth = 1)
 	{
 		Vector2 vector = new Vector2((float)this.WorldSize.x * Grid.CellSizeInMeters, (float)this.worldSize.y * Grid.CellSizeInMeters);
@@ -241,6 +272,8 @@ public class WorldContainer : KMonoBehaviour
 		this.worldInventory = base.GetComponent<WorldInventory>();
 		this.materialNeeds = new Dictionary<Tag, float>();
 		ClusterManager.Instance.RegisterWorldContainer(this);
+		Game.Instance.Subscribe(880851192, new Action<object>(this.OnWorldParentChanged));
+		ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
 	}
 
 	protected override void OnSpawn()
@@ -260,6 +293,8 @@ public class WorldContainer : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		SaveGame.Instance.materialSelectorSerializer.WipeWorldSelectionData(this.id);
+		Game.Instance.Unsubscribe(880851192, new Action<object>(this.OnWorldParentChanged));
+		ClusterManager.Instance.Unsubscribe(-1078710002, new Action<object>(this.OnWorldRemoved));
 		base.OnCleanUp();
 	}
 
@@ -975,7 +1010,7 @@ public class WorldContainer : KMonoBehaviour
 				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 				if (pickupable != null)
 				{
-					if (pickupable.KPrefabID.IsPrefabID(GameTags.Minion))
+					if (pickupable.KPrefabID.HasTag(GameTags.BaseMinion))
 					{
 						global::Util.KDestroyGameObject(pickupable.gameObject);
 					}
@@ -1370,4 +1405,6 @@ public class WorldContainer : KMonoBehaviour
 	private AlertStateManager.Instance m_alertManager;
 
 	private List<Prioritizable> yellowAlertTasks = new List<Prioritizable>();
+
+	private List<int> m_childWorlds = new List<int>();
 }

@@ -28,7 +28,7 @@ namespace UnityEngine
 				bool flag = this.m_jobject != IntPtr.Zero;
 				if (flag)
 				{
-					AndroidJNISafe.DeleteGlobalRef(this.m_jobject);
+					AndroidJNISafe.QueueDeleteGlobalRef(this.m_jobject);
 				}
 			}
 		}

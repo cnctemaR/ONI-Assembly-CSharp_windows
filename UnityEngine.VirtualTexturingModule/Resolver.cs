@@ -63,6 +63,11 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			bool flag = this.CurrentWidth != width || this.CurrentHeight != height;
 			if (flag)
 			{
+				bool flag2 = width <= 0 || height <= 0;
+				if (flag2)
+				{
+					throw new ArgumentException(string.Format("Zero sized dimensions are invalid (width: {0}, height: {1}.", width, height));
+				}
 				this.CurrentWidth = width;
 				this.CurrentHeight = height;
 				this.Flush_Internal();

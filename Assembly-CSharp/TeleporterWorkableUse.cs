@@ -14,7 +14,7 @@ public class TeleporterWorkableUse : Workable
 		this.resetProgressOnStop = true;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		Teleporter component = base.GetComponent<Teleporter>();
 		Teleporter teleporter = component.FindTeleportTarget();
@@ -23,7 +23,7 @@ public class TeleporterWorkableUse : Workable
 		smi.sm.targetTeleporter.Trigger(smi);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		TeleportalPad.StatesInstance smi = this.GetSMI<TeleportalPad.StatesInstance>();
 		smi.sm.doTeleport.Trigger(smi);

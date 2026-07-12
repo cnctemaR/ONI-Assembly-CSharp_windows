@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
 
 		public virtual void Add(MulticastIPAddressInformation address)
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		internal void InternalAdd(MulticastIPAddressInformation address)
@@ -67,12 +67,12 @@ namespace System.Net.NetworkInformation
 
 		public virtual bool Remove(MulticastIPAddressInformation address)
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		public virtual void Clear()
 		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
+			throw new NotSupportedException(SR.GetString("The collection is read-only."));
 		}
 
 		private Collection<MulticastIPAddressInformation> addresses = new Collection<MulticastIPAddressInformation>();

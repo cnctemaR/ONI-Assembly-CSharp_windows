@@ -120,28 +120,23 @@ namespace UnityEngine
 		{
 			get
 			{
-				bool flag = this.containsFiles;
-				if (flag)
+				byte[] array5;
+				using (MemoryStream memoryStream = new MemoryStream(1024))
 				{
-					byte[] bytes = WWWForm.DefaultEncoding.GetBytes("--");
-					byte[] bytes2 = WWWForm.DefaultEncoding.GetBytes("\r\n");
-					byte[] bytes3 = WWWForm.DefaultEncoding.GetBytes("Content-Type: ");
-					byte[] bytes4 = WWWForm.DefaultEncoding.GetBytes("Content-disposition: form-data; name=\"");
-					byte[] bytes5 = WWWForm.DefaultEncoding.GetBytes("\"");
-					byte[] bytes6 = WWWForm.DefaultEncoding.GetBytes("; filename=\"");
-					using (MemoryStream memoryStream = new MemoryStream(1024))
+					bool flag = this.containsFiles;
+					if (flag)
 					{
 						for (int i = 0; i < this.formData.Count; i++)
 						{
-							memoryStream.Write(bytes2, 0, bytes2.Length);
-							memoryStream.Write(bytes, 0, bytes.Length);
+							memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
+							memoryStream.Write(WWWForm.dDash, 0, WWWForm.dDash.Length);
 							memoryStream.Write(this.boundary, 0, this.boundary.Length);
-							memoryStream.Write(bytes2, 0, bytes2.Length);
-							memoryStream.Write(bytes3, 0, bytes3.Length);
-							byte[] bytes7 = Encoding.UTF8.GetBytes(this.types[i]);
-							memoryStream.Write(bytes7, 0, bytes7.Length);
-							memoryStream.Write(bytes2, 0, bytes2.Length);
-							memoryStream.Write(bytes4, 0, bytes4.Length);
+							memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
+							memoryStream.Write(WWWForm.contentTypeHeader, 0, WWWForm.contentTypeHeader.Length);
+							byte[] bytes = Encoding.UTF8.GetBytes(this.types[i]);
+							memoryStream.Write(bytes, 0, bytes.Length);
+							memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
+							memoryStream.Write(WWWForm.dispositionHeader, 0, WWWForm.dispositionHeader.Length);
 							string headerName = Encoding.UTF8.HeaderName;
 							string text = this.fieldNames[i];
 							bool flag2 = !WWWTranscoder.SevenBitClean(text, Encoding.UTF8) || text.IndexOf("=?") > -1;
@@ -156,9 +151,9 @@ namespace UnityEngine
 									"?="
 								});
 							}
-							byte[] bytes8 = Encoding.UTF8.GetBytes(text);
-							memoryStream.Write(bytes8, 0, bytes8.Length);
-							memoryStream.Write(bytes5, 0, bytes5.Length);
+							byte[] bytes2 = Encoding.UTF8.GetBytes(text);
+							memoryStream.Write(bytes2, 0, bytes2.Length);
+							memoryStream.Write(WWWForm.endQuote, 0, WWWForm.endQuote.Length);
 							bool flag3 = this.fileNames[i] != null;
 							if (flag3)
 							{
@@ -175,44 +170,40 @@ namespace UnityEngine
 										"?="
 									});
 								}
-								byte[] bytes9 = Encoding.UTF8.GetBytes(text2);
-								memoryStream.Write(bytes6, 0, bytes6.Length);
-								memoryStream.Write(bytes9, 0, bytes9.Length);
-								memoryStream.Write(bytes5, 0, bytes5.Length);
+								byte[] bytes3 = Encoding.UTF8.GetBytes(text2);
+								memoryStream.Write(WWWForm.fileNameField, 0, WWWForm.fileNameField.Length);
+								memoryStream.Write(bytes3, 0, bytes3.Length);
+								memoryStream.Write(WWWForm.endQuote, 0, WWWForm.endQuote.Length);
 							}
-							memoryStream.Write(bytes2, 0, bytes2.Length);
-							memoryStream.Write(bytes2, 0, bytes2.Length);
+							memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
+							memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
 							byte[] array = this.formData[i];
 							memoryStream.Write(array, 0, array.Length);
 						}
-						memoryStream.Write(bytes2, 0, bytes2.Length);
-						memoryStream.Write(bytes, 0, bytes.Length);
+						memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
+						memoryStream.Write(WWWForm.dDash, 0, WWWForm.dDash.Length);
 						memoryStream.Write(this.boundary, 0, this.boundary.Length);
-						memoryStream.Write(bytes, 0, bytes.Length);
-						memoryStream.Write(bytes2, 0, bytes2.Length);
-						return memoryStream.ToArray();
+						memoryStream.Write(WWWForm.dDash, 0, WWWForm.dDash.Length);
+						memoryStream.Write(WWWForm.crlf, 0, WWWForm.crlf.Length);
 					}
-				}
-				byte[] bytes10 = WWWForm.DefaultEncoding.GetBytes("&");
-				byte[] bytes11 = WWWForm.DefaultEncoding.GetBytes("=");
-				byte[] array5;
-				using (MemoryStream memoryStream2 = new MemoryStream(1024))
-				{
-					for (int j = 0; j < this.formData.Count; j++)
+					else
 					{
-						byte[] array2 = WWWTranscoder.DataEncode(Encoding.UTF8.GetBytes(this.fieldNames[j]));
-						byte[] array3 = this.formData[j];
-						byte[] array4 = WWWTranscoder.DataEncode(array3);
-						bool flag5 = j > 0;
-						if (flag5)
+						for (int j = 0; j < this.formData.Count; j++)
 						{
-							memoryStream2.Write(bytes10, 0, bytes10.Length);
+							byte[] array2 = WWWTranscoder.DataEncode(Encoding.UTF8.GetBytes(this.fieldNames[j]));
+							byte[] array3 = this.formData[j];
+							byte[] array4 = WWWTranscoder.DataEncode(array3);
+							bool flag5 = j > 0;
+							if (flag5)
+							{
+								memoryStream.Write(WWWForm.ampersand, 0, WWWForm.ampersand.Length);
+							}
+							memoryStream.Write(array2, 0, array2.Length);
+							memoryStream.Write(WWWForm.equal, 0, WWWForm.equal.Length);
+							memoryStream.Write(array4, 0, array4.Length);
 						}
-						memoryStream2.Write(array2, 0, array2.Length);
-						memoryStream2.Write(bytes11, 0, bytes11.Length);
-						memoryStream2.Write(array4, 0, array4.Length);
 					}
-					array5 = memoryStream2.ToArray();
+					array5 = memoryStream.ToArray();
 				}
 				return array5;
 			}
@@ -229,5 +220,21 @@ namespace UnityEngine
 		private byte[] boundary;
 
 		private bool containsFiles = false;
+
+		private static byte[] dDash = WWWForm.DefaultEncoding.GetBytes("--");
+
+		private static byte[] crlf = WWWForm.DefaultEncoding.GetBytes("\r\n");
+
+		private static byte[] contentTypeHeader = WWWForm.DefaultEncoding.GetBytes("Content-Type: ");
+
+		private static byte[] dispositionHeader = WWWForm.DefaultEncoding.GetBytes("Content-disposition: form-data; name=\"");
+
+		private static byte[] endQuote = WWWForm.DefaultEncoding.GetBytes("\"");
+
+		private static byte[] fileNameField = WWWForm.DefaultEncoding.GetBytes("; filename=\"");
+
+		private static byte[] ampersand = WWWForm.DefaultEncoding.GetBytes("&");
+
+		private static byte[] equal = WWWForm.DefaultEncoding.GetBytes("=");
 	}
 }

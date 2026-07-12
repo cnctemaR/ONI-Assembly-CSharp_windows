@@ -15,7 +15,7 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 		this.CreateChore();
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (!string.IsNullOrEmpty(this.pill.info.effect))
 		{

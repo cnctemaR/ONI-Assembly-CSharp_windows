@@ -6,66 +6,74 @@ namespace System.Threading.Tasks
 	[StructLayout(LayoutKind.Auto)]
 	internal struct RangeWorker
 	{
+		internal bool IsInitialized
+		{
+			get
+			{
+				return this._indexRanges != null;
+			}
+		}
+
 		internal RangeWorker(IndexRange[] ranges, int nInitialRange, long nStep, bool use32BitCurrentIndex)
 		{
-			this.m_indexRanges = ranges;
-			this.m_nCurrentIndexRange = nInitialRange;
+			this._indexRanges = ranges;
 			this._use32BitCurrentIndex = use32BitCurrentIndex;
-			this.m_nStep = nStep;
-			this.m_nIncrementValue = nStep;
-			this.m_nMaxIncrementValue = 16L * nStep;
+			this._nCurrentIndexRange = nInitialRange;
+			this._nStep = nStep;
+			this._nIncrementValue = nStep;
+			this._nMaxIncrementValue = 16L * nStep;
 		}
 
 		internal unsafe bool FindNewWork(out long nFromInclusiveLocal, out long nToExclusiveLocal)
 		{
-			int num = this.m_indexRanges.Length;
+			int num = this._indexRanges.Length;
 			IndexRange indexRange;
 			long num2;
 			for (;;)
 			{
-				indexRange = this.m_indexRanges[this.m_nCurrentIndexRange];
-				if (indexRange.m_bRangeFinished == 0)
+				indexRange = this._indexRanges[this._nCurrentIndexRange];
+				if (indexRange._bRangeFinished == 0)
 				{
-					if (this.m_indexRanges[this.m_nCurrentIndexRange].m_nSharedCurrentIndexOffset == null)
+					if (this._indexRanges[this._nCurrentIndexRange]._nSharedCurrentIndexOffset == null)
 					{
-						Interlocked.CompareExchange<Shared<long>>(ref this.m_indexRanges[this.m_nCurrentIndexRange].m_nSharedCurrentIndexOffset, new Shared<long>(0L), null);
+						Interlocked.CompareExchange<Box<long>>(ref this._indexRanges[this._nCurrentIndexRange]._nSharedCurrentIndexOffset, new Box<long>(0L), null);
 					}
 					if (IntPtr.Size == 4 && this._use32BitCurrentIndex)
 					{
-						fixed (long* ptr = &this.m_indexRanges[this.m_nCurrentIndexRange].m_nSharedCurrentIndexOffset.Value)
+						fixed (long* ptr = &this._indexRanges[this._nCurrentIndexRange]._nSharedCurrentIndexOffset.Value)
 						{
-							num2 = (long)Interlocked.Add(ref *(int*)ptr, (int)this.m_nIncrementValue) - this.m_nIncrementValue;
+							num2 = (long)Interlocked.Add(ref *(int*)ptr, (int)this._nIncrementValue) - this._nIncrementValue;
 						}
 					}
 					else
 					{
-						num2 = Interlocked.Add(ref this.m_indexRanges[this.m_nCurrentIndexRange].m_nSharedCurrentIndexOffset.Value, this.m_nIncrementValue) - this.m_nIncrementValue;
+						num2 = Interlocked.Add(ref this._indexRanges[this._nCurrentIndexRange]._nSharedCurrentIndexOffset.Value, this._nIncrementValue) - this._nIncrementValue;
 					}
-					if (indexRange.m_nToExclusive - indexRange.m_nFromInclusive > num2)
+					if (indexRange._nToExclusive - indexRange._nFromInclusive > num2)
 					{
 						break;
 					}
-					Interlocked.Exchange(ref this.m_indexRanges[this.m_nCurrentIndexRange].m_bRangeFinished, 1);
+					Interlocked.Exchange(ref this._indexRanges[this._nCurrentIndexRange]._bRangeFinished, 1);
 				}
-				this.m_nCurrentIndexRange = (this.m_nCurrentIndexRange + 1) % this.m_indexRanges.Length;
+				this._nCurrentIndexRange = (this._nCurrentIndexRange + 1) % this._indexRanges.Length;
 				num--;
 				if (num <= 0)
 				{
 					goto Block_9;
 				}
 			}
-			nFromInclusiveLocal = indexRange.m_nFromInclusive + num2;
-			nToExclusiveLocal = nFromInclusiveLocal + this.m_nIncrementValue;
-			if (nToExclusiveLocal > indexRange.m_nToExclusive || nToExclusiveLocal < indexRange.m_nFromInclusive)
+			nFromInclusiveLocal = indexRange._nFromInclusive + num2;
+			nToExclusiveLocal = nFromInclusiveLocal + this._nIncrementValue;
+			if (nToExclusiveLocal > indexRange._nToExclusive || nToExclusiveLocal < indexRange._nFromInclusive)
 			{
-				nToExclusiveLocal = indexRange.m_nToExclusive;
+				nToExclusiveLocal = indexRange._nToExclusive;
 			}
-			if (this.m_nIncrementValue < this.m_nMaxIncrementValue)
+			if (this._nIncrementValue < this._nMaxIncrementValue)
 			{
-				this.m_nIncrementValue *= 2L;
-				if (this.m_nIncrementValue > this.m_nMaxIncrementValue)
+				this._nIncrementValue *= 2L;
+				if (this._nIncrementValue > this._nMaxIncrementValue)
 				{
-					this.m_nIncrementValue = this.m_nMaxIncrementValue;
+					this._nIncrementValue = this._nMaxIncrementValue;
 				}
 			}
 			return true;
@@ -85,15 +93,15 @@ namespace System.Threading.Tasks
 			return flag;
 		}
 
-		internal readonly IndexRange[] m_indexRanges;
+		internal readonly IndexRange[] _indexRanges;
 
-		internal int m_nCurrentIndexRange;
+		internal int _nCurrentIndexRange;
 
-		internal long m_nStep;
+		internal long _nStep;
 
-		internal long m_nIncrementValue;
+		internal long _nIncrementValue;
 
-		internal readonly long m_nMaxIncrementValue;
+		internal readonly long _nMaxIncrementValue;
 
 		internal readonly bool _use32BitCurrentIndex;
 	}

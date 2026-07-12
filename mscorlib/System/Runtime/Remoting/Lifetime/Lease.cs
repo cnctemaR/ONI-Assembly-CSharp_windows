@@ -46,7 +46,7 @@ namespace System.Runtime.Remoting.Lifetime
 			{
 				if (this._currentState != LeaseState.Initial)
 				{
-					throw new RemotingException("InitialLeaseTime property can only be set when the lease is in initial state; state is " + this._currentState + ".");
+					throw new RemotingException("InitialLeaseTime property can only be set when the lease is in initial state; state is " + this._currentState.ToString() + ".");
 				}
 				this._initialLeaseTime = value;
 				this._leaseExpireTime = DateTime.UtcNow + this._initialLeaseTime;
@@ -67,7 +67,7 @@ namespace System.Runtime.Remoting.Lifetime
 			{
 				if (this._currentState != LeaseState.Initial)
 				{
-					throw new RemotingException("RenewOnCallTime property can only be set when the lease is in initial state; state is " + this._currentState + ".");
+					throw new RemotingException("RenewOnCallTime property can only be set when the lease is in initial state; state is " + this._currentState.ToString() + ".");
 				}
 				this._renewOnCallTime = value;
 			}
@@ -83,7 +83,7 @@ namespace System.Runtime.Remoting.Lifetime
 			{
 				if (this._currentState != LeaseState.Initial)
 				{
-					throw new RemotingException("SponsorshipTimeout property can only be set when the lease is in initial state; state is " + this._currentState + ".");
+					throw new RemotingException("SponsorshipTimeout property can only be set when the lease is in initial state; state is " + this._currentState.ToString() + ".");
 				}
 				this._sponsorshipTimeout = value;
 			}

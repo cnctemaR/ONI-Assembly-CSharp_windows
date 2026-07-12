@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Edible")]
@@ -104,7 +105,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.Edible, this);
 	}
 
-	public override HashedString[] GetWorkAnims(Worker worker)
+	public override HashedString[] GetWorkAnims(WorkerBase worker)
 	{
 		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
 		bool flag = smi != null && smi.UseSalt();
@@ -127,7 +128,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		}
 	}
 
-	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
+	public override HashedString[] GetWorkPstAnims(WorkerBase worker, bool successfully_completed)
 	{
 		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
 		bool flag = smi != null && smi.UseSalt();
@@ -152,10 +153,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	private void OnCraft(object data)
 	{
-		RationTracker.Get().RegisterCaloriesProduced(this.Calories);
+		WorldResourceAmountTracker<RationTracker>.Get().RegisterAmountProduced(this.Calories);
 	}
 
-	public float GetFeedingTime(Worker worker)
+	public float GetFeedingTime(WorkerBase worker)
 	{
 		float num = this.Calories * 2E-05f;
 		if (worker != null)
@@ -169,7 +170,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return num;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		this.totalFeedingTime = this.GetFeedingTime(worker);
 		base.SetWorkTime(this.totalFeedingTime);
@@ -181,7 +182,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		this.StartConsuming();
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (this.currentlyLit)
 		{
@@ -201,7 +202,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return this.OnTickConsume(worker, dt);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		if (this.currentModifier != null)
 		{
@@ -212,7 +213,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		this.StopConsuming(worker);
 	}
 
-	private bool OnTickConsume(Worker worker, float dt)
+	private bool OnTickConsume(WorkerBase worker, float dt)
 	{
 		if (!this.isBeingConsumed)
 		{
@@ -302,7 +303,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		base.worker.Trigger(1406130139, this);
 	}
 
-	private void StopConsuming(Worker worker)
+	private void StopConsuming(WorkerBase worker)
 	{
 		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()", null);
 		this.isBeingConsumed = false;
@@ -329,7 +330,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		return Edible.qualityEffects[qualityLevel];
 	}
 
-	private void AddOnConsumeEffects(Worker worker)
+	private void AddOnConsumeEffects(WorkerBase worker)
 	{
 		int num = Mathf.RoundToInt(worker.GetAttributes().Add(Db.Get().Attributes.FoodExpectation).GetTotalValue());
 		int num2 = this.FoodInfo.Quality + num;
@@ -445,7 +446,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
 
-	private AttributeModifier caloriesLitSpaceModifier = new AttributeModifier("CaloriesDelta", 57500f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
+	private AttributeModifier caloriesLitSpaceModifier = new AttributeModifier("CaloriesDelta", (1f + DUPLICANTSTATS.STANDARD.Light.LIGHT_WORK_EFFICIENCY_BONUS) / 2E-05f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
 
 	private AttributeModifier currentModifier;
 
@@ -481,7 +482,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		{ 5, "Edible3" }
 	};
 
-	public class EdibleStartWorkInfo : Worker.StartWorkInfo
+	public class EdibleStartWorkInfo : WorkerBase.StartWorkInfo
 	{
 		public float amount { get; private set; }
 

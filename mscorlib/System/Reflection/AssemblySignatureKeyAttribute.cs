@@ -7,28 +7,12 @@ namespace System.Reflection
 	{
 		public AssemblySignatureKeyAttribute(string publicKey, string countersignature)
 		{
-			this._publicKey = publicKey;
-			this._countersignature = countersignature;
+			this.PublicKey = publicKey;
+			this.Countersignature = countersignature;
 		}
 
-		public string PublicKey
-		{
-			get
-			{
-				return this._publicKey;
-			}
-		}
+		public string PublicKey { get; }
 
-		public string Countersignature
-		{
-			get
-			{
-				return this._countersignature;
-			}
-		}
-
-		private string _publicKey;
-
-		private string _countersignature;
+		public string Countersignature { get; }
 	}
 }

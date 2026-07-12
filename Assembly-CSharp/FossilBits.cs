@@ -86,7 +86,7 @@ public class FossilBits : FossilExcavationWorkable, ISidescreenButtonControl
 		}
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		this.DropLoot();

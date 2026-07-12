@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace System.IO.Compression
 {
-	internal struct ZipLocalFileHeader
+	internal readonly struct ZipLocalFileHeader
 	{
 		public static List<ZipGenericExtraField> GetExtraFields(BinaryReader reader)
 		{

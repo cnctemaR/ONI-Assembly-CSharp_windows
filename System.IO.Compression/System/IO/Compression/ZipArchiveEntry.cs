@@ -87,6 +87,15 @@ namespace System.IO.Compression
 			}
 		}
 
+		[CLSCompliant(false)]
+		public uint Crc32
+		{
+			get
+			{
+				return this._crc32;
+			}
+		}
+
 		public long CompressedLength
 		{
 			get

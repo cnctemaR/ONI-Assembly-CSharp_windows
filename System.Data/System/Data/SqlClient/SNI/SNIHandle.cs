@@ -12,7 +12,7 @@ namespace System.Data.SqlClient.SNI
 
 		public abstract uint Send(SNIPacket packet);
 
-		public abstract uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null);
+		public abstract uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null);
 
 		public abstract uint Receive(out SNIPacket packet, int timeoutInMilliseconds);
 

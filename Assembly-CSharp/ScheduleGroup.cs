@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using STRINGS;
+using UnityEngine;
 
 [DebuggerDisplay("{Id}")]
 public class ScheduleGroup : Resource
@@ -16,7 +17,9 @@ public class ScheduleGroup : Resource
 
 	public bool alarm { get; private set; }
 
-	public ScheduleGroup(string id, ResourceSet parent, int defaultSegments, string name, string description, string notificationTooltip, List<ScheduleBlockType> allowedTypes, bool alarm = false)
+	public Color uiColor { get; private set; }
+
+	public ScheduleGroup(string id, ResourceSet parent, int defaultSegments, string name, string description, Color uiColor, string notificationTooltip, List<ScheduleBlockType> allowedTypes, bool alarm = false)
 		: base(id, parent, name)
 	{
 		this.defaultSegments = defaultSegments;
@@ -24,6 +27,7 @@ public class ScheduleGroup : Resource
 		this.notificationTooltip = notificationTooltip;
 		this.allowedTypes = allowedTypes;
 		this.alarm = alarm;
+		this.uiColor = uiColor;
 	}
 
 	public bool Allowed(ScheduleBlockType type)

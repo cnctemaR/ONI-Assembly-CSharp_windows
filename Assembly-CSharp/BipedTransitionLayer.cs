@@ -126,7 +126,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		{
 			return attributeInstance.GetTotalValue();
 		}
-		return 18f;
+		return DUPLICANTSTATS.STANDARD.BaseStats.TRANSIT_TUBE_TRAVEL_SPEED;
 	}
 
 	public float GetMovementSpeedMultiplier(Navigator navigator)

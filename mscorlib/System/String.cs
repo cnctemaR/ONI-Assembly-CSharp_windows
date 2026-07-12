@@ -1,228 +1,25 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Security;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public sealed class String : IComparable, ICloneable, IConvertible, IEnumerable, IComparable<string>, IEnumerable<char>, IEquatable<string>
+	public sealed class String : IComparable, IEnumerable, IEnumerable<char>, IComparable<string>, IEquatable<string>, IConvertible, ICloneable
 	{
-		public static string Join(string separator, params string[] value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return string.Join(separator, value, 0, value.Length);
-		}
-
-		[ComVisible(false)]
-		public static string Join(string separator, params object[] values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			if (values.Length == 0 || values[0] == null)
-			{
-				return string.Empty;
-			}
-			if (separator == null)
-			{
-				separator = string.Empty;
-			}
-			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			string text = values[0].ToString();
-			if (text != null)
-			{
-				stringBuilder.Append(text);
-			}
-			for (int i = 1; i < values.Length; i++)
-			{
-				stringBuilder.Append(separator);
-				if (values[i] != null)
-				{
-					text = values[i].ToString();
-					if (text != null)
-					{
-						stringBuilder.Append(text);
-					}
-				}
-			}
-			return StringBuilderCache.GetStringAndRelease(stringBuilder);
-		}
-
-		[ComVisible(false)]
-		public static string Join<T>(string separator, IEnumerable<T> values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			if (separator == null)
-			{
-				separator = string.Empty;
-			}
-			string text;
-			using (IEnumerator<T> enumerator = values.GetEnumerator())
-			{
-				if (!enumerator.MoveNext())
-				{
-					text = string.Empty;
-				}
-				else
-				{
-					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-					if (enumerator.Current != null)
-					{
-						T t = enumerator.Current;
-						string text2 = t.ToString();
-						if (text2 != null)
-						{
-							stringBuilder.Append(text2);
-						}
-					}
-					while (enumerator.MoveNext())
-					{
-						stringBuilder.Append(separator);
-						if (enumerator.Current != null)
-						{
-							T t = enumerator.Current;
-							string text3 = t.ToString();
-							if (text3 != null)
-							{
-								stringBuilder.Append(text3);
-							}
-						}
-					}
-					text = StringBuilderCache.GetStringAndRelease(stringBuilder);
-				}
-			}
-			return text;
-		}
-
-		[ComVisible(false)]
-		public static string Join(string separator, IEnumerable<string> values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			if (separator == null)
-			{
-				separator = string.Empty;
-			}
-			string text;
-			using (IEnumerator<string> enumerator = values.GetEnumerator())
-			{
-				if (!enumerator.MoveNext())
-				{
-					text = string.Empty;
-				}
-				else
-				{
-					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-					if (enumerator.Current != null)
-					{
-						stringBuilder.Append(enumerator.Current);
-					}
-					while (enumerator.MoveNext())
-					{
-						stringBuilder.Append(separator);
-						if (enumerator.Current != null)
-						{
-							stringBuilder.Append(enumerator.Current);
-						}
-					}
-					text = StringBuilderCache.GetStringAndRelease(stringBuilder);
-				}
-			}
-			return text;
-		}
-
-		internal char FirstChar
-		{
-			get
-			{
-				return this.m_firstChar;
-			}
-		}
-
-		[SecuritySafeCritical]
-		public unsafe static string Join(string separator, string[] value, int startIndex, int count)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
-			}
-			if (startIndex > value.Length - count)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
-			}
-			if (separator == null)
-			{
-				separator = string.Empty;
-			}
-			if (count == 0)
-			{
-				return string.Empty;
-			}
-			int num = 0;
-			int num2 = startIndex + count - 1;
-			for (int i = startIndex; i <= num2; i++)
-			{
-				if (value[i] != null)
-				{
-					num += value[i].Length;
-				}
-			}
-			num += (count - 1) * separator.Length;
-			if (num < 0 || num + 1 < 0)
-			{
-				throw new OutOfMemoryException();
-			}
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(num);
-			fixed (char* ptr = &text.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				UnSafeCharBuffer unSafeCharBuffer = new UnSafeCharBuffer(ptr2, num);
-				unSafeCharBuffer.AppendString(value[startIndex]);
-				for (int j = startIndex + 1; j <= num2; j++)
-				{
-					unSafeCharBuffer.AppendString(separator);
-					unSafeCharBuffer.AppendString(value[j]);
-				}
-			}
-			return text;
-		}
-
-		[SecuritySafeCritical]
 		private unsafe static int CompareOrdinalIgnoreCaseHelper(string strA, string strB)
 		{
 			int num = Math.Min(strA.Length, strB.Length);
-			fixed (char* ptr = &strA.m_firstChar)
+			fixed (char* ptr = &strA._firstChar)
 			{
 				char* ptr2 = ptr;
-				fixed (char* ptr3 = &strB.m_firstChar)
+				fixed (char* ptr3 = &strB._firstChar)
 				{
 					char* ptr4 = ptr3;
 					char* ptr5 = ptr2;
@@ -252,1240 +49,137 @@ namespace System
 			}
 		}
 
-		[SecuritySafeCritical]
-		internal unsafe static string SmallCharToUpper(string strIn)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static bool EqualsHelper(string strA, string strB)
 		{
-			int length = strIn.Length;
-			string text = string.FastAllocateString(length);
-			fixed (char* ptr = &strIn.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &text.m_firstChar)
-				{
-					char* ptr4 = ptr3;
-					for (int i = 0; i < length; i++)
-					{
-						int num = (int)ptr2[i];
-						if (num - 97 <= 25)
-						{
-							num -= 32;
-						}
-						ptr4[i] = (char)num;
-					}
-					ptr = null;
-				}
-				return text;
-			}
+			return SpanHelpers.SequenceEqual(Unsafe.As<char, byte>(strA.GetRawStringData()), Unsafe.As<char, byte>(strB.GetRawStringData()), (ulong)((long)strA.Length * 2L));
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[SecuritySafeCritical]
-		private unsafe static bool EqualsHelper(string strA, string strB)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static int CompareOrdinalHelper(string strA, int indexA, int countA, string strB, int indexB, int countB)
 		{
-			int i = strA.Length;
-			fixed (char* ptr = &strA.m_firstChar)
+			return SpanHelpers.SequenceCompareTo(Unsafe.Add<char>(strA.GetRawStringData(), indexA), countA, Unsafe.Add<char>(strB.GetRawStringData(), indexB), countB);
+		}
+
+		private unsafe static bool EqualsIgnoreCaseAsciiHelper(string strA, string strB)
+		{
+			int num = strA.Length;
+			fixed (char* ptr = &strA._firstChar)
 			{
 				char* ptr2 = ptr;
-				fixed (char* ptr3 = &strB.m_firstChar)
+				fixed (char* ptr3 = &strB._firstChar)
 				{
 					char* ptr4 = ptr3;
 					char* ptr5 = ptr2;
 					char* ptr6 = ptr4;
-					if (Environment.Is64BitProcess)
+					while (num != 0)
 					{
-						while (i >= 12)
+						int num2 = (int)(*ptr5);
+						int num3 = (int)(*ptr6);
+						if (num2 != num3 && ((num2 | 32) != (num3 | 32) || (num2 | 32) - 97 > 25))
 						{
-							if (*(long*)ptr5 != *(long*)ptr6)
-							{
-								return false;
-							}
-							if (*(long*)(ptr5 + 4) != *(long*)(ptr6 + 4))
-							{
-								return false;
-							}
-							if (*(long*)(ptr5 + 8) != *(long*)(ptr6 + 8))
-							{
-								return false;
-							}
-							ptr5 += 12;
-							ptr6 += 12;
-							i -= 12;
+							return false;
 						}
+						ptr5++;
+						ptr6++;
+						num--;
 					}
-					else
-					{
-						while (i >= 10)
-						{
-							if (*(int*)ptr5 != *(int*)ptr6)
-							{
-								return false;
-							}
-							if (*(int*)(ptr5 + 2) != *(int*)(ptr6 + 2))
-							{
-								return false;
-							}
-							if (*(int*)(ptr5 + 4) != *(int*)(ptr6 + 4))
-							{
-								return false;
-							}
-							if (*(int*)(ptr5 + 6) != *(int*)(ptr6 + 6))
-							{
-								return false;
-							}
-							if (*(int*)(ptr5 + 8) != *(int*)(ptr6 + 8))
-							{
-								return false;
-							}
-							ptr5 += 10;
-							ptr6 += 10;
-							i -= 10;
-						}
-					}
-					while (i > 0 && *(int*)ptr5 == *(int*)ptr6)
-					{
-						ptr5 += 2;
-						ptr6 += 2;
-						i -= 2;
-					}
-					return i <= 0;
+					return true;
 				}
 			}
 		}
 
-		[SecuritySafeCritical]
 		private unsafe static int CompareOrdinalHelper(string strA, string strB)
 		{
 			int i = Math.Min(strA.Length, strB.Length);
-			int num = -1;
-			fixed (char* ptr = &strA.m_firstChar)
+			fixed (char* ptr = &strA._firstChar)
 			{
 				char* ptr2 = ptr;
-				fixed (char* ptr3 = &strB.m_firstChar)
+				fixed (char* ptr3 = &strB._firstChar)
 				{
 					char* ptr4 = ptr3;
 					char* ptr5 = ptr2;
 					char* ptr6 = ptr4;
-					while (i >= 10)
+					if (ptr5[1] == ptr6[1])
 					{
-						if (*(int*)ptr5 != *(int*)ptr6)
+						i -= 2;
+						ptr5 += 2;
+						ptr6 += 2;
+						while (i >= 12)
 						{
-							num = 0;
-							break;
+							if (*(long*)ptr5 == *(long*)ptr6)
+							{
+								if (*(long*)(ptr5 + 4) == *(long*)(ptr6 + 4))
+								{
+									if (*(long*)(ptr5 + 8) == *(long*)(ptr6 + 8))
+									{
+										i -= 12;
+										ptr5 += 12;
+										ptr6 += 12;
+										continue;
+									}
+									ptr5 += 4;
+									ptr6 += 4;
+								}
+								ptr5 += 4;
+								ptr6 += 4;
+							}
+							if (*(int*)ptr5 == *(int*)ptr6)
+							{
+								ptr5 += 2;
+								ptr6 += 2;
+							}
+							IL_010E:
+							if (*ptr5 != *ptr6)
+							{
+								return (int)(*ptr5 - *ptr6);
+							}
+							goto IL_011E;
 						}
-						if (*(int*)(ptr5 + 2) != *(int*)(ptr6 + 2))
+						while (i > 0)
 						{
-							num = 2;
-							break;
-						}
-						if (*(int*)(ptr5 + 4) != *(int*)(ptr6 + 4))
-						{
-							num = 4;
-							break;
-						}
-						if (*(int*)(ptr5 + 6) != *(int*)(ptr6 + 6))
-						{
-							num = 6;
-							break;
-						}
-						if (*(int*)(ptr5 + 8) != *(int*)(ptr6 + 8))
-						{
-							num = 8;
-							break;
-						}
-						ptr5 += 10;
-						ptr6 += 10;
-						i -= 10;
-					}
-					if (num != -1)
-					{
-						ptr5 += num;
-						ptr6 += num;
-						int num2;
-						if ((num2 = (int)(*ptr5 - *ptr6)) != 0)
-						{
-							return num2;
-						}
-						return (int)(ptr5[1] - ptr6[1]);
-					}
-					else
-					{
-						while (i > 0 && *(int*)ptr5 == *(int*)ptr6)
-						{
+							if (*(int*)ptr5 != *(int*)ptr6)
+							{
+								goto IL_010E;
+							}
+							i -= 2;
 							ptr5 += 2;
 							ptr6 += 2;
-							i -= 2;
 						}
-						if (i <= 0)
-						{
-							return strA.Length - strB.Length;
-						}
-						int num3;
-						if ((num3 = (int)(*ptr5 - *ptr6)) != 0)
-						{
-							return num3;
-						}
-						return (int)(ptr5[1] - ptr6[1]);
+						return strA.Length - strB.Length;
 					}
+					IL_011E:
+					return (int)(ptr5[1] - ptr6[1]);
 				}
 			}
 		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public override bool Equals(object obj)
-		{
-			if (this == null)
-			{
-				throw new NullReferenceException();
-			}
-			string text = obj as string;
-			return text != null && (this == obj || (this.Length == text.Length && string.EqualsHelper(this, text)));
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public bool Equals(string value)
-		{
-			if (this == null)
-			{
-				throw new NullReferenceException();
-			}
-			return value != null && (this == value || (this.Length == value.Length && string.EqualsHelper(this, value)));
-		}
-
-		[SecuritySafeCritical]
-		public bool Equals(string value, StringComparison comparisonType)
-		{
-			if (comparisonType < StringComparison.CurrentCulture || comparisonType > StringComparison.OrdinalIgnoreCase)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
-			if (this == value)
-			{
-				return true;
-			}
-			if (value == null)
-			{
-				return false;
-			}
-			switch (comparisonType)
-			{
-			case StringComparison.CurrentCulture:
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, CompareOptions.None) == 0;
-			case StringComparison.CurrentCultureIgnoreCase:
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, CompareOptions.IgnoreCase) == 0;
-			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(this, value, CompareOptions.None) == 0;
-			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(this, value, CompareOptions.IgnoreCase) == 0;
-			case StringComparison.Ordinal:
-				return this.Length == value.Length && string.EqualsHelper(this, value);
-			case StringComparison.OrdinalIgnoreCase:
-				if (this.Length != value.Length)
-				{
-					return false;
-				}
-				if (this.IsAscii() && value.IsAscii())
-				{
-					return string.CompareOrdinalIgnoreCaseHelper(this, value) == 0;
-				}
-				return TextInfo.CompareOrdinalIgnoreCase(this, value) == 0;
-			default:
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
-		}
-
-		public static bool Equals(string a, string b)
-		{
-			return a == b || (a != null && b != null && a.Length == b.Length && string.EqualsHelper(a, b));
-		}
-
-		[SecuritySafeCritical]
-		public static bool Equals(string a, string b, StringComparison comparisonType)
-		{
-			if (comparisonType < StringComparison.CurrentCulture || comparisonType > StringComparison.OrdinalIgnoreCase)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
-			if (a == b)
-			{
-				return true;
-			}
-			if (a == null || b == null)
-			{
-				return false;
-			}
-			switch (comparisonType)
-			{
-			case StringComparison.CurrentCulture:
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, CompareOptions.None) == 0;
-			case StringComparison.CurrentCultureIgnoreCase:
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, CompareOptions.IgnoreCase) == 0;
-			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(a, b, CompareOptions.None) == 0;
-			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(a, b, CompareOptions.IgnoreCase) == 0;
-			case StringComparison.Ordinal:
-				return a.Length == b.Length && string.EqualsHelper(a, b);
-			case StringComparison.OrdinalIgnoreCase:
-				if (a.Length != b.Length)
-				{
-					return false;
-				}
-				if (a.IsAscii() && b.IsAscii())
-				{
-					return string.CompareOrdinalIgnoreCaseHelper(a, b) == 0;
-				}
-				return TextInfo.CompareOrdinalIgnoreCase(a, b) == 0;
-			default:
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
-		}
-
-		public static bool operator ==(string a, string b)
-		{
-			return string.Equals(a, b);
-		}
-
-		public static bool operator !=(string a, string b)
-		{
-			return !string.Equals(a, b);
-		}
-
-		[IndexerName("Chars")]
-		public unsafe char this[int index]
-		{
-			get
-			{
-				if (index < 0 || index >= this.m_stringLength)
-				{
-					throw new IndexOutOfRangeException();
-				}
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					return ptr[index];
-				}
-			}
-		}
-
-		[SecuritySafeCritical]
-		public unsafe void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
-		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
-			}
-			if (sourceIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("sourceIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (count > this.Length - sourceIndex)
-			{
-				throw new ArgumentOutOfRangeException("sourceIndex", Environment.GetResourceString("Index and count must refer to a location within the string."));
-			}
-			if (destinationIndex > destination.Length - count || destinationIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("destinationIndex", Environment.GetResourceString("Index and count must refer to a location within the string."));
-			}
-			if (count > 0)
-			{
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr2 = ptr;
-					fixed (char[] array = destination)
-					{
-						char* ptr3;
-						if (destination == null || array.Length == 0)
-						{
-							ptr3 = null;
-						}
-						else
-						{
-							ptr3 = &array[0];
-						}
-						string.wstrcpy(ptr3 + destinationIndex, ptr2 + sourceIndex, count);
-					}
-				}
-			}
-		}
-
-		[SecuritySafeCritical]
-		public unsafe char[] ToCharArray()
-		{
-			int length = this.Length;
-			char[] array = new char[length];
-			if (length > 0)
-			{
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr2 = ptr;
-					char[] array2;
-					char* ptr3;
-					if ((array2 = array) == null || array2.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array2[0];
-					}
-					string.wstrcpy(ptr3, ptr2, length);
-					array2 = null;
-				}
-			}
-			return array;
-		}
-
-		[SecuritySafeCritical]
-		public unsafe char[] ToCharArray(int startIndex, int length)
-		{
-			if (startIndex < 0 || startIndex > this.Length || startIndex > this.Length - length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			char[] array = new char[length];
-			if (length > 0)
-			{
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr2 = ptr;
-					char[] array2;
-					char* ptr3;
-					if ((array2 = array) == null || array2.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array2[0];
-					}
-					string.wstrcpy(ptr3, ptr2 + startIndex, length);
-					array2 = null;
-				}
-			}
-			return array;
-		}
-
-		public static bool IsNullOrEmpty(string value)
-		{
-			return value == null || value.Length == 0;
-		}
-
-		public static bool IsNullOrWhiteSpace(string value)
-		{
-			if (value == null)
-			{
-				return true;
-			}
-			for (int i = 0; i < value.Length; i++)
-			{
-				if (!char.IsWhiteSpace(value[i]))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		[SecuritySafeCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public unsafe override int GetHashCode()
-		{
-			char* ptr = this;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			int num = 5381;
-			int num2 = num;
-			char* ptr2 = ptr;
-			int num3;
-			while ((num3 = (int)(*ptr2)) != 0)
-			{
-				num = ((num << 5) + num) ^ num3;
-				num3 = (int)ptr2[1];
-				if (num3 == 0)
-				{
-					break;
-				}
-				num2 = ((num2 << 5) + num2) ^ num3;
-				ptr2 += 2;
-			}
-			return num + num2 * 1566083941;
-		}
-
-		[SecuritySafeCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		internal unsafe int GetLegacyNonRandomizedHashCode()
-		{
-			char* ptr = this;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			int num = 5381;
-			int num2 = num;
-			char* ptr2 = ptr;
-			int num3;
-			while ((num3 = (int)(*ptr2)) != 0)
-			{
-				num = ((num << 5) + num) ^ num3;
-				num3 = (int)ptr2[1];
-				if (num3 == 0)
-				{
-					break;
-				}
-				num2 = ((num2 << 5) + num2) ^ num3;
-				ptr2 += 2;
-			}
-			return num + num2 * 1566083941;
-		}
-
-		public string[] Split(params char[] separator)
-		{
-			return this.SplitInternal(separator, int.MaxValue, StringSplitOptions.None);
-		}
-
-		public string[] Split(char[] separator, int count)
-		{
-			return this.SplitInternal(separator, count, StringSplitOptions.None);
-		}
-
-		[ComVisible(false)]
-		public string[] Split(char[] separator, StringSplitOptions options)
-		{
-			return this.SplitInternal(separator, int.MaxValue, options);
-		}
-
-		[ComVisible(false)]
-		public string[] Split(char[] separator, int count, StringSplitOptions options)
-		{
-			return this.SplitInternal(separator, count, options);
-		}
-
-		[ComVisible(false)]
-		internal string[] SplitInternal(char[] separator, int count, StringSplitOptions options)
-		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
-			}
-			if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Illegal enum value: {0}.", new object[] { options }));
-			}
-			bool flag = options == StringSplitOptions.RemoveEmptyEntries;
-			if (count == 0 || (flag && this.Length == 0))
-			{
-				return new string[0];
-			}
-			int[] array = new int[this.Length];
-			int num = this.MakeSeparatorList(separator, ref array);
-			if (num == 0 || count == 1)
-			{
-				return new string[] { this };
-			}
-			if (flag)
-			{
-				return this.InternalSplitOmitEmptyEntries(array, null, num, count);
-			}
-			return this.InternalSplitKeepEmptyEntries(array, null, num, count);
-		}
-
-		[ComVisible(false)]
-		public string[] Split(string[] separator, StringSplitOptions options)
-		{
-			return this.Split(separator, int.MaxValue, options);
-		}
-
-		[ComVisible(false)]
-		public string[] Split(string[] separator, int count, StringSplitOptions options)
-		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
-			}
-			if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Illegal enum value: {0}.", new object[] { (int)options }));
-			}
-			bool flag = options == StringSplitOptions.RemoveEmptyEntries;
-			if (separator == null || separator.Length == 0)
-			{
-				return this.SplitInternal(null, count, options);
-			}
-			if (count == 0 || (flag && this.Length == 0))
-			{
-				return new string[0];
-			}
-			int[] array = new int[this.Length];
-			int[] array2 = new int[this.Length];
-			int num = this.MakeSeparatorList(separator, ref array, ref array2);
-			if (num == 0 || count == 1)
-			{
-				return new string[] { this };
-			}
-			if (flag)
-			{
-				return this.InternalSplitOmitEmptyEntries(array, array2, num, count);
-			}
-			return this.InternalSplitKeepEmptyEntries(array, array2, num, count);
-		}
-
-		private string[] InternalSplitKeepEmptyEntries(int[] sepList, int[] lengthList, int numReplaces, int count)
-		{
-			int num = 0;
-			int num2 = 0;
-			count--;
-			int num3 = ((numReplaces < count) ? numReplaces : count);
-			string[] array = new string[num3 + 1];
-			int num4 = 0;
-			while (num4 < num3 && num < this.Length)
-			{
-				array[num2++] = this.Substring(num, sepList[num4] - num);
-				num = sepList[num4] + ((lengthList == null) ? 1 : lengthList[num4]);
-				num4++;
-			}
-			if (num < this.Length && num3 >= 0)
-			{
-				array[num2] = this.Substring(num);
-			}
-			else if (num2 == num3)
-			{
-				array[num2] = string.Empty;
-			}
-			return array;
-		}
-
-		private string[] InternalSplitOmitEmptyEntries(int[] sepList, int[] lengthList, int numReplaces, int count)
-		{
-			int num = ((numReplaces < count) ? (numReplaces + 1) : count);
-			string[] array = new string[num];
-			int num2 = 0;
-			int num3 = 0;
-			int i = 0;
-			while (i < numReplaces && num2 < this.Length)
-			{
-				if (sepList[i] - num2 > 0)
-				{
-					array[num3++] = this.Substring(num2, sepList[i] - num2);
-				}
-				num2 = sepList[i] + ((lengthList == null) ? 1 : lengthList[i]);
-				if (num3 == count - 1)
-				{
-					while (i < numReplaces - 1)
-					{
-						if (num2 != sepList[++i])
-						{
-							break;
-						}
-						num2 += ((lengthList == null) ? 1 : lengthList[i]);
-					}
-					break;
-				}
-				i++;
-			}
-			if (num2 < this.Length)
-			{
-				array[num3++] = this.Substring(num2);
-			}
-			string[] array2 = array;
-			if (num3 != num)
-			{
-				array2 = new string[num3];
-				for (int j = 0; j < num3; j++)
-				{
-					array2[j] = array[j];
-				}
-			}
-			return array2;
-		}
-
-		[SecuritySafeCritical]
-		private unsafe int MakeSeparatorList(char[] separator, ref int[] sepList)
-		{
-			int num = 0;
-			if (separator == null || separator.Length == 0)
-			{
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr2 = ptr;
-					int num2 = 0;
-					while (num2 < this.Length && num < sepList.Length)
-					{
-						if (char.IsWhiteSpace(ptr2[num2]))
-						{
-							sepList[num++] = num2;
-						}
-						num2++;
-					}
-				}
-			}
-			else
-			{
-				int num3 = sepList.Length;
-				int num4 = separator.Length;
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr3 = ptr;
-					fixed (char[] array = separator)
-					{
-						char* ptr4;
-						if (separator == null || array.Length == 0)
-						{
-							ptr4 = null;
-						}
-						else
-						{
-							ptr4 = &array[0];
-						}
-						int num5 = 0;
-						while (num5 < this.Length && num < num3)
-						{
-							char* ptr5 = ptr4;
-							int i = 0;
-							while (i < num4)
-							{
-								if (ptr3[num5] == *ptr5)
-								{
-									sepList[num++] = num5;
-									break;
-								}
-								i++;
-								ptr5++;
-							}
-							num5++;
-						}
-						ptr = null;
-					}
-				}
-			}
-			return num;
-		}
-
-		[SecuritySafeCritical]
-		private unsafe int MakeSeparatorList(string[] separators, ref int[] sepList, ref int[] lengthList)
-		{
-			int num = 0;
-			int num2 = sepList.Length;
-			int num3 = separators.Length;
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				int num4 = 0;
-				while (num4 < this.Length && num < num2)
-				{
-					foreach (string text in separators)
-					{
-						if (!string.IsNullOrEmpty(text))
-						{
-							int length = text.Length;
-							if (ptr2[num4] == text[0] && length <= this.Length - num4 && (length == 1 || string.CompareOrdinal(this, num4, text, 0, length) == 0))
-							{
-								sepList[num] = num4;
-								lengthList[num] = length;
-								num++;
-								num4 += length - 1;
-								break;
-							}
-						}
-					}
-					num4++;
-				}
-			}
-			return num;
-		}
-
-		public string Substring(int startIndex)
-		{
-			return this.Substring(startIndex, this.Length - startIndex);
-		}
-
-		[SecuritySafeCritical]
-		public string Substring(int startIndex, int length)
-		{
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
-			}
-			if (startIndex > this.Length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("startIndex cannot be larger than length of string."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
-			}
-			if (startIndex > this.Length - length)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Index and length must refer to a location within the string."));
-			}
-			if (length == 0)
-			{
-				return string.Empty;
-			}
-			if (startIndex == 0 && length == this.Length)
-			{
-				return this;
-			}
-			return this.InternalSubString(startIndex, length);
-		}
-
-		[SecurityCritical]
-		private unsafe string InternalSubString(int startIndex, int length)
-		{
-			string text = string.FastAllocateString(length);
-			fixed (char* ptr = &text.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &this.m_firstChar)
-				{
-					char* ptr4 = ptr3;
-					string.wstrcpy(ptr2, ptr4 + startIndex, length);
-				}
-			}
-			return text;
-		}
-
-		public string Trim(params char[] trimChars)
-		{
-			if (trimChars == null || trimChars.Length == 0)
-			{
-				return this.TrimHelper(2);
-			}
-			return this.TrimHelper(trimChars, 2);
-		}
-
-		public string TrimStart(params char[] trimChars)
-		{
-			if (trimChars == null || trimChars.Length == 0)
-			{
-				return this.TrimHelper(0);
-			}
-			return this.TrimHelper(trimChars, 0);
-		}
-
-		public string TrimEnd(params char[] trimChars)
-		{
-			if (trimChars == null || trimChars.Length == 0)
-			{
-				return this.TrimHelper(1);
-			}
-			return this.TrimHelper(trimChars, 1);
-		}
-
-		[CLSCompliant(false)]
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(char* value);
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(char* value, int startIndex, int length);
-
-		[CLSCompliant(false)]
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value);
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value, int startIndex, int length);
-
-		[CLSCompliant(false)]
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value, int startIndex, int length, Encoding enc);
-
-		[SecurityCritical]
-		internal unsafe static string CreateStringFromEncoding(byte* bytes, int byteLength, Encoding encoding)
-		{
-			int charCount = encoding.GetCharCount(bytes, byteLength, null);
-			if (charCount == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(charCount);
-			fixed (char* ptr = &text.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				encoding.GetChars(bytes, byteLength, ptr2, charCount, null);
-			}
-			return text;
-		}
-
-		internal unsafe int GetBytesFromEncoding(byte* pbNativeBuffer, int cbNativeBuffer, Encoding encoding)
-		{
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				return encoding.GetBytes(ptr2, this.m_stringLength, pbNativeBuffer, cbNativeBuffer);
-			}
-		}
-
-		public bool IsNormalized()
-		{
-			return this.IsNormalized(NormalizationForm.FormC);
-		}
-
-		[SecuritySafeCritical]
-		public bool IsNormalized(NormalizationForm normalizationForm)
-		{
-			return (this.IsFastSort() && (normalizationForm == NormalizationForm.FormC || normalizationForm == NormalizationForm.FormKC || normalizationForm == NormalizationForm.FormD || normalizationForm == NormalizationForm.FormKD)) || Normalization.IsNormalized(this, normalizationForm);
-		}
-
-		public string Normalize()
-		{
-			return this.Normalize(NormalizationForm.FormC);
-		}
-
-		[SecuritySafeCritical]
-		public string Normalize(NormalizationForm normalizationForm)
-		{
-			if (this.IsAscii() && (normalizationForm == NormalizationForm.FormC || normalizationForm == NormalizationForm.FormKC || normalizationForm == NormalizationForm.FormD || normalizationForm == NormalizationForm.FormKD))
-			{
-				return this;
-			}
-			return Normalization.Normalize(this, normalizationForm);
-		}
-
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string FastAllocateString(int length);
-
-		[SecuritySafeCritical]
-		private unsafe static void FillStringChecked(string dest, int destPos, string src)
-		{
-			if (src.Length > dest.Length - destPos)
-			{
-				throw new IndexOutOfRangeException();
-			}
-			fixed (char* ptr = &dest.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &src.m_firstChar)
-				{
-					char* ptr4 = ptr3;
-					string.wstrcpy(ptr2 + destPos, ptr4, src.Length);
-				}
-			}
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char[] value, int startIndex, int length);
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char[] value);
-
-		[SecurityCritical]
-		internal unsafe static void wstrcpy(char* dmem, char* smem, int charCount)
-		{
-			Buffer.Memcpy((byte*)dmem, (byte*)smem, charCount * 2);
-		}
-
-		[SecuritySafeCritical]
-		private unsafe string CtorCharArray(char[] value)
-		{
-			if (value != null && value.Length != 0)
-			{
-				string text2;
-				string text = (text2 = string.FastAllocateString(value.Length));
-				char* ptr = text2;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				fixed (char[] array = value)
-				{
-					char* ptr2;
-					if (value == null || array.Length == 0)
-					{
-						ptr2 = null;
-					}
-					else
-					{
-						ptr2 = &array[0];
-					}
-					string.wstrcpy(ptr, ptr2, value.Length);
-					text2 = null;
-				}
-				return text;
-			}
-			return string.Empty;
-		}
-
-		[SecuritySafeCritical]
-		private unsafe string CtorCharArrayStartLength(char[] value, int startIndex, int length)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
-			}
-			if (startIndex > value.Length - length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (length > 0)
-			{
-				string text2;
-				string text = (text2 = string.FastAllocateString(length));
-				char* ptr = text2;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				fixed (char[] array = value)
-				{
-					char* ptr2;
-					if (value == null || array.Length == 0)
-					{
-						ptr2 = null;
-					}
-					else
-					{
-						ptr2 = &array[0];
-					}
-					string.wstrcpy(ptr, ptr2 + startIndex, length);
-					text2 = null;
-				}
-				return text;
-			}
-			return string.Empty;
-		}
-
-		[SecuritySafeCritical]
-		private unsafe string CtorCharCount(char c, int count)
-		{
-			if (count > 0)
-			{
-				string text = string.FastAllocateString(count);
-				if (c != '\0')
-				{
-					fixed (string text2 = text)
-					{
-						char* ptr = text2;
-						if (ptr != null)
-						{
-							ptr += RuntimeHelpers.OffsetToStringData / 2;
-						}
-						char* ptr2 = ptr;
-						while ((ptr2 & 3U) != 0U && count > 0)
-						{
-							*(ptr2++) = c;
-							count--;
-						}
-						uint num = (uint)(((uint)c << 16) | c);
-						if (count >= 4)
-						{
-							count -= 4;
-							do
-							{
-								*(int*)ptr2 = (int)num;
-								*(int*)(ptr2 + 2) = (int)num;
-								ptr2 += 4;
-								count -= 4;
-							}
-							while (count >= 0);
-						}
-						if ((count & 2) != 0)
-						{
-							*(int*)ptr2 = (int)num;
-							ptr2 += 2;
-						}
-						if ((count & 1) != 0)
-						{
-							*ptr2 = c;
-						}
-					}
-				}
-				return text;
-			}
-			if (count == 0)
-			{
-				return string.Empty;
-			}
-			throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("'{0}' must be non-negative.", new object[] { "count" }));
-		}
-
-		[SecurityCritical]
-		private unsafe static int wcslen(char* ptr)
-		{
-			char* ptr2 = ptr;
-			while ((ptr2 & 3U) != 0U && *ptr2 != '\0')
-			{
-				ptr2++;
-			}
-			if (*ptr2 != '\0')
-			{
-				for (;;)
-				{
-					if ((*ptr2 & ptr2[1]) == '\0')
-					{
-						if (*ptr2 == '\0')
-						{
-							break;
-						}
-						if (ptr2[1] == '\0')
-						{
-							break;
-						}
-					}
-					ptr2 += 2;
-				}
-			}
-			while (*ptr2 != '\0')
-			{
-				ptr2++;
-			}
-			return (int)((long)(ptr2 - ptr));
-		}
-
-		[SecurityCritical]
-		private unsafe string CtorCharPtr(char* ptr)
-		{
-			if (ptr == null)
-			{
-				return string.Empty;
-			}
-			string text;
-			try
-			{
-				int num = string.wcslen(ptr);
-				if (num == 0)
-				{
-					text = string.Empty;
-				}
-				else
-				{
-					string text2 = string.FastAllocateString(num);
-					try
-					{
-						fixed (string text3 = text2)
-						{
-							char* ptr2 = text3;
-							if (ptr2 != null)
-							{
-								ptr2 += RuntimeHelpers.OffsetToStringData / 2;
-							}
-							string.wstrcpy(ptr2, ptr, num);
-						}
-					}
-					finally
-					{
-						string text3 = null;
-					}
-					text = text2;
-				}
-			}
-			catch (NullReferenceException)
-			{
-				throw new ArgumentOutOfRangeException("ptr", Environment.GetResourceString("Pointer startIndex and length do not refer to a valid string."));
-			}
-			return text;
-		}
-
-		[SecurityCritical]
-		private unsafe string CtorCharPtrStartLength(char* ptr, int startIndex, int length)
-		{
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
-			}
-			char* ptr2 = ptr + startIndex;
-			if (ptr2 < ptr)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Pointer startIndex and length do not refer to a valid string."));
-			}
-			if (length == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(length);
-			string text3;
-			try
-			{
-				try
-				{
-					fixed (string text2 = text)
-					{
-						char* ptr3 = text2;
-						if (ptr3 != null)
-						{
-							ptr3 += RuntimeHelpers.OffsetToStringData / 2;
-						}
-						string.wstrcpy(ptr3, ptr2, length);
-					}
-				}
-				finally
-				{
-					string text2 = null;
-				}
-				text3 = text;
-			}
-			catch (NullReferenceException)
-			{
-				throw new ArgumentOutOfRangeException("ptr", Environment.GetResourceString("Pointer startIndex and length do not refer to a valid string."));
-			}
-			return text3;
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char c, int count);
 
 		public static int Compare(string strA, string strB)
 		{
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, CompareOptions.None);
+			return string.Compare(strA, strB, StringComparison.CurrentCulture);
 		}
 
 		public static int Compare(string strA, string strB, bool ignoreCase)
 		{
-			if (ignoreCase)
-			{
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, CompareOptions.IgnoreCase);
-			}
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, CompareOptions.None);
+			StringComparison stringComparison = (ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
+			return string.Compare(strA, strB, stringComparison);
 		}
 
-		[SecuritySafeCritical]
 		public static int Compare(string strA, string strB, StringComparison comparisonType)
 		{
-			if (comparisonType - StringComparison.CurrentCulture > 5)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
 			if (strA == strB)
 			{
+				string.CheckStringComparison(comparisonType);
 				return 0;
 			}
 			if (strA == null)
 			{
+				string.CheckStringComparison(comparisonType);
 				return -1;
 			}
 			if (strB == null)
 			{
+				string.CheckStringComparison(comparisonType);
 				return 1;
 			}
 			switch (comparisonType)
@@ -1495,23 +189,19 @@ namespace System
 			case StringComparison.CurrentCultureIgnoreCase:
 				return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, CompareOptions.IgnoreCase);
 			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(strA, strB, CompareOptions.None);
+				return CompareInfo.Invariant.Compare(strA, strB, CompareOptions.None);
 			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.Compare(strA, strB, CompareOptions.IgnoreCase);
+				return CompareInfo.Invariant.Compare(strA, strB, CompareOptions.IgnoreCase);
 			case StringComparison.Ordinal:
-				if (strA.m_firstChar - strB.m_firstChar != '\0')
+				if (strA._firstChar != strB._firstChar)
 				{
-					return (int)(strA.m_firstChar - strB.m_firstChar);
+					return (int)(strA._firstChar - strB._firstChar);
 				}
 				return string.CompareOrdinalHelper(strA, strB);
 			case StringComparison.OrdinalIgnoreCase:
-				if (strA.IsAscii() && strB.IsAscii())
-				{
-					return string.CompareOrdinalIgnoreCaseHelper(strA, strB);
-				}
-				return TextInfo.CompareOrdinalIgnoreCase(strA, strB);
+				return CompareInfo.CompareOrdinalIgnoreCase(strA, 0, strA.Length, strB, 0, strB.Length);
 			default:
-				throw new NotSupportedException(Environment.GetResourceString("The string comparison type passed in is currently not supported."));
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 			}
 		}
 
@@ -1526,72 +216,35 @@ namespace System
 
 		public static int Compare(string strA, string strB, bool ignoreCase, CultureInfo culture)
 		{
-			if (culture == null)
-			{
-				throw new ArgumentNullException("culture");
-			}
-			if (ignoreCase)
-			{
-				return culture.CompareInfo.Compare(strA, strB, CompareOptions.IgnoreCase);
-			}
-			return culture.CompareInfo.Compare(strA, strB, CompareOptions.None);
+			CompareOptions compareOptions = (ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+			return string.Compare(strA, strB, culture, compareOptions);
 		}
 
 		public static int Compare(string strA, int indexA, string strB, int indexB, int length)
 		{
-			int num = length;
-			int num2 = length;
-			if (strA != null && strA.Length - indexA < num)
-			{
-				num = strA.Length - indexA;
-			}
-			if (strB != null && strB.Length - indexB < num2)
-			{
-				num2 = strB.Length - indexB;
-			}
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.None);
+			return string.Compare(strA, indexA, strB, indexB, length, false);
 		}
 
 		public static int Compare(string strA, int indexA, string strB, int indexB, int length, bool ignoreCase)
 		{
 			int num = length;
 			int num2 = length;
-			if (strA != null && strA.Length - indexA < num)
+			if (strA != null)
 			{
-				num = strA.Length - indexA;
+				num = Math.Min(num, strA.Length - indexA);
 			}
-			if (strB != null && strB.Length - indexB < num2)
+			if (strB != null)
 			{
-				num2 = strB.Length - indexB;
+				num2 = Math.Min(num2, strB.Length - indexB);
 			}
-			if (ignoreCase)
-			{
-				return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.IgnoreCase);
-			}
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.None);
+			CompareOptions compareOptions = (ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, compareOptions);
 		}
 
 		public static int Compare(string strA, int indexA, string strB, int indexB, int length, bool ignoreCase, CultureInfo culture)
 		{
-			if (culture == null)
-			{
-				throw new ArgumentNullException("culture");
-			}
-			int num = length;
-			int num2 = length;
-			if (strA != null && strA.Length - indexA < num)
-			{
-				num = strA.Length - indexA;
-			}
-			if (strB != null && strB.Length - indexB < num2)
-			{
-				num2 = strB.Length - indexB;
-			}
-			if (ignoreCase)
-			{
-				return culture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.IgnoreCase);
-			}
-			return culture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.None);
+			CompareOptions compareOptions = (ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+			return string.Compare(strA, indexA, strB, indexB, length, culture, compareOptions);
 		}
 
 		public static int Compare(string strA, int indexA, string strB, int indexB, int length, CultureInfo culture, CompareOptions options)
@@ -1602,24 +255,20 @@ namespace System
 			}
 			int num = length;
 			int num2 = length;
-			if (strA != null && strA.Length - indexA < num)
+			if (strA != null)
 			{
-				num = strA.Length - indexA;
+				num = Math.Min(num, strA.Length - indexA);
 			}
-			if (strB != null && strB.Length - indexB < num2)
+			if (strB != null)
 			{
-				num2 = strB.Length - indexB;
+				num2 = Math.Min(num2, strB.Length - indexB);
 			}
 			return culture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, options);
 		}
 
-		[SecuritySafeCritical]
 		public static int Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType)
 		{
-			if (comparisonType < StringComparison.CurrentCulture || comparisonType > StringComparison.OrdinalIgnoreCase)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
+			string.CheckStringComparison(comparisonType);
 			if (strA == null || strB == null)
 			{
 				if (strA == strB)
@@ -1636,38 +285,22 @@ namespace System
 			{
 				if (length < 0)
 				{
-					throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Length cannot be less than zero."));
+					throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
 				}
-				if (indexA < 0)
+				if (indexA < 0 || indexB < 0)
 				{
-					throw new ArgumentOutOfRangeException("indexA", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException((indexA < 0) ? "indexA" : "indexB", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
-				if (indexB < 0)
+				if (strA.Length - indexA < 0 || strB.Length - indexB < 0)
 				{
-					throw new ArgumentOutOfRangeException("indexB", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (strA.Length - indexA < 0)
-				{
-					throw new ArgumentOutOfRangeException("indexA", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (strB.Length - indexB < 0)
-				{
-					throw new ArgumentOutOfRangeException("indexB", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					throw new ArgumentOutOfRangeException((strA.Length - indexA < 0) ? "indexA" : "indexB", "Index was out of range. Must be non-negative and less than the size of the collection.");
 				}
 				if (length == 0 || (strA == strB && indexA == indexB))
 				{
 					return 0;
 				}
-				int num = length;
-				int num2 = length;
-				if (strA != null && strA.Length - indexA < num)
-				{
-					num = strA.Length - indexA;
-				}
-				if (strB != null && strB.Length - indexB < num2)
-				{
-					num2 = strB.Length - indexB;
-				}
+				int num = Math.Min(length, strA.Length - indexA);
+				int num2 = Math.Min(length, strB.Length - indexB);
 				switch (comparisonType)
 				{
 				case StringComparison.CurrentCulture:
@@ -1675,39 +308,17 @@ namespace System
 				case StringComparison.CurrentCultureIgnoreCase:
 					return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.IgnoreCase);
 				case StringComparison.InvariantCulture:
-					return CultureInfo.InvariantCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.None);
+					return CompareInfo.Invariant.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.None);
 				case StringComparison.InvariantCultureIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.IgnoreCase);
+					return CompareInfo.Invariant.Compare(strA, indexA, num, strB, indexB, num2, CompareOptions.IgnoreCase);
 				case StringComparison.Ordinal:
-					return string.nativeCompareOrdinalEx(strA, indexA, strB, indexB, length);
+					return string.CompareOrdinalHelper(strA, indexA, num, strB, indexB, num2);
 				case StringComparison.OrdinalIgnoreCase:
-					return TextInfo.CompareOrdinalIgnoreCaseEx(strA, indexA, strB, indexB, num, num2);
+					return CompareInfo.CompareOrdinalIgnoreCase(strA, indexA, num, strB, indexB, num2);
 				default:
-					throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."));
+					throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 				}
 			}
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is string))
-			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type String."));
-			}
-			return string.Compare(this, (string)value, StringComparison.CurrentCulture);
-		}
-
-		public int CompareTo(string strB)
-		{
-			if (strB == null)
-			{
-				return 1;
-			}
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(this, strB, CompareOptions.None);
 		}
 
 		public static int CompareOrdinal(string strA, string strB)
@@ -1724,34 +335,74 @@ namespace System
 			{
 				return 1;
 			}
-			if (strA.m_firstChar - strB.m_firstChar != '\0')
+			if (strA._firstChar != strB._firstChar)
 			{
-				return (int)(strA.m_firstChar - strB.m_firstChar);
+				return (int)(strA._firstChar - strB._firstChar);
 			}
 			return string.CompareOrdinalHelper(strA, strB);
 		}
 
-		[SecuritySafeCritical]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static int CompareOrdinal(ReadOnlySpan<char> strA, ReadOnlySpan<char> strB)
+		{
+			return SpanHelpers.SequenceCompareTo(MemoryMarshal.GetReference<char>(strA), strA.Length, MemoryMarshal.GetReference<char>(strB), strB.Length);
+		}
+
 		public static int CompareOrdinal(string strA, int indexA, string strB, int indexB, int length)
 		{
-			if (strA != null && strB != null)
+			if (strA == null || strB == null)
 			{
-				return string.nativeCompareOrdinalEx(strA, indexA, strB, indexB, length);
+				if (strA == strB)
+				{
+					return 0;
+				}
+				if (strA != null)
+				{
+					return 1;
+				}
+				return -1;
 			}
-			if (strA == strB)
+			else
 			{
-				return 0;
+				if (length < 0)
+				{
+					throw new ArgumentOutOfRangeException("length", "Count cannot be less than zero.");
+				}
+				if (indexA < 0 || indexB < 0)
+				{
+					throw new ArgumentOutOfRangeException((indexA < 0) ? "indexA" : "indexB", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				int num = Math.Min(length, strA.Length - indexA);
+				int num2 = Math.Min(length, strB.Length - indexB);
+				if (num < 0 || num2 < 0)
+				{
+					throw new ArgumentOutOfRangeException((num < 0) ? "indexA" : "indexB", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				if (length == 0 || (strA == strB && indexA == indexB))
+				{
+					return 0;
+				}
+				return string.CompareOrdinalHelper(strA, indexA, num, strB, indexB, num2);
 			}
-			if (strA != null)
+		}
+
+		public int CompareTo(object value)
+		{
+			if (value == null)
 			{
 				return 1;
 			}
-			return -1;
+			string text = value as string;
+			if (text == null)
+			{
+				throw new ArgumentException("Object must be of type String.");
+			}
+			return this.CompareTo(text);
 		}
 
-		public bool Contains(string value)
+		public int CompareTo(string strB)
 		{
-			return this.IndexOf(value, StringComparison.Ordinal) >= 0;
+			return string.Compare(this, strB, StringComparison.CurrentCulture);
 		}
 
 		public bool EndsWith(string value)
@@ -1759,24 +410,20 @@ namespace System
 			return this.EndsWith(value, StringComparison.CurrentCulture);
 		}
 
-		[SecuritySafeCritical]
-		[ComVisible(false)]
 		public bool EndsWith(string value, StringComparison comparisonType)
 		{
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (comparisonType < StringComparison.CurrentCulture || comparisonType > StringComparison.OrdinalIgnoreCase)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
 			if (this == value)
 			{
+				string.CheckStringComparison(comparisonType);
 				return true;
 			}
 			if (value.Length == 0)
 			{
+				string.CheckStringComparison(comparisonType);
 				return true;
 			}
 			switch (comparisonType)
@@ -1786,15 +433,15 @@ namespace System
 			case StringComparison.CurrentCultureIgnoreCase:
 				return CultureInfo.CurrentCulture.CompareInfo.IsSuffix(this, value, CompareOptions.IgnoreCase);
 			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.IsSuffix(this, value, CompareOptions.None);
+				return CompareInfo.Invariant.IsSuffix(this, value, CompareOptions.None);
 			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.IsSuffix(this, value, CompareOptions.IgnoreCase);
+				return CompareInfo.Invariant.IsSuffix(this, value, CompareOptions.IgnoreCase);
 			case StringComparison.Ordinal:
-				return this.Length >= value.Length && string.nativeCompareOrdinalEx(this, this.Length - value.Length, value, 0, value.Length) == 0;
+				return this.Length >= value.Length && string.CompareOrdinalHelper(this, this.Length - value.Length, value.Length, value, 0, value.Length) == 0;
 			case StringComparison.OrdinalIgnoreCase:
-				return this.Length >= value.Length && TextInfo.CompareOrdinalIgnoreCaseEx(this, this.Length - value.Length, value, 0, value.Length, value.Length) == 0;
+				return this.Length >= value.Length && CompareInfo.CompareOrdinalIgnoreCase(this, this.Length - value.Length, value.Length, value, 0, value.Length) == 0;
 			default:
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 			}
 		}
 
@@ -1804,247 +451,139 @@ namespace System
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (this == value)
-			{
-				return true;
-			}
-			CultureInfo cultureInfo;
-			if (culture == null)
-			{
-				cultureInfo = CultureInfo.CurrentCulture;
-			}
-			else
-			{
-				cultureInfo = culture;
-			}
-			return cultureInfo.CompareInfo.IsSuffix(this, value, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+			return this == value || (culture ?? CultureInfo.CurrentCulture).CompareInfo.IsSuffix(this, value, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
 		}
 
-		internal bool EndsWith(char value)
+		public bool EndsWith(char value)
 		{
 			int length = this.Length;
 			return length != 0 && this[length - 1] == value;
 		}
 
-		public int IndexOf(char value)
+		public override bool Equals(object obj)
 		{
-			return this.IndexOf(value, 0, this.Length);
-		}
-
-		public int IndexOf(char value, int startIndex)
-		{
-			return this.IndexOf(value, startIndex, this.Length - startIndex);
-		}
-
-		public int IndexOfAny(char[] anyOf)
-		{
-			return this.IndexOfAny(anyOf, 0, this.Length);
-		}
-
-		public int IndexOfAny(char[] anyOf, int startIndex)
-		{
-			return this.IndexOfAny(anyOf, startIndex, this.Length - startIndex);
-		}
-
-		public int IndexOf(string value)
-		{
-			return this.IndexOf(value, StringComparison.CurrentCulture);
-		}
-
-		public int IndexOf(string value, int startIndex)
-		{
-			return this.IndexOf(value, startIndex, StringComparison.CurrentCulture);
-		}
-
-		public int IndexOf(string value, int startIndex, int count)
-		{
-			if (startIndex < 0 || startIndex > this.Length)
+			if (this == obj)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				return true;
 			}
-			if (count < 0 || count > this.Length - startIndex)
+			string text = obj as string;
+			return text != null && this.Length == text.Length && string.EqualsHelper(this, text);
+		}
+
+		public bool Equals(string value)
+		{
+			return this == value || (value != null && this.Length == value.Length && string.EqualsHelper(this, value));
+		}
+
+		public bool Equals(string value, StringComparison comparisonType)
+		{
+			if (this == value)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				string.CheckStringComparison(comparisonType);
+				return true;
 			}
-			return this.IndexOf(value, startIndex, count, StringComparison.CurrentCulture);
-		}
-
-		public int IndexOf(string value, StringComparison comparisonType)
-		{
-			return this.IndexOf(value, 0, this.Length, comparisonType);
-		}
-
-		public int IndexOf(string value, int startIndex, StringComparison comparisonType)
-		{
-			return this.IndexOf(value, startIndex, this.Length - startIndex, comparisonType);
-		}
-
-		[SecuritySafeCritical]
-		public int IndexOf(string value, int startIndex, int count, StringComparison comparisonType)
-		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0 || startIndex > this.Length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (count < 0 || startIndex > this.Length - count)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				string.CheckStringComparison(comparisonType);
+				return false;
 			}
 			switch (comparisonType)
 			{
 			case StringComparison.CurrentCulture:
-				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.None);
+				return CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, CompareOptions.None) == 0;
 			case StringComparison.CurrentCultureIgnoreCase:
-				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+				return CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, CompareOptions.IgnoreCase) == 0;
 			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.None);
+				return CompareInfo.Invariant.Compare(this, value, CompareOptions.None) == 0;
 			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+				return CompareInfo.Invariant.Compare(this, value, CompareOptions.IgnoreCase) == 0;
 			case StringComparison.Ordinal:
-				return CultureInfo.InvariantCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.Ordinal);
+				return this.Length == value.Length && string.EqualsHelper(this, value);
 			case StringComparison.OrdinalIgnoreCase:
-				if (value.IsAscii() && this.IsAscii())
-				{
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
-				}
-				return TextInfo.IndexOfStringOrdinalIgnoreCase(this, value, startIndex, count);
+				return this.Length == value.Length && CompareInfo.CompareOrdinalIgnoreCase(this, 0, this.Length, value, 0, value.Length) == 0;
 			default:
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 			}
 		}
 
-		public int LastIndexOf(char value)
+		public static bool Equals(string a, string b)
 		{
-			return this.LastIndexOf(value, this.Length - 1, this.Length);
+			return a == b || (a != null && b != null && a.Length == b.Length && string.EqualsHelper(a, b));
 		}
 
-		public int LastIndexOf(char value, int startIndex)
+		public static bool Equals(string a, string b, StringComparison comparisonType)
 		{
-			return this.LastIndexOf(value, startIndex, startIndex + 1);
-		}
-
-		public int LastIndexOfAny(char[] anyOf)
-		{
-			return this.LastIndexOfAny(anyOf, this.Length - 1, this.Length);
-		}
-
-		public int LastIndexOfAny(char[] anyOf, int startIndex)
-		{
-			return this.LastIndexOfAny(anyOf, startIndex, startIndex + 1);
-		}
-
-		public int LastIndexOf(string value)
-		{
-			return this.LastIndexOf(value, this.Length - 1, this.Length, StringComparison.CurrentCulture);
-		}
-
-		public int LastIndexOf(string value, int startIndex)
-		{
-			return this.LastIndexOf(value, startIndex, startIndex + 1, StringComparison.CurrentCulture);
-		}
-
-		public int LastIndexOf(string value, int startIndex, int count)
-		{
-			if (count < 0)
+			if (a == b)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				string.CheckStringComparison(comparisonType);
+				return true;
 			}
-			return this.LastIndexOf(value, startIndex, count, StringComparison.CurrentCulture);
-		}
-
-		public int LastIndexOf(string value, StringComparison comparisonType)
-		{
-			return this.LastIndexOf(value, this.Length - 1, this.Length, comparisonType);
-		}
-
-		public int LastIndexOf(string value, int startIndex, StringComparison comparisonType)
-		{
-			return this.LastIndexOf(value, startIndex, startIndex + 1, comparisonType);
-		}
-
-		[SecuritySafeCritical]
-		public int LastIndexOf(string value, int startIndex, int count, StringComparison comparisonType)
-		{
-			if (value == null)
+			if (a == null || b == null)
 			{
-				throw new ArgumentNullException("value");
+				string.CheckStringComparison(comparisonType);
+				return false;
 			}
-			if (this.Length == 0 && (startIndex == -1 || startIndex == 0))
+			switch (comparisonType)
 			{
-				if (value.Length != 0)
+			case StringComparison.CurrentCulture:
+				return CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, CompareOptions.None) == 0;
+			case StringComparison.CurrentCultureIgnoreCase:
+				return CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, CompareOptions.IgnoreCase) == 0;
+			case StringComparison.InvariantCulture:
+				return CompareInfo.Invariant.Compare(a, b, CompareOptions.None) == 0;
+			case StringComparison.InvariantCultureIgnoreCase:
+				return CompareInfo.Invariant.Compare(a, b, CompareOptions.IgnoreCase) == 0;
+			case StringComparison.Ordinal:
+				return a.Length == b.Length && string.EqualsHelper(a, b);
+			case StringComparison.OrdinalIgnoreCase:
+				return a.Length == b.Length && CompareInfo.CompareOrdinalIgnoreCase(a, 0, a.Length, b, 0, b.Length) == 0;
+			default:
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
+			}
+		}
+
+		public static bool operator ==(string a, string b)
+		{
+			return string.Equals(a, b);
+		}
+
+		public static bool operator !=(string a, string b)
+		{
+			return !string.Equals(a, b);
+		}
+
+		public override int GetHashCode()
+		{
+			return this.GetLegacyNonRandomizedHashCode();
+		}
+
+		public int GetHashCode(StringComparison comparisonType)
+		{
+			return StringComparer.FromComparison(comparisonType).GetHashCode(this);
+		}
+
+		internal unsafe int GetLegacyNonRandomizedHashCode()
+		{
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				int num = 5381;
+				int num2 = num;
+				char* ptr3 = ptr2;
+				int num3;
+				while ((num3 = (int)(*ptr3)) != 0)
 				{
-					return -1;
-				}
-				return 0;
-			}
-			else
-			{
-				if (startIndex < 0 || startIndex > this.Length)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (startIndex == this.Length)
-				{
-					startIndex--;
-					if (count > 0)
+					num = ((num << 5) + num) ^ num3;
+					num3 = (int)ptr3[1];
+					if (num3 == 0)
 					{
-						count--;
+						break;
 					}
-					if (value.Length == 0 && count >= 0 && startIndex - count + 1 >= 0)
-					{
-						return startIndex;
-					}
+					num2 = ((num2 << 5) + num2) ^ num3;
+					ptr3 += 2;
 				}
-				if (count < 0 || startIndex - count + 1 < 0)
-				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
-				}
-				switch (comparisonType)
-				{
-				case StringComparison.CurrentCulture:
-					return CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.None);
-				case StringComparison.CurrentCultureIgnoreCase:
-					return CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
-				case StringComparison.InvariantCulture:
-					return CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.None);
-				case StringComparison.InvariantCultureIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
-				case StringComparison.Ordinal:
-					return CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.Ordinal);
-				case StringComparison.OrdinalIgnoreCase:
-					if (value.IsAscii() && this.IsAscii())
-					{
-						return CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
-					}
-					return TextInfo.LastIndexOfStringOrdinalIgnoreCase(this, value, startIndex, count);
-				default:
-					throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-				}
+				return num + num2 * 1566083941;
 			}
-		}
-
-		public string PadLeft(int totalWidth)
-		{
-			return this.PadHelper(totalWidth, ' ', false);
-		}
-
-		public string PadLeft(int totalWidth, char paddingChar)
-		{
-			return this.PadHelper(totalWidth, paddingChar, false);
-		}
-
-		public string PadRight(int totalWidth)
-		{
-			return this.PadHelper(totalWidth, ' ', true);
-		}
-
-		public string PadRight(int totalWidth, char paddingChar)
-		{
-			return this.PadHelper(totalWidth, paddingChar, true);
 		}
 
 		public bool StartsWith(string value)
@@ -2056,24 +595,20 @@ namespace System
 			return this.StartsWith(value, StringComparison.CurrentCulture);
 		}
 
-		[SecuritySafeCritical]
-		[ComVisible(false)]
 		public bool StartsWith(string value, StringComparison comparisonType)
 		{
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (comparisonType < StringComparison.CurrentCulture || comparisonType > StringComparison.OrdinalIgnoreCase)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
-			}
 			if (this == value)
 			{
+				string.CheckStringComparison(comparisonType);
 				return true;
 			}
 			if (value.Length == 0)
 			{
+				string.CheckStringComparison(comparisonType);
 				return true;
 			}
 			switch (comparisonType)
@@ -2083,15 +618,15 @@ namespace System
 			case StringComparison.CurrentCultureIgnoreCase:
 				return CultureInfo.CurrentCulture.CompareInfo.IsPrefix(this, value, CompareOptions.IgnoreCase);
 			case StringComparison.InvariantCulture:
-				return CultureInfo.InvariantCulture.CompareInfo.IsPrefix(this, value, CompareOptions.None);
+				return CompareInfo.Invariant.IsPrefix(this, value, CompareOptions.None);
 			case StringComparison.InvariantCultureIgnoreCase:
-				return CultureInfo.InvariantCulture.CompareInfo.IsPrefix(this, value, CompareOptions.IgnoreCase);
+				return CompareInfo.Invariant.IsPrefix(this, value, CompareOptions.IgnoreCase);
 			case StringComparison.Ordinal:
-				return this.Length >= value.Length && string.nativeCompareOrdinalEx(this, 0, value, 0, value.Length) == 0;
+				return this.Length >= value.Length && this._firstChar == value._firstChar && (value.Length == 1 || SpanHelpers.SequenceEqual(Unsafe.As<char, byte>(this.GetRawStringData()), Unsafe.As<char, byte>(value.GetRawStringData()), (ulong)((long)value.Length * 2L)));
 			case StringComparison.OrdinalIgnoreCase:
-				return this.Length >= value.Length && TextInfo.CompareOrdinalIgnoreCaseEx(this, 0, value, 0, value.Length, value.Length) == 0;
+				return this.Length >= value.Length && CompareInfo.CompareOrdinalIgnoreCase(this, 0, value.Length, value, 0, value.Length) == 0;
 			default:
-				throw new ArgumentException(Environment.GetResourceString("The string comparison type passed in is currently not supported."), "comparisonType");
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 			}
 		}
 
@@ -2101,260 +636,360 @@ namespace System
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (this == value)
+			return this == value || (culture ?? CultureInfo.CurrentCulture).CompareInfo.IsPrefix(this, value, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+		}
+
+		public bool StartsWith(char value)
+		{
+			return this.Length != 0 && this._firstChar == value;
+		}
+
+		internal static void CheckStringComparison(StringComparison comparisonType)
+		{
+			if (comparisonType - StringComparison.CurrentCulture > 5)
 			{
-				return true;
+				ThrowHelper.ThrowArgumentException(ExceptionResource.NotSupported_StringComparison, ExceptionArgument.comparisonType);
 			}
-			CultureInfo cultureInfo;
-			if (culture == null)
+		}
+
+		private unsafe static void FillStringChecked(string dest, int destPos, string src)
+		{
+			if (src.Length > dest.Length - destPos)
 			{
-				cultureInfo = CultureInfo.CurrentCulture;
+				throw new IndexOutOfRangeException();
+			}
+			fixed (char* ptr = &dest._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &src._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr2 + destPos, ptr4, src.Length);
+				}
+			}
+		}
+
+		public static string Concat(object arg0)
+		{
+			if (arg0 == null)
+			{
+				return string.Empty;
+			}
+			return arg0.ToString();
+		}
+
+		public static string Concat(object arg0, object arg1)
+		{
+			if (arg0 == null)
+			{
+				arg0 = string.Empty;
+			}
+			if (arg1 == null)
+			{
+				arg1 = string.Empty;
+			}
+			return arg0.ToString() + arg1.ToString();
+		}
+
+		public static string Concat(object arg0, object arg1, object arg2)
+		{
+			if (arg0 == null)
+			{
+				arg0 = string.Empty;
+			}
+			if (arg1 == null)
+			{
+				arg1 = string.Empty;
+			}
+			if (arg2 == null)
+			{
+				arg2 = string.Empty;
+			}
+			return arg0.ToString() + arg1.ToString() + arg2.ToString();
+		}
+
+		public static string Concat(params object[] args)
+		{
+			if (args == null)
+			{
+				throw new ArgumentNullException("args");
+			}
+			if (args.Length <= 1)
+			{
+				string text;
+				if (args.Length != 0)
+				{
+					object obj = args[0];
+					if ((text = ((obj != null) ? obj.ToString() : null)) == null)
+					{
+						return string.Empty;
+					}
+				}
+				else
+				{
+					text = string.Empty;
+				}
+				return text;
+			}
+			string[] array = new string[args.Length];
+			int num = 0;
+			for (int i = 0; i < args.Length; i++)
+			{
+				object obj2 = args[i];
+				string text2 = ((obj2 != null) ? obj2.ToString() : null) ?? string.Empty;
+				array[i] = text2;
+				num += text2.Length;
+				if (num < 0)
+				{
+					throw new OutOfMemoryException();
+				}
+			}
+			if (num == 0)
+			{
+				return string.Empty;
+			}
+			string text3 = string.FastAllocateString(num);
+			int num2 = 0;
+			foreach (string text4 in array)
+			{
+				string.FillStringChecked(text3, num2, text4);
+				num2 += text4.Length;
+			}
+			return text3;
+		}
+
+		public static string Concat<T>(IEnumerable<T> values)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException("values");
+			}
+			if (typeof(T) == typeof(char))
+			{
+				using (IEnumerator<char> enumerator = Unsafe.As<IEnumerable<char>>(values).GetEnumerator())
+				{
+					if (!enumerator.MoveNext())
+					{
+						return string.Empty;
+					}
+					char c = enumerator.Current;
+					if (!enumerator.MoveNext())
+					{
+						return string.CreateFromChar(c);
+					}
+					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+					stringBuilder.Append(c);
+					do
+					{
+						c = enumerator.Current;
+						stringBuilder.Append(c);
+					}
+					while (enumerator.MoveNext());
+					return StringBuilderCache.GetStringAndRelease(stringBuilder);
+				}
+			}
+			string text;
+			using (IEnumerator<T> enumerator2 = values.GetEnumerator())
+			{
+				if (!enumerator2.MoveNext())
+				{
+					text = string.Empty;
+				}
+				else
+				{
+					T t = enumerator2.Current;
+					string text2 = ((t != null) ? t.ToString() : null);
+					if (!enumerator2.MoveNext())
+					{
+						text = text2 ?? string.Empty;
+					}
+					else
+					{
+						StringBuilder stringBuilder2 = StringBuilderCache.Acquire(16);
+						stringBuilder2.Append(text2);
+						do
+						{
+							t = enumerator2.Current;
+							if (t != null)
+							{
+								stringBuilder2.Append(t.ToString());
+							}
+						}
+						while (enumerator2.MoveNext());
+						text = StringBuilderCache.GetStringAndRelease(stringBuilder2);
+					}
+				}
+			}
+			return text;
+		}
+
+		public static string Concat(IEnumerable<string> values)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException("values");
+			}
+			string text;
+			using (IEnumerator<string> enumerator = values.GetEnumerator())
+			{
+				if (!enumerator.MoveNext())
+				{
+					text = string.Empty;
+				}
+				else
+				{
+					string text2 = enumerator.Current;
+					if (!enumerator.MoveNext())
+					{
+						text = text2 ?? string.Empty;
+					}
+					else
+					{
+						StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+						stringBuilder.Append(text2);
+						do
+						{
+							stringBuilder.Append(enumerator.Current);
+						}
+						while (enumerator.MoveNext());
+						text = StringBuilderCache.GetStringAndRelease(stringBuilder);
+					}
+				}
+			}
+			return text;
+		}
+
+		public static string Concat(string str0, string str1)
+		{
+			if (string.IsNullOrEmpty(str0))
+			{
+				if (string.IsNullOrEmpty(str1))
+				{
+					return string.Empty;
+				}
+				return str1;
 			}
 			else
 			{
-				cultureInfo = culture;
-			}
-			return cultureInfo.CompareInfo.IsPrefix(this, value, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
-		}
-
-		public string ToLower()
-		{
-			return this.ToLower(CultureInfo.CurrentCulture);
-		}
-
-		public string ToLower(CultureInfo culture)
-		{
-			if (culture == null)
-			{
-				throw new ArgumentNullException("culture");
-			}
-			return culture.TextInfo.ToLower(this);
-		}
-
-		public string ToLowerInvariant()
-		{
-			return this.ToLower(CultureInfo.InvariantCulture);
-		}
-
-		public string ToUpper()
-		{
-			return this.ToUpper(CultureInfo.CurrentCulture);
-		}
-
-		public string ToUpper(CultureInfo culture)
-		{
-			if (culture == null)
-			{
-				throw new ArgumentNullException("culture");
-			}
-			return culture.TextInfo.ToUpper(this);
-		}
-
-		public string ToUpperInvariant()
-		{
-			return this.ToUpper(CultureInfo.InvariantCulture);
-		}
-
-		public override string ToString()
-		{
-			return this;
-		}
-
-		public string ToString(IFormatProvider provider)
-		{
-			return this;
-		}
-
-		public object Clone()
-		{
-			return this;
-		}
-
-		private static bool IsBOMWhitespace(char c)
-		{
-			return false;
-		}
-
-		public string Trim()
-		{
-			return this.TrimHelper(2);
-		}
-
-		[SecuritySafeCritical]
-		private string TrimHelper(int trimType)
-		{
-			int num = this.Length - 1;
-			int num2 = 0;
-			if (trimType != 1)
-			{
-				num2 = 0;
-				while (num2 < this.Length && (char.IsWhiteSpace(this[num2]) || string.IsBOMWhitespace(this[num2])))
+				if (string.IsNullOrEmpty(str1))
 				{
-					num2++;
+					return str0;
 				}
+				int length = str0.Length;
+				string text = string.FastAllocateString(length + str1.Length);
+				string.FillStringChecked(text, 0, str0);
+				string.FillStringChecked(text, length, str1);
+				return text;
 			}
-			if (trimType != 0)
-			{
-				num = this.Length - 1;
-				while (num >= num2 && (char.IsWhiteSpace(this[num]) || string.IsBOMWhitespace(this[num2])))
-				{
-					num--;
-				}
-			}
-			return this.CreateTrimmedString(num2, num);
 		}
 
-		[SecuritySafeCritical]
-		private string TrimHelper(char[] trimChars, int trimType)
+		public static string Concat(string str0, string str1, string str2)
 		{
-			int i = this.Length - 1;
-			int j = 0;
-			if (trimType != 1)
+			if (string.IsNullOrEmpty(str0))
 			{
-				for (j = 0; j < this.Length; j++)
-				{
-					char c = this[j];
-					int num = 0;
-					while (num < trimChars.Length && trimChars[num] != c)
-					{
-						num++;
-					}
-					if (num == trimChars.Length)
-					{
-						break;
-					}
-				}
+				return str1 + str2;
 			}
-			if (trimType != 0)
+			if (string.IsNullOrEmpty(str1))
 			{
-				for (i = this.Length - 1; i >= j; i--)
-				{
-					char c2 = this[i];
-					int num2 = 0;
-					while (num2 < trimChars.Length && trimChars[num2] != c2)
-					{
-						num2++;
-					}
-					if (num2 == trimChars.Length)
-					{
-						break;
-					}
-				}
+				return str0 + str2;
 			}
-			return this.CreateTrimmedString(j, i);
-		}
-
-		[SecurityCritical]
-		private string CreateTrimmedString(int start, int end)
-		{
-			int num = end - start + 1;
-			if (num == this.Length)
+			if (string.IsNullOrEmpty(str2))
 			{
-				return this;
+				return str0 + str1;
 			}
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			return this.InternalSubString(start, num);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe string Insert(int startIndex, string value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0 || startIndex > this.Length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex");
-			}
-			int length = this.Length;
-			int length2 = value.Length;
-			int num = length + length2;
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(num);
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &value.m_firstChar)
-				{
-					char* ptr4 = ptr3;
-					fixed (char* ptr5 = &text.m_firstChar)
-					{
-						char* ptr6 = ptr5;
-						string.wstrcpy(ptr6, ptr2, startIndex);
-						string.wstrcpy(ptr6 + startIndex, ptr4, length2);
-						string.wstrcpy(ptr6 + startIndex + length2, ptr2 + startIndex, length - startIndex);
-					}
-				}
-			}
+			string text = string.FastAllocateString(str0.Length + str1.Length + str2.Length);
+			string.FillStringChecked(text, 0, str0);
+			string.FillStringChecked(text, str0.Length, str1);
+			string.FillStringChecked(text, str0.Length + str1.Length, str2);
 			return text;
 		}
 
-		public string Replace(char oldChar, char newChar)
+		public static string Concat(string str0, string str1, string str2, string str3)
 		{
-			return this.ReplaceInternal(oldChar, newChar);
-		}
-
-		public string Replace(string oldValue, string newValue)
-		{
-			if (oldValue == null)
+			if (string.IsNullOrEmpty(str0))
 			{
-				throw new ArgumentNullException("oldValue");
+				return str1 + str2 + str3;
 			}
-			return this.ReplaceInternal(oldValue, newValue);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe string Remove(int startIndex, int count)
-		{
-			if (startIndex < 0)
+			if (string.IsNullOrEmpty(str1))
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				return str0 + str2 + str3;
 			}
-			if (count < 0)
+			if (string.IsNullOrEmpty(str2))
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
+				return str0 + str1 + str3;
 			}
-			if (count > this.Length - startIndex)
+			if (string.IsNullOrEmpty(str3))
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Index and count must refer to a location within the string."));
+				return str0 + str1 + str2;
 			}
-			int num = this.Length - count;
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(num);
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &text.m_firstChar)
-				{
-					char* ptr4 = ptr3;
-					string.wstrcpy(ptr4, ptr2, startIndex);
-					string.wstrcpy(ptr4 + startIndex, ptr2 + startIndex + count, num - startIndex);
-				}
-			}
+			string text = string.FastAllocateString(str0.Length + str1.Length + str2.Length + str3.Length);
+			string.FillStringChecked(text, 0, str0);
+			string.FillStringChecked(text, str0.Length, str1);
+			string.FillStringChecked(text, str0.Length + str1.Length, str2);
+			string.FillStringChecked(text, str0.Length + str1.Length + str2.Length, str3);
 			return text;
 		}
 
-		public string Remove(int startIndex)
+		public static string Concat(params string[] values)
 		{
-			if (startIndex < 0)
+			if (values == null)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+				throw new ArgumentNullException("values");
 			}
-			if (startIndex >= this.Length)
+			if (values.Length <= 1)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("startIndex must be less than length of string."));
+				string text;
+				if (values.Length != 0)
+				{
+					if ((text = values[0]) == null)
+					{
+						return string.Empty;
+					}
+				}
+				else
+				{
+					text = string.Empty;
+				}
+				return text;
 			}
-			return this.Substring(0, startIndex);
+			long num = 0L;
+			foreach (string text2 in values)
+			{
+				if (text2 != null)
+				{
+					num += (long)text2.Length;
+				}
+			}
+			if (num > 2147483647L)
+			{
+				throw new OutOfMemoryException();
+			}
+			int num2 = (int)num;
+			if (num2 == 0)
+			{
+				return string.Empty;
+			}
+			string text3 = string.FastAllocateString(num2);
+			int num3 = 0;
+			foreach (string text4 in values)
+			{
+				if (!string.IsNullOrEmpty(text4))
+				{
+					int length = text4.Length;
+					if (length > num2 - num3)
+					{
+						num3 = -1;
+						break;
+					}
+					string.FillStringChecked(text3, num3, text4);
+					num3 += length;
+				}
+			}
+			if (num3 != num2)
+			{
+				return string.Concat((string[])values.Clone());
+			}
+			return text3;
 		}
 
 		public static string Format(string format, object arg0)
@@ -2414,289 +1049,2252 @@ namespace System
 			return StringBuilderCache.GetStringAndRelease(StringBuilderCache.Acquire(format.Length + args.Length * 8).AppendFormatHelper(provider, format, args));
 		}
 
-		[SecuritySafeCritical]
+		public unsafe string Insert(int startIndex, string value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0 || startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex");
+			}
+			int length = this.Length;
+			int length2 = value.Length;
+			if (length == 0)
+			{
+				return value;
+			}
+			if (length2 == 0)
+			{
+				return this;
+			}
+			string text = string.FastAllocateString(length + length2);
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &value._firstChar)
+				{
+					char* ptr4 = ptr3;
+					fixed (char* ptr5 = &text._firstChar)
+					{
+						char* ptr6 = ptr5;
+						string.wstrcpy(ptr6, ptr2, startIndex);
+						string.wstrcpy(ptr6 + startIndex, ptr4, length2);
+						string.wstrcpy(ptr6 + startIndex + length2, ptr2 + startIndex, length - startIndex);
+					}
+				}
+			}
+			return text;
+		}
+
+		public static string Join(char separator, params string[] value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			return string.Join(separator, value, 0, value.Length);
+		}
+
+		public unsafe static string Join(char separator, params object[] values)
+		{
+			return string.JoinCore(&separator, 1, values);
+		}
+
+		public unsafe static string Join<T>(char separator, IEnumerable<T> values)
+		{
+			return string.JoinCore<T>(&separator, 1, values);
+		}
+
+		public unsafe static string Join(char separator, string[] value, int startIndex, int count)
+		{
+			return string.JoinCore(&separator, 1, value, startIndex, count);
+		}
+
+		public static string Join(string separator, params string[] value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			return string.Join(separator, value, 0, value.Length);
+		}
+
+		public unsafe static string Join(string separator, params object[] values)
+		{
+			separator = separator ?? string.Empty;
+			fixed (char* ptr = &separator._firstChar)
+			{
+				return string.JoinCore(ptr, separator.Length, values);
+			}
+		}
+
+		public unsafe static string Join<T>(string separator, IEnumerable<T> values)
+		{
+			separator = separator ?? string.Empty;
+			fixed (char* ptr = &separator._firstChar)
+			{
+				return string.JoinCore<T>(ptr, separator.Length, values);
+			}
+		}
+
+		public static string Join(string separator, IEnumerable<string> values)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException("values");
+			}
+			string text;
+			using (IEnumerator<string> enumerator = values.GetEnumerator())
+			{
+				if (!enumerator.MoveNext())
+				{
+					text = string.Empty;
+				}
+				else
+				{
+					string text2 = enumerator.Current;
+					if (!enumerator.MoveNext())
+					{
+						text = text2 ?? string.Empty;
+					}
+					else
+					{
+						StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+						stringBuilder.Append(text2);
+						do
+						{
+							stringBuilder.Append(separator);
+							stringBuilder.Append(enumerator.Current);
+						}
+						while (enumerator.MoveNext());
+						text = StringBuilderCache.GetStringAndRelease(stringBuilder);
+					}
+				}
+			}
+			return text;
+		}
+
+		public unsafe static string Join(string separator, string[] value, int startIndex, int count)
+		{
+			separator = separator ?? string.Empty;
+			fixed (char* ptr = &separator._firstChar)
+			{
+				return string.JoinCore(ptr, separator.Length, value, startIndex, count);
+			}
+		}
+
+		private unsafe static string JoinCore(char* separator, int separatorLength, object[] values)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException("values");
+			}
+			if (values.Length == 0)
+			{
+				return string.Empty;
+			}
+			object obj = values[0];
+			string text = ((obj != null) ? obj.ToString() : null);
+			if (values.Length == 1)
+			{
+				return text ?? string.Empty;
+			}
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+			stringBuilder.Append(text);
+			for (int i = 1; i < values.Length; i++)
+			{
+				stringBuilder.Append(separator, separatorLength);
+				object obj2 = values[i];
+				if (obj2 != null)
+				{
+					stringBuilder.Append(obj2.ToString());
+				}
+			}
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+		}
+
+		private unsafe static string JoinCore<T>(char* separator, int separatorLength, IEnumerable<T> values)
+		{
+			if (values == null)
+			{
+				throw new ArgumentNullException("values");
+			}
+			string text;
+			using (IEnumerator<T> enumerator = values.GetEnumerator())
+			{
+				if (!enumerator.MoveNext())
+				{
+					text = string.Empty;
+				}
+				else
+				{
+					T t = enumerator.Current;
+					string text2 = ((t != null) ? t.ToString() : null);
+					if (!enumerator.MoveNext())
+					{
+						text = text2 ?? string.Empty;
+					}
+					else
+					{
+						StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+						stringBuilder.Append(text2);
+						do
+						{
+							t = enumerator.Current;
+							stringBuilder.Append(separator, separatorLength);
+							if (t != null)
+							{
+								stringBuilder.Append(t.ToString());
+							}
+						}
+						while (enumerator.MoveNext());
+						text = StringBuilderCache.GetStringAndRelease(stringBuilder);
+					}
+				}
+			}
+			return text;
+		}
+
+		private unsafe static string JoinCore(char* separator, int separatorLength, string[] value, int startIndex, int count)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+			}
+			if (startIndex > value.Length - count)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index and count must refer to a location within the buffer.");
+			}
+			if (count <= 1)
+			{
+				string text;
+				if (count != 0)
+				{
+					if ((text = value[startIndex]) == null)
+					{
+						return string.Empty;
+					}
+				}
+				else
+				{
+					text = string.Empty;
+				}
+				return text;
+			}
+			long num = (long)(count - 1) * (long)separatorLength;
+			if (num > 2147483647L)
+			{
+				throw new OutOfMemoryException();
+			}
+			int num2 = (int)num;
+			int i = startIndex;
+			int num3 = startIndex + count;
+			while (i < num3)
+			{
+				string text2 = value[i];
+				if (text2 != null)
+				{
+					num2 += text2.Length;
+					if (num2 < 0)
+					{
+						throw new OutOfMemoryException();
+					}
+				}
+				i++;
+			}
+			string text3 = string.FastAllocateString(num2);
+			int num4 = 0;
+			int j = startIndex;
+			int num5 = startIndex + count;
+			while (j < num5)
+			{
+				string text4 = value[j];
+				if (text4 != null)
+				{
+					int length = text4.Length;
+					if (length > num2 - num4)
+					{
+						num4 = -1;
+						break;
+					}
+					string.FillStringChecked(text3, num4, text4);
+					num4 += length;
+				}
+				if (j < num5 - 1)
+				{
+					fixed (char* ptr = &text3._firstChar)
+					{
+						char* ptr2 = ptr;
+						if (separatorLength == 1)
+						{
+							ptr2[num4] = *separator;
+						}
+						else
+						{
+							string.wstrcpy(ptr2 + num4, separator, separatorLength);
+						}
+					}
+					num4 += separatorLength;
+				}
+				j++;
+			}
+			if (num4 != num2)
+			{
+				return string.JoinCore(separator, separatorLength, (string[])value.Clone(), startIndex, count);
+			}
+			return text3;
+		}
+
+		public string PadLeft(int totalWidth)
+		{
+			return this.PadLeft(totalWidth, ' ');
+		}
+
+		public unsafe string PadLeft(int totalWidth, char paddingChar)
+		{
+			if (totalWidth < 0)
+			{
+				throw new ArgumentOutOfRangeException("totalWidth", "Non-negative number required.");
+			}
+			int length = this.Length;
+			int num = totalWidth - length;
+			if (num <= 0)
+			{
+				return this;
+			}
+			string text = string.FastAllocateString(totalWidth);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				for (int i = 0; i < num; i++)
+				{
+					ptr2[i] = paddingChar;
+				}
+				fixed (char* ptr3 = &this._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr2 + num, ptr4, length);
+				}
+			}
+			return text;
+		}
+
+		public string PadRight(int totalWidth)
+		{
+			return this.PadRight(totalWidth, ' ');
+		}
+
+		public unsafe string PadRight(int totalWidth, char paddingChar)
+		{
+			if (totalWidth < 0)
+			{
+				throw new ArgumentOutOfRangeException("totalWidth", "Non-negative number required.");
+			}
+			int length = this.Length;
+			int num = totalWidth - length;
+			if (num <= 0)
+			{
+				return this;
+			}
+			string text = string.FastAllocateString(totalWidth);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &this._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr2, ptr4, length);
+				}
+				for (int i = 0; i < num; i++)
+				{
+					ptr2[length + i] = paddingChar;
+				}
+			}
+			return text;
+		}
+
+		public unsafe string Remove(int startIndex, int count)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+			}
+			int length = this.Length;
+			if (count > length - startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Index and count must refer to a location within the string.");
+			}
+			if (count == 0)
+			{
+				return this;
+			}
+			int num = length - count;
+			if (num == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(num);
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &text._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr4, ptr2, startIndex);
+					string.wstrcpy(ptr4 + startIndex, ptr2 + startIndex + count, num - startIndex);
+				}
+			}
+			return text;
+		}
+
+		public string Remove(int startIndex)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (startIndex >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "startIndex must be less than length of string.");
+			}
+			return this.Substring(0, startIndex);
+		}
+
+		public string Replace(string oldValue, string newValue, bool ignoreCase, CultureInfo culture)
+		{
+			return this.ReplaceCore(oldValue, newValue, culture, ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None);
+		}
+
+		public string Replace(string oldValue, string newValue, StringComparison comparisonType)
+		{
+			switch (comparisonType)
+			{
+			case StringComparison.CurrentCulture:
+				return this.ReplaceCore(oldValue, newValue, CultureInfo.CurrentCulture, CompareOptions.None);
+			case StringComparison.CurrentCultureIgnoreCase:
+				return this.ReplaceCore(oldValue, newValue, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase);
+			case StringComparison.InvariantCulture:
+				return this.ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, CompareOptions.None);
+			case StringComparison.InvariantCultureIgnoreCase:
+				return this.ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
+			case StringComparison.Ordinal:
+				return this.Replace(oldValue, newValue);
+			case StringComparison.OrdinalIgnoreCase:
+				return this.ReplaceCore(oldValue, newValue, CultureInfo.InvariantCulture, CompareOptions.OrdinalIgnoreCase);
+			default:
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
+			}
+		}
+
+		private unsafe string ReplaceCore(string oldValue, string newValue, CultureInfo culture, CompareOptions options)
+		{
+			if (oldValue == null)
+			{
+				throw new ArgumentNullException("oldValue");
+			}
+			if (oldValue.Length == 0)
+			{
+				throw new ArgumentException("String cannot be of zero length.", "oldValue");
+			}
+			if (newValue == null)
+			{
+				newValue = string.Empty;
+			}
+			CultureInfo cultureInfo = culture ?? CultureInfo.CurrentCulture;
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
+			int num = 0;
+			int num2 = 0;
+			bool flag = false;
+			CompareInfo compareInfo = cultureInfo.CompareInfo;
+			for (;;)
+			{
+				int num3 = compareInfo.IndexOf(this, oldValue, num, this.Length - num, options, &num2);
+				if (num3 >= 0)
+				{
+					stringBuilder.Append(this, num, num3 - num);
+					stringBuilder.Append(newValue);
+					num = num3 + num2;
+					flag = true;
+				}
+				else
+				{
+					if (!flag)
+					{
+						break;
+					}
+					stringBuilder.Append(this, num, this.Length - num);
+				}
+				if (num3 < 0)
+				{
+					goto Block_7;
+				}
+			}
+			StringBuilderCache.Release(stringBuilder);
+			return this;
+			Block_7:
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+		}
+
+		public unsafe string Replace(char oldChar, char newChar)
+		{
+			if (oldChar == newChar)
+			{
+				return this;
+			}
+			int num = this.Length;
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				while (num > 0 && *ptr2 != oldChar)
+				{
+					num--;
+					ptr2++;
+				}
+			}
+			if (num == 0)
+			{
+				return this;
+			}
+			string text = string.FastAllocateString(this.Length);
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr3 = ptr;
+				fixed (char* ptr4 = &text._firstChar)
+				{
+					char* ptr5 = ptr4;
+					int num2 = this.Length - num;
+					if (num2 > 0)
+					{
+						string.wstrcpy(ptr5, ptr3, num2);
+					}
+					char* ptr6 = ptr3 + num2;
+					char* ptr7 = ptr5 + num2;
+					do
+					{
+						char c = *ptr6;
+						if (c == oldChar)
+						{
+							c = newChar;
+						}
+						*ptr7 = c;
+						num--;
+						ptr6++;
+						ptr7++;
+					}
+					while (num > 0);
+				}
+			}
+			return text;
+		}
+
+		public unsafe string Replace(string oldValue, string newValue)
+		{
+			if (oldValue == null)
+			{
+				throw new ArgumentNullException("oldValue");
+			}
+			if (oldValue.Length == 0)
+			{
+				throw new ArgumentException("String cannot be of zero length.", "oldValue");
+			}
+			if (newValue == null)
+			{
+				newValue = string.Empty;
+			}
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)512], 128);
+			ValueListBuilder<int> valueListBuilder = new ValueListBuilder<int>(span);
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				int i = 0;
+				int num = this.Length - oldValue.Length;
+				IL_00B6:
+				while (i <= num)
+				{
+					char* ptr3 = ptr2 + i;
+					for (int j = 0; j < oldValue.Length; j++)
+					{
+						if (ptr3[j] != oldValue[j])
+						{
+							i++;
+							goto IL_00B6;
+						}
+					}
+					valueListBuilder.Append(i);
+					i += oldValue.Length;
+				}
+			}
+			if (valueListBuilder.Length == 0)
+			{
+				return this;
+			}
+			string text = this.ReplaceHelper(oldValue.Length, newValue, valueListBuilder.AsSpan());
+			valueListBuilder.Dispose();
+			return text;
+		}
+
+		private unsafe string ReplaceHelper(int oldValueLength, string newValue, ReadOnlySpan<int> indices)
+		{
+			long num = (long)this.Length + (long)(newValue.Length - oldValueLength) * (long)indices.Length;
+			if (num > 2147483647L)
+			{
+				throw new OutOfMemoryException();
+			}
+			string text = string.FastAllocateString((int)num);
+			Span<char> span = new Span<char>(text.GetRawStringData(), text.Length);
+			int num2 = 0;
+			int num3 = 0;
+			for (int i = 0; i < indices.Length; i++)
+			{
+				int num4 = *indices[i];
+				int num5 = num4 - num2;
+				if (num5 != 0)
+				{
+					this.AsSpan(num2, num5).CopyTo(span.Slice(num3));
+					num3 += num5;
+				}
+				num2 = num4 + oldValueLength;
+				newValue.AsSpan().CopyTo(span.Slice(num3));
+				num3 += newValue.Length;
+			}
+			this.AsSpan(num2).CopyTo(span.Slice(num3));
+			return text;
+		}
+
+		public string[] Split(char separator, StringSplitOptions options = StringSplitOptions.None)
+		{
+			return this.SplitInternal(new ReadOnlySpan<char>(ref separator, 1), int.MaxValue, options);
+		}
+
+		public string[] Split(char separator, int count, StringSplitOptions options = StringSplitOptions.None)
+		{
+			return this.SplitInternal(new ReadOnlySpan<char>(ref separator, 1), count, options);
+		}
+
+		public string[] Split(params char[] separator)
+		{
+			return this.SplitInternal(separator, int.MaxValue, StringSplitOptions.None);
+		}
+
+		public string[] Split(char[] separator, int count)
+		{
+			return this.SplitInternal(separator, count, StringSplitOptions.None);
+		}
+
+		public string[] Split(char[] separator, StringSplitOptions options)
+		{
+			return this.SplitInternal(separator, int.MaxValue, options);
+		}
+
+		public string[] Split(char[] separator, int count, StringSplitOptions options)
+		{
+			return this.SplitInternal(separator, count, options);
+		}
+
+		private unsafe string[] SplitInternal(ReadOnlySpan<char> separators, int count, StringSplitOptions options)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+			}
+			if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
+			{
+				throw new ArgumentException(SR.Format("Illegal enum value: {0}.", options));
+			}
+			bool flag = options == StringSplitOptions.RemoveEmptyEntries;
+			if (count == 0 || (flag && this.Length == 0))
+			{
+				return Array.Empty<string>();
+			}
+			if (count == 1)
+			{
+				return new string[] { this };
+			}
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)512], 128);
+			ValueListBuilder<int> valueListBuilder = new ValueListBuilder<int>(span);
+			this.MakeSeparatorList(separators, ref valueListBuilder);
+			ReadOnlySpan<int> readOnlySpan = valueListBuilder.AsSpan();
+			if (readOnlySpan.Length == 0)
+			{
+				return new string[] { this };
+			}
+			string[] array = (flag ? this.SplitOmitEmptyEntries(readOnlySpan, default(ReadOnlySpan<int>), 1, count) : this.SplitKeepEmptyEntries(readOnlySpan, default(ReadOnlySpan<int>), 1, count));
+			valueListBuilder.Dispose();
+			return array;
+		}
+
+		public string[] Split(string separator, StringSplitOptions options = StringSplitOptions.None)
+		{
+			return this.SplitInternal(separator ?? string.Empty, null, int.MaxValue, options);
+		}
+
+		public string[] Split(string separator, int count, StringSplitOptions options = StringSplitOptions.None)
+		{
+			return this.SplitInternal(separator ?? string.Empty, null, count, options);
+		}
+
+		public string[] Split(string[] separator, StringSplitOptions options)
+		{
+			return this.SplitInternal(null, separator, int.MaxValue, options);
+		}
+
+		public string[] Split(string[] separator, int count, StringSplitOptions options)
+		{
+			return this.SplitInternal(null, separator, count, options);
+		}
+
+		private unsafe string[] SplitInternal(string separator, string[] separators, int count, StringSplitOptions options)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+			}
+			if (options < StringSplitOptions.None || options > StringSplitOptions.RemoveEmptyEntries)
+			{
+				throw new ArgumentException(SR.Format("Illegal enum value: {0}.", (int)options));
+			}
+			bool flag = options == StringSplitOptions.RemoveEmptyEntries;
+			bool flag2 = separator != null;
+			if (!flag2 && (separators == null || separators.Length == 0))
+			{
+				return this.SplitInternal(null, count, options);
+			}
+			if (count == 0 || (flag && this.Length == 0))
+			{
+				return Array.Empty<string>();
+			}
+			if (count == 1 || (flag2 && separator.Length == 0))
+			{
+				return new string[] { this };
+			}
+			if (flag2)
+			{
+				return this.SplitInternal(separator, count, options);
+			}
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)512], 128);
+			ValueListBuilder<int> valueListBuilder = new ValueListBuilder<int>(span);
+			Span<int> span2 = new Span<int>(stackalloc byte[(UIntPtr)512], 128);
+			ValueListBuilder<int> valueListBuilder2 = new ValueListBuilder<int>(span2);
+			this.MakeSeparatorList(separators, ref valueListBuilder, ref valueListBuilder2);
+			ReadOnlySpan<int> readOnlySpan = valueListBuilder.AsSpan();
+			ReadOnlySpan<int> readOnlySpan2 = valueListBuilder2.AsSpan();
+			if (readOnlySpan.Length == 0)
+			{
+				return new string[] { this };
+			}
+			string[] array = (flag ? this.SplitOmitEmptyEntries(readOnlySpan, readOnlySpan2, 0, count) : this.SplitKeepEmptyEntries(readOnlySpan, readOnlySpan2, 0, count));
+			valueListBuilder.Dispose();
+			valueListBuilder2.Dispose();
+			return array;
+		}
+
+		private unsafe string[] SplitInternal(string separator, int count, StringSplitOptions options)
+		{
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)512], 128);
+			ValueListBuilder<int> valueListBuilder = new ValueListBuilder<int>(span);
+			this.MakeSeparatorList(separator, ref valueListBuilder);
+			ReadOnlySpan<int> readOnlySpan = valueListBuilder.AsSpan();
+			if (readOnlySpan.Length == 0)
+			{
+				return new string[] { this };
+			}
+			string[] array = ((options == StringSplitOptions.RemoveEmptyEntries) ? this.SplitOmitEmptyEntries(readOnlySpan, default(ReadOnlySpan<int>), separator.Length, count) : this.SplitKeepEmptyEntries(readOnlySpan, default(ReadOnlySpan<int>), separator.Length, count));
+			valueListBuilder.Dispose();
+			return array;
+		}
+
+		private unsafe string[] SplitKeepEmptyEntries(ReadOnlySpan<int> sepList, ReadOnlySpan<int> lengthList, int defaultLength, int count)
+		{
+			int num = 0;
+			int num2 = 0;
+			count--;
+			int num3 = ((sepList.Length < count) ? sepList.Length : count);
+			string[] array = new string[num3 + 1];
+			int num4 = 0;
+			while (num4 < num3 && num < this.Length)
+			{
+				array[num2++] = this.Substring(num, *sepList[num4] - num);
+				num = *sepList[num4] + (lengthList.IsEmpty ? defaultLength : (*lengthList[num4]));
+				num4++;
+			}
+			if (num < this.Length && num3 >= 0)
+			{
+				array[num2] = this.Substring(num);
+			}
+			else if (num2 == num3)
+			{
+				array[num2] = string.Empty;
+			}
+			return array;
+		}
+
+		private unsafe string[] SplitOmitEmptyEntries(ReadOnlySpan<int> sepList, ReadOnlySpan<int> lengthList, int defaultLength, int count)
+		{
+			int length = sepList.Length;
+			int num = ((length < count) ? (length + 1) : count);
+			string[] array = new string[num];
+			int num2 = 0;
+			int num3 = 0;
+			int i = 0;
+			while (i < length && num2 < this.Length)
+			{
+				if (*sepList[i] - num2 > 0)
+				{
+					array[num3++] = this.Substring(num2, *sepList[i] - num2);
+				}
+				num2 = *sepList[i] + (lengthList.IsEmpty ? defaultLength : (*lengthList[i]));
+				if (num3 == count - 1)
+				{
+					while (i < length - 1)
+					{
+						if (num2 != *sepList[++i])
+						{
+							break;
+						}
+						num2 += (lengthList.IsEmpty ? defaultLength : (*lengthList[i]));
+					}
+					break;
+				}
+				i++;
+			}
+			if (num2 < this.Length)
+			{
+				array[num3++] = this.Substring(num2);
+			}
+			string[] array2 = array;
+			if (num3 != num)
+			{
+				array2 = new string[num3];
+				for (int j = 0; j < num3; j++)
+				{
+					array2[j] = array[j];
+				}
+			}
+			return array2;
+		}
+
+		private unsafe void MakeSeparatorList(ReadOnlySpan<char> separators, ref ValueListBuilder<int> sepListBuilder)
+		{
+			switch (separators.Length)
+			{
+			case 0:
+			{
+				for (int i = 0; i < this.Length; i++)
+				{
+					if (char.IsWhiteSpace(this[i]))
+					{
+						sepListBuilder.Append(i);
+					}
+				}
+				return;
+			}
+			case 1:
+			{
+				char c = (char)(*separators[0]);
+				for (int j = 0; j < this.Length; j++)
+				{
+					if (this[j] == c)
+					{
+						sepListBuilder.Append(j);
+					}
+				}
+				return;
+			}
+			case 2:
+			{
+				char c = (char)(*separators[0]);
+				char c2 = (char)(*separators[1]);
+				for (int k = 0; k < this.Length; k++)
+				{
+					char c3 = this[k];
+					if (c3 == c || c3 == c2)
+					{
+						sepListBuilder.Append(k);
+					}
+				}
+				return;
+			}
+			case 3:
+			{
+				char c = (char)(*separators[0]);
+				char c2 = (char)(*separators[1]);
+				char c4 = (char)(*separators[2]);
+				for (int l = 0; l < this.Length; l++)
+				{
+					char c5 = this[l];
+					if (c5 == c || c5 == c2 || c5 == c4)
+					{
+						sepListBuilder.Append(l);
+					}
+				}
+				return;
+			}
+			default:
+			{
+				string.ProbabilisticMap probabilisticMap = default(string.ProbabilisticMap);
+				uint* ptr = (uint*)(&probabilisticMap);
+				string.InitializeProbabilisticMap(ptr, separators);
+				for (int m = 0; m < this.Length; m++)
+				{
+					char c6 = this[m];
+					if (string.IsCharBitSet(ptr, (byte)c6) && string.IsCharBitSet(ptr, (byte)(c6 >> 8)) && separators.Contains(c6))
+					{
+						sepListBuilder.Append(m);
+					}
+				}
+				return;
+			}
+			}
+		}
+
+		private void MakeSeparatorList(string separator, ref ValueListBuilder<int> sepListBuilder)
+		{
+			int length = separator.Length;
+			for (int i = 0; i < this.Length; i++)
+			{
+				if (this[i] == separator[0] && length <= this.Length - i && (length == 1 || this.AsSpan(i, length).SequenceEqual<char>(separator)))
+				{
+					sepListBuilder.Append(i);
+					i += length - 1;
+				}
+			}
+		}
+
+		private void MakeSeparatorList(string[] separators, ref ValueListBuilder<int> sepListBuilder, ref ValueListBuilder<int> lengthListBuilder)
+		{
+			int num = separators.Length;
+			for (int i = 0; i < this.Length; i++)
+			{
+				foreach (string text in separators)
+				{
+					if (!string.IsNullOrEmpty(text))
+					{
+						int length = text.Length;
+						if (this[i] == text[0] && length <= this.Length - i && (length == 1 || this.AsSpan(i, length).SequenceEqual<char>(text)))
+						{
+							sepListBuilder.Append(i);
+							lengthListBuilder.Append(length);
+							i += length - 1;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		public string Substring(int startIndex)
+		{
+			return this.Substring(startIndex, this.Length - startIndex);
+		}
+
+		public string Substring(int startIndex, int length)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "startIndex cannot be larger than length of string.");
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (startIndex > this.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("length", "Index and length must refer to a location within the string.");
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			if (startIndex == 0 && length == this.Length)
+			{
+				return this;
+			}
+			return this.InternalSubString(startIndex, length);
+		}
+
+		private unsafe string InternalSubString(int startIndex, int length)
+		{
+			string text = string.FastAllocateString(length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &this._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr2, ptr4 + startIndex, length);
+				}
+			}
+			return text;
+		}
+
+		public string ToLower()
+		{
+			return CultureInfo.CurrentCulture.TextInfo.ToLower(this);
+		}
+
+		public string ToLower(CultureInfo culture)
+		{
+			if (culture == null)
+			{
+				throw new ArgumentNullException("culture");
+			}
+			return culture.TextInfo.ToLower(this);
+		}
+
+		public string ToLowerInvariant()
+		{
+			return CultureInfo.InvariantCulture.TextInfo.ToLower(this);
+		}
+
+		public string ToUpper()
+		{
+			return CultureInfo.CurrentCulture.TextInfo.ToUpper(this);
+		}
+
+		public string ToUpper(CultureInfo culture)
+		{
+			if (culture == null)
+			{
+				throw new ArgumentNullException("culture");
+			}
+			return culture.TextInfo.ToUpper(this);
+		}
+
+		public string ToUpperInvariant()
+		{
+			return CultureInfo.InvariantCulture.TextInfo.ToUpper(this);
+		}
+
+		public string Trim()
+		{
+			return this.TrimWhiteSpaceHelper(string.TrimType.Both);
+		}
+
+		public unsafe string Trim(char trimChar)
+		{
+			return this.TrimHelper(&trimChar, 1, string.TrimType.Both);
+		}
+
+		public unsafe string Trim(params char[] trimChars)
+		{
+			if (trimChars == null || trimChars.Length == 0)
+			{
+				return this.TrimWhiteSpaceHelper(string.TrimType.Both);
+			}
+			fixed (char* ptr = &trimChars[0])
+			{
+				char* ptr2 = ptr;
+				return this.TrimHelper(ptr2, trimChars.Length, string.TrimType.Both);
+			}
+		}
+
+		public string TrimStart()
+		{
+			return this.TrimWhiteSpaceHelper(string.TrimType.Head);
+		}
+
+		public unsafe string TrimStart(char trimChar)
+		{
+			return this.TrimHelper(&trimChar, 1, string.TrimType.Head);
+		}
+
+		public unsafe string TrimStart(params char[] trimChars)
+		{
+			if (trimChars == null || trimChars.Length == 0)
+			{
+				return this.TrimWhiteSpaceHelper(string.TrimType.Head);
+			}
+			fixed (char* ptr = &trimChars[0])
+			{
+				char* ptr2 = ptr;
+				return this.TrimHelper(ptr2, trimChars.Length, string.TrimType.Head);
+			}
+		}
+
+		public string TrimEnd()
+		{
+			return this.TrimWhiteSpaceHelper(string.TrimType.Tail);
+		}
+
+		public unsafe string TrimEnd(char trimChar)
+		{
+			return this.TrimHelper(&trimChar, 1, string.TrimType.Tail);
+		}
+
+		public unsafe string TrimEnd(params char[] trimChars)
+		{
+			if (trimChars == null || trimChars.Length == 0)
+			{
+				return this.TrimWhiteSpaceHelper(string.TrimType.Tail);
+			}
+			fixed (char* ptr = &trimChars[0])
+			{
+				char* ptr2 = ptr;
+				return this.TrimHelper(ptr2, trimChars.Length, string.TrimType.Tail);
+			}
+		}
+
+		private string TrimWhiteSpaceHelper(string.TrimType trimType)
+		{
+			int num = this.Length - 1;
+			int num2 = 0;
+			if (trimType != string.TrimType.Tail)
+			{
+				num2 = 0;
+				while (num2 < this.Length && char.IsWhiteSpace(this[num2]))
+				{
+					num2++;
+				}
+			}
+			if (trimType != string.TrimType.Head)
+			{
+				num = this.Length - 1;
+				while (num >= num2 && char.IsWhiteSpace(this[num]))
+				{
+					num--;
+				}
+			}
+			return this.CreateTrimmedString(num2, num);
+		}
+
+		private unsafe string TrimHelper(char* trimChars, int trimCharsLength, string.TrimType trimType)
+		{
+			int i = this.Length - 1;
+			int j = 0;
+			if (trimType != string.TrimType.Tail)
+			{
+				for (j = 0; j < this.Length; j++)
+				{
+					char c = this[j];
+					int num = 0;
+					while (num < trimCharsLength && trimChars[num] != c)
+					{
+						num++;
+					}
+					if (num == trimCharsLength)
+					{
+						break;
+					}
+				}
+			}
+			if (trimType != string.TrimType.Head)
+			{
+				for (i = this.Length - 1; i >= j; i--)
+				{
+					char c2 = this[i];
+					int num2 = 0;
+					while (num2 < trimCharsLength && trimChars[num2] != c2)
+					{
+						num2++;
+					}
+					if (num2 == trimCharsLength)
+					{
+						break;
+					}
+				}
+			}
+			return this.CreateTrimmedString(j, i);
+		}
+
+		private string CreateTrimmedString(int start, int end)
+		{
+			int num = end - start + 1;
+			if (num == this.Length)
+			{
+				return this;
+			}
+			if (num != 0)
+			{
+				return this.InternalSubString(start, num);
+			}
+			return string.Empty;
+		}
+
+		public bool Contains(string value)
+		{
+			return this.IndexOf(value, StringComparison.Ordinal) >= 0;
+		}
+
+		public bool Contains(string value, StringComparison comparisonType)
+		{
+			return this.IndexOf(value, comparisonType) >= 0;
+		}
+
+		public bool Contains(char value)
+		{
+			return this.IndexOf(value) != -1;
+		}
+
+		public bool Contains(char value, StringComparison comparisonType)
+		{
+			return this.IndexOf(value, comparisonType) != -1;
+		}
+
+		public int IndexOf(char value)
+		{
+			return SpanHelpers.IndexOf(ref this._firstChar, value, this.Length);
+		}
+
+		public int IndexOf(char value, int startIndex)
+		{
+			return this.IndexOf(value, startIndex, this.Length - startIndex);
+		}
+
+		public int IndexOf(char value, StringComparison comparisonType)
+		{
+			switch (comparisonType)
+			{
+			case StringComparison.CurrentCulture:
+				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, CompareOptions.None);
+			case StringComparison.CurrentCultureIgnoreCase:
+				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, CompareOptions.IgnoreCase);
+			case StringComparison.InvariantCulture:
+				return CompareInfo.Invariant.IndexOf(this, value, CompareOptions.None);
+			case StringComparison.InvariantCultureIgnoreCase:
+				return CompareInfo.Invariant.IndexOf(this, value, CompareOptions.IgnoreCase);
+			case StringComparison.Ordinal:
+				return CompareInfo.Invariant.IndexOf(this, value, CompareOptions.Ordinal);
+			case StringComparison.OrdinalIgnoreCase:
+				return CompareInfo.Invariant.IndexOf(this, value, CompareOptions.OrdinalIgnoreCase);
+			default:
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
+			}
+		}
+
+		public int IndexOf(char value, int startIndex, int count)
+		{
+			if (startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count > this.Length - startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			int num = SpanHelpers.IndexOf(Unsafe.Add<char>(ref this._firstChar, startIndex), value, count);
+			if (num != -1)
+			{
+				return num + startIndex;
+			}
+			return num;
+		}
+
+		public int IndexOfAny(char[] anyOf)
+		{
+			return this.IndexOfAny(anyOf, 0, this.Length);
+		}
+
+		public int IndexOfAny(char[] anyOf, int startIndex)
+		{
+			return this.IndexOfAny(anyOf, startIndex, this.Length - startIndex);
+		}
+
+		public int IndexOfAny(char[] anyOf, int startIndex, int count)
+		{
+			if (anyOf == null)
+			{
+				throw new ArgumentNullException("anyOf");
+			}
+			if (startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count > this.Length - startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			if (anyOf.Length == 2)
+			{
+				return this.IndexOfAny(anyOf[0], anyOf[1], startIndex, count);
+			}
+			if (anyOf.Length == 3)
+			{
+				return this.IndexOfAny(anyOf[0], anyOf[1], anyOf[2], startIndex, count);
+			}
+			if (anyOf.Length > 3)
+			{
+				return this.IndexOfCharArray(anyOf, startIndex, count);
+			}
+			if (anyOf.Length == 1)
+			{
+				return this.IndexOf(anyOf[0], startIndex, count);
+			}
+			return -1;
+		}
+
+		private unsafe int IndexOfAny(char value1, char value2, int startIndex, int count)
+		{
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				char* ptr3 = ptr2 + startIndex;
+				while (count > 0)
+				{
+					char c = *ptr3;
+					if (c == value1 || c == value2)
+					{
+						return (int)((long)(ptr3 - ptr2));
+					}
+					c = ptr3[1];
+					if (c == value1 || c == value2)
+					{
+						if (count != 1)
+						{
+							return (int)((long)(ptr3 - ptr2)) + 1;
+						}
+						return -1;
+					}
+					else
+					{
+						ptr3 += 2;
+						count -= 2;
+					}
+				}
+				return -1;
+			}
+		}
+
+		private unsafe int IndexOfAny(char value1, char value2, char value3, int startIndex, int count)
+		{
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				char* ptr3 = ptr2 + startIndex;
+				while (count > 0)
+				{
+					char c = *ptr3;
+					if (c == value1 || c == value2 || c == value3)
+					{
+						return (int)((long)(ptr3 - ptr2));
+					}
+					ptr3++;
+					count--;
+				}
+				return -1;
+			}
+		}
+
+		private unsafe int IndexOfCharArray(char[] anyOf, int startIndex, int count)
+		{
+			string.ProbabilisticMap probabilisticMap = default(string.ProbabilisticMap);
+			uint* ptr = (uint*)(&probabilisticMap);
+			string.InitializeProbabilisticMap(ptr, anyOf);
+			fixed (char* ptr2 = &this._firstChar)
+			{
+				char* ptr3 = ptr2;
+				char* ptr4 = ptr3 + startIndex;
+				while (count > 0)
+				{
+					int num = (int)(*ptr4);
+					if (string.IsCharBitSet(ptr, (byte)num) && string.IsCharBitSet(ptr, (byte)(num >> 8)) && string.ArrayContains((char)num, anyOf))
+					{
+						return (int)((long)(ptr4 - ptr3));
+					}
+					count--;
+					ptr4++;
+				}
+				return -1;
+			}
+		}
+
+		private unsafe static void InitializeProbabilisticMap(uint* charMap, ReadOnlySpan<char> anyOf)
+		{
+			bool flag = false;
+			for (int i = 0; i < anyOf.Length; i++)
+			{
+				int num = (int)(*anyOf[i]);
+				string.SetCharBit(charMap, (byte)num);
+				num >>= 8;
+				if (num == 0)
+				{
+					flag = true;
+				}
+				else
+				{
+					string.SetCharBit(charMap, (byte)num);
+				}
+			}
+			if (flag)
+			{
+				*charMap |= 1U;
+			}
+		}
+
+		private static bool ArrayContains(char searchChar, char[] anyOf)
+		{
+			for (int i = 0; i < anyOf.Length; i++)
+			{
+				if (anyOf[i] == searchChar)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private unsafe static bool IsCharBitSet(uint* charMap, byte value)
+		{
+			return (charMap[value & 7] & (1U << (value >> 3))) > 0U;
+		}
+
+		private unsafe static void SetCharBit(uint* charMap, byte value)
+		{
+			charMap[value & 7] |= 1U << (value >> 3);
+		}
+
+		public int IndexOf(string value)
+		{
+			return this.IndexOf(value, StringComparison.CurrentCulture);
+		}
+
+		public int IndexOf(string value, int startIndex)
+		{
+			return this.IndexOf(value, startIndex, StringComparison.CurrentCulture);
+		}
+
+		public int IndexOf(string value, int startIndex, int count)
+		{
+			if (startIndex < 0 || startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || count > this.Length - startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			return this.IndexOf(value, startIndex, count, StringComparison.CurrentCulture);
+		}
+
+		public int IndexOf(string value, StringComparison comparisonType)
+		{
+			return this.IndexOf(value, 0, this.Length, comparisonType);
+		}
+
+		public int IndexOf(string value, int startIndex, StringComparison comparisonType)
+		{
+			return this.IndexOf(value, startIndex, this.Length - startIndex, comparisonType);
+		}
+
+		public int IndexOf(string value, int startIndex, int count, StringComparison comparisonType)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0 || startIndex > this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || startIndex > this.Length - count)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			switch (comparisonType)
+			{
+			case StringComparison.CurrentCulture:
+				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.None);
+			case StringComparison.CurrentCultureIgnoreCase:
+				return CultureInfo.CurrentCulture.CompareInfo.IndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+			case StringComparison.InvariantCulture:
+				return CompareInfo.Invariant.IndexOf(this, value, startIndex, count, CompareOptions.None);
+			case StringComparison.InvariantCultureIgnoreCase:
+				return CompareInfo.Invariant.IndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+			case StringComparison.Ordinal:
+				return CompareInfo.Invariant.IndexOfOrdinal(this, value, startIndex, count, false);
+			case StringComparison.OrdinalIgnoreCase:
+				return CompareInfo.Invariant.IndexOfOrdinal(this, value, startIndex, count, true);
+			default:
+				throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
+			}
+		}
+
+		public int LastIndexOf(char value)
+		{
+			return SpanHelpers.LastIndexOf(ref this._firstChar, value, this.Length);
+		}
+
+		public int LastIndexOf(char value, int startIndex)
+		{
+			return this.LastIndexOf(value, startIndex, startIndex + 1);
+		}
+
+		public int LastIndexOf(char value, int startIndex, int count)
+		{
+			if (this.Length == 0)
+			{
+				return -1;
+			}
+			if (startIndex >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count > startIndex + 1)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			int num = startIndex + 1 - count;
+			int num2 = SpanHelpers.LastIndexOf(Unsafe.Add<char>(ref this._firstChar, num), value, count);
+			if (num2 != -1)
+			{
+				return num2 + num;
+			}
+			return num2;
+		}
+
+		public int LastIndexOfAny(char[] anyOf)
+		{
+			return this.LastIndexOfAny(anyOf, this.Length - 1, this.Length);
+		}
+
+		public int LastIndexOfAny(char[] anyOf, int startIndex)
+		{
+			return this.LastIndexOfAny(anyOf, startIndex, startIndex + 1);
+		}
+
+		public int LastIndexOfAny(char[] anyOf, int startIndex, int count)
+		{
+			if (anyOf == null)
+			{
+				throw new ArgumentNullException("anyOf");
+			}
+			if (this.Length == 0)
+			{
+				return -1;
+			}
+			if (startIndex >= this.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || count - 1 > startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			if (anyOf.Length > 1)
+			{
+				return this.LastIndexOfCharArray(anyOf, startIndex, count);
+			}
+			if (anyOf.Length == 1)
+			{
+				return this.LastIndexOf(anyOf[0], startIndex, count);
+			}
+			return -1;
+		}
+
+		private unsafe int LastIndexOfCharArray(char[] anyOf, int startIndex, int count)
+		{
+			string.ProbabilisticMap probabilisticMap = default(string.ProbabilisticMap);
+			uint* ptr = (uint*)(&probabilisticMap);
+			string.InitializeProbabilisticMap(ptr, anyOf);
+			fixed (char* ptr2 = &this._firstChar)
+			{
+				char* ptr3 = ptr2;
+				char* ptr4 = ptr3 + startIndex;
+				while (count > 0)
+				{
+					int num = (int)(*ptr4);
+					if (string.IsCharBitSet(ptr, (byte)num) && string.IsCharBitSet(ptr, (byte)(num >> 8)) && string.ArrayContains((char)num, anyOf))
+					{
+						return (int)((long)(ptr4 - ptr3));
+					}
+					count--;
+					ptr4--;
+				}
+				return -1;
+			}
+		}
+
+		public int LastIndexOf(string value)
+		{
+			return this.LastIndexOf(value, this.Length - 1, this.Length, StringComparison.CurrentCulture);
+		}
+
+		public int LastIndexOf(string value, int startIndex)
+		{
+			return this.LastIndexOf(value, startIndex, startIndex + 1, StringComparison.CurrentCulture);
+		}
+
+		public int LastIndexOf(string value, int startIndex, int count)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			return this.LastIndexOf(value, startIndex, count, StringComparison.CurrentCulture);
+		}
+
+		public int LastIndexOf(string value, StringComparison comparisonType)
+		{
+			return this.LastIndexOf(value, this.Length - 1, this.Length, comparisonType);
+		}
+
+		public int LastIndexOf(string value, int startIndex, StringComparison comparisonType)
+		{
+			return this.LastIndexOf(value, startIndex, startIndex + 1, comparisonType);
+		}
+
+		public int LastIndexOf(string value, int startIndex, int count, StringComparison comparisonType)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (this.Length == 0 && (startIndex == -1 || startIndex == 0))
+			{
+				if (value.Length != 0)
+				{
+					return -1;
+				}
+				return 0;
+			}
+			else
+			{
+				if (startIndex < 0 || startIndex > this.Length)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				if (startIndex == this.Length)
+				{
+					startIndex--;
+					if (count > 0)
+					{
+						count--;
+					}
+				}
+				if (count < 0 || startIndex - count + 1 < 0)
+				{
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+				}
+				if (value.Length == 0)
+				{
+					return startIndex;
+				}
+				switch (comparisonType)
+				{
+				case StringComparison.CurrentCulture:
+					return CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.None);
+				case StringComparison.CurrentCultureIgnoreCase:
+					return CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+				case StringComparison.InvariantCulture:
+					return CompareInfo.Invariant.LastIndexOf(this, value, startIndex, count, CompareOptions.None);
+				case StringComparison.InvariantCultureIgnoreCase:
+					return CompareInfo.Invariant.LastIndexOf(this, value, startIndex, count, CompareOptions.IgnoreCase);
+				case StringComparison.Ordinal:
+					return CompareInfo.Invariant.LastIndexOfOrdinal(this, value, startIndex, count, false);
+				case StringComparison.OrdinalIgnoreCase:
+					return CompareInfo.Invariant.LastIndexOfOrdinal(this, value, startIndex, count, true);
+				default:
+					throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
+				}
+			}
+		}
+
+		[PreserveDependency("CreateString(System.Char[])", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char[] value);
+
+		private unsafe static string Ctor(char[] value)
+		{
+			if (value == null || value.Length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(value.Length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char[] array = value)
+				{
+					char* ptr3;
+					if (value == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr2, ptr3, value.Length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		[PreserveDependency("CreateString(System.Char[], System.Int32, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char[] value, int startIndex, int length);
+
+		private unsafe static string Ctor(char[] value, int startIndex, int length)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (startIndex > value.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char[] array = value)
+				{
+					char* ptr3;
+					if (value == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr2, ptr3 + startIndex, length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.Char*)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(char* value);
+
+		private unsafe static string Ctor(char* ptr)
+		{
+			if (ptr == null)
+			{
+				return string.Empty;
+			}
+			int num = string.wcslen(ptr);
+			if (num == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(num);
+			fixed (char* ptr2 = &text._firstChar)
+			{
+				string.wstrcpy(ptr2, ptr, num);
+			}
+			return text;
+		}
+
+		[PreserveDependency("CreateString(System.Char*, System.Int32, System.Int32)", "System.String")]
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(char* value, int startIndex, int length);
+
+		private unsafe static string Ctor(char* ptr, int startIndex, int length)
+		{
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			char* ptr2 = ptr + startIndex;
+			if (ptr2 < ptr)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			if (ptr == null)
+			{
+				throw new ArgumentOutOfRangeException("ptr", "Pointer startIndex and length do not refer to a valid string.");
+			}
+			string text = string.FastAllocateString(length);
+			fixed (char* ptr3 = &text._firstChar)
+			{
+				string.wstrcpy(ptr3, ptr2, length);
+			}
+			return text;
+		}
+
+		[PreserveDependency("CreateString(System.SByte*)", "System.String")]
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value);
+
+		private unsafe static string Ctor(sbyte* value)
+		{
+			if (value == null)
+			{
+				return string.Empty;
+			}
+			int num = new ReadOnlySpan<byte>((void*)value, int.MaxValue).IndexOf(0);
+			if (num < 0)
+			{
+				throw new ArgumentException("The string must be null-terminated.");
+			}
+			return string.CreateStringForSByteConstructor((byte*)value, num);
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value, int startIndex, int length);
+
+		private unsafe static string Ctor(sbyte* value, int startIndex, int length)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (value == null)
+			{
+				if (length == 0)
+				{
+					return string.Empty;
+				}
+				throw new ArgumentNullException("value");
+			}
+			else
+			{
+				byte* ptr = (byte*)(value + startIndex);
+				if (ptr < (byte*)value)
+				{
+					throw new ArgumentOutOfRangeException("value", "Pointer startIndex and length do not refer to a valid string.");
+				}
+				return string.CreateStringForSByteConstructor(ptr, length);
+			}
+		}
+
+		private unsafe static string CreateStringForSByteConstructor(byte* pb, int numBytes)
+		{
+			if (numBytes == 0)
+			{
+				return string.Empty;
+			}
+			return Encoding.UTF8.GetString(pb, numBytes);
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32, System.Text.Encoding)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value, int startIndex, int length, Encoding enc);
+
+		private unsafe static string Ctor(sbyte* value, int startIndex, int length, Encoding enc)
+		{
+			if (enc == null)
+			{
+				return new string(value, startIndex, length);
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (value == null)
+			{
+				if (length == 0)
+				{
+					return string.Empty;
+				}
+				throw new ArgumentNullException("value");
+			}
+			else
+			{
+				byte* ptr = (byte*)(value + startIndex);
+				if (ptr < (byte*)value)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
+				}
+				return enc.GetString(new ReadOnlySpan<byte>((void*)ptr, length));
+			}
+		}
+
+		[PreserveDependency("CreateString(System.Char, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char c, int count);
+
+		private unsafe static string Ctor(char c, int count)
+		{
+			if (count > 0)
+			{
+				string text = string.FastAllocateString(count);
+				if (c != '\0')
+				{
+					fixed (char* ptr = &text._firstChar)
+					{
+						uint* ptr2 = (uint*)ptr;
+						uint num = (uint)(((uint)c << 16) | c);
+						uint* ptr3 = ptr2;
+						if (count >= 4)
+						{
+							count -= 4;
+							do
+							{
+								*ptr3 = num;
+								ptr3[1] = num;
+								ptr3 += 2;
+								count -= 4;
+							}
+							while (count >= 0);
+						}
+						if ((count & 2) != 0)
+						{
+							*ptr3 = num;
+							ptr3++;
+						}
+						if ((count & 1) != 0)
+						{
+							*(short*)ptr3 = (short)c;
+						}
+					}
+				}
+				return text;
+			}
+			if (count == 0)
+			{
+				return string.Empty;
+			}
+			throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+		}
+
+		[PreserveDependency("CreateString(System.ReadOnlySpan`1<System.Char>)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(ReadOnlySpan<char> value);
+
+		private unsafe static string Ctor(ReadOnlySpan<char> value)
+		{
+			if (value.Length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(value.Length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* reference = MemoryMarshal.GetReference<char>(value))
+				{
+					char* ptr3 = reference;
+					string.wstrcpy(ptr2, ptr3, value.Length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		public static string Create<TState>(int length, TState state, SpanAction<char, TState> action)
+		{
+			if (action == null)
+			{
+				throw new ArgumentNullException("action");
+			}
+			if (length > 0)
+			{
+				string text = string.FastAllocateString(length);
+				action(new Span<char>(text.GetRawStringData(), length), state);
+				return text;
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			throw new ArgumentOutOfRangeException("length");
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static implicit operator ReadOnlySpan<char>(string value)
+		{
+			if (value == null)
+			{
+				return default(ReadOnlySpan<char>);
+			}
+			return new ReadOnlySpan<char>(value.GetRawStringData(), value.Length);
+		}
+
+		public object Clone()
+		{
+			return this;
+		}
+
 		public unsafe static string Copy(string str)
 		{
 			if (str == null)
 			{
 				throw new ArgumentNullException("str");
 			}
-			int length = str.Length;
-			string text = string.FastAllocateString(length);
-			fixed (char* ptr = &text.m_firstChar)
+			string text = string.FastAllocateString(str.Length);
+			fixed (char* ptr = &text._firstChar)
 			{
 				char* ptr2 = ptr;
-				fixed (char* ptr3 = &str.m_firstChar)
+				fixed (char* ptr3 = &str._firstChar)
 				{
 					char* ptr4 = ptr3;
-					string.wstrcpy(ptr2, ptr4, length);
+					string.wstrcpy(ptr2, ptr4, str.Length);
+					ptr = null;
 				}
-			}
-			return text;
-		}
-
-		public static string Concat(object arg0)
-		{
-			if (arg0 == null)
-			{
-				return string.Empty;
-			}
-			return arg0.ToString();
-		}
-
-		public static string Concat(object arg0, object arg1)
-		{
-			if (arg0 == null)
-			{
-				arg0 = string.Empty;
-			}
-			if (arg1 == null)
-			{
-				arg1 = string.Empty;
-			}
-			return arg0.ToString() + arg1.ToString();
-		}
-
-		public static string Concat(object arg0, object arg1, object arg2)
-		{
-			if (arg0 == null)
-			{
-				arg0 = string.Empty;
-			}
-			if (arg1 == null)
-			{
-				arg1 = string.Empty;
-			}
-			if (arg2 == null)
-			{
-				arg2 = string.Empty;
-			}
-			return arg0.ToString() + arg1.ToString() + arg2.ToString();
-		}
-
-		[CLSCompliant(false)]
-		public static string Concat(object arg0, object arg1, object arg2, object arg3, __arglist)
-		{
-			ArgIterator argIterator = new ArgIterator(__arglist);
-			int num = argIterator.GetRemainingCount() + 4;
-			object[] array = new object[num];
-			array[0] = arg0;
-			array[1] = arg1;
-			array[2] = arg2;
-			array[3] = arg3;
-			for (int i = 4; i < num; i++)
-			{
-				array[i] = TypedReference.ToObject(argIterator.GetNextArg());
-			}
-			return string.Concat(array);
-		}
-
-		public static string Concat(params object[] args)
-		{
-			if (args == null)
-			{
-				throw new ArgumentNullException("args");
-			}
-			string[] array = new string[args.Length];
-			int num = 0;
-			for (int i = 0; i < args.Length; i++)
-			{
-				object obj = args[i];
-				array[i] = ((obj == null) ? string.Empty : obj.ToString());
-				if (array[i] == null)
-				{
-					array[i] = string.Empty;
-				}
-				num += array[i].Length;
-				if (num < 0)
-				{
-					throw new OutOfMemoryException();
-				}
-			}
-			return string.ConcatArray(array, num);
-		}
-
-		[ComVisible(false)]
-		public static string Concat<T>(IEnumerable<T> values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			using (IEnumerator<T> enumerator = values.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current != null)
-					{
-						T t = enumerator.Current;
-						string text = t.ToString();
-						if (text != null)
-						{
-							stringBuilder.Append(text);
-						}
-					}
-				}
-			}
-			return StringBuilderCache.GetStringAndRelease(stringBuilder);
-		}
-
-		[ComVisible(false)]
-		public static string Concat(IEnumerable<string> values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			using (IEnumerator<string> enumerator = values.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current != null)
-					{
-						stringBuilder.Append(enumerator.Current);
-					}
-				}
-			}
-			return StringBuilderCache.GetStringAndRelease(stringBuilder);
-		}
-
-		[SecuritySafeCritical]
-		public static string Concat(string str0, string str1)
-		{
-			if (string.IsNullOrEmpty(str0))
-			{
-				if (string.IsNullOrEmpty(str1))
-				{
-					return string.Empty;
-				}
-				return str1;
-			}
-			else
-			{
-				if (string.IsNullOrEmpty(str1))
-				{
-					return str0;
-				}
-				int length = str0.Length;
-				string text = string.FastAllocateString(length + str1.Length);
-				string.FillStringChecked(text, 0, str0);
-				string.FillStringChecked(text, length, str1);
 				return text;
 			}
 		}
 
-		[SecuritySafeCritical]
-		public static string Concat(string str0, string str1, string str2)
+		public unsafe void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
 		{
-			if (str0 == null && str1 == null && str2 == null)
+			if (destination == null)
 			{
-				return string.Empty;
+				throw new ArgumentNullException("destination");
 			}
-			if (str0 == null)
+			if (count < 0)
 			{
-				str0 = string.Empty;
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
 			}
-			if (str1 == null)
+			if (sourceIndex < 0)
 			{
-				str1 = string.Empty;
+				throw new ArgumentOutOfRangeException("sourceIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
 			}
-			if (str2 == null)
+			if (count > this.Length - sourceIndex)
 			{
-				str2 = string.Empty;
+				throw new ArgumentOutOfRangeException("sourceIndex", "Index and count must refer to a location within the string.");
 			}
-			string text = string.FastAllocateString(str0.Length + str1.Length + str2.Length);
-			string.FillStringChecked(text, 0, str0);
-			string.FillStringChecked(text, str0.Length, str1);
-			string.FillStringChecked(text, str0.Length + str1.Length, str2);
-			return text;
-		}
-
-		[SecuritySafeCritical]
-		public static string Concat(string str0, string str1, string str2, string str3)
-		{
-			if (str0 == null && str1 == null && str2 == null && str3 == null)
+			if (destinationIndex > destination.Length - count || destinationIndex < 0)
 			{
-				return string.Empty;
+				throw new ArgumentOutOfRangeException("destinationIndex", "Index and count must refer to a location within the string.");
 			}
-			if (str0 == null)
+			fixed (char* ptr = &this._firstChar)
 			{
-				str0 = string.Empty;
-			}
-			if (str1 == null)
-			{
-				str1 = string.Empty;
-			}
-			if (str2 == null)
-			{
-				str2 = string.Empty;
-			}
-			if (str3 == null)
-			{
-				str3 = string.Empty;
-			}
-			string text = string.FastAllocateString(str0.Length + str1.Length + str2.Length + str3.Length);
-			string.FillStringChecked(text, 0, str0);
-			string.FillStringChecked(text, str0.Length, str1);
-			string.FillStringChecked(text, str0.Length + str1.Length, str2);
-			string.FillStringChecked(text, str0.Length + str1.Length + str2.Length, str3);
-			return text;
-		}
-
-		[SecuritySafeCritical]
-		private static string ConcatArray(string[] values, int totalLength)
-		{
-			string text = string.FastAllocateString(totalLength);
-			int num = 0;
-			for (int i = 0; i < values.Length; i++)
-			{
-				string.FillStringChecked(text, num, values[i]);
-				num += values[i].Length;
-			}
-			return text;
-		}
-
-		public static string Concat(params string[] values)
-		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			int num = 0;
-			string[] array = new string[values.Length];
-			for (int i = 0; i < values.Length; i++)
-			{
-				string text = values[i];
-				array[i] = ((text == null) ? string.Empty : text);
-				num += array[i].Length;
-				if (num < 0)
+				char* ptr2 = ptr;
+				fixed (char[] array = destination)
 				{
-					throw new OutOfMemoryException();
+					char* ptr3;
+					if (destination == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr3 + destinationIndex, ptr2 + sourceIndex, count);
+					ptr = null;
+				}
+				return;
+			}
+		}
+
+		public unsafe char[] ToCharArray()
+		{
+			if (this.Length == 0)
+			{
+				return Array.Empty<char>();
+			}
+			char[] array = new char[this.Length];
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &array[0])
+				{
+					string.wstrcpy(ptr3, ptr2, this.Length);
+					ptr = null;
+				}
+				return array;
+			}
+		}
+
+		public unsafe char[] ToCharArray(int startIndex, int length)
+		{
+			if (startIndex < 0 || startIndex > this.Length || startIndex > this.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (length > 0)
+			{
+				char[] array = new char[length];
+				fixed (char* ptr = &this._firstChar)
+				{
+					char* ptr2 = ptr;
+					fixed (char* ptr3 = &array[0])
+					{
+						string.wstrcpy(ptr3, ptr2 + startIndex, length);
+						ptr = null;
+					}
+					return array;
 				}
 			}
-			return string.ConcatArray(array, num);
+			if (length == 0)
+			{
+				return Array.Empty<char>();
+			}
+			throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
 		}
 
-		[SecuritySafeCritical]
-		public static string Intern(string str)
+		[NonVersionable]
+		public static bool IsNullOrEmpty(string value)
 		{
-			if (str == null)
-			{
-				throw new ArgumentNullException("str");
-			}
-			return string.InternalIntern(str);
+			return value == null || 0 >= value.Length;
 		}
 
-		[SecuritySafeCritical]
-		public static string IsInterned(string str)
+		public static bool IsNullOrWhiteSpace(string value)
 		{
-			if (str == null)
+			if (value == null)
 			{
-				throw new ArgumentNullException("str");
+				return true;
 			}
-			return string.InternalIsInterned(str);
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (!char.IsWhiteSpace(value[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		internal ref char GetRawStringData()
+		{
+			return ref this._firstChar;
+		}
+
+		internal unsafe static string CreateStringFromEncoding(byte* bytes, int byteLength, Encoding encoding)
+		{
+			int charCount = encoding.GetCharCount(bytes, byteLength, null);
+			if (charCount == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(charCount);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				encoding.GetChars(bytes, byteLength, ptr2, charCount, null);
+			}
+			return text;
+		}
+
+		internal static string CreateFromChar(char c)
+		{
+			string text = string.FastAllocateString(1);
+			text._firstChar = c;
+			return text;
+		}
+
+		internal unsafe static void wstrcpy(char* dmem, char* smem, int charCount)
+		{
+			Buffer.Memmove((byte*)dmem, (byte*)smem, (uint)(charCount * 2));
+		}
+
+		public override string ToString()
+		{
+			return this;
+		}
+
+		public string ToString(IFormatProvider provider)
+		{
+			return this;
+		}
+
+		public CharEnumerator GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		IEnumerator<char> IEnumerable<char>.GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		internal unsafe static int wcslen(char* ptr)
+		{
+			char* ptr2 = ptr;
+			int num = IntPtr.Size - 1;
+			while ((ptr2 & (uint)num) != 0U)
+			{
+				if (*ptr2 != '\0')
+				{
+					ptr2++;
+				}
+				else
+				{
+					IL_006E:
+					int num2 = (int)((long)(ptr2 - ptr));
+					if (ptr + num2 != ptr2)
+					{
+						throw new ArgumentException("The string must be null-terminated.");
+					}
+					return num2;
+				}
+			}
+			for (;;)
+			{
+				if (((*(long*)ptr2 + 9223231297218904063L) | 9223231297218904063L) == -1L)
+				{
+					ptr2 += 4;
+				}
+				else
+				{
+					if (*ptr2 == '\0')
+					{
+						goto IL_006E;
+					}
+					if (ptr2[1] == '\0')
+					{
+						goto IL_006A;
+					}
+					if (ptr2[2] == '\0')
+					{
+						goto IL_0066;
+					}
+					if (ptr2[3] == '\0')
+					{
+						break;
+					}
+					ptr2 += 4;
+				}
+			}
+			ptr2++;
+			IL_0066:
+			ptr2++;
+			IL_006A:
+			ptr2++;
+			goto IL_006E;
 		}
 
 		public TypeCode GetTypeCode()
@@ -2779,166 +3377,31 @@ namespace System
 			return Convert.DefaultToType(this, type, provider);
 		}
 
-		public CharEnumerator GetEnumerator()
+		public bool IsNormalized()
 		{
-			return new CharEnumerator(this);
+			return this.IsNormalized(NormalizationForm.FormC);
 		}
 
-		IEnumerator<char> IEnumerable<char>.GetEnumerator()
+		public bool IsNormalized(NormalizationForm normalizationForm)
 		{
-			return new CharEnumerator(this);
+			return Normalization.IsNormalized(this, normalizationForm);
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		public string Normalize()
 		{
-			return new CharEnumerator(this);
+			return this.Normalize(NormalizationForm.FormC);
 		}
 
-		[SecurityCritical]
-		internal unsafe static void InternalCopy(string src, IntPtr dest, int len)
+		public string Normalize(NormalizationForm normalizationForm)
 		{
-			if (len == 0)
-			{
-				return;
-			}
-			fixed (char* ptr = &src.m_firstChar)
-			{
-				byte* ptr2 = (byte*)ptr;
-				byte* ptr3 = (byte*)(void*)dest;
-				Buffer.Memcpy(ptr3, ptr2, len);
-			}
+			return Normalization.Normalize(this, normalizationForm);
 		}
 
 		public int Length
 		{
 			get
 			{
-				return this.m_stringLength;
-			}
-		}
-
-		internal unsafe static int CompareOrdinalUnchecked(string strA, int indexA, int lenA, string strB, int indexB, int lenB)
-		{
-			if (strA == null)
-			{
-				if (strB != null)
-				{
-					return -1;
-				}
-				return 0;
-			}
-			else
-			{
-				if (strB == null)
-				{
-					return 1;
-				}
-				int num = Math.Min(lenA, strA.m_stringLength - indexA);
-				int num2 = Math.Min(lenB, strB.m_stringLength - indexB);
-				if (num == num2 && indexA == indexB && strA == strB)
-				{
-					return 0;
-				}
-				char* ptr = strA;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				char* ptr2 = strB;
-				if (ptr2 != null)
-				{
-					ptr2 += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				char* ptr3 = ptr + indexA;
-				char* ptr4 = ptr3 + Math.Min(num, num2);
-				char* ptr5 = ptr2 + indexB;
-				while (ptr3 < ptr4)
-				{
-					if (*ptr3 != *ptr5)
-					{
-						return (int)(*ptr3 - *ptr5);
-					}
-					ptr3++;
-					ptr5++;
-				}
-				return num - num2;
-			}
-		}
-
-		public int IndexOf(char value, int startIndex, int count)
-		{
-			if (startIndex < 0 || startIndex > this.m_stringLength)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Cannot be negative and must be< 0");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", "< 0");
-			}
-			if (startIndex > this.m_stringLength - count)
-			{
-				throw new ArgumentOutOfRangeException("count", "startIndex + count > this.m_stringLength");
-			}
-			if ((startIndex == 0 && this.m_stringLength == 0) || startIndex == this.m_stringLength || count == 0)
-			{
-				return -1;
-			}
-			return this.IndexOfUnchecked(value, startIndex, count);
-		}
-
-		internal unsafe int IndexOfUnchecked(char value, int startIndex, int count)
-		{
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				char* ptr3 = ptr2 + startIndex;
-				char* ptr4 = ptr3 + (count >> 3 << 3);
-				while (ptr3 != ptr4)
-				{
-					if (*ptr3 == value)
-					{
-						return (int)((long)(ptr3 - ptr2));
-					}
-					if (ptr3[1] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 1L);
-					}
-					if (ptr3[2] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 2L);
-					}
-					if (ptr3[3] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 3L);
-					}
-					if (ptr3[4] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 4L);
-					}
-					if (ptr3[5] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 5L);
-					}
-					if (ptr3[6] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 6L);
-					}
-					if (ptr3[7] == value)
-					{
-						return (int)((long)(ptr3 - ptr2) + 7L);
-					}
-					ptr3 += 8;
-				}
-				ptr4 += count & 7;
-				while (ptr3 != ptr4)
-				{
-					if (*ptr3 == value)
-					{
-						return (int)((long)(ptr3 - ptr2));
-					}
-					ptr3++;
-				}
-				return -1;
+				return this._stringLength;
 			}
 		}
 
@@ -2949,530 +3412,208 @@ namespace System
 			{
 				return -1;
 			}
-			if (length > 1)
+			if (length == 0)
 			{
-				fixed (char* ptr = &this.m_firstChar)
-				{
-					char* ptr2 = ptr;
-					fixed (string text = value)
-					{
-						char* ptr3 = text;
-						if (ptr3 != null)
-						{
-							ptr3 += RuntimeHelpers.OffsetToStringData / 2;
-						}
-						char* ptr4 = ptr2 + startIndex;
-						char* ptr5 = ptr4 + count - length + 1;
-						while (ptr4 != ptr5)
-						{
-							if (*ptr4 == *ptr3)
-							{
-								for (int i = 1; i < length; i++)
-								{
-									if (ptr4[i] != ptr3[i])
-									{
-										goto IL_0090;
-									}
-								}
-								return (int)((long)(ptr4 - ptr2));
-							}
-							IL_0090:
-							ptr4++;
-						}
-						ptr = null;
-					}
-					return -1;
-				}
+				return startIndex;
 			}
-			if (length == 1)
-			{
-				return this.IndexOfUnchecked(value[0], startIndex, count);
-			}
-			return startIndex;
-		}
-
-		public int IndexOfAny(char[] anyOf, int startIndex, int count)
-		{
-			if (anyOf == null)
-			{
-				throw new ArgumentNullException();
-			}
-			if (startIndex < 0 || startIndex > this.m_stringLength)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			if (count < 0 || startIndex > this.m_stringLength - count)
-			{
-				throw new ArgumentOutOfRangeException("count", "Count cannot be negative, and startIndex + count must be less than m_stringLength of the string.");
-			}
-			return this.IndexOfAnyUnchecked(anyOf, startIndex, count);
-		}
-
-		private unsafe int IndexOfAnyUnchecked(char[] anyOf, int startIndex, int count)
-		{
-			if (anyOf.Length == 0)
-			{
-				return -1;
-			}
-			if (anyOf.Length == 1)
-			{
-				return this.IndexOfUnchecked(anyOf[0], startIndex, count);
-			}
-			fixed (char[] array = anyOf)
-			{
-				char* ptr;
-				if (anyOf == null || array.Length == 0)
-				{
-					ptr = null;
-				}
-				else
-				{
-					ptr = &array[0];
-				}
-				int num = (int)(*ptr);
-				int num2 = (int)(*ptr);
-				char* ptr2 = ptr + anyOf.Length;
-				char* ptr3 = ptr;
-				while (++ptr3 != ptr2)
-				{
-					if ((int)(*ptr3) > num)
-					{
-						num = (int)(*ptr3);
-					}
-					else if ((int)(*ptr3) < num2)
-					{
-						num2 = (int)(*ptr3);
-					}
-				}
-				fixed (char* ptr4 = &this.m_firstChar)
-				{
-					char* ptr5 = ptr4;
-					char* ptr6 = ptr5 + startIndex;
-					char* ptr7 = ptr6 + count;
-					while (ptr6 != ptr7)
-					{
-						if ((int)(*ptr6) > num || (int)(*ptr6) < num2)
-						{
-							ptr6++;
-						}
-						else
-						{
-							if (*ptr6 == *ptr)
-							{
-								return (int)((long)(ptr6 - ptr5));
-							}
-							ptr3 = ptr;
-							while (++ptr3 != ptr2)
-							{
-								if (*ptr6 == *ptr3)
-								{
-									return (int)((long)(ptr6 - ptr5));
-								}
-							}
-							ptr6++;
-						}
-					}
-				}
-			}
-			return -1;
-		}
-
-		public int LastIndexOf(char value, int startIndex, int count)
-		{
-			if (this.m_stringLength == 0)
-			{
-				return -1;
-			}
-			if (startIndex < 0 || startIndex >= this.Length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "< 0 || >= this.Length");
-			}
-			if (count < 0 || count > this.Length)
-			{
-				throw new ArgumentOutOfRangeException("count", "< 0 || > this.Length");
-			}
-			if (startIndex - count + 1 < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex - count + 1 < 0");
-			}
-			return this.LastIndexOfUnchecked(value, startIndex, count);
-		}
-
-		internal unsafe int LastIndexOfUnchecked(char value, int startIndex, int count)
-		{
-			fixed (char* ptr = &this.m_firstChar)
+			fixed (char* ptr = &this._firstChar)
 			{
 				char* ptr2 = ptr;
-				char* ptr3 = ptr2 + startIndex;
-				char* ptr4 = ptr3 - (count >> 3 << 3);
-				while (ptr3 != ptr4)
+				fixed (string text = value)
 				{
-					if (*ptr3 == value)
+					char* ptr3 = text;
+					if (ptr3 != null)
 					{
-						return (int)((long)(ptr3 - ptr2));
+						ptr3 += RuntimeHelpers.OffsetToStringData / 2;
 					}
-					if (ptr3[-1] == value)
+					char* ptr4 = ptr2 + startIndex;
+					char* ptr5 = ptr4 + count - length + 1;
+					while (ptr4 != ptr5)
 					{
-						return (int)((long)(ptr3 - ptr2)) - 1;
-					}
-					if (ptr3[-2] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 2;
-					}
-					if (ptr3[-3] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 3;
-					}
-					if (ptr3[-4] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 4;
-					}
-					if (ptr3[-5] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 5;
-					}
-					if (ptr3[-6] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 6;
-					}
-					if (ptr3[-7] == value)
-					{
-						return (int)((long)(ptr3 - ptr2)) - 7;
-					}
-					ptr3 -= 8;
-				}
-				ptr4 -= count & 7;
-				while (ptr3 != ptr4)
-				{
-					if (*ptr3 == value)
-					{
-						return (int)((long)(ptr3 - ptr2));
-					}
-					ptr3--;
-				}
-				return -1;
-			}
-		}
-
-		public int LastIndexOfAny(char[] anyOf, int startIndex, int count)
-		{
-			if (anyOf == null)
-			{
-				throw new ArgumentNullException();
-			}
-			if (this.m_stringLength == 0)
-			{
-				return -1;
-			}
-			if (startIndex < 0 || startIndex >= this.Length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "< 0 || > this.Length");
-			}
-			if (count < 0 || count > this.Length)
-			{
-				throw new ArgumentOutOfRangeException("count", "< 0 || > this.Length");
-			}
-			if (startIndex - count + 1 < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex - count + 1 < 0");
-			}
-			if (this.m_stringLength == 0)
-			{
-				return -1;
-			}
-			return this.LastIndexOfAnyUnchecked(anyOf, startIndex, count);
-		}
-
-		private unsafe int LastIndexOfAnyUnchecked(char[] anyOf, int startIndex, int count)
-		{
-			if (anyOf.Length == 1)
-			{
-				return this.LastIndexOfUnchecked(anyOf[0], startIndex, count);
-			}
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				char* ptr3;
-				if (anyOf == null || anyOf.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &anyOf[0];
-				}
-				char* ptr4 = ptr2 + startIndex;
-				char* ptr5 = ptr4 - count;
-				char* ptr6 = ptr3 + anyOf.Length;
-				while (ptr4 != ptr5)
-				{
-					for (char* ptr7 = ptr3; ptr7 != ptr6; ptr7++)
-					{
-						if (*ptr7 == *ptr4)
+						if (*ptr4 == *ptr3)
 						{
+							for (int i = 1; i < length; i++)
+							{
+								if (ptr4[i] != ptr3[i])
+								{
+									goto IL_007B;
+								}
+							}
 							return (int)((long)(ptr4 - ptr2));
 						}
+						IL_007B:
+						ptr4++;
 					}
-					ptr4--;
+					ptr = null;
 				}
 				return -1;
 			}
 		}
 
-		internal static int nativeCompareOrdinalEx(string strA, int indexA, string strB, int indexB, int count)
+		[CLSCompliant(false)]
+		public static string Concat(object arg0, object arg1, object arg2, object arg3, __arglist)
 		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count cannot be less than zero."));
-			}
-			if (indexA < 0 || indexA > strA.Length)
-			{
-				throw new ArgumentOutOfRangeException("indexA", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (indexB < 0 || indexB > strB.Length)
-			{
-				throw new ArgumentOutOfRangeException("indexB", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			return string.CompareOrdinalUnchecked(strA, indexA, count, strB, indexB, count);
+			throw new PlatformNotSupportedException();
 		}
 
-		private unsafe string ReplaceInternal(char oldChar, char newChar)
+		internal unsafe int IndexOfUncheckedIgnoreCase(string value, int startIndex, int count)
 		{
-			if (this.m_stringLength == 0 || oldChar == newChar)
+			int length = value.Length;
+			if (count < length)
 			{
-				return this;
+				return -1;
 			}
-			int num = this.IndexOfUnchecked(oldChar, 0, this.m_stringLength);
-			if (num == -1)
+			if (length == 0)
 			{
-				return this;
+				return startIndex;
 			}
-			if (num < 4)
+			TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
+			fixed (char* ptr = &this._firstChar)
 			{
-				num = 0;
-			}
-			string text = string.FastAllocateString(this.m_stringLength);
-			fixed (string text2 = text)
-			{
-				char* ptr = text2;
-				if (ptr != null)
+				char* ptr2 = ptr;
+				fixed (string text = value)
 				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				fixed (char* ptr2 = &this.m_firstChar)
-				{
-					char* ptr3 = ptr2;
-					if (num != 0)
+					char* ptr3 = text;
+					if (ptr3 != null)
 					{
-						string.CharCopy(ptr, ptr3, num);
+						ptr3 += RuntimeHelpers.OffsetToStringData / 2;
 					}
-					char* ptr4 = ptr + this.m_stringLength;
-					char* ptr5 = ptr + num;
-					char* ptr6 = ptr3 + num;
-					while (ptr5 != ptr4)
+					char* ptr4 = ptr2 + startIndex;
+					char* ptr5 = ptr4 + count - length + 1;
+					char c = textInfo.ToUpper(*ptr3);
+					while (ptr4 != ptr5)
 					{
-						if (*ptr6 == oldChar)
+						if (textInfo.ToUpper(*ptr4) == c)
 						{
-							*ptr5 = newChar;
+							for (int i = 1; i < length; i++)
+							{
+								if (textInfo.ToUpper(ptr4[i]) != textInfo.ToUpper(ptr3[i]))
+								{
+									goto IL_00A4;
+								}
+							}
+							return (int)((long)(ptr4 - ptr2));
 						}
-						else
+						IL_00A4:
+						ptr4++;
+					}
+					ptr = null;
+				}
+				return -1;
+			}
+		}
+
+		internal unsafe int LastIndexOfUnchecked(string value, int startIndex, int count)
+		{
+			int length = value.Length;
+			if (count < length)
+			{
+				return -1;
+			}
+			if (length == 0)
+			{
+				return startIndex;
+			}
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (string text = value)
+				{
+					char* ptr3 = text;
+					if (ptr3 != null)
+					{
+						ptr3 += RuntimeHelpers.OffsetToStringData / 2;
+					}
+					char* ptr4 = ptr2 + startIndex;
+					char* ptr5 = ptr4 - count + length - 1;
+					char* ptr6 = ptr3 + length - 1;
+					while (ptr4 != ptr5)
+					{
+						if (*ptr4 == *ptr6)
 						{
-							*ptr5 = *ptr6;
+							char* ptr7 = ptr4;
+							while (ptr3 != ptr6)
+							{
+								ptr6--;
+								ptr4--;
+								if (*ptr4 != *ptr6)
+								{
+									ptr6 = ptr3 + length - 1;
+									ptr4 = ptr7;
+									goto IL_0092;
+								}
+							}
+							return (int)((long)(ptr4 - ptr2));
 						}
-						ptr6++;
-						ptr5++;
+						IL_0092:
+						ptr4--;
 					}
-					text2 = null;
+					ptr = null;
 				}
-				return text;
+				return -1;
 			}
 		}
 
-		internal string ReplaceInternal(string oldValue, string newValue)
+		internal unsafe int LastIndexOfUncheckedIgnoreCase(string value, int startIndex, int count)
 		{
-			if (oldValue == null)
+			int length = value.Length;
+			if (count < length)
 			{
-				throw new ArgumentNullException("oldValue");
+				return -1;
 			}
-			if (oldValue.Length == 0)
+			if (length == 0)
 			{
-				throw new ArgumentException("oldValue is the empty string.");
+				return startIndex;
 			}
-			if (this.Length == 0)
+			TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
+			fixed (char* ptr = &this._firstChar)
 			{
-				return this;
-			}
-			if (newValue == null)
-			{
-				newValue = string.Empty;
-			}
-			return this.ReplaceUnchecked(oldValue, newValue);
-		}
-
-		private unsafe string ReplaceUnchecked(string oldValue, string newValue)
-		{
-			if (oldValue.m_stringLength > this.m_stringLength)
-			{
-				return this;
-			}
-			if (oldValue.m_stringLength == 1 && newValue.m_stringLength == 1)
-			{
-				return this.Replace(oldValue[0], newValue[0]);
-			}
-			int* ptr = stackalloc int[(UIntPtr)800];
-			fixed (char* ptr2 = &this.m_firstChar)
-			{
-				char* ptr3 = ptr2;
-				char* ptr4 = newValue;
-				if (ptr4 != null)
+				char* ptr2 = ptr;
+				fixed (string text = value)
 				{
-					ptr4 += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				int i = 0;
-				int num = 0;
-				while (i < this.m_stringLength)
-				{
-					int num2 = this.IndexOfUnchecked(oldValue, i, this.m_stringLength - i);
-					if (num2 < 0)
+					char* ptr3 = text;
+					if (ptr3 != null)
 					{
-						break;
+						ptr3 += RuntimeHelpers.OffsetToStringData / 2;
 					}
-					if (num >= 200)
+					char* ptr4 = ptr2 + startIndex;
+					char* ptr5 = ptr4 - count + length - 1;
+					char* ptr6 = ptr3 + length - 1;
+					char c = textInfo.ToUpper(*ptr6);
+					while (ptr4 != ptr5)
 					{
-						return this.ReplaceFallback(oldValue, newValue, 200);
-					}
-					ptr[(IntPtr)(num++) * 4] = num2;
-					i = num2 + oldValue.m_stringLength;
-				}
-				if (num == 0)
-				{
-					return this;
-				}
-				int num3 = 0;
-				try
-				{
-					num3 = checked(this.m_stringLength + (newValue.m_stringLength - oldValue.m_stringLength) * num);
-				}
-				catch (OverflowException)
-				{
-					throw new OutOfMemoryException();
-				}
-				string text = string.FastAllocateString(num3);
-				int num4 = 0;
-				int num5 = 0;
-				fixed (string text2 = text)
-				{
-					char* ptr5 = text2;
-					if (ptr5 != null)
-					{
-						ptr5 += RuntimeHelpers.OffsetToStringData / 2;
-					}
-					for (int j = 0; j < num; j++)
-					{
-						int num6 = ptr[j] - num5;
-						string.CharCopy(ptr5 + num4, ptr3 + num5, num6);
-						num4 += num6;
-						num5 = ptr[j] + oldValue.m_stringLength;
-						string.CharCopy(ptr5 + num4, ptr4, newValue.m_stringLength);
-						num4 += newValue.m_stringLength;
-					}
-					string.CharCopy(ptr5 + num4, ptr3 + num5, this.m_stringLength - num5);
-				}
-				return text;
-			}
-		}
-
-		private string ReplaceFallback(string oldValue, string newValue, int testedCount)
-		{
-			StringBuilder stringBuilder = new StringBuilder(this.m_stringLength + (newValue.m_stringLength - oldValue.m_stringLength) * testedCount);
-			int num;
-			for (int i = 0; i < this.m_stringLength; i = num + oldValue.m_stringLength)
-			{
-				num = this.IndexOfUnchecked(oldValue, i, this.m_stringLength - i);
-				if (num < 0)
-				{
-					stringBuilder.Append(this.InternalSubString(i, this.m_stringLength - i));
-					break;
-				}
-				stringBuilder.Append(this.InternalSubString(i, num - i));
-				stringBuilder.Append(newValue);
-			}
-			return stringBuilder.ToString();
-		}
-
-		private unsafe string PadHelper(int totalWidth, char paddingChar, bool isRightPadded)
-		{
-			if (totalWidth < 0)
-			{
-				throw new ArgumentOutOfRangeException("totalWidth", "Non-negative number required");
-			}
-			if (totalWidth <= this.m_stringLength)
-			{
-				return this;
-			}
-			string text = string.FastAllocateString(totalWidth);
-			fixed (string text2 = text)
-			{
-				char* ptr = text2;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				fixed (char* ptr2 = &this.m_firstChar)
-				{
-					char* ptr3 = ptr2;
-					if (isRightPadded)
-					{
-						string.CharCopy(ptr, ptr3, this.m_stringLength);
-						char* ptr4 = ptr + totalWidth;
-						char* ptr5 = ptr + this.m_stringLength;
-						while (ptr5 < ptr4)
+						if (textInfo.ToUpper(*ptr4) == c)
 						{
-							*(ptr5++) = paddingChar;
+							char* ptr7 = ptr4;
+							while (ptr3 != ptr6)
+							{
+								ptr6--;
+								ptr4--;
+								if (textInfo.ToUpper(*ptr4) != textInfo.ToUpper(*ptr6))
+								{
+									ptr6 = ptr3 + length - 1;
+									ptr4 = ptr7;
+									goto IL_00BB;
+								}
+							}
+							return (int)((long)(ptr4 - ptr2));
 						}
+						IL_00BB:
+						ptr4--;
 					}
-					else
-					{
-						char* ptr6 = ptr;
-						char* ptr7 = ptr6 + totalWidth - this.m_stringLength;
-						while (ptr6 < ptr7)
-						{
-							*(ptr6++) = paddingChar;
-						}
-						string.CharCopy(ptr6, ptr3, this.m_stringLength);
-					}
-					text2 = null;
+					ptr = null;
 				}
-				return text;
+				return -1;
 			}
 		}
 
 		internal bool StartsWithOrdinalUnchecked(string value)
 		{
-			return this.m_stringLength >= value.m_stringLength && string.CompareOrdinalUnchecked(this, 0, value.m_stringLength, value, 0, value.m_stringLength) == 0;
+			return this.Length >= value.Length && this._firstChar == value._firstChar && (value.Length == 1 || SpanHelpers.SequenceEqual(Unsafe.As<char, byte>(this.GetRawStringData()), Unsafe.As<char, byte>(value.GetRawStringData()), (ulong)((long)value.Length * 2L)));
 		}
 
-		internal unsafe bool IsAscii()
-		{
-			fixed (char* ptr = &this.m_firstChar)
-			{
-				char* ptr2 = ptr;
-				char* ptr3 = ptr2 + this.m_stringLength;
-				for (char* ptr4 = ptr2; ptr4 != ptr3; ptr4++)
-				{
-					if (*ptr4 >= '\u0080')
-					{
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		internal bool IsFastSort()
-		{
-			return false;
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern string FastAllocateString(int length);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string InternalIsInterned(string str);
@@ -3480,24 +3621,21 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string InternalIntern(string str);
 
-		internal unsafe static void CharCopy(char* dest, char* src, int count)
+		private unsafe static int FastCompareStringHelper(uint* strAChars, int countA, uint* strBChars, int countB)
 		{
-			if (((dest | src) & 3) != 0)
+			char* ptr = (char*)strAChars;
+			char* ptr2 = (char*)strBChars;
+			char* ptr3 = ptr + Math.Min(countA, countB);
+			while (ptr < ptr3)
 			{
-				if ((dest & 2) != 0 && (src & 2) != 0 && count > 0)
+				if (*ptr != *ptr2)
 				{
-					*dest = (char)(*(short*)src);
-					dest++;
-					src++;
-					count--;
+					return (int)(*ptr - *ptr2);
 				}
-				if (((dest | src) & 2) != 0)
-				{
-					Buffer.memcpy2((byte*)dest, (byte*)src, count * 2);
-					return;
-				}
+				ptr++;
+				ptr2++;
 			}
-			Buffer.memcpy4((byte*)dest, (byte*)src, count * 2);
+			return countA - countB;
 		}
 
 		private unsafe static void memset(byte* dest, int val, int len)
@@ -3605,152 +3743,135 @@ namespace System
 
 		private unsafe string CreateString(sbyte* value)
 		{
-			if (value == null)
-			{
-				return string.Empty;
-			}
-			byte* ptr = (byte*)value;
-			int num = 0;
-			try
-			{
-				while (*(ptr++) != 0)
-				{
-					num++;
-				}
-			}
-			catch (NullReferenceException)
-			{
-				throw new ArgumentOutOfRangeException("ptr", "Value does not refer to a valid string.");
-			}
-			return this.CreateString(value, 0, num, null);
+			return string.Ctor(value);
 		}
 
 		private unsafe string CreateString(sbyte* value, int startIndex, int length)
 		{
-			return this.CreateString(value, startIndex, length, null);
+			return string.Ctor(value, startIndex, length);
 		}
 
 		private unsafe string CreateString(char* value)
 		{
-			return this.CtorCharPtr(value);
+			return string.Ctor(value);
 		}
 
 		private unsafe string CreateString(char* value, int startIndex, int length)
 		{
-			return this.CtorCharPtrStartLength(value, startIndex, length);
+			return string.Ctor(value, startIndex, length);
 		}
 
 		private string CreateString(char[] val, int startIndex, int length)
 		{
-			return this.CtorCharArrayStartLength(val, startIndex, length);
+			return string.Ctor(val, startIndex, length);
 		}
 
 		private string CreateString(char[] val)
 		{
-			return this.CtorCharArray(val);
+			return string.Ctor(val);
 		}
 
-		private unsafe string CreateString(char c, int count)
+		private string CreateString(char c, int count)
 		{
-			if (count < 0)
+			return string.Ctor(c, count);
+		}
+
+		private unsafe string CreateString(sbyte* value, int startIndex, int length, Encoding enc)
+		{
+			return string.Ctor(value, startIndex, length, enc);
+		}
+
+		private string CreateString(ReadOnlySpan<char> value)
+		{
+			return string.Ctor(value);
+		}
+
+		[IndexerName("Chars")]
+		public unsafe char this[int index]
+		{
+			[Intrinsic]
+			get
 			{
-				throw new ArgumentOutOfRangeException("count");
+				if ((ulong)index >= (ulong)((long)this._stringLength))
+				{
+					ThrowHelper.ThrowIndexOutOfRangeException();
+				}
+				return *Unsafe.Add<char>(ref this._firstChar, index);
 			}
-			if (count == 0)
+		}
+
+		public static string Intern(string str)
+		{
+			if (str == null)
 			{
-				return string.Empty;
+				throw new ArgumentNullException("str");
 			}
-			string text = string.FastAllocateString(count);
-			fixed (string text2 = text)
+			return string.InternalIntern(str);
+		}
+
+		public static string IsInterned(string str)
+		{
+			if (str == null)
 			{
-				char* ptr = text2;
+				throw new ArgumentNullException("str");
+			}
+			return string.InternalIsInterned(str);
+		}
+
+		private unsafe int LegacyStringGetHashCode()
+		{
+			int num = 5381;
+			int num2 = num;
+			fixed (string text = this)
+			{
+				char* ptr = text;
 				if (ptr != null)
 				{
 					ptr += RuntimeHelpers.OffsetToStringData / 2;
 				}
 				char* ptr2 = ptr;
-				char* ptr3 = ptr2 + count;
-				while (ptr2 < ptr3)
+				int num3;
+				while ((num3 = (int)(*ptr2)) != 0)
 				{
-					*ptr2 = c;
-					ptr2++;
-				}
-			}
-			return text;
-		}
-
-		private unsafe string CreateString(sbyte* value, int startIndex, int length, Encoding enc)
-		{
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Non-negative number required.");
-			}
-			if (value + startIndex < value)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Value, startIndex and length do not refer to a valid string.");
-			}
-			if (enc == null)
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				if (length == 0)
-				{
-					return string.Empty;
-				}
-				enc = Encoding.Default;
-			}
-			byte[] array = new byte[length];
-			if (length != 0)
-			{
-				byte[] array2;
-				byte* ptr;
-				if ((array2 = array) == null || array2.Length == 0)
-				{
-					ptr = null;
-				}
-				else
-				{
-					ptr = &array2[0];
-				}
-				try
-				{
-					if (value == null)
+					num = ((num << 5) + num) ^ num3;
+					num3 = (int)ptr2[1];
+					if (num3 == 0)
 					{
-						throw new ArgumentOutOfRangeException("ptr", "Value, startIndex and length do not refer to a valid string.");
+						break;
 					}
-					string.memcpy(ptr, (byte*)(value + startIndex), length);
+					num2 = ((num2 << 5) + num2) ^ num3;
+					ptr2 += 2;
 				}
-				catch (NullReferenceException)
-				{
-					throw new ArgumentOutOfRangeException("ptr", "Value, startIndex and length do not refer to a valid string.");
-				}
-				array2 = null;
 			}
-			return enc.GetString(array);
+			return num + num2 * 1566083941;
 		}
 
-		[NonSerialized]
-		private int m_stringLength;
+		private const int StackallocIntBufferSizeLimit = 128;
+
+		private const int PROBABILISTICMAP_BLOCK_INDEX_MASK = 7;
+
+		private const int PROBABILISTICMAP_BLOCK_INDEX_SHIFT = 3;
+
+		private const int PROBABILISTICMAP_SIZE = 8;
 
 		[NonSerialized]
-		private char m_firstChar;
+		private int _stringLength;
 
-		private const int TrimHead = 0;
-
-		private const int TrimTail = 1;
-
-		private const int TrimBoth = 2;
+		[NonSerialized]
+		private char _firstChar;
 
 		public static readonly string Empty;
 
-		private const int charPtrAlignConst = 1;
+		private enum TrimType
+		{
+			Head,
+			Tail,
+			Both
+		}
 
-		private const int alignConst = 3;
+		[StructLayout(LayoutKind.Explicit, Size = 32)]
+		private struct ProbabilisticMap
+		{
+		}
 	}
 }

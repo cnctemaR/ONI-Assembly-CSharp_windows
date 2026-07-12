@@ -5,16 +5,16 @@ namespace System.Data.Common
 {
 	public abstract class DbParameter : MarshalByRefObject, IDbDataParameter, IDataParameter
 	{
-		[Browsable(false)]
 		[RefreshProperties(RefreshProperties.All)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public abstract DbType DbType { get; set; }
 
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		public abstract void ResetDbType();
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue(ParameterDirection.Input)]
+		[RefreshProperties(RefreshProperties.All)]
 		public abstract ParameterDirection Direction { get; set; }
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -76,9 +76,9 @@ namespace System.Data.Common
 		[DefaultValue("")]
 		public abstract string SourceColumn { get; set; }
 
+		[DefaultValue(false)]
 		[RefreshProperties(RefreshProperties.All)]
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		[DefaultValue(false)]
 		public abstract bool SourceColumnNullMapping { get; set; }
 
 		[DefaultValue(DataRowVersion.Current)]
@@ -93,8 +93,8 @@ namespace System.Data.Common
 			}
 		}
 
-		[DefaultValue(null)]
 		[RefreshProperties(RefreshProperties.All)]
+		[DefaultValue(null)]
 		public abstract object Value { get; set; }
 	}
 }

@@ -2,24 +2,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Security;
-using System.Security.Permissions;
 
 namespace System.Threading.Tasks
 {
-	[DebuggerTypeProxy(typeof(TaskScheduler.SystemThreadingTasks_TaskSchedulerDebugView))]
 	[DebuggerDisplay("Id={Id}")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Unrestricted = true)]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
+	[DebuggerTypeProxy(typeof(TaskScheduler.SystemThreadingTasks_TaskSchedulerDebugView))]
 	public abstract class TaskScheduler
 	{
-		[SecurityCritical]
 		protected internal abstract void QueueTask(Task task);
 
-		[SecurityCritical]
 		protected abstract bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued);
 
-		[SecurityCritical]
 		protected abstract IEnumerable<Task> GetScheduledTasks();
 
 		public virtual int MaximumConcurrencyLevel
@@ -30,7 +23,6 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[SecuritySafeCritical]
 		internal bool TryRunInline(Task task, bool taskWasPreviouslyQueued)
 		{
 			TaskScheduler executingTaskScheduler = task.ExecutingTaskScheduler;
@@ -46,7 +38,6 @@ namespace System.Threading.Tasks
 			bool flag = false;
 			try
 			{
-				task.FireTaskScheduledIfNeeded(this);
 				flag = this.TryExecuteTaskInline(task, taskWasPreviouslyQueued);
 			}
 			finally
@@ -55,12 +46,11 @@ namespace System.Threading.Tasks
 			}
 			if (flag && !task.IsDelegateInvoked && !task.IsCanceled)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("The TryExecuteTaskInline call to the underlying scheduler succeeded, but the task body was not invoked."));
+				throw new InvalidOperationException("The TryExecuteTaskInline call to the underlying scheduler succeeded, but the task body was not invoked.");
 			}
 			return flag;
 		}
 
-		[SecurityCritical]
 		protected internal virtual bool TryDequeue(Task task)
 		{
 			return false;
@@ -75,21 +65,6 @@ namespace System.Threading.Tasks
 			get
 			{
 				return true;
-			}
-		}
-
-		[SecurityCritical]
-		internal void InternalQueueTask(Task task)
-		{
-			task.FireTaskScheduledIfNeeded(this);
-			this.QueueTask(task);
-		}
-
-		protected TaskScheduler()
-		{
-			if (Debugger.IsAttached)
-			{
-				this.AddToActiveTaskSchedulers();
 			}
 		}
 
@@ -117,14 +92,6 @@ namespace System.Threading.Tasks
 			get
 			{
 				return TaskScheduler.InternalCurrent ?? TaskScheduler.Default;
-			}
-		}
-
-		internal static bool IsDefault
-		{
-			get
-			{
-				return TaskScheduler.Current == TaskScheduler.Default;
 			}
 		}
 
@@ -164,36 +131,30 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[SecurityCritical]
 		protected bool TryExecuteTask(Task task)
 		{
 			if (task.ExecutingTaskScheduler != this)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("ExecuteTask may not be called for a task which was previously queued to a different TaskScheduler."));
+				throw new InvalidOperationException("ExecuteTask may not be called for a task which was previously queued to a different TaskScheduler.");
 			}
 			return task.ExecuteEntry(true);
 		}
 
 		public static event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException
 		{
-			[SecurityCritical]
 			add
 			{
 				if (value != null)
 				{
-					RuntimeHelpers.PrepareContractedDelegate(value);
-					object unobservedTaskExceptionLockObject = TaskScheduler._unobservedTaskExceptionLockObject;
-					lock (unobservedTaskExceptionLockObject)
+					using (LockHolder.Hold(TaskScheduler._unobservedTaskExceptionLockObject))
 					{
 						TaskScheduler._unobservedTaskException = (EventHandler<UnobservedTaskExceptionEventArgs>)Delegate.Combine(TaskScheduler._unobservedTaskException, value);
 					}
 				}
 			}
-			[SecurityCritical]
 			remove
 			{
-				object unobservedTaskExceptionLockObject = TaskScheduler._unobservedTaskExceptionLockObject;
-				lock (unobservedTaskExceptionLockObject)
+				using (LockHolder.Hold(TaskScheduler._unobservedTaskExceptionLockObject))
 				{
 					TaskScheduler._unobservedTaskException = (EventHandler<UnobservedTaskExceptionEventArgs>)Delegate.Remove(TaskScheduler._unobservedTaskException, value);
 				}
@@ -202,8 +163,7 @@ namespace System.Threading.Tasks
 
 		internal static void PublishUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs ueea)
 		{
-			object unobservedTaskExceptionLockObject = TaskScheduler._unobservedTaskExceptionLockObject;
-			lock (unobservedTaskExceptionLockObject)
+			using (LockHolder.Hold(TaskScheduler._unobservedTaskExceptionLockObject))
 			{
 				EventHandler<UnobservedTaskExceptionEventArgs> unobservedTaskException = TaskScheduler._unobservedTaskException;
 				if (unobservedTaskException != null)
@@ -213,7 +173,6 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[SecurityCritical]
 		internal Task[] GetScheduledTasksForDebugger()
 		{
 			IEnumerable<Task> scheduledTasks = this.GetScheduledTasks();
@@ -224,7 +183,7 @@ namespace System.Threading.Tasks
 			Task[] array = scheduledTasks as Task[];
 			if (array == null)
 			{
-				array = new List<Task>(scheduledTasks).ToArray();
+				array = new LowLevelList<Task>(scheduledTasks).ToArray();
 			}
 			Task[] array2 = array;
 			for (int i = 0; i < array2.Length; i++)
@@ -234,20 +193,22 @@ namespace System.Threading.Tasks
 			return array;
 		}
 
-		[SecurityCritical]
 		internal static TaskScheduler[] GetTaskSchedulersForDebugger()
 		{
 			if (TaskScheduler.s_activeTaskSchedulers == null)
 			{
 				return new TaskScheduler[] { TaskScheduler.s_defaultTaskScheduler };
 			}
-			ICollection<TaskScheduler> keys = TaskScheduler.s_activeTaskSchedulers.Keys;
-			if (!keys.Contains(TaskScheduler.s_defaultTaskScheduler))
+			LowLevelList<TaskScheduler> lowLevelList = new LowLevelList<TaskScheduler>();
+			foreach (KeyValuePair<TaskScheduler, object> keyValuePair in ((IEnumerable<KeyValuePair<TaskScheduler, object>>)TaskScheduler.s_activeTaskSchedulers))
 			{
-				keys.Add(TaskScheduler.s_defaultTaskScheduler);
+				lowLevelList.Add(keyValuePair.Key);
 			}
-			TaskScheduler[] array = new TaskScheduler[keys.Count];
-			keys.CopyTo(array, 0);
+			if (!lowLevelList.Contains(TaskScheduler.s_defaultTaskScheduler))
+			{
+				lowLevelList.Add(TaskScheduler.s_defaultTaskScheduler);
+			}
+			TaskScheduler[] array = lowLevelList.ToArray();
 			TaskScheduler[] array2 = array;
 			for (int i = 0; i < array2.Length; i++)
 			{
@@ -266,7 +227,7 @@ namespace System.Threading.Tasks
 
 		private static EventHandler<UnobservedTaskExceptionEventArgs> _unobservedTaskException;
 
-		private static readonly object _unobservedTaskExceptionLockObject = new object();
+		private static readonly Lock _unobservedTaskExceptionLockObject = new Lock();
 
 		internal sealed class SystemThreadingTasks_TaskSchedulerDebugView
 		{
@@ -285,7 +246,6 @@ namespace System.Threading.Tasks
 
 			public IEnumerable<Task> ScheduledTasks
 			{
-				[SecurityCritical]
 				get
 				{
 					return this.m_taskScheduler.GetScheduledTasks();

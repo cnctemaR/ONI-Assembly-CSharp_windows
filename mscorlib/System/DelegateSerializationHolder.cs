@@ -40,7 +40,7 @@ namespace System
 			for (int i = 0; i < invocationList.Length; i++)
 			{
 				Delegate @delegate = invocationList[i];
-				string text = ((@delegate.Target != null) ? ("target" + i) : null);
+				string text = ((@delegate.Target != null) ? ("target" + i.ToString()) : null);
 				DelegateSerializationHolder.DelegateEntry delegateEntry2 = new DelegateSerializationHolder.DelegateEntry(@delegate, text);
 				if (delegateEntry == null)
 				{
@@ -55,7 +55,7 @@ namespace System
 				{
 					info.AddValue(text, @delegate.Target);
 				}
-				info.AddValue("method" + i, @delegate.Method);
+				info.AddValue("method" + i.ToString(), @delegate.Method);
 			}
 			info.SetType(typeof(DelegateSerializationHolder));
 		}
@@ -92,7 +92,7 @@ namespace System
 				{
 					obj = info.GetValue(this.target.ToString(), typeof(object));
 				}
-				string text = "method" + index;
+				string text = "method" + index.ToString();
 				MethodInfo methodInfo = (MethodInfo)info.GetValueNoThrow(text, typeof(MethodInfo));
 				Type type = Assembly.Load(this.assembly).GetType(this.type);
 				if (obj != null)

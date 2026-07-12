@@ -149,13 +149,13 @@ namespace System.ComponentModel
 			string text;
 			if (value == null)
 			{
-				text = global::SR.GetString("(null)");
+				text = SR.GetString("(null)");
 			}
 			else
 			{
 				text = value.GetType().FullName;
 			}
-			throw new NotSupportedException(global::SR.GetString("{0} cannot convert from {1}.", new object[]
+			throw new NotSupportedException(SR.GetString("{0} cannot convert from {1}.", new object[]
 			{
 				base.GetType().Name,
 				text
@@ -167,13 +167,13 @@ namespace System.ComponentModel
 			string text;
 			if (value == null)
 			{
-				text = global::SR.GetString("(null)");
+				text = SR.GetString("(null)");
 			}
 			else
 			{
 				text = value.GetType().FullName;
 			}
-			throw new NotSupportedException(global::SR.GetString("'{0}' is unable to convert '{1}' to '{2}'.", new object[]
+			throw new NotSupportedException(SR.GetString("'{0}' is unable to convert '{1}' to '{2}'.", new object[]
 			{
 				base.GetType().Name,
 				text,

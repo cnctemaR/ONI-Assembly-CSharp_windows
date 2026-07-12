@@ -27,7 +27,7 @@ namespace System.IO.Compression
 			this.StartIndex = state._startIndex;
 		}
 
-		internal struct InputState
+		internal readonly struct InputState
 		{
 			internal InputState(int count, int startIndex)
 			{

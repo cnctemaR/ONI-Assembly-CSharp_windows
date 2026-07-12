@@ -10,7 +10,7 @@ namespace FMODUnity
 			base.Identifier = "default";
 		}
 
-		public override string DisplayName
+		internal override string DisplayName
 		{
 			get
 			{
@@ -18,11 +18,11 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareRuntimePlatforms(Settings settings)
+		internal override void DeclareRuntimePlatforms(Settings settings)
 		{
 		}
 
-		public override bool IsIntrinsic
+		internal override bool IsIntrinsic
 		{
 			get
 			{
@@ -30,14 +30,14 @@ namespace FMODUnity
 			}
 		}
 
-		public override void InitializeProperties()
+		internal override void InitializeProperties()
 		{
 			base.InitializeProperties();
 			Platform.PropertyAccessors.Plugins.Set(this, new List<string>());
 			Platform.PropertyAccessors.StaticPlugins.Set(this, new List<string>());
 		}
 
-		public override void EnsurePropertiesAreValid()
+		internal override void EnsurePropertiesAreValid()
 		{
 			base.EnsurePropertiesAreValid();
 			if (base.StaticPlugins == null)

@@ -10,7 +10,7 @@ namespace System.Configuration
 		public override object ConvertFrom(ITypeDescriptorContext ctx, CultureInfo ci, object data)
 		{
 			CommaDelimitedStringCollection commaDelimitedStringCollection = new CommaDelimitedStringCollection();
-			foreach (string text in ((string)data).Split(new char[] { ',' }))
+			foreach (string text in ((string)data).Split(',', StringSplitOptions.None))
 			{
 				commaDelimitedStringCollection.Add(text.Trim());
 			}

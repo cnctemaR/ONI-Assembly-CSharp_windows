@@ -3,6 +3,18 @@ using System.Collections.Generic;
 
 public class KAnimSynchronizer
 {
+	public string IdleAnim
+	{
+		get
+		{
+			return this.idle_anim;
+		}
+		set
+		{
+			this.idle_anim = value;
+		}
+	}
+
 	public KAnimSynchronizer(KAnimControllerBase master_controller)
 	{
 		this.masterController = master_controller;
@@ -10,7 +22,7 @@ public class KAnimSynchronizer
 
 	private void Clear(KAnimControllerBase controller)
 	{
-		controller.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play(this.IdleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimControllerBase controller)
@@ -24,9 +36,14 @@ public class KAnimSynchronizer
 		this.Targets.Remove(controller);
 	}
 
+	public void RemoveWithoutIdleAnim(KAnimControllerBase controller)
+	{
+		this.Targets.Remove(controller);
+	}
+
 	private void Clear(KAnimSynchronizedController controller)
 	{
-		controller.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play(this.IdleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimSynchronizedController controller)
@@ -159,6 +176,8 @@ public class KAnimSynchronizer
 			this.SyncedControllers[j].synchronizedController.SetElapsedTime(elapsedTime);
 		}
 	}
+
+	private string idle_anim = "idle_default";
 
 	private KAnimControllerBase masterController;
 

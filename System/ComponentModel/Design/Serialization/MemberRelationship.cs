@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel.Design.Serialization
 {
-	public struct MemberRelationship
+	public readonly struct MemberRelationship
 	{
 		public MemberRelationship(object owner, MemberDescriptor member)
 		{
@@ -14,33 +14,21 @@ namespace System.ComponentModel.Design.Serialization
 			{
 				throw new ArgumentNullException("member");
 			}
-			this._owner = owner;
-			this._member = member;
+			this.Owner = owner;
+			this.Member = member;
 		}
 
 		public bool IsEmpty
 		{
 			get
 			{
-				return this._owner == null;
+				return this.Owner == null;
 			}
 		}
 
-		public MemberDescriptor Member
-		{
-			get
-			{
-				return this._member;
-			}
-		}
+		public MemberDescriptor Member { get; }
 
-		public object Owner
-		{
-			get
-			{
-				return this._owner;
-			}
-		}
+		public object Owner { get; }
 
 		public override bool Equals(object obj)
 		{
@@ -54,11 +42,11 @@ namespace System.ComponentModel.Design.Serialization
 
 		public override int GetHashCode()
 		{
-			if (this._owner == null)
+			if (this.Owner == null)
 			{
 				return base.GetHashCode();
 			}
-			return this._owner.GetHashCode() ^ this._member.GetHashCode();
+			return this.Owner.GetHashCode() ^ this.Member.GetHashCode();
 		}
 
 		public static bool operator ==(MemberRelationship left, MemberRelationship right)
@@ -70,10 +58,6 @@ namespace System.ComponentModel.Design.Serialization
 		{
 			return !(left == right);
 		}
-
-		private object _owner;
-
-		private MemberDescriptor _member;
 
 		public static readonly MemberRelationship Empty;
 	}

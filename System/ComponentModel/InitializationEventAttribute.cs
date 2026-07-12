@@ -7,17 +7,9 @@ namespace System.ComponentModel
 	{
 		public InitializationEventAttribute(string eventName)
 		{
-			this.eventName = eventName;
+			this.EventName = eventName;
 		}
 
-		public string EventName
-		{
-			get
-			{
-				return this.eventName;
-			}
-		}
-
-		private string eventName;
+		public string EventName { get; }
 	}
 }

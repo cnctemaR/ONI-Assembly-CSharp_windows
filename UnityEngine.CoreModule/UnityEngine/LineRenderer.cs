@@ -149,6 +149,20 @@ namespace UnityEngine
 			return vector;
 		}
 
+		public Vector2 textureScale
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_textureScale_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_textureScale_Injected(ref value);
+			}
+		}
+
 		public extern float shadowBias
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -174,6 +188,14 @@ namespace UnityEngine
 		}
 
 		public extern LineAlignment alignment
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern SpriteMaskInteraction maskInteraction
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -281,5 +303,11 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetPosition_Injected(int index, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_textureScale_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_textureScale_Injected(ref Vector2 value);
 	}
 }

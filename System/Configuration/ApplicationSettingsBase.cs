@@ -49,24 +49,46 @@ namespace System.Configuration
 
 		public void Reload()
 		{
-			foreach (object obj in this.Providers)
+			if (this.PropertyValues != null)
 			{
-				SettingsProvider settingsProvider = (SettingsProvider)obj;
-				this.CacheValuesByProvider(settingsProvider);
+				this.PropertyValues.Clear();
+			}
+			foreach (object obj in this.Properties)
+			{
+				SettingsProperty settingsProperty = (SettingsProperty)obj;
+				this.OnPropertyChanged(this, new PropertyChangedEventArgs(settingsProperty.Name));
 			}
 		}
 
 		public void Reset()
 		{
-			this.Reload();
-			foreach (object obj in this.PropertyValues)
+			if (this.Properties != null)
 			{
-				SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj;
-				settingsPropertyValue.PropertyValue = settingsPropertyValue.Reset();
+				foreach (object obj in this.Providers)
+				{
+					IApplicationSettingsProvider applicationSettingsProvider = ((SettingsProvider)obj) as IApplicationSettingsProvider;
+					if (applicationSettingsProvider != null)
+					{
+						applicationSettingsProvider.Reset(this.Context);
+					}
+				}
+				this.InternalSave();
 			}
+			this.Reload();
 		}
 
 		public override void Save()
+		{
+			CancelEventArgs e = new CancelEventArgs();
+			this.OnSettingsSaving(this, e);
+			if (e.Cancel)
+			{
+				return;
+			}
+			this.InternalSave();
+		}
+
+		private void InternalSave()
 		{
 			this.Context.CurrentSettings = this;
 			foreach (object obj in this.Providers)
@@ -91,6 +113,33 @@ namespace System.Configuration
 
 		public virtual void Upgrade()
 		{
+			if (this.Properties != null)
+			{
+				foreach (object obj in this.Providers)
+				{
+					SettingsProvider settingsProvider = (SettingsProvider)obj;
+					IApplicationSettingsProvider applicationSettingsProvider = settingsProvider as IApplicationSettingsProvider;
+					if (applicationSettingsProvider != null)
+					{
+						applicationSettingsProvider.Upgrade(this.Context, this.GetPropertiesForProvider(settingsProvider));
+					}
+				}
+			}
+			this.Reload();
+		}
+
+		private SettingsPropertyCollection GetPropertiesForProvider(SettingsProvider provider)
+		{
+			SettingsPropertyCollection settingsPropertyCollection = new SettingsPropertyCollection();
+			foreach (object obj in this.Properties)
+			{
+				SettingsProperty settingsProperty = (SettingsProperty)obj;
+				if (settingsProperty.Provider == provider)
+				{
+					settingsPropertyCollection.Add(settingsProperty);
+				}
+			}
+			return settingsPropertyCollection;
 		}
 
 		protected virtual void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -313,7 +362,21 @@ namespace System.Configuration
 			{
 				if (attribute is SettingsProviderAttribute)
 				{
-					settingsProvider = (SettingsProvider)Activator.CreateInstance(Type.GetType(((SettingsProviderAttribute)attribute).ProviderTypeName));
+					string providerTypeName = ((SettingsProviderAttribute)attribute).ProviderTypeName;
+					Type type = Type.GetType(providerTypeName);
+					if (type == null)
+					{
+						string[] array = providerTypeName.Split('.', StringSplitOptions.None);
+						if (array.Length > 1)
+						{
+							Assembly assembly = Assembly.Load(array[0]);
+							if (assembly != null)
+							{
+								type = assembly.GetType(providerTypeName);
+							}
+						}
+					}
+					settingsProvider = (SettingsProvider)Activator.CreateInstance(type);
 					settingsProvider.Initialize(null, null);
 				}
 				else if (attribute is DefaultSettingValueAttribute)

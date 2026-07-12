@@ -84,7 +84,10 @@ namespace System.Reflection.Emit
 				for (int i = 0; i < constructorBuilder.parameters.Length; i++)
 				{
 					Type type = this.instantiation.InflateType(constructorBuilder.parameters[i]);
-					array[i] = ParameterInfo.New((constructorBuilder.pinfo == null) ? null : constructorBuilder.pinfo[i], type, this, i + 1);
+					ParameterInfo[] array2 = array;
+					int num = i;
+					ParameterBuilder[] pinfo = constructorBuilder.pinfo;
+					array2[num] = RuntimeParameterInfo.New((pinfo != null) ? pinfo[i] : null, type, this, i + 1);
 				}
 			}
 			else
@@ -94,7 +97,7 @@ namespace System.Reflection.Emit
 				for (int j = 0; j < parameters.Length; j++)
 				{
 					Type type2 = this.instantiation.InflateType(parameters[j].ParameterType);
-					array[j] = ParameterInfo.New(parameters[j], type2, this, j + 1);
+					array[j] = RuntimeParameterInfo.New(parameters[j], type2, this, j + 1);
 				}
 			}
 			return array;

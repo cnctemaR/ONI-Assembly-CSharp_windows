@@ -72,7 +72,15 @@ public class BlueGrass : StateMachineComponent<BlueGrass.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.grow;
-			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(BlueGrass.StatesInstance smi)
+			GameStateMachine<BlueGrass.States, BlueGrass.StatesInstance, BlueGrass, object>.State state = this.dead;
+			string text = CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			string text3 = "";
+			StatusItem.IconType iconType = StatusItem.IconType.Info;
+			NotificationType notificationType = NotificationType.Neutral;
+			bool flag = false;
+			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+			state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).Enter(delegate(BlueGrass.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);

@@ -21,6 +21,12 @@ namespace Mono.Security.Authenticode
 			this.FileName = fileName;
 		}
 
+		public AuthenticodeDeformatter(byte[] rawData)
+			: this()
+		{
+			this.RawData = rawData;
+		}
+
 		public string FileName
 		{
 			get
@@ -30,15 +36,41 @@ namespace Mono.Security.Authenticode
 			set
 			{
 				this.Reset();
+				this.filename = value;
 				try
 				{
-					this.CheckSignature(value);
+					this.CheckSignature();
 				}
 				catch (SecurityException)
 				{
 					throw;
 				}
-				catch (Exception)
+				catch
+				{
+					this.reason = 1;
+				}
+			}
+		}
+
+		public byte[] RawData
+		{
+			get
+			{
+				return this.rawdata;
+			}
+			set
+			{
+				this.Reset();
+				this.rawdata = value;
+				try
+				{
+					this.CheckSignature();
+				}
+				catch (SecurityException)
+				{
+					throw;
+				}
+				catch
 				{
 					this.reason = 1;
 				}
@@ -147,10 +179,16 @@ namespace Mono.Security.Authenticode
 			}
 		}
 
-		private bool CheckSignature(string fileName)
+		private bool CheckSignature()
 		{
-			this.filename = fileName;
-			base.Open(this.filename);
+			if (this.filename != null)
+			{
+				base.Open(this.filename);
+			}
+			else
+			{
+				base.Open(this.rawdata);
+			}
 			this.entry = base.GetSecurityEntry();
 			if (this.entry == null)
 			{
@@ -181,13 +219,13 @@ namespace Mono.Security.Authenticode
 				{
 					hashAlgorithm = MD5.Create();
 					this.hash = base.GetHash(hashAlgorithm);
-					goto IL_0167;
+					goto IL_0176;
 				}
 				if (length == 20)
 				{
 					hashAlgorithm = SHA1.Create();
 					this.hash = base.GetHash(hashAlgorithm);
-					goto IL_0167;
+					goto IL_0176;
 				}
 			}
 			else
@@ -196,25 +234,25 @@ namespace Mono.Security.Authenticode
 				{
 					hashAlgorithm = SHA256.Create();
 					this.hash = base.GetHash(hashAlgorithm);
-					goto IL_0167;
+					goto IL_0176;
 				}
 				if (length == 48)
 				{
 					hashAlgorithm = SHA384.Create();
 					this.hash = base.GetHash(hashAlgorithm);
-					goto IL_0167;
+					goto IL_0176;
 				}
 				if (length == 64)
 				{
 					hashAlgorithm = SHA512.Create();
 					this.hash = base.GetHash(hashAlgorithm);
-					goto IL_0167;
+					goto IL_0176;
 				}
 			}
 			this.reason = 5;
 			base.Close();
 			return false;
-			IL_0167:
+			IL_0176:
 			base.Close();
 			if (!this.signedHash.CompareValue(this.hash))
 			{
@@ -319,8 +357,7 @@ namespace Mono.Security.Authenticode
 				for (int j = 0; j < sd.SignerInfo.UnauthenticatedAttributes.Count; j++)
 				{
 					ASN1 asn5 = (ASN1)sd.SignerInfo.UnauthenticatedAttributes[j];
-					string text4 = ASN1Convert.ToOid(asn5[0]);
-					if (text4 == "1.2.840.113549.1.9.6")
+					if (ASN1Convert.ToOid(asn5[0]) == "1.2.840.113549.1.9.6")
 					{
 						PKCS7.SignerInfo signerInfo = new PKCS7.SignerInfo(asn5[1]);
 						this.trustedTimestampRoot = this.VerifyCounterSignature(signerInfo, signature);
@@ -438,6 +475,7 @@ namespace Mono.Security.Authenticode
 		private void Reset()
 		{
 			this.filename = null;
+			this.rawdata = null;
 			this.entry = null;
 			this.hash = null;
 			this.signedHash = null;
@@ -451,6 +489,8 @@ namespace Mono.Security.Authenticode
 		}
 
 		private string filename;
+
+		private byte[] rawdata;
 
 		private byte[] hash;
 

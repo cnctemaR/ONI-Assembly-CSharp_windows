@@ -7,15 +7,15 @@ namespace MS.Internal.Xml.XPath
 	{
 		internal IteratorFilter(XPathNodeIterator innerIterator, string name)
 		{
-			this.innerIterator = innerIterator;
-			this.name = name;
+			this._innerIterator = innerIterator;
+			this._name = name;
 		}
 
 		private IteratorFilter(IteratorFilter it)
 		{
-			this.innerIterator = it.innerIterator.Clone();
-			this.name = it.name;
-			this.position = it.position;
+			this._innerIterator = it._innerIterator.Clone();
+			this._name = it._name;
+			this._position = it._position;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -27,7 +27,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.innerIterator.Current;
+				return this._innerIterator.Current;
 			}
 		}
 
@@ -35,27 +35,27 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.position;
+				return this._position;
 			}
 		}
 
 		public override bool MoveNext()
 		{
-			while (this.innerIterator.MoveNext())
+			while (this._innerIterator.MoveNext())
 			{
-				if (this.innerIterator.Current.LocalName == this.name)
+				if (this._innerIterator.Current.LocalName == this._name)
 				{
-					this.position++;
+					this._position++;
 					return true;
 				}
 			}
 			return false;
 		}
 
-		private XPathNodeIterator innerIterator;
+		private XPathNodeIterator _innerIterator;
 
-		private string name;
+		private string _name;
 
-		private int position;
+		private int _position;
 	}
 }

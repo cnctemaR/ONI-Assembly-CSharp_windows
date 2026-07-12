@@ -14,11 +14,11 @@ public class FloorSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
-		KBatchedAnimController component = behaviour.GetComponent<KBatchedAnimController>();
-		if (component != null)
+		Vector3 vector = behaviour.position;
+		KBatchedAnimController controller = behaviour.controller;
+		if (controller != null)
 		{
-			vector = component.GetPivotSymbolPosition();
+			vector = controller.GetPivotSymbolPosition();
 		}
 		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
@@ -36,6 +36,7 @@ public class FloorSoundEvent : SoundEvent
 			}
 		}
 		GameObject gameObject = behaviour.controller.gameObject;
+		MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
 		if (SoundEvent.IsLowPrioritySound(text) && !base.objectIsSelectedAndVisible)
 		{
@@ -65,6 +66,14 @@ public class FloorSoundEvent : SoundEvent
 					eventInstance.setParameterByName("liquidDepth", num3, false);
 				}
 				SoundEvent.EndOneShot(eventInstance);
+			}
+		}
+		if (component != null && component.model == BionicMinionConfig.MODEL)
+		{
+			string sound2 = GlobalAssets.GetSound("Bionic_move", true);
+			if (sound2 != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound2, base.looping, this.isDynamic)))
+			{
+				SoundEvent.EndOneShot(SoundEvent.BeginOneShot(sound2, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false));
 			}
 		}
 		if (text != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text, base.looping, this.isDynamic)))

@@ -5,7 +5,7 @@ namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct StringToken
+	public readonly struct StringToken : IEquatable<StringToken>
 	{
 		internal StringToken(int val)
 		{
@@ -51,6 +51,6 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal int tokValue;
+		internal readonly int tokValue;
 	}
 }

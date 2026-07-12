@@ -5,13 +5,13 @@ namespace System.Text.RegularExpressions
 {
 	internal sealed class RegexFC
 	{
-		internal RegexFC(bool nullable)
+		public RegexFC(bool nullable)
 		{
 			this._cc = new RegexCharClass();
 			this._nullable = nullable;
 		}
 
-		internal RegexFC(char ch, bool not, bool nullable, bool caseInsensitive)
+		public RegexFC(char ch, bool not, bool nullable, bool caseInsensitive)
 		{
 			this._cc = new RegexCharClass();
 			if (not)
@@ -29,18 +29,18 @@ namespace System.Text.RegularExpressions
 			{
 				this._cc.AddRange(ch, ch);
 			}
-			this._caseInsensitive = caseInsensitive;
+			this.CaseInsensitive = caseInsensitive;
 			this._nullable = nullable;
 		}
 
-		internal RegexFC(string charClass, bool nullable, bool caseInsensitive)
+		public RegexFC(string charClass, bool nullable, bool caseInsensitive)
 		{
 			this._cc = RegexCharClass.Parse(charClass);
 			this._nullable = nullable;
-			this._caseInsensitive = caseInsensitive;
+			this.CaseInsensitive = caseInsensitive;
 		}
 
-		internal bool AddFC(RegexFC fc, bool concatenate)
+		public bool AddFC(RegexFC fc, bool concatenate)
 		{
 			if (!this._cc.CanMerge || !fc._cc.CanMerge)
 			{
@@ -61,29 +61,24 @@ namespace System.Text.RegularExpressions
 			{
 				this._nullable = true;
 			}
-			this._caseInsensitive |= fc._caseInsensitive;
+			this.CaseInsensitive |= fc.CaseInsensitive;
 			this._cc.AddCharClass(fc._cc);
 			return true;
 		}
 
-		internal string GetFirstChars(CultureInfo culture)
+		public bool CaseInsensitive { get; private set; }
+
+		public string GetFirstChars(CultureInfo culture)
 		{
-			if (this._caseInsensitive)
+			if (this.CaseInsensitive)
 			{
 				this._cc.AddLowercase(culture);
 			}
 			return this._cc.ToStringClass();
 		}
 
-		internal bool IsCaseInsensitive()
-		{
-			return this._caseInsensitive;
-		}
+		private RegexCharClass _cc;
 
-		internal RegexCharClass _cc;
-
-		internal bool _nullable;
-
-		internal bool _caseInsensitive;
+		public bool _nullable;
 	}
 }

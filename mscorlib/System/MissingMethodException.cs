@@ -1,31 +1,34 @@
 ﻿using System;
-using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public class MissingMethodException : MissingMemberException, ISerializable
+	public class MissingMethodException : MissingMemberException
 	{
 		public MissingMethodException()
-			: base(Environment.GetResourceString("Attempted to access a missing method."))
+			: base("Attempted to access a missing method.")
 		{
-			base.SetErrorCode(-2146233069);
+			base.HResult = -2146233069;
 		}
 
 		public MissingMethodException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233069);
+			base.HResult = -2146233069;
 		}
 
 		public MissingMethodException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233069);
+			base.HResult = -2146233069;
+		}
+
+		public MissingMethodException(string className, string methodName)
+		{
+			this.ClassName = className;
+			this.MemberName = methodName;
 		}
 
 		protected MissingMethodException(SerializationInfo info, StreamingContext context)
@@ -38,45 +41,12 @@ namespace System
 			[SecuritySafeCritical]
 			get
 			{
-				if (this.ClassName == null)
+				if (this.ClassName != null)
 				{
-					return base.Message;
+					return SR.Format("Method '{0}' not found.", this.ClassName + "." + this.MemberName + ((this.Signature != null) ? (" " + MissingMemberException.FormatSignature(this.Signature)) : string.Empty));
 				}
-				string text = this.ClassName + "." + this.MemberName;
-				if (!string.IsNullOrEmpty(this.signature))
-				{
-					text = string.Format(CultureInfo.InvariantCulture, this.signature, text);
-				}
-				if (!string.IsNullOrEmpty(this._message))
-				{
-					text = text + " Due to: " + this._message;
-				}
-				return text;
+				return base.Message;
 			}
 		}
-
-		private MissingMethodException(string className, string methodName, byte[] signature)
-		{
-			this.ClassName = className;
-			this.MemberName = methodName;
-			this.Signature = signature;
-		}
-
-		public MissingMethodException(string className, string methodName)
-		{
-			this.ClassName = className;
-			this.MemberName = methodName;
-		}
-
-		private MissingMethodException(string className, string methodName, string signature, string message)
-			: base(message)
-		{
-			this.ClassName = className;
-			this.MemberName = methodName;
-			this.signature = signature;
-		}
-
-		[NonSerialized]
-		private string signature;
 	}
 }

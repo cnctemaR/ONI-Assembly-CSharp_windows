@@ -13,27 +13,27 @@ namespace System.ComponentModel.Design.Serialization
 
 		public InstanceDescriptor(MemberInfo member, ICollection arguments, bool isComplete)
 		{
-			this.member = member;
-			this.isComplete = isComplete;
+			this.MemberInfo = member;
+			this.IsComplete = isComplete;
 			if (arguments == null)
 			{
-				this.arguments = new object[0];
+				this.Arguments = Array.Empty<object>();
 			}
 			else
 			{
 				object[] array = new object[arguments.Count];
 				arguments.CopyTo(array, 0);
-				this.arguments = array;
+				this.Arguments = array;
 			}
 			if (member is FieldInfo)
 			{
 				if (!((FieldInfo)member).IsStatic)
 				{
-					throw new ArgumentException(global::SR.GetString("Parameter must be static."));
+					throw new ArgumentException("Parameter must be static.");
 				}
-				if (this.arguments.Count != 0)
+				if (this.Arguments.Count != 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Length mismatch."));
+					throw new ArgumentException("Length mismatch.");
 				}
 			}
 			else if (member is ConstructorInfo)
@@ -41,11 +41,11 @@ namespace System.ComponentModel.Design.Serialization
 				ConstructorInfo constructorInfo = (ConstructorInfo)member;
 				if (constructorInfo.IsStatic)
 				{
-					throw new ArgumentException(global::SR.GetString("Parameter cannot be static."));
+					throw new ArgumentException("Parameter cannot be static.");
 				}
-				if (this.arguments.Count != constructorInfo.GetParameters().Length)
+				if (this.Arguments.Count != constructorInfo.GetParameters().Length)
 				{
-					throw new ArgumentException(global::SR.GetString("Length mismatch."));
+					throw new ArgumentException("Length mismatch.");
 				}
 			}
 			else if (member is MethodInfo)
@@ -53,11 +53,11 @@ namespace System.ComponentModel.Design.Serialization
 				MethodInfo methodInfo = (MethodInfo)member;
 				if (!methodInfo.IsStatic)
 				{
-					throw new ArgumentException(global::SR.GetString("Parameter must be static."));
+					throw new ArgumentException("Parameter must be static.");
 				}
-				if (this.arguments.Count != methodInfo.GetParameters().Length)
+				if (this.Arguments.Count != methodInfo.GetParameters().Length)
 				{
-					throw new ArgumentException(global::SR.GetString("Length mismatch."));
+					throw new ArgumentException("Length mismatch.");
 				}
 			}
 			else if (member is PropertyInfo)
@@ -65,44 +65,26 @@ namespace System.ComponentModel.Design.Serialization
 				PropertyInfo propertyInfo = (PropertyInfo)member;
 				if (!propertyInfo.CanRead)
 				{
-					throw new ArgumentException(global::SR.GetString("Parameter must be readable."));
+					throw new ArgumentException("Parameter must be readable.");
 				}
 				MethodInfo getMethod = propertyInfo.GetGetMethod();
 				if (getMethod != null && !getMethod.IsStatic)
 				{
-					throw new ArgumentException(global::SR.GetString("Parameter must be static."));
+					throw new ArgumentException("Parameter must be static.");
 				}
 			}
 		}
 
-		public ICollection Arguments
-		{
-			get
-			{
-				return this.arguments;
-			}
-		}
+		public ICollection Arguments { get; }
 
-		public bool IsComplete
-		{
-			get
-			{
-				return this.isComplete;
-			}
-		}
+		public bool IsComplete { get; }
 
-		public MemberInfo MemberInfo
-		{
-			get
-			{
-				return this.member;
-			}
-		}
+		public MemberInfo MemberInfo { get; }
 
 		public object Invoke()
 		{
-			object[] array = new object[this.arguments.Count];
-			this.arguments.CopyTo(array, 0);
+			object[] array = new object[this.Arguments.Count];
+			this.Arguments.CopyTo(array, 0);
 			for (int i = 0; i < array.Length; i++)
 			{
 				if (array[i] is InstanceDescriptor)
@@ -110,29 +92,23 @@ namespace System.ComponentModel.Design.Serialization
 					array[i] = ((InstanceDescriptor)array[i]).Invoke();
 				}
 			}
-			if (this.member is ConstructorInfo)
+			if (this.MemberInfo is ConstructorInfo)
 			{
-				return ((ConstructorInfo)this.member).Invoke(array);
+				return ((ConstructorInfo)this.MemberInfo).Invoke(array);
 			}
-			if (this.member is MethodInfo)
+			if (this.MemberInfo is MethodInfo)
 			{
-				return ((MethodInfo)this.member).Invoke(null, array);
+				return ((MethodInfo)this.MemberInfo).Invoke(null, array);
 			}
-			if (this.member is PropertyInfo)
+			if (this.MemberInfo is PropertyInfo)
 			{
-				return ((PropertyInfo)this.member).GetValue(null, array);
+				return ((PropertyInfo)this.MemberInfo).GetValue(null, array);
 			}
-			if (this.member is FieldInfo)
+			if (this.MemberInfo is FieldInfo)
 			{
-				return ((FieldInfo)this.member).GetValue(null);
+				return ((FieldInfo)this.MemberInfo).GetValue(null);
 			}
 			return null;
 		}
-
-		private MemberInfo member;
-
-		private ICollection arguments;
-
-		private bool isComplete;
 	}
 }

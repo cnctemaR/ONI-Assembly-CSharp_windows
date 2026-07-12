@@ -6,8 +6,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaXPath : XmlSchemaAnnotated
 	{
-		[DefaultValue("")]
 		[XmlAttribute("xpath")]
+		[DefaultValue("")]
 		public string XPath
 		{
 			get

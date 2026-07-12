@@ -1874,8 +1874,7 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			TypeKind kind = ((SpecialMapping)text.Mapping).TypeDesc.Kind;
-			if (kind == TypeKind.Node)
+			if (((SpecialMapping)text.Mapping).TypeDesc.Kind == TypeKind.Node)
 			{
 				base.Writer.Write(source);
 				base.Writer.WriteLine(".WriteTo(Writer);");

@@ -67,6 +67,7 @@ public class FarmStationConfig : IBuildingConfig
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Farming.Id;
 			component.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
+			component.SetWorkTime(15f);
 		};
 	}
 

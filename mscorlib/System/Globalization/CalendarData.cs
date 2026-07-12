@@ -153,9 +153,9 @@ namespace System.Globalization
 			}
 			this.InitializeEraNames(localeName, calendarId);
 			this.InitializeAbbreviatedEraNames(localeName, calendarId);
-			if (calendarId == 3)
+			if (!GlobalizationMode.Invariant && calendarId == 3)
 			{
-				this.saAbbrevEnglishEraNames = JapaneseCalendar.EnglishEraNames();
+				this.saAbbrevEnglishEraNames = CalendarData.GetJapaneseEnglishEraNames();
 			}
 			else
 			{
@@ -181,7 +181,7 @@ namespace System.Globalization
 				return;
 			case 3:
 			case 14:
-				this.saEraNames = JapaneseCalendar.EraNames();
+				this.saEraNames = CalendarData.GetJapaneseEraNames();
 				return;
 			case 4:
 				if (CultureInfo.IsTaiwanSku)
@@ -228,6 +228,24 @@ namespace System.Globalization
 			this.saEraNames = CalendarData.Invariant.saEraNames;
 		}
 
+		private static string[] GetJapaneseEraNames()
+		{
+			if (GlobalizationMode.Invariant)
+			{
+				throw new PlatformNotSupportedException();
+			}
+			return JapaneseCalendar.EraNames();
+		}
+
+		private static string[] GetJapaneseEnglishEraNames()
+		{
+			if (GlobalizationMode.Invariant)
+			{
+				throw new PlatformNotSupportedException();
+			}
+			return JapaneseCalendar.EnglishEraNames();
+		}
+
 		private void InitializeAbbreviatedEraNames(string localeName, int calendarId)
 		{
 			CalendarId calendarId2 = (CalendarId)calendarId;
@@ -256,13 +274,13 @@ namespace System.Globalization
 					this.saAbbrevEraNames[0] = this.saEraNames[0];
 					return;
 				case CalendarId.KOREA:
-					goto IL_014B;
+					goto IL_0159;
 				case CalendarId.HIJRI:
-					goto IL_00A2;
+					goto IL_00B0;
 				default:
 					if (calendarId2 != CalendarId.JULIAN)
 					{
-						goto IL_014B;
+						goto IL_0159;
 					}
 					break;
 				}
@@ -275,9 +293,9 @@ namespace System.Globalization
 				{
 					if (calendarId2 != CalendarId.UMALQURA)
 					{
-						goto IL_014B;
+						goto IL_0159;
 					}
-					goto IL_00A2;
+					goto IL_00B0;
 				}
 				else
 				{
@@ -290,9 +308,13 @@ namespace System.Globalization
 				}
 			}
 			IL_0096:
-			this.saAbbrevEraNames = JapaneseCalendar.AbbrevEraNames();
+			if (GlobalizationMode.Invariant)
+			{
+				throw new PlatformNotSupportedException();
+			}
+			this.saAbbrevEraNames = this.saEraNames;
 			return;
-			IL_00A2:
+			IL_00B0:
 			if (localeName == "dv-MV")
 			{
 				this.saAbbrevEraNames = new string[] { "ހ." };
@@ -300,7 +322,7 @@ namespace System.Globalization
 			}
 			this.saAbbrevEraNames = new string[] { "هـ" };
 			return;
-			IL_014B:
+			IL_0159:
 			this.saAbbrevEraNames = this.saEraNames;
 		}
 
@@ -345,7 +367,16 @@ namespace System.Globalization
 
 		private static bool nativeGetCalendarData(CalendarData data, string localeName, int calendarId)
 		{
-			return data.fill_calendar_data(localeName.ToLowerInvariant(), calendarId);
+			if (data.fill_calendar_data(localeName.ToLowerInvariant(), calendarId))
+			{
+				if ((ushort)calendarId == 8)
+				{
+					data.saMonthNames = CalendarData.HEBREW_MONTH_NAMES;
+					data.saLeapYearMonthNames = CalendarData.HEBREW_LEAP_MONTH_NAMES;
+				}
+				return true;
+			}
+			return false;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -392,5 +423,17 @@ namespace System.Globalization
 		internal bool bUseUserOverrides;
 
 		internal static CalendarData Invariant;
+
+		private static string[] HEBREW_MONTH_NAMES = new string[]
+		{
+			"תשרי", "חשון", "כסלו", "טבת", "שבט", "אדר", "אדר ב", "ניסן", "אייר", "סיון",
+			"תמוז", "אב", "אלול"
+		};
+
+		private static string[] HEBREW_LEAP_MONTH_NAMES = new string[]
+		{
+			"תשרי", "חשון", "כסלו", "טבת", "שבט", "אדר א", "אדר ב", "ניסן", "אייר", "סיון",
+			"תמוז", "אב", "אלול"
+		};
 	}
 }

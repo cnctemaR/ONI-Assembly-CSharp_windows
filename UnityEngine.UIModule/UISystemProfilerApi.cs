@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Unity.Profiling;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
 	[StaticAccessor("UI::SystemProfilerApi", StaticAccessorType.DoubleColon)]
+	[IgnoredByDeepProfiler]
 	[NativeHeader("Modules/UI/Canvas.h")]
 	public static class UISystemProfilerApi
 	{

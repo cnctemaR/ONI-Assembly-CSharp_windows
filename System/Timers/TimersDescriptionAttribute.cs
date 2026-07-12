@@ -18,7 +18,7 @@ namespace System.Timers
 				if (!this.replaced)
 				{
 					this.replaced = true;
-					base.DescriptionValue = global::SR.GetString(base.Description);
+					base.DescriptionValue = SR.GetString(base.Description);
 				}
 				return base.Description;
 			}

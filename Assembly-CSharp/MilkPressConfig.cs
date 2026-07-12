@@ -6,11 +6,6 @@ using UnityEngine;
 
 public class MilkPressConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "MilkPress";
@@ -33,7 +28,7 @@ public class MilkPressConfig : IBuildingConfig
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 0));
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.AudioCategory = "HollowMetal";
-		buildingDef.AudioSize = "Metal";
+		buildingDef.AudioSize = "medium";
 		return buildingDef;
 	}
 
@@ -76,7 +71,7 @@ public class MilkPressConfig : IBuildingConfig
 		};
 		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MilkPress", array, array2), array, array2, 0, 0);
 		complexRecipe.time = 40f;
-		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.WHEAT_MILK_RECIPE_DESCRIPTION, ITEMS.FOOD.COLDWHEATSEED.NAME, SimHashes.Milk.CreateTag().ProperName());
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.WHEAT_MILK_RECIPE_DESCRIPTION, global::STRINGS.ITEMS.FOOD.COLDWHEATSEED.NAME, SimHashes.Milk.CreateTag().ProperName());
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
@@ -90,7 +85,7 @@ public class MilkPressConfig : IBuildingConfig
 		};
 		ComplexRecipe complexRecipe2 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MilkPress", array3, array4), array3, array4, 0, 0);
 		complexRecipe2.time = 40f;
-		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.NUT_MILK_RECIPE_DESCRIPTION, ITEMS.FOOD.SPICENUT.NAME, SimHashes.Milk.CreateTag().ProperName());
+		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.NUT_MILK_RECIPE_DESCRIPTION, global::STRINGS.ITEMS.FOOD.SPICENUT.NAME, SimHashes.Milk.CreateTag().ProperName());
 		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe2.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
@@ -104,9 +99,26 @@ public class MilkPressConfig : IBuildingConfig
 		};
 		ComplexRecipe complexRecipe3 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MilkPress", array5, array6), array5, array6, 0, 0);
 		complexRecipe3.time = 40f;
-		complexRecipe3.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.NUT_MILK_RECIPE_DESCRIPTION, ITEMS.FOOD.BEANPLANTSEED.NAME, SimHashes.Milk.CreateTag().ProperName());
+		complexRecipe3.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.NUT_MILK_RECIPE_DESCRIPTION, global::STRINGS.ITEMS.FOOD.BEANPLANTSEED.NAME, SimHashes.Milk.CreateTag().ProperName());
 		complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe3.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
+		if (DlcManager.IsContentSubscribed("DLC3_ID"))
+		{
+			ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(SimHashes.SlimeMold.CreateTag(), 100f)
+			};
+			ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(SimHashes.PhytoOil.CreateTag(), 70f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
+				new ComplexRecipe.RecipeElement(SimHashes.Dirt.CreateTag(), 30f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			ComplexRecipe complexRecipe4 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MilkPress", array7, array8), array7, array8, 0, 0, DlcManager.DLC3);
+			complexRecipe4.time = 40f;
+			complexRecipe4.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.PHYTO_OIL_RECIPE_DESCRIPTION, ELEMENTS.SLIMEMOLD.NAME, SimHashes.PhytoOil.CreateTag().ProperName(), SimHashes.Dirt.CreateTag().ProperName());
+			complexRecipe4.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
+			complexRecipe4.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

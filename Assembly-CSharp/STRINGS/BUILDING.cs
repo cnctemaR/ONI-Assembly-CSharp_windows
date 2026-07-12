@@ -6,6 +6,13 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class GUNKEMPTIERFULL
+			{
+				public static LocString NAME = "Storage Full";
+
+				public static LocString TOOLTIP = "This building's internal storage is at maximum capacity\n\nIt must be emptied before its next use";
+			}
+
 			public class MERCURYLIGHT_CHARGING
 			{
 				public static LocString NAME = "Powering Up: {0}";
@@ -635,6 +642,20 @@ namespace STRINGS
 				public static LocString NOTIFICATION_NAME = "Building entombment";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings are entombed and need to be dug out:";
+			}
+
+			public class ELECTROBANKJOULESAVAILABLE
+			{
+				public static LocString NAME = "Power Remaining: {JoulesAvailable} / {JoulesCapacity}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"<b>{JoulesAvailable}</b> of stored ",
+					UI.PRE_KEYWORD,
+					"Power",
+					UI.PST_KEYWORD,
+					" available for use\n\nMaximum capacity: {JoulesCapacity}"
+				});
 			}
 
 			public class FABRICATORACCEPTSMUTANTSEEDS
@@ -3910,6 +3931,43 @@ namespace STRINGS
 					public static LocString NAME = "Studying Meteor";
 
 					public static LocString TOOLTIP = "This building is currently studying a meteor";
+				}
+			}
+
+			public class REMOTEWORKERDEPOT
+			{
+				public class MAKINGWORKER
+				{
+					public static LocString NAME = "Assembling Remote Worker";
+
+					public static LocString TOOLTIP = "This building is currently assembling a remote worker drone";
+				}
+			}
+
+			public class REMOTEWORKTERMINAL
+			{
+				public class NODOCK
+				{
+					public static LocString NAME = "No Dock Assigned";
+
+					public static LocString TOOLTIP = string.Concat(new string[]
+					{
+						"This building must be assigned a ",
+						UI.PRE_KEYWORD,
+						"Remote Worker Dock",
+						UI.PST_KEYWORD,
+						" in order to function"
+					});
+				}
+			}
+
+			public class DATAMINER
+			{
+				public class PRODUCTIONRATE
+				{
+					public static LocString NAME = "Production Rate: {RATE}";
+
+					public static LocString TOOLTIP = "This building is operating at {RATE} of its maximum speed\n\nProduction rate decreases at higher temperatures\n\nCurrent ambient temperature: {TEMP}";
 				}
 			}
 		}

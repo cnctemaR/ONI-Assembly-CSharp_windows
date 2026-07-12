@@ -609,7 +609,11 @@ public class SpaceTreePlant : GameStateMachine<SpaceTreePlant, SpaceTreePlant.In
 		public void DropInventory()
 		{
 			List<GameObject> list = new List<GameObject>();
-			this.storage.DropAll(false, false, default(Vector3), true, list);
+			Storage storage = this.storage;
+			bool flag = false;
+			bool flag2 = false;
+			List<GameObject> list2 = list;
+			storage.DropAll(flag, flag2, default(Vector3), true, list2);
 			foreach (GameObject gameObject in list)
 			{
 				Vector3 position = gameObject.transform.position;

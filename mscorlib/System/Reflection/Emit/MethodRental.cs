@@ -4,9 +4,9 @@ using System.Security.Permissions;
 
 namespace System.Reflection.Emit
 {
+	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_MethodRental))]
-	[ComVisible(true)]
 	public sealed class MethodRental : _MethodRental
 	{
 		private MethodRental()
@@ -27,7 +27,7 @@ namespace System.Reflection.Emit
 			}
 			if (cls is TypeBuilder && !((TypeBuilder)cls).is_created)
 			{
-				throw new NotSupportedException("Type '" + cls + "' is not yet created.");
+				throw new NotSupportedException("Type '" + ((cls != null) ? cls.ToString() : null) + "' is not yet created.");
 			}
 			throw new NotImplementedException();
 		}

@@ -51,12 +51,12 @@ namespace System.Net
 				{
 					if (c == 'U')
 					{
-						c = HttpDateParse.MAKE_UPPER(lpszDay[index + 2]);
-						if (c == 'L')
+						char c2 = HttpDateParse.MAKE_UPPER(lpszDay[index + 2]);
+						if (c2 == 'L')
 						{
 							return 7;
 						}
-						if (c == 'N')
+						if (c2 == 'N')
 						{
 							return 6;
 						}
@@ -77,12 +77,12 @@ namespace System.Net
 				}
 				else
 				{
-					c = HttpDateParse.MAKE_UPPER(lpszDay[index + 2]);
-					if (c == 'R')
+					char c2 = HttpDateParse.MAKE_UPPER(lpszDay[index + 2]);
+					if (c2 == 'R')
 					{
 						return 3;
 					}
-					if (c == 'Y')
+					if (c2 == 'Y')
 					{
 						return 5;
 					}

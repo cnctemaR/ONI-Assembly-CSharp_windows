@@ -2,7 +2,6 @@
 
 namespace System.Globalization
 {
-	[Serializable]
 	internal enum BidiCategory
 	{
 		LeftToRight,

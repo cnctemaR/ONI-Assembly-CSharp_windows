@@ -33,29 +33,26 @@ public class Durability : KMonoBehaviour
 		if (currentQualitySetting != null)
 		{
 			string id = currentQualitySetting.id;
-			if (id != null)
+			if (id == "Indestructible")
 			{
-				if (id == "Indestructible")
-				{
-					this.difficultySettingMod = EQUIPMENT.SUITS.INDESTRUCTIBLE_DURABILITY_MOD;
-					return;
-				}
-				if (id == "Reinforced")
-				{
-					this.difficultySettingMod = EQUIPMENT.SUITS.REINFORCED_DURABILITY_MOD;
-					return;
-				}
-				if (id == "Flimsy")
-				{
-					this.difficultySettingMod = EQUIPMENT.SUITS.FLIMSY_DURABILITY_MOD;
-					return;
-				}
-				if (!(id == "Threadbare"))
-				{
-					return;
-				}
-				this.difficultySettingMod = EQUIPMENT.SUITS.THREADBARE_DURABILITY_MOD;
+				this.difficultySettingMod = EQUIPMENT.SUITS.INDESTRUCTIBLE_DURABILITY_MOD;
+				return;
 			}
+			if (id == "Reinforced")
+			{
+				this.difficultySettingMod = EQUIPMENT.SUITS.REINFORCED_DURABILITY_MOD;
+				return;
+			}
+			if (id == "Flimsy")
+			{
+				this.difficultySettingMod = EQUIPMENT.SUITS.FLIMSY_DURABILITY_MOD;
+				return;
+			}
+			if (!(id == "Threadbare"))
+			{
+				return;
+			}
+			this.difficultySettingMod = EQUIPMENT.SUITS.THREADBARE_DURABILITY_MOD;
 		}
 	}
 

@@ -343,7 +343,7 @@ namespace System.Configuration
 					if (attribute2 != null && attribute2.Length > 0)
 					{
 						string text = reader.ReadOuterXml();
-						string[] array = attribute2.Split(new char[] { ',' });
+						string[] array = attribute2.Split(',', StringSplitOptions.None);
 						for (int i = 0; i < array.Length; i++)
 						{
 							string text2 = array[i].Trim();

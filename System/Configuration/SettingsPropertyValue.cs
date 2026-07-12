@@ -14,6 +14,7 @@ namespace System.Configuration
 		{
 			this.property = property;
 			this.needPropertyValue = true;
+			this.needSerializedValue = true;
 		}
 
 		public bool Deserialized
@@ -66,6 +67,8 @@ namespace System.Configuration
 					if (this.propertyValue == null)
 					{
 						this.propertyValue = this.GetDeserializedDefaultValue();
+						this.serializedValue = null;
+						this.needSerializedValue = true;
 						this.defaulted = true;
 					}
 					this.needPropertyValue = false;
@@ -90,9 +93,8 @@ namespace System.Configuration
 		{
 			get
 			{
-				if (this.needSerializedValue)
+				if ((this.needSerializedValue || this.IsDirty) && !this.UsingDefaultValue)
 				{
-					this.needSerializedValue = false;
 					switch (this.property.SerializeAs)
 					{
 					case SettingsSerializeAs.String:
@@ -128,6 +130,8 @@ namespace System.Configuration
 						this.serializedValue = null;
 						break;
 					}
+					this.needSerializedValue = false;
+					this.dirty = false;
 				}
 				return this.serializedValue;
 			}
@@ -135,6 +139,7 @@ namespace System.Configuration
 			{
 				this.serializedValue = value;
 				this.needPropertyValue = true;
+				this.needSerializedValue = false;
 			}
 		}
 
@@ -152,6 +157,7 @@ namespace System.Configuration
 			this.dirty = true;
 			this.defaulted = true;
 			this.needPropertyValue = true;
+			this.needSerializedValue = true;
 			return this.propertyValue;
 		}
 

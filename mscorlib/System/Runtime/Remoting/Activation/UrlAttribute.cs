@@ -39,8 +39,8 @@ namespace System.Runtime.Remoting.Activation
 		{
 		}
 
-		[SecurityCritical]
 		[ComVisible(true)]
+		[SecurityCritical]
 		public override bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			return true;

@@ -96,6 +96,15 @@ namespace System.Net.Configuration
 			}
 		}
 
+		public WindowsAuthenticationElement WindowsAuthentication
+		{
+			get
+			{
+				global::Unity.ThrowStub.ThrowNotSupportedException();
+				return null;
+			}
+		}
+
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
 		private static ConfigurationProperty httpWebRequestProp = new ConfigurationProperty("httpWebRequest", typeof(HttpWebRequestElement));

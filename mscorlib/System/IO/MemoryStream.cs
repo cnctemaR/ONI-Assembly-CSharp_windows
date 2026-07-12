@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class MemoryStream : Stream
 	{
@@ -20,9 +17,9 @@ namespace System.IO
 		{
 			if (capacity < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Capacity must be positive."));
+				throw new ArgumentOutOfRangeException("capacity", "Capacity must be positive.");
 			}
-			this._buffer = new byte[capacity];
+			this._buffer = ((capacity != 0) ? new byte[capacity] : Array.Empty<byte>());
 			this._capacity = capacity;
 			this._expandable = true;
 			this._writable = true;
@@ -40,7 +37,7 @@ namespace System.IO
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			this._buffer = buffer;
 			this._length = (this._capacity = buffer.Length);
@@ -64,19 +61,19 @@ namespace System.IO
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - index < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			this._buffer = buffer;
 			this._position = index;
@@ -112,11 +109,19 @@ namespace System.IO
 			}
 		}
 
+		private void EnsureNotClosed()
+		{
+			if (!this._isOpen)
+			{
+				throw Error.GetStreamIsClosed();
+			}
+		}
+
 		private void EnsureWriteable()
 		{
 			if (!this.CanWrite)
 			{
-				__Error.WriteNotSupported();
+				throw Error.GetWriteNotSupported();
 			}
 		}
 
@@ -142,7 +147,7 @@ namespace System.IO
 		{
 			if (value < 0)
 			{
-				throw new IOException(Environment.GetResourceString("Stream was too long."));
+				throw new IOException("Stream was too long.");
 			}
 			if (value > this._capacity)
 			{
@@ -169,13 +174,11 @@ namespace System.IO
 		{
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
 		public override Task FlushAsync(CancellationToken cancellationToken)
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
-				return Task.FromCancellation(cancellationToken);
+				return Task.FromCanceled(cancellationToken);
 			}
 			Task task;
 			try
@@ -194,7 +197,7 @@ namespace System.IO
 		{
 			if (!this._exposable)
 			{
-				throw new UnauthorizedAccessException(Environment.GetResourceString("MemoryStream's internal buffer cannot be accessed."));
+				throw new UnauthorizedAccessException("MemoryStream's internal buffer cannot be accessed.");
 			}
 			return this._buffer;
 		}
@@ -215,7 +218,6 @@ namespace System.IO
 			return this._buffer;
 		}
 
-		[FriendAccessAllowed]
 		internal void InternalGetOriginAndLength(out int origin, out int length)
 		{
 			if (!this._isOpen)
@@ -228,34 +230,24 @@ namespace System.IO
 
 		internal int InternalGetPosition()
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
 			return this._position;
 		}
 
 		internal int InternalReadInt32()
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			int num = (this._position += 4);
 			if (num > this._length)
 			{
 				this._position = this._length;
-				__Error.EndOfFile();
+				throw Error.GetEndOfFile();
 			}
 			return (int)this._buffer[num - 4] | ((int)this._buffer[num - 3] << 8) | ((int)this._buffer[num - 2] << 16) | ((int)this._buffer[num - 1] << 24);
 		}
 
 		internal int InternalEmulateRead(int count)
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			int num = this._length - this._position;
 			if (num > count)
 			{
@@ -273,25 +265,19 @@ namespace System.IO
 		{
 			get
 			{
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
+				this.EnsureNotClosed();
 				return this._capacity - this._origin;
 			}
 			set
 			{
 				if ((long)value < this.Length)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					throw new ArgumentOutOfRangeException("value", "capacity was less than the current size.");
 				}
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
+				this.EnsureNotClosed();
 				if (!this._expandable && value != this.Capacity)
 				{
-					__Error.MemoryStreamNotExpandable();
+					throw new NotSupportedException("Memory stream is not expandable.");
 				}
 				if (this._expandable && value != this._capacity)
 				{
@@ -300,7 +286,7 @@ namespace System.IO
 						byte[] array = new byte[value];
 						if (this._length > 0)
 						{
-							Buffer.InternalBlockCopy(this._buffer, 0, array, 0, this._length);
+							Buffer.BlockCopy(this._buffer, 0, array, 0, this._length);
 						}
 						this._buffer = array;
 					}
@@ -317,10 +303,7 @@ namespace System.IO
 		{
 			get
 			{
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
+				this.EnsureNotClosed();
 				return (long)(this._length - this._origin);
 			}
 		}
@@ -329,52 +312,43 @@ namespace System.IO
 		{
 			get
 			{
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
+				this.EnsureNotClosed();
 				return (long)(this._position - this._origin);
 			}
 			set
 			{
 				if (value < 0L)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("value", "Non-negative number required.");
 				}
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
+				this.EnsureNotClosed();
 				if (value > 2147483647L)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+					throw new ArgumentOutOfRangeException("value", "Stream length must be non-negative and less than 2^31 - 1 - origin.");
 				}
 				this._position = this._origin + (int)value;
 			}
 		}
 
-		public override int Read([In] [Out] byte[] buffer, int offset, int count)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			int num = this._length - this._position;
 			if (num > count)
 			{
@@ -394,35 +368,50 @@ namespace System.IO
 			}
 			else
 			{
-				Buffer.InternalBlockCopy(this._buffer, this._position, buffer, offset, num);
+				Buffer.BlockCopy(this._buffer, this._position, buffer, offset, num);
 			}
 			this._position += num;
 			return num;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override int Read(Span<byte> buffer)
+		{
+			if (base.GetType() != typeof(MemoryStream))
+			{
+				return base.Read(buffer);
+			}
+			this.EnsureNotClosed();
+			int num = Math.Min(this._length - this._position, buffer.Length);
+			if (num <= 0)
+			{
+				return 0;
+			}
+			new Span<byte>(this._buffer, this._position, num).CopyTo(buffer);
+			this._position += num;
+			return num;
+		}
+
 		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (cancellationToken.IsCancellationRequested)
 			{
-				return Task.FromCancellation<int>(cancellationToken);
+				return Task.FromCanceled<int>(cancellationToken);
 			}
 			Task<int> task;
 			try
@@ -452,12 +441,32 @@ namespace System.IO
 			return task;
 		}
 
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return new ValueTask<int>(Task.FromCanceled<int>(cancellationToken));
+			}
+			ValueTask<int> valueTask;
+			try
+			{
+				ArraySegment<byte> arraySegment;
+				valueTask = new ValueTask<int>(MemoryMarshal.TryGetArray<byte>(buffer, out arraySegment) ? this.Read(arraySegment.Array, arraySegment.Offset, arraySegment.Count) : this.Read(buffer.Span));
+			}
+			catch (OperationCanceledException ex)
+			{
+				valueTask = new ValueTask<int>(Task.FromCancellation<int>(ex));
+			}
+			catch (Exception ex2)
+			{
+				valueTask = new ValueTask<int>(Task.FromException<int>(ex2));
+			}
+			return valueTask;
+		}
+
 		public override int ReadByte()
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			if (this._position >= this._length)
 			{
 				return -1;
@@ -468,42 +477,39 @@ namespace System.IO
 			return buffer[position];
 		}
 
+		public override void CopyTo(Stream destination, int bufferSize)
+		{
+			StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+			if (base.GetType() != typeof(MemoryStream))
+			{
+				base.CopyTo(destination, bufferSize);
+				return;
+			}
+			int position = this._position;
+			int num = this.InternalEmulateRead(this._length - position);
+			if (num > 0)
+			{
+				destination.Write(this._buffer, position, num);
+			}
+		}
+
 		public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
 		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			if (bufferSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
-			}
-			if (!this.CanRead && !this.CanWrite)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!destination.CanRead && !destination.CanWrite)
-			{
-				throw new ObjectDisposedException("destination", Environment.GetResourceString("Cannot access a closed Stream."));
-			}
-			if (!this.CanRead)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
-			}
-			if (!destination.CanWrite)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
-			}
+			StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
 			if (base.GetType() != typeof(MemoryStream))
 			{
 				return base.CopyToAsync(destination, bufferSize, cancellationToken);
 			}
 			if (cancellationToken.IsCancellationRequested)
 			{
-				return Task.FromCancellation(cancellationToken);
+				return Task.FromCanceled(cancellationToken);
 			}
 			int position = this._position;
 			int num = this.InternalEmulateRead(this._length - this._position);
+			if (num == 0)
+			{
+				return Task.CompletedTask;
+			}
 			MemoryStream memoryStream = destination as MemoryStream;
 			if (memoryStream == null)
 			{
@@ -524,13 +530,10 @@ namespace System.IO
 
 		public override long Seek(long offset, SeekOrigin loc)
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			if (offset > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+				throw new ArgumentOutOfRangeException("offset", "Stream length must be non-negative and less than 2^31 - 1 - origin.");
 			}
 			switch (loc)
 			{
@@ -539,7 +542,7 @@ namespace System.IO
 				int num = this._origin + (int)offset;
 				if (offset < 0L || num < this._origin)
 				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
+					throw new IOException("An attempt was made to move the position before the beginning of the stream.");
 				}
 				this._position = num;
 				break;
@@ -549,7 +552,7 @@ namespace System.IO
 				int num2 = this._position + (int)offset;
 				if ((long)this._position + offset < (long)this._origin || num2 < this._origin)
 				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
+					throw new IOException("An attempt was made to move the position before the beginning of the stream.");
 				}
 				this._position = num2;
 				break;
@@ -559,13 +562,13 @@ namespace System.IO
 				int num3 = this._length + (int)offset;
 				if ((long)this._length + offset < (long)this._origin || num3 < this._origin)
 				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
+					throw new IOException("An attempt was made to move the position before the beginning of the stream.");
 				}
 				this._position = num3;
 				break;
 			}
 			default:
-				throw new ArgumentException(Environment.GetResourceString("Invalid seek origin."));
+				throw new ArgumentException("Invalid seek origin.");
 			}
 			return (long)this._position;
 		}
@@ -574,12 +577,12 @@ namespace System.IO
 		{
 			if (value < 0L || value > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+				throw new ArgumentOutOfRangeException("value", "Stream length must be non-negative and less than 2^31 - 1 - origin.");
 			}
 			this.EnsureWriteable();
 			if (value > (long)(2147483647 - this._origin))
 			{
-				throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Stream length must be non-negative and less than 2^31 - 1 - origin."));
+				throw new ArgumentOutOfRangeException("value", "Stream length must be non-negative and less than 2^31 - 1 - origin.");
 			}
 			int num = this._origin + (int)value;
 			if (!this.EnsureCapacity(num) && num > this._length)
@@ -595,12 +598,13 @@ namespace System.IO
 
 		public virtual byte[] ToArray()
 		{
-			if (this._length - this._origin == 0)
+			int num = this._length - this._origin;
+			if (num == 0)
 			{
-				return EmptyArray<byte>.Value;
+				return Array.Empty<byte>();
 			}
-			byte[] array = new byte[this._length - this._origin];
-			Buffer.InternalBlockCopy(this._buffer, this._origin, array, 0, this._length - this._origin);
+			byte[] array = new byte[num];
+			Buffer.BlockCopy(this._buffer, this._origin, array, 0, num);
 			return array;
 		}
 
@@ -608,29 +612,26 @@ namespace System.IO
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			this.EnsureWriteable();
 			int num = this._position + count;
 			if (num < 0)
 			{
-				throw new IOException(Environment.GetResourceString("Stream was too long."));
+				throw new IOException("Stream was too long.");
 			}
 			if (num > this._length)
 			{
@@ -655,34 +656,63 @@ namespace System.IO
 			}
 			else
 			{
-				Buffer.InternalBlockCopy(buffer, offset, this._buffer, this._position, count);
+				Buffer.BlockCopy(buffer, offset, this._buffer, this._position, count);
 			}
 			this._position = num;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public override void Write(ReadOnlySpan<byte> buffer)
+		{
+			if (base.GetType() != typeof(MemoryStream))
+			{
+				base.Write(buffer);
+				return;
+			}
+			this.EnsureNotClosed();
+			this.EnsureWriteable();
+			int num = this._position + buffer.Length;
+			if (num < 0)
+			{
+				throw new IOException("Stream was too long.");
+			}
+			if (num > this._length)
+			{
+				bool flag = this._position > this._length;
+				if (num > this._capacity && this.EnsureCapacity(num))
+				{
+					flag = false;
+				}
+				if (flag)
+				{
+					Array.Clear(this._buffer, this._length, num - this._length);
+				}
+				this._length = num;
+			}
+			buffer.CopyTo(new Span<byte>(this._buffer, this._position, buffer.Length));
+			this._position = num;
+		}
+
 		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer", "Buffer cannot be null.");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
 			}
 			if (cancellationToken.IsCancellationRequested)
 			{
-				return Task.FromCancellation(cancellationToken);
+				return Task.FromCanceled(cancellationToken);
 			}
 			Task task;
 			try
@@ -701,12 +731,41 @@ namespace System.IO
 			return task;
 		}
 
+		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return new ValueTask(Task.FromCanceled(cancellationToken));
+			}
+			ValueTask valueTask;
+			try
+			{
+				ArraySegment<byte> arraySegment;
+				if (MemoryMarshal.TryGetArray<byte>(buffer, out arraySegment))
+				{
+					this.Write(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+				}
+				else
+				{
+					this.Write(buffer.Span);
+				}
+				valueTask = default(ValueTask);
+				valueTask = valueTask;
+			}
+			catch (OperationCanceledException ex)
+			{
+				valueTask = new ValueTask(Task.FromCancellation<VoidTaskResult>(ex));
+			}
+			catch (Exception ex2)
+			{
+				valueTask = new ValueTask(Task.FromException(ex2));
+			}
+			return valueTask;
+		}
+
 		public override void WriteByte(byte value)
 		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			this.EnsureWriteable();
 			if (this._position >= this._length)
 			{
@@ -732,12 +791,9 @@ namespace System.IO
 		{
 			if (stream == null)
 			{
-				throw new ArgumentNullException("stream", Environment.GetResourceString("Stream cannot be null."));
+				throw new ArgumentNullException("stream", "Stream cannot be null.");
 			}
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
+			this.EnsureNotClosed();
 			stream.Write(this._buffer, this._origin, this._length - this._origin);
 		}
 

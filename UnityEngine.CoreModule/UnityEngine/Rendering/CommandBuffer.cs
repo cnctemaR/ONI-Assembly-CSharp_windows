@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Profiling;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Internal;
 using UnityEngine.Profiling;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
+	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
+	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
+	[UsedByNativeCode]
 	public class CommandBuffer : IDisposable
 	{
 		public void ConvertTexture(RenderTargetIdentifier src, RenderTargetIdentifier dst)
@@ -336,7 +339,7 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeVectorArrayParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeVectorArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, Vector4[] values);
+		public extern void SetComputeVectorArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] Vector4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeMatrixParam", HasExplicitThis = true)]
 		public void SetComputeMatrixParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, Matrix4x4 val)
@@ -346,15 +349,15 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeMatrixArrayParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeMatrixArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, Matrix4x4[] values);
+		public extern void SetComputeMatrixArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] Matrix4x4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeFloats", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeFloats([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, float[] values);
+		private extern void Internal_SetComputeFloats([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] float[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeInts", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeInts([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, int[] values);
+		private extern void Internal_SetComputeInts([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] int[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeTextureParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -364,7 +367,13 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetComputeBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, ComputeBuffer buffer);
 
-		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeGraphicsBufferParam", HasExplicitThis = true)]
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
+		private void Internal_SetComputeGraphicsBufferHandleParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBufferHandle bufferHandle)
+		{
+			this.Internal_SetComputeGraphicsBufferHandleParam_Injected(computeShader, kernelIndex, nameID, ref bufferHandle);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetComputeGraphicsBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBuffer buffer);
 
@@ -375,6 +384,10 @@ namespace UnityEngine.Rendering
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeConstantBufferParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetComputeConstantGraphicsBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, GraphicsBuffer buffer, int offset, int size);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeParamsFromMaterial", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_SetComputeParamsFromMaterial([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, Material material);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchCompute", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -420,7 +433,7 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingVectorArrayParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingVectorArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, Vector4[] values);
+		private extern void Internal_SetRayTracingVectorArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] Vector4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingMatrixParam", HasExplicitThis = true)]
 		private void Internal_SetRayTracingMatrixParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, Matrix4x4 val)
@@ -430,15 +443,15 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingMatrixArrayParam", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingMatrixArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, Matrix4x4[] values);
+		private extern void Internal_SetRayTracingMatrixArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] Matrix4x4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingFloats", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingFloats([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, float[] values);
+		private extern void Internal_SetRayTracingFloats([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] float[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingInts", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingInts([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, int[] values);
+		private extern void Internal_SetRayTracingInts([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] int[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_BuildRayTracingAccelerationStructure", HasExplicitThis = true)]
 		private void Internal_BuildRayTracingAccelerationStructure([NotNull("ArgumentNullException")] RayTracingAccelerationStructure accelerationStructure, Vector3 relativeOrigin)
@@ -513,6 +526,12 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_DrawRenderer([NotNull("ArgumentNullException")] Renderer renderer, Material material, int submeshIndex, int shaderPass);
 
+		[NativeMethod("AddDrawRendererList")]
+		private void Internal_DrawRendererList(RendererList rendererList)
+		{
+			this.Internal_DrawRendererList_Injected(ref rendererList);
+		}
+
 		private void Internal_DrawRenderer(Renderer renderer, Material material, int submeshIndex)
 		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
@@ -563,7 +582,7 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstanced", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, int shaderPass, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties);
+		private extern void Internal_DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, int shaderPass, [Unmarshalled] Matrix4x4[] matrices, int count, MaterialPropertyBlock properties);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstancedProcedural", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -775,15 +794,21 @@ namespace UnityEngine.Rendering
 		public extern void ReleaseTemporaryRT(int nameID);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ClearRenderTarget", HasExplicitThis = true)]
-		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor, float depth)
+		public void ClearRenderTarget(RTClearFlags clearFlags, Color backgroundColor, float depth, uint stencil)
 		{
-			this.ClearRenderTarget_Injected(clearDepth, clearColor, ref backgroundColor, depth);
+			this.ClearRenderTarget_Injected(clearFlags, ref backgroundColor, depth, stencil);
 		}
 
 		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor)
 		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
-			this.ClearRenderTarget(clearDepth, clearColor, backgroundColor, 1f);
+			this.ClearRenderTarget((clearColor ? RTClearFlags.Color : RTClearFlags.None) | (clearDepth ? RTClearFlags.DepthStencil : RTClearFlags.None), backgroundColor, 1f, 0U);
+		}
+
+		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor, float depth)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.ClearRenderTarget((clearColor ? RTClearFlags.Color : RTClearFlags.None) | (clearDepth ? RTClearFlags.DepthStencil : RTClearFlags.None), backgroundColor, depth, 0U);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalFloat", HasExplicitThis = true)]
@@ -793,6 +818,10 @@ namespace UnityEngine.Rendering
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalInt", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetGlobalInt(int nameID, int value);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalInteger", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetGlobalInteger(int nameID, int value);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalVector", HasExplicitThis = true)]
 		public void SetGlobalVector(int nameID, Vector4 value)
@@ -816,9 +845,108 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void EnableShaderKeyword(string keyword);
 
+		[FreeFunction("RenderingCommandBuffer_Bindings::EnableShaderKeyword", HasExplicitThis = true)]
+		private void EnableGlobalKeyword(GlobalKeyword keyword)
+		{
+			this.EnableGlobalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::EnableMaterialKeyword", HasExplicitThis = true)]
+		private void EnableMaterialKeyword(Material material, LocalKeyword keyword)
+		{
+			this.EnableMaterialKeyword_Injected(material, ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::EnableComputeKeyword", HasExplicitThis = true)]
+		private void EnableComputeKeyword(ComputeShader computeShader, LocalKeyword keyword)
+		{
+			this.EnableComputeKeyword_Injected(computeShader, ref keyword);
+		}
+
+		public void EnableKeyword(in GlobalKeyword keyword)
+		{
+			this.EnableGlobalKeyword(keyword);
+		}
+
+		public void EnableKeyword(Material material, in LocalKeyword keyword)
+		{
+			this.EnableMaterialKeyword(material, keyword);
+		}
+
+		public void EnableKeyword(ComputeShader computeShader, in LocalKeyword keyword)
+		{
+			this.EnableComputeKeyword(computeShader, keyword);
+		}
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableShaderKeyword", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DisableShaderKeyword(string keyword);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::DisableShaderKeyword", HasExplicitThis = true)]
+		private void DisableGlobalKeyword(GlobalKeyword keyword)
+		{
+			this.DisableGlobalKeyword_Injected(ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::DisableMaterialKeyword", HasExplicitThis = true)]
+		private void DisableMaterialKeyword(Material material, LocalKeyword keyword)
+		{
+			this.DisableMaterialKeyword_Injected(material, ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::DisableComputeKeyword", HasExplicitThis = true)]
+		private void DisableComputeKeyword(ComputeShader computeShader, LocalKeyword keyword)
+		{
+			this.DisableComputeKeyword_Injected(computeShader, ref keyword);
+		}
+
+		public void DisableKeyword(in GlobalKeyword keyword)
+		{
+			this.DisableGlobalKeyword(keyword);
+		}
+
+		public void DisableKeyword(Material material, in LocalKeyword keyword)
+		{
+			this.DisableMaterialKeyword(material, keyword);
+		}
+
+		public void DisableKeyword(ComputeShader computeShader, in LocalKeyword keyword)
+		{
+			this.DisableComputeKeyword(computeShader, keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetShaderKeyword", HasExplicitThis = true)]
+		private void SetGlobalKeyword(GlobalKeyword keyword, bool value)
+		{
+			this.SetGlobalKeyword_Injected(ref keyword, value);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetMaterialKeyword", HasExplicitThis = true)]
+		private void SetMaterialKeyword(Material material, LocalKeyword keyword, bool value)
+		{
+			this.SetMaterialKeyword_Injected(material, ref keyword, value);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeKeyword", HasExplicitThis = true)]
+		private void SetComputeKeyword(ComputeShader computeShader, LocalKeyword keyword, bool value)
+		{
+			this.SetComputeKeyword_Injected(computeShader, ref keyword, value);
+		}
+
+		public void SetKeyword(in GlobalKeyword keyword, bool value)
+		{
+			this.SetGlobalKeyword(keyword, value);
+		}
+
+		public void SetKeyword(Material material, in LocalKeyword keyword, bool value)
+		{
+			this.SetMaterialKeyword(material, keyword, value);
+		}
+
+		public void SetKeyword(ComputeShader computeShader, in LocalKeyword keyword, bool value)
+		{
+			this.SetComputeKeyword(computeShader, keyword, value);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetViewMatrix", HasExplicitThis = true, ThrowsException = true)]
 		public void SetViewMatrix(Matrix4x4 view)
@@ -864,19 +992,19 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalFloatArray", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalFloatArray(int nameID, float[] values);
+		public extern void SetGlobalFloatArray(int nameID, [Unmarshalled] float[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalVectorArray", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalVectorArray(int nameID, Vector4[] values);
+		public extern void SetGlobalVectorArray(int nameID, [Unmarshalled] Vector4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalMatrixArray", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalMatrixArray(int nameID, Matrix4x4[] values);
+		public extern void SetGlobalMatrixArray(int nameID, [Unmarshalled] Matrix4x4[] values);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetLateLatchProjectionMatrices", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetLateLatchProjectionMatrices(Matrix4x4[] projectionMat);
+		public extern void SetLateLatchProjectionMatrices([Unmarshalled] Matrix4x4[] projectionMat);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::MarkLateLatchMatrixShaderPropertyID", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -932,9 +1060,35 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void EndSample_CustomSampler([NotNull("ArgumentNullException")] CustomSampler sampler);
 
+		[Conditional("ENABLE_PROFILER")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void BeginSample(ProfilerMarker marker)
+		{
+			this.BeginSample_ProfilerMarker(marker.Handle);
+		}
+
+		[Conditional("ENABLE_PROFILER")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void EndSample(ProfilerMarker marker)
+		{
+			this.EndSample_ProfilerMarker(marker.Handle);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::BeginSample_ProfilerMarker", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void BeginSample_ProfilerMarker(IntPtr markerHandle);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::EndSample_ProfilerMarker", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EndSample_ProfilerMarker(IntPtr markerHandle);
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginEventAndDataInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void IssuePluginEventAndDataInternal(IntPtr callback, int eventID, IntPtr data);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginEventAndDataWithFlagsInternal", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void IssuePluginEventAndDataInternalWithFlags(IntPtr callback, int eventID, CustomMarkerCallbackFlags flags, IntPtr data);
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginCustomBlitInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -961,6 +1115,18 @@ namespace UnityEngine.Rendering
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetInstanceMultiplier", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetInstanceMultiplier(uint multiplier);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetFoveatedRenderingMode", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetFoveatedRenderingMode(FoveatedRenderingMode foveatedRenderingMode);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetWireframe", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetWireframe(bool enable);
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::ConfigureFoveatedRendering", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ConfigureFoveatedRendering(IntPtr platformData);
 
 		public void SetRenderTarget(RenderTargetIdentifier rt)
 		{
@@ -1225,7 +1391,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData(ComputeBuffer buffer, Array data)
+		public void SetBufferData(ComputeBuffer buffer, Array data)
 		{
 			bool flag = data == null;
 			if (flag)
@@ -1241,7 +1407,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data) where T : struct
+		public void SetBufferData<T>(ComputeBuffer buffer, List<T> data) where T : struct
 		{
 			bool flag = data == null;
 			if (flag)
@@ -1257,13 +1423,13 @@ namespace UnityEngine.Rendering
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data) where T : struct
+		public void SetBufferData<T>(ComputeBuffer buffer, NativeArray<T> data) where T : struct
 		{
 			this.InternalSetComputeBufferNativeData(buffer, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), 0, 0, data.Length, UnsafeUtility.SizeOf<T>());
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData(ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count)
+		public void SetBufferData(ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count)
 		{
 			bool flag = data == null;
 			if (flag)
@@ -1284,7 +1450,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		public void SetBufferData<T>(ComputeBuffer buffer, List<T> data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
 		{
 			bool flag = data == null;
 			if (flag)
@@ -1305,7 +1471,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[SecuritySafeCritical]
-		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		public void SetBufferData<T>(ComputeBuffer buffer, NativeArray<T> data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
 		{
 			bool flag = nativeBufferStartIndex < 0 || graphicsBufferStartIndex < 0 || count < 0 || nativeBufferStartIndex + count > data.Length;
 			if (flag)
@@ -1315,19 +1481,135 @@ namespace UnityEngine.Rendering
 			this.InternalSetComputeBufferNativeData(buffer, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, graphicsBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
 		}
 
-		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetComputeBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
-		[SecurityCritical]
+		public void SetBufferCounterValue(ComputeBuffer buffer, uint counterValue)
+		{
+			this.InternalSetComputeBufferCounterValue(buffer, counterValue);
+		}
+
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetComputeBufferNativeData([NotNull("ArgumentNullException")] ComputeBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
 
-		[SecurityCritical]
-		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetComputeBufferData", HasExplicitThis = true, ThrowsException = true)]
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetComputeBufferData([NotNull("ArgumentNullException")] ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
 
-		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetComputeBufferCounterValue", HasExplicitThis = true)]
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferCounterValue", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeBufferCounterValue([NotNull("ArgumentNullException")] ComputeBuffer buffer, uint counterValue);
+		private extern void InternalSetComputeBufferCounterValue([NotNull("ArgumentNullException")] ComputeBuffer buffer, uint counterValue);
+
+		[SecuritySafeCritical]
+		public void SetBufferData(GraphicsBuffer buffer, Array data)
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("Array passed to RenderingCommandBuffer.SetBufferData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
+			}
+			this.InternalSetGraphicsBufferData(buffer, data, 0, 0, data.Length, UnsafeUtility.SizeOf(data.GetType().GetElementType()));
+		}
+
+		[SecuritySafeCritical]
+		public void SetBufferData<T>(GraphicsBuffer buffer, List<T> data) where T : struct
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			bool flag2 = !UnsafeUtility.IsGenericListBlittable<T>();
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("List<{0}> passed to RenderingCommandBuffer.SetBufferData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
+			}
+			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
+		}
+
+		[SecuritySafeCritical]
+		public void SetBufferData<T>(GraphicsBuffer buffer, NativeArray<T> data) where T : struct
+		{
+			this.InternalSetGraphicsBufferNativeData(buffer, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), 0, 0, data.Length, UnsafeUtility.SizeOf<T>());
+		}
+
+		[SecuritySafeCritical]
+		public void SetBufferData(GraphicsBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count)
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			bool flag2 = !UnsafeUtility.IsArrayBlittable(data);
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("Array passed to RenderingCommandBuffer.SetBufferData(array) must be blittable.\n{0}", UnsafeUtility.GetReasonForArrayNonBlittable(data)));
+			}
+			bool flag3 = managedBufferStartIndex < 0 || graphicsBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Length;
+			if (flag3)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", managedBufferStartIndex, graphicsBufferStartIndex, count));
+			}
+			this.InternalSetGraphicsBufferData(buffer, data, managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(data.GetType().GetElementType()));
+		}
+
+		[SecuritySafeCritical]
+		public void SetBufferData<T>(GraphicsBuffer buffer, List<T> data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		{
+			bool flag = data == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("data");
+			}
+			bool flag2 = !UnsafeUtility.IsGenericListBlittable<T>();
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("List<{0}> passed to RenderingCommandBuffer.SetBufferData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
+			}
+			bool flag3 = managedBufferStartIndex < 0 || graphicsBufferStartIndex < 0 || count < 0 || managedBufferStartIndex + count > data.Count;
+			if (flag3)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", managedBufferStartIndex, graphicsBufferStartIndex, count));
+			}
+			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
+		}
+
+		[SecuritySafeCritical]
+		public void SetBufferData<T>(GraphicsBuffer buffer, NativeArray<T> data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		{
+			bool flag = nativeBufferStartIndex < 0 || graphicsBufferStartIndex < 0 || count < 0 || nativeBufferStartIndex + count > data.Length;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (nativeBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", nativeBufferStartIndex, graphicsBufferStartIndex, count));
+			}
+			this.InternalSetGraphicsBufferNativeData(buffer, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, graphicsBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
+		}
+
+		public void SetBufferCounterValue(GraphicsBuffer buffer, uint counterValue)
+		{
+			this.InternalSetGraphicsBufferCounterValue(buffer, counterValue);
+		}
+
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void InternalSetGraphicsBufferNativeData([NotNull("ArgumentNullException")] GraphicsBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferData", HasExplicitThis = true, ThrowsException = true)]
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void InternalSetGraphicsBufferData([NotNull("ArgumentNullException")] GraphicsBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferCounterValue", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void InternalSetGraphicsBufferCounterValue([NotNull("ArgumentNullException")] GraphicsBuffer buffer, uint counterValue);
+
+		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::CopyBuffer", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void CopyBufferImpl([NotNull("ArgumentNullException")] GraphicsBuffer source, [NotNull("ArgumentNullException")] GraphicsBuffer dest);
 
 		~CommandBuffer()
 		{
@@ -1369,6 +1651,7 @@ namespace UnityEngine.Rendering
 		public GraphicsFence CreateGraphicsFence(GraphicsFenceType fenceType, SynchronisationStageFlags stage)
 		{
 			GraphicsFence graphicsFence = default(GraphicsFence);
+			graphicsFence.m_FenceType = fenceType;
 			graphicsFence.m_Ptr = this.CreateGPUFence_Internal(fenceType, stage);
 			graphicsFence.InitPostAllocation();
 			graphicsFence.Validate();
@@ -1490,6 +1773,16 @@ namespace UnityEngine.Rendering
 			this.Internal_SetComputeBufferParam(computeShader, kernelIndex, Shader.PropertyToID(name), buffer);
 		}
 
+		public void SetComputeBufferParam(ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBufferHandle bufferHandle)
+		{
+			this.Internal_SetComputeGraphicsBufferHandleParam(computeShader, kernelIndex, nameID, bufferHandle);
+		}
+
+		public void SetComputeBufferParam(ComputeShader computeShader, int kernelIndex, string name, GraphicsBufferHandle bufferHandle)
+		{
+			this.Internal_SetComputeGraphicsBufferHandleParam(computeShader, kernelIndex, Shader.PropertyToID(name), bufferHandle);
+		}
+
 		public void SetComputeBufferParam(ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBuffer buffer)
 		{
 			this.Internal_SetComputeGraphicsBufferParam(computeShader, kernelIndex, nameID, buffer);
@@ -1520,6 +1813,11 @@ namespace UnityEngine.Rendering
 			this.Internal_SetComputeConstantGraphicsBufferParam(computeShader, Shader.PropertyToID(name), buffer, offset, size);
 		}
 
+		public void SetComputeParamsFromMaterial(ComputeShader computeShader, int kernelIndex, Material material)
+		{
+			this.Internal_SetComputeParamsFromMaterial(computeShader, kernelIndex, material);
+		}
+
 		public void DispatchCompute(ComputeShader computeShader, int kernelIndex, int threadGroupsX, int threadGroupsY, int threadGroupsZ)
 		{
 			this.Internal_DispatchCompute(computeShader, kernelIndex, threadGroupsX, threadGroupsY, threadGroupsZ);
@@ -1527,11 +1825,21 @@ namespace UnityEngine.Rendering
 
 		public void DispatchCompute(ComputeShader computeShader, int kernelIndex, ComputeBuffer indirectBuffer, uint argsOffset)
 		{
+			bool flag = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal && !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
 			this.Internal_DispatchComputeIndirect(computeShader, kernelIndex, indirectBuffer, argsOffset);
 		}
 
 		public void DispatchCompute(ComputeShader computeShader, int kernelIndex, GraphicsBuffer indirectBuffer, uint argsOffset)
 		{
+			bool flag = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal && !SystemInfo.supportsIndirectArgumentsBuffer;
+			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
 			this.Internal_DispatchComputeIndirectGraphicsBuffer(computeShader, kernelIndex, indirectBuffer, argsOffset);
 		}
 
@@ -1707,7 +2015,7 @@ namespace UnityEngine.Rendering
 			this.Internal_ResolveAntiAliasedSurface(rt, target);
 		}
 
-		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties)
+		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, [DefaultValue("0")] int submeshIndex, [DefaultValue("-1")] int shaderPass, [DefaultValue("null")] MaterialPropertyBlock properties)
 		{
 			bool flag = mesh == null;
 			if (flag)
@@ -1729,22 +2037,25 @@ namespace UnityEngine.Rendering
 			this.Internal_DrawMesh(mesh, matrix, material, submeshIndex, shaderPass, properties);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass)
 		{
 			this.DrawMesh(mesh, matrix, material, submeshIndex, shaderPass, null);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex)
 		{
 			this.DrawMesh(mesh, matrix, material, submeshIndex, -1);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material)
 		{
 			this.DrawMesh(mesh, matrix, material, 0);
 		}
 
-		public void DrawRenderer(Renderer renderer, Material material, int submeshIndex, int shaderPass)
+		public void DrawRenderer(Renderer renderer, Material material, [DefaultValue("0")] int submeshIndex, [DefaultValue("-1")] int shaderPass)
 		{
 			bool flag = renderer == null;
 			if (flag)
@@ -1766,17 +2077,24 @@ namespace UnityEngine.Rendering
 			this.Internal_DrawRenderer(renderer, material, submeshIndex, shaderPass);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawRenderer(Renderer renderer, Material material, int submeshIndex)
 		{
 			this.DrawRenderer(renderer, material, submeshIndex, -1);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawRenderer(Renderer renderer, Material material)
 		{
 			this.DrawRenderer(renderer, material, 0);
 		}
 
-		public void DrawProcedural(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount, MaterialPropertyBlock properties)
+		public void DrawRendererList(RendererList rendererList)
+		{
+			this.Internal_DrawRendererList(rendererList);
+		}
+
+		public void DrawProcedural(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, [DefaultValue("1")] int instanceCount, [DefaultValue("null")] MaterialPropertyBlock properties)
 		{
 			bool flag = material == null;
 			if (flag)
@@ -1787,11 +2105,13 @@ namespace UnityEngine.Rendering
 			this.Internal_DrawProcedural(matrix, material, shaderPass, topology, vertexCount, instanceCount, properties);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawProcedural(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount)
 		{
 			this.DrawProcedural(matrix, material, shaderPass, topology, vertexCount, instanceCount, null);
 		}
 
+		[ExcludeFromDocs]
 		public void DrawProcedural(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount)
 		{
 			this.DrawProcedural(matrix, material, shaderPass, topology, vertexCount, 1);
@@ -1824,13 +2144,18 @@ namespace UnityEngine.Rendering
 
 		public void DrawProceduralIndirect(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			bool flag = material == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = material == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag2 = bufferWithArgs == null;
-			if (flag2)
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -1850,18 +2175,23 @@ namespace UnityEngine.Rendering
 
 		public void DrawProceduralIndirect(GraphicsBuffer indexBuffer, Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			bool flag = indexBuffer == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("indexBuffer");
 			}
-			bool flag2 = material == null;
-			if (flag2)
+			bool flag3 = material == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag3 = bufferWithArgs == null;
-			if (flag3)
+			bool flag4 = bufferWithArgs == null;
+			if (flag4)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -1880,13 +2210,18 @@ namespace UnityEngine.Rendering
 
 		public void DrawProceduralIndirect(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			bool flag = material == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = material == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag2 = bufferWithArgs == null;
-			if (flag2)
+			bool flag3 = bufferWithArgs == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -1906,18 +2241,23 @@ namespace UnityEngine.Rendering
 
 		public void DrawProceduralIndirect(GraphicsBuffer indexBuffer, Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			bool flag = indexBuffer == null;
+			bool flag = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag2 = indexBuffer == null;
+			if (flag2)
 			{
 				throw new ArgumentNullException("indexBuffer");
 			}
-			bool flag2 = material == null;
-			if (flag2)
+			bool flag3 = material == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag3 = bufferWithArgs == null;
-			if (flag3)
+			bool flag4 = bufferWithArgs == null;
+			if (flag4)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -2026,23 +2366,28 @@ namespace UnityEngine.Rendering
 			{
 				throw new InvalidOperationException("Instancing is not supported.");
 			}
-			bool flag2 = mesh == null;
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag3 = mesh == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("mesh");
 			}
-			bool flag3 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
-			if (flag3)
+			bool flag4 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("submeshIndex", "submeshIndex out of range.");
 			}
-			bool flag4 = material == null;
-			if (flag4)
+			bool flag5 = material == null;
+			if (flag5)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag5 = bufferWithArgs == null;
-			if (flag5)
+			bool flag6 = bufferWithArgs == null;
+			if (flag6)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -2066,23 +2411,28 @@ namespace UnityEngine.Rendering
 			{
 				throw new InvalidOperationException("Instancing is not supported.");
 			}
-			bool flag2 = mesh == null;
+			bool flag2 = !SystemInfo.supportsIndirectArgumentsBuffer;
 			if (flag2)
+			{
+				throw new InvalidOperationException("Indirect argument buffers are not supported.");
+			}
+			bool flag3 = mesh == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("mesh");
 			}
-			bool flag3 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
-			if (flag3)
+			bool flag4 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
+			if (flag4)
 			{
 				throw new ArgumentOutOfRangeException("submeshIndex", "submeshIndex out of range.");
 			}
-			bool flag4 = material == null;
-			if (flag4)
+			bool flag5 = material == null;
+			if (flag5)
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag5 = bufferWithArgs == null;
-			if (flag5)
+			bool flag6 = bufferWithArgs == null;
+			if (flag6)
 			{
 				throw new ArgumentNullException("bufferWithArgs");
 			}
@@ -2246,6 +2596,11 @@ namespace UnityEngine.Rendering
 		public void SetGlobalInt(string name, int value)
 		{
 			this.SetGlobalInt(Shader.PropertyToID(name), value);
+		}
+
+		public void SetGlobalInteger(string name, int value)
+		{
+			this.SetGlobalInteger(Shader.PropertyToID(name), value);
 		}
 
 		public void SetGlobalVector(string name, Vector4 value)
@@ -2430,6 +2785,17 @@ namespace UnityEngine.Rendering
 			this.IssuePluginEventAndDataInternal(callback, eventID, data);
 		}
 
+		public void IssuePluginEventAndDataWithFlags(IntPtr callback, int eventID, CustomMarkerCallbackFlags flags, IntPtr data)
+		{
+			bool flag = callback == IntPtr.Zero;
+			if (flag)
+			{
+				throw new ArgumentException("Null callback specified.");
+			}
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.IssuePluginEventAndDataInternalWithFlags(callback, eventID, flags, data);
+		}
+
 		public void IssuePluginCustomBlit(IntPtr callback, uint command, RenderTargetIdentifier source, RenderTargetIdentifier dest, uint commandParam, uint commandFlags)
 		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
@@ -2460,6 +2826,12 @@ namespace UnityEngine.Rendering
 			this.Internal_ProcessVTFeedback(rt, resolver, slice, x, width, y, height, mip);
 		}
 
+		public void CopyBuffer(GraphicsBuffer source, GraphicsBuffer dest)
+		{
+			Graphics.ValidateCopyBuffer(source, dest);
+			this.CopyBufferImpl(source, dest);
+		}
+
 		[Obsolete("CommandBuffer.CreateGPUFence has been deprecated. Use CreateGraphicsFence instead (UnityUpgradable) -> CreateAsyncGraphicsFence(*)", false)]
 		public GPUFence CreateGPUFence(SynchronisationStage stage)
 		{
@@ -2482,6 +2854,48 @@ namespace UnityEngine.Rendering
 		{
 		}
 
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", false)]
+		public void SetComputeBufferData(ComputeBuffer buffer, Array data)
+		{
+			this.SetBufferData(buffer, data);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data) where T : struct
+		{
+			this.SetBufferData<T>(buffer, data);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data) where T : struct
+		{
+			this.SetBufferData<T>(buffer, data);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", false)]
+		public void SetComputeBufferData(ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count)
+		{
+			this.SetBufferData(buffer, data, managedBufferStartIndex, graphicsBufferStartIndex, count);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		{
+			this.SetBufferData<T>(buffer, data, managedBufferStartIndex, graphicsBufferStartIndex, count);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
+		{
+			this.SetBufferData<T>(buffer, data, nativeBufferStartIndex, graphicsBufferStartIndex, count);
+		}
+
+		[Obsolete("CommandBuffer.SetComputeBufferCounterValue has been deprecated. Use SetBufferCounterValue instead (UnityUpgradable) -> SetBufferCounterValue(*)", false)]
+		public void SetComputeBufferCounterValue(ComputeBuffer buffer, uint counterValue)
+		{
+			this.SetBufferCounterValue(buffer, counterValue);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ConvertTexture_Internal_Injected(ref RenderTargetIdentifier src, int srcElement, ref RenderTargetIdentifier dst, int dstElement);
 
@@ -2490,6 +2904,9 @@ namespace UnityEngine.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetComputeMatrixParam_Injected(ComputeShader computeShader, int nameID, ref Matrix4x4 val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_SetComputeGraphicsBufferHandleParam_Injected(ComputeShader computeShader, int kernelIndex, int nameID, ref GraphicsBufferHandle bufferHandle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetRayTracingVectorParam_Injected(RayTracingShader rayTracingShader, int nameID, ref Vector4 val);
@@ -2505,6 +2922,9 @@ namespace UnityEngine.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_DrawMesh_Injected(Mesh mesh, ref Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_DrawRendererList_Injected(ref RendererList rendererList);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_DrawProcedural_Injected(ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount, MaterialPropertyBlock properties);
@@ -2543,7 +2963,7 @@ namespace UnityEngine.Rendering
 		private extern void GetTemporaryRTWithDescriptor_Injected(int nameID, ref RenderTextureDescriptor desc, FilterMode filter);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ClearRenderTarget_Injected(bool clearDepth, bool clearColor, ref Color backgroundColor, float depth);
+		private extern void ClearRenderTarget_Injected(RTClearFlags clearFlags, ref Color backgroundColor, float depth, uint stencil);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGlobalVector_Injected(int nameID, ref Vector4 value);
@@ -2553,6 +2973,33 @@ namespace UnityEngine.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetGlobalMatrix_Injected(int nameID, ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EnableGlobalKeyword_Injected(ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EnableMaterialKeyword_Injected(Material material, ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EnableComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DisableGlobalKeyword_Injected(ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DisableMaterialKeyword_Injected(Material material, ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DisableComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetGlobalKeyword_Injected(ref GlobalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetMaterialKeyword_Injected(Material material, ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetViewMatrix_Injected(ref Matrix4x4 view);

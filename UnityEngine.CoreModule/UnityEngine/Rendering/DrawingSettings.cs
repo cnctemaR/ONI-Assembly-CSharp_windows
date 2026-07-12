@@ -11,8 +11,11 @@ namespace UnityEngine.Rendering
 			this.m_SortingSettings = sortingSettings;
 			this.m_PerObjectData = PerObjectData.None;
 			this.m_Flags = DrawRendererFlags.EnableInstancing;
+			this.m_OverrideShaderID = 0;
+			this.m_OverrideShaderPassIndex = 0;
 			this.m_OverrideMaterialInstanceId = 0;
 			this.m_OverrideMaterialPassIndex = 0;
+			this.m_fallbackMaterialInstanceId = 0;
 			this.m_MainLightIndex = -1;
 			fixed (int* ptr = &this.shaderPassNames.FixedElementField)
 			{
@@ -23,8 +26,6 @@ namespace UnityEngine.Rendering
 					ptr2[i] = -1;
 				}
 			}
-			this.m_PerObjectData = PerObjectData.None;
-			this.m_Flags = DrawRendererFlags.EnableInstancing;
 			this.m_UseSrpBatcher = 0;
 		}
 
@@ -102,6 +103,18 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public Shader overrideShader
+		{
+			get
+			{
+				return (this.m_OverrideShaderID != 0) ? (Object.FindObjectFromInstanceID(this.m_OverrideShaderID) as Shader) : null;
+			}
+			set
+			{
+				this.m_OverrideShaderID = ((value != null) ? value.GetInstanceID() : 0);
+			}
+		}
+
 		public int overrideMaterialPassIndex
 		{
 			get
@@ -111,6 +124,30 @@ namespace UnityEngine.Rendering
 			set
 			{
 				this.m_OverrideMaterialPassIndex = value;
+			}
+		}
+
+		public int overrideShaderPassIndex
+		{
+			get
+			{
+				return this.m_OverrideShaderPassIndex;
+			}
+			set
+			{
+				this.m_OverrideShaderPassIndex = value;
+			}
+		}
+
+		public Material fallbackMaterial
+		{
+			get
+			{
+				return (this.m_fallbackMaterialInstanceId != 0) ? (Object.FindObjectFromInstanceID(this.m_fallbackMaterialInstanceId) as Material) : null;
+			}
+			set
+			{
+				this.m_fallbackMaterialInstanceId = ((value != null) ? value.GetInstanceID() : 0);
 			}
 		}
 
@@ -167,7 +204,7 @@ namespace UnityEngine.Rendering
 					return false;
 				}
 			}
-			return this.m_SortingSettings.Equals(other.m_SortingSettings) && this.m_PerObjectData == other.m_PerObjectData && this.m_Flags == other.m_Flags && this.m_OverrideMaterialInstanceId == other.m_OverrideMaterialInstanceId && this.m_OverrideMaterialPassIndex == other.m_OverrideMaterialPassIndex && this.m_UseSrpBatcher == other.m_UseSrpBatcher;
+			return this.m_SortingSettings.Equals(other.m_SortingSettings) && this.m_PerObjectData == other.m_PerObjectData && this.m_Flags == other.m_Flags && this.m_OverrideMaterialInstanceId == other.m_OverrideMaterialInstanceId && this.m_OverrideMaterialPassIndex == other.m_OverrideMaterialPassIndex && this.m_fallbackMaterialInstanceId == other.m_fallbackMaterialInstanceId && this.m_UseSrpBatcher == other.m_UseSrpBatcher;
 		}
 
 		public override bool Equals(object obj)
@@ -183,6 +220,7 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ (int)this.m_Flags;
 			num = (num * 397) ^ this.m_OverrideMaterialInstanceId;
 			num = (num * 397) ^ this.m_OverrideMaterialPassIndex;
+			num = (num * 397) ^ this.m_fallbackMaterialInstanceId;
 			return (num * 397) ^ this.m_UseSrpBatcher;
 		}
 
@@ -209,9 +247,15 @@ namespace UnityEngine.Rendering
 
 		private DrawRendererFlags m_Flags;
 
+		private int m_OverrideShaderID;
+
+		private int m_OverrideShaderPassIndex;
+
 		private int m_OverrideMaterialInstanceId;
 
 		private int m_OverrideMaterialPassIndex;
+
+		private int m_fallbackMaterialInstanceId;
 
 		private int m_MainLightIndex;
 

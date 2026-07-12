@@ -99,12 +99,12 @@ namespace UnityEngine.SocialPlatforms.Impl
 			}
 		}
 
-		[Obsolete("legacyId returns playerID from GKPlayer, which became obsolete in iOS 12.4 . id returns playerID for devices running versions before iOS 12.4, and the newer teamPlayerID for later versions. Please use IUserProfile.id or UserProfile.id instead (UnityUpgradable) -> id")]
+		[Obsolete("legacyId returns playerID from GKPlayer, which became obsolete in iOS 12.4 . id returns playerID for devices running versions before iOS 12.4, and the newer teamPlayerID for later versions. Please use IUserProfile.id or UserProfile.id instead (UnityUpgradable) -> id", true)]
 		public string legacyId
 		{
 			get
 			{
-				return this.m_legacyID;
+				throw new NotSupportedException("legacyId returns playerID from GKPlayer, which became obsolete in iOS 12.4 . id returns playerID for devices running versions before iOS 12.4, and the newer teamPlayerID for later versions. Please use IUserProfile.id or UserProfile.id instead");
 			}
 		}
 
@@ -153,5 +153,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 		protected Texture2D m_Image;
 
 		private string m_gameID;
+
+		private const string legacyIdObsoleteMessage = "legacyId returns playerID from GKPlayer, which became obsolete in iOS 12.4 . id returns playerID for devices running versions before iOS 12.4, and the newer teamPlayerID for later versions. Please use IUserProfile.id or UserProfile.id instead";
 	}
 }

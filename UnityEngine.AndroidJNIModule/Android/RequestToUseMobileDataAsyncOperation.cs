@@ -9,12 +9,12 @@ namespace UnityEngine.Android
 			get
 			{
 				object operationLock = this.m_OperationLock;
-				bool flag;
+				bool flag2;
 				lock (operationLock)
 				{
-					flag = this.m_RequestResult == null;
+					flag2 = this.m_RequestResult == null;
 				}
-				return flag;
+				return flag2;
 			}
 		}
 

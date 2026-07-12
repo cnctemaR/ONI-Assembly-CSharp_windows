@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[StaticAccessor("TextRenderingPrivate", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
-	[NativeHeader("Modules/TextRendering/Public/Font.h")]
 	[NativeClass("TextRendering::Font")]
+	[NativeHeader("Modules/TextRendering/Public/Font.h")]
+	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
+	[StaticAccessor("TextRenderingPrivate", StaticAccessorType.DoubleColon)]
 	public sealed class Font : Object
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -33,6 +33,7 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[param: Unmarshalled]
 			set;
 		}
 
@@ -61,6 +62,7 @@ namespace UnityEngine
 			get;
 			[FreeFunction("TextRenderingPrivate::SetFontCharacterInfo", HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[param: Unmarshalled]
 			set;
 		}
 
@@ -162,7 +164,7 @@ namespace UnityEngine
 		private static extern void Internal_CreateFontFromPath([Writable] Font self, string fontPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CreateDynamicFont([Writable] Font self, string[] _names, int size);
+		private static extern void Internal_CreateDynamicFont([Writable] Font self, [Unmarshalled] string[] _names, int size);
 
 		[FreeFunction("TextRenderingPrivate::GetCharacterInfo", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

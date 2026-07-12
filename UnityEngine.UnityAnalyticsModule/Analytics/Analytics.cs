@@ -7,8 +7,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Analytics
 {
-	[NativeHeader("Modules/UnityConnect/UnityConnectSettings.h")]
 	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
+	[NativeHeader("Modules/UnityConnect/UnityConnectSettings.h")]
 	[NativeHeader("Modules/UnityAnalytics/Public/Events/UserCustomEvent.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public static class Analytics
@@ -45,8 +45,8 @@ namespace UnityEngine.Analytics
 			return analyticsResult;
 		}
 
-		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[NativeMethod("ResumeInitialization")]
+		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnalyticsResult ResumeInitializationInternal();
 
@@ -171,18 +171,18 @@ namespace UnityEngine.Analytics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult RegisterEventsWithLimit(string[] eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer);
 
-		[ThreadSafe]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult SendEventWithLimit(string eventName, object parameters, int ver, string prefix);
 
-		[ThreadSafe]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult SetEventWithLimitEndPoint(string eventName, string endPoint, int ver, string prefix);
 
-		[ThreadSafe]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult SetEventWithLimitPriority(string eventName, AnalyticsEventPriority eventPriority, int ver, string prefix);
 
@@ -320,6 +320,7 @@ namespace UnityEngine.Analytics
 			return analyticsResult;
 		}
 
+		[Obsolete("SetUserId is no longer supported", true)]
 		public static AnalyticsResult SetUserId(string userId)
 		{
 			bool flag = string.IsNullOrEmpty(userId);
@@ -327,42 +328,25 @@ namespace UnityEngine.Analytics
 			{
 				throw new ArgumentException("Cannot set userId to an empty or null string");
 			}
-			return Analytics.SendUserInfoEvent(new Analytics.UserInfo
-			{
-				custom_userid = userId
-			});
+			return AnalyticsResult.InvalidData;
 		}
 
+		[Obsolete("SetUserGender is no longer supported", true)]
 		public static AnalyticsResult SetUserGender(Gender gender)
 		{
-			return Analytics.SendUserInfoEvent(new Analytics.UserInfo
-			{
-				sex = ((gender == Gender.Male) ? "M" : ((gender == Gender.Female) ? "F" : "U"))
-			});
+			return AnalyticsResult.InvalidData;
 		}
 
+		[Obsolete("SetUserBirthYear is no longer supported", true)]
 		public static AnalyticsResult SetUserBirthYear(int birthYear)
 		{
-			return Analytics.SendUserInfoEvent(new Analytics.UserInfoBirthYear
-			{
-				birth_year = birthYear
-			});
+			return AnalyticsResult.InvalidData;
 		}
 
+		[Obsolete("SendUserInfoEvent is no longer supported", true)]
 		private static AnalyticsResult SendUserInfoEvent(object param)
 		{
-			bool flag = !Analytics.IsInitialized();
-			AnalyticsResult analyticsResult;
-			if (flag)
-			{
-				analyticsResult = AnalyticsResult.NotInitialized;
-			}
-			else
-			{
-				Analytics.QueueEvent("userInfo", param, 1, string.Empty);
-				analyticsResult = AnalyticsResult.Ok;
-			}
-			return analyticsResult;
+			return AnalyticsResult.InvalidData;
 		}
 
 		public static AnalyticsResult Transaction(string productId, decimal amount, string currency)
@@ -679,20 +663,6 @@ namespace UnityEngine.Analytics
 				analyticsResult = Analytics.IsEventWithLimitEnabled(eventName, ver, prefix);
 			}
 			return analyticsResult;
-		}
-
-		[Serializable]
-		private struct UserInfo
-		{
-			public string custom_userid;
-
-			public string sex;
-		}
-
-		[Serializable]
-		private struct UserInfoBirthYear
-		{
-			public int birth_year;
 		}
 	}
 }

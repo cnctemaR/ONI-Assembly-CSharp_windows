@@ -24,17 +24,30 @@ public class CarrotPlantConfig : IEntityConfig
 		float num3 = 218.15f;
 		float num4 = 259.15f;
 		float num5 = 269.15f;
-		string id = CarrotConfig.ID;
+		string text4 = CarrotConfig.ID;
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, id, true, true, true, true, 2400f, 0f, 4600f, "CarrotPlantOriginal", global::STRINGS.CREATURES.SPECIES.CARROTPLANT.NAME);
+		}, true, 0f, 0.15f, text4, true, true, true, true, 2400f, 0f, 4600f, "CarrotPlantOriginal", global::STRINGS.CREATURES.SPECIES.CARROTPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "CarrotPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.CARROTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.CARROTPLANT.DESC, Assets.GetAnim("seed_purpleroot_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.CARROTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, this.GetDlcIds());
+		GameObject gameObject3 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		string text5 = "CarrotPlantSeed";
+		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.CARROTPLANT.NAME;
+		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.CARROTPLANT.DESC;
+		KAnimFile anim = Assets.GetAnim("seed_purpleroot_kanim");
+		string text8 = "object";
+		int num6 = 1;
+		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.CropSeed);
+		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
+		text4 = global::STRINGS.CREATURES.SPECIES.CARROTPLANT.DOMESTICATEDDESC;
+		string[] dlcIds = this.GetDlcIds();
+		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 1, text4, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false, dlcIds);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -43,7 +56,7 @@ public class CarrotPlantConfig : IEntityConfig
 				massConsumptionRate = 0.025f
 			}
 		});
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "CarrotPlant_preview", Assets.GetAnim("purpleroot_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject4, "CarrotPlant_preview", Assets.GetAnim("purpleroot_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

@@ -1985,9 +1985,14 @@ namespace System.Linq
 			}
 			FirstQueryOperator<TSource> firstQueryOperator = new FirstQueryOperator<TSource>(source, null);
 			QuerySettings querySettings = firstQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (firstQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (firstQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).First<TSource>();
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).First<TSource>();
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(firstQueryOperator, false, false);
 		}
@@ -2004,9 +2009,14 @@ namespace System.Linq
 			}
 			FirstQueryOperator<TSource> firstQueryOperator = new FirstQueryOperator<TSource>(source, predicate);
 			QuerySettings querySettings = firstQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (firstQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (firstQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).First<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).First<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(firstQueryOperator, false, false);
 		}
@@ -2019,9 +2029,14 @@ namespace System.Linq
 			}
 			FirstQueryOperator<TSource> firstQueryOperator = new FirstQueryOperator<TSource>(source, null);
 			QuerySettings querySettings = firstQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (firstQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (firstQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).FirstOrDefault<TSource>();
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).FirstOrDefault<TSource>();
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(firstQueryOperator, false, true);
 		}
@@ -2038,9 +2053,14 @@ namespace System.Linq
 			}
 			FirstQueryOperator<TSource> firstQueryOperator = new FirstQueryOperator<TSource>(source, predicate);
 			QuerySettings querySettings = firstQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (firstQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (firstQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).FirstOrDefault<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(firstQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).FirstOrDefault<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(firstQueryOperator, false, true);
 		}
@@ -2053,9 +2073,14 @@ namespace System.Linq
 			}
 			LastQueryOperator<TSource> lastQueryOperator = new LastQueryOperator<TSource>(source, null);
 			QuerySettings querySettings = lastQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (lastQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (lastQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).Last<TSource>();
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).Last<TSource>();
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(lastQueryOperator, false, false);
 		}
@@ -2072,9 +2097,14 @@ namespace System.Linq
 			}
 			LastQueryOperator<TSource> lastQueryOperator = new LastQueryOperator<TSource>(source, predicate);
 			QuerySettings querySettings = lastQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (lastQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (lastQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).Last<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).Last<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(lastQueryOperator, false, false);
 		}
@@ -2087,9 +2117,14 @@ namespace System.Linq
 			}
 			LastQueryOperator<TSource> lastQueryOperator = new LastQueryOperator<TSource>(source, null);
 			QuerySettings querySettings = lastQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (lastQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (lastQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).LastOrDefault<TSource>();
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).LastOrDefault<TSource>();
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(lastQueryOperator, false, true);
 		}
@@ -2106,9 +2141,14 @@ namespace System.Linq
 			}
 			LastQueryOperator<TSource> lastQueryOperator = new LastQueryOperator<TSource>(source, predicate);
 			QuerySettings querySettings = lastQueryOperator.SpecifiedQuerySettings.WithDefaults();
-			if (lastQueryOperator.LimitsParallelism && querySettings.ExecutionMode != ParallelExecutionMode.ForceParallelism)
+			if (lastQueryOperator.LimitsParallelism)
 			{
-				return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).LastOrDefault<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				ParallelExecutionMode? executionMode = querySettings.ExecutionMode;
+				ParallelExecutionMode parallelExecutionMode = ParallelExecutionMode.ForceParallelism;
+				if (!((executionMode.GetValueOrDefault() == parallelExecutionMode) & (executionMode != null)))
+				{
+					return ExceptionAggregator.WrapEnumerable<TSource>(CancellableEnumerable.Wrap<TSource>(lastQueryOperator.Child.AsSequentialQuery(querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState.ExternalCancellationToken), querySettings.CancellationState).LastOrDefault<TSource>(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, querySettings.CancellationState));
+				}
 			}
 			return ParallelEnumerable.GetOneWithPossibleDefault<TSource>(lastQueryOperator, false, true);
 		}

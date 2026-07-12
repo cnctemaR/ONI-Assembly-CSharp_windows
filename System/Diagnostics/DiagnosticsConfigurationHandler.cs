@@ -41,8 +41,7 @@ namespace System.Diagnostics
 			foreach (object obj in section.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
-				XmlNodeType nodeType = xmlNode.NodeType;
-				if (nodeType == XmlNodeType.Element && !(xmlNode.LocalName != "sharedListeners"))
+				if (xmlNode.NodeType == XmlNodeType.Element && !(xmlNode.LocalName != "sharedListeners"))
 				{
 					this.AddTraceListeners(dictionary, xmlNode, this.GetSharedListeners(dictionary));
 				}
@@ -50,10 +49,10 @@ namespace System.Diagnostics
 			foreach (object obj2 in section.ChildNodes)
 			{
 				XmlNode xmlNode2 = (XmlNode)obj2;
-				XmlNodeType nodeType2 = xmlNode2.NodeType;
-				if (nodeType2 != XmlNodeType.Element)
+				XmlNodeType nodeType = xmlNode2.NodeType;
+				if (nodeType != XmlNodeType.Element)
 				{
-					if (nodeType2 != XmlNodeType.Comment && nodeType2 != XmlNodeType.Whitespace)
+					if (nodeType != XmlNodeType.Comment && nodeType != XmlNodeType.Whitespace)
 					{
 						this.ThrowUnrecognizedElement(xmlNode2);
 					}

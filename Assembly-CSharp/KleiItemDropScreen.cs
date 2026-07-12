@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Database;
 using FMOD.Studio;
 using STRINGS;
@@ -87,18 +88,58 @@ public class KleiItemDropScreen : KModalScreen
 
 	public void PresentNextUnopenedItem(bool firstItemPresentation = true)
 	{
+		int num = 0;
+		using (IEnumerator<KleiItems.ItemData> enumerator = PermitItems.IterateInventory().GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (!enumerator.Current.IsOpened)
+				{
+					num++;
+				}
+			}
+		}
+		this.RefreshUnopenedItemsLabel();
 		foreach (KleiItems.ItemData itemData in PermitItems.IterateInventory())
 		{
 			if (!itemData.IsOpened)
 			{
-				this.PresentItem(itemData, firstItemPresentation);
+				this.PresentItem(itemData, firstItemPresentation, num == 1);
 				return;
 			}
 		}
 		this.PresentNoItemAvailablePrompt(false);
 	}
 
-	public void PresentItem(KleiItems.ItemData item, bool firstItemPresentation)
+	private void RefreshUnopenedItemsLabel()
+	{
+		int num = 0;
+		using (IEnumerator<KleiItems.ItemData> enumerator = PermitItems.IterateInventory().GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (!enumerator.Current.IsOpened)
+				{
+					num++;
+				}
+			}
+		}
+		if (num > 1)
+		{
+			this.unopenedItemCountLabel.gameObject.SetActive(true);
+			this.unopenedItemCountLabel.SetText(UI.ITEM_DROP_SCREEN.UNOPENED_ITEM_COUNT, (float)num);
+			return;
+		}
+		if (num == 1)
+		{
+			this.unopenedItemCountLabel.gameObject.SetActive(true);
+			this.unopenedItemCountLabel.SetText(UI.ITEM_DROP_SCREEN.UNOPENED_ITEM, (float)num);
+			return;
+		}
+		this.unopenedItemCountLabel.gameObject.SetActive(false);
+	}
+
+	public void PresentItem(KleiItems.ItemData item, bool firstItemPresentation, bool lastItemPresentation)
 	{
 		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.THANKS_FOR_PLAYING);
 		this.giftAcknowledged = false;
@@ -108,14 +149,13 @@ public class KleiItemDropScreen : KModalScreen
 		{
 			base.StopCoroutine(this.activePresentationRoutine);
 		}
-		this.activePresentationRoutine = base.StartCoroutine(this.PresentItemRoutine(item, firstItemPresentation));
+		this.activePresentationRoutine = base.StartCoroutine(this.PresentItemRoutine(item, firstItemPresentation, lastItemPresentation));
 		this.acceptButton.ClearOnClick();
 		this.acknowledgeButton.ClearOnClick();
 		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.PRINT_ITEM_BUTTON);
 		this.acceptButton.onClick += delegate
 		{
-			this.serverRequestState.revealRequested = true;
-			PermitItems.QueueRequestOpenOrUnboxItem(item, new KleiItems.ResponseCallback(this.OnOpenItemRequestResponse));
+			this.RequestReveal(item);
 		};
 		this.acknowledgeButton.onClick += delegate
 		{
@@ -124,6 +164,12 @@ public class KleiItemDropScreen : KModalScreen
 				this.giftAcknowledged = true;
 			}
 		};
+	}
+
+	private void RequestReveal(KleiItems.ItemData item)
+	{
+		this.serverRequestState.revealRequested = true;
+		PermitItems.QueueRequestOpenOrUnboxItem(item, new KleiItems.ResponseCallback(this.OnOpenItemRequestResponse));
 	}
 
 	public void OnOpenItemRequestResponse(KleiItems.Result result)
@@ -233,7 +279,7 @@ public class KleiItemDropScreen : KModalScreen
 		yield break;
 	}
 
-	private IEnumerator PresentItemRoutine(KleiItems.ItemData item, bool firstItem)
+	private IEnumerator PresentItemRoutine(KleiItems.ItemData item, bool firstItem, bool lastItem)
 	{
 		yield return null;
 		if (item.ItemId == 0UL)
@@ -261,20 +307,23 @@ public class KleiItemDropScreen : KModalScreen
 			yield return Updater.WaitForSeconds(0.125f);
 			this.closeButton.gameObject.SetActive(true);
 		}
+		Vector2 animate_offset = new Vector2(0f, -30f);
+		if (firstItem)
+		{
+			this.acceptButtonRect.FindOrAddComponent<CanvasGroup>().alpha = 0f;
+			this.acceptButtonRect.gameObject.SetActive(true);
+			this.acceptButtonPosition.SetOn(this.acceptButtonRect);
+			this.animatedPod.Play("powerup", KAnim.PlayMode.Once, 1f, 0f);
+			this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+			yield return Updater.WaitForSeconds(1.25f);
+			yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
+			yield return Updater.Until(() => this.serverRequestState.revealRequested);
+			yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
+		}
 		else
 		{
-			yield return Updater.WaitForSeconds(0.25f);
+			this.RequestReveal(item);
 		}
-		Vector2 animate_offset = new Vector2(0f, -30f);
-		this.acceptButtonRect.FindOrAddComponent<CanvasGroup>().alpha = 0f;
-		this.acceptButtonRect.gameObject.SetActive(true);
-		this.acceptButtonPosition.SetOn(this.acceptButtonRect);
-		this.animatedPod.Play("powerup", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.WaitForSeconds(1.25f);
-		yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
-		yield return Updater.Until(() => this.serverRequestState.revealRequested);
-		yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
 		this.animatedLoadingIcon.gameObject.rectTransform().anchoredPosition = new Vector2(0f, -352f);
 		if (this.animatedLoadingIcon.GetComponent<CanvasGroup>() != null)
 		{
@@ -299,9 +348,13 @@ public class KleiItemDropScreen : KModalScreen
 		}
 		else if (this.serverRequestState.revealConfirmedByServer)
 		{
+			float num = 1f;
+			this.animatedPod.PlaySpeedMultiplier = (firstItem ? 1f : (1f * num));
 			this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
 			this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-			yield return Updater.WaitForSeconds(1f);
+			yield return Updater.WaitForSeconds(firstItem ? 1f : (1f / num));
+			this.animatedPod.PlaySpeedMultiplier = 1f;
+			this.RefreshUnopenedItemsLabel();
 			DropScreenPresentationInfo dropScreenPresentationInfo;
 			dropScreenPresentationInfo.UseEquipmentVis = false;
 			dropScreenPresentationInfo.BuildOverride = null;
@@ -368,14 +421,24 @@ public class KleiItemDropScreen : KModalScreen
 			this.itemTextContainerPosition.SetOn(this.itemTextContainer);
 			yield return Updater.Parallel(new Updater[] { PresUtil.OffsetToAndFade(this.itemTextContainer.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut) });
 			yield return Updater.Until(() => this.giftAcknowledged);
-			this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-			this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
-			yield return Updater.Parallel(new Updater[] { PresUtil.OffsetFromAndFade(this.itemTextContainer.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut) });
-			this.itemNameLabel.SetText("");
-			this.itemDescriptionLabel.SetText("");
-			this.itemRarityLabel.SetText("");
-			this.itemCategoryLabel.SetText("");
-			yield return this.permitVisualizer.AnimateOut();
+			if (lastItem)
+			{
+				this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+				this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
+				yield return Updater.Parallel(new Updater[] { PresUtil.OffsetFromAndFade(this.itemTextContainer.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut) });
+				this.itemNameLabel.SetText("");
+				this.itemDescriptionLabel.SetText("");
+				this.itemRarityLabel.SetText("");
+				this.itemCategoryLabel.SetText("");
+				yield return this.permitVisualizer.AnimateOut();
+			}
+			else
+			{
+				this.itemNameLabel.SetText("");
+				this.itemDescriptionLabel.SetText("");
+				this.itemRarityLabel.SetText("");
+				this.itemCategoryLabel.SetText("");
+			}
 			name = null;
 			desc = null;
 			categoryString = null;
@@ -404,6 +467,9 @@ public class KleiItemDropScreen : KModalScreen
 
 	[SerializeField]
 	private LocText userMessageLabel;
+
+	[SerializeField]
+	private LocText unopenedItemCountLabel;
 
 	[Header("Item Info")]
 	[SerializeField]

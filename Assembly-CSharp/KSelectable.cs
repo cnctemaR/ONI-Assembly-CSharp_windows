@@ -308,10 +308,10 @@ public class KSelectable : KMonoBehaviour
 
 	public void UpdateWorkableSelection(bool selected)
 	{
-		Worker component = base.GetComponent<Worker>();
-		if (component != null && component.workable != null)
+		WorkerBase component = base.GetComponent<WorkerBase>();
+		if (component != null && component.GetWorkable() != null)
 		{
-			Workable workable = base.GetComponent<Worker>().workable;
+			Workable workable = base.GetComponent<WorkerBase>().GetWorkable();
 			if (workable.GetComponent<LoopingSounds>() != null)
 			{
 				workable.GetComponent<LoopingSounds>().UpdateObjectSelection(selected);

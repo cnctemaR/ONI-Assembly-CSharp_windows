@@ -130,8 +130,12 @@ namespace UnityEngine
 				throw new NullReferenceException("Cannot get contacts as the provided list is NULL.");
 			}
 			contacts.Clear();
-			contacts.AddRange(this.GetContacts_Internal());
-			return this.contactCount;
+			ContactPoint2D[] contacts_Internal = this.GetContacts_Internal();
+			for (int i = 0; i < this.m_ContactCount; i++)
+			{
+				contacts.Add(contacts_Internal[i]);
+			}
+			return this.m_ContactCount;
 		}
 
 		internal int m_Collider;

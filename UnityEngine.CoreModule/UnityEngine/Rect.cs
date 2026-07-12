@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Math/Rect.h")]
-	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	public struct Rect : IEquatable<Rect>, IFormattable
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Rect(float x, float y, float width, float height)
 		{
 			this.m_XMin = x;
@@ -18,6 +20,7 @@ namespace UnityEngine
 			this.m_Height = height;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Rect(Vector2 position, Vector2 size)
 		{
 			this.m_XMin = position.x;
@@ -26,6 +29,7 @@ namespace UnityEngine
 			this.m_Height = size.y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Rect(Rect source)
 		{
 			this.m_XMin = source.m_XMin;
@@ -42,11 +46,13 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Rect MinMaxRect(float xmin, float ymin, float xmax, float ymax)
 		{
 			return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Set(float x, float y, float width, float height)
 		{
 			this.m_XMin = x;
@@ -57,10 +63,12 @@ namespace UnityEngine
 
 		public float x
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_XMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_XMin = value;
@@ -69,10 +77,12 @@ namespace UnityEngine
 
 		public float y
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_YMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_YMin = value;
@@ -81,10 +91,12 @@ namespace UnityEngine
 
 		public Vector2 position
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Vector2(this.m_XMin, this.m_YMin);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_XMin = value.x;
@@ -94,10 +106,12 @@ namespace UnityEngine
 
 		public Vector2 center
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Vector2(this.x + this.m_Width / 2f, this.y + this.m_Height / 2f);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_XMin = value.x - this.m_Width / 2f;
@@ -107,10 +121,12 @@ namespace UnityEngine
 
 		public Vector2 min
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Vector2(this.xMin, this.yMin);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.xMin = value.x;
@@ -120,10 +136,12 @@ namespace UnityEngine
 
 		public Vector2 max
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Vector2(this.xMax, this.yMax);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.xMax = value.x;
@@ -133,10 +151,12 @@ namespace UnityEngine
 
 		public float width
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Width;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Width = value;
@@ -145,10 +165,12 @@ namespace UnityEngine
 
 		public float height
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Height;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Height = value;
@@ -157,10 +179,12 @@ namespace UnityEngine
 
 		public Vector2 size
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return new Vector2(this.m_Width, this.m_Height);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Width = value.x;
@@ -170,10 +194,12 @@ namespace UnityEngine
 
 		public float xMin
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_XMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				float xMax = this.xMax;
@@ -184,10 +210,12 @@ namespace UnityEngine
 
 		public float yMin
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_YMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				float yMax = this.yMax;
@@ -198,10 +226,12 @@ namespace UnityEngine
 
 		public float xMax
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Width + this.m_XMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Width = value - this.m_XMin;
@@ -210,26 +240,31 @@ namespace UnityEngine
 
 		public float yMax
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.m_Height + this.m_YMin;
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				this.m_Height = value - this.m_YMin;
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Vector2 point)
 		{
 			return point.x >= this.xMin && point.x < this.xMax && point.y >= this.yMin && point.y < this.yMax;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Vector3 point)
 		{
 			return point.x >= this.xMin && point.x < this.xMax && point.y >= this.yMin && point.y < this.yMax;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Vector3 point, bool allowInverse)
 		{
 			bool flag = !allowInverse;
@@ -247,6 +282,7 @@ namespace UnityEngine
 			return flag2;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static Rect OrderMinMax(Rect rect)
 		{
 			bool flag = rect.xMin > rect.xMax;
@@ -266,11 +302,13 @@ namespace UnityEngine
 			return rect;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Overlaps(Rect other)
 		{
 			return other.xMax > this.xMin && other.xMin < this.xMax && other.yMax > this.yMin && other.yMin < this.yMax;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Overlaps(Rect other, bool allowInverse)
 		{
 			Rect rect = this;
@@ -282,21 +320,25 @@ namespace UnityEngine
 			return rect.Overlaps(other);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 NormalizedToPoint(Rect rectangle, Vector2 normalizedRectCoordinates)
 		{
 			return new Vector2(Mathf.Lerp(rectangle.x, rectangle.xMax, normalizedRectCoordinates.x), Mathf.Lerp(rectangle.y, rectangle.yMax, normalizedRectCoordinates.y));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2 PointToNormalized(Rect rectangle, Vector2 point)
 		{
 			return new Vector2(Mathf.InverseLerp(rectangle.x, rectangle.xMax, point.x), Mathf.InverseLerp(rectangle.y, rectangle.yMax, point.y));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(Rect lhs, Rect rhs)
 		{
 			return !(lhs == rhs);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Rect lhs, Rect rhs)
 		{
 			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.width == rhs.width && lhs.height == rhs.height;
@@ -307,25 +349,29 @@ namespace UnityEngine
 			return this.x.GetHashCode() ^ (this.width.GetHashCode() << 2) ^ (this.y.GetHashCode() >> 2) ^ (this.height.GetHashCode() >> 1);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals(object other)
 		{
 			bool flag = !(other is Rect);
 			return !flag && this.Equals((Rect)other);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Equals(Rect other)
 		{
 			return this.x.Equals(other.x) && this.y.Equals(other.y) && this.width.Equals(other.width) && this.height.Equals(other.height);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
 		{
-			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(null, null);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			return this.ToString(format, null);
 		}
 
 		public string ToString(string format, IFormatProvider formatProvider)
@@ -334,6 +380,11 @@ namespace UnityEngine
 			if (flag)
 			{
 				format = "F2";
+			}
+			bool flag2 = formatProvider == null;
+			if (flag2)
+			{
+				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
 			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
 			{

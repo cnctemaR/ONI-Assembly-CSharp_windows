@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public static class AsyncOperationManager
 	{
 		public static AsyncOperation CreateOperation(object userSuppliedState)
@@ -23,7 +21,6 @@ namespace System.ComponentModel
 				}
 				return SynchronizationContext.Current;
 			}
-			[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 			set
 			{
 				SynchronizationContext.SetSynchronizationContext(value);

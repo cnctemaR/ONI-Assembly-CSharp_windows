@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace System.IO
 {
@@ -9,7 +8,7 @@ namespace System.IO
 	{
 		public Iterator()
 		{
-			this.threadId = Thread.CurrentThread.ManagedThreadId;
+			this._threadId = Environment.CurrentManagedThreadId;
 		}
 
 		public TSource Current
@@ -36,7 +35,7 @@ namespace System.IO
 
 		public IEnumerator<TSource> GetEnumerator()
 		{
-			if (this.threadId == Thread.CurrentThread.ManagedThreadId && this.state == 0)
+			if (this.state == 0 && this._threadId == Environment.CurrentManagedThreadId)
 			{
 				this.state = 1;
 				return this;
@@ -66,7 +65,7 @@ namespace System.IO
 			throw new NotSupportedException();
 		}
 
-		private int threadId;
+		private int _threadId;
 
 		internal int state;
 

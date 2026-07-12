@@ -206,7 +206,7 @@ namespace UnityEngine.Experimental.Audio
 
 		public void SetSampleFramesAvailableNativeHandler(AudioSampleProvider.SampleFramesEventNativeFunction handler, IntPtr userData)
 		{
-			AudioSampleProvider.InternalSetSampleFramesAvailableNativeHandler(this.id, Marshal.GetFunctionPointerForDelegate(handler), userData);
+			AudioSampleProvider.InternalSetSampleFramesAvailableNativeHandler(this.id, Marshal.GetFunctionPointerForDelegate<AudioSampleProvider.SampleFramesEventNativeFunction>(handler), userData);
 		}
 
 		public void ClearSampleFramesAvailableNativeHandler()
@@ -216,7 +216,7 @@ namespace UnityEngine.Experimental.Audio
 
 		public void SetSampleFramesOverflowNativeHandler(AudioSampleProvider.SampleFramesEventNativeFunction handler, IntPtr userData)
 		{
-			AudioSampleProvider.InternalSetSampleFramesOverflowNativeHandler(this.id, Marshal.GetFunctionPointerForDelegate(handler), userData);
+			AudioSampleProvider.InternalSetSampleFramesOverflowNativeHandler(this.id, Marshal.GetFunctionPointerForDelegate<AudioSampleProvider.SampleFramesEventNativeFunction>(handler), userData);
 		}
 
 		public void ClearSampleFramesOverflowNativeHandler()

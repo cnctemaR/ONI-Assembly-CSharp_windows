@@ -493,7 +493,7 @@ namespace Mono.Globalization.Unicode
 		{
 			int num;
 			Module module;
-			return Assembly.GetExecutingAssembly().GetManifestResourceInternal(name, out num, out module);
+			return ((RuntimeAssembly)Assembly.GetExecutingAssembly()).GetManifestResourceInternal(name, out num, out module);
 		}
 
 		private unsafe static uint UInt32FromBytePtr(byte* raw, uint idx)

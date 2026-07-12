@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class ConcurrentBag<T> : IProducerConsumerCollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{
@@ -25,13 +25,13 @@ namespace System.Collections.Concurrent
 			ConcurrentBag<T>.WorkStealingQueue currentThreadWorkStealingQueue = this.GetCurrentThreadWorkStealingQueue(true);
 			foreach (T t in collection)
 			{
-				currentThreadWorkStealingQueue.LocalPush(t);
+				currentThreadWorkStealingQueue.LocalPush(t, ref this._emptyToNonEmptyListTransitionCount);
 			}
 		}
 
 		public void Add(T item)
 		{
-			this.GetCurrentThreadWorkStealingQueue(true).LocalPush(item);
+			this.GetCurrentThreadWorkStealingQueue(true).LocalPush(item, ref this._emptyToNonEmptyListTransitionCount);
 		}
 
 		bool IProducerConsumerCollection<T>.TryAdd(T item)
@@ -99,23 +99,28 @@ namespace System.Collections.Concurrent
 
 		private bool TrySteal(out T result, bool take)
 		{
-			if (CDSCollectionETWBCLProvider.Log.IsEnabled())
+			if (take)
 			{
-				if (take)
+				CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryTakeSteals();
+			}
+			else
+			{
+				CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryPeekSteals();
+			}
+			for (;;)
+			{
+				long num = Interlocked.Read(ref this._emptyToNonEmptyListTransitionCount);
+				ConcurrentBag<T>.WorkStealingQueue currentThreadWorkStealingQueue = this.GetCurrentThreadWorkStealingQueue(false);
+				if ((currentThreadWorkStealingQueue == null) ? this.TryStealFromTo(this._workStealingQueues, null, out result, take) : (this.TryStealFromTo(currentThreadWorkStealingQueue._nextQueue, null, out result, take) || this.TryStealFromTo(this._workStealingQueues, currentThreadWorkStealingQueue, out result, take)))
 				{
-					CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryTakeSteals();
+					break;
 				}
-				else
+				if (Interlocked.Read(ref this._emptyToNonEmptyListTransitionCount) == num)
 				{
-					CDSCollectionETWBCLProvider.Log.ConcurrentBag_TryPeekSteals();
+					return false;
 				}
 			}
-			ConcurrentBag<T>.WorkStealingQueue currentThreadWorkStealingQueue = this.GetCurrentThreadWorkStealingQueue(false);
-			if (currentThreadWorkStealingQueue == null)
-			{
-				return this.TryStealFromTo(this._workStealingQueues, null, out result, take);
-			}
-			return this.TryStealFromTo(currentThreadWorkStealingQueue._nextQueue, null, out result, take) || this.TryStealFromTo(this._workStealingQueues, currentThreadWorkStealingQueue, out result, take);
+			return true;
 		}
 
 		private bool TryStealFromTo(ConcurrentBag<T>.WorkStealingQueue startInclusive, ConcurrentBag<T>.WorkStealingQueue endExclusive, out T result, bool take)
@@ -399,9 +404,11 @@ namespace System.Collections.Concurrent
 			}
 		}
 
-		private ThreadLocal<ConcurrentBag<T>.WorkStealingQueue> _locals;
+		private readonly ThreadLocal<ConcurrentBag<T>.WorkStealingQueue> _locals;
 
 		private volatile ConcurrentBag<T>.WorkStealingQueue _workStealingQueues;
+
+		private long _emptyToNonEmptyListTransitionCount;
 
 		private sealed class WorkStealingQueue
 		{
@@ -419,7 +426,7 @@ namespace System.Collections.Concurrent
 				}
 			}
 
-			internal void LocalPush(T item)
+			internal void LocalPush(T item, ref long emptyToNonEmptyListTransitionCount)
 			{
 				bool flag = false;
 				try
@@ -432,11 +439,12 @@ namespace System.Collections.Concurrent
 						lock (this)
 						{
 							this._headIndex &= this._mask;
-							num = (this._tailIndex &= this._mask);
-							this._currentOp = 1;
+							num = (this._tailIndex = num & this._mask);
+							Interlocked.Exchange(ref this._currentOp, 1);
 						}
 					}
-					if (!this._frozen && num < this._headIndex + this._mask)
+					int num2 = this._headIndex;
+					if (!this._frozen && ((num2 < num - 1) & (num < num2 + this._mask)))
 					{
 						this._array[num & this._mask] = item;
 						this._tailIndex = num + 1;
@@ -445,28 +453,32 @@ namespace System.Collections.Concurrent
 					{
 						this._currentOp = 0;
 						Monitor.Enter(this, ref flag);
-						int headIndex = this._headIndex;
-						int num2 = this._tailIndex - this._headIndex;
-						if (num2 >= this._mask)
+						num2 = this._headIndex;
+						int num3 = num - num2;
+						if (num3 >= this._mask)
 						{
 							T[] array = new T[this._array.Length << 1];
-							int num3 = headIndex & this._mask;
-							if (num3 == 0)
+							int num4 = num2 & this._mask;
+							if (num4 == 0)
 							{
 								Array.Copy(this._array, 0, array, 0, this._array.Length);
 							}
 							else
 							{
-								Array.Copy(this._array, num3, array, 0, this._array.Length - num3);
-								Array.Copy(this._array, 0, array, this._array.Length - num3, num3);
+								Array.Copy(this._array, num4, array, 0, this._array.Length - num4);
+								Array.Copy(this._array, 0, array, this._array.Length - num4, num4);
 							}
 							this._array = array;
 							this._headIndex = 0;
-							num = (this._tailIndex = num2);
+							num = (this._tailIndex = num3);
 							this._mask = (this._mask << 1) | 1;
 						}
 						this._array[num & this._mask] = item;
 						this._tailIndex = num + 1;
+						if (num3 == 0)
+						{
+							Interlocked.Increment(ref emptyToNonEmptyListTransitionCount);
+						}
 						this._addTakeCount -= this._stealCount;
 						this._stealCount = 0;
 					}
@@ -571,29 +583,35 @@ namespace System.Collections.Concurrent
 
 			internal bool TrySteal(out T result, bool take)
 			{
-				if (this._headIndex < this._tailIndex)
+				lock (this)
 				{
-					lock (this)
+					int headIndex = this._headIndex;
+					if (take)
 					{
-						int headIndex = this._headIndex;
-						if (take)
+						if (headIndex < this._tailIndex - 1 && this._currentOp != 1)
 						{
-							Interlocked.Exchange(ref this._headIndex, headIndex + 1);
-							if (headIndex < this._tailIndex)
+							SpinWait spinWait = default(SpinWait);
+							do
 							{
-								int num = headIndex & this._mask;
-								result = this._array[num];
-								this._array[num] = default(T);
-								this._stealCount++;
-								return true;
+								spinWait.SpinOnce();
 							}
-							this._headIndex = headIndex;
+							while (this._currentOp == 1);
 						}
-						else if (headIndex < this._tailIndex)
+						Interlocked.Exchange(ref this._headIndex, headIndex + 1);
+						if (headIndex < this._tailIndex)
 						{
-							result = this._array[headIndex & this._mask];
+							int num = headIndex & this._mask;
+							result = this._array[num];
+							this._array[num] = default(T);
+							this._stealCount++;
 							return true;
 						}
+						this._headIndex = headIndex;
+					}
+					else if (headIndex < this._tailIndex)
+					{
+						result = this._array[headIndex & this._mask];
+						return true;
 					}
 				}
 				result = default(T);

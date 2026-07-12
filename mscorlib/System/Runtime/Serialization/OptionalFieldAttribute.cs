@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class OptionalFieldAttribute : Attribute
 	{
 		public int VersionAdded

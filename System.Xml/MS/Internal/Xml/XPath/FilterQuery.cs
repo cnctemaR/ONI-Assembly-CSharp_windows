@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -10,20 +9,20 @@ namespace MS.Internal.Xml.XPath
 		public FilterQuery(Query qyParent, Query cond, bool noPosition)
 			: base(qyParent)
 		{
-			this.cond = cond;
-			this.noPosition = noPosition;
+			this._cond = cond;
+			this._noPosition = noPosition;
 		}
 
 		private FilterQuery(FilterQuery other)
 			: base(other)
 		{
-			this.cond = Query.Clone(other.cond);
-			this.noPosition = other.noPosition;
+			this._cond = Query.Clone(other._cond);
+			this._noPosition = other._noPosition;
 		}
 
 		public override void Reset()
 		{
-			this.cond.Reset();
+			this._cond.Reset();
 			base.Reset();
 		}
 
@@ -31,15 +30,15 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.cond;
+				return this._cond;
 			}
 		}
 
 		public override void SetXsltContext(XsltContext input)
 		{
 			base.SetXsltContext(input);
-			this.cond.SetXsltContext(input);
-			if (this.cond.StaticType != XPathResultType.Number && this.cond.StaticType != XPathResultType.Any && this.noPosition)
+			this._cond.SetXsltContext(input);
+			if (this._cond.StaticType != XPathResultType.Number && this._cond.StaticType != XPathResultType.Any && this._noPosition)
 			{
 				ReversePositionQuery reversePositionQuery = this.qyInput as ReversePositionQuery;
 				if (reversePositionQuery != null)
@@ -64,10 +63,10 @@ namespace MS.Internal.Xml.XPath
 
 		internal bool EvaluatePredicate()
 		{
-			object obj = this.cond.Evaluate(this.qyInput);
+			object obj = this._cond.Evaluate(this.qyInput);
 			if (obj is XPathNodeIterator)
 			{
-				return this.cond.Advance() != null;
+				return this._cond.Advance() != null;
 			}
 			if (obj is string)
 			{
@@ -89,11 +88,11 @@ namespace MS.Internal.Xml.XPath
 			XPathNavigator xpathNavigator = this.qyInput.MatchNode(current);
 			if (xpathNavigator != null)
 			{
-				switch (this.cond.StaticType)
+				switch (this._cond.StaticType)
 				{
 				case XPathResultType.Number:
 				{
-					OperandQuery operandQuery = this.cond as OperandQuery;
+					OperandQuery operandQuery = this._cond as OperandQuery;
 					if (operandQuery != null)
 					{
 						double num = (double)operandQuery.val;
@@ -161,9 +160,9 @@ namespace MS.Internal.Xml.XPath
 					break;
 				}
 				case XPathResultType.String:
-					if (this.noPosition)
+					if (this._noPosition)
 					{
-						if (((string)this.cond.Evaluate(new XPathSingletonIterator(current, true))).Length == 0)
+						if (((string)this._cond.Evaluate(new XPathSingletonIterator(current, true))).Length == 0)
 						{
 							return null;
 						}
@@ -171,9 +170,9 @@ namespace MS.Internal.Xml.XPath
 					}
 					break;
 				case XPathResultType.Boolean:
-					if (this.noPosition)
+					if (this._noPosition)
 					{
-						if (!(bool)this.cond.Evaluate(new XPathSingletonIterator(current, true)))
+						if (!(bool)this._cond.Evaluate(new XPathSingletonIterator(current, true)))
 						{
 							return null;
 						}
@@ -181,8 +180,8 @@ namespace MS.Internal.Xml.XPath
 					}
 					break;
 				case XPathResultType.NodeSet:
-					this.cond.Evaluate(new XPathSingletonIterator(current, true));
-					if (this.cond.Advance() == null)
+					this._cond.Evaluate(new XPathSingletonIterator(current, true));
+					if (this._cond.Advance() == null)
 					{
 						return null;
 					}
@@ -218,20 +217,8 @@ namespace MS.Internal.Xml.XPath
 			return new FilterQuery(this);
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			if (!this.noPosition)
-			{
-				w.WriteAttributeString("position", "yes");
-			}
-			this.qyInput.PrintQuery(w);
-			this.cond.PrintQuery(w);
-			w.WriteEndElement();
-		}
+		private Query _cond;
 
-		private Query cond;
-
-		private bool noPosition;
+		private bool _noPosition;
 	}
 }

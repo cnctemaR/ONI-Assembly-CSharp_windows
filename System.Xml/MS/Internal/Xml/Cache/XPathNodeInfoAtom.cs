@@ -4,11 +4,11 @@ using System.Xml.XPath;
 
 namespace MS.Internal.Xml.Cache
 {
-	internal sealed class XPathNodeInfoAtom
+	internal sealed class XPathNodeInfoAtom : IEquatable<XPathNodeInfoAtom>
 	{
 		public XPathNodeInfoAtom(XPathNodePageInfo pageInfo)
 		{
-			this.pageInfo = pageInfo;
+			this._pageInfo = pageInfo;
 		}
 
 		public XPathNodeInfoAtom(string localName, string namespaceUri, string prefix, string baseUri, XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar, XPathDocument doc, int lineNumBase, int linePosBase)
@@ -18,23 +18,23 @@ namespace MS.Internal.Xml.Cache
 
 		public void Init(string localName, string namespaceUri, string prefix, string baseUri, XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar, XPathDocument doc, int lineNumBase, int linePosBase)
 		{
-			this.localName = localName;
-			this.namespaceUri = namespaceUri;
-			this.prefix = prefix;
-			this.baseUri = baseUri;
-			this.pageParent = pageParent;
-			this.pageSibling = pageSibling;
-			this.pageSimilar = pageSimilar;
-			this.doc = doc;
-			this.lineNumBase = lineNumBase;
-			this.linePosBase = linePosBase;
-			this.next = null;
-			this.pageInfo = null;
-			this.hashCode = 0;
-			this.localNameHash = 0;
-			for (int i = 0; i < this.localName.Length; i++)
+			this._localName = localName;
+			this._namespaceUri = namespaceUri;
+			this._prefix = prefix;
+			this._baseUri = baseUri;
+			this._pageParent = pageParent;
+			this._pageSibling = pageSibling;
+			this._pageSimilar = pageSimilar;
+			this._doc = doc;
+			this._lineNumBase = lineNumBase;
+			this._linePosBase = linePosBase;
+			this._next = null;
+			this._pageInfo = null;
+			this._hashCode = 0;
+			this._localNameHash = 0;
+			for (int i = 0; i < this._localName.Length; i++)
 			{
-				this.localNameHash += (this.localNameHash << 7) ^ (int)this.localName[i];
+				this._localNameHash += (this._localNameHash << 7) ^ (int)this._localName[i];
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageInfo;
+				return this._pageInfo;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.localName;
+				return this._localName;
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.namespaceUri;
+				return this._namespaceUri;
 			}
 		}
 
@@ -66,7 +66,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.prefix;
+				return this._prefix;
 			}
 		}
 
@@ -74,7 +74,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.baseUri;
+				return this._baseUri;
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageSibling;
+				return this._pageSibling;
 			}
 		}
 
@@ -90,7 +90,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageSimilar;
+				return this._pageSimilar;
 			}
 		}
 
@@ -98,7 +98,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.pageParent;
+				return this._pageParent;
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.doc;
+				return this._doc;
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.lineNumBase;
+				return this._lineNumBase;
 			}
 		}
 
@@ -122,7 +122,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.linePosBase;
+				return this._linePosBase;
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.localNameHash;
+				return this._localNameHash;
 			}
 		}
 
@@ -138,40 +138,44 @@ namespace MS.Internal.Xml.Cache
 		{
 			get
 			{
-				return this.next;
+				return this._next;
 			}
 			set
 			{
-				this.next = value;
+				this._next = value;
 			}
 		}
 
 		public override int GetHashCode()
 		{
-			if (this.hashCode == 0)
+			if (this._hashCode == 0)
 			{
-				int num = this.localNameHash;
-				if (this.pageSibling != null)
+				int num = this._localNameHash;
+				if (this._pageSibling != null)
 				{
-					num += (num << 7) ^ this.pageSibling[0].PageInfo.PageNumber;
+					num += (num << 7) ^ this._pageSibling[0].PageInfo.PageNumber;
 				}
-				if (this.pageParent != null)
+				if (this._pageParent != null)
 				{
-					num += (num << 7) ^ this.pageParent[0].PageInfo.PageNumber;
+					num += (num << 7) ^ this._pageParent[0].PageInfo.PageNumber;
 				}
-				if (this.pageSimilar != null)
+				if (this._pageSimilar != null)
 				{
-					num += (num << 7) ^ this.pageSimilar[0].PageInfo.PageNumber;
+					num += (num << 7) ^ this._pageSimilar[0].PageInfo.PageNumber;
 				}
-				this.hashCode = ((num == 0) ? 1 : num);
+				this._hashCode = ((num == 0) ? 1 : num);
 			}
-			return this.hashCode;
+			return this._hashCode;
 		}
 
 		public override bool Equals(object other)
 		{
-			XPathNodeInfoAtom xpathNodeInfoAtom = other as XPathNodeInfoAtom;
-			return this.GetHashCode() == xpathNodeInfoAtom.GetHashCode() && this.localName == xpathNodeInfoAtom.localName && this.pageSibling == xpathNodeInfoAtom.pageSibling && this.namespaceUri == xpathNodeInfoAtom.namespaceUri && this.pageParent == xpathNodeInfoAtom.pageParent && this.pageSimilar == xpathNodeInfoAtom.pageSimilar && this.prefix == xpathNodeInfoAtom.prefix && this.baseUri == xpathNodeInfoAtom.baseUri && this.lineNumBase == xpathNodeInfoAtom.lineNumBase && this.linePosBase == xpathNodeInfoAtom.linePosBase;
+			return this.Equals(other as XPathNodeInfoAtom);
+		}
+
+		public bool Equals(XPathNodeInfoAtom other)
+		{
+			return this.GetHashCode() == other.GetHashCode() && this._localName == other._localName && this._pageSibling == other._pageSibling && this._namespaceUri == other._namespaceUri && this._pageParent == other._pageParent && this._pageSimilar == other._pageSimilar && this._prefix == other._prefix && this._baseUri == other._baseUri && this._lineNumBase == other._lineNumBase && this._linePosBase == other._linePosBase;
 		}
 
 		public override string ToString()
@@ -180,71 +184,71 @@ namespace MS.Internal.Xml.Cache
 			stringBuilder.Append("hash=");
 			stringBuilder.Append(this.GetHashCode());
 			stringBuilder.Append(", ");
-			if (this.localName.Length != 0)
+			if (this._localName.Length != 0)
 			{
 				stringBuilder.Append('{');
-				stringBuilder.Append(this.namespaceUri);
+				stringBuilder.Append(this._namespaceUri);
 				stringBuilder.Append('}');
-				if (this.prefix.Length != 0)
+				if (this._prefix.Length != 0)
 				{
-					stringBuilder.Append(this.prefix);
+					stringBuilder.Append(this._prefix);
 					stringBuilder.Append(':');
 				}
-				stringBuilder.Append(this.localName);
+				stringBuilder.Append(this._localName);
 				stringBuilder.Append(", ");
 			}
-			if (this.pageParent != null)
+			if (this._pageParent != null)
 			{
 				stringBuilder.Append("parent=");
-				stringBuilder.Append(this.pageParent[0].PageInfo.PageNumber);
+				stringBuilder.Append(this._pageParent[0].PageInfo.PageNumber);
 				stringBuilder.Append(", ");
 			}
-			if (this.pageSibling != null)
+			if (this._pageSibling != null)
 			{
 				stringBuilder.Append("sibling=");
-				stringBuilder.Append(this.pageSibling[0].PageInfo.PageNumber);
+				stringBuilder.Append(this._pageSibling[0].PageInfo.PageNumber);
 				stringBuilder.Append(", ");
 			}
-			if (this.pageSimilar != null)
+			if (this._pageSimilar != null)
 			{
 				stringBuilder.Append("similar=");
-				stringBuilder.Append(this.pageSimilar[0].PageInfo.PageNumber);
+				stringBuilder.Append(this._pageSimilar[0].PageInfo.PageNumber);
 				stringBuilder.Append(", ");
 			}
 			stringBuilder.Append("lineNum=");
-			stringBuilder.Append(this.lineNumBase);
+			stringBuilder.Append(this._lineNumBase);
 			stringBuilder.Append(", ");
 			stringBuilder.Append("linePos=");
-			stringBuilder.Append(this.linePosBase);
+			stringBuilder.Append(this._linePosBase);
 			return stringBuilder.ToString();
 		}
 
-		private string localName;
+		private string _localName;
 
-		private string namespaceUri;
+		private string _namespaceUri;
 
-		private string prefix;
+		private string _prefix;
 
-		private string baseUri;
+		private string _baseUri;
 
-		private XPathNode[] pageParent;
+		private XPathNode[] _pageParent;
 
-		private XPathNode[] pageSibling;
+		private XPathNode[] _pageSibling;
 
-		private XPathNode[] pageSimilar;
+		private XPathNode[] _pageSimilar;
 
-		private XPathDocument doc;
+		private XPathDocument _doc;
 
-		private int lineNumBase;
+		private int _lineNumBase;
 
-		private int linePosBase;
+		private int _linePosBase;
 
-		private int hashCode;
+		private int _hashCode;
 
-		private int localNameHash;
+		private int _localNameHash;
 
-		private XPathNodeInfoAtom next;
+		private XPathNodeInfoAtom _next;
 
-		private XPathNodePageInfo pageInfo;
+		private XPathNodePageInfo _pageInfo;
 	}
 }

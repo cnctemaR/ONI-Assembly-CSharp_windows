@@ -13,7 +13,7 @@ public class IntermediateRadPillConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("IntermediateRadPill", ITEMS.PILLS.INTERMEDIATERADPILL.NAME, ITEMS.PILLS.INTERMEDIATERADPILL.DESC, 1f, true, Assets.GetAnim("vial_radiation_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("IntermediateRadPill", global::STRINGS.ITEMS.PILLS.INTERMEDIATERADPILL.NAME, global::STRINGS.ITEMS.PILLS.INTERMEDIATERADPILL.DESC, 1f, true, Assets.GetAnim("vial_radiation_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.INTERMEDIATERADPILL);
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
@@ -26,7 +26,7 @@ public class IntermediateRadPillConfig : IEntityConfig
 		IntermediateRadPillConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("AdvancedApothecary", array, array2), array, array2)
 		{
 			time = 50f,
-			description = ITEMS.PILLS.INTERMEDIATERADPILL.RECIPEDESC,
+			description = global::STRINGS.ITEMS.PILLS.INTERMEDIATERADPILL.RECIPEDESC,
 			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "AdvancedApothecary" },
 			sortOrder = 21

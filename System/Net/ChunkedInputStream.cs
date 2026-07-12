@@ -11,10 +11,10 @@ namespace System.Net
 		{
 			this.context = context;
 			WebHeaderCollection webHeaderCollection = (WebHeaderCollection)context.Request.Headers;
-			this.decoder = new MonoChunkStream(webHeaderCollection);
+			this.decoder = new MonoChunkParser(webHeaderCollection);
 		}
 
-		public MonoChunkStream Decoder
+		public MonoChunkParser Decoder
 		{
 			get
 			{
@@ -148,7 +148,7 @@ namespace System.Net
 
 		private bool disposed;
 
-		private MonoChunkStream decoder;
+		private MonoChunkParser decoder;
 
 		private HttpListenerContext context;
 

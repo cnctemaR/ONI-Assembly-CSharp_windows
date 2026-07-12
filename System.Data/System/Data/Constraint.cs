@@ -5,8 +5,8 @@ using System.Globalization;
 
 namespace System.Data
 {
-	[TypeConverter(typeof(ConstraintConverter))]
 	[DefaultProperty("ConstraintName")]
+	[TypeConverter(typeof(ConstraintConverter))]
 	public abstract class Constraint
 	{
 		[DefaultValue("")]

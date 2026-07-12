@@ -8,26 +8,26 @@ namespace MS.Internal.Xml.XPath
 		public PrecedingQuery(Query qyInput, string name, string prefix, XPathNodeType typeTest)
 			: base(qyInput, name, prefix, typeTest)
 		{
-			this.ancestorStk = new ClonableStack<XPathNavigator>();
+			this._ancestorStk = new ClonableStack<XPathNavigator>();
 		}
 
 		private PrecedingQuery(PrecedingQuery other)
 			: base(other)
 		{
-			this.workIterator = Query.Clone(other.workIterator);
-			this.ancestorStk = other.ancestorStk.Clone();
+			this._workIterator = Query.Clone(other._workIterator);
+			this._ancestorStk = other._ancestorStk.Clone();
 		}
 
 		public override void Reset()
 		{
-			this.workIterator = null;
-			this.ancestorStk.Clear();
+			this._workIterator = null;
+			this._ancestorStk.Clear();
 			base.Reset();
 		}
 
 		public override XPathNavigator Advance()
 		{
-			if (this.workIterator == null)
+			if (this._workIterator == null)
 			{
 				XPathNavigator xpathNavigator = this.qyInput.Advance();
 				if (xpathNavigator == null)
@@ -46,21 +46,21 @@ namespace MS.Internal.Xml.XPath
 				}
 				do
 				{
-					this.ancestorStk.Push(xpathNavigator2.Clone());
+					this._ancestorStk.Push(xpathNavigator2.Clone());
 				}
 				while (xpathNavigator2.MoveToParent());
-				this.workIterator = xpathNavigator2.SelectDescendants(XPathNodeType.All, true);
+				this._workIterator = xpathNavigator2.SelectDescendants(XPathNodeType.All, true);
 			}
-			while (this.workIterator.MoveNext())
+			while (this._workIterator.MoveNext())
 			{
-				this.currentNode = this.workIterator.Current;
-				if (this.currentNode.IsSamePosition(this.ancestorStk.Peek()))
+				this.currentNode = this._workIterator.Current;
+				if (this.currentNode.IsSamePosition(this._ancestorStk.Peek()))
 				{
-					this.ancestorStk.Pop();
-					if (this.ancestorStk.Count == 0)
+					this._ancestorStk.Pop();
+					if (this._ancestorStk.Count == 0)
 					{
 						this.currentNode = null;
-						this.workIterator = null;
+						this._workIterator = null;
 						return null;
 					}
 				}
@@ -86,8 +86,8 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		private XPathNodeIterator workIterator;
+		private XPathNodeIterator _workIterator;
 
-		private ClonableStack<XPathNavigator> ancestorStk;
+		private ClonableStack<XPathNavigator> _ancestorStk;
 	}
 }

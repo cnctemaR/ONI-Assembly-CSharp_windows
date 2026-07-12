@@ -12,15 +12,15 @@ namespace MS.Internal.Xml.Cache
 			{
 				throw new ArgumentNullException("namespaceURI");
 			}
-			this.localName = parent.NameTable.Get(name);
-			this.namespaceUri = namespaceURI;
+			this._localName = parent.NameTable.Get(name);
+			this._namespaceUri = namespaceURI;
 		}
 
 		public XPathDocumentElementChildIterator(XPathDocumentElementChildIterator iter)
 			: base(iter)
 		{
-			this.localName = iter.localName;
-			this.namespaceUri = iter.namespaceUri;
+			this._localName = iter._localName;
+			this._namespaceUri = iter._namespaceUri;
 		}
 
 		public override XPathNodeIterator Clone()
@@ -32,12 +32,12 @@ namespace MS.Internal.Xml.Cache
 		{
 			if (this.pos == 0)
 			{
-				if (!this.ctxt.MoveToChild(this.localName, this.namespaceUri))
+				if (!this.ctxt.MoveToChild(this._localName, this._namespaceUri))
 				{
 					return false;
 				}
 			}
-			else if (!this.ctxt.MoveToNext(this.localName, this.namespaceUri))
+			else if (!this.ctxt.MoveToNext(this._localName, this._namespaceUri))
 			{
 				return false;
 			}
@@ -45,8 +45,8 @@ namespace MS.Internal.Xml.Cache
 			return true;
 		}
 
-		private string localName;
+		private string _localName;
 
-		private string namespaceUri;
+		private string _namespaceUri;
 	}
 }

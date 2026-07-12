@@ -22,10 +22,70 @@ public class DetailsScreen : KTabMenu
 		base.ConsumeMouseScroll = true;
 		global::Debug.Assert(DetailsScreen.Instance == null);
 		DetailsScreen.Instance = this;
+		this.InitiateSidescreenTabs();
 		this.DeactivateSideContent();
 		this.Show(false);
 		base.Subscribe(Game.Instance.gameObject, -1503271301, new Action<object>(this.OnSelectObject));
 		this.tabHeader.Init();
+	}
+
+	public bool CanObjectDisplayTabOfType(GameObject obj, DetailsScreen.SidescreenTabTypes type)
+	{
+		for (int i = 0; i < this.sidescreenTabs.Length; i++)
+		{
+			DetailsScreen.SidescreenTab sidescreenTab = this.sidescreenTabs[i];
+			if (sidescreenTab.type == type)
+			{
+				return sidescreenTab.ValidateTarget(obj);
+			}
+		}
+		return false;
+	}
+
+	public DetailsScreen.SidescreenTab GetTabOfType(DetailsScreen.SidescreenTabTypes type)
+	{
+		for (int i = 0; i < this.sidescreenTabs.Length; i++)
+		{
+			DetailsScreen.SidescreenTab sidescreenTab = this.sidescreenTabs[i];
+			if (sidescreenTab.type == type)
+			{
+				return sidescreenTab;
+			}
+		}
+		return null;
+	}
+
+	public void InitiateSidescreenTabs()
+	{
+		for (int i = 0; i < this.sidescreenTabs.Length; i++)
+		{
+			DetailsScreen.SidescreenTab sidescreenTab = this.sidescreenTabs[i];
+			sidescreenTab.Initiate(this.original_tab, this.original_tab_body, delegate(DetailsScreen.SidescreenTab _tab)
+			{
+				this.SelectSideScreenTab(_tab.type);
+			});
+			switch (sidescreenTab.type)
+			{
+			case DetailsScreen.SidescreenTabTypes.Errands:
+				sidescreenTab.ValidateTargetCallback = (GameObject target, DetailsScreen.SidescreenTab _tab) => target.GetComponent<MinionIdentity>() != null;
+				break;
+			case DetailsScreen.SidescreenTabTypes.Material:
+				sidescreenTab.ValidateTargetCallback = delegate(GameObject target, DetailsScreen.SidescreenTab _tab)
+				{
+					Reconstructable component = target.GetComponent<Reconstructable>();
+					return component != null && component.AllowReconstruct;
+				};
+				break;
+			case DetailsScreen.SidescreenTabTypes.Blueprints:
+				sidescreenTab.ValidateTargetCallback = delegate(GameObject target, DetailsScreen.SidescreenTab _tab)
+				{
+					global::UnityEngine.Object component2 = target.GetComponent<MinionIdentity>();
+					BuildingFacade component3 = target.GetComponent<BuildingFacade>();
+					return component2 != null || component3 != null;
+				};
+				break;
+			}
+		}
 	}
 
 	private void OnSelectObject(object data)
@@ -33,16 +93,21 @@ public class DetailsScreen : KTabMenu
 		if (data == null)
 		{
 			this.previouslyActiveTab = -1;
-			this.SelectSideScreenTab("sidescreen_config", false);
+			this.SelectSideScreenTab(DetailsScreen.SidescreenTabTypes.Config);
 			return;
 		}
 		KPrefabID component = ((GameObject)data).GetComponent<KPrefabID>();
-		if (component == null || this.previousTargetID != component.PrefabID())
+		if (!(component == null) && !(this.previousTargetID != component.PrefabID()))
 		{
-			this.SelectSideScreenTab("sidescreen_config", false);
+			this.SelectSideScreenTab(this.selectedSidescreenTabID);
 			return;
 		}
-		this.SelectSideScreenTab(this.selectedSidescreenTabID, true);
+		if (component != null && component.GetComponent<MinionIdentity>())
+		{
+			this.SelectSideScreenTab(DetailsScreen.SidescreenTabTypes.Errands);
+			return;
+		}
+		this.SelectSideScreenTab(DetailsScreen.SidescreenTabTypes.Config);
 	}
 
 	protected override void OnSpawn()
@@ -53,21 +118,6 @@ public class DetailsScreen : KTabMenu
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
-		MultiToggle multiToggle = this.sidescreenConfigTab;
-		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
-		{
-			this.SelectSideScreenTab("sidescreen_config", true);
-		}));
-		MultiToggle multiToggle2 = this.sidescreenMaterialTab;
-		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(delegate
-		{
-			this.SelectSideScreenTab("sidescreen_material", true);
-		}));
-		MultiToggle multiToggle3 = this.sidescreenSkinTab;
-		multiToggle3.onClick = (global::System.Action)Delegate.Combine(multiToggle3.onClick, new global::System.Action(delegate
-		{
-			this.SelectSideScreenTab("sidescreen_skin", true);
-		}));
 		this.sideScreen2.SetActive(false);
 		base.Subscribe<DetailsScreen>(-1514841199, DetailsScreen.OnRefreshDataDelegate);
 	}
@@ -251,14 +301,14 @@ public class DetailsScreen : KTabMenu
 	private bool PinResourceButton_TryGetResourceTagAndProperName(out Tag targetTag, out string targetProperName)
 	{
 		KPrefabID component = this.target.GetComponent<KPrefabID>();
-		if (component != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(component.PrefabTag))
+		if (component != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|51_0(component.PrefabTag))
 		{
 			targetTag = component.PrefabTag;
 			targetProperName = component.GetProperName();
 			return true;
 		}
 		CellSelectionObject component2 = this.target.GetComponent<CellSelectionObject>();
-		if (component2 != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(component2.element.tag))
+		if (component2 != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|51_0(component2.element.tag))
 		{
 			targetTag = component2.element.tag;
 			targetProperName = component2.GetProperName();
@@ -288,7 +338,7 @@ public class DetailsScreen : KTabMenu
 				text2 = GameUtil.GetFormattedMass(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag, false), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 				break;
 			case GameUtil.MeasureUnit.kcal:
-				text2 = GameUtil.GetFormattedCalories(RationTracker.Get().CountRationsByFoodType(tag.Name, ClusterManager.Instance.activeWorld.worldInventory, true), GameUtil.TimeSlice.None, true);
+				text2 = GameUtil.GetFormattedCalories(WorldResourceAmountTracker<RationTracker>.Get().CountAmountForItemWithID(tag.Name, ClusterManager.Instance.activeWorld.worldInventory, true), GameUtil.TimeSlice.None, true);
 				break;
 			case GameUtil.MeasureUnit.quantity:
 				text2 = GameUtil.GetFormattedUnits(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag, false), GameUtil.TimeSlice.None, true, "");
@@ -340,9 +390,16 @@ public class DetailsScreen : KTabMenu
 				this.target.Unsubscribe(this.setRocketTitleHandle);
 				this.setRocketTitleHandle = -1;
 			}
-			if (this.target != null && this.target.GetComponent<KPrefabID>() != null)
+			if (this.target != null)
 			{
-				this.previousTargetID = this.target.GetComponent<KPrefabID>().PrefabID();
+				if (this.target.GetComponent<KPrefabID>() != null)
+				{
+					this.previousTargetID = this.target.GetComponent<KPrefabID>().PrefabID();
+				}
+				else
+				{
+					this.previousTargetID = null;
+				}
 			}
 		}
 		this.target = go;
@@ -371,7 +428,8 @@ public class DetailsScreen : KTabMenu
 					flag = true;
 					if (sideScreenRef.screenInstance == null)
 					{
-						sideScreenRef.screenInstance = global::Util.KInstantiateUI<SideScreenContent>(sideScreenRef.screenPrefab.gameObject, this.sideScreenConfigContentBody, false);
+						DetailsScreen.SidescreenTab tabOfType = this.GetTabOfType(sideScreenRef.tab);
+						sideScreenRef.screenInstance = global::Util.KInstantiateUI<SideScreenContent>(sideScreenRef.screenPrefab.gameObject, tabOfType.bodyInstance, false);
 					}
 					if (!this.sideScreen.activeSelf)
 					{
@@ -380,34 +438,22 @@ public class DetailsScreen : KTabMenu
 					sideScreenRef.screenInstance.SetTarget(this.target);
 					sideScreenRef.screenInstance.Show(true);
 					int sideScreenSortOrder = sideScreenRef.screenInstance.GetSideScreenSortOrder();
-					this.sortedSideScreens.Add(new KeyValuePair<GameObject, int>(sideScreenRef.screenInstance.gameObject, sideScreenSortOrder));
-					if (this.currentSideScreen == null || !this.currentSideScreen.gameObject.activeSelf || sideScreenSortOrder > this.sortedSideScreens.Find((KeyValuePair<GameObject, int> match) => match.Key == this.currentSideScreen.gameObject).Value)
-					{
-						this.currentSideScreen = sideScreenRef.screenInstance;
-					}
-					this.RefreshTitle();
+					this.sortedSideScreens.Add(new KeyValuePair<DetailsScreen.SideScreenRef, int>(sideScreenRef, sideScreenSortOrder));
 				}
 			}
 			if (!flag)
 			{
-				if (this.target.GetComponent<MinionIdentity>() == null && (this.target.GetComponent<Reconstructable>() == null || !this.target.GetComponent<Reconstructable>().AllowReconstruct) && this.target.GetComponent<BuildingFacade>() == null)
+				if (!this.CanObjectDisplayTabOfType(this.target, DetailsScreen.SidescreenTabTypes.Material) && !this.CanObjectDisplayTabOfType(this.target, DetailsScreen.SidescreenTabTypes.Blueprints))
 				{
-					this.noConfigSideScreen.SetActive(false);
 					this.sideScreen.SetActive(false);
 				}
 				else
 				{
-					this.noConfigSideScreen.SetActive(true);
-					this.sideScreenTitleLabel.SetText(UI.UISIDESCREENS.NOCONFIG.TITLE);
 					this.sideScreen.SetActive(true);
 				}
 			}
-			else
-			{
-				this.noConfigSideScreen.SetActive(false);
-			}
 		}
-		this.sortedSideScreens.Sort(delegate(KeyValuePair<GameObject, int> x, KeyValuePair<GameObject, int> y)
+		this.sortedSideScreens.Sort(delegate(KeyValuePair<DetailsScreen.SideScreenRef, int> x, KeyValuePair<DetailsScreen.SideScreenRef, int> y)
 		{
 			if (x.Value <= y.Value)
 			{
@@ -417,114 +463,71 @@ public class DetailsScreen : KTabMenu
 		});
 		for (int i = 0; i < this.sortedSideScreens.Count; i++)
 		{
-			this.sortedSideScreens[i].Key.transform.SetSiblingIndex(i);
+			this.sortedSideScreens[i].Key.screenInstance.transform.SetSiblingIndex(i);
 		}
+		for (int j = 0; j < this.sidescreenTabs.Length; j++)
+		{
+			DetailsScreen.SidescreenTab tab = this.sidescreenTabs[j];
+			tab.RepositionTitle();
+			KeyValuePair<DetailsScreen.SideScreenRef, int> keyValuePair = this.sortedSideScreens.Find((KeyValuePair<DetailsScreen.SideScreenRef, int> t) => t.Key.tab == tab.type);
+			tab.SetNoConfigMessageVisibility(keyValuePair.Key == null);
+		}
+		this.RefreshTitle();
 	}
 
 	public void RefreshTitle()
 	{
-		if (this.currentSideScreen)
+		for (int i = 0; i < this.sidescreenTabs.Length; i++)
 		{
-			this.sideScreenTitleLabel.SetText(this.currentSideScreen.GetTitle());
+			DetailsScreen.SidescreenTab tab = this.sidescreenTabs[i];
+			if (tab.IsVisible)
+			{
+				KeyValuePair<DetailsScreen.SideScreenRef, int> keyValuePair = this.sortedSideScreens.Find((KeyValuePair<DetailsScreen.SideScreenRef, int> match) => match.Key.tab == tab.type);
+				if (keyValuePair.Key != null)
+				{
+					tab.SetTitleVisibility(true);
+					tab.SetTitle(keyValuePair.Key.screenInstance.GetTitle());
+				}
+				else
+				{
+					tab.SetTitle(UI.UISIDESCREENS.NOCONFIG.TITLE);
+					tab.SetTitleVisibility(tab.type == DetailsScreen.SidescreenTabTypes.Config || tab.type == DetailsScreen.SidescreenTabTypes.Errands);
+				}
+			}
 		}
 	}
 
-	private void SelectSideScreenTab(string tabID, bool considerPreviousMinLayoutHeight = true)
+	private void SelectSideScreenTab(DetailsScreen.SidescreenTabTypes tabID)
 	{
-		if (this.selectedSidescreenTabID == "sidescreen_config" && considerPreviousMinLayoutHeight)
-		{
-			this.tabBodyLayoutElement.minHeight = this.tabBodyLayoutElement.rectTransform().sizeDelta.y;
-		}
-		else if (tabID == "sidescreen_config")
-		{
-			this.tabBodyLayoutElement.minHeight = 0f;
-		}
 		this.selectedSidescreenTabID = tabID;
 		this.RefreshSideScreenTabs();
 	}
 
 	private void RefreshSideScreenTabs()
 	{
-		string text = this.selectedSidescreenTabID;
-		if (text != null)
+		int num = 1;
+		for (int i = 0; i < this.sidescreenTabs.Length; i++)
 		{
-			if (!(text == "sidescreen_config"))
+			DetailsScreen.SidescreenTab sidescreenTab = this.sidescreenTabs[i];
+			bool flag = sidescreenTab.ValidateTarget(this.target);
+			sidescreenTab.SetVisible(flag);
+			sidescreenTab.SetSelected(this.selectedSidescreenTabID == sidescreenTab.type);
+			num += (flag ? 1 : 0);
+		}
+		this.RefreshTitle();
+		DetailsScreen.SidescreenTabTypes sidescreenTabTypes = this.selectedSidescreenTabID;
+		if (sidescreenTabTypes != DetailsScreen.SidescreenTabTypes.Material)
+		{
+			if (sidescreenTabTypes == DetailsScreen.SidescreenTabTypes.Blueprints)
 			{
-				if (!(text == "sidescreen_material"))
-				{
-					if (text == "sidescreen_skin")
-					{
-						CosmeticsPanel reference = this.sideScreenSkinContentBody.GetComponent<HierarchyReferences>().GetReference<CosmeticsPanel>("CosmeticsPanel");
-						reference.SetTarget(this.target);
-						this.sidescreenConfigTab.ChangeState(0);
-						this.sidescreenMaterialTab.ChangeState(0);
-						this.sidescreenSkinTab.ChangeState(1);
-						this.sideScreenConfigContentBody.SetActive(false);
-						this.sideScreenMaterialContentBody.SetActive(false);
-						this.sideScreenSkinContentBody.SetActive(true);
-						this.sideScreenTitle.SetActive(false);
-						reference.Refresh();
-					}
-				}
-				else
-				{
-					this.sidescreenConfigTab.ChangeState(0);
-					this.sidescreenMaterialTab.ChangeState(1);
-					this.sidescreenSkinTab.ChangeState(0);
-					this.sideScreenConfigContentBody.SetActive(false);
-					this.sideScreenMaterialContentBody.SetActive(true);
-					this.sideScreenSkinContentBody.SetActive(false);
-					this.sideScreenTitle.SetActive(false);
-					this.sideScreenMaterialContentBody.GetComponentInChildren<DetailsScreenMaterialPanel>().SetTarget(this.target);
-				}
-			}
-			else
-			{
-				this.sidescreenConfigTab.ChangeState(1);
-				this.sidescreenMaterialTab.ChangeState(0);
-				this.sidescreenSkinTab.ChangeState(0);
-				this.sideScreenConfigContentBody.SetActive(true);
-				this.sideScreenMaterialContentBody.SetActive(false);
-				this.sideScreenSkinContentBody.SetActive(false);
-				this.sideScreenTitle.SetActive(true);
+				CosmeticsPanel reference = this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Blueprints).bodyInstance.GetComponent<HierarchyReferences>().GetReference<CosmeticsPanel>("CosmeticsPanel");
+				reference.SetTarget(this.target);
+				reference.Refresh();
 			}
 		}
-		int num = 1;
-		if (!this.target.IsNullOrDestroyed())
+		else
 		{
-			if (this.target.GetComponent<Reconstructable>() == null || !this.target.GetComponent<Reconstructable>().AllowReconstruct)
-			{
-				this.sidescreenMaterialTab.gameObject.SetActive(false);
-			}
-			else
-			{
-				this.sidescreenMaterialTab.gameObject.SetActive(true);
-				num++;
-			}
-			MinionIdentity component = this.target.GetComponent<MinionIdentity>();
-			if (component != null)
-			{
-				HierarchyReferences component2 = this.sidescreenConfigTab.GetComponent<HierarchyReferences>();
-				component2.GetReference<LocText>("label").SetText(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.NAME);
-				component2.GetReference<Image>("icon").sprite = Assets.GetSprite("icon_display_screen_errands");
-				this.sidescreenConfigTab.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP);
-			}
-			else
-			{
-				HierarchyReferences component3 = this.sidescreenConfigTab.GetComponent<HierarchyReferences>();
-				component3.GetReference<LocText>("label").SetText(UI.DETAILTABS.CONFIGURATION.NAME);
-				component3.GetReference<Image>("icon").sprite = Assets.GetSprite("icon_display_screen_config");
-				this.sidescreenConfigTab.GetComponent<ToolTip>().SetSimpleTooltip(UI.DETAILTABS.CONFIGURATION.TOOLTIP);
-			}
-			if (component == null && this.target.GetComponent<BuildingFacade>() == null)
-			{
-				this.sidescreenSkinTab.gameObject.SetActive(false);
-			}
-			else
-			{
-				this.sidescreenSkinTab.gameObject.SetActive(true);
-				num++;
-			}
+			this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Material).bodyInstance.GetComponentInChildren<DetailsScreenMaterialPanel>().SetTarget(this.target);
 		}
 		this.sidescreenTabHeader.SetActive(num > 1);
 	}
@@ -575,8 +578,10 @@ public class DetailsScreen : KTabMenu
 				}
 			});
 		}
-		this.sideScreenMaterialContentBody.GetComponentInChildren<DetailsScreenMaterialPanel>().SetTarget(null);
-		this.sideScreenSkinContentBody.GetComponentInChildren<CosmeticsPanel>().SetTarget(null);
+		DetailsScreen.SidescreenTab tabOfType = this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Material);
+		DetailsScreen.SidescreenTab tabOfType2 = this.GetTabOfType(DetailsScreen.SidescreenTabTypes.Blueprints);
+		tabOfType.bodyInstance.GetComponentInChildren<DetailsScreenMaterialPanel>().SetTarget(null);
+		tabOfType2.bodyInstance.GetComponentInChildren<CosmeticsPanel>().SetTarget(null);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenHalfEffect, STOP_MODE.ALLOWFADEOUT);
 		this.sideScreen.SetActive(false);
 	}
@@ -608,6 +613,7 @@ public class DetailsScreen : KTabMenu
 			return;
 		}
 		this.target = null;
+		this.previousTargetID = null;
 		this.DeactivateSideContent();
 		this.Show(false);
 	}
@@ -752,7 +758,7 @@ public class DetailsScreen : KTabMenu
 	}
 
 	[CompilerGenerated]
-	internal static bool <PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|56_0(Tag targetTag)
+	internal static bool <PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|51_0(Tag targetTag)
 	{
 		foreach (Tag tag in GameTags.MaterialCategories)
 		{
@@ -808,47 +814,23 @@ public class DetailsScreen : KTabMenu
 
 	[Header("Side Screen Tabs")]
 	[SerializeField]
+	private DetailsScreen.SidescreenTab[] sidescreenTabs;
+
+	[SerializeField]
 	private GameObject sidescreenTabHeader;
 
 	[SerializeField]
-	private MultiToggle sidescreenConfigTab;
+	private GameObject original_tab;
 
 	[SerializeField]
-	private MultiToggle sidescreenMaterialTab;
-
-	[SerializeField]
-	private MultiToggle sidescreenSkinTab;
-
-	private const string sidescreenConfigID = "sidescreen_config";
-
-	private const string sidescreenMaterialID = "sidescreen_material";
-
-	private const string sidescreenSkinID = "sidescreen_skin";
+	private GameObject original_tab_body;
 
 	[Header("Side Screens")]
-	[SerializeField]
-	private GameObject sideScreenConfigContentBody;
-
-	[SerializeField]
-	private GameObject sideScreenMaterialContentBody;
-
-	[SerializeField]
-	private GameObject sideScreenSkinContentBody;
-
 	[SerializeField]
 	private GameObject sideScreen;
 
 	[SerializeField]
-	private GameObject sideScreenTitle;
-
-	[SerializeField]
-	private LocText sideScreenTitleLabel;
-
-	[SerializeField]
 	private List<DetailsScreen.SideScreenRef> sideScreens;
-
-	[SerializeField]
-	private GameObject noConfigSideScreen;
 
 	[SerializeField]
 	private LayoutElement tabBodyLayoutElement;
@@ -869,9 +851,7 @@ public class DetailsScreen : KTabMenu
 
 	private bool HasActivated;
 
-	private string selectedSidescreenTabID = "sidescreen_config";
-
-	private SideScreenContent currentSideScreen;
+	private DetailsScreen.SidescreenTabTypes selectedSidescreenTabID;
 
 	private Dictionary<KScreen, KScreen> instantiatedSecondarySideScreens = new Dictionary<KScreen, KScreen>();
 
@@ -880,7 +860,7 @@ public class DetailsScreen : KTabMenu
 		component.OnRefreshData(data);
 	});
 
-	private List<KeyValuePair<GameObject, int>> sortedSideScreens = new List<KeyValuePair<GameObject, int>>();
+	private List<KeyValuePair<DetailsScreen.SideScreenRef, int>> sortedSideScreens = new List<KeyValuePair<DetailsScreen.SideScreenRef, int>>();
 
 	private int setRocketTitleHandle = -1;
 
@@ -907,6 +887,149 @@ public class DetailsScreen : KTabMenu
 		public int tabIdx;
 	}
 
+	public enum SidescreenTabTypes
+	{
+		Config,
+		Errands,
+		Material,
+		Blueprints
+	}
+
+	[Serializable]
+	public class SidescreenTab
+	{
+		private void OnTabClicked()
+		{
+			global::System.Action onClicked = this.OnClicked;
+			if (onClicked == null)
+			{
+				return;
+			}
+			onClicked();
+		}
+
+		public bool IsVisible { get; private set; }
+
+		public bool IsSelected { get; private set; }
+
+		public void Initiate(GameObject originalTabInstance, GameObject originalBodyInstance, Action<DetailsScreen.SidescreenTab> on_tab_clicked_callback)
+		{
+			if (on_tab_clicked_callback != null)
+			{
+				this.OnClicked = delegate
+				{
+					on_tab_clicked_callback(this);
+				};
+			}
+			originalBodyInstance.gameObject.SetActive(false);
+			if (this.OverrideBody == null)
+			{
+				this.bodyInstance = global::UnityEngine.Object.Instantiate<GameObject>(originalBodyInstance);
+				this.bodyInstance.name = this.type.ToString() + " Tab - body instance";
+				this.bodyInstance.SetActive(true);
+				this.bodyInstance.transform.SetParent(originalBodyInstance.transform.parent, false);
+			}
+			else
+			{
+				this.bodyInstance = this.OverrideBody;
+			}
+			this.bodyReferences = this.bodyInstance.GetComponent<HierarchyReferences>();
+			originalTabInstance.gameObject.SetActive(false);
+			if (this.tabInstance == null)
+			{
+				this.tabInstance = global::UnityEngine.Object.Instantiate<GameObject>(originalTabInstance.gameObject).GetComponent<MultiToggle>();
+				this.tabInstance.name = this.type.ToString() + " Tab Instance";
+				this.tabInstance.gameObject.SetActive(true);
+				this.tabInstance.transform.SetParent(originalTabInstance.transform.parent, false);
+				MultiToggle multiToggle = this.tabInstance;
+				multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnTabClicked));
+				HierarchyReferences component = this.tabInstance.GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("label").SetText(Strings.Get(this.Title_Key));
+				component.GetReference<Image>("icon").sprite = this.Icon;
+				this.tabInstance.GetComponent<ToolTip>().SetSimpleTooltip(Strings.Get(this.Tooltip_Key));
+			}
+		}
+
+		public void SetSelected(bool isSelected)
+		{
+			this.IsSelected = isSelected;
+			this.tabInstance.ChangeState(isSelected ? 1 : 0);
+			this.bodyInstance.SetActive(isSelected);
+		}
+
+		public void SetTitle(string title)
+		{
+			if (this.bodyReferences != null && this.bodyReferences.HasReference("TitleLabel"))
+			{
+				this.bodyReferences.GetReference<LocText>("TitleLabel").SetText(title);
+			}
+		}
+
+		public void SetTitleVisibility(bool visible)
+		{
+			if (this.bodyReferences != null && this.bodyReferences.HasReference("Title"))
+			{
+				this.bodyReferences.GetReference("Title").gameObject.SetActive(visible);
+			}
+		}
+
+		public void SetNoConfigMessageVisibility(bool visible)
+		{
+			if (this.bodyReferences != null && this.bodyReferences.HasReference("NoConfigMessage"))
+			{
+				this.bodyReferences.GetReference("NoConfigMessage").gameObject.SetActive(visible);
+			}
+		}
+
+		public void RepositionTitle()
+		{
+			if (this.bodyReferences != null && this.bodyReferences.GetReference("Title") != null)
+			{
+				this.bodyReferences.GetReference("Title").transform.SetSiblingIndex(0);
+			}
+		}
+
+		public void SetVisible(bool visible)
+		{
+			this.IsVisible = visible;
+			this.tabInstance.gameObject.SetActive(visible);
+			this.bodyInstance.SetActive(this.IsSelected && this.IsVisible);
+		}
+
+		public bool ValidateTarget(GameObject target)
+		{
+			return !(target == null) && (this.ValidateTargetCallback == null || this.ValidateTargetCallback(target, this));
+		}
+
+		public DetailsScreen.SidescreenTabTypes type;
+
+		public string Title_Key;
+
+		public string Tooltip_Key;
+
+		public Sprite Icon;
+
+		public GameObject OverrideBody;
+
+		public Func<GameObject, DetailsScreen.SidescreenTab, bool> ValidateTargetCallback;
+
+		public global::System.Action OnClicked;
+
+		[NonSerialized]
+		public MultiToggle tabInstance;
+
+		[NonSerialized]
+		public GameObject bodyInstance;
+
+		private HierarchyReferences bodyReferences;
+
+		private const string bodyRef_Title = "Title";
+
+		private const string bodyRef_TitleLabel = "TitleLabel";
+
+		private const string bodyRef_NoConfigMessage = "NoConfigMessage";
+	}
+
 	[Serializable]
 	public class SideScreenRef
 	{
@@ -915,6 +1038,8 @@ public class DetailsScreen : KTabMenu
 		public SideScreenContent screenPrefab;
 
 		public Vector2 offset;
+
+		public DetailsScreen.SidescreenTabTypes tab;
 
 		[HideInInspector]
 		public SideScreenContent screenInstance;

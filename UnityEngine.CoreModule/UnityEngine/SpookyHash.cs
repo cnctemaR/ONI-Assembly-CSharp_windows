@@ -10,14 +10,7 @@ namespace UnityEngine
 		{
 			string processorType = SystemInfo.processorType;
 			string text = processorType;
-			if (text != null)
-			{
-				if (text == "x86" || text == "AMD64")
-				{
-					return true;
-				}
-			}
-			return false;
+			return text == "x86" || text == "AMD64";
 		}
 
 		public unsafe static void Hash(void* message, ulong length, ulong* hash1, ulong* hash2)

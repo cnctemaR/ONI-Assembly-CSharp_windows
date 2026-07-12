@@ -5,11 +5,11 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.U2D
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/2D/Common/SpriteDataMarshalling.h")]
-	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[MovedFrom("UnityEngine.Experimental.U2D")]
-	[RequiredByNativeCode]
+	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[Serializable]
 	public struct SpriteBone
 	{
@@ -22,6 +22,18 @@ namespace UnityEngine.U2D
 			set
 			{
 				this.m_Name = value;
+			}
+		}
+
+		public string guid
+		{
+			get
+			{
+				return this.m_Guid;
+			}
+			set
+			{
+				this.m_Guid = value;
 			}
 		}
 
@@ -73,9 +85,25 @@ namespace UnityEngine.U2D
 			}
 		}
 
+		public Color32 color
+		{
+			get
+			{
+				return this.m_Color;
+			}
+			set
+			{
+				this.m_Color = value;
+			}
+		}
+
 		[NativeName("name")]
 		[SerializeField]
 		private string m_Name;
+
+		[NativeName("guid")]
+		[SerializeField]
+		private string m_Guid;
 
 		[NativeName("position")]
 		[SerializeField]
@@ -89,8 +117,12 @@ namespace UnityEngine.U2D
 		[NativeName("length")]
 		private float m_Length;
 
-		[NativeName("parentId")]
 		[SerializeField]
+		[NativeName("parentId")]
 		private int m_ParentId;
+
+		[SerializeField]
+		[NativeName("color")]
+		private Color32 m_Color;
 	}
 }

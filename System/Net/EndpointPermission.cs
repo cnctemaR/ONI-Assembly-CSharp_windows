@@ -58,14 +58,15 @@ namespace System.Net
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
-			{
-				this.hostname,
-				"#",
-				this.port,
-				"#",
-				(int)this.transport
-			});
+			string[] array = new string[5];
+			array[0] = this.hostname;
+			array[1] = "#";
+			array[2] = this.port.ToString();
+			array[3] = "#";
+			int num = 4;
+			int num2 = (int)this.transport;
+			array[num] = num2.ToString();
+			return string.Concat(array);
 		}
 
 		internal bool IsSubsetOf(EndpointPermission perm)
@@ -271,11 +272,11 @@ namespace System.Net
 				}
 				if (num == 256)
 				{
-					array3[i << 1] = ((num2 == 256) ? "*" : (string.Empty + num2));
+					array3[i << 1] = ((num2 == 256) ? "*" : (string.Empty + num2.ToString()));
 				}
 				else if (num2 == 256)
 				{
-					array3[i << 1] = ((num == 256) ? "*" : (string.Empty + num));
+					array3[i << 1] = ((num == 256) ? "*" : (string.Empty + num.ToString()));
 				}
 				else
 				{
@@ -283,7 +284,7 @@ namespace System.Net
 					{
 						return null;
 					}
-					array3[i << 1] = string.Empty + num;
+					array3[i << 1] = string.Empty + num.ToString();
 				}
 			}
 			array3[1] = (array3[3] = (array3[5] = "."));

@@ -132,7 +132,10 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
-		protected abstract IsolatedStoragePermission GetPermission(PermissionSet ps);
+		protected virtual IsolatedStoragePermission GetPermission(PermissionSet ps)
+		{
+			return null;
+		}
 
 		protected void InitStore(IsolatedStorageScope scope, Type domainEvidenceType, Type assemblyEvidenceType)
 		{

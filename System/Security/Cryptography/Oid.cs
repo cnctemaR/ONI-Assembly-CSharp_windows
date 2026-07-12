@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
+using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -10,32 +10,20 @@ namespace System.Security.Cryptography
 		}
 
 		public Oid(string oid)
-			: this(oid, OidGroup.All, true)
 		{
-		}
-
-		internal Oid(string oid, OidGroup group, bool lookupFriendlyName)
-		{
-			if (lookupFriendlyName)
+			string text = OidLookup.ToOid(oid, OidGroup.All, false);
+			if (text == null)
 			{
-				string text = X509Utils.FindOidInfoWithFallback(2U, oid, group);
-				if (text == null)
-				{
-					text = oid;
-				}
-				this.Value = text;
+				text = oid;
 			}
-			else
-			{
-				this.Value = oid;
-			}
-			this.m_group = group;
+			this.Value = text;
+			this._group = OidGroup.All;
 		}
 
 		public Oid(string value, string friendlyName)
 		{
-			this.m_value = value;
-			this.m_friendlyName = friendlyName;
+			this._value = value;
+			this._friendlyName = friendlyName;
 		}
 
 		public Oid(Oid oid)
@@ -44,16 +32,9 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("oid");
 			}
-			this.m_value = oid.m_value;
-			this.m_friendlyName = oid.m_friendlyName;
-			this.m_group = oid.m_group;
-		}
-
-		private Oid(string value, string friendlyName, OidGroup group)
-		{
-			this.m_value = value;
-			this.m_friendlyName = friendlyName;
-			this.m_group = group;
+			this._value = oid._value;
+			this._friendlyName = oid._friendlyName;
+			this._group = oid._group;
 		}
 
 		public static Oid FromFriendlyName(string friendlyName, OidGroup group)
@@ -62,10 +43,10 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("friendlyName");
 			}
-			string text = X509Utils.FindOidInfo(2U, friendlyName, group);
+			string text = OidLookup.ToOid(friendlyName, group, false);
 			if (text == null)
 			{
-				throw new CryptographicException(global::SR.GetString("The OID value is invalid."));
+				throw new CryptographicException("No OID value matches this name.");
 			}
 			return new Oid(text, friendlyName, group);
 		}
@@ -76,10 +57,10 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("oidValue");
 			}
-			string text = X509Utils.FindOidInfo(1U, oidValue, group);
+			string text = OidLookup.ToFriendlyName(oidValue, group, false);
 			if (text == null)
 			{
-				throw new CryptographicException(global::SR.GetString("The OID value is invalid."));
+				throw new CryptographicException("The OID value is invalid.");
 			}
 			return new Oid(oidValue, text, group);
 		}
@@ -88,11 +69,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_value;
+				return this._value;
 			}
 			set
 			{
-				this.m_value = value;
+				this._value = value;
 			}
 		}
 
@@ -100,30 +81,37 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				if (this.m_friendlyName == null && this.m_value != null)
+				if (this._friendlyName == null && this._value != null)
 				{
-					this.m_friendlyName = X509Utils.FindOidInfoWithFallback(1U, this.m_value, this.m_group);
+					this._friendlyName = OidLookup.ToFriendlyName(this._value, this._group, true);
 				}
-				return this.m_friendlyName;
+				return this._friendlyName;
 			}
 			set
 			{
-				this.m_friendlyName = value;
-				if (this.m_friendlyName != null)
+				this._friendlyName = value;
+				if (this._friendlyName != null)
 				{
-					string text = X509Utils.FindOidInfoWithFallback(2U, this.m_friendlyName, this.m_group);
+					string text = OidLookup.ToOid(this._friendlyName, this._group, true);
 					if (text != null)
 					{
-						this.m_value = text;
+						this._value = text;
 					}
 				}
 			}
 		}
 
-		private string m_value;
+		private Oid(string value, string friendlyName, OidGroup group)
+		{
+			this._value = value;
+			this._friendlyName = friendlyName;
+			this._group = group;
+		}
 
-		private string m_friendlyName;
+		private string _value;
 
-		private OidGroup m_group;
+		private string _friendlyName;
+
+		private OidGroup _group;
 	}
 }

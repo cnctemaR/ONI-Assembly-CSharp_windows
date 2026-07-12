@@ -231,7 +231,7 @@ namespace System.Security.AccessControl
 				throw new ArgumentException("Invalid SDDL string.", "sddlForm");
 			}
 			int num2 = num - (pos + 1);
-			string[] array = sddlForm.Substring(pos + 1, num2).ToUpperInvariant().Split(new char[] { ';' });
+			string[] array = sddlForm.Substring(pos + 1, num2).ToUpperInvariant().Split(';', StringSplitOptions.None);
 			if (array.Length != 6)
 			{
 				throw new ArgumentException("Invalid SDDL string.", "sddlForm");
@@ -299,7 +299,7 @@ namespace System.Security.AccessControl
 			case AceType.AccessDeniedCallback:
 				return "XD";
 			}
-			throw new ArgumentException("Unable to convert to SDDL ACE type: " + type, "type");
+			throw new ArgumentException("Unable to convert to SDDL ACE type: " + type.ToString(), "type");
 		}
 
 		private static AceType ParseSddlAceType(string type)

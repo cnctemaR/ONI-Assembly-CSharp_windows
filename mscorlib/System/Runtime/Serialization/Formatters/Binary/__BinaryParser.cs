@@ -472,7 +472,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
 				binaryAssemblyInfo = (BinaryAssemblyInfo)this.AssemIdToAssemblyTable[record.assemId];
 				if (binaryAssemblyInfo == null)
 				{
-					throw new SerializationException(Environment.GetResourceString("No assembly information is available for object on the wire, '{0}'.", new object[] { record.assemId + " " + record.name }));
+					throw new SerializationException(Environment.GetResourceString("No assembly information is available for object on the wire, '{0}'.", new object[] { record.assemId.ToString() + " " + record.name }));
 				}
 			}
 			else if (record.binaryHeaderEnum == BinaryHeaderEnum.ObjectWithMap)
@@ -561,7 +561,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
 				binaryAssemblyInfo = (BinaryAssemblyInfo)this.AssemIdToAssemblyTable[record.assemId];
 				if (binaryAssemblyInfo == null)
 				{
-					throw new SerializationException(Environment.GetResourceString("No assembly ID for object type '{0}'.", new object[] { record.assemId + " " + record.name }));
+					throw new SerializationException(Environment.GetResourceString("No assembly ID for object type '{0}'.", new object[] { record.assemId.ToString() + " " + record.name }));
 				}
 			}
 			else if (record.binaryHeaderEnum == BinaryHeaderEnum.ObjectWithMapTyped)

@@ -19,7 +19,7 @@ public class RocketControlStationIdleWorkable : Workable
 		base.SetWorkTime(30f);
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		RocketControlStation.StatesInstance smi = this.GetSMI<RocketControlStation.StatesInstance>();

@@ -1,31 +1,34 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 
 namespace System
 {
-	[ComVisible(true)]
 	[Serializable]
-	public class MissingMemberException : MemberAccessException, ISerializable
+	public class MissingMemberException : MemberAccessException
 	{
 		public MissingMemberException()
-			: base(Environment.GetResourceString("Attempted to access a missing member."))
+			: base("Attempted to access a missing member.")
 		{
-			base.SetErrorCode(-2146233070);
+			base.HResult = -2146233070;
 		}
 
 		public MissingMemberException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233070);
+			base.HResult = -2146233070;
 		}
 
 		public MissingMemberException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233070);
+			base.HResult = -2146233070;
+		}
+
+		public MissingMemberException(string className, string memberName)
+		{
+			this.ClassName = className;
+			this.MemberName = memberName;
 		}
 
 		protected MissingMemberException(SerializationInfo info, StreamingContext context)
@@ -34,6 +37,15 @@ namespace System
 			this.ClassName = info.GetString("MMClassName");
 			this.MemberName = info.GetString("MMMemberName");
 			this.Signature = (byte[])info.GetValue("MMSignature", typeof(byte[]));
+		}
+
+		[SecurityCritical]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("MMClassName", this.ClassName, typeof(string));
+			info.AddValue("MMMemberName", this.MemberName, typeof(string));
+			info.AddValue("MMSignature", this.Signature, typeof(byte[]));
 		}
 
 		public override string Message
@@ -45,38 +57,13 @@ namespace System
 				{
 					return base.Message;
 				}
-				return Environment.GetResourceString("Member '{0}' not found.", new object[] { this.ClassName + "." + this.MemberName + ((this.Signature != null) ? (" " + MissingMemberException.FormatSignature(this.Signature)) : "") });
+				return SR.Format("Member '{0}' not found.", this.ClassName + "." + this.MemberName + ((this.Signature != null) ? (" " + MissingMemberException.FormatSignature(this.Signature)) : string.Empty));
 			}
 		}
 
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string FormatSignature(byte[] signature);
-
-		private MissingMemberException(string className, string memberName, byte[] signature)
+		internal static string FormatSignature(byte[] signature)
 		{
-			this.ClassName = className;
-			this.MemberName = memberName;
-			this.Signature = signature;
-		}
-
-		public MissingMemberException(string className, string memberName)
-		{
-			this.ClassName = className;
-			this.MemberName = memberName;
-		}
-
-		[SecurityCritical]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			base.GetObjectData(info, context);
-			info.AddValue("MMClassName", this.ClassName, typeof(string));
-			info.AddValue("MMMemberName", this.MemberName, typeof(string));
-			info.AddValue("MMSignature", this.Signature, typeof(byte[]));
+			return string.Empty;
 		}
 
 		protected string ClassName;

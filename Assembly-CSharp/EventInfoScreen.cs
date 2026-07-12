@@ -209,7 +209,7 @@ public class EventInfoScreen : KModalScreen
 					component2.AddSymbolOverride(symbolEntry.targetSymbol, symbolEntry.sourceSymbol, symbolEntry.priority);
 				}
 			}
-			MinionConfig.CopyVisibleSymbols(gameObject, minion);
+			BaseMinionConfig.CopyVisibleSymbols(gameObject, minion);
 		}
 		if (artifact != null)
 		{

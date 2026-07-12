@@ -85,7 +85,7 @@ namespace System.Net
 			{
 				if (value < 0L)
 				{
-					throw new ArgumentException(global::SR.GetString("The Content-Length value must be greater than or equal to zero."), "value");
+					throw new ArgumentException(SR.GetString("The Content-Length value must be greater than or equal to zero."), "value");
 				}
 				this.m_contentLength = value;
 			}
@@ -133,7 +133,7 @@ namespace System.Net
 			{
 				if (ValidationHelper.IsBlankString(value))
 				{
-					throw new ArgumentException(global::SR.GetString("Cannot set null or blank methods on request."), "value");
+					throw new ArgumentException(SR.GetString("Cannot set null or blank methods on request."), "value");
 				}
 				this.m_method = value;
 			}
@@ -173,7 +173,7 @@ namespace System.Net
 			{
 				if (value < 0 && value != -1)
 				{
-					throw new ArgumentOutOfRangeException("value", global::SR.GetString("Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value >= 0."));
+					throw new ArgumentOutOfRangeException("value", SR.GetString("Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value >= 0."));
 				}
 				this.m_timeout = value;
 			}
@@ -198,17 +198,17 @@ namespace System.Net
 				}
 				if (!this.CanGetRequestStream())
 				{
-					throw new ProtocolViolationException(global::SR.GetString("Cannot send a content-body with this verb-type."));
+					throw new ProtocolViolationException(SR.GetString("Cannot send a content-body with this verb-type."));
 				}
 				if (this.m_response != null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("This operation cannot be performed after the request has been submitted."));
+					throw new InvalidOperationException(SR.GetString("This operation cannot be performed after the request has been submitted."));
 				}
 				lock (this)
 				{
 					if (this.m_writePending)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
+						throw new InvalidOperationException(SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
 					}
 					this.m_writePending = true;
 				}
@@ -239,7 +239,7 @@ namespace System.Net
 				{
 					if (this.m_readPending)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
+						throw new InvalidOperationException(SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
 					}
 					this.m_readPending = true;
 				}
@@ -270,7 +270,7 @@ namespace System.Net
 				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
 				if (asyncResult == null || lazyAsyncResult == null)
 				{
-					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(global::SR.GetString("The AsyncResult is not valid."), "asyncResult");
+					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(SR.GetString("The AsyncResult is not valid."), "asyncResult");
 				}
 				object obj = lazyAsyncResult.InternalWaitForCompletion();
 				if (obj is Exception)
@@ -299,7 +299,7 @@ namespace System.Net
 				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
 				if (asyncResult == null || lazyAsyncResult == null)
 				{
-					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(global::SR.GetString("The AsyncResult is not valid."), "asyncResult");
+					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(SR.GetString("The AsyncResult is not valid."), "asyncResult");
 				}
 				object obj = lazyAsyncResult.InternalWaitForCompletion();
 				if (obj is Exception)

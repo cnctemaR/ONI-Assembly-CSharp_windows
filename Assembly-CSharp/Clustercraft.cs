@@ -45,7 +45,12 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 
 	public override Sprite GetUISprite()
 	{
-		return Def.GetUISprite(this.m_moduleInterface.GetPassengerModule().gameObject, "ui", false).first;
+		PassengerRocketModule passengerModule = this.m_moduleInterface.GetPassengerModule();
+		if (passengerModule != null)
+		{
+			return Def.GetUISprite(passengerModule.gameObject, "ui", false).first;
+		}
+		return Assets.GetSprite("ic_rocket");
 	}
 
 	public override bool IsVisible
@@ -91,6 +96,13 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		{
 			float num = this.EnginePower / this.TotalBurden;
 			float num2 = num * this.AutoPilotMultiplier * this.PilotSkillMultiplier;
+			float num3 = 1f;
+			RoboPilotModule robotPilotModule = this.ModuleInterface.GetRobotPilotModule();
+			if (robotPilotModule != null)
+			{
+				num3 += robotPilotModule.FlightEfficiencyModifier();
+			}
+			num2 *= num3;
 			if (this.controlStationBuffTimeRemaining > 0f)
 			{
 				num2 += num * 0.20000005f;
@@ -371,7 +383,8 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 		float num = 600f;
 		foreach (Ref<RocketModuleCluster> @ref in this.m_moduleInterface.ClusterModules)
 		{
-			RocketEngineCluster component = @ref.Get().GetComponent<RocketEngineCluster>();
+			RocketModuleCluster rocketModuleCluster = @ref.Get();
+			RocketEngineCluster component = rocketModuleCluster.GetComponent<RocketEngineCluster>();
 			if (component != null)
 			{
 				Tag fuelTag = component.fuelTag;
@@ -395,6 +408,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 						}
 					}
 				}
+			}
+			RoboPilotModule component3 = rocketModuleCluster.GetComponent<RoboPilotModule>();
+			if (component3 != null)
+			{
+				component3.ConsumeDataBanksInFlight();
 			}
 		}
 		this.UpdateStatusItem();
@@ -556,6 +574,10 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms, ISim10
 			return;
 		}
 		global::Debug.Log("Triggering launch!");
+		if (this.m_moduleInterface.GetRobotPilotModule() != null)
+		{
+			this.Launch(automated);
+		}
 		this.LaunchRequested = true;
 	}
 

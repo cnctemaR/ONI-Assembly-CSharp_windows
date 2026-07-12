@@ -33,9 +33,10 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
-		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("ColdAir"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WarmAir"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Slipped"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
@@ -52,6 +53,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 				{
 					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(this.expertAthleticsModifier);
 				}
+				targetGameObject.AddTag(GameTags.HasAirtightSuit);
 			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
@@ -84,6 +86,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 								component4.Remove("SoiledSuit");
 							}
 						}
+						targetGameObject2.RemoveTag(GameTags.HasAirtightSuit);
 					}
 					Tag elementTag = eq.GetComponent<SuitTank>().elementTag;
 					eq.GetComponent<Storage>().DropUnlessHasTag(elementTag);
@@ -99,7 +102,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 	{
 		SuitTank suitTank = go.AddComponent<SuitTank>();
 		suitTank.element = "Oxygen";
-		suitTank.capacity = 75f;
+		suitTank.capacity = DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * 600f * 1.25f;
 		suitTank.elementTag = GameTags.Breathable;
 		go.AddComponent<HelmetController>();
 		KPrefabID component = go.GetComponent<KPrefabID>();

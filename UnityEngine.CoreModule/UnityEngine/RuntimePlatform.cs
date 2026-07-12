@@ -54,13 +54,27 @@ namespace UnityEngine
 		WiiU = 30,
 		tvOS,
 		Switch,
+		[Obsolete("Lumin is no longer supported in Unity 2022.2")]
 		Lumin,
 		Stadia,
+		[Obsolete("Use LinuxPlayer instead")]
 		CloudRendering,
 		[Obsolete("GameCoreScarlett is deprecated, please use GameCoreXboxSeries (UnityUpgradable) -> GameCoreXboxSeries", false)]
-		GameCoreScarlett,
+		GameCoreScarlett = -1,
 		GameCoreXboxSeries = 36,
 		GameCoreXboxOne,
-		PS5
+		PS5,
+		EmbeddedLinuxArm64,
+		EmbeddedLinuxArm32,
+		EmbeddedLinuxX64,
+		EmbeddedLinuxX86,
+		LinuxServer,
+		WindowsServer,
+		OSXServer,
+		QNXArm32,
+		QNXArm64,
+		QNXX64,
+		QNXX86,
+		VisionOS
 	}
 }

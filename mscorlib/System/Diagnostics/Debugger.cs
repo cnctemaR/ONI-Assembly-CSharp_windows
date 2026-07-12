@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 namespace System.Diagnostics
 {
 	[ComVisible(true)]
-	[MonoTODO("The Debugger class is not functional")]
 	public sealed class Debugger
 	{
 		public static bool IsAttached
@@ -26,14 +25,18 @@ namespace System.Diagnostics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsLogging();
 
-		[MonoTODO("Not implemented")]
 		public static bool Launch()
 		{
 			throw new NotImplementedException();
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Log(int level, string category, string message);
+		private static extern void Log_icall(int level, ref string category, ref string message);
+
+		public static void Log(int level, string category, string message)
+		{
+			Debugger.Log_icall(level, ref category, ref message);
+		}
 
 		public static void NotifyOfCrossThreadDependency()
 		{

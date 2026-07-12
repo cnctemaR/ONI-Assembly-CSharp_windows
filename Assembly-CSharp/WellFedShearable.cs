@@ -12,10 +12,20 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		this.root.Enter(delegate(WellFedShearable.Instance smi)
 		{
 			WellFedShearable.UpdateScales(smi, 0f);
-		}).Update(new Action<WellFedShearable.Instance, float>(WellFedShearable.UpdateScales), UpdateRate.SIM_1000ms, false).EventHandler(GameHashes.CaloriesConsumed, delegate(WellFedShearable.Instance smi, object data)
+		}).Enter(delegate(WellFedShearable.Instance smi)
 		{
-			smi.OnCaloriesConsumed(data);
-		});
+			if (smi.def.hideSymbols != null)
+			{
+				foreach (KAnimHashedString kanimHashedString in smi.def.hideSymbols)
+				{
+					smi.animController.SetSymbolVisiblity(kanimHashedString, false);
+				}
+			}
+		}).Update(new Action<WellFedShearable.Instance, float>(WellFedShearable.UpdateScales), UpdateRate.SIM_1000ms, false)
+			.EventHandler(GameHashes.CaloriesConsumed, delegate(WellFedShearable.Instance smi, object data)
+			{
+				smi.OnCaloriesConsumed(data);
+			});
 		this.growing.Enter(delegate(WellFedShearable.Instance smi)
 		{
 			WellFedShearable.UpdateScales(smi, 0f);
@@ -37,11 +47,10 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		int num = (int)((float)smi.def.levelCount * smi.scaleGrowth.value / 100f);
 		if (smi.currentScaleLevel != num)
 		{
-			KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
-			for (int i = 0; i < WellFedShearable.SCALE_SYMBOL_NAMES.Length; i++)
+			for (int i = 0; i < smi.def.scaleGrowthSymbols.Length; i++)
 			{
 				bool flag = i <= num - 1;
-				component.SetSymbolVisiblity(WellFedShearable.SCALE_SYMBOL_NAMES[i], flag);
+				smi.animController.SetSymbolVisiblity(smi.def.scaleGrowthSymbols[i], flag);
 			}
 			smi.currentScaleLevel = num;
 		}
@@ -50,8 +59,6 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 	public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State growing;
 
 	public GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.State fullyGrown;
-
-	private static HashedString[] SCALE_SYMBOL_NAMES = new HashedString[] { "scale_0", "scale_1", "scale_2", "scale_3", "scale_4" };
 
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
@@ -79,6 +86,14 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		public Tag itemDroppedOnShear;
 
 		public float dropMass;
+
+		public Tag requiredDiet = null;
+
+		public KAnimHashedString[] scaleGrowthSymbols = WellFedShearable.Def.SCALE_SYMBOL_NAMES;
+
+		public KAnimHashedString[] hideSymbols;
+
+		public static KAnimHashedString[] SCALE_SYMBOL_NAMES = new KAnimHashedString[] { "scale_0", "scale_1", "scale_2", "scale_3", "scale_4" };
 	}
 
 	public new class Instance : GameStateMachine<WellFedShearable, WellFedShearable.Instance, IStateMachineTarget, WellFedShearable.Def>.GameInstance, IShearable
@@ -98,6 +113,10 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 		public void OnCaloriesConsumed(object data)
 		{
 			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
+			if (base.def.requiredDiet != null && caloriesConsumedEvent.tag != base.def.requiredDiet)
+			{
+				return;
+			}
 			EffectInstance effectInstance = this.effects.Get(base.smi.def.effectId);
 			if (effectInstance == null)
 			{
@@ -128,6 +147,9 @@ public class WellFedShearable : GameStateMachine<WellFedShearable, WellFedSheara
 
 		[MyCmpGet]
 		private Effects effects;
+
+		[MyCmpGet]
+		public KBatchedAnimController animController;
 
 		public AmountInstance scaleGrowth;
 

@@ -100,7 +100,15 @@ namespace System.Configuration
 				{
 					if (this.line != 0)
 					{
-						text = string.Concat(new object[] { this.BareMessage, " (", this.filename, " line ", this.line, ")" });
+						text = string.Concat(new string[]
+						{
+							this.BareMessage,
+							" (",
+							this.filename,
+							" line ",
+							this.line.ToString(),
+							")"
+						});
 					}
 					else
 					{
@@ -109,7 +117,7 @@ namespace System.Configuration
 				}
 				else if (this.line != 0)
 				{
-					text = string.Concat(new object[] { this.BareMessage, " (line ", this.line, ")" });
+					text = this.BareMessage + " (line " + this.line.ToString() + ")";
 				}
 				else
 				{

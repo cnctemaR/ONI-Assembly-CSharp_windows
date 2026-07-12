@@ -94,7 +94,7 @@ public class GeneShuffler : Workable
 		this.storage_recursion_guard = false;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null, true, false, false);
@@ -110,12 +110,12 @@ public class GeneShuffler : Workable
 		}
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		return base.OnWorkTick(worker, dt);
 	}
 
-	protected override void OnAbortWork(Worker worker)
+	protected override void OnAbortWork(WorkerBase worker)
 	{
 		base.OnAbortWork(worker);
 		if (this.chore != null)
@@ -125,7 +125,7 @@ public class GeneShuffler : Workable
 		this.notifier.Remove(this.notification);
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		if (this.chore != null)
@@ -135,7 +135,7 @@ public class GeneShuffler : Workable
 		this.notifier.Remove(this.notification);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		base.OnCompleteWork(worker);
 		CameraController.Instance.CameraGoTo(base.transform.GetPosition(), 1f, false);
@@ -145,7 +145,7 @@ public class GeneShuffler : Workable
 		this.notifier.Remove(this.notification);
 	}
 
-	private void ApplyRandomTrait(Worker worker)
+	private void ApplyRandomTrait(WorkerBase worker)
 	{
 		Traits component = worker.GetComponent<Traits>();
 		List<string> list = new List<string>();

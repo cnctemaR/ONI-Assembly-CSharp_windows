@@ -1,29 +1,29 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class CustomAttributeFormatException : FormatException
 	{
 		public CustomAttributeFormatException()
-			: base(Locale.GetText("The Binary format of the custom attribute is invalid."))
+			: this("Binary format of the specified custom attribute was invalid.")
 		{
 		}
 
 		public CustomAttributeFormatException(string message)
-			: base(message)
+			: this(message, null)
 		{
 		}
 
 		public CustomAttributeFormatException(string message, Exception inner)
 			: base(message, inner)
 		{
+			base.HResult = -2146232827;
 		}
 
 		protected CustomAttributeFormatException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}

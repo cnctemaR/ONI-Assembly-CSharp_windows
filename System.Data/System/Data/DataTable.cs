@@ -17,11 +17,11 @@ using System.Xml.Serialization;
 
 namespace System.Data
 {
+	[XmlSchemaProvider("GetDataTableSchema")]
+	[DefaultEvent("RowChanging")]
+	[DefaultProperty("TableName")]
 	[ToolboxItem(false)]
 	[DesignTimeVisible(false)]
-	[DefaultProperty("TableName")]
-	[DefaultEvent("RowChanging")]
-	[XmlSchemaProvider("GetDataTableSchema")]
 	[Serializable]
 	public class DataTable : MarshalByValueComponent, IListSource, ISupportInitializeNotification, ISupportInitialize, ISerializable, IXmlSerializable
 	{
@@ -59,8 +59,7 @@ namespace System.Data
 			SerializationInfoEnumerator enumerator = info.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				string name = enumerator.Name;
-				if (name == "DataTable.RemotingFormat")
+				if (enumerator.Name == "DataTable.RemotingFormat")
 				{
 					serializationFormat = (SerializationFormat)enumerator.Value;
 				}
@@ -188,7 +187,7 @@ namespace System.Data
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DefaultValue", i), this.Columns[i].DefaultValue);
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.ReadOnly", i), this.Columns[i].ReadOnly);
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.MaxLength", i), this.Columns[i].MaxLength);
-				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DataType", i), this.Columns[i].DataType);
+				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DataType_AssemblyQualifiedName", i), this.Columns[i].DataType.AssemblyQualifiedName);
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.XmlDataType", i), this.Columns[i].XmlDataType);
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.SimpleType", i), this.Columns[i].SimpleType);
 				info.AddValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DateTimeMode", i), this.Columns[i].DateTimeMode);
@@ -231,7 +230,8 @@ namespace System.Data
 				dataColumn.ColumnName = info.GetString(string.Format(invariantCulture, "DataTable.DataColumn_{0}.ColumnName", i));
 				dataColumn._columnUri = info.GetString(string.Format(invariantCulture, "DataTable.DataColumn_{0}.Namespace", i));
 				dataColumn.Prefix = info.GetString(string.Format(invariantCulture, "DataTable.DataColumn_{0}.Prefix", i));
-				dataColumn.DataType = (Type)info.GetValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DataType", i), typeof(Type));
+				string text = (string)info.GetValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.DataType_AssemblyQualifiedName", i), typeof(string));
+				dataColumn.DataType = Type.GetType(text, true);
 				dataColumn.XmlDataType = (string)info.GetValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.XmlDataType", i), typeof(string));
 				dataColumn.SimpleType = (SimpleType)info.GetValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.SimpleType", i), typeof(SimpleType));
 				dataColumn.ColumnMapping = (MappingType)info.GetValue(string.Format(invariantCulture, "DataTable.DataColumn_{0}.ColumnMapping", i), typeof(MappingType));
@@ -850,8 +850,8 @@ namespace System.Data
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DataRelationCollection ChildRelations
 		{
 			get
@@ -906,8 +906,8 @@ namespace System.Data
 			this.Constraints.Clear();
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DataSet DataSet
 		{
 			get
@@ -1245,8 +1245,8 @@ namespace System.Data
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public DataRelationCollection ParentRelations
 		{
 			get
@@ -4512,9 +4512,7 @@ namespace System.Data
 				dataRowAction = DataRowAction.ChangeCurrentAndOriginal;
 				break;
 			case LoadOption.PreserveChanges:
-			{
-				DataRowState dataRowState = dataRow.RowState;
-				if (dataRowState == DataRowState.Unchanged)
+				if (dataRow.RowState == DataRowState.Unchanged)
 				{
 					dataRowAction = DataRowAction.ChangeCurrentAndOriginal;
 				}
@@ -4523,13 +4521,12 @@ namespace System.Data
 					dataRowAction = DataRowAction.ChangeOriginal;
 				}
 				break;
-			}
 			case LoadOption.Upsert:
 			{
-				DataRowState dataRowState = dataRow.RowState;
-				if (dataRowState != DataRowState.Unchanged)
+				DataRowState rowState = dataRow.RowState;
+				if (rowState != DataRowState.Unchanged)
 				{
-					if (dataRowState == DataRowState.Deleted)
+					if (rowState == DataRowState.Deleted)
 					{
 						break;
 					}
@@ -5043,10 +5040,12 @@ namespace System.Data
 
 		internal XmlReadMode ReadXml(XmlReader reader, bool denyResolving)
 		{
+			IDisposable disposable = null;
 			long num = DataCommonEventSource.Log.EnterScope<int, bool>("<ds.DataTable.ReadXml|INFO> {0}, denyResolving={1}", this.ObjectID, denyResolving);
 			XmlReadMode xmlReadMode2;
 			try
 			{
+				disposable = TypeLimiter.EnterRestrictedScope(this);
 				DataTable.RowDiffIdUsageSection rowDiffIdUsageSection = default(DataTable.RowDiffIdUsageSection);
 				try
 				{
@@ -5238,6 +5237,10 @@ namespace System.Data
 			}
 			finally
 			{
+				if (disposable != null)
+				{
+					disposable.Dispose();
+				}
 				DataCommonEventSource.Log.ExitScope(num);
 			}
 			return xmlReadMode2;
@@ -5245,10 +5248,12 @@ namespace System.Data
 
 		internal XmlReadMode ReadXml(XmlReader reader, XmlReadMode mode, bool denyResolving)
 		{
+			IDisposable disposable = null;
 			DataTable.RowDiffIdUsageSection rowDiffIdUsageSection = default(DataTable.RowDiffIdUsageSection);
 			XmlReadMode xmlReadMode2;
 			try
 			{
+				disposable = TypeLimiter.EnterRestrictedScope(this);
 				bool flag = false;
 				bool flag2 = false;
 				bool flag3 = false;
@@ -5500,6 +5505,10 @@ namespace System.Data
 			}
 			finally
 			{
+				if (disposable != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			return xmlReadMode2;
 		}

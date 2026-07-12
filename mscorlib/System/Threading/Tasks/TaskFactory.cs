@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
-using System.Security.Permissions;
+using Internal.Runtime.Augments;
 
 namespace System.Threading.Tasks
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class TaskFactory<TResult>
 	{
 		private TaskScheduler DefaultScheduler
@@ -95,66 +92,50 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<TResult> function)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<TResult> function, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<TResult> function, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<TResult> function, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler, ref stackCrawlMark);
+			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<object, TResult> function, object state)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<object, TResult> function, object state, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, cancellationToken, this.m_defaultCreationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<object, TResult> function, object state, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
 			Task internalCurrent = Task.InternalCurrent;
-			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent), ref stackCrawlMark);
+			return Task<TResult>.StartNew(internalCurrent, function, state, this.m_defaultCancellationToken, creationOptions, InternalTaskOptions.None, this.GetDefaultScheduler(internalCurrent));
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> StartNew(Func<object, TResult> function, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, state, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler, ref stackCrawlMark);
+			return Task<TResult>.StartNew(Task.InternalCurrentIfAttached(creationOptions), function, state, cancellationToken, creationOptions, InternalTaskOptions.None, scheduler);
 		}
 
 		private static void FromAsyncCoreLogic(IAsyncResult iar, Func<IAsyncResult, TResult> endFunction, Action<IAsyncResult> endAction, Task<TResult> promise, bool requiresSynchronization)
@@ -187,21 +168,15 @@ namespace System.Threading.Tasks
 				}
 				else if (ex != null)
 				{
-					if (promise.TrySetException(ex) && ex is ThreadAbortException)
-					{
-						promise.m_contingentProperties.m_exceptionsHolder.MarkAsHandled(false);
-					}
+					promise.TrySetException(ex);
 				}
 				else
 				{
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, promise.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, promise, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(promise.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(promise);
 					if (requiresSynchronization)
 					{
 						promise.TrySetResult(tresult);
@@ -214,28 +189,22 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, this.m_defaultCreationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, this.m_defaultCreationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod, TaskCreationOptions creationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> FromAsync(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endMethod, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.FromAsyncImpl(asyncResult, endMethod, null, creationOptions, scheduler);
 		}
 
-		internal static Task<TResult> FromAsyncImpl(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endFunction, Action<IAsyncResult> endAction, TaskCreationOptions creationOptions, TaskScheduler scheduler, ref StackCrawlMark stackMark)
+		internal static Task<TResult> FromAsyncImpl(IAsyncResult asyncResult, Func<IAsyncResult, TResult> endFunction, Action<IAsyncResult> endAction, TaskCreationOptions creationOptions, TaskScheduler scheduler)
 		{
 			if (asyncResult == null)
 			{
@@ -251,37 +220,21 @@ namespace System.Threading.Tasks
 			}
 			TaskFactory.CheckFromAsyncOptions(creationOptions, false);
 			Task<TResult> promise = new Task<TResult>(null, creationOptions);
-			if (AsyncCausalityTracer.LoggingOn)
-			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, promise.Id, "TaskFactory.FromAsync", 0UL);
-			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(promise);
-			}
-			Task t = new Task(delegate
+			Task t = new Task(new Action<object>(delegate
 			{
 				TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, true);
-			}, null, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.None, null, ref stackMark);
-			if (AsyncCausalityTracer.LoggingOn)
-			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Verbose, t.Id, "TaskFactory.FromAsync Callback", 0UL);
-			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(t);
-			}
+			}), null, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.None, null);
 			if (asyncResult.IsCompleted)
 			{
 				try
 				{
 					t.InternalRunSynchronously(scheduler, false);
-					goto IL_0154;
+					goto IL_00EE;
 				}
 				catch (Exception ex)
 				{
 					promise.TrySetException(ex);
-					goto IL_0154;
+					goto IL_00EE;
 				}
 			}
 			ThreadPool.RegisterWaitForSingleObject(asyncResult.AsyncWaitHandle, delegate
@@ -295,7 +248,7 @@ namespace System.Threading.Tasks
 					promise.TrySetException(ex2);
 				}
 			}, null, -1, true);
-			IL_0154:
+			IL_00EE:
 			return promise;
 		}
 
@@ -321,49 +274,32 @@ namespace System.Threading.Tasks
 			}
 			TaskFactory.CheckFromAsyncOptions(creationOptions, true);
 			Task<TResult> promise = new Task<TResult>(state, creationOptions);
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, promise.Id, "TaskFactory.FromAsync: " + beginMethod.Method.Name, 0UL);
+				DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, promise, "TaskFactory.FromAsync: " + ((beginMethod != null) ? beginMethod.ToString() : null), 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(promise);
-			}
+			DebuggerSupport.AddToActiveTasks(promise);
 			try
 			{
-				if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+				IAsyncResult asyncResult = beginMethod(delegate(IAsyncResult iar)
 				{
-					AtomicBoolean invoked = new AtomicBoolean();
-					IAsyncResult asyncResult = beginMethod(delegate(IAsyncResult iar)
-					{
-						if (invoked.TryRelaxedSet())
-						{
-							TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-						}
-					}, state);
-					if (asyncResult != null && asyncResult.CompletedSynchronously && invoked.TryRelaxedSet())
-					{
-						TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
-					}
-				}
-				else
-				{
-					beginMethod(delegate(IAsyncResult iar)
+					if (!iar.CompletedSynchronously)
 					{
 						TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-					}, state);
+					}
+				}, state);
+				if (asyncResult.CompletedSynchronously)
+				{
+					TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
 				}
 			}
 			catch
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, promise.Id, AsyncCausalityStatus.Error);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, promise, AsyncStatus.Error);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(promise.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(promise);
 				promise.TrySetResult(default(TResult));
 				throw;
 			}
@@ -392,49 +328,32 @@ namespace System.Threading.Tasks
 			}
 			TaskFactory.CheckFromAsyncOptions(creationOptions, true);
 			Task<TResult> promise = new Task<TResult>(state, creationOptions);
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, promise.Id, "TaskFactory.FromAsync: " + beginMethod.Method.Name, 0UL);
+				DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, promise, "TaskFactory.FromAsync: " + ((beginMethod != null) ? beginMethod.ToString() : null), 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(promise);
-			}
+			DebuggerSupport.AddToActiveTasks(promise);
 			try
 			{
-				if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+				IAsyncResult asyncResult = beginMethod(arg1, delegate(IAsyncResult iar)
 				{
-					AtomicBoolean invoked = new AtomicBoolean();
-					IAsyncResult asyncResult = beginMethod(arg1, delegate(IAsyncResult iar)
-					{
-						if (invoked.TryRelaxedSet())
-						{
-							TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-						}
-					}, state);
-					if (asyncResult != null && asyncResult.CompletedSynchronously && invoked.TryRelaxedSet())
-					{
-						TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
-					}
-				}
-				else
-				{
-					beginMethod(arg1, delegate(IAsyncResult iar)
+					if (!iar.CompletedSynchronously)
 					{
 						TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-					}, state);
+					}
+				}, state);
+				if (asyncResult.CompletedSynchronously)
+				{
+					TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
 				}
 			}
 			catch
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, promise.Id, AsyncCausalityStatus.Error);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, promise, AsyncStatus.Error);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(promise.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(promise);
 				promise.TrySetResult(default(TResult));
 				throw;
 			}
@@ -463,49 +382,32 @@ namespace System.Threading.Tasks
 			}
 			TaskFactory.CheckFromAsyncOptions(creationOptions, true);
 			Task<TResult> promise = new Task<TResult>(state, creationOptions);
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, promise.Id, "TaskFactory.FromAsync: " + beginMethod.Method.Name, 0UL);
+				DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, promise, "TaskFactory.FromAsync: " + ((beginMethod != null) ? beginMethod.ToString() : null), 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(promise);
-			}
+			DebuggerSupport.AddToActiveTasks(promise);
 			try
 			{
-				if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+				IAsyncResult asyncResult = beginMethod(arg1, arg2, delegate(IAsyncResult iar)
 				{
-					AtomicBoolean invoked = new AtomicBoolean();
-					IAsyncResult asyncResult = beginMethod(arg1, arg2, delegate(IAsyncResult iar)
-					{
-						if (invoked.TryRelaxedSet())
-						{
-							TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-						}
-					}, state);
-					if (asyncResult != null && asyncResult.CompletedSynchronously && invoked.TryRelaxedSet())
-					{
-						TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
-					}
-				}
-				else
-				{
-					beginMethod(arg1, arg2, delegate(IAsyncResult iar)
+					if (!iar.CompletedSynchronously)
 					{
 						TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-					}, state);
+					}
+				}, state);
+				if (asyncResult.CompletedSynchronously)
+				{
+					TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
 				}
 			}
 			catch
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, promise.Id, AsyncCausalityStatus.Error);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, promise, AsyncStatus.Error);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(promise.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(promise);
 				promise.TrySetResult(default(TResult));
 				throw;
 			}
@@ -534,49 +436,32 @@ namespace System.Threading.Tasks
 			}
 			TaskFactory.CheckFromAsyncOptions(creationOptions, true);
 			Task<TResult> promise = new Task<TResult>(state, creationOptions);
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, promise.Id, "TaskFactory.FromAsync: " + beginMethod.Method.Name, 0UL);
+				DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, promise, "TaskFactory.FromAsync: " + ((beginMethod != null) ? beginMethod.ToString() : null), 0UL);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.AddToActiveTasks(promise);
-			}
+			DebuggerSupport.AddToActiveTasks(promise);
 			try
 			{
-				if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+				IAsyncResult asyncResult = beginMethod(arg1, arg2, arg3, delegate(IAsyncResult iar)
 				{
-					AtomicBoolean invoked = new AtomicBoolean();
-					IAsyncResult asyncResult = beginMethod(arg1, arg2, arg3, delegate(IAsyncResult iar)
-					{
-						if (invoked.TryRelaxedSet())
-						{
-							TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-						}
-					}, state);
-					if (asyncResult != null && asyncResult.CompletedSynchronously && invoked.TryRelaxedSet())
-					{
-						TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
-					}
-				}
-				else
-				{
-					beginMethod(arg1, arg2, arg3, delegate(IAsyncResult iar)
+					if (!iar.CompletedSynchronously)
 					{
 						TaskFactory<TResult>.FromAsyncCoreLogic(iar, endFunction, endAction, promise, true);
-					}, state);
+					}
+				}, state);
+				if (asyncResult.CompletedSynchronously)
+				{
+					TaskFactory<TResult>.FromAsyncCoreLogic(asyncResult, endFunction, endAction, promise, false);
 				}
 			}
 			catch
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, promise.Id, AsyncCausalityStatus.Error);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, promise, AsyncStatus.Error);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(promise.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(promise);
 				promise.TrySetResult(default(TResult));
 				throw;
 			}
@@ -587,7 +472,7 @@ namespace System.Threading.Tasks
 		{
 			TaskFactory<TResult>.FromAsyncTrimPromise<TInstance> fromAsyncTrimPromise = new TaskFactory<TResult>.FromAsyncTrimPromise<TInstance>(thisRef, endMethod);
 			IAsyncResult asyncResult = beginMethod(thisRef, args, TaskFactory<TResult>.FromAsyncTrimPromise<TInstance>.s_completeFromAsyncResult, fromAsyncTrimPromise);
-			if (asyncResult != null && asyncResult.CompletedSynchronously)
+			if (asyncResult.CompletedSynchronously)
 			{
 				fromAsyncTrimPromise.Complete(thisRef, endMethod, asyncResult, false);
 			}
@@ -602,95 +487,79 @@ namespace System.Threading.Tasks
 			return new Task<TResult>(true, default(TResult), taskCreationOptions, ct);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll(Task[] tasks, Func<Task[], TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll(Task[] tasks, Func<Task[], TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll(Task[] tasks, Func<Task[], TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll(Task[] tasks, Func<Task[], TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAll<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAllImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		internal static Task<TResult> ContinueWhenAllImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, Action<Task<TAntecedentResult>[]> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler, ref StackCrawlMark stackMark)
+		internal static Task<TResult> ContinueWhenAllImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>[], TResult> continuationFunction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
 		{
 			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
 			if (tasks == null)
@@ -706,15 +575,29 @@ namespace System.Threading.Tasks
 			{
 				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
 			}
-			Task<Task<TAntecedentResult>[]> task = TaskFactory.CommonCWAllLogic<TAntecedentResult>(array);
-			if (continuationFunction != null)
-			{
-				return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAllFuncDelegate, continuationFunction, scheduler, cancellationToken, continuationOptions, ref stackMark);
-			}
-			return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAllActionDelegate, continuationAction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+			return TaskFactory.CommonCWAllLogic<TAntecedentResult>(array).ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAllFuncDelegate, continuationFunction, scheduler, cancellationToken, continuationOptions);
 		}
 
-		internal static Task<TResult> ContinueWhenAllImpl(Task[] tasks, Func<Task[], TResult> continuationFunction, Action<Task[]> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler, ref StackCrawlMark stackMark)
+		internal static Task<TResult> ContinueWhenAllImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>[]> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
+		{
+			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
+			if (tasks == null)
+			{
+				throw new ArgumentNullException("tasks");
+			}
+			if (scheduler == null)
+			{
+				throw new ArgumentNullException("scheduler");
+			}
+			Task<TAntecedentResult>[] array = TaskFactory.CheckMultiContinuationTasksAndCopy<TAntecedentResult>(tasks);
+			if (cancellationToken.IsCancellationRequested && (continuationOptions & TaskContinuationOptions.LazyCancellation) == TaskContinuationOptions.None)
+			{
+				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
+			}
+			return TaskFactory.CommonCWAllLogic<TAntecedentResult>(array).ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAllActionDelegate, continuationAction, scheduler, cancellationToken, continuationOptions);
+		}
+
+		internal static Task<TResult> ContinueWhenAllImpl(Task[] tasks, Func<Task[], TResult> continuationFunction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
 		{
 			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
 			if (tasks == null)
@@ -730,112 +613,110 @@ namespace System.Threading.Tasks
 			{
 				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
 			}
-			Task<Task[]> task = TaskFactory.CommonCWAllLogic(array);
-			if (continuationFunction != null)
+			return TaskFactory.CommonCWAllLogic(array).ContinueWith<TResult>(delegate(Task<Task[]> completedTasks, object state)
 			{
-				return task.ContinueWith<TResult>(delegate(Task<Task[]> completedTasks, object state)
-				{
-					completedTasks.NotifyDebuggerOfWaitCompletionIfNecessary();
-					return ((Func<Task[], TResult>)state)(completedTasks.Result);
-				}, continuationFunction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+				completedTasks.NotifyDebuggerOfWaitCompletionIfNecessary();
+				return ((Func<Task[], TResult>)state)(completedTasks.Result);
+			}, continuationFunction, scheduler, cancellationToken, continuationOptions);
+		}
+
+		internal static Task<TResult> ContinueWhenAllImpl(Task[] tasks, Action<Task[]> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
+		{
+			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
+			if (tasks == null)
+			{
+				throw new ArgumentNullException("tasks");
 			}
-			return task.ContinueWith<TResult>(delegate(Task<Task[]> completedTasks, object state)
+			if (scheduler == null)
+			{
+				throw new ArgumentNullException("scheduler");
+			}
+			Task[] array = TaskFactory.CheckMultiContinuationTasksAndCopy(tasks);
+			if (cancellationToken.IsCancellationRequested && (continuationOptions & TaskContinuationOptions.LazyCancellation) == TaskContinuationOptions.None)
+			{
+				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
+			}
+			return TaskFactory.CommonCWAllLogic(array).ContinueWith<TResult>(delegate(Task<Task[]> completedTasks, object state)
 			{
 				completedTasks.NotifyDebuggerOfWaitCompletionIfNecessary();
 				((Action<Task[]>)state)(completedTasks.Result);
 				return default(TResult);
-			}, continuationAction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+			}, continuationAction, scheduler, cancellationToken, continuationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny(Task[] tasks, Func<Task, TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny(Task[] tasks, Func<Task, TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny(Task[] tasks, Func<Task, TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny(Task[] tasks, Func<Task, TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, CancellationToken cancellationToken)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, this.m_defaultContinuationOptions, cancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, this.m_defaultCancellationToken, this.DefaultScheduler);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWhenAny<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
 			if (continuationFunction == null)
 			{
 				throw new ArgumentNullException("continuationFunction");
 			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, null, continuationOptions, cancellationToken, scheduler, ref stackCrawlMark);
+			return TaskFactory<TResult>.ContinueWhenAnyImpl<TAntecedentResult>(tasks, continuationFunction, continuationOptions, cancellationToken, scheduler);
 		}
 
-		internal static Task<TResult> ContinueWhenAnyImpl(Task[] tasks, Func<Task, TResult> continuationFunction, Action<Task> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler, ref StackCrawlMark stackMark)
+		internal static Task<TResult> ContinueWhenAnyImpl(Task[] tasks, Action<Task> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
 		{
 			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
 			if (tasks == null)
@@ -844,7 +725,7 @@ namespace System.Threading.Tasks
 			}
 			if (tasks.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
 			if (scheduler == null)
 			{
@@ -854,19 +735,15 @@ namespace System.Threading.Tasks
 			if (cancellationToken.IsCancellationRequested && (continuationOptions & TaskContinuationOptions.LazyCancellation) == TaskContinuationOptions.None)
 			{
 				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
-			}
-			if (continuationFunction != null)
-			{
-				return task.ContinueWith<TResult>((Task<Task> completedTask, object state) => ((Func<Task, TResult>)state)(completedTask.Result), continuationFunction, scheduler, cancellationToken, continuationOptions, ref stackMark);
 			}
 			return task.ContinueWith<TResult>(delegate(Task<Task> completedTask, object state)
 			{
 				((Action<Task>)state)(completedTask.Result);
 				return default(TResult);
-			}, continuationAction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+			}, continuationAction, scheduler, cancellationToken, continuationOptions);
 		}
 
-		internal static Task<TResult> ContinueWhenAnyImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, Action<Task<TAntecedentResult>> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler, ref StackCrawlMark stackMark)
+		internal static Task<TResult> ContinueWhenAnyImpl(Task[] tasks, Func<Task, TResult> continuationFunction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
 		{
 			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
 			if (tasks == null)
@@ -875,7 +752,7 @@ namespace System.Threading.Tasks
 			}
 			if (tasks.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
 			if (scheduler == null)
 			{
@@ -886,11 +763,53 @@ namespace System.Threading.Tasks
 			{
 				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
 			}
-			if (continuationFunction != null)
+			return task.ContinueWith<TResult>((Task<Task> completedTask, object state) => ((Func<Task, TResult>)state)(completedTask.Result), continuationFunction, scheduler, cancellationToken, continuationOptions);
+		}
+
+		internal static Task<TResult> ContinueWhenAnyImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Func<Task<TAntecedentResult>, TResult> continuationFunction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
+		{
+			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
+			if (tasks == null)
 			{
-				return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAnyFuncDelegate, continuationFunction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+				throw new ArgumentNullException("tasks");
 			}
-			return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAnyActionDelegate, continuationAction, scheduler, cancellationToken, continuationOptions, ref stackMark);
+			if (tasks.Length == 0)
+			{
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
+			}
+			if (scheduler == null)
+			{
+				throw new ArgumentNullException("scheduler");
+			}
+			Task<Task> task = TaskFactory.CommonCWAnyLogic(tasks);
+			if (cancellationToken.IsCancellationRequested && (continuationOptions & TaskContinuationOptions.LazyCancellation) == TaskContinuationOptions.None)
+			{
+				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
+			}
+			return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAnyFuncDelegate, continuationFunction, scheduler, cancellationToken, continuationOptions);
+		}
+
+		internal static Task<TResult> ContinueWhenAnyImpl<TAntecedentResult>(Task<TAntecedentResult>[] tasks, Action<Task<TAntecedentResult>> continuationAction, TaskContinuationOptions continuationOptions, CancellationToken cancellationToken, TaskScheduler scheduler)
+		{
+			TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
+			if (tasks == null)
+			{
+				throw new ArgumentNullException("tasks");
+			}
+			if (tasks.Length == 0)
+			{
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
+			}
+			if (scheduler == null)
+			{
+				throw new ArgumentNullException("scheduler");
+			}
+			Task<Task> task = TaskFactory.CommonCWAnyLogic(tasks);
+			if (cancellationToken.IsCancellationRequested && (continuationOptions & TaskContinuationOptions.LazyCancellation) == TaskContinuationOptions.None)
+			{
+				return TaskFactory<TResult>.CreateCanceledTask(continuationOptions, cancellationToken);
+			}
+			return task.ContinueWith<TResult>(GenericDelegateCache<TAntecedentResult, TResult>.CWAnyActionDelegate, continuationAction, scheduler, cancellationToken, continuationOptions);
 		}
 
 		private CancellationToken m_defaultCancellationToken;
@@ -918,7 +837,7 @@ namespace System.Threading.Tasks
 				TaskFactory<TResult>.FromAsyncTrimPromise<TInstance> fromAsyncTrimPromise = asyncResult.AsyncState as TaskFactory<TResult>.FromAsyncTrimPromise<TInstance>;
 				if (fromAsyncTrimPromise == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or the End method was called multiple times with the same IAsyncResult."), "asyncResult");
+					throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or the End method was called multiple times with the same IAsyncResult.", "asyncResult");
 				}
 				TInstance thisRef = fromAsyncTrimPromise.m_thisRef;
 				Func<TInstance, IAsyncResult, TResult> endMethod = fromAsyncTrimPromise.m_endMethod;
@@ -926,7 +845,7 @@ namespace System.Threading.Tasks
 				fromAsyncTrimPromise.m_endMethod = null;
 				if (endMethod == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("Either the IAsyncResult object did not come from the corresponding async method on this type, or the End method was called multiple times with the same IAsyncResult."), "asyncResult");
+					throw new ArgumentException("Either the IAsyncResult object did not come from the corresponding async method on this type, or the End method was called multiple times with the same IAsyncResult.", "asyncResult");
 				}
 				if (!asyncResult.CompletedSynchronously)
 				{

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class StringConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -20,7 +18,7 @@ namespace System.ComponentModel
 			}
 			if (value == null)
 			{
-				return "";
+				return string.Empty;
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

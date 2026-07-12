@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
@@ -13,6 +14,19 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[Obsolete("CircleCollider2D.center has been deprecated. Use CircleCollider2D.offset instead (UnityUpgradable) -> offset", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public Vector2 center
+		{
+			get
+			{
+				return Vector2.zero;
+			}
+			set
+			{
+			}
 		}
 	}
 }

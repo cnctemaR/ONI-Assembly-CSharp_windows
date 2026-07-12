@@ -14,7 +14,7 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("boundary");
 			}
-			this.boundaryBytes = Encoding.ASCII.GetBytes(boundary);
+			this._boundaryBytes = Encoding.ASCII.GetBytes(boundary);
 		}
 
 		internal override void WriteHeaders(NameValueCollection headers, bool allowUnicode)
@@ -41,53 +41,53 @@ namespace System.Net.Mime
 		internal void EndClose(IAsyncResult result)
 		{
 			MultiAsyncResult.End(result);
-			this.stream.Close();
+			this._stream.Close();
 		}
 
 		internal override void Close()
 		{
 			this.Close(null);
-			this.stream.Close();
+			this._stream.Close();
 		}
 
 		private void Close(MultiAsyncResult multiResult)
 		{
-			this.bufferBuilder.Append(BaseWriter.CRLF);
-			this.bufferBuilder.Append(MimeWriter.DASHDASH);
-			this.bufferBuilder.Append(this.boundaryBytes);
-			this.bufferBuilder.Append(MimeWriter.DASHDASH);
-			this.bufferBuilder.Append(BaseWriter.CRLF);
+			this._bufferBuilder.Append(BaseWriter.s_crlf);
+			this._bufferBuilder.Append(MimeWriter.s_DASHDASH);
+			this._bufferBuilder.Append(this._boundaryBytes);
+			this._bufferBuilder.Append(MimeWriter.s_DASHDASH);
+			this._bufferBuilder.Append(BaseWriter.s_crlf);
 			base.Flush(multiResult);
 		}
 
 		protected override void OnClose(object sender, EventArgs args)
 		{
-			if (this.contentStream != sender)
+			if (this._contentStream != sender)
 			{
 				return;
 			}
-			this.contentStream.Flush();
-			this.contentStream = null;
-			this.writeBoundary = true;
-			this.isInContent = false;
+			this._contentStream.Flush();
+			this._contentStream = null;
+			this._writeBoundary = true;
+			this._isInContent = false;
 		}
 
 		protected override void CheckBoundary()
 		{
-			if (this.writeBoundary)
+			if (this._writeBoundary)
 			{
-				this.bufferBuilder.Append(BaseWriter.CRLF);
-				this.bufferBuilder.Append(MimeWriter.DASHDASH);
-				this.bufferBuilder.Append(this.boundaryBytes);
-				this.bufferBuilder.Append(BaseWriter.CRLF);
-				this.writeBoundary = false;
+				this._bufferBuilder.Append(BaseWriter.s_crlf);
+				this._bufferBuilder.Append(MimeWriter.s_DASHDASH);
+				this._bufferBuilder.Append(this._boundaryBytes);
+				this._bufferBuilder.Append(BaseWriter.s_crlf);
+				this._writeBoundary = false;
 			}
 		}
 
-		private static byte[] DASHDASH = new byte[] { 45, 45 };
+		private static byte[] s_DASHDASH = new byte[] { 45, 45 };
 
-		private byte[] boundaryBytes;
+		private byte[] _boundaryBytes;
 
-		private bool writeBoundary = true;
+		private bool _writeBoundary = true;
 	}
 }

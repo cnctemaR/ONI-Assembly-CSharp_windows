@@ -283,7 +283,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			NameObjectCollectionBase.NameObjectEntry nameObjectEntry = new NameObjectCollectionBase.NameObjectEntry(name, value);
 			if (name != null)
@@ -305,7 +305,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			if (name != null)
 			{
@@ -336,7 +336,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			string text = this.BaseGetKey(index);
 			if (text != null)
@@ -355,7 +355,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			this.Reset();
 		}
@@ -374,7 +374,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			NameObjectCollectionBase.NameObjectEntry nameObjectEntry = this.FindEntry(name);
 			if (nameObjectEntry != null)
@@ -400,7 +400,7 @@ namespace System.Collections.Specialized
 		{
 			if (this._readOnly)
 			{
-				throw new NotSupportedException(global::SR.GetString("Collection is read-only."));
+				throw new NotSupportedException(SR.GetString("Collection is read-only."));
 			}
 			((NameObjectCollectionBase.NameObjectEntry)this._entriesArray[index]).Value = value;
 			this._version++;
@@ -427,15 +427,15 @@ namespace System.Collections.Specialized
 			}
 			if (array.Rank != 1)
 			{
-				throw new ArgumentException(global::SR.GetString("Multi dimension array is not supported on this operation."));
+				throw new ArgumentException(SR.GetString("Multi dimension array is not supported on this operation."));
 			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Index {0} is out of range.", new object[] { index.ToString(CultureInfo.CurrentCulture) }));
+				throw new ArgumentOutOfRangeException("index", SR.GetString("Index {0} is out of range.", new object[] { index.ToString(CultureInfo.CurrentCulture) }));
 			}
 			if (array.Length - index < this._entriesArray.Count)
 			{
-				throw new ArgumentException(global::SR.GetString("Insufficient space in the target location to copy the information."));
+				throw new ArgumentException(SR.GetString("Insufficient space in the target location to copy the information."));
 			}
 			foreach (object obj in this)
 			{
@@ -576,7 +576,7 @@ namespace System.Collections.Specialized
 			{
 				if (this._version != this._coll._version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 				}
 				if (this._pos < this._coll.Count - 1)
 				{
@@ -591,7 +591,7 @@ namespace System.Collections.Specialized
 			{
 				if (this._version != this._coll._version)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					throw new InvalidOperationException(SR.GetString("Collection was modified; enumeration operation may not execute."));
 				}
 				this._pos = -1;
 			}
@@ -604,7 +604,7 @@ namespace System.Collections.Specialized
 					{
 						return this._coll.BaseGetKey(this._pos);
 					}
-					throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+					throw new InvalidOperationException(SR.GetString("Enumeration has either not started or has already finished."));
 				}
 			}
 
@@ -657,15 +657,15 @@ namespace System.Collections.Specialized
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException(global::SR.GetString("Multi dimension array is not supported on this operation."));
+					throw new ArgumentException(SR.GetString("Multi dimension array is not supported on this operation."));
 				}
 				if (index < 0)
 				{
-					throw new ArgumentOutOfRangeException("index", global::SR.GetString("Index {0} is out of range.", new object[] { index.ToString(CultureInfo.CurrentCulture) }));
+					throw new ArgumentOutOfRangeException("index", SR.GetString("Index {0} is out of range.", new object[] { index.ToString(CultureInfo.CurrentCulture) }));
 				}
 				if (array.Length - index < this._coll.Count)
 				{
-					throw new ArgumentException(global::SR.GetString("Insufficient space in the target location to copy the information."));
+					throw new ArgumentException(SR.GetString("Insufficient space in the target location to copy the information."));
 				}
 				foreach (object obj in this)
 				{

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class SteamEngineClusterConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
+	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.EXPANSION1;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -34,7 +34,7 @@ public class SteamEngineClusterConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(2, 3);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.GeneratorWattageRating = 600f;
-		buildingDef.GeneratorBaseCapacity = 20000f;
+		buildingDef.GeneratorBaseCapacity = buildingDef.GeneratorWattageRating;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.RequiresPowerOutput = false;
 		buildingDef.CanMove = true;

@@ -631,7 +631,7 @@ namespace System.Resources
 				{
 					throw new BadImageFormatException(Environment.GetResourceString("Corrupt .resources file.  The specified data length '{0}' is not a valid position in the stream.", new object[] { num2 }));
 				}
-				return new UnmanagedMemoryStream(this._ums.PositionPointer, (long)num2, (long)num2, FileAccess.Read, true);
+				return new UnmanagedMemoryStream(this._ums.PositionPointer, (long)num2, (long)num2, FileAccess.Read);
 			}
 			}
 			if (typeCode < ResourceTypeCode.StartOfUserTypes)

@@ -7,8 +7,8 @@ namespace System.Diagnostics.Contracts.Internal
 	[Obsolete("Use the ContractHelper class in the System.Runtime.CompilerServices namespace instead.")]
 	public static class ContractHelper
 	{
-		[DebuggerNonUserCode]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[DebuggerNonUserCode]
 		public static string RaiseContractFailedEvent(ContractFailureKind failureKind, string userMessage, string conditionText, Exception innerException)
 		{
 			return ContractHelper.RaiseContractFailedEvent(failureKind, userMessage, conditionText, innerException);

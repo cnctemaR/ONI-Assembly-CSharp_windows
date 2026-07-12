@@ -43,7 +43,7 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		}
 		GameObject gameObject2 = gameObject;
 		bool flag = SoundEvent.ObjectIsSelectedAndVisible(gameObject2);
-		Vector3 vector3 = gameObject2.GetComponent<Transform>().GetPosition();
+		Vector3 vector3 = gameObject2.transform.GetPosition();
 		vector3.z = 0f;
 		float num = 1f;
 		if (flag)

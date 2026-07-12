@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Text
 {
@@ -7,46 +6,46 @@ namespace System.Text
 	{
 		public DecoderReplacementFallbackBuffer(DecoderReplacementFallback fallback)
 		{
-			this.strDefault = fallback.DefaultString;
+			this._strDefault = fallback.DefaultString;
 		}
 
 		public override bool Fallback(byte[] bytesUnknown, int index)
 		{
-			if (this.fallbackCount >= 1)
+			if (this._fallbackCount >= 1)
 			{
 				base.ThrowLastBytesRecursive(bytesUnknown);
 			}
-			if (this.strDefault.Length == 0)
+			if (this._strDefault.Length == 0)
 			{
 				return false;
 			}
-			this.fallbackCount = this.strDefault.Length;
-			this.fallbackIndex = -1;
+			this._fallbackCount = this._strDefault.Length;
+			this._fallbackIndex = -1;
 			return true;
 		}
 
 		public override char GetNextChar()
 		{
-			this.fallbackCount--;
-			this.fallbackIndex++;
-			if (this.fallbackCount < 0)
+			this._fallbackCount--;
+			this._fallbackIndex++;
+			if (this._fallbackCount < 0)
 			{
 				return '\0';
 			}
-			if (this.fallbackCount == 2147483647)
+			if (this._fallbackCount == 2147483647)
 			{
-				this.fallbackCount = -1;
+				this._fallbackCount = -1;
 				return '\0';
 			}
-			return this.strDefault[this.fallbackIndex];
+			return this._strDefault[this._fallbackIndex];
 		}
 
 		public override bool MovePrevious()
 		{
-			if (this.fallbackCount >= -1 && this.fallbackIndex >= 0)
+			if (this._fallbackCount >= -1 && this._fallbackIndex >= 0)
 			{
-				this.fallbackIndex--;
-				this.fallbackCount++;
+				this._fallbackIndex--;
+				this._fallbackCount++;
 				return true;
 			}
 			return false;
@@ -56,32 +55,30 @@ namespace System.Text
 		{
 			get
 			{
-				if (this.fallbackCount >= 0)
+				if (this._fallbackCount >= 0)
 				{
-					return this.fallbackCount;
+					return this._fallbackCount;
 				}
 				return 0;
 			}
 		}
 
-		[SecuritySafeCritical]
 		public override void Reset()
 		{
-			this.fallbackCount = -1;
-			this.fallbackIndex = -1;
+			this._fallbackCount = -1;
+			this._fallbackIndex = -1;
 			this.byteStart = null;
 		}
 
-		[SecurityCritical]
 		internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
 		{
-			return this.strDefault.Length;
+			return this._strDefault.Length;
 		}
 
-		private string strDefault;
+		private string _strDefault;
 
-		private int fallbackCount = -1;
+		private int _fallbackCount = -1;
 
-		private int fallbackIndex = -1;
+		private int _fallbackIndex = -1;
 	}
 }

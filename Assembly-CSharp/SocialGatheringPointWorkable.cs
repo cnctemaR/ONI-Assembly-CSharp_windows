@@ -33,7 +33,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		return base.GetFacingTarget();
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (!worker.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Recreation))
 		{
@@ -46,7 +46,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		return false;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnStartWork(WorkerBase worker)
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<KPrefabID>().AddTag(GameTags.AlwaysConverse, false);
@@ -55,7 +55,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		this.timesConversed = 0;
 	}
 
-	protected override void OnStopWork(Worker worker)
+	protected override void OnStopWork(WorkerBase worker)
 	{
 		base.OnStopWork(worker);
 		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AlwaysConverse);
@@ -63,7 +63,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		worker.Unsubscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override void OnCompleteWork(WorkerBase worker)
 	{
 		if (this.timesConversed > 0)
 		{
@@ -103,7 +103,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	{
 	}
 
-	public bool GetWorkerPriority(Worker worker, out int priority)
+	public bool GetWorkerPriority(WorkerBase worker, out int priority)
 	{
 		priority = this.basePriority;
 		if (!string.IsNullOrEmpty(this.specificEffect) && worker.GetComponent<Effects>().HasEffect(this.specificEffect))

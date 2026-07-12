@@ -10,12 +10,12 @@ namespace System.Reflection
 			{
 				throw new ArgumentNullException("type");
 			}
-			IReflectableType reflectableType = (IReflectableType)type;
-			if (reflectableType == null)
+			IReflectableType reflectableType = type as IReflectableType;
+			if (reflectableType != null)
 			{
-				return null;
+				return reflectableType.GetTypeInfo();
 			}
-			return reflectableType.GetTypeInfo();
+			return new TypeDelegator(type);
 		}
 	}
 }

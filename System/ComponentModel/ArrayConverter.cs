@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ArrayConverter : CollectionConverter
 	{
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -15,13 +13,17 @@ namespace System.ComponentModel
 			}
 			if (destinationType == typeof(string) && value is Array)
 			{
-				return global::SR.GetString("{0} Array", new object[] { value.GetType().Name });
+				return SR.Format("{0} Array", value.GetType().Name);
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
 		public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
 		{
+			if (value == null)
+			{
+				return null;
+			}
 			PropertyDescriptor[] array = null;
 			if (value.GetType().IsArray)
 			{
@@ -45,20 +47,17 @@ namespace System.ComponentModel
 		private class ArrayPropertyDescriptor : TypeConverter.SimplePropertyDescriptor
 		{
 			public ArrayPropertyDescriptor(Type arrayType, Type elementType, int index)
-				: base(arrayType, "[" + index + "]", elementType, null)
+				: base(arrayType, "[" + index.ToString() + "]", elementType, null)
 			{
-				this.index = index;
+				this._index = index;
 			}
 
 			public override object GetValue(object instance)
 			{
-				if (instance is Array)
+				Array array = instance as Array;
+				if (array != null && array.GetLength(0) > this._index)
 				{
-					Array array = (Array)instance;
-					if (array.GetLength(0) > this.index)
-					{
-						return array.GetValue(this.index);
-					}
+					return array.GetValue(this._index);
 				}
 				return null;
 			}
@@ -68,15 +67,15 @@ namespace System.ComponentModel
 				if (instance is Array)
 				{
 					Array array = (Array)instance;
-					if (array.GetLength(0) > this.index)
+					if (array.GetLength(0) > this._index)
 					{
-						array.SetValue(value, this.index);
+						array.SetValue(value, this._index);
 					}
 					this.OnValueChanged(instance, EventArgs.Empty);
 				}
 			}
 
-			private int index;
+			private readonly int _index;
 		}
 	}
 }

@@ -46,7 +46,7 @@ namespace System.Data.SqlClient
 
 		internal SqlInfoMessageEventArgs()
 		{
-			ThrowStub.ThrowNotSupportedException();
+			global::Unity.ThrowStub.ThrowNotSupportedException();
 		}
 
 		private SqlException _exception;

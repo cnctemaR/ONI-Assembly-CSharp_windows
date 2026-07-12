@@ -3339,14 +3339,14 @@ namespace System.Xml
 				{
 					if (c == '<')
 					{
-						c = chars[num + 1];
-						if (c != '!')
+						char c2 = chars[num + 1];
+						if (c2 != '!')
 						{
-							if (c == '/')
+							if (c2 == '/')
 							{
 								goto IL_013B;
 							}
-							if (c == '?')
+							if (c2 == '?')
 							{
 								this.ps.charPos = num + 2;
 								if (this.ParsePI())
@@ -3642,7 +3642,8 @@ namespace System.Xml
 				{
 					array = new XmlTextReaderImpl.NodeData[this.attrCount];
 					Array.Copy(this.nodes, this.index + 1, array, 0, this.attrCount);
-					Array.Sort<object>(array, XmlTextReaderImpl.DtdDefaultAttributeInfoToNodeDataComparer.Instance);
+					object[] array2 = array;
+					Array.Sort<object>(array2, XmlTextReaderImpl.DtdDefaultAttributeInfoToNodeDataComparer.Instance);
 				}
 				foreach (IDtdDefaultAttributeInfo dtdDefaultAttributeInfo in enumerable)
 				{
@@ -4091,10 +4092,10 @@ namespace System.Xml
 
 		private void OnXmlReservedAttribute(XmlTextReaderImpl.NodeData attr)
 		{
-			string text = attr.localName;
-			if (!(text == "space"))
+			string localName = attr.localName;
+			if (!(localName == "space"))
 			{
-				if (!(text == "lang"))
+				if (!(localName == "lang"))
 				{
 					return;
 				}
@@ -4111,7 +4112,7 @@ namespace System.Xml
 				{
 					this.PushXmlContext();
 				}
-				text = XmlConvert.TrimString(attr.StringValue);
+				string text = XmlConvert.TrimString(attr.StringValue);
 				if (text == "preserve")
 				{
 					this.xmlContext.xmlSpace = XmlSpace.Preserve;
@@ -6020,16 +6021,10 @@ namespace System.Xml
 
 		private int ParseNumericCharRef(bool expand, StringBuilder internalSubsetBuilder, out XmlTextReaderImpl.EntityType entityType)
 		{
-			int num3;
+			int num2;
 			int num;
-			for (;;)
+			while ((num = this.ParseNumericCharRefInline(this.ps.charPos, expand, internalSubsetBuilder, out num2, out entityType)) == -2)
 			{
-				int num2;
-				num = (num2 = this.ParseNumericCharRefInline(this.ps.charPos, expand, internalSubsetBuilder, out num3, out entityType));
-				if (num2 != -2)
-				{
-					break;
-				}
 				if (this.ReadData() == 0)
 				{
 					this.Throw("Unexpected end of file while parsing {0} has occurred.");
@@ -6037,7 +6032,7 @@ namespace System.Xml
 			}
 			if (expand)
 			{
-				this.ps.charPos = num - num3;
+				this.ps.charPos = num - num2;
 			}
 			return num;
 		}
@@ -7047,12 +7042,12 @@ namespace System.Xml
 								{
 									goto IL_0691;
 								}
-								c2 = array[num5 + 1];
-								if (c2 != '!')
+								char c3 = array[num5 + 1];
+								if (c3 != '!')
 								{
-									if (c2 != '/')
+									if (c3 != '/')
 									{
-										if (c2 == '?')
+										if (c3 == '?')
 										{
 											goto Block_31;
 										}
@@ -9309,7 +9304,7 @@ namespace System.Xml
 				}
 				if (configuredTaskAwaiter.GetResult() == 0)
 				{
-					IL_0D47:
+					IL_0D3B:
 					if (!isTextDecl)
 					{
 						this.parsingFunction = this.nextParsingFunction;
@@ -9344,7 +9339,7 @@ namespace System.Xml
 				for (;;)
 				{
 					int originalSbLen = sb.Length;
-					int wsCount = await this.EatWhitespacesAsync((xmlDeclState == 0) ? null : sb).ConfigureAwait(false);
+					int num = await this.EatWhitespacesAsync((xmlDeclState == 0) ? null : sb).ConfigureAwait(false);
 					if (this.ps.chars[this.ps.charPos] == '?')
 					{
 						sb.Length = originalSbLen;
@@ -9354,24 +9349,24 @@ namespace System.Xml
 						}
 						if (this.ps.charPos + 1 == this.ps.charsUsed)
 						{
-							goto IL_0CB1;
+							goto IL_0CA5;
 						}
 						this.ThrowUnexpectedToken("'>'");
 					}
-					if (wsCount == 0 && xmlDeclState != 0)
+					if (num == 0 && xmlDeclState != 0)
 					{
 						this.ThrowUnexpectedToken("?>");
 					}
-					int num = await this.ParseNameAsync().ConfigureAwait(false);
+					int num2 = await this.ParseNameAsync().ConfigureAwait(false);
 					XmlTextReaderImpl.NodeData attr = null;
 					char c = this.ps.chars[this.ps.charPos];
 					if (c != 'e')
 					{
 						if (c != 's')
 						{
-							if (c != 'v' || !XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num - this.ps.charPos, "version") || xmlDeclState != 0)
+							if (c != 'v' || !XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num2 - this.ps.charPos, "version") || xmlDeclState != 0)
 							{
-								goto IL_06A5;
+								goto IL_0699;
 							}
 							if (!isTextDecl)
 							{
@@ -9380,9 +9375,9 @@ namespace System.Xml
 						}
 						else
 						{
-							if (!XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num - this.ps.charPos, "standalone") || (xmlDeclState != 1 && xmlDeclState != 2) || isTextDecl)
+							if (!XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num2 - this.ps.charPos, "standalone") || (xmlDeclState != 1 && xmlDeclState != 2) || isTextDecl)
 							{
-								goto IL_06A5;
+								goto IL_0699;
 							}
 							if (!isTextDecl)
 							{
@@ -9393,9 +9388,9 @@ namespace System.Xml
 					}
 					else
 					{
-						if (!XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num - this.ps.charPos, "encoding") || (xmlDeclState != 1 && (!isTextDecl || xmlDeclState != 0)))
+						if (!XmlConvert.StrEqual(this.ps.chars, this.ps.charPos, num2 - this.ps.charPos, "encoding") || (xmlDeclState != 1 && (!isTextDecl || xmlDeclState != 0)))
 						{
-							goto IL_06A5;
+							goto IL_0699;
 						}
 						if (!isTextDecl)
 						{
@@ -9403,13 +9398,13 @@ namespace System.Xml
 						}
 						xmlDeclState = 1;
 					}
-					IL_06BF:
+					IL_06B3:
 					if (!isTextDecl)
 					{
 						attr.SetLineInfo(this.ps.LineNo, this.ps.LinePos);
 					}
-					sb.Append(this.ps.chars, this.ps.charPos, num - this.ps.charPos);
-					this.ps.charPos = num;
+					sb.Append(this.ps.chars, this.ps.charPos, num2 - this.ps.charPos);
+					this.ps.charPos = num2;
 					if (this.ps.chars[this.ps.charPos] != '=')
 					{
 						await this.EatWhitespacesAsync(sb).ConfigureAwait(false);
@@ -9452,7 +9447,7 @@ namespace System.Xml
 						}
 						if (pos != this.ps.charsUsed)
 						{
-							goto IL_0C97;
+							goto IL_0C8B;
 						}
 						ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadDataAsync().ConfigureAwait(false).GetAwaiter();
 						if (!configuredTaskAwaiter.IsCompleted)
@@ -9519,14 +9514,14 @@ namespace System.Xml
 					continue;
 					Block_59:
 					this.Throw("There is an unclosed literal string.");
-					goto IL_0CB1;
-					IL_0C97:
+					goto IL_0CA5;
+					IL_0C8B:
 					this.Throw(isTextDecl ? "Invalid text declaration." : "Syntax for an XML declaration is invalid.");
-					goto IL_0CB1;
-					IL_06A5:
+					goto IL_0CA5;
+					IL_0699:
 					this.Throw(isTextDecl ? "Invalid text declaration." : "Syntax for an XML declaration is invalid.");
-					goto IL_06BF;
-					IL_0CB1:
+					goto IL_06B3;
+					IL_0CA5:
 					bool flag = this.ps.isEof;
 					if (!flag)
 					{
@@ -9583,7 +9578,7 @@ namespace System.Xml
 				this.ps.appendMode = false;
 				return true;
 			}
-			goto IL_0D47;
+			goto IL_0D3B;
 		}
 
 		private Task<bool> ParseDocumentContentAsync()
@@ -9880,12 +9875,12 @@ namespace System.Xml
 		private Task<bool> ParseElementContentAsync()
 		{
 			int num;
-			char c;
+			char c2;
 			for (;;)
 			{
 				num = this.ps.charPos;
 				char[] chars = this.ps.chars;
-				c = chars[num];
+				char c = chars[num];
 				if (c == '&')
 				{
 					goto IL_01B4;
@@ -9894,8 +9889,8 @@ namespace System.Xml
 				{
 					goto IL_01CC;
 				}
-				c = chars[num + 1];
-				if (c != '!')
+				c2 = chars[num + 1];
+				if (c2 != '!')
 				{
 					break;
 				}
@@ -9934,12 +9929,12 @@ namespace System.Xml
 					this.ThrowUnexpectedToken(num, "<!--", "<[CDATA[");
 				}
 			}
-			if (c == '/')
+			if (c2 == '/')
 			{
 				this.ps.charPos = num + 2;
 				return this.ParseEndElementAsync().ReturnTaskBoolWhenFinish(true);
 			}
-			if (c == '?')
+			if (c2 == '?')
 			{
 				this.ps.charPos = num + 2;
 				return this.ParsePIAsync().ContinueBoolTaskFuncWhenFalse(new Func<Task<bool>>(this.ParseElementContentAsync));
@@ -10392,38 +10387,35 @@ namespace System.Xml
 			for (;;)
 			{
 				IL_0055:
-				int lineNoDelta = 0;
-				char tmpch0;
-				int num;
-				while ((this.xmlCharType.charProperties[(int)(tmpch0 = chars[pos])] & 1) != 0)
+				int num = 0;
+				char c;
+				int num2;
+				while ((this.xmlCharType.charProperties[(int)(c = chars[pos])] & 1) != 0)
 				{
-					if (tmpch0 == '\n')
+					if (c == '\n')
 					{
 						this.OnNewLine(pos + 1);
-						num = lineNoDelta;
-						lineNoDelta = num + 1;
+						num++;
 					}
-					else if (tmpch0 == '\r')
+					else if (c == '\r')
 					{
 						if (chars[pos + 1] == '\n')
 						{
 							this.OnNewLine(pos + 2);
-							num = lineNoDelta;
-							lineNoDelta = num + 1;
-							num = pos;
-							pos = num + 1;
+							num++;
+							num2 = pos;
+							pos = num2 + 1;
 						}
 						else if (pos + 1 != this.ps.charsUsed)
 						{
 							this.OnNewLine(pos + 1);
-							num = lineNoDelta;
-							lineNoDelta = num + 1;
+							num++;
 						}
 						else
 						{
 							this.ps.charPos = pos;
-							IL_08D7:
-							this.ps.lineNo = this.ps.lineNo - lineNoDelta;
+							IL_0888:
+							this.ps.lineNo = this.ps.lineNo - num;
 							ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadDataAsync().ConfigureAwait(false).GetAwaiter();
 							if (!configuredTaskAwaiter.IsCompleted)
 							{
@@ -10442,26 +10434,26 @@ namespace System.Xml
 							goto IL_0055;
 						}
 					}
-					num = pos;
-					pos = num + 1;
+					num2 = pos;
+					pos = num2 + 1;
 				}
-				int num2 = 0;
-				char c;
-				if ((this.xmlCharType.charProperties[(int)(c = chars[pos])] & 4) != 0)
+				int num3 = 0;
+				char c2;
+				if ((this.xmlCharType.charProperties[(int)(c2 = chars[pos])] & 4) != 0)
 				{
-					num2 = 1;
+					num3 = 1;
 				}
-				if (num2 == 0)
+				if (num3 == 0)
 				{
-					if (c == '>')
+					if (c2 == '>')
 					{
 						break;
 					}
-					if (c == '/')
+					if (c2 == '/')
 					{
 						if (pos + 1 == this.ps.charsUsed)
 						{
-							goto IL_08D7;
+							goto IL_0888;
 						}
 						if (chars[pos + 1] == '>')
 						{
@@ -10473,9 +10465,9 @@ namespace System.Xml
 					{
 						if (pos == this.ps.charsUsed)
 						{
-							goto IL_08D7;
+							goto IL_0888;
 						}
-						if (c != ':' || this.supportNamespaces)
+						if (c2 != ':' || this.supportNamespaces)
 						{
 							this.Throw(pos, "Name cannot begin with the '{0}' character, hexadecimal value {1}.", XmlException.BuildCharExceptionArgs(chars, this.ps.charsUsed, pos));
 						}
@@ -10487,47 +10479,47 @@ namespace System.Xml
 				}
 				this.ps.charPos = pos;
 				int attrNameLinePos = this.ps.LinePos;
-				int num3 = -1;
-				pos += num2;
+				int num4 = -1;
+				pos += num3;
 				for (;;)
 				{
-					char tmpch;
-					if ((this.xmlCharType.charProperties[(int)(tmpch = chars[pos])] & 8) != 0)
+					char c3;
+					if ((this.xmlCharType.charProperties[(int)(c3 = chars[pos])] & 8) != 0)
 					{
-						num = pos;
-						pos = num + 1;
+						num2 = pos;
+						pos = num2 + 1;
 					}
 					else
 					{
-						if (tmpch != ':')
+						if (c3 != ':')
 						{
-							goto IL_0448;
+							goto IL_03F9;
 						}
-						if (num3 != -1)
+						if (num4 != -1)
 						{
 							if (this.supportNamespaces)
 							{
 								goto Block_18;
 							}
-							num = pos;
-							pos = num + 1;
+							num2 = pos;
+							pos = num2 + 1;
 						}
 						else
 						{
-							num3 = pos;
-							num = pos;
-							pos = num + 1;
+							num4 = pos;
+							num2 = pos;
+							pos = num2 + 1;
 							if ((this.xmlCharType.charProperties[(int)chars[pos]] & 4) == 0)
 							{
-								goto IL_03B2;
+								goto IL_0363;
 							}
-							num = pos;
-							pos = num + 1;
+							num2 = pos;
+							pos = num2 + 1;
 						}
 					}
 				}
-				IL_04F1:
-				attr = this.AddAttribute(pos, num3);
+				IL_04A2:
+				attr = this.AddAttribute(pos, num4);
 				attr.SetLineInfo(this.ps.LineNo, attrNameLinePos);
 				if (chars[pos] != '=')
 				{
@@ -10539,41 +10531,41 @@ namespace System.Xml
 						this.ThrowUnexpectedToken("=");
 					}
 				}
-				num = pos;
-				pos = num + 1;
-				char c2 = chars[pos];
-				if (c2 != '"' && c2 != '\'')
+				num2 = pos;
+				pos = num2 + 1;
+				char c4 = chars[pos];
+				if (c4 != '"' && c4 != '\'')
 				{
 					this.ps.charPos = pos;
 					await this.EatWhitespacesAsync(null).ConfigureAwait(false);
 					pos = this.ps.charPos;
-					c2 = chars[pos];
-					if (c2 != '"' && c2 != '\'')
+					c4 = chars[pos];
+					if (c4 != '"' && c4 != '\'')
 					{
 						this.ThrowUnexpectedToken("\"", "'");
 					}
 				}
-				num = pos;
-				pos = num + 1;
+				num2 = pos;
+				pos = num2 + 1;
 				this.ps.charPos = pos;
-				attr.quoteChar = c2;
+				attr.quoteChar = c4;
 				attr.SetLineInfo2(this.ps.LineNo, this.ps.LinePos);
-				char c3;
-				while ((this.xmlCharType.charProperties[(int)(c3 = chars[pos])] & 128) != 0)
+				char c5;
+				while ((this.xmlCharType.charProperties[(int)(c5 = chars[pos])] & 128) != 0)
 				{
-					num = pos;
-					pos = num + 1;
+					num2 = pos;
+					pos = num2 + 1;
 				}
-				if (c3 == c2)
+				if (c5 == c4)
 				{
 					attr.SetValue(chars, this.ps.charPos, pos - this.ps.charPos);
-					num = pos;
-					pos = num + 1;
+					num2 = pos;
+					pos = num2 + 1;
 					this.ps.charPos = pos;
 				}
 				else
 				{
-					await this.ParseAttributeValueSlowAsync(pos, c2, attr).ConfigureAwait(false);
+					await this.ParseAttributeValueSlowAsync(pos, c4, attr).ConfigureAwait(false);
 					pos = this.ps.charPos;
 					chars = this.ps.chars;
 				}
@@ -10602,33 +10594,33 @@ namespace System.Xml
 				}
 				Block_18:
 				this.Throw(pos, "The '{0}' character, hexadecimal value {1}, cannot be included in a name.", XmlException.BuildCharExceptionArgs(':', '\0'));
-				goto IL_04F1;
-				IL_03B2:
+				goto IL_04A2;
+				IL_0363:
 				Tuple<int, int> tuple = await this.ParseQNameAsync().ConfigureAwait(false);
-				num3 = tuple.Item1;
+				num4 = tuple.Item1;
 				pos = tuple.Item2;
 				chars = this.ps.chars;
-				goto IL_04F1;
-				IL_0448:
+				goto IL_04A2;
+				IL_03F9:
 				if (pos + 1 >= this.ps.charsUsed)
 				{
 					Tuple<int, int> tuple2 = await this.ParseQNameAsync().ConfigureAwait(false);
-					num3 = tuple2.Item1;
+					num4 = tuple2.Item1;
 					pos = tuple2.Item2;
 					chars = this.ps.chars;
-					goto IL_04F1;
+					goto IL_04A2;
 				}
-				goto IL_04F1;
+				goto IL_04A2;
 			}
 			this.ps.charPos = pos + 1;
 			this.parsingFunction = XmlTextReaderImpl.ParsingFunction.MoveToElementContent;
-			goto IL_0988;
+			goto IL_0934;
 			Block_11:
 			this.ps.charPos = pos + 2;
 			this.curNode.IsEmptyElement = true;
 			this.nextParsingFunction = this.parsingFunction;
 			this.parsingFunction = XmlTextReaderImpl.ParsingFunction.PopEmptyElementContext;
-			IL_0988:
+			IL_0934:
 			if (this.addDefaultAttributesAndNormalize)
 			{
 				this.AddDefaultAttributesAndNormalize();
@@ -10973,7 +10965,7 @@ namespace System.Xml
 						num = tuple.Item3;
 					}
 					while (!tuple.Item4);
-					goto IL_0560;
+					goto IL_0539;
 				}
 				this.curNode.SetLineInfo(this.ps.LineNo, this.ps.LinePos);
 				parseTask = this.ParseTextAsync(num);
@@ -11024,7 +11016,6 @@ namespace System.Xml
 			}
 			else
 			{
-				bool fullValue = false;
 				if (num > 32)
 				{
 					this.curNode.SetValueNode(XmlNodeType.Text, this.ps.chars, num2, num3 - num2);
@@ -11036,25 +11027,26 @@ namespace System.Xml
 				{
 					this.stringBuilder.Append(this.ps.chars, num2, num3 - num2);
 				}
+				bool item;
 				do
 				{
-					Tuple<int, int, int, bool> tuple3 = await this.ParseTextAsync(num).ConfigureAwait(false);
-					num2 = tuple3.Item1;
-					num3 = tuple3.Item2;
-					num = tuple3.Item3;
-					fullValue = tuple3.Item4;
+					object obj2 = await this.ParseTextAsync(num).ConfigureAwait(false);
+					num2 = obj2.Item1;
+					num3 = obj2.Item2;
+					num = obj2.Item3;
+					item = obj2.Item4;
 					if (num3 - num2 > 0)
 					{
 						this.stringBuilder.Append(this.ps.chars, num2, num3 - num2);
 					}
 				}
-				while (!fullValue && num <= 32 && this.stringBuilder.Length < 4096);
-				XmlNodeType nodeType = ((this.stringBuilder.Length < 4096) ? this.GetTextNodeType(num) : XmlNodeType.Text);
-				if (nodeType != XmlNodeType.None)
+				while (!item && num <= 32 && this.stringBuilder.Length < 4096);
+				XmlNodeType xmlNodeType = ((this.stringBuilder.Length < 4096) ? this.GetTextNodeType(num) : XmlNodeType.Text);
+				if (xmlNodeType != XmlNodeType.None)
 				{
-					this.curNode.SetValueNode(nodeType, this.stringBuilder.ToString());
+					this.curNode.SetValueNode(xmlNodeType, this.stringBuilder.ToString());
 					this.stringBuilder.Length = 0;
-					if (!fullValue)
+					if (!item)
 					{
 						this.nextParsingFunction = this.parsingFunction;
 						this.parsingFunction = XmlTextReaderImpl.ParsingFunction.PartialTextValue;
@@ -11062,20 +11054,20 @@ namespace System.Xml
 					return true;
 				}
 				this.stringBuilder.Length = 0;
-				if (!fullValue)
+				if (!item)
 				{
-					Tuple<int, int, int, bool> tuple4;
+					Tuple<int, int, int, bool> tuple3;
 					do
 					{
-						tuple4 = await this.ParseTextAsync(num).ConfigureAwait(false);
-						num2 = tuple4.Item1;
-						num3 = tuple4.Item2;
-						num = tuple4.Item3;
+						tuple3 = await this.ParseTextAsync(num).ConfigureAwait(false);
+						num2 = tuple3.Item1;
+						num3 = tuple3.Item2;
+						num = tuple3.Item3;
 					}
-					while (!tuple4.Item4);
+					while (!tuple3.Item4);
 				}
 			}
-			IL_0560:
+			IL_0539:
 			return await this.ParseTextAsync_IgnoreNode().ConfigureAwait(false);
 		}
 
@@ -11163,14 +11155,14 @@ namespace System.Xml
 					task = this.ParseTextAsync_ReadData(outOrChars, chars, pos, rcount, rpos, orChars, c);
 					break;
 				case XmlTextReaderImpl.ParseTextFunction.NoValue:
-					goto IL_01EB;
+					goto IL_0187;
 				case XmlTextReaderImpl.ParseTextFunction.PartialValue:
-					goto IL_0260;
+					goto IL_01F8;
 				}
 			}
-			IL_01EB:
+			IL_0187:
 			return await this.ParseTextAsync_NoValue(outOrChars, pos).ConfigureAwait(false);
-			IL_0260:
+			IL_01F8:
 			return await this.ParseTextAsync_PartialValue(pos, rcount, rpos, orChars, c).ConfigureAwait(false);
 		}
 
@@ -11705,23 +11697,23 @@ namespace System.Xml
 				{
 					this.ps.charPos = this.ps.charPos + 1;
 					int savedLinePos = this.ps.LinePos;
-					int endPos;
+					int num;
 					try
 					{
-						endPos = await this.ParseNameAsync().ConfigureAwait(false);
+						num = await this.ParseNameAsync().ConfigureAwait(false);
 					}
 					catch (XmlException)
 					{
 						this.Throw("An error occurred while parsing EntityName.", this.ps.LineNo, savedLinePos);
 						return new Tuple<int, XmlTextReaderImpl.EntityType>(charRefEndPos, XmlTextReaderImpl.EntityType.Skipped);
 					}
-					if (this.ps.chars[endPos] != ';')
+					if (this.ps.chars[num] != ';')
 					{
-						this.ThrowUnexpectedToken(endPos, ";");
+						this.ThrowUnexpectedToken(num, ";");
 					}
 					int linePos = this.ps.LinePos;
-					string text = this.nameTable.Add(this.ps.chars, this.ps.charPos, endPos - this.ps.charPos);
-					this.ps.charPos = endPos + 1;
+					string text = this.nameTable.Add(this.ps.chars, this.ps.charPos, num - this.ps.charPos);
+					this.ps.charPos = num + 1;
 					charRefEndPos = -1;
 					XmlTextReaderImpl.EntityType entityType = await this.HandleGeneralEntityReferenceAsync(text, isInAttributeValue, false, linePos).ConfigureAwait(false);
 					this.reportedBaseUri = this.ps.baseUriStr;
@@ -12863,16 +12855,11 @@ namespace System.Xml
 
 		private async Task<Tuple<XmlTextReaderImpl.EntityType, int>> ParseNumericCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
 		{
-			int charCount;
+			int num2;
 			XmlTextReaderImpl.EntityType entityType;
-			int newPos;
-			for (;;)
+			int num;
+			while ((num = this.ParseNumericCharRefInline(this.ps.charPos, expand, internalSubsetBuilder, out num2, out entityType)) == -2)
 			{
-				int num = (newPos = this.ParseNumericCharRefInline(this.ps.charPos, expand, internalSubsetBuilder, out charCount, out entityType));
-				if (num != -2)
-				{
-					break;
-				}
 				ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadDataAsync().ConfigureAwait(false).GetAwaiter();
 				if (!configuredTaskAwaiter.IsCompleted)
 				{
@@ -12888,19 +12875,19 @@ namespace System.Xml
 			}
 			if (expand)
 			{
-				this.ps.charPos = newPos - charCount;
+				this.ps.charPos = num - num2;
 			}
-			return new Tuple<XmlTextReaderImpl.EntityType, int>(entityType, newPos);
+			return new Tuple<XmlTextReaderImpl.EntityType, int>(entityType, num);
 		}
 
 		private async Task<int> ParseNamedCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
 		{
-			int newPos;
+			int num2;
 			int num;
 			for (;;)
 			{
-				num = (newPos = this.ParseNamedCharRefInline(this.ps.charPos, expand, internalSubsetBuilder));
-				if (num != -2)
+				num = (num2 = this.ParseNamedCharRefInline(this.ps.charPos, expand, internalSubsetBuilder));
+				if (num2 != -2)
 				{
 					break;
 				}
@@ -12917,15 +12904,15 @@ namespace System.Xml
 					goto Block_3;
 				}
 			}
-			if (num == -1)
+			if (num2 == -1)
 			{
 				return -1;
 			}
 			if (expand)
 			{
-				this.ps.charPos = newPos - 1;
+				this.ps.charPos = num - 1;
 			}
-			return newPos;
+			return num;
 			Block_3:
 			return -1;
 		}
@@ -13031,23 +13018,22 @@ namespace System.Xml
 
 		private async Task<string> ParseEntityNameAsync()
 		{
-			int endPos;
+			int num;
 			try
 			{
-				int num = await this.ParseNameAsync().ConfigureAwait(false);
-				endPos = num;
+				num = await this.ParseNameAsync().ConfigureAwait(false);
 			}
 			catch (XmlException)
 			{
 				this.Throw("An error occurred while parsing EntityName.");
 				return null;
 			}
-			if (this.ps.chars[endPos] != ';')
+			if (this.ps.chars[num] != ';')
 			{
 				this.Throw("An error occurred while parsing EntityName.");
 			}
-			string text = this.nameTable.Add(this.ps.chars, this.ps.charPos, endPos - this.ps.charPos);
-			this.ps.charPos = endPos + 1;
+			string text = this.nameTable.Add(this.ps.chars, this.ps.charPos, num - this.ps.charPos);
+			this.ps.charPos = num + 1;
 			return text;
 		}
 

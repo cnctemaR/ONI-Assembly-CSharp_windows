@@ -7,6 +7,7 @@ namespace Unity.IO.LowLevel.Unsafe
 		Complete,
 		InProgress,
 		Failed,
-		Truncated = 4
+		Truncated = 4,
+		Canceled
 	}
 }

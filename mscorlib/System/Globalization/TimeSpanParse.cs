@@ -5,34 +5,51 @@ namespace System.Globalization
 {
 	internal static class TimeSpanParse
 	{
-		internal static void ValidateStyles(TimeSpanStyles style, string parameterName)
+		internal static long Pow10(int pow)
 		{
-			if (style != TimeSpanStyles.None && style != TimeSpanStyles.AssumeNegative)
+			switch (pow)
 			{
-				throw new ArgumentException(Environment.GetResourceString("An undefined TimeSpanStyles value is being used."), parameterName);
+			case 0:
+				return 1L;
+			case 1:
+				return 10L;
+			case 2:
+				return 100L;
+			case 3:
+				return 1000L;
+			case 4:
+				return 10000L;
+			case 5:
+				return 100000L;
+			case 6:
+				return 1000000L;
+			case 7:
+				return 10000000L;
+			default:
+				return (long)Math.Pow(10.0, (double)pow);
 			}
 		}
 
 		private static bool TryTimeToTicks(bool positive, TimeSpanParse.TimeSpanToken days, TimeSpanParse.TimeSpanToken hours, TimeSpanParse.TimeSpanToken minutes, TimeSpanParse.TimeSpanToken seconds, TimeSpanParse.TimeSpanToken fraction, out long result)
 		{
-			if (days.IsInvalidNumber(10675199, -1) || hours.IsInvalidNumber(23, -1) || minutes.IsInvalidNumber(59, -1) || seconds.IsInvalidNumber(59, -1) || fraction.IsInvalidNumber(9999999, 7))
+			if (days._num > 10675199 || hours._num > 23 || minutes._num > 59 || seconds._num > 59 || fraction.IsInvalidFraction())
 			{
 				result = 0L;
 				return false;
 			}
-			long num = ((long)days.num * 3600L * 24L + (long)hours.num * 3600L + (long)minutes.num * 60L + (long)seconds.num) * 1000L;
+			long num = ((long)days._num * 3600L * 24L + (long)hours._num * 3600L + (long)minutes._num * 60L + (long)seconds._num) * 1000L;
 			if (num > 922337203685477L || num < -922337203685477L)
 			{
 				result = 0L;
 				return false;
 			}
-			long num2 = (long)fraction.num;
+			long num2 = (long)fraction._num;
 			if (num2 != 0L)
 			{
 				long num3 = 1000000L;
-				if (fraction.zeroes > 0)
+				if (fraction._zeroes > 0)
 				{
-					long num4 = (long)Math.Pow(10.0, (double)fraction.zeroes);
+					long num4 = TimeSpanParse.Pow10(fraction._zeroes);
 					num3 /= num4;
 				}
 				while (num2 < num3)
@@ -49,21 +66,16 @@ namespace System.Globalization
 			return true;
 		}
 
-		internal static TimeSpan Parse(string input, IFormatProvider formatProvider)
+		internal static TimeSpan Parse(ReadOnlySpan<char> input, IFormatProvider formatProvider)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.All);
-			if (TimeSpanParse.TryParseTimeSpan(input, TimeSpanParse.TimeSpanStandardStyles.Any, formatProvider, ref timeSpanResult))
-			{
-				return timeSpanResult.parsedTimeSpan;
-			}
-			throw timeSpanResult.GetTimeSpanParseException();
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(true);
+			TimeSpanParse.TryParseTimeSpan(input, TimeSpanParse.TimeSpanStandardStyles.Any, formatProvider, ref timeSpanResult);
+			return timeSpanResult.parsedTimeSpan;
 		}
 
-		internal static bool TryParse(string input, IFormatProvider formatProvider, out TimeSpan result)
+		internal static bool TryParse(ReadOnlySpan<char> input, IFormatProvider formatProvider, out TimeSpan result)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.None);
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(false);
 			if (TimeSpanParse.TryParseTimeSpan(input, TimeSpanParse.TimeSpanStandardStyles.Any, formatProvider, ref timeSpanResult))
 			{
 				result = timeSpanResult.parsedTimeSpan;
@@ -73,21 +85,16 @@ namespace System.Globalization
 			return false;
 		}
 
-		internal static TimeSpan ParseExact(string input, string format, IFormatProvider formatProvider, TimeSpanStyles styles)
+		internal static TimeSpan ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.All);
-			if (TimeSpanParse.TryParseExactTimeSpan(input, format, formatProvider, styles, ref timeSpanResult))
-			{
-				return timeSpanResult.parsedTimeSpan;
-			}
-			throw timeSpanResult.GetTimeSpanParseException();
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(true);
+			TimeSpanParse.TryParseExactTimeSpan(input, format, formatProvider, styles, ref timeSpanResult);
+			return timeSpanResult.parsedTimeSpan;
 		}
 
-		internal static bool TryParseExact(string input, string format, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
+		internal static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.None);
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(false);
 			if (TimeSpanParse.TryParseExactTimeSpan(input, format, formatProvider, styles, ref timeSpanResult))
 			{
 				result = timeSpanResult.parsedTimeSpan;
@@ -97,21 +104,16 @@ namespace System.Globalization
 			return false;
 		}
 
-		internal static TimeSpan ParseExactMultiple(string input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles)
+		internal static TimeSpan ParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.All);
-			if (TimeSpanParse.TryParseExactMultipleTimeSpan(input, formats, formatProvider, styles, ref timeSpanResult))
-			{
-				return timeSpanResult.parsedTimeSpan;
-			}
-			throw timeSpanResult.GetTimeSpanParseException();
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(true);
+			TimeSpanParse.TryParseExactMultipleTimeSpan(input, formats, formatProvider, styles, ref timeSpanResult);
+			return timeSpanResult.parsedTimeSpan;
 		}
 
-		internal static bool TryParseExactMultiple(string input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
+		internal static bool TryParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
 		{
-			TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-			timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.None);
+			TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(false);
 			if (TimeSpanParse.TryParseExactMultipleTimeSpan(input, formats, formatProvider, styles, ref timeSpanResult))
 			{
 				result = timeSpanResult.parsedTimeSpan;
@@ -121,60 +123,40 @@ namespace System.Globalization
 			return false;
 		}
 
-		private static bool TryParseTimeSpan(string input, TimeSpanParse.TimeSpanStandardStyles style, IFormatProvider formatProvider, ref TimeSpanParse.TimeSpanResult result)
+		private static bool TryParseTimeSpan(ReadOnlySpan<char> input, TimeSpanParse.TimeSpanStandardStyles style, IFormatProvider formatProvider, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (input == null)
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "input");
-				return false;
-			}
 			input = input.Trim();
-			if (input == string.Empty)
+			if (input.IsEmpty)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			TimeSpanParse.TimeSpanTokenizer timeSpanTokenizer = default(TimeSpanParse.TimeSpanTokenizer);
-			timeSpanTokenizer.Init(input);
+			TimeSpanParse.TimeSpanTokenizer timeSpanTokenizer = new TimeSpanParse.TimeSpanTokenizer(input);
 			TimeSpanParse.TimeSpanRawInfo timeSpanRawInfo = default(TimeSpanParse.TimeSpanRawInfo);
 			timeSpanRawInfo.Init(DateTimeFormatInfo.GetInstance(formatProvider));
 			TimeSpanParse.TimeSpanToken timeSpanToken = timeSpanTokenizer.GetNextToken();
-			while (timeSpanToken.ttt != TimeSpanParse.TTT.End)
+			while (timeSpanToken._ttt != TimeSpanParse.TTT.End)
 			{
 				if (!timeSpanRawInfo.ProcessToken(ref timeSpanToken, ref result))
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
 				timeSpanToken = timeSpanTokenizer.GetNextToken();
 			}
-			if (!timeSpanTokenizer.EOL)
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
-			}
-			if (!TimeSpanParse.ProcessTerminalState(ref timeSpanRawInfo, style, ref result))
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
-			}
-			return true;
+			return TimeSpanParse.ProcessTerminalState(ref timeSpanRawInfo, style, ref result) || result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 		}
 
 		private static bool ProcessTerminalState(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.lastSeenTTT == TimeSpanParse.TTT.Num)
+			if (raw._lastSeenTTT == TimeSpanParse.TTT.Num)
 			{
 				TimeSpanParse.TimeSpanToken timeSpanToken = default(TimeSpanParse.TimeSpanToken);
-				timeSpanToken.ttt = TimeSpanParse.TTT.Sep;
-				timeSpanToken.sep = string.Empty;
+				timeSpanToken._ttt = TimeSpanParse.TTT.Sep;
 				if (!raw.ProcessToken(ref timeSpanToken, ref result))
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
 			}
-			switch (raw.NumCount)
+			switch (raw._numCount)
 			{
 			case 1:
 				return TimeSpanParse.ProcessTerminal_D(ref raw, style, ref result);
@@ -187,17 +169,15 @@ namespace System.Globalization
 			case 5:
 				return TimeSpanParse.ProcessTerminal_DHMSF(ref raw, style, ref result);
 			default:
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 		}
 
 		private static bool ProcessTerminal_DHMSF(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.SepCount != 6 || raw.NumCount != 5)
+			if (raw._sepCount != 6)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			bool flag = (style & TimeSpanParse.TimeSpanStandardStyles.Invariant) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag2 = (style & TimeSpanParse.TimeSpanStandardStyles.Localized) > TimeSpanParse.TimeSpanStandardStyles.None;
@@ -231,34 +211,30 @@ namespace System.Globalization
 			}
 			if (!flag4)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			long num;
-			if (!TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], raw.numbers[4], out num))
+			if (!TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, raw._numbers4, out num))
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 			}
 			if (!flag3)
 			{
 				num = -num;
 				if (num > 0L)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 				}
 			}
-			result.parsedTimeSpan._ticks = num;
+			result.parsedTimeSpan = new TimeSpan(num);
 			return true;
 		}
 
 		private static bool ProcessTerminal_HMS_F_D(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.SepCount != 5 || raw.NumCount != 4 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
+			if (raw._sepCount != 5 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			bool flag = (style & TimeSpanParse.TimeSpanStandardStyles.Invariant) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag2 = (style & TimeSpanParse.TimeSpanStandardStyles.Localized) > TimeSpanParse.TimeSpanStandardStyles.None;
@@ -266,42 +242,43 @@ namespace System.Globalization
 			bool flag3 = false;
 			bool flag4 = false;
 			bool flag5 = false;
+			TimeSpanParse.TimeSpanToken timeSpanToken = new TimeSpanParse.TimeSpanToken(0);
 			if (flag)
 			{
 				if (raw.FullHMSFMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMSMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullAppCompatMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullHMSFMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMSMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullAppCompatMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 			}
@@ -310,37 +287,37 @@ namespace System.Globalization
 				if (!flag4 && raw.FullHMSFMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMSMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullAppCompatMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullHMSFMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMSMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], raw.numbers[3], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullAppCompatMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, raw.numbers[3], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, raw._numbers3, out num);
 					flag5 = flag5 || !flag4;
 				}
 			}
@@ -351,71 +328,68 @@ namespace System.Globalization
 					num = -num;
 					if (num > 0L)
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 					}
 				}
-				result.parsedTimeSpan._ticks = num;
+				result.parsedTimeSpan = new TimeSpan(num);
 				return true;
 			}
-			if (flag5)
+			if (!flag5)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-			return false;
+			return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 		}
 
 		private static bool ProcessTerminal_HM_S_D(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.SepCount != 4 || raw.NumCount != 3 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
+			if (raw._sepCount != 4 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			bool flag = (style & TimeSpanParse.TimeSpanStandardStyles.Invariant) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag2 = (style & TimeSpanParse.TimeSpanStandardStyles.Localized) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag3 = false;
 			bool flag4 = false;
 			bool flag5 = false;
+			TimeSpanParse.TimeSpanToken timeSpanToken = new TimeSpanParse.TimeSpanToken(0);
 			long num = 0L;
 			if (flag)
 			{
 				if (raw.FullHMSMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.PartialAppCompatMatch(raw.PositiveInvariant))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], TimeSpanParse.zero, raw.numbers[2], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, timeSpanToken, raw._numbers2, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullHMSMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.PartialAppCompatMatch(raw.NegativeInvariant))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], TimeSpanParse.zero, raw.numbers[2], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, timeSpanToken, raw._numbers2, out num);
 					flag5 = flag5 || !flag4;
 				}
 			}
@@ -424,37 +398,37 @@ namespace System.Globalization
 				if (!flag4 && raw.FullHMSMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.PartialAppCompatMatch(raw.PositiveLocalized))
 				{
 					flag3 = true;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], TimeSpanParse.zero, raw.numbers[2], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, timeSpanToken, raw._numbers2, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullHMSMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.FullDHMMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], raw.numbers[1], raw.numbers[2], TimeSpanParse.zero, TimeSpanParse.zero, out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, raw._numbers1, raw._numbers2, timeSpanToken, timeSpanToken, out num);
 					flag5 = flag5 || !flag4;
 				}
 				if (!flag4 && raw.PartialAppCompatMatch(raw.NegativeLocalized))
 				{
 					flag3 = false;
-					flag4 = TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], TimeSpanParse.zero, raw.numbers[2], out num);
+					flag4 = TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, timeSpanToken, raw._numbers2, out num);
 					flag5 = flag5 || !flag4;
 				}
 			}
@@ -465,28 +439,24 @@ namespace System.Globalization
 					num = -num;
 					if (num > 0L)
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 					}
 				}
-				result.parsedTimeSpan._ticks = num;
+				result.parsedTimeSpan = new TimeSpan(num);
 				return true;
 			}
-			if (flag5)
+			if (!flag5)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-			return false;
+			return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 		}
 
 		private static bool ProcessTerminal_HM(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.SepCount != 3 || raw.NumCount != 2 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
+			if (raw._sepCount != 3 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			bool flag = (style & TimeSpanParse.TimeSpanStandardStyles.Invariant) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag2 = (style & TimeSpanParse.TimeSpanStandardStyles.Localized) > TimeSpanParse.TimeSpanStandardStyles.None;
@@ -518,36 +488,33 @@ namespace System.Globalization
 					flag3 = false;
 				}
 			}
-			long num = 0L;
 			if (!flag4)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			if (!TimeSpanParse.TryTimeToTicks(flag3, TimeSpanParse.zero, raw.numbers[0], raw.numbers[1], TimeSpanParse.zero, TimeSpanParse.zero, out num))
+			long num = 0L;
+			TimeSpanParse.TimeSpanToken timeSpanToken = new TimeSpanParse.TimeSpanToken(0);
+			if (!TimeSpanParse.TryTimeToTicks(flag3, timeSpanToken, raw._numbers0, raw._numbers1, timeSpanToken, timeSpanToken, out num))
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 			}
 			if (!flag3)
 			{
 				num = -num;
 				if (num > 0L)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 				}
 			}
-			result.parsedTimeSpan._ticks = num;
+			result.parsedTimeSpan = new TimeSpan(num);
 			return true;
 		}
 
 		private static bool ProcessTerminal_D(ref TimeSpanParse.TimeSpanRawInfo raw, TimeSpanParse.TimeSpanStandardStyles style, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (raw.SepCount != 2 || raw.NumCount != 1 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
+			if (raw._sepCount != 2 || (style & TimeSpanParse.TimeSpanStandardStyles.RequireFull) != TimeSpanParse.TimeSpanStandardStyles.None)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			bool flag = (style & TimeSpanParse.TimeSpanStandardStyles.Invariant) > TimeSpanParse.TimeSpanStandardStyles.None;
 			bool flag2 = (style & TimeSpanParse.TimeSpanStandardStyles.Localized) > TimeSpanParse.TimeSpanStandardStyles.None;
@@ -579,73 +546,67 @@ namespace System.Globalization
 					flag3 = false;
 				}
 			}
-			long num = 0L;
 			if (!flag4)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			if (!TimeSpanParse.TryTimeToTicks(flag3, raw.numbers[0], TimeSpanParse.zero, TimeSpanParse.zero, TimeSpanParse.zero, TimeSpanParse.zero, out num))
+			long num = 0L;
+			TimeSpanParse.TimeSpanToken timeSpanToken = new TimeSpanParse.TimeSpanToken(0);
+			if (!TimeSpanParse.TryTimeToTicks(flag3, raw._numbers0, timeSpanToken, timeSpanToken, timeSpanToken, timeSpanToken, out num))
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 			}
 			if (!flag3)
 			{
 				num = -num;
 				if (num > 0L)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 				}
 			}
-			result.parsedTimeSpan._ticks = num;
+			result.parsedTimeSpan = new TimeSpan(num);
 			return true;
 		}
 
-		private static bool TryParseExactTimeSpan(string input, string format, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
+		private unsafe static bool TryParseExactTimeSpan(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (input == null)
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "input");
-				return false;
-			}
-			if (format == null)
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "format");
-				return false;
-			}
 			if (format.Length == 0)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.", null, null);
 			}
-			if (format.Length != 1)
+			if (format.Length == 1)
 			{
-				return TimeSpanParse.TryParseByFormat(input, format, styles, ref result);
-			}
-			if (format[0] == 'c' || format[0] == 't' || format[0] == 'T')
-			{
-				return TimeSpanParse.TryParseTimeSpanConstant(input, ref result);
-			}
-			TimeSpanParse.TimeSpanStandardStyles timeSpanStandardStyles;
-			if (format[0] == 'g')
-			{
-				timeSpanStandardStyles = TimeSpanParse.TimeSpanStandardStyles.Localized;
-			}
-			else
-			{
-				if (format[0] != 'G')
+				char c = (char)(*format[0]);
+				if (c <= 'T')
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.");
-					return false;
+					if (c == 'G')
+					{
+						return TimeSpanParse.TryParseTimeSpan(input, TimeSpanParse.TimeSpanStandardStyles.Localized | TimeSpanParse.TimeSpanStandardStyles.RequireFull, formatProvider, ref result);
+					}
+					if (c != 'T')
+					{
+						goto IL_006C;
+					}
 				}
-				timeSpanStandardStyles = TimeSpanParse.TimeSpanStandardStyles.Localized | TimeSpanParse.TimeSpanStandardStyles.RequireFull;
+				else if (c != 'c')
+				{
+					if (c == 'g')
+					{
+						return TimeSpanParse.TryParseTimeSpan(input, TimeSpanParse.TimeSpanStandardStyles.Localized, formatProvider, ref result);
+					}
+					if (c != 't')
+					{
+						goto IL_006C;
+					}
+				}
+				return TimeSpanParse.TryParseTimeSpanConstant(input, ref result);
+				IL_006C:
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.", null, null);
 			}
-			return TimeSpanParse.TryParseTimeSpan(input, timeSpanStandardStyles, formatProvider, ref result);
+			return TimeSpanParse.TryParseByFormat(input, format, styles, ref result);
 		}
 
-		private static bool TryParseByFormat(string input, string format, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
+		private unsafe static bool TryParseByFormat(ReadOnlySpan<char> input, ReadOnlySpan<char> format, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
 		{
 			bool flag = false;
 			bool flag2 = false;
@@ -660,11 +621,10 @@ namespace System.Globalization
 			int num6 = 0;
 			int i = 0;
 			int num7 = 0;
-			TimeSpanParse.TimeSpanTokenizer timeSpanTokenizer = default(TimeSpanParse.TimeSpanTokenizer);
-			timeSpanTokenizer.Init(input, -1);
+			TimeSpanParse.TimeSpanTokenizer timeSpanTokenizer = new TimeSpanParse.TimeSpanTokenizer(input, -1);
 			while (i < format.Length)
 			{
-				char c = format[i];
+				char c = (char)(*format[i]);
 				if (c <= 'F')
 				{
 					if (c <= '%')
@@ -673,45 +633,44 @@ namespace System.Globalization
 						{
 							if (c != '%')
 							{
-								goto IL_02C5;
+								goto IL_02E1;
 							}
 							int num8 = DateTimeFormat.ParseNextChar(format, i);
 							if (num8 >= 0 && num8 != 37)
 							{
 								num7 = 1;
-								goto IL_02D3;
+								goto IL_02F0;
 							}
-							result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-							return false;
+							return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 						}
 					}
 					else if (c != '\'')
 					{
 						if (c != 'F')
 						{
-							goto IL_02C5;
+							goto IL_02E1;
 						}
 						num7 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 						if (num7 > 7 || flag5)
 						{
-							result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-							return false;
+							return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 						}
 						TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, num7, num7, out num5, out num6);
 						flag5 = true;
-						goto IL_02D3;
+						goto IL_02F0;
 					}
-					StringBuilder stringBuilder = new StringBuilder();
+					StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
 					if (!DateTimeParse.TryParseQuoteString(format, i, stringBuilder, out num7))
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.FormatWithParameter, "Cannot find a matching quote character for the character '{0}'.", c);
-						return false;
+						StringBuilderCache.Release(stringBuilder);
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.FormatWithParameter, "Cannot find a matching quote character for the character '{0}'.", c, null);
 					}
 					if (!TimeSpanParse.ParseExactLiteral(ref timeSpanTokenizer, stringBuilder))
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-						return false;
+						StringBuilderCache.Release(stringBuilder);
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 					}
+					StringBuilderCache.Release(stringBuilder);
 				}
 				else if (c <= 'h')
 				{
@@ -725,21 +684,19 @@ namespace System.Globalization
 							int num9 = 0;
 							if (num7 > 8 || flag || !TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, (num7 < 2) ? 1 : num7, (num7 < 2) ? 8 : num7, out num9, out num))
 							{
-								result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-								return false;
+								return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 							}
 							flag = true;
 							break;
 						}
 						case 'e':
 						case 'g':
-							goto IL_02C5;
+							goto IL_02E1;
 						case 'f':
 							num7 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 							if (num7 > 7 || flag5 || !TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, num7, num7, out num5, out num6))
 							{
-								result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-								return false;
+								return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 							}
 							flag5 = true;
 							break;
@@ -747,13 +704,12 @@ namespace System.Globalization
 							num7 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 							if (num7 > 2 || flag2 || !TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, num7, out num2))
 							{
-								result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-								return false;
+								return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 							}
 							flag2 = true;
 							break;
 						default:
-							goto IL_02C5;
+							goto IL_02E1;
 						}
 					}
 					else
@@ -761,8 +717,7 @@ namespace System.Globalization
 						int num8 = DateTimeFormat.ParseNextChar(format, i);
 						if (num8 < 0 || timeSpanTokenizer.NextChar != (char)num8)
 						{
-							result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-							return false;
+							return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 						}
 						num7 = 2;
 					}
@@ -771,13 +726,12 @@ namespace System.Globalization
 				{
 					if (c != 's')
 					{
-						goto IL_02C5;
+						goto IL_02E1;
 					}
 					num7 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 					if (num7 > 2 || flag4 || !TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, num7, out num4))
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 					}
 					flag4 = true;
 				}
@@ -786,36 +740,32 @@ namespace System.Globalization
 					num7 = DateTimeFormat.ParseRepeatPattern(format, i, c);
 					if (num7 > 2 || flag3 || !TimeSpanParse.ParseExactDigits(ref timeSpanTokenizer, num7, out num3))
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 					}
 					flag3 = true;
 				}
-				IL_02D3:
+				IL_02F0:
 				i += num7;
 				continue;
-				IL_02C5:
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.");
-				return false;
+				IL_02E1:
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Input string was not in a correct format.", null, null);
 			}
 			if (!timeSpanTokenizer.EOL)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
-			long num10 = 0L;
 			bool flag6 = (styles & TimeSpanStyles.AssumeNegative) == TimeSpanStyles.None;
-			if (TimeSpanParse.TryTimeToTicks(flag6, new TimeSpanParse.TimeSpanToken(num), new TimeSpanParse.TimeSpanToken(num2), new TimeSpanParse.TimeSpanToken(num3), new TimeSpanParse.TimeSpanToken(num4), new TimeSpanParse.TimeSpanToken(num5, num6), out num10))
+			long num10;
+			if (TimeSpanParse.TryTimeToTicks(flag6, new TimeSpanParse.TimeSpanToken(num), new TimeSpanParse.TimeSpanToken(num2), new TimeSpanParse.TimeSpanToken(num3), new TimeSpanParse.TimeSpanToken(num4), new TimeSpanParse.TimeSpanToken(num6, num5), out num10))
 			{
 				if (!flag6)
 				{
 					num10 = -num10;
 				}
-				result.parsedTimeSpan._ticks = num10;
+				result.parsedTimeSpan = new TimeSpan(num10);
 				return true;
 			}
-			result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-			return false;
+			return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 		}
 
 		private static bool ParseExactDigits(ref TimeSpanParse.TimeSpanTokenizer tokenizer, int minDigitLength, out int result)
@@ -828,8 +778,8 @@ namespace System.Globalization
 
 		private static bool ParseExactDigits(ref TimeSpanParse.TimeSpanTokenizer tokenizer, int minDigitLength, int maxDigitLength, out int zeroes, out int result)
 		{
-			result = 0;
-			zeroes = 0;
+			int num = 0;
+			int num2 = 0;
 			int i;
 			for (i = 0; i < maxDigitLength; i++)
 			{
@@ -839,12 +789,14 @@ namespace System.Globalization
 					tokenizer.BackOne();
 					break;
 				}
-				result = result * 10 + (int)(nextChar - '0');
-				if (result == 0)
+				num = num * 10 + (int)(nextChar - '0');
+				if (num == 0)
 				{
-					zeroes++;
+					num2++;
 				}
 			}
+			zeroes = num2;
+			result = num;
 			return i >= minDigitLength;
 		}
 
@@ -860,75 +812,62 @@ namespace System.Globalization
 			return true;
 		}
 
-		private static bool TryParseTimeSpanConstant(string input, ref TimeSpanParse.TimeSpanResult result)
+		private static bool TryParseTimeSpanConstant(ReadOnlySpan<char> input, ref TimeSpanParse.TimeSpanResult result)
 		{
 			return default(TimeSpanParse.StringParser).TryParse(input, ref result);
 		}
 
-		private static bool TryParseExactMultipleTimeSpan(string input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
+		private static bool TryParseExactMultipleTimeSpan(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanParse.TimeSpanResult result)
 		{
-			if (input == null)
-			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "input");
-				return false;
-			}
 			if (formats == null)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "formats");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "formats");
 			}
 			if (input.Length == 0)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 			}
 			if (formats.Length == 0)
 			{
-				result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.");
-				return false;
+				return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.", null, null);
 			}
 			for (int i = 0; i < formats.Length; i++)
 			{
 				if (formats[i] == null || formats[i].Length == 0)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "Format specifier was invalid.", null, null);
 				}
-				TimeSpanParse.TimeSpanResult timeSpanResult = default(TimeSpanParse.TimeSpanResult);
-				timeSpanResult.Init(TimeSpanParse.TimeSpanThrowStyle.None);
+				TimeSpanParse.TimeSpanResult timeSpanResult = new TimeSpanParse.TimeSpanResult(false);
 				if (TimeSpanParse.TryParseExactTimeSpan(input, formats[i], formatProvider, styles, ref timeSpanResult))
 				{
 					result.parsedTimeSpan = timeSpanResult.parsedTimeSpan;
 					return true;
 				}
 			}
-			result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-			return false;
+			return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 		}
 
-		internal const int unlimitedDigits = -1;
-
-		internal const int maxFractionDigits = 7;
-
-		internal const int maxDays = 10675199;
-
-		internal const int maxHours = 23;
-
-		internal const int maxMinutes = 59;
-
-		internal const int maxSeconds = 59;
-
-		internal const int maxFraction = 9999999;
-
-		private static readonly TimeSpanParse.TimeSpanToken zero = new TimeSpanParse.TimeSpanToken(0);
-
-		private enum TimeSpanThrowStyle
+		internal static void ValidateStyles(TimeSpanStyles style, string parameterName)
 		{
-			None,
-			All
+			if (style != TimeSpanStyles.None && style != TimeSpanStyles.AssumeNegative)
+			{
+				throw new ArgumentException(Environment.GetResourceString("An undefined TimeSpanStyles value is being used."), parameterName);
+			}
 		}
 
-		private enum ParseFailureKind
+		private const int MaxFractionDigits = 7;
+
+		private const int MaxDays = 10675199;
+
+		private const int MaxHours = 23;
+
+		private const int MaxMinutes = 59;
+
+		private const int MaxSeconds = 59;
+
+		private const int MaxFraction = 9999999;
+
+		private enum ParseFailureKind : byte
 		{
 			None,
 			ArgumentNull,
@@ -938,7 +877,7 @@ namespace System.Globalization
 		}
 
 		[Flags]
-		private enum TimeSpanStandardStyles
+		private enum TimeSpanStandardStyles : byte
 		{
 			None = 0,
 			Invariant = 1,
@@ -947,7 +886,7 @@ namespace System.Globalization
 			Any = 3
 		}
 
-		private enum TTT
+		private enum TTT : byte
 		{
 			None,
 			End,
@@ -956,141 +895,162 @@ namespace System.Globalization
 			NumOverflow
 		}
 
-		private struct TimeSpanToken
+		private ref struct TimeSpanToken
 		{
+			public TimeSpanToken(TimeSpanParse.TTT type)
+			{
+				this = new TimeSpanParse.TimeSpanToken(type, 0, 0, default(ReadOnlySpan<char>));
+			}
+
 			public TimeSpanToken(int number)
 			{
-				this.ttt = TimeSpanParse.TTT.Num;
-				this.num = number;
-				this.zeroes = 0;
-				this.sep = null;
+				this = new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.Num, number, 0, default(ReadOnlySpan<char>));
 			}
 
-			public TimeSpanToken(int leadingZeroes, int number)
+			public TimeSpanToken(int number, int leadingZeroes)
 			{
-				this.ttt = TimeSpanParse.TTT.Num;
-				this.num = number;
-				this.zeroes = leadingZeroes;
-				this.sep = null;
+				this = new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.Num, number, leadingZeroes, default(ReadOnlySpan<char>));
 			}
 
-			public bool IsInvalidNumber(int maxValue, int maxPrecision)
+			public TimeSpanToken(TimeSpanParse.TTT type, int number, int leadingZeroes, ReadOnlySpan<char> separator)
 			{
-				return this.num > maxValue || (maxPrecision != -1 && (this.zeroes > maxPrecision || (this.num != 0 && this.zeroes != 0 && (long)this.num >= (long)maxValue / (long)Math.Pow(10.0, (double)(this.zeroes - 1)))));
+				this._ttt = type;
+				this._num = number;
+				this._zeroes = leadingZeroes;
+				this._sep = separator;
 			}
 
-			internal TimeSpanParse.TTT ttt;
+			public bool IsInvalidFraction()
+			{
+				return this._num > 9999999 || this._zeroes > 7 || (this._num != 0 && this._zeroes != 0 && (long)this._num >= 9999999L / TimeSpanParse.Pow10(this._zeroes - 1));
+			}
 
-			internal int num;
+			internal TimeSpanParse.TTT _ttt;
 
-			internal int zeroes;
+			internal int _num;
 
-			internal string sep;
+			internal int _zeroes;
+
+			internal ReadOnlySpan<char> _sep;
 		}
 
-		private struct TimeSpanTokenizer
+		private ref struct TimeSpanTokenizer
 		{
-			internal void Init(string input)
+			internal TimeSpanTokenizer(ReadOnlySpan<char> input)
 			{
-				this.Init(input, 0);
+				this = new TimeSpanParse.TimeSpanTokenizer(input, 0);
 			}
 
-			internal void Init(string input, int startPosition)
+			internal TimeSpanTokenizer(ReadOnlySpan<char> input, int startPosition)
 			{
-				this.m_pos = startPosition;
-				this.m_value = input;
+				this._value = input;
+				this._pos = startPosition;
 			}
 
-			internal TimeSpanParse.TimeSpanToken GetNextToken()
+			internal unsafe TimeSpanParse.TimeSpanToken GetNextToken()
 			{
-				TimeSpanParse.TimeSpanToken timeSpanToken = default(TimeSpanParse.TimeSpanToken);
-				char c = this.CurrentChar;
-				if (c == '\0')
+				int pos = this._pos;
+				if (pos >= this._value.Length)
 				{
-					timeSpanToken.ttt = TimeSpanParse.TTT.End;
-					return timeSpanToken;
+					return new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.End);
 				}
-				if (c >= '0' && c <= '9')
+				int num = (int)(*this._value[pos] - 48);
+				if (num <= 9)
 				{
-					timeSpanToken.ttt = TimeSpanParse.TTT.Num;
-					timeSpanToken.num = 0;
-					timeSpanToken.zeroes = 0;
-					while (((long)timeSpanToken.num & (long)((ulong)(-268435456))) == 0L)
+					int num2 = 0;
+					if (num == 0)
 					{
-						timeSpanToken.num = timeSpanToken.num * 10 + (int)c - 48;
-						if (timeSpanToken.num == 0)
+						num2 = 1;
+						int num4;
+						for (;;)
 						{
-							timeSpanToken.zeroes++;
+							int num3 = this._pos + 1;
+							this._pos = num3;
+							if (num3 >= this._value.Length || (num4 = (int)(*this._value[this._pos] - 48)) > 9)
+							{
+								break;
+							}
+							if (num4 != 0)
+							{
+								goto IL_0099;
+							}
+							num2++;
 						}
-						if (timeSpanToken.num < 0)
-						{
-							timeSpanToken.ttt = TimeSpanParse.TTT.NumOverflow;
-							return timeSpanToken;
-						}
-						c = this.NextChar;
-						if (c < '0' || c > '9')
-						{
-							return timeSpanToken;
-						}
+						return new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.Num, 0, num2, default(ReadOnlySpan<char>));
+						IL_0099:
+						num = num4;
 					}
-					timeSpanToken.ttt = TimeSpanParse.TTT.NumOverflow;
-					return timeSpanToken;
+					do
+					{
+						int num3 = this._pos + 1;
+						this._pos = num3;
+						if (num3 >= this._value.Length)
+						{
+							goto IL_00F6;
+						}
+						int num5 = (int)(*this._value[this._pos] - 48);
+						if (num5 > 9)
+						{
+							goto IL_00F6;
+						}
+						num = num * 10 + num5;
+					}
+					while (((long)num & (long)((ulong)(-268435456))) == 0L);
+					return new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.NumOverflow);
+					IL_00F6:
+					return new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.Num, num, num2, default(ReadOnlySpan<char>));
 				}
-				timeSpanToken.ttt = TimeSpanParse.TTT.Sep;
-				int pos = this.m_pos;
-				int num = 0;
-				while (c != '\0' && (c < '0' || '9' < c))
+				int num6 = 1;
+				for (;;)
 				{
-					c = this.NextChar;
-					num++;
+					int num3 = this._pos + 1;
+					this._pos = num3;
+					if (num3 >= this._value.Length || *this._value[this._pos] - 48 <= 9)
+					{
+						break;
+					}
+					num6++;
 				}
-				timeSpanToken.sep = this.m_value.Substring(pos, num);
-				return timeSpanToken;
+				return new TimeSpanParse.TimeSpanToken(TimeSpanParse.TTT.Sep, 0, 0, this._value.Slice(pos, num6));
 			}
 
 			internal bool EOL
 			{
 				get
 				{
-					return this.m_pos >= this.m_value.Length - 1;
+					return this._pos >= this._value.Length - 1;
 				}
 			}
 
 			internal void BackOne()
 			{
-				if (this.m_pos > 0)
+				if (this._pos > 0)
 				{
-					this.m_pos--;
+					this._pos--;
 				}
 			}
 
-			internal char NextChar
+			internal unsafe char NextChar
 			{
 				get
 				{
-					this.m_pos++;
-					return this.CurrentChar;
-				}
-			}
-
-			internal char CurrentChar
-			{
-				get
-				{
-					if (this.m_pos > -1 && this.m_pos < this.m_value.Length)
+					int num = this._pos + 1;
+					this._pos = num;
+					int num2 = num;
+					if (num2 >= this._value.Length)
 					{
-						return this.m_value[this.m_pos];
+						return '\0';
 					}
-					return '\0';
+					return (char)(*this._value[num2]);
 				}
 			}
 
-			private int m_pos;
+			private ReadOnlySpan<char> _value;
 
-			private string m_value;
+			private int _pos;
 		}
 
-		private struct TimeSpanRawInfo
+		private ref struct TimeSpanRawInfo
 		{
 			internal TimeSpanFormat.FormatLiterals PositiveInvariant
 			{
@@ -1112,13 +1072,13 @@ namespace System.Globalization
 			{
 				get
 				{
-					if (!this.m_posLocInit)
+					if (!this._posLocInit)
 					{
-						this.m_posLoc = default(TimeSpanFormat.FormatLiterals);
-						this.m_posLoc.Init(this.m_fullPosPattern, false);
-						this.m_posLocInit = true;
+						this._posLoc = default(TimeSpanFormat.FormatLiterals);
+						this._posLoc.Init(this._fullPosPattern, false);
+						this._posLocInit = true;
 					}
-					return this.m_posLoc;
+					return this._posLoc;
 				}
 			}
 
@@ -1126,247 +1086,259 @@ namespace System.Globalization
 			{
 				get
 				{
-					if (!this.m_negLocInit)
+					if (!this._negLocInit)
 					{
-						this.m_negLoc = default(TimeSpanFormat.FormatLiterals);
-						this.m_negLoc.Init(this.m_fullNegPattern, false);
-						this.m_negLocInit = true;
+						this._negLoc = default(TimeSpanFormat.FormatLiterals);
+						this._negLoc.Init(this._fullNegPattern, false);
+						this._negLocInit = true;
 					}
-					return this.m_negLoc;
+					return this._negLoc;
 				}
 			}
 
 			internal bool FullAppCompatMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 5 && this.NumCount == 4 && pattern.Start == this.literals[0] && pattern.DayHourSep == this.literals[1] && pattern.HourMinuteSep == this.literals[2] && pattern.AppCompatLiteral == this.literals[3] && pattern.End == this.literals[4];
+				return this._sepCount == 5 && this._numCount == 4 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.DayHourSep) && this._literals2.EqualsOrdinal(pattern.HourMinuteSep) && this._literals3.EqualsOrdinal(pattern.AppCompatLiteral) && this._literals4.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool PartialAppCompatMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 4 && this.NumCount == 3 && pattern.Start == this.literals[0] && pattern.HourMinuteSep == this.literals[1] && pattern.AppCompatLiteral == this.literals[2] && pattern.End == this.literals[3];
+				return this._sepCount == 4 && this._numCount == 3 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.HourMinuteSep) && this._literals2.EqualsOrdinal(pattern.AppCompatLiteral) && this._literals3.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 6 && this.NumCount == 5 && pattern.Start == this.literals[0] && pattern.DayHourSep == this.literals[1] && pattern.HourMinuteSep == this.literals[2] && pattern.MinuteSecondSep == this.literals[3] && pattern.SecondFractionSep == this.literals[4] && pattern.End == this.literals[5];
+				return this._sepCount == 6 && this._numCount == 5 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.DayHourSep) && this._literals2.EqualsOrdinal(pattern.HourMinuteSep) && this._literals3.EqualsOrdinal(pattern.MinuteSecondSep) && this._literals4.EqualsOrdinal(pattern.SecondFractionSep) && this._literals5.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullDMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 2 && this.NumCount == 1 && pattern.Start == this.literals[0] && pattern.End == this.literals[1];
+				return this._sepCount == 2 && this._numCount == 1 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullHMMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 3 && this.NumCount == 2 && pattern.Start == this.literals[0] && pattern.HourMinuteSep == this.literals[1] && pattern.End == this.literals[2];
+				return this._sepCount == 3 && this._numCount == 2 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.HourMinuteSep) && this._literals2.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullDHMMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 4 && this.NumCount == 3 && pattern.Start == this.literals[0] && pattern.DayHourSep == this.literals[1] && pattern.HourMinuteSep == this.literals[2] && pattern.End == this.literals[3];
+				return this._sepCount == 4 && this._numCount == 3 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.DayHourSep) && this._literals2.EqualsOrdinal(pattern.HourMinuteSep) && this._literals3.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullHMSMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 4 && this.NumCount == 3 && pattern.Start == this.literals[0] && pattern.HourMinuteSep == this.literals[1] && pattern.MinuteSecondSep == this.literals[2] && pattern.End == this.literals[3];
+				return this._sepCount == 4 && this._numCount == 3 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.HourMinuteSep) && this._literals2.EqualsOrdinal(pattern.MinuteSecondSep) && this._literals3.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullDHMSMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 5 && this.NumCount == 4 && pattern.Start == this.literals[0] && pattern.DayHourSep == this.literals[1] && pattern.HourMinuteSep == this.literals[2] && pattern.MinuteSecondSep == this.literals[3] && pattern.End == this.literals[4];
+				return this._sepCount == 5 && this._numCount == 4 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.DayHourSep) && this._literals2.EqualsOrdinal(pattern.HourMinuteSep) && this._literals3.EqualsOrdinal(pattern.MinuteSecondSep) && this._literals4.EqualsOrdinal(pattern.End);
 			}
 
 			internal bool FullHMSFMatch(TimeSpanFormat.FormatLiterals pattern)
 			{
-				return this.SepCount == 5 && this.NumCount == 4 && pattern.Start == this.literals[0] && pattern.HourMinuteSep == this.literals[1] && pattern.MinuteSecondSep == this.literals[2] && pattern.SecondFractionSep == this.literals[3] && pattern.End == this.literals[4];
+				return this._sepCount == 5 && this._numCount == 4 && this._literals0.EqualsOrdinal(pattern.Start) && this._literals1.EqualsOrdinal(pattern.HourMinuteSep) && this._literals2.EqualsOrdinal(pattern.MinuteSecondSep) && this._literals3.EqualsOrdinal(pattern.SecondFractionSep) && this._literals4.EqualsOrdinal(pattern.End);
 			}
 
 			internal void Init(DateTimeFormatInfo dtfi)
 			{
-				this.lastSeenTTT = TimeSpanParse.TTT.None;
-				this.tokenCount = 0;
-				this.SepCount = 0;
-				this.NumCount = 0;
-				this.literals = new string[6];
-				this.numbers = new TimeSpanParse.TimeSpanToken[5];
-				this.m_fullPosPattern = dtfi.FullTimeSpanPositivePattern;
-				this.m_fullNegPattern = dtfi.FullTimeSpanNegativePattern;
-				this.m_posLocInit = false;
-				this.m_negLocInit = false;
+				this._lastSeenTTT = TimeSpanParse.TTT.None;
+				this._tokenCount = 0;
+				this._sepCount = 0;
+				this._numCount = 0;
+				this._fullPosPattern = dtfi.FullTimeSpanPositivePattern;
+				this._fullNegPattern = dtfi.FullTimeSpanNegativePattern;
+				this._posLocInit = false;
+				this._negLocInit = false;
 			}
 
 			internal bool ProcessToken(ref TimeSpanParse.TimeSpanToken tok, ref TimeSpanParse.TimeSpanResult result)
 			{
-				if (tok.ttt == TimeSpanParse.TTT.NumOverflow)
+				switch (tok._ttt)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null);
-					return false;
-				}
-				if (tok.ttt != TimeSpanParse.TTT.Sep && tok.ttt != TimeSpanParse.TTT.Num)
-				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null);
-					return false;
-				}
-				TimeSpanParse.TTT ttt = tok.ttt;
-				if (ttt != TimeSpanParse.TTT.Num)
-				{
-					if (ttt == TimeSpanParse.TTT.Sep && !this.AddSep(tok.sep, ref result))
+				case TimeSpanParse.TTT.Num:
+					if ((this._tokenCount == 0 && !this.AddSep(default(ReadOnlySpan<char>), ref result)) || !this.AddNum(tok, ref result))
 					{
 						return false;
 					}
-				}
-				else
-				{
-					if (this.tokenCount == 0 && !this.AddSep(string.Empty, ref result))
+					break;
+				case TimeSpanParse.TTT.Sep:
+					if (!this.AddSep(tok._sep, ref result))
 					{
 						return false;
 					}
-					if (!this.AddNum(tok, ref result))
-					{
-						return false;
-					}
+					break;
+				case TimeSpanParse.TTT.NumOverflow:
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
+				default:
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
-				this.lastSeenTTT = tok.ttt;
+				this._lastSeenTTT = tok._ttt;
 				return true;
 			}
 
-			private bool AddSep(string sep, ref TimeSpanParse.TimeSpanResult result)
+			private bool AddSep(ReadOnlySpan<char> sep, ref TimeSpanParse.TimeSpanResult result)
 			{
-				if (this.SepCount >= 6 || this.tokenCount >= 11)
+				if (this._sepCount >= 6 || this._tokenCount >= 11)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null);
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
-				string[] array = this.literals;
-				int sepCount = this.SepCount;
-				this.SepCount = sepCount + 1;
-				array[sepCount] = sep;
-				this.tokenCount++;
+				int sepCount = this._sepCount;
+				this._sepCount = sepCount + 1;
+				switch (sepCount)
+				{
+				case 0:
+					this._literals0 = sep;
+					break;
+				case 1:
+					this._literals1 = sep;
+					break;
+				case 2:
+					this._literals2 = sep;
+					break;
+				case 3:
+					this._literals3 = sep;
+					break;
+				case 4:
+					this._literals4 = sep;
+					break;
+				default:
+					this._literals5 = sep;
+					break;
+				}
+				this._tokenCount++;
 				return true;
 			}
 
 			private bool AddNum(TimeSpanParse.TimeSpanToken num, ref TimeSpanParse.TimeSpanResult result)
 			{
-				if (this.NumCount >= 5 || this.tokenCount >= 11)
+				if (this._numCount >= 5 || this._tokenCount >= 11)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null);
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
-				TimeSpanParse.TimeSpanToken[] array = this.numbers;
-				int numCount = this.NumCount;
-				this.NumCount = numCount + 1;
-				array[numCount] = num;
-				this.tokenCount++;
+				int numCount = this._numCount;
+				this._numCount = numCount + 1;
+				switch (numCount)
+				{
+				case 0:
+					this._numbers0 = num;
+					break;
+				case 1:
+					this._numbers1 = num;
+					break;
+				case 2:
+					this._numbers2 = num;
+					break;
+				case 3:
+					this._numbers3 = num;
+					break;
+				default:
+					this._numbers4 = num;
+					break;
+				}
+				this._tokenCount++;
 				return true;
 			}
 
-			internal TimeSpanParse.TTT lastSeenTTT;
+			internal TimeSpanParse.TTT _lastSeenTTT;
 
-			internal int tokenCount;
+			internal int _tokenCount;
 
-			internal int SepCount;
+			internal int _sepCount;
 
-			internal int NumCount;
+			internal int _numCount;
 
-			internal string[] literals;
+			private TimeSpanFormat.FormatLiterals _posLoc;
 
-			internal TimeSpanParse.TimeSpanToken[] numbers;
+			private TimeSpanFormat.FormatLiterals _negLoc;
 
-			private TimeSpanFormat.FormatLiterals m_posLoc;
+			private bool _posLocInit;
 
-			private TimeSpanFormat.FormatLiterals m_negLoc;
+			private bool _negLocInit;
 
-			private bool m_posLocInit;
+			private string _fullPosPattern;
 
-			private bool m_negLocInit;
-
-			private string m_fullPosPattern;
-
-			private string m_fullNegPattern;
+			private string _fullNegPattern;
 
 			private const int MaxTokens = 11;
 
 			private const int MaxLiteralTokens = 6;
 
 			private const int MaxNumericTokens = 5;
+
+			internal TimeSpanParse.TimeSpanToken _numbers0;
+
+			internal TimeSpanParse.TimeSpanToken _numbers1;
+
+			internal TimeSpanParse.TimeSpanToken _numbers2;
+
+			internal TimeSpanParse.TimeSpanToken _numbers3;
+
+			internal TimeSpanParse.TimeSpanToken _numbers4;
+
+			internal ReadOnlySpan<char> _literals0;
+
+			internal ReadOnlySpan<char> _literals1;
+
+			internal ReadOnlySpan<char> _literals2;
+
+			internal ReadOnlySpan<char> _literals3;
+
+			internal ReadOnlySpan<char> _literals4;
+
+			internal ReadOnlySpan<char> _literals5;
 		}
 
 		private struct TimeSpanResult
 		{
-			internal void Init(TimeSpanParse.TimeSpanThrowStyle canThrow)
+			internal TimeSpanResult(bool throwOnFailure)
 			{
 				this.parsedTimeSpan = default(TimeSpan);
-				this.throwStyle = canThrow;
+				this._throwOnFailure = throwOnFailure;
 			}
 
-			internal void SetFailure(TimeSpanParse.ParseFailureKind failure, string failureMessageID)
+			internal bool SetFailure(TimeSpanParse.ParseFailureKind kind, string resourceKey, object messageArgument = null, string argumentName = null)
 			{
-				this.SetFailure(failure, failureMessageID, null, null);
-			}
-
-			internal void SetFailure(TimeSpanParse.ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument)
-			{
-				this.SetFailure(failure, failureMessageID, failureMessageFormatArgument, null);
-			}
-
-			internal void SetFailure(TimeSpanParse.ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument, string failureArgumentName)
-			{
-				this.m_failure = failure;
-				this.m_failureMessageID = failureMessageID;
-				this.m_failureMessageFormatArgument = failureMessageFormatArgument;
-				this.m_failureArgumentName = failureArgumentName;
-				if (this.throwStyle != TimeSpanParse.TimeSpanThrowStyle.None)
+				if (!this._throwOnFailure)
 				{
-					throw this.GetTimeSpanParseException();
+					return false;
 				}
-			}
-
-			internal Exception GetTimeSpanParseException()
-			{
-				switch (this.m_failure)
+				string resourceString = SR.GetResourceString(resourceKey);
+				switch (kind)
 				{
 				case TimeSpanParse.ParseFailureKind.ArgumentNull:
-					return new ArgumentNullException(this.m_failureArgumentName, Environment.GetResourceString(this.m_failureMessageID));
-				case TimeSpanParse.ParseFailureKind.Format:
-					return new FormatException(Environment.GetResourceString(this.m_failureMessageID));
+					throw new ArgumentNullException(argumentName, resourceString);
 				case TimeSpanParse.ParseFailureKind.FormatWithParameter:
-					return new FormatException(Environment.GetResourceString(this.m_failureMessageID, new object[] { this.m_failureMessageFormatArgument }));
+					throw new FormatException(SR.Format(resourceString, messageArgument));
 				case TimeSpanParse.ParseFailureKind.Overflow:
-					return new OverflowException(Environment.GetResourceString(this.m_failureMessageID));
-				default:
-					return new FormatException(Environment.GetResourceString("Input string was not in a correct format."));
+					throw new OverflowException(resourceString);
 				}
+				throw new FormatException(resourceString);
 			}
 
 			internal TimeSpan parsedTimeSpan;
 
-			internal TimeSpanParse.TimeSpanThrowStyle throwStyle;
-
-			internal TimeSpanParse.ParseFailureKind m_failure;
-
-			internal string m_failureMessageID;
-
-			internal object m_failureMessageFormatArgument;
-
-			internal string m_failureArgumentName;
+			private readonly bool _throwOnFailure;
 		}
 
-		private struct StringParser
+		[Obsolete("Types with embedded references are not supported in this version of your compiler.", true)]
+		private ref struct StringParser
 		{
-			internal void NextChar()
+			internal unsafe void NextChar()
 			{
-				if (this.pos < this.len)
+				if (this._pos < this._len)
 				{
-					this.pos++;
+					this._pos++;
 				}
-				this.ch = ((this.pos < this.len) ? this.str[this.pos] : '\0');
+				this._ch = (char)((this._pos < this._len) ? (*this._str[this._pos]) : 0);
 			}
 
-			internal char NextNonDigit()
+			internal unsafe char NextNonDigit()
 			{
-				for (int i = this.pos; i < this.len; i++)
+				for (int i = this._pos; i < this._len; i++)
 				{
-					char c = this.str[i];
+					char c = (char)(*this._str[i]);
 					if (c < '0' || c > '9')
 					{
 						return c;
@@ -1375,21 +1347,16 @@ namespace System.Globalization
 				return '\0';
 			}
 
-			internal bool TryParse(string input, ref TimeSpanParse.TimeSpanResult result)
+			internal bool TryParse(ReadOnlySpan<char> input, ref TimeSpanParse.TimeSpanResult result)
 			{
-				result.parsedTimeSpan._ticks = 0L;
-				if (input == null)
-				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.ArgumentNull, "String reference not set to an instance of a String.", null, "input");
-					return false;
-				}
-				this.str = input;
-				this.len = input.Length;
-				this.pos = -1;
+				result.parsedTimeSpan = default(TimeSpan);
+				this._str = input;
+				this._len = input.Length;
+				this._pos = -1;
 				this.NextChar();
 				this.SkipBlanks();
 				bool flag = false;
-				if (this.ch == '-')
+				if (this._ch == '-')
 				{
 					flag = true;
 					this.NextChar();
@@ -1410,7 +1377,7 @@ namespace System.Globalization
 						return false;
 					}
 					num = (long)num2 * 864000000000L;
-					if (this.ch == '.')
+					if (this._ch == '.')
 					{
 						this.NextChar();
 						long num3;
@@ -1426,55 +1393,44 @@ namespace System.Globalization
 					num = -num;
 					if (num > 0L)
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 					}
 				}
 				else if (num < 0L)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 				}
 				this.SkipBlanks();
-				if (this.pos < this.len)
+				if (this._pos < this._len)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
-				result.parsedTimeSpan._ticks = num;
+				result.parsedTimeSpan = new TimeSpan(num);
 				return true;
 			}
 
 			internal bool ParseInt(int max, out int i, ref TimeSpanParse.TimeSpanResult result)
 			{
 				i = 0;
-				int num = this.pos;
-				while (this.ch >= '0' && this.ch <= '9')
+				int pos = this._pos;
+				while (this._ch >= '0' && this._ch <= '9')
 				{
 					if (((long)i & (long)((ulong)(-268435456))) != 0L)
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 					}
-					i = i * 10 + (int)this.ch - 48;
+					i = i * 10 + (int)this._ch - 48;
 					if (i < 0)
 					{
-						result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-						return false;
+						return result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 					}
 					this.NextChar();
 				}
-				if (num == this.pos)
+				if (pos == this._pos)
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
-				if (i > max)
-				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.");
-					return false;
-				}
-				return true;
+				return i <= max || result.SetFailure(TimeSpanParse.ParseFailureKind.Overflow, "The TimeSpan could not be parsed because at least one of the numeric components is out of range or contains too many digits.", null, null);
 			}
 
 			internal bool ParseTime(out long time, ref TimeSpanParse.TimeSpanResult result)
@@ -1486,10 +1442,9 @@ namespace System.Globalization
 					return false;
 				}
 				time = (long)num * 36000000000L;
-				if (this.ch != ':')
+				if (this._ch != ':')
 				{
-					result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.");
-					return false;
+					return result.SetFailure(TimeSpanParse.ParseFailureKind.Format, "String was not recognized as a valid TimeSpan.", null, null);
 				}
 				this.NextChar();
 				if (!this.ParseInt(59, out num, ref result))
@@ -1497,10 +1452,10 @@ namespace System.Globalization
 					return false;
 				}
 				time += (long)num * 600000000L;
-				if (this.ch == ':')
+				if (this._ch == ':')
 				{
 					this.NextChar();
-					if (this.ch != '.')
+					if (this._ch != '.')
 					{
 						if (!this.ParseInt(59, out num, ref result))
 						{
@@ -1508,14 +1463,14 @@ namespace System.Globalization
 						}
 						time += (long)num * 10000000L;
 					}
-					if (this.ch == '.')
+					if (this._ch == '.')
 					{
 						this.NextChar();
 						int num2 = 10000000;
-						while (num2 > 1 && this.ch >= '0' && this.ch <= '9')
+						while (num2 > 1 && this._ch >= '0' && this._ch <= '9')
 						{
 							num2 /= 10;
-							time += (long)((int)(this.ch - '0') * num2);
+							time += (long)((int)(this._ch - '0') * num2);
 							this.NextChar();
 						}
 					}
@@ -1525,19 +1480,19 @@ namespace System.Globalization
 
 			internal void SkipBlanks()
 			{
-				while (this.ch == ' ' || this.ch == '\t')
+				while (this._ch == ' ' || this._ch == '\t')
 				{
 					this.NextChar();
 				}
 			}
 
-			private string str;
+			private ReadOnlySpan<char> _str;
 
-			private char ch;
+			private char _ch;
 
-			private int pos;
+			private int _pos;
 
-			private int len;
+			private int _len;
 		}
 	}
 }

@@ -47,7 +47,9 @@ namespace System.Runtime.Remoting.Messaging
 			ArrayList arrayList = null;
 			if (this._serializedArgs != null)
 			{
-				arrayList = new ArrayList((object[])CADSerializer.DeserializeObject(new MemoryStream(this._serializedArgs)));
+				byte[] array = new byte[this._serializedArgs.Length];
+				Array.Copy(this._serializedArgs, array, this._serializedArgs.Length);
+				arrayList = new ArrayList((object[])CADSerializer.DeserializeObject(new MemoryStream(array)));
 				this._serializedArgs = null;
 			}
 			return arrayList;

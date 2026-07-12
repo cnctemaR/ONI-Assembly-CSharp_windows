@@ -273,7 +273,7 @@ namespace System.Configuration
 
 		public ConfigurationSection GetSection(string sectionName)
 		{
-			string[] array = sectionName.Split(new char[] { '/' });
+			string[] array = sectionName.Split('/', StringSplitOptions.None);
 			if (array.Length == 1)
 			{
 				return this.Sections[array[0]];
@@ -294,7 +294,7 @@ namespace System.Configuration
 
 		public ConfigurationSectionGroup GetSectionGroup(string sectionGroupName)
 		{
-			string[] array = sectionGroupName.Split(new char[] { '/' });
+			string[] array = sectionGroupName.Split('/', StringSplitOptions.None);
 			ConfigurationSectionGroup configurationSectionGroup = this.SectionGroups[array[0]];
 			int num = 1;
 			while (configurationSectionGroup != null && num < array.Length)
@@ -386,7 +386,14 @@ namespace System.Configuration
 			if (!this.system.Host.IsDefinitionAllowed(this.configPath, sec.SectionInformation.AllowDefinition, sec.SectionInformation.AllowExeDefinition))
 			{
 				object obj = ((sec.SectionInformation.AllowExeDefinition != ConfigurationAllowExeDefinition.MachineToApplication) ? sec.SectionInformation.AllowExeDefinition : sec.SectionInformation.AllowDefinition);
-				throw new ConfigurationErrorsException(string.Concat(new object[] { "The section <", name, "> can't be defined in this configuration file (the allowed definition context is '", obj, "')." }));
+				throw new ConfigurationErrorsException(string.Concat(new string[]
+				{
+					"The section <",
+					name,
+					"> can't be defined in this configuration file (the allowed definition context is '",
+					(obj != null) ? obj.ToString() : null,
+					"')."
+				}));
 			}
 			if (sec.SectionInformation.Type == null)
 			{

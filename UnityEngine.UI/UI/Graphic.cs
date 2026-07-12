@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 using UnityEngine.Serialization;
 using UnityEngine.UI.CoroutineTween;
 
@@ -60,6 +61,7 @@ namespace UnityEngine.UI
 						GraphicRegistry.RegisterRaycastGraphicForCanvas(this.canvas, this);
 					}
 				}
+				this.m_RaycastTargetCache = value;
 			}
 		}
 
@@ -106,6 +108,7 @@ namespace UnityEngine.UI
 				this.SetMaterialDirty();
 			}
 			this.SetVerticesDirty();
+			this.SetRaycastDirty();
 		}
 
 		public virtual void SetLayoutDirty()
@@ -147,6 +150,22 @@ namespace UnityEngine.UI
 			{
 				this.m_OnDirtyMaterialCallback();
 			}
+		}
+
+		public void SetRaycastDirty()
+		{
+			if (this.m_RaycastTargetCache != this.m_RaycastTarget)
+			{
+				if (this.m_RaycastTarget && base.isActiveAndEnabled)
+				{
+					GraphicRegistry.RegisterRaycastGraphicForCanvas(this.canvas, this);
+				}
+				else if (!this.m_RaycastTarget)
+				{
+					GraphicRegistry.UnregisterRaycastGraphicForCanvas(this.canvas, this);
+				}
+			}
+			this.m_RaycastTargetCache = this.m_RaycastTarget;
 		}
 
 		protected override void OnRectTransformDimensionsChange()
@@ -216,7 +235,7 @@ namespace UnityEngine.UI
 
 		private void CacheCanvas()
 		{
-			List<Canvas> list = ListPool<Canvas>.Get();
+			List<Canvas> list = CollectionPool<List<Canvas>, Canvas>.Get();
 			base.gameObject.GetComponentsInParent<Canvas>(false, list);
 			if (list.Count > 0)
 			{
@@ -237,7 +256,7 @@ namespace UnityEngine.UI
 			{
 				this.m_Canvas = null;
 			}
-			ListPool<Canvas>.Release(list);
+			CollectionPool<List<Canvas>, Canvas>.Release(list);
 		}
 
 		public CanvasRenderer canvasRenderer
@@ -289,14 +308,14 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				List<Component> list = ListPool<Component>.Get();
-				base.GetComponents(typeof(IMaterialModifier), list);
+				List<IMaterialModifier> list = CollectionPool<List<IMaterialModifier>, IMaterialModifier>.Get();
+				base.GetComponents<IMaterialModifier>(list);
 				Material material = this.material;
 				for (int i = 0; i < list.Count; i++)
 				{
-					material = (list[i] as IMaterialModifier).GetModifiedMaterial(material);
+					material = list[i].GetModifiedMaterial(material);
 				}
-				ListPool<Component>.Release(list);
+				CollectionPool<List<IMaterialModifier>, IMaterialModifier>.Release(list);
 				return material;
 			}
 		}
@@ -323,8 +342,8 @@ namespace UnityEngine.UI
 
 		protected override void OnDisable()
 		{
-			GraphicRegistry.UnregisterGraphicForCanvas(this.canvas, this);
-			CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+			GraphicRegistry.DisableGraphicForCanvas(this.canvas, this);
+			CanvasUpdateRegistry.DisableCanvasElementForRebuild(this);
 			if (this.canvasRenderer != null)
 			{
 				this.canvasRenderer.Clear();
@@ -335,6 +354,8 @@ namespace UnityEngine.UI
 
 		protected override void OnDestroy()
 		{
+			GraphicRegistry.UnregisterGraphicForCanvas(this.canvas, this);
+			CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 			if (this.m_CachedMesh)
 			{
 				Object.Destroy(this.m_CachedMesh);
@@ -349,6 +370,7 @@ namespace UnityEngine.UI
 			this.m_Canvas = null;
 			if (!this.IsActive())
 			{
+				GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
 				return;
 			}
 			this.CacheCanvas();
@@ -430,13 +452,13 @@ namespace UnityEngine.UI
 			{
 				Graphic.s_VertexHelper.Clear();
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			base.GetComponents(typeof(IMeshModifier), list);
 			for (int i = 0; i < list.Count; i++)
 			{
 				((IMeshModifier)list[i]).ModifyMesh(Graphic.s_VertexHelper);
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 			Graphic.s_VertexHelper.FillMesh(Graphic.workerMesh);
 			this.canvasRenderer.SetMesh(Graphic.workerMesh);
 		}
@@ -451,13 +473,13 @@ namespace UnityEngine.UI
 			{
 				Graphic.workerMesh.Clear();
 			}
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			base.GetComponents(typeof(IMeshModifier), list);
 			for (int i = 0; i < list.Count; i++)
 			{
 				((IMeshModifier)list[i]).ModifyMesh(Graphic.workerMesh);
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 			this.canvasRenderer.SetMesh(Graphic.workerMesh);
 		}
 
@@ -469,7 +491,6 @@ namespace UnityEngine.UI
 				{
 					Graphic.s_Mesh = new Mesh();
 					Graphic.s_Mesh.name = "Shared UI Mesh";
-					Graphic.s_Mesh.hideFlags = HideFlags.HideAndDontSave;
 				}
 				return Graphic.s_Mesh;
 			}
@@ -518,7 +539,7 @@ namespace UnityEngine.UI
 				return false;
 			}
 			Transform transform = base.transform;
-			List<Component> list = ListPool<Component>.Get();
+			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			bool flag = false;
 			bool flag2 = true;
 			while (transform != null)
@@ -538,6 +559,10 @@ namespace UnityEngine.UI
 						CanvasGroup canvasGroup = list[i] as CanvasGroup;
 						if (canvasGroup != null)
 						{
+							if (!canvasGroup.enabled)
+							{
+								goto IL_00CD;
+							}
 							if (!flag && canvasGroup.ignoreParentGroups)
 							{
 								flag = true;
@@ -554,14 +579,15 @@ namespace UnityEngine.UI
 						}
 						if (!flag3)
 						{
-							ListPool<Component>.Release(list);
+							CollectionPool<List<Component>, Component>.Release(list);
 							return false;
 						}
 					}
+					IL_00CD:;
 				}
 				transform = (flag2 ? transform.parent : null);
 			}
-			ListPool<Component>.Release(list);
+			CollectionPool<List<Component>, Component>.Release(list);
 			return true;
 		}
 
@@ -678,6 +704,8 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private bool m_RaycastTarget = true;
+
+		private bool m_RaycastTargetCache = true;
 
 		[SerializeField]
 		private Vector4 m_RaycastPadding;

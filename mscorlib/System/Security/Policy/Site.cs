@@ -105,7 +105,7 @@ namespace System.Security.Policy
 			{
 				return false;
 			}
-			string[] array = name.Split(new char[] { '.' });
+			string[] array = name.Split('.', StringSplitOptions.None);
 			for (int i = 0; i < array.Length; i++)
 			{
 				string text = array[i];

@@ -162,7 +162,6 @@ namespace System.Data.ProviderBase
 
 		private DataColumn[] FilterColumns(DataTable sourceTable, string[] hiddenColumnNames, DataColumnCollection destinationColumns)
 		{
-			DataColumn[] array = null;
 			int num = 0;
 			foreach (object obj in sourceTable.Columns)
 			{
@@ -177,7 +176,7 @@ namespace System.Data.ProviderBase
 				throw ADP.NoColumns();
 			}
 			int num2 = 0;
-			array = new DataColumn[num];
+			DataColumn[] array = new DataColumn[num];
 			foreach (object obj2 in sourceTable.Columns)
 			{
 				DataColumn dataColumn2 = (DataColumn)obj2;

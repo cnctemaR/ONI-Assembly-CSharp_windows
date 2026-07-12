@@ -7,9 +7,9 @@ namespace System.Net.Mail
 	{
 		static MailHeaderInfo()
 		{
-			for (int i = 0; i < MailHeaderInfo.m_HeaderInfo.Length; i++)
+			for (int i = 0; i < MailHeaderInfo.s_headerInfo.Length; i++)
 			{
-				MailHeaderInfo.m_HeaderDictionary.Add(MailHeaderInfo.m_HeaderInfo[i].NormalizedName, i);
+				MailHeaderInfo.s_headerDictionary.Add(MailHeaderInfo.s_headerInfo[i].NormalizedName, i);
 			}
 		}
 
@@ -19,60 +19,48 @@ namespace System.Net.Mail
 			{
 				return null;
 			}
-			return MailHeaderInfo.m_HeaderInfo[(int)id].NormalizedName;
+			return MailHeaderInfo.s_headerInfo[(int)id].NormalizedName;
 		}
 
 		internal static MailHeaderID GetID(string name)
 		{
 			int num;
-			if (MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num))
+			if (!MailHeaderInfo.s_headerDictionary.TryGetValue(name, out num))
 			{
-				return (MailHeaderID)num;
+				return MailHeaderID.Unknown;
 			}
-			return MailHeaderID.Unknown;
-		}
-
-		internal static bool IsWellKnown(string name)
-		{
-			int num;
-			return MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num);
+			return (MailHeaderID)num;
 		}
 
 		internal static bool IsUserSettable(string name)
 		{
 			int num;
-			return !MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num) || MailHeaderInfo.m_HeaderInfo[num].IsUserSettable;
+			return !MailHeaderInfo.s_headerDictionary.TryGetValue(name, out num) || MailHeaderInfo.s_headerInfo[num].IsUserSettable;
 		}
 
 		internal static bool IsSingleton(string name)
 		{
 			int num;
-			return MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num) && MailHeaderInfo.m_HeaderInfo[num].IsSingleton;
+			return MailHeaderInfo.s_headerDictionary.TryGetValue(name, out num) && MailHeaderInfo.s_headerInfo[num].IsSingleton;
 		}
 
 		internal static string NormalizeCase(string name)
 		{
 			int num;
-			if (MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num))
+			if (!MailHeaderInfo.s_headerDictionary.TryGetValue(name, out num))
 			{
-				return MailHeaderInfo.m_HeaderInfo[num].NormalizedName;
+				return name;
 			}
-			return name;
-		}
-
-		internal static bool IsMatch(string name, MailHeaderID header)
-		{
-			int num;
-			return MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num) && num == (int)header;
+			return MailHeaderInfo.s_headerInfo[num].NormalizedName;
 		}
 
 		internal static bool AllowsUnicode(string name)
 		{
 			int num;
-			return !MailHeaderInfo.m_HeaderDictionary.TryGetValue(name, out num) || MailHeaderInfo.m_HeaderInfo[num].AllowsUnicode;
+			return !MailHeaderInfo.s_headerDictionary.TryGetValue(name, out num) || MailHeaderInfo.s_headerInfo[num].AllowsUnicode;
 		}
 
-		private static readonly MailHeaderInfo.HeaderInfo[] m_HeaderInfo = new MailHeaderInfo.HeaderInfo[]
+		private static readonly MailHeaderInfo.HeaderInfo[] s_headerInfo = new MailHeaderInfo.HeaderInfo[]
 		{
 			new MailHeaderInfo.HeaderInfo(MailHeaderID.Bcc, "Bcc", true, false, true),
 			new MailHeaderInfo.HeaderInfo(MailHeaderID.Cc, "Cc", true, false, true),
@@ -109,9 +97,9 @@ namespace System.Net.Mail
 			new MailHeaderInfo.HeaderInfo(MailHeaderID.XSender, "X-Sender", true, true, true)
 		};
 
-		private static readonly Dictionary<string, int> m_HeaderDictionary = new Dictionary<string, int>(33, StringComparer.OrdinalIgnoreCase);
+		private static readonly Dictionary<string, int> s_headerDictionary = new Dictionary<string, int>(33, StringComparer.OrdinalIgnoreCase);
 
-		private struct HeaderInfo
+		private readonly struct HeaderInfo
 		{
 			public HeaderInfo(MailHeaderID id, string name, bool isSingleton, bool isUserSettable, bool allowsUnicode)
 			{

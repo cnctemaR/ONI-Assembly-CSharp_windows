@@ -13,6 +13,7 @@ namespace UnityEngine
 		Rec2020,
 		DisplayP3,
 		HDR10,
-		DolbyHDR
+		DolbyHDR,
+		P3D65G22
 	}
 }

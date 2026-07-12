@@ -35,16 +35,16 @@ namespace System.Text
 			int num = 0;
 			while (num < bytesUnknown.Length && num < 20)
 			{
-				stringBuilder.Append("[");
+				stringBuilder.Append('[');
 				stringBuilder.Append(bytesUnknown[num].ToString("X2", CultureInfo.InvariantCulture));
-				stringBuilder.Append("]");
+				stringBuilder.Append(']');
 				num++;
 			}
 			if (num == 20)
 			{
 				stringBuilder.Append(" ...");
 			}
-			throw new DecoderFallbackException(Environment.GetResourceString("Unable to translate bytes {0} at index {1} from specified code page to Unicode.", new object[] { stringBuilder, index }), bytesUnknown, index);
+			throw new DecoderFallbackException(SR.Format("Unable to translate bytes {0} at index {1} from specified code page to Unicode.", stringBuilder, index), bytesUnknown, index);
 		}
 	}
 }

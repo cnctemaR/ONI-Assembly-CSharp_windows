@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using System.Security.Claims;
 
 namespace System.Security.Principal
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class GenericIdentity : ClaimsIdentity
 	{
-		[SecuritySafeCritical]
 		public GenericIdentity(string name)
 		{
 			if (name == null)
@@ -22,7 +18,6 @@ namespace System.Security.Principal
 			this.AddNameClaim();
 		}
 
-		[SecuritySafeCritical]
 		public GenericIdentity(string name, string type)
 		{
 			if (name == null)
@@ -86,25 +81,6 @@ namespace System.Security.Principal
 			}
 		}
 
-		[OnDeserialized]
-		private void OnDeserializedMethod(StreamingContext context)
-		{
-			bool flag = false;
-			using (IEnumerator<Claim> enumerator = base.Claims.GetEnumerator())
-			{
-				if (enumerator.MoveNext())
-				{
-					Claim claim = enumerator.Current;
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-				this.AddNameClaim();
-			}
-		}
-
-		[SecuritySafeCritical]
 		private void AddNameClaim()
 		{
 			if (this.m_name != null)
@@ -113,8 +89,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		private string m_name;
+		private readonly string m_name;
 
-		private string m_type;
+		private readonly string m_type;
 	}
 }

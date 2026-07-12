@@ -1,64 +1,270 @@
 ﻿using System;
-using System.Runtime.ConstrainedExecution;
+using System.Runtime.CompilerServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Runtime.InteropServices
 {
-	public abstract class SafeBuffer : SafeHandleZeroOrMinusOneIsInvalid, IDisposable
+	public abstract class SafeBuffer : SafeHandleZeroOrMinusOneIsInvalid
 	{
 		protected SafeBuffer(bool ownsHandle)
 			: base(ownsHandle)
 		{
+			this._numBytes = SafeBuffer.Uninitialized;
 		}
 
 		[CLSCompliant(false)]
-		public unsafe void Initialize(ulong numBytes)
+		public void Initialize(ulong numBytes)
 		{
-			if (numBytes == 0UL)
+			if (IntPtr.Size == 4 && numBytes > (ulong)(-1))
 			{
-				throw new ArgumentOutOfRangeException("numBytes");
+				throw new ArgumentOutOfRangeException("numBytes", "The number of bytes cannot exceed the virtual address space on a 32 bit machine.");
 			}
-			this.inited = true;
-			this.byte_length = numBytes;
-			this.last_byte = (byte*)(void*)this.handle + numBytes;
+			if (numBytes >= (ulong)SafeBuffer.Uninitialized)
+			{
+				throw new ArgumentOutOfRangeException("numBytes", "The length of the buffer must be less than the maximum UIntPtr value for your platform.");
+			}
+			this._numBytes = (UIntPtr)numBytes;
 		}
 
 		[CLSCompliant(false)]
 		public void Initialize(uint numElements, uint sizeOfEachElement)
 		{
-			this.Initialize((ulong)(numElements * sizeOfEachElement));
+			if (IntPtr.Size == 4 && numElements * sizeOfEachElement > 4294967295U)
+			{
+				throw new ArgumentOutOfRangeException("numBytes", "The number of bytes cannot exceed the virtual address space on a 32 bit machine.");
+			}
+			if ((ulong)(numElements * sizeOfEachElement) >= (ulong)SafeBuffer.Uninitialized)
+			{
+				throw new ArgumentOutOfRangeException("numElements", "The length of the buffer must be less than the maximum UIntPtr value for your platform.");
+			}
+			this._numBytes = (UIntPtr)(checked(numElements * sizeOfEachElement));
 		}
 
 		[CLSCompliant(false)]
 		public void Initialize<T>(uint numElements) where T : struct
 		{
-			this.Initialize(numElements, (uint)Marshal.SizeOf(typeof(T)));
+			this.Initialize(numElements, SafeBuffer.AlignedSizeOf<T>());
 		}
 
 		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public unsafe void AcquirePointer(ref byte* pointer)
 		{
-			if (!this.inited)
+			if (this._numBytes == SafeBuffer.Uninitialized)
 			{
-				throw new InvalidOperationException();
+				throw SafeBuffer.NotInitialized();
 			}
+			pointer = (IntPtr)((UIntPtr)0);
 			bool flag = false;
 			base.DangerousAddRef(ref flag);
-			if (flag)
+			pointer = (void*)this.handle;
+		}
+
+		public void ReleasePointer()
+		{
+			if (this._numBytes == SafeBuffer.Uninitialized)
 			{
-				pointer = (void*)this.handle;
+				throw SafeBuffer.NotInitialized();
+			}
+			base.DangerousRelease();
+		}
+
+		[CLSCompliant(false)]
+		public unsafe T Read<T>(ulong byteOffset) where T : struct
+		{
+			if (this._numBytes == SafeBuffer.Uninitialized)
+			{
+				throw SafeBuffer.NotInitialized();
+			}
+			uint num = SafeBuffer.SizeOf<T>();
+			byte* ptr = (byte*)(void*)this.handle + byteOffset;
+			this.SpaceCheck(ptr, (ulong)num);
+			T t = default(T);
+			bool flag = false;
+			try
+			{
+				base.DangerousAddRef(ref flag);
+				try
+				{
+					fixed (byte* ptr2 = Unsafe.As<T, byte>(ref t))
+					{
+						Buffer.Memmove(ptr2, ptr, num);
+					}
+				}
+				finally
+				{
+					byte* ptr2 = null;
+				}
+			}
+			finally
+			{
+				if (flag)
+				{
+					base.DangerousRelease();
+				}
+			}
+			return t;
+		}
+
+		[CLSCompliant(false)]
+		public unsafe void ReadArray<T>(ulong byteOffset, T[] array, int index, int count) where T : struct
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array", "Buffer cannot be null.");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
+			}
+			if (array.Length - index < count)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (this._numBytes == SafeBuffer.Uninitialized)
+			{
+				throw SafeBuffer.NotInitialized();
+			}
+			uint num = SafeBuffer.SizeOf<T>();
+			uint num2 = SafeBuffer.AlignedSizeOf<T>();
+			byte* ptr = (byte*)(void*)this.handle + byteOffset;
+			bool flag;
+			checked
+			{
+				this.SpaceCheck(ptr, unchecked((ulong)num2) * (ulong)(unchecked((long)count)));
+				flag = false;
+			}
+			try
+			{
+				base.DangerousAddRef(ref flag);
+				if (count > 0)
+				{
+					try
+					{
+						fixed (byte* ptr2 = Unsafe.As<T, byte>(ref array[index]))
+						{
+							byte* ptr3 = ptr2;
+							for (int i = 0; i < count; i++)
+							{
+								Buffer.Memmove(ptr3 + (ulong)num * (ulong)((long)i), ptr + (ulong)num2 * (ulong)((long)i), num);
+							}
+						}
+					}
+					finally
+					{
+						byte* ptr2 = null;
+					}
+				}
+			}
+			finally
+			{
+				if (flag)
+				{
+					base.DangerousRelease();
+				}
 			}
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public void ReleasePointer()
+		[CLSCompliant(false)]
+		public unsafe void Write<T>(ulong byteOffset, T value) where T : struct
 		{
-			if (!this.inited)
+			if (this._numBytes == SafeBuffer.Uninitialized)
 			{
-				throw new InvalidOperationException();
+				throw SafeBuffer.NotInitialized();
 			}
-			base.DangerousRelease();
+			uint num = SafeBuffer.SizeOf<T>();
+			byte* ptr = (byte*)(void*)this.handle + byteOffset;
+			this.SpaceCheck(ptr, (ulong)num);
+			bool flag = false;
+			try
+			{
+				base.DangerousAddRef(ref flag);
+				try
+				{
+					fixed (byte* ptr2 = Unsafe.As<T, byte>(ref value))
+					{
+						byte* ptr3 = ptr2;
+						Buffer.Memmove(ptr, ptr3, num);
+					}
+				}
+				finally
+				{
+					byte* ptr2 = null;
+				}
+			}
+			finally
+			{
+				if (flag)
+				{
+					base.DangerousRelease();
+				}
+			}
+		}
+
+		[CLSCompliant(false)]
+		public unsafe void WriteArray<T>(ulong byteOffset, T[] array, int index, int count) where T : struct
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array", "Buffer cannot be null.");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", "Non-negative number required.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
+			}
+			if (array.Length - index < count)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (this._numBytes == SafeBuffer.Uninitialized)
+			{
+				throw SafeBuffer.NotInitialized();
+			}
+			uint num = SafeBuffer.SizeOf<T>();
+			uint num2 = SafeBuffer.AlignedSizeOf<T>();
+			byte* ptr = (byte*)(void*)this.handle + byteOffset;
+			bool flag;
+			checked
+			{
+				this.SpaceCheck(ptr, unchecked((ulong)num2) * (ulong)(unchecked((long)count)));
+				flag = false;
+			}
+			try
+			{
+				base.DangerousAddRef(ref flag);
+				if (count > 0)
+				{
+					try
+					{
+						fixed (byte* ptr2 = Unsafe.As<T, byte>(ref array[index]))
+						{
+							byte* ptr3 = ptr2;
+							for (int i = 0; i < count; i++)
+							{
+								Buffer.Memmove(ptr + (ulong)num2 * (ulong)((long)i), ptr3 + (ulong)num * (ulong)((long)i), num);
+							}
+						}
+					}
+					finally
+					{
+						byte* ptr2 = null;
+					}
+				}
+			}
+			finally
+			{
+				if (flag)
+				{
+					base.DangerousRelease();
+				}
+			}
 		}
 
 		[CLSCompliant(false)]
@@ -66,80 +272,57 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this.byte_length;
+				if (this._numBytes == SafeBuffer.Uninitialized)
+				{
+					throw SafeBuffer.NotInitialized();
+				}
+				return (ulong)this._numBytes;
 			}
 		}
 
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public unsafe T Read<T>(ulong byteOffset) where T : struct
+		private unsafe void SpaceCheck(byte* ptr, ulong sizeInBytes)
 		{
-			if (!this.inited)
+			if ((ulong)this._numBytes < sizeInBytes)
 			{
-				throw new InvalidOperationException();
+				SafeBuffer.NotEnoughRoom();
 			}
-			byte* ptr = (byte*)(void*)this.handle + byteOffset;
-			if (ptr >= this.last_byte || ptr + Marshal.SizeOf(typeof(T)) != this.last_byte)
+			if ((long)((byte*)ptr - (byte*)(void*)this.handle) > (long)((ulong)this._numBytes - sizeInBytes))
 			{
-				throw new ArgumentException("byteOffset");
+				SafeBuffer.NotEnoughRoom();
 			}
-			return (T)((object)Marshal.PtrToStructure((IntPtr)((void*)ptr), typeof(T)));
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[CLSCompliant(false)]
-		public unsafe void ReadArray<T>(ulong byteOffset, T[] array, int index, int count) where T : struct
+		private static void NotEnoughRoom()
 		{
-			if (!this.inited)
-			{
-				throw new InvalidOperationException();
-			}
-			int num = Marshal.SizeOf(typeof(T)) * count;
-			byte* ptr = (byte*)(void*)this.handle + byteOffset;
-			if (ptr >= this.last_byte || ptr + num != this.last_byte)
-			{
-				throw new ArgumentException("byteOffset");
-			}
-			Marshal.copy_from_unmanaged((IntPtr)((void*)ptr), index, array, count);
+			throw new ArgumentException("Not enough space available in the buffer.");
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[CLSCompliant(false)]
-		public unsafe void Write<T>(ulong byteOffset, T value) where T : struct
+		private static InvalidOperationException NotInitialized()
 		{
-			if (!this.inited)
-			{
-				throw new InvalidOperationException();
-			}
-			byte* ptr = (byte*)(void*)this.handle + byteOffset;
-			if (ptr >= this.last_byte || ptr + Marshal.SizeOf(typeof(T)) != this.last_byte)
-			{
-				throw new ArgumentException("byteOffset");
-			}
-			Marshal.StructureToPtr<T>(value, (IntPtr)((void*)ptr), false);
+			return new InvalidOperationException("You must call Initialize on this object instance before using it.");
 		}
 
-		[CLSCompliant(false)]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public unsafe void WriteArray<T>(ulong byteOffset, T[] array, int index, int count) where T : struct
+		internal static uint AlignedSizeOf<T>() where T : struct
 		{
-			if (!this.inited)
+			uint num = SafeBuffer.SizeOf<T>();
+			if (num == 1U || num == 2U)
 			{
-				throw new InvalidOperationException();
+				return num;
 			}
-			byte* ptr = (byte*)(void*)this.handle + byteOffset;
-			int num = Marshal.SizeOf(typeof(T)) * count;
-			if (ptr >= this.last_byte || ptr + num != this.last_byte)
-			{
-				throw new ArgumentException("would overrite");
-			}
-			Marshal.copy_to_unmanaged(array, index, (IntPtr)((void*)ptr), count);
+			return (uint)((ulong)(num + 3U) & 18446744073709551612UL);
 		}
 
-		private ulong byte_length;
+		internal static uint SizeOf<T>() where T : struct
+		{
+			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+			{
+				throw new ArgumentException("The specified Type must be a struct containing no references.");
+			}
+			return (uint)Unsafe.SizeOf<T>();
+		}
 
-		private unsafe byte* last_byte;
+		private static readonly UIntPtr Uninitialized = ((UIntPtr.Size == 4) ? ((UIntPtr)uint.MaxValue) : ((UIntPtr)ulong.MaxValue));
 
-		private bool inited;
+		private UIntPtr _numBytes;
 	}
 }

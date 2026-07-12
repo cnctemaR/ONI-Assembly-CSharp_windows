@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class OxygenMaskStationConfig : IBuildingConfig
 {
-	public override string[] GetDlcIds()
-	{
-		return DlcManager.AVAILABLE_ALL_VERSIONS;
-	}
-
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "OxygenMaskStation";

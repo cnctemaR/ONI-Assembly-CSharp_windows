@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using TUNING;
 
 public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Instance>
 {
@@ -25,9 +26,9 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		WorldContainer myWorld = smi.master.gameObject.GetMyWorld();
 		if (!(myWorld == null) && myWorld.AlertManager.IsRedAlert())
 		{
-			return smi.breath.value < 45.454548f;
+			return smi.breath.value < DUPLICANTSTATS.STANDARD.Breath.SUFFOCATE_AMOUNT;
 		}
-		return smi.breath.value < 72.72727f;
+		return smi.breath.value < DUPLICANTSTATS.STANDARD.Breath.RETREAT_AMOUNT;
 	}
 
 	private static Chore CreateRecoverBreathChore(BreathMonitor.Instance smi)
@@ -47,7 +48,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 
 	private static bool IsNotInBreathableArea(BreathMonitor.Instance smi)
 	{
-		return !smi.breather.IsBreathableElementAtCell(Grid.PosToCell(smi), null);
+		return smi.breather.IsSuffocating || !smi.breather.IsBreathableElementAtCell(Grid.PosToCell(smi), null);
 	}
 
 	private static void ShowBreathBar(BreathMonitor.Instance smi)
@@ -83,14 +84,17 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 
 	private static void UpdateRecoverBreathCell(BreathMonitor.Instance smi)
 	{
-		smi.query.Reset();
-		smi.navigator.RunQuery(smi.query);
-		int num = smi.query.GetResultCell();
-		if (!smi.breather.IsBreathableElementAtCell(num, null))
+		if (smi.canRecoverBreath)
 		{
-			num = PathFinder.InvalidCell;
+			smi.query.Reset();
+			smi.navigator.RunQuery(smi.query);
+			int num = smi.query.GetResultCell();
+			if (!smi.breather.IsBreathableElementAtCell(num, null))
+			{
+				num = PathFinder.InvalidCell;
+			}
+			smi.sm.recoverBreathCell.Set(num, smi, false);
 		}
-		smi.sm.recoverBreathCell.Set(num, smi, false);
 	}
 
 	public BreathMonitor.SatisfiedState satisfied;
@@ -141,5 +145,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		public Navigator navigator;
 
 		public OxygenBreather breather;
+
+		public bool canRecoverBreath = true;
 	}
 }

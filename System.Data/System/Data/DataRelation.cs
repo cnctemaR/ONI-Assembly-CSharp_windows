@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.Data
 {
-	[TypeConverter(typeof(RelationshipConverter))]
 	[DefaultProperty("RelationName")]
+	[TypeConverter(typeof(RelationshipConverter))]
 	public class DataRelation
 	{
 		public DataRelation(string relationName, DataColumn parentColumn, DataColumn childColumn)

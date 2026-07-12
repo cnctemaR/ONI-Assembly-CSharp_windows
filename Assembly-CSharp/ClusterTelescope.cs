@@ -299,7 +299,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 
 		private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
 		{
-			Worker worker = base.worker;
+			WorkerBase worker = base.worker;
 			if (worker == null)
 			{
 				return;
@@ -323,9 +323,12 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 				if (this.m_telescope.providesOxygen)
 				{
 					attributes.Add(this.radiationShielding);
-					this.workerGasProvider = component2.GetGasProvider();
-					component2.SetGasProvider(this);
-					component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
+					if (component2 != null)
+					{
+						this.workerGasProvider = component2.GetGasProvider();
+						component2.SetGasProvider(this);
+					}
+					worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 					component.AddTag(GameTags.Shaded, false);
 				}
 				base.GetComponent<Operational>().SetActive(true, false);
@@ -340,8 +343,11 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			if (this.m_telescope.providesOxygen)
 			{
 				attributes.Remove(this.radiationShielding);
-				component2.SetGasProvider(this.workerGasProvider);
-				component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+				if (component2 != null)
+				{
+					component2.SetGasProvider(this.workerGasProvider);
+				}
+				worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 				component.RemoveTag(GameTags.Shaded);
 			}
 			base.GetComponent<Operational>().SetActive(false, false);
@@ -363,12 +369,12 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return descriptors;
 		}
 
-		public override float GetEfficiencyMultiplier(Worker worker)
+		public override float GetEfficiencyMultiplier(WorkerBase worker)
 		{
 			return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.m_telescope.PercentClear);
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			AxialI analyzeTarget = this.m_telescope.GetAnalyzeTarget();
 			bool flag = false;
@@ -498,7 +504,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 
 		private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
 		{
-			Worker worker = base.worker;
+			WorkerBase worker = base.worker;
 			if (worker == null)
 			{
 				return;
@@ -571,7 +577,7 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			return descriptors;
 		}
 
-		protected override bool OnWorkTick(Worker worker, float dt)
+		protected override bool OnWorkTick(WorkerBase worker, float dt)
 		{
 			ClusterMapMeteorShower.Instance meteorTarget = this.m_telescope.GetMeteorTarget();
 			AxialI axialI = meteorTarget.ClusterGridPosition();

@@ -2,6 +2,5 @@
 
 namespace System.Runtime.Serialization
 {
-	[Serializable]
-	internal delegate void SerializationEventHandler(StreamingContext context);
+	public delegate void SerializationEventHandler(StreamingContext context);
 }

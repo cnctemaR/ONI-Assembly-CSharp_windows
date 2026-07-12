@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +41,7 @@ namespace System.IO
 			{
 				if (disposing)
 				{
-					this._unmanagedStream.Close();
+					this._unmanagedStream.Dispose();
 				}
 			}
 			finally
@@ -59,7 +57,7 @@ namespace System.IO
 
 		public override byte[] GetBuffer()
 		{
-			throw new UnauthorizedAccessException(Environment.GetResourceString("MemoryStream's internal buffer cannot be accessed."));
+			throw new UnauthorizedAccessException("MemoryStream's internal buffer cannot be accessed.");
 		}
 
 		public override bool TryGetBuffer(out ArraySegment<byte> buffer)
@@ -76,7 +74,7 @@ namespace System.IO
 			}
 			set
 			{
-				throw new IOException(Environment.GetResourceString("Unable to expand length of this stream beyond its capacity."));
+				throw new IOException("Unable to expand length of this stream beyond its capacity.");
 			}
 		}
 
@@ -100,9 +98,14 @@ namespace System.IO
 			}
 		}
 
-		public override int Read([In] [Out] byte[] buffer, int offset, int count)
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			return this._unmanagedStream.Read(buffer, offset, count);
+		}
+
+		public override int Read(Span<byte> buffer)
+		{
+			return this._unmanagedStream.Read(buffer);
 		}
 
 		public override int ReadByte()
@@ -115,25 +118,21 @@ namespace System.IO
 			return this._unmanagedStream.Seek(offset, loc);
 		}
 
-		[SecuritySafeCritical]
 		public override byte[] ToArray()
 		{
-			if (!this._unmanagedStream._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
-			if (!this._unmanagedStream.CanRead)
-			{
-				__Error.ReadNotSupported();
-			}
 			byte[] array = new byte[this._unmanagedStream.Length];
-			Buffer.Memcpy(array, 0, this._unmanagedStream.Pointer, 0, (int)this._unmanagedStream.Length);
+			this._unmanagedStream.Read(array, 0, (int)this._unmanagedStream.Length);
 			return array;
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)
 		{
 			this._unmanagedStream.Write(buffer, offset, count);
+		}
+
+		public override void Write(ReadOnlySpan<byte> buffer)
+		{
+			this._unmanagedStream.Write(buffer);
 		}
 
 		public override void WriteByte(byte value)
@@ -145,15 +144,7 @@ namespace System.IO
 		{
 			if (stream == null)
 			{
-				throw new ArgumentNullException("stream", Environment.GetResourceString("Stream cannot be null."));
-			}
-			if (!this._unmanagedStream._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
-			if (!this.CanRead)
-			{
-				__Error.ReadNotSupported();
+				throw new ArgumentNullException("stream", "Stream cannot be null.");
 			}
 			byte[] array = this.ToArray();
 			stream.Write(array, 0, array.Length);
@@ -172,23 +163,23 @@ namespace System.IO
 			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("bufferSize", "Positive number required.");
 			}
 			if (!this.CanRead && !this.CanWrite)
 			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed Stream."));
+				throw new ObjectDisposedException(null, "Cannot access a closed Stream.");
 			}
 			if (!destination.CanRead && !destination.CanWrite)
 			{
-				throw new ObjectDisposedException("destination", Environment.GetResourceString("Cannot access a closed Stream."));
+				throw new ObjectDisposedException("destination", "Cannot access a closed Stream.");
 			}
 			if (!this.CanRead)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
+				throw new NotSupportedException("Stream does not support reading.");
 			}
 			if (!destination.CanWrite)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
+				throw new NotSupportedException("Stream does not support writing.");
 			}
 			return this._unmanagedStream.CopyToAsync(destination, bufferSize, cancellationToken);
 		}
@@ -203,9 +194,19 @@ namespace System.IO
 			return this._unmanagedStream.ReadAsync(buffer, offset, count, cancellationToken);
 		}
 
+		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return this._unmanagedStream.ReadAsync(buffer, cancellationToken);
+		}
+
 		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
 			return this._unmanagedStream.WriteAsync(buffer, offset, count, cancellationToken);
+		}
+
+		public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+		{
+			return this._unmanagedStream.WriteAsync(buffer, cancellationToken);
 		}
 
 		private UnmanagedMemoryStream _unmanagedStream;

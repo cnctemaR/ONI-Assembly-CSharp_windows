@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security;
-using System.Security.Permissions;
 
 namespace System.Threading.Tasks
 {
 	[DebuggerDisplay("Concurrent={ConcurrentTaskCountForDebugger}, Exclusive={ExclusiveTaskCountForDebugger}, Mode={ModeForDebugger}")]
 	[DebuggerTypeProxy(typeof(ConcurrentExclusiveSchedulerPair.DebugView))]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class ConcurrentExclusiveSchedulerPair
 	{
 		private static int DefaultMaxConcurrencyLevel
@@ -24,7 +20,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_threadProcessingMapping;
+				return this.m_threadProcessingMode;
 			}
 		}
 
@@ -145,15 +141,18 @@ namespace System.Threading.Tasks
 				completionState.m_completionQueued = true;
 				ThreadPool.QueueUserWorkItem(delegate(object state)
 				{
-					ConcurrentExclusiveSchedulerPair.CompletionState completionState2 = (ConcurrentExclusiveSchedulerPair.CompletionState)state;
-					List<Exception> exceptions = completionState2.m_exceptions;
+					ConcurrentExclusiveSchedulerPair concurrentExclusiveSchedulerPair = (ConcurrentExclusiveSchedulerPair)state;
+					List<Exception> exceptions = concurrentExclusiveSchedulerPair.m_completionState.m_exceptions;
 					if (exceptions == null || exceptions.Count <= 0)
 					{
-						completionState2.TrySetResult(default(VoidTaskResult));
-						return;
+						concurrentExclusiveSchedulerPair.m_completionState.TrySetResult(default(VoidTaskResult));
 					}
-					completionState2.TrySetException(exceptions);
-				}, completionState);
+					else
+					{
+						concurrentExclusiveSchedulerPair.m_completionState.TrySetException(exceptions);
+					}
+					concurrentExclusiveSchedulerPair.m_threadProcessingMode.Dispose();
+				}, this);
 			}
 		}
 
@@ -257,7 +256,7 @@ namespace System.Threading.Tasks
 		{
 			try
 			{
-				this.m_threadProcessingMapping[Thread.CurrentThread.ManagedThreadId] = ConcurrentExclusiveSchedulerPair.ProcessingMode.ProcessingExclusiveTask;
+				this.m_threadProcessingMode.Value = ConcurrentExclusiveSchedulerPair.ProcessingMode.ProcessingExclusiveTask;
 				for (int i = 0; i < this.m_maxItemsPerTask; i++)
 				{
 					Task task;
@@ -273,8 +272,7 @@ namespace System.Threading.Tasks
 			}
 			finally
 			{
-				ConcurrentExclusiveSchedulerPair.ProcessingMode processingMode;
-				this.m_threadProcessingMapping.TryRemove(Thread.CurrentThread.ManagedThreadId, out processingMode);
+				this.m_threadProcessingMode.Value = ConcurrentExclusiveSchedulerPair.ProcessingMode.NotCurrentlyProcessing;
 				object valueLock = this.ValueLock;
 				lock (valueLock)
 				{
@@ -288,7 +286,7 @@ namespace System.Threading.Tasks
 		{
 			try
 			{
-				this.m_threadProcessingMapping[Thread.CurrentThread.ManagedThreadId] = ConcurrentExclusiveSchedulerPair.ProcessingMode.ProcessingConcurrentTasks;
+				this.m_threadProcessingMode.Value = ConcurrentExclusiveSchedulerPair.ProcessingMode.ProcessingConcurrentTasks;
 				for (int i = 0; i < this.m_maxItemsPerTask; i++)
 				{
 					Task task;
@@ -308,8 +306,7 @@ namespace System.Threading.Tasks
 			}
 			finally
 			{
-				ConcurrentExclusiveSchedulerPair.ProcessingMode processingMode;
-				this.m_threadProcessingMapping.TryRemove(Thread.CurrentThread.ManagedThreadId, out processingMode);
+				this.m_threadProcessingMode.Value = ConcurrentExclusiveSchedulerPair.ProcessingMode.NotCurrentlyProcessing;
 				object valueLock = this.ValueLock;
 				lock (valueLock)
 				{
@@ -348,7 +345,7 @@ namespace System.Threading.Tasks
 		}
 
 		[Conditional("DEBUG")]
-		internal static void ContractAssertMonitorStatus(object syncObj, bool held)
+		private static void ContractAssertMonitorStatus(object syncObj, bool held)
 		{
 		}
 
@@ -362,7 +359,7 @@ namespace System.Threading.Tasks
 			return taskCreationOptions;
 		}
 
-		private readonly ConcurrentDictionary<int, ConcurrentExclusiveSchedulerPair.ProcessingMode> m_threadProcessingMapping = new ConcurrentDictionary<int, ConcurrentExclusiveSchedulerPair.ProcessingMode>();
+		private readonly ThreadLocal<ConcurrentExclusiveSchedulerPair.ProcessingMode> m_threadProcessingMode = new ThreadLocal<ConcurrentExclusiveSchedulerPair.ProcessingMode>();
 
 		private readonly ConcurrentExclusiveSchedulerPair.ConcurrentExclusiveTaskScheduler m_concurrentTaskScheduler;
 
@@ -424,7 +421,6 @@ namespace System.Threading.Tasks
 				}
 			}
 
-			[SecurityCritical]
 			protected internal override void QueueTask(Task task)
 			{
 				object valueLock = this.m_pair.ValueLock;
@@ -432,20 +428,18 @@ namespace System.Threading.Tasks
 				{
 					if (this.m_pair.CompletionRequested)
 					{
-						throw new InvalidOperationException(base.GetType().Name);
+						throw new InvalidOperationException(base.GetType().ToString());
 					}
 					this.m_tasks.Enqueue(task);
 					this.m_pair.ProcessAsyncIfNecessary(false);
 				}
 			}
 
-			[SecuritySafeCritical]
 			internal void ExecuteTask(Task task)
 			{
 				base.TryExecuteTask(task);
 			}
 
-			[SecurityCritical]
 			protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
 			{
 				if (!taskWasPreviouslyQueued && this.m_pair.CompletionRequested)
@@ -457,8 +451,7 @@ namespace System.Threading.Tasks
 				{
 					return false;
 				}
-				ConcurrentExclusiveSchedulerPair.ProcessingMode processingMode;
-				if (!this.m_pair.m_threadProcessingMapping.TryGetValue(Thread.CurrentThread.ManagedThreadId, out processingMode) || processingMode != this.m_processingMode)
+				if (this.m_pair.m_threadProcessingMode.Value != this.m_processingMode)
 				{
 					return false;
 				}
@@ -490,14 +483,12 @@ namespace System.Threading.Tasks
 				return result;
 			}
 
-			[SecuritySafeCritical]
 			private static bool TryExecuteTaskShim(object state)
 			{
 				Tuple<ConcurrentExclusiveSchedulerPair.ConcurrentExclusiveTaskScheduler, Task> tuple = (Tuple<ConcurrentExclusiveSchedulerPair.ConcurrentExclusiveTaskScheduler, Task>)state;
 				return tuple.Item1.TryExecuteTask(tuple.Item2);
 			}
 
-			[SecurityCritical]
 			protected override IEnumerable<Task> GetScheduledTasks()
 			{
 				return this.m_tasks;

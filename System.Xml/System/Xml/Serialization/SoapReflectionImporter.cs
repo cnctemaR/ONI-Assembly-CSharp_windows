@@ -828,10 +828,12 @@ namespace System.Xml.Serialization
 				Type[] genericArguments2 = type.GetGenericArguments();
 				for (int i = 0; i < genericArguments.Length; i++)
 				{
-					string text2 = "{" + genericArguments[i] + "}";
-					if (text.Contains(text2))
+					string text2 = "{";
+					Type type2 = genericArguments[i];
+					string text3 = text2 + ((type2 != null) ? type2.ToString() : null) + "}";
+					if (text.Contains(text3))
 					{
-						text = text.Replace(text2, this.XsdTypeName(genericArguments2[i]));
+						text = text.Replace(text3, this.XsdTypeName(genericArguments2[i]));
 						if (text.IndexOf('{') < 0)
 						{
 							break;

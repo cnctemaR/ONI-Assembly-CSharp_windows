@@ -4,11 +4,11 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[NativeHeader("Modules/UI/Canvas.h")]
-	[NativeHeader("Modules/UI/RectTransformUtil.h")]
-	[NativeHeader("Runtime/Transform/RectTransform.h")]
 	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[NativeHeader("Modules/UI/RectTransformUtil.h")]
+	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	public sealed class RectTransformUtility
 	{
 		public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)
@@ -54,8 +54,9 @@ namespace UnityEngine
 			worldPoint = Vector2.zero;
 			Ray ray = RectTransformUtility.ScreenPointToRay(cam, screenPoint);
 			Plane plane = new Plane(rect.rotation * Vector3.back, rect.position);
-			float num;
-			bool flag = !plane.Raycast(ray, out num);
+			float num = 0f;
+			float num2 = Vector3.Dot(Vector3.Normalize(rect.position - ray.origin), plane.normal);
+			bool flag = num2 != 0f && !plane.Raycast(ray, out num);
 			bool flag2;
 			if (flag)
 			{

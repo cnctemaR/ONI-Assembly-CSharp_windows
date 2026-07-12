@@ -54,7 +54,7 @@ namespace MS.Internal.Xml.XPath
 			{
 				if (contextNode.MoveToId(array[i]))
 				{
-					base.Insert(this.outputBuffer, contextNode);
+					Query.Insert(this.outputBuffer, contextNode);
 				}
 			}
 		}

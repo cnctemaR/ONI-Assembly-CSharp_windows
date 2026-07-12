@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -261,7 +262,7 @@ namespace System.Net
 			{
 				return "(null)";
 			}
-			return value.GetType().Name + "#" + NetEventSource.GetHashCode(value);
+			return value.GetType().Name + "#" + NetEventSource.GetHashCode(value).ToString();
 		}
 
 		[NonEvent]
@@ -392,15 +393,27 @@ namespace System.Net
 								checked
 								{
 									ptr5 = stackalloc EventSource.EventData[unchecked((UIntPtr)4) * (UIntPtr)sizeof(EventSource.EventData)];
-									ptr5->DataPointer = (IntPtr)((void*)ptr);
 								}
-								ptr5->Size = (arg1.Length + 1) * 2;
-								ptr5[1].DataPointer = (IntPtr)((void*)ptr2);
-								ptr5[1].Size = (arg2.Length + 1) * 2;
-								ptr5[2].DataPointer = (IntPtr)((void*)ptr3);
-								ptr5[2].Size = (arg3.Length + 1) * 2;
-								ptr5[3].DataPointer = (IntPtr)((void*)ptr4);
-								ptr5[3].Size = (arg4.Length + 1) * 2;
+								*ptr5 = new EventSource.EventData
+								{
+									DataPointer = (IntPtr)((void*)ptr),
+									Size = (arg1.Length + 1) * 2
+								};
+								ptr5[1] = new EventSource.EventData
+								{
+									DataPointer = (IntPtr)((void*)ptr2),
+									Size = (arg2.Length + 1) * 2
+								};
+								ptr5[2] = new EventSource.EventData
+								{
+									DataPointer = (IntPtr)((void*)ptr3),
+									Size = (arg3.Length + 1) * 2
+								};
+								ptr5[3] = new EventSource.EventData
+								{
+									DataPointer = (IntPtr)((void*)ptr4),
+									Size = (arg4.Length + 1) * 2
+								};
 								base.WriteEventCore(eventId, 4, ptr5);
 							}
 						}
@@ -455,15 +468,27 @@ namespace System.Net
 						checked
 						{
 							ptr4 = stackalloc EventSource.EventData[unchecked((UIntPtr)4) * (UIntPtr)sizeof(EventSource.EventData)];
-							ptr4->DataPointer = (IntPtr)((void*)ptr);
 						}
-						ptr4->Size = (arg1.Length + 1) * 2;
-						ptr4[1].DataPointer = (IntPtr)((void*)ptr2);
-						ptr4[1].Size = (arg2.Length + 1) * 2;
-						ptr4[2].DataPointer = (IntPtr)((void*)(&num));
-						ptr4[2].Size = 4;
-						ptr4[3].DataPointer = (IntPtr)((void*)ptr3);
-						ptr4[3].Size = num;
+						*ptr4 = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr),
+							Size = (arg1.Length + 1) * 2
+						};
+						ptr4[1] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr2),
+							Size = (arg2.Length + 1) * 2
+						};
+						ptr4[2] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)(&num)),
+							Size = 4
+						};
+						ptr4[3] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr3),
+							Size = num
+						};
 						base.WriteEventCore(eventId, 4, ptr4);
 						array = null;
 					}
@@ -491,15 +516,27 @@ namespace System.Net
 					checked
 					{
 						ptr2 = stackalloc EventSource.EventData[unchecked((UIntPtr)4) * (UIntPtr)sizeof(EventSource.EventData)];
-						ptr2->DataPointer = (IntPtr)((void*)ptr);
 					}
-					ptr2->Size = (arg1.Length + 1) * 2;
-					ptr2[1].DataPointer = (IntPtr)((void*)(&arg2));
-					ptr2[1].Size = 4;
-					ptr2[2].DataPointer = (IntPtr)((void*)(&arg3));
-					ptr2[2].Size = 4;
-					ptr2[3].DataPointer = (IntPtr)((void*)(&arg4));
-					ptr2[3].Size = 4;
+					*ptr2 = new EventSource.EventData
+					{
+						DataPointer = (IntPtr)((void*)ptr),
+						Size = (arg1.Length + 1) * 2
+					};
+					ptr2[1] = new EventSource.EventData
+					{
+						DataPointer = (IntPtr)((void*)(&arg2)),
+						Size = 4
+					};
+					ptr2[2] = new EventSource.EventData
+					{
+						DataPointer = (IntPtr)((void*)(&arg3)),
+						Size = 4
+					};
+					ptr2[3] = new EventSource.EventData
+					{
+						DataPointer = (IntPtr)((void*)(&arg4)),
+						Size = 4
+					};
 					base.WriteEventCore(eventId, 4, ptr2);
 				}
 			}
@@ -536,13 +573,22 @@ namespace System.Net
 						checked
 						{
 							ptr3 = stackalloc EventSource.EventData[unchecked((UIntPtr)3) * (UIntPtr)sizeof(EventSource.EventData)];
-							ptr3->DataPointer = (IntPtr)((void*)ptr);
 						}
-						ptr3->Size = (arg1.Length + 1) * 2;
-						ptr3[1].DataPointer = (IntPtr)((void*)(&arg2));
-						ptr3[1].Size = 4;
-						ptr3[2].DataPointer = (IntPtr)((void*)ptr2);
-						ptr3[2].Size = (arg3.Length + 1) * 2;
+						*ptr3 = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr),
+							Size = (arg1.Length + 1) * 2
+						};
+						ptr3[1] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)(&arg2)),
+							Size = 4
+						};
+						ptr3[2] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr2),
+							Size = (arg3.Length + 1) * 2
+						};
 						base.WriteEventCore(eventId, 3, ptr3);
 					}
 				}
@@ -580,13 +626,22 @@ namespace System.Net
 						checked
 						{
 							ptr3 = stackalloc EventSource.EventData[unchecked((UIntPtr)3) * (UIntPtr)sizeof(EventSource.EventData)];
-							ptr3->DataPointer = (IntPtr)((void*)ptr);
 						}
-						ptr3->Size = (arg1.Length + 1) * 2;
-						ptr3[1].DataPointer = (IntPtr)((void*)ptr2);
-						ptr3[1].Size = (arg2.Length + 1) * 2;
-						ptr3[2].DataPointer = (IntPtr)((void*)(&arg3));
-						ptr3[2].Size = 4;
+						*ptr3 = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr),
+							Size = (arg1.Length + 1) * 2
+						};
+						ptr3[1] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)ptr2),
+							Size = (arg2.Length + 1) * 2
+						};
+						ptr3[2] = new EventSource.EventData
+						{
+							DataPointer = (IntPtr)((void*)(&arg3)),
+							Size = 4
+						};
 						base.WriteEventCore(eventId, 3, ptr3);
 					}
 				}
@@ -635,19 +690,133 @@ namespace System.Net
 							checked
 							{
 								ptr4 = stackalloc EventSource.EventData[unchecked((UIntPtr)4) * (UIntPtr)sizeof(EventSource.EventData)];
-								ptr4->DataPointer = (IntPtr)((void*)ptr);
 							}
-							ptr4->Size = (arg1.Length + 1) * 2;
-							ptr4[1].DataPointer = (IntPtr)((void*)ptr2);
-							ptr4[1].Size = (arg2.Length + 1) * 2;
-							ptr4[2].DataPointer = (IntPtr)((void*)ptr3);
-							ptr4[2].Size = (arg3.Length + 1) * 2;
-							ptr4[3].DataPointer = (IntPtr)((void*)(&arg4));
-							ptr4[3].Size = 4;
+							*ptr4 = new EventSource.EventData
+							{
+								DataPointer = (IntPtr)((void*)ptr),
+								Size = (arg1.Length + 1) * 2
+							};
+							ptr4[1] = new EventSource.EventData
+							{
+								DataPointer = (IntPtr)((void*)ptr2),
+								Size = (arg2.Length + 1) * 2
+							};
+							ptr4[2] = new EventSource.EventData
+							{
+								DataPointer = (IntPtr)((void*)ptr3),
+								Size = (arg3.Length + 1) * 2
+							};
+							ptr4[3] = new EventSource.EventData
+							{
+								DataPointer = (IntPtr)((void*)(&arg4)),
+								Size = 4
+							};
 							base.WriteEventCore(eventId, 4, ptr4);
 						}
 					}
 				}
+			}
+		}
+
+		[Event(10, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void AcquireDefaultCredential(string packageName, global::Interop.SspiCli.CredentialUse intent)
+		{
+			if (base.IsEnabled())
+			{
+				base.WriteEvent(10, new object[] { packageName, intent });
+			}
+		}
+
+		[NonEvent]
+		public void AcquireCredentialsHandle(string packageName, global::Interop.SspiCli.CredentialUse intent, object authdata)
+		{
+			if (base.IsEnabled())
+			{
+				this.AcquireCredentialsHandle(packageName, intent, NetEventSource.IdOf(authdata));
+			}
+		}
+
+		[Event(11, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void AcquireCredentialsHandle(string packageName, global::Interop.SspiCli.CredentialUse intent, string authdata)
+		{
+			if (base.IsEnabled())
+			{
+				this.WriteEvent(11, packageName, (int)intent, authdata);
+			}
+		}
+
+		[NonEvent]
+		public void InitializeSecurityContext(SafeFreeCredentials credential, SafeDeleteContext context, string targetName, global::Interop.SspiCli.ContextFlags inFlags)
+		{
+			if (base.IsEnabled())
+			{
+				this.InitializeSecurityContext(NetEventSource.IdOf(credential), NetEventSource.IdOf(context), targetName, inFlags);
+			}
+		}
+
+		[Event(12, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		private void InitializeSecurityContext(string credential, string context, string targetName, global::Interop.SspiCli.ContextFlags inFlags)
+		{
+			this.WriteEvent(12, credential, context, targetName, (int)inFlags);
+		}
+
+		[NonEvent]
+		public void AcceptSecurityContext(SafeFreeCredentials credential, SafeDeleteContext context, global::Interop.SspiCli.ContextFlags inFlags)
+		{
+			if (base.IsEnabled())
+			{
+				this.AcceptSecurityContext(NetEventSource.IdOf(credential), NetEventSource.IdOf(context), inFlags);
+			}
+		}
+
+		[Event(15, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		private void AcceptSecurityContext(string credential, string context, global::Interop.SspiCli.ContextFlags inFlags)
+		{
+			this.WriteEvent(15, credential, context, (int)inFlags);
+		}
+
+		[Event(16, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void OperationReturnedSomething(string operation, global::Interop.SECURITY_STATUS errorCode)
+		{
+			if (base.IsEnabled())
+			{
+				base.WriteEvent(16, new object[] { operation, errorCode });
+			}
+		}
+
+		[Event(13, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void SecurityContextInputBuffer(string context, int inputBufferSize, int outputBufferSize, global::Interop.SECURITY_STATUS errorCode)
+		{
+			if (base.IsEnabled())
+			{
+				this.WriteEvent(13, context, inputBufferSize, outputBufferSize, (int)errorCode);
+			}
+		}
+
+		[Event(14, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void SecurityContextInputBuffers(string context, int inputBuffersSize, int outputBufferSize, global::Interop.SECURITY_STATUS errorCode)
+		{
+			if (base.IsEnabled())
+			{
+				this.WriteEvent(14, context, inputBuffersSize, outputBufferSize, (int)errorCode);
+			}
+		}
+
+		[Event(8, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void EnumerateSecurityPackages(string securityPackage)
+		{
+			if (base.IsEnabled())
+			{
+				base.WriteEvent(8, securityPackage ?? "");
+			}
+		}
+
+		[Event(9, Keywords = (EventKeywords)1L, Level = EventLevel.Informational)]
+		public void SspiPackageNotFound(string packageName)
+		{
+			if (base.IsEnabled())
+			{
+				base.WriteEvent(9, packageName ?? "");
 			}
 		}
 
@@ -677,7 +846,25 @@ namespace System.Net
 
 		private const int DumpArrayEventId = 7;
 
-		private const int NextAvailableEventId = 8;
+		private const int EnumerateSecurityPackagesId = 8;
+
+		private const int SspiPackageNotFoundId = 9;
+
+		private const int AcquireDefaultCredentialId = 10;
+
+		private const int AcquireCredentialsHandleId = 11;
+
+		private const int InitializeSecurityContextId = 12;
+
+		private const int SecurityContextInputBufferId = 13;
+
+		private const int SecurityContextInputBuffersId = 14;
+
+		private const int AcceptSecuritContextId = 15;
+
+		private const int OperationReturnedSomethingId = 16;
+
+		private const int NextAvailableEventId = 17;
 
 		public class Keywords
 		{

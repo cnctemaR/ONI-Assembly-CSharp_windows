@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace UnityEngine.UI
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	[AddComponentMenu("UI/Text", 10)]
+	[AddComponentMenu("UI/Legacy/Text", 100)]
 	public class Text : MaskableGraphic, ILayoutElement
 	{
 		protected Text()
@@ -370,7 +370,15 @@ namespace UnityEngine.UI
 
 		internal void AssignDefaultFont()
 		{
-			this.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+			this.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+		}
+
+		internal void AssignDefaultFontIfNecessary()
+		{
+			if (this.font == null)
+			{
+				this.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+			}
 		}
 
 		public TextGenerationSettings GetGenerationSettings(Vector2 extents)

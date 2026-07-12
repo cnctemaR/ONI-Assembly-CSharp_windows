@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace System.Data.SqlTypes
 {
@@ -19,6 +20,11 @@ namespace System.Data.SqlTypes
 			: base(message, e)
 		{
 			base.HResult = -2146232015;
+		}
+
+		private SqlAlreadyFilledException(SerializationInfo si, StreamingContext sc)
+			: base(si, sc)
+		{
 		}
 	}
 }

@@ -183,7 +183,8 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 	private Dictionary<string, uint> DLCtoSteamIDMap = new Dictionary<string, uint>
 	{
 		{ "EXPANSION1_ID", 1452490U },
-		{ "DLC2_ID", 2952300U }
+		{ "DLC2_ID", 2952300U },
+		{ "DLC3_ID", 3302470U }
 	};
 
 	public class SteamUserId : DistributionPlatform.UserId

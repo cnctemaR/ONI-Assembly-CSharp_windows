@@ -42,7 +42,7 @@ public class UIPrefabLocalPool
 		{
 			int num;
 			GameObject gameObject;
-			keyValuePair.Deconstruct<int, GameObject>(out num, out gameObject);
+			keyValuePair.Deconstruct(out num, out gameObject);
 			int num2 = num;
 			GameObject gameObject2 = gameObject;
 			this.availableInstances.Add(num2, gameObject2);

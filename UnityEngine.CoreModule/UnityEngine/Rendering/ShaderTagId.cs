@@ -65,7 +65,7 @@ namespace UnityEngine.Rendering
 			return tagId.name;
 		}
 
-		public static readonly ShaderTagId none = default(ShaderTagId);
+		public static readonly ShaderTagId none;
 
 		private int m_Id;
 	}

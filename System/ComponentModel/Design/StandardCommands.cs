@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	public class StandardCommands
 	{
-		private static readonly Guid standardCommandSet = StandardCommands.ShellGuids.VSStandardCommandSet97;
+		private static readonly Guid s_standardCommandSet = StandardCommands.ShellGuids.VSStandardCommandSet97;
 
-		private static readonly Guid ndpCommandSet = new Guid("{74D21313-2AEE-11d1-8BFB-00A0C90F26F7}");
+		private static readonly Guid s_ndpCommandSet = new Guid("{74D21313-2AEE-11d1-8BFB-00A0C90F26F7}");
 
 		private const int cmdidDesignerVerbFirst = 8192;
 
@@ -22,115 +18,115 @@ namespace System.ComponentModel.Design
 
 		private const int cmdidShowLargeIcons = 12300;
 
-		public static readonly CommandID AlignBottom = new CommandID(StandardCommands.standardCommandSet, 1);
+		public static readonly CommandID AlignBottom = new CommandID(StandardCommands.s_standardCommandSet, 1);
 
-		public static readonly CommandID AlignHorizontalCenters = new CommandID(StandardCommands.standardCommandSet, 2);
+		public static readonly CommandID AlignHorizontalCenters = new CommandID(StandardCommands.s_standardCommandSet, 2);
 
-		public static readonly CommandID AlignLeft = new CommandID(StandardCommands.standardCommandSet, 3);
+		public static readonly CommandID AlignLeft = new CommandID(StandardCommands.s_standardCommandSet, 3);
 
-		public static readonly CommandID AlignRight = new CommandID(StandardCommands.standardCommandSet, 4);
+		public static readonly CommandID AlignRight = new CommandID(StandardCommands.s_standardCommandSet, 4);
 
-		public static readonly CommandID AlignToGrid = new CommandID(StandardCommands.standardCommandSet, 5);
+		public static readonly CommandID AlignToGrid = new CommandID(StandardCommands.s_standardCommandSet, 5);
 
-		public static readonly CommandID AlignTop = new CommandID(StandardCommands.standardCommandSet, 6);
+		public static readonly CommandID AlignTop = new CommandID(StandardCommands.s_standardCommandSet, 6);
 
-		public static readonly CommandID AlignVerticalCenters = new CommandID(StandardCommands.standardCommandSet, 7);
+		public static readonly CommandID AlignVerticalCenters = new CommandID(StandardCommands.s_standardCommandSet, 7);
 
-		public static readonly CommandID ArrangeBottom = new CommandID(StandardCommands.standardCommandSet, 8);
+		public static readonly CommandID ArrangeBottom = new CommandID(StandardCommands.s_standardCommandSet, 8);
 
-		public static readonly CommandID ArrangeRight = new CommandID(StandardCommands.standardCommandSet, 9);
+		public static readonly CommandID ArrangeRight = new CommandID(StandardCommands.s_standardCommandSet, 9);
 
-		public static readonly CommandID BringForward = new CommandID(StandardCommands.standardCommandSet, 10);
+		public static readonly CommandID BringForward = new CommandID(StandardCommands.s_standardCommandSet, 10);
 
-		public static readonly CommandID BringToFront = new CommandID(StandardCommands.standardCommandSet, 11);
+		public static readonly CommandID BringToFront = new CommandID(StandardCommands.s_standardCommandSet, 11);
 
-		public static readonly CommandID CenterHorizontally = new CommandID(StandardCommands.standardCommandSet, 12);
+		public static readonly CommandID CenterHorizontally = new CommandID(StandardCommands.s_standardCommandSet, 12);
 
-		public static readonly CommandID CenterVertically = new CommandID(StandardCommands.standardCommandSet, 13);
+		public static readonly CommandID CenterVertically = new CommandID(StandardCommands.s_standardCommandSet, 13);
 
-		public static readonly CommandID ViewCode = new CommandID(StandardCommands.standardCommandSet, 333);
+		public static readonly CommandID ViewCode = new CommandID(StandardCommands.s_standardCommandSet, 333);
 
-		public static readonly CommandID DocumentOutline = new CommandID(StandardCommands.standardCommandSet, 239);
+		public static readonly CommandID DocumentOutline = new CommandID(StandardCommands.s_standardCommandSet, 239);
 
-		public static readonly CommandID Copy = new CommandID(StandardCommands.standardCommandSet, 15);
+		public static readonly CommandID Copy = new CommandID(StandardCommands.s_standardCommandSet, 15);
 
-		public static readonly CommandID Cut = new CommandID(StandardCommands.standardCommandSet, 16);
+		public static readonly CommandID Cut = new CommandID(StandardCommands.s_standardCommandSet, 16);
 
-		public static readonly CommandID Delete = new CommandID(StandardCommands.standardCommandSet, 17);
+		public static readonly CommandID Delete = new CommandID(StandardCommands.s_standardCommandSet, 17);
 
-		public static readonly CommandID Group = new CommandID(StandardCommands.standardCommandSet, 20);
+		public static readonly CommandID Group = new CommandID(StandardCommands.s_standardCommandSet, 20);
 
-		public static readonly CommandID HorizSpaceConcatenate = new CommandID(StandardCommands.standardCommandSet, 21);
+		public static readonly CommandID HorizSpaceConcatenate = new CommandID(StandardCommands.s_standardCommandSet, 21);
 
-		public static readonly CommandID HorizSpaceDecrease = new CommandID(StandardCommands.standardCommandSet, 22);
+		public static readonly CommandID HorizSpaceDecrease = new CommandID(StandardCommands.s_standardCommandSet, 22);
 
-		public static readonly CommandID HorizSpaceIncrease = new CommandID(StandardCommands.standardCommandSet, 23);
+		public static readonly CommandID HorizSpaceIncrease = new CommandID(StandardCommands.s_standardCommandSet, 23);
 
-		public static readonly CommandID HorizSpaceMakeEqual = new CommandID(StandardCommands.standardCommandSet, 24);
+		public static readonly CommandID HorizSpaceMakeEqual = new CommandID(StandardCommands.s_standardCommandSet, 24);
 
-		public static readonly CommandID Paste = new CommandID(StandardCommands.standardCommandSet, 26);
+		public static readonly CommandID Paste = new CommandID(StandardCommands.s_standardCommandSet, 26);
 
-		public static readonly CommandID Properties = new CommandID(StandardCommands.standardCommandSet, 28);
+		public static readonly CommandID Properties = new CommandID(StandardCommands.s_standardCommandSet, 28);
 
-		public static readonly CommandID Redo = new CommandID(StandardCommands.standardCommandSet, 29);
+		public static readonly CommandID Redo = new CommandID(StandardCommands.s_standardCommandSet, 29);
 
-		public static readonly CommandID MultiLevelRedo = new CommandID(StandardCommands.standardCommandSet, 30);
+		public static readonly CommandID MultiLevelRedo = new CommandID(StandardCommands.s_standardCommandSet, 30);
 
-		public static readonly CommandID SelectAll = new CommandID(StandardCommands.standardCommandSet, 31);
+		public static readonly CommandID SelectAll = new CommandID(StandardCommands.s_standardCommandSet, 31);
 
-		public static readonly CommandID SendBackward = new CommandID(StandardCommands.standardCommandSet, 32);
+		public static readonly CommandID SendBackward = new CommandID(StandardCommands.s_standardCommandSet, 32);
 
-		public static readonly CommandID SendToBack = new CommandID(StandardCommands.standardCommandSet, 33);
+		public static readonly CommandID SendToBack = new CommandID(StandardCommands.s_standardCommandSet, 33);
 
-		public static readonly CommandID SizeToControl = new CommandID(StandardCommands.standardCommandSet, 35);
+		public static readonly CommandID SizeToControl = new CommandID(StandardCommands.s_standardCommandSet, 35);
 
-		public static readonly CommandID SizeToControlHeight = new CommandID(StandardCommands.standardCommandSet, 36);
+		public static readonly CommandID SizeToControlHeight = new CommandID(StandardCommands.s_standardCommandSet, 36);
 
-		public static readonly CommandID SizeToControlWidth = new CommandID(StandardCommands.standardCommandSet, 37);
+		public static readonly CommandID SizeToControlWidth = new CommandID(StandardCommands.s_standardCommandSet, 37);
 
-		public static readonly CommandID SizeToFit = new CommandID(StandardCommands.standardCommandSet, 38);
+		public static readonly CommandID SizeToFit = new CommandID(StandardCommands.s_standardCommandSet, 38);
 
-		public static readonly CommandID SizeToGrid = new CommandID(StandardCommands.standardCommandSet, 39);
+		public static readonly CommandID SizeToGrid = new CommandID(StandardCommands.s_standardCommandSet, 39);
 
-		public static readonly CommandID SnapToGrid = new CommandID(StandardCommands.standardCommandSet, 40);
+		public static readonly CommandID SnapToGrid = new CommandID(StandardCommands.s_standardCommandSet, 40);
 
-		public static readonly CommandID TabOrder = new CommandID(StandardCommands.standardCommandSet, 41);
+		public static readonly CommandID TabOrder = new CommandID(StandardCommands.s_standardCommandSet, 41);
 
-		public static readonly CommandID Undo = new CommandID(StandardCommands.standardCommandSet, 43);
+		public static readonly CommandID Undo = new CommandID(StandardCommands.s_standardCommandSet, 43);
 
-		public static readonly CommandID MultiLevelUndo = new CommandID(StandardCommands.standardCommandSet, 44);
+		public static readonly CommandID MultiLevelUndo = new CommandID(StandardCommands.s_standardCommandSet, 44);
 
-		public static readonly CommandID Ungroup = new CommandID(StandardCommands.standardCommandSet, 45);
+		public static readonly CommandID Ungroup = new CommandID(StandardCommands.s_standardCommandSet, 45);
 
-		public static readonly CommandID VertSpaceConcatenate = new CommandID(StandardCommands.standardCommandSet, 46);
+		public static readonly CommandID VertSpaceConcatenate = new CommandID(StandardCommands.s_standardCommandSet, 46);
 
-		public static readonly CommandID VertSpaceDecrease = new CommandID(StandardCommands.standardCommandSet, 47);
+		public static readonly CommandID VertSpaceDecrease = new CommandID(StandardCommands.s_standardCommandSet, 47);
 
-		public static readonly CommandID VertSpaceIncrease = new CommandID(StandardCommands.standardCommandSet, 48);
+		public static readonly CommandID VertSpaceIncrease = new CommandID(StandardCommands.s_standardCommandSet, 48);
 
-		public static readonly CommandID VertSpaceMakeEqual = new CommandID(StandardCommands.standardCommandSet, 49);
+		public static readonly CommandID VertSpaceMakeEqual = new CommandID(StandardCommands.s_standardCommandSet, 49);
 
-		public static readonly CommandID ShowGrid = new CommandID(StandardCommands.standardCommandSet, 103);
+		public static readonly CommandID ShowGrid = new CommandID(StandardCommands.s_standardCommandSet, 103);
 
-		public static readonly CommandID ViewGrid = new CommandID(StandardCommands.standardCommandSet, 125);
+		public static readonly CommandID ViewGrid = new CommandID(StandardCommands.s_standardCommandSet, 125);
 
-		public static readonly CommandID Replace = new CommandID(StandardCommands.standardCommandSet, 230);
+		public static readonly CommandID Replace = new CommandID(StandardCommands.s_standardCommandSet, 230);
 
-		public static readonly CommandID PropertiesWindow = new CommandID(StandardCommands.standardCommandSet, 235);
+		public static readonly CommandID PropertiesWindow = new CommandID(StandardCommands.s_standardCommandSet, 235);
 
-		public static readonly CommandID LockControls = new CommandID(StandardCommands.standardCommandSet, 369);
+		public static readonly CommandID LockControls = new CommandID(StandardCommands.s_standardCommandSet, 369);
 
-		public static readonly CommandID F1Help = new CommandID(StandardCommands.standardCommandSet, 377);
+		public static readonly CommandID F1Help = new CommandID(StandardCommands.s_standardCommandSet, 377);
 
-		public static readonly CommandID ArrangeIcons = new CommandID(StandardCommands.ndpCommandSet, 12298);
+		public static readonly CommandID ArrangeIcons = new CommandID(StandardCommands.s_ndpCommandSet, 12298);
 
-		public static readonly CommandID LineupIcons = new CommandID(StandardCommands.ndpCommandSet, 12299);
+		public static readonly CommandID LineupIcons = new CommandID(StandardCommands.s_ndpCommandSet, 12299);
 
-		public static readonly CommandID ShowLargeIcons = new CommandID(StandardCommands.ndpCommandSet, 12300);
+		public static readonly CommandID ShowLargeIcons = new CommandID(StandardCommands.s_ndpCommandSet, 12300);
 
-		public static readonly CommandID VerbFirst = new CommandID(StandardCommands.ndpCommandSet, 8192);
+		public static readonly CommandID VerbFirst = new CommandID(StandardCommands.s_ndpCommandSet, 8192);
 
-		public static readonly CommandID VerbLast = new CommandID(StandardCommands.ndpCommandSet, 8448);
+		public static readonly CommandID VerbLast = new CommandID(StandardCommands.s_ndpCommandSet, 8448);
 
 		private static class VSStandardCommands
 		{

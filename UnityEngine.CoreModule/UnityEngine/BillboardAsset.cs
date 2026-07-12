@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Graphics/BillboardRenderer.bindings.h")]
 	[NativeHeader("Runtime/Graphics/Billboard/BillboardAsset.h")]
+	[NativeHeader("Runtime/Export/Graphics/BillboardRenderer.bindings.h")]
 	public sealed class BillboardAsset : Object
 	{
 		public BillboardAsset()
@@ -101,7 +101,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoords", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetImageTexCoords([NotNull("ArgumentNullException")] Vector4[] imageTexCoords);
+		public extern void SetImageTexCoords([NotNull("ArgumentNullException")] [Unmarshalled] Vector4[] imageTexCoords);
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoordsInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -137,7 +137,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVertices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetVertices([NotNull("ArgumentNullException")] Vector2[] vertices);
+		public extern void SetVertices([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices);
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVerticesInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -173,7 +173,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndices", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetIndices([NotNull("ArgumentNullException")] ushort[] indices);
+		public extern void SetIndices([Unmarshalled] [NotNull("ArgumentNullException")] ushort[] indices);
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndicesInternalList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

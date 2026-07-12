@@ -68,6 +68,11 @@ namespace UnityEngine.Playables
 			this.EvaluateNextFrame();
 		}
 
+		internal void Play(FrameRate frameRate)
+		{
+			this.PlayOnFrame(frameRate);
+		}
+
 		public void Play(PlayableAsset asset)
 		{
 			bool flag = asset == null;
@@ -128,6 +133,12 @@ namespace UnityEngine.Playables
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Evaluate();
+
+		[NativeThrows]
+		private void PlayOnFrame(FrameRate frameRate)
+		{
+			this.PlayOnFrame_Injected(ref frameRate);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -259,6 +270,9 @@ namespace UnityEngine.Playables
 				this.stopped(this);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void PlayOnFrame_Injected(ref FrameRate frameRate);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ClearReferenceValue_Injected(ref PropertyName id);

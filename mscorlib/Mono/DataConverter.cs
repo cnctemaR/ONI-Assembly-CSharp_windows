@@ -272,7 +272,7 @@ namespace Mono
 					case '.':
 					case '/':
 					case '0':
-						goto IL_044B;
+						goto IL_0457;
 					case '$':
 						break;
 					case '%':
@@ -295,7 +295,7 @@ namespace Mono
 					default:
 						if (c != 'C')
 						{
-							goto IL_044B;
+							goto IL_0457;
 						}
 						b.Add(new byte[] { Convert.ToByte(oarg) });
 						return true;
@@ -315,7 +315,7 @@ namespace Mono
 					}
 					if (c != 'S')
 					{
-						goto IL_044B;
+						goto IL_0457;
 					}
 					b.Add(b.conv.GetBytes(Convert.ToUInt16(oarg)));
 					return true;
@@ -360,7 +360,7 @@ namespace Mono
 				case 'e':
 				case 'g':
 				case 'h':
-					goto IL_044B;
+					goto IL_0457;
 				case '^':
 					b.conv = DataConverter.BigEndian;
 					return false;
@@ -385,7 +385,7 @@ namespace Mono
 				default:
 					if (c != 'l')
 					{
-						goto IL_044B;
+						goto IL_0457;
 					}
 					b.Add(b.conv.GetBytes(Convert.ToInt64(oarg)));
 					return true;
@@ -405,7 +405,7 @@ namespace Mono
 				}
 				if (c != 'z')
 				{
-					goto IL_044B;
+					goto IL_0457;
 				}
 			}
 			bool flag = b.description[b.i] == 'z';
@@ -422,13 +422,13 @@ namespace Mono
 			{
 				encoding = Encoding.GetEncoding(12000);
 				int num3 = 4;
-				goto IL_0416;
+				goto IL_0423;
 			}
 			case '4':
 			{
 				encoding = Encoding.GetEncoding(12001);
 				int num3 = 4;
-				goto IL_0416;
+				goto IL_0423;
 			}
 			case '5':
 				break;
@@ -436,31 +436,31 @@ namespace Mono
 			{
 				encoding = Encoding.Unicode;
 				int num3 = 2;
-				goto IL_0416;
+				goto IL_0423;
 			}
 			case '7':
 			{
 				encoding = Encoding.UTF7;
 				int num3 = 1;
-				goto IL_0416;
+				goto IL_0423;
 			}
 			case '8':
 			{
 				encoding = Encoding.UTF8;
 				int num3 = 1;
-				goto IL_0416;
+				goto IL_0423;
 			}
 			default:
 				if (c2 == 'b')
 				{
 					encoding = Encoding.BigEndianUnicode;
 					int num3 = 2;
-					goto IL_0416;
+					goto IL_0423;
 				}
 				break;
 			}
 			throw new ArgumentException("Invalid format for $ specifier", "description");
-			IL_0416:
+			IL_0423:
 			if (b.align == -1)
 			{
 				b.align = 4;
@@ -473,7 +473,7 @@ namespace Mono
 				return true;
 			}
 			return true;
-			IL_044B:
+			IL_0457:
 			throw new ArgumentException(string.Format("invalid format specified `{0}'", b.description[b.i]));
 		}
 

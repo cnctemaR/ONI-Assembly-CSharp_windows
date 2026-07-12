@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Effects/Outline", 15)]
+	[AddComponentMenu("UI/Effects/Outline", 81)]
 	public class Outline : Shadow
 	{
 		protected Outline()
@@ -16,7 +17,7 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			List<UIVertex> list = ListPool<UIVertex>.Get();
+			List<UIVertex> list = CollectionPool<List<UIVertex>, UIVertex>.Get();
 			vh.GetUIVertexStream(list);
 			int num = list.Count * 5;
 			if (list.Capacity < num)
@@ -37,7 +38,7 @@ namespace UnityEngine.UI
 			base.ApplyShadowZeroAlloc(list, base.effectColor, num2, list.Count, -base.effectDistance.x, -base.effectDistance.y);
 			vh.Clear();
 			vh.AddUIVertexTriangleStream(list);
-			ListPool<UIVertex>.Release(list);
+			CollectionPool<List<UIVertex>, UIVertex>.Release(list);
 		}
 	}
 }

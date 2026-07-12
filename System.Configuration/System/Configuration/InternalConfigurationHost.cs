@@ -223,7 +223,7 @@ namespace System.Configuration
 		{
 			if (!this.IsDefinitionAllowed(configPath, allowDefinition, allowExeDefinition))
 			{
-				throw new ConfigurationErrorsException("The section can't be defined in this file (the allowed definition context is '" + allowDefinition + "').", errorInfo.Filename, errorInfo.LineNumber);
+				throw new ConfigurationErrorsException("The section can't be defined in this file (the allowed definition context is '" + allowDefinition.ToString() + "').", errorInfo.Filename, errorInfo.LineNumber);
 			}
 		}
 

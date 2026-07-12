@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Security.Permissions;
 using System.Threading.Tasks;
 
@@ -7,36 +6,9 @@ namespace System.Net.NetworkInformation
 {
 	public abstract class IPGlobalProperties
 	{
-		private static bool PlatformNeedsLibCWorkaround { get; }
-
 		public static IPGlobalProperties GetIPGlobalProperties()
 		{
-			PlatformID platform = Environment.OSVersion.Platform;
-			if (platform != PlatformID.Unix)
-			{
-				return new Win32IPGlobalProperties();
-			}
-			if (IPGlobalProperties.PlatformNeedsLibCWorkaround)
-			{
-				return new UnixNoLibCIPGlobalProperties();
-			}
-			if (Directory.Exists("/proc"))
-			{
-				MibIPGlobalProperties mibIPGlobalProperties = new MibIPGlobalProperties("/proc");
-				if (File.Exists(mibIPGlobalProperties.StatisticsFile))
-				{
-					return mibIPGlobalProperties;
-				}
-			}
-			if (Directory.Exists("/usr/compat/linux/proc"))
-			{
-				MibIPGlobalProperties mibIPGlobalProperties = new MibIPGlobalProperties("/usr/compat/linux/proc");
-				if (File.Exists(mibIPGlobalProperties.StatisticsFile))
-				{
-					return mibIPGlobalProperties;
-				}
-			}
-			return new UnixIPGlobalProperties();
+			return IPGlobalPropertiesFactoryPal.Create();
 		}
 
 		internal static IPGlobalProperties InternalGetIPGlobalProperties()

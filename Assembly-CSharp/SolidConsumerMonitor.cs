@@ -89,6 +89,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList2)
 			{
 				KPrefabID kprefabID = (KPrefabID)scenePartitionerEntry.obj;
+				Diet.Info dietInfo = diet.GetDietInfo(kprefabID.PrefabTag);
 				Vector3 vector = kprefabID.transform.GetPosition();
 				bool flag3 = kprefabID.HasTag(GameTags.PlantedOnFloorVessel);
 				if (flag3)
@@ -97,33 +98,48 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				}
 				int num4 = smi.GetCost(Grid.PosToCell(vector));
 				Vector3 vector2 = Vector3.zero;
-				if (smi.IsCloserThanTargetEdible(num4) && !kprefabID.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
+				if (smi.IsCloserThanTargetEdible(num4) && !kprefabID.HasAnyTags(SolidConsumerMonitor.creatureTags) && dietInfo != null)
 				{
 					if (kprefabID.HasTag(GameTags.Plant))
 					{
-						IPlantConsumptionInstructions plantConsumptionInstructions = kprefabID.GetComponent<IPlantConsumptionInstructions>();
-						plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : kprefabID.GetSMI<IPlantConsumptionInstructions>());
-						if (plantConsumptionInstructions == null || !plantConsumptionInstructions.CanPlantBeEaten())
+						IPlantConsumptionInstructions[] plantConsumptionInstructions = GameUtil.GetPlantConsumptionInstructions(kprefabID.gameObject);
+						if (plantConsumptionInstructions == null || plantConsumptionInstructions.Length == 0)
 						{
 							continue;
 						}
-						CellOffset[] allowedOffsets = plantConsumptionInstructions.GetAllowedOffsets();
-						if (allowedOffsets != null)
+						bool flag4 = false;
+						foreach (IPlantConsumptionInstructions plantConsumptionInstructions2 in plantConsumptionInstructions)
 						{
-							num4 = -1;
-							foreach (CellOffset cellOffset in allowedOffsets)
+							if (plantConsumptionInstructions2.CanPlantBeEaten() && dietInfo.foodType == plantConsumptionInstructions2.GetDietFoodType())
 							{
-								int cost2 = smi.GetCost(Grid.OffsetCell(Grid.PosToCell(vector), cellOffset));
-								if (cost2 != -1 && (num4 == -1 || cost2 < num4))
+								CellOffset[] allowedOffsets = plantConsumptionInstructions2.GetAllowedOffsets();
+								if (allowedOffsets != null)
 								{
-									num4 = cost2;
-									vector2 = cellOffset.ToVector3();
+									num4 = -1;
+									foreach (CellOffset cellOffset in allowedOffsets)
+									{
+										int cost2 = smi.GetCost(Grid.OffsetCell(Grid.PosToCell(vector), cellOffset));
+										if (cost2 != -1 && (num4 == -1 || cost2 < num4))
+										{
+											num4 = cost2;
+											vector2 = cellOffset.ToVector3();
+										}
+									}
+									if (num4 != -1)
+									{
+										flag4 = true;
+										break;
+									}
+								}
+								else
+								{
+									flag4 = true;
 								}
 							}
-							if (num4 == -1)
-							{
-								continue;
-							}
+						}
+						if (!flag4)
+						{
+							continue;
 						}
 					}
 					smi.SetTargetEdible(kprefabID.gameObject, num4);
@@ -135,7 +151,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		}
 		if (!flag2 && diet.CanEatAnyNonDirectlyEdiblePlant && smi.CanSearchForPickupables(flag))
 		{
-			bool flag4 = false;
+			bool flag5 = false;
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
 			foreach (ScenePartitionerEntry scenePartitionerEntry2 in pooledList3)
@@ -144,10 +160,10 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				KPrefabID kprefabID2 = pickupable.KPrefabID;
 				if (!kprefabID2.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID2.PrefabTag) != null)
 				{
-					bool flag5;
-					smi.ProcessEdible(pickupable.gameObject, out flag5);
+					bool flag6;
+					smi.ProcessEdible(pickupable.gameObject, out flag6);
 					smi.targetEdibleOffset = Vector3.zero;
-					flag4 = flag4 || flag5;
+					flag5 = flag5 || flag6;
 				}
 			}
 			pooledList3.Recycle();
@@ -261,8 +277,14 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, properName, kprefabID.transform, 1.5f, false);
 			float num = amountInstance.GetMax() - amountInstance.value;
 			float num2 = dietInfo.ConvertCaloriesToConsumptionMass(num);
-			IPlantConsumptionInstructions plantConsumptionInstructions = kprefabID.GetComponent<IPlantConsumptionInstructions>();
-			plantConsumptionInstructions = ((plantConsumptionInstructions != null) ? plantConsumptionInstructions : kprefabID.GetSMI<IPlantConsumptionInstructions>());
+			IPlantConsumptionInstructions plantConsumptionInstructions = null;
+			foreach (IPlantConsumptionInstructions plantConsumptionInstructions3 in GameUtil.GetPlantConsumptionInstructions(kprefabID.gameObject))
+			{
+				if (dietInfo.foodType == plantConsumptionInstructions3.GetDietFoodType())
+				{
+					plantConsumptionInstructions = plantConsumptionInstructions3;
+				}
+			}
 			if (plantConsumptionInstructions != null)
 			{
 				num2 = plantConsumptionInstructions.ConsumePlant(num2);
@@ -286,6 +308,11 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			};
 			base.Trigger(-2038961714, caloriesConsumedEvent);
 			this.targetEdible = null;
+		}
+
+		public string[] GetTargetEdibleEatAnims()
+		{
+			return this.diet.GetDietInfo(this.targetEdible.PrefabID()).eatAnims;
 		}
 
 		private const int RECALC_THRESHOLD = 4;

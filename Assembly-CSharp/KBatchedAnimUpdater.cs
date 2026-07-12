@@ -384,6 +384,10 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			return;
 		}
 		KBatchedAnimController component = transform.GetComponent<KBatchedAnimController>();
+		if (component == null)
+		{
+			return;
+		}
 		int instanceID = component.GetInstanceID();
 		KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = default(KBatchedAnimUpdater.ControllerChunkInfo);
 		DebugUtil.Assert(this.controllerChunkInfos.TryGetValue(instanceID, out controllerChunkInfo));

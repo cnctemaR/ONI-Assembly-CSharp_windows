@@ -62,9 +62,22 @@ namespace System.IO.Compression
 		{
 		}
 
+		~DeflateStream()
+		{
+			this.Dispose(false);
+		}
+
 		protected override void Dispose(bool disposing)
 		{
-			this.native.Dispose(disposing);
+			if (disposing)
+			{
+				GC.SuppressFinalize(this);
+			}
+			DeflateStreamNative deflateStreamNative = this.native;
+			if (deflateStreamNative != null)
+			{
+				deflateStreamNative.Dispose(disposing);
+			}
 			if (disposing && !this.disposed)
 			{
 				this.disposed = true;
@@ -102,12 +115,15 @@ namespace System.IO.Compression
 
 		internal ValueTask<int> ReadAsyncMemory(Memory<byte> destination, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			return base.ReadAsync(destination, cancellationToken);
 		}
 
 		internal int ReadCore(Span<byte> destination)
 		{
-			throw new NotImplementedException();
+			byte[] array = new byte[destination.Length];
+			int num = this.Read(array, 0, array.Length);
+			array.AsSpan<byte>(0, num).CopyTo(destination);
+			return num;
 		}
 
 		public override int Read(byte[] array, int offset, int count)
@@ -162,14 +178,14 @@ namespace System.IO.Compression
 			}
 		}
 
-		internal Task WriteAsyncMemory(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+		internal ValueTask WriteAsyncMemory(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			return base.WriteAsync(source, cancellationToken);
 		}
 
 		internal void WriteCore(ReadOnlySpan<byte> source)
 		{
-			throw new NotImplementedException();
+			this.Write(source.ToArray(), 0, source.Length);
 		}
 
 		public override void Write(byte[] array, int offset, int count)

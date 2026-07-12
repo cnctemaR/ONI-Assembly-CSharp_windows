@@ -12,7 +12,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this._list = new ArrayList();
 		}
 
-		internal X509ExtensionCollection(Mono.Security.X509.X509Certificate cert)
+		internal X509ExtensionCollection(X509Certificate cert)
 		{
 			this._list = new ArrayList(cert.Extensions.Count);
 			if (cert.Extensions.Count == 0)
@@ -21,7 +21,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			foreach (object obj in cert.Extensions)
 			{
-				Mono.Security.X509.X509Extension x509Extension = (Mono.Security.X509.X509Extension)obj;
+				X509Extension x509Extension = (X509Extension)obj;
 				bool critical = x509Extension.Critical;
 				string oid = x509Extension.Oid;
 				byte[] array = null;
@@ -30,14 +30,14 @@ namespace System.Security.Cryptography.X509Certificates
 				{
 					array = value[0].GetBytes();
 				}
-				global::System.Security.Cryptography.X509Certificates.X509Extension x509Extension2 = (global::System.Security.Cryptography.X509Certificates.X509Extension)CryptoConfig.CreateFromName(oid, new object[]
+				X509Extension x509Extension2 = (X509Extension)CryptoConfig.CreateFromName(oid, new object[]
 				{
-					new AsnEncodedData(oid, array ?? global::System.Security.Cryptography.X509Certificates.X509ExtensionCollection.Empty),
+					new AsnEncodedData(oid, array ?? X509ExtensionCollection.Empty),
 					critical
 				});
 				if (x509Extension2 == null)
 				{
-					x509Extension2 = new global::System.Security.Cryptography.X509Certificates.X509Extension(oid, array ?? global::System.Security.Cryptography.X509Certificates.X509ExtensionCollection.Empty, critical);
+					x509Extension2 = new X509Extension(oid, array ?? X509ExtensionCollection.Empty, critical);
 				}
 				this._list.Add(x509Extension2);
 			}
@@ -67,7 +67,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		public global::System.Security.Cryptography.X509Certificates.X509Extension this[int index]
+		public X509Extension this[int index]
 		{
 			get
 			{
@@ -75,11 +75,11 @@ namespace System.Security.Cryptography.X509Certificates
 				{
 					throw new InvalidOperationException("index");
 				}
-				return (global::System.Security.Cryptography.X509Certificates.X509Extension)this._list[index];
+				return (X509Extension)this._list[index];
 			}
 		}
 
-		public global::System.Security.Cryptography.X509Certificates.X509Extension this[string oid]
+		public X509Extension this[string oid]
 		{
 			get
 			{
@@ -93,7 +93,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				foreach (object obj in this._list)
 				{
-					global::System.Security.Cryptography.X509Certificates.X509Extension x509Extension = (global::System.Security.Cryptography.X509Certificates.X509Extension)obj;
+					X509Extension x509Extension = (X509Extension)obj;
 					if (x509Extension.Oid.Value.Equals(oid))
 					{
 						return x509Extension;
@@ -103,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		public int Add(global::System.Security.Cryptography.X509Certificates.X509Extension extension)
+		public int Add(X509Extension extension)
 		{
 			if (extension == null)
 			{
@@ -112,7 +112,7 @@ namespace System.Security.Cryptography.X509Certificates
 			return this._list.Add(extension);
 		}
 
-		public void CopyTo(global::System.Security.Cryptography.X509Certificates.X509Extension[] array, int index)
+		public void CopyTo(X509Extension[] array, int index)
 		{
 			if (array == null)
 			{

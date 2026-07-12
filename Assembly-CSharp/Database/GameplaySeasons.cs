@@ -43,6 +43,7 @@ namespace Database
 		private void DLCSeasons()
 		{
 			this.CeresMeteorShowers = base.Add(new MeteorShowerSeason("CeresMeteorShowers", GameplaySeason.Type.World, "DLC2_ID", 20f, false, -1f, true, -1, 10f, float.PositiveInfinity, 1, true, 6000f).AddEvent(Db.Get().GameplayEvents.ClusterIceAndTreesShower));
+			this.MiniCeresStartShowers = base.Add(new MeteorShowerSeason("MiniCeresStartShowers", GameplaySeason.Type.World, "EXPANSION1_ID", 20f, false, -1f, true, -1, 0f, float.PositiveInfinity, 1, true, 6000f).AddEvent(Db.Get().GameplayEvents.ClusterOxyliteShower).AddEvent(Db.Get().GameplayEvents.ClusterSnowShower));
 		}
 
 		private void UnusedSeasons()
@@ -92,6 +93,8 @@ namespace Database
 		public GameplaySeason MiniFlippedMeteorShowers;
 
 		public GameplaySeason MiniRadioactiveOceanMeteorShowers;
+
+		public GameplaySeason MiniCeresStartShowers;
 
 		public GameplaySeason CeresMeteorShowers;
 	}

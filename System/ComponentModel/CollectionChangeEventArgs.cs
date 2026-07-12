@@ -1,35 +1,17 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CollectionChangeEventArgs : EventArgs
 	{
 		public CollectionChangeEventArgs(CollectionChangeAction action, object element)
 		{
-			this.action = action;
-			this.element = element;
+			this.Action = action;
+			this.Element = element;
 		}
 
-		public virtual CollectionChangeAction Action
-		{
-			get
-			{
-				return this.action;
-			}
-		}
+		public virtual CollectionChangeAction Action { get; }
 
-		public virtual object Element
-		{
-			get
-			{
-				return this.element;
-			}
-		}
-
-		private CollectionChangeAction action;
-
-		private object element;
+		public virtual object Element { get; }
 	}
 }

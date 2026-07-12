@@ -33,7 +33,7 @@ namespace System.Net
 			IPHostEntry hostEntry = e.HostEntry;
 			if (hostEntry == null || e.ResolverError != ResolverError.NoError)
 			{
-				dnsAsyncResult.SetCompleted(false, new Exception("Error: " + e.ResolverError));
+				dnsAsyncResult.SetCompleted(false, new Exception("Error: " + e.ResolverError.ToString()));
 				return;
 			}
 			dnsAsyncResult.SetCompleted(false, hostEntry);
@@ -229,13 +229,13 @@ namespace System.Net
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetHostByName_internal(string host, out string h_name, out string[] h_aliases, out string[] h_addr_list, int hint);
+		private static extern bool GetHostByName_icall(string host, out string h_name, out string[] h_aliases, out string[] h_addr_list, int hint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetHostByAddr_internal(string addr, out string h_name, out string[] h_aliases, out string[] h_addr_list, int hint);
+		private static extern bool GetHostByAddr_icall(string addr, out string h_name, out string[] h_aliases, out string[] h_addr_list, int hint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetHostName_internal(out string h_name);
+		private static extern bool GetHostName_icall(out string h_name);
 
 		private static void Error_11001(string hostName)
 		{
@@ -253,7 +253,7 @@ namespace System.Net
 				try
 				{
 					IPAddress ipaddress = IPAddress.Parse(h_addrlist[i]);
-					if ((Socket.SupportsIPv6 && ipaddress.AddressFamily == AddressFamily.InterNetworkV6) || (Socket.SupportsIPv4 && ipaddress.AddressFamily == AddressFamily.InterNetwork))
+					if ((Socket.OSSupportsIPv6 && ipaddress.AddressFamily == AddressFamily.InterNetworkV6) || (Socket.OSSupportsIPv4 && ipaddress.AddressFamily == AddressFamily.InterNetwork))
 					{
 						arrayList.Add(ipaddress);
 					}
@@ -304,7 +304,7 @@ namespace System.Net
 			string text;
 			string[] array;
 			string[] array2;
-			if (!Dns.GetHostByAddr_internal(address, out text, out array, out array2, Socket.FamilyHint))
+			if (!Dns.GetHostByAddr_icall(address, out text, out array, out array2, Socket.FamilyHint))
 			{
 				Dns.Error_11001(address);
 			}
@@ -366,7 +366,7 @@ namespace System.Net
 			string text;
 			string[] array;
 			string[] array2;
-			if (!Dns.GetHostByName_internal(hostName, out text, out array, out array2, Socket.FamilyHint))
+			if (!Dns.GetHostByName_icall(hostName, out text, out array, out array2, Socket.FamilyHint))
 			{
 				Dns.Error_11001(hostName);
 			}
@@ -376,7 +376,7 @@ namespace System.Net
 		public static string GetHostName()
 		{
 			string text;
-			if (!Dns.GetHostName_internal(out text))
+			if (!Dns.GetHostName_icall(out text))
 			{
 				Dns.Error_11001(text);
 			}

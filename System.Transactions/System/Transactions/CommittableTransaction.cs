@@ -13,12 +13,14 @@ namespace System.Transactions
 		}
 
 		public CommittableTransaction(TimeSpan timeout)
+			: base(IsolationLevel.Serializable)
 		{
 			this.options = default(TransactionOptions);
 			this.options.Timeout = timeout;
 		}
 
 		public CommittableTransaction(TransactionOptions options)
+			: base(options.IsolationLevel)
 		{
 			this.options = options;
 		}

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data.Common;
 using System.Data.ProviderBase;
+using System.IO;
+using System.Reflection;
 
 namespace System.Data.Odbc
 {
@@ -36,6 +38,17 @@ namespace System.Data.Odbc
 		internal override DbConnectionPoolGroupProviderInfo CreateConnectionPoolGroupProviderInfo(DbConnectionOptions connectionOptions)
 		{
 			return new OdbcConnectionPoolGroupProviderInfo();
+		}
+
+		protected override DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
+		{
+			cacheMetaDataFactory = false;
+			OdbcConnection outerConnection = ((OdbcConnectionOpen)internalConnection).OuterConnection;
+			string infoStringUnhandled = outerConnection.GetInfoStringUnhandled(ODBC32.SQL_INFO.DRIVER_NAME);
+			Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.Odbc.OdbcMetaData.xml");
+			cacheMetaDataFactory = true;
+			string infoStringUnhandled2 = outerConnection.GetInfoStringUnhandled(ODBC32.SQL_INFO.DBMS_VER);
+			return new OdbcMetaDataFactory(manifestResourceStream, infoStringUnhandled2, infoStringUnhandled2, outerConnection);
 		}
 
 		internal override DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection)

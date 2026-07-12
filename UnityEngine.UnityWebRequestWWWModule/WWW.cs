@@ -319,8 +319,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Please use WWW.text instead. (UnityUpgradable) -> text", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use WWW.text instead. (UnityUpgradable) -> text", true)]
 		public string data
 		{
 			get

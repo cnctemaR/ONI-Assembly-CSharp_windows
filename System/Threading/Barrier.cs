@@ -6,8 +6,8 @@ using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[DebuggerDisplay("Participant Count={ParticipantCount},Participants Remaining={ParticipantsRemaining}")]
 	[ComVisible(false)]
+	[DebuggerDisplay("Participant Count={ParticipantCount},Participants Remaining={ParticipantsRemaining}")]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Barrier : IDisposable
 	{
@@ -51,7 +51,7 @@ namespace System.Threading
 		{
 			if (participantCount < 0 || participantCount > 32767)
 			{
-				throw new ArgumentOutOfRangeException("participantCount", participantCount, global::SR.GetString("The participantCount argument must be non-negative and less than or equal to 32767."));
+				throw new ArgumentOutOfRangeException("participantCount", participantCount, SR.GetString("The participantCount argument must be non-negative and less than or equal to 32767."));
 			}
 			this.m_currentTotalCount = participantCount;
 			this.m_postPhaseAction = postPhaseAction;
@@ -90,7 +90,7 @@ namespace System.Threading
 			}
 			catch (ArgumentOutOfRangeException)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
+				throw new InvalidOperationException(SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
 			}
 			return num;
 		}
@@ -100,15 +100,15 @@ namespace System.Threading
 			this.ThrowIfDisposed();
 			if (participantCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("participantCount", participantCount, global::SR.GetString("The participantCount argument must be a positive value."));
+				throw new ArgumentOutOfRangeException("participantCount", participantCount, SR.GetString("The participantCount argument must be a positive value."));
 			}
 			if (participantCount > 32767)
 			{
-				throw new ArgumentOutOfRangeException("participantCount", global::SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
+				throw new ArgumentOutOfRangeException("participantCount", SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
 			}
 			if (this.m_actionCallerID != 0 && Thread.CurrentThread.ManagedThreadId == this.m_actionCallerID)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This method may not be called from within the postPhaseAction."));
+				throw new InvalidOperationException(SR.GetString("This method may not be called from within the postPhaseAction."));
 			}
 			SpinWait spinWait = default(SpinWait);
 			bool flag;
@@ -128,7 +128,7 @@ namespace System.Threading
 				}
 				spinWait.SpinOnce();
 			}
-			throw new ArgumentOutOfRangeException("participantCount", global::SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
+			throw new ArgumentOutOfRangeException("participantCount", SR.GetString("Adding participantCount participants would result in the number of participants exceeding the maximum number allowed."));
 			Block_6:
 			long currentPhaseNumber = this.CurrentPhaseNumber;
 			long num3 = ((flag != (currentPhaseNumber % 2L == 0L)) ? (currentPhaseNumber + 1L) : currentPhaseNumber);
@@ -164,11 +164,11 @@ namespace System.Threading
 			this.ThrowIfDisposed();
 			if (participantCount < 1)
 			{
-				throw new ArgumentOutOfRangeException("participantCount", participantCount, global::SR.GetString("The participantCount argument must be a positive value."));
+				throw new ArgumentOutOfRangeException("participantCount", participantCount, SR.GetString("The participantCount argument must be a positive value."));
 			}
 			if (this.m_actionCallerID != 0 && Thread.CurrentThread.ManagedThreadId == this.m_actionCallerID)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This method may not be called from within the postPhaseAction."));
+				throw new InvalidOperationException(SR.GetString("This method may not be called from within the postPhaseAction."));
 			}
 			SpinWait spinWait = default(SpinWait);
 			bool flag;
@@ -200,9 +200,9 @@ namespace System.Threading
 				}
 				spinWait.SpinOnce();
 			}
-			throw new ArgumentOutOfRangeException("participantCount", global::SR.GetString("The participantCount argument must be less than or equal the number of participants."));
+			throw new ArgumentOutOfRangeException("participantCount", SR.GetString("The participantCount argument must be less than or equal the number of participants."));
 			Block_5:
-			throw new InvalidOperationException(global::SR.GetString("The participantCount argument is greater than the number of participants that haven't yet arrived at the barrier in this phase."));
+			throw new InvalidOperationException(SR.GetString("The participantCount argument is greater than the number of participants that haven't yet arrived at the barrier in this phase."));
 			Block_8:
 			this.FinishPhase(flag);
 		}
@@ -227,7 +227,7 @@ namespace System.Threading
 			long num = (long)timeout.TotalMilliseconds;
 			if (num < -1L || num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("timeout", timeout, global::SR.GetString("The specified timeout must represent a value between -1 and Int32.MaxValue, inclusive."));
+				throw new ArgumentOutOfRangeException("timeout", timeout, SR.GetString("The specified timeout must represent a value between -1 and Int32.MaxValue, inclusive."));
 			}
 			return this.SignalAndWait((int)timeout.TotalMilliseconds, cancellationToken);
 		}
@@ -243,11 +243,11 @@ namespace System.Threading
 			cancellationToken.ThrowIfCancellationRequested();
 			if (millisecondsTimeout < -1)
 			{
-				throw new ArgumentOutOfRangeException("millisecondsTimeout", millisecondsTimeout, global::SR.GetString("The specified timeout must represent a value between -1 and Int32.MaxValue, inclusive."));
+				throw new ArgumentOutOfRangeException("millisecondsTimeout", millisecondsTimeout, SR.GetString("The specified timeout must represent a value between -1 and Int32.MaxValue, inclusive."));
 			}
 			if (this.m_actionCallerID != 0 && Thread.CurrentThread.ManagedThreadId == this.m_actionCallerID)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This method may not be called from within the postPhaseAction."));
+				throw new InvalidOperationException(SR.GetString("This method may not be called from within the postPhaseAction."));
 			}
 			SpinWait spinWait = default(SpinWait);
 			bool flag;
@@ -280,9 +280,9 @@ namespace System.Threading
 				}
 				spinWait.SpinOnce();
 			}
-			throw new InvalidOperationException(global::SR.GetString("The barrier has no registered participants."));
+			throw new InvalidOperationException(SR.GetString("The barrier has no registered participants."));
 			Block_6:
-			throw new InvalidOperationException(global::SR.GetString("The number of threads using the barrier exceeded the total number of registered participants."));
+			throw new InvalidOperationException(SR.GetString("The number of threads using the barrier exceeded the total number of registered participants."));
 			Block_8:
 			this.FinishPhase(flag);
 			return true;
@@ -331,7 +331,7 @@ namespace System.Threading
 				Block_13:
 				if (flag2)
 				{
-					throw new OperationCanceledException(global::SR.GetString("The operation was canceled."), cancellationToken);
+					throw new OperationCanceledException(SR.GetString("The operation was canceled."), cancellationToken);
 				}
 				return false;
 			}
@@ -446,7 +446,7 @@ namespace System.Threading
 		{
 			if (this.m_actionCallerID != 0 && Thread.CurrentThread.ManagedThreadId == this.m_actionCallerID)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This method may not be called from within the postPhaseAction."));
+				throw new InvalidOperationException(SR.GetString("This method may not be called from within the postPhaseAction."));
 			}
 			this.Dispose(true);
 			GC.SuppressFinalize(this);
@@ -474,7 +474,7 @@ namespace System.Threading
 		{
 			if (this.m_disposed)
 			{
-				throw new ObjectDisposedException("Barrier", global::SR.GetString("The barrier has been disposed."));
+				throw new ObjectDisposedException("Barrier", SR.GetString("The barrier has been disposed."));
 			}
 		}
 

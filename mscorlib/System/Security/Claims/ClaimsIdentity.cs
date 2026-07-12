@@ -285,17 +285,17 @@ namespace System.Security.Claims
 				}
 				if (this.m_externalClaims != null)
 				{
-					for (int j = 0; j < this.m_externalClaims.Count; j = num + 1)
+					for (int i = 0; i < this.m_externalClaims.Count; i = num + 1)
 					{
-						if (this.m_externalClaims[j] != null)
+						if (this.m_externalClaims[i] != null)
 						{
-							foreach (Claim claim in this.m_externalClaims[j])
+							foreach (Claim claim in this.m_externalClaims[i])
 							{
 								yield return claim;
 							}
 							IEnumerator<Claim> enumerator = null;
 						}
-						num = j;
+						num = i;
 					}
 				}
 				yield break;
@@ -585,8 +585,8 @@ namespace System.Security.Claims
 			this.m_serializedRoleType = this.m_roleType;
 		}
 
-		[SecurityCritical]
 		[OnDeserialized]
+		[SecurityCritical]
 		private void OnDeserializedMethod(StreamingContext context)
 		{
 			if (this is ISerializable)

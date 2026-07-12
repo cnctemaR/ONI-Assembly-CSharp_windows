@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Apple
 {
+	[NativeConditional("PLATFORM_APPLE")]
 	[NativeHeader("Runtime/Export/Apple/FrameCaptureMetalScriptBindings.h")]
-	[NativeConditional("PLATFORM_IOS || PLATFORM_TVOS || PLATFORM_OSX")]
 	public class FrameCapture
 	{
 		private FrameCapture()

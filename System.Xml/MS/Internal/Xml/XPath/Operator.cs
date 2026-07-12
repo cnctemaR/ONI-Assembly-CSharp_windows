@@ -7,14 +7,14 @@ namespace MS.Internal.Xml.XPath
 	{
 		public static Operator.Op InvertOperator(Operator.Op op)
 		{
-			return Operator.invertOp[(int)op];
+			return Operator.s_invertOp[(int)op];
 		}
 
 		public Operator(Operator.Op op, AstNode opnd1, AstNode opnd2)
 		{
-			this.opType = op;
-			this.opnd1 = opnd1;
-			this.opnd2 = opnd2;
+			this._opType = op;
+			this._opnd1 = opnd1;
+			this._opnd2 = opnd2;
 		}
 
 		public override AstNode.AstType Type
@@ -29,11 +29,11 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				if (this.opType <= Operator.Op.GE)
+				if (this._opType <= Operator.Op.GE)
 				{
 					return XPathResultType.Boolean;
 				}
-				if (this.opType <= Operator.Op.MOD)
+				if (this._opType <= Operator.Op.MOD)
 				{
 					return XPathResultType.Number;
 				}
@@ -45,7 +45,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.opType;
+				return this._opType;
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.opnd1;
+				return this._opnd1;
 			}
 		}
 
@@ -61,11 +61,11 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.opnd2;
+				return this._opnd2;
 			}
 		}
 
-		private static Operator.Op[] invertOp = new Operator.Op[]
+		private static Operator.Op[] s_invertOp = new Operator.Op[]
 		{
 			Operator.Op.INVALID,
 			Operator.Op.INVALID,
@@ -78,11 +78,11 @@ namespace MS.Internal.Xml.XPath
 			Operator.Op.LE
 		};
 
-		private Operator.Op opType;
+		private Operator.Op _opType;
 
-		private AstNode opnd1;
+		private AstNode _opnd1;
 
-		private AstNode opnd2;
+		private AstNode _opnd2;
 
 		public enum Op
 		{

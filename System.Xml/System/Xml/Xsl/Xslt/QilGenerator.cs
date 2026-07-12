@@ -355,7 +355,7 @@ namespace System.Xml.Xsl.Xslt
 				}
 			}
 			QilIterator qilIterator2 = this.f.Let(nsList);
-			qilIterator2.DebugName = this.f.QName("ns" + this.nsVars.Count, "urn:schemas-microsoft-com:xslt-debug").ToString();
+			qilIterator2.DebugName = this.f.QName("ns" + this.nsVars.Count.ToString(), "urn:schemas-microsoft-com:xslt-debug").ToString();
 			this.gloVars.Add(qilIterator2);
 			this.nsVars.Add(qilIterator2);
 			return qilIterator2;
@@ -2754,10 +2754,10 @@ namespace System.Xml.Xsl.Xslt
 				QilIterator qilIterator2 = this.f.Let(this.f.InvokeRegisterDecimalFormatter(formatPicture, decimalFormatDecl));
 				QilReference qilReference = qilIterator2;
 				QilPatternFactory qilPatternFactory = this.f;
-				object obj = "formatter";
+				string text = "formatter";
 				int num = this.formatterCnt;
 				this.formatterCnt = num + 1;
-				qilReference.DebugName = qilPatternFactory.QName(obj + num, "urn:schemas-microsoft-com:xslt-debug").ToString();
+				qilReference.DebugName = qilPatternFactory.QName(text + num.ToString(), "urn:schemas-microsoft-com:xslt-debug").ToString();
 				this.gloVars.Add(qilIterator2);
 				return this.f.InvokeFormatNumberStatic(value, qilIterator2);
 			}

@@ -96,7 +96,7 @@ namespace System.Diagnostics
 			{
 				if (value < 0)
 				{
-					throw new ArgumentOutOfRangeException("IndentSize", value, global::SR.GetString("The IndentSize property must be non-negative."));
+					throw new ArgumentOutOfRangeException("IndentSize", value, SR.GetString("The IndentSize property must be non-negative."));
 				}
 				this.indentSize = value;
 			}
@@ -159,7 +159,7 @@ namespace System.Diagnostics
 		public virtual void Fail(string message, string detailMessage)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(global::SR.GetString("Fail:"));
+			stringBuilder.Append(SR.GetString("Fail:"));
 			stringBuilder.Append(" ");
 			stringBuilder.Append(message);
 			if (detailMessage != null)
@@ -372,7 +372,7 @@ namespace System.Diagnostics
 			this.indentLevel++;
 			if (this.IsEnabled(TraceOptions.ProcessId))
 			{
-				this.WriteLine("ProcessId=" + eventCache.ProcessId);
+				this.WriteLine("ProcessId=" + eventCache.ProcessId.ToString());
 			}
 			if (this.IsEnabled(TraceOptions.LogicalOperationStack))
 			{
@@ -403,7 +403,7 @@ namespace System.Diagnostics
 			}
 			if (this.IsEnabled(TraceOptions.Timestamp))
 			{
-				this.WriteLine("Timestamp=" + eventCache.Timestamp);
+				this.WriteLine("Timestamp=" + eventCache.Timestamp.ToString());
 			}
 			if (this.IsEnabled(TraceOptions.Callstack))
 			{

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class OnSerializingAttribute : Attribute
 	{
 	}

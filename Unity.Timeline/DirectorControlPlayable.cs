@@ -32,7 +32,7 @@ namespace UnityEngine.Timeline
 			}
 			this.m_SyncTime |= info.evaluationType == FrameData.EvaluationType.Evaluate || this.DetectDiscontinuity(playable, info);
 			this.SyncSpeed((double)info.effectiveSpeed);
-			this.SyncPlayState(playable.GetGraph<Playable>(), playable.GetTime<Playable>());
+			this.SyncStart(playable.GetGraph<Playable>(), playable.GetTime<Playable>());
 		}
 
 		public override void OnBehaviourPlay(Playable playable, FrameData info)
@@ -66,9 +66,18 @@ namespace UnityEngine.Timeline
 			if (this.m_SyncTime || this.DetectOutOfSync(playable))
 			{
 				this.UpdateTime(playable);
-				this.director.Evaluate();
+				if (this.director.playableGraph.IsValid())
+				{
+					this.director.playableGraph.Evaluate();
+					this.director.playableGraph.SynchronizeEvaluation(playable.GetGraph<Playable>());
+				}
+				else
+				{
+					this.director.Evaluate();
+				}
 			}
 			this.m_SyncTime = false;
+			this.SyncStop(playable.GetGraph<Playable>(), playable.GetTime<Playable>());
 		}
 
 		private void SyncSpeed(double speed)
@@ -87,15 +96,34 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		private void SyncPlayState(PlayableGraph graph, double playableTime)
+		private void SyncStart(PlayableGraph graph, double time)
 		{
-			bool flag = playableTime >= this.m_AssetDuration && this.director.extrapolationMode == DirectorWrapMode.None;
-			if (graph.IsPlaying() && !flag)
+			if (this.director.state == PlayState.Playing || !graph.IsPlaying() || (this.director.extrapolationMode == DirectorWrapMode.None && time > this.m_AssetDuration))
 			{
-				this.director.Play();
 				return;
 			}
-			this.director.Pause();
+			if (graph.IsMatchFrameRateEnabled())
+			{
+				this.director.Play(graph.GetFrameRate());
+				return;
+			}
+			this.director.Play();
+		}
+
+		private void SyncStop(PlayableGraph graph, double time)
+		{
+			if (this.director.state == PlayState.Paused || (graph.IsPlaying() && (this.director.extrapolationMode != DirectorWrapMode.None || time < this.m_AssetDuration)))
+			{
+				return;
+			}
+			if (this.director.state == PlayState.Paused)
+			{
+				return;
+			}
+			if ((this.director.extrapolationMode == DirectorWrapMode.None && time > this.m_AssetDuration) || !graph.IsPlaying())
+			{
+				this.director.Pause();
+			}
 		}
 
 		private bool DetectDiscontinuity(Playable playable, FrameData info)
@@ -108,17 +136,17 @@ namespace UnityEngine.Timeline
 			double num = playable.GetTime<Playable>();
 			if (playable.GetTime<Playable>() >= this.m_AssetDuration)
 			{
-				if (this.director.extrapolationMode == DirectorWrapMode.None)
+				switch (this.director.extrapolationMode)
 				{
-					return false;
-				}
-				if (this.director.extrapolationMode == DirectorWrapMode.Hold)
-				{
+				case DirectorWrapMode.Hold:
 					num = this.m_AssetDuration;
-				}
-				else if (this.m_AssetDuration > 1.401298464324817E-45)
-				{
+					break;
+				case DirectorWrapMode.Loop:
 					num %= this.m_AssetDuration;
+					break;
+				case DirectorWrapMode.None:
+					num = this.m_AssetDuration;
+					break;
 				}
 			}
 			return !Mathf.Approximately((float)num, (float)this.director.time);
@@ -136,7 +164,7 @@ namespace UnityEngine.Timeline
 				this.director.time = Math.Max(0.0, playable.GetTime<Playable>() % num);
 				return;
 			case DirectorWrapMode.None:
-				this.director.time = playable.GetTime<Playable>();
+				this.director.time = Math.Min(num, Math.Max(0.0, playable.GetTime<Playable>()));
 				return;
 			default:
 				return;

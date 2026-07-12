@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography.X509Certificates
 {
@@ -20,60 +21,62 @@ namespace System.Security.Cryptography.X509Certificates
 
 		public abstract X509CertificateImpl Clone();
 
-		public abstract string GetIssuerName(bool legacyV1Mode);
+		public abstract string Issuer { get; }
 
-		public abstract string GetSubjectName(bool legacyV1Mode);
+		public abstract string Subject { get; }
 
-		public abstract byte[] GetRawCertData();
+		public abstract string LegacyIssuer { get; }
 
-		public abstract DateTime GetValidFrom();
+		public abstract string LegacySubject { get; }
 
-		public abstract DateTime GetValidUntil();
+		public abstract byte[] RawData { get; }
 
-		public byte[] GetCertHash()
-		{
-			this.ThrowIfContextInvalid();
-			if (this.cachedCertificateHash == null)
-			{
-				this.cachedCertificateHash = this.GetCertHash(false);
-			}
-			return this.cachedCertificateHash;
-		}
+		public abstract DateTime NotAfter { get; }
 
-		protected abstract byte[] GetCertHash(bool lazy);
+		public abstract DateTime NotBefore { get; }
 
-		public override int GetHashCode()
+		public abstract byte[] Thumbprint { get; }
+
+		public sealed override int GetHashCode()
 		{
 			if (!this.IsValid)
 			{
 				return 0;
 			}
-			if (this.cachedCertificateHash == null)
+			byte[] thumbprint = this.Thumbprint;
+			int num = 0;
+			int num2 = 0;
+			while (num2 < thumbprint.Length && num2 < 4)
 			{
-				this.cachedCertificateHash = this.GetCertHash(true);
+				num = (num << 8) | (int)thumbprint[num2];
+				num2++;
 			}
-			if (this.cachedCertificateHash != null && this.cachedCertificateHash.Length >= 4)
-			{
-				return ((int)this.cachedCertificateHash[0] << 24) | ((int)this.cachedCertificateHash[1] << 16) | ((int)this.cachedCertificateHash[2] << 8) | (int)this.cachedCertificateHash[3];
-			}
-			return 0;
+			return num;
 		}
 
 		public abstract bool Equals(X509CertificateImpl other, out bool result);
 
-		public abstract string GetKeyAlgorithm();
+		public abstract string KeyAlgorithm { get; }
 
-		public abstract byte[] GetKeyAlgorithmParameters();
+		public abstract byte[] KeyAlgorithmParameters { get; }
 
-		public abstract byte[] GetPublicKey();
+		public abstract byte[] PublicKeyValue { get; }
 
-		public abstract byte[] GetSerialNumber();
+		public abstract byte[] SerialNumber { get; }
 
-		public abstract byte[] Export(X509ContentType contentType, byte[] password);
+		public abstract bool HasPrivateKey { get; }
 
-		public abstract string ToString(bool full);
+		public abstract RSA GetRSAPrivateKey();
 
-		public override bool Equals(object obj)
+		public abstract DSA GetDSAPrivateKey();
+
+		public abstract byte[] Export(X509ContentType contentType, SafePasswordHandle password);
+
+		public abstract X509CertificateImpl CopyWithPrivateKey(RSA privateKey);
+
+		public abstract X509Certificate CreateCertificate();
+
+		public sealed override bool Equals(object obj)
 		{
 			X509CertificateImpl x509CertificateImpl = obj as X509CertificateImpl;
 			if (x509CertificateImpl == null)
@@ -84,28 +87,19 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				return false;
 			}
-			bool flag;
-			if (this.Equals(x509CertificateImpl, out flag))
-			{
-				return flag;
-			}
-			byte[] rawCertData = this.GetRawCertData();
-			byte[] rawCertData2 = x509CertificateImpl.GetRawCertData();
-			if (rawCertData == null)
-			{
-				return rawCertData2 == null;
-			}
-			if (rawCertData2 == null)
+			if (!this.Issuer.Equals(x509CertificateImpl.Issuer))
 			{
 				return false;
 			}
-			if (rawCertData.Length != rawCertData2.Length)
+			byte[] serialNumber = this.SerialNumber;
+			byte[] serialNumber2 = x509CertificateImpl.SerialNumber;
+			if (serialNumber.Length != serialNumber2.Length)
 			{
 				return false;
 			}
-			for (int i = 0; i < rawCertData.Length; i++)
+			for (int i = 0; i < serialNumber.Length; i++)
 			{
-				if (rawCertData[i] != rawCertData2[i])
+				if (serialNumber[i] != serialNumber2[i])
 				{
 					return false;
 				}
@@ -121,14 +115,11 @@ namespace System.Security.Cryptography.X509Certificates
 
 		protected virtual void Dispose(bool disposing)
 		{
-			this.cachedCertificateHash = null;
 		}
 
 		~X509CertificateImpl()
 		{
 			this.Dispose(false);
 		}
-
-		private byte[] cachedCertificateHash;
 	}
 }

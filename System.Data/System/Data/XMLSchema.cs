@@ -31,7 +31,7 @@ namespace System.Data
 							object obj;
 							if (converter.CanConvertFrom(typeof(string)))
 							{
-								obj = converter.ConvertFromString(value);
+								obj = converter.ConvertFromInvariantString(value);
 							}
 							else if (propertyType == typeof(Type))
 							{

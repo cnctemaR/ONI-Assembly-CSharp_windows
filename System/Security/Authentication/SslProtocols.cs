@@ -13,6 +13,7 @@ namespace System.Security.Authentication
 		Tls11 = 768,
 		[MonoTODO("unsupported")]
 		Tls12 = 3072,
+		Tls13 = 12288,
 		Default = 240
 	}
 }

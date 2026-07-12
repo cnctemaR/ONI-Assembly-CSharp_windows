@@ -31,5 +31,11 @@ public class BatteryMediumConfig : BaseBatteryConfig
 		base.DoPostConfigureComplete(go);
 	}
 
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		base.ConfigureBuildingTemplate(go, prefab_tag);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+	}
+
 	public const string ID = "BatteryMedium";
 }

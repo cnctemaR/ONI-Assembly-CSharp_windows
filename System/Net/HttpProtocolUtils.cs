@@ -16,7 +16,7 @@ namespace System.Net
 			{
 				return dateTime;
 			}
-			throw new ProtocolViolationException(global::SR.GetString("The value of the date string in the header is invalid."));
+			throw new ProtocolViolationException(SR.GetString("The value of the date string in the header is invalid."));
 		}
 
 		internal static string date2string(DateTime D)

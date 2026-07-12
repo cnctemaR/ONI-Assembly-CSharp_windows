@@ -5,33 +5,28 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Security;
-using System.Security.Permissions;
+using Internal.Runtime.Augments;
+using Internal.Threading.Tasks.Tracing;
 
 namespace System.Threading.Tasks
 {
 	[DebuggerTypeProxy(typeof(SystemThreadingTasks_TaskDebugView))]
 	[DebuggerDisplay("Id = {Id}, Status = {Status}, Method = {DebuggerDisplayMethodDescription}")]
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Task : IThreadPoolWorkItem, IAsyncResult, IDisposable
 	{
-		[FriendAccessAllowed]
-		internal static bool AddToActiveTasks(Task task)
+		private Task ParentForDebugger
 		{
-			object obj = Task.s_activeTasksLock;
-			lock (obj)
+			get
 			{
-				Task.s_currentActiveTasks[task.Id] = task;
+				return this.m_parent;
 			}
-			return true;
 		}
 
-		[FriendAccessAllowed]
-		internal static void RemoveFromActiveTasks(int taskId)
+		private int StateFlagsForDebugger
 		{
-			object obj = Task.s_activeTasksLock;
-			lock (obj)
+			get
 			{
-				Task.s_currentActiveTasks.Remove(taskId);
+				return this.m_stateFlags;
 			}
 		}
 
@@ -66,74 +61,44 @@ namespace System.Threading.Tasks
 			this.TaskConstructorCore(null, state, default(CancellationToken), creationOptions, InternalTaskOptions.PromiseTask, null);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action action)
 			: this(action, null, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action action, CancellationToken cancellationToken)
 			: this(action, null, null, cancellationToken, TaskCreationOptions.None, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action action, TaskCreationOptions creationOptions)
 			: this(action, null, Task.InternalCurrentIfAttached(creationOptions), default(CancellationToken), creationOptions, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action action, CancellationToken cancellationToken, TaskCreationOptions creationOptions)
 			: this(action, null, Task.InternalCurrentIfAttached(creationOptions), cancellationToken, creationOptions, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action<object> action, object state)
 			: this(action, state, null, default(CancellationToken), TaskCreationOptions.None, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action<object> action, object state, CancellationToken cancellationToken)
 			: this(action, state, null, cancellationToken, TaskCreationOptions.None, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action<object> action, object state, TaskCreationOptions creationOptions)
 			: this(action, state, Task.InternalCurrentIfAttached(creationOptions), default(CancellationToken), creationOptions, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task(Action<object> action, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions)
 			: this(action, state, Task.InternalCurrentIfAttached(creationOptions), cancellationToken, creationOptions, InternalTaskOptions.None, null)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			this.PossiblyCaptureContext(ref stackCrawlMark);
-		}
-
-		internal Task(Action<object> action, object state, Task parent, CancellationToken cancellationToken, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, TaskScheduler scheduler, ref StackCrawlMark stackMark)
-			: this(action, state, parent, cancellationToken, creationOptions, internalOptions, scheduler)
-		{
-			this.PossiblyCaptureContext(ref stackMark);
 		}
 
 		internal Task(Delegate action, object state, Task parent, CancellationToken cancellationToken, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, TaskScheduler scheduler)
@@ -142,14 +107,14 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("action");
 			}
-			if ((creationOptions & TaskCreationOptions.AttachedToParent) != TaskCreationOptions.None || (internalOptions & InternalTaskOptions.SelfReplicating) != InternalTaskOptions.None)
+			if ((creationOptions & TaskCreationOptions.AttachedToParent) != TaskCreationOptions.None)
 			{
 				this.m_parent = parent;
 			}
 			this.TaskConstructorCore(action, state, cancellationToken, creationOptions, internalOptions, scheduler);
 		}
 
-		internal void TaskConstructorCore(object action, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, TaskScheduler scheduler)
+		internal void TaskConstructorCore(Delegate action, object state, CancellationToken cancellationToken, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions, TaskScheduler scheduler)
 		{
 			this.m_action = action;
 			this.m_stateObject = state;
@@ -157,10 +122,6 @@ namespace System.Threading.Tasks
 			if ((creationOptions & ~(TaskCreationOptions.PreferFairness | TaskCreationOptions.LongRunning | TaskCreationOptions.AttachedToParent | TaskCreationOptions.DenyChildAttach | TaskCreationOptions.HideScheduler | TaskCreationOptions.RunContinuationsAsynchronously)) != TaskCreationOptions.None)
 			{
 				throw new ArgumentOutOfRangeException("creationOptions");
-			}
-			if ((creationOptions & TaskCreationOptions.LongRunning) != TaskCreationOptions.None && (internalOptions & InternalTaskOptions.SelfReplicating) != InternalTaskOptions.None)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("(Internal)An attempt was made to create a LongRunning SelfReplicating task."));
 			}
 			int num = (int)(creationOptions | (TaskCreationOptions)internalOptions);
 			if (this.m_action == null || (internalOptions & InternalTaskOptions.ContinuationTask) != InternalTaskOptions.None)
@@ -176,6 +137,7 @@ namespace System.Threading.Tasks
 			{
 				this.AssignCancellationToken(cancellationToken, null, null);
 			}
+			this.CapturedContext = ExecutionContext.Capture();
 		}
 
 		private void AssignCancellationToken(CancellationToken cancellationToken, Task antecedent, TaskContinuation continuation)
@@ -184,10 +146,6 @@ namespace System.Threading.Tasks
 			contingentProperties.m_cancellationToken = cancellationToken;
 			try
 			{
-				if (AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
-				{
-					cancellationToken.ThrowIfSourceDisposed();
-				}
 				if ((this.Options & (TaskCreationOptions)13312) == TaskCreationOptions.None)
 				{
 					if (cancellationToken.IsCancellationRequested)
@@ -205,7 +163,7 @@ namespace System.Threading.Tasks
 						{
 							cancellationTokenRegistration = cancellationToken.InternalRegisterWithoutEC(Task.s_taskCancelCallback, new Tuple<Task, Task, TaskContinuation>(this, antecedent, continuation));
 						}
-						contingentProperties.m_cancellationRegistration = new Shared<CancellationTokenRegistration>(cancellationTokenRegistration);
+						contingentProperties.m_cancellationRegistration = cancellationTokenRegistration;
 					}
 				}
 			}
@@ -236,23 +194,47 @@ namespace System.Threading.Tasks
 			task.InternalCancel(false);
 		}
 
+		internal bool TrySetCanceled(CancellationToken tokenToRecord)
+		{
+			return this.TrySetCanceled(tokenToRecord, null);
+		}
+
+		internal bool TrySetCanceled(CancellationToken tokenToRecord, object cancellationException)
+		{
+			bool flag = false;
+			if (this.AtomicStateUpdate(67108864, 90177536))
+			{
+				this.RecordInternalCancellationRequest(tokenToRecord, cancellationException);
+				this.CancellationCleanupLogic();
+				flag = true;
+			}
+			return flag;
+		}
+
+		internal bool TrySetException(object exceptionObject)
+		{
+			bool flag = false;
+			this.EnsureContingentPropertiesInitialized(true);
+			if (this.AtomicStateUpdate(67108864, 90177536))
+			{
+				this.AddException(exceptionObject);
+				this.Finish(false);
+				flag = true;
+			}
+			return flag;
+		}
+
 		private string DebuggerDisplayMethodDescription
 		{
 			get
 			{
-				Delegate @delegate = (Delegate)this.m_action;
-				if (@delegate == null)
+				Delegate action = this.m_action;
+				if (action == null)
 				{
 					return "{null}";
 				}
-				return @delegate.Method.ToString();
+				return "0x" + action.GetNativeFunctionPointer().ToString("x");
 			}
-		}
-
-		[SecuritySafeCritical]
-		internal void PossiblyCaptureContext(ref StackCrawlMark stackMark)
-		{
-			this.CapturedContext = ExecutionContext.Capture(ref stackMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx | ExecutionContext.CaptureOptions.OptimizeDefaultCase);
 		}
 
 		internal TaskCreationOptions Options
@@ -384,16 +366,10 @@ namespace System.Threading.Tasks
 			return this.AtomicStateUpdate(65536, 4259840);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal bool FireTaskScheduledIfNeeded(TaskScheduler ts)
-		{
-			return false;
-		}
-
 		internal void AddNewChild()
 		{
 			Task.ContingentProperties contingentProperties = this.EnsureContingentPropertiesInitialized(true);
-			if (contingentProperties.m_completionCountdown == 1 && !this.IsSelfReplicatingRoot)
+			if (contingentProperties.m_completionCountdown == 1)
 			{
 				contingentProperties.m_completionCountdown++;
 				return;
@@ -416,7 +392,7 @@ namespace System.Threading.Tasks
 			int stateFlags = this.m_stateFlags;
 			if (Task.IsCompletedMethod(stateFlags))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Start may not be called on a task that has completed."));
+				throw new InvalidOperationException("Start may not be called on a task that has completed.");
 			}
 			if (scheduler == null)
 			{
@@ -425,15 +401,15 @@ namespace System.Threading.Tasks
 			TaskCreationOptions taskCreationOptions = Task.OptionsMethod(stateFlags);
 			if ((taskCreationOptions & (TaskCreationOptions)1024) != TaskCreationOptions.None)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Start may not be called on a promise-style task."));
+				throw new InvalidOperationException("Start may not be called on a promise-style task.");
 			}
 			if ((taskCreationOptions & (TaskCreationOptions)512) != TaskCreationOptions.None)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Start may not be called on a continuation task."));
+				throw new InvalidOperationException("Start may not be called on a continuation task.");
 			}
 			if (Interlocked.CompareExchange<TaskScheduler>(ref this.m_taskScheduler, scheduler, null) != null)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Start may not be called on a task that was already started."));
+				throw new InvalidOperationException("Start may not be called on a task that was already started.");
 			}
 			this.ScheduleAndStart(true);
 		}
@@ -452,26 +428,25 @@ namespace System.Threading.Tasks
 			this.InternalRunSynchronously(scheduler, true);
 		}
 
-		[SecuritySafeCritical]
 		internal void InternalRunSynchronously(TaskScheduler scheduler, bool waitForCompletion)
 		{
 			int stateFlags = this.m_stateFlags;
 			TaskCreationOptions taskCreationOptions = Task.OptionsMethod(stateFlags);
 			if ((taskCreationOptions & (TaskCreationOptions)512) != TaskCreationOptions.None)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("RunSynchronously may not be called on a continuation task."));
+				throw new InvalidOperationException("RunSynchronously may not be called on a continuation task.");
 			}
 			if ((taskCreationOptions & (TaskCreationOptions)1024) != TaskCreationOptions.None)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("RunSynchronously may not be called on a task not bound to a delegate, such as the task returned from an asynchronous method."));
+				throw new InvalidOperationException("RunSynchronously may not be called on a task not bound to a delegate, such as the task returned from an asynchronous method.");
 			}
 			if (Task.IsCompletedMethod(stateFlags))
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("RunSynchronously may not be called on a task that has already completed."));
+				throw new InvalidOperationException("RunSynchronously may not be called on a task that has already completed.");
 			}
 			if (Interlocked.CompareExchange<TaskScheduler>(ref this.m_taskScheduler, scheduler, null) != null)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("RunSynchronously may not be called on a task that was already started."));
+				throw new InvalidOperationException("RunSynchronously may not be called on a task that was already started.");
 			}
 			if (this.MarkStarted())
 			{
@@ -480,7 +455,7 @@ namespace System.Threading.Tasks
 				{
 					if (!scheduler.TryRunInline(this, false))
 					{
-						scheduler.InternalQueueTask(this);
+						scheduler.QueueTask(this);
 						flag = true;
 					}
 					if (waitForCompletion && !this.IsCompleted)
@@ -491,7 +466,7 @@ namespace System.Threading.Tasks
 				}
 				catch (Exception ex)
 				{
-					if (!flag && !(ex is ThreadAbortException))
+					if (!flag)
 					{
 						TaskSchedulerException ex2 = new TaskSchedulerException(ex);
 						this.AddException(ex2);
@@ -502,30 +477,18 @@ namespace System.Threading.Tasks
 					throw;
 				}
 			}
-			throw new InvalidOperationException(Environment.GetResourceString("RunSynchronously may not be called on a task that has already completed."));
+			throw new InvalidOperationException("RunSynchronously may not be called on a task that has already completed.");
 		}
 
-		internal static Task InternalStartNew(Task creatingTask, Delegate action, object state, CancellationToken cancellationToken, TaskScheduler scheduler, TaskCreationOptions options, InternalTaskOptions internalOptions, ref StackCrawlMark stackMark)
+		internal static Task InternalStartNew(Task creatingTask, Delegate action, object state, CancellationToken cancellationToken, TaskScheduler scheduler, TaskCreationOptions options, InternalTaskOptions internalOptions)
 		{
 			if (scheduler == null)
 			{
 				throw new ArgumentNullException("scheduler");
 			}
 			Task task = new Task(action, state, creatingTask, cancellationToken, options, internalOptions | InternalTaskOptions.QueuedByRuntime, scheduler);
-			task.PossiblyCaptureContext(ref stackMark);
 			task.ScheduleAndStart(false);
 			return task;
-		}
-
-		internal static int NewId()
-		{
-			int num;
-			do
-			{
-				num = Interlocked.Increment(ref Task.s_taskIdCounter);
-			}
-			while (num == 0);
-			return num;
 		}
 
 		public int Id
@@ -534,7 +497,12 @@ namespace System.Threading.Tasks
 			{
 				if (this.m_taskId == 0)
 				{
-					int num = Task.NewId();
+					int num;
+					do
+					{
+						num = Interlocked.Increment(ref Task.s_taskIdCounter);
+					}
+					while (num == 0);
 					Interlocked.CompareExchange(ref this.m_taskId, num, 0);
 				}
 				return this.m_taskId;
@@ -717,14 +685,6 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		internal bool IsRanToCompletion
-		{
-			get
-			{
-				return (this.m_stateFlags & 23068672) == 16777216;
-			}
-		}
-
 		public TaskCreationOptions CreationOptions
 		{
 			get
@@ -739,7 +699,7 @@ namespace System.Threading.Tasks
 			{
 				if ((this.m_stateFlags & 262144) != 0)
 				{
-					throw new ObjectDisposedException(null, Environment.GetResourceString("The task has been disposed."));
+					throw new ObjectDisposedException(null, "The task has been disposed.");
 				}
 				return this.CompletedEvent.WaitHandle;
 			}
@@ -769,26 +729,9 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		public static TaskFactory Factory
-		{
-			get
-			{
-				return Task.s_factory;
-			}
-		}
+		public static TaskFactory Factory { get; } = new TaskFactory();
 
-		public static Task CompletedTask
-		{
-			get
-			{
-				Task task = Task.s_completedTask;
-				if (task == null)
-				{
-					task = (Task.s_completedTask = new Task(false, (TaskCreationOptions)16384, default(CancellationToken)));
-				}
-				return task;
-			}
-		}
+		public static Task CompletedTask { get; } = new Task(false, (TaskCreationOptions)16384, default(CancellationToken));
 
 		internal ManualResetEventSlim CompletedEvent
 		{
@@ -809,35 +752,6 @@ namespace System.Threading.Tasks
 					}
 				}
 				return contingentProperties.m_completionEvent;
-			}
-		}
-
-		internal bool IsSelfReplicatingRoot
-		{
-			get
-			{
-				return (this.Options & (TaskCreationOptions)2304) == (TaskCreationOptions)2048;
-			}
-		}
-
-		internal bool IsChildReplica
-		{
-			get
-			{
-				return (this.Options & (TaskCreationOptions)256) > TaskCreationOptions.None;
-			}
-		}
-
-		internal int ActiveChildCount
-		{
-			get
-			{
-				Task.ContingentProperties contingentProperties = this.m_contingentProperties;
-				if (contingentProperties == null)
-				{
-					return 0;
-				}
-				return contingentProperties.m_completionCountdown - 1;
 			}
 		}
 
@@ -862,42 +776,20 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				if ((this.m_stateFlags & 536870912) == 536870912)
-				{
-					return null;
-				}
 				Task.ContingentProperties contingentProperties = this.m_contingentProperties;
 				if (contingentProperties != null && contingentProperties.m_capturedContext != null)
 				{
 					return contingentProperties.m_capturedContext;
 				}
-				return ExecutionContext.PreAllocatedDefault;
+				return ExecutionContext.Default;
 			}
 			set
 			{
-				if (value == null)
-				{
-					this.m_stateFlags |= 536870912;
-					return;
-				}
-				if (!value.IsPreAllocatedDefault)
+				if (value != ExecutionContext.Default)
 				{
 					this.EnsureContingentPropertiesInitialized(false).m_capturedContext = value;
 				}
 			}
-		}
-
-		private static ExecutionContext CopyExecutionContext(ExecutionContext capturedContext)
-		{
-			if (capturedContext == null)
-			{
-				return null;
-			}
-			if (capturedContext.IsPreAllocatedDefault)
-			{
-				return ExecutionContext.PreAllocatedDefault;
-			}
-			return capturedContext.CreateCopy();
 		}
 
 		public void Dispose()
@@ -916,9 +808,9 @@ namespace System.Threading.Tasks
 				}
 				if (!this.IsCompleted)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("A task may only be disposed if it is in a completion state (RanToCompletion, Faulted or Canceled)."));
+					throw new InvalidOperationException("A task may only be disposed if it is in a completion state (RanToCompletion, Faulted or Canceled).");
 				}
-				Task.ContingentProperties contingentProperties = this.m_contingentProperties;
+				Task.ContingentProperties contingentProperties = Volatile.Read<Task.ContingentProperties>(ref this.m_contingentProperties);
 				if (contingentProperties != null)
 				{
 					ManualResetEventSlim completionEvent = contingentProperties.m_completionEvent;
@@ -936,7 +828,6 @@ namespace System.Threading.Tasks
 			this.m_stateFlags |= 262144;
 		}
 
-		[SecuritySafeCritical]
 		internal void ScheduleAndStart(bool needsProtection)
 		{
 			if (needsProtection)
@@ -950,33 +841,28 @@ namespace System.Threading.Tasks
 			{
 				this.m_stateFlags |= 65536;
 			}
-			if (Task.s_asyncDebuggingEnabled)
+			DebuggerSupport.AddToActiveTasks(this);
+			if (DebuggerSupport.LoggingOn && (this.Options & (TaskCreationOptions)512) == TaskCreationOptions.None)
 			{
-				Task.AddToActiveTasks(this);
-			}
-			if (AsyncCausalityTracer.LoggingOn && (this.Options & (TaskCreationOptions)512) == TaskCreationOptions.None)
-			{
-				AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, this.Id, "Task: " + ((Delegate)this.m_action).Method.Name, 0UL);
+				CausalityTraceLevel causalityTraceLevel = CausalityTraceLevel.Required;
+				string text = "Task: ";
+				Delegate action = this.m_action;
+				DebuggerSupport.TraceOperationCreation(causalityTraceLevel, this, text + ((action != null) ? action.ToString() : null), 0UL);
 			}
 			try
 			{
-				this.m_taskScheduler.InternalQueueTask(this);
+				this.m_taskScheduler.QueueTask(this);
 			}
-			catch (ThreadAbortException ex)
+			catch (Exception ex)
 			{
-				this.AddException(ex);
-				this.FinishThreadAbortedTask(true, false);
-			}
-			catch (Exception ex2)
-			{
-				TaskSchedulerException ex3 = new TaskSchedulerException(ex2);
-				this.AddException(ex3);
+				TaskSchedulerException ex2 = new TaskSchedulerException(ex);
+				this.AddException(ex2);
 				this.Finish(false);
 				if ((this.Options & (TaskCreationOptions)512) == TaskCreationOptions.None)
 				{
 					this.m_contingentProperties.m_exceptionsHolder.MarkAsHandled(false);
 				}
-				throw ex3;
+				throw ex2;
 			}
 		}
 
@@ -1025,7 +911,7 @@ namespace System.Threading.Tasks
 		{
 			if (!this.IsFaulted || !this.ExceptionRecorded)
 			{
-				return new ReadOnlyCollection<ExceptionDispatchInfo>(new ExceptionDispatchInfo[0]);
+				return new ReadOnlyCollection<ExceptionDispatchInfo>(Array.Empty<ExceptionDispatchInfo>());
 			}
 			return this.m_contingentProperties.m_exceptionsHolder.GetExceptionDispatchInfos();
 		}
@@ -1087,7 +973,7 @@ namespace System.Threading.Tasks
 				return;
 			}
 			Task.ContingentProperties contingentProperties = this.m_contingentProperties;
-			if (contingentProperties == null || (contingentProperties.m_completionCountdown == 1 && !this.IsSelfReplicatingRoot) || Interlocked.Decrement(ref contingentProperties.m_completionCountdown) == 0)
+			if (contingentProperties == null || contingentProperties.m_completionCountdown == 1 || Interlocked.Decrement(ref contingentProperties.m_completionCountdown) == 0)
 			{
 				this.FinishStageTwo();
 			}
@@ -1095,13 +981,13 @@ namespace System.Threading.Tasks
 			{
 				this.AtomicStateUpdate(8388608, 23068672);
 			}
-			List<Task> list = ((contingentProperties != null) ? contingentProperties.m_exceptionalChildren : null);
-			if (list != null)
+			LowLevelListWithIList<Task> lowLevelListWithIList = ((contingentProperties != null) ? contingentProperties.m_exceptionalChildren : null);
+			if (lowLevelListWithIList != null)
 			{
-				List<Task> list2 = list;
-				lock (list2)
+				LowLevelListWithIList<Task> lowLevelListWithIList2 = lowLevelListWithIList;
+				lock (lowLevelListWithIList2)
 				{
-					list.RemoveAll(Task.s_IsExceptionObservedByParentPredicate);
+					lowLevelListWithIList.RemoveAll(Task.s_IsExceptionObservedByParentPredicate);
 				}
 			}
 		}
@@ -1113,45 +999,36 @@ namespace System.Threading.Tasks
 			if (this.ExceptionRecorded)
 			{
 				num = 2097152;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, this.Id, AsyncCausalityStatus.Error);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Error);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(this.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(this);
 			}
 			else if (this.IsCancellationRequested && this.IsCancellationAcknowledged)
 			{
 				num = 4194304;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, this.Id, AsyncCausalityStatus.Canceled);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Canceled);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(this.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(this);
 			}
 			else
 			{
 				num = 16777216;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, this.Id, AsyncCausalityStatus.Completed);
+					DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.RemoveFromActiveTasks(this.Id);
-				}
+				DebuggerSupport.RemoveFromActiveTasks(this);
 			}
 			Interlocked.Exchange(ref this.m_stateFlags, this.m_stateFlags | num);
 			Task.ContingentProperties contingentProperties = this.m_contingentProperties;
 			if (contingentProperties != null)
 			{
 				contingentProperties.SetCompleted();
-				contingentProperties.DeregisterCancellationCallback();
+				contingentProperties.UnregisterCancellationCallback();
 			}
 			this.FinishStageThree();
 		}
@@ -1173,13 +1050,13 @@ namespace System.Threading.Tasks
 			{
 				if (contingentProperties.m_exceptionalChildren == null)
 				{
-					Interlocked.CompareExchange<List<Task>>(ref contingentProperties.m_exceptionalChildren, new List<Task>(), null);
+					Interlocked.CompareExchange<LowLevelListWithIList<Task>>(ref contingentProperties.m_exceptionalChildren, new LowLevelListWithIList<Task>(), null);
 				}
-				List<Task> exceptionalChildren = contingentProperties.m_exceptionalChildren;
+				LowLevelListWithIList<Task> exceptionalChildren = contingentProperties.m_exceptionalChildren;
 				if (exceptionalChildren != null)
 				{
-					List<Task> list = exceptionalChildren;
-					lock (list)
+					LowLevelListWithIList<Task> lowLevelListWithIList = exceptionalChildren;
+					lock (lowLevelListWithIList)
 					{
 						exceptionalChildren.Add(childTask);
 					}
@@ -1194,13 +1071,13 @@ namespace System.Threading.Tasks
 		internal void AddExceptionsFromChildren()
 		{
 			Task.ContingentProperties contingentProperties = this.m_contingentProperties;
-			List<Task> list = ((contingentProperties != null) ? contingentProperties.m_exceptionalChildren : null);
-			if (list != null)
+			LowLevelListWithIList<Task> lowLevelListWithIList = ((contingentProperties != null) ? contingentProperties.m_exceptionalChildren : null);
+			if (lowLevelListWithIList != null)
 			{
-				List<Task> list2 = list;
-				lock (list2)
+				LowLevelListWithIList<Task> lowLevelListWithIList2 = lowLevelListWithIList;
+				lock (lowLevelListWithIList2)
 				{
-					foreach (Task task in list)
+					foreach (Task task in ((IEnumerable<Task>)lowLevelListWithIList))
 					{
 						if (task.IsFaulted && !task.IsExceptionObservedByParent)
 						{
@@ -1213,168 +1090,26 @@ namespace System.Threading.Tasks
 			}
 		}
 
-		internal void FinishThreadAbortedTask(bool bTAEAddedToExceptionHolder, bool delegateRan)
-		{
-			if (bTAEAddedToExceptionHolder)
-			{
-				this.m_contingentProperties.m_exceptionsHolder.MarkAsHandled(false);
-			}
-			if (!this.AtomicStateUpdate(134217728, 157286400))
-			{
-				return;
-			}
-			this.Finish(delegateRan);
-		}
-
 		private void Execute()
 		{
-			if (this.IsSelfReplicatingRoot)
-			{
-				Task.ExecuteSelfReplicating(this);
-				return;
-			}
 			try
 			{
 				this.InnerInvoke();
 			}
-			catch (ThreadAbortException ex)
+			catch (Exception ex)
 			{
-				if (!this.IsChildReplica)
-				{
-					this.HandleException(ex);
-					this.FinishThreadAbortedTask(true, true);
-				}
-			}
-			catch (Exception ex2)
-			{
-				this.HandleException(ex2);
+				this.HandleException(ex);
 			}
 		}
 
-		internal virtual bool ShouldReplicate()
-		{
-			return true;
-		}
-
-		internal virtual Task CreateReplicaTask(Action<object> taskReplicaDelegate, object stateObject, Task parentTask, TaskScheduler taskScheduler, TaskCreationOptions creationOptionsForReplica, InternalTaskOptions internalOptionsForReplica)
-		{
-			return new Task(taskReplicaDelegate, stateObject, parentTask, default(CancellationToken), creationOptionsForReplica, internalOptionsForReplica, parentTask.ExecutingTaskScheduler);
-		}
-
-		internal virtual object SavedStateForNextReplica
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
-		}
-
-		internal virtual object SavedStateFromPreviousReplica
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
-		}
-
-		internal virtual Task HandedOverChildReplica
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
-		}
-
-		private static void ExecuteSelfReplicating(Task root)
-		{
-			TaskCreationOptions creationOptionsForReplicas = root.CreationOptions | TaskCreationOptions.AttachedToParent;
-			InternalTaskOptions internalOptionsForReplicas = InternalTaskOptions.ChildReplica | InternalTaskOptions.SelfReplicating | InternalTaskOptions.QueuedByRuntime;
-			bool replicasAreQuitting = false;
-			Action<object> taskReplicaDelegate = null;
-			taskReplicaDelegate = delegate
-			{
-				Task internalCurrent = Task.InternalCurrent;
-				Task task = internalCurrent.HandedOverChildReplica;
-				if (task == null)
-				{
-					if (!root.ShouldReplicate())
-					{
-						return;
-					}
-					if (Volatile.Read(ref replicasAreQuitting))
-					{
-						return;
-					}
-					ExecutionContext capturedContext = root.CapturedContext;
-					task = root.CreateReplicaTask(taskReplicaDelegate, root.m_stateObject, root, root.ExecutingTaskScheduler, creationOptionsForReplicas, internalOptionsForReplicas);
-					task.CapturedContext = Task.CopyExecutionContext(capturedContext);
-					task.ScheduleAndStart(false);
-				}
-				try
-				{
-					root.InnerInvokeWithArg(internalCurrent);
-				}
-				catch (Exception ex)
-				{
-					root.HandleException(ex);
-					if (ex is ThreadAbortException)
-					{
-						internalCurrent.FinishThreadAbortedTask(false, true);
-					}
-				}
-				object savedStateForNextReplica = internalCurrent.SavedStateForNextReplica;
-				if (savedStateForNextReplica != null)
-				{
-					Task task2 = root.CreateReplicaTask(taskReplicaDelegate, root.m_stateObject, root, root.ExecutingTaskScheduler, creationOptionsForReplicas, internalOptionsForReplicas);
-					ExecutionContext capturedContext2 = root.CapturedContext;
-					task2.CapturedContext = Task.CopyExecutionContext(capturedContext2);
-					task2.HandedOverChildReplica = task;
-					task2.SavedStateFromPreviousReplica = savedStateForNextReplica;
-					task2.ScheduleAndStart(false);
-					return;
-				}
-				replicasAreQuitting = true;
-				try
-				{
-					task.InternalCancel(true);
-				}
-				catch (Exception ex2)
-				{
-					root.HandleException(ex2);
-				}
-			};
-			taskReplicaDelegate(null);
-		}
-
-		[SecurityCritical]
 		void IThreadPoolWorkItem.ExecuteWorkItem()
 		{
 			this.ExecuteEntry(false);
 		}
 
-		[SecurityCritical]
-		void IThreadPoolWorkItem.MarkAborted(ThreadAbortException tae)
-		{
-			if (!this.IsCompleted)
-			{
-				this.HandleException(tae);
-				this.FinishThreadAbortedTask(true, false);
-			}
-		}
-
-		[SecuritySafeCritical]
 		internal bool ExecuteEntry(bool bPreventDoubleExecution)
 		{
-			if (bPreventDoubleExecution || (this.Options & (TaskCreationOptions)2048) != TaskCreationOptions.None)
+			if (bPreventDoubleExecution)
 			{
 				int num = 0;
 				if (!this.AtomicStateUpdate(131072, 23199744, ref num) && (num & 4194304) == 0)
@@ -1397,44 +1132,6 @@ namespace System.Threading.Tasks
 			return true;
 		}
 
-		[SecurityCritical]
-		private void ExecuteWithThreadLocal(ref Task currentTaskSlot)
-		{
-			Task task = currentTaskSlot;
-			try
-			{
-				currentTaskSlot = this;
-				ExecutionContext capturedContext = this.CapturedContext;
-				if (capturedContext == null)
-				{
-					this.Execute();
-				}
-				else
-				{
-					if (this.IsSelfReplicatingRoot || this.IsChildReplica)
-					{
-						this.CapturedContext = Task.CopyExecutionContext(capturedContext);
-					}
-					ContextCallback contextCallback = Task.s_ecCallback;
-					if (contextCallback == null)
-					{
-						contextCallback = (Task.s_ecCallback = new ContextCallback(Task.ExecutionContextCallback));
-					}
-					ExecutionContext.Run(capturedContext, contextCallback, this, true);
-				}
-				if (AsyncCausalityTracer.LoggingOn)
-				{
-					AsyncCausalityTracer.TraceSynchronousWorkCompletion(CausalityTraceLevel.Required, CausalitySynchronousWork.Execution);
-				}
-				this.Finish(true);
-			}
-			finally
-			{
-				currentTaskSlot = task;
-			}
-		}
-
-		[SecurityCritical]
 		private static void ExecutionContextCallback(object obj)
 		{
 			(obj as Task).Execute();
@@ -1454,12 +1151,6 @@ namespace System.Threading.Tasks
 				action2(this.m_stateObject);
 				return;
 			}
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-		internal void InnerInvokeWithArg(Task childTask)
-		{
-			this.InnerInvoke();
 		}
 
 		private void HandleException(Exception unhandledException)
@@ -1484,29 +1175,24 @@ namespace System.Threading.Tasks
 			return new ConfiguredTaskAwaitable(this, continueOnCapturedContext);
 		}
 
-		[SecurityCritical]
-		internal void SetContinuationForAwait(Action continuationAction, bool continueOnCapturedContext, bool flowExecutionContext, ref StackCrawlMark stackMark)
+		internal void SetContinuationForAwait(Action continuationAction, bool continueOnCapturedContext, bool flowExecutionContext)
 		{
 			TaskContinuation taskContinuation = null;
 			if (continueOnCapturedContext)
 			{
-				SynchronizationContext currentNoFlow = SynchronizationContext.CurrentNoFlow;
-				if (currentNoFlow != null && currentNoFlow.GetType() != typeof(SynchronizationContext))
+				SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+				if (synchronizationContext != null && synchronizationContext.GetType() != typeof(SynchronizationContext))
 				{
-					taskContinuation = new SynchronizationContextAwaitTaskContinuation(currentNoFlow, continuationAction, flowExecutionContext, ref stackMark);
+					taskContinuation = new SynchronizationContextAwaitTaskContinuation(synchronizationContext, continuationAction, flowExecutionContext);
 				}
 				else
 				{
 					TaskScheduler internalCurrent = TaskScheduler.InternalCurrent;
 					if (internalCurrent != null && internalCurrent != TaskScheduler.Default)
 					{
-						taskContinuation = new TaskSchedulerAwaitTaskContinuation(internalCurrent, continuationAction, flowExecutionContext, ref stackMark);
+						taskContinuation = new TaskSchedulerAwaitTaskContinuation(internalCurrent, continuationAction, flowExecutionContext);
 					}
 				}
-			}
-			if (taskContinuation == null && flowExecutionContext)
-			{
-				taskContinuation = new AwaitTaskContinuation(continuationAction, true, ref stackMark);
 			}
 			if (taskContinuation != null)
 			{
@@ -1518,7 +1204,7 @@ namespace System.Threading.Tasks
 			}
 			else if (!this.AddTaskContinuation(continuationAction, false))
 			{
-				AwaitTaskContinuation.UnsafeScheduleAction(continuationAction, this);
+				AwaitTaskContinuation.UnsafeScheduleAction(continuationAction);
 			}
 		}
 
@@ -1591,11 +1277,7 @@ namespace System.Threading.Tasks
 			}
 			catch (Exception ex)
 			{
-				if (!(ex is ThreadAbortException))
-				{
-					throw new TaskSchedulerException(ex);
-				}
-				throw;
+				throw new TaskSchedulerException(ex);
 			}
 			return flag;
 		}
@@ -1603,11 +1285,27 @@ namespace System.Threading.Tasks
 		[MethodImpl(MethodImplOptions.NoOptimization)]
 		internal bool InternalWait(int millisecondsTimeout, CancellationToken cancellationToken)
 		{
+			if (TaskTrace.Enabled)
+			{
+				Task internalCurrent = Task.InternalCurrent;
+				TaskTrace.TaskWaitBegin_Synchronous((internalCurrent != null) ? internalCurrent.m_taskScheduler.Id : TaskScheduler.Default.Id, (internalCurrent != null) ? internalCurrent.Id : 0, this.Id);
+			}
 			bool flag = this.IsCompleted;
 			if (!flag)
 			{
-				Debugger.NotifyOfCrossThreadDependency();
 				flag = (millisecondsTimeout == -1 && !cancellationToken.CanBeCanceled && this.WrappedTryRunInline() && this.IsCompleted) || this.SpinThenBlockingWait(millisecondsTimeout, cancellationToken);
+			}
+			if (TaskTrace.Enabled)
+			{
+				Task internalCurrent2 = Task.InternalCurrent;
+				if (internalCurrent2 != null)
+				{
+					TaskTrace.TaskWaitEnd(internalCurrent2.m_taskScheduler.Id, internalCurrent2.Id, this.Id);
+				}
+				else
+				{
+					TaskTrace.TaskWaitEnd(TaskScheduler.Default.Id, 0, this.Id);
+				}
 			}
 			return flag;
 		}
@@ -1657,26 +1355,19 @@ namespace System.Threading.Tasks
 			{
 				return false;
 			}
-			int num = (PlatformHelper.IsSingleProcessor ? 1 : 10);
-			for (int i = 0; i < num; i++)
+			int spinCountforSpinBeforeWait = global::System.Threading.SpinWait.SpinCountforSpinBeforeWait;
+			SpinWait spinWait = default(SpinWait);
+			while (spinWait.Count < spinCountforSpinBeforeWait)
 			{
+				spinWait.SpinOnce(-1);
 				if (this.IsCompleted)
 				{
 					return true;
 				}
-				if (i == num / 2)
-				{
-					Thread.Yield();
-				}
-				else
-				{
-					Thread.SpinWait(PlatformHelper.ProcessorCount * (4 << i));
-				}
 			}
-			return this.IsCompleted;
+			return false;
 		}
 
-		[SecuritySafeCritical]
 		internal bool InternalCancel(bool bCancelNonExecutingOnly)
 		{
 			bool flag = false;
@@ -1691,12 +1382,9 @@ namespace System.Threading.Tasks
 				}
 				catch (Exception ex2)
 				{
-					if (!(ex2 is ThreadAbortException))
-					{
-						ex = new TaskSchedulerException(ex2);
-					}
+					ex = new TaskSchedulerException(ex2);
 				}
-				bool flag3 = (taskScheduler != null && taskScheduler.RequiresAtomicStartTransition) || (this.Options & (TaskCreationOptions)2048) > TaskCreationOptions.None;
+				bool flag3 = taskScheduler != null && taskScheduler.RequiresAtomicStartTransition;
 				if (!flag && bCancelNonExecutingOnly && flag3)
 				{
 					flag2 = this.AtomicStateUpdate(4194304, 4325376);
@@ -1755,16 +1443,13 @@ namespace System.Threading.Tasks
 			if (contingentProperties != null)
 			{
 				contingentProperties.SetCompleted();
-				contingentProperties.DeregisterCancellationCallback();
+				contingentProperties.UnregisterCancellationCallback();
 			}
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, this.Id, AsyncCausalityStatus.Canceled);
+				DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Canceled);
 			}
-			if (Task.s_asyncDebuggingEnabled)
-			{
-				Task.RemoveFromActiveTasks(this.Id);
-			}
+			DebuggerSupport.RemoveFromActiveTasks(this);
 			this.FinishStageThree();
 		}
 
@@ -1773,17 +1458,16 @@ namespace System.Threading.Tasks
 			this.m_stateFlags |= 1048576;
 		}
 
-		[SecuritySafeCritical]
 		internal void FinishContinuations()
 		{
 			object obj = Interlocked.Exchange(ref this.m_continuationObject, Task.s_taskCompletionSentinel);
 			if (obj != null)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceSynchronousWorkStart(CausalityTraceLevel.Required, this.Id, CausalitySynchronousWork.CompletionNotification);
+					DebuggerSupport.TraceSynchronousWorkStart(CausalityTraceLevel.Required, this, CausalitySynchronousWork.CompletionNotification);
 				}
-				bool flag = (this.m_stateFlags & 134217728) == 0 && Thread.CurrentThread.ThreadState != ThreadState.AbortRequested && (this.m_stateFlags & 64) == 0;
+				bool flag = (this.m_stateFlags & 134217728) == 0 && (this.m_stateFlags & 64) == 0;
 				Action action = obj as Action;
 				if (action != null)
 				{
@@ -1794,7 +1478,7 @@ namespace System.Threading.Tasks
 				ITaskCompletionAction taskCompletionAction = obj as ITaskCompletionAction;
 				if (taskCompletionAction != null)
 				{
-					if (flag)
+					if (flag || !taskCompletionAction.InvokeMayRunArbitraryCode)
 					{
 						taskCompletionAction.Invoke(this);
 					}
@@ -1812,32 +1496,32 @@ namespace System.Threading.Tasks
 					this.LogFinishCompletionNotification();
 					return;
 				}
-				List<object> list = obj as List<object>;
-				if (list == null)
+				LowLevelListWithIList<object> lowLevelListWithIList = obj as LowLevelListWithIList<object>;
+				if (lowLevelListWithIList == null)
 				{
 					this.LogFinishCompletionNotification();
 					return;
 				}
-				List<object> list2 = list;
-				lock (list2)
+				LowLevelListWithIList<object> lowLevelListWithIList2 = lowLevelListWithIList;
+				lock (lowLevelListWithIList2)
 				{
 				}
-				int count = list.Count;
+				int count = lowLevelListWithIList.Count;
 				for (int i = 0; i < count; i++)
 				{
-					StandardTaskContinuation standardTaskContinuation = list[i] as StandardTaskContinuation;
+					StandardTaskContinuation standardTaskContinuation = lowLevelListWithIList[i] as StandardTaskContinuation;
 					if (standardTaskContinuation != null && (standardTaskContinuation.m_options & TaskContinuationOptions.ExecuteSynchronously) == TaskContinuationOptions.None)
 					{
-						list[i] = null;
+						lowLevelListWithIList[i] = null;
 						standardTaskContinuation.Run(this, flag);
 					}
 				}
 				for (int j = 0; j < count; j++)
 				{
-					object obj2 = list[j];
+					object obj2 = lowLevelListWithIList[j];
 					if (obj2 != null)
 					{
-						list[j] = null;
+						lowLevelListWithIList[j] = null;
 						Action action2 = obj2 as Action;
 						if (action2 != null)
 						{
@@ -1853,7 +1537,7 @@ namespace System.Threading.Tasks
 							else
 							{
 								ITaskCompletionAction taskCompletionAction2 = (ITaskCompletionAction)obj2;
-								if (flag)
+								if (flag || !taskCompletionAction2.InvokeMayRunArbitraryCode)
 								{
 									taskCompletionAction2.Invoke(this);
 								}
@@ -1869,50 +1553,41 @@ namespace System.Threading.Tasks
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void LogFinishCompletionNotification()
 		{
-			if (AsyncCausalityTracer.LoggingOn)
+			if (DebuggerSupport.LoggingOn)
 			{
-				AsyncCausalityTracer.TraceSynchronousWorkCompletion(CausalityTraceLevel.Required, CausalitySynchronousWork.CompletionNotification);
+				DebuggerSupport.TraceSynchronousWorkCompletion(CausalityTraceLevel.Required, CausalitySynchronousWork.CompletionNotification);
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task> continuationAction)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task> continuationAction, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task> continuationAction, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, scheduler, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, scheduler, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task> continuationAction, TaskContinuationOptions continuationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, TaskScheduler.Current, default(CancellationToken), continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, TaskScheduler.Current, default(CancellationToken), continuationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task> continuationAction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, scheduler, cancellationToken, continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, scheduler, cancellationToken, continuationOptions);
 		}
 
-		private Task ContinueWith(Action<Task> continuationAction, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, ref StackCrawlMark stackMark)
+		private Task ContinueWith(Action<Task> continuationAction, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
@@ -1925,47 +1600,37 @@ namespace System.Threading.Tasks
 			TaskCreationOptions taskCreationOptions;
 			InternalTaskOptions internalTaskOptions;
 			Task.CreationOptionsFromContinuationOptions(continuationOptions, out taskCreationOptions, out internalTaskOptions);
-			Task task = new ContinuationTaskFromTask(this, continuationAction, null, taskCreationOptions, internalTaskOptions, ref stackMark);
+			Task task = new ContinuationTaskFromTask(this, continuationAction, null, taskCreationOptions, internalTaskOptions);
 			this.ContinueWithCore(task, scheduler, cancellationToken, continuationOptions);
 			return task;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task, object> continuationAction, object state)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task, object> continuationAction, object state, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task, object> continuationAction, object state, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, state, scheduler, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, state, scheduler, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task, object> continuationAction, object state, TaskContinuationOptions continuationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, default(CancellationToken), continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, state, TaskScheduler.Current, default(CancellationToken), continuationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task ContinueWith(Action<Task, object> continuationAction, object state, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith(continuationAction, state, scheduler, cancellationToken, continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith(continuationAction, state, scheduler, cancellationToken, continuationOptions);
 		}
 
-		private Task ContinueWith(Action<Task, object> continuationAction, object state, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, ref StackCrawlMark stackMark)
+		private Task ContinueWith(Action<Task, object> continuationAction, object state, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationAction == null)
 			{
@@ -1978,47 +1643,37 @@ namespace System.Threading.Tasks
 			TaskCreationOptions taskCreationOptions;
 			InternalTaskOptions internalTaskOptions;
 			Task.CreationOptionsFromContinuationOptions(continuationOptions, out taskCreationOptions, out internalTaskOptions);
-			Task task = new ContinuationTaskFromTask(this, continuationAction, state, taskCreationOptions, internalTaskOptions, ref stackMark);
+			Task task = new ContinuationTaskFromTask(this, continuationAction, state, taskCreationOptions, internalTaskOptions);
 			this.ContinueWithCore(task, scheduler, cancellationToken, continuationOptions);
 			return task;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, scheduler, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, scheduler, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, TaskContinuationOptions continuationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, default(CancellationToken), continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, default(CancellationToken), continuationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, scheduler, cancellationToken, continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, scheduler, cancellationToken, continuationOptions);
 		}
 
-		private Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, ref StackCrawlMark stackMark)
+		private Task<TResult> ContinueWith<TResult>(Func<Task, TResult> continuationFunction, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
@@ -2031,47 +1686,37 @@ namespace System.Threading.Tasks
 			TaskCreationOptions taskCreationOptions;
 			InternalTaskOptions internalTaskOptions;
 			Task.CreationOptionsFromContinuationOptions(continuationOptions, out taskCreationOptions, out internalTaskOptions);
-			Task<TResult> task = new ContinuationResultTaskFromTask<TResult>(this, continuationFunction, null, taskCreationOptions, internalTaskOptions, ref stackMark);
+			Task<TResult> task = new ContinuationResultTaskFromTask<TResult>(this, continuationFunction, null, taskCreationOptions, internalTaskOptions);
 			this.ContinueWithCore(task, scheduler, cancellationToken, continuationOptions);
 			return task;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, state, scheduler, default(CancellationToken), TaskContinuationOptions.None, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, state, scheduler, default(CancellationToken), TaskContinuationOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, TaskContinuationOptions continuationOptions)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, default(CancellationToken), continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, default(CancellationToken), continuationOptions);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, TaskScheduler scheduler)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return this.ContinueWith<TResult>(continuationFunction, state, scheduler, cancellationToken, continuationOptions, ref stackCrawlMark);
+			return this.ContinueWith<TResult>(continuationFunction, state, scheduler, cancellationToken, continuationOptions);
 		}
 
-		private Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions, ref StackCrawlMark stackMark)
+		private Task<TResult> ContinueWith<TResult>(Func<Task, object, TResult> continuationFunction, object state, TaskScheduler scheduler, CancellationToken cancellationToken, TaskContinuationOptions continuationOptions)
 		{
 			if (continuationFunction == null)
 			{
@@ -2084,7 +1729,7 @@ namespace System.Threading.Tasks
 			TaskCreationOptions taskCreationOptions;
 			InternalTaskOptions internalTaskOptions;
 			Task.CreationOptionsFromContinuationOptions(continuationOptions, out taskCreationOptions, out internalTaskOptions);
-			Task<TResult> task = new ContinuationResultTaskFromTask<TResult>(this, continuationFunction, state, taskCreationOptions, internalTaskOptions, ref stackMark);
+			Task<TResult> task = new ContinuationResultTaskFromTask<TResult>(this, continuationFunction, state, taskCreationOptions, internalTaskOptions);
 			this.ContinueWithCore(task, scheduler, cancellationToken, continuationOptions);
 			return task;
 		}
@@ -2096,7 +1741,7 @@ namespace System.Threading.Tasks
 			TaskContinuationOptions taskContinuationOptions3 = TaskContinuationOptions.LongRunning | TaskContinuationOptions.ExecuteSynchronously;
 			if ((continuationOptions & taskContinuationOptions3) == taskContinuationOptions3)
 			{
-				throw new ArgumentOutOfRangeException("continuationOptions", Environment.GetResourceString("The specified TaskContinuationOptions combined LongRunning and ExecuteSynchronously.  Synchronous continuations should not be long running."));
+				throw new ArgumentOutOfRangeException("continuationOptions", "The specified TaskContinuationOptions combined LongRunning and ExecuteSynchronously.  Synchronous continuations should not be long running.");
 			}
 			if ((continuationOptions & ~((taskContinuationOptions2 | taskContinuationOptions | TaskContinuationOptions.LazyCancellation | TaskContinuationOptions.ExecuteSynchronously) != TaskContinuationOptions.None)) != TaskContinuationOptions.None)
 			{
@@ -2104,7 +1749,7 @@ namespace System.Threading.Tasks
 			}
 			if ((continuationOptions & taskContinuationOptions) == taskContinuationOptions)
 			{
-				throw new ArgumentOutOfRangeException("continuationOptions", Environment.GetResourceString("The specified TaskContinuationOptions excluded all continuation kinds."));
+				throw new ArgumentOutOfRangeException("continuationOptions", "The specified TaskContinuationOptions excluded all continuation kinds.");
 			}
 			creationOptions = (TaskCreationOptions)(continuationOptions & taskContinuationOptions2);
 			internalOptions = InternalTaskOptions.ContinuationTask;
@@ -2150,29 +1795,29 @@ namespace System.Threading.Tasks
 		private bool AddTaskContinuationComplex(object tc, bool addBeforeOthers)
 		{
 			object continuationObject = this.m_continuationObject;
-			if (continuationObject != Task.s_taskCompletionSentinel && !(continuationObject is List<object>))
+			if (continuationObject != Task.s_taskCompletionSentinel && !(continuationObject is LowLevelListWithIList<object>))
 			{
-				Interlocked.CompareExchange(ref this.m_continuationObject, new List<object> { continuationObject }, continuationObject);
+				Interlocked.CompareExchange(ref this.m_continuationObject, new LowLevelListWithIList<object> { continuationObject }, continuationObject);
 			}
-			List<object> list = this.m_continuationObject as List<object>;
-			if (list != null)
+			LowLevelListWithIList<object> lowLevelListWithIList = this.m_continuationObject as LowLevelListWithIList<object>;
+			if (lowLevelListWithIList != null)
 			{
-				List<object> list2 = list;
-				lock (list2)
+				LowLevelListWithIList<object> lowLevelListWithIList2 = lowLevelListWithIList;
+				lock (lowLevelListWithIList2)
 				{
 					if (this.m_continuationObject != Task.s_taskCompletionSentinel)
 					{
-						if (list.Count == list.Capacity)
+						if (lowLevelListWithIList.Count == lowLevelListWithIList.Capacity)
 						{
-							list.RemoveAll(Task.s_IsTaskContinuationNullPredicate);
+							lowLevelListWithIList.RemoveAll(Task.s_IsTaskContinuationNullPredicate);
 						}
 						if (addBeforeOthers)
 						{
-							list.Insert(0, tc);
+							lowLevelListWithIList.Insert(0, tc);
 						}
 						else
 						{
-							list.Add(tc);
+							lowLevelListWithIList.Add(tc);
 						}
 						return true;
 					}
@@ -2194,26 +1839,26 @@ namespace System.Threading.Tasks
 			{
 				return;
 			}
-			List<object> list = continuationObject2 as List<object>;
-			if (list == null)
+			LowLevelListWithIList<object> lowLevelListWithIList = continuationObject2 as LowLevelListWithIList<object>;
+			if (lowLevelListWithIList == null)
 			{
-				if (Interlocked.CompareExchange(ref this.m_continuationObject, new List<object>(), continuationObject) == continuationObject)
+				if (Interlocked.CompareExchange(ref this.m_continuationObject, new LowLevelListWithIList<object>(), continuationObject) == continuationObject)
 				{
 					return;
 				}
-				list = this.m_continuationObject as List<object>;
+				lowLevelListWithIList = this.m_continuationObject as LowLevelListWithIList<object>;
 			}
-			if (list != null)
+			if (lowLevelListWithIList != null)
 			{
-				List<object> list2 = list;
-				lock (list2)
+				LowLevelListWithIList<object> lowLevelListWithIList2 = lowLevelListWithIList;
+				lock (lowLevelListWithIList2)
 				{
 					if (this.m_continuationObject != Task.s_taskCompletionSentinel)
 					{
-						int num = list.IndexOf(continuationObject);
+						int num = lowLevelListWithIList.IndexOf(continuationObject);
 						if (num != -1)
 						{
-							list[num] = null;
+							lowLevelListWithIList[num] = null;
 						}
 					}
 				}
@@ -2261,9 +1906,9 @@ namespace System.Threading.Tasks
 				throw new ArgumentOutOfRangeException("millisecondsTimeout");
 			}
 			cancellationToken.ThrowIfCancellationRequested();
-			List<Exception> list = null;
-			List<Task> list2 = null;
-			List<Task> list3 = null;
+			LowLevelListWithIList<Exception> lowLevelListWithIList = null;
+			LowLevelListWithIList<Task> lowLevelListWithIList2 = null;
+			LowLevelListWithIList<Task> lowLevelListWithIList3 = null;
 			bool flag = false;
 			bool flag2 = false;
 			bool flag3 = true;
@@ -2272,21 +1917,21 @@ namespace System.Threading.Tasks
 				Task task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks array included at least one null element."), "tasks");
+					throw new ArgumentException("The tasks array included at least one null element.", "tasks");
 				}
 				bool flag4 = task.IsCompleted;
 				if (!flag4)
 				{
 					if (millisecondsTimeout != -1 || cancellationToken.CanBeCanceled)
 					{
-						Task.AddToList<Task>(task, ref list2, tasks.Length);
+						Task.AddToList<Task>(task, ref lowLevelListWithIList2, tasks.Length);
 					}
 					else
 					{
 						flag4 = task.WrappedTryRunInline() && task.IsCompleted;
 						if (!flag4)
 						{
-							Task.AddToList<Task>(task, ref list2, tasks.Length);
+							Task.AddToList<Task>(task, ref lowLevelListWithIList2, tasks.Length);
 						}
 					}
 				}
@@ -2302,16 +1947,16 @@ namespace System.Threading.Tasks
 					}
 					if (task.IsWaitNotificationEnabled)
 					{
-						Task.AddToList<Task>(task, ref list3, 1);
+						Task.AddToList<Task>(task, ref lowLevelListWithIList3, 1);
 					}
 				}
 			}
-			if (list2 != null)
+			if (lowLevelListWithIList2 != null)
 			{
-				flag3 = Task.WaitAllBlockingCore(list2, millisecondsTimeout, cancellationToken);
+				flag3 = Task.WaitAllBlockingCore(lowLevelListWithIList2, millisecondsTimeout, cancellationToken);
 				if (flag3)
 				{
-					foreach (Task task2 in list2)
+					foreach (Task task2 in ((IEnumerable<Task>)lowLevelListWithIList2))
 					{
 						if (task2.IsFaulted)
 						{
@@ -2323,15 +1968,15 @@ namespace System.Threading.Tasks
 						}
 						if (task2.IsWaitNotificationEnabled)
 						{
-							Task.AddToList<Task>(task2, ref list3, 1);
+							Task.AddToList<Task>(task2, ref lowLevelListWithIList3, 1);
 						}
 					}
 				}
 				GC.KeepAlive(tasks);
 			}
-			if (flag3 && list3 != null)
+			if (flag3 && lowLevelListWithIList3 != null)
 			{
-				using (List<Task>.Enumerator enumerator = list3.GetEnumerator())
+				using (IEnumerator<Task> enumerator = ((IEnumerable<Task>)lowLevelListWithIList3).GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
@@ -2350,29 +1995,29 @@ namespace System.Threading.Tasks
 				}
 				foreach (Task task3 in tasks)
 				{
-					Task.AddExceptionsForCompletedTask(ref list, task3);
+					Task.AddExceptionsForCompletedTask(ref lowLevelListWithIList, task3);
 				}
-				throw new AggregateException(list);
+				throw new AggregateException(lowLevelListWithIList);
 			}
 			return flag3;
 		}
 
-		private static void AddToList<T>(T item, ref List<T> list, int initSize)
+		private static void AddToList<T>(T item, ref LowLevelListWithIList<T> list, int initSize)
 		{
 			if (list == null)
 			{
-				list = new List<T>(initSize);
+				list = new LowLevelListWithIList<T>(initSize);
 			}
 			list.Add(item);
 		}
 
-		private static bool WaitAllBlockingCore(List<Task> tasks, int millisecondsTimeout, CancellationToken cancellationToken)
+		private static bool WaitAllBlockingCore(LowLevelListWithIList<Task> tasks, int millisecondsTimeout, CancellationToken cancellationToken)
 		{
 			bool flag = false;
 			Task.SetOnCountdownMres setOnCountdownMres = new Task.SetOnCountdownMres(tasks.Count);
 			try
 			{
-				foreach (Task task in tasks)
+				foreach (Task task in ((IEnumerable<Task>)tasks))
 				{
 					task.AddCompletionAction(setOnCountdownMres, true);
 				}
@@ -2382,7 +2027,7 @@ namespace System.Threading.Tasks
 			{
 				if (!flag)
 				{
-					foreach (Task task2 in tasks)
+					foreach (Task task2 in ((IEnumerable<Task>)tasks))
 					{
 						if (!task2.IsCompleted)
 						{
@@ -2394,29 +2039,7 @@ namespace System.Threading.Tasks
 			return flag;
 		}
 
-		internal static void FastWaitAll(Task[] tasks)
-		{
-			List<Exception> list = null;
-			for (int i = tasks.Length - 1; i >= 0; i--)
-			{
-				if (!tasks[i].IsCompleted)
-				{
-					tasks[i].WrappedTryRunInline();
-				}
-			}
-			for (int j = tasks.Length - 1; j >= 0; j--)
-			{
-				Task task = tasks[j];
-				task.SpinThenBlockingWait(-1, default(CancellationToken));
-				Task.AddExceptionsForCompletedTask(ref list, task);
-			}
-			if (list != null)
-			{
-				throw new AggregateException(list);
-			}
-		}
-
-		internal static void AddExceptionsForCompletedTask(ref List<Exception> exceptions, Task t)
+		internal static void AddExceptionsForCompletedTask(ref LowLevelListWithIList<Exception> exceptions, Task t)
 		{
 			AggregateException exceptions2 = t.GetExceptions(true);
 			if (exceptions2 != null)
@@ -2424,7 +2047,7 @@ namespace System.Threading.Tasks
 				t.UpdateExceptionObservedStatus();
 				if (exceptions == null)
 				{
-					exceptions = new List<Exception>(exceptions2.InnerExceptions.Count);
+					exceptions = new LowLevelListWithIList<Exception>(exceptions2.InnerExceptions.Count);
 				}
 				exceptions.AddRange(exceptions2.InnerExceptions);
 			}
@@ -2477,7 +2100,7 @@ namespace System.Threading.Tasks
 				Task task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks array included at least one null element."), "tasks");
+					throw new ArgumentException("The tasks array included at least one null element.", "tasks");
 				}
 				if (num == -1 && task.IsCompleted)
 				{
@@ -2517,7 +2140,6 @@ namespace System.Threading.Tasks
 			return task;
 		}
 
-		[FriendAccessAllowed]
 		internal static Task FromCancellation(CancellationToken cancellationToken)
 		{
 			if (!cancellationToken.IsCancellationRequested)
@@ -2532,7 +2154,6 @@ namespace System.Threading.Tasks
 			return Task.FromCancellation(cancellationToken);
 		}
 
-		[FriendAccessAllowed]
 		internal static Task<TResult> FromCancellation<TResult>(CancellationToken cancellationToken)
 		{
 			if (!cancellationToken.IsCancellationRequested)
@@ -2558,32 +2179,24 @@ namespace System.Threading.Tasks
 			return task;
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Task Run(Action action)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task.InternalStartNew(null, action, null, default(CancellationToken), TaskScheduler.Default, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(null, action, null, default(CancellationToken), TaskScheduler.Default, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Task Run(Action action, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task.InternalStartNew(null, action, null, cancellationToken, TaskScheduler.Default, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, ref stackCrawlMark);
+			return Task.InternalStartNew(null, action, null, cancellationToken, TaskScheduler.Default, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Task<TResult> Run<TResult>(Func<TResult> function)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(null, function, default(CancellationToken), TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, TaskScheduler.Default, ref stackCrawlMark);
+			return Task<TResult>.StartNew(null, function, default(CancellationToken), TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, TaskScheduler.Default);
 		}
 
-		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static Task<TResult> Run<TResult>(Func<TResult> function, CancellationToken cancellationToken)
 		{
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Task<TResult>.StartNew(null, function, cancellationToken, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, TaskScheduler.Default, ref stackCrawlMark);
+			return Task<TResult>.StartNew(null, function, cancellationToken, TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, TaskScheduler.Default);
 		}
 
 		public static Task Run(Func<Task> function)
@@ -2597,15 +2210,11 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("function");
 			}
-			if (AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
-			{
-				cancellationToken.ThrowIfSourceDisposed();
-			}
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return Task.FromCancellation(cancellationToken);
 			}
-			return new UnwrapPromise<VoidTaskResult>(Task<Task>.Factory.StartNew(function, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default), true);
+			return new UnwrapPromise<VoidTaskResult>(Task.Factory.StartNew<Task>(function, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default), true);
 		}
 
 		public static Task<TResult> Run<TResult>(Func<Task<TResult>> function)
@@ -2619,15 +2228,11 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("function");
 			}
-			if (AppContextSwitches.ThrowExceptionIfDisposedCancellationTokenSource)
-			{
-				cancellationToken.ThrowIfSourceDisposed();
-			}
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return Task.FromCancellation<TResult>(cancellationToken);
 			}
-			return new UnwrapPromise<TResult>(Task<Task<TResult>>.Factory.StartNew(function, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default), true);
+			return new UnwrapPromise<TResult>(Task.Factory.StartNew<Task<TResult>>(function, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default), true);
 		}
 
 		public static Task Delay(TimeSpan delay)
@@ -2640,7 +2245,7 @@ namespace System.Threading.Tasks
 			long num = (long)delay.TotalMilliseconds;
 			if (num < -1L || num > 2147483647L)
 			{
-				throw new ArgumentOutOfRangeException("delay", Environment.GetResourceString("The value needs to translate in milliseconds to -1 (signifying an infinite timeout), 0 or a positive integer less than or equal to Int32.MaxValue."));
+				throw new ArgumentOutOfRangeException("delay", "The value needs to translate in milliseconds to -1 (signifying an infinite timeout), 0 or a positive integer less than or equal to Int32.MaxValue.");
 			}
 			return Task.Delay((int)num, cancellationToken);
 		}
@@ -2654,7 +2259,7 @@ namespace System.Threading.Tasks
 		{
 			if (millisecondsDelay < -1)
 			{
-				throw new ArgumentOutOfRangeException("millisecondsDelay", Environment.GetResourceString("The value needs to be either -1 (signifying an infinite timeout), 0 or a positive integer."));
+				throw new ArgumentOutOfRangeException("millisecondsDelay", "The value needs to be either -1 (signifying an infinite timeout), 0 or a positive integer.");
 			}
 			if (cancellationToken.IsCancellationRequested)
 			{
@@ -2699,7 +2304,7 @@ namespace System.Threading.Tasks
 				{
 					if (task == null)
 					{
-						throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+						throw new ArgumentException("The tasks argument included a null value.", "tasks");
 					}
 					array[num++] = task;
 				}
@@ -2709,16 +2314,16 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("tasks");
 			}
-			List<Task> list = new List<Task>();
+			LowLevelListWithIList<Task> lowLevelListWithIList = new LowLevelListWithIList<Task>();
 			foreach (Task task2 in tasks)
 			{
 				if (task2 == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
-				list.Add(task2);
+				lowLevelListWithIList.Add(task2);
 			}
-			return Task.InternalWhenAll(list.ToArray());
+			return Task.InternalWhenAll(lowLevelListWithIList.ToArray());
 		}
 
 		public static Task WhenAll(params Task[] tasks)
@@ -2738,7 +2343,7 @@ namespace System.Threading.Tasks
 				Task task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 				array[i] = task;
 			}
@@ -2770,7 +2375,7 @@ namespace System.Threading.Tasks
 				{
 					if (task == null)
 					{
-						throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+						throw new ArgumentException("The tasks argument included a null value.", "tasks");
 					}
 					array[num++] = task;
 				}
@@ -2780,16 +2385,16 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("tasks");
 			}
-			List<Task<TResult>> list = new List<Task<TResult>>();
+			LowLevelListWithIList<Task<TResult>> lowLevelListWithIList = new LowLevelListWithIList<Task<TResult>>();
 			foreach (Task<TResult> task2 in tasks)
 			{
 				if (task2 == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
-				list.Add(task2);
+				lowLevelListWithIList.Add(task2);
 			}
-			return Task.InternalWhenAll<TResult>(list.ToArray());
+			return Task.InternalWhenAll<TResult>(lowLevelListWithIList.ToArray());
 		}
 
 		public static Task<TResult[]> WhenAll<TResult>(params Task<TResult>[] tasks)
@@ -2809,7 +2414,7 @@ namespace System.Threading.Tasks
 				Task<TResult> task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 				array[i] = task;
 			}
@@ -2822,7 +2427,7 @@ namespace System.Threading.Tasks
 			{
 				return new Task.WhenAllPromise<TResult>(tasks);
 			}
-			return new Task<TResult[]>(false, new TResult[0], TaskCreationOptions.None, default(CancellationToken));
+			return new Task<TResult[]>(false, Array.Empty<TResult>(), TaskCreationOptions.None, default(CancellationToken));
 		}
 
 		public static Task<Task> WhenAny(params Task[] tasks)
@@ -2833,7 +2438,7 @@ namespace System.Threading.Tasks
 			}
 			if (tasks.Length == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
 			int num = tasks.Length;
 			Task[] array = new Task[num];
@@ -2842,7 +2447,7 @@ namespace System.Threading.Tasks
 				Task task = tasks[i];
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
 				array[i] = task;
 			}
@@ -2855,48 +2460,43 @@ namespace System.Threading.Tasks
 			{
 				throw new ArgumentNullException("tasks");
 			}
-			List<Task> list = new List<Task>();
+			LowLevelListWithIList<Task> lowLevelListWithIList = new LowLevelListWithIList<Task>();
 			foreach (Task task in tasks)
 			{
 				if (task == null)
 				{
-					throw new ArgumentException(Environment.GetResourceString("The tasks argument included a null value."), "tasks");
+					throw new ArgumentException("The tasks argument included a null value.", "tasks");
 				}
-				list.Add(task);
+				lowLevelListWithIList.Add(task);
 			}
-			if (list.Count == 0)
+			if (lowLevelListWithIList.Count == 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("The tasks argument contains no tasks."), "tasks");
+				throw new ArgumentException("The tasks argument contains no tasks.", "tasks");
 			}
-			return TaskFactory.CommonCWAnyLogic(list);
+			return TaskFactory.CommonCWAnyLogic(lowLevelListWithIList);
 		}
 
 		public static Task<Task<TResult>> WhenAny<TResult>(params Task<TResult>[] tasks)
 		{
-			return Task.WhenAny(tasks).ContinueWith<Task<TResult>>(Task<TResult>.TaskWhenAnyCast, default(CancellationToken), TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+			return Task.WhenAny(tasks).ContinueWith<Task<TResult>>(Task<TResult>.TaskWhenAnyCast.Value, default(CancellationToken), TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 		}
 
 		public static Task<Task<TResult>> WhenAny<TResult>(IEnumerable<Task<TResult>> tasks)
 		{
-			return Task.WhenAny(tasks).ContinueWith<Task<TResult>>(Task<TResult>.TaskWhenAnyCast, default(CancellationToken), TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+			return Task.WhenAny(tasks).ContinueWith<Task<TResult>>(Task<TResult>.TaskWhenAnyCast.Value, default(CancellationToken), TaskContinuationOptions.DenyChildAttach | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 		}
 
-		[FriendAccessAllowed]
-		internal static Task<TResult> CreateUnwrapPromise<TResult>(Task outerTask, bool lookForOce)
+		public static Task<TResult> CreateUnwrapPromise<TResult>(Task outerTask, bool lookForOce)
 		{
 			return new UnwrapPromise<TResult>(outerTask, lookForOce);
 		}
 
 		internal virtual Delegate[] GetDelegateContinuationsForDebugger()
 		{
-			if (this.m_continuationObject != this)
-			{
-				return Task.GetDelegatesFromContinuationObject(this.m_continuationObject);
-			}
-			return null;
+			return Task.GetDelegatesFromContinuationObject(this.m_continuationObject);
 		}
 
-		internal static Delegate[] GetDelegatesFromContinuationObject(object continuationObject)
+		private static Delegate[] GetDelegatesFromContinuationObject(object continuationObject)
 		{
 			if (continuationObject != null)
 			{
@@ -2913,11 +2513,7 @@ namespace System.Threading.Tasks
 				Task task = continuationObject as Task;
 				if (task != null)
 				{
-					Delegate[] delegateContinuationsForDebugger = task.GetDelegateContinuationsForDebugger();
-					if (delegateContinuationsForDebugger != null)
-					{
-						return delegateContinuationsForDebugger;
-					}
+					return task.GetDelegateContinuationsForDebugger();
 				}
 				ITaskCompletionAction taskCompletionAction = continuationObject as ITaskCompletionAction;
 				if (taskCompletionAction != null)
@@ -2927,11 +2523,11 @@ namespace System.Threading.Tasks
 						new Action<Task>(taskCompletionAction.Invoke)
 					};
 				}
-				List<object> list = continuationObject as List<object>;
-				if (list != null)
+				LowLevelListWithIList<object> lowLevelListWithIList = continuationObject as LowLevelListWithIList<object>;
+				if (lowLevelListWithIList != null)
 				{
-					List<Delegate> list2 = new List<Delegate>();
-					foreach (object obj in list)
+					LowLevelListWithIList<Delegate> lowLevelListWithIList2 = new LowLevelListWithIList<Delegate>();
+					foreach (object obj in ((IEnumerable<object>)lowLevelListWithIList))
 					{
 						Delegate[] delegatesFromContinuationObject = Task.GetDelegatesFromContinuationObject(obj);
 						if (delegatesFromContinuationObject != null)
@@ -2940,12 +2536,12 @@ namespace System.Threading.Tasks
 							{
 								if (@delegate != null)
 								{
-									list2.Add(@delegate);
+									lowLevelListWithIList2.Add(@delegate);
 								}
 							}
 						}
 					}
-					return list2.ToArray();
+					return lowLevelListWithIList2.ToArray();
 				}
 			}
 			return null;
@@ -2953,29 +2549,72 @@ namespace System.Threading.Tasks
 
 		private static Task GetActiveTaskFromId(int taskId)
 		{
-			Task task = null;
-			Task.s_currentActiveTasks.TryGetValue(taskId, out task);
-			return task;
+			return DebuggerSupport.GetActiveTaskFromId(taskId);
 		}
 
-		private static Task[] GetActiveTasks()
+		[FriendAccessAllowed]
+		internal static bool AddToActiveTasks(Task task)
 		{
-			return new List<Task>(Task.s_currentActiveTasks.Values).ToArray();
+			object obj = Task.s_activeTasksLock;
+			lock (obj)
+			{
+				Task.s_currentActiveTasks[task.Id] = task;
+			}
+			return true;
 		}
 
-		[ThreadStatic]
-		internal static Task t_currentTask;
+		[FriendAccessAllowed]
+		internal static void RemoveFromActiveTasks(int taskId)
+		{
+			object obj = Task.s_activeTasksLock;
+			lock (obj)
+			{
+				Task.s_currentActiveTasks.Remove(taskId);
+			}
+		}
 
-		[ThreadStatic]
-		private static StackGuard t_stackGuard;
+		public void MarkAborted(ThreadAbortException e)
+		{
+		}
+
+		[SecurityCritical]
+		private void ExecuteWithThreadLocal(ref Task currentTaskSlot)
+		{
+			Task task = currentTaskSlot;
+			try
+			{
+				currentTaskSlot = this;
+				ExecutionContext capturedContext = this.CapturedContext;
+				if (capturedContext == null)
+				{
+					this.Execute();
+				}
+				else
+				{
+					ContextCallback contextCallback = Task.s_ecCallback;
+					if (contextCallback == null)
+					{
+						contextCallback = (Task.s_ecCallback = new ContextCallback(Task.ExecutionContextCallback));
+					}
+					ExecutionContext.Run(capturedContext, contextCallback, this, true);
+				}
+				if (AsyncCausalityTracer.LoggingOn)
+				{
+					AsyncCausalityTracer.TraceSynchronousWorkCompletion(CausalityTraceLevel.Required, CausalitySynchronousWork.Execution);
+				}
+				this.Finish(true);
+			}
+			finally
+			{
+				currentTaskSlot = task;
+			}
+		}
 
 		internal static int s_taskIdCounter;
 
-		private static readonly TaskFactory s_factory = new TaskFactory();
-
 		private volatile int m_taskId;
 
-		internal object m_action;
+		internal Delegate m_action;
 
 		internal object m_stateObject;
 
@@ -3013,10 +2652,6 @@ namespace System.Threading.Tasks
 
 		internal const int TASK_STATE_WAIT_COMPLETION_NOTIFICATION = 268435456;
 
-		internal const int TASK_STATE_EXECUTIONCONTEXT_IS_NULL = 536870912;
-
-		internal const int TASK_STATE_TASKSCHEDULED_WAS_FIRED = 1073741824;
-
 		private const int TASK_STATE_COMPLETED_MASK = 23068672;
 
 		private const int CANCELLATION_REQUESTED = 1;
@@ -3025,27 +2660,29 @@ namespace System.Threading.Tasks
 
 		private static readonly object s_taskCompletionSentinel = new object();
 
-		[FriendAccessAllowed]
 		internal static bool s_asyncDebuggingEnabled;
-
-		private static readonly Dictionary<int, Task> s_currentActiveTasks = new Dictionary<int, Task>();
-
-		private static readonly object s_activeTasksLock = new object();
 
 		internal volatile Task.ContingentProperties m_contingentProperties;
 
 		private static readonly Action<object> s_taskCancelCallback = new Action<object>(Task.TaskCancelCallback);
 
-		private static readonly Func<Task.ContingentProperties> s_createContingentProperties = () => new Task.ContingentProperties();
+		[ThreadStatic]
+		internal static Task t_currentTask;
 
-		private static Task s_completedTask;
+		[ThreadStatic]
+		private static StackGuard t_stackGuard;
+
+		private static readonly Func<Task.ContingentProperties> s_createContingentProperties = () => new Task.ContingentProperties();
 
 		private static readonly Predicate<Task> s_IsExceptionObservedByParentPredicate = (Task t) => t.IsExceptionObservedByParent;
 
-		[SecurityCritical]
 		private static ContextCallback s_ecCallback;
 
 		private static readonly Predicate<object> s_IsTaskContinuationNullPredicate = (object tc) => tc == null;
+
+		private static readonly Dictionary<int, Task> s_currentActiveTasks = new Dictionary<int, Task>();
+
+		private static readonly object s_activeTasksLock = new object();
 
 		internal class ContingentProperties
 		{
@@ -3058,13 +2695,13 @@ namespace System.Threading.Tasks
 				}
 			}
 
-			internal void DeregisterCancellationCallback()
+			internal void UnregisterCancellationCallback()
 			{
 				if (this.m_cancellationRegistration != null)
 				{
 					try
 					{
-						this.m_cancellationRegistration.Value.Dispose();
+						((CancellationTokenRegistration)this.m_cancellationRegistration).Dispose();
 					}
 					catch (ObjectDisposedException)
 					{
@@ -3081,13 +2718,13 @@ namespace System.Threading.Tasks
 
 			internal CancellationToken m_cancellationToken;
 
-			internal Shared<CancellationTokenRegistration> m_cancellationRegistration;
+			internal object m_cancellationRegistration;
 
 			internal volatile int m_internalCancellationRequested;
 
 			internal volatile int m_completionCountdown = 1;
 
-			internal volatile List<Task> m_exceptionalChildren;
+			internal volatile LowLevelListWithIList<Task> m_exceptionalChildren;
 		}
 
 		private sealed class SetOnInvokeMres : ManualResetEventSlim, ITaskCompletionAction
@@ -3100,6 +2737,14 @@ namespace System.Threading.Tasks
 			public void Invoke(Task completingTask)
 			{
 				base.Set();
+			}
+
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return false;
+				}
 			}
 		}
 
@@ -3118,6 +2763,14 @@ namespace System.Threading.Tasks
 				}
 			}
 
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return false;
+				}
+			}
+
 			private int _count;
 		}
 
@@ -3126,14 +2779,11 @@ namespace System.Threading.Tasks
 			internal DelayPromise(CancellationToken token)
 			{
 				this.Token = token;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "Task.Delay", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "Task.Delay", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 			}
 
 			internal void Complete()
@@ -3145,14 +2795,11 @@ namespace System.Threading.Tasks
 				}
 				else
 				{
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					flag = base.TrySetResult(default(VoidTaskResult));
 				}
 				if (flag)
@@ -3176,14 +2823,11 @@ namespace System.Threading.Tasks
 		{
 			internal WhenAllPromise(Task[] tasks)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "Task.WhenAll", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "Task.WhenAll", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 				this.m_tasks = tasks;
 				this.m_count = tasks.Length;
 				foreach (Task task in tasks)
@@ -3199,26 +2843,26 @@ namespace System.Threading.Tasks
 				}
 			}
 
-			public void Invoke(Task completedTask)
+			public void Invoke(Task ignored)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Join);
+					DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Join);
 				}
 				if (Interlocked.Decrement(ref this.m_count) == 0)
 				{
-					List<ExceptionDispatchInfo> list = null;
+					LowLevelListWithIList<ExceptionDispatchInfo> lowLevelListWithIList = null;
 					Task task = null;
 					for (int i = 0; i < this.m_tasks.Length; i++)
 					{
 						Task task2 = this.m_tasks[i];
 						if (task2.IsFaulted)
 						{
-							if (list == null)
+							if (lowLevelListWithIList == null)
 							{
-								list = new List<ExceptionDispatchInfo>();
+								lowLevelListWithIList = new LowLevelListWithIList<ExceptionDispatchInfo>();
 							}
-							list.AddRange(task2.GetExceptionDispatchInfos());
+							lowLevelListWithIList.AddRange(task2.GetExceptionDispatchInfos());
 						}
 						else if (task2.IsCanceled && task == null)
 						{
@@ -3233,9 +2877,9 @@ namespace System.Threading.Tasks
 							this.m_tasks[i] = null;
 						}
 					}
-					if (list != null)
+					if (lowLevelListWithIList != null)
 					{
-						base.TrySetException(list);
+						base.TrySetException(lowLevelListWithIList);
 						return;
 					}
 					if (task != null)
@@ -3243,14 +2887,11 @@ namespace System.Threading.Tasks
 						base.TrySetCanceled(task.CancellationToken, task.GetCancellationExceptionDispatchInfo());
 						return;
 					}
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					base.TrySetResult(default(VoidTaskResult));
 				}
 			}
@@ -3260,6 +2901,14 @@ namespace System.Threading.Tasks
 				get
 				{
 					return base.ShouldNotifyDebuggerOfWaitCompletion && Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(this.m_tasks);
+				}
+			}
+
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return true;
 				}
 			}
 
@@ -3274,14 +2923,11 @@ namespace System.Threading.Tasks
 			{
 				this.m_tasks = tasks;
 				this.m_count = tasks.Length;
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationCreation(CausalityTraceLevel.Required, base.Id, "Task.WhenAll", 0UL);
+					DebuggerSupport.TraceOperationCreation(CausalityTraceLevel.Required, this, "Task.WhenAll", 0UL);
 				}
-				if (Task.s_asyncDebuggingEnabled)
-				{
-					Task.AddToActiveTasks(this);
-				}
+				DebuggerSupport.AddToActiveTasks(this);
 				foreach (Task<T> task in tasks)
 				{
 					if (task.IsCompleted)
@@ -3297,25 +2943,25 @@ namespace System.Threading.Tasks
 
 			public void Invoke(Task ignored)
 			{
-				if (AsyncCausalityTracer.LoggingOn)
+				if (DebuggerSupport.LoggingOn)
 				{
-					AsyncCausalityTracer.TraceOperationRelation(CausalityTraceLevel.Important, base.Id, CausalityRelation.Join);
+					DebuggerSupport.TraceOperationRelation(CausalityTraceLevel.Important, this, CausalityRelation.Join);
 				}
 				if (Interlocked.Decrement(ref this.m_count) == 0)
 				{
 					T[] array = new T[this.m_tasks.Length];
-					List<ExceptionDispatchInfo> list = null;
+					LowLevelListWithIList<ExceptionDispatchInfo> lowLevelListWithIList = null;
 					Task task = null;
 					for (int i = 0; i < this.m_tasks.Length; i++)
 					{
 						Task<T> task2 = this.m_tasks[i];
 						if (task2.IsFaulted)
 						{
-							if (list == null)
+							if (lowLevelListWithIList == null)
 							{
-								list = new List<ExceptionDispatchInfo>();
+								lowLevelListWithIList = new LowLevelListWithIList<ExceptionDispatchInfo>();
 							}
-							list.AddRange(task2.GetExceptionDispatchInfos());
+							lowLevelListWithIList.AddRange(task2.GetExceptionDispatchInfos());
 						}
 						else if (task2.IsCanceled)
 						{
@@ -3337,9 +2983,9 @@ namespace System.Threading.Tasks
 							this.m_tasks[i] = null;
 						}
 					}
-					if (list != null)
+					if (lowLevelListWithIList != null)
 					{
-						base.TrySetException(list);
+						base.TrySetException(lowLevelListWithIList);
 						return;
 					}
 					if (task != null)
@@ -3347,14 +2993,11 @@ namespace System.Threading.Tasks
 						base.TrySetCanceled(task.CancellationToken, task.GetCancellationExceptionDispatchInfo());
 						return;
 					}
-					if (AsyncCausalityTracer.LoggingOn)
+					if (DebuggerSupport.LoggingOn)
 					{
-						AsyncCausalityTracer.TraceOperationCompletion(CausalityTraceLevel.Required, base.Id, AsyncCausalityStatus.Completed);
+						DebuggerSupport.TraceOperationCompletion(CausalityTraceLevel.Required, this, AsyncStatus.Completed);
 					}
-					if (Task.s_asyncDebuggingEnabled)
-					{
-						Task.RemoveFromActiveTasks(base.Id);
-					}
+					DebuggerSupport.RemoveFromActiveTasks(this);
 					base.TrySetResult(array);
 				}
 			}
@@ -3363,7 +3006,20 @@ namespace System.Threading.Tasks
 			{
 				get
 				{
-					return base.ShouldNotifyDebuggerOfWaitCompletion && Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(this.m_tasks);
+					if (base.ShouldNotifyDebuggerOfWaitCompletion)
+					{
+						Task[] tasks = this.m_tasks;
+						return Task.AnyTaskRequiresNotifyDebuggerOfWaitCompletion(tasks);
+					}
+					return false;
+				}
+			}
+
+			public bool InvokeMayRunArbitraryCode
+			{
+				get
+				{
+					return true;
 				}
 			}
 

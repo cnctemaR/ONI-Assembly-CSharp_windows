@@ -258,7 +258,7 @@ namespace System.Net
 			WebPermission webPermission = target as WebPermission;
 			if (webPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			if (webPermission.m_noRestriction)
 			{
@@ -286,7 +286,7 @@ namespace System.Net
 						{
 							if (!WebPermission.isSpecialSubsetCase(obj.ToString(), webPermission.m_acceptList))
 							{
-								throw new NotSupportedException(global::SR.GetString("Cannot subset Regex. Only support if both patterns are identical."));
+								throw new NotSupportedException(SR.GetString("Cannot subset Regex. Only support if both patterns are identical."));
 							}
 						}
 						else if (!WebPermission.isMatchedURI(obj, webPermission.m_acceptList))
@@ -314,7 +314,7 @@ namespace System.Net
 						{
 							if (!WebPermission.isSpecialSubsetCase(obj2.ToString(), webPermission.m_connectList))
 							{
-								throw new NotSupportedException(global::SR.GetString("Cannot subset Regex. Only support if both patterns are identical."));
+								throw new NotSupportedException(SR.GetString("Cannot subset Regex. Only support if both patterns are identical."));
 							}
 						}
 						else if (!WebPermission.isMatchedURI(obj2, webPermission.m_connectList))
@@ -364,7 +364,7 @@ namespace System.Net
 			WebPermission webPermission = target as WebPermission;
 			if (webPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			if (this.m_noRestriction || webPermission.m_noRestriction)
 			{
@@ -437,7 +437,7 @@ namespace System.Net
 			WebPermission webPermission = target as WebPermission;
 			if (webPermission == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Cannot cast target permission type."), "target");
+				throw new ArgumentException(SR.GetString("Cannot cast target permission type."), "target");
 			}
 			if (this.m_noRestriction)
 			{
@@ -487,16 +487,16 @@ namespace System.Net
 			}
 			if (!securityElement.Tag.Equals("IPermission"))
 			{
-				throw new ArgumentException(global::SR.GetString("Specified value does not contain 'IPermission' as its tag."), "securityElement");
+				throw new ArgumentException(SR.GetString("Specified value does not contain 'IPermission' as its tag."), "securityElement");
 			}
 			string text = securityElement.Attribute("class");
 			if (text == null)
 			{
-				throw new ArgumentException(global::SR.GetString("Specified value does not contain a 'class' attribute."), "securityElement");
+				throw new ArgumentException(SR.GetString("Specified value does not contain a 'class' attribute."), "securityElement");
 			}
 			if (text.IndexOf(base.GetType().FullName) < 0)
 			{
-				throw new ArgumentException(global::SR.GetString("The value class attribute is not valid."), "securityElement");
+				throw new ArgumentException(SR.GetString("The value class attribute is not valid."), "securityElement");
 			}
 			string text2 = securityElement.Attribute("Unrestricted");
 			this.m_connectList = new ArrayList();
@@ -527,7 +527,7 @@ namespace System.Net
 						}
 						if (text3 == null)
 						{
-							throw new ArgumentException(global::SR.GetString("The '{0}' element contains one or more invalid values."), "ConnectAccess");
+							throw new ArgumentException(SR.GetString("The '{0}' element contains one or more invalid values."), "ConnectAccess");
 						}
 						if (text3 == ".*")
 						{
@@ -558,7 +558,7 @@ namespace System.Net
 						}
 						if (text3 == null)
 						{
-							throw new ArgumentException(global::SR.GetString("The '{0}' element contains one or more invalid values."), "AcceptAccess");
+							throw new ArgumentException(SR.GetString("The '{0}' element contains one or more invalid values."), "AcceptAccess");
 						}
 						if (text3 == ".*")
 						{

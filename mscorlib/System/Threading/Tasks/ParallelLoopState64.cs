@@ -7,18 +7,18 @@ namespace System.Threading.Tasks
 		internal ParallelLoopState64(ParallelLoopStateFlags64 sharedParallelStateFlags)
 			: base(sharedParallelStateFlags)
 		{
-			this.m_sharedParallelStateFlags = sharedParallelStateFlags;
+			this._sharedParallelStateFlags = sharedParallelStateFlags;
 		}
 
 		internal long CurrentIteration
 		{
 			get
 			{
-				return this.m_currentIteration;
+				return this._currentIteration;
 			}
 			set
 			{
-				this.m_currentIteration = value;
+				this._currentIteration = value;
 			}
 		}
 
@@ -26,7 +26,7 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_sharedParallelStateFlags.ShouldExitLoop(this.CurrentIteration);
+				return this._sharedParallelStateFlags.ShouldExitLoop(this.CurrentIteration);
 			}
 		}
 
@@ -34,17 +34,17 @@ namespace System.Threading.Tasks
 		{
 			get
 			{
-				return this.m_sharedParallelStateFlags.NullableLowestBreakIteration;
+				return this._sharedParallelStateFlags.NullableLowestBreakIteration;
 			}
 		}
 
 		internal override void InternalBreak()
 		{
-			ParallelLoopState.Break(this.CurrentIteration, this.m_sharedParallelStateFlags);
+			ParallelLoopState.Break(this.CurrentIteration, this._sharedParallelStateFlags);
 		}
 
-		private ParallelLoopStateFlags64 m_sharedParallelStateFlags;
+		private readonly ParallelLoopStateFlags64 _sharedParallelStateFlags;
 
-		private long m_currentIteration;
+		private long _currentIteration;
 	}
 }

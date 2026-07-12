@@ -61,7 +61,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 
 	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
 	{
-		Worker worker = base.worker;
+		WorkerBase worker = base.worker;
 		if (worker == null)
 		{
 			return;
@@ -80,9 +80,12 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 				}
 				return 0f;
 			});
-			this.workerGasProvider = component.GetGasProvider();
-			component.SetGasProvider(this);
-			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
+			if (component != null)
+			{
+				this.workerGasProvider = component.GetGasProvider();
+				component.SetGasProvider(this);
+			}
+			worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 			component2.AddTag(GameTags.Shaded, false);
 			component3.AddStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 			return;
@@ -91,19 +94,22 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		{
 			return;
 		}
-		component.SetGasProvider(this.workerGasProvider);
-		component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+		if (component != null)
+		{
+			component.SetGasProvider(this.workerGasProvider);
+		}
+		worker.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 		base.ShowProgressBar(false);
 		component2.RemoveTag(GameTags.Shaded);
 		component3.AddStatusItem(Db.Get().BuildingStatusItems.TelescopeWorking, this);
 	}
 
-	public override float GetEfficiencyMultiplier(Worker worker)
+	public override float GetEfficiencyMultiplier(WorkerBase worker)
 	{
 		return base.GetEfficiencyMultiplier(worker) * Mathf.Clamp01(this.percentClear);
 	}
 
-	protected override bool OnWorkTick(Worker worker, float dt)
+	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
 		if (SpacecraftManager.instance.HasAnalysisTarget())
 		{

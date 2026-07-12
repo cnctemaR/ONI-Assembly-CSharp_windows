@@ -57,7 +57,7 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-			if (bindingEntry.mGroup != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mGroup) && DlcManager.IsDlcListValidForCurrentContent(bindingEntry.dlcIds))
+			if (bindingEntry.mGroup != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mGroup) && DlcManager.IsAllContentSubscribed(bindingEntry.dlcIds))
 			{
 				if (bindingEntry.mGroup == "Root")
 				{
@@ -103,7 +103,7 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry binding = GameInputMapping.KeyBindings[i];
-			if (binding.mGroup == this.screens[this.activeScreen] && binding.mRebindable && DlcManager.IsDlcListValidForCurrentContent(binding.dlcIds))
+			if (binding.mGroup == this.screens[this.activeScreen] && binding.mRebindable && DlcManager.IsAllContentSubscribed(binding.dlcIds))
 			{
 				GameObject gameObject = this.entryPool.GetFreeElement(this.parent, true).gameObject;
 				TMP_Text componentInChildren = gameObject.transform.GetChild(0).GetComponentInChildren<LocText>();

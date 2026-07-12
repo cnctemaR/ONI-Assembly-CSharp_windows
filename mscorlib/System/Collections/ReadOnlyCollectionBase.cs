@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.Collections
 {
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class ReadOnlyCollectionBase : ICollection, IEnumerable
 	{
@@ -11,11 +9,11 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this.list == null)
+				if (this._list == null)
 				{
-					this.list = new ArrayList();
+					this._list = new ArrayList();
 				}
-				return this.list;
+				return this._list;
 			}
 		}
 
@@ -53,6 +51,6 @@ namespace System.Collections
 			return this.InnerList.GetEnumerator();
 		}
 
-		private ArrayList list;
+		private ArrayList _list;
 	}
 }

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using UnityEngine.Bindings;
 using UnityEngine.Diagnostics;
 using UnityEngine.Events;
@@ -14,24 +15,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
-	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
-	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
-	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
-	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
 	[NativeHeader("Runtime/Misc/Player.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
+	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
+	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
 	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
-	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
 	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
 	[NativeHeader("Runtime/Logging/LogSystem.h")]
 	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
+	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
+	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	[NativeHeader("Runtime/Network/NetworkUtility.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Utilities/Argv.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
 	public class Application
 	{
 		[FreeFunction("GetInputManager().QuitApplication")]
@@ -59,6 +60,10 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		[FreeFunction("UpdateMemoryUsage")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SimulateMemoryUsage(ApplicationMemoryUsage usage);
 
 		[Obsolete("Streaming was a Unity Web Player feature, and is removed. This function is deprecated and always returns 1.0 for valid level indices.")]
 		public static float GetStreamProgressForLevel(int levelIndex)
@@ -129,9 +134,11 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetBuildSettings().GetBuildTags")]
+		[Obsolete("Application.GetBuildTags is no longer supported and will be removed.", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string[] GetBuildTags();
 
+		[Obsolete("Application.SetBuildTags is no longer supported and will be removed.", false)]
 		[FreeFunction("GetBuildSettings().SetBuildTags")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetBuildTags(string[] buildTags);
@@ -188,7 +195,7 @@ namespace UnityEngine
 
 		public static extern string dataPath
 		{
-			[FreeFunction("GetAppDataPath")]
+			[FreeFunction("GetAppDataPath", IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -435,7 +442,27 @@ namespace UnityEngine
 			{
 				RuntimePlatform platform = Application.platform;
 				RuntimePlatform runtimePlatform = platform;
-				return runtimePlatform == RuntimePlatform.IPhonePlayer || runtimePlatform == RuntimePlatform.Android || (runtimePlatform - RuntimePlatform.MetroPlayerX86 <= 2 && SystemInfo.deviceType == DeviceType.Handheld);
+				if (runtimePlatform <= RuntimePlatform.Android)
+				{
+					if (runtimePlatform != RuntimePlatform.IPhonePlayer && runtimePlatform != RuntimePlatform.Android)
+					{
+						goto IL_003A;
+					}
+				}
+				else
+				{
+					if (runtimePlatform - RuntimePlatform.MetroPlayerX86 <= 2)
+					{
+						return SystemInfo.deviceType == DeviceType.Handheld;
+					}
+					if (runtimePlatform != RuntimePlatform.VisionOS)
+					{
+						goto IL_003A;
+					}
+				}
+				return true;
+				IL_003A:
+				return false;
 			}
 		}
 
@@ -444,7 +471,7 @@ namespace UnityEngine
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.GameCoreXboxOne || platform == RuntimePlatform.GameCoreScarlett || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.PS5 || platform == RuntimePlatform.Switch || platform == RuntimePlatform.XboxOne;
+				return platform == RuntimePlatform.GameCoreXboxOne || platform == RuntimePlatform.GameCoreXboxSeries || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.PS5 || platform == RuntimePlatform.Switch || platform == RuntimePlatform.XboxOne;
 			}
 		}
 
@@ -465,15 +492,38 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Application.LowMemoryCallback lowMemory;
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Application.MemoryUsageChangedCallback memoryUsageChanged;
+
 		[RequiredByNativeCode]
-		internal static void CallLowMemory()
+		internal static void CallLowMemory(ApplicationMemoryUsage usage)
 		{
-			Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
-			bool flag = lowMemoryCallback != null;
+			Application.MemoryUsageChangedCallback memoryUsageChangedCallback = Application.memoryUsageChanged;
+			bool flag = memoryUsageChangedCallback != null;
 			if (flag)
 			{
-				lowMemoryCallback();
+				ApplicationMemoryUsageChange applicationMemoryUsageChange = new ApplicationMemoryUsageChange(usage);
+				memoryUsageChangedCallback(in applicationMemoryUsageChange);
 			}
+			if (usage > ApplicationMemoryUsage.High)
+			{
+				if (usage != ApplicationMemoryUsage.Critical)
+				{
+					throw new Exception(string.Format("Unknown application memory usage: {0}", usage));
+				}
+				Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
+				bool flag2 = lowMemoryCallback != null;
+				if (flag2)
+				{
+					lowMemoryCallback();
+				}
+			}
+		}
+
+		[RequiredByNativeCode]
+		internal static bool HasLogCallback()
+		{
+			return Application.s_LogCallbackHandler != null || Application.s_LogCallbackHandlerThreaded != null;
 		}
 
 		public static event Application.LogCallback logMessageReceived
@@ -734,9 +784,24 @@ namespace UnityEngine
 			return true;
 		}
 
+		public static CancellationToken exitCancellationToken
+		{
+			get
+			{
+				return Application.s_currentCancellationTokenSource.Token;
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void Internal_ApplicationInit()
+		{
+			Application.s_currentCancellationTokenSource = new CancellationTokenSource();
+		}
+
 		[RequiredByNativeCode]
 		private static void Internal_ApplicationQuit()
 		{
+			Application.s_currentCancellationTokenSource.Cancel();
 			bool flag = Application.quitting != null;
 			if (flag)
 			{
@@ -916,11 +981,15 @@ namespace UnityEngine
 
 		internal static Application.AdvertisingIdentifierCallback OnAdvertisingIdentifierCallback;
 
+		private static CancellationTokenSource s_currentCancellationTokenSource = new CancellationTokenSource();
+
 		private static volatile Application.LogCallback s_RegisterLogCallbackDeprecated;
 
 		public delegate void AdvertisingIdentifierCallback(string advertisingId, bool trackingEnabled, string errorMsg);
 
 		public delegate void LowMemoryCallback();
+
+		public delegate void MemoryUsageChangedCallback(in ApplicationMemoryUsageChange usage);
 
 		public delegate void LogCallback(string condition, string stackTrace, LogType type);
 	}

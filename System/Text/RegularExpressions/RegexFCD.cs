@@ -1,30 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace System.Text.RegularExpressions
 {
-	internal sealed class RegexFCD
+	internal ref struct RegexFCD
 	{
-		internal static RegexPrefix FirstChars(RegexTree t)
+		private RegexFCD(Span<int> intStack)
 		{
-			RegexFC regexFC = new RegexFCD().RegexFCFromRegexTree(t);
+			this._fcStack = new List<RegexFC>(32);
+			this._intStack = new global::System.Collections.Generic.ValueListBuilder<int>(intStack);
+			this._failed = false;
+			this._skipchild = false;
+			this._skipAllChildren = false;
+		}
+
+		public unsafe static RegexPrefix? FirstChars(RegexTree t)
+		{
+			Span<int> span = new Span<int>(stackalloc byte[(UIntPtr)128], 32);
+			RegexFCD regexFCD = new RegexFCD(span);
+			RegexFC regexFC = regexFCD.RegexFCFromRegexTree(t);
+			regexFCD.Dispose();
 			if (regexFC == null || regexFC._nullable)
 			{
 				return null;
 			}
-			CultureInfo cultureInfo = (((t._options & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
-			return new RegexPrefix(regexFC.GetFirstChars(cultureInfo), regexFC.IsCaseInsensitive());
+			CultureInfo cultureInfo = (((t.Options & RegexOptions.CultureInvariant) != RegexOptions.None) ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
+			return new RegexPrefix?(new RegexPrefix(regexFC.GetFirstChars(cultureInfo), regexFC.CaseInsensitive));
 		}
 
-		internal static RegexPrefix Prefix(RegexTree tree)
+		public static RegexPrefix Prefix(RegexTree tree)
 		{
-			RegexNode regexNode = null;
+			RegexNode regexNode = tree.Root;
+			RegexNode regexNode2 = null;
 			int num = 0;
-			RegexNode regexNode2 = tree._root;
 			for (;;)
 			{
-				int type = regexNode2._type;
-				switch (type)
+				int ntype = regexNode.NType;
+				switch (ntype)
 				{
 				case 3:
 				case 6:
@@ -42,11 +55,11 @@ namespace System.Text.RegularExpressions
 				case 26:
 				case 27:
 				case 29:
-					goto IL_0131;
+					goto IL_0139;
 				case 9:
-					goto IL_00F9;
+					goto IL_0106;
 				case 12:
-					goto IL_011A;
+					goto IL_0122;
 				case 14:
 				case 15:
 				case 16:
@@ -59,59 +72,59 @@ namespace System.Text.RegularExpressions
 				case 31:
 					break;
 				case 25:
-					if (regexNode2.ChildCount() > 0)
+					if (regexNode.ChildCount() > 0)
 					{
-						regexNode = regexNode2;
+						regexNode2 = regexNode;
 						num = 0;
 					}
 					break;
 				case 28:
 				case 32:
-					regexNode2 = regexNode2.Child(0);
-					regexNode = null;
+					regexNode = regexNode.Child(0);
+					regexNode2 = null;
 					continue;
 				default:
-					if (type != 41)
+					if (ntype != 41)
 					{
 						goto Block_2;
 					}
 					break;
 				}
-				if (regexNode == null || num >= regexNode.ChildCount())
+				if (regexNode2 == null || num >= regexNode2.ChildCount())
 				{
-					goto IL_0143;
+					goto IL_014B;
 				}
-				regexNode2 = regexNode.Child(num++);
+				regexNode = regexNode2.Child(num++);
 			}
 			Block_2:
-			goto IL_0131;
+			goto IL_0139;
 			IL_00C3:
-			if (regexNode2._m > 0)
+			if (regexNode.M > 0 && regexNode.M < 1000000)
 			{
-				return new RegexPrefix(string.Empty.PadRight(regexNode2._m, regexNode2._ch), (regexNode2._options & RegexOptions.IgnoreCase) > RegexOptions.None);
+				return new RegexPrefix(string.Empty.PadRight(regexNode.M, regexNode.Ch), (regexNode.Options & RegexOptions.IgnoreCase) > RegexOptions.None);
 			}
 			return RegexPrefix.Empty;
-			IL_00F9:
-			return new RegexPrefix(regexNode2._ch.ToString(CultureInfo.InvariantCulture), (regexNode2._options & RegexOptions.IgnoreCase) > RegexOptions.None);
-			IL_011A:
-			return new RegexPrefix(regexNode2._str, (regexNode2._options & RegexOptions.IgnoreCase) > RegexOptions.None);
-			IL_0131:
+			IL_0106:
+			return new RegexPrefix(regexNode.Ch.ToString(), (regexNode.Options & RegexOptions.IgnoreCase) > RegexOptions.None);
+			IL_0122:
+			return new RegexPrefix(regexNode.Str, (regexNode.Options & RegexOptions.IgnoreCase) > RegexOptions.None);
+			IL_0139:
 			return RegexPrefix.Empty;
-			IL_0143:
+			IL_014B:
 			return RegexPrefix.Empty;
 		}
 
-		internal static int Anchors(RegexTree tree)
+		public static int Anchors(RegexTree tree)
 		{
 			RegexNode regexNode = null;
 			int num = 0;
 			int num2 = 0;
-			RegexNode regexNode2 = tree._root;
-			int type;
+			RegexNode regexNode2 = tree.Root;
+			int ntype;
 			for (;;)
 			{
-				type = regexNode2._type;
-				switch (type)
+				ntype = regexNode2.NType;
+				switch (ntype)
 				{
 				case 14:
 				case 15:
@@ -154,12 +167,12 @@ namespace System.Text.RegularExpressions
 				}
 				regexNode2 = regexNode.Child(num++);
 			}
-			if (type != 41)
+			if (ntype != 41)
 			{
 				return num2;
 			}
 			IL_0091:
-			return num2 | RegexFCD.AnchorFromType(regexNode2._type);
+			return num2 | RegexFCD.AnchorFromType(regexNode2.NType);
 		}
 
 		private static int AnchorFromType(int type)
@@ -192,87 +205,64 @@ namespace System.Text.RegularExpressions
 			return 0;
 		}
 
-		private RegexFCD()
+		private void PushInt(int i)
 		{
-			this._fcStack = new RegexFC[32];
-			this._intStack = new int[32];
-		}
-
-		private void PushInt(int I)
-		{
-			if (this._intDepth >= this._intStack.Length)
-			{
-				int[] array = new int[this._intDepth * 2];
-				Array.Copy(this._intStack, 0, array, 0, this._intDepth);
-				this._intStack = array;
-			}
-			int[] intStack = this._intStack;
-			int intDepth = this._intDepth;
-			this._intDepth = intDepth + 1;
-			intStack[intDepth] = I;
+			this._intStack.Append(i);
 		}
 
 		private bool IntIsEmpty()
 		{
-			return this._intDepth == 0;
+			return this._intStack.Length == 0;
 		}
 
 		private int PopInt()
 		{
-			int[] intStack = this._intStack;
-			int num = this._intDepth - 1;
-			this._intDepth = num;
-			return intStack[num];
+			return this._intStack.Pop();
 		}
 
 		private void PushFC(RegexFC fc)
 		{
-			if (this._fcDepth >= this._fcStack.Length)
-			{
-				RegexFC[] array = new RegexFC[this._fcDepth * 2];
-				Array.Copy(this._fcStack, 0, array, 0, this._fcDepth);
-				this._fcStack = array;
-			}
-			RegexFC[] fcStack = this._fcStack;
-			int fcDepth = this._fcDepth;
-			this._fcDepth = fcDepth + 1;
-			fcStack[fcDepth] = fc;
+			this._fcStack.Add(fc);
 		}
 
 		private bool FCIsEmpty()
 		{
-			return this._fcDepth == 0;
+			return this._fcStack.Count == 0;
 		}
 
 		private RegexFC PopFC()
 		{
-			RegexFC[] fcStack = this._fcStack;
-			int num = this._fcDepth - 1;
-			this._fcDepth = num;
-			return fcStack[num];
+			RegexFC regexFC = this.TopFC();
+			this._fcStack.RemoveAt(this._fcStack.Count - 1);
+			return regexFC;
 		}
 
 		private RegexFC TopFC()
 		{
-			return this._fcStack[this._fcDepth - 1];
+			return this._fcStack[this._fcStack.Count - 1];
+		}
+
+		public void Dispose()
+		{
+			this._intStack.Dispose();
 		}
 
 		private RegexFC RegexFCFromRegexTree(RegexTree tree)
 		{
-			RegexNode regexNode = tree._root;
+			RegexNode regexNode = tree.Root;
 			int num = 0;
 			for (;;)
 			{
-				if (regexNode._children == null)
+				if (regexNode.Children == null)
 				{
-					this.CalculateFC(regexNode._type, regexNode, 0);
+					this.CalculateFC(regexNode.NType, regexNode, 0);
 				}
-				else if (num < regexNode._children.Count && !this._skipAllChildren)
+				else if (num < regexNode.Children.Count && !this._skipAllChildren)
 				{
-					this.CalculateFC(regexNode._type | 64, regexNode, num);
+					this.CalculateFC(regexNode.NType | 64, regexNode, num);
 					if (!this._skipchild)
 					{
-						regexNode = regexNode._children[num];
+						regexNode = regexNode.Children[num];
 						this.PushInt(num);
 						num = 0;
 						continue;
@@ -287,8 +277,8 @@ namespace System.Text.RegularExpressions
 					goto IL_00B9;
 				}
 				num = this.PopInt();
-				regexNode = regexNode._next;
-				this.CalculateFC(regexNode._type | 128, regexNode, num);
+				regexNode = regexNode.Next;
+				this.CalculateFC(regexNode.NType | 128, regexNode, num);
 				if (this._failed)
 				{
 					break;
@@ -315,11 +305,11 @@ namespace System.Text.RegularExpressions
 			bool flag2 = false;
 			if (NodeType <= 13)
 			{
-				if ((node._options & RegexOptions.IgnoreCase) != RegexOptions.None)
+				if ((node.Options & RegexOptions.IgnoreCase) != RegexOptions.None)
 				{
 					flag = true;
 				}
-				if ((node._options & RegexOptions.RightToLeft) != RegexOptions.None)
+				if ((node.Options & RegexOptions.RightToLeft) != RegexOptions.None)
 				{
 					flag2 = true;
 				}
@@ -328,35 +318,35 @@ namespace System.Text.RegularExpressions
 			{
 			case 3:
 			case 6:
-				this.PushFC(new RegexFC(node._ch, false, node._m == 0, flag));
+				this.PushFC(new RegexFC(node.Ch, false, node.M == 0, flag));
 				return;
 			case 4:
 			case 7:
-				this.PushFC(new RegexFC(node._ch, true, node._m == 0, flag));
+				this.PushFC(new RegexFC(node.Ch, true, node.M == 0, flag));
 				return;
 			case 5:
 			case 8:
-				this.PushFC(new RegexFC(node._str, node._m == 0, flag));
+				this.PushFC(new RegexFC(node.Str, node.M == 0, flag));
 				return;
 			case 9:
 			case 10:
-				this.PushFC(new RegexFC(node._ch, NodeType == 10, false, flag));
+				this.PushFC(new RegexFC(node.Ch, NodeType == 10, false, flag));
 				return;
 			case 11:
-				this.PushFC(new RegexFC(node._str, false, flag));
+				this.PushFC(new RegexFC(node.Str, false, flag));
 				return;
 			case 12:
-				if (node._str.Length == 0)
+				if (node.Str.Length == 0)
 				{
 					this.PushFC(new RegexFC(true));
 					return;
 				}
 				if (!flag2)
 				{
-					this.PushFC(new RegexFC(node._str[0], false, false, flag));
+					this.PushFC(new RegexFC(node.Str[0], false, false, flag));
 					return;
 				}
-				this.PushFC(new RegexFC(node._str[node._str.Length - 1], false, false, flag));
+				this.PushFC(new RegexFC(node.Str[node.Str.Length - 1], false, false, flag));
 				return;
 			case 13:
 				this.PushFC(new RegexFC("\0\u0001\0\0", true, false));
@@ -447,7 +437,7 @@ namespace System.Text.RegularExpressions
 						break;
 					case 154:
 					case 155:
-						if (node._m == 0)
+						if (node.M == 0)
 						{
 							this.TopFC()._nullable = true;
 							return;
@@ -476,41 +466,39 @@ namespace System.Text.RegularExpressions
 				return;
 			}
 			IL_0312:
-			throw new ArgumentException(global::SR.GetString("Unexpected opcode in regular expression generation: {0}.", new object[] { NodeType.ToString(CultureInfo.CurrentCulture) }));
+			throw new ArgumentException(SR.Format("Unexpected opcode in regular expression generation: {0}.", NodeType.ToString(CultureInfo.CurrentCulture)));
 		}
 
-		private int[] _intStack;
+		private const int StackBufferSize = 32;
 
-		private int _intDepth;
+		private const int BeforeChild = 64;
 
-		private RegexFC[] _fcStack;
+		private const int AfterChild = 128;
 
-		private int _fcDepth;
+		public const int Beginning = 1;
+
+		public const int Bol = 2;
+
+		public const int Start = 4;
+
+		public const int Eol = 8;
+
+		public const int EndZ = 16;
+
+		public const int End = 32;
+
+		public const int Boundary = 64;
+
+		public const int ECMABoundary = 128;
+
+		private readonly List<RegexFC> _fcStack;
+
+		private global::System.Collections.Generic.ValueListBuilder<int> _intStack;
 
 		private bool _skipAllChildren;
 
 		private bool _skipchild;
 
 		private bool _failed;
-
-		private const int BeforeChild = 64;
-
-		private const int AfterChild = 128;
-
-		internal const int Beginning = 1;
-
-		internal const int Bol = 2;
-
-		internal const int Start = 4;
-
-		internal const int Eol = 8;
-
-		internal const int EndZ = 16;
-
-		internal const int End = 32;
-
-		internal const int Boundary = 64;
-
-		internal const int ECMABoundary = 128;
 	}
 }

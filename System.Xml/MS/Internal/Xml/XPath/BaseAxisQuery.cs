@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
@@ -9,31 +8,31 @@ namespace MS.Internal.Xml.XPath
 	{
 		protected BaseAxisQuery(Query qyInput)
 		{
-			this.name = string.Empty;
-			this.prefix = string.Empty;
-			this.nsUri = string.Empty;
+			this._name = string.Empty;
+			this._prefix = string.Empty;
+			this._nsUri = string.Empty;
 			this.qyInput = qyInput;
 		}
 
 		protected BaseAxisQuery(Query qyInput, string name, string prefix, XPathNodeType typeTest)
 		{
 			this.qyInput = qyInput;
-			this.name = name;
-			this.prefix = prefix;
-			this.typeTest = typeTest;
-			this.nameTest = prefix.Length != 0 || name.Length != 0;
-			this.nsUri = string.Empty;
+			this._name = name;
+			this._prefix = prefix;
+			this._typeTest = typeTest;
+			this._nameTest = prefix.Length != 0 || name.Length != 0;
+			this._nsUri = string.Empty;
 		}
 
 		protected BaseAxisQuery(BaseAxisQuery other)
 			: base(other)
 		{
 			this.qyInput = Query.Clone(other.qyInput);
-			this.name = other.name;
-			this.prefix = other.prefix;
-			this.nsUri = other.nsUri;
-			this.typeTest = other.typeTest;
-			this.nameTest = other.nameTest;
+			this._name = other._name;
+			this._prefix = other._prefix;
+			this._nsUri = other._nsUri;
+			this._typeTest = other._typeTest;
+			this._nameTest = other._nameTest;
 			this.position = other.position;
 			this.currentNode = other.currentNode;
 		}
@@ -47,7 +46,7 @@ namespace MS.Internal.Xml.XPath
 
 		public override void SetXsltContext(XsltContext context)
 		{
-			this.nsUri = context.LookupNamespace(this.prefix);
+			this._nsUri = context.LookupNamespace(this._prefix);
 			this.qyInput.SetXsltContext(context);
 		}
 
@@ -55,15 +54,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.name;
-			}
-		}
-
-		protected string Prefix
-		{
-			get
-			{
-				return this.prefix;
+				return this._name;
 			}
 		}
 
@@ -71,7 +62,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.nsUri;
+				return this._nsUri;
 			}
 		}
 
@@ -79,7 +70,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.nameTest;
+				return this._nameTest;
 			}
 		}
 
@@ -87,7 +78,7 @@ namespace MS.Internal.Xml.XPath
 		{
 			get
 			{
-				return this.typeTest;
+				return this._typeTest;
 			}
 		}
 
@@ -115,7 +106,7 @@ namespace MS.Internal.Xml.XPath
 				{
 					return true;
 				}
-				if ((this.name.Equals(e.LocalName) || this.name.Length == 0) && this.nsUri.Equals(e.NamespaceURI))
+				if ((this._name.Equals(e.LocalName) || this._name.Length == 0) && this._nsUri.Equals(e.NamespaceURI))
 				{
 					return true;
 				}
@@ -139,11 +130,11 @@ namespace MS.Internal.Xml.XPath
 				{
 					return 0.5;
 				}
-				if (this.name.Length != 0)
+				if (this._name.Length != 0)
 				{
 					return 0.0;
 				}
-				if (this.prefix.Length != 0)
+				if (this._prefix.Length != 0)
 				{
 					return -0.25;
 				}
@@ -159,32 +150,17 @@ namespace MS.Internal.Xml.XPath
 			}
 		}
 
-		public override void PrintQuery(XmlWriter w)
-		{
-			w.WriteStartElement(base.GetType().Name);
-			if (this.NameTest)
-			{
-				w.WriteAttributeString("name", (this.Prefix.Length != 0) ? (this.Prefix + ":" + this.Name) : this.Name);
-			}
-			if (this.TypeTest != XPathNodeType.Element)
-			{
-				w.WriteAttributeString("nodeType", this.TypeTest.ToString());
-			}
-			this.qyInput.PrintQuery(w);
-			w.WriteEndElement();
-		}
-
 		internal Query qyInput;
 
-		private bool nameTest;
+		private bool _nameTest;
 
-		private string name;
+		private string _name;
 
-		private string prefix;
+		private string _prefix;
 
-		private string nsUri;
+		private string _nsUri;
 
-		private XPathNodeType typeTest;
+		private XPathNodeType _typeTest;
 
 		protected XPathNavigator currentNode;
 

@@ -9,8 +9,8 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 	{
 		base.smi = new FoodFightChore.StatesInstance(this, locator);
 		this.showAvailabilityInHoverText = false;
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(FoodFightChore.EdibleIsNotNull, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		this.AddPrecondition(FoodFightChore.EdibleIsNotNull, null);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)

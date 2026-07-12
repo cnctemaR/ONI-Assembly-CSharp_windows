@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("00020403-0000-0000-c000-000000000046")]
+	[Obsolete]
 	[ComImport]
 	public interface UCOMITypeComp
 	{

@@ -32,6 +32,9 @@ namespace UnityEngine.Rendering
 
 		public LightmapsMode lightmapsModes { get; set; } = LightmapsMode.CombinedDirectional;
 
+		[Obsolete("Bake with the Progressive Lightmapper. The backend that uses Enlighten to bake is deprecated.", false)]
+		public bool enlightenLightmapper { get; set; } = true;
+
 		public bool enlighten { get; set; } = true;
 
 		public bool lightProbeProxyVolumes { get; set; } = true;
@@ -42,11 +45,11 @@ namespace UnityEngine.Rendering
 
 		public bool reflectionProbes { get; set; } = true;
 
+		public bool reflectionProbesBlendDistance { get; set; } = true;
+
 		public bool rendererPriority { get; set; } = false;
 
-		public bool terrainDetailUnsupported { get; set; } = false;
-
-		public bool rendersUIOverlay { get; set; }
+		public bool rendersUIOverlay { get; set; } = false;
 
 		public bool overridesEnvironmentLighting { get; set; } = false;
 
@@ -62,6 +65,8 @@ namespace UnityEngine.Rendering
 
 		public bool overridesMaximumLODLevel { get; set; } = false;
 
+		public bool overridesEnableLODCrossFade { get; set; } = false;
+
 		public bool rendererProbes { get; set; } = true;
 
 		public bool particleSystemInstancing { get; set; } = true;
@@ -72,25 +77,11 @@ namespace UnityEngine.Rendering
 
 		public bool overridesShadowmask { get; set; } = false;
 
-		public string overrideShadowmaskMessage { get; set; } = "";
+		public bool overridesLightProbeSystem { get; set; } = false;
 
-		public string shadowmaskMessage
-		{
-			get
-			{
-				bool flag = !this.overridesShadowmask;
-				string text;
-				if (flag)
-				{
-					text = "The Shadowmask Mode used at run time can be set in the Quality Settings panel.";
-				}
-				else
-				{
-					text = this.overrideShadowmaskMessage;
-				}
-				return text;
-			}
-		}
+		public bool supportsHDR { get; set; } = false;
+
+		public string overridesLightProbeSystemWarningMessage { get; set; } = "The rendering pipeline used has an alternative method to handle light probes. Please consult the documentation for the used SRP to setup the alternative.";
 
 		internal unsafe static MixedLightingMode FallbackMixedLightingMode()
 		{
@@ -223,7 +214,7 @@ namespace UnityEngine.Rendering
 		internal unsafe static void IsLightmapperSupportedByRef(int lightmapper, IntPtr isSupportedPtr)
 		{
 			bool* ptr = (bool*)(void*)isSupportedPtr;
-			*ptr = ((lightmapper == 0 && !SupportedRenderingFeatures.active.enlighten) ? false : true);
+			*ptr = lightmapper != 0 || SupportedRenderingFeatures.active.enlightenLightmapper;
 		}
 
 		[RequiredByNativeCode]
@@ -247,6 +238,13 @@ namespace UnityEngine.Rendering
 			*ptr = SupportedRenderingFeatures.active.autoDefaultReflectionProbeBaking;
 		}
 
+		[RequiredByNativeCode]
+		internal unsafe static void OverridesLightProbeSystem(IntPtr overridesPtr)
+		{
+			bool* ptr = (bool*)(void*)overridesPtr;
+			*ptr = SupportedRenderingFeatures.active.overridesLightProbeSystem;
+		}
+
 		internal unsafe static int FallbackLightmapper()
 		{
 			int num;
@@ -259,6 +257,18 @@ namespace UnityEngine.Rendering
 		{
 			int* ptr = (int*)(void*)lightmapperPtr;
 			*ptr = 1;
+		}
+
+		[Obsolete("terrainDetailUnsupported is deprecated.")]
+		public bool terrainDetailUnsupported
+		{
+			get
+			{
+				return true;
+			}
+			set
+			{
+			}
 		}
 
 		private static SupportedRenderingFeatures s_Active = new SupportedRenderingFeatures();

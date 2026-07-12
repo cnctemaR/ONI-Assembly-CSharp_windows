@@ -159,6 +159,9 @@ namespace UnityEngine
 			[NativeName("IsAudioDisabled")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[NativeName("DisableAudio")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		[NativeMethod(Name = "AudioSettings::GetCurrentAmbisonicDefinitionName", IsFreeFunction = true)]

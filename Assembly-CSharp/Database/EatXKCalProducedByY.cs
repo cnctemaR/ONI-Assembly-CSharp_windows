@@ -32,7 +32,7 @@ namespace Database
 					}
 				}
 			}
-			return RationTracker.Get().GetCaloiresConsumedByFood(list.Distinct<string>().ToList<string>()) / 1000f > (float)this.numCalories;
+			return WorldResourceAmountTracker<RationTracker>.Get().GetAmountConsumedForIDs(list.Distinct<string>().ToList<string>()) / 1000f > (float)this.numCalories;
 		}
 
 		public void Deserialize(IReader reader)

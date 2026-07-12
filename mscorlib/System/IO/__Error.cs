@@ -147,7 +147,7 @@ namespace System.IO
 					{
 						if (displayablePath.Length != 0)
 						{
-							throw new IOException(Environment.GetResourceString("The file '{0}' already exists.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+							throw new IOException(Environment.GetResourceString("The file '{0}' already exists.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode));
 						}
 					}
 				}
@@ -155,22 +155,22 @@ namespace System.IO
 				{
 					if (displayablePath.Length == 0)
 					{
-						throw new IOException(Environment.GetResourceString("The process cannot access the file because it is being used by another process."), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+						throw new IOException(Environment.GetResourceString("The process cannot access the file because it is being used by another process."), Win32Native.MakeHRFromErrorCode(errorCode));
 					}
-					throw new IOException(Environment.GetResourceString("The process cannot access the file '{0}' because it is being used by another process.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+					throw new IOException(Environment.GetResourceString("The process cannot access the file '{0}' because it is being used by another process.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode));
 				}
 			}
 			else if (errorCode <= 183)
 			{
 				if (errorCode == 87)
 				{
-					throw new IOException(Win32Native.GetMessage(errorCode), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+					throw new IOException(Win32Native.GetMessage(errorCode), Win32Native.MakeHRFromErrorCode(errorCode));
 				}
 				if (errorCode == 183)
 				{
 					if (displayablePath.Length != 0)
 					{
-						throw new IOException(Environment.GetResourceString("Cannot create \"{0}\" because a file or directory with the same name already exists.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+						throw new IOException(Environment.GetResourceString("Cannot create \"{0}\" because a file or directory with the same name already exists.", new object[] { displayablePath }), Win32Native.MakeHRFromErrorCode(errorCode));
 					}
 				}
 			}
@@ -185,7 +185,7 @@ namespace System.IO
 					throw new OperationCanceledException();
 				}
 			}
-			throw new IOException(Win32Native.GetMessage(errorCode), Win32Native.MakeHRFromErrorCode(errorCode), maybeFullPath);
+			throw new IOException(Win32Native.GetMessage(errorCode), Win32Native.MakeHRFromErrorCode(errorCode));
 		}
 
 		internal static void WriteNotSupported()

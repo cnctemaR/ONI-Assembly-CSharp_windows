@@ -12,13 +12,39 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/Texture2D.h")]
+	[HelpURL("texture-type-default")]
 	[NativeHeader("Runtime/Graphics/GeneratedTextures.h")]
 	[UsedByNativeCode]
+	[ExcludeFromPreset]
 	public sealed class Texture2D : Texture
 	{
 		public extern TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public extern bool ignoreMipmapLimit
+		{
+			[NativeName("IgnoreMipmapLimit")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[NativeName("SetIgnoreMipmapLimitAndReload")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern string mipmapLimitGroup
+		{
+			[NativeName("GetMipmapLimitGroupName")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public extern int activeMipmapLimit
+		{
+			[NativeName("GetMipmapLimit")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -70,11 +96,11 @@ namespace UnityEngine
 
 		[FreeFunction("Texture2DScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex);
+		private static extern bool Internal_CreateImpl([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags, IntPtr nativeTex, string mipmapLimitGroupName);
 
-		private static void Internal_Create([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
+		private static void Internal_Create([Writable] Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags, IntPtr nativeTex, string mipmapLimitGroupName)
 		{
-			bool flag = !Texture2D.Internal_CreateImpl(mono, w, h, mipCount, format, flags, nativeTex);
+			bool flag = !Texture2D.Internal_CreateImpl(mono, w, h, mipCount, format, colorSpace, flags, nativeTex, mipmapLimitGroupName);
 			if (flag)
 			{
 				throw new UnityException("Failed to create texture because of invalid parameters.");
@@ -87,8 +113,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeName("VTOnly")]
 		[NativeConditional("ENABLE_VIRTUALTEXTURING && UNITY_EDITOR")]
+		[NativeName("VTOnly")]
 		public extern bool vtOnly
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -99,35 +125,39 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
 
-		[NativeName("Resize")]
+		[NativeName("Reinitialize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ResizeImpl(int width, int height);
+		private extern bool ReinitializeImpl(int width, int height);
 
 		[NativeName("SetPixel")]
-		private void SetPixelImpl(int image, int x, int y, Color color)
+		private void SetPixelImpl(int image, int mip, int x, int y, Color color)
 		{
-			this.SetPixelImpl_Injected(image, x, y, ref color);
+			this.SetPixelImpl_Injected(image, mip, x, y, ref color);
 		}
 
 		[NativeName("GetPixel")]
-		private Color GetPixelImpl(int image, int x, int y)
+		private Color GetPixelImpl(int image, int mip, int x, int y)
 		{
 			Color color;
-			this.GetPixelImpl_Injected(image, x, y, out color);
+			this.GetPixelImpl_Injected(image, mip, x, y, out color);
 			return color;
 		}
 
 		[NativeName("GetPixelBilinear")]
-		private Color GetPixelBilinearImpl(int image, float u, float v)
+		private Color GetPixelBilinearImpl(int image, int mip, float u, float v)
 		{
 			Color color;
-			this.GetPixelBilinearImpl_Injected(image, u, v, out color);
+			this.GetPixelBilinearImpl_Injected(image, mip, u, v, out color);
 			return color;
 		}
 
-		[FreeFunction(Name = "Texture2DScripting::ResizeWithFormat", HasExplicitThis = true)]
+		[FreeFunction(Name = "Texture2DScripting::ReinitializeWithFormat", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ResizeWithFormatImpl(int width, int height, GraphicsFormat format, bool hasMipMap);
+		private extern bool ReinitializeWithFormatImpl(int width, int height, GraphicsFormat format, bool hasMipMap);
+
+		[FreeFunction(Name = "Texture2DScripting::ReinitializeWithTextureFormat", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool ReinitializeWithTextureFormatImpl(int width, int height, TextureFormat textureFormat, bool hasMipMap);
 
 		[FreeFunction(Name = "Texture2DScripting::ReadPixels", HasExplicitThis = true)]
 		private void ReadPixelsImpl(Rect source, int destX, int destY, bool recalculateMipMaps)
@@ -135,13 +165,13 @@ namespace UnityEngine
 			this.ReadPixelsImpl_Injected(ref source, destX, destY, recalculateMipMaps);
 		}
 
-		[FreeFunction(Name = "Texture2DScripting::SetPixels", HasExplicitThis = true)]
+		[FreeFunction(Name = "Texture2DScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetPixelsImpl(int x, int y, int w, int h, Color[] pixel, int miplevel, int frame);
 
 		[FreeFunction(Name = "Texture2DScripting::LoadRawData", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool LoadRawTextureDataImpl(IntPtr data, int size);
+		private extern bool LoadRawTextureDataImpl(IntPtr data, ulong size);
 
 		[FreeFunction(Name = "Texture2DScripting::LoadRawData", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -159,7 +189,7 @@ namespace UnityEngine
 		private extern IntPtr GetWritableImageData(int frame);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern long GetRawImageDataSize();
+		private extern ulong GetRawImageDataSize();
 
 		[FreeFunction("Texture2DScripting::GenerateAtlas")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -259,20 +289,21 @@ namespace UnityEngine
 
 		[FreeFunction("Texture2DScripting::SetAllPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetAllPixels32(Color32[] colors, int miplevel);
+		private extern void SetAllPixels32([Unmarshalled] Color32[] colors, int miplevel);
 
 		[FreeFunction("Texture2DScripting::SetBlockOfPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBlockOfPixels32(int x, int y, int blockWidth, int blockHeight, Color32[] colors, int miplevel);
+		private extern void SetBlockOfPixels32(int x, int y, int blockWidth, int blockHeight, [Unmarshalled] Color32[] colors, int miplevel);
 
-		[FreeFunction("Texture2DScripting::GetRawTextureData", HasExplicitThis = true)]
+		[FreeFunction("Texture2DScripting::GetRawTextureData", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern byte[] GetRawTextureData();
 
 		[FreeFunction("Texture2DScripting::GetPixels", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels(int x, int y, int blockWidth, int blockHeight, int miplevel);
+		public extern Color[] GetPixels(int x, int y, int blockWidth, int blockHeight, [DefaultValue("0")] int miplevel);
 
+		[ExcludeFromDocs]
 		public Color[] GetPixels(int x, int y, int blockWidth, int blockHeight)
 		{
 			return this.GetPixels(x, y, blockWidth, blockHeight, 0);
@@ -280,8 +311,9 @@ namespace UnityEngine
 
 		[FreeFunction("Texture2DScripting::GetPixels32", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32(int miplevel);
+		public extern Color32[] GetPixels32([DefaultValue("0")] int miplevel);
 
+		[ExcludeFromDocs]
 		public Color32[] GetPixels32()
 		{
 			return this.GetPixels32(0);
@@ -301,33 +333,86 @@ namespace UnityEngine
 			return this.PackTextures(textures, padding, 2048);
 		}
 
-		internal Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags, int mipCount, IntPtr nativeTex)
+		internal bool ValidateFormat(TextureFormat format, int width, int height)
+		{
+			bool flag = base.ValidateFormat(format);
+			bool flag2 = flag;
+			if (flag2)
+			{
+				bool flag3 = TextureFormat.PVRTC_RGB2 <= format && format <= TextureFormat.PVRTC_RGBA4;
+				bool flag4 = flag3 && (width != height || !Mathf.IsPowerOfTwo(width));
+				if (flag4)
+				{
+					throw new UnityException(string.Format("'{0}' demands texture to be square and have power-of-two dimensions", format.ToString()));
+				}
+			}
+			return flag;
+		}
+
+		internal bool ValidateFormat(GraphicsFormat format, int width, int height)
 		{
 			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag2 = flag;
+			if (flag2)
+			{
+				bool flag3 = GraphicsFormatUtility.IsPVRTCFormat(format);
+				bool flag4 = flag3 && (width != height || !Mathf.IsPowerOfTwo(width));
+				if (flag4)
+				{
+					throw new UnityException(string.Format("'{0}' demands texture to be square and have power-of-two dimensions", format.ToString()));
+				}
+			}
+			return flag;
+		}
+
+		internal Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags, int mipCount, IntPtr nativeTex, string mipmapLimitGroupName)
+		{
+			bool flag = this.ValidateFormat(format, width, height);
 			if (flag)
 			{
-				Texture2D.Internal_Create(this, width, height, mipCount, format, flags, nativeTex);
+				Texture2D.Internal_Create(this, width, height, mipCount, format, base.GetTextureColorSpace(format), flags, nativeTex, mipmapLimitGroupName);
 			}
 		}
 
+		[ExcludeFromDocs]
 		public Texture2D(int width, int height, DefaultFormat format, TextureCreationFlags flags)
 			: this(width, height, SystemInfo.GetGraphicsFormat(format), flags)
 		{
 		}
 
+		[ExcludeFromDocs]
+		public Texture2D(int width, int height, DefaultFormat format, int mipCount, TextureCreationFlags flags)
+			: this(width, height, SystemInfo.GetGraphicsFormat(format), flags, mipCount, IntPtr.Zero, null)
+		{
+		}
+
+		[ExcludeFromDocs]
+		public Texture2D(int width, int height, DefaultFormat format, int mipCount, string mipmapLimitGroupName, TextureCreationFlags flags)
+			: this(width, height, SystemInfo.GetGraphicsFormat(format), flags, mipCount, IntPtr.Zero, mipmapLimitGroupName)
+		{
+		}
+
+		[ExcludeFromDocs]
 		public Texture2D(int width, int height, GraphicsFormat format, TextureCreationFlags flags)
-			: this(width, height, format, flags, Texture.GenerateAllMips, IntPtr.Zero)
+			: this(width, height, format, flags, Texture.GenerateAllMips, IntPtr.Zero, null)
 		{
 		}
 
+		[ExcludeFromDocs]
 		public Texture2D(int width, int height, GraphicsFormat format, int mipCount, TextureCreationFlags flags)
-			: this(width, height, format, flags, mipCount, IntPtr.Zero)
+			: this(width, height, format, flags, mipCount, IntPtr.Zero, null)
 		{
 		}
 
-		internal Texture2D(int width, int height, TextureFormat textureFormat, int mipCount, bool linear, IntPtr nativeTex)
+		[ExcludeFromDocs]
+		public Texture2D(int width, int height, GraphicsFormat format, int mipCount, string mipmapLimitGroupName, TextureCreationFlags flags)
+			: this(width, height, format, flags, mipCount, IntPtr.Zero, mipmapLimitGroupName)
 		{
-			bool flag = !base.ValidateFormat(textureFormat);
+		}
+
+		internal Texture2D(int width, int height, TextureFormat textureFormat, int mipCount, bool linear, IntPtr nativeTex, bool createUninitialized, bool ignoreMipmapLimit, string mipmapLimitGroupName)
+		{
+			bool flag = !this.ValidateFormat(textureFormat, width, height);
 			if (!flag)
 			{
 				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
@@ -337,27 +422,52 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
-				Texture2D.Internal_Create(this, width, height, mipCount, graphicsFormat, textureCreationFlags, nativeTex);
+				if (createUninitialized)
+				{
+					textureCreationFlags |= TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate;
+				}
+				if (ignoreMipmapLimit)
+				{
+					textureCreationFlags |= TextureCreationFlags.IgnoreMipmapLimit;
+				}
+				Texture2D.Internal_Create(this, width, height, mipCount, graphicsFormat, base.GetTextureColorSpace(linear), textureCreationFlags, nativeTex, mipmapLimitGroupName);
 			}
 		}
 
 		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("-1")] int mipCount, [DefaultValue("false")] bool linear)
-			: this(width, height, textureFormat, mipCount, linear, IntPtr.Zero)
+			: this(width, height, textureFormat, mipCount, linear, IntPtr.Zero, false, false, null)
+		{
+		}
+
+		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("-1")] int mipCount, [DefaultValue("false")] bool linear, [DefaultValue("false")] bool createUninitialized)
+			: this(width, height, textureFormat, mipCount, linear, IntPtr.Zero, createUninitialized, false, null)
+		{
+		}
+
+		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("-1")] int mipCount, [DefaultValue("false")] bool linear, [DefaultValue("false")] bool createUninitialized, [DefaultValue("false")] bool ignoreMipmapLimit, [DefaultValue("null")] string mipmapLimitGroupName)
+			: this(width, height, textureFormat, mipCount, linear, IntPtr.Zero, createUninitialized, ignoreMipmapLimit, mipmapLimitGroupName)
 		{
 		}
 
 		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("true")] bool mipChain, [DefaultValue("false")] bool linear)
-			: this(width, height, textureFormat, mipChain ? (-1) : 1, linear, IntPtr.Zero)
+			: this(width, height, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear, IntPtr.Zero, false, false, null)
 		{
 		}
 
+		public Texture2D(int width, int height, [DefaultValue("TextureFormat.RGBA32")] TextureFormat textureFormat, [DefaultValue("true")] bool mipChain, [DefaultValue("false")] bool linear, [DefaultValue("false")] bool createUninitialized)
+			: this(width, height, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear, IntPtr.Zero, createUninitialized, false, null)
+		{
+		}
+
+		[ExcludeFromDocs]
 		public Texture2D(int width, int height, TextureFormat textureFormat, bool mipChain)
-			: this(width, height, textureFormat, mipChain ? (-1) : 1, false, IntPtr.Zero)
+			: this(width, height, textureFormat, mipChain ? Texture.GenerateAllMips : 1, false, IntPtr.Zero, false, false, null)
 		{
 		}
 
+		[ExcludeFromDocs]
 		public Texture2D(int width, int height)
-			: this(width, height, TextureFormat.RGBA32, Texture.GenerateAllMips, false, IntPtr.Zero)
+			: this(width, height, TextureFormat.RGBA32, Texture.GenerateAllMips, false, IntPtr.Zero, false, false, null)
 		{
 		}
 
@@ -368,9 +478,10 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("nativeTex can not be null");
 			}
-			return new Texture2D(width, height, format, mipChain ? (-1) : 1, linear, nativeTex);
+			return new Texture2D(width, height, format, mipChain ? (-1) : 1, linear, nativeTex, false, false, null);
 		}
 
+		[ExcludeFromDocs]
 		public void SetPixel(int x, int y, Color color)
 		{
 			bool flag = !this.isReadable;
@@ -378,17 +489,17 @@ namespace UnityEngine
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			this.SetPixelImpl(0, x, y, color);
+			this.SetPixelImpl(0, 0, x, y, color);
 		}
 
-		public void SetPixel(int x, int y, Color color, int mipLevel)
+		public void SetPixel(int x, int y, Color color, [DefaultValue("0")] int mipLevel)
 		{
 			bool flag = !this.isReadable;
 			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			this.SetPixelImpl(mipLevel, x, y, color);
+			this.SetPixelImpl(0, mipLevel, x, y, color);
 		}
 
 		public void SetPixels(int x, int y, int blockWidth, int blockHeight, Color[] colors, [DefaultValue("0")] int miplevel)
@@ -401,6 +512,7 @@ namespace UnityEngine
 			this.SetPixelsImpl(x, y, blockWidth, blockHeight, colors, miplevel, 0);
 		}
 
+		[ExcludeFromDocs]
 		public void SetPixels(int x, int y, int blockWidth, int blockHeight, Color[] colors)
 		{
 			this.SetPixels(x, y, blockWidth, blockHeight, colors, 0);
@@ -423,11 +535,13 @@ namespace UnityEngine
 			this.SetPixels(0, 0, num, num2, colors, miplevel);
 		}
 
+		[ExcludeFromDocs]
 		public void SetPixels(Color[] colors)
 		{
 			this.SetPixels(0, 0, this.width, this.height, colors, 0);
 		}
 
+		[ExcludeFromDocs]
 		public Color GetPixel(int x, int y)
 		{
 			bool flag = !this.isReadable;
@@ -435,19 +549,20 @@ namespace UnityEngine
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			return this.GetPixelImpl(0, x, y);
+			return this.GetPixelImpl(0, 0, x, y);
 		}
 
-		public Color GetPixel(int x, int y, int mipLevel)
+		public Color GetPixel(int x, int y, [DefaultValue("0")] int mipLevel)
 		{
 			bool flag = !this.isReadable;
 			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			return this.GetPixelImpl(mipLevel, x, y);
+			return this.GetPixelImpl(0, mipLevel, x, y);
 		}
 
+		[ExcludeFromDocs]
 		public Color GetPixelBilinear(float u, float v)
 		{
 			bool flag = !this.isReadable;
@@ -455,17 +570,17 @@ namespace UnityEngine
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			return this.GetPixelBilinearImpl(0, u, v);
+			return this.GetPixelBilinearImpl(0, 0, u, v);
 		}
 
-		public Color GetPixelBilinear(float u, float v, int mipLevel)
+		public Color GetPixelBilinear(float u, float v, [DefaultValue("0")] int mipLevel)
 		{
 			bool flag = !this.isReadable;
 			if (flag)
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			return this.GetPixelBilinearImpl(mipLevel, u, v);
+			return this.GetPixelBilinearImpl(0, mipLevel, u, v);
 		}
 
 		public void LoadRawTextureData(IntPtr data, int size)
@@ -482,7 +597,7 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag3 = !this.LoadRawTextureDataImpl(data, size);
+				bool flag3 = !this.LoadRawTextureDataImpl(data, (ulong)((long)size));
 				if (flag3)
 				{
 					throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
@@ -524,14 +639,14 @@ namespace UnityEngine
 			{
 				throw new UnityException("No texture data provided to LoadRawTextureData");
 			}
-			bool flag3 = !this.LoadRawTextureDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), data.Length * UnsafeUtility.SizeOf<T>());
+			bool flag3 = !this.LoadRawTextureDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), (ulong)((long)data.Length * (long)UnsafeUtility.SizeOf<T>()));
 			if (flag3)
 			{
 				throw new UnityException("LoadRawTextureData: not enough data provided (will result in overread).");
 			}
 		}
 
-		public void SetPixelData<T>(T[] data, int mipLevel, int sourceDataStartIndex = 0)
+		public void SetPixelData<T>(T[] data, int mipLevel, [DefaultValue("0")] int sourceDataStartIndex = 0)
 		{
 			bool flag = sourceDataStartIndex < 0;
 			if (flag)
@@ -548,10 +663,10 @@ namespace UnityEngine
 			{
 				throw new UnityException("No texture data provided to SetPixelData.");
 			}
-			this.SetPixelDataImplArray(data, mipLevel, Marshal.SizeOf(data[0]), data.Length, sourceDataStartIndex);
+			this.SetPixelDataImplArray(data, mipLevel, Marshal.SizeOf<T>(data[0]), data.Length, sourceDataStartIndex);
 		}
 
-		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, int sourceDataStartIndex = 0) where T : struct
+		public void SetPixelData<T>(NativeArray<T> data, int mipLevel, [DefaultValue("0")] int sourceDataStartIndex = 0) where T : struct
 		{
 			bool flag = sourceDataStartIndex < 0;
 			if (flag)
@@ -578,11 +693,27 @@ namespace UnityEngine
 			{
 				throw base.CreateNonReadableException(this);
 			}
-			int pixelDataOffset = base.GetPixelDataOffset(mipLevel, 0);
-			int pixelDataSize = base.GetPixelDataSize(mipLevel, 0);
+			bool flag2 = mipLevel < 0 || mipLevel >= base.mipmapCount;
+			if (flag2)
+			{
+				throw new ArgumentException("The passed in miplevel " + mipLevel.ToString() + " is invalid. It needs to be in the range 0 and " + (base.mipmapCount - 1).ToString());
+			}
+			bool flag3 = this.GetWritableImageData(0).ToInt64() == 0L;
+			if (flag3)
+			{
+				throw new UnityException("Texture '" + base.name + "' has no data.");
+			}
+			ulong pixelDataOffset = base.GetPixelDataOffset(mipLevel, 0);
+			ulong pixelDataSize = base.GetPixelDataSize(mipLevel, 0);
 			int num = UnsafeUtility.SizeOf<T>();
-			IntPtr intPtr = new IntPtr(this.GetWritableImageData(0).ToInt64() + (long)pixelDataOffset);
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
+			ulong num2 = pixelDataSize / (ulong)((long)num);
+			bool flag4 = num2 > 2147483647UL;
+			if (flag4)
+			{
+				throw base.CreateNativeArrayLengthOverflowException();
+			}
+			IntPtr intPtr = new IntPtr((long)this.GetWritableImageData(0) + (long)pixelDataOffset);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, (int)num2, Allocator.None);
 		}
 
 		public unsafe NativeArray<T> GetRawTextureData<T>() where T : struct
@@ -593,7 +724,13 @@ namespace UnityEngine
 				throw base.CreateNonReadableException(this);
 			}
 			int num = UnsafeUtility.SizeOf<T>();
-			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)this.GetWritableImageData(0), (int)(this.GetRawImageDataSize() / (long)num), Allocator.None);
+			ulong num2 = this.GetRawImageDataSize() / (ulong)((long)num);
+			bool flag2 = num2 > 2147483647UL;
+			if (flag2)
+			{
+				throw base.CreateNativeArrayLengthOverflowException();
+			}
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)this.GetWritableImageData(0), (int)num2, Allocator.None);
 		}
 
 		public void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable)
@@ -606,39 +743,59 @@ namespace UnityEngine
 			this.ApplyImpl(updateMipmaps, makeNoLongerReadable);
 		}
 
+		[ExcludeFromDocs]
 		public void Apply(bool updateMipmaps)
 		{
 			this.Apply(updateMipmaps, false);
 		}
 
+		[ExcludeFromDocs]
 		public void Apply()
 		{
 			this.Apply(true, false);
 		}
 
+		public bool Reinitialize(int width, int height)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			return this.ReinitializeImpl(width, height);
+		}
+
+		public bool Reinitialize(int width, int height, TextureFormat format, bool hasMipMap)
+		{
+			return this.ReinitializeWithTextureFormatImpl(width, height, format, hasMipMap);
+		}
+
+		public bool Reinitialize(int width, int height, GraphicsFormat format, bool hasMipMap)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			return this.ReinitializeWithFormatImpl(width, height, format, hasMipMap);
+		}
+
+		[Obsolete("Texture2D.Resize(int, int) has been deprecated because it actually reinitializes the texture. Use Texture2D.Reinitialize(int, int) instead (UnityUpgradable) -> Reinitialize([*] System.Int32, [*] System.Int32)", false)]
 		public bool Resize(int width, int height)
 		{
-			bool flag = !this.isReadable;
-			if (flag)
-			{
-				throw base.CreateNonReadableException(this);
-			}
-			return this.ResizeImpl(width, height);
+			return this.Reinitialize(width, height);
 		}
 
+		[Obsolete("Texture2D.Resize(int, int, TextureFormat, bool) has been deprecated because it actually reinitializes the texture. Use Texture2D.Reinitialize(int, int, TextureFormat, bool) instead (UnityUpgradable) -> Reinitialize([*] System.Int32, [*] System.Int32, UnityEngine.TextureFormat, [*] System.Boolean)", false)]
 		public bool Resize(int width, int height, TextureFormat format, bool hasMipMap)
 		{
-			return this.ResizeWithFormatImpl(width, height, GraphicsFormatUtility.GetGraphicsFormat(format, base.activeTextureColorSpace == ColorSpace.Linear), hasMipMap);
+			return this.Reinitialize(width, height, format, hasMipMap);
 		}
 
+		[Obsolete("Texture2D.Resize(int, int, GraphicsFormat, bool) has been deprecated because it actually reinitializes the texture. Use Texture2D.Reinitialize(int, int, GraphicsFormat, bool) instead (UnityUpgradable) -> Reinitialize([*] System.Int32, [*] System.Int32, UnityEngine.Experimental.Rendering.GraphicsFormat, [*] System.Boolean)", false)]
 		public bool Resize(int width, int height, GraphicsFormat format, bool hasMipMap)
 		{
-			bool flag = !this.isReadable;
-			if (flag)
-			{
-				throw base.CreateNonReadableException(this);
-			}
-			return this.ResizeWithFormatImpl(width, height, format, hasMipMap);
+			return this.Reinitialize(width, height, format, hasMipMap);
 		}
 
 		public void ReadPixels(Rect source, int destX, int destY, [DefaultValue("true")] bool recalculateMipMaps)
@@ -695,27 +852,29 @@ namespace UnityEngine
 			return flag6;
 		}
 
-		public void SetPixels32(Color32[] colors, int miplevel)
+		public void SetPixels32(Color32[] colors, [DefaultValue("0")] int miplevel)
 		{
 			this.SetAllPixels32(colors, miplevel);
 		}
 
+		[ExcludeFromDocs]
 		public void SetPixels32(Color32[] colors)
 		{
 			this.SetPixels32(colors, 0);
 		}
 
-		public void SetPixels32(int x, int y, int blockWidth, int blockHeight, Color32[] colors, int miplevel)
+		public void SetPixels32(int x, int y, int blockWidth, int blockHeight, Color32[] colors, [DefaultValue("0")] int miplevel)
 		{
 			this.SetBlockOfPixels32(x, y, blockWidth, blockHeight, colors, miplevel);
 		}
 
+		[ExcludeFromDocs]
 		public void SetPixels32(int x, int y, int blockWidth, int blockHeight, Color32[] colors)
 		{
 			this.SetPixels32(x, y, blockWidth, blockHeight, colors, 0);
 		}
 
-		public Color[] GetPixels(int miplevel)
+		public Color[] GetPixels([DefaultValue("0")] int miplevel)
 		{
 			int num = this.width >> miplevel;
 			bool flag = num < 1;
@@ -732,22 +891,27 @@ namespace UnityEngine
 			return this.GetPixels(0, 0, num, num2, miplevel);
 		}
 
+		[ExcludeFromDocs]
 		public Color[] GetPixels()
 		{
 			return this.GetPixels(0);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetPixelImpl_Injected(int image, int x, int y, ref Color color);
+		private extern void SetPixelImpl_Injected(int image, int mip, int x, int y, ref Color color);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixelImpl_Injected(int image, int x, int y, out Color ret);
+		private extern void GetPixelImpl_Injected(int image, int mip, int x, int y, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixelBilinearImpl_Injected(int image, float u, float v, out Color ret);
+		private extern void GetPixelBilinearImpl_Injected(int image, int mip, float u, float v, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ReadPixelsImpl_Injected(ref Rect source, int destX, int destY, bool recalculateMipMaps);
+
+		internal const int streamingMipmapsPriorityMin = -128;
+
+		internal const int streamingMipmapsPriorityMax = 127;
 
 		[Flags]
 		public enum EXRFlags

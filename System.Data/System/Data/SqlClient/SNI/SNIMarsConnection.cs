@@ -59,7 +59,7 @@ namespace System.Data.SqlClient.SNI
 			uint num;
 			lock (this)
 			{
-				num = this._lowerHandle.SendAsync(packet, callback);
+				num = this._lowerHandle.SendAsync(packet, false, callback);
 			}
 			return num;
 		}
@@ -146,8 +146,7 @@ namespace System.Data.SqlClient.SNI
 							highwater = BitConverter.ToUInt32(this._headerBytes, 12)
 						};
 						this._dataBytesLeft = (int)this._currentHeader.length;
-						this._currentPacket = new SNIPacket(null);
-						this._currentPacket.Allocate((int)this._currentHeader.length);
+						this._currentPacket = new SNIPacket((int)this._currentHeader.length);
 					}
 					snismuxheader = this._currentHeader;
 					snipacket = this._currentPacket;
